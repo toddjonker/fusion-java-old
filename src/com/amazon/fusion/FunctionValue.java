@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
+import java.util.Collection;
 
 
 class FunctionValue
@@ -43,6 +44,12 @@ class FunctionValue
                 }
 
                 return myEnclosure.lookup(name);
+            }
+
+            public void collectNames(Collection<String> names)
+            {
+                names.add(myParam);
+                myEnclosure.collectNames(names);
             }
         };
         

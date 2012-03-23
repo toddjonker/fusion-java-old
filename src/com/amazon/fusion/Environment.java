@@ -2,8 +2,12 @@
 
 package com.amazon.fusion;
 
+import java.util.Collection;
+
 
 interface Environment
 {    
     FusionValue lookup(String name);
+    
+    void collectNames(Collection<String> names);
 }

@@ -36,6 +36,7 @@ class Repl
     {
         myConsole.printf("Welcome to Fusion!\n");
         myConsole.printf("Type 'exit' to exit.\n");
+        myConsole.printf("Type '(list_bindings)' to see available forms.\n");
         
         while (rep())
         {
