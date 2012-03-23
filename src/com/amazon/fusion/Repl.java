@@ -36,7 +36,7 @@ class Repl
     void welcome()
     {
         PrintWriter writer = myConsole.writer();
-        writer.println("\nWelcome to Fusion!\n");
+        writer.println("\n\033[1;31mWelcome to Fusion!\033[m\n");
         writer.println("Type...");
         writer.println("  exit              to exit");
         writer.println("  (list_bindings)   to see available forms");
