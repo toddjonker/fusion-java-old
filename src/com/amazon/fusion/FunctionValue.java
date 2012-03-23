@@ -3,56 +3,26 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
-import java.util.Collection;
 
 
-class FunctionValue
+abstract class FunctionValue
     extends FusionValue
 {
-    private final Environment myEnclosure;
-    private final String myParam;
-    
-    FunctionValue(IonSexp definition, Environment enclosure)
+    @Deprecated
+    FunctionValue(IonValue dom)
     {
-        super(definition);
-        
-        myEnclosure = enclosure;
-        
-        IonSymbol param = (IonSymbol) definition.get(1);
-        myParam = param.stringValue();
+        super(dom);
     }
     
     @Override
     FusionValue invoke(Evaluator eval, final Environment env, IonSexp expr)
     {
-        IonSexp funcDom = (IonSexp) getDom();
-        IonValue body = funcDom.get(2);
-        
         IonValue argumentExpr = expr.get(1);
+        FusionValue argumentValue = eval.eval(env, argumentExpr);
         
-        final FusionValue argumentValue = eval.eval(env, argumentExpr);
-        
-        Environment c2 = new Environment()
-        {
-            public FusionValue lookup(String name)
-            {
-                if (name.equals(myParam))
-                {
-                    return argumentValue;
-                }
-
-                return myEnclosure.lookup(name);
-            }
-
-            public void collectNames(Collection<String> names)
-            {
-                names.add(myParam);
-                myEnclosure.collectNames(names);
-            }
-        };
-        
-        return eval.eval(c2, body);
+        return invoke(eval, argumentValue);
     }
+    
+    abstract FusionValue invoke(Evaluator eval, FusionValue arg);
 }

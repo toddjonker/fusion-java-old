@@ -62,7 +62,7 @@ class CoreEnvironment
         @Override
         FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
         {
-            return new FunctionValue(expr, env);
+            return new FuncValue(expr, env);
         }
     };
     
