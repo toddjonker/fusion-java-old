@@ -9,20 +9,14 @@ import com.amazon.ion.IonValue;
 abstract class FunctionValue
     extends FusionValue
 {
-    @Deprecated
-    FunctionValue(IonValue dom)
-    {
-        super(dom);
-    }
-    
     @Override
     FusionValue invoke(Evaluator eval, final Environment env, IonSexp expr)
     {
         IonValue argumentExpr = expr.get(1);
         FusionValue argumentValue = eval.eval(env, argumentExpr);
-        
+
         return invoke(eval, argumentValue);
     }
-    
+
     abstract FusionValue invoke(Evaluator eval, FusionValue arg);
 }

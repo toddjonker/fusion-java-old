@@ -5,28 +5,29 @@ package com.amazon.fusion;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.Writer;
 
 
 abstract class KeywordValue
     extends FusionValue
 {
     protected final String myKeyword;
-    
+
     KeywordValue(String keyword)
     {
         myKeyword = keyword;
     }
-    
-    @Override
-    abstract FusionValue invoke(Evaluator eval, 
-                                Environment context, 
-                                IonSexp expression);
 
     @Override
-    final void print(PrintWriter out)
+    abstract FusionValue invoke(Evaluator eval,
+                                Environment context,
+                                IonSexp expr);
+
+    @Override
+    final void print(Writer out)
+        throws IOException
     {
-        out.print("// Keyword ");
+        out.write("// Keyword ");
         try
         {
             IonTextUtils.printQuotedSymbol(out, myKeyword);
@@ -35,6 +36,6 @@ abstract class KeywordValue
         {
             throw new IllegalStateException("Shouldn't happen", e);
         }
-        out.println();
+        out.write('\n');
     }
 }

@@ -45,7 +45,7 @@ class CoreEnvironment
         myValueFactory = valueFactory;
 
         myBindings.put("fusion_version",
-                       FusionValue.forIon(myValueFactory.newString("0.1a1")));
+                       new DomValue(myValueFactory.newString("0.1a1")));
         myBindings.put("define",
                        new DefineKeyword("define"));
         myBindings.put("func",

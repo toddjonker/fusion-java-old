@@ -15,8 +15,8 @@ class Evaluator
         FusionValue fv = eval(env, expr);
         return fv.getDom();
     }
-    
-    
+
+
     FusionValue eval(Environment env, IonValue expr)
     {
         switch (expr.getType())
@@ -30,7 +30,7 @@ class Evaluator
             case NULL:
             case STRING:
             case TIMESTAMP:
-                return FusionValue.forIon(expr);
+                return new DomValue(expr);
             case LIST:
             case STRUCT:
                 break;
@@ -40,19 +40,19 @@ class Evaluator
             }
             case SYMBOL:
             {
-                return eval(env, (IonSymbol) expr);                
+                return eval(env, (IonSymbol) expr);
             }
             case DATAGRAM:
                 throw new IllegalStateException("Shouldn't have datagram here");
         }
-        
-        return FusionValue.forIon(expr);
+
+        return new DomValue(expr);
     }
-    
-    
+
+
     FusionValue eval(Environment env, IonSymbol expr)
     {
-        String name = expr.stringValue();                
+        String name = expr.stringValue();
         FusionValue result = env.lookup(name);
         if (result == null)
         {
@@ -60,21 +60,21 @@ class Evaluator
         }
         return result;
     }
-    
-    
+
+
     FusionValue eval(Environment env, IonSexp expr)
     {
         int len = expr.size();
         if (len < 1) return null;
-        
+
         IonValue first = expr.get(0);
-        
+
         FusionValue form = eval(env, first);
         if (form == null)
         {
             throw new IonException("Bad form: " + first);
         }
-        
+
         return form.invoke(this, env, expr);
     }
 }

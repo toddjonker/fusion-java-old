@@ -20,15 +20,15 @@ final class ListBindingsKeyword
     {
         TreeSet<String> names = new TreeSet<String>();
         env.collectNames(names);
-        
+
         ValueFactory factory = expr.getSystem();
         IonList result = factory.newEmptyList();
-        
+
         for (String name : names)
         {
             result.add(factory.newString(name));
         }
-        
-        return new FusionValue(result);
+
+        return new DomValue(result);
     }
 }
