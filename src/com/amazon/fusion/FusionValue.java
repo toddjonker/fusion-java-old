@@ -15,8 +15,23 @@ abstract class FusionValue
         return null;
     }
 
+
     abstract void print(Writer out)
         throws IOException;
+
+
+    /**
+     * Prints the documentation of this value.
+     * Implementations should try to ensure that a final newline is printed.
+     *
+     * @param out the output stream, not null.
+     */
+    void printDoc(Writer out)
+        throws IOException
+    {
+        out.write("// No documentation.\n");
+    }
+
 
     abstract FusionValue invoke(Evaluator eval,
                                 Environment context,

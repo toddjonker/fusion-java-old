@@ -3,7 +3,9 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonSexp;
+import com.amazon.ion.IonString;
 import com.amazon.ion.IonSymbol;
+import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import java.io.IOException;
 import java.io.Writer;
@@ -16,6 +18,8 @@ class FuncValue
     private final Environment myEnclosure;
     private final IonSexp myDefinition;
     private final String myParam;
+    private final String myDoc;
+    private final IonValue myBody;
 
     FuncValue(IonSexp definition, Environment enclosure)
     {
@@ -25,6 +29,37 @@ class FuncValue
 
         IonSymbol param = (IonSymbol) definition.get(1);
         myParam = param.stringValue();
+
+        IonValue maybeDoc = definition.get(2);
+        if (maybeDoc.getType() == IonType.STRING
+            && definition.size() > 3)
+        {
+            myDoc = ((IonString) maybeDoc).stringValue();
+            myBody = definition.get(3);
+        }
+        else
+        {
+            myDoc = null;
+            myBody = maybeDoc;
+        }
+    }
+
+    @Override
+    void printDoc(Writer out)
+        throws IOException
+    {
+        if (myDoc != null)
+        {
+            out.write(myDoc);
+            if (! myDoc.endsWith("\n"))
+            {
+                out.write('\n');
+            }
+        }
+        else
+        {
+            super.printDoc(out);
+        }
     }
 
 
@@ -44,9 +79,6 @@ class FuncValue
     @Override
     FusionValue invoke(Evaluator eval, final FusionValue argumentValue)
     {
-        IonSexp funcDom = (IonSexp) getDom();
-        IonValue body = funcDom.get(2);
-
         Environment c2 = new Environment()
         {
             @Override
@@ -68,6 +100,6 @@ class FuncValue
             }
         };
 
-        return eval.eval(c2, body);
+        return eval.eval(c2, myBody);
     }
 }

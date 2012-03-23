@@ -12,8 +12,10 @@ final class ListBindingsKeyword
 {
     ListBindingsKeyword(String keyword)
     {
-        super(keyword);
+        super(keyword, null,
+              "Returns a list of strings, one for each visible binding.");
     }
+
 
     @Override
     FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)

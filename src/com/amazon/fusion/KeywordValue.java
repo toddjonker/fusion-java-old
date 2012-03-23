@@ -12,10 +12,14 @@ abstract class KeywordValue
     extends FusionValue
 {
     protected final String myKeyword;
+    protected final String myBodyPattern;
+    protected final String myDoc;
 
-    KeywordValue(String keyword)
+    KeywordValue(String keyword, String bodyPattern, String doc)
     {
         myKeyword = keyword;
+        myBodyPattern = bodyPattern;
+        myDoc = doc;
     }
 
     @Override
@@ -36,6 +40,22 @@ abstract class KeywordValue
         {
             throw new IllegalStateException("Shouldn't happen", e);
         }
+        out.write('\n');
+    }
+
+    @Override
+    void printDoc(Writer out)
+        throws IOException
+    {
+        out.write('(');
+        out.write(myKeyword);
+        if (myBodyPattern != null)
+        {
+            out.write(' ');
+            out.write(myBodyPattern);
+        }
+        out.write(")\n\n");
+        out.write(myDoc);
         out.write('\n');
     }
 }

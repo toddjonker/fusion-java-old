@@ -18,7 +18,8 @@ class CoreEnvironment
     {
         private DefineKeyword(String keyword)
         {
-            super(keyword);
+            super(keyword, "VAR VALUE",
+                  "Defines a global variable VAR with the given VALUE.");
         }
 
         @Override
@@ -52,6 +53,8 @@ class CoreEnvironment
                        new FuncKeyword("func"));
         myBindings.put("list_bindings",
                        new ListBindingsKeyword("list_bindings"));
+        myBindings.put("doc",
+                       new DocFunction());
     }
 
     @Override

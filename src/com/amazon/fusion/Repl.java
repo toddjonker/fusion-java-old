@@ -16,6 +16,7 @@ class Repl
     public static void main(String[] args)
     {
         Repl r = new Repl();
+        r.welcome();
         r.loop();
     }
 
@@ -32,13 +33,19 @@ class Repl
         }
     }
 
+    void welcome()
+    {
+        PrintWriter writer = myConsole.writer();
+        writer.println("\nWelcome to Fusion!\n");
+        writer.println("Type...");
+        writer.println("  exit              to exit");
+        writer.println("  (list_bindings)   to see available forms");
+        writer.println("  (doc SOMETHING)   to see documentation; try '(doc doc)'!\n");
+    }
+
 
     void loop()
     {
-        myConsole.printf("Welcome to Fusion!\n");
-        myConsole.printf("Type 'exit' to exit.\n");
-        myConsole.printf("Type '(list_bindings)' to see available forms.\n");
-
         while (rep())
         {
             // loop!
@@ -47,20 +54,20 @@ class Repl
 
     private boolean rep()
     {
+        PrintWriter writer = myConsole.writer();
         String line = myConsole.readLine("$ ");
 
         if (line == null)
         {
             // Print a newline otherwise the user's shell prompt will be on
             // the same line, and that's ugly.
-            myConsole.writer().println();
+            writer.println();
             return false;
         }
 
         boolean cont = ! line.equals("exit");
         if (cont)
         {
-            PrintWriter writer = myConsole.writer();
 
             try
             {
@@ -69,7 +76,8 @@ class Repl
                 {
                     try
                     {
-                        result.print(myConsole.writer());
+                        result.print(writer);
+                        writer.println();
                     }
                     catch (IOException e)
                     {

@@ -9,7 +9,10 @@ final class FuncKeyword
 {
     FuncKeyword(String keyword)
     {
-        super(keyword);
+        super(keyword, "PARAM DOC? EXPR",
+              "Returns a single-parameter function.  When invoked, the caller's argument is\n" +
+              "bound to PARAM and the body EXPR is evaluated and returned.\n" +
+              "DOC is an optional documentation string.");
     }
 
     @Override
