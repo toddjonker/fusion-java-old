@@ -2,8 +2,6 @@
 
 package com.amazon.fusion;
 
-import java.io.PrintWriter;
-
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
@@ -12,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class CoreEnvironment
+class CoreEnvironment
     implements Environment
 {
     private ValueFactory myValueFactory;
@@ -20,7 +18,7 @@ public class CoreEnvironment
         new HashMap<String,FusionValue>();
     
     
-    private final FusionValue myDefineKeyword = new FusionValue() 
+    private final FusionValue myDefineKeyword = new KeywordValue("define") 
     {
         @Override
         FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
@@ -33,26 +31,14 @@ public class CoreEnvironment
             
             return fusionValue;
         }
-        
-        @Override
-        void print(PrintWriter out)
-        {
-            out.println("// Keyword 'define'");
-        }
     };
-    
-    private final FusionValue myFuncKeyword = new FusionValue() 
+        
+    private final FusionValue myFuncKeyword = new KeywordValue("func") 
     {
         @Override
         FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
         {
             return new FunctionValue(expr, env);
-        }
-        
-        @Override
-        void print(PrintWriter out)
-        {
-            out.println("// Keyword 'func'");
         }
     };
     
