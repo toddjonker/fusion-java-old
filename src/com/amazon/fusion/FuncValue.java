@@ -32,6 +32,7 @@ class FuncValue
                 
         Environment c2 = new Environment()
         {
+            @Override
             public FusionValue lookup(String name)
             {
                 if (name.equals(myParam))
@@ -42,6 +43,7 @@ class FuncValue
                 return myEnclosure.lookup(name);
             }
 
+            @Override
             public void collectNames(Collection<String> names)
             {
                 names.add(myParam);
