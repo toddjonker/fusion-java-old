@@ -57,9 +57,6 @@ class CoreEnvironment
 
         myBindings.put(".",   new DotFunction());
         myBindings.put("doc", new DocFunction());
-
-        myBindings.put("fusion_version",
-                       new DomValue(myValueFactory.newString("0.1a1")));
     }
 
     private void bind(KeywordValue keyword)
