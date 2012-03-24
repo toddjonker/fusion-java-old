@@ -26,8 +26,8 @@ final class DocFunction
     void printDoc(Writer out)
         throws IOException
     {
-        out.write("(doc VALUE)\n\n");
-        out.write("Prints the documentation of a given value, if available.\n");
+        out.write("(doc VALUE ...)\n\n");
+        out.write("Prints the documentation of the given values, if available.\n");
     }
 
     @Override
@@ -39,8 +39,11 @@ final class DocFunction
             void print(Writer out)
                 throws IOException
             {
-                out.write('\n');
-                args[0].printDoc(out);
+                for (FusionValue arg : args)
+                {
+                    out.write('\n');
+                    arg.printDoc(out);
+                }
             }
 
             @Override
