@@ -59,6 +59,7 @@ class CoreEnvironment
                        new ListBindingsKeyword("list_bindings"));
         myBindings.put("doc",
                        new DocFunction());
+        myBindings.put(".", new DotFunction());
     }
 
     @Override
