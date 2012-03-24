@@ -19,7 +19,7 @@ final class FuncValue
 {
     private final Environment myEnclosure;
     private final IonSexp myDefinition;
-    private final String myParam;
+    private final String[] myParams;
     private final String myDoc;
     private final IonValue myBody;
 
@@ -34,12 +34,9 @@ final class FuncValue
      */
     FuncValue(IonSexp definition, Environment enclosure)
     {
-        myDefinition = definition;
-
         myEnclosure = enclosure;
-
-        IonSymbol param = (IonSymbol) definition.get(1);
-        myParam = param.stringValue();
+        myDefinition = definition;
+        myParams = determineParams((IonSexp) definition.get(1));
 
         IonValue maybeDoc = definition.get(2);
         if (maybeDoc.getType() == IonType.STRING
@@ -53,6 +50,18 @@ final class FuncValue
             myDoc = null;
             myBody = maybeDoc;
         }
+    }
+
+    private String[] determineParams(IonSexp paramsExpr)
+    {
+        int size = paramsExpr.size();
+        String[] params = new String[size];
+        for (int i = 0; i < size; i++)
+        {
+            IonSymbol param = (IonSymbol) paramsExpr.get(i);
+            params[i] = param.stringValue();
+        }
+        return params;
     }
 
     @Override
@@ -88,16 +97,21 @@ final class FuncValue
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, final FusionValue argumentValue)
+    FusionValue invoke(Evaluator eval, final FusionValue[] args)
     {
+        // TODO check number of arguments
+
         Environment c2 = new Environment()
         {
             @Override
             public FusionValue lookup(String name)
             {
-                if (name.equals(myParam))
+                for (int i = 0; i < myParams.length; i++)
                 {
-                    return argumentValue;
+                    if (name.equals(myParams[i]))
+                    {
+                        return args[i];
+                    }
                 }
 
                 return myEnclosure.lookup(name);
@@ -106,7 +120,10 @@ final class FuncValue
             @Override
             public void collectNames(Collection<String> names)
             {
-                names.add(myParam);
+                for (String name : myParams)
+                {
+                    names.add(name);
+                }
                 myEnclosure.collectNames(names);
             }
         };

@@ -16,11 +16,26 @@ abstract class FunctionValue
     @Override
     final FusionValue invoke(Evaluator eval, final Environment env, IonSexp expr)
     {
-        IonValue argumentExpr = expr.get(1);
-        FusionValue argumentValue = eval.eval(env, argumentExpr);
+        int argCount = expr.size() - 1;
 
-        return invoke(eval, argumentValue);
+        FusionValue[] args;
+        if (argCount == 0)
+        {
+            args = FusionValue.EMPTY_ARRAY;
+        }
+        else
+        {
+            args = new FusionValue[argCount];
+            for (int i = 0; i < argCount; i++)
+            {
+                IonValue argumentExpr = expr.get(i + 1);
+                FusionValue argumentValue = eval.eval(env, argumentExpr);
+                args[i] = argumentValue;
+            }
+        }
+
+        return invoke(eval, args);
     }
 
-    abstract FusionValue invoke(Evaluator eval, FusionValue arg);
+    abstract FusionValue invoke(Evaluator eval, FusionValue[] arg);
 }

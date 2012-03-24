@@ -50,7 +50,7 @@ abstract class KeywordValue
     void printDoc(Writer out)
         throws IOException
     {
-        out.write('(');
+        out.write("[SYNTAX]  (");
         out.write(myKeyword);
         if (myBodyPattern != null)
         {

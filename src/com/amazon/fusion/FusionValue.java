@@ -14,6 +14,10 @@ import java.io.Writer;
  */
 abstract class FusionValue
 {
+    /** A zero-length array. */
+    public static final FusionValue[] EMPTY_ARRAY = new FusionValue[0];
+
+
     /**
      * Gets an Ion representation of this value, if available.
      * <p>

@@ -31,7 +31,7 @@ final class DocFunction
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, final FusionValue arg)
+    FusionValue invoke(Evaluator eval, final FusionValue[] args)
     {
         FusionValue result = new FusionValue()
         {
@@ -40,7 +40,7 @@ final class DocFunction
                 throws IOException
             {
                 out.write('\n');
-                arg.printDoc(out);
+                args[0].printDoc(out);
             }
 
             @Override
