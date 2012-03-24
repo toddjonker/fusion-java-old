@@ -18,7 +18,7 @@ final class ListBindingsKeyword
     ListBindingsKeyword()
     {
         super("list_bindings", null,
-              "Returns a list of strings, one for each visible binding.");
+              "Returns a list of symbols, one for each visible binding.");
     }
 
 
@@ -33,7 +33,7 @@ final class ListBindingsKeyword
 
         for (String name : names)
         {
-            result.add(factory.newString(name));
+            result.add(factory.newSymbol(name));
         }
 
         return new DomValue(result);
