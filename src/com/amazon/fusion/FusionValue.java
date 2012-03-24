@@ -18,6 +18,12 @@ abstract class FusionValue
     public static final FusionValue[] EMPTY_ARRAY = new FusionValue[0];
 
 
+    boolean isTruthy()
+    {
+        return false;
+    }
+
+
     /**
      * Gets an Ion representation of this value, if available.
      * <p>

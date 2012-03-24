@@ -28,16 +28,32 @@ public class CoreTestCase
 
     protected void assertEval(String expectedIon, String expressionIon)
     {
-        IonValue expression = mySystem.singleValue(expressionIon);
         IonValue expected   = mySystem.singleValue(expectedIon);
-        
+        IonValue expression = mySystem.singleValue(expressionIon);
+
         IonValue result = myEvaluator.evalToIon(myEnvironment, expression);
-        
+
         assertEquals(expected, result);
     }
-    
+
+    protected void assertEval(int expectedInt, String expressionIon)
+    {
+        IonValue expected   = mySystem.newInt(expectedInt);
+        IonValue expression = mySystem.singleValue(expressionIon);
+
+        IonValue result = myEvaluator.evalToIon(myEnvironment, expression);
+
+        assertEquals(expected, result);
+    }
+
     protected void assertSelfEval(String expressionIon)
     {
         assertEval(expressionIon, expressionIon);
+    }
+
+    protected void eval(String expressionIon)
+    {
+        IonValue expression = mySystem.singleValue(expressionIon);
+        myEvaluator.eval(myEnvironment, expression);
     }
 }

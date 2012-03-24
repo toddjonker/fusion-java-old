@@ -2,8 +2,10 @@
 
 package com.amazon.fusion;
 
+import com.amazon.ion.IonBool;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonSexp;
+import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import java.io.IOException;
 import java.io.Writer;
@@ -19,6 +21,15 @@ class DomValue
     DomValue(IonValue dom)
     {
         myDom = dom;
+    }
+
+
+    @Override
+    boolean isTruthy()
+    {
+        return (myDom.getType() == IonType.BOOL
+                && ! myDom.isNullValue()
+                && ((IonBool) myDom).booleanValue());
     }
 
 

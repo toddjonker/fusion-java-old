@@ -60,6 +60,7 @@ class CoreEnvironment
         myBindings.put("doc",
                        new DocFunction());
         myBindings.put(".", new DotFunction());
+        myBindings.put("if", new IfKeyword());
     }
 
     @Override
