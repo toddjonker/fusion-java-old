@@ -36,7 +36,7 @@ class DomValue
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment context, IonSexp expr)
+    FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
     {
         throw new IonException("not invokable: " + myDom);
     }

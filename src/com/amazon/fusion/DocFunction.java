@@ -7,7 +7,12 @@ import com.amazon.ion.IonSexp;
 import java.io.IOException;
 import java.io.Writer;
 
-class DocFunction
+/**
+ * The {@code doc} built-in function.
+ * <p>
+ * TODO add a Documentation model and move this to user space.
+ */
+final class DocFunction
     extends FunctionValue
 {
     @Override
@@ -39,7 +44,7 @@ class DocFunction
             }
 
             @Override
-            FusionValue invoke(Evaluator eval, Environment context, IonSexp expr)
+            FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
             {
                 throw new IonException("not invokable");
             }

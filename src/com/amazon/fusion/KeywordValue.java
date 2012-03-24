@@ -7,7 +7,10 @@ import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.io.Writer;
 
-
+/**
+ * Base class for syntactic forms
+ * (as opposed to {@linkplain FunctionValue functions}).
+ */
 abstract class KeywordValue
     extends FusionValue
 {
@@ -24,7 +27,7 @@ abstract class KeywordValue
 
     @Override
     abstract FusionValue invoke(Evaluator eval,
-                                Environment context,
+                                Environment env,
                                 IonSexp expr);
 
     @Override

@@ -10,6 +10,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The core, built-in bindings for Fusion.
+ * This is kind-of hacky and will probably be refactored significantly.
+ */
 class CoreEnvironment
     implements Environment
 {

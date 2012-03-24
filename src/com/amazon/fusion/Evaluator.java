@@ -7,8 +7,10 @@ import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
 
-
-class Evaluator
+/**
+ * Main entry point to the Fusion evaluation engine.
+ */
+final class Evaluator
 {
     IonValue evalToIon(Environment env, IonValue expr)
     {

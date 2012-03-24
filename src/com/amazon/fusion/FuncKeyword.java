@@ -4,6 +4,9 @@ package com.amazon.fusion;
 
 import com.amazon.ion.IonSexp;
 
+/**
+ * The {@code func} syntactic form, which evaluates to a {@link FuncValue}.
+ */
 final class FuncKeyword
     extends KeywordValue
 {

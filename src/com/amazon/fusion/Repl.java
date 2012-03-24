@@ -10,8 +10,10 @@ import java.io.Console;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-
-class Repl
+/**
+ * A simple Read-Eval-Print Loop for Fusion.
+ */
+final class Repl
 {
     public static void main(String[] args)
     {
@@ -65,6 +67,7 @@ class Repl
             return false;
         }
 
+        // TODO exit shouldn't be magic here.
         boolean cont = ! line.equals("exit");
         if (cont)
         {

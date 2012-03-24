@@ -11,8 +11,10 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
 
-
-class FuncValue
+/**
+ * A user-defined function, the result of evaluating a {@link FuncKeyword}.
+ */
+final class FuncValue
     extends FunctionValue
 {
     private final Environment myEnclosure;
@@ -21,6 +23,15 @@ class FuncValue
     private final String myDoc;
     private final IonValue myBody;
 
+    /**
+     * Constructs a new function from its source and enclosing lexical
+     * environment.
+     *
+     * @param definition the source text of the {@code func} expression.
+     * @param enclosure the lexical environment surrounding the source of this
+     *  function.  Any free variables in the function are expected to be bound
+     *  here.
+     */
     FuncValue(IonSexp definition, Environment enclosure)
     {
         myDefinition = definition;
