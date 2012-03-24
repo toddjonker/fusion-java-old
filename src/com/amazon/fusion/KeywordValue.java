@@ -25,6 +25,11 @@ abstract class KeywordValue
         myDoc = doc;
     }
 
+    String getIntrinsicName()
+    {
+        return myKeyword;
+    }
+
     @Override
     abstract FusionValue invoke(Evaluator eval,
                                 Environment env,

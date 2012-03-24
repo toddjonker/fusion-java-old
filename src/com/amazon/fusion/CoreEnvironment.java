@@ -20,9 +20,9 @@ class CoreEnvironment
     private final class DefineKeyword
         extends KeywordValue
     {
-        private DefineKeyword(String keyword)
+        private DefineKeyword()
         {
-            super(keyword, "VAR VALUE",
+            super("define", "VAR VALUE",
                   "Defines a global variable VAR with the given VALUE.");
         }
 
@@ -49,20 +49,24 @@ class CoreEnvironment
     {
         myValueFactory = valueFactory;
 
+        bind(new BeginKeyword());
+        bind(new DefineKeyword());
+        bind(new FuncKeyword());
+        bind(new ListBindingsKeyword());
+        bind(new IfKeyword());
+
+        myBindings.put(".",   new DotFunction());
+        myBindings.put("doc", new DocFunction());
+
         myBindings.put("fusion_version",
                        new DomValue(myValueFactory.newString("0.1a1")));
-        myBindings.put("define",
-                       new DefineKeyword("define"));
-        myBindings.put("func",
-                       new FuncKeyword("func"));
-        myBindings.put("list_bindings",
-                       new ListBindingsKeyword("list_bindings"));
-        myBindings.put("doc",
-                       new DocFunction());
-        myBindings.put(".", new DotFunction());
-        myBindings.put("if", new IfKeyword());
-        myBindings.put("begin", new BeginKeyword());
     }
+
+    private void bind(KeywordValue keyword)
+    {
+        myBindings.put(keyword.getIntrinsicName(), keyword);
+    }
+
 
     @Override
     public FusionValue lookup(String name)

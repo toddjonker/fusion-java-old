@@ -15,9 +15,9 @@ import java.util.TreeSet;
 final class ListBindingsKeyword
     extends KeywordValue
 {
-    ListBindingsKeyword(String keyword)
+    ListBindingsKeyword()
     {
-        super(keyword, null,
+        super("list_bindings", null,
               "Returns a list of strings, one for each visible binding.");
     }
 
