@@ -61,6 +61,7 @@ class CoreEnvironment
                        new DocFunction());
         myBindings.put(".", new DotFunction());
         myBindings.put("if", new IfKeyword());
+        myBindings.put("begin", new BeginKeyword());
     }
 
     @Override
