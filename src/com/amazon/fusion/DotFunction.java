@@ -30,7 +30,7 @@ class DotFunction
         out.write("Traverses down through an Ion data structure.\n" +
                   "VALUE must be Ion data, either a struct or a sequence (list/sexp).\n" +
                   "Each PART must be either a string or an int, to denote either a struct's\n" +
-                  "field-name or a sequence's index.");
+                  "field-name or a sequence's index.\n");
     }
 
     @Override

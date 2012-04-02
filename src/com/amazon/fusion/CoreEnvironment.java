@@ -55,8 +55,9 @@ class CoreEnvironment
         bind(new ListBindingsKeyword());
         bind(new IfKeyword());
 
-        myBindings.put(".",   new DotFunction());
-        myBindings.put("doc", new DocFunction());
+        myBindings.put(".",    new DotFunction());
+        myBindings.put("doc",  new DocFunction());
+        myBindings.put("exit", new ExitFunction());
     }
 
     private void bind(KeywordValue keyword)

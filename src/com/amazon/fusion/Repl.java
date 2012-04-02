@@ -15,6 +15,16 @@ import java.io.PrintWriter;
  */
 final class Repl
 {
+    /**
+     * Thown to force the exit of a {@link Repl}.
+     */
+    static class ExitException
+        extends RuntimeException
+    {
+        private static final long serialVersionUID = 1L;
+    }
+
+
     public static void main(String[] args)
     {
         Repl r = new Repl();
@@ -40,7 +50,7 @@ final class Repl
         PrintWriter writer = myConsole.writer();
         writer.println("\n\033[1;31mWelcome to Fusion!\033[m\n");
         writer.println("Type...");
-        writer.println("  exit              to exit");
+        writer.println("  (exit)            to exit");
         writer.println("  (list_bindings)   to see available forms");
         writer.println("  (doc SOMETHING)   to see documentation; try '(doc doc)'!\n");
     }
@@ -67,41 +77,40 @@ final class Repl
             return false;
         }
 
-        // TODO exit shouldn't be magic here.
-        boolean cont = ! line.equals("exit");
-        if (cont)
+        try
         {
-
-            try
+            FusionValue result = eval(line);
+            if (result != null)
             {
-                FusionValue result = eval(line);
-                if (result != null)
+                try
                 {
-                    try
-                    {
-                        result.print(writer);
-                        writer.println();
-                    }
-                    catch (IOException e)
-                    {
-                        // This shouldn't happen since the Console provides a
-                        // PrintWriter, which doesn't throw exceptions.
-                        throw new IllegalStateException(e);
-                    }
+                    result.print(writer);
+                    writer.println();
                 }
-                else
+                catch (IOException e)
                 {
-                    writer.println("// No value");
+                    // This shouldn't happen printing to a PrintWriter,
+                    // which doesn't throw exceptions.
+                    throw new IllegalStateException(e);
                 }
             }
-            catch (IonException e)
+            else
             {
-                writer.print("// ");
-                writer.println(e.getMessage());
+                writer.println("// No value");
             }
         }
+        catch (ExitException e)
+        {
+            writer.println("// Goodbye!");
+            return false;
+        }
+        catch (IonException e)
+        {
+            writer.print("// ");
+            writer.println(e.getMessage());
+        }
 
-        return cont;
+        return true;
     }
 
 
