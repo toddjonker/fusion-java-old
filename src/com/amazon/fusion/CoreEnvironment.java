@@ -55,7 +55,9 @@ class CoreEnvironment
         bind(new ListBindingsKeyword());
         bind(new IfKeyword());
 
+        myBindings.put("+",    new PlusFunction());
         myBindings.put(".",    new DotFunction());
+        myBindings.put("=",    new EqualFunction());
         myBindings.put("doc",  new DocFunction());
         myBindings.put("exit", new ExitFunction());
     }
