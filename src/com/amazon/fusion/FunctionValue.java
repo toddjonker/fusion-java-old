@@ -37,5 +37,5 @@ abstract class FunctionValue
         return invoke(eval, args);
     }
 
-    abstract FusionValue invoke(Evaluator eval, FusionValue[] arg);
+    abstract FusionValue invoke(Evaluator eval, FusionValue[] args);
 }

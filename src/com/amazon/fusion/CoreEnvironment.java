@@ -58,8 +58,10 @@ class CoreEnvironment
         myBindings.put("+",    new PlusFunction());
         myBindings.put(".",    new DotFunction());
         myBindings.put("=",    new EqualFunction());
+        myBindings.put("add",  new AddFunction());
         myBindings.put("doc",  new DocFunction());
         myBindings.put("exit", new ExitFunction());
+        myBindings.put("size", new SizeFunction());
     }
 
     private void bind(KeywordValue keyword)
