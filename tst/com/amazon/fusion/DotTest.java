@@ -28,7 +28,7 @@ public class DotTest
     @Test
     public void testSequenceParts()
     {
-        assertEval("f", "(. [f, \"hello\"] 0)");
-        assertEval("{{}}", "(. [99, (true {{}})] 1 1)");
+        assertEval("99", "(. [99, \"hello\"] 0)");
+        assertEval("{{}}", "(. [99, [true, {{}}]] 1 1)");
     }
 }

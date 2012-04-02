@@ -3,15 +3,28 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonException;
+import com.amazon.ion.IonList;
 import com.amazon.ion.IonSexp;
+import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
+import com.amazon.ion.ValueFactory;
 
 /**
  * Main entry point to the Fusion evaluation engine.
  */
 final class Evaluator
 {
+    static IonValue cloneIfContained(IonValue value)
+    {
+        if (value.getContainer() != null)
+        {
+            value = value.clone();
+        }
+        return value;
+    }
+
+
     IonValue evalToIon(Environment env, IonValue expr)
     {
         FusionValue fv = eval(env, expr);
@@ -34,8 +47,13 @@ final class Evaluator
             case TIMESTAMP:
                 return new DomValue(expr);
             case LIST:
+            {
+                return eval(env, (IonList) expr);
+            }
             case STRUCT:
-                break;
+            {
+                return eval(env, (IonStruct) expr);
+            }
             case SEXP:
             {
                 return eval(env, (IonSexp) expr);
@@ -78,5 +96,49 @@ final class Evaluator
         }
 
         return form.invoke(this, env, expr);
+    }
+
+    FusionValue eval(Environment env, IonList expr)
+    {
+        IonList resultDom;
+        if (expr.isNullValue())
+        {
+            resultDom = expr;
+        }
+        else
+        {
+            ValueFactory vf = expr.getSystem();
+            resultDom = vf.newEmptyList();
+            for (IonValue elementExpr : expr)
+            {
+                DomValue elementValue = (DomValue) eval(env, elementExpr);
+                IonValue elementDom = elementValue.getDom();
+                elementDom = cloneIfContained(elementDom);
+                resultDom.add(elementDom);
+            }
+        }
+        return new DomValue(resultDom);
+    }
+
+    FusionValue eval(Environment env, IonStruct expr)
+    {
+        IonStruct resultDom;
+        if (expr.isNullValue())
+        {
+            resultDom = expr;
+        }
+        else
+        {
+            ValueFactory vf = expr.getSystem();
+            resultDom = vf.newEmptyStruct();
+            for (IonValue elementExpr : expr)
+            {
+                DomValue elementValue = (DomValue) eval(env, elementExpr);
+                IonValue elementDom = elementValue.getDom();
+                elementDom = cloneIfContained(elementDom);
+                resultDom.add(elementExpr.getFieldName(), elementDom);
+            }
+        }
+        return new DomValue(resultDom);
     }
 }
