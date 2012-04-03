@@ -51,6 +51,7 @@ class CoreEnvironment
 
         bind(new BeginKeyword());
         bind(new DefineKeyword());
+        bind(new EvalFileKeyword());
         bind(new FuncKeyword());
         bind(new IfKeyword());
         bind(new LetKeyword());
