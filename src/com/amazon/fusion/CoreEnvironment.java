@@ -52,8 +52,9 @@ class CoreEnvironment
         bind(new BeginKeyword());
         bind(new DefineKeyword());
         bind(new FuncKeyword());
-        bind(new ListBindingsKeyword());
         bind(new IfKeyword());
+        bind(new LetKeyword());
+        bind(new ListBindingsKeyword());
 
         myBindings.put("+",    new PlusFunction());
         myBindings.put(".",    new DotFunction());
