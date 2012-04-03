@@ -2,10 +2,8 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.Language.ExitException;
 import com.amazon.ion.IonException;
-import com.amazon.ion.IonSystem;
-import com.amazon.ion.IonValue;
-import com.amazon.ion.system.IonSystemBuilder;
 import java.io.Console;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -15,16 +13,6 @@ import java.io.PrintWriter;
  */
 final class Repl
 {
-    /**
-     * Thown to force the exit of a {@link Repl}.
-     */
-    static class ExitException
-        extends RuntimeException
-    {
-        private static final long serialVersionUID = 1L;
-    }
-
-
     public static void main(String[] args)
     {
         Repl r = new Repl();
@@ -33,9 +21,7 @@ final class Repl
     }
 
     private final Console myConsole = System.console();
-    private final IonSystem mySystem = IonSystemBuilder.standard().build();
-    private final Environment myEnvironment = new CoreEnvironment(mySystem);
-    private final Evaluator myEvaluator = new Evaluator();
+    private final Language myLanguage = new Language();
 
     Repl()
     {
@@ -79,24 +65,16 @@ final class Repl
 
         try
         {
-            FusionValue result = eval(line);
-            if (result != null)
+            FusionValue result = myLanguage.eval(line);
+            try
             {
-                try
-                {
-                    result.print(writer);
-                    writer.println();
-                }
-                catch (IOException e)
-                {
-                    // This shouldn't happen printing to a PrintWriter,
-                    // which doesn't throw exceptions.
-                    throw new IllegalStateException(e);
-                }
+                myLanguage.write(result, writer);
             }
-            else
+            catch (IOException e)
             {
-                writer.println("// No value");
+                // This shouldn't happen printing to a PrintWriter,
+                // which doesn't throw exceptions.
+                throw new IllegalStateException(e);
             }
         }
         catch (ExitException e)
@@ -111,13 +89,5 @@ final class Repl
         }
 
         return true;
-    }
-
-
-    private FusionValue eval(String line)
-    {
-        IonValue expression = mySystem.singleValue(line);
-        expression.makeReadOnly();
-        return myEvaluator.eval(myEnvironment, expression);
     }
 }

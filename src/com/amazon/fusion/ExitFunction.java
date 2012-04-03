@@ -22,12 +22,12 @@ class ExitFunction
         throws IOException
     {
         out.write("(exit)\n\n");
-        out.write("Exits the Fusion interactive console.\n");
+        out.write("Exits the running program.\n");
     }
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] arg)
     {
-        throw new Repl.ExitException();
+        throw new Language.ExitException();
     }
 }

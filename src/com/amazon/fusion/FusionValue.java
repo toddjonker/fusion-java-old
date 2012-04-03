@@ -12,7 +12,7 @@ import java.io.Writer;
  * values is a superset of the Ion values, so not all {@link FusionValue}s are
  * Ion data values.
  */
-abstract class FusionValue
+public abstract class FusionValue
 {
     /** A zero-length array. */
     public static final FusionValue[] EMPTY_ARRAY = new FusionValue[0];
