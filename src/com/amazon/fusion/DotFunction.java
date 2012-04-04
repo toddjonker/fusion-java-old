@@ -4,8 +4,8 @@ package com.amazon.fusion;
 
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonSequence;
-import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
+import com.amazon.ion.IonText;
 import com.amazon.ion.IonValue;
 import java.io.IOException;
 import java.io.Writer;
@@ -29,7 +29,7 @@ class DotFunction
         out.write("(. VALUE PART ...)\n\n");
         out.write("Traverses down through an Ion data structure.\n" +
                   "VALUE must be Ion data, either a struct or a sequence (list/sexp).\n" +
-                  "Each PART must be either a string or an int, to denote either a struct's\n" +
+                  "Each PART must be a string, symbol, or int, to denote either a struct's\n" +
                   "field-name or a sequence's index.\n");
     }
 
@@ -44,8 +44,9 @@ class DotFunction
             switch (partValue.getType())
             {
                 case STRING:
+                case SYMBOL:
                 {
-                    IonString nameDom = (IonString) partValue;
+                    IonText nameDom = (IonText) partValue;
                     // TODO check for null.string
                     IonStruct s = (IonStruct) value;
                     value = s.get(nameDom.stringValue());

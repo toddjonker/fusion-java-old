@@ -22,7 +22,8 @@ public class DotTest
     public void testStructParts()
     {
         assertEval("true", "(. {f:true} \"f\")");
-        assertEval("\"oy\"", "(. {f:{g:'''oy'''}, h:true} \"f\" \"g\")");
+        assertEval("true", "(. {f:true} (quote f))");
+        assertEval("\"oy\"", "(. {f:{g:'''oy'''}, h:true} \"f\" (quote g))");
     }
 
     @Test
