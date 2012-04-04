@@ -10,7 +10,6 @@ import com.amazon.ion.IonValue;
 import com.amazon.ion.system.IonSystemBuilder;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.Iterator;
 
 /**
@@ -56,14 +55,9 @@ final class Eval
         try
         {
             FusionValue result = evalFile(myFileName);
-            OutputStreamWriter out = new OutputStreamWriter(System.out);
-            try
+            if (result != FusionValue.UNDEF)
             {
-                myLanguage.write(result, out);
-            }
-            finally
-            {
-                out.flush();
+                myLanguage.writeToStdout(result);
             }
         }
         catch (IOException e)
