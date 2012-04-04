@@ -90,4 +90,20 @@ public class LiteralEvalTest
         assertEval("{f:x,g:true}", "(quote {g:true, f:x})");
         assertEval("[x,99,[]]", "(quote [x, 99, [ ] ])");
     }
+
+    @Test
+    public void testUndef()
+    {
+        assertEval("true",  "(is_undef undef)");
+        assertEval("false", "(is_undef null)");
+        assertEval("false", "(is_undef true)");
+        assertEval("false", "(is_undef false)");
+        assertEval("false", "(is_undef null.bool)");
+        assertEval("false", "(is_undef 0)");
+        assertEval("false", "(is_undef (quote f))");
+        assertEval("false", "(is_undef \"\")");
+        assertEval("false", "(is_undef [])");
+        assertEval("false", "(is_undef (quote ()))");
+        assertEval("false", "(is_undef {})");
+    }
 }

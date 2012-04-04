@@ -32,4 +32,13 @@ public class DotTest
         assertEval("99", "(. [99, \"hello\"] 0)");
         assertEval("{{}}", "(. [99, [true, {{}}]] 1 1)");
     }
+
+    @Test
+    public void testMissingPart()
+    {
+        assertEval("true", "(is_undef (. {f:1} \"g\"))");
+        assertEval("true", "(is_undef (. {f:1,g:[2]} \"g\" 1 1))");
+        assertEval("true", "(is_undef (. [1] 1))");
+        assertEval("true", "(is_undef (. [1, {f:2}] 1 \"g\" 1))");
+    }
 }

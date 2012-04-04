@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionValue.UNDEF;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSexp;
@@ -47,6 +48,9 @@ final class Evaluator
     }
 
 
+    /**
+     * @return not null
+     */
     FusionValue eval(Environment env, IonValue expr)
     {
         switch (expr.getType())
@@ -60,7 +64,9 @@ final class Evaluator
             case NULL:
             case STRING:
             case TIMESTAMP:
+            {
                 return new DomValue(expr);
+            }
             case LIST:
             {
                 return eval(env, (IonList) expr);
@@ -78,13 +84,18 @@ final class Evaluator
                 return eval(env, (IonSymbol) expr);
             }
             case DATAGRAM:
+            {
                 throw new IllegalStateException("Shouldn't have datagram here");
+            }
         }
 
         return new DomValue(expr);
     }
 
 
+    /**
+     * @return not null
+     */
     FusionValue eval(Environment env, IonSymbol expr)
     {
         String name = expr.stringValue();
@@ -97,10 +108,13 @@ final class Evaluator
     }
 
 
+    /**
+     * @return not null
+     */
     FusionValue eval(Environment env, IonSexp expr)
     {
         int len = expr.size();
-        if (len < 1) return null;
+        if (len < 1) return UNDEF; // TODO throw
 
         IonValue first = expr.get(0);
 
@@ -110,10 +124,16 @@ final class Evaluator
             throw new IonException("Bad form: " + first);
         }
 
-        return form.invoke(this, env, expr);
+        FusionValue result = form.invoke(this, env, expr);
+        if (result == null) result = UNDEF;
+        return result;
     }
 
-    FusionValue eval(Environment env, IonList expr)
+
+    /**
+     * @return not null.
+     */
+    DomValue eval(Environment env, IonList expr)
     {
         IonList resultDom;
         if (expr.isNullValue())
@@ -135,7 +155,11 @@ final class Evaluator
         return new DomValue(resultDom);
     }
 
-    FusionValue eval(Environment env, IonStruct expr)
+
+    /**
+     * @return not null
+     */
+    DomValue eval(Environment env, IonStruct expr)
     {
         IonStruct resultDom;
         if (expr.isNullValue())

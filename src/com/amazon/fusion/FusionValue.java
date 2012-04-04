@@ -20,6 +20,16 @@ public abstract class FusionValue
     public static final FusionValue[] EMPTY_ARRAY = new FusionValue[0];
 
 
+    public final static FusionValue UNDEF = new FusionValue()
+    {
+        @Override
+        void print(Writer out) throws IOException
+        {
+            out.write("/* undef */");
+        }
+    };
+
+
     boolean isTruthy()
     {
         return false;

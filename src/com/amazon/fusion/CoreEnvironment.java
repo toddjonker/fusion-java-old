@@ -65,6 +65,8 @@ class CoreEnvironment
         myBindings.put("doc", new DocFunction());
         myBindings.put("exit", new ExitFunction());
         myBindings.put("size", new SizeFunction());
+        myBindings.put("is_undef", new IsUndefFunction());
+        myBindings.put("undef", FusionValue.UNDEF);
     }
 
     private void bind(KeywordValue keyword)

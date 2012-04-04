@@ -16,8 +16,12 @@ class DomValue
 {
     private final IonValue myDom;
 
+    /**
+     * @param dom must not be null.
+     */
     DomValue(IonValue dom)
     {
+        assert dom != null;
         myDom = dom;
     }
 
@@ -31,6 +35,11 @@ class DomValue
     }
 
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return not null.
+     */
     @Override
     IonValue getDom()
     {

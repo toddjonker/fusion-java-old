@@ -36,7 +36,7 @@ class DotFunction
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
     {
-        IonValue value = ((DomValue) args[0]).getDom();
+        IonValue value = ((DomValue) args[0]).getDom(); // not null
 
         for (int i = 1; i < args.length; i++)
         {
@@ -58,13 +58,19 @@ class DotFunction
                     IonInt indexDom = (IonInt) partValue;
                     // TODO check for null.int
                     IonSequence s = (IonSequence) value;
-                    // TODO check for out-of-range index
-                    value = s.get(indexDom.intValue());
+                    long index = indexDom.longValue();
+                    if (s.size() <= index)
+                    {
+                        return UNDEF;
+                    }
+                    value = s.get((int) index);
                     break;
                 }
 
                 // TODO handle bogus types
             }
+
+            if (value == null) return UNDEF;
         }
 
         return new DomValue(value);

@@ -37,5 +37,9 @@ abstract class FunctionValue
         return invoke(eval, args);
     }
 
+    /**
+     * @param args must not be null, and none of its elements may be null.
+     * @return null is a synonym for {@link #UNDEF}.
+     */
     abstract FusionValue invoke(Evaluator eval, FusionValue[] args);
 }

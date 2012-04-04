@@ -73,6 +73,9 @@ final class Eval
     }
 
 
+    /**
+     * @return not null.
+     */
     private FusionValue evalFile(String fileName)
         throws IOException
     {
