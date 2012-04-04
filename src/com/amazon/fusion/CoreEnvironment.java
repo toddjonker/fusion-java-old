@@ -56,12 +56,13 @@ class CoreEnvironment
         bind(new IfKeyword());
         bind(new LetKeyword());
         bind(new ListBindingsKeyword());
+        bind(new QuoteKeyword());
 
-        myBindings.put("+",    new PlusFunction());
-        myBindings.put(".",    new DotFunction());
-        myBindings.put("=",    new EqualFunction());
-        myBindings.put("add",  new AddFunction());
-        myBindings.put("doc",  new DocFunction());
+        myBindings.put("+", new PlusFunction());
+        myBindings.put(".", new DotFunction());
+        myBindings.put("=", new EqualFunction());
+        myBindings.put("add", new AddFunction());
+        myBindings.put("doc", new DocFunction());
         myBindings.put("exit", new ExitFunction());
         myBindings.put("size", new SizeFunction());
     }

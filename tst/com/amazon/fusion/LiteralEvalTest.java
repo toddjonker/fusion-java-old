@@ -81,4 +81,13 @@ public class LiteralEvalTest
         eval("(define x 33)");
         assertEval("{a:{b:33}}", "(z)");
     }
+
+    @Test
+    public void testQuote()
+    {
+        eval("(define x 13)");
+        assertEval("x", "(quote x)");
+        assertEval("{f:x,g:true}", "(quote {g:true, f:x})");
+        assertEval("[x,99,[]]", "(quote [x, 99, [ ] ])");
+    }
 }
