@@ -2,9 +2,11 @@
 
 package com.amazon.fusion;
 
+import com.amazon.ion.IonException;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonValue;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 
 /**
@@ -80,7 +82,18 @@ public abstract class FusionValue
      *
      * @return the invocation result.
      */
-    abstract FusionValue invoke(Evaluator eval,
-                                Environment env,
-                                IonSexp expr);
+    FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+    {
+        StringWriter w = new StringWriter();
+        w.write("not invokable: ");
+        try
+        {
+            print(w);
+        }
+        catch (IOException e)
+        {
+            // ignore it
+        }
+        throw new IonException(w.toString());
+    }
 }

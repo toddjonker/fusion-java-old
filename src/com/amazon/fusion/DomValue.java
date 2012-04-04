@@ -3,8 +3,6 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonBool;
-import com.amazon.ion.IonException;
-import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import java.io.IOException;
@@ -44,11 +42,5 @@ class DomValue
         throws IOException
     {
         out.write(myDom.toString());
-    }
-
-    @Override
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
-    {
-        throw new IonException("not invokable: " + myDom);
     }
 }
