@@ -9,6 +9,7 @@ import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -99,7 +100,11 @@ final class FuncValue
     @Override
     FusionValue invoke(Evaluator eval, final FusionValue[] args)
     {
-        // TODO check number of arguments
+        if (myParams.length != args.length)
+        {
+            throw new RuntimeException("Bad application of\n  " + myDefinition +
+                                       "\nto\n  " + Arrays.toString(args));
+        }
 
         Environment c2 = new Environment()
         {

@@ -74,10 +74,15 @@ public class FuncTest
     {
         assertEval("1", "((func (x y) x) 1 2)");
         assertEval("2", "((func (x y) y) 1 2)");
-        assertEval("1", "((func (x y) (x y)) (func () 1) 2)");  // TODO should fail
         assertEval("2", "((func (x y) (x y)) (func (x) x) 2)");
 
         assertEval("(func (x) x)", "(define i (func ( x )x))");
         assertEval("2", "((func (x y) ((y y) (y x))) 2 i)");
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testWrongNumberOfArguments()
+    {
+        assertEval("1", "((func (x y) (x y)) (func () 1) 2)");
     }
 }
