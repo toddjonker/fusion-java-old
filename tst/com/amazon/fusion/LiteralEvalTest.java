@@ -106,4 +106,18 @@ public class LiteralEvalTest
         assertEval("false", "(is_undef (quote ()))");
         assertEval("false", "(is_undef {})");
     }
+
+    @Test
+    public void testIsNull()
+    {
+        assertEval("true", "(is_null null)");
+        assertEval("true", "(is_null null.int)");
+        assertEval("false", "(is_null undef)");
+        assertEval("false", "(is_null false)");
+        assertEval("false", "(is_null 0)");
+        assertEval("false", "(is_null \"\")");
+        assertEval("false", "(is_null [])");
+        assertEval("false", "(is_null (quote ()))");
+        assertEval("false", "(is_null {{}})");
+    }
 }

@@ -64,6 +64,7 @@ class CoreEnvironment
         myBindings.put("add", new AddFunction());
         myBindings.put("doc", new DocFunction());
         myBindings.put("exit", new ExitFunction());
+        myBindings.put("is_null", new IsNullFunction());
         myBindings.put("is_undef", new IsUndefFunction());
         myBindings.put("read", new ReadFunction());
         myBindings.put("size", new SizeFunction());
