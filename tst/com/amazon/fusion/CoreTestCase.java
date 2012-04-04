@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
-
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.system.IonSystemBuilder;
@@ -14,7 +13,7 @@ public class CoreTestCase
 {
     private IonSystem mySystem = IonSystemBuilder.standard().build();
     private Environment myEnvironment = new CoreEnvironment(mySystem);
-    private Evaluator myEvaluator = new Evaluator();
+    private Evaluator myEvaluator = new Evaluator(mySystem);
 
     @After
     public void tearDown()

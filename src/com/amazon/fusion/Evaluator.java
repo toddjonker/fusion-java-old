@@ -7,6 +7,7 @@ import com.amazon.ion.IonList;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonSymbol;
+import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
 
@@ -15,6 +16,9 @@ import com.amazon.ion.ValueFactory;
  */
 final class Evaluator
 {
+    private final IonSystem mySystem;
+
+
     static IonValue cloneIfContained(IonValue value)
     {
         if (value.getContainer() != null)
@@ -22,6 +26,17 @@ final class Evaluator
             value = value.clone();
         }
         return value;
+    }
+
+    Evaluator(IonSystem system)
+    {
+        mySystem = system;
+    }
+
+
+    IonSystem getSystem()
+    {
+        return mySystem;
     }
 
 

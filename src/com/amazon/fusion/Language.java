@@ -26,7 +26,7 @@ public final class Language
 
     private final IonSystem mySystem = IonSystemBuilder.standard().build();
     private final Environment myEnvironment = new CoreEnvironment(mySystem);
-    private final Evaluator myEvaluator = new Evaluator();
+    private final Evaluator myEvaluator = new Evaluator(mySystem);
 
 
     public FusionValue eval(String source)
