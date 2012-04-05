@@ -9,7 +9,6 @@ import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -106,43 +105,53 @@ final class FuncValue
     @Override
     FusionValue invoke(Evaluator eval, final FusionValue[] args)
     {
-        if (myParams.length != args.length)
+        final int paramCount = myParams.length;
+        if (paramCount != args.length)
         {
-            throw new RuntimeException("Bad application of\n  " + myDefinition +
-                                       "\nto\n  " + Arrays.toString(args));
+            throw new RuntimeException("Bad application of:\n  " + myDefinition +
+                                       "\nto:\n  " +
+                                       displayToString(args, "\n  "));
         }
 
-        Environment c2 = new Environment()
+        Environment bodyEnv;
+        if (paramCount == 0)
         {
-            @Override
-            public FusionValue lookup(String name)
+            bodyEnv = myEnclosure;
+        }
+        else
+        {
+            bodyEnv = new Environment()
             {
-                for (int i = 0; i < myParams.length; i++)
+                @Override
+                public FusionValue lookup(String name)
                 {
-                    if (name.equals(myParams[i]))
+                    for (int i = 0; i < paramCount; i++)
                     {
-                        return args[i];
+                        if (name.equals(myParams[i]))
+                        {
+                            return args[i];
+                        }
                     }
+
+                    return myEnclosure.lookup(name);
                 }
 
-                return myEnclosure.lookup(name);
-            }
-
-            @Override
-            public void collectNames(Collection<String> names)
-            {
-                for (String name : myParams)
+                @Override
+                public void collectNames(Collection<String> names)
                 {
-                    names.add(name);
+                    for (String name : myParams)
+                    {
+                        names.add(name);
+                    }
+                    myEnclosure.collectNames(names);
                 }
-                myEnclosure.collectNames(names);
-            }
-        };
+            };
+        }
 
         FusionValue result = null;
         for (int i = myBodyStart; i < myDefinition.size(); i++)
         {
-            result = eval.eval(c2, myDefinition.get(i));
+            result = eval.eval(bodyEnv, myDefinition.get(i));
         }
         return result;
     }

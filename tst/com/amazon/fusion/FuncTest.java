@@ -67,6 +67,7 @@ public class FuncTest
     {
         assertEval("true", "((func () true))");
         assertEval("13", "((func (f) (f)) (func () 13))");
+        assertEval("1", "((let ((x 1)) (func () x)))");
     }
 
     @Test
