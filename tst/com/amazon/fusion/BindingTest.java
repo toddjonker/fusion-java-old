@@ -15,9 +15,15 @@ public class BindingTest
     {
         assertEval("1",  "(let ((x 1)) x)");
         assertEval("3",  "(let ((x 1) (y 2))" +
-        		         "  (+ x y))");
+                        "  (+ x y))");
         assertEval("11", "(let ((x 1) (y 2))" +
-        		         "  (let [(x 10), (y x)]" +
-        		         "    (+ x y)))");
+                        "  (let [(x 10), (y x)]" +
+                        "    (+ x y)))");
+    }
+
+    @Test
+    public void testLetMultipleBodyForms()
+    {
+        assertEval("2", "(let ((x 1)) x (+ x x))");
     }
 }

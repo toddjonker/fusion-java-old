@@ -24,9 +24,8 @@ public class StructTest
     {
         assertEval("{f:1,g:{i:4}}",
                    "(let ((s {f:1,g:{h:3,i:4}}))" +
-                   "  (begin" +
-                   "    (remove (. s \"g\") \"h\")" +
-                   "    s))");
+                   "  (remove (. s \"g\") \"h\")" +
+                   "  s)");
     }
 
     @Test

@@ -34,14 +34,12 @@ public class ListTest
     {
         assertEval("{f:[2]}",
                    "(let ((s {f:[]}))" +
-                   "  (begin" +
-                   "    (add (. s \"f\") 2)" +
-                   "    s))");
+                   "  (add (. s \"f\") 2)" +
+                   "  s)");
 
         assertEval("{f:(2)}",
                    "(let ((s {f:(quote ())}))" +
-                   "  (begin" +
-                   "    (add (. s \"f\") 2)" +
-                   "    s))");
+                   "  (add (. s \"f\") 2)" +
+                   "  s)");
     }
 }

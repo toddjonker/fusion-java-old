@@ -17,7 +17,9 @@ class LetKeyword
     LetKeyword()
     {
         super("let", "((IDENT EXPR) ...) BODY",
-              "Binds each IDENT to its EXPR, then evaluates BODY.");
+              "Binds each IDENT to its EXPR, then evaluates BODY.\n" +
+              "BODY may be one or more forms; the result of the last form is the result of the\n" +
+              "entire let-expression.");
     }
 
     /**
@@ -28,7 +30,6 @@ class LetKeyword
     IonValue expand(IonSexp expr)
     {
         IonSequence bindingForms = (IonSequence) expr.get(1);
-        IonValue body = expr.get(2);
 
         ValueFactory vf = expr.getSystem();
 
@@ -36,7 +37,11 @@ class LetKeyword
         IonSexp function = result.add().newEmptySexp();
         function.add().newSymbol("func");
         IonSexp formals = function.add().newEmptySexp();
-        function.add(body.clone());
+        for (int i = 2; i < expr.size(); i++)
+        {
+            IonValue bodyForm = expr.get(i).clone();
+            function.add(bodyForm);
+        }
 
         for (IonValue bindingForm : bindingForms)
         {
