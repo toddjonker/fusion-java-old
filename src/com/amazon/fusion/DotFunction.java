@@ -17,7 +17,7 @@ class DotFunction
     extends FunctionValue
 {
     @Override
-    void print(Writer out) throws IOException
+    void display(Writer out) throws IOException
     {
         out.write("// Function '.'\n");
     }

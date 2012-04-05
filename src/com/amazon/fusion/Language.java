@@ -71,25 +71,25 @@ public final class Language
      * @param v must not be null.
      * @param out
      */
-    public void write(FusionValue v, Writer out)
+    public void display(FusionValue v, Writer out)
         throws IOException
     {
         if (v == null) v = UNDEF;
-        v.print(out);
+        v.display(out);
         out.write('\n');
     }
 
     /**
      * @param v must not be null
      */
-    public void writeToStdout(FusionValue v)
+    public void displayToStdout(FusionValue v)
     {
         try
         {
             OutputStreamWriter out = new OutputStreamWriter(System.out);
             try
             {
-                write(v, out);
+                display(v, out);
             }
             finally
             {

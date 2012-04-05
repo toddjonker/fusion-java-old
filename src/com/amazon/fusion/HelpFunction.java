@@ -16,7 +16,7 @@ final class HelpFunction
     extends FunctionValue
 {
     @Override
-    final void print(Writer out)
+    final void display(Writer out)
         throws IOException
     {
         out.write("// Function 'help'\n");
@@ -36,7 +36,7 @@ final class HelpFunction
         FusionValue result = new FusionValue()
         {
             @Override
-            void print(Writer out)
+            void display(Writer out)
                 throws IOException
             {
                 for (FusionValue arg : args)

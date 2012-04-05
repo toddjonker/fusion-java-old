@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.system.IonTextWriterBuilder;
 import java.io.IOException;
@@ -16,7 +15,7 @@ class WriteFunction
     extends FunctionValue
 {
     @Override
-    void print(Writer out) throws IOException
+    void display(Writer out) throws IOException
     {
         out.write("// Function 'write'\n");
     }
@@ -32,11 +31,11 @@ class WriteFunction
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
     {
-        IonValue value = ((DomValue) args[0]).getDom();
+        Writeable value = (Writeable) args[0];
 
         IonTextWriterBuilder b = IonTextWriterBuilder.pretty();
         IonWriter writer = b.build((OutputStream) System.out);
-        value.writeTo(writer);
+        value.write(writer);
         try
         {
             writer.flush();

@@ -4,7 +4,10 @@ package com.amazon.fusion.cli;
 
 import com.amazon.fusion.FusionValue;
 import com.amazon.fusion.Language;
+import com.amazon.fusion.Writeable;
 import com.amazon.ion.IonException;
+import com.amazon.ion.IonWriter;
+import com.amazon.ion.system.IonTextWriterBuilder;
 import java.io.Console;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -86,16 +89,7 @@ class Repl
         try
         {
             FusionValue result = myLanguage.eval(line);
-            try
-            {
-                myLanguage.write(result, myOut);
-            }
-            catch (IOException e)
-            {
-                // This shouldn't happen printing to a PrintWriter,
-                // which doesn't throw exceptions.
-                throw new IllegalStateException(e);
-            }
+            print(result);
         }
         catch (Language.ExitException e)
         {
@@ -109,5 +103,32 @@ class Repl
         }
 
         return true;
+    }
+
+    private void print(FusionValue v)
+    {
+        if (v == FusionValue.UNDEF) return;
+
+        try
+        {
+            if (v instanceof Writeable)
+            {
+                IonTextWriterBuilder b = IonTextWriterBuilder.standard();
+                IonWriter writer = b.build(myOut);
+                ((Writeable)v).write(writer);
+                writer.flush();
+                myOut.println();
+            }
+            else
+            {
+                myLanguage.display(v, myOut);
+            }
+        }
+        catch (IOException e)
+        {
+            // This shouldn't happen printing to a PrintWriter,
+            // which doesn't throw exceptions.
+            throw new IllegalStateException(e);
+        }
     }
 }

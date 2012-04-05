@@ -3,8 +3,10 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonBool;
+import com.amazon.ion.IonText;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
+import com.amazon.ion.IonWriter;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -13,6 +15,7 @@ import java.io.Writer;
  */
 class DomValue
     extends FusionValue
+    implements Writeable
 {
     private final IonValue myDom;
 
@@ -47,9 +50,25 @@ class DomValue
     }
 
     @Override
-    void print(Writer out)
+    void display(Writer out)
         throws IOException
     {
-        out.write(myDom.toString());
+        String text;
+        if (myDom instanceof IonText)
+        {
+            text = ((IonText) myDom).stringValue();
+        }
+        else
+        {
+            // TODO avoid building the string
+            text = myDom.toString();
+        }
+        out.write(text);
+    }
+
+    @Override
+    public void write(IonWriter out)
+    {
+        myDom.writeTo(out);
     }
 }

@@ -23,7 +23,7 @@ public abstract class FusionValue
     public final static FusionValue UNDEF = new FusionValue()
     {
         @Override
-        void print(Writer out) throws IOException
+        void display(Writer out) throws IOException
         {
             out.write("/* undef */");
         }
@@ -52,14 +52,12 @@ public abstract class FusionValue
     /**
      * Prints a representation of this value for human consumption, generally
      * for use by "print" phase of the {@linkplain Repl Read-Eval-Print Loop}.
-     * <p>
-     * TODO This should be refactored.
      *
      * @param out the output stream; not null.
      *
      * @throws IOException Propagated from the output stream.
      */
-    abstract void print(Writer out)
+    abstract void display(Writer out)
         throws IOException;
 
 
@@ -98,7 +96,7 @@ public abstract class FusionValue
         w.write("not invokable: ");
         try
         {
-            print(w);
+            display(w);
         }
         catch (IOException e)
         {

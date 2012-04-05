@@ -7,7 +7,7 @@ import com.amazon.ion.IonWriter;
 /**
  *
  */
-interface Writeable
+public interface Writeable
 {
     void write(IonWriter out);
 }

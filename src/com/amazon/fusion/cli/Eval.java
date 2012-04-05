@@ -57,7 +57,7 @@ final class Eval
             FusionValue result = evalFile(myFileName);
             if (result != FusionValue.UNDEF)
             {
-                myLanguage.writeToStdout(result);
+                myLanguage.displayToStdout(result);
             }
         }
         catch (IOException e)

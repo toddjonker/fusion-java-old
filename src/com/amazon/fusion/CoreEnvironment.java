@@ -62,6 +62,7 @@ class CoreEnvironment
         myBindings.put(".", new DotFunction());
         myBindings.put("=", new EqualFunction());
         myBindings.put("add", new AddFunction());
+        myBindings.put("display", new DisplayFunction());
         myBindings.put("exit", new ExitFunction());
         myBindings.put("help", new HelpFunction());
         myBindings.put("is_null", new IsNullFunction());

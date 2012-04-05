@@ -91,7 +91,7 @@ final class FuncValue
     }
 
     @Override
-    void print(Writer out)
+    void display(Writer out)
         throws IOException
     {
         out.write(myDefinition.toString());

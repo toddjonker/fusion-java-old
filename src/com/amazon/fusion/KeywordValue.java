@@ -36,7 +36,7 @@ abstract class KeywordValue
                                 IonSexp expr);
 
     @Override
-    final void print(Writer out)
+    final void display(Writer out)
         throws IOException
     {
         out.write("// Keyword ");
