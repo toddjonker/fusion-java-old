@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonBool;
+import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonType;
@@ -74,6 +75,12 @@ class DomValue
     }
 
     //========================================================================
+
+    static IonSequence assumeSequence(FusionValue v)
+    {
+        // TODO error checking
+        return (IonSequence) ((DomValue) v).myDom;
+    }
 
     static IonStruct assumeStruct(FusionValue v)
     {

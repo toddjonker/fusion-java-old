@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonList;
+import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonValue;
 import java.io.IOException;
 import java.io.Writer;
@@ -23,17 +23,17 @@ class AddFunction
     void printHelp(Writer out)
         throws IOException
     {
-        out.write("(add LIST VALUE)\n\n");
-        out.write("Adds the VALUE to the end of the LIST.\n");
+        out.write("(add SEQUENCE VALUE)\n\n");
+        out.write("Adds the VALUE to the end of the SEQUENCE (Ion list or sexp).\n");
     }
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
     {
-        IonList list = (IonList) ((DomValue) args[0]).getDom().clone();
+        IonSequence seq = DomValue.assumeSequence(args[0]);
         IonValue value = ((DomValue) args[1]).getDom();
         value = Evaluator.cloneIfContained(value);
-        list.add(value);
-        return new DomValue(list);
+        seq.add(value);
+        return args[0];
     }
 }
