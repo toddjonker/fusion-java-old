@@ -68,6 +68,7 @@ class CoreEnvironment
         myBindings.put("is_null", new IsNullFunction());
         myBindings.put("is_undef", new IsUndefFunction());
         myBindings.put("read", new ReadFunction());
+        myBindings.put("remove", new RemoveFunction());
         myBindings.put("size", new SizeFunction());
         myBindings.put("undef", FusionValue.UNDEF);
         myBindings.put("write", new WriteFunction());
