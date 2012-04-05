@@ -12,10 +12,12 @@ final class FuncKeyword
 {
     FuncKeyword()
     {
-        super("func", "(PARAM ...) DOC? EXPR",
-              "Returns a new function.  When invoked, the caller's arguments are bound to\n" +
-              "the PARAMs and the body EXPR is evaluated and returned.\n" +
-              "DOC is an optional documentation string.");
+        super("func", "(PARAM ...) DOC? BODY",
+              "Returns a new function.  When invoked, the caller's arguments are bound to the\n" +
+              "PARAMs and the BODY is evaluated and returned.\n" +
+              "DOC is an optional documentation string.\n" +
+              "BODY may be one or more forms; the result of the last form is the result of the\n" +
+              "function invocation.");
     }
 
     @Override

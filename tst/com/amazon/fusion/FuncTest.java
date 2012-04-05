@@ -80,6 +80,13 @@ public class FuncTest
         assertEval("2", "((func (x y) ((y y) (y x))) 2 i)");
     }
 
+    @Test
+    public void testMultipleBodyForms()
+    {
+        assertEval("2", "((func () 1 2))");
+        assertEval("1", "((func (x y) y x) 1 2)");
+    }
+
     @Test(expected = RuntimeException.class)
     public void testWrongNumberOfArguments()
     {

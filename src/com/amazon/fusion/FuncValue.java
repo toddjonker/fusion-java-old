@@ -22,7 +22,11 @@ final class FuncValue
     private final IonSexp myDefinition;
     private final String[] myParams;
     private final String myDoc;
-    private final IonValue myBody;
+
+    /**
+     * Index within {@link #myDefinition} of the first body form.
+     */
+    private final int myBodyStart;
 
     /**
      * Constructs a new function from its source and enclosing lexical
@@ -39,17 +43,19 @@ final class FuncValue
         myDefinition = definition;
         myParams = determineParams((IonSexp) definition.get(1));
 
+        int defSize = definition.size();
+
         IonValue maybeDoc = definition.get(2);
         if (maybeDoc.getType() == IonType.STRING
-            && definition.size() > 3)
+            && defSize > 3)
         {
             myDoc = ((IonString) maybeDoc).stringValue();
-            myBody = definition.get(3);
+            myBodyStart = 3;
         }
         else
         {
             myDoc = null;
-            myBody = maybeDoc;
+            myBodyStart = 2;
         }
     }
 
@@ -133,6 +139,11 @@ final class FuncValue
             }
         };
 
-        return eval.eval(c2, myBody);
+        FusionValue result = null;
+        for (int i = myBodyStart; i < myDefinition.size(); i++)
+        {
+            result = eval.eval(c2, myDefinition.get(i));
+        }
+        return result;
     }
 }
