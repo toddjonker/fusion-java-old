@@ -28,4 +28,13 @@ public class StructTest
                    "    (remove (. s \"g\") \"h\")" +
                    "    s))");
     }
+
+    @Test
+    public void testForEachChild()
+    {
+        eval("(define add_name (func (name value) (add value name)))");
+        assertEval("{f:[\"f\"],g:[\"g\"],f:[true,false,\"f\"]}",
+                   "(for_each_field add_name " +
+                   "  {f:null.list,g:[],f:[true,false]})");
+    }
 }

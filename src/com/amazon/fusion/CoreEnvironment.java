@@ -64,6 +64,7 @@ class CoreEnvironment
         myBindings.put("add", new AddFunction());
         myBindings.put("display", new DisplayFunction());
         myBindings.put("exit", new ExitFunction());
+        myBindings.put("for_each_field", new ForEachFieldFunction());
         myBindings.put("help", new HelpFunction());
         myBindings.put("is_null", new IsNullFunction());
         myBindings.put("is_undef", new IsUndefFunction());
