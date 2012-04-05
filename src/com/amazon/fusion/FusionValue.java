@@ -92,16 +92,35 @@ public abstract class FusionValue
      */
     FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
     {
-        StringWriter w = new StringWriter();
-        w.write("not invokable: ");
+        throw new IonException("not invokable: " + displayToString(this));
+    }
+
+
+    static String displayToString(FusionValue value)
+    {
+        StringWriter buf = new StringWriter();
         try
         {
-            display(w);
+            value.display(buf);
         }
         catch (IOException e)
         {
             // ignore it
         }
-        throw new IonException(w.toString());
+        return buf.toString();
+    }
+
+    static String displayToString(FusionValue[] values, String join)
+    {
+        StringBuilder buf = new StringBuilder();
+        for (int i = 0; i < values.length; i++)
+        {
+            if (i != 0)
+            {
+                buf.append(join);
+            }
+            buf.append(displayToString(values[i]));
+        }
+        return buf.toString();
     }
 }
