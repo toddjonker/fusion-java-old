@@ -22,7 +22,7 @@ class ReadFunction
     }
 
     @Override
-    void printDoc(Writer out)
+    void printHelp(Writer out)
         throws IOException
     {
         out.write("(read)\n\n");

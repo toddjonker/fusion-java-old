@@ -74,7 +74,7 @@ public abstract class FusionValue
      *
      * @throws IOException Propagated from the output stream.
      */
-    void printDoc(Writer out)
+    void printHelp(Writer out)
         throws IOException
     {
         out.write("// No documentation.\n");

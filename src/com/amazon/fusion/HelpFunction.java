@@ -8,26 +8,26 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * The {@code doc} built-in function.
+ * The {@code help} built-in function.
  * <p>
  * TODO add a Documentation model and move this to user space.
  */
-final class DocFunction
+final class HelpFunction
     extends FunctionValue
 {
     @Override
     final void print(Writer out)
         throws IOException
     {
-        out.write("// Function 'doc'\n");
+        out.write("// Function 'help'\n");
     }
 
     @Override
-    void printDoc(Writer out)
+    void printHelp(Writer out)
         throws IOException
     {
-        out.write("(doc VALUE ...)\n\n");
-        out.write("Prints the documentation of the given values, if available.\n");
+        out.write("(help OBJ ...)\n\n");
+        out.write("Prints the documentation of the given objects, if available.\n");
     }
 
     @Override
@@ -42,7 +42,7 @@ final class DocFunction
                 for (FusionValue arg : args)
                 {
                     out.write('\n');
-                    arg.printDoc(out);
+                    arg.printHelp(out);
                 }
             }
 

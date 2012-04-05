@@ -23,7 +23,7 @@ class DotFunction
     }
 
     @Override
-    void printDoc(Writer out)
+    void printHelp(Writer out)
         throws IOException
     {
         out.write("(. VALUE PART ...)\n\n");

@@ -66,7 +66,7 @@ final class FuncValue
     }
 
     @Override
-    void printDoc(Writer out)
+    void printHelp(Writer out)
         throws IOException
     {
         if (myDoc != null)
@@ -79,7 +79,7 @@ final class FuncValue
         }
         else
         {
-            super.printDoc(out);
+            super.printHelp(out);
         }
     }
 

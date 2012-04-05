@@ -20,7 +20,7 @@ class AddFunction
     }
 
     @Override
-    void printDoc(Writer out)
+    void printHelp(Writer out)
         throws IOException
     {
         out.write("(add LIST VALUE)\n\n");

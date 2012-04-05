@@ -20,7 +20,7 @@ class PlusFunction
     }
 
     @Override
-    void printDoc(Writer out)
+    void printHelp(Writer out)
         throws IOException
     {
         out.write("(+ NUM ...)\n\n");

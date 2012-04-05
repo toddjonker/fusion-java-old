@@ -20,7 +20,7 @@ class SizeFunction
     }
 
     @Override
-    void printDoc(Writer out)
+    void printHelp(Writer out)
         throws IOException
     {
         out.write("(size LIST)\n\n");
