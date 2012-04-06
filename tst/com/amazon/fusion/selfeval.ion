@@ -1,0 +1,52 @@
+// These are literals that evaluate to themselves.
+
+null.null
+null
+
+null.bool
+true
+false
+
+null.int
+-98763
+0
+12
+1234356789012343567890123435678901234356789012343567890
+
+null.decimal
+123.45
+
+null.float
+123.45e0
+
+null.timestamp
+2012T
+2012-03T
+2012-03-21
+2012-03-21T
+2012-03-21T02:57-07:00
+
+// TODO null.symbol  ???
+
+null.string
+""
+"Hello my ragtime gal"
+
+null.blob
+{{}}
+{{OiBTIKUgTyAASb8=}}
+
+null.clob
+{{""}}
+{{"clob"}}
+
+null.list
+[]
+[13]
+[true, false, null]
+
+// TODO null.sexp
+
+null.struct
+{}
+{f:1, g:2}

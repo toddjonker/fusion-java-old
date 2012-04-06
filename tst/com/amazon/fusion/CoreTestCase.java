@@ -23,16 +23,26 @@ public class CoreTestCase
         myEvaluator = null;
     }
 
+    protected IonSystem system()
+    {
+        return mySystem;
+    }
+
     //========================================================================
+
+    protected void assertEval(IonValue expected, IonValue expression)
+    {
+        IonValue result = myEvaluator.evalToIon(myEnvironment, expression);
+
+        assertEquals(expected, result);
+    }
 
     protected void assertEval(String expectedIon, String expressionIon)
     {
         IonValue expected   = mySystem.singleValue(expectedIon);
         IonValue expression = mySystem.singleValue(expressionIon);
 
-        IonValue result = myEvaluator.evalToIon(myEnvironment, expression);
-
-        assertEquals(expected, result);
+        assertEval(expected, expression);
     }
 
     protected void assertEval(int expectedInt, String expressionIon)
@@ -40,9 +50,7 @@ public class CoreTestCase
         IonValue expected   = mySystem.newInt(expectedInt);
         IonValue expression = mySystem.singleValue(expressionIon);
 
-        IonValue result = myEvaluator.evalToIon(myEnvironment, expression);
-
-        assertEquals(expected, result);
+        assertEval(expected, expression);
     }
 
     protected void assertSelfEval(String expressionIon)
