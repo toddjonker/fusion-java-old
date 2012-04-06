@@ -50,6 +50,7 @@ class CoreEnvironment
     {
         myValueFactory = valueFactory;
 
+        bind(new AssertKeyword());
         bind(new BeginKeyword());
         bind(new DefineKeyword());
         bind(new EvalFileKeyword());
