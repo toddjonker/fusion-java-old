@@ -19,6 +19,7 @@ final class BeginKeyword
 
     @Override
     FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+        throws FusionException
     {
         FusionValue result = null;
         int count = expr.size();

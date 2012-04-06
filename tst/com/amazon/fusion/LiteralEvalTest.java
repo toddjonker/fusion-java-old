@@ -27,6 +27,7 @@ public class LiteralEvalTest
 
     @Test
     public void testList()
+        throws Exception
     {
         eval("(define x 13)");
         assertEval("[13]", "[x]");
@@ -45,6 +46,7 @@ public class LiteralEvalTest
 
     @Test
     public void testStruct()
+        throws Exception
     {
         eval("(define x 13)");
         assertEval("{f:13}", "{f:x}");
@@ -63,6 +65,7 @@ public class LiteralEvalTest
 
     @Test
     public void testQuote()
+        throws Exception
     {
         eval("(define x 13)");
         assertEval("x", "(quote x)");

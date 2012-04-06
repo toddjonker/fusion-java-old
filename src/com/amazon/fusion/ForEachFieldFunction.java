@@ -31,6 +31,7 @@ class ForEachFieldFunction
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
+        throws FusionException
     {
         FunctionValue func = (FunctionValue) args[0];
 

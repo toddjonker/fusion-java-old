@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.Language.ExitException;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -27,7 +28,8 @@ class ExitFunction
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] arg)
+        throws ExitException
     {
-        throw new Language.ExitException();
+        throw new ExitException();
     }
 }

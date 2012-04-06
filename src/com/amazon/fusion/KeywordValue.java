@@ -33,7 +33,8 @@ abstract class KeywordValue
     @Override
     abstract FusionValue invoke(Evaluator eval,
                                 Environment env,
-                                IonSexp expr);
+                                IonSexp expr)
+        throws FusionException;
 
     @Override
     final void display(Writer out)

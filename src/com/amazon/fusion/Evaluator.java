@@ -42,6 +42,7 @@ final class Evaluator
 
 
     IonValue evalToIon(Environment env, IonValue expr)
+        throws FusionException
     {
         FusionValue fv = eval(env, expr);
         return fv.getDom();
@@ -52,6 +53,7 @@ final class Evaluator
      * @return not null
      */
     FusionValue eval(Environment env, IonValue expr)
+        throws FusionException
     {
         switch (expr.getType())
         {
@@ -112,6 +114,7 @@ final class Evaluator
      * @return not null
      */
     FusionValue eval(Environment env, IonSexp expr)
+        throws FusionException
     {
         int len = expr.size();
         if (len < 1) return UNDEF; // TODO throw
@@ -134,6 +137,7 @@ final class Evaluator
      * @return not null.
      */
     DomValue eval(Environment env, IonList expr)
+        throws FusionException
     {
         IonList resultDom;
         if (expr.isNullValue())
@@ -160,6 +164,7 @@ final class Evaluator
      * @return not null
      */
     DomValue eval(Environment env, IonStruct expr)
+        throws FusionException
     {
         IonStruct resultDom;
         if (expr.isNullValue())

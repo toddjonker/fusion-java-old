@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonException;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonValue;
 import java.io.IOException;
@@ -89,10 +88,13 @@ public abstract class FusionValue
      *  The first child element is the source for this value.
      *
      * @return the invocation result.
+     *
+     * @throws FusionException if there's a failure in the fusion code.
      */
     FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+        throws FusionException
     {
-        throw new IonException("not invokable: " + displayToString(this));
+        throw new FusionException("not invokable: " + displayToString(this));
     }
 
 

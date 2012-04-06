@@ -29,6 +29,7 @@ abstract class MacroValue
 
     @Override
     final FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+        throws FusionException
     {
         IonValue expanded = expand(expr);
         // TODO this shouldn't grow the stack

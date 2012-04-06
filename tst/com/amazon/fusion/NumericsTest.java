@@ -19,6 +19,7 @@ public class NumericsTest
 
     @Test
     public void testPlus()
+        throws Exception
     {
         assertEval("1", "(+ 1)");
         assertEval("2", "(+ 1 1)");

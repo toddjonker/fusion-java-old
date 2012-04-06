@@ -2,6 +2,7 @@
 
 package com.amazon.fusion.cli;
 
+import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionValue;
 import com.amazon.fusion.Language;
 import com.amazon.fusion.Writeable;
@@ -95,6 +96,11 @@ class Repl
         {
             myOut.println("// Goodbye!");
             return false;
+        }
+        catch (FusionException e)
+        {
+            myOut.print("// ");
+            myOut.println(e.getMessage());
         }
         catch (IonException e)
         {

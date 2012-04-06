@@ -21,6 +21,7 @@ final class IfKeyword
 
     @Override
     FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+        throws FusionException
     {
         // TODO check number of clauses
         IonValue source = expr.get(1);

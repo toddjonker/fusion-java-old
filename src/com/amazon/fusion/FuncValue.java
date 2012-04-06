@@ -104,6 +104,7 @@ final class FuncValue
 
     @Override
     FusionValue invoke(Evaluator eval, final FusionValue[] args)
+        throws FusionException
     {
         final int paramCount = myParams.length;
         if (paramCount != args.length)

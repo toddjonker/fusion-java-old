@@ -2,8 +2,10 @@
 
 package com.amazon.fusion.cli;
 
+import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionValue;
 import com.amazon.fusion.Language;
+import com.amazon.fusion.Language.ExitException;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
@@ -54,10 +56,21 @@ final class Eval
     {
         try
         {
-            FusionValue result = evalFile(myFileName);
-            if (result != FusionValue.UNDEF)
+            try
             {
-                myLanguage.displayToStdout(result);
+                FusionValue result = evalFile(myFileName);
+                if (result != FusionValue.UNDEF)
+                {
+                    myLanguage.displayToStdout(result);
+                }
+            }
+            catch (ExitException e)
+            {
+                // Do nothing.
+            }
+            catch (FusionException e)
+            {
+                e.printStackTrace(System.err);
             }
         }
         catch (IOException e)
@@ -71,7 +84,7 @@ final class Eval
      * @return not null.
      */
     private FusionValue evalFile(String fileName)
-        throws IOException
+        throws FusionException, IOException
     {
         FileInputStream in = new FileInputStream(fileName);
         try

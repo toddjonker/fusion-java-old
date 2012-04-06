@@ -21,11 +21,11 @@ public final class Language
      * Thown to force the exit of an evaluation.
      */
     public static final class ExitException
-        extends RuntimeException
+        extends FusionException
     {
         private static final long serialVersionUID = 1L;
 
-        ExitException() { }
+        ExitException() { super("Exit requested"); }
     }
 
 
@@ -39,7 +39,7 @@ public final class Language
      * @return not null, but perhaps {@link FusionValue#UNDEF}.
      */
     public FusionValue eval(String source)
-        throws ExitException
+        throws ExitException, FusionException
     {
         Iterator<IonValue> i = mySystem.iterate(source);
         return eval(i);
@@ -53,7 +53,7 @@ public final class Language
      * @throws ExitException
      */
     public FusionValue eval(Iterator<IonValue> source)
-        throws ExitException
+        throws ExitException, FusionException
     {
         FusionValue result = UNDEF;
 

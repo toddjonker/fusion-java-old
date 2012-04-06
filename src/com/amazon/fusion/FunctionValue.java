@@ -15,6 +15,7 @@ abstract class FunctionValue
 {
     @Override
     final FusionValue invoke(Evaluator eval, final Environment env, IonSexp expr)
+        throws FusionException
     {
         int argCount = expr.size() - 1;
 
@@ -41,5 +42,6 @@ abstract class FunctionValue
      * @param args must not be null, and none of its elements may be null.
      * @return null is a synonym for {@link #UNDEF}.
      */
-    abstract FusionValue invoke(Evaluator eval, FusionValue[] args);
+    abstract FusionValue invoke(Evaluator eval, FusionValue[] args)
+        throws FusionException;
 }

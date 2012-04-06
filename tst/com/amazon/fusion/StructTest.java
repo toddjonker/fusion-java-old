@@ -30,6 +30,7 @@ public class StructTest
 
     @Test
     public void testForEachChild()
+        throws Exception
     {
         eval("(define add_name (func (name value) (add value name)))");
         assertEval("{f:[\"f\"],g:[\"g\"],f:[true,false,\"f\"]}",

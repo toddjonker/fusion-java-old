@@ -26,6 +26,7 @@ class EvalFileKeyword
 
     @Override
     FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+        throws FusionException
     {
         String fileName;
         {

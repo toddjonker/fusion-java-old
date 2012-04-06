@@ -28,6 +28,7 @@ class CoreEnvironment
 
         @Override
         FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+            throws FusionException
         {
             IonSymbol name = (IonSymbol) expr.get(1);
             IonValue ionValue = expr.get(2);

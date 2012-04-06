@@ -17,6 +17,7 @@ public class IfTest
 
     @Test
     public void testNotEvaluatingOtherBranch()
+        throws Exception
     {
         eval("(define boom (func () (boom)))");
 
@@ -26,6 +27,7 @@ public class IfTest
 
     @Test
     public void testTruthiness()
+        throws Exception
     {
         eval("(define n null)");
         assertEval(2, "(if null 1 2)");
