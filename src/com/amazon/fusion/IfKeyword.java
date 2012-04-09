@@ -2,7 +2,9 @@
 
 package com.amazon.fusion;
 
+import com.amazon.ion.IonBool;
 import com.amazon.ion.IonSexp;
+import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 
 /**
@@ -11,11 +13,36 @@ import com.amazon.ion.IonValue;
 final class IfKeyword
     extends KeywordValue
 {
+    /**
+     * Returns true or false indicating which branch an {@code if} expression
+     * would take.
+     *
+     * @throws FusionException if the value can't be used as an if-test
+     * expression.
+     */
+    static boolean whichBranch(FusionValue fv)
+        throws FusionException
+    {
+        if (fv instanceof DomValue)
+        {
+            IonValue iv = ((DomValue) fv).getDom();
+            if (iv.getType() == IonType.BOOL && ! iv.isNullValue())
+            {
+                return ((IonBool) iv).booleanValue();
+            }
+        }
+
+        String message = "Value isn't true or false: " + displayToString(fv);
+        throw new FusionException(message);
+    }
+
+
     IfKeyword()
     {
         super("if", "TEST THEN ELSE",
-              "Evaluates the TEST expression; if the result is true, evaluates the THEN\n" +
-              "expression, otherwise evaluates the ELSE expression.\n" +
+              "Evaluates the TEST expression first. If the result is true, evaluates the\n" +
+              "THEN expression and returns its value. If the result is false, evaluates the\n" +
+              "ELSE expression and returns its value.\n" +
               "Note that only one of THEN or ELSE is evaluated.");
     }
 
@@ -26,7 +53,7 @@ final class IfKeyword
         // TODO check number of clauses
         IonValue source = expr.get(1);
         FusionValue result = eval.eval(env, source);
-        if (result.isTruthy())
+        if (whichBranch(result))
         {
             source = expr.get(2);
         }

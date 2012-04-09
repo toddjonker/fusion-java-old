@@ -29,12 +29,6 @@ public abstract class FusionValue
     };
 
 
-    boolean isTruthy()
-    {
-        return false;
-    }
-
-
     /**
      * Gets an Ion representation of this value, if available.
      * <p>

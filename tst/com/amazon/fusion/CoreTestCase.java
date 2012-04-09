@@ -35,7 +35,7 @@ public class CoreTestCase
         try
         {
             IonValue result = myEvaluator.evalToIon(myEnvironment, expression);
-            assertEquals(expected, result);
+            assertEquals(expression.toString(), expected, result);
         }
         catch (FusionException e)
         {
