@@ -13,7 +13,8 @@ class AssertKeyword
 {
     AssertKeyword()
     {
-        super("assert", "EXPR MESSAGE",
+        //    "                                                                               |
+        super("EXPR MESSAGE",
               "Evaluates the EXPR, throwing an exception if the result isn't true.\n" +
               "The exception uses the MESSAGE, which is only evaluated on failure.");
     }

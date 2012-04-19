@@ -13,7 +13,8 @@ final class QuoteKeyword
 {
     QuoteKeyword()
     {
-        super("quote", "DATUM",
+        //    "                                                                               |
+        super("DATUM",
               "Returns the Ion DATUM as-is, without evaluation.");
     }
 

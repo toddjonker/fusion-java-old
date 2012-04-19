@@ -7,6 +7,7 @@ import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.system.IonSystemBuilder;
 import org.junit.After;
+import org.junit.Assert;
 
 
 public class CoreTestCase
@@ -65,10 +66,18 @@ public class CoreTestCase
         assertEval(expressionIon, expressionIon);
     }
 
-    protected void eval(String expressionIon)
+    protected FusionValue eval(String expressionIon)
         throws FusionException
     {
         IonValue expression = mySystem.singleValue(expressionIon);
-        myEvaluator.eval(myEnvironment, expression);
+        FusionValue result = myEvaluator.eval(myEnvironment, expression);
+        return result;
+    }
+
+    protected void evalToFunction(String expressionIon)
+        throws FusionException
+    {
+        FusionValue result = eval(expressionIon);
+        Assert.assertTrue(result instanceof FunctionValue);
     }
 }

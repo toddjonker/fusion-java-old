@@ -39,10 +39,11 @@ final class IfKeyword
 
     IfKeyword()
     {
-        super("if", "TEST THEN ELSE",
-              "Evaluates the TEST expression first. If the result is true, evaluates the\n" +
-              "THEN expression and returns its value. If the result is false, evaluates the\n" +
-              "ELSE expression and returns its value.\n" +
+        //    "                                                                               |
+        super("TEST THEN ELSE",
+              "Evaluates the TEST expression first. If the result is true, evaluates the THEN\n" +
+              "expression and returns its value. If the result is false, evaluates the ELSE\n" +
+              "expression and returns its value.\n" +
               "Note that only one of THEN or ELSE is evaluated.");
     }
 

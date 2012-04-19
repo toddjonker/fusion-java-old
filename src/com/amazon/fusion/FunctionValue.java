@@ -4,6 +4,9 @@ package com.amazon.fusion;
 
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonValue;
+import com.amazon.ion.util.IonTextUtils;
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Base class for invocable functions, both built-in and user-defined.
@@ -11,8 +14,22 @@ import com.amazon.ion.IonValue;
  * access to the caller's environment.
  */
 abstract class FunctionValue
-    extends FusionValue
+    extends NamedValue
 {
+    final static String DOTDOTDOT = "...";
+
+    final String[] myParams;
+    private final String myDoc;
+
+    FunctionValue(String doc, String... params)
+    {
+        assert doc == null || ! doc.endsWith("\n");
+        assert params != null;
+        myParams = params;
+        myDoc = doc;
+    }
+
+
     @Override
     final FusionValue invoke(Evaluator eval, final Environment env, IonSexp expr)
         throws FusionException
@@ -36,6 +53,48 @@ abstract class FunctionValue
         }
 
         return invoke(eval, args);
+    }
+
+    @Override
+    final void display(Writer out)
+        throws IOException
+    {
+        out.write("/* function");
+        String name = getInferredName();
+        if (name != null)
+        {
+            out.write(' ');
+            try
+            {
+                IonTextUtils.printQuotedSymbol(out, name);
+            }
+            catch (IOException e)
+            {
+                throw new IllegalStateException("Shouldn't happen", e);
+            }
+        }
+        out.write(" */\n");
+    }
+
+    @Override
+    final void printHelp(Writer out)
+        throws IOException
+    {
+        out.write("[FUNCTION]  (");
+        out.write(getEffectiveName());
+        for (String formal : myParams)
+        {
+            out.write(' ');
+            out.write(formal);
+        }
+        out.write(")\n");
+
+        if (myDoc != null)
+        {
+            out.write('\n');
+            out.write(myDoc);
+            out.write('\n');
+        }
     }
 
     /**

@@ -3,8 +3,6 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonValue;
-import java.io.IOException;
-import java.io.Writer;
 
 /**
  *
@@ -12,18 +10,11 @@ import java.io.Writer;
 class IsNullFunction
     extends FunctionValue
 {
-    @Override
-    void display(Writer out) throws IOException
+    IsNullFunction()
     {
-        out.write("// Function 'is_null'\n");
-    }
-
-    @Override
-    void printHelp(Writer out)
-        throws IOException
-    {
-        out.write("(is_null VALUE)\n\n");
-        out.write("Returns true when VALUE is any Ion null, false otherwise.\n");
+        //    "                                                                               |
+        super("Returns true when VALUE is any Ion null, false otherwise.",
+              "value");
     }
 
     @Override

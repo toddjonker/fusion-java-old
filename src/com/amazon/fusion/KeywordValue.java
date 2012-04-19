@@ -12,22 +12,15 @@ import java.io.Writer;
  * (as opposed to {@linkplain FunctionValue functions}).
  */
 abstract class KeywordValue
-    extends FusionValue
+    extends NamedValue
 {
-    protected final String myKeyword;
     protected final String myBodyPattern;
     protected final String myDoc;
 
-    KeywordValue(String keyword, String bodyPattern, String doc)
+    KeywordValue(String bodyPattern, String doc)
     {
-        myKeyword = keyword;
         myBodyPattern = bodyPattern;
         myDoc = doc;
-    }
-
-    String getIntrinsicName()
-    {
-        return myKeyword;
     }
 
     @Override
@@ -43,7 +36,7 @@ abstract class KeywordValue
         out.write("// Keyword ");
         try
         {
-            IonTextUtils.printQuotedSymbol(out, myKeyword);
+            IonTextUtils.printQuotedSymbol(out, getEffectiveName());
         }
         catch (IOException e)
         {
@@ -57,7 +50,7 @@ abstract class KeywordValue
         throws IOException
     {
         out.write("[SYNTAX]  (");
-        out.write(myKeyword);
+        out.write(getEffectiveName());
         if (myBodyPattern != null)
         {
             out.write(' ');

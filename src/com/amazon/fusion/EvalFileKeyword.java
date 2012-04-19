@@ -18,9 +18,10 @@ class EvalFileKeyword
 {
     EvalFileKeyword()
     {
-        super("eval_file", "FILENAME",
-              "Opens the Fusion source file named by the given string and evaluates\n" +
-              "each expression in sequence. Returns the last result.");
+        //    "                                                                               |
+        super("FILENAME",
+              "Opens the Fusion source file named by the given string and evaluates each\n" +
+              "expression in sequence. Returns the last result.");
     }
 
 

@@ -11,9 +11,9 @@ import com.amazon.ion.IonValue;
 abstract class MacroValue
     extends KeywordValue
 {
-    MacroValue(String keyword, String bodyPattern, String doc)
+    MacroValue(String bodyPattern, String doc)
     {
-        super(keyword, bodyPattern, doc);
+        super(bodyPattern, doc);
     }
 
 

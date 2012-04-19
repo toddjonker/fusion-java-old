@@ -5,7 +5,6 @@ package com.amazon.fusion;
 import com.amazon.ion.IonException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.Writer;
 
 /**
  *
@@ -13,19 +12,12 @@ import java.io.Writer;
 class DisplayFunction
     extends FunctionValue
 {
-    @Override
-    void display(Writer out) throws IOException
+    DisplayFunction()
     {
-        out.write("// Function 'display'\n");
-    }
-
-    @Override
-    void printHelp(Writer out)
-        throws IOException
-    {
-        out.write("(display OBJ ...)\n\n");
-        out.write("Outputs objects to stdout in human-readable form.\n" +
-                  "The result is not necessarily Ion data.\n");
+        //    "                                                                               |
+        super("Outputs the VALUEs to stdout in human-readable form.\n" +
+              "The result is not necessarily Ion data.",
+              "value", DOTDOTDOT);
     }
 
     @Override

@@ -3,12 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonString;
 import com.amazon.ion.IonSymbol;
-import com.amazon.ion.IonType;
-import com.amazon.ion.IonValue;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Collection;
 
 /**
@@ -19,8 +14,6 @@ final class FuncValue
 {
     private final Environment myEnclosure;
     private final IonSexp myDefinition;
-    private final String[] myParams;
-    private final String myDoc;
 
     /**
      * Index within {@link #myDefinition} of the first body form.
@@ -31,34 +24,22 @@ final class FuncValue
      * Constructs a new function from its source and enclosing lexical
      * environment.
      *
-     * @param definition the source text of the {@code func} expression.
      * @param enclosure the lexical environment surrounding the source of this
      *  function.  Any free variables in the function are expected to be bound
      *  here.
+     * @param definition the source text of the {@code func} expression.
      */
-    FuncValue(IonSexp definition, Environment enclosure)
+    FuncValue(Environment enclosure, IonSexp definition, String doc,
+              int bodyStartIndex)
     {
+        super(doc, determineParams((IonSexp) definition.get(1)));
+
         myEnclosure = enclosure;
         myDefinition = definition;
-        myParams = determineParams((IonSexp) definition.get(1));
-
-        int defSize = definition.size();
-
-        IonValue maybeDoc = definition.get(2);
-        if (maybeDoc.getType() == IonType.STRING
-            && defSize > 3)
-        {
-            myDoc = ((IonString) maybeDoc).stringValue();
-            myBodyStart = 3;
-        }
-        else
-        {
-            myDoc = null;
-            myBodyStart = 2;
-        }
+        myBodyStart = bodyStartIndex;
     }
 
-    private String[] determineParams(IonSexp paramsExpr)
+    private static String[] determineParams(IonSexp paramsExpr)
     {
         int size = paramsExpr.size();
         String[] params = new String[size];
@@ -70,37 +51,6 @@ final class FuncValue
         return params;
     }
 
-    @Override
-    void printHelp(Writer out)
-        throws IOException
-    {
-        if (myDoc != null)
-        {
-            out.write(myDoc);
-            if (! myDoc.endsWith("\n"))
-            {
-                out.write('\n');
-            }
-        }
-        else
-        {
-            super.printHelp(out);
-        }
-    }
-
-
-    @Override
-    IonValue getDom()
-    {
-        return myDefinition;
-    }
-
-    @Override
-    void display(Writer out)
-        throws IOException
-    {
-        out.write(myDefinition.toString());
-    }
 
     @Override
     FusionValue invoke(Evaluator eval, final FusionValue[] args)

@@ -6,7 +6,6 @@ import com.amazon.ion.IonWriter;
 import com.amazon.ion.system.IonTextWriterBuilder;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Writer;
 
 /**
  *
@@ -14,18 +13,11 @@ import java.io.Writer;
 class WriteFunction
     extends FunctionValue
 {
-    @Override
-    void display(Writer out) throws IOException
+    WriteFunction()
     {
-        out.write("// Function 'write'\n");
-    }
-
-    @Override
-    void printHelp(Writer out)
-        throws IOException
-    {
-        out.write("(write VAL)\n\n");
-        out.write("Writes a value as Ion data to the standard output stream.\n");
+        //    "                                                                               |
+        super("Writes a value as Ion data to the standard output stream.",
+              "value");
     }
 
     @Override

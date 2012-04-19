@@ -4,8 +4,6 @@ package com.amazon.fusion;
 
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonInt;
-import java.io.IOException;
-import java.io.Writer;
 
 /**
  *
@@ -13,18 +11,11 @@ import java.io.Writer;
 class EqualFunction
     extends FunctionValue
 {
-    @Override
-    void display(Writer out) throws IOException
+    EqualFunction()
     {
-        out.write("// Function '='\n");
-    }
-
-    @Override
-    void printHelp(Writer out)
-        throws IOException
-    {
-        out.write("(= NUM NUM)\n\n");
-        out.write("Returns true if the arguments are equal integers, false otherwise.\n");
+        //    "                                                                               |
+        super("Returns true if the arguments are equal integers, false otherwise.",
+              "int", "int");
     }
 
     @Override

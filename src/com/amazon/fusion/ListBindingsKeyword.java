@@ -17,7 +17,8 @@ final class ListBindingsKeyword
 {
     ListBindingsKeyword()
     {
-        super("list_bindings", null,
+        //    "                                                                               |
+        super(null,
               "Returns a list of symbols, one for each visible binding.");
     }
 

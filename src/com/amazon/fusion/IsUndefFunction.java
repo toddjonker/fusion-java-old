@@ -3,8 +3,6 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonValue;
-import java.io.IOException;
-import java.io.Writer;
 
 /**
  *
@@ -12,18 +10,11 @@ import java.io.Writer;
 class IsUndefFunction
     extends FunctionValue
 {
-    @Override
-    void display(Writer out) throws IOException
+    IsUndefFunction()
     {
-        out.write("// Function 'is_undef'\n");
-    }
-
-    @Override
-    void printHelp(Writer out)
-        throws IOException
-    {
-        out.write("(is_undef EXPR)\n\n");
-        out.write("Returns true when EXPR evaluates to the unique UNDEF object, false otherwise.\n");
+        //    "                                                                               |
+        super("Returns true when VALUE is the unique UNDEF object, false otherwise.",
+              "value");
     }
 
     @Override

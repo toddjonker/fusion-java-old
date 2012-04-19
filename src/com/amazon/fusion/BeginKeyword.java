@@ -13,7 +13,8 @@ final class BeginKeyword
 {
     BeginKeyword()
     {
-        super("begin", "EXPR ...",
+        //    "                                                                               |
+        super("EXPR ...",
               "Evaluates the EXPRs in order, returning the final result.");
     }
 

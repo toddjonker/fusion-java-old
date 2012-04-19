@@ -15,19 +15,11 @@ import java.io.Writer;
 final class HelpFunction
     extends FunctionValue
 {
-    @Override
-    final void display(Writer out)
-        throws IOException
+    HelpFunction()
     {
-        out.write("// Function 'help'\n");
-    }
-
-    @Override
-    void printHelp(Writer out)
-        throws IOException
-    {
-        out.write("(help OBJ ...)\n\n");
-        out.write("Prints the documentation of the given objects, if available.\n");
+        //    "                                                                               |
+        super("Prints the documentation of the given values, if available.",
+              "value", DOTDOTDOT);
     }
 
     @Override

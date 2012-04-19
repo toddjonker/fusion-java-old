@@ -54,6 +54,16 @@ public abstract class FusionValue
         throws IOException;
 
 
+    String getInferredName()
+    {
+        return null;
+    }
+
+    void inferName(String name)
+    {
+    }
+
+
     /**
      * Prints the documentation of this value.
      * Implementations should try to ensure that a final newline is printed.

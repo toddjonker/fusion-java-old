@@ -3,8 +3,6 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonValue;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Iterator;
 
 /**
@@ -15,20 +13,11 @@ class ReadFunction
 {
     private Iterator<IonValue> myInputValues;
 
-    @Override
-    void display(Writer out) throws IOException
+    ReadFunction()
     {
-        out.write("// Function 'read'\n");
-    }
-
-    @Override
-    void printHelp(Writer out)
-        throws IOException
-    {
-        out.write("(read)\n\n");
-        out.write("Reads an Ion value from the standard input stream.\n" +
-                  "Returns undef when there's no more data; use (is_undef) to\n" +
-                  "check for it.");
+        //    "                                                                               |
+        super("Reads an Ion value from the standard input stream. Returns undef when there's\n" +
+              "no more data; use (is_undef) to check for it.");
     }
 
     @Override

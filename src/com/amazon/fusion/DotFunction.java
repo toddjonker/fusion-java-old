@@ -7,8 +7,6 @@ import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonValue;
-import java.io.IOException;
-import java.io.Writer;
 
 /**
  *
@@ -16,21 +14,14 @@ import java.io.Writer;
 class DotFunction
     extends FunctionValue
 {
-    @Override
-    void display(Writer out) throws IOException
+    DotFunction()
     {
-        out.write("// Function '.'\n");
-    }
-
-    @Override
-    void printHelp(Writer out)
-        throws IOException
-    {
-        out.write("(. VALUE PART ...)\n\n");
-        out.write("Traverses down through an Ion data structure.\n" +
-                  "VALUE must be Ion data, either a struct or a sequence (list/sexp).\n" +
-                  "Each PART must be a string, symbol, or int, to denote either a struct's\n" +
-                  "field-name or a sequence's index.\n");
+        //    "                                                                               |
+        super("Traverses down through an Ion data structure.\n" +
+              "VALUE must be Ion data, either a struct or a sequence (list/sexp).\n" +
+              "Each PART must be a string, symbol, or int, to denote either a struct's\n" +
+              "field-name or a sequence's index.",
+              "value", "part", DOTDOTDOT);
     }
 
     @Override

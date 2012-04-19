@@ -4,8 +4,6 @@ package com.amazon.fusion;
 
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonValue;
-import java.io.IOException;
-import java.io.Writer;
 
 /**
  *
@@ -13,18 +11,11 @@ import java.io.Writer;
 class PlusFunction
     extends FunctionValue
 {
-    @Override
-    void display(Writer out) throws IOException
+    PlusFunction()
     {
-        out.write("// Function '+'\n");
-    }
-
-    @Override
-    void printHelp(Writer out)
-        throws IOException
-    {
-        out.write("(+ NUM ...)\n\n");
-        out.write("Adds one or more integers.\n");
+        //    "                                                                               |
+        super("Adds one or more integers.",
+              "int", DOTDOTDOT);
     }
 
     @Override

@@ -22,7 +22,8 @@ class CoreEnvironment
     {
         private DefineKeyword()
         {
-            super("define", "VAR VALUE",
+            //    "                                                                               |
+            super("VAR VALUE",
                   "Defines a global variable VAR with the given VALUE.");
         }
 
@@ -34,7 +35,7 @@ class CoreEnvironment
             IonValue ionValue = expr.get(2);
 
             FusionValue fusionValue = eval.eval(env, ionValue);
-            myBindings.put(name.stringValue(), fusionValue);
+            bind(name.stringValue(), fusionValue);
 
             return fusionValue;
         }
@@ -50,38 +51,37 @@ class CoreEnvironment
     {
         myValueFactory = valueFactory;
 
-        bind(new AssertKeyword());
-        bind(new BeginKeyword());
-        bind(new DefineKeyword());
-        bind(new EvalFileKeyword());
-        bind(new FuncKeyword());
-        bind(new IfKeyword());
-        bind(new LetKeyword());
-        bind(new ListBindingsKeyword());
-        bind(new QuoteKeyword());
-
-        myBindings.put("+", new PlusFunction());
-        myBindings.put(".", new DotFunction());
-        myBindings.put("=", new EqualFunction());
-        myBindings.put("add", new AddFunction());
-        myBindings.put("display", new DisplayFunction());
-        myBindings.put("exit", new ExitFunction());
-        myBindings.put("for_each_field", new ForEachFieldFunction());
-        myBindings.put("help", new HelpFunction());
-        myBindings.put("is_null", new IsNullFunction());
-        myBindings.put("is_undef", new IsUndefFunction());
-        myBindings.put("read", new ReadFunction());
-        myBindings.put("remove", new RemoveFunction());
-        myBindings.put("size", new SizeFunction());
-        myBindings.put("undef", FusionValue.UNDEF);
-        myBindings.put("write", new WriteFunction());
+        bind("+", new PlusFunction());
+        bind(".", new DotFunction());
+        bind("=", new EqualFunction());
+        bind("add", new AddFunction());
+        bind("assert", new AssertKeyword());
+        bind("begin", new BeginKeyword());
+        bind("define", new DefineKeyword());
+        bind("display", new DisplayFunction());
+        bind("eval_file", new EvalFileKeyword());
+        bind("exit", new ExitFunction());
+        bind("for_each_field", new ForEachFieldFunction());
+        bind("func", new FuncKeyword());
+        bind("help", new HelpFunction());
+        bind("if", new IfKeyword());
+        bind("is_null", new IsNullFunction());
+        bind("is_undef", new IsUndefFunction());
+        bind("let", new LetKeyword());
+        bind("list", new ListBindingsKeyword());
+        bind("quote", new QuoteKeyword());
+        bind("read", new ReadFunction());
+        bind("remove", new RemoveFunction());
+        bind("size", new SizeFunction());
+        bind("undef", FusionValue.UNDEF);
+        bind("write", new WriteFunction());
     }
 
-    private void bind(KeywordValue keyword)
+    private void bind(String name, FusionValue value)
     {
-        myBindings.put(keyword.getIntrinsicName(), keyword);
+        value.inferName(name);
+        myBindings.put(name, value);
     }
-
 
     @Override
     public FusionValue lookup(String name)
