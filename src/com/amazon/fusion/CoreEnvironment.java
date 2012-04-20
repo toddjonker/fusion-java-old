@@ -68,7 +68,7 @@ class CoreEnvironment
         bind("is_null", new IsNullFunction());
         bind("is_undef", new IsUndefFunction());
         bind("let", new LetKeyword());
-        bind("list", new ListBindingsKeyword());
+        bind("list_bindings", new ListBindingsKeyword());
         bind("quote", new QuoteKeyword());
         bind("read", new ReadFunction());
         bind("remove", new RemoveFunction());
