@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionValue.UNDEF;
 import com.amazon.ion.IonException;
+import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonStruct;
@@ -39,6 +40,28 @@ final class Evaluator
     {
         return mySystem;
     }
+
+
+    //========================================================================
+
+
+    long assumeLong(FusionValue fv)
+    {
+        // TODO type check
+        // TODO null check
+        IonInt iv = (IonInt) ((DomValue) fv).getDom();
+        return iv.longValue();
+    }
+
+
+    FusionValue newInt(long value)
+    {
+        IonInt dom = mySystem.newInt(value);
+        return new DomValue(dom);
+    }
+
+
+    //========================================================================
 
 
     IonValue evalToIon(Environment env, IonValue expr)

@@ -51,7 +51,9 @@ class CoreEnvironment
     {
         myValueFactory = valueFactory;
 
-        bind("+", new PlusFunction());
+        bind("*", new ProductFunction());
+        bind("+", new SumFunction());
+        bind("-", new DifferenceFunction());
         bind(".", new DotFunction());
         bind("=", new EqualFunction());
         bind("add", new AddFunction());

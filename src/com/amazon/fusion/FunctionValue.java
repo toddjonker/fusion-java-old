@@ -16,6 +16,7 @@ abstract class FunctionValue
     extends NamedValue
 {
     final static String DOTDOTDOT = "...";
+    final static String DOTDOTDOTPLUS = "...+";
 
     final String[] myParams;
     private final String myDoc;
