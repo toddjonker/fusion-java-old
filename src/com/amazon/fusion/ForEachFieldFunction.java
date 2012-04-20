@@ -36,8 +36,7 @@ class ForEachFieldFunction
 
             DomValue fieldValue = new DomValue(field);
 
-            FusionValue[] funcArgs = new FusionValue[]{ nameValue, fieldValue };
-            func.invoke(eval, funcArgs);
+            eval.applyNonTail(func, nameValue, fieldValue);
         }
 
         return args[1];

@@ -15,7 +15,8 @@ final class BeginKeyword
     {
         //    "                                                                               |
         super("EXPR ...",
-              "Evaluates the EXPRs in order, returning the final result.");
+              "Evaluates the EXPRs in order, returning the final result.\n" +
+              "The last EXPR is in tail position.");
     }
 
     @Override
@@ -23,12 +24,15 @@ final class BeginKeyword
         throws FusionException
     {
         FusionValue result = null;
-        int count = expr.size();
-        for (int i = 1; i < count; i++)
+        final int last = expr.size() - 1;
+        for (int i = 1; i < last; i++)
         {
             IonValue source = expr.get(i);
             result = eval.eval(env, source);
         }
+
+        IonValue source = expr.get(last);
+        result = eval.bounceTailExpression(env, source);
         return result;
     }
 }

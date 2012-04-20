@@ -11,6 +11,7 @@ import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
+import java.io.Writer;
 
 /**
  * Main entry point to the Fusion evaluation engine.
@@ -49,49 +50,57 @@ final class Evaluator
     }
 
 
+
     /**
      * @return not null
      */
     FusionValue eval(Environment env, IonValue expr)
         throws FusionException
     {
-        switch (expr.getType())
+        while (true)
         {
-            case BLOB:
-            case BOOL:
-            case CLOB:
-            case DECIMAL:
-            case FLOAT:
-            case INT:
-            case NULL:
-            case STRING:
-            case TIMESTAMP:
+            switch (expr.getType())
             {
-                return new DomValue(expr);
-            }
-            case LIST:
-            {
-                return eval(env, (IonList) expr);
-            }
-            case STRUCT:
-            {
-                return eval(env, (IonStruct) expr);
-            }
-            case SEXP:
-            {
-                return eval(env, (IonSexp) expr);
-            }
-            case SYMBOL:
-            {
-                return eval(env, (IonSymbol) expr);
-            }
-            case DATAGRAM:
-            {
-                throw new IllegalStateException("Shouldn't have datagram here");
+                case LIST:
+                {
+                    return eval(env, (IonList) expr);
+                }
+                case STRUCT:
+                {
+                    return eval(env, (IonStruct) expr);
+                }
+                case SEXP:
+                {
+                    FusionValue result = eval(env, (IonSexp) expr);
+                    if (result instanceof TailExpression)
+                    {
+                        TailExpression tail = (TailExpression) result;
+                        env = tail.myEnv;
+                        expr = tail.myTailExpr;
+                        continue;
+                    }
+                    else if (result == null)
+                    {
+                        result = UNDEF;
+                    }
+
+                    assert ! (result instanceof TailExpression);
+                    return result;
+                }
+                case SYMBOL:
+                {
+                    return eval(env, (IonSymbol) expr);
+                }
+                case DATAGRAM:
+                {
+                    throw new IllegalStateException("Shouldn't have datagram here");
+                }
+                default:
+                {
+                    return new DomValue(expr);
+                }
             }
         }
-
-        return new DomValue(expr);
     }
 
 
@@ -113,7 +122,7 @@ final class Evaluator
     /**
      * @return not null
      */
-    FusionValue eval(Environment env, IonSexp expr)
+    private FusionValue eval(Environment env, IonSexp expr)
         throws FusionException
     {
         int len = expr.size();
@@ -128,8 +137,41 @@ final class Evaluator
         }
 
         FusionValue result = form.invoke(this, env, expr);
-        if (result == null) result = UNDEF;
         return result;
+    }
+
+
+    /**
+     * Makes a <b>non-tail</b> call to a function.
+     *
+     * @return not null
+     */
+    FusionValue applyNonTail(FunctionValue function, FusionValue... args)
+        throws FusionException
+    {
+        FusionValue result = function.invoke(this, args);
+        if (result instanceof TailExpression)
+        {
+            TailExpression tail = (TailExpression) result;
+            Environment env = tail.myEnv;
+            IonValue expr = tail.myTailExpr;
+            result = eval(env, expr);
+        }
+        else if (result == null)
+        {
+            result = UNDEF;
+        }
+        return result;
+    }
+
+
+    /**
+     * Wraps an expression for evaluation in tail position.
+     * Must be returned back to this {@link Evaluator} for proper behavior.
+     */
+    FusionValue bounceTailExpression(Environment env, IonValue tailExpr)
+    {
+        return new TailExpression(env, tailExpr);
     }
 
 
@@ -184,5 +226,31 @@ final class Evaluator
             }
         }
         return new DomValue(resultDom);
+    }
+
+
+    /**
+     * Returned from evaluation of a form when evaluation needs to continue in
+     * a tail position. This allows the {@link Evaluator} to trampoline into
+     * the tail call without growing the stack.  Not the most efficient
+     * implementation, but it works.
+     */
+    private static final class TailExpression
+        extends FusionValue
+    {
+        final Environment myEnv;
+        final IonValue myTailExpr;
+
+        TailExpression(Environment env, IonValue tailExpr)
+        {
+            myEnv = env;
+            myTailExpr = tailExpr;
+        }
+
+        @Override
+        void display(Writer out)
+        {
+            throw new IllegalStateException();
+        }
     }
 }

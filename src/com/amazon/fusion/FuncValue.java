@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonSymbol;
+import com.amazon.ion.IonValue;
 import java.util.Collection;
 
 /**
@@ -99,11 +100,16 @@ final class FuncValue
             };
         }
 
-        FusionValue result = null;
-        for (int i = myBodyStart; i < myDefinition.size(); i++)
+        FusionValue result;
+        final int bodyEnd = myDefinition.size() - 1;
+        for (int i = myBodyStart; i < bodyEnd; i++)
         {
-            result = eval.eval(bodyEnv, myDefinition.get(i));
+            IonValue expr = myDefinition.get(i);
+            result = eval.eval(bodyEnv, expr);
         }
+
+        IonValue expr = myDefinition.get(bodyEnd);
+        result = eval.bounceTailExpression(bodyEnv, expr);
         return result;
     }
 }

@@ -96,4 +96,16 @@ public class FuncTest
     {
         assertEval(1, "((func (x y) (x y)) (func () 1) 2)");
     }
+
+    @Test
+    public void testTailCall()
+        throws Exception
+    {
+        // This code forces tail handling of 'if' and 'begin'
+        eval("(define countup" +
+             "  (func (i limit)" +
+             "    (if (= i limit) i" +
+             "      (begin (countup (+ 1 i) limit)))))");
+        assertEval(1000000, "(countup 0 1000000)");
+    }
 }

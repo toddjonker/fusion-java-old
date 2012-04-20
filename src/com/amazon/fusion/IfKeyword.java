@@ -44,7 +44,7 @@ final class IfKeyword
               "Evaluates the TEST expression first. If the result is true, evaluates the THEN\n" +
               "expression and returns its value. If the result is false, evaluates the ELSE\n" +
               "expression and returns its value.\n" +
-              "Note that only one of THEN or ELSE is evaluated.");
+              "Note that only one of THEN or ELSE is evaluated, and both are in tail position.");
     }
 
     @Override
@@ -62,7 +62,7 @@ final class IfKeyword
         {
             source = expr.get(3);
         }
-        result = eval.eval(env, source);
-        return result;
+
+        return eval.bounceTailExpression(env, source);
     }
 }

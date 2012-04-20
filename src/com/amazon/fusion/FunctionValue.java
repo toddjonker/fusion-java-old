@@ -30,8 +30,15 @@ abstract class FunctionValue
     }
 
 
+    /**
+     * Do not call directly! Only for use by the {@link Evaluator} which can
+     * properly handle bounced tail expressions.
+     *
+     * @see Evaluator#applyNonTail(FunctionValue, FusionValue...)
+     * @see Evaluator#bounceTailExpression(Environment, IonValue)
+     */
     @Override
-    final FusionValue invoke(Evaluator eval, final Environment env, IonSexp expr)
+    final FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
         throws FusionException
     {
         int argCount = expr.size() - 1;
