@@ -94,7 +94,7 @@ public class FuncTest
         assertEval(1, "((func (x y) y x) 1 2)");
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = ArityFailure.class)
     public void testWrongNumberOfArguments()
         throws Exception
     {

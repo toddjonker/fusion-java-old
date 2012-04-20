@@ -102,16 +102,13 @@ public abstract class FusionValue
      */
     public String write()
     {
-        StringBuilder buf = new StringBuilder();
+        StringBuilder out = new StringBuilder();
         try
         {
-            write(buf);
+            write(out);
         }
-        catch (IOException e)
-        {
-            // ignore it
-        }
-        return buf.toString();
+        catch (IOException e) {}
+        return out.toString();
     }
 
 
@@ -147,16 +144,13 @@ public abstract class FusionValue
      */
     String display()
     {
-        StringWriter buf = new StringWriter();
+        StringWriter out = new StringWriter();
         try
         {
-            display(buf);
+            display(out);
         }
-        catch (IOException e)
-        {
-            // ignore it
-        }
-        return buf.toString();
+        catch (IOException e) {}
+        return out.toString();
     }
 
 
@@ -178,47 +172,56 @@ public abstract class FusionValue
     }
 
 
-    static String write(FusionValue[] values, String join)
+    static void write(Appendable out, FusionValue[] values, String join)
+        throws IOException
     {
-        StringBuilder buf = new StringBuilder();
         for (int i = 0; i < values.length; i++)
         {
             if (i != 0)
             {
-                buf.append(join);
+                out.append(join);
             }
 
-            try
-            {
-                values[i].write(buf);
-            }
-            catch (IOException e)
-            {
-                // ignore
-            }
+            values[i].write(out);
         }
-        return buf.toString();
     }
+
+
+    static String write(FusionValue[] values, String join)
+    {
+        StringBuilder out = new StringBuilder();
+        try
+        {
+            write(out, values, join);
+        }
+        catch (IOException e) {}
+        return out.toString();
+    }
+
+
+    static void display(Appendable out, FusionValue[] values, String join)
+        throws IOException
+    {
+        for (int i = 0; i < values.length; i++)
+        {
+            if (i != 0)
+            {
+                out.append(join);
+            }
+
+            values[i].display(out);
+        }
+    }
+
 
     static String display(FusionValue[] values, String join)
     {
-        StringBuilder buf = new StringBuilder();
-        for (int i = 0; i < values.length; i++)
+        StringBuilder out = new StringBuilder();
+        try
         {
-            if (i != 0)
-            {
-                buf.append(join);
-            }
-
-            try
-            {
-                values[i].display(buf);
-            }
-            catch (IOException e)
-            {
-                // ignore
-            }
+            display(out, values, join);
         }
-        return buf.toString();
+        catch (IOException e) {}
+        return out.toString();
     }
 }

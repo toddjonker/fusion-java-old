@@ -60,9 +60,7 @@ final class FuncValue
         final int paramCount = myParams.length;
         if (paramCount != args.length)
         {
-            throw new RuntimeException("Bad application of:\n  " + myDefinition +
-                                       "\nto:\n  " +
-                                       write(args, "\n  "));
+            throw new ArityFailure(this, paramCount, args);
         }
 
         Environment bodyEnv;
