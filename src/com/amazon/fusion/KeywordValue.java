@@ -5,7 +5,6 @@ package com.amazon.fusion;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
-import java.io.Writer;
 
 /**
  * Base class for syntactic forms
@@ -29,35 +28,29 @@ abstract class KeywordValue
                                 IonSexp expr)
         throws FusionException;
 
+
     @Override
-    final void display(Writer out)
+    public final void write(Appendable out)
         throws IOException
     {
-        out.write("// Keyword ");
-        try
-        {
-            IonTextUtils.printQuotedSymbol(out, getEffectiveName());
-        }
-        catch (IOException e)
-        {
-            throw new IllegalStateException("Shouldn't happen", e);
-        }
-        out.write('\n');
+        out.append("/* Keyword ");
+        IonTextUtils.printQuotedSymbol(out, getEffectiveName());
+        out.append(" */");
     }
 
     @Override
-    void printHelp(Writer out)
+    void displayHelp(Appendable out)
         throws IOException
     {
-        out.write("[SYNTAX]  (");
-        out.write(getEffectiveName());
+        out.append("[SYNTAX]  (");
+        out.append(getEffectiveName());
         if (myBodyPattern != null)
         {
-            out.write(' ');
-            out.write(myBodyPattern);
+            out.append(' ');
+            out.append(myBodyPattern);
         }
-        out.write(")\n\n");
-        out.write(myDoc);
-        out.write('\n');
+        out.append(")\n\n");
+        out.append(myDoc);
+        out.append('\n');
     }
 }

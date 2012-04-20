@@ -11,7 +11,6 @@ import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
-import java.io.Writer;
 
 /**
  * Main entry point to the Fusion evaluation engine.
@@ -248,7 +247,7 @@ final class Evaluator
         }
 
         @Override
-        void display(Writer out)
+        public void write(Appendable out)
         {
             throw new IllegalStateException();
         }

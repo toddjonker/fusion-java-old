@@ -30,7 +30,7 @@ class AssertKeyword
 
         IonValue messageExpr = expr.get(2);
         FusionValue messageValue = eval.eval(env, messageExpr);
-        String message = FusionValue.displayToString(messageValue);
+        String message = messageValue.display();
         throw new FusionAssertionFailure(message, testExpr, result);
     }
 }

@@ -7,13 +7,13 @@ import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
+import com.amazon.ion.system.IonTextWriterBuilder;
 import java.io.IOException;
-import java.io.Writer;
 
 /**
  * A {@link FusionValue} that contains an {@link IonValue}.
  */
-class DomValue
+final class DomValue
     extends FusionValue
     implements Writeable
 {
@@ -40,21 +40,30 @@ class DomValue
         return myDom;
     }
 
+
     @Override
-    void display(Writer out)
+    public void write(Appendable out)
         throws IOException
     {
-        String text;
+        IonWriter writer = IonTextWriterBuilder.standard().build(out);
+        myDom.writeTo(writer);
+        writer.flush();
+    }
+
+
+    @Override
+    public void display(Appendable out)
+        throws IOException
+    {
         if (myDom instanceof IonText)
         {
-            text = ((IonText) myDom).stringValue();
+            String text = ((IonText) myDom).stringValue();
+            out.append(text);
         }
         else
         {
-            // TODO avoid building the string
-            text = myDom.toString();
+            write(out);
         }
-        out.write(text);
     }
 
     @Override

@@ -5,7 +5,6 @@ package com.amazon.fusion;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonSexp;
 import java.io.IOException;
-import java.io.Writer;
 
 /**
  * The {@code help} built-in function.
@@ -28,13 +27,13 @@ final class HelpFunction
         FusionValue result = new FusionValue()
         {
             @Override
-            void display(Writer out)
+            public void write(Appendable out)
                 throws IOException
             {
                 for (FusionValue arg : args)
                 {
-                    out.write('\n');
-                    arg.printHelp(out);
+                    out.append('\n');
+                    arg.displayHelp(out);
                 }
             }
 

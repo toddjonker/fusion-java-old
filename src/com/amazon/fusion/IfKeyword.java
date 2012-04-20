@@ -32,7 +32,7 @@ final class IfKeyword
             }
         }
 
-        String message = "Value isn't true or false: " + displayToString(fv);
+        String message = "Value isn't true or false: " + fv.write();
         throw new FusionException(message);
     }
 

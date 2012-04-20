@@ -62,7 +62,7 @@ final class FuncValue
         {
             throw new RuntimeException("Bad application of:\n  " + myDefinition +
                                        "\nto:\n  " +
-                                       displayToString(args, "\n  "));
+                                       write(args, "\n  "));
         }
 
         Environment bodyEnv;

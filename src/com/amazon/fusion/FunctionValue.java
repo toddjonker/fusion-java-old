@@ -6,7 +6,6 @@ import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
-import java.io.Writer;
 
 /**
  * Base class for invocable functions, both built-in and user-defined.
@@ -62,45 +61,40 @@ abstract class FunctionValue
         return invoke(eval, args);
     }
 
+
     @Override
-    final void display(Writer out)
+    public final void write(Appendable out)
         throws IOException
     {
-        out.write("/* function");
+        out.append("/* function");
         String name = getInferredName();
         if (name != null)
         {
-            out.write(' ');
-            try
-            {
-                IonTextUtils.printQuotedSymbol(out, name);
-            }
-            catch (IOException e)
-            {
-                throw new IllegalStateException("Shouldn't happen", e);
-            }
+            out.append(' ');
+            IonTextUtils.printQuotedSymbol(out, name);
         }
-        out.write(" */\n");
+        out.append(" */");
     }
 
+
     @Override
-    final void printHelp(Writer out)
+    final void displayHelp(Appendable out)
         throws IOException
     {
-        out.write("[FUNCTION]  (");
-        out.write(getEffectiveName());
+        out.append("[FUNCTION]  (");
+        out.append(getEffectiveName());
         for (String formal : myParams)
         {
-            out.write(' ');
-            out.write(formal);
+            out.append(' ');
+            out.append(formal);
         }
-        out.write(")\n");
+        out.append(")\n");
 
         if (myDoc != null)
         {
-            out.write('\n');
-            out.write(myDoc);
-            out.write('\n');
+            out.append('\n');
+            out.append(myDoc);
+            out.append('\n');
         }
     }
 

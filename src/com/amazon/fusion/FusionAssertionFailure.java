@@ -32,7 +32,7 @@ class FusionAssertionFailure
         String message =
             "Assertion failure: " + super.getMessage() +
             "\nExpression: " + myExpr +
-            "\nResult: " + FusionValue.displayToString(myResult);
+            "\nResult: " + myResult.write();
         return message;
     }
 }

@@ -5,10 +5,7 @@ package com.amazon.fusion.cli;
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionValue;
 import com.amazon.fusion.Language;
-import com.amazon.fusion.Writeable;
 import com.amazon.ion.IonException;
-import com.amazon.ion.IonWriter;
-import com.amazon.ion.system.IonTextWriterBuilder;
 import java.io.Console;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -117,18 +114,8 @@ class Repl
 
         try
         {
-            if (v instanceof Writeable)
-            {
-                IonTextWriterBuilder b = IonTextWriterBuilder.standard();
-                IonWriter writer = b.build(myOut);
-                ((Writeable)v).write(writer);
-                writer.flush();
-                myOut.println();
-            }
-            else
-            {
-                myLanguage.display(v, myOut);
-            }
+            v.write(myOut);
+            myOut.println();
         }
         catch (IOException e)
         {

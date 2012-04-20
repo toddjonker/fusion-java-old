@@ -3,13 +3,9 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionValue.UNDEF;
-import com.amazon.ion.IonException;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.system.IonSystemBuilder;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.util.Iterator;
 
 /**
@@ -64,41 +60,5 @@ public final class Language
         }
 
         return result;
-    }
-
-
-    /**
-     * @param v must not be null.
-     * @param out
-     */
-    public void display(FusionValue v, Writer out)
-        throws IOException
-    {
-        if (v == null) v = UNDEF;
-        v.display(out);
-        out.write('\n');
-    }
-
-    /**
-     * @param v must not be null
-     */
-    public void displayToStdout(FusionValue v)
-    {
-        try
-        {
-            OutputStreamWriter out = new OutputStreamWriter(System.out);
-            try
-            {
-                display(v, out);
-            }
-            finally
-            {
-                out.flush();
-            }
-        }
-        catch (IOException e)
-        {
-            throw new IonException(e);
-        }
     }
 }
