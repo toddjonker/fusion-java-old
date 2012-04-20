@@ -10,6 +10,7 @@ public class DefineTest
 {
     @Test
     public void testRedefine()
+        throws Exception
     {
         assertEval("93", "(define x 93)");
         assertEval("93", "x");

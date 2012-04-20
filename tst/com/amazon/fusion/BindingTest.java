@@ -12,6 +12,7 @@ public class BindingTest
 {
     @Test
     public void testLet()
+        throws Exception
     {
         assertEval("1",  "(let ((x 1)) x)");
         assertEval("3",  "(let ((x 1) (y 2))" +
@@ -23,6 +24,7 @@ public class BindingTest
 
     @Test
     public void testLetMultipleBodyForms()
+        throws Exception
     {
         assertEval("2", "(let ((x 1)) x (+ x x))");
     }

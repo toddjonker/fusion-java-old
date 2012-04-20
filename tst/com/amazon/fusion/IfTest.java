@@ -30,6 +30,7 @@ public class IfTest
 
     @Test
     public void testBasicIf()
+        throws Exception
     {
         assertEval(1, "(if true 1 2)");
         assertEval(2, "(if false 1 2)");
@@ -60,6 +61,7 @@ public class IfTest
 
     @Test
     public void testTruthyIf()
+        throws Exception
     {
         for (String form : TRUTHY_EXPRESSIONS)
         {
@@ -69,6 +71,7 @@ public class IfTest
 
     @Test
     public void testUntruthyIf()
+        throws Exception
     {
         for (String form : UNTRUTHY_EXPRESSIONS)
         {

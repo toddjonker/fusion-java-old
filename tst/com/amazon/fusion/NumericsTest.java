@@ -12,6 +12,7 @@ public class NumericsTest
 {
     @Test
     public void testEqual()
+        throws Exception
     {
         assertEval("true",  "(= 1 1)");
         assertEval("false", "(= 1 2)");

@@ -12,6 +12,7 @@ public class StructTest
 {
     @Test
     public void testRemove()
+        throws Exception
     {
         assertEval("{}", "(remove {} \"f\")");
         assertEval("{}", "(remove {f:1} \"f\")");
@@ -21,6 +22,7 @@ public class StructTest
 
     @Test
     public void testDeepRemove()
+        throws Exception
     {
         assertEval("{f:1,g:{i:4}}",
                    "(let ((s {f:1,g:{h:3,i:4}}))" +

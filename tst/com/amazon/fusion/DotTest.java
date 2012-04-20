@@ -10,6 +10,7 @@ public class DotTest
 {
     @Test
     public void testNoParts()
+        throws Exception
     {
         assertEval("3", "(. 3)");
         assertEval("null", "(. null.null)");
@@ -20,6 +21,7 @@ public class DotTest
 
     @Test
     public void testStructParts()
+        throws Exception
     {
         assertEval("true", "(. {f:true} \"f\")");
         assertEval("true", "(. {f:true} (quote f))");
@@ -28,6 +30,7 @@ public class DotTest
 
     @Test
     public void testSequenceParts()
+        throws Exception
     {
         assertEval("99", "(. [99, \"hello\"] 0)");
         assertEval("{{}}", "(. [99, [true, {{}}]] 1 1)");
@@ -35,6 +38,7 @@ public class DotTest
 
     @Test
     public void testMissingPart()
+        throws Exception
     {
         assertEval("true", "(is_undef (. {f:1} \"g\"))");
         assertEval("true", "(is_undef (. {f:1,g:[2]} \"g\" 1 1))");

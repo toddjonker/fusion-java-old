@@ -10,6 +10,7 @@ public class FuncTest
 {
     @Test
     public void testBasicFunc()
+        throws Exception
     {
         assertEval(3, "((func (p) 3) 4)");
     }
@@ -66,6 +67,7 @@ public class FuncTest
 
     @Test
     public void testNoParams()
+        throws Exception
     {
         assertEval("true", "((func () true))");
         assertEval(13, "((func (f) (f)) (func () 13))");
@@ -86,6 +88,7 @@ public class FuncTest
 
     @Test
     public void testMultipleBodyForms()
+        throws Exception
     {
         assertEval(2, "((func () 1 2))");
         assertEval(1, "((func (x y) y x) 1 2)");
@@ -93,6 +96,7 @@ public class FuncTest
 
     @Test(expected = RuntimeException.class)
     public void testWrongNumberOfArguments()
+        throws Exception
     {
         assertEval(1, "((func (x y) (x y)) (func () 1) 2)");
     }

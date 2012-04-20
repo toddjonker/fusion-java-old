@@ -9,6 +9,7 @@ public class BeginTest
 {
     @Test
     public void testBegin()
+        throws Exception
     {
         assertEval(1, "(begin 1)");
         assertEval(2, "(begin 1 2)");

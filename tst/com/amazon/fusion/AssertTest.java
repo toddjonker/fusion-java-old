@@ -33,6 +33,7 @@ public class AssertTest
     }
 
     private void expectAssertSuccess(String expr)
+        throws Exception
     {
         // TODO test that the message isn't evaluated
         assertEval(1, "(begin (assert " + expr + " \"barney\") 1)");

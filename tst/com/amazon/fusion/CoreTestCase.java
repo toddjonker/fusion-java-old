@@ -32,20 +32,14 @@ public class CoreTestCase
     //========================================================================
 
     protected void assertEval(IonValue expected, IonValue expression)
+        throws FusionException
     {
-        try
-        {
-            IonValue result = myEvaluator.evalToIon(myEnvironment, expression);
-            assertEquals(expression.toString(), expected, result);
-        }
-        catch (FusionException e)
-        {
-            throw new AssertionError(e);
-        }
-
+        IonValue result = myEvaluator.evalToIon(myEnvironment, expression);
+        assertEquals(expression.toString(), expected, result);
     }
 
     protected void assertEval(String expectedIon, String expressionIon)
+        throws FusionException
     {
         IonValue expected   = mySystem.singleValue(expectedIon);
         IonValue expression = mySystem.singleValue(expressionIon);
@@ -54,6 +48,7 @@ public class CoreTestCase
     }
 
     protected void assertEval(int expectedInt, String expressionIon)
+        throws FusionException
     {
         IonValue expected   = mySystem.newInt(expectedInt);
         IonValue expression = mySystem.singleValue(expressionIon);
@@ -62,6 +57,7 @@ public class CoreTestCase
     }
 
     protected void assertSelfEval(String expressionIon)
+        throws FusionException
     {
         assertEval(expressionIon, expressionIon);
     }

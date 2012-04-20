@@ -75,6 +75,7 @@ public class LiteralEvalTest
 
     @Test
     public void testUndef()
+        throws Exception
     {
         assertEval("true",  "(is_undef undef)");
         assertEval("false", "(is_undef null)");
@@ -91,6 +92,7 @@ public class LiteralEvalTest
 
     @Test
     public void testIsNull()
+        throws Exception
     {
         assertEval("true", "(is_null null)");
         assertEval("true", "(is_null null.int)");

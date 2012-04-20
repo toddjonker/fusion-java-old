@@ -12,6 +12,7 @@ public class ListTest
 {
     @Test
     public void testAdd()
+        throws Exception
     {
         assertEval("[1]", "(add null.list 1)");
         assertEval("[1]", "(add [] 1)");
@@ -22,6 +23,7 @@ public class ListTest
 
     @Test
     public void testSize()
+        throws Exception
     {
         assertEval("0", "(size null.list)");
         assertEval("0", "(size [])");
@@ -31,6 +33,7 @@ public class ListTest
 
     @Test
     public void testDeepAdd()
+        throws Exception
     {
         assertEval("{f:[2]}",
                    "(let ((s {f:[]}))" +
