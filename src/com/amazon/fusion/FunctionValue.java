@@ -61,18 +61,28 @@ abstract class FunctionValue
         return invoke(eval, args);
     }
 
+    final void identify(Appendable out)
+        throws IOException
+    {
+        String name = getInferredName();
+        if (name == null)
+        {
+            out.append("anonymous function");
+        }
+        else
+        {
+            out.append("function ");
+            IonTextUtils.printQuotedSymbol(out, name);
+        }
+    }
+
 
     @Override
     public final void write(Appendable out)
         throws IOException
     {
-        out.append("/* function");
-        String name = getInferredName();
-        if (name != null)
-        {
-            out.append(' ');
-            IonTextUtils.printQuotedSymbol(out, name);
-        }
+        out.append("/* ");
+        identify(out);
         out.append(" */");
     }
 
