@@ -7,6 +7,21 @@ import org.junit.Test;
 public class NumericsTest
     extends CoreTestCase
 {
+    static final String[] NOT_INT_EXPRESSIONS =
+    {
+        "undef",
+        "null",
+        "true",
+        "null.int",
+        "123.45",
+        "123e45",
+        "\"text\"",
+        "(quote ())",
+        "[]",
+        "{}",
+        "(func () 1)",
+    };
+
     @Test
     public void testEqual()
         throws Exception
@@ -28,6 +43,20 @@ public class NumericsTest
     }
 
     @Test
+    public void testSumBadType()
+        throws Exception
+    {
+        for (String form : NOT_INT_EXPRESSIONS)
+        {
+            String expr = "(+ " + form + ")";
+            expectArgTypeFailure(expr);
+
+            expr = "(+ 1 " + form + " 3)";
+            expectArgTypeFailure(expr);
+        }
+    }
+
+    @Test
     public void testProduct()
         throws Exception
     {
@@ -41,11 +70,39 @@ public class NumericsTest
     }
 
     @Test
+    public void testProductBadType()
+        throws Exception
+    {
+        for (String form : NOT_INT_EXPRESSIONS)
+        {
+            String expr = "(* " + form + ")";
+            expectArgTypeFailure(expr);
+
+            expr = "(* 1 " + form + " 3)";
+            expectArgTypeFailure(expr);
+        }
+    }
+
+    @Test
     public void testDifference()
         throws Exception
     {
         assertEval(-1, "(- 1)");
         assertEval(-1, "(- 3 4)");
         assertEval(-6, "(- 3 4 5)");
+    }
+
+    @Test
+    public void testDifferenceBadType()
+        throws Exception
+    {
+        for (String form : NOT_INT_EXPRESSIONS)
+        {
+            String expr = "(- " + form + ")";
+            expectArgTypeFailure(expr);
+
+            expr = "(- 1 " + form + " 3)";
+            expectArgTypeFailure(expr);
+        }
     }
 }

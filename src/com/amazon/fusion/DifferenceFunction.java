@@ -19,9 +19,10 @@ final class DifferenceFunction
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
+        throws FusionException
     {
         // TODO check arity
-        long result = eval.assumeLong(args[0]);
+        long result = assumeLongArg(0, args);
 
         int arity = args.length;
         if (arity == 1)
@@ -32,7 +33,7 @@ final class DifferenceFunction
         {
             for (int i = 1; i < args.length; i++)
             {
-                long v = eval.assumeLong(args[i]);
+                long v = assumeLongArg(i, args);
                 result -= v;
             }
         }

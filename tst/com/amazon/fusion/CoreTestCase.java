@@ -76,4 +76,19 @@ public class CoreTestCase
         FusionValue result = eval(expressionIon);
         Assert.assertTrue(result instanceof FunctionValue);
     }
+
+
+    //========================================================================
+
+
+    void expectArgTypeFailure(String expr)
+        throws Exception
+    {
+        try
+        {
+            eval(expr);
+            Assert.fail("Expected exception from " + expr);
+        }
+        catch (ArgTypeFailure e) { }
+    }
 }

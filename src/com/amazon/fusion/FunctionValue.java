@@ -2,8 +2,10 @@
 
 package com.amazon.fusion;
 
+import com.amazon.ion.IonInt;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonValue;
+import com.amazon.ion.NullValueException;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 
@@ -115,4 +117,26 @@ abstract class FunctionValue
      */
     abstract FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException;
+
+
+    long assumeLongArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        FusionValue arg = args[argNum];
+
+        try
+        {
+            DomValue dom = (DomValue) arg;
+            IonInt iv = (IonInt) dom.getDom();
+            return iv.longValue();
+        }
+        catch (ClassCastException e)
+        {
+            throw new ArgTypeFailure(this, "int", argNum, args);
+        }
+        catch (NullValueException e)
+        {
+            throw new ArgTypeFailure(this, "int", argNum, args);
+        }
+    }
 }

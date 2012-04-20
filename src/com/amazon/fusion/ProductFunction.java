@@ -18,12 +18,13 @@ final class ProductFunction
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
+        throws FusionException
     {
         long result = 1;
 
         for (int i = 0; i < args.length; i++)
         {
-            long v = eval.assumeLong(args[i]);
+            long v = assumeLongArg(i, args);
             result *= v;
         }
 

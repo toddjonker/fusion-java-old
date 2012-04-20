@@ -6,7 +6,7 @@ import java.io.IOException;
 
 
 /**
- *
+ * Indicates a failure applying a procedure with the wrong number of arguments.
  */
 final class ArityFailure
     extends FusionException
