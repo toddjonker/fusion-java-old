@@ -92,6 +92,13 @@ public class NumericsTest
         assertEval(-6, "(- 3 4 5)");
     }
 
+    @Test(expected = ArityFailure.class)
+    public void testDifferenceNoArgs()
+        throws Exception
+    {
+        eval("(-)");
+    }
+
     @Test
     public void testDifferenceBadType()
         throws Exception

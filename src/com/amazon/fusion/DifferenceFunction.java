@@ -21,7 +21,8 @@ final class DifferenceFunction
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        // TODO check arity
+        expectArityAtLeast(1, args);
+
         long result = assumeLongArg(0, args);
 
         int arity = args.length;

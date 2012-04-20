@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.ArityFailure.Variability;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
@@ -60,7 +61,7 @@ final class FuncValue
         final int paramCount = myParams.length;
         if (paramCount != args.length)
         {
-            throw new ArityFailure(this, paramCount, args);
+            throw new ArityFailure(this, paramCount, Variability.EXACT, args);
         }
 
         Environment bodyEnv;

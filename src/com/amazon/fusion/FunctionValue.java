@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.ArityFailure.Variability;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonValue;
@@ -117,6 +118,16 @@ abstract class FunctionValue
      */
     abstract FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException;
+
+
+    void expectArityAtLeast(int atLeast, FusionValue... args)
+        throws ArityFailure
+    {
+        if (args.length < atLeast)
+        {
+            throw new ArityFailure(this, atLeast, Variability.AT_LEAST, args);
+        }
+    }
 
 
     long assumeLongArg(int argNum, FusionValue... args)
