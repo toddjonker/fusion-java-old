@@ -219,6 +219,18 @@ public class CoreTestCase
     //========================================================================
 
 
+    void expectSyntaxFailure(String expr)
+        throws Exception
+    {
+        try
+        {
+            eval(expr);
+            Assert.fail("Expected exception from " + expr);
+        }
+        catch (SyntaxFailure e) { }
+    }
+
+
     void expectContractFailure(String expr)
         throws Exception
     {

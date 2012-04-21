@@ -30,13 +30,21 @@ abstract class KeywordValue
 
 
     @Override
-    public final void write(Appendable out)
+    final void identify(Appendable out)
         throws IOException
     {
-        out.append("/* Keyword ");
-        IonTextUtils.printQuotedSymbol(out, getEffectiveName());
-        out.append(" */");
+        String name = getInferredName();
+        if (name == null)
+        {
+            out.append("anonymous syntax");
+        }
+        else
+        {
+            out.append("keyword ");
+            IonTextUtils.printQuotedSymbol(out, name);
+        }
     }
+
 
     @Override
     void displayHelp(Appendable out)

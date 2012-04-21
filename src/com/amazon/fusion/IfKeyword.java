@@ -20,7 +20,7 @@ final class IfKeyword
      * @throws FusionException if the value can't be used as an if-test
      * expression.
      */
-    static boolean whichBranch(FusionValue fv)
+    static boolean whichBranch(NamedValue form, int argNum, FusionValue fv)
         throws FusionException
     {
         if (fv instanceof DomValue)
@@ -32,8 +32,7 @@ final class IfKeyword
             }
         }
 
-        String message = "Value isn't true or false: " + fv.write();
-        throw new FusionException(message);
+        throw new ArgTypeFailure(form, "true or false", argNum, fv);
     }
 
 
@@ -51,17 +50,17 @@ final class IfKeyword
     FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
         throws FusionException
     {
-        // TODO check number of clauses
+        if (expr.size() != 4)
+        {
+            throw new SyntaxFailure(getEffectiveName(),
+                                    "3 subexpressions required", expr);
+        }
+
         IonValue source = expr.get(1);
         FusionValue result = eval.eval(env, source);
-        if (whichBranch(result))
-        {
-            source = expr.get(2);
-        }
-        else
-        {
-            source = expr.get(3);
-        }
+
+        int branch = whichBranch(this, 1, result) ? 2 : 3;
+        source = expr.get(branch);
 
         return eval.bounceTailExpression(env, source);
     }

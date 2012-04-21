@@ -9,8 +9,6 @@ import org.junit.Test;
 public class AssertTest
     extends CoreTestCase
 {
-    // TODO test wrong number of args
-
     private void expectAssertFailure(String expr)
         throws Exception
     {
@@ -29,13 +27,15 @@ public class AssertTest
     public void testAssertFailure()
         throws Exception
     {
-        expectAssertFailure("false");
+        for (String form : IfTest.UNTRUTHY_EXPRESSIONS)
+        {
+            expectAssertFailure(form);
+        }
     }
 
     private void expectAssertSuccess(String expr)
         throws Exception
     {
-        // TODO test that the message isn't evaluated
         assertEval(1, "(begin (assert " + expr + " \"barney\") 1)");
     }
 
@@ -43,7 +43,10 @@ public class AssertTest
     public void testAssertSuccess()
         throws Exception
     {
-        expectAssertSuccess("true");
+        for (String form : IfTest.TRUTHY_EXPRESSIONS)
+        {
+            expectAssertSuccess(form);
+        }
     }
 
     @Test(expected = ExitException.class)
@@ -58,5 +61,19 @@ public class AssertTest
         throws Exception
     {
         eval("(assert true (exit))");
+    }
+
+    @Test
+    public void testAssertArity()
+        throws Exception
+    {
+        expectSyntaxFailure("(assert)");
+    }
+
+    @Test
+    public void testBadTest()
+        throws Exception
+    {
+        expectContractFailure("(assert 3)");
     }
 }

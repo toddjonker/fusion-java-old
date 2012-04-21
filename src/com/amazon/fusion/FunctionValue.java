@@ -70,6 +70,7 @@ abstract class FunctionValue
         return invoke(eval, args);
     }
 
+    @Override
     final void identify(Appendable out)
         throws IOException
     {
@@ -83,16 +84,6 @@ abstract class FunctionValue
             out.append("function ");
             IonTextUtils.printQuotedSymbol(out, name);
         }
-    }
-
-
-    @Override
-    public final void write(Appendable out)
-        throws IOException
-    {
-        out.append("/* ");
-        identify(out);
-        out.append(" */");
     }
 
 

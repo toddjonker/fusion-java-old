@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -79,16 +78,22 @@ public class IfTest
 
     @Test
     public void testFailingIf()
+        throws Exception
     {
         for (String form : FAILING_FORMS)
         {
-            try
-            {
-                String ifExpr = "(if " + form + " 1 2)";
-                eval(ifExpr);
-                Assert.fail("Expected exception from " + ifExpr);
-            }
-            catch (FusionException e) { }
+            String expr = "(if " + form + " 1 2)";
+            expectContractFailure(expr);
         }
+    }
+
+    @Test
+    public void testIfArity()
+        throws Exception
+    {
+        expectSyntaxFailure("(if)");
+        expectSyntaxFailure("(if true)");
+        expectSyntaxFailure("(if true 1)");
+        expectSyntaxFailure("(if true 1 2 3)");
     }
 }

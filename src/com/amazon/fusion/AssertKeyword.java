@@ -16,17 +16,24 @@ class AssertKeyword
         //    "                                                                               |
         super("EXPR MESSAGE",
               "Evaluates the EXPR, throwing an exception if the result isn't true.\n" +
-              "The exception uses the MESSAGE, which is only evaluated on failure.");
+              "The exception displays the MESSAGE, which is only evaluated on failure.");
     }
 
     @Override
     FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
         throws FusionException
     {
-        IonValue testExpr = expr.get(1);
+        int size = expr.size();
+        if (size < 2)
+        {
+            throw new SyntaxFailure(getEffectiveName(),
+                                    "test-expression required",
+                                    expr);
+        }
 
+        IonValue testExpr = expr.get(1);
         FusionValue result = eval.eval(env, testExpr);
-        if (IfKeyword.whichBranch(result)) return UNDEF;
+        if (IfKeyword.whichBranch(this, 1, result)) return UNDEF;
 
         IonValue messageExpr = expr.get(2);
         FusionValue messageValue = eval.eval(env, messageExpr);

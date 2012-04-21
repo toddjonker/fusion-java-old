@@ -12,20 +12,18 @@ import java.io.IOException;
 final class ArgTypeFailure
     extends ContractFailure
 {
-    private final FunctionValue myProc;
+    private final NamedValue myName;
     private final String myExpectedType;
     private final int myArgNum;
     private final FusionValue[] myActuals;
 
-    /**
-     * @param procName must not be null or empty
-     */
-    ArgTypeFailure(FunctionValue proc, String expectedType,
+
+    ArgTypeFailure(NamedValue name, String expectedType,
                    int argNum, FusionValue... actuals)
     {
         super("arg type failure");
-        assert proc != null && actuals != null;
-        myProc = proc;
+        assert name != null && actuals != null;
+        myName = name;
         myExpectedType = expectedType;
         myArgNum = argNum;
         myActuals = actuals;
@@ -38,8 +36,8 @@ final class ArgTypeFailure
     {
         StringBuilder b = new StringBuilder();
         try {
-            myProc.identify(b);
-            b.append(" expects type ");
+            myName.identify(b);
+            b.append(" expects ");
             b.append(myExpectedType);
             b.append(" as ");
             writeFriendlyIndex(b, myArgNum);
