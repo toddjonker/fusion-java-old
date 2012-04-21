@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
 import java.io.IOException;
 
 /**
@@ -30,40 +31,7 @@ final class ArgTypeFailure
         myActuals = actuals;
     }
 
-    /**
-     * Writes a zero-based index as a one-based position like
-     * "1st", "12th, or "23rd".
-     *
-     * @param out
-     * @param i
-     * @throws IOException
-     */
-    private void writeFriendlyIndex(Appendable out, int i)
-        throws IOException
-    {
-        i++;
-        out.append(Integer.toString(i));
-        String suffix = friendlySuffix(i);
-        out.append(suffix);
-    }
 
-    private String friendlySuffix(int i)
-    {
-        int lastDigit = i % 10;
-        if (lastDigit == 1 && i != 11)
-        {
-            return "st";
-        }
-        if (lastDigit == 2 && i != 12)
-        {
-            return "nd";
-        }
-        if (lastDigit == 3 && i != 13)
-        {
-            return "rd";
-        }
-        return "th";
-    }
 
     @Override
     public String getMessage()
