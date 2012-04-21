@@ -2,8 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonValue;
-
 /**
  *
  */
@@ -19,10 +17,11 @@ class IsUndefFunction
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
+        throws FusionException
     {
+        expectArityExact(1, args);
         FusionValue arg = args[0];
         boolean isUndef = (arg == UNDEF);
-        IonValue result = eval.getSystem().newBool(isUndef);
-        return new DomValue(result);
+        return eval.newBool(isUndef);
     }
 }

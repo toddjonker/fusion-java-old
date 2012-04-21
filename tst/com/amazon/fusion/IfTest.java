@@ -41,10 +41,8 @@ public class IfTest
     public void testNotEvaluatingOtherBranch()
         throws Exception
     {
-        eval("(define boom (func () (boom)))");
-
-        assertEval(1, "(if true 1 (boom))");
-        assertEval(2, "(if false (boom) 2)");
+        assertEval(1, "(if true 1 (exit))");
+        assertEval(2, "(if false (exit) 2)");
     }
 
     @Test @Ignore

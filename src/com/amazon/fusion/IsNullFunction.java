@@ -19,7 +19,10 @@ class IsNullFunction
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
+        throws FusionException
     {
+        expectArityExact(1, args);
+
         boolean isNull;
         FusionValue arg = args[0];
         if (arg instanceof DomValue)
@@ -31,7 +34,7 @@ class IsNullFunction
         {
             isNull = false;
         }
-        IonValue result = eval.getSystem().newBool(isNull);
-        return new DomValue(result);
+
+        return eval.newBool(isNull);
     }
 }

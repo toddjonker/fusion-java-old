@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionValue.UNDEF;
+import com.amazon.ion.IonBool;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
@@ -45,14 +46,11 @@ final class Evaluator
     //========================================================================
 
 
-    long assumeLong(FusionValue fv)
+    FusionValue newBool(boolean value)
     {
-        // TODO type check
-        // TODO null check
-        IonInt iv = (IonInt) ((DomValue) fv).getDom();
-        return iv.longValue();
+        IonBool dom = mySystem.newBool(value);
+        return new DomValue(dom);
     }
-
 
     FusionValue newInt(long value)
     {

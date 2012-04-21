@@ -21,8 +21,10 @@ class SizeFunction
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
+        throws FusionException
     {
-        IonList list = (IonList) ((DomValue) args[0]).getDom();
+        expectArityExact(1, args);
+        IonList list = assumeListArg(0, args);
         IonInt result = list.getSystem().newInt(list.size());
         return new DomValue(result);
     }

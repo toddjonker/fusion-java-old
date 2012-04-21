@@ -4,7 +4,11 @@ package com.amazon.fusion;
 
 import com.amazon.fusion.ArityFailure.Variability;
 import com.amazon.ion.IonInt;
+import com.amazon.ion.IonList;
+import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonSexp;
+import com.amazon.ion.IonStruct;
+import com.amazon.ion.IonText;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.NullValueException;
 import com.amazon.ion.util.IonTextUtils;
@@ -120,6 +124,19 @@ abstract class FunctionValue
         throws FusionException;
 
 
+    //========================================================================
+    // Type-checking helpers
+
+
+    void expectArityExact(int argCount, FusionValue... args)
+        throws ArityFailure
+    {
+        if (args.length != argCount)
+        {
+            throw new ArityFailure(this, argCount, Variability.EXACT, args);
+        }
+    }
+
     void expectArityAtLeast(int atLeast, FusionValue... args)
         throws ArityFailure
     {
@@ -149,5 +166,71 @@ abstract class FunctionValue
         {
             throw new ArgTypeFailure(this, "int", argNum, args);
         }
+    }
+
+
+    IonValue assumeIonArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        IonValue iv = assumeDomArg(IonValue.class, "Ion datum",
+                                   true /* nullable */, argNum, args);
+        return iv;
+    }
+
+
+    String assumeTextArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        IonText iv = assumeDomArg(IonText.class, "text", false /* nullable */,
+                                  argNum, args);
+        return iv.stringValue();
+    }
+
+
+    IonSequence assumeSequenceArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        return assumeDomArg(IonSequence.class, "list or sexp",
+                            true /* nullable */, argNum, args);
+    }
+
+
+    IonList assumeListArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        return assumeDomArg(IonList.class, "list", true /* nullable */,
+                            argNum, args);
+    }
+
+
+    IonStruct assumeStructArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        return assumeDomArg(IonStruct.class, "struct", true /* nullable */,
+                            argNum, args);
+    }
+
+
+    <T extends IonValue> T assumeDomArg(Class<T> klass, String typeName,
+                                        boolean nullable,
+                                        int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        FusionValue arg = args[argNum];
+
+        try
+        {
+            DomValue dom = (DomValue) arg;
+            IonValue iv = dom.getDom();
+            if (nullable || ! iv.isNullValue())
+            {
+                return klass.cast(iv);
+            }
+        }
+        catch (ClassCastException e)
+        {
+        }
+
+        throw new ArgTypeFailure(this, typeName, argNum, args);
     }
 }

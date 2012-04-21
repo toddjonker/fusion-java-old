@@ -7,21 +7,6 @@ import org.junit.Test;
 public class NumericsTest
     extends CoreTestCase
 {
-    static final String[] NOT_INT_EXPRESSIONS =
-    {
-        "undef",
-        "null",
-        "true",
-        "null.int",
-        "123.45",
-        "123e45",
-        "\"text\"",
-        "(quote ())",
-        "[]",
-        "{}",
-        "(func () 1)",
-    };
-
     @Test
     public void testEqual()
         throws Exception
@@ -46,7 +31,7 @@ public class NumericsTest
     public void testSumBadType()
         throws Exception
     {
-        for (String form : NOT_INT_EXPRESSIONS)
+        for (String form : nonIntExpressions())
         {
             String expr = "(+ " + form + ")";
             expectArgTypeFailure(expr);
@@ -73,7 +58,7 @@ public class NumericsTest
     public void testProductBadType()
         throws Exception
     {
-        for (String form : NOT_INT_EXPRESSIONS)
+        for (String form : nonIntExpressions())
         {
             String expr = "(* " + form + ")";
             expectArgTypeFailure(expr);
@@ -103,7 +88,7 @@ public class NumericsTest
     public void testDifferenceBadType()
         throws Exception
     {
-        for (String form : NOT_INT_EXPRESSIONS)
+        for (String form : nonIntExpressions())
         {
             String expr = "(- " + form + ")";
             expectArgTypeFailure(expr);

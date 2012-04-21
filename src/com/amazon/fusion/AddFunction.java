@@ -20,11 +20,13 @@ class AddFunction
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
+        throws FusionException
     {
-        IonSequence seq = DomValue.assumeSequence(args[0]);
-        IonValue value = ((DomValue) args[1]).getDom();
+        expectArityExact(2, args);
+        IonSequence seq = assumeSequenceArg(0, args);
+        IonValue value = assumeIonArg(1, args);
         value = Evaluator.cloneIfContained(value);
         seq.add(value);
-        return args[0];
+        return args[0]; // Return the original FusionValue, no need to rewrap
     }
 }

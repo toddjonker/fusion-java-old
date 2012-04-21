@@ -22,7 +22,10 @@ class ReadFunction
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
+        throws FusionException
     {
+        expectArityExact(0, args);
+
         if (myInputValues == null)
         {
             myInputValues = eval.getSystem().iterate(System.in);

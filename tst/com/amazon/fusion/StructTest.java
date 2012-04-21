@@ -14,6 +14,10 @@ public class StructTest
     public void testRemove()
         throws Exception
     {
+        assertEval("null.struct", "(remove null.struct)");
+        assertEval("null.struct", "(remove null.struct \"f\")");
+
+        assertEval("{}", "(remove {})");
         assertEval("{}", "(remove {} \"f\")");
         assertEval("{}", "(remove {f:1} \"f\")");
         assertEval("{g:2}", "(remove {g:2,f:1} \"f\")");
@@ -29,6 +33,42 @@ public class StructTest
                    "  (remove (. s \"g\") \"h\")" +
                    "  s)");
     }
+
+    @Test
+    public void testRemoveArity()
+        throws Exception
+    {
+        expectArityFailure("(remove)");
+    }
+
+    @Test
+    public void testRemoveBadStruct()
+        throws Exception
+    {
+        for (String form : nonStructExpressions())
+        {
+            String expr = "(remove " + form + ")";
+            expectArgTypeFailure(expr);
+
+            expr = "(remove " + form + " \"f\")";
+            expectArgTypeFailure(expr);
+        }
+    }
+
+    @Test
+    public void testRemoveBadName()
+        throws Exception
+    {
+        for (String form : nonTextExpressions())
+        {
+            String expr = "(remove {} " + form + ")";
+            expectArgTypeFailure(expr);
+
+            expr = "(remove {} \"f\" " + form + " \"f\")";
+            expectArgTypeFailure(expr);
+        }
+    }
+
 
     @Test
     public void testForEachChild()

@@ -91,6 +91,25 @@ public class LiteralEvalTest
     }
 
     @Test
+    public void testIsUndefArity()
+        throws Exception
+    {
+        expectArityFailure("(is_undef)");
+        expectArityFailure("(is_undef undef 2)");
+    }
+
+    @Test
+    public void testIsUndefLeniency()
+        throws Exception
+    {
+        for (String e : allTypeExpressions())
+        {
+            eval("(is_undef " + e + ")");
+        }
+    }
+
+
+    @Test
     public void testIsNull()
         throws Exception
     {
@@ -103,5 +122,23 @@ public class LiteralEvalTest
         assertEval("false", "(is_null [])");
         assertEval("false", "(is_null (quote ()))");
         assertEval("false", "(is_null {{}})");
+    }
+
+    @Test
+    public void testIsNullArity()
+        throws Exception
+    {
+        expectArityFailure("(is_null)");
+        expectArityFailure("(is_null null 2)");
+    }
+
+    @Test
+    public void testIsNullLeniency()
+        throws Exception
+    {
+        for (String e : allTypeExpressions())
+        {
+            eval("(is_null " + e + ")");
+        }
     }
 }
