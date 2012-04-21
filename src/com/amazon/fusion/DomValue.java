@@ -7,7 +7,6 @@ import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
-import com.amazon.ion.system.IonTextWriterBuilder;
 import java.io.IOException;
 
 /**
@@ -45,9 +44,7 @@ final class DomValue
     public void write(Appendable out)
         throws IOException
     {
-        IonWriter writer = IonTextWriterBuilder.standard().build(out);
-        myDom.writeTo(writer);
-        writer.flush();
+        FusionUtils.writeIon(out, myDom);
     }
 
 

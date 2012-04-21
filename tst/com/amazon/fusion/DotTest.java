@@ -9,11 +9,16 @@ public class DotTest
     extends CoreTestCase
 {
     @Test
+    public void testDotArity()
+        throws Exception
+    {
+        expectArityFailure("(.)");
+    }
+
+    @Test
     public void testNoParts()
         throws Exception
     {
-        assertEval("3", "(. 3)");
-        assertEval("null", "(. null.null)");
         assertEval("[]", "(. [])");
         assertEval("{}", "(.{})");
         assertEval("{f:true}", "(. {f:true})");
@@ -44,5 +49,27 @@ public class DotTest
         assertEval("true", "(is_undef (. {f:1,g:[2]} \"g\" 1 1))");
         assertEval("true", "(is_undef (. [1] 1))");
         assertEval("true", "(is_undef (. [1, {f:2}] 1 \"g\" 1))");
+    }
+
+    @Test
+    public void testDotBadArgType()
+        throws Exception
+    {
+        for (String form : nonContainerExpressions())
+        {
+            String expr = "(. " + form + ")";
+            expectArgTypeFailure(expr);
+
+            expr = "(. " + form + " 12)";
+            expectArgTypeFailure(expr);
+        }
+    }
+
+    @Test
+    public void testNonContainerMidway()
+        throws Exception
+    {
+        expectContractFailure("(. [true] 0 1)");
+        expectContractFailure("(. [{f:null}] 0 \"f\" 0)");
     }
 }

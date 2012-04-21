@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
+import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
@@ -132,6 +133,12 @@ public class CoreTestCase
         return nonIonExpressions(IonText.class);
     }
 
+    List<String> nonContainerExpressions()
+        throws FusionException
+    {
+        return nonIonExpressions(IonContainer.class);
+    }
+
     List<String> nonSequenceExpressions()
         throws FusionException
     {
@@ -210,6 +217,18 @@ public class CoreTestCase
 
 
     //========================================================================
+
+
+    void expectContractFailure(String expr)
+        throws Exception
+    {
+        try
+        {
+            eval(expr);
+            Assert.fail("Expected exception from " + expr);
+        }
+        catch (ContractFailure e) { }
+    }
 
 
     void expectArityFailure(String expr)

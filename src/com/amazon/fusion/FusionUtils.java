@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import com.amazon.ion.IonValue;
+import com.amazon.ion.IonWriter;
+import com.amazon.ion.system.IonTextWriterBuilder;
 import java.io.IOException;
 
 /**
@@ -43,5 +46,13 @@ class FusionUtils
         out.append(Integer.toString(i));
         String suffix = friendlySuffix(i);
         out.append(suffix);
+    }
+
+    static void writeIon(Appendable out, IonValue v)
+        throws IOException
+    {
+        IonWriter writer = IonTextWriterBuilder.standard().build(out);
+        v.writeTo(writer);
+        writer.flush();
     }
 }

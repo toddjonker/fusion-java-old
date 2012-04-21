@@ -2,11 +2,12 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonInt;
+import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
+import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonStruct;
-import com.amazon.ion.IonText;
 import com.amazon.ion.IonValue;
+import java.io.IOException;
 
 /**
  *
@@ -18,50 +19,79 @@ class DotFunction
     {
         //    "                                                                               |
         super("Traverses down through an Ion data structure.\n" +
-              "VALUE must be Ion data, either a struct or a sequence (list/sexp).\n" +
+              "CONTAINER must be Ion container (struct, list, or sexp).\n" +
               "Each PART must be a string, symbol, or int, to denote either a struct's\n" +
               "field-name or a sequence's index.",
-              "value", "part", DOTDOTDOT);
+              "container", "part", DOTDOTDOT);
     }
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
+        throws FusionException
     {
-        IonValue value = ((DomValue) args[0]).getDom(); // not null
+        checkArityAtLeast(1, args);
+        IonContainer c = checkContainerArg(0, args);
+        IonValue value = c;
 
-        for (int i = 1; i < args.length; i++)
+        final int lastArg = args.length - 1;
+        for (int i = 1; i <= lastArg; i++)
         {
-            IonValue partValue = ((DomValue) args[i]).getDom();
-            switch (partValue.getType())
+            switch (c.getType())
             {
-                case STRING:
-                case SYMBOL:
+                case LIST:
+                case SEXP:
                 {
-                    IonText nameDom = (IonText) partValue;
-                    // TODO check for null.string
-                    IonStruct s = (IonStruct) value;
-                    value = s.get(nameDom.stringValue());
-                    break;
-                }
-
-                case INT:
-                {
-                    IonInt indexDom = (IonInt) partValue;
-                    // TODO check for null.int
-                    IonSequence s = (IonSequence) value;
-                    long index = indexDom.longValue();
-                    if (s.size() <= index)
+                    long index = checkLongArg(i, args);
+                    if (c.size() <= index)
                     {
                         return UNDEF;
                     }
+                    IonSequence s = (IonSequence) c;
                     value = s.get((int) index);
                     break;
                 }
-
-                // TODO handle bogus types
+                case STRUCT:
+                {
+                    String field = checkTextArg(i, args);
+                    IonStruct s = (IonStruct) c;
+                    value = s.get(field);
+                    break;
+                }
+                default:
+                {
+                    throw new IllegalStateException();
+                }
             }
 
             if (value == null) return UNDEF;
+
+            if (i < lastArg)
+            {
+                try
+                {
+                    c = (IonContainer) value;
+                }
+                catch (ClassCastException cce)
+                {
+                    StringBuilder out = new StringBuilder();
+                    try {
+                        identify(out);
+                        out.append(" expects container before traversing ");
+                        writeFriendlyIndex(out, i + 1);
+                        out.append(" argument, had: ");
+                        FusionUtils.writeIon(out, value);
+                        out.append("\nArguments were:");
+                        for (FusionValue arg : args)
+                        {
+                            out.append("\n  ");
+                            arg.write(out);
+                        }
+                    }
+                    catch (IOException ioe) {}
+                    String message = out.toString();
+                    throw new ContractFailure(message);
+                }
+            }
         }
 
         return new DomValue(value);

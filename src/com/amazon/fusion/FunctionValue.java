@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.ArityFailure.Variability;
+import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
@@ -174,12 +175,23 @@ abstract class FunctionValue
     }
 
 
+    /**
+     * @return not null
+     */
     String checkTextArg(int argNum, FusionValue... args)
         throws ArgTypeFailure
     {
         IonText iv = checkDomArg(IonText.class, "text",
                                  false /* nullable */, argNum, args);
         return iv.stringValue();
+    }
+
+
+    IonContainer checkContainerArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        return checkDomArg(IonContainer.class, "list, sexp, or struct",
+                           true /* nullable */, argNum, args);
     }
 
 
