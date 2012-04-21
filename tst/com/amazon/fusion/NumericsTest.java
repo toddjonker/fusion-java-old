@@ -28,16 +28,16 @@ public class NumericsTest
     }
 
     @Test
-    public void testSumBadType()
+    public void testSumArgType()
         throws Exception
     {
         for (String form : nonIntExpressions())
         {
             String expr = "(+ " + form + ")";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 0);
 
             expr = "(+ 1 " + form + " 3)";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 1);
         }
     }
 
@@ -55,16 +55,16 @@ public class NumericsTest
     }
 
     @Test
-    public void testProductBadType()
+    public void testProductArgType()
         throws Exception
     {
         for (String form : nonIntExpressions())
         {
             String expr = "(* " + form + ")";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 0);
 
             expr = "(* 1 " + form + " 3)";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 1);
         }
     }
 
@@ -85,16 +85,16 @@ public class NumericsTest
     }
 
     @Test
-    public void testDifferenceBadType()
+    public void testDifferenceArgType()
         throws Exception
     {
         for (String form : nonIntExpressions())
         {
             String expr = "(- " + form + ")";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 0);
 
             expr = "(- 1 " + form + " 3)";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 1);
         }
     }
 }

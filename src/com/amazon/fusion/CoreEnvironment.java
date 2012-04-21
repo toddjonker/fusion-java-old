@@ -57,6 +57,7 @@ class CoreEnvironment
         bind(".", new DotFunction());
         bind("=", new EqualFunction());
         bind("add", new AddFunction());
+        bind("and", new AndKeyword());
         bind("assert", new AssertKeyword());
         bind("begin", new BeginKeyword());
         bind("define", new DefineKeyword());
@@ -71,6 +72,8 @@ class CoreEnvironment
         bind("is_undef", new IsUndefFunction());
         bind("let", new LetKeyword());
         bind("list_bindings", new ListBindingsKeyword());
+        bind("not", new NotFunction());
+        bind("or", new OrKeyword());
         bind("quote", new QuoteKeyword());
         bind("read", new ReadFunction());
         bind("remove", new RemoveFunction());

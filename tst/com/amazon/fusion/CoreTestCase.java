@@ -177,6 +177,15 @@ public class CoreTestCase
         assertEval(expected, expression);
     }
 
+    protected void assertEval(boolean expectedBool, String expressionIon)
+        throws FusionException
+    {
+        IonValue expected   = mySystem.newBool(expectedBool);
+        IonValue expression = mySystem.singleValue(expressionIon);
+
+        assertEval(expected, expression);
+    }
+
     protected void assertEval(int expectedInt, String expressionIon)
         throws FusionException
     {
@@ -219,50 +228,51 @@ public class CoreTestCase
     //========================================================================
 
 
-    void expectSyntaxFailure(String expr)
+    <T extends FusionException> T expectFailure(Class<T> klass, String expr)
         throws Exception
     {
         try
         {
             eval(expr);
             Assert.fail("Expected exception from " + expr);
+            return null; // Dummy for compiler
         }
-        catch (SyntaxFailure e) { }
+        catch (Exception e)
+        {
+            if (klass.isInstance(e))
+            {
+                return klass.cast(e);
+            }
+            throw e;
+        }
+    }
+
+
+    void expectSyntaxFailure(String expr)
+        throws Exception
+    {
+        expectFailure(SyntaxFailure.class, expr);
     }
 
 
     void expectContractFailure(String expr)
         throws Exception
     {
-        try
-        {
-            eval(expr);
-            Assert.fail("Expected exception from " + expr);
-        }
-        catch (ContractFailure e) { }
+        expectFailure(ContractFailure.class, expr);
     }
 
 
     void expectArityFailure(String expr)
         throws Exception
     {
-        try
-        {
-            eval(expr);
-            Assert.fail("Expected exception from " + expr);
-        }
-        catch (ArityFailure e) { }
+        expectFailure(ArityFailure.class, expr);
     }
 
 
-    void expectArgTypeFailure(String expr)
+    void expectArgTypeFailure(String expr, int badArgNum)
         throws Exception
     {
-        try
-        {
-            eval(expr);
-            Assert.fail("Expected exception from " + expr);
-        }
-        catch (ArgTypeFailure e) { }
+        ArgTypeFailure e = expectFailure(ArgTypeFailure.class, expr);
+        assertEquals("argument #", badArgNum, e.getArgNum());
     }
 }

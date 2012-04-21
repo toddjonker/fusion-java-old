@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.ArityFailure.Variability;
+import com.amazon.ion.IonBool;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
@@ -136,6 +137,23 @@ abstract class FunctionValue
         {
             throw new ArityFailure(this, atLeast, Variability.AT_LEAST, args);
         }
+    }
+
+
+    final boolean checkBoolArg(int argNum, FusionValue[] args)
+        throws ArgTypeFailure
+    {
+        FusionValue arg = args[argNum];
+        try
+        {
+            DomValue dom = (DomValue) arg;
+            IonBool iv = (IonBool) dom.getDom();
+            return iv.booleanValue();
+        }
+        catch (ClassCastException e) {}
+        catch (NullValueException e) {}
+
+        throw new ArgTypeFailure(this, "true or false", argNum, args);
     }
 
 

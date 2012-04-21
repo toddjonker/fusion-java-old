@@ -52,16 +52,16 @@ public class DotTest
     }
 
     @Test
-    public void testDotBadArgType()
+    public void testDotArgType()
         throws Exception
     {
         for (String form : nonContainerExpressions())
         {
             String expr = "(. " + form + ")";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 0);
 
             expr = "(. " + form + " 12)";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 0);
         }
     }
 

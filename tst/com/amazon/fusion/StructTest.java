@@ -48,10 +48,10 @@ public class StructTest
         for (String form : nonStructExpressions())
         {
             String expr = "(remove " + form + ")";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 0);
 
             expr = "(remove " + form + " \"f\")";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 0);
         }
     }
 
@@ -62,10 +62,10 @@ public class StructTest
         for (String form : nonTextExpressions())
         {
             String expr = "(remove {} " + form + ")";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 1);
 
             expr = "(remove {} \"f\" " + form + " \"f\")";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 2);
         }
     }
 
@@ -102,13 +102,13 @@ public class StructTest
         for (String form : allIonExpressions())
         {
             String expr = "(for_each_field " + form + " {})";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 0);
         }
 
         for (String form : nonStructExpressions())
         {
             String expr = "(for_each_field add_name " + form + ")";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 1);
         }
     }
 }

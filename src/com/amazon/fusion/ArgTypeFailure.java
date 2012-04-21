@@ -19,17 +19,34 @@ final class ArgTypeFailure
 
 
     ArgTypeFailure(NamedValue name, String expectedType,
-                   int argNum, FusionValue... actuals)
+                   int argNum, FusionValue[] actuals)
     {
         super("arg type failure");
-        assert name != null && actuals != null;
+        assert name != null && actuals.length != 0;
+        assert argNum < actuals.length;
+
         myName = name;
         myExpectedType = expectedType;
         myArgNum = argNum;
         myActuals = actuals;
     }
 
+    ArgTypeFailure(NamedValue name, String expectedType,
+                   int argNum, FusionValue actuals)
+    {
+        super("arg type failure");
+        assert name != null && actuals != null;
+        myName = name;
+        myExpectedType = expectedType;
+        myArgNum = argNum;
+        myActuals = new FusionValue[]{ actuals };
+    }
 
+
+    public int getArgNum()
+    {
+        return myArgNum;
+    }
 
     @Override
     public String getMessage()
@@ -42,7 +59,7 @@ final class ArgTypeFailure
             b.append(" as ");
             writeFriendlyIndex(b, myArgNum);
             b.append(" argument, given ");
-            myActuals[myArgNum].write(b);
+            myActuals[myActuals.length == 1 ? 0 : myArgNum].write(b);
 
             if (myActuals.length != 1)
             {

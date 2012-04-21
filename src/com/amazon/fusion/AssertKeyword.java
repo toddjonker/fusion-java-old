@@ -33,7 +33,7 @@ class AssertKeyword
 
         IonValue testExpr = expr.get(1);
         FusionValue result = eval.eval(env, testExpr);
-        if (IfKeyword.whichBranch(this, 1, result)) return UNDEF;
+        if (checkBoolArg(0 /* argNum */, result)) return UNDEF;
 
         IonValue messageExpr = expr.get(2);
         FusionValue messageValue = eval.eval(env, messageExpr);

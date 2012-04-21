@@ -59,19 +59,19 @@ public class ListTest
 
 
     @Test
-    public void testAddBadType()
+    public void testAddArgType()
         throws Exception
     {
         for (String form : nonSequenceExpressions())
         {
             String expr = "(add " + form + " 12)";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 0);
         }
 
         for (String form : nonIonExpressions())
         {
             String expr = "(add [] " + form + ")";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 1);
         }
     }
 
@@ -99,13 +99,13 @@ public class ListTest
     }
 
     @Test
-    public void testSizeBadType()
+    public void testSizeArgType()
         throws Exception
     {
         for (String form : nonListExpressions())
         {
             String expr = "(size " + form + ")";
-            expectArgTypeFailure(expr);
+            expectArgTypeFailure(expr, 0);
         }
     }
 }

@@ -24,6 +24,7 @@ public class IfTest
     {
          "null.bool",
          "undef",
+         "(func () true)",
     };
 
 
@@ -77,13 +78,13 @@ public class IfTest
     }
 
     @Test
-    public void testFailingIf()
+    public void testIfArgType()
         throws Exception
     {
         for (String form : FAILING_FORMS)
         {
             String expr = "(if " + form + " 1 2)";
-            expectContractFailure(expr);
+            expectArgTypeFailure(expr, 0);
         }
     }
 
@@ -95,5 +96,92 @@ public class IfTest
         expectSyntaxFailure("(if true)");
         expectSyntaxFailure("(if true 1)");
         expectSyntaxFailure("(if true 1 2 3)");
+    }
+
+
+    //========================================================================
+
+
+    @Test
+    public void testAnd()
+        throws Exception
+    {
+        assertEval(true, "(and)");
+        assertEval(true, "(and true)");
+        assertEval(true, "(and true true)");
+        assertEval(true, "(and (= 1 1) true)");
+
+        assertEval(false, "(and false)");
+        assertEval(false, "(and true false)");
+        assertEval(false, "(and false (exit))");
+        assertEval(false, "(and true false true (exit))");
+    }
+
+
+    @Test
+    public void testAndArgType()
+        throws Exception
+    {
+        expectArgTypeFailure("(and null)", 0);
+        expectArgTypeFailure("(and true null)", 1);
+    }
+
+
+    //========================================================================
+
+
+    @Test
+    public void testOr()
+        throws Exception
+    {
+        assertEval(true, "(or true)");
+        assertEval(true, "(or true (exit))");
+        assertEval(true, "(or false (= 1 1) (exit))");
+
+        assertEval(false, "(or)");
+        assertEval(false, "(or false)");
+        assertEval(false, "(or false false)");
+    }
+
+
+    @Test
+    public void testOrArgType()
+        throws Exception
+    {
+        expectArgTypeFailure("(or null)", 0);
+        expectArgTypeFailure("(or false null)", 1);
+    }
+
+
+    //========================================================================
+
+
+    @Test
+    public void testNot()
+        throws Exception
+    {
+        assertEval(true,  "(not false)");
+        assertEval(false, "(not true)");
+    }
+
+
+    @Test
+    public void testNotArity()
+        throws Exception
+    {
+        expectArityFailure("(not)");
+        expectArityFailure("(not true false)");
+    }
+
+
+    @Test
+    public void testNotArgType()
+        throws Exception
+    {
+        for (String form : FAILING_FORMS)
+        {
+            String expr = "(not " + form + ")";
+            expectArgTypeFailure(expr, 0);
+        }
     }
 }

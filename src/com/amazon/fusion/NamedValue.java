@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import com.amazon.ion.IonBool;
+import com.amazon.ion.NullValueException;
 import java.io.IOException;
 
 
@@ -47,5 +49,23 @@ abstract class NamedValue
         out.append("/* ");
         identify(out);
         out.append(" */");
+    }
+
+    //========================================================================
+    // Type-checking helpers
+
+    boolean checkBoolArg(int argNum, FusionValue arg)
+        throws ArgTypeFailure
+    {
+        try
+        {
+            DomValue dom = (DomValue) arg;
+            IonBool iv = (IonBool) dom.getDom();
+            return iv.booleanValue();
+        }
+        catch (ClassCastException e) {}
+        catch (NullValueException e) {}
+
+        throw new ArgTypeFailure(this, "true or false", argNum, arg);
     }
 }

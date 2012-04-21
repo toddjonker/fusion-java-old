@@ -71,9 +71,9 @@ public class AssertTest
     }
 
     @Test
-    public void testBadTest()
+    public void testAssertArgType()
         throws Exception
     {
-        expectContractFailure("(assert 3)");
+        expectArgTypeFailure("(assert 3)", 0);
     }
 }

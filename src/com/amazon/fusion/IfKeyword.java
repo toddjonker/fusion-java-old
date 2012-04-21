@@ -2,9 +2,7 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonBool;
 import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 
 /**
@@ -13,29 +11,6 @@ import com.amazon.ion.IonValue;
 final class IfKeyword
     extends KeywordValue
 {
-    /**
-     * Returns true or false indicating which branch an {@code if} expression
-     * would take.
-     *
-     * @throws FusionException if the value can't be used as an if-test
-     * expression.
-     */
-    static boolean whichBranch(NamedValue form, int argNum, FusionValue fv)
-        throws FusionException
-    {
-        if (fv instanceof DomValue)
-        {
-            IonValue iv = ((DomValue) fv).getDom();
-            if (iv.getType() == IonType.BOOL && ! iv.isNullValue())
-            {
-                return ((IonBool) iv).booleanValue();
-            }
-        }
-
-        throw new ArgTypeFailure(form, "true or false", argNum, fv);
-    }
-
-
     IfKeyword()
     {
         //    "                                                                               |
@@ -59,7 +34,8 @@ final class IfKeyword
         IonValue source = expr.get(1);
         FusionValue result = eval.eval(env, source);
 
-        int branch = whichBranch(this, 1, result) ? 2 : 3;
+        boolean test = checkBoolArg(0, result);
+        int branch = (test ? 2 : 3);
         source = expr.get(branch);
 
         return eval.bounceTailExpression(env, source);
