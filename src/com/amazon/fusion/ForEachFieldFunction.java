@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.DomValue.assumeStruct;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonValue;
@@ -24,9 +23,10 @@ class ForEachFieldFunction
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        FunctionValue func = (FunctionValue) args[0];
+        checkArityExact(2, args);
 
-        IonStruct s = assumeStruct(args[1]);
+        FunctionValue func = checkFuncArg(0, args);
+        IonStruct s = checkStructArg(1, args);
 
         for (IonValue field : s)
         {
@@ -39,6 +39,6 @@ class ForEachFieldFunction
             eval.applyNonTail(func, nameValue, fieldValue);
         }
 
-        return args[1];
+        return args[1]; // Don't need to re-wrap the input struct
     }
 }

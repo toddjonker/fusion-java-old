@@ -230,4 +230,17 @@ abstract class FunctionValue
 
         throw new ArgTypeFailure(this, typeName, argNum, args);
     }
+
+    FunctionValue checkFuncArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        FusionValue arg = args[argNum];
+        try
+        {
+            return (FunctionValue) arg;
+        }
+        catch (ClassCastException e) {}
+
+        throw new ArgTypeFailure(this, "procedure", argNum, args);
+    }
 }

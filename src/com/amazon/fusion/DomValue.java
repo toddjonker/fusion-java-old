@@ -2,8 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSequence;
-import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
@@ -67,30 +65,5 @@ final class DomValue
     public void write(IonWriter out)
     {
         myDom.writeTo(out);
-    }
-
-    //========================================================================
-
-    static IonSequence assumeSequence(FusionValue v)
-    {
-        // TODO error checking
-        return (IonSequence) ((DomValue) v).myDom;
-    }
-
-    static IonStruct assumeStruct(FusionValue v)
-    {
-        // TODO error checking
-        return (IonStruct) ((DomValue) v).myDom;
-    }
-
-    static IonText assumeText(FusionValue v)
-    {
-        // TODO error checking
-        return (IonText) ((DomValue) v).myDom;
-    }
-
-    static String assumeTextContent(FusionValue v)
-    {
-        return assumeText(v).stringValue();
     }
 }
