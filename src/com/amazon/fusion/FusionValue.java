@@ -14,11 +14,8 @@ import java.io.StringWriter;
  */
 public abstract class FusionValue
 {
-    /** A zero-length array. */
-    public static final FusionValue[] EMPTY_ARRAY = new FusionValue[0];
-
-
-    public final static FusionValue UNDEF = new FusionValue()
+    private static final class Undef
+        extends FusionValue
     {
         @Override
         public void write(Appendable out) throws IOException
@@ -31,7 +28,14 @@ public abstract class FusionValue
         {
             return("/* undef */");
         }
-    };
+    }
+
+
+    /** A zero-length array. */
+    public static final FusionValue[] EMPTY_ARRAY = new FusionValue[0];
+
+
+    public final static FusionValue UNDEF = new Undef();
 
 
     //========================================================================

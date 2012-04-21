@@ -14,6 +14,35 @@ import java.io.IOException;
 final class HelpFunction
     extends FunctionValue
 {
+    private static final class HelpDocument
+        extends FusionValue
+    {
+        private final FusionValue[] myArgs;
+
+        private HelpDocument(FusionValue[] args)
+        {
+            myArgs = args;
+        }
+
+        @Override
+        public void write(Appendable out)
+            throws IOException
+        {
+            for (FusionValue arg : myArgs)
+            {
+                out.append('\n');
+                arg.displayHelp(out);
+            }
+        }
+
+        @Override
+        FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+        {
+            throw new IonException("not invokable");
+        }
+    }
+
+
     HelpFunction()
     {
         //    "                                                                               |
@@ -24,26 +53,6 @@ final class HelpFunction
     @Override
     FusionValue invoke(Evaluator eval, final FusionValue[] args)
     {
-        FusionValue result = new FusionValue()
-        {
-            @Override
-            public void write(Appendable out)
-                throws IOException
-            {
-                for (FusionValue arg : args)
-                {
-                    out.append('\n');
-                    arg.displayHelp(out);
-                }
-            }
-
-            @Override
-            FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
-            {
-                throw new IonException("not invokable");
-            }
-        };
-
-        return result;
+        return new HelpDocument(args);
     }
 }
