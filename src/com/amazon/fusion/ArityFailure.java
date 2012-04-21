@@ -8,12 +8,11 @@ import java.io.IOException;
 /**
  * Indicates a failure applying a procedure with the wrong number of arguments.
  */
+@SuppressWarnings("serial")
 final class ArityFailure
-    extends FusionException
+    extends ContractFailure
 {
-    enum Variability { EXACT, AT_LEAST };
-
-    private static final long serialVersionUID = 1L;
+    enum Variability { EXACT, AT_LEAST }
 
     private final FunctionValue myProc;
     private final int myArity;

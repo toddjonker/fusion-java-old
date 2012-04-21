@@ -7,11 +7,10 @@ import java.io.IOException;
 /**
  * Indicates a failure applying a procedure with the wrong type of argument.
  */
+@SuppressWarnings("serial")
 final class ArgTypeFailure
-    extends FusionException
+    extends ContractFailure
 {
-    private static final long serialVersionUID = 1L;
-
     private final FunctionValue myProc;
     private final String myExpectedType;
     private final int myArgNum;
@@ -23,7 +22,7 @@ final class ArgTypeFailure
     ArgTypeFailure(FunctionValue proc, String expectedType,
                    int argNum, FusionValue... actuals)
     {
-        super("arity failure");
+        super("arg type failure");
         assert proc != null && actuals != null;
         myProc = proc;
         myExpectedType = expectedType;

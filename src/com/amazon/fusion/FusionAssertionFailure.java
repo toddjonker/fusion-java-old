@@ -7,10 +7,10 @@ import com.amazon.ion.IonValue;
 /**
  *
  */
+@SuppressWarnings("serial")
 class FusionAssertionFailure
     extends FusionException
 {
-    private static final long serialVersionUID = 1L;
     private final IonValue myExpr;
     private final FusionValue myResult;
 

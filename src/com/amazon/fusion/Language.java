@@ -16,11 +16,10 @@ public final class Language
     /**
      * Thown to force the exit of an evaluation.
      */
+    @SuppressWarnings("serial")
     public static final class ExitException
         extends FusionException
     {
-        private static final long serialVersionUID = 1L;
-
         ExitException() { super("Exit requested"); }
     }
 
