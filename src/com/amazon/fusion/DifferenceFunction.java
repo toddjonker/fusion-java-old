@@ -21,9 +21,9 @@ final class DifferenceFunction
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        expectArityAtLeast(1, args);
+        checkArityAtLeast(1, args);
 
-        long result = assumeLongArg(0, args);
+        long result = checkLongArg(0, args);
 
         int arity = args.length;
         if (arity == 1)
@@ -34,7 +34,7 @@ final class DifferenceFunction
         {
             for (int i = 1; i < args.length; i++)
             {
-                long v = assumeLongArg(i, args);
+                long v = checkLongArg(i, args);
                 result -= v;
             }
         }

@@ -24,7 +24,7 @@ final class SumFunction
 
         for (int i = 0; i < args.length; i++)
         {
-            long v = assumeLongArg(i, args);
+            long v = checkLongArg(i, args);
             result += v;
         }
 

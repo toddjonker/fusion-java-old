@@ -24,7 +24,7 @@ class ReadFunction
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        expectArityExact(0, args);
+        checkArityExact(0, args);
 
         if (myInputValues == null)
         {

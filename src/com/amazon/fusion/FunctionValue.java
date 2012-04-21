@@ -128,7 +128,7 @@ abstract class FunctionValue
     // Type-checking helpers
 
 
-    void expectArityExact(int argCount, FusionValue... args)
+    void checkArityExact(int argCount, FusionValue... args)
         throws ArityFailure
     {
         if (args.length != argCount)
@@ -137,7 +137,7 @@ abstract class FunctionValue
         }
     }
 
-    void expectArityAtLeast(int atLeast, FusionValue... args)
+    void checkArityAtLeast(int atLeast, FusionValue... args)
         throws ArityFailure
     {
         if (args.length < atLeast)
@@ -147,7 +147,7 @@ abstract class FunctionValue
     }
 
 
-    long assumeLongArg(int argNum, FusionValue... args)
+    long checkLongArg(int argNum, FusionValue... args)
         throws ArgTypeFailure
     {
         FusionValue arg = args[argNum];
@@ -158,62 +158,58 @@ abstract class FunctionValue
             IonInt iv = (IonInt) dom.getDom();
             return iv.longValue();
         }
-        catch (ClassCastException e)
-        {
-            throw new ArgTypeFailure(this, "int", argNum, args);
-        }
-        catch (NullValueException e)
-        {
-            throw new ArgTypeFailure(this, "int", argNum, args);
-        }
+        catch (ClassCastException e) {}
+        catch (NullValueException e) {}
+
+        throw new ArgTypeFailure(this, "int", argNum, args);
     }
 
 
-    IonValue assumeIonArg(int argNum, FusionValue... args)
+    IonValue checkIonArg(int argNum, FusionValue... args)
         throws ArgTypeFailure
     {
-        IonValue iv = assumeDomArg(IonValue.class, "Ion datum",
-                                   true /* nullable */, argNum, args);
+        IonValue iv = checkDomArg(IonValue.class, "Ion datum",
+                                  true /* nullable */, argNum, args);
         return iv;
     }
 
 
-    String assumeTextArg(int argNum, FusionValue... args)
+    String checkTextArg(int argNum, FusionValue... args)
         throws ArgTypeFailure
     {
-        IonText iv = assumeDomArg(IonText.class, "text", false /* nullable */,
-                                  argNum, args);
+        IonText iv = checkDomArg(IonText.class, "text",
+                                 false /* nullable */, argNum, args);
         return iv.stringValue();
     }
 
 
-    IonSequence assumeSequenceArg(int argNum, FusionValue... args)
+    IonSequence checkSequenceArg(int argNum, FusionValue... args)
         throws ArgTypeFailure
     {
-        return assumeDomArg(IonSequence.class, "list or sexp",
-                            true /* nullable */, argNum, args);
+        return checkDomArg(IonSequence.class, "list or sexp",
+                           true /* nullable */, argNum, args);
     }
 
 
-    IonList assumeListArg(int argNum, FusionValue... args)
+    IonList checkListArg(int argNum, FusionValue... args)
         throws ArgTypeFailure
     {
-        return assumeDomArg(IonList.class, "list", true /* nullable */,
-                            argNum, args);
+        return checkDomArg(IonList.class, "list",
+                           true /* nullable */, argNum, args);
     }
 
 
-    IonStruct assumeStructArg(int argNum, FusionValue... args)
+    IonStruct checkStructArg(int argNum, FusionValue... args)
         throws ArgTypeFailure
     {
-        return assumeDomArg(IonStruct.class, "struct", true /* nullable */,
-                            argNum, args);
+        return checkDomArg(IonStruct.class, "struct",
+                           true /* nullable */, argNum, args);
     }
 
 
-    <T extends IonValue> T assumeDomArg(Class<T> klass, String typeName,
-                                        boolean nullable,
-                                        int argNum, FusionValue... args)
+    <T extends IonValue> T checkDomArg(Class<T> klass, String typeName,
+                                       boolean nullable,
+                                       int argNum, FusionValue... args)
         throws ArgTypeFailure
     {
         FusionValue arg = args[argNum];
@@ -227,9 +223,7 @@ abstract class FunctionValue
                 return klass.cast(iv);
             }
         }
-        catch (ClassCastException e)
-        {
-        }
+        catch (ClassCastException e) {}
 
         throw new ArgTypeFailure(this, typeName, argNum, args);
     }

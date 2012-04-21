@@ -22,9 +22,9 @@ class AddFunction
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        expectArityExact(2, args);
-        IonSequence seq = assumeSequenceArg(0, args);
-        IonValue value = assumeIonArg(1, args);
+        checkArityExact(2, args);
+        IonSequence seq = checkSequenceArg(0, args);
+        IonValue value = checkIonArg(1, args);
         value = Evaluator.cloneIfContained(value);
         seq.add(value);
         return args[0]; // Return the original FusionValue, no need to rewrap

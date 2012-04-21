@@ -21,7 +21,7 @@ class IsNullFunction
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        expectArityExact(1, args);
+        checkArityExact(1, args);
 
         boolean isNull;
         FusionValue arg = args[0];

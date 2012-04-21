@@ -23,8 +23,8 @@ class SizeFunction
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        expectArityExact(1, args);
-        IonList list = assumeListArg(0, args);
+        checkArityExact(1, args);
+        IonList list = checkListArg(0, args);
         IonInt result = list.getSystem().newInt(list.size());
         return new DomValue(result);
     }

@@ -20,12 +20,12 @@ class RemoveFunction
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        expectArityAtLeast(1, args);
-        IonStruct s = assumeStructArg(0, args);
+        checkArityAtLeast(1, args);
+        IonStruct s = checkStructArg(0, args);
 
         for (int i = 1; i < args.length; i++)
         {
-            String fieldName = assumeTextArg(i, args);
+            String fieldName = checkTextArg(i, args);
             s.remove(fieldName);
         }
 

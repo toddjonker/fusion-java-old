@@ -19,7 +19,7 @@ class IsUndefFunction
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        expectArityExact(1, args);
+        checkArityExact(1, args);
         FusionValue arg = args[0];
         boolean isUndef = (arg == UNDEF);
         return eval.newBool(isUndef);
