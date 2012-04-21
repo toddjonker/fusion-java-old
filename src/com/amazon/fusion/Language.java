@@ -25,7 +25,7 @@ public final class Language
 
 
     private final IonSystem mySystem = IonSystemBuilder.standard().build();
-    private final Environment myEnvironment = new CoreEnvironment(mySystem);
+    private final Environment myEnvironment = new CoreEnvironment();
     private final Evaluator myEvaluator = new Evaluator(mySystem);
 
 

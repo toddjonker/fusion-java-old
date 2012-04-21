@@ -5,7 +5,6 @@ package com.amazon.fusion;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
-import com.amazon.ion.ValueFactory;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,15 +41,12 @@ class CoreEnvironment
     }
 
 
-    private final ValueFactory myValueFactory;
     private final Map<String,FusionValue> myBindings =
         new HashMap<String,FusionValue>();
 
 
-    CoreEnvironment(ValueFactory valueFactory)
+    CoreEnvironment()
     {
-        myValueFactory = valueFactory;
-
         bind("*", new ProductFunction());
         bind("+", new SumFunction());
         bind("-", new DifferenceFunction());

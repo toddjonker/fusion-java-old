@@ -83,10 +83,10 @@ public class ListTest
     public void testSize()
         throws Exception
     {
-        assertEval("0", "(size null.list)");
-        assertEval("0", "(size [])");
-        assertEval("1", "(size [1])");
-        assertEval("2", "(size [2,2])");
+        assertEval(0, "(size null.list)");
+        assertEval(0, "(size [])");
+        assertEval(1, "(size [1])");
+        assertEval(2, "(size [2,2])");
     }
 
 

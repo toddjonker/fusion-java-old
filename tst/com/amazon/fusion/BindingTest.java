@@ -14,18 +14,18 @@ public class BindingTest
     public void testLet()
         throws Exception
     {
-        assertEval("1",  "(let ((x 1)) x)");
-        assertEval("3",  "(let ((x 1) (y 2))" +
-                        "  (+ x y))");
-        assertEval("11", "(let ((x 1) (y 2))" +
-                        "  (let [(x 10), (y x)]" +
-                        "    (+ x y)))");
+        assertEval(1,  "(let ((x 1)) x)");
+        assertEval(3,  "(let ((x 1) (y 2))" +
+                       "  (+ x y))");
+        assertEval(11, "(let ((x 1) (y 2))" +
+                       "  (let [(x 10), (y x)]" +
+                       "    (+ x y)))");
     }
 
     @Test
     public void testLetMultipleBodyForms()
         throws Exception
     {
-        assertEval("2", "(let ((x 1)) x (+ x x))");
+        assertEval(2, "(let ((x 1)) x (+ x x))");
     }
 }

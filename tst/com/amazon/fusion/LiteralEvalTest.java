@@ -77,17 +77,17 @@ public class LiteralEvalTest
     public void testUndef()
         throws Exception
     {
-        assertEval("true",  "(is_undef undef)");
-        assertEval("false", "(is_undef null)");
-        assertEval("false", "(is_undef true)");
-        assertEval("false", "(is_undef false)");
-        assertEval("false", "(is_undef null.bool)");
-        assertEval("false", "(is_undef 0)");
-        assertEval("false", "(is_undef (quote f))");
-        assertEval("false", "(is_undef \"\")");
-        assertEval("false", "(is_undef [])");
-        assertEval("false", "(is_undef (quote ()))");
-        assertEval("false", "(is_undef {})");
+        assertEval(true,  "(is_undef undef)");
+        assertEval(false, "(is_undef null)");
+        assertEval(false, "(is_undef true)");
+        assertEval(false, "(is_undef false)");
+        assertEval(false, "(is_undef null.bool)");
+        assertEval(false, "(is_undef 0)");
+        assertEval(false, "(is_undef (quote f))");
+        assertEval(false, "(is_undef \"\")");
+        assertEval(false, "(is_undef [])");
+        assertEval(false, "(is_undef (quote ()))");
+        assertEval(false, "(is_undef {})");
     }
 
     @Test
@@ -113,15 +113,15 @@ public class LiteralEvalTest
     public void testIsNull()
         throws Exception
     {
-        assertEval("true", "(is_null null)");
-        assertEval("true", "(is_null null.int)");
-        assertEval("false", "(is_null undef)");
-        assertEval("false", "(is_null false)");
-        assertEval("false", "(is_null 0)");
-        assertEval("false", "(is_null \"\")");
-        assertEval("false", "(is_null [])");
-        assertEval("false", "(is_null (quote ()))");
-        assertEval("false", "(is_null {{}})");
+        assertEval(true,  "(is_null null)");
+        assertEval(true,  "(is_null null.int)");
+        assertEval(false, "(is_null undef)");
+        assertEval(false, "(is_null false)");
+        assertEval(false, "(is_null 0)");
+        assertEval(false, "(is_null \"\")");
+        assertEval(false, "(is_null [])");
+        assertEval(false, "(is_null (quote ()))");
+        assertEval(false, "(is_null {{}})");
     }
 
     @Test

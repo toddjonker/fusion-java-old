@@ -28,8 +28,8 @@ public class DotTest
     public void testStructParts()
         throws Exception
     {
-        assertEval("true", "(. {f:true} \"f\")");
-        assertEval("true", "(. {f:true} (quote f))");
+        assertEval(true, "(. {f:true} \"f\")");
+        assertEval(true, "(. {f:true} (quote f))");
         assertEval("\"oy\"", "(. {f:{g:'''oy'''}, h:true} \"f\" (quote g))");
     }
 
@@ -37,7 +37,7 @@ public class DotTest
     public void testSequenceParts()
         throws Exception
     {
-        assertEval("99", "(. [99, \"hello\"] 0)");
+        assertEval(99, "(. [99, \"hello\"] 0)");
         assertEval("{{}}", "(. [99, [true, {{}}]] 1 1)");
     }
 
@@ -45,10 +45,10 @@ public class DotTest
     public void testMissingPart()
         throws Exception
     {
-        assertEval("true", "(is_undef (. {f:1} \"g\"))");
-        assertEval("true", "(is_undef (. {f:1,g:[2]} \"g\" 1 1))");
-        assertEval("true", "(is_undef (. [1] 1))");
-        assertEval("true", "(is_undef (. [1, {f:2}] 1 \"g\" 1))");
+        assertEval(true, "(is_undef (. {f:1} \"g\"))");
+        assertEval(true, "(is_undef (. {f:1,g:[2]} \"g\" 1 1))");
+        assertEval(true, "(is_undef (. [1] 1))");
+        assertEval(true, "(is_undef (. [1, {f:2}] 1 \"g\" 1))");
     }
 
     @Test

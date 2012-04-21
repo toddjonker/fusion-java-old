@@ -27,7 +27,7 @@ public class AssertTest
     public void testAssertFailure()
         throws Exception
     {
-        for (String form : IfTest.UNTRUTHY_EXPRESSIONS)
+        for (String form : BooleanTest.UNTRUTHY_EXPRESSIONS)
         {
             expectAssertFailure(form);
         }
@@ -43,7 +43,7 @@ public class AssertTest
     public void testAssertSuccess()
         throws Exception
     {
-        for (String form : IfTest.TRUTHY_EXPRESSIONS)
+        for (String form : BooleanTest.TRUTHY_EXPRESSIONS)
         {
             expectAssertSuccess(form);
         }

@@ -5,7 +5,7 @@ package com.amazon.fusion;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class IfTest
+public class BooleanTest
     extends CoreTestCase
 {
     public static final String[] TRUTHY_EXPRESSIONS =
