@@ -32,8 +32,6 @@ abstract class MacroValue
         throws FusionException
     {
         IonValue expanded = expand(expr);
-        // TODO this shouldn't grow the stack
-        FusionValue result = eval.eval(env, expanded);
-        return result;
+        return eval.bounceTailExpression(env, expanded);
     }
 }

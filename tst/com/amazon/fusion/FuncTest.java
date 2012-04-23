@@ -110,8 +110,9 @@ public class FuncTest
              "  (func (i limit)" +
              "    (if (= i limit) i" +
              "      (begin" +
-             "        (letrec ((v 5))" +
-             "          (countup (+ 1 i) limit))))))");
+             "        (let ((x 1))" +
+               "        (letrec ((v 5))" +
+             "            (countup (+ 1 i) limit)))))))");
         assertEval(1000000, "(countup 0 1000000)");
     }
 }
