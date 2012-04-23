@@ -10,6 +10,24 @@ import org.junit.Test;
 public class BindingTest
     extends CoreTestCase
 {
+    @Test(expected = UnboundIdentifierFailure.class)
+    public void testNoBindingAtTop()
+        throws Exception
+    {
+        eval("g");
+    }
+
+    @Test(expected = UnboundIdentifierFailure.class)
+    public void testNoBindingInFunction()
+        throws Exception
+    {
+        eval("((func () g))");
+    }
+
+
+    //========================================================================
+    // Let
+
     @Test
     public void testLet()
         throws Exception
@@ -30,23 +48,8 @@ public class BindingTest
     }
 
 
-    @Test(expected = UnboundIdentifierFailure.class)
-    public void testNoBindingAtTop()
-        throws Exception
-    {
-        eval("g");
-    }
-
-    @Test(expected = UnboundIdentifierFailure.class)
-    public void testNoBindingInFunction()
-        throws Exception
-    {
-        eval("((func () g))");
-    }
-
-
     //========================================================================
-
+    // Letrec
 
     @Test
     public void testLetrec()
