@@ -6,7 +6,6 @@ import com.amazon.fusion.ArityFailure.Variability;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
-import java.util.Collection;
 
 /**
  * A user-defined function, the result of evaluating a {@link FuncKeyword}.
@@ -71,32 +70,7 @@ final class FuncValue
         }
         else
         {
-            bodyEnv = new Environment()
-            {
-                @Override
-                public FusionValue lookup(String name)
-                {
-                    for (int i = 0; i < paramCount; i++)
-                    {
-                        if (name.equals(myParams[i]))
-                        {
-                            return args[i];
-                        }
-                    }
-
-                    return myEnclosure.lookup(name);
-                }
-
-                @Override
-                public void collectNames(Collection<String> names)
-                {
-                    for (String name : myParams)
-                    {
-                        names.add(name);
-                    }
-                    myEnclosure.collectNames(names);
-                }
-            };
+            bodyEnv = new LocalEnvironment(myEnclosure, myParams, args);
         }
 
         FusionValue result;
