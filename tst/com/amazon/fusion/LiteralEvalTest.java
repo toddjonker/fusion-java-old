@@ -25,6 +25,30 @@ public class LiteralEvalTest
     }
 
 
+    @Test(expected = SyntaxFailure.class)
+    public void testNullSymbol()
+        throws Exception
+    {
+        eval("null.symbol");
+    }
+
+
+    @Test(expected = SyntaxFailure.class)
+    public void testNullSexp()
+        throws Exception
+    {
+        eval("null.sexp");
+    }
+
+
+    @Test(expected = SyntaxFailure.class)
+    public void testEmptySexp()
+        throws Exception
+    {
+        eval("()");
+    }
+
+
     @Test
     public void testList()
         throws Exception

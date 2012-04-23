@@ -127,9 +127,16 @@ final class Evaluator
     /**
      * @return not null
      */
-    FusionValue eval(Environment env, IonSymbol expr)
+    private FusionValue eval(Environment env, IonSymbol expr)
+        throws FusionException
     {
         String name = expr.stringValue();
+        if (name == null)
+        {
+            throw new SyntaxFailure(null, "null.symbol is not an expression",
+                                    expr);
+        }
+
         FusionValue result = env.lookup(name);
         if (result == null)
         {
@@ -146,7 +153,11 @@ final class Evaluator
         throws FusionException
     {
         int len = expr.size();
-        if (len < 1) return UNDEF; // TODO throw
+        if (len == 0)
+        {
+            throw new SyntaxFailure(null, expr + " is not an expression",
+                                    expr);
+        }
 
         IonValue first = expr.get(0);
 

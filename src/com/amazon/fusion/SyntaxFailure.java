@@ -29,8 +29,12 @@ public class SyntaxFailure
         StringBuilder out = new StringBuilder();
         try
         {
-            out.append("Bad syntax for ");
-            IonTextUtils.printQuotedSymbol(out, myName);
+            out.append("Bad syntax");
+            if (myName != null)
+            {
+                out.append(" for ");
+                IonTextUtils.printQuotedSymbol(out, myName);
+            }
             out.append(": ");
             out.append(super.getMessage());
 

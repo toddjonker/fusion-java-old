@@ -26,7 +26,7 @@ null.timestamp
 2012-03-21T
 2012-03-21T02:57-07:00
 
-// TODO null.symbol  ???
+// null.symbol is not an expression
 
 null.string
 ""
@@ -45,7 +45,8 @@ null.list
 [13]
 [true, false, null]
 
-// TODO null.sexp
+// null.sexp is not an expression
+// () is not an expression
 
 null.struct
 {}
