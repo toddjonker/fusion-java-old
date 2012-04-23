@@ -43,4 +43,40 @@ public class BindingTest
     {
         eval("((func () g))");
     }
+
+
+    //========================================================================
+
+
+    @Test
+    public void testLetrec()
+        throws Exception
+    {
+        assertEval(9, "(letrec () 9)");
+        assertEval(5, "(letrec ((v 5)) v)");
+        assertEval(true,
+                   "(letrec ((is_even (func (n)" +
+                   "                    (or (= 0 n)" +
+                   "                      (is_odd (- n 1)))))" +
+                   "         (is_odd (func (n)" +
+                   "                   (and (not (= 0 n))" +
+                   "                     (is_even (- n 1))))))" +
+                   "  (is_odd 11))");
+    }
+
+    @Test
+    public void testLetrecSyntax()
+        throws Exception
+    {
+        expectSyntaxFailure("(letrec)");
+        expectSyntaxFailure("(letrec ((x 1)))");
+        expectSyntaxFailure("(letrec 12 13)");
+        expectSyntaxFailure("(letrec null.sexp 13)");
+        expectSyntaxFailure("(letrec (12) 13)");
+        expectSyntaxFailure("(letrec (()) 13)");
+        expectSyntaxFailure("(letrec ((12)) 13)");
+        expectSyntaxFailure("(letrec ((name)) 13)");
+        expectSyntaxFailure("(letrec ((name 1) ()) 13)");
+        expectSyntaxFailure("(letrec ((name 1) (name2)) 13)");
+    }
 }

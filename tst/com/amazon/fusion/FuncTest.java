@@ -105,11 +105,13 @@ public class FuncTest
     public void testTailCall()
         throws Exception
     {
-        // This code forces tail handling of 'if' and 'begin'
+        // This code forces tail handling of 'if', 'begin', 'letrec'
         eval("(define countup" +
              "  (func (i limit)" +
              "    (if (= i limit) i" +
-             "      (begin (countup (+ 1 i) limit)))))");
+             "      (begin" +
+             "        (letrec ((v 5))" +
+             "          (countup (+ 1 i) limit))))))");
         assertEval(1000000, "(countup 0 1000000)");
     }
 }

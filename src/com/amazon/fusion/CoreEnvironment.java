@@ -67,6 +67,7 @@ class CoreEnvironment
         bind("is_null", new IsNullFunction());
         bind("is_undef", new IsUndefFunction());
         bind("let", new LetKeyword());
+        bind("letrec", new LetrecKeyword());
         bind("list_bindings", new ListBindingsKeyword());
         bind("not", new NotFunction());
         bind("or", new OrKeyword());
