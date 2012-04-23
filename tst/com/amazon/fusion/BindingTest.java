@@ -28,4 +28,19 @@ public class BindingTest
     {
         assertEval(2, "(let ((x 1)) x (+ x x))");
     }
+
+
+    @Test(expected = UnboundIdentifierFailure.class)
+    public void testNoBindingAtTop()
+        throws Exception
+    {
+        eval("g");
+    }
+
+    @Test(expected = UnboundIdentifierFailure.class)
+    public void testNoBindingInFunction()
+        throws Exception
+    {
+        eval("((func () g))");
+    }
 }

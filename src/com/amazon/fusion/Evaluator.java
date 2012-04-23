@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionValue.UNDEF;
 import com.amazon.ion.IonBool;
-import com.amazon.ion.IonException;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSexp;
@@ -140,7 +139,7 @@ final class Evaluator
         FusionValue result = env.lookup(name);
         if (result == null)
         {
-            throw new IonException("No binding for " + name);
+            throw new UnboundIdentifierFailure(null, expr);
         }
         return result;
     }
@@ -162,11 +161,6 @@ final class Evaluator
         IonValue first = expr.get(0);
 
         FusionValue form = eval(env, first);
-        if (form == null)
-        {
-            throw new IonException("Bad form: " + first);
-        }
-
         FusionValue result = form.invoke(this, env, expr);
         return result;
     }

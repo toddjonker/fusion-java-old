@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonException;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonValue;
@@ -60,7 +59,7 @@ class EvalFileKeyword
         }
         catch (IOException e)
         {
-            throw new IonException(e);
+            throw new FusionException(e);
         }
     }
 }

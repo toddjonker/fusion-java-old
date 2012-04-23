@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
@@ -22,6 +21,7 @@ class DisplayFunction
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
+        throws FusionException
     {
         try
         {
@@ -40,7 +40,7 @@ class DisplayFunction
         }
         catch (IOException e)
         {
-            throw new IonException(e);
+            throw new FusionException(e);
         }
 
         return UNDEF;

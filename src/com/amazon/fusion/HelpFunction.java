@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonException;
 import com.amazon.ion.IonSexp;
 import java.io.IOException;
 
@@ -37,8 +36,9 @@ final class HelpFunction
 
         @Override
         FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+            throws FusionException
         {
-            throw new IonException("not invokable");
+            throw new FusionException("not invokable");
         }
     }
 

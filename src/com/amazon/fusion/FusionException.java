@@ -14,4 +14,14 @@ public class FusionException
     {
         super(message);
     }
+
+    FusionException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
+
+    FusionException(Throwable cause)
+    {
+        super(cause.getMessage(), cause);
+    }
 }
