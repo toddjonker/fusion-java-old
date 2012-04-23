@@ -24,7 +24,8 @@ abstract class MacroValue
      * @param expr the input expression, including the keyword symbol.
      * @return
      */
-    abstract IonValue expand(IonSexp expr);
+    abstract IonValue expand(IonSexp expr)
+        throws SyntaxFailure;
 
 
     @Override

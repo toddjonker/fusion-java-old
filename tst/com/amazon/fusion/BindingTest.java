@@ -47,6 +47,22 @@ public class BindingTest
         assertEval(2, "(let ((x 1)) x (+ x x))");
     }
 
+    @Test
+    public void testLetSyntax()
+        throws Exception
+    {
+        expectSyntaxFailure("(let)");
+        expectSyntaxFailure("(let ((x 1)))");
+        expectSyntaxFailure("(let 12 13)");
+        expectSyntaxFailure("(let null.sexp 13)");
+        expectSyntaxFailure("(let (12) 13)");
+        expectSyntaxFailure("(let (()) 13)");
+        expectSyntaxFailure("(let ((12)) 13)");
+        expectSyntaxFailure("(let ((name)) 13)");
+        expectSyntaxFailure("(let ((name 1) ()) 13)");
+        expectSyntaxFailure("(let ((name 1) (name2)) 13)");
+    }
+
 
     //========================================================================
     // Letrec

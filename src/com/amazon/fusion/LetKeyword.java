@@ -17,20 +17,27 @@ class LetKeyword
     LetKeyword()
     {
         //    "                                                                               |
-        super("((IDENT EXPR) ...) BODY",
+        super("((IDENT EXPR) ...) BODY ...+",
               "Binds each IDENT to its EXPR, then evaluates BODY.\n" +
               "BODY may be one or more forms; the result of the last form is the result of the\n" +
-              "entire let-expression.");
+              "entire expression.");
     }
 
     /**
      * Expands
-     * {@code (let ((v e) ...) b)} to {@code ((func (v ...) b) e ...)}
+     * {@code (let ((v e) ...) b ...)} to {@code ((func (v ...) b ...) e ...)}
      */
     @Override
     IonValue expand(IonSexp expr)
+        throws SyntaxFailure
     {
-        IonSequence bindingForms = (IonSequence) expr.get(1);
+        final int letExprSize = expr.size();
+        if (letExprSize < 3)
+        {
+            throw new SyntaxFailure(getEffectiveName(), "", expr);
+        }
+        IonSequence bindingForms =
+            requiredSequence("sequence of bindings", 1, expr);
 
         ValueFactory vf = expr.getSystem();
 
@@ -38,7 +45,7 @@ class LetKeyword
         IonSexp function = result.add().newEmptySexp();
         function.add().newSymbol("func");
         IonSexp formals = function.add().newEmptySexp();
-        for (int i = 2; i < expr.size(); i++)
+        for (int i = 2; i < letExprSize; i++)
         {
             IonValue bodyForm = expr.get(i).clone();
             function.add(bodyForm);
@@ -46,11 +53,12 @@ class LetKeyword
 
         for (IonValue bindingForm : bindingForms)
         {
-            IonSexp bindingPair = (IonSexp) bindingForm;
-            IonSymbol formal = (IonSymbol) bindingPair.get(0);
-            IonValue arg = bindingPair.get(1);
+            IonSexp binding =
+                requiredSexp("name/value binding", bindingForm);
+            IonSymbol name = requiredSymbol("name/value binding", 0, binding);
+            IonValue arg = requiredForm("name/value binding", 1, binding);
 
-            formals.add(formal.clone());
+            formals.add(name.clone());
             result.add(arg.clone());
         }
 
