@@ -38,7 +38,10 @@ public class BindingTest
         assertEval(11, "(let ((x 1) (y 2))" +
                        "  (let [(x 10), (y x)]" +
                        "    (+ x y)))");
+        assertEval(1, "(let ((u undef)) (if (is_undef u) 1 2))");
+        assertEval(1, "(let ((u undef)) (if (is_undef u) 1 2))");
     }
+
 
     @Test
     public void testLetMultipleBodyForms()
@@ -46,6 +49,7 @@ public class BindingTest
     {
         assertEval(2, "(let ((x 1)) x (+ x x))");
     }
+
 
     @Test
     public void testLetSyntax()
@@ -61,6 +65,26 @@ public class BindingTest
         expectSyntaxFailure("(let ((name)) 13)");
         expectSyntaxFailure("(let ((name 1) ()) 13)");
         expectSyntaxFailure("(let ((name 1) (name2)) 13)");
+    }
+
+
+    @Test
+    public void testNamedLet()
+        throws Exception
+    {
+        assertEval(3628800,
+                   "(let fac ((n 10))" +
+                   "  (if (= 0 n)" +
+                   "      1" +
+                   "      (* n (fac (- n 1)))))");
+    }
+
+
+    @Test
+    public void testNamedLetSyntax()
+        throws Exception
+    {
+        expectSyntaxFailure("(let null.symbol ((n 1)) 2)");
     }
 
 

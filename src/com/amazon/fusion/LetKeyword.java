@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonSymbol;
+import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
 
@@ -25,29 +26,55 @@ class LetKeyword
 
     /**
      * Expands
-     * {@code (let ((v e) ...) b ...)} to {@code ((func (v ...) b ...) e ...)}
+     * {@code (let ((v e) ...) b ...)}
+     * to
+     * {@code ((func (v ...) b ...) e ...)}
+     * <p>
+     * Expands
+     * {@code (let f ((v e) ...) b ...)}
+     * to
+     * {@code ((letrec ((f (func (v ...) b ...))) f) e ...)}
      */
     @Override
-    IonValue expand(IonSexp expr)
+    IonValue expand(IonSexp letExpr)
         throws SyntaxFailure
     {
-        final int letExprSize = expr.size();
-        if (letExprSize < 3)
+        String loopName = checkForName(letExpr);
+        int bindingPos = (loopName == null ? 1 : 2);
+
+        final int letExprSize = letExpr.size();
+        if (letExprSize < bindingPos + 2)
         {
-            throw new SyntaxFailure(getEffectiveName(), "", expr);
+            throw new SyntaxFailure(getEffectiveName(), "", letExpr);
         }
+
         IonSequence bindingForms =
-            requiredSequence("sequence of bindings", 1, expr);
+            requiredSequence("sequence of bindings", bindingPos, letExpr);
 
-        ValueFactory vf = expr.getSystem();
-
+        ValueFactory vf = letExpr.getSystem();
         IonSexp result = vf.newEmptySexp();
-        IonSexp function = result.add().newEmptySexp();
+
+        IonSexp function;
+        if (loopName != null)
+        {
+            IonSexp letrec = result.add().newEmptySexp();
+            letrec.add().newSymbol("letrec");
+            IonSexp bindings = letrec.add().newEmptySexp();
+            IonSexp binding = bindings.add().newEmptySexp();
+            binding.add().newSymbol(loopName);
+            function = binding.add().newEmptySexp();
+            letrec.add().newSymbol(loopName);
+        }
+        else
+        {
+            function = result.add().newEmptySexp();
+        }
+
         function.add().newSymbol("func");
         IonSexp formals = function.add().newEmptySexp();
-        for (int i = 2; i < letExprSize; i++)
+        for (int i = bindingPos + 1; i < letExprSize; i++)
         {
-            IonValue bodyForm = expr.get(i).clone();
+            IonValue bodyForm = letExpr.get(i).clone();
             function.add(bodyForm);
         }
 
@@ -55,13 +82,26 @@ class LetKeyword
         {
             IonSexp binding =
                 requiredSexp("name/value binding", bindingForm);
-            IonSymbol name = requiredSymbol("name/value binding", 0, binding);
-            IonValue arg = requiredForm("name/value binding", 1, binding);
+            IonSymbol boundName =
+                requiredSymbol("name/value binding", 0, binding);
+            IonValue boundValue =
+                requiredForm("name/value binding", 1, binding);
 
-            formals.add(name.clone());
-            result.add(arg.clone());
+            formals.add(boundName.clone());
+            result.add(boundValue.clone());
         }
 
         return result;
+    }
+
+    String checkForName(IonSexp letExpr)
+        throws SyntaxFailure
+    {
+        IonValue maybeName = requiredForm("", 1, letExpr);
+        if (maybeName.getType() == IonType.SYMBOL)
+        {
+            return ((IonSymbol) maybeName).stringValue();
+        }
+        return null;
     }
 }

@@ -63,8 +63,16 @@ abstract class FunctionValue
             for (int i = 0; i < argCount; i++)
             {
                 IonValue argumentExpr = expr.get(i + 1);
-                FusionValue argumentValue = eval.eval(env, argumentExpr);
-                args[i] = argumentValue;
+                try
+                {
+                    FusionValue argumentValue = eval.eval(env, argumentExpr);
+                    args[i] = argumentValue;
+                }
+                catch (SyntaxFailure e)
+                {
+                    e.addContext(expr);
+                    throw e;
+                }
             }
         }
 

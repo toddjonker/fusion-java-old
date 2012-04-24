@@ -94,6 +94,13 @@ public class FuncTest
         assertEval(1, "((func (x y) y x) 1 2)");
     }
 
+    @Test
+    public void testArgSyntaxFailure()
+        throws Exception
+    {
+        expectSyntaxFailure("((func (x) 1) (if 2))");
+    }
+
     @Test(expected = ArityFailure.class)
     public void testWrongNumberOfArguments()
         throws Exception
