@@ -51,6 +51,8 @@ class CoreEnvironment
             eval.newString(System.getProperty("user.dir"));
         DynamicParameter currentDirectory =
             new DynamicParameter(userDir);
+        EvalFileKeyword evalFile =
+            new EvalFileKeyword(currentDirectory);
 
         bind("*", new ProductFunction());
         bind("+", new SumFunction());
@@ -64,7 +66,7 @@ class CoreEnvironment
         bind("current_directory", currentDirectory);
         bind("define", new DefineKeyword());
         bind("display", new DisplayFunction());
-        bind("eval_file", new EvalFileKeyword(currentDirectory));
+        bind("eval_file", evalFile);
         bind("exit", new ExitFunction());
         bind("for_each_field", new ForEachFieldFunction());
         bind("func", new FuncKeyword());
@@ -76,6 +78,7 @@ class CoreEnvironment
         bind("letrec", new LetrecKeyword());
         bind("list_bindings", new ListBindingsKeyword());
         bind("make_parameter", new MakeParameterFunction());
+        bind("module", new ModuleKeyword());
         bind("not", new NotFunction());
         bind("or", new OrKeyword());
         bind("parameterize", new ParameterizeKeyword());
@@ -84,10 +87,11 @@ class CoreEnvironment
         bind("remove", new RemoveFunction());
         bind("size", new SizeFunction());
         bind("undef", FusionValue.UNDEF);
+        bind("use", new UseKeyword(evalFile));
         bind("write", new WriteFunction());
     }
 
-    private void bind(String name, FusionValue value)
+    void bind(String name, FusionValue value)
     {
         value.inferName(name);
         myBindings.put(name, value);
