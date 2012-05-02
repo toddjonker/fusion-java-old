@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.ion.util.IonTextUtils.printString;
 import org.junit.Test;
 
 /**
@@ -15,5 +16,20 @@ public class IoTest
         throws Exception
     {
         eval("(read \"hi\")");
+    }
+
+
+    @Test
+    public void testCurrentDirectory()
+        throws Exception
+    {
+        String userDir = System.getProperty("user.dir");
+        assertEval(printString(userDir), "(current_directory)");
+
+        String newDir = userDir + "/tst/com";
+        assertEval("\"hello\"",
+                   "(parameterize" +
+                   "  ((current_directory " + printString(newDir) + "))" +
+                   "  (eval_file \"amazon/fusion/hello.ion\"))");
     }
 }

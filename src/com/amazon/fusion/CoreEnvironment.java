@@ -45,8 +45,13 @@ class CoreEnvironment
         new HashMap<String,FusionValue>();
 
 
-    CoreEnvironment()
+    CoreEnvironment(Evaluator eval)
     {
+        FusionValue userDir =
+            eval.newString(System.getProperty("user.dir"));
+        DynamicParameter currentDirectory =
+            new DynamicParameter(userDir);
+
         bind("*", new ProductFunction());
         bind("+", new SumFunction());
         bind("-", new DifferenceFunction());
@@ -56,9 +61,10 @@ class CoreEnvironment
         bind("and", new AndKeyword());
         bind("assert", new AssertKeyword());
         bind("begin", new BeginKeyword());
+        bind("current_directory", currentDirectory);
         bind("define", new DefineKeyword());
         bind("display", new DisplayFunction());
-        bind("eval_file", new EvalFileKeyword());
+        bind("eval_file", new EvalFileKeyword(currentDirectory));
         bind("exit", new ExitFunction());
         bind("for_each_field", new ForEachFieldFunction());
         bind("func", new FuncKeyword());

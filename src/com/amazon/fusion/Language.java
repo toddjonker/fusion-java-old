@@ -25,8 +25,8 @@ public final class Language
 
 
     private final IonSystem mySystem = IonSystemBuilder.standard().build();
-    private final Environment myEnvironment = new CoreEnvironment();
     private final Evaluator myEvaluator = new Evaluator(mySystem);
+    private final Environment myEnvironment = new CoreEnvironment(myEvaluator);
 
 
     /**
@@ -54,8 +54,8 @@ public final class Language
 
         while (source.hasNext())
         {
-            IonValue fileExpr = source.next();
-            result = myEvaluator.eval(myEnvironment, fileExpr);
+            IonValue sourceExpr = source.next();
+            result = myEvaluator.eval(myEnvironment, sourceExpr);
         }
 
         return result;
