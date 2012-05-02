@@ -69,8 +69,10 @@ class CoreEnvironment
         bind("let", new LetKeyword());
         bind("letrec", new LetrecKeyword());
         bind("list_bindings", new ListBindingsKeyword());
+        bind("make_parameter", new MakeParameterFunction());
         bind("not", new NotFunction());
         bind("or", new OrKeyword());
+        bind("parameterize", new ParameterizeKeyword());
         bind("quote", new QuoteKeyword());
         bind("read", new ReadFunction());
         bind("remove", new RemoveFunction());

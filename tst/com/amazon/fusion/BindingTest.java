@@ -122,4 +122,36 @@ public class BindingTest
         expectSyntaxFailure("(letrec ((name 1) ()) 13)");
         expectSyntaxFailure("(letrec ((name 1) (name2)) 13)");
     }
+
+
+    //========================================================================
+    // Dynamic Parameters
+
+
+    @Test
+    public void testParameters()
+        throws Exception
+    {
+        evalToFunction("(make_parameter 19)");
+        eval("(define p (make_parameter 19))");
+        assertEval(19, "(p)");
+
+        assertEval(3,  "(parameterize () 3)");
+        assertEval(19, "(parameterize () (p))");
+        assertEval(91, "(parameterize ((p 91)) (p))");
+        assertEval(20, "(parameterize ((p 13))" +
+        		       "  (+ (parameterize ((p 7))" +
+        		       "       (p))" +
+        		       "     (p)))");
+        assertEval(19, "(p)");
+    }
+
+
+    @Test
+    public void testParameterArity()
+        throws Exception
+    {
+        expectArityFailure("(make_parameter)");
+        expectArityFailure("(make_parameter 1 2)");
+    }
 }

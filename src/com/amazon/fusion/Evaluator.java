@@ -8,11 +8,14 @@ import com.amazon.ion.IonBool;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSexp;
+import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Main entry point to the Fusion evaluation engine.
@@ -20,13 +23,23 @@ import com.amazon.ion.ValueFactory;
 final class Evaluator
 {
     private final IonSystem mySystem;
+    private final Evaluator myOuterFrame;
+    private final Map<FusionValue, FusionValue> myContinuationMarks;
 
 
     Evaluator(IonSystem system)
     {
         mySystem = system;
+        myOuterFrame = null;
+        myContinuationMarks = null;
     }
 
+    private Evaluator(IonSystem system, Evaluator outerBindings)
+    {
+        mySystem = system;
+        myOuterFrame = outerBindings;
+        myContinuationMarks = new HashMap<FusionValue, FusionValue>();
+    }
 
     IonSystem getSystem()
     {
@@ -47,6 +60,44 @@ final class Evaluator
     {
         IonInt dom = mySystem.newInt(value);
         return new DomValue(dom);
+    }
+
+    FusionValue newString(String value)
+    {
+        IonString dom = mySystem.newString(value);
+        return new DomValue(dom);
+    }
+
+
+    //========================================================================
+
+    // This is a shady implementation of Racket's continuation marks.
+    // It's not full featured: we don't create every continuation frame, so we
+    // can't implement the primitive with-continuation-mark.
+
+    FusionValue firstContinuationMark(FusionValue key)
+    {
+        Evaluator e = this;
+        while (e.myOuterFrame != null)
+        {
+            FusionValue value = e.myContinuationMarks.get(key);
+            if (value != null) return value;
+            e = e.myOuterFrame;
+        }
+        return null;
+    }
+
+
+    Evaluator markedContinuation(FusionValue[] keys, FusionValue[] marks)
+    {
+        assert keys.length == marks.length;
+
+        Evaluator innerFrame = new Evaluator(mySystem, this);
+        for (int i = 0; i < keys.length; i++)
+        {
+            innerFrame.myContinuationMarks.put(keys[i], marks[i]);
+        }
+        return innerFrame;
     }
 
 
