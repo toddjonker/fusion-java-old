@@ -12,6 +12,16 @@ import java.io.IOException;
  */
 class FusionUtils
 {
+    static IonValue cloneIfContained(IonValue value)
+    {
+        if (value.getContainer() != null)
+        {
+            value = value.clone();
+        }
+        return value;
+    }
+
+
     static String friendlySuffix(int i)
     {
         int lastDigit = i % 10;

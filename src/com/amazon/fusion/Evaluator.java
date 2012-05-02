@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionUtils.cloneIfContained;
 import static com.amazon.fusion.FusionValue.UNDEF;
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonInt;
@@ -20,15 +21,6 @@ final class Evaluator
 {
     private final IonSystem mySystem;
 
-
-    static IonValue cloneIfContained(IonValue value)
-    {
-        if (value.getContainer() != null)
-        {
-            value = value.clone();
-        }
-        return value;
-    }
 
     Evaluator(IonSystem system)
     {

@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionUtils.cloneIfContained;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonValue;
 
@@ -25,7 +26,7 @@ class AddFunction
         checkArityExact(2, args);
         IonSequence seq = checkSequenceArg(0, args);
         IonValue value = checkIonArg(1, args);
-        value = Evaluator.cloneIfContained(value);
+        value = cloneIfContained(value);
         seq.add(value);
         return args[0]; // Return the original FusionValue, no need to rewrap
     }
