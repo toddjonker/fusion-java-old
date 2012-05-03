@@ -8,7 +8,7 @@ import java.io.IOException;
 /**
  *
  */
-final class ModuleInstance
+class ModuleInstance
     extends NamedValue
 {
     private final Namespace myNamespace;

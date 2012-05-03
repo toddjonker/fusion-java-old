@@ -23,6 +23,7 @@ import java.util.Map;
 final class Evaluator
 {
     private final IonSystem mySystem;
+    private final BaseModule myBaseModule;
     private final Evaluator myOuterFrame;
     private final Map<FusionValue, FusionValue> myContinuationMarks;
 
@@ -32,11 +33,13 @@ final class Evaluator
         mySystem = system;
         myOuterFrame = null;
         myContinuationMarks = null;
+        myBaseModule = new BaseModule(this);
     }
 
     private Evaluator(IonSystem system, Evaluator outerBindings)
     {
         mySystem = system;
+        myBaseModule = outerBindings.myBaseModule;
         myOuterFrame = outerBindings;
         myContinuationMarks = new HashMap<FusionValue, FusionValue>();
     }
@@ -51,7 +54,9 @@ final class Evaluator
 
     Namespace newBaseNamespace()
     {
-        return new CoreEnvironment(this);
+        Namespace base = new Namespace();
+        base.use(myBaseModule);
+        return base;
     }
 
     //========================================================================
