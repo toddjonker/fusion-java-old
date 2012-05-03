@@ -117,7 +117,7 @@ class LoadHandler
 
         // TODO don't create a copy of the kernel
         // TODO Do we need an Evaluator with no continuation marks?
-        Namespace namespace = new CoreEnvironment(eval);
+        Namespace namespace = eval.newBaseNamespace();
         FusionValue result = eval.eval(namespace, moduleDeclaration);
         // TODO tail call handling
         return (ModuleInstance) result;

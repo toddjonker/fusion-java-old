@@ -49,6 +49,13 @@ final class Evaluator
 
     //========================================================================
 
+    Namespace newBaseNamespace()
+    {
+        return new CoreEnvironment(this);
+    }
+
+    //========================================================================
+
 
     FusionValue newBool(boolean value)
     {

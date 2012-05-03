@@ -55,7 +55,7 @@ public class CoreTestCase
 
     private IonSystem mySystem = IonSystemBuilder.standard().build();
     private Evaluator myEvaluator = new Evaluator(mySystem);
-    private Environment myEnvironment = new CoreEnvironment(myEvaluator);
+    private Environment myEnvironment = myEvaluator.newBaseNamespace();
 
     @After
     public void tearDown()
