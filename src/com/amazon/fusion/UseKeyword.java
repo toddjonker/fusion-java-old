@@ -13,12 +13,12 @@ import com.amazon.ion.IonValue;
 final class UseKeyword
     extends KeywordValue
 {
-    private final EvalFileKeyword myEvalFile;
+    private final LoadHandler myLoadHandler;
 
-    UseKeyword(EvalFileKeyword evalFile)
+    UseKeyword(LoadHandler loadHandler)
     {
         super("MODULE", "doc");
-        myEvalFile = evalFile;
+        myLoadHandler = loadHandler;
     }
 
 
@@ -26,6 +26,8 @@ final class UseKeyword
     FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
         throws FusionException
     {
+        Namespace namespace = env.rootNamespace();
+
         ModuleInstance module;
 
         IonValue modStx = expr.get(1);
@@ -40,10 +42,10 @@ final class UseKeyword
             String path = ((IonString) modStx).stringValue();
             if (! path.endsWith(".ion")) path += ".ion";
 
-            module = (ModuleInstance) myEvalFile.evalFile(eval, env, path);
+            module = myLoadHandler.loadModule(eval, path);
         }
 
-        module.useIn((CoreEnvironment) env);
+        namespace.use(module);
 
         return UNDEF;
     }

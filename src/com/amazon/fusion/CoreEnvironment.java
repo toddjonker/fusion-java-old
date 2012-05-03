@@ -5,15 +5,13 @@ package com.amazon.fusion;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The core, built-in bindings for Fusion.
  * This is kind-of hacky and will probably be refactored significantly.
  */
 class CoreEnvironment
+    extends Namespace
     implements Environment
 {
     private final class DefineKeyword
@@ -41,18 +39,16 @@ class CoreEnvironment
     }
 
 
-    private final Map<String,FusionValue> myBindings =
-        new HashMap<String,FusionValue>();
-
-
     CoreEnvironment(Evaluator eval)
     {
         FusionValue userDir =
             eval.newString(System.getProperty("user.dir"));
         DynamicParameter currentDirectory =
             new DynamicParameter(userDir);
+        LoadHandler loadHandler =
+            new LoadHandler(currentDirectory);
         EvalFileKeyword evalFile =
-            new EvalFileKeyword(currentDirectory);
+            new EvalFileKeyword(loadHandler);
 
         bind("*", new ProductFunction());
         bind("+", new SumFunction());
@@ -87,25 +83,7 @@ class CoreEnvironment
         bind("remove", new RemoveFunction());
         bind("size", new SizeFunction());
         bind("undef", FusionValue.UNDEF);
-        bind("use", new UseKeyword(evalFile));
+        bind("use", new UseKeyword(loadHandler));
         bind("write", new WriteFunction());
-    }
-
-    void bind(String name, FusionValue value)
-    {
-        value.inferName(name);
-        myBindings.put(name, value);
-    }
-
-    @Override
-    public FusionValue lookup(String name)
-    {
-        return myBindings.get(name);
-    }
-
-    @Override
-    public void collectNames(Collection<String> names)
-    {
-        names.addAll(myBindings.keySet());
     }
 }

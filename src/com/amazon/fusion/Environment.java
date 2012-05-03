@@ -10,6 +10,8 @@ import java.util.Collection;
  */
 interface Environment
 {
+    Namespace rootNamespace();
+
     /**
      * Finds the value bound to a given name.
      *

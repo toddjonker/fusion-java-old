@@ -4,8 +4,6 @@ package com.amazon.fusion;
 
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  *
@@ -13,13 +11,17 @@ import java.util.Collection;
 final class ModuleInstance
     extends NamedValue
 {
-    private final Evaluator myEvaluator;
-    private final Environment myEnvironment;
+    private final Namespace myNamespace;
 
-    ModuleInstance(Evaluator eval, Environment env)
+    ModuleInstance(Namespace namespace)
     {
-        myEvaluator = eval;
-        myEnvironment = env;
+        myNamespace = namespace;
+    }
+
+
+    Namespace getNamespace()
+    {
+        return myNamespace;
     }
 
 
@@ -36,18 +38,6 @@ final class ModuleInstance
         {
             out.append("module ");
             IonTextUtils.printQuotedSymbol(out, name);
-        }
-    }
-
-
-    void useIn(CoreEnvironment env)
-    {
-        Collection<String> names = new ArrayList<String>();
-        myEnvironment.collectNames(names);
-        for (String name : names)
-        {
-            FusionValue value = myEnvironment.lookup(name);
-            env.bind(name, value);
         }
     }
 }

@@ -19,13 +19,13 @@ final class ModuleKeyword
     FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
         throws FusionException
     {
-        Environment moduleEnv = new CoreEnvironment(eval);
+        Namespace moduleEnv = new CoreEnvironment(eval);
 
         for (int i = 1; i < expr.size(); i++)
         {
             eval.eval(moduleEnv, expr.get(i));
         }
 
-        return new ModuleInstance(eval, moduleEnv);
+        return new ModuleInstance(moduleEnv);
     }
 }

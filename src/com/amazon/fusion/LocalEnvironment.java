@@ -25,6 +25,14 @@ final class LocalEnvironment
         myValues = values;
     }
 
+
+    @Override
+    public Namespace rootNamespace()
+    {
+        return myEnclosure.rootNamespace();
+    }
+
+
     @Override
     public FusionValue lookup(String name)
     {

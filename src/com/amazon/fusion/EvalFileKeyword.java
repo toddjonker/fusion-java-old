@@ -5,10 +5,6 @@ package com.amazon.fusion;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonValue;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Iterator;
 
 /**
  * This is syntax because we currently evaluate the file in the invoker's
@@ -17,9 +13,9 @@ import java.util.Iterator;
 class EvalFileKeyword
     extends KeywordValue
 {
-    private final DynamicParameter myCurrentDirectoryParameter;
+    private final LoadHandler myLoadHandler;
 
-    EvalFileKeyword(DynamicParameter currentDirectoryParameter)
+    EvalFileKeyword(LoadHandler loadHandler)
     {
         //    "                                                                               |
         super("FILENAME",
@@ -27,7 +23,7 @@ class EvalFileKeyword
               "expression in sequence. Returns the last result.\n" +
               "FILENAME is resolve relative to the value of current_directory.");
 
-        myCurrentDirectoryParameter = currentDirectoryParameter;
+        myLoadHandler = loadHandler;
     }
 
 
@@ -43,43 +39,7 @@ class EvalFileKeyword
             fileName = nameDom.stringValue();
         }
 
-        return evalFile(eval, env, fileName);
-    }
-
-
-    FusionValue evalFile(Evaluator eval, Environment env, String path)
-        throws FusionException
-    {
-        // TODO error handling
-        FusionValue cd = eval.applyNonTail(myCurrentDirectoryParameter);
-        String cdPath = ((IonString) ((DomValue) cd).getDom()).stringValue();
-        File cdFile = new File(cdPath);
-
-        File evaluatedFile = new File(cdFile, path);
-        try
-        {
-            FileInputStream in = new FileInputStream(evaluatedFile);
-            try
-            {
-                FusionValue result = null;
-
-                Iterator<IonValue> i = eval.getSystem().iterate(in);
-                while (i.hasNext())
-                {
-                    IonValue fileExpr = i.next();
-                    result = eval.eval(env, fileExpr);
-                }
-
-                return result;
-            }
-            finally
-            {
-                in.close();
-            }
-        }
-        catch (IOException e)
-        {
-            throw new FusionException(e);
-        }
+        Namespace namespace = env.rootNamespace();
+        return myLoadHandler.loadTopLevel(eval, namespace, fileName);
     }
 }
