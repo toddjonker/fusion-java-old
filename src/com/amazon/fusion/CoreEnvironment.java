@@ -2,9 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonSymbol;
-import com.amazon.ion.IonValue;
 
 /**
  * The core, built-in bindings for Fusion.
@@ -14,31 +11,6 @@ class CoreEnvironment
     extends Namespace
     implements Environment
 {
-    private final class DefineKeyword
-        extends KeywordValue
-    {
-        private DefineKeyword()
-        {
-            //    "                                                                               |
-            super("VAR VALUE",
-                  "Defines a global variable VAR with the given VALUE.");
-        }
-
-        @Override
-        FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
-            throws FusionException
-        {
-            IonSymbol name = (IonSymbol) expr.get(1);
-            IonValue ionValue = expr.get(2);
-
-            FusionValue fusionValue = eval.eval(env, ionValue);
-            bind(name.stringValue(), fusionValue);
-
-            return fusionValue;
-        }
-    }
-
-
     CoreEnvironment(Evaluator eval)
     {
         FusionValue userDir =
