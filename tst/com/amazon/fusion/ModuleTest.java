@@ -11,19 +11,24 @@ public class ModuleTest
     extends CoreTestCase
 {
     @Test
-    public void testModuleForm()
-        throws Exception
-    {
-        eval("(define M (module (define X 735)))");
-        eval("(use M)");
-        assertEval(735, "X");
-    }
-
-    @Test
-    public void testModuleFromFile()
+    public void testUseModuleFromFile()
         throws Exception
     {
         eval("(use \"tst/com/amazon/fusion/Module1\")");
         assertEval(214, "X");
+    }
+
+    @Test(expected = FusionException.class)
+    public void testUseNonSexp()
+        throws Exception
+    {
+        eval("(use \"tst/com/amazon/fusion/hello.ion\")");
+    }
+
+    @Test(expected = FusionException.class)
+    public void testUseNonModule()
+        throws Exception
+    {
+        eval("(use \"tst/com/amazon/fusion/trivialDefine.ion\")");
     }
 }

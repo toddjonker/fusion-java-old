@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
+import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
 import java.io.File;
 import java.io.FileInputStream;
@@ -68,7 +69,7 @@ class LoadHandler
     }
 
 
-    IonSexp readModuleDeclaration(Evaluator eval, String path)
+    private IonValue readSingleTopLevelValue(Evaluator eval, String path)
         throws FusionException
     {
         File file = resolvePath(eval, path);
@@ -85,19 +86,16 @@ class LoadHandler
                    throw new FusionException(message);
                 }
 
-                // TODO error handling
-                IonSexp moduleDeclaration = (IonSexp) i.next();
-                // TODO form must start with 'module'
-
+                IonValue firstTopLevel = i.next();
                 if (i.hasNext())
                 {
                     String message =
                         "Module file has more than one top-level form: " +
-                            path;
+                        path;
                     throw new FusionException(message);
                 }
 
-                return moduleDeclaration;
+                return firstTopLevel;
             }
             finally
             {
@@ -110,13 +108,36 @@ class LoadHandler
         }
     }
 
+
+    private IonSexp readModuleDeclaration(Evaluator eval, String path)
+        throws FusionException
+    {
+        IonValue topLevel = readSingleTopLevelValue(eval, path);
+        try {
+            IonSexp moduleDeclaration = (IonSexp) topLevel;
+            if (moduleDeclaration.size() > 1)
+            {
+                IonSymbol moduleSym = (IonSymbol) moduleDeclaration.get(0);
+                if ("module".equals(moduleSym.stringValue()))
+                {
+                    return moduleDeclaration;
+                }
+            }
+        }
+        catch (ClassCastException e) { /* fall through */ }
+
+        String message = "Top-level form isn't (module ...): " + path;
+        throw new FusionException(message);
+    }
+
+
     ModuleInstance loadModule(Evaluator eval, String path)
         throws FusionException
     {
         IonValue moduleDeclaration = readModuleDeclaration(eval, path);
 
-        // TODO don't create a copy of the kernel
         // TODO Do we need an Evaluator with no continuation marks?
+        // This namespace ensures correct binding for 'module'
         Namespace namespace = eval.newBaseNamespace();
         FusionValue result = eval.eval(namespace, moduleDeclaration);
         // TODO tail call handling
