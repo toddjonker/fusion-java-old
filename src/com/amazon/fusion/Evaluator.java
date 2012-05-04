@@ -100,6 +100,13 @@ final class Evaluator
     }
 
 
+    Evaluator markedContinuation(FusionValue key, FusionValue mark)
+    {
+        Evaluator innerFrame = new Evaluator(mySystem, this);
+        innerFrame.myContinuationMarks.put(key, mark);
+        return innerFrame;
+    }
+
     Evaluator markedContinuation(FusionValue[] keys, FusionValue[] marks)
     {
         assert keys.length == marks.length;

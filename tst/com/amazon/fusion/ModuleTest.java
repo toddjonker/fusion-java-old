@@ -31,4 +31,12 @@ public class ModuleTest
     {
         eval("(use \"tst/com/amazon/fusion/trivialDefine.ion\")");
     }
+
+    @Test
+    public void testTransitiveLoad()
+        throws Exception
+    {
+        eval("(use \"tst/com/amazon/fusion/root_module.ion\")");
+        assertEval(437, "leaf_var");
+    }
 }

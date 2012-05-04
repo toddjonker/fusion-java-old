@@ -20,8 +20,12 @@ class BaseModule
             eval.newString(System.getProperty("user.dir"));
         DynamicParameter currentDirectory =
             new DynamicParameter(userDir);
+        DynamicParameter currentLoadRelativeDirectory =
+            new DynamicParameter(UNDEF);
         LoadHandler loadHandler =
-            new LoadHandler(currentDirectory);
+            new LoadHandler(currentLoadRelativeDirectory, currentDirectory);
+        ModuleNameResolver resolver =
+            new ModuleNameResolver(currentLoadRelativeDirectory, currentDirectory);
         EvalFileKeyword evalFile =
             new EvalFileKeyword(loadHandler);
 
@@ -58,7 +62,7 @@ class BaseModule
         ns.bind("remove", new RemoveFunction());
         ns.bind("size", new SizeFunction());
         ns.bind("undef", FusionValue.UNDEF);
-        ns.bind("use", new UseKeyword(loadHandler));
+        ns.bind("use", new UseKeyword(resolver, loadHandler));
         ns.bind("write", new WriteFunction());
     }
 }

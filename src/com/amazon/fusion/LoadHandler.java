@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonString;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
 import java.io.File;
@@ -16,22 +15,34 @@ import java.util.Iterator;
  */
 class LoadHandler
 {
-    private final DynamicParameter myCurrentDirectoryParameter;
+    private final DynamicParameter myCurrentLoadRelativeDirectory;
+    private final DynamicParameter myCurrentDirectory;
 
-    LoadHandler(DynamicParameter currentDirectoryParameter)
+    LoadHandler(DynamicParameter currentLoadRelativeDirectory,
+                DynamicParameter currentDirectory)
     {
-        myCurrentDirectoryParameter = currentDirectoryParameter;
+        myCurrentLoadRelativeDirectory = currentLoadRelativeDirectory;
+        myCurrentDirectory = currentDirectory;
     }
 
 
-    File resolvePath(Evaluator eval, String path)
+    private File resolvePath(Evaluator eval, File file)
         throws FusionException
     {
-        // TODO error handling
-        FusionValue cd = eval.applyNonTail(myCurrentDirectoryParameter);
-        String cdPath = ((IonString) ((DomValue) cd).getDom()).stringValue();
-        File cdFile = new File(cdPath);
-        return new File(cdFile, path);
+        if (! file.isAbsolute())
+        {
+            String cdPath = myCurrentDirectory.asString(eval);
+            File cdFile = new File(cdPath);
+            file = new File(cdFile, file.getPath());
+        }
+        return file;
+    }
+
+    private File resolvePath(Evaluator eval, String path)
+        throws FusionException
+    {
+        File file = new File(path);
+        return resolvePath(eval, file);
     }
 
 
@@ -69,10 +80,9 @@ class LoadHandler
     }
 
 
-    private IonValue readSingleTopLevelValue(Evaluator eval, String path)
+    private IonValue readSingleTopLevelValue(Evaluator eval, File file)
         throws FusionException
     {
-        File file = resolvePath(eval, path);
         try
         {
             FileInputStream in = new FileInputStream(file);
@@ -82,7 +92,7 @@ class LoadHandler
                 if (! i.hasNext())
                 {
                     String message =
-                        "Module file has no top-level forms: " + path;
+                        "Module file has no top-level forms: " + file;
                    throw new FusionException(message);
                 }
 
@@ -91,7 +101,7 @@ class LoadHandler
                 {
                     String message =
                         "Module file has more than one top-level form: " +
-                        path;
+                        file;
                     throw new FusionException(message);
                 }
 
@@ -109,7 +119,7 @@ class LoadHandler
     }
 
 
-    private IonSexp readModuleDeclaration(Evaluator eval, String path)
+    private IonSexp readModuleDeclaration(Evaluator eval, File path)
         throws FusionException
     {
         IonValue topLevel = readSingleTopLevelValue(eval, path);
@@ -131,15 +141,21 @@ class LoadHandler
     }
 
 
-    ModuleInstance loadModule(Evaluator eval, String path)
+    ModuleInstance loadModule(Evaluator eval, File path)
         throws FusionException
     {
-        IonValue moduleDeclaration = readModuleDeclaration(eval, path);
+        File file = resolvePath(eval, path);
+        IonValue moduleDeclaration = readModuleDeclaration(eval, file);
+
+        String dirPath = file.getParentFile().getAbsolutePath();
+        Evaluator bodyEval =
+            eval.markedContinuation(myCurrentLoadRelativeDirectory,
+                                    eval.newString(dirPath));
 
         // TODO Do we need an Evaluator with no continuation marks?
         // This namespace ensures correct binding for 'module'
         Namespace namespace = eval.newBaseNamespace();
-        FusionValue result = eval.eval(namespace, moduleDeclaration);
+        FusionValue result = bodyEval.eval(namespace, moduleDeclaration);
         // TODO tail call handling
         return (ModuleInstance) result;
     }

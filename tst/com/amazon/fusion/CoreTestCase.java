@@ -217,11 +217,11 @@ public class CoreTestCase
         return result.getDom();
     }
 
-    protected void evalToFunction(String expressionIon)
+    protected FunctionValue evalToFunction(String expressionIon)
         throws FusionException
     {
         FusionValue result = eval(expressionIon);
-        Assert.assertTrue(result instanceof FunctionValue);
+        return (FunctionValue) result;
     }
 
 

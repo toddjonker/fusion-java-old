@@ -6,6 +6,7 @@ import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
+import java.io.File;
 
 /**
  *
@@ -13,11 +14,13 @@ import com.amazon.ion.IonValue;
 final class UseKeyword
     extends KeywordValue
 {
+    private final ModuleNameResolver myModuleNameResolver;
     private final LoadHandler myLoadHandler;
 
-    UseKeyword(LoadHandler loadHandler)
+    UseKeyword(ModuleNameResolver moduleNameResolver, LoadHandler loadHandler)
     {
         super("MODULE", "doc");
+        myModuleNameResolver = moduleNameResolver;
         myLoadHandler = loadHandler;
     }
 
@@ -40,9 +43,8 @@ final class UseKeyword
         else
         {
             String path = ((IonString) modStx).stringValue();
-            if (! path.endsWith(".ion")) path += ".ion";
-
-            module = myLoadHandler.loadModule(eval, path);
+            File file = myModuleNameResolver.resolve(eval, path);
+            module = myLoadHandler.loadModule(eval, file);
         }
 
         namespace.use(module);

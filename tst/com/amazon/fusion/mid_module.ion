@@ -1,0 +1,3 @@
+(module
+  (use "leaf_module")
+  (define mid_fn leaf_fn))
