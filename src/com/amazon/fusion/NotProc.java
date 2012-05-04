@@ -5,14 +5,15 @@ package com.amazon.fusion;
 /**
  *
  */
-class IsUndefFunction
-    extends FunctionValue
+class NotProc
+    extends Procedure
 {
-    IsUndefFunction()
+    NotProc()
     {
         //    "                                                                               |
-        super("Returns true when VALUE is the unique UNDEF object, false otherwise.",
-              "value");
+        super("Returns true if BOOL is false, false if BOOL is true. Throws an exception\n" +
+              "otherwise.",
+              "BOOL");
     }
 
     @Override
@@ -20,8 +21,8 @@ class IsUndefFunction
         throws FusionException
     {
         checkArityExact(1, args);
-        FusionValue arg = args[0];
-        boolean isUndef = (arg == UNDEF);
-        return eval.newBool(isUndef);
+        boolean b = checkBoolArg(0, args);
+        return eval.newBool(! b);
     }
+
 }

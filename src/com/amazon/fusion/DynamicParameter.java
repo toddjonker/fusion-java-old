@@ -8,7 +8,7 @@ import com.amazon.ion.IonString;
  *
  */
 final class DynamicParameter
-    extends FunctionValue
+    extends Procedure
 {
     private final FusionValue myInitialValue;
 

@@ -10,8 +10,7 @@ import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 
 /**
- * Base class for syntactic forms
- * (as opposed to {@linkplain FunctionValue functions}).
+ * Base class for syntactic keywords.
  */
 abstract class KeywordValue
     extends NamedValue

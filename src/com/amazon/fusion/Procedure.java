@@ -17,11 +17,11 @@ import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 
 /**
- * Base class for invocable functions, both built-in and user-defined.
- * This implements the evaluation of arguments and prevents the function from
+ * Base class for invocable procedures, both built-in and user-defined.
+ * This implements the evaluation of arguments and prevents the procedure from
  * access to the caller's environment.
  */
-abstract class FunctionValue
+abstract class Procedure
     extends NamedValue
 {
     final static String DOTDOTDOT = "...";
@@ -30,7 +30,7 @@ abstract class FunctionValue
     final String[] myParams;
     private final String myDoc;
 
-    FunctionValue(String doc, String... params)
+    Procedure(String doc, String... params)
     {
         assert doc == null || ! doc.endsWith("\n");
         assert params != null;
@@ -43,7 +43,7 @@ abstract class FunctionValue
      * Do not call directly! Only for use by the {@link Evaluator} which can
      * properly handle bounced tail expressions.
      *
-     * @see Evaluator#applyNonTail(FunctionValue, FusionValue...)
+     * @see Evaluator#applyNonTail(Procedure, FusionValue...)
      * @see Evaluator#bounceTailExpression(Environment, IonValue)
      */
     @Override
@@ -86,11 +86,11 @@ abstract class FunctionValue
         String name = getInferredName();
         if (name == null)
         {
-            out.append("anonymous function");
+            out.append("anonymous procedure");
         }
         else
         {
-            out.append("function ");
+            out.append("procedure ");
             IonTextUtils.printQuotedSymbol(out, name);
         }
     }
@@ -100,7 +100,7 @@ abstract class FunctionValue
     final void displayHelp(Appendable out)
         throws IOException
     {
-        out.append("[FUNCTION]  (");
+        out.append("[PROCEDURE]  (");
         out.append(getEffectiveName());
         for (String formal : myParams)
         {
@@ -257,13 +257,14 @@ abstract class FunctionValue
         throw new ArgTypeFailure(this, typeName, argNum, args);
     }
 
-    FunctionValue checkFuncArg(int argNum, FusionValue... args)
+    /** Ensures that an argument is a {@link Procedure}. */
+    Procedure checkProcArg(int argNum, FusionValue... args)
         throws ArgTypeFailure
     {
         FusionValue arg = args[argNum];
         try
         {
-            return (FunctionValue) arg;
+            return (Procedure) arg;
         }
         catch (ClassCastException e) {}
 

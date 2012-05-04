@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.BaseModule.LAMBDA;
+import static com.amazon.fusion.BaseModule.LETREC;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonSymbol;
@@ -28,12 +30,12 @@ class LetKeyword
      * Expands
      * {@code (let ((v e) ...) b ...)}
      * to
-     * {@code ((func (v ...) b ...) e ...)}
+     * {@code ((lambda (v ...) b ...) e ...)}
      * <p>
      * Expands
      * {@code (let f ((v e) ...) b ...)}
      * to
-     * {@code ((letrec ((f (func (v ...) b ...))) f) e ...)}
+     * {@code ((letrec ((f (lambda (v ...) b ...))) f) e ...)}
      */
     @Override
     IonValue expand(IonSexp letExpr)
@@ -54,28 +56,28 @@ class LetKeyword
         ValueFactory vf = letExpr.getSystem();
         IonSexp result = vf.newEmptySexp();
 
-        IonSexp function;
+        IonSexp lambdaForm;
         if (loopName != null)
         {
             IonSexp letrec = result.add().newEmptySexp();
-            letrec.add().newSymbol("letrec");
+            letrec.add().newSymbol(LETREC);
             IonSexp bindings = letrec.add().newEmptySexp();
             IonSexp binding = bindings.add().newEmptySexp();
             binding.add().newSymbol(loopName);
-            function = binding.add().newEmptySexp();
+            lambdaForm = binding.add().newEmptySexp();
             letrec.add().newSymbol(loopName);
         }
         else
         {
-            function = result.add().newEmptySexp();
+            lambdaForm = result.add().newEmptySexp();
         }
 
-        function.add().newSymbol("func");
-        IonSexp formals = function.add().newEmptySexp();
+        lambdaForm.add().newSymbol(LAMBDA);
+        IonSexp formals = lambdaForm.add().newEmptySexp();
         for (int i = bindingPos + 1; i < letExprSize; i++)
         {
             IonValue bodyForm = letExpr.get(i).clone();
-            function.add(bodyForm);
+            lambdaForm.add(bodyForm);
         }
 
         for (IonValue bindingForm : bindingForms)

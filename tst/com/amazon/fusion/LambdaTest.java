@@ -5,21 +5,21 @@ package com.amazon.fusion;
 import org.junit.Test;
 
 
-public class FuncTest
+public class LambdaTest
     extends CoreTestCase
 {
     @Test
-    public void testBasicFunc()
+    public void testBasicLambda()
         throws Exception
     {
-        assertEval(3, "((func (p) 3) 4)");
+        assertEval(3, "((lambda (p) 3) 4)");
     }
 
     @Test
-    public void testDefineFunc()
+    public void testDefineLambda()
         throws Exception
     {
-        eval("(define f (func (p) 3))");
+        eval("(define f (lambda (p) 3))");
         assertEval(3, "(f 4)");
     }
 
@@ -28,7 +28,7 @@ public class FuncTest
         throws Exception
     {
         eval("(define p 19)");
-        eval("(define f (func (p) p))");
+        eval("(define f (lambda (p) p))");
         assertEval(4, "(f 4)");
     }
 
@@ -37,7 +37,7 @@ public class FuncTest
         throws Exception
     {
         eval("(define p 19)");
-        eval("(define f (func (p1) p))");
+        eval("(define f (lambda (p1) p))");
         assertEval(19, "(f 4)");
         eval("(define p 20)");
         assertEval(20, "(f 4)");
@@ -48,20 +48,20 @@ public class FuncTest
         throws Exception
     {
         eval("(define p 19)");
-        eval("(define f (func (p) (func (p1) p)))");
-        evalToFunction("(f 4)");
+        eval("(define f (lambda (p) (lambda (p1) p)))");
+        evalToProcedure("(f 4)");
         assertEval(4, "((f 4) 5)");
     }
 
     @Test
-    public void testFunctionArguments()
+    public void testLambdaArguments()
         throws Exception
     {
         eval("(define p 19)");
-        eval("(define f (func (g) (func (p) (g p))))");
-        evalToFunction("(f 4)");
-        assertEval(76, "((f (func (x) 76)) 5)");
-        eval("(define f2 (f (func (x) 77)))");
+        eval("(define f (lambda (g) (lambda (p) (g p))))");
+        evalToProcedure("(f 4)");
+        assertEval(76, "((f (lambda (x) 76)) 5)");
+        eval("(define f2 (f (lambda (x) 77)))");
         assertEval(77, "(f2 5)");
     }
 
@@ -69,43 +69,43 @@ public class FuncTest
     public void testNoParams()
         throws Exception
     {
-        assertEval("true", "((func () true))");
-        assertEval(13, "((func (f) (f)) (func () 13))");
-        assertEval(1, "((let ((x 1)) (func () x)))");
+        assertEval("true", "((lambda () true))");
+        assertEval(13, "((lambda (f) (f)) (lambda () 13))");
+        assertEval(1, "((let ((x 1)) (lambda () x)))");
     }
 
     @Test
     public void testMultipleArguments()
         throws Exception
     {
-        assertEval(1, "((func (x y) x) 1 2)");
-        assertEval(2, "((func (x y) y) 1 2)");
-        assertEval(2, "((func (x y) (x y)) (func (x) x) 2)");
+        assertEval(1, "((lambda (x y) x) 1 2)");
+        assertEval(2, "((lambda (x y) y) 1 2)");
+        assertEval(2, "((lambda (x y) (x y)) (lambda (x) x) 2)");
 
-        eval("(define i (func ( x )x))");
-        assertEval(2, "((func (x y) ((y y) (y x))) 2 i)");
+        eval("(define i (lambda ( x )x))");
+        assertEval(2, "((lambda (x y) ((y y) (y x))) 2 i)");
     }
 
     @Test
     public void testMultipleBodyForms()
         throws Exception
     {
-        assertEval(2, "((func () 1 2))");
-        assertEval(1, "((func (x y) y x) 1 2)");
+        assertEval(2, "((lambda () 1 2))");
+        assertEval(1, "((lambda (x y) y x) 1 2)");
     }
 
     @Test
     public void testArgSyntaxFailure()
         throws Exception
     {
-        expectSyntaxFailure("((func (x) 1) (if 2))");
+        expectSyntaxFailure("((lambda (x) 1) (if 2))");
     }
 
     @Test(expected = ArityFailure.class)
     public void testWrongNumberOfArguments()
         throws Exception
     {
-        assertEval(1, "((func (x y) (x y)) (func () 1) 2)");
+        assertEval(1, "((lambda (x y) (x y)) (lambda () 1) 2)");
     }
 
     @Test
@@ -114,7 +114,7 @@ public class FuncTest
     {
         // This code forces tail handling of 'if', 'begin', 'letrec'
         eval("(define countup" +
-             "  (func (i limit)" +
+             "  (lambda (i limit)" +
              "    (if (= i limit) i" +
              "      (begin" +
              "        (let ((x 1))" +

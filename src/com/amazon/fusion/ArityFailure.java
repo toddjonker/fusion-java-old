@@ -14,7 +14,7 @@ final class ArityFailure
 {
     enum Variability { EXACT, AT_LEAST }
 
-    private final FunctionValue myProc;
+    private final Procedure myProc;
     private final int myArity;
     private final Variability myVariability;
     private final FusionValue[] myActuals;
@@ -22,7 +22,7 @@ final class ArityFailure
     /**
      * @param procName must not be null or empty
      */
-    ArityFailure(FunctionValue proc, int arity, Variability variability,
+    ArityFailure(Procedure proc, int arity, Variability variability,
                  FusionValue... actuals)
     {
         super("arity failure");

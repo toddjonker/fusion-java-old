@@ -5,24 +5,23 @@ package com.amazon.fusion;
 /**
  *
  */
-class NotFunction
-    extends FunctionValue
+final class MakeParameterProc
+    extends Procedure
 {
-    NotFunction()
+    MakeParameterProc()
     {
         //    "                                                                               |
-        super("Returns true if BOOL is false, false if BOOL is true. Throws an exception\n" +
-              "otherwise.",
-              "BOOL");
+        super("Makes a new dynamic parameter procedure. The initial value of the parameter is\n" +
+              "VALUE.",
+              "value");
     }
+
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
         checkArityExact(1, args);
-        boolean b = checkBoolArg(0, args);
-        return eval.newBool(! b);
+        return new DynamicParameter(args[0]);
     }
-
 }

@@ -7,10 +7,10 @@ import com.amazon.ion.IonValue;
 /**
  *
  */
-class IsNullFunction
-    extends FunctionValue
+class IsNullProc
+    extends Procedure
 {
-    IsNullFunction()
+    IsNullProc()
     {
         //    "                                                                               |
         super("Returns true when VALUE is any Ion null, false otherwise.",

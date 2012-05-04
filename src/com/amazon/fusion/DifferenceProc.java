@@ -6,10 +6,10 @@ package com.amazon.fusion;
 /**
  * Numeric difference and negation.
  */
-final class DifferenceFunction
-    extends FunctionValue
+final class DifferenceProc
+    extends Procedure
 {
-    DifferenceFunction()
+    DifferenceProc()
     {
         //    "                                                                               |
         super("With two or more (int) arguments, returns their difference, associating to the\n" +

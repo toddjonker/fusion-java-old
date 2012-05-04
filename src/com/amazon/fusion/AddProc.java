@@ -9,10 +9,10 @@ import com.amazon.ion.IonValue;
 /**
  *
  */
-class AddFunction
-    extends FunctionValue
+class AddProc
+    extends Procedure
 {
-    AddFunction()
+    AddProc()
     {
         //    "                                                                               |
         super("Adds the Ion DATUM to the end of the SEQUENCE (Ion list or sexp).",

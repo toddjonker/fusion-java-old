@@ -11,20 +11,20 @@ public class BooleanTest
     public static final String[] TRUTHY_EXPRESSIONS =
     {
         "true",
-        "((func () true))",
+        "((lambda () true))",
     };
 
     public static final String[] UNTRUTHY_EXPRESSIONS =
     {
         "false",
-        "((func () false))",
+        "((lambda () false))",
     };
 
     public static final String[] FAILING_FORMS =
     {
          "null.bool",
          "undef",
-         "(func () true)",
+         "(lambda () true)",
     };
 
 
@@ -54,7 +54,7 @@ public class BooleanTest
         assertEval(2, "(if null.bool 1 2)");
         assertEval(2, "(if n 1 2)");
         assertEval(2, "(if [] 1 2)");
-        assertEval(2, "(if (func (x) true) 1 2)");
+        assertEval(2, "(if (lambda (x) true) 1 2)");
     }
 
     @Test

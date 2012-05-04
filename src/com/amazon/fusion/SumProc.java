@@ -4,15 +4,15 @@ package com.amazon.fusion;
 
 
 /**
- * Numeric product.
+ * Numeric sum.
  */
-final class ProductFunction
-    extends FunctionValue
+final class SumProc
+    extends Procedure
 {
-    ProductFunction()
+    SumProc()
     {
         //    "                                                                               |
-        super("Returns the product of the (integer) arguments. With no arguments, returns 1.",
+        super("Returns the sum of the (integer) arguments. With no arguments, returns 0.",
               "int", DOTDOTDOT);
     }
 
@@ -20,12 +20,12 @@ final class ProductFunction
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        long result = 1;
+        long result = 0;
 
         for (int i = 0; i < args.length; i++)
         {
             long v = checkLongArg(i, args);
-            result *= v;
+            result += v;
         }
 
         return eval.newInt(result);

@@ -8,12 +8,12 @@ import java.util.Iterator;
 /**
  *
  */
-class ReadFunction
-    extends FunctionValue
+class ReadProc
+    extends Procedure
 {
     private Iterator<IonValue> myInputValues;
 
-    ReadFunction()
+    ReadProc()
     {
         //    "                                                                               |
         super("Reads an Ion value from the standard input stream. Returns undef when there's\n" +

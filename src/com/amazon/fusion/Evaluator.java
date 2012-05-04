@@ -229,14 +229,14 @@ final class Evaluator
 
 
     /**
-     * Makes a <b>non-tail</b> call to a function.
+     * Makes a <b>non-tail</b> procedure call.
      *
      * @return not null
      */
-    FusionValue applyNonTail(FunctionValue function, FusionValue... args)
+    FusionValue applyNonTail(Procedure proc, FusionValue... args)
         throws FusionException
     {
-        FusionValue result = function.invoke(this, args);
+        FusionValue result = proc.invoke(this, args);
         if (result instanceof TailExpression)
         {
             TailExpression tail = (TailExpression) result;

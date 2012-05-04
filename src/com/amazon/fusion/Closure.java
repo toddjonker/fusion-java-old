@@ -8,10 +8,10 @@ import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
 
 /**
- * A user-defined function, the result of evaluating a {@link FuncKeyword}.
+ * A user-defined procedure, the result of evaluating a {@link LambdaKeyword}.
  */
-final class FuncValue
-    extends FunctionValue
+final class Closure
+    extends Procedure
 {
     private final Environment myEnclosure;
     private final IonSexp myDefinition;
@@ -22,16 +22,16 @@ final class FuncValue
     private final int myBodyStart;
 
     /**
-     * Constructs a new function from its source and enclosing lexical
+     * Constructs a new closure from its source and enclosing lexical
      * environment.
      *
      * @param enclosure the lexical environment surrounding the source of this
-     *  function.  Any free variables in the function are expected to be bound
+     *  closure.  Any free variables in the procedure are expected to be bound
      *  here.
-     * @param definition the source text of the {@code func} expression.
+     * @param definition the source text of the {@code lambda} expression.
      */
-    FuncValue(Environment enclosure, IonSexp definition, String doc,
-              int bodyStartIndex)
+    Closure(Environment enclosure, IonSexp definition, String doc,
+            int bodyStartIndex)
     {
         super(doc, determineParams((IonSexp) definition.get(1)));
 

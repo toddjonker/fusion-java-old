@@ -9,7 +9,7 @@ import java.util.TreeSet;
 
 /**
  * The {@code list_bindings} syntactic form.
- * This cannot be a function since it requires access to the caller's
+ * This cannot be a procedure since it requires access to the caller's
  * lexical environment.
  */
 final class ListBindingsKeyword

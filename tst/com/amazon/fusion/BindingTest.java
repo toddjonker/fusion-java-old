@@ -18,10 +18,10 @@ public class BindingTest
     }
 
     @Test(expected = UnboundIdentifierFailure.class)
-    public void testNoBindingInFunction()
+    public void testNoBindingInProcedureBody()
         throws Exception
     {
-        eval("((func () g))");
+        eval("((lambda () g))");
     }
 
 
@@ -98,10 +98,10 @@ public class BindingTest
         assertEval(9, "(letrec () 9)");
         assertEval(5, "(letrec ((v 5)) v)");
         assertEval(true,
-                   "(letrec ((is_even (func (n)" +
+                   "(letrec ((is_even (lambda (n)" +
                    "                    (or (= 0 n)" +
                    "                      (is_odd (- n 1)))))" +
-                   "         (is_odd (func (n)" +
+                   "         (is_odd (lambda (n)" +
                    "                   (and (not (= 0 n))" +
                    "                     (is_even (- n 1))))))" +
                    "  (is_odd 11))");
@@ -132,7 +132,7 @@ public class BindingTest
     public void testParameters()
         throws Exception
     {
-        evalToFunction("(make_parameter 19)");
+        evalToProcedure("(make_parameter 19)");
         eval("(define p (make_parameter 19))");
         assertEval(19, "(p)");
 
@@ -140,9 +140,9 @@ public class BindingTest
         assertEval(19, "(parameterize () (p))");
         assertEval(91, "(parameterize ((p 91)) (p))");
         assertEval(20, "(parameterize ((p 13))" +
-        		       "  (+ (parameterize ((p 7))" +
-        		       "       (p))" +
-        		       "     (p)))");
+                    "  (+ (parameterize ((p 7))" +
+                    "       (p))" +
+                    "     (p)))");
         assertEval(19, "(p)");
     }
 

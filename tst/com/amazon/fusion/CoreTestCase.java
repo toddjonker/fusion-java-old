@@ -22,7 +22,7 @@ import org.junit.Assert;
 public class CoreTestCase
 {
     static final String NONTERMINATING_EXPRESSION =
-        "((func (x) (x x)) (func (x) (x x)))";
+        "((lambda (x) (x x)) (lambda (x) (x x)))";
 
     /** Exprs that evaluate to Ion types. */
     private static final String[] ION_EXPRESSIONS =
@@ -46,7 +46,7 @@ public class CoreTestCase
     private static final String[] NON_ION_EXPRESSIONS =
     {
         "undef",
-        "(func () 1)",
+        "(lambda () 1)",
     };
 
 
@@ -217,11 +217,11 @@ public class CoreTestCase
         return result.getDom();
     }
 
-    protected FunctionValue evalToFunction(String expressionIon)
+    protected Procedure evalToProcedure(String expressionIon)
         throws FusionException
     {
         FusionValue result = eval(expressionIon);
-        return (FunctionValue) result;
+        return (Procedure) result;
     }
 
 

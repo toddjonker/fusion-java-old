@@ -4,10 +4,10 @@ package com.amazon.fusion;
 
 import com.amazon.ion.IonStruct;
 
-class RemoveFunction
-    extends FunctionValue
+class RemoveProc
+    extends Procedure
 {
-    RemoveFunction()
+    RemoveProc()
     {
         //    "                                                                               |
         super("Removes all fields from STRUCT that have the given NAMEs, returning STRUCT.\n" +

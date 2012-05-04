@@ -8,10 +8,10 @@ import java.io.OutputStreamWriter;
 /**
  *
  */
-class DisplayFunction
-    extends FunctionValue
+class DisplayProc
+    extends Procedure
 {
-    DisplayFunction()
+    DisplayProc()
     {
         //    "                                                                               |
         super("Outputs the VALUEs to stdout in human-readable form.\n" +

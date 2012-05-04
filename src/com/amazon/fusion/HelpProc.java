@@ -6,12 +6,12 @@ import com.amazon.ion.IonSexp;
 import java.io.IOException;
 
 /**
- * The {@code help} built-in function.
+ * The {@code help} built-in procedure.
  * <p>
  * TODO add a Documentation model and move this to user space.
  */
-final class HelpFunction
-    extends FunctionValue
+final class HelpProc
+    extends Procedure
 {
     private static final class HelpDocument
         extends FusionValue
@@ -43,7 +43,7 @@ final class HelpFunction
     }
 
 
-    HelpFunction()
+    HelpProc()
     {
         //    "                                                                               |
         super("Prints the documentation of the given values, if available.",

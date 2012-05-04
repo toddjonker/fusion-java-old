@@ -8,10 +8,10 @@ import com.amazon.ion.IonList;
 /**
  *
  */
-class SizeFunction
-    extends FunctionValue
+class SizeProc
+    extends Procedure
 {
-    SizeFunction()
+    SizeProc()
     {
         //    "                                                                               |
         super("Returns the number of child elements contained in the LIST.\n" +

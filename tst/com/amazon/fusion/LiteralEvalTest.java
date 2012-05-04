@@ -62,7 +62,7 @@ public class LiteralEvalTest
         assertEval("[1,[13]]", "[ 1, y]");
         eval("(define x 23)");
         assertEval("[1,{f:[13]}]", "[1, {f:y}]");
-        eval("(define z (func () [x]))");
+        eval("(define z (lambda () [x]))");
         assertEval("[23]", "(z)");
         eval("(define x 33)");
         assertEval("[33]", "(z)");
@@ -81,7 +81,7 @@ public class LiteralEvalTest
         assertEval("{f:1,f:{f:13}}", "{ f:1, f:y}");
         eval("(define x 23)");
         assertEval("{g:1,f:[{f:13}]}", "{ g:1, f:[y]}");
-        eval("(define z (func () {a:{b:x}}))");
+        eval("(define z (lambda () {a:{b:x}}))");
         assertEval("{a:{b:23}}", "(z)");
         eval("(define x 33)");
         assertEval("{a:{b:33}}", "(z)");

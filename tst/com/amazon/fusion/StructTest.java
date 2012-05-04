@@ -77,7 +77,7 @@ public class StructTest
     public void testForEachField()
         throws Exception
     {
-        eval("(define add_name (func (name value) (add value name)))");
+        eval("(define add_name (lambda (name value) (add value name)))");
         assertEval("{f:[\"f\"],g:[\"g\"],f:[true,false,\"f\"]}",
                    "(for_each_field add_name " +
                    "  {f:null.list,g:[],f:[true,false]})");
@@ -87,7 +87,7 @@ public class StructTest
     public void testForEachFieldArity()
         throws Exception
     {
-        eval("(define add_name (func (name value) (add value name)))");
+        eval("(define add_name (lambda (name value) (add value name)))");
         expectArityFailure("(for_each_field)");
         expectArityFailure("(for_each_field add_name)");
         expectArityFailure("(for_each_field add_name {} 3)");
@@ -97,7 +97,7 @@ public class StructTest
     public void testForEachFieldArgTypes()
         throws Exception
     {
-        eval("(define add_name (func (name value) (add value name)))");
+        eval("(define add_name (lambda (name value) (add value name)))");
 
         for (String form : allIonExpressions())
         {

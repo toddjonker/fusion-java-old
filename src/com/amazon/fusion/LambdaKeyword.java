@@ -8,20 +8,20 @@ import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 
 /**
- * The {@code func} syntactic form, which evaluates to a {@link FuncValue}.
+ * The {@code lambda} syntactic form, which evaluates to a {@link Closure}.
  */
-final class FuncKeyword
+final class LambdaKeyword
     extends KeywordValue
 {
-    FuncKeyword()
+    LambdaKeyword()
     {
         //    "                                                                               |
         super("(PARAM ...) DOC? BODY",
-              "Returns a new function.  When invoked, the caller's arguments are bound to the\n" +
+              "Returns a new procedure. When invoked, the caller's arguments are bound to the\n" +
               "PARAMs and the BODY is evaluated and returned.\n" +
               "DOC is an optional documentation string.\n" +
               "BODY may be one or more forms; the result of the last form is the result of the\n" +
-              "function invocation.");
+              "procedure invocation.");
     }
 
     @Override
@@ -44,6 +44,6 @@ final class FuncKeyword
             bodyStart = 2;
         }
 
-        return new FuncValue(env, expr, doc, bodyStart);
+        return new Closure(env, expr, doc, bodyStart);
     }
 }

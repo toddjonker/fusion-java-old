@@ -10,10 +10,10 @@ import java.io.OutputStream;
 /**
  *
  */
-class WriteFunction
-    extends FunctionValue
+class WriteProc
+    extends Procedure
 {
-    WriteFunction()
+    WriteProc()
     {
         //    "                                                                               |
         super("Writes a value as Ion data to the standard output stream.",

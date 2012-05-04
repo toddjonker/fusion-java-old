@@ -6,16 +6,16 @@ import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonValue;
 
-class ForEachFieldFunction
-    extends FunctionValue
+class ForEachFieldProc
+    extends Procedure
 {
-    ForEachFieldFunction()
+    ForEachFieldProc()
     {
         //    "                                                                               |
-        super("Applies FUNC to each field within STRUCT, ignoring any results.\n" +
-              "FUNC must take two arguments, a field name and an Ion value.\n" +
+        super("Applies PROC to each field within STRUCT, ignoring any results.\n" +
+              "PROC must take two arguments, a field name and an Ion value.\n" +
               "Returns STRUCT.",
-              "func", "struct");
+              "proc", "struct");
     }
 
 
@@ -25,7 +25,7 @@ class ForEachFieldFunction
     {
         checkArityExact(2, args);
 
-        FunctionValue func = checkFuncArg(0, args);
+        Procedure proc = checkProcArg(0, args);
         IonStruct s = checkStructArg(1, args);
 
         for (IonValue field : s)
@@ -36,7 +36,7 @@ class ForEachFieldFunction
 
             DomValue fieldValue = new DomValue(field);
 
-            eval.applyNonTail(func, nameValue, fieldValue);
+            eval.applyNonTail(proc, nameValue, fieldValue);
         }
 
         return args[1]; // Don't need to re-wrap the input struct

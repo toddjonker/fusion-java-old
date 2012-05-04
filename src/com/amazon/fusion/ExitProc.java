@@ -7,10 +7,10 @@ import com.amazon.fusion.Language.ExitException;
 /**
  *
  */
-class ExitFunction
-    extends FunctionValue
+class ExitProc
+    extends Procedure
 {
-    ExitFunction()
+    ExitProc()
     {
         //    "                                                                               |
         super("Exits the running program.");

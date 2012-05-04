@@ -91,8 +91,8 @@ public abstract class FusionValue
     /**
      * Writes a representation of this value, following Ion syntax where
      * possible, including for strings.
-     * The result will be if the value contains any non-Ion data like
-     * functions.
+     * The result will be invalid if the value contains any non-Ion data like
+     * closures.
      *
      * @param out the output stream; not null.
      *

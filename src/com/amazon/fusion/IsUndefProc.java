@@ -5,23 +5,23 @@ package com.amazon.fusion;
 /**
  *
  */
-final class MakeParameterFunction
-    extends FunctionValue
+class IsUndefProc
+    extends Procedure
 {
-    MakeParameterFunction()
+    IsUndefProc()
     {
         //    "                                                                               |
-        super("Makes a new dynamic parameter procedure. The initial value of the parameter is\n" +
-              "VALUE.",
+        super("Returns true when VALUE is the unique UNDEF object, false otherwise.",
               "value");
     }
-
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
         checkArityExact(1, args);
-        return new DynamicParameter(args[0]);
+        FusionValue arg = args[0];
+        boolean isUndef = (arg == UNDEF);
+        return eval.newBool(isUndef);
     }
 }

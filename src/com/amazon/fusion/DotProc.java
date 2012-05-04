@@ -12,10 +12,10 @@ import java.io.IOException;
 /**
  *
  */
-class DotFunction
-    extends FunctionValue
+class DotProc
+    extends Procedure
 {
-    DotFunction()
+    DotProc()
     {
         //    "                                                                               |
         super("Traverses down through an Ion data structure.\n" +

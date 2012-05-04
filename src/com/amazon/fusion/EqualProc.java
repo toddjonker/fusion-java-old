@@ -8,10 +8,10 @@ import com.amazon.ion.IonInt;
 /**
  *
  */
-class EqualFunction
-    extends FunctionValue
+class EqualProc
+    extends Procedure
 {
-    EqualFunction()
+    EqualProc()
     {
         //    "                                                                               |
         super("Returns true if the arguments are equal integers, false otherwise.",
