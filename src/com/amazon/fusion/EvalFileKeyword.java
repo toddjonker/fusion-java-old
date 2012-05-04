@@ -39,7 +39,7 @@ class EvalFileKeyword
             fileName = nameDom.stringValue();
         }
 
-        Namespace namespace = env.rootNamespace();
+        Namespace namespace = env.namespace();
         return myLoadHandler.loadTopLevel(eval, namespace, fileName);
     }
 }

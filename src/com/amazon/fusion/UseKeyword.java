@@ -29,7 +29,7 @@ final class UseKeyword
     FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
         throws FusionException
     {
-        Namespace namespace = env.rootNamespace();
+        Namespace namespace = env.namespace();
 
         ModuleInstance module;
 

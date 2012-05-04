@@ -17,7 +17,7 @@ class Namespace
         new HashMap<String,FusionValue>();
 
     @Override
-    public Namespace rootNamespace()
+    public Namespace namespace()
     {
         return this;
     }

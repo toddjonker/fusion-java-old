@@ -25,7 +25,7 @@ final class DefineKeyword
 
         FusionValue fusionValue = eval.eval(env, ionValue);
 
-        Namespace ns = env.rootNamespace();
+        Namespace ns = env.namespace();
         ns.bind(name.stringValue(), fusionValue);
 
         return fusionValue;

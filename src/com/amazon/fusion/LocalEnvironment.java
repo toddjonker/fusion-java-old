@@ -27,9 +27,9 @@ final class LocalEnvironment
 
 
     @Override
-    public Namespace rootNamespace()
+    public Namespace namespace()
     {
-        return myEnclosure.rootNamespace();
+        return myEnclosure.namespace();
     }
 
 
