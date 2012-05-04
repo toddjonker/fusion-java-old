@@ -1,0 +1,54 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+package com.amazon.fusion;
+
+import org.junit.Test;
+
+/**
+ *
+ */
+public class ApplyTest
+    extends CoreTestCase
+{
+    @Test
+    public void testApply()
+        throws Exception
+    {
+        assertEval(0, "(apply + [])");
+        assertEval(1, "(apply + [1])");
+        assertEval(3, "(apply + [1, 2])");
+
+        assertEval(10, "(apply + 10 [])");
+        assertEval(22, "(apply + 10 11 [1])");
+        assertEval(13, "(apply + 10 [1, 2])");
+
+        assertEval(0, "(apply + (quote ()))");
+        assertEval(1, "(apply + (quote (1)))");
+        assertEval(3, "(apply + (quote (1 2)))");
+
+        assertEval(10, "(apply apply + 1 [2, [3, 4]])");
+    }
+
+    @Test
+    public void testApplyArity()
+        throws Exception
+    {
+        expectArityFailure("(apply)");
+        expectArityFailure("(apply +)");
+    }
+
+    @Test
+    public void testApplyBadProc()
+        throws Exception
+    {
+        expectContractFailure("(apply 12 [])");
+    }
+
+    @Test
+    public void testApplyBadRest()
+        throws Exception
+    {
+        expectContractFailure("(apply + 12)");
+        expectContractFailure("(apply + 12 13 {})");
+    }
+}

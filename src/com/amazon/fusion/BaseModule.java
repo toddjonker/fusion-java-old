@@ -41,6 +41,7 @@ class BaseModule
         ns.bind("=", new EqualProc());
         ns.bind("add", new AddProc());
         ns.bind("and", new AndKeyword());
+        ns.bind("apply", new ApplyProc());
         ns.bind("assert", new AssertKeyword());
         ns.bind("begin", new BeginKeyword());
         ns.bind("current_directory", currentDirectory);
