@@ -107,19 +107,4 @@ public class LambdaTest
     {
         assertEval(1, "((lambda (x y) (x y)) (lambda () 1) 2)");
     }
-
-    @Test
-    public void testTailCall()
-        throws Exception
-    {
-        // This code forces tail handling of 'if', 'begin', 'letrec'
-        eval("(define countup" +
-             "  (lambda (i limit)" +
-             "    (if (= i limit) i" +
-             "      (begin" +
-             "        (let ((x 1))" +
-               "        (letrec ((v 5))" +
-             "            (countup (+ 1 i) limit)))))))");
-        assertEval(1000000, "(countup 0 1000000)");
-    }
 }
