@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.TailCallTest.STACK_OVERFLOW_DEPTH;
 import org.junit.Test;
 
 /**
@@ -50,5 +51,18 @@ public class ApplyTest
     {
         expectContractFailure("(apply + 12)");
         expectContractFailure("(apply + 12 13 {})");
+    }
+
+    @Test
+    public void testTailCall()
+        throws Exception
+    {
+        eval("(define countup" +
+            "  (lambda (i limit)" +
+            "    (if (= i limit) i" +
+            "      (apply countup [(+ 1 i), limit]))))");
+
+       assertEval(STACK_OVERFLOW_DEPTH * 100,
+                  "(countup 0 " + STACK_OVERFLOW_DEPTH * 100 + ")");
     }
 }

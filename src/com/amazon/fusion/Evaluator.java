@@ -138,7 +138,7 @@ final class Evaluator
     FusionValue eval(Environment env, IonValue expr)
         throws FusionException
     {
-        while (true)
+        moreEval: while (true)
         {
             switch (expr.getType())
             {
@@ -153,20 +153,27 @@ final class Evaluator
                 case SEXP:
                 {
                     FusionValue result = eval(env, (IonSexp) expr);
-                    if (result instanceof TailExpression)
+                    while (true)
                     {
-                        TailExpression tail = (TailExpression) result;
-                        env = tail.myEnv;
-                        expr = tail.myTailExpr;
-                        continue;
+                        if (result == null)
+                        {
+                            return UNDEF;
+                        }
+                        if (result instanceof TailExpression)
+                        {
+                            TailExpression tail = (TailExpression) result;
+                            env = tail.myEnv;
+                            expr = tail.myTailExpr;
+                            continue moreEval;
+                        }
+                        if (result instanceof TailCall)
+                        {
+                            TailCall tail = (TailCall) result;
+                            result = tail.myProc.invoke(this, tail.myArgs);
+                            continue;
+                        }
+                        return result;
                     }
-                    else if (result == null)
-                    {
-                        result = UNDEF;
-                    }
-
-                    assert ! (result instanceof TailExpression);
-                    return result;
                 }
                 case SYMBOL:
                 {
@@ -244,21 +251,12 @@ final class Evaluator
             IonValue expr = tail.myTailExpr;
             result = eval(env, expr);
         }
+        // TODO handle TailCall, but nothing triggers this path yet.
         else if (result == null)
         {
             result = UNDEF;
         }
         return result;
-    }
-
-
-    /**
-     * Wraps an expression for evaluation in tail position.
-     * Must be returned back to this {@link Evaluator} for proper behavior.
-     */
-    FusionValue bounceTailExpression(Environment env, IonValue tailExpr)
-    {
-        return new TailExpression(env, tailExpr);
     }
 
 
@@ -316,6 +314,19 @@ final class Evaluator
     }
 
 
+    //========================================================================
+
+
+    /**
+     * Wraps an expression for evaluation in tail position.
+     * Must be returned back to this {@link Evaluator} for proper behavior.
+     */
+    FusionValue bounceTailExpression(Environment env, IonValue tailExpr)
+    {
+        return new TailExpression(env, tailExpr);
+    }
+
+
     /**
      * Returned from evaluation of a form when evaluation needs to continue in
      * a tail position. This allows the {@link Evaluator} to trampoline into
@@ -332,6 +343,46 @@ final class Evaluator
         {
             myEnv = env;
             myTailExpr = tailExpr;
+        }
+
+        @Override
+        public void write(Appendable out)
+        {
+            throw new IllegalStateException();
+        }
+    }
+
+
+    /**
+     * Makes a procedure call from tail position.
+     * The result MUST be immediately returned to the evaluator,
+     * it's not a normal value!
+     *
+     * @return not null
+     */
+    FusionValue bounceTailCall(Procedure proc, FusionValue... args)
+        throws FusionException
+    {
+        return new TailCall(proc, args);
+
+    }
+
+    /**
+     * Returned from evaluation of a form when evaluation needs to continue in
+     * a tail position. This allows the {@link Evaluator} to trampoline into
+     * the tail call without growing the stack.  Not the most efficient
+     * implementation, but it works.
+     */
+    private static final class TailCall
+        extends FusionValue
+    {
+        final Procedure myProc;
+        final FusionValue[] myArgs;
+
+        TailCall(Procedure proc, FusionValue... args)
+        {
+            myProc = proc;
+            myArgs = args;
         }
 
         @Override

@@ -12,7 +12,7 @@ public class ApplyProc
     {
         //    "                                                                               |
         super("Calls the given PROC with arguments that are the (optional) ARGs prepended to\n" +
-              "the elements of SEQUENCE.\n\n" +
+              "the elements of SEQUENCE. The PROC is called in tail position.\n" +
               "(apply + [1, 2])         => 3\n" +
               "(apply + 10 11 [1, 2])   => 24",
               "proc", "arg", DOTDOTDOT, "sequence");
@@ -45,8 +45,6 @@ public class ApplyProc
         }
         assert arg == procArity;
 
-        // TODO tail call handling
-        return eval.applyNonTail(proc, procArgs);
+        return eval.bounceTailCall(proc, procArgs);
     }
-
 }
