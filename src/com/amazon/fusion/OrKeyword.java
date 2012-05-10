@@ -24,6 +24,8 @@ class OrKeyword
     FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
         throws FusionException
     {
+        // TODO FUSION-12 tail optimization
+
         for (int i = 1; i < expr.size(); i++)
         {
             IonValue testExpr = expr.get(i);

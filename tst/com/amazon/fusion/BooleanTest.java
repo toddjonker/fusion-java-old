@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.TailCallTest.STACK_OVERFLOW_DEPTH;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -150,6 +151,21 @@ public class BooleanTest
     {
         expectArgTypeFailure("(or null)", 0);
         expectArgTypeFailure("(or false null)", 1);
+    }
+
+
+    @Test @Ignore
+    public void testAndOrTailCall()        // TODO FUSION-12 tail optimization
+        throws Exception
+    {
+        assertEval(true,
+                   "(letrec ((is_even (lambda (n)" +
+                   "                    (or (= 0 n)" +
+                   "                      (is_odd (- n 1)))))" +
+                   "         (is_odd (lambda (n)" +
+                   "                   (and (not (= 0 n))" +
+                   "                     (is_even (- n 1))))))" +
+                   "  (is_even " + STACK_OVERFLOW_DEPTH + "0))");
     }
 
 
