@@ -2,8 +2,8 @@
 
 package com.amazon.fusion;
 
+import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonInt;
-import com.amazon.ion.IonList;
 
 /**
  *
@@ -14,9 +14,9 @@ class SizeProc
     SizeProc()
     {
         //    "                                                                               |
-        super("Returns the number of child elements contained in the LIST.\n" +
-              "The size of null.list is zero.",
-              "list");
+        super("Returns the number of child elements contained in the CONTAINER.\n" +
+              "The size of null.list (etc) is zero.",
+              "container");
     }
 
     @Override
@@ -24,8 +24,8 @@ class SizeProc
         throws FusionException
     {
         checkArityExact(1, args);
-        IonList list = checkListArg(0, args);
-        IonInt result = list.getSystem().newInt(list.size());
+        IonContainer c = checkContainerArg(0, args);
+        IonInt result = c.getSystem().newInt(c.size());
         return new DomValue(result);
     }
 }

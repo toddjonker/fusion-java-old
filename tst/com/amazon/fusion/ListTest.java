@@ -87,6 +87,11 @@ public class ListTest
         assertEval(0, "(size [])");
         assertEval(1, "(size [1])");
         assertEval(2, "(size [2,2])");
+
+        assertEval(0, "(size (quote null.sexp))");
+        assertEval(0, "(size (quote ()))");
+        assertEval(1, "(size (quote (1)))");
+        assertEval(2, "(size (quote (2 2)))");
     }
 
 
@@ -102,7 +107,7 @@ public class ListTest
     public void testSizeArgType()
         throws Exception
     {
-        for (String form : nonListExpressions())
+        for (String form : nonContainerExpressions())
         {
             String expr = "(size " + form + ")";
             expectArgTypeFailure(expr, 0);

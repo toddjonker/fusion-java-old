@@ -11,6 +11,21 @@ public class StructTest
     extends CoreTestCase
 {
     @Test
+    public void testSize()
+        throws Exception
+    {
+        assertEval(0, "(size null.struct)");
+        assertEval(0, "(size {})");
+        assertEval(1, "(size {f:1})");
+        assertEval(2, "(size {f:2, f:2})");  // repeated field
+        assertEval(2, "(size {f:2, g:2})");
+    }
+
+
+    //========================================================================
+
+
+    @Test
     public void testRemove()
         throws Exception
     {
