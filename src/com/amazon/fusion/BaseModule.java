@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.ModuleIdentity.intern;
+
 
 /**
  * The baseline bindings for Fusion.
@@ -9,16 +11,18 @@ package com.amazon.fusion;
 class BaseModule
     extends ModuleInstance
 {
+    static final String BASE_NAME = "fusion/base";
+    static final ModuleIdentity BASE_IDENTITY = intern(BASE_NAME);
+
     static final String LAMBDA = "lambda";
     static final String LETREC = "letrec";
 
 
-    BaseModule(Evaluator eval)
+    BaseModule(Evaluator eval, Namespace ns)
+        throws FusionException
     {
-        super(new Namespace());
+        super(BASE_IDENTITY, ns);
         inferName("fusion_base");
-
-        Namespace ns = getNamespace();
 
         FusionValue userDir =
             eval.newString(System.getProperty("user.dir"));
@@ -26,10 +30,15 @@ class BaseModule
             new DynamicParameter(userDir);
         DynamicParameter currentLoadRelativeDirectory =
             new DynamicParameter(UNDEF);
+        DynamicParameter currentModuleDeclareName =
+            new DynamicParameter(UNDEF);
         LoadHandler loadHandler =
             new LoadHandler(currentLoadRelativeDirectory, currentDirectory);
         ModuleNameResolver resolver =
-            new ModuleNameResolver(currentLoadRelativeDirectory, currentDirectory);
+            new ModuleNameResolver(loadHandler,
+                                   currentLoadRelativeDirectory,
+                                   currentDirectory,
+                                   currentModuleDeclareName);
         EvalFileKeyword evalFile =
             new EvalFileKeyword(loadHandler);
         LambdaKeyword lambda = new LambdaKeyword();
@@ -59,7 +68,7 @@ class BaseModule
         ns.bind(LETREC, new LetrecKeyword());
         ns.bind("list_bindings", new ListBindingsKeyword());
         ns.bind("make_parameter", new MakeParameterProc());
-        ns.bind("module", new ModuleKeyword());
+        ns.bind("module", new ModuleKeyword(currentModuleDeclareName));
         ns.bind("not", new NotProc());
         ns.bind("or", new OrKeyword());
         ns.bind("parameterize", new ParameterizeKeyword());
@@ -68,7 +77,7 @@ class BaseModule
         ns.bind("remove", new RemoveProc());
         ns.bind("size", new SizeProc());
         ns.bind("undef", FusionValue.UNDEF);
-        ns.bind("use", new UseKeyword(resolver, loadHandler));
+        ns.bind("use", new UseKeyword(resolver));
         ns.bind("write", new WriteProc());
     }
 }

@@ -6,7 +6,6 @@ import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
-import java.io.File;
 
 /**
  *
@@ -15,13 +14,11 @@ final class UseKeyword
     extends KeywordValue
 {
     private final ModuleNameResolver myModuleNameResolver;
-    private final LoadHandler myLoadHandler;
 
-    UseKeyword(ModuleNameResolver moduleNameResolver, LoadHandler loadHandler)
+    UseKeyword(ModuleNameResolver moduleNameResolver)
     {
         super("MODULE", "doc");
         myModuleNameResolver = moduleNameResolver;
-        myLoadHandler = loadHandler;
     }
 
 
@@ -38,16 +35,16 @@ final class UseKeyword
         {
             IonSymbol name = (IonSymbol) modStx;
 
+            // TODO error handling
             module = (ModuleInstance) eval.eval(env, name);
+            namespace.use(module);
         }
         else
         {
             String path = ((IonString) modStx).stringValue();
-            File file = myModuleNameResolver.resolve(eval, path);
-            module = myLoadHandler.loadModule(eval, file);
+            ModuleIdentity id = myModuleNameResolver.resolve(eval, env, path);
+            namespace.use(id);
         }
-
-        namespace.use(module);
 
         return UNDEF;
     }

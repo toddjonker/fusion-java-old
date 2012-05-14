@@ -33,7 +33,17 @@ final class Evaluator
         mySystem = system;
         myOuterFrame = null;
         myContinuationMarks = null;
-        myBaseModule = new BaseModule(this);
+
+        ModuleRegistry registry = new ModuleRegistry();
+        Namespace ns = new Namespace(registry);
+        try
+        {
+            myBaseModule = new BaseModule(this, ns);
+        }
+        catch (FusionException e)
+        {
+            throw new RuntimeException("Should not happen", e);
+        }
     }
 
     private Evaluator(IonSystem system, Evaluator outerBindings)
@@ -52,11 +62,37 @@ final class Evaluator
 
     //========================================================================
 
+
+    private Namespace newBaseNamespace(ModuleRegistry registry)
+    {
+        Namespace ns = new Namespace(registry);
+        ns.use(myBaseModule);
+        return ns;
+    }
+
+
+    /**
+     * Creates a new namespace sharing this {@link Evaluator}'s default
+     * registry and {@code use}ing the {@link BaseModule}.
+     */
     Namespace newBaseNamespace()
     {
-        Namespace base = new Namespace();
-        base.use(myBaseModule);
-        return base;
+        ModuleRegistry registry = myBaseModule.getNamespace().getRegistry();
+        return newBaseNamespace(registry);
+    }
+
+
+    /**
+     * Creates a new namespace sharing a namespace's registry
+     * and {@code use}ing the {@link BaseModule}.
+     *
+     * @param ns carries the {@link ModuleRegistry} to share.
+     * Must not be null.
+     */
+    Namespace newBaseNamespace(Namespace ns)
+    {
+        ModuleRegistry registry = ns.getRegistry();
+        return newBaseNamespace(registry);
     }
 
     //========================================================================

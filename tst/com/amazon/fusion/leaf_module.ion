@@ -1,3 +1,3 @@
-(module
+(module leaf
   (define leaf_var 437)
   (define leaf_fn (lambda () leaf_var)))

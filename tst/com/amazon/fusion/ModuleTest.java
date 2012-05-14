@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static org.junit.Assert.assertSame;
 import org.junit.Test;
 
 /**
@@ -38,5 +39,10 @@ public class ModuleTest
     {
         eval("(use \"tst/com/amazon/fusion/root_module.ion\")");
         assertEval(437, "leaf_var");
+        FusionValue rootFn = eval("root_fn");
+        FusionValue midFn  = eval("mid_fn");
+        FusionValue leafFn = eval("leaf_fn");
+        assertSame(leafFn, rootFn);
+        assertSame(leafFn, midFn);
     }
 }

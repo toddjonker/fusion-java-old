@@ -70,6 +70,10 @@ public class CoreTestCase
         return mySystem;
     }
 
+    protected Environment environment()
+    {
+        return myEnvironment;
+    }
 
     //========================================================================
 
