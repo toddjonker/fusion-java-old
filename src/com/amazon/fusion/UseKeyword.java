@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonString;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
 
@@ -41,8 +40,8 @@ final class UseKeyword
         }
         else
         {
-            String path = ((IonString) modStx).stringValue();
-            ModuleIdentity id = myModuleNameResolver.resolve(eval, env, path);
+            ModuleIdentity id =
+                myModuleNameResolver.resolve(eval, env, modStx);
             namespace.use(id);
         }
 

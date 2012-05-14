@@ -45,4 +45,24 @@ public class ModuleTest
         assertSame(leafFn, rootFn);
         assertSame(leafFn, midFn);
     }
+
+    @Test
+    public void testRepositoryLoad()
+        throws Exception
+    {
+        eval("(use (lib \"fusion/map\"))");
+        assertEval("[]", "(map + [])");
+    }
+
+    @Test
+    public void testUseSyntax()
+        throws Exception
+    {
+        expectSyntaxFailure("(use {})");
+        expectSyntaxFailure("(use ())");
+        expectSyntaxFailure("(use (lib))");
+        expectSyntaxFailure("(use (lib \"fusion/map\" \"map\"))");
+        expectSyntaxFailure("(use (lib 'fusion/map'))");
+        expectSyntaxFailure("(use (lib fusion/map))");
+    }
 }
