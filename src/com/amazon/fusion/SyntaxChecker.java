@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonSymbol;
@@ -39,6 +40,15 @@ final class SyntaxChecker
         }
     }
 
+    final void arityAtLeast(int count)
+        throws SyntaxFailure
+    {
+        if (myForm.size() < count)
+        {
+            throw failure("expect at least " + count + " subforms");
+        }
+    }
+
 
     final IonValue requiredForm(String expectation, int argNum)
         throws SyntaxFailure
@@ -50,6 +60,15 @@ final class SyntaxChecker
         catch (IndexOutOfBoundsException e) {}
 
         throw failure("expected " + expectation);
+    }
+
+
+    final IonSequence requiredSequence(String expectation, int argNum)
+        throws SyntaxFailure
+    {
+        IonValue form = requiredForm(expectation, argNum);
+        return checkSyntax(IonSequence.class, expectation,
+                           false /* nullable */, form);
     }
 
 

@@ -19,6 +19,14 @@ class AddProc
               "sequence", "datum");
     }
 
+
+    static void invoke(IonSequence seq, IonValue value)
+    {
+        value = cloneIfContained(value);
+        seq.add(value);
+    }
+
+
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
@@ -26,8 +34,9 @@ class AddProc
         checkArityExact(2, args);
         IonSequence seq = checkSequenceArg(0, args);
         IonValue value = checkIonArg(1, args);
-        value = cloneIfContained(value);
-        seq.add(value);
+
+        invoke(seq, value);
+
         return args[0]; // Return the original FusionValue, no need to rewrap
     }
 }

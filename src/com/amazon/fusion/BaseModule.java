@@ -59,6 +59,7 @@ class BaseModule
         ns.bind("eval_file", evalFile);
         ns.bind("exit", new ExitProc());
         ns.bind("for_each_field", new ForEachFieldProc());
+        ns.bind("for_list", new ForListKeyword());
         ns.bind("help", new HelpProc());
         ns.bind("if", new IfKeyword());
         ns.bind("is_null", new IsNullProc());
