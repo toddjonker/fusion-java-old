@@ -11,11 +11,11 @@ import java.util.Iterator;
  */
 class Sequences
 {
-    private static final class DomIterator implements Iterator<FusionValue>
+    private static final class DomStream extends Stream
     {
         private final Iterator<IonValue> myIonIterator;
 
-        DomIterator(IonSequence seq)
+        DomStream(IonSequence seq)
         {
             myIonIterator = seq.iterator();
         }
@@ -31,16 +31,10 @@ class Sequences
         {
             return new DomValue(myIonIterator.next());
         }
-
-        @Override
-        public void remove()
-        {
-            throw new UnsupportedOperationException();
-        }
     }
 
 
-    static Iterator<FusionValue> iteratorFor(FusionValue value)
+    static Stream streamFor(FusionValue value)
         throws ContractFailure
     {
         if (value instanceof DomValue)
@@ -48,10 +42,20 @@ class Sequences
             IonValue iv = value.getDom();
             if (iv instanceof IonSequence)
             {
-                return new DomIterator((IonSequence) iv);
+                return new DomStream((IonSequence) iv);
             }
         }
 
-        throw new ContractFailure("value is not iterable: " + value.write());
+        throw new ContractFailure("value is not streamable: " + value.write());
+     }
+
+
+    static boolean allHaveNext(Stream... streams)
+    {
+        for (Stream s : streams)
+        {
+            if (! s.hasNext()) return false;
+        }
+        return true;
     }
 }

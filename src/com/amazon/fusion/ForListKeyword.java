@@ -7,7 +7,6 @@ import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
-import java.util.Iterator;
 
 /**
  *
@@ -40,9 +39,7 @@ public class ForListKeyword
         if (numBindings != 0)
         {
             String[] boundNames = new String[numBindings];
-
-            @SuppressWarnings("unchecked")
-            Iterator<FusionValue>[] boundIters = new Iterator[numBindings];
+            Stream[] streams    = new Stream[numBindings];
 
             for (int i = 0; i < numBindings; i++)
             {
@@ -55,20 +52,20 @@ public class ForListKeyword
                 IonValue boundExpr =
                     requiredForm("name/value binding", 1, binding);
                 FusionValue boundValue = eval.eval(env, boundExpr);
-                boundIters[i] = Sequences.iteratorFor(boundValue);
+                streams[i] = Sequences.streamFor(boundValue);
             }
 
             FusionValue[] boundValues = new FusionValue[numBindings];
             Environment bodyEnv =
                 new LocalEnvironment(env, boundNames, boundValues);
 
-            while (allItersHaveNext(boundIters))
+            while (Sequences.allHaveNext(streams))
             {
                 // Determine the next round of bound values
                 for (int i = 0; i < numBindings; i++)
                 {
-                    Iterator<FusionValue> iter = boundIters[i];
-                    boundValues[i] = iter.next();
+                    Stream s = streams[i];
+                    boundValues[i] = s.next();
                 }
 
                 // Evaluate the body.
@@ -93,14 +90,5 @@ public class ForListKeyword
             }
         }
         return new DomValue(result);
-    }
-
-    private boolean allItersHaveNext(Iterator<FusionValue>[] boundIters)
-    {
-        for (Iterator<FusionValue> iter : boundIters)
-        {
-            if (! iter.hasNext()) return false;
-        }
-        return true;
     }
 }
