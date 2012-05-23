@@ -54,15 +54,13 @@ public class CoreTestCase
 
 
     private IonSystem mySystem = IonSystemBuilder.standard().build();
-    private Evaluator myEvaluator = new Evaluator(mySystem);
-    private Environment myEnvironment = myEvaluator.newBaseNamespace();
+    private FusionRuntime myRuntime = FusionRuntimeBuilder.standard().build();
 
     @After
     public void tearDown()
     {
         mySystem = null;
-        myEnvironment = null;
-        myEvaluator = null;
+        myRuntime = null;
     }
 
     protected IonSystem system()
@@ -70,10 +68,6 @@ public class CoreTestCase
         return mySystem;
     }
 
-    protected Environment environment()
-    {
-        return myEnvironment;
-    }
 
     //========================================================================
 
@@ -165,38 +159,40 @@ public class CoreTestCase
     //========================================================================
 
 
+    protected void assertEval(IonValue expected, String source)
+        throws FusionException
+    {
+        FusionValue fv = myRuntime.eval(source);
+        IonValue result = fv.getDom();
+        assertEquals(source, expected, result);
+    }
+
     protected void assertEval(IonValue expected, IonValue expression)
         throws FusionException
     {
-        IonValue result = myEvaluator.evalToIon(myEnvironment, expression);
-        assertEquals(expression.toString(), expected, result);
+        String source = expression.toString();
+        assertEval(expected, source);
     }
 
     protected void assertEval(String expectedIon, String expressionIon)
         throws FusionException
     {
-        IonValue expected   = mySystem.singleValue(expectedIon);
-        IonValue expression = mySystem.singleValue(expressionIon);
-
-        assertEval(expected, expression);
+        IonValue expected = mySystem.singleValue(expectedIon);
+        assertEval(expected, expressionIon);
     }
 
     protected void assertEval(boolean expectedBool, String expressionIon)
         throws FusionException
     {
-        IonValue expected   = mySystem.newBool(expectedBool);
-        IonValue expression = mySystem.singleValue(expressionIon);
-
-        assertEval(expected, expression);
+        IonValue expected = mySystem.newBool(expectedBool);
+        assertEval(expected, expressionIon);
     }
 
     protected void assertEval(int expectedInt, String expressionIon)
         throws FusionException
     {
-        IonValue expected   = mySystem.newInt(expectedInt);
-        IonValue expression = mySystem.singleValue(expressionIon);
-
-        assertEval(expected, expression);
+        IonValue expected = mySystem.newInt(expectedInt);
+        assertEval(expected, expressionIon);
     }
 
     protected void assertSelfEval(String expressionIon)
@@ -208,8 +204,7 @@ public class CoreTestCase
     protected FusionValue eval(String expressionIon)
         throws FusionException
     {
-        IonValue expression = mySystem.singleValue(expressionIon);
-        FusionValue result = myEvaluator.eval(myEnvironment, expression);
+        FusionValue result = myRuntime.eval(expressionIon);
         return result;
     }
 

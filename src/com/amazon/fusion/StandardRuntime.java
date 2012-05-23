@@ -3,38 +3,28 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionValue.UNDEF;
+import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.system.IonSystemBuilder;
-import java.util.Iterator;
 
 /**
  *
  */
-public final class Language
+final class StandardRuntime
+    implements FusionRuntime
 {
-    /**
-     * Thown to force the exit of an evaluation.
-     */
-    @SuppressWarnings("serial")
-    public static final class ExitException
-        extends FusionException
-    {
-        ExitException() { super("Exit requested"); }
-    }
-
-
     private final IonSystem mySystem;
     private final Evaluator myEvaluator;
     private final Environment myEnvironment;
 
 
-    public Language()
+    public StandardRuntime()
     {
         this(IonSystemBuilder.standard().build());
     }
 
-    public Language(IonSystem system)
+    public StandardRuntime(IonSystem system)
     {
         mySystem = system;
         myEvaluator = new Evaluator(system);
@@ -49,10 +39,11 @@ public final class Language
      * @param source must not be null.
      * @return not null, but perhaps {@link FusionValue#UNDEF}.
      */
+    @Override
     public FusionValue eval(String source)
         throws ExitException, FusionException
     {
-        Iterator<IonValue> i = mySystem.iterate(source);
+        IonReader i = mySystem.newReader(source);
         return eval(i);
     }
 
@@ -63,14 +54,17 @@ public final class Language
      *
      * @throws ExitException
      */
-    public FusionValue eval(Iterator<IonValue> source)
+    @Override
+    public FusionValue eval(IonReader source)
         throws ExitException, FusionException
     {
         FusionValue result = UNDEF;
 
-        while (source.hasNext())
+        // TODO should work even if already positioned on first value
+
+        while (source.next() != null)
         {
-            IonValue sourceExpr = source.next();
+            IonValue sourceExpr = mySystem.newValue(source);
             result = myEvaluator.eval(myEnvironment, sourceExpr);
         }
 

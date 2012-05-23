@@ -159,15 +159,6 @@ final class Evaluator
     //========================================================================
 
 
-    IonValue evalToIon(Environment env, IonValue expr)
-        throws FusionException
-    {
-        FusionValue fv = eval(env, expr);
-        return fv.getDom();
-    }
-
-
-
     /**
      * @return not null
      */

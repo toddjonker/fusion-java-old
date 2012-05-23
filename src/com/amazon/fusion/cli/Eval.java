@@ -2,17 +2,17 @@
 
 package com.amazon.fusion.cli;
 
+import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
+import com.amazon.fusion.FusionRuntime;
+import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.fusion.FusionValue;
-import com.amazon.fusion.Language;
-import com.amazon.fusion.Language.ExitException;
 import com.amazon.ion.IonException;
+import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
-import com.amazon.ion.IonValue;
 import com.amazon.ion.system.IonSystemBuilder;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Iterator;
 
 /**
  *
@@ -30,7 +30,7 @@ final class Eval
 
 
     private final IonSystem mySystem = IonSystemBuilder.standard().build();
-    private final Language myLanguage = new Language();
+    private final FusionRuntime myRuntime = FusionRuntimeBuilder.standard().build();
     private String myFileName;
 
     Eval()
@@ -90,8 +90,8 @@ final class Eval
         FileInputStream in = new FileInputStream(fileName);
         try
         {
-            Iterator<IonValue> i = mySystem.iterate(in);
-            return myLanguage.eval(i);
+            IonReader i = mySystem.newReader(in);
+            return myRuntime.eval(i);
         }
         finally
         {

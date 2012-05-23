@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.Language.ExitException;
 import org.junit.Assert;
 import org.junit.Test;
 

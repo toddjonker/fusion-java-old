@@ -2,9 +2,11 @@
 
 package com.amazon.fusion.cli;
 
+import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
+import com.amazon.fusion.FusionRuntime;
+import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.fusion.FusionValue;
-import com.amazon.fusion.Language;
 import com.amazon.ion.IonException;
 import java.io.Console;
 import java.io.IOException;
@@ -28,7 +30,7 @@ class Repl
 
     private final Console     myConsole;
     private final PrintWriter myOut;
-    private final Language    myLanguage = new Language();
+    private final FusionRuntime myRuntime = FusionRuntimeBuilder.standard().build();
 
 
     Repl()
@@ -86,10 +88,10 @@ class Repl
 
         try
         {
-            FusionValue result = myLanguage.eval(line);
+            FusionValue result = myRuntime.eval(line);
             print(result);
         }
-        catch (Language.ExitException e)
+        catch (ExitException e)
         {
             myOut.println("// Goodbye!");
             return false;

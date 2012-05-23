@@ -34,7 +34,7 @@ public abstract class FusionValue
     /** A zero-length array. */
     public static final FusionValue[] EMPTY_ARRAY = new FusionValue[0];
 
-
+    /** The singular {@code undef} value. */
     public final static FusionValue UNDEF = new Undef();
 
 
@@ -44,6 +44,7 @@ public abstract class FusionValue
     FusionValue()
     {
     }
+
 
     /**
      * Gets an Ion representation of this value, if available.
@@ -124,7 +125,9 @@ public abstract class FusionValue
 
 
     /**
-     * Behaves like {@link #write()}
+     * Returns a representation of this value for debugging and diagnostics.
+     * Currently, it behaves like {@link #write()} but the behavior may change
+     * at any time.
      */
     @Override
     public final String toString()

@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.Language.ExitException;
 
 /**
  * Throws an {@link ExitException}, which will generally cause the runtime
