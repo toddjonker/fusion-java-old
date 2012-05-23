@@ -40,6 +40,10 @@ public abstract class FusionValue
 
     //========================================================================
 
+    /** Not for application use. */
+    FusionValue()
+    {
+    }
 
     /**
      * Gets an Ion representation of this value, if available.

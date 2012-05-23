@@ -5,7 +5,7 @@ package com.amazon.fusion;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonValue;
 
-public class ApplyProc
+final class ApplyProc
     extends Procedure
 {
     ApplyProc()

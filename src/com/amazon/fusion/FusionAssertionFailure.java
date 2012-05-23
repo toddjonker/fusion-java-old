@@ -8,7 +8,7 @@ import com.amazon.ion.IonValue;
  *
  */
 @SuppressWarnings("serial")
-class FusionAssertionFailure
+final class FusionAssertionFailure
     extends FusionException
 {
     private final IonValue myExpr;

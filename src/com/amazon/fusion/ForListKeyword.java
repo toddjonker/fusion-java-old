@@ -11,7 +11,7 @@ import com.amazon.ion.IonValue;
 /**
  *
  */
-public class ForListKeyword
+final class ForListKeyword
     extends KeywordValue
 {
     ForListKeyword()

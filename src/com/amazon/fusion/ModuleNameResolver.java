@@ -10,7 +10,7 @@ import java.io.File;
 /**
  *
  */
-class ModuleNameResolver
+final class ModuleNameResolver
 {
     private final LoadHandler myLoadHandler;
     private final DynamicParameter myCurrentLoadRelativeDirectory;

@@ -8,7 +8,7 @@ import com.amazon.ion.IonValue;
 /**
  *
  */
-class AssertKeyword
+final class AssertKeyword
     extends KeywordValue
 {
     AssertKeyword()

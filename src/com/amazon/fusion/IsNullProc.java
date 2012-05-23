@@ -7,7 +7,7 @@ import com.amazon.ion.IonValue;
 /**
  *
  */
-class IsNullProc
+final class IsNullProc
     extends Procedure
 {
     IsNullProc()

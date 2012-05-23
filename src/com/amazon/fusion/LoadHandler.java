@@ -13,7 +13,7 @@ import java.util.Iterator;
 /**
  *
  */
-class LoadHandler
+final class LoadHandler
 {
     private final DynamicParameter myCurrentLoadRelativeDirectory;
     private final DynamicParameter myCurrentDirectory;

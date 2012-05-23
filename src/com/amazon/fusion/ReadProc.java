@@ -8,7 +8,7 @@ import java.util.Iterator;
 /**
  *
  */
-class ReadProc
+final class ReadProc
     extends Procedure
 {
     private Iterator<IonValue> myInputValues;

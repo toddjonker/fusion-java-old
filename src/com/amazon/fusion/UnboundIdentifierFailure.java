@@ -8,7 +8,7 @@ import com.amazon.ion.IonValue;
  * Indicates a reference to an unbound identifier.
  */
 @SuppressWarnings("serial")
-public class UnboundIdentifierFailure
+public final class UnboundIdentifierFailure
     extends SyntaxFailure
 {
     public UnboundIdentifierFailure(String name, IonValue... exprs)

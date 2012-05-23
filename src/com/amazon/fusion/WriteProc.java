@@ -10,7 +10,7 @@ import java.io.OutputStream;
 /**
  *
  */
-class WriteProc
+final class WriteProc
     extends Procedure
 {
     WriteProc()

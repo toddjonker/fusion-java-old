@@ -12,7 +12,7 @@ import java.io.IOException;
 /**
  *
  */
-class DotProc
+final class DotProc
     extends Procedure
 {
     DotProc()

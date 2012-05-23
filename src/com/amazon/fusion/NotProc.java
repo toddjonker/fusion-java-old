@@ -5,7 +5,7 @@ package com.amazon.fusion;
 /**
  *
  */
-class NotProc
+final class NotProc
     extends Procedure
 {
     NotProc()

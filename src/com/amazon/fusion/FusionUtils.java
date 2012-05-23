@@ -10,8 +10,12 @@ import java.io.IOException;
 /**
  *
  */
-class FusionUtils
+final class FusionUtils
 {
+    /** This class is not to be instantiated. */
+    private FusionUtils() { }
+
+
     static IonValue cloneIfContained(IonValue value)
     {
         if (value.getContainer() != null)

@@ -8,7 +8,7 @@ import java.io.OutputStreamWriter;
 /**
  *
  */
-class DisplayProc
+final class DisplayProc
     extends Procedure
 {
     DisplayProc()

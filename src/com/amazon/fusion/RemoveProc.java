@@ -4,7 +4,7 @@ package com.amazon.fusion;
 
 import com.amazon.ion.IonStruct;
 
-class RemoveProc
+final class RemoveProc
     extends Procedure
 {
     RemoveProc()

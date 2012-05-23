@@ -8,7 +8,7 @@ import com.amazon.ion.IonInt;
 /**
  *
  */
-class SizeProc
+final class SizeProc
     extends Procedure
 {
     SizeProc()

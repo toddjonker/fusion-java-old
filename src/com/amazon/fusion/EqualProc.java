@@ -8,7 +8,7 @@ import com.amazon.ion.IonInt;
 /**
  *
  */
-class EqualProc
+final class EqualProc
     extends Procedure
 {
     EqualProc()

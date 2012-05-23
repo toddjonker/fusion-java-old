@@ -10,7 +10,7 @@ import com.amazon.ion.IonValue;
 /**
  *
  */
-class LetrecKeyword
+final class LetrecKeyword
     extends KeywordValue
 {
     LetrecKeyword()

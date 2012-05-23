@@ -5,7 +5,7 @@ package com.amazon.fusion;
 /**
  *
  */
-class IsUndefProc
+final class IsUndefProc
     extends Procedure
 {
     IsUndefProc()

@@ -8,7 +8,7 @@ import com.amazon.ion.IonValue;
 /**
  *
  */
-class OrKeyword
+final class OrKeyword
     extends KeywordValue
 {
     OrKeyword()

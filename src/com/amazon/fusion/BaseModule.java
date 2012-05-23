@@ -8,7 +8,7 @@ import static com.amazon.fusion.ModuleIdentity.intern;
 /**
  * The baseline bindings for Fusion.
  */
-class BaseModule
+final class BaseModule
     extends ModuleInstance
 {
     static final String BASE_NAME = "fusion/base";

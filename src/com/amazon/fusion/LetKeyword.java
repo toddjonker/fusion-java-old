@@ -14,7 +14,7 @@ import com.amazon.ion.ValueFactory;
 /**
  *
  */
-class LetKeyword
+final class LetKeyword
     extends MacroValue
 {
     LetKeyword()

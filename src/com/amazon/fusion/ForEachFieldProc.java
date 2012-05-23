@@ -6,7 +6,7 @@ import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonValue;
 
-class ForEachFieldProc
+final class ForEachFieldProc
     extends Procedure
 {
     ForEachFieldProc()
