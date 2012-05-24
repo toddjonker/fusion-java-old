@@ -25,9 +25,9 @@ final class IsNullProc
 
         boolean isNull;
         FusionValue arg = args[0];
-        if (arg instanceof DomValue)
+        if (arg.isIon())
         {
-            IonValue value = ((DomValue) arg).getDom();
+            IonValue value = arg.ionValue();
             isNull = value.isNullValue();
         }
         else

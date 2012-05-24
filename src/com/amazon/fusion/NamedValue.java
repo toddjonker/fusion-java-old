@@ -60,7 +60,7 @@ abstract class NamedValue
         try
         {
             DomValue dom = (DomValue) arg;
-            IonBool iv = (IonBool) dom.getDom();
+            IonBool iv = (IonBool) dom.ionValue();
             return iv.booleanValue();
         }
         catch (ClassCastException e) {}

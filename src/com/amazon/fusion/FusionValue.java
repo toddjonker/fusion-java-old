@@ -48,18 +48,6 @@ public abstract class FusionValue
 
 
     /**
-     * Gets an Ion representation of this value, if available.
-     * <p>
-     * TODO This should be refactored.
-     *
-     * @return may be null.
-     */
-    IonValue getDom()
-    {
-        return null;
-    }
-
-    /**
      * Determines whether this value falls within the Ion type system.
      *
      * @return true if this Fusion value is also an Ion value.
@@ -80,6 +68,21 @@ public abstract class FusionValue
      * Fusion procedures).
      */
     public IonValue ionValue(ValueFactory factory)
+    {
+        return null;
+    }
+
+    /**
+     * Returns the DOM representation of this value, if its type falls within
+     * the Ion type system. The result may have a container!
+     * <p>
+     * This isn't public because I'm not convinced that the runtime should have
+     * a singular IonSystem or ValueFactory.  Different subsystems may have
+     * different needs, some using a lazy dom others with full materialization.
+     *
+     * @return null if this value's type isn't an Ion type.
+     */
+    IonValue ionValue()
     {
         return null;
     }

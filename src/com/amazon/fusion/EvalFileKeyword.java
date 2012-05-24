@@ -35,7 +35,7 @@ final class EvalFileKeyword
         {
             IonValue argExpr = expr.get(1);
             FusionValue argValue = eval.eval(env, argExpr);
-            IonString nameDom = (IonString) ((DomValue) argValue).getDom();
+            IonString nameDom = (IonString) ((DomValue) argValue).ionValue();
             fileName = nameDom.stringValue();
         }
 

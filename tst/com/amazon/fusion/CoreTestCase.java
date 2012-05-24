@@ -3,6 +3,8 @@
 package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
@@ -108,7 +110,7 @@ public class CoreTestCase
         for (String expr : allTypeExpressions())
         {
             FusionValue v = eval(expr);
-            IonValue dom = v.getDom();
+            IonValue dom = v.ionValue();
             if (dom == null || ! klass.isInstance(dom))
             {
                 exprs.add(expr);
@@ -163,7 +165,11 @@ public class CoreTestCase
         throws FusionException
     {
         FusionValue fv = myRuntime.eval(source);
-        IonValue result = fv.getDom();
+        if (! fv.isIon())
+        {
+            fail("Result isn't ion: " + fv + "\nSource: " + source);
+        }
+        IonValue result = fv.ionValue();
         assertEquals(source, expected, result);
     }
 
@@ -212,8 +218,8 @@ public class CoreTestCase
         throws FusionException
     {
         FusionValue result = eval(expressionIon);
-        Assert.assertTrue(result instanceof DomValue);
-        return result.getDom();
+        assertTrue("Result isn't Ion", result.isIon());
+        return result.ionValue();
     }
 
     protected Procedure evalToProcedure(String expressionIon)

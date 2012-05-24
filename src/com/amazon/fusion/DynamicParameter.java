@@ -41,7 +41,7 @@ final class DynamicParameter
         if (value != null && value != UNDEF)
         {
             // TODO error handling
-            result = ((IonString) value.getDom()).stringValue();
+            result = ((IonString) value.ionValue()).stringValue();
         }
         return result;
     }

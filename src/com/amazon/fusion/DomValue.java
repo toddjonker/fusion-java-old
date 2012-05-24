@@ -28,18 +28,6 @@ final class DomValue
     }
 
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return not null.
-     */
-    @Override
-    IonValue getDom()
-    {
-        return myDom;
-    }
-
-
     @Override
     public boolean isIon()
     {
@@ -47,6 +35,11 @@ final class DomValue
     }
 
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return not null.
+     */
     @Override
     public IonValue ionValue(ValueFactory factory)
     {
@@ -59,6 +52,19 @@ final class DomValue
         // FIXME this is horrible hack
         return ((IonSystem)factory).clone(myDom);
     }
+
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return not null.
+     */
+    @Override
+    IonValue ionValue()
+    {
+        return myDom;
+    }
+
 
 
     @Override

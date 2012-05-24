@@ -21,8 +21,8 @@ final class EqualProc
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
     {
-        IonInt left = (IonInt) ((DomValue) args[0]).getDom();
-        IonInt right = (IonInt) ((DomValue) args[1]).getDom();
+        IonInt left  = (IonInt) ((DomValue) args[0]).ionValue();
+        IonInt right = (IonInt) ((DomValue) args[1]).ionValue();
 
         boolean result = left.longValue() == right.longValue();
         IonBool resultDom = left.getSystem().newBool(result);

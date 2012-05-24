@@ -155,7 +155,7 @@ abstract class Procedure
         try
         {
             DomValue dom = (DomValue) arg;
-            IonBool iv = (IonBool) dom.getDom();
+            IonBool iv = (IonBool) dom.ionValue();
             return iv.booleanValue();
         }
         catch (ClassCastException e) {}
@@ -173,7 +173,7 @@ abstract class Procedure
         try
         {
             DomValue dom = (DomValue) arg;
-            IonInt iv = (IonInt) dom.getDom();
+            IonInt iv = (IonInt) dom.ionValue();
             return iv.longValue();
         }
         catch (ClassCastException e) {}
@@ -246,7 +246,7 @@ abstract class Procedure
         try
         {
             DomValue dom = (DomValue) arg;
-            IonValue iv = dom.getDom();
+            IonValue iv = dom.ionValue();
             if (nullable || ! iv.isNullValue())
             {
                 return klass.cast(iv);

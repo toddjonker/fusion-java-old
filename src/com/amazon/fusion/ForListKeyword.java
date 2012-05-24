@@ -76,9 +76,9 @@ final class ForListKeyword
                     nextResult = eval.eval(bodyEnv, bodyStx);
                 }
 
-                if (nextResult instanceof DomValue)
+                IonValue value = nextResult.ionValue();
+                if (value != null)
                 {
-                    IonValue value = nextResult.getDom();
                     AddProc.invoke(result, value);
                 }
                 else

@@ -305,7 +305,7 @@ final class Evaluator
             for (IonValue elementExpr : expr)
             {
                 DomValue elementValue = (DomValue) eval(env, elementExpr);
-                IonValue elementDom = elementValue.getDom();
+                IonValue elementDom = elementValue.ionValue();
                 elementDom = cloneIfContained(elementDom);
                 resultDom.add(elementDom);
             }
@@ -332,7 +332,7 @@ final class Evaluator
             for (IonValue elementExpr : expr)
             {
                 DomValue elementValue = (DomValue) eval(env, elementExpr);
-                IonValue elementDom = elementValue.getDom();
+                IonValue elementDom = elementValue.ionValue();
                 elementDom = cloneIfContained(elementDom);
                 resultDom.add(elementExpr.getFieldName(), elementDom);
             }
