@@ -19,15 +19,16 @@ final class StandardRuntime
     private final Environment myEnvironment;
 
 
-    public StandardRuntime()
+    /**
+     * WARNING: if the IonSystem is ever configurable, be sure to verify that
+     * {@link FusionValue#ionValue(com.amazon.ion.ValueFactory)} works right!
+     *
+     * @see {@link FusionValueTest#testIonValue()}.
+     */
+    StandardRuntime()
     {
-        this(IonSystemBuilder.standard().build());
-    }
-
-    public StandardRuntime(IonSystem system)
-    {
-        mySystem = system;
-        myEvaluator = new Evaluator(system);
+        mySystem = IonSystemBuilder.standard().build();
+        myEvaluator = new Evaluator(mySystem);
         myEnvironment = myEvaluator.newBaseNamespace();
     }
 

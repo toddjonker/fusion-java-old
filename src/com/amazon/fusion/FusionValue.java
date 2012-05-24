@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonValue;
+import com.amazon.ion.ValueFactory;
 import java.io.IOException;
 import java.io.StringWriter;
 
@@ -54,6 +55,31 @@ public abstract class FusionValue
      * @return may be null.
      */
     IonValue getDom()
+    {
+        return null;
+    }
+
+    /**
+     * Determines whether this value falls within the Ion type system.
+     *
+     * @return true if this Fusion value is also an Ion value.
+     */
+    public boolean isIon()
+    {
+        return false;
+    }
+
+    /**
+     * Returns the DOM representation of this value, if its type falls within
+     * the Ion type system. The {@link IonValue} will use the given factory
+     * and will not have a container.
+     *
+     * @param factory must not be null.
+     *
+     * @return null if this value's type isn't an Ion type (for example,
+     * Fusion procedures).
+     */
+    public IonValue ionValue(ValueFactory factory)
     {
         return null;
     }

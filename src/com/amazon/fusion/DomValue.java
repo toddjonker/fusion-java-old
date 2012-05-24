@@ -2,9 +2,11 @@
 
 package com.amazon.fusion;
 
+import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
+import com.amazon.ion.ValueFactory;
 import java.io.IOException;
 
 /**
@@ -35,6 +37,27 @@ final class DomValue
     IonValue getDom()
     {
         return myDom;
+    }
+
+
+    @Override
+    public boolean isIon()
+    {
+        return true;
+    }
+
+
+    @Override
+    public IonValue ionValue(ValueFactory factory)
+    {
+        // TODO this isn't really the proper comparison
+        if (myDom.getSystem() == factory && myDom.getContainer() == null)
+        {
+            return myDom;
+        }
+
+        // FIXME this is horrible hack
+        return ((IonSystem)factory).clone(myDom);
     }
 
 
