@@ -1,12 +1,16 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
 package com.amazon.fusion;
 
+import static com.amazon.ion.util.IonTextUtils.printString;
+import java.io.File;
 import org.junit.Test;
 
 /**
  * Contains test cases for the stream classes and operations
  */
 public class StreamTest
-    extends CoreTestCase
+    extends ExternalTest
 {
     @Test
     public void testValidConversions()
@@ -16,10 +20,10 @@ public class StreamTest
         assertEval("[]","(stream_to_list (stream_for []) )");
         assertEval("[1]","(stream_to_list (stream_for [1]) )");
         assertEval("[\"hello\", \"world\"]",
-        		   "(stream_to_list " +
+                   "(stream_to_list " +
                    " (stream_for [\"hello\", \"world\"]) )");
         assertEval("[[1,2,3],[4,5,6],[7,8,9]]",
-        		   "(stream_to_list " +
+                   "(stream_to_list " +
                    " (stream_for [[1,2,3],[4,5,6],[7,8,9]]) )");
     }
 
@@ -47,12 +51,12 @@ public class StreamTest
         assertEval("[[]]","(stream_to_list (inject_stream []) )");
         assertEval("[1]","(stream_to_list (inject_stream 1) )");
         assertEval("[\"hello\"]",
-        		   "(stream_to_list (inject_stream \"hello\") )");
+                   "(stream_to_list (inject_stream \"hello\") )");
         assertEval("[[\"hello\", \"world\"]]",
-        		   "(stream_to_list " +
-        		   " (inject_stream [\"hello\", \"world\"]) )");
+                   "(stream_to_list " +
+                   " (inject_stream [\"hello\", \"world\"]) )");
         assertEval("[[[1,2,3,4],[3.3,2.5,5.6],[\"hello\"]]]",
-        		   "(stream_to_list" +
+                   "(stream_to_list" +
                    " (inject_stream [[1,2,3,4],[3.3,2.5,5.6],[\"hello\"]]) )");
         assertEval("[7]", "(stream_to_list (inject_stream (+ 1 2 4)) )");
 
@@ -111,22 +115,22 @@ public class StreamTest
         throws Exception
     {
         assertEval("[]",
-        		   "(stream_to_list" +
+                   "(stream_to_list" +
                    " (stream_union" +
-        		   "  (empty_stream)" +
+                   "  (empty_stream)" +
                    "   (empty_stream)) )");
         assertEval("[1,2]",
-        		   "(stream_to_list" +
+                   "(stream_to_list" +
                    " (stream_union" +
-        	       "  (empty_stream)"+
+                   "  (empty_stream)"+
                    "   (stream_for [1,2]) ) )");
         assertEval("[1,2,3,4]",
-        		   "(stream_to_list" +
+                   "(stream_to_list" +
                    " (stream_union" +
-        		   "  (stream_for [1,2])" +
+                   "  (stream_for [1,2])" +
                    "   (stream_for [3,4]) ) )");
         assertEval("[[1,2],[],5]",
-        		   "(stream_to_list" +
+                   "(stream_to_list" +
                    " (stream_union" +
                    "  (stream_for [[1,2]])" +
                    "   (stream_for [[],5]) ) )");
@@ -161,15 +165,15 @@ public class StreamTest
 
         // test lib fxn transformation from <list> -> bool
         assertEval("[false,false]",
-        		   "(stream_to_list" +
-        		   " (stream_project " +
+                   "(stream_to_list" +
+                   " (stream_project " +
                    "  (stream_for [1,2]) is_null))");
 
         // test usr-defn'd fxn
         eval("(define add2 (lambda (x) (+ x 2)))");
         assertEval("[7,9,11,13]",
-        		   "(stream_to_list" +
-        		   " (stream_project " +
+                   "(stream_to_list" +
+                   " (stream_project " +
                    "  (stream_for [5,7,9,11]) add2))");
     }
 
@@ -190,25 +194,25 @@ public class StreamTest
     {
         eval("(define is_zero (lambda (x) (= x 0)))");
         assertEval("[0]",
-        		"(stream_to_list" +
-        		" (stream_select" +
-        		"  (stream_for [0,1]) is_zero))");
+                   "(stream_to_list" +
+                   " (stream_select" +
+                   "  (stream_for [0,1]) is_zero))");
         eval("(define is_one (lambda (x) (= x 1)))");
         eval("(define is_odd" +
-        	 " (lambda (x) " +
-        	 "  (if (is_one x) true " +
-        	 "    (if (is_zero x) false" +
-        	 "     (is_odd (- x 2))))))");
+             " (lambda (x) " +
+             "  (if (is_one x) true " +
+             "    (if (is_zero x) false" +
+             "     (is_odd (- x 2))))))");
         assertEval("[1,3,5,7,9]",
-        		   "(stream_to_list" +
-        		   " (stream_select" +
+                   "(stream_to_list" +
+                   " (stream_select" +
                    "(stream_for [1,2,3,4,5,6,7,8,9]) is_odd))");
 
         eval("(define rightSize (lambda (x) (= 4 (size x))))");
         assertEval("[[1,2,3,4]]",
-        		   "(stream_to_list" +
-        		   " (stream_select" +
-        		   "  (stream_for" +
+                   "(stream_to_list" +
+                   " (stream_select" +
+                   "  (stream_for" +
                    "   [[1,2,3],[1,2,3,4],[1,2,3,4,5],[]]) rightSize))");
     }
 
@@ -234,26 +238,26 @@ public class StreamTest
 
         // User-defined - one-to-one mapping / single elt return
         // TODO invalid TC -- should return a stream -- stream_inject(...)
-    	eval("(define add1 (lambda (x) (+ x 1)))");
+        eval("(define add1 (lambda (x) (+ x 1)))");
         assertEval("[]",
-     		       "(stream_to_list" +
-     		       " (stream_cross_apply " +
+                   "(stream_to_list" +
+                   " (stream_cross_apply " +
                    "  (stream_for []) add1))");
         //assertEval("[1]",
-        //		   "(stream_to_list" +
-        //		   " (stream_cross_apply " +
+        //           "(stream_to_list" +
+        //           " (stream_cross_apply " +
         //           "  (stream_for [0]) add1))");
 
         // User-defined - one-to-many mapping / list return
         eval("(define seqExpandList" +
-        	 " (lambda (x)" +
-        	 "  (add" +
-        	 "   (add " +
-        	 "    (add " +
-        	 "     (add" +
-        	 "      (add [] (+ x 1)) (+ x 2)) (+ x 3)) (+ x 4)) (+ x 5))))");
+             " (lambda (x)" +
+             "  (add" +
+             "   (add " +
+             "    (add " +
+             "     (add" +
+             "      (add [] (+ x 1)) (+ x 2)) (+ x 3)) (+ x 4)) (+ x 5))))");
         assertEval("[1,2,3,4,5]",
-        		   "(stream_to_list " +
+                   "(stream_to_list " +
                    " (stream_cross_apply" +
                    "  (stream_for [0]) seqExpandList))");
 
@@ -264,15 +268,15 @@ public class StreamTest
              "  (add (add (add (add (add []" +
              "   (+ x 1)) (+ x 2)) (+ x 3)) (+ x 4)) (+ x 5)))))");
         assertEval("[1,2,3,4,5,2,3,4,5,6,3,4,5,6,7]",
-        		   "(stream_to_list" +
+                   "(stream_to_list" +
                    " (stream_cross_apply" +
                    "  (stream_for [0,1,2])" +
                    "   seqExpand))");
 
         // Lib fxn
         //assertEval("[false,false,false,true,false]",
-        //		   "(stream_to_list" +
-        //		   " (stream_cross_apply" +
+        //           "(stream_to_list" +
+        //           " (stream_cross_apply" +
         //           "  (stream_for" +
         //           "   [[],0,[1,2],null,[null]])" +
          //          "    is_null))");
@@ -283,15 +287,30 @@ public class StreamTest
         throws Exception
     {
          assertEval("[]",
-        		    "(stream_to_list" +
-        		    " (stream_cross_product" +
-        		    "  (stream_for [])" +
+                    "(stream_to_list" +
+                    " (stream_cross_product" +
+                    "  (stream_for [])" +
                     "   (stream_for [3,4])))");
          assertEval("[[1,3],[1,4],[2,3],[2,4]]",
-        		    "(stream_to_list" +
-        		    " (stream_cross_product" +
+                    "(stream_to_list" +
+                    " (stream_cross_product" +
                     "  (stream_for [1,2])" +
                     "   (stream_for [3,4])))");
     }
 
+
+    @Test
+    public void testStreamForFile()
+        throws Exception
+    {
+        File f = getProjectFile("tst/com/amazon/fusion/ints.ion");
+        String path = f.getAbsolutePath();
+        eval("(define s (stream_for_file " + printString(path) + "))");
+        assertEval(0, "(stream_next s)");
+        assertEval(true, "(stream_has_next s)");
+        assertEval(1, "(stream_next s)");
+        assertEval(2, "(stream_next s)");
+        assertEval(3, "(stream_next s)");
+        assertEval(false, "(stream_has_next s)");
+    }
 }

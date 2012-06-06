@@ -20,6 +20,11 @@ class Sequences
             myIonIterator = seq.iterator();
         }
 
+        DomStream(Iterator<IonValue> iter)
+        {
+            myIonIterator = iter;
+        }
+
         @Override
         public boolean hasNext()
         {
@@ -56,6 +61,10 @@ class Sequences
         return Sequences.streamFor(new DomValue(ionSeq));
     }
 
+    static Stream streamFor(Iterator<IonValue> iter)
+    {
+        return new DomStream(iter);
+    }
 
     static boolean allHaveNext(Stream... streams)
         throws FusionException

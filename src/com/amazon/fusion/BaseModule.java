@@ -82,6 +82,7 @@ final class BaseModule
         ns.bind("stream_cross_product", new StreamCrossProductProc());
         ns.bind("stream_cross_apply", new StreamCrossApplyProc());
         ns.bind("stream_for", new IonListToStreamProc());
+        ns.bind("stream_for_file", new StreamForFileProc());
         ns.bind("stream_has_next", new StreamHasNextProc());
         ns.bind("stream_next", new StreamNextProc());
         ns.bind("stream_project", new StreamProjectProc());

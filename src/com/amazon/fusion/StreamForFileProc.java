@@ -1,0 +1,41 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+package com.amazon.fusion;
+
+import com.amazon.ion.IonSystem;
+import com.amazon.ion.IonValue;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.Iterator;
+
+public class StreamForFileProc
+    extends Procedure
+{
+    StreamForFileProc()
+    {
+        super("Opens the file identified by PATH, returning a stream of Ion values.",
+              "path");
+    }
+
+    @Override
+    FusionValue invoke(Evaluator eval, FusionValue[] args)
+        throws FusionException
+    {
+        checkArityExact(1, args);
+        String path = checkTextArg(0, args);
+
+        IonSystem system = eval.getSystem();
+        FileInputStream in;
+        try
+        {
+            in = new FileInputStream(path);
+        }
+        catch (FileNotFoundException e)
+        {
+            throw new ContractFailure("File not found: " + path);
+        }
+
+        Iterator<IonValue> iter = system.iterate(in);
+        return Sequences.streamFor(iter);
+    }
+}
