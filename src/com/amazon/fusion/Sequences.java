@@ -31,6 +31,7 @@ class Sequences
         {
             return new DomValue(myIonIterator.next());
         }
+
     }
 
 
@@ -49,8 +50,15 @@ class Sequences
         throw new ContractFailure("value is not streamable: " + value.write());
      }
 
+    static Stream streamFor(IonSequence ionSeq)
+        throws ContractFailure
+    {
+        return Sequences.streamFor(new DomValue(ionSeq));
+    }
+
 
     static boolean allHaveNext(Stream... streams)
+        throws FusionException
     {
         for (Stream s : streams)
         {
@@ -58,4 +66,5 @@ class Sequences
         }
         return true;
     }
+
 }

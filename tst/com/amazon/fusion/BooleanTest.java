@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.TailCallTest.STACK_OVERFLOW_DEPTH;
+
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -200,4 +201,5 @@ public class BooleanTest
             expectArgTypeFailure(expr, 0);
         }
     }
+
 }

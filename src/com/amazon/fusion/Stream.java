@@ -13,14 +13,14 @@ import java.io.IOException;
 abstract class Stream
     extends FusionValue
 {
-    abstract boolean hasNext();
+    abstract boolean hasNext() throws FusionException;
 
-    abstract FusionValue next();
-
+    abstract FusionValue next() throws ContractFailure, FusionException;
 
     @Override
     public void write(Appendable out) throws IOException
     {
         out.append("/* stream */");
     }
+
 }

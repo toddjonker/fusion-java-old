@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
@@ -250,6 +251,12 @@ public class CoreTestCase
             }
             throw e;
         }
+    }
+
+    void expectFusionException(String expr)
+        throws Exception
+    {
+        expectFailure(FusionException.class, expr);
     }
 
 

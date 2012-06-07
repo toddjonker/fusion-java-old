@@ -54,6 +54,21 @@ abstract class NamedValue
     //========================================================================
     // Type-checking helpers
 
+    final boolean checkBoolArg(FusionValue arg)
+        throws ContractFailure
+    {
+        try
+        {
+            DomValue dom = (DomValue) arg;
+            IonBool iv = (IonBool) dom.ionValue();
+            return iv.booleanValue();
+        }
+        catch (ClassCastException e) {}
+        catch (NullValueException e) {}
+
+        throw new ContractFailure("Expected true or false: " + arg);
+    }
+
     boolean checkBoolArg(int argNum, FusionValue arg)
         throws ArgTypeFailure
     {

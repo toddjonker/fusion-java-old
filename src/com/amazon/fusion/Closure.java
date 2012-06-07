@@ -82,7 +82,10 @@ final class Closure
         }
 
         IonValue expr = myDefinition.get(bodyEnd);
+
         result = eval.bounceTailExpression(bodyEnv, expr);
+
         return result;
     }
+
 }

@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.ArityFailure.Variability;
-import com.amazon.ion.IonBool;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
@@ -147,23 +146,12 @@ abstract class Procedure
         }
     }
 
-
     final boolean checkBoolArg(int argNum, FusionValue[] args)
         throws ArgTypeFailure
     {
         FusionValue arg = args[argNum];
-        try
-        {
-            DomValue dom = (DomValue) arg;
-            IonBool iv = (IonBool) dom.ionValue();
-            return iv.booleanValue();
-        }
-        catch (ClassCastException e) {}
-        catch (NullValueException e) {}
-
-        throw new ArgTypeFailure(this, "true or false", argNum, args);
+        return checkBoolArg(argNum, arg);
     }
-
 
     long checkLongArg(int argNum, FusionValue... args)
         throws ArgTypeFailure
@@ -235,6 +223,16 @@ abstract class Procedure
                            true /* nullable */, argNum, args);
     }
 
+    Stream checkStreamArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        try
+        {
+            return (Stream)args[argNum];
+        } catch (ClassCastException e) { }
+
+        throw new ArgTypeFailure(this, "stream", argNum, args);
+    }
 
     <T extends IonValue> T checkDomArg(Class<T> klass, String typeName,
                                        boolean nullable,

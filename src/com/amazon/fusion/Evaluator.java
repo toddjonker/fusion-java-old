@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.cloneIfContained;
 import static com.amazon.fusion.FusionValue.UNDEF;
+
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
