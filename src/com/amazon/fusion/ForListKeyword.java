@@ -83,9 +83,8 @@ final class ForListKeyword
                 }
                 else
                 {
-                    throw new ContractFailure("body of " + getInferredName()
-                                              + "returned non-Ion value: "
-                                              + nextResult);
+                    throw contractFailure("body returned non-Ion value: "
+                                          + nextResult);
                 }
             }
         }

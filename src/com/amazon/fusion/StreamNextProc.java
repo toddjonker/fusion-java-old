@@ -22,6 +22,6 @@ final class StreamNextProc
         {
             return source.next();
         }
-        throw new ContractFailure("No new items to fetch from stream");
+        throw contractFailure("No new items to fetch from stream");
     }
 }

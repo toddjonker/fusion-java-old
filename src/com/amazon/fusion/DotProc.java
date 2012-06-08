@@ -75,8 +75,7 @@ final class DotProc
                 {
                     StringBuilder out = new StringBuilder();
                     try {
-                        identify(out);
-                        out.append(" expects container before traversing ");
+                        out.append("expected container before traversing ");
                         writeFriendlyIndex(out, i + 1);
                         out.append(" argument, had: ");
                         FusionUtils.writeIon(out, value);
@@ -89,7 +88,7 @@ final class DotProc
                     }
                     catch (IOException ioe) {}
                     String message = out.toString();
-                    throw new ContractFailure(message);
+                    throw contractFailure(message);
                 }
             }
         }

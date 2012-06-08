@@ -32,7 +32,7 @@ public class StreamForFileProc
         }
         catch (FileNotFoundException e)
         {
-            throw new ContractFailure("File not found: " + path);
+            throw contractFailure("File not found: " + path);
         }
 
         Iterator<IonValue> iter = system.iterate(in);

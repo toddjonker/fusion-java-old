@@ -82,7 +82,7 @@ abstract class NamedValue
         catch (ClassCastException e) {}
         catch (NullValueException e) {}
 
-        throw new ContractFailure("Expected true or false: " + arg);
+        throw contractFailure("Expected true or false: " + arg);
     }
 
     boolean checkBoolArg(int argNum, FusionValue arg)
@@ -98,5 +98,31 @@ abstract class NamedValue
         catch (NullValueException e) {}
 
         throw new ArgTypeFailure(this, "true or false", argNum, arg);
+    }
+
+
+    //========================================================================
+    // Error helpers
+
+    /**
+     * Returns a new {@link ContractFailure} with the given message and
+     * the identification of this value. This is preferable to creating
+     * the exception directly, since this method can annotate it with location
+     * information.
+     * <p>
+     * Expected usage:
+     * <pre>
+     * if (somethingBadHappened)
+     * {
+     *   throw failure("somebody screwed up");
+     * }
+     * </pre>
+     *
+     * @param message the message to render in the exception.
+     * @return a new exception
+     */
+    ContractFailure contractFailure(String message)
+    {
+        return new ContractFailure(identify() + ": " + message);
     }
 }
