@@ -66,6 +66,7 @@ final class BaseModule
         ns.bind("inject_stream", new StreamInjectProc());
         ns.bind("is_null", new IsNullProc());
         ns.bind("is_undef", new IsUndefProc());
+        ns.bind("java_new", new JavaNewProc());
         ns.bind(LAMBDA, lambda);
         ns.bind("let", new LetKeyword());
         ns.bind(LETREC, new LetrecKeyword());
