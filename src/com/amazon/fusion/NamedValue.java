@@ -41,6 +41,22 @@ abstract class NamedValue
     abstract void identify(Appendable out)
         throws IOException;
 
+    /**
+     * Returns the output of {@link #identify(Appendable)} as a {@link String}.
+     *
+     * @return not null.
+     */
+    String identify()
+    {
+        StringBuilder out = new StringBuilder();
+        try
+        {
+            identify(out);
+        }
+        catch (IOException e) {}
+        return out.toString();
+    }
+
 
     @Override
     public final void write(Appendable out)
