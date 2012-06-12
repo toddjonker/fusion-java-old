@@ -1,4 +1,5 @@
 (module map
+  (provide map for_each chew_stdin)
 
   (define map
     (lambda (proc list)

@@ -15,12 +15,28 @@ class ModuleInstance
 {
     private final ModuleIdentity myIdentity;
     private final Namespace myNamespace;
+    private final String[] myProvidedNames;
 
     /**
+     * Creates a module that {@code provide}s all names in its namespace.
+     *
      * @throws ContractFailure if the namespace's registry already has a
      * module with the given identity.
      */
     ModuleInstance(ModuleIdentity identity, Namespace namespace)
+        throws FusionException, ContractFailure
+    {
+        this(identity, namespace, null);
+    }
+
+    /**
+     * Creates a module that {@code provide}s only the given names.
+     *
+     * @throws ContractFailure if the namespace's registry already has a
+     * module with the given identity.
+     */
+    ModuleInstance(ModuleIdentity identity, Namespace namespace,
+                   String[] providedNames)
         throws FusionException, ContractFailure
     {
         myIdentity = identity;
@@ -28,6 +44,8 @@ class ModuleInstance
 
         namespace.getRegistry().register(this);
         inferName(identity.toString());
+
+        myProvidedNames = providedNames;
     }
 
 
@@ -40,6 +58,26 @@ class ModuleInstance
     Namespace getNamespace()
     {
         return myNamespace;
+    }
+
+
+    //========================================================================
+
+
+    void visitProvidedBindings(BindingVisitor v)
+    {
+        if (myProvidedNames == null)
+        {
+            myNamespace.visitAllBindings(v);
+        }
+        else
+        {
+            for (String name : myProvidedNames)
+            {
+                FusionValue value = myNamespace.lookup(name);
+                v.visitBinding(name, value);
+            }
+        }
     }
 
 

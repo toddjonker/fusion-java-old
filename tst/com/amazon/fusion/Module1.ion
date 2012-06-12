@@ -1,5 +1,7 @@
 (module Module1
 
+  (provide X)
+
   (define X 214)
 
 )

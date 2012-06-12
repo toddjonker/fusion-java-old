@@ -19,6 +19,14 @@ public class ModuleTest
         assertEval(214, "X");
     }
 
+    @Test(expected = UnboundIdentifierFailure.class)
+    public void testUseModuleWithNoProvides()
+        throws Exception
+    {
+        eval("(use \"tst/com/amazon/fusion/NoProvides\")");
+        eval("X");
+    }
+
     @Test(expected = FusionException.class)
     public void testUseNonSexp()
         throws Exception

@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,14 +51,14 @@ class Namespace
 
     void use(ModuleInstance module)
     {
-        Namespace moduleNamespace = module.getNamespace();
-        Collection<String> names = new ArrayList<String>();
-        moduleNamespace.collectNames(names);
-        for (String name : names)
+        module.visitProvidedBindings(new BindingVisitor()
         {
-            FusionValue value = moduleNamespace.lookup(name);
-            myBindings.put(name, value);
-        }
+            @Override
+            public void visitBinding(String name, FusionValue value)
+            {
+                myBindings.put(name, value);
+            }
+        });
     }
 
     @Override
@@ -72,6 +71,15 @@ class Namespace
     public void collectNames(Collection<String> names)
     {
         names.addAll(myBindings.keySet());
+    }
+
+
+    void visitAllBindings(BindingVisitor v)
+    {
+        for (Map.Entry<String, FusionValue> entry : myBindings.entrySet())
+        {
+            v.visitBinding(entry.getKey(), entry.getValue());
+        }
     }
 
 
