@@ -16,14 +16,17 @@ final class ModuleKeyword
     extends KeywordValue
 {
     private final DynamicParameter myCurrentModuleDeclareName;
+    private final ModuleNameResolver myModuleNameResolver;
 
-    ModuleKeyword(DynamicParameter currentModuleDeclareName)
+    ModuleKeyword(ModuleNameResolver moduleNameResolver,
+                  DynamicParameter currentModuleDeclareName)
     {
         //    "                                                                               |
         super("NAME BODY ...+",
               "Declares a module containing the given body. The NAME must be a symbol.");
 
         myCurrentModuleDeclareName = currentModuleDeclareName;
+        myModuleNameResolver = moduleNameResolver;
     }
 
     @Override
@@ -34,12 +37,17 @@ final class ModuleKeyword
         String declaredName = name.stringValue();
         // TODO check null/empty
 
+        IonValue initialBindingsStx = requiredForm("initial module path", 2, expr);
+
         Namespace ns = env.namespace();
-        Namespace moduleNamespace = eval.newBaseNamespace(ns);
+        Namespace moduleNamespace = new Namespace(ns.getRegistry());
+        ModuleIdentity initialBindingsId =
+            myModuleNameResolver.resolve(eval, env, initialBindingsStx);
+        moduleNamespace.use(initialBindingsId);
 
         ArrayList<IonSexp> provideForms = new ArrayList<IonSexp>();
 
-        for (int i = 2; i < expr.size(); i++)
+        for (int i = 3; i < expr.size(); i++)
         {
             IonValue form = expr.get(i);
             IonSexp provide = formIsProvide(form);

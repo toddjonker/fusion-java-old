@@ -2,8 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.BaseModule.LAMBDA;
-import static com.amazon.fusion.BaseModule.LETREC;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonSymbol;
@@ -60,7 +58,7 @@ final class LetKeyword
         if (loopName != null)
         {
             IonSexp letrec = result.add().newEmptySexp();
-            letrec.add().newSymbol(LETREC);
+            letrec.add().newSymbol("letrec");
             IonSexp bindings = letrec.add().newEmptySexp();
             IonSexp binding = bindings.add().newEmptySexp();
             binding.add().newSymbol(loopName);
@@ -72,7 +70,7 @@ final class LetKeyword
             lambdaForm = result.add().newEmptySexp();
         }
 
-        lambdaForm.add().newSymbol(LAMBDA);
+        lambdaForm.add().newSymbol("lambda");
         IonSexp formals = lambdaForm.add().newEmptySexp();
         for (int i = bindingPos + 1; i < letExprSize; i++)
         {

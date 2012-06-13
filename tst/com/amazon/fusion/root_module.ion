@@ -1,4 +1,4 @@
-(module root
+(module root 'fusion/base'
   (use "leaf_module")
   (define root_fn leaf_fn)
   (use "mid_module")

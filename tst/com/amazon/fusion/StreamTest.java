@@ -3,8 +3,8 @@
 package com.amazon.fusion;
 
 import static com.amazon.ion.util.IonTextUtils.printString;
-
 import java.io.File;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -14,11 +14,18 @@ import org.junit.Test;
 public class StreamTest
     extends ExternalTest
 {
+    @Before
+    public void setUp()
+        throws Exception
+    {
+        eval("(use 'fusion/stream')");
+    }
+
+
     @Test
     public void testValidConversions()
         throws Exception
     {
-
         assertEval("[]","(stream_to_list (stream_for []) )");
         assertEval("[1]","(stream_to_list (stream_for [1]) )");
         assertEval("[\"hello\", \"world\"]",
@@ -333,7 +340,7 @@ public class StreamTest
                     "(is_stream (stream_for [[[]],null,\"hello\",[0,1,2]]))");
     }
 
-    @Ignore
+    @Test @Ignore
     public void testForListAsStream()
         throws Exception
     {

@@ -14,6 +14,7 @@ public class NamespaceTest
 {
     @Test
     public void testBaseNamespace() // TODO move to EvaluatorTest
+        throws Exception
     {
         Evaluator eval = new Evaluator(system());
 
@@ -21,8 +22,8 @@ public class NamespaceTest
         assertTrue(ns.lookup("module") instanceof ModuleKeyword);
 
         ModuleRegistry reg = ns.getRegistry();
-        ModuleInstance base = reg.lookup(BaseModule.BASE_IDENTITY);
-        assertTrue(base instanceof BaseModule);
+        ModuleInstance kernel = reg.lookup(KernelModule.IDENTITY);
+        assertTrue(kernel instanceof KernelModule);
     }
 
 

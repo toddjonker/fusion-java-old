@@ -29,7 +29,14 @@ final class StandardRuntime
     {
         mySystem = IonSystemBuilder.standard().build();
         myEvaluator = new Evaluator(mySystem);
-        myEnvironment = myEvaluator.newBaseNamespace();
+        try
+        {
+            myEnvironment = myEvaluator.newBaseNamespace();
+        }
+        catch (FusionException e)
+        {
+            throw new RuntimeException("This shouldn't happen!", e);
+        }
     }
 
 

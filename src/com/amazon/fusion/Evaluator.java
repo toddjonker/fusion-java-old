@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.cloneIfContained;
 import static com.amazon.fusion.FusionValue.UNDEF;
-
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
@@ -24,7 +23,7 @@ import java.util.Map;
 final class Evaluator
 {
     private final IonSystem mySystem;
-    private final BaseModule myBaseModule;
+    private final ModuleRegistry myDefaultRegistry;
     private final Evaluator myOuterFrame;
     private final Map<FusionValue, FusionValue> myContinuationMarks;
 
@@ -35,22 +34,25 @@ final class Evaluator
         myOuterFrame = null;
         myContinuationMarks = null;
 
-        ModuleRegistry registry = new ModuleRegistry();
-        Namespace ns = new Namespace(registry);
+        myDefaultRegistry = new ModuleRegistry();
+        Namespace ns = new Namespace(myDefaultRegistry);
         try
         {
-            myBaseModule = new BaseModule(this, ns);
+            @SuppressWarnings("unused")
+            ModuleInstance kernel = new KernelModule(this, ns);
+            // The module constructor registers itself with the ModuleRegistry
         }
         catch (FusionException e)
         {
             throw new RuntimeException("Should not happen", e);
         }
+
     }
 
     private Evaluator(IonSystem system, Evaluator outerBindings)
     {
         mySystem = system;
-        myBaseModule = outerBindings.myBaseModule;
+        myDefaultRegistry = outerBindings.myDefaultRegistry;
         myOuterFrame = outerBindings;
         myContinuationMarks = new HashMap<FusionValue, FusionValue>();
     }
@@ -64,33 +66,46 @@ final class Evaluator
     //========================================================================
 
 
-    private Namespace newBaseNamespace(ModuleRegistry registry)
+    Namespace newKernelNamespace(ModuleRegistry registry)
+        throws FusionException
     {
         Namespace ns = new Namespace(registry);
-        ns.use(myBaseModule);
+        ns.use(KernelModule.IDENTITY);
+        return ns;
+    }
+
+    private Namespace newBaseNamespace(ModuleRegistry registry)
+        throws FusionException
+    {
+        Namespace ns = newKernelNamespace(registry);
+
+        IonValue useForm = mySystem.singleValue("(use 'fusion/base')");
+        eval(ns, useForm);
+
         return ns;
     }
 
 
     /**
      * Creates a new namespace sharing this {@link Evaluator}'s default
-     * registry and {@code use}ing the {@link BaseModule}.
+     * registry and {@code use}ing {@code fusion/base}.
      */
     Namespace newBaseNamespace()
+        throws FusionException
     {
-        ModuleRegistry registry = myBaseModule.getNamespace().getRegistry();
-        return newBaseNamespace(registry);
+        return newBaseNamespace(myDefaultRegistry);
     }
 
 
     /**
      * Creates a new namespace sharing a namespace's registry
-     * and {@code use}ing the {@link BaseModule}.
+     * and {@code use}ing {@code fusion/base}.
      *
      * @param ns carries the {@link ModuleRegistry} to share.
      * Must not be null.
      */
     Namespace newBaseNamespace(Namespace ns)
+        throws FusionException
     {
         ModuleRegistry registry = ns.getRegistry();
         return newBaseNamespace(registry);

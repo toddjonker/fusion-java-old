@@ -1,4 +1,12 @@
-(module function
+(module function 'fusion/base'
+
+  (provide
+    compose
+    negate
+    predicate_and
+    predicate_or
+  )
+
 
   (define compose
     (lambda (p1 p2)

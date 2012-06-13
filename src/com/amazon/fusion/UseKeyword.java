@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
 
 /**
@@ -27,23 +26,9 @@ final class UseKeyword
     {
         Namespace namespace = env.namespace();
 
-        ModuleInstance module;
-
-        IonValue modStx = expr.get(1);
-        if (modStx instanceof IonSymbol)
-        {
-            IonSymbol name = (IonSymbol) modStx;
-
-            // TODO error handling
-            module = (ModuleInstance) eval.eval(env, name);
-            namespace.use(module);
-        }
-        else
-        {
-            ModuleIdentity id =
-                myModuleNameResolver.resolve(eval, env, modStx);
-            namespace.use(id);
-        }
+        IonValue modStx = requiredForm("module spec", 1, expr);
+        ModuleIdentity id = myModuleNameResolver.resolve(eval, env, modStx);
+        namespace.use(id);
 
         return UNDEF;
     }

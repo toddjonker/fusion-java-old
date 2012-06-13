@@ -1,4 +1,4 @@
-(module Module1
+(module Module1 (lib "fusion/base")
 
   (provide X)
 

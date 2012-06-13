@@ -154,7 +154,7 @@ final class LoadHandler
 
         // TODO Do we need an Evaluator with no continuation marks?
         // This namespace ensures correct binding for 'module'
-        Namespace namespace = eval.newBaseNamespace(ns);
+        Namespace namespace = eval.newKernelNamespace(ns.getRegistry());
         FusionValue result = bodyEval.eval(namespace, moduleDeclaration);
         // TODO tail call handling
         return (ModuleInstance) result;

@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
+import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
 import java.io.File;
 
@@ -34,6 +35,12 @@ final class ModuleNameResolver
     {
         switch (pathStx.getType())
         {
+            case SYMBOL:
+            {
+                String libName = ((IonSymbol) pathStx).stringValue();
+                // TODO check null/empty
+                return resolveLib(eval, env, libName);
+            }
             case STRING:
             {
                 String path = ((IonString) pathStx).stringValue();
@@ -59,15 +66,30 @@ final class ModuleNameResolver
         String form = check.requiredNonEmptySymbol("symbol", 0);
         if ("lib".equals(form))
         {
-            // TODO libName should not be absolute
             String libName = check.requiredNonEmptyString("module name", 1);
-            libName += ".ion"; // TODO ugly hard-coding
-            File repo = findRepository();
-            File pathFile = new File(repo, libName);
-            return resolve(eval, env, pathFile);
+            return resolveLib(eval, env, libName);
+        }
+
+        if ("quote".equals(form))
+        {
+            String libName = check.requiredNonEmptySymbol("module name", 1);
+            ModuleIdentity id = ModuleIdentity.intern(libName);
+            return id;
         }
 
         throw check.failure("unrecognized form");
+    }
+
+
+    private ModuleIdentity resolveLib(Evaluator eval, Environment env,
+                                      String libName)
+        throws FusionException
+    {
+        // TODO libName should not be absolute
+        libName += ".ion"; // TODO ugly hard-coding
+        File repo = findRepository();
+        File pathFile = new File(repo, libName);
+        return resolve(eval, env, pathFile);
     }
 
 

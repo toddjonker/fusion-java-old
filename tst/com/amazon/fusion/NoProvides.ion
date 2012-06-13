@@ -1,4 +1,4 @@
-(module NoProvides
+(module NoProvides (lib "fusion/base")
 
   // X isn't provide-d so isn't visible to users
   (define X 214)

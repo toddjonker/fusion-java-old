@@ -1,4 +1,5 @@
-(module map
+(module map 'fusion/base'
+
   (provide map for_each chew_stdin)
 
   (define map

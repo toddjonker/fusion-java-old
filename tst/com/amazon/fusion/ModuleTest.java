@@ -55,6 +55,20 @@ public class ModuleTest
     }
 
     @Test
+    public void testLoadFusionBase()
+        throws Exception
+    {
+        eval("(use 'fusion/base')");
+    }
+
+    @Test
+    public void testLoadFusionBaseAsLib()
+        throws Exception
+    {
+        eval("(use (lib \"fusion/base\"))");
+    }
+
+    @Test
     public void testRepositoryLoad()
         throws Exception
     {

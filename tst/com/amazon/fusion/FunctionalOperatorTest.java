@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -10,12 +11,19 @@ import org.junit.Test;
 public class FunctionalOperatorTest
     extends CoreTestCase
 {
+    @Before
+    public void setUp()
+        throws Exception
+    {
+        eval("(use 'fusion/function')");
+        eval("(use 'fusion/stream')");
+    }
+
     @Test
     public void testCompose()
         throws Exception
     {
-    	// usr + lib
-        eval("(use (lib \"fusion/function\"))");
+        // usr + lib
         eval("(define is_zero (lambda (x) (= x 0)))");
         eval("(define numCheck (compose is_null is_zero))");
         assertEval(false, "(numCheck 0)");
@@ -35,9 +43,8 @@ public class FunctionalOperatorTest
     public void testPredicateAnd()
         throws Exception
     {
-    	eval("(use (lib \"fusion/function\"))");
-    	eval("(define is_zero (lambda (x) (= x 0)))");
-    	eval("(define invalidNumber (predicate_and is_zero is_null))");
+        eval("(define is_zero (lambda (x) (= x 0)))");
+        eval("(define invalidNumber (predicate_and is_zero is_null))");
         //assertEval(false,"(invalidNumber 0)");
         //assertEval(false, "(invalidNumber 1)");
 
@@ -51,12 +58,11 @@ public class FunctionalOperatorTest
     public void testPredicateOr()
         throws Exception
     {
-    	eval("(use (lib \"fusion/function\"))");
-    	eval("(define is_zero (lambda (x) (= x 0)))");
-    	eval("(define is_one (lambda (x) (= x 1)))");
-    	eval("(define invalidNumber (predicate_or is_zero is_one))");
-    	//assertEval(true, "(invalidNumber 0)");
-    	//assertEval(false, "(invalidNumber 2)");
+        eval("(define is_zero (lambda (x) (= x 0)))");
+        eval("(define is_one (lambda (x) (= x 1)))");
+        eval("(define invalidNumber (predicate_or is_zero is_one))");
+        //assertEval(true, "(invalidNumber 0)");
+        //assertEval(false, "(invalidNumber 2)");
 
         // ensures that the second code does not get exec'd
         eval("(define assertFail (lambda (x) (assert false \"doi\")))");
@@ -68,16 +74,15 @@ public class FunctionalOperatorTest
     public void testNegate()
         throws Exception
     {
-    	// negated lib fxn
-    	eval("(use (lib \"fusion/function\"))");
-    	eval("(define is_not_null (negate is_null))");
-    	assertEval(true, "(is_not_null 1)");
-    	assertEval(false, "(is_not_null null)");
+        // negated lib fxn
+        eval("(define is_not_null (negate is_null))");
+        assertEval(true, "(is_not_null 1)");
+        assertEval(false, "(is_not_null null)");
 
-    	// negated user fxn
-    	eval("(define is_not_stream (negate is_stream))");
-    	assertEval(true, "(is_not_stream 1)");
-    	assertEval(false, "(is_not_stream (stream_for [1]))");
-    	assertEval(false, "(is_not_stream (empty_stream))");
+        // negated user fxn
+        eval("(define is_not_stream (negate is_stream))");
+        assertEval(true, "(is_not_stream 1)");
+        assertEval(false, "(is_not_stream (stream_for [1]))");
+        assertEval(false, "(is_not_stream (empty_stream))");
     }
 }
