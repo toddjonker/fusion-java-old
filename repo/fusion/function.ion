@@ -1,0 +1,48 @@
+(module function
+
+  (define compose
+    (lambda (p1 p2)
+      '''
+Applies function p1 to the result of (p2 x), returning another function that
+accepts a single input
+      '''
+
+     (lambda (x)
+      (p1 (p2 x)))))
+
+  //==========================================================================
+
+  (define predicate_and
+   (lambda (p1 p2)
+     '''
+Applies procedures p1 and p2 to an input x and returns the boolean value
+of the result of performing an AND on the return of p1 and p2, assuming
+that p1 and p2 return boolean values.
+      '''
+     (lambda (x)
+      (and (p1 x) (p2 x)))))
+
+  //==========================================================================
+
+  (define predicate_or
+   (lambda (p1 p2)
+      '''
+Applies procedures p1 and p2 to an input x and returns the boolean value
+of the result of performing an OR on the return of p1 and p2, assuming
+that p1 and p2 return boolean values.
+      '''
+     (lambda (x)
+      (or (p1 x) (p2 x)))))
+
+  //==========================================================================
+
+  (define negate
+   (lambda (p)
+      '''
+Takes a procedure that returns a boolean value and returns a procedure that
+returns the opposite of the input procedure
+      '''
+     (lambda (x)
+      (not (p x)))))
+
+) // end module

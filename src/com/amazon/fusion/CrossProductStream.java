@@ -25,6 +25,8 @@ class CrossProductStream
         this.mySource1 = source1;
         cloneSource2 = new ArrayList<FusionValue>();
         cloneSourceObjects(source2);
+
+        // TODO FUSION-25 stashing of evaluators is incorrect
         this.eval = eval;
         this.index = 0;
         this.first = null;
@@ -37,7 +39,8 @@ class CrossProductStream
         return (mySource1.hasNext() || (index != 0));
     }
 
-    // TODO improve space efficiency somehow
+    // TODO FUSION-26 perform lazy construction of list cache
+    // for cross product
     void cloneSourceObjects(Stream originSource)
         throws ContractFailure, FusionException
     {

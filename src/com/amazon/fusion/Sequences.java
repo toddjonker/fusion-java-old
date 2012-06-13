@@ -49,6 +49,9 @@ class Sequences
             if (iv instanceof IonSequence)
             {
                 return new DomStream((IonSequence) iv);
+            } else if (value instanceof Stream)
+            {
+                return (Stream)value;
             }
         }
 

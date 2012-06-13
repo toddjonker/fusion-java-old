@@ -3,7 +3,9 @@
 package com.amazon.fusion;
 
 import static com.amazon.ion.util.IonTextUtils.printString;
+
 import java.io.File;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -298,7 +300,6 @@ public class StreamTest
                     "   (stream_for [3,4])))");
     }
 
-
     @Test
     public void testStreamForFile()
         throws Exception
@@ -313,4 +314,31 @@ public class StreamTest
         assertEval(3, "(stream_next s)");
         assertEval(false, "(stream_has_next s)");
     }
+
+    @Test
+    public void testIsStream()
+        throws Exception
+    {
+         assertEval(false,
+                    "(is_stream 0)");
+         assertEval(true,
+                    "(is_stream (empty_stream))");
+         assertEval(false,
+                    "(is_stream [0,1,2])");
+         assertEval(false,
+                    "(is_stream \"hello there\")");
+         assertEval(true,
+                    "(is_stream (stream_for [0,1,2]))");
+         assertEval(true,
+                    "(is_stream (stream_for [[[]],null,\"hello\",[0,1,2]]))");
+    }
+
+    @Ignore
+    public void testForListAsStream()
+        throws Exception
+    {
+        assertEval("[]","(for_list((s (empty_stream))) s)");
+        //assertEval("[2,3,4,5]","(list_to_stream(for_list (stream_for [1,2,3,4]) (+ x 1)))");
+    }
+
 }

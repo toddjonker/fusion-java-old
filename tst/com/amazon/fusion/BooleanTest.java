@@ -30,7 +30,7 @@ public class BooleanTest
     };
 
 
-    @Test
+    @Test @Ignore
     public void testBasicIf()
         throws Exception
     {
@@ -132,7 +132,7 @@ public class BooleanTest
     //========================================================================
 
 
-    @Test
+    @Test @Ignore
     public void testOr()
         throws Exception
     {

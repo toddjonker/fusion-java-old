@@ -16,6 +16,7 @@ class CrossApplyStream
     private final Stream mySource;
     private Stream myResults;
     private final Procedure proc;
+    // TODO FUSION-25 stashing of evaluators is incorrect
     private final Evaluator eval;
     private FusionValue nextResult;
 
@@ -42,7 +43,7 @@ class CrossApplyStream
     boolean search()
         throws FusionException
     {
-    	assert(nextResult == null);
+        assert(nextResult == null);
         if (!mySource.hasNext())
         {
             return false;

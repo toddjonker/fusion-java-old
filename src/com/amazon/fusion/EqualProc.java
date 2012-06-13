@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonInt;
+import com.amazon.ion.IonValue;
 
 /**
  *
@@ -20,12 +21,30 @@ final class EqualProc
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
+        throws FusionException
     {
-        IonInt left  = (IonInt) ((DomValue) args[0]).ionValue();
-        IonInt right = (IonInt) ((DomValue) args[1]).ionValue();
+    	IonValue leftVal = args[0].ionValue();
+    	IonValue rightVal = args[1].ionValue();
+    	boolean result = false;
+    	IonBool resultDom;
 
-        boolean result = left.longValue() == right.longValue();
-        IonBool resultDom = left.getSystem().newBool(result);
+    	if (leftVal instanceof IonInt && rightVal instanceof IonInt)
+    	{
+            IonInt left  = (IonInt) leftVal;
+            IonInt right = (IonInt) rightVal;
+            result = left.longValue() == right.longValue();
+            resultDom = left.getSystem().newBool(result);
+    	} else if (leftVal instanceof IonBool && rightVal instanceof IonBool)
+    	{
+            IonBool left  = (IonBool) leftVal;
+            IonBool right = (IonBool) rightVal;
+            result = left.booleanValue() == right.booleanValue();
+            resultDom = left.getSystem().newBool(result);
+    	} else
+    	{
+    		throw new ContractFailure("Mismatched or invalid type equivalence cannot be determined.");
+    	}
+
         return new DomValue(resultDom);
     }
 }

@@ -64,7 +64,9 @@ final class BaseModule
         ns.bind("help", new HelpProc());
         ns.bind("if", new IfKeyword());
         ns.bind("inject_stream", new StreamInjectProc());
+        ns.bind("is_bool", new IsBoolProc());
         ns.bind("is_null", new IsNullProc());
+        ns.bind("is_stream", new IsStreamProc());
         ns.bind("is_undef", new IsUndefProc());
         ns.bind("java_new", new JavaNewProc());
         ns.bind(LAMBDA, lambda);

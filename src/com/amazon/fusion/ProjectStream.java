@@ -17,6 +17,7 @@ class ProjectStream
 
     private final Stream mySource;
     private final Procedure proc;
+    // TODO FUSION-25 stashing of evaluators is incorrect
     private final Evaluator eval;
 
     public ProjectStream(Evaluator eval, Procedure proc, Stream source)
