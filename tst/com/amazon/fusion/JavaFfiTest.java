@@ -50,6 +50,9 @@ public class JavaFfiTest
     {
         eval("(define plus (java_new " + name(SumProc.class) + "))");
         assertEval(2, "(plus 1 1)");
+
+        eval("(define param (java_new " + name(DynamicParameter.class) + " 1))");
+        assertEval(1, "(param)");
     }
 
     @Test

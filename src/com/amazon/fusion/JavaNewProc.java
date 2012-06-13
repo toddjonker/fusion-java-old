@@ -2,6 +2,10 @@
 
 package com.amazon.fusion;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+
 /**
  *
  */
@@ -12,9 +16,9 @@ final class JavaNewProc
     {
         //    "                                                                               |
         super("Instantiates a new Fusion value that's implemented by a Java class. CLASSNAME\n" +
-              "is the fully-qualified Java class name; its no-argument constructor will be\n" +
-              "invoked and the result returned.",
-              "CLASSNAME");
+              "is the fully-qualified Java class name. A constructor with the appropriate\n" +
+              "number of FusionValue parameters will be invoked and the result returned.",
+              "CLASSNAME", "ARG", DOTDOTDOT);
     }
 
 
@@ -22,30 +26,127 @@ final class JavaNewProc
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(1, args);
+        checkArityAtLeast(1, args);
         String className = checkTextArg(0, args);
+
+        Class<?> klass = determineClass(className);
+
+        Object result;
+        if (args.length == 1)
+        {
+            result = callNoArgConstructor(klass);
+        }
+        else
+        {
+            FusionValue[] constructorArgs =
+                Arrays.copyOfRange(args, 1, args.length);
+            Constructor<?> constructor =
+                determineConstructor(klass, constructorArgs);
+            result = callConstructor(constructor, constructorArgs);
+        }
 
         try
         {
-            Class<?> c = Class.forName(className);
-            Object o = c.newInstance();
-            return (FusionValue) o;
+            return (FusionValue) result;
+        }
+        catch (ClassCastException e)
+        {
+            throw contractFailure("Java class isn't a FusionValue: " + className);
+        }
+    }
+
+
+    private Class<?> determineClass(String className)
+        throws FusionException
+    {
+        try
+        {
+            return Class.forName(className);
         }
         catch (ClassNotFoundException e)
         {
             throw contractFailure("Java class isn't found: " + className);
         }
+    }
+
+
+    private Object callNoArgConstructor(Class<?> klass)
+        throws FusionException
+    {
+        try
+        {
+            return klass.newInstance();
+        }
         catch (InstantiationException e)
         {
-            throw contractFailure("Error constructing Java class: " + className);
+            throw contractFailure("Error constructing Java class: " + klass);
         }
         catch (IllegalAccessException e)
         {
-            throw contractFailure("Java class isn't accessible: " + className);
+            throw contractFailure("Java class isn't accessible: " + klass);
         }
-        catch (ClassCastException e)
+    }
+
+
+    private Constructor<?> determineConstructor(Class<?> klass,
+                                                FusionValue[] args)
+        throws FusionException
+    {
+        Class<?>[] parameterTypes = new Class[args.length];
+        Arrays.fill(parameterTypes, FusionValue.class);
+
+        try
         {
-            throw contractFailure("Java class isn't a FusionValue: " + className);
+            return klass.getConstructor(parameterTypes);
+        }
+        catch (SecurityException e)
+        {
+            String message =
+                "The Java security manager denied access to " + klass + ": " +
+                e.getMessage();
+            throw contractFailure(message);
+        }
+        catch (NoSuchMethodException e)
+        {
+            String message =
+                "Java class doesn't have a public constructor accepting " +
+                args.length + " FusionValues: " + klass;
+            throw contractFailure(message);
+        }
+    }
+
+
+    private Object callConstructor(Constructor<?> constructor, FusionValue[] args)
+        throws FusionException
+    {
+        try
+        {
+            return constructor.newInstance((Object[]) args);
+        }
+        catch (IllegalAccessException e)
+        {
+            throw contractFailure("Java constructor isn't accessible: " + constructor);
+        }
+        catch (IllegalArgumentException e)
+        {
+            String message =
+                "Illegal argument to Java constructor: " + constructor +
+                e.getMessage();
+            throw contractFailure(message);
+        }
+        catch (InstantiationException e)
+        {
+            String message =
+                "Exception from Java constructor: " + constructor +
+                e.getMessage();
+            throw contractFailure(message);
+        }
+        catch (InvocationTargetException e)
+        {
+            String message =
+                "Exception from Java constructor: " + constructor +
+                e.getMessage();
+            throw contractFailure(message);
         }
     }
 }

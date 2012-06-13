@@ -13,7 +13,7 @@ final class DynamicParameter
     private final FusionValue myInitialValue;
 
 
-    DynamicParameter(FusionValue initialValue)
+    public DynamicParameter(FusionValue initialValue)
     {
         super(null);
         myInitialValue = initialValue;
