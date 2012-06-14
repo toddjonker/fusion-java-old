@@ -34,6 +34,7 @@
   (define remove         (java_new "com.amazon.fusion.RemoveProc"))
   (define size           (java_new "com.amazon.fusion.SizeProc"))
   (define write          (java_new "com.amazon.fusion.WriteProc"))
+  (define unless         (java_new "com.amazon.fusion.UnlessKeyword"))
 
 
   (define make_parameter
@@ -53,6 +54,7 @@ VALUE.
     make_parameter module not or parameterize quote read remove
     size
     undef
+    unless
     use
     write)
 )

@@ -2,15 +2,12 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.BaseModule.BEGIN;
-import static com.amazon.fusion.BaseModule.IF;
-
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
 
 /**
- * The {@code when} syntactic form.
+ * The {@code unless} syntactic form.
  */
 final class UnlessKeyword
     extends MacroValue
@@ -48,14 +45,14 @@ final class UnlessKeyword
         ValueFactory vf = expr.getSystem();
         IonSexp ifForm = vf.newEmptySexp();
 
-        ifForm.add().newSymbol(IF);
+        ifForm.add().newSymbol("if");
         IonValue conditionForm = expr.get(1).clone();
         ifForm.add(conditionForm);
 
         ifForm.add().newSymbol("undef");
 
         IonSexp beginForm = ifForm.add().newEmptySexp();
-        beginForm.add().newSymbol(BEGIN);
+        beginForm.add().newSymbol("begin");
         for (int i = bindingPos + 1; i < unlessExprSize; i++)
         {
             IonValue bodyForm = expr.get(i).clone();
