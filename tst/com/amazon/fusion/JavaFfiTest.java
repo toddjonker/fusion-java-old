@@ -16,7 +16,7 @@ public class JavaFfiTest
     public void setUp()
         throws Exception
     {
-        eval("(use (quote '#%kernel'))");
+        eval("(use 'fusion/ffi/java')");
     }
 
     public class Uninstantiable extends Procedure

@@ -1,7 +1,6 @@
 (module 'fusion/base' (quote '#%kernel')
 
 /*
-  (use java)
   (define make_parameter
     (lambda (value)
       (java_new "com.amazon.fusion.DynamicParameter" value)))
