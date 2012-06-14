@@ -14,9 +14,9 @@ final class AssertKeyword
     AssertKeyword()
     {
         //    "                                                                               |
-        super("EXPR MESSAGE",
+        super("EXPR MESSAGE ...",
               "Evaluates the EXPR, throwing an exception if the result isn't true.\n" +
-              "The exception displays the MESSAGE, which is only evaluated on failure.");
+              "The exception displays the MESSAGEs, which are only evaluated on failure.");
     }
 
     @Override
@@ -35,9 +35,22 @@ final class AssertKeyword
         FusionValue result = eval.eval(env, testExpr);
         if (checkBoolArg(0 /* argNum */, result)) return UNDEF;
 
-        IonValue messageExpr = expr.get(2);
-        FusionValue messageValue = eval.eval(env, messageExpr);
-        String message = messageValue.display();
+        String message;
+        if (expr.size() > 2)
+        {
+            message = "";
+            for (int i = 2; i < expr.size(); i++)
+            {
+                IonValue messageExpr = expr.get(i);
+                FusionValue messageValue = eval.eval(env, messageExpr);
+                message += messageValue.display();
+            }
+        }
+        else
+        {
+            message = null;
+        }
+
         throw new FusionAssertionFailure(message, testExpr, result);
     }
 }

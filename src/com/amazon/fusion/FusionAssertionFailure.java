@@ -29,8 +29,9 @@ final class FusionAssertionFailure
     @Override
     public String getMessage()
     {
+        String superMessage = super.getMessage();
         String message =
-            "Assertion failure: " + super.getMessage() +
+            "Assertion failure: " + (superMessage == null ? "" : superMessage) +
             "\nExpression: " + myExpr +
             "\nResult: " + myResult.write();
         return message;

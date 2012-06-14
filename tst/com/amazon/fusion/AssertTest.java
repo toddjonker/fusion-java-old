@@ -13,12 +13,32 @@ public class AssertTest
     {
         try
         {
+            eval("(assert " + expr + ")");
+            Assert.fail("Expected exception");
+        }
+        catch (FusionAssertionFailure e)
+        {
+            Assert.assertEquals(null, e.getUserMessage());
+        }
+
+        try
+        {
             eval("(assert " + expr + " \"barney\")");
             Assert.fail("Expected exception");
         }
         catch (FusionAssertionFailure e)
         {
             Assert.assertEquals("barney", e.getUserMessage());
+        }
+
+        try
+        {
+            eval("(assert " + expr + " \"barney\" 13)");
+            Assert.fail("Expected exception");
+        }
+        catch (FusionAssertionFailure e)
+        {
+            Assert.assertEquals("barney13", e.getUserMessage());
         }
     }
 
