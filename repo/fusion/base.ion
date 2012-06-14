@@ -1,9 +1,6 @@
 (module 'fusion/base' (quote '#%kernel')
 
 /*
-  (define make_parameter
-    (lambda (value)
-      (java_new "com.amazon.fusion.DynamicParameter" value)))
   (define current_directory (make_parameter (java_system_property "user.dir")))
 */
 
@@ -29,7 +26,6 @@
   (define let            (java_new "com.amazon.fusion.LetKeyword"))
   (define letrec         (java_new "com.amazon.fusion.LetrecKeyword"))
   (define list_bindings  (java_new "com.amazon.fusion.ListBindingsKeyword"))
-  (define make_parameter (java_new "com.amazon.fusion.MakeParameterProc"))
   (define not            (java_new "com.amazon.fusion.NotProc"))
   (define or             (java_new "com.amazon.fusion.OrKeyword"))
   (define parameterize   (java_new "com.amazon.fusion.ParameterizeKeyword"))
@@ -38,6 +34,16 @@
   (define remove         (java_new "com.amazon.fusion.RemoveProc"))
   (define size           (java_new "com.amazon.fusion.SizeProc"))
   (define write          (java_new "com.amazon.fusion.WriteProc"))
+
+
+  (define make_parameter
+    (lambda (value)
+      '''
+Makes a new dynamic parameter procedure. The initial value of the parameter is
+VALUE.
+      '''
+      (java_new "com.amazon.fusion.DynamicParameter" value)))
+
 
   (provide * + - . = add and apply assert begin current_directory
     define display
