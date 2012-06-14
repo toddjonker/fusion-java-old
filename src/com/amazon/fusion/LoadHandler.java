@@ -141,7 +141,7 @@ final class LoadHandler
     }
 
 
-    ModuleInstance loadModule(Evaluator eval, Namespace ns, File path)
+    ModuleInstance loadModule(Evaluator eval, File path)
         throws FusionException
     {
         File file = resolvePath(eval, path);
@@ -154,7 +154,9 @@ final class LoadHandler
 
         // TODO Do we need an Evaluator with no continuation marks?
         // This namespace ensures correct binding for 'module'
-        Namespace namespace = eval.newKernelNamespace(ns.getRegistry());
+
+        ModuleRegistry reg = eval.getModuleRegistry();
+        Namespace namespace = eval.newModuleNamespace(reg);
         FusionValue result = bodyEval.eval(namespace, moduleDeclaration);
         // TODO tail call handling
         return (ModuleInstance) result;

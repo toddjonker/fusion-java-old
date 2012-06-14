@@ -40,9 +40,9 @@ final class ModuleKeyword
         IonValue initialBindingsStx = requiredForm("initial module path", 2, expr);
 
         Namespace ns = env.namespace();
-        Namespace moduleNamespace = new Namespace(ns.getRegistry());
         ModuleIdentity initialBindingsId =
-            myModuleNameResolver.resolve(eval, env, initialBindingsStx);
+            myModuleNameResolver.resolve(eval, initialBindingsStx);
+        Namespace moduleNamespace = eval.newEmptyNamespace(ns);
         moduleNamespace.use(initialBindingsId);
 
         ArrayList<IonSexp> provideForms = new ArrayList<IonSexp>();

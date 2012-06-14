@@ -44,8 +44,7 @@
     define display
     eval_file exit for_each_field for_list
     help
-    if
-    is_null is_undef lambda let letrec list_bindings
+    if is_null is_undef lambda let letrec list_bindings
     make_parameter module not or parameterize quote read remove
     size
     undef

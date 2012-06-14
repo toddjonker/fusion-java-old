@@ -30,7 +30,7 @@ final class ModuleNameResolver
     }
 
 
-    ModuleIdentity resolve(Evaluator eval, Environment env, IonValue pathStx)
+    ModuleIdentity resolve(Evaluator eval, IonValue pathStx)
         throws FusionException
     {
         switch (pathStx.getType())
@@ -39,17 +39,17 @@ final class ModuleNameResolver
             {
                 String libName = ((IonSymbol) pathStx).stringValue();
                 // TODO check null/empty
-                return resolveLib(eval, env, libName);
+                return resolveLib(eval, libName);
             }
             case STRING:
             {
                 String path = ((IonString) pathStx).stringValue();
-                return resolve(eval, env, path);
+                return resolve(eval, path);
             }
             case SEXP:
             {
                 IonSexp pathSexp = (IonSexp) pathStx;
-                return resolve(eval, env, pathSexp);
+                return resolve(eval, pathSexp);
             }
         }
 
@@ -57,7 +57,7 @@ final class ModuleNameResolver
     }
 
 
-    ModuleIdentity resolve(Evaluator eval, Environment env, IonSexp pathStx)
+    ModuleIdentity resolve(Evaluator eval, IonSexp pathStx)
         throws FusionException
     {
         SyntaxChecker check = new SyntaxChecker("module path", pathStx);
@@ -67,7 +67,7 @@ final class ModuleNameResolver
         if ("lib".equals(form))
         {
             String libName = check.requiredNonEmptyString("module name", 1);
-            return resolveLib(eval, env, libName);
+            return resolveLib(eval, libName);
         }
 
         if ("quote".equals(form))
@@ -81,19 +81,18 @@ final class ModuleNameResolver
     }
 
 
-    private ModuleIdentity resolveLib(Evaluator eval, Environment env,
-                                      String libName)
+    private ModuleIdentity resolveLib(Evaluator eval, String libName)
         throws FusionException
     {
         // TODO libName should not be absolute
         libName += ".ion"; // TODO ugly hard-coding
         File repo = findRepository();
         File pathFile = new File(repo, libName);
-        return resolve(eval, env, pathFile);
+        return resolve(eval, pathFile);
     }
 
 
-    ModuleIdentity resolve(Evaluator eval, Environment env, String path)
+    ModuleIdentity resolve(Evaluator eval, String path)
         throws FusionException
     {
         if (! path.endsWith(".ion")) path += ".ion";
@@ -113,25 +112,22 @@ final class ModuleNameResolver
             pathFile = new File(base, path);
         }
 
-        return resolve(eval, env, pathFile);
+        return resolve(eval, pathFile);
     }
 
 
-    private ModuleIdentity resolve(Evaluator eval, Environment env,
-                                   File pathFile)
+    private ModuleIdentity resolve(Evaluator eval, File pathFile)
         throws FusionException
     {
+        ModuleRegistry reg = eval.getModuleRegistry();
         ModuleIdentity id = ModuleIdentity.intern(pathFile);
-
-        Namespace ns = env.namespace();
-        ModuleRegistry reg = ns.getRegistry();
         if (reg.lookup(id) == null)
         {
             FusionValue idString = eval.newString(id.toString());
             Evaluator loadEval =
                 eval.markedContinuation(myCurrentModuleDeclareName, idString);
             ModuleInstance module =
-                myLoadHandler.loadModule(loadEval, ns, pathFile);
+                myLoadHandler.loadModule(loadEval, pathFile);
             reg.register(module);
         }
 

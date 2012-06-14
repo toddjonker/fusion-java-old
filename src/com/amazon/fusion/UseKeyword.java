@@ -24,12 +24,16 @@ final class UseKeyword
     FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
         throws FusionException
     {
-        Namespace namespace = env.namespace();
-
         IonValue modStx = requiredForm("module spec", 1, expr);
-        ModuleIdentity id = myModuleNameResolver.resolve(eval, env, modStx);
-        namespace.use(id);
-
+        Namespace namespace = env.namespace();
+        use(eval, namespace, modStx);
         return UNDEF;
+    }
+
+    void use(Evaluator eval, Namespace ns, IonValue moduleSpec)
+        throws FusionException
+    {
+        ModuleIdentity id = myModuleNameResolver.resolve(eval, moduleSpec);
+        ns.use(id);
     }
 }

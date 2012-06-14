@@ -15,6 +15,9 @@ final class KernelModule
     static final String NAME = "#%kernel";
     static final ModuleIdentity IDENTITY = intern(NAME);
 
+    private final KeywordValue myModuleKeyword;
+    private final UseKeyword   myUseKeyword;
+
 
     KernelModule(Evaluator eval, Namespace ns)
         throws FusionException
@@ -37,8 +40,9 @@ final class KernelModule
                                    currentLoadRelativeDirectory,
                                    currentDirectory,
                                    currentModuleDeclareName);
-        ModuleKeyword moduleKeyword =
+        myModuleKeyword =
             new ModuleKeyword(resolver, currentModuleDeclareName);
+        myUseKeyword = new UseKeyword(resolver);
         EvalFileKeyword evalFile =
             new EvalFileKeyword(loadHandler);
 
@@ -46,8 +50,19 @@ final class KernelModule
         ns.bind("define", new DefineKeyword());
         ns.bind("eval_file", evalFile);
         ns.bind("java_new", new JavaNewProc());
-        ns.bind("module", moduleKeyword);
+        ns.bind("module", myModuleKeyword);
         ns.bind("undef", FusionValue.UNDEF);
-        ns.bind("use", new UseKeyword(resolver));
+        ns.bind("use", myUseKeyword);
+    }
+
+
+    KeywordValue getModuleKeyword()
+    {
+        return myModuleKeyword;
+    }
+
+    UseKeyword getUseKeyword()
+    {
+        return myUseKeyword;
     }
 }

@@ -24,6 +24,7 @@ final class Evaluator
 {
     private final IonSystem mySystem;
     private final ModuleRegistry myDefaultRegistry;
+    private final KernelModule myKernel;
     private final Evaluator myOuterFrame;
     private final Map<FusionValue, FusionValue> myContinuationMarks;
 
@@ -38,8 +39,7 @@ final class Evaluator
         Namespace ns = new Namespace(myDefaultRegistry);
         try
         {
-            @SuppressWarnings("unused")
-            ModuleInstance kernel = new KernelModule(this, ns);
+            myKernel = new KernelModule(this, ns);
             // The module constructor registers itself with the ModuleRegistry
         }
         catch (FusionException e)
@@ -53,6 +53,7 @@ final class Evaluator
     {
         mySystem = system;
         myDefaultRegistry = outerBindings.myDefaultRegistry;
+        myKernel = outerBindings.myKernel;
         myOuterFrame = outerBindings;
         myContinuationMarks = new HashMap<FusionValue, FusionValue>();
     }
@@ -62,26 +63,44 @@ final class Evaluator
         return mySystem;
     }
 
+    ModuleRegistry getModuleRegistry()
+    {
+        return myDefaultRegistry;
+    }
 
     //========================================================================
 
 
-    Namespace newKernelNamespace(ModuleRegistry registry)
+    Namespace newModuleNamespace(ModuleRegistry registry)
         throws FusionException
     {
         Namespace ns = new Namespace(registry);
-        ns.use(KernelModule.IDENTITY);
+        ns.bind("module", myKernel.getModuleKeyword());
         return ns;
     }
+
+
+    /**
+     * Creates a new namespace sharing a namespace's registry.
+     *
+     * @param ns carries the {@link ModuleRegistry} to share.
+     * Must not be null.
+     */
+    Namespace newEmptyNamespace(Namespace ns)
+        throws FusionException
+    {
+        ModuleRegistry registry = ns.getRegistry();
+        return new Namespace(registry);
+    }
+
 
     private Namespace newBaseNamespace(ModuleRegistry registry)
         throws FusionException
     {
-        Namespace ns = newKernelNamespace(registry);
-
-        IonValue useForm = mySystem.singleValue("(use 'fusion/base')");
-        eval(ns, useForm);
-
+        Namespace ns = new Namespace(registry);
+        UseKeyword useKeyword = myKernel.getUseKeyword();
+        IonValue baseRef = mySystem.singleValue("'fusion/base'");
+        useKeyword.use(this, ns, baseRef);
         return ns;
     }
 
