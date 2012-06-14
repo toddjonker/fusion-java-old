@@ -209,12 +209,20 @@ public class BooleanTest
         assertUndef("(unless true 1)");
         assertEval(1, "(unless false 1)");
 
-        assertUndef("(unless true 1)");
+        assertEval(3, "(unless false (begin 3))");
 
-        assertEval(3, "(unless false 3)");
-
-        // multi body expr
         assertEval(3, "(unless false 1 2 3)");
+    }
+
+    public void testWhen()
+         throws Exception
+    {
+        assertUndef("(when false 1)");
+        assertEval(1,"(when true 1)");
+
+        assertEval(3, "(when true (begin 3))");
+
+        assertEval(3, "(when true 1 2 3)");
     }
 
 }

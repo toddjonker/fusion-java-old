@@ -33,6 +33,7 @@
   (define read           (java_new "com.amazon.fusion.ReadProc"))
   (define remove         (java_new "com.amazon.fusion.RemoveProc"))
   (define size           (java_new "com.amazon.fusion.SizeProc"))
+  (define when           (java_new "com.amazon.fusion.WhenKeyword"))
   (define write          (java_new "com.amazon.fusion.WriteProc"))
   (define unless         (java_new "com.amazon.fusion.UnlessKeyword"))
 
@@ -56,5 +57,6 @@ VALUE.
     undef
     unless
     use
+    when
     write)
 )
