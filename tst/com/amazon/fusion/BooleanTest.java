@@ -202,4 +202,22 @@ public class BooleanTest
         }
     }
 
+    @Test
+    public void testUnless()
+        throws Exception
+    {
+        assertUndef("(unless true 1)");
+        assertEval(1, "(unless false 1)");
+
+        eval("(define s1 (stream_for [0,1,2]))");
+        eval("(define add1 (lambda (x) (+ x 1)))");
+        assertUndef("(unless (stream_has_next s1) (stream_to_list(stream_project s1 add1)))");
+
+        eval("(define s2 (empty_stream))");
+        assertEval(3, "(unless (stream_has_next s2) 3)");
+
+        // multi body expr
+        assertEval(3, "(unless (stream_has_next s2) (begin 1 2 3))");
+    }
+
 }

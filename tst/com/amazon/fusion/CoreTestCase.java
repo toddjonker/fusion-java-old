@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonInt;
@@ -168,7 +167,7 @@ public class CoreTestCase
         FusionValue fv = myRuntime.eval(source);
         if (! fv.isIon())
         {
-            fail("Result isn't ion: " + fv + "\nSource: " + source);
+            Assert.fail("Result isn't ion: " + fv + "\nSource: " + source);
         }
         IonValue result = fv.ionValue();
         assertEquals(source, expected, result);
@@ -186,6 +185,16 @@ public class CoreTestCase
     {
         IonValue expected = mySystem.singleValue(expectedIon);
         assertEval(expected, expressionIon);
+    }
+
+    protected void assertUndef(String expressionIon)
+        throws FusionException
+    {
+        FusionValue fv = myRuntime.eval(expressionIon);
+        if (!fv.equals(FusionValue.UNDEF))
+        {
+            Assert.fail("Expected undef, did not observe undef");
+        }
     }
 
     protected void assertEval(boolean expectedBool, String expressionIon)
@@ -258,7 +267,6 @@ public class CoreTestCase
     {
         expectFailure(FusionException.class, expr);
     }
-
 
     void expectSyntaxFailure(String expr)
         throws Exception
