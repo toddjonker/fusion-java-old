@@ -7,13 +7,6 @@ import org.junit.Test;
 public class NumericsTest
     extends CoreTestCase
 {
-    @Test
-    public void testEqual()
-        throws Exception
-    {
-        assertEval(true,  "(= 1 1)");
-        assertEval(false, "(= 1 2)");
-    }
 
     @Test
     public void testSum()

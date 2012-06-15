@@ -203,6 +203,77 @@ public class BooleanTest
     }
 
     @Test
+    public void testEqual()
+        throws Exception
+    {
+        // integer test
+        assertEval(true,  "(= 1 1)");
+        assertEval(false, "(= 1 2)");
+
+        // boolean test
+        assertEval(true,  "(= true true)");
+        assertEval(false, "(= false true)");
+
+        // string test
+        assertEval(true,  "(= \"hello\" \"hello\")");
+        assertEval(false, "(= \"hello\" \"world\")");
+
+        // date-and-time timestamp test
+        assertEval(true,  "(= 2007-08-28T16:37:24.0000Z 2007-08-28T16:37:24.0000Z)");
+        assertEval(false, "(= 2007-08-29T16:37:24.0000Z 2007-08-28T16:37:24.0000Z)");
+
+        // date-only timestamp test
+        assertEval(true,  "(= 2008-08-28 2008-08-28)");
+        assertEval(false, "(= 2008-08-28 2007-08-28)");
+
+        // mixed-state timestamp test
+        assertEval(false, "(= 2008-08-28 2007-08-29T16:37:24.0000Z)");
+        assertEval(true, "(= 2007-08-28T16:37:24.0000Z 2007-08-28T16:37:24Z)");
+        assertEval(true, "(= 2008-08-28 2008-08-28T00:00:00.0000Z)");
+        assertEval(true, "(= 2007-08-28 2007-08-28T00:00Z)");
+
+    }
+
+    @Ignore
+    public void testEqualsInvalid()
+        throws Exception
+    {
+        expectContractFailure("(= 1 true)");
+        expectContractFailure("(= 1 \"hello\")");
+        expectContractFailure("(= 1 2008-08-28)");
+        expectContractFailure("(= 1 2007-08-28T16:37:24.0000Z)");
+        expectContractFailure("(= 1 null.int)");
+        expectContractFailure("(= 1 undef)");
+
+        expectContractFailure("(= true 1)");
+        expectContractFailure("(= true \"hello\")");
+        expectContractFailure("(= true 2008-08-28)");
+        expectContractFailure("(= true 2007-08-28T16:37:24.0000Z)");
+        expectContractFailure("(= true null.bool)");
+        expectContractFailure("(= true undef)");
+
+        expectContractFailure("(= \"hello\" 1)");
+        expectContractFailure("(= \"hello\" true)");
+        expectContractFailure("(= \"hello\" 2008-08-28)");
+        expectContractFailure("(= \"hello\" 2007-08-28T16:37:24.0000Z)");
+        expectContractFailure("(= \"hello\" null.string)");
+        expectContractFailure("(= \"hello\" undef)");
+
+        expectContractFailure("(= 2008-08-28 1)");
+        expectContractFailure("(= 2008-08-28 \"hello\")");
+        expectContractFailure("(= 2008-08-28 true)");
+        expectContractFailure("(= 2008-08-28 null.timestamp)");
+        expectContractFailure("(= 2008-08-28 undef)");
+
+        expectContractFailure("(= 2007-08-28T16:37:24.0000Z true)");
+        expectContractFailure("(= 2007-08-28T16:37:24.0000Z 1)");
+        expectContractFailure("(= 2007-08-28T16:37:24.0000Z \"hello\")");
+        expectContractFailure("(= 2008-08-28T16:37:24.0000Z  null.timestamp)");
+        expectContractFailure("(= 2008-08-28T16:37:24.0000Z  undef)");
+
+    }
+
+    @Test
     public void testUnless()
         throws Exception
     {
