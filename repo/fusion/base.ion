@@ -49,7 +49,7 @@ VALUE.
 
 
   (provide * + - . = add and apply assert begin current_directory
-    define display
+    define define_syntax display
     eval_file exit for_each_field for_list
     help
     if is_null is_undef lambda let letrec list_bindings

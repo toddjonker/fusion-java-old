@@ -1,0 +1,5 @@
+(module syntax (quote '#%kernel')
+  (provide wrong_syntax)
+
+  (define wrong_syntax (java_new "com.amazon.fusion.WrongSyntaxProc"))
+)

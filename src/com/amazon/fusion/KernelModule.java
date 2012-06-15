@@ -49,6 +49,7 @@ final class KernelModule
 
         ns.bind("current_directory", currentDirectory);
         ns.bind("define", new DefineKeyword());
+        ns.bind("define_syntax", new DefineSyntaxKeyword());
         ns.bind("eval_file", evalFile);
         ns.bind("java_new", new JavaNewProc());
         ns.bind("module", myModuleKeyword);
