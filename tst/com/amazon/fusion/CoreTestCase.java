@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
@@ -191,9 +190,9 @@ public class CoreTestCase
         throws FusionException
     {
         FusionValue fv = myRuntime.eval(expressionIon);
-        if (!fv.equals(FusionValue.UNDEF))
+        if (fv != FusionValue.UNDEF)
         {
-            Assert.fail("Expected undef, did not observe undef");
+            Assert.fail("Result isn't undef: " + fv + "\nSource: " + expressionIon);
         }
     }
 

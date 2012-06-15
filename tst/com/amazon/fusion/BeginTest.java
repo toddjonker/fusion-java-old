@@ -11,6 +11,7 @@ public class BeginTest
     public void testBegin()
         throws Exception
     {
+        assertUndef("(begin)");
         assertEval(1, "(begin 1)");
         assertEval(2, "(begin 1 2)");
         assertEval("[]", "(begin 1 2 [])");
