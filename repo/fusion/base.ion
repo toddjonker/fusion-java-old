@@ -26,6 +26,7 @@
   (define let            (java_new "com.amazon.fusion.LetKeyword"))
   (define letrec         (java_new "com.amazon.fusion.LetrecKeyword"))
   (define list_bindings  (java_new "com.amazon.fusion.ListBindingsKeyword"))
+  (define make_sexp      (java_new "com.amazon.fusion.MakeSexpProc"))
   (define not            (java_new "com.amazon.fusion.NotProc"))
   (define or             (java_new "com.amazon.fusion.OrKeyword"))
   (define parameterize   (java_new "com.amazon.fusion.ParameterizeKeyword"))
@@ -52,7 +53,7 @@ VALUE.
     eval_file exit for_each_field for_list
     help
     if is_null is_undef lambda let letrec list_bindings
-    make_parameter module not or parameterize quote read remove
+    make_parameter make_sexp module not or parameterize quote read remove
     size
     undef
     unless
