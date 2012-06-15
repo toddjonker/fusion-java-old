@@ -1,0 +1,35 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+package com.amazon.fusion;
+
+import com.amazon.ion.IonType;
+
+/**
+ * Implements all the {@code is_TYPE} procedures for the Ion types.
+ */
+public class IonTypeCheckingProc
+    extends Procedure
+{
+    private final IonType myType;
+
+    IonTypeCheckingProc(IonType type)
+    {
+        //    "                                                                               |
+        super("Determines whether a VALUE is an Ion "
+                 + type.name().toLowerCase()
+                 + ", returning true or false.",
+              "VALUE");
+
+        myType = type;
+    }
+
+    @Override
+    FusionValue invoke(Evaluator eval, FusionValue[] args)
+        throws FusionException
+    {
+        checkArityExact(1, args);
+        FusionValue fv = args[0];
+        boolean result = (fv.isIon() && fv.ionValue().getType() == myType);
+        return eval.newBool(result);
+    }
+}

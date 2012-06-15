@@ -19,4 +19,15 @@ public class DomTest
         assertEval("(1 [2] 3)", "(make_sexp 1 [2] 3)");
         assertEval("(1 [2] 3)", "(make_sexp 1 (add [] 2) 3)");
     }
+
+    @Test
+    public void testTypeChecks()
+        throws Exception
+    {
+        assertEval(true,  "(is_sexp (quote ()))");
+        assertEval(false, "(is_string (quote ()))");
+        assertEval(false, "(is_int undef)");
+
+        expectArityFailure("(is_bool)");
+    }
 }
