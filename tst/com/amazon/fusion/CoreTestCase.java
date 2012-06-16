@@ -3,8 +3,7 @@
 package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.Assert.assertNotNull;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
@@ -110,8 +109,8 @@ public class CoreTestCase
         ArrayList<String> exprs = new ArrayList<String>();
         for (String expr : allTypeExpressions())
         {
-            FusionValue v = eval(expr);
-            IonValue dom = v.ionValue();
+            Object v = eval(expr);
+            IonValue dom = FusionValue.toIonValue(v);
             if (dom == null || ! klass.isInstance(dom))
             {
                 exprs.add(expr);
@@ -165,13 +164,13 @@ public class CoreTestCase
     protected void assertEval(IonValue expected, String source)
         throws FusionException
     {
-        FusionValue fv = myRuntime.eval(source);
-        if (! fv.isIon())
+        Object fv = myRuntime.eval(source);
+        IonValue iv = FusionValue.toIonValue(fv);
+        if (iv == null)
         {
             Assert.fail("Result isn't ion: " + fv + "\nSource: " + source);
         }
-        IonValue result = fv.ionValue();
-        assertEquals(source, expected, result);
+        assertEquals(source, expected, iv);
     }
 
     protected void assertEval(IonValue expected, IonValue expression)
@@ -191,7 +190,7 @@ public class CoreTestCase
     protected void assertUndef(String expressionIon)
         throws FusionException
     {
-        FusionValue fv = myRuntime.eval(expressionIon);
+        Object fv = myRuntime.eval(expressionIon);
         if (fv != FusionValue.UNDEF)
         {
             Assert.fail("Result isn't undef: " + fv + "\nSource: " + expressionIon);
@@ -215,8 +214,8 @@ public class CoreTestCase
     protected void assertEval(BigInteger expectedInt, String expressionIon)
         throws FusionException
     {
-        FusionValue fv = myRuntime.eval(expressionIon);
-        IonValue observed = fv.ionValue();
+        Object fv = myRuntime.eval(expressionIon);
+        IonValue observed = FusionValue.toIonValue(fv);
         if (observed instanceof IonInt)
         {
             IonInt iObsExp = (IonInt)observed;
@@ -240,9 +239,8 @@ public class CoreTestCase
     protected void assertString(String expectedString, String expressionIon)
         throws FusionException
     {
-        FusionValue fv = myRuntime.eval(expressionIon);
-        IonValue observed = fv.ionValue();
-        IonValue iv = fv.ionValue();
+        Object fv = myRuntime.eval(expressionIon);
+        IonValue iv = FusionValue.toIonValue(fv);
         if (iv instanceof IonString)
         {
             IonString is = (IonString)iv;
@@ -262,22 +260,22 @@ public class CoreTestCase
     protected FusionValue eval(String expressionIon)
         throws FusionException
     {
-        FusionValue result = myRuntime.eval(expressionIon);
-        return result;
+        return myRuntime.eval(expressionIon);
     }
 
     protected IonValue evalToIon(String expressionIon)
         throws FusionException
     {
-        FusionValue result = eval(expressionIon);
-        assertTrue("Result isn't Ion", result.isIon());
-        return result.ionValue();
+        Object fv = eval(expressionIon);
+        IonValue iv = FusionValue.toIonValue(fv);
+        assertNotNull("Result isn't Ion", iv);
+        return iv;
     }
 
     protected Procedure evalToProcedure(String expressionIon)
         throws FusionException
     {
-        FusionValue result = eval(expressionIon);
+        Object result = eval(expressionIon);
         return (Procedure) result;
     }
 

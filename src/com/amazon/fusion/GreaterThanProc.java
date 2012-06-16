@@ -26,8 +26,8 @@ final class GreaterThanProc
     {
         checkArityExact(2, args);
 
-        IonValue leftVal = args[0].ionValue();
-        IonValue rightVal = args[1].ionValue();
+        IonValue leftVal  = FusionValue.toIonValue(args[0]);
+        IonValue rightVal = FusionValue.toIonValue(args[1]);
         boolean result = false;
         FusionValue fusionResult;
 

@@ -55,17 +55,16 @@ class CrossProductStream
     FusionValue next()
         throws FusionException
     {
-        FusionValue rv = null;
         // TODO unionize results
         IonList ionList = eval.getSystem().newEmptyList();
         if (hasNext())
         {
             first = (index > 0) ? first : mySource1.next();
-            IonValue ivFirst = first.ionValue();
+            IonValue ivFirst = FusionValue.toIonValue(first);
             IonValue cloneFirst = ivFirst.clone();
             ionList.add(cloneFirst);
             FusionValue second = cloneSource2.get(index);
-            IonValue ivSecond = second.ionValue();
+            IonValue ivSecond = FusionValue.toIonValue(second);
             IonValue cloneSecond = ivSecond.clone();
             ionList.add(cloneSecond);
             index = ((index+1) == cloneSource2.size()) ? 0 : index+1;

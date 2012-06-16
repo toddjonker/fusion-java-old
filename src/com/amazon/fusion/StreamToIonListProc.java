@@ -22,8 +22,8 @@ final class StreamToIonListProc
         IonList ionList = eval.getSystem().newEmptyList();
         while (stream.hasNext())
         {
-            FusionValue fv = stream.next();
-            IonValue iv = fv.ionValue();
+            Object fv = stream.next();
+            IonValue iv = FusionValue.toIonValue(fv);
             IonValue iv2 = FusionUtils.cloneIfContained(iv);
             ionList.add(iv2);
         }

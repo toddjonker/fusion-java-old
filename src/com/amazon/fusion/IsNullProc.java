@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonValue;
 
 /**
  *
@@ -23,18 +22,7 @@ final class IsNullProc
     {
         checkArityExact(1, args);
 
-        boolean isNull;
-        FusionValue arg = args[0];
-        if (arg.isIon())
-        {
-            IonValue value = arg.ionValue();
-            isNull = value.isNullValue();
-        }
-        else
-        {
-            isNull = false;
-        }
-
+        boolean isNull = FusionValue.isAnyIonNull(args[0]);
         return eval.newBool(isNull);
     }
 }

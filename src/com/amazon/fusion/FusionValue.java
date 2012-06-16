@@ -2,7 +2,10 @@
 
 package com.amazon.fusion;
 
+import com.amazon.ion.IonBool;
 import com.amazon.ion.IonSexp;
+import com.amazon.ion.IonString;
+import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
@@ -38,47 +41,6 @@ public abstract class FusionValue
     /** Not for application use. */
     FusionValue()
     {
-    }
-
-
-    /**
-     * Determines whether this value falls within the Ion type system.
-     *
-     * @return true if this Fusion value is also an Ion value.
-     */
-    public boolean isIon()
-    {
-        return false;
-    }
-
-    /**
-     * Returns the DOM representation of this value, if its type falls within
-     * the Ion type system. The {@link IonValue} will use the given factory
-     * and will not have a container.
-     *
-     * @param factory must not be null.
-     *
-     * @return null if this value's type isn't an Ion type (for example,
-     * Fusion procedures).
-     */
-    public IonValue ionValue(ValueFactory factory)
-    {
-        return null;
-    }
-
-    /**
-     * Returns the DOM representation of this value, if its type falls within
-     * the Ion type system. The result may have a container!
-     * <p>
-     * This isn't public because I'm not convinced that the runtime should have
-     * a singular IonSystem or ValueFactory.  Different subsystems may have
-     * different needs, some using a lazy dom others with full materialization.
-     *
-     * @return null if this value's type isn't an Ion type.
-     */
-    IonValue ionValue()
-    {
-        return null;
     }
 
 
@@ -488,5 +450,101 @@ public abstract class FusionValue
         StringBuilder out = new StringBuilder();
         displayMany(out, values, first);
         return out.toString();
+    }
+
+
+    //========================================================================
+    // Static IonValue methods
+
+
+    /**
+     * Returns the DOM representation of a value, if its type falls within
+     * the Ion type system. The result may have a container!
+     * <p>
+     * This isn't public because I'm not convinced that the runtime should have
+     * a singular IonSystem or ValueFactory.  Different subsystems may have
+     * different needs, some using a lazy dom others with full materialization.
+     *
+     * @return null if this value's type isn't an Ion type.
+     */
+    static IonValue toIonValue(Object value)
+    {
+        if (value instanceof DomValue)
+        {
+            return ((DomValue) value).ionValue();
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the DOM representation of this value, if its type falls within
+     * the Ion type system. The {@link IonValue} will use the given factory
+     * and will not have a container.
+     *
+     * @param factory must not be null.
+     *
+     * @return null if this value's type isn't an Ion type (for example,
+     * Fusion procedures).
+     */
+    static IonValue toIonValue(Object value, ValueFactory factory)
+    {
+        if (value instanceof DomValue)
+        {
+            return ((DomValue) value).ionValue(factory);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    static IonType ionType(Object value)
+    {
+        IonValue iv = toIonValue(value);
+        return (iv != null ? iv.getType() : null);
+    }
+
+    static boolean isAnyIonNull(Object value)
+    {
+        IonValue iv = toIonValue(value);
+        return (iv != null ? iv.isNullValue() : false);
+    }
+
+    /**
+     * Returns a Fusion string as a Java string.
+     * @return null if the value isn't a string.
+     */
+    static String asJavaString(Object value)
+    {
+        if (value instanceof DomValue)
+        {
+            IonValue iv = ((DomValue) value).ionValue();
+            if (iv.getType() == IonType.STRING)
+            {
+                return ((IonString) iv).stringValue();
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * Returns a Fusion bool as a Java Boolean.
+     * @return null if the value isn't true or false.
+     */
+    static Boolean asBoolean(Object value)
+    {
+        if (value instanceof DomValue)
+        {
+            IonValue iv = ((DomValue) value).ionValue();
+            if (iv.getType() == IonType.BOOL && ! iv.isNullValue())
+            {
+                return ((IonBool) iv).booleanValue();
+            }
+        }
+        return null;
     }
 }

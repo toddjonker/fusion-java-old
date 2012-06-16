@@ -26,8 +26,9 @@ final class MacroTransformer
         throws FusionException
     {
         DomValue exprValue = new DomValue(expr);
-        FusionValue resultFv = eval.applyNonTail(myTransformer, exprValue);
-        IonValue resultIv = resultFv.ionValue();
+        Object resultFv = eval.applyNonTail(myTransformer, exprValue);
+        IonValue resultIv = FusionValue.toIonValue(resultFv);
+        // TODO error check
         return eval.bounceTailExpression(env, resultIv);
     }
 }

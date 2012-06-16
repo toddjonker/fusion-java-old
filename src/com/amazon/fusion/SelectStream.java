@@ -2,8 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonBool;
-import com.amazon.ion.IonValue;
 
 /**
  * Class to express streams for the select operator
@@ -40,23 +38,16 @@ class SelectStream
             fv = this.mySource.next();
             FusionValue [] newArg = { fv };
             FusionValue boolResult = this.eval.applyNonTail(proc,newArg);
-            if (boolResult != null)
+            Boolean bv = FusionValue.asBoolean(boolResult);
+            if (bv != null)
             {
-                IonValue iv = boolResult.ionValue();
-                if (iv instanceof IonBool)
-                {
-                    IonBool ionBool = (IonBool)iv;
-                    if (ionBool.isNullValue())
-                    {
-                        throw new ContractFailure("Only true or false bool vals accepted");
-                    }
-                    boolean boolVal = ionBool.booleanValue();
-                    nextResult = boolVal ? fv : null;
-                    return (nextResult != null) ? true : this.search();
-                } else
-                {
-                    throw new ContractFailure("Proc does not return bool values");
-                }
+                boolean boolVal = bv.booleanValue();
+                nextResult = boolVal ? fv : null;
+                return (nextResult != null) ? true : this.search();
+            }
+            else
+            {
+                throw new ContractFailure("Proc does not return true or false");
             }
         }
         return false;

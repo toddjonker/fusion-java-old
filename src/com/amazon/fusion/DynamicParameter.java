@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonString;
 
 /**
  *
@@ -36,14 +35,8 @@ final class DynamicParameter
     String asString(Evaluator eval)
         throws FusionException
     {
-        String result = null;
-        FusionValue value = currentValue(eval);
-        if (value != null && value != UNDEF)
-        {
-            // TODO error handling
-            result = ((IonString) value.ionValue()).stringValue();
-        }
-        return result;
+        Object value = currentValue(eval);
+        return FusionValue.asJavaString(value);
     }
 
 

@@ -28,8 +28,8 @@ public class IonTypeCheckingProc
         throws FusionException
     {
         checkArityExact(1, args);
-        FusionValue fv = args[0];
-        boolean result = (fv.isIon() && fv.ionValue().getType() == myType);
+        Object fv = args[0];
+        boolean result = (FusionValue.ionType(fv) == myType);
         return eval.newBool(result);
     }
 }
