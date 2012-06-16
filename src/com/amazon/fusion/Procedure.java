@@ -8,6 +8,7 @@ import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonSexp;
+import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonValue;
@@ -191,6 +192,13 @@ abstract class Procedure
         return iv.stringValue();
     }
 
+    String checkStringArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        IonString iv = checkDomArg(IonString.class, "text",
+                                   false /* nullable */, argNum, args);
+        return iv.stringValue();
+    }
 
     IonContainer checkContainerArg(int argNum, FusionValue... args)
         throws ArgTypeFailure

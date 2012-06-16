@@ -14,6 +14,7 @@
   (define apply          (java_new "com.amazon.fusion.ApplyProc"))
   (define assert         (java_new "com.amazon.fusion.AssertKeyword"))
   (define begin          (java_new "com.amazon.fusion.BeginKeyword"))
+  (define concatenate    (java_new "com.amazon.fusion.StringConcatenateProc"))
   (define display        (java_new "com.amazon.fusion.DisplayProc"))
   (define exit           (java_new "com.amazon.fusion.ExitProc"))
   (define for_each_field (java_new "com.amazon.fusion.ForEachFieldProc"))
@@ -48,7 +49,7 @@ VALUE.
       (java_new "com.amazon.fusion.DynamicParameter" value)))
 
 
-  (provide * + - . = add and apply assert begin current_directory
+  (provide * + - . = add and apply assert begin concatenate current_directory
     define define_syntax display
     eval_file exit for_each_field for_list
     help

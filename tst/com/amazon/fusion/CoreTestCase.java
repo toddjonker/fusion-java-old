@@ -4,10 +4,12 @@ package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
+import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonText;
@@ -208,6 +210,24 @@ public class CoreTestCase
     {
         IonValue expected = mySystem.newInt(expectedInt);
         assertEval(expected, expressionIon);
+    }
+
+    protected void assertString(String expectedString, String expressionIon)
+        throws FusionException
+    {
+        FusionValue fv = myRuntime.eval(expressionIon);
+        IonValue iv = fv.ionValue();
+        if (iv != null)
+        {
+            if (iv instanceof IonString)
+            {
+                IonString is = (IonString)iv;
+                String result = is.stringValue();
+                assertEquals(expressionIon, expectedString, result);
+                return;
+            }
+        }
+        Assert.fail("Input arg is of invalid type.");
     }
 
     protected void assertSelfEval(String expressionIon)
