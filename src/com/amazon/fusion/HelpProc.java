@@ -53,6 +53,7 @@ final class HelpProc
     @Override
     FusionValue invoke(Evaluator eval, final FusionValue[] args)
     {
+        // TODO write directly to current_output_port
         return new HelpDocument(args);
     }
 }

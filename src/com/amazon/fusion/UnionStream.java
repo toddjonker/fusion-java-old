@@ -2,9 +2,6 @@
 
 package com.amazon.fusion;
 
-import java.io.IOException;
-
-
 /**
  * Class to express union'd streams
  */
@@ -45,11 +42,5 @@ class UnionStream
         }
 
         throw new ContractFailure("No more objects left to fetch in stream.");
-    }
-
-    @Override
-    public void write(Appendable out) throws IOException
-    {
-        out.append("/* union stream */");
     }
 }

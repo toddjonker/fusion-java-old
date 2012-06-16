@@ -52,7 +52,7 @@ final class ArityFailure
             if (myActuals.length != 0)
             {
                 b.append(":\n  ");
-                FusionValue.write(b, myActuals, "\n  ");
+                FusionValue.writeMany(b, myActuals, "\n  ");
             }
         }
         catch (IOException e) {}

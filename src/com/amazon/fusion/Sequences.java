@@ -55,7 +55,8 @@ class Sequences
             }
         }
 
-        throw new ContractFailure("value is not streamable: " + value.write());
+        throw new ContractFailure("value is not streamable: "
+                                  + FusionValue.writeToString(value));
      }
 
     static Stream streamFor(IonSequence ionSeq)

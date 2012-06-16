@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
+import static com.amazon.fusion.FusionValue.write;
 import java.io.IOException;
 
 /**
@@ -59,7 +60,7 @@ final class ArgTypeFailure
             b.append(" as ");
             writeFriendlyIndex(b, myArgNum);
             b.append(" argument, given ");
-            myActuals[myActuals.length == 1 ? 0 : myArgNum].write(b);
+            write(b, myActuals[myActuals.length == 1 ? 0 : myArgNum]);
 
             if (myActuals.length != 1)
             {
@@ -69,7 +70,7 @@ final class ArgTypeFailure
                     if (i != myArgNum)
                     {
                         b.append("\n  ");
-                        myActuals[i].write(b);
+                        write(b, myActuals[i]);
                     }
                 }
             }

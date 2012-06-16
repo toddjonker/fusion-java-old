@@ -19,15 +19,9 @@ public abstract class FusionValue
         extends FusionValue
     {
         @Override
-        public void write(Appendable out) throws IOException
+        void write(Appendable out) throws IOException
         {
             out.append("/* undef */");
-        }
-
-        @Override
-        public String write()
-        {
-            return("/* undef */");
         }
     }
 
@@ -132,7 +126,7 @@ public abstract class FusionValue
      *
      * @throws IOException Propagated from the output stream.
      */
-    public abstract void write(Appendable out)
+    abstract void write(Appendable out)
         throws IOException;
 
 
@@ -141,7 +135,7 @@ public abstract class FusionValue
      *
      * @return not null.
      */
-    public String write()
+    String write()
     {
         StringBuilder out = new StringBuilder();
         try
@@ -185,7 +179,7 @@ public abstract class FusionValue
     /**
      * Returns the output of {@link #display(Appendable)} as a {@link String}
      */
-    String display()
+    final String display()
     {
         StringWriter out = new StringWriter();
         try
@@ -215,8 +209,129 @@ public abstract class FusionValue
     }
 
 
-    static void write(Appendable out, FusionValue[] values, String join)
+    //========================================================================
+    // Static write methods
+
+
+    private static void dispatchWrite(Appendable out, Object value)
         throws IOException
+    {
+        if (value instanceof FusionValue)
+        {
+            ((FusionValue) value).write(out);
+        }
+        else
+        {
+            out.append("/* ");
+            out.append(value.toString());
+            out.append(" */");
+        }
+    }
+
+
+    /**
+     * Writes a representation of this value, following Ion syntax where
+     * possible, including for strings.
+     * The result will be invalid if the value contains any non-Ion data like
+     * closures.
+     *
+     * @param out the output stream; not null.
+     *
+     * @throws FusionException if there's an exception thrown by the output
+     * stream.
+     */
+    public static void write(Appendable out, Object value)
+        throws FusionException
+    {
+        try
+        {
+            dispatchWrite(out, value);
+        }
+        catch (IOException e)
+        {
+            throw new FusionException("I/O exception", e);
+        }
+    }
+
+
+    /**
+     * Writes a representation of this value, following Ion syntax where
+     * possible, including for strings.
+     * The result will be invalid if the value contains any non-Ion data like
+     * closures.
+     *
+     * @param out the output buffer; not null.
+     */
+    public static void write(StringBuilder out, Object value)
+    {
+        try
+        {
+            dispatchWrite(out, value);
+        }
+        catch (IOException e)
+        {
+            // This shouldn't happen
+            throw new IllegalStateException("I/O exception", e);
+        }
+    }
+
+
+    // TODO (write val) that goes to current_output_stream
+
+
+    /**
+     * Returns the output of {@link #write(StringBuilder,Object)} as a
+     * {@link String}.
+     *
+     * @return not null.
+     */
+    public static String writeToString(Object value)
+    {
+        StringBuilder out = new StringBuilder();
+        write(out, value);
+        return out.toString();
+    }
+
+
+    /**
+     * {@linkplain #write(Appendable, Object) Writes} several values,
+     * injecting a string between each pair of values.
+     *
+     * @param out must not be null.
+     * @param values must not be null.
+     * @param join must not be null.
+     */
+    public static void writeMany(Appendable out, Object[] values, String join)
+        throws FusionException
+    {
+        try
+        {
+            for (int i = 0; i < values.length; i++)
+            {
+                if (i != 0)
+                {
+                    out.append(join);
+                }
+
+                FusionValue.write(out, values[i]);
+            }
+        }
+        catch (IOException e)
+        {
+            throw new FusionException("I/O exception", e);
+        }
+    }
+
+
+    /**
+     * {@linkplain #write(StringBuilder, Object) Writes} several values,
+     * injecting a string between each pair of values.
+     *
+     * @param out must not be null.
+     * @param values must not be null.
+     * @param join must not be null.
+     */
+    public static void writeMany(StringBuilder out, Object[] values, String join)
     {
         for (int i = 0; i < values.length; i++)
         {
@@ -225,21 +340,21 @@ public abstract class FusionValue
                 out.append(join);
             }
 
-            values[i].write(out);
+            FusionValue.write(out, values[i]);
         }
     }
 
 
-    static String write(FusionValue[] values, String join)
+    public static String writeManyToString(Object[] values, String join)
     {
         StringBuilder out = new StringBuilder();
-        try
-        {
-            write(out, values, join);
-        }
-        catch (IOException e) {}
+        writeMany(out, values, join);
         return out.toString();
     }
+
+
+    //========================================================================
+    // Static display methods
 
 
     static void display(Appendable out, FusionValue[] values, String join)

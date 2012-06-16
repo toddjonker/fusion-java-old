@@ -9,7 +9,6 @@ import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.fusion.FusionValue;
 import com.amazon.ion.IonException;
 import java.io.Console;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
@@ -111,19 +110,11 @@ class Repl
     }
 
     private void print(FusionValue v)
+        throws FusionException
     {
         if (v == FusionValue.UNDEF) return;
 
-        try
-        {
-            v.write(myOut);
-            myOut.println();
-        }
-        catch (IOException e)
-        {
-            // This shouldn't happen printing to a PrintWriter,
-            // which doesn't throw exceptions.
-            throw new IllegalStateException(e);
-        }
+        FusionValue.write(myOut, v);
+        myOut.println();
     }
 }

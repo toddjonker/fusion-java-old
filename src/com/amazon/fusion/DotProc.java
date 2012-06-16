@@ -83,7 +83,7 @@ final class DotProc
                         for (FusionValue arg : args)
                         {
                             out.append("\n  ");
-                            arg.write(out);
+                            FusionValue.write(out, arg);
                         }
                     }
                     catch (IOException ioe) {}
