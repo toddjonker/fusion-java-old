@@ -45,7 +45,7 @@ class Sequences
     {
         if (value instanceof DomValue)
         {
-            IonValue iv = value.ionValue();
+            IonValue iv = FusionValue.toIonValue(value);
             if (iv instanceof IonSequence)
             {
                 return new DomStream((IonSequence) iv);

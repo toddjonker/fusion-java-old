@@ -3,9 +3,7 @@
 package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonValue;
 import org.junit.Test;
@@ -21,25 +19,28 @@ public class FusionValueTest
     public void testIonValue()
         throws Exception
     {
-        FusionValue fv = eval("12");
-        assertTrue(fv.isIon());
-        IonValue iv = fv.ionValue(system());
+        Object fv = eval("12");
+        IonValue iv = FusionValue.toIonValue(fv);
+        assertEquals(12, ((IonInt)iv).intValue());
+        iv = FusionValue.toIonValue(fv, system());
         assertEquals(12, ((IonInt)iv).intValue());
 
         fv = eval("(lambda () 12)");
-        assertFalse(fv.isIon());
-        assertSame(null, fv.ionValue(system()));
+        assertSame(null, FusionValue.toIonValue(fv));
+        assertSame(null, FusionValue.toIonValue(fv, system()));
 
         fv = eval("(. [12] 0)");
-        assertTrue(fv.isIon());
-        iv = fv.ionValue(system());
+        iv = FusionValue.toIonValue(fv);
+        assertEquals(12, ((IonInt)iv).intValue());
+        iv = FusionValue.toIonValue(fv, system());
         assertSame(null, iv.getContainer());
         assertEquals(12, ((IonInt)iv).intValue());
 
 
         fv = eval("(quote 12)");
-        assertTrue(fv.isIon());
-        iv = fv.ionValue(system());
+        iv = FusionValue.toIonValue(fv);
+        assertEquals(12, ((IonInt)iv).intValue());
+        iv = FusionValue.toIonValue(fv, system());
         assertSame(null, iv.getContainer());
         assertEquals(12, ((IonInt)iv).intValue());
     }

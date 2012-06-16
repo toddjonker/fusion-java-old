@@ -69,14 +69,14 @@ final class ForListKeyword
                 }
 
                 // Evaluate the body.
-                FusionValue nextResult = null;
+                Object nextResult = null;
                 for (int i = 2; i < forStx.size(); i++)
                 {
                     IonValue bodyStx = forStx.get(i);
                     nextResult = eval.eval(bodyEnv, bodyStx);
                 }
 
-                IonValue value = nextResult.ionValue();
+                IonValue value = toIonValue(nextResult);
                 if (value != null)
                 {
                     AddProc.invoke(result, value);
@@ -84,7 +84,7 @@ final class ForListKeyword
                 else
                 {
                     throw contractFailure("body returned non-Ion value: "
-                                          + nextResult);
+                                          + writeToString(nextResult));
                 }
             }
         }

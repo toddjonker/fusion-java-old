@@ -28,9 +28,9 @@ final class DisplayProc
             OutputStreamWriter out = new OutputStreamWriter(System.out);
             try
             {
-                for (FusionValue arg : args)
+                for (Object arg : args)
                 {
-                    arg.display(out);
+                    FusionValue.display(out, arg);
                 }
             }
             finally

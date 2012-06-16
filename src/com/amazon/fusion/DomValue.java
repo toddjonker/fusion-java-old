@@ -28,19 +28,15 @@ final class DomValue
     }
 
 
-    @Override
-    public boolean isIon()
-    {
-        return true;
-    }
-
-
     /**
-     * {@inheritDoc}
+     * Returns the DOM representation of this value.
+     * The {@link IonValue} will use the given factory
+     * and will not have a container.
+     *
+     * @param factory must not be null.
      *
      * @return not null.
      */
-    @Override
     public IonValue ionValue(ValueFactory factory)
     {
         // TODO this isn't really the proper comparison
@@ -55,11 +51,15 @@ final class DomValue
 
 
     /**
-     * {@inheritDoc}
+     * Returns the DOM representation of a value.
+     * The result may have a container!
+     * <p>
+     * This isn't public because I'm not convinced that the runtime should have
+     * a singular IonSystem or ValueFactory.  Different subsystems may have
+     * different needs, some using a lazy dom others with full materialization.
      *
      * @return not null.
      */
-    @Override
     IonValue ionValue()
     {
         return myDom;

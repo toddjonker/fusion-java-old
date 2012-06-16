@@ -178,11 +178,11 @@ abstract class Procedure
     BigInteger checkBigIntArg(int argNum, FusionValue... args)
         throws ArgTypeFailure
     {
-        FusionValue arg = args[argNum];
+        Object arg = args[argNum];
 
         try
         {
-            IonValue dom = arg.ionValue();
+            IonValue dom = FusionValue.toIonValue(arg);
             if (dom instanceof IonInt)
             {
                 IonInt iv = (IonInt)dom;
