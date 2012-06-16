@@ -169,7 +169,7 @@ public abstract class FusionValue
      *
      * @throws IOException Propagated from the output stream.
      */
-    public void display(Appendable out)
+    void display(Appendable out)
         throws IOException
     {
         write(out);
@@ -357,8 +357,104 @@ public abstract class FusionValue
     // Static display methods
 
 
-    static void display(Appendable out, FusionValue[] values, String join)
+    private static void dispatchDisplay(Appendable out, Object value)
         throws IOException
+    {
+        if (value instanceof FusionValue)
+        {
+            ((FusionValue) value).display(out);
+        }
+        else
+        {
+            out.append("/* ");
+            out.append(value.toString());
+            out.append(" */");
+        }
+    }
+
+
+    public static void display(Appendable out, Object value)
+        throws FusionException
+    {
+        try
+        {
+            dispatchDisplay(out, value);
+        }
+        catch (IOException e)
+        {
+            throw new FusionException("I/O exception", e);
+        }
+    }
+
+
+    public static void display(StringBuilder out, Object value)
+    {
+        try
+        {
+            dispatchDisplay(out, value);
+        }
+        catch (IOException e)
+        {
+            // This shouldn't happen
+            throw new IllegalStateException("I/O exception", e);
+        }
+    }
+
+
+    /**
+     * Returns the output of {@link #write(StringBuilder,Object)} as a
+     * {@link String}.
+     *
+     * @return not null.
+     */
+    public static String displayToString(Object value)
+    {
+        StringBuilder out = new StringBuilder();
+        display(out, value);
+        return out.toString();
+    }
+
+
+
+    /**
+     * {@linkplain #display(Appendable, Object) Displays} several values,
+     * injecting a string between each pair of values.
+     *
+     * @param out must not be null.
+     * @param values must not be null.
+     * @param join must not be null.
+     */
+    public static void displayMany(Appendable out, Object[] values, String join)
+        throws FusionException
+    {
+        try
+        {
+            for (int i = 0; i < values.length; i++)
+            {
+                if (i != 0)
+                {
+                    out.append(join);
+                }
+
+                FusionValue.display(out, values[i]);
+            }
+        }
+        catch (IOException e)
+        {
+            throw new FusionException("I/O exception", e);
+        }
+    }
+
+
+    /**
+     * {@linkplain #display(StringBuilder, Object) Displays} several values,
+     * injecting a string between each pair of values.
+     *
+     * @param out must not be null.
+     * @param values must not be null.
+     * @param join must not be null.
+     */
+    public static void displayMany(StringBuilder out, Object[] values, String join)
     {
         for (int i = 0; i < values.length; i++)
         {
@@ -367,19 +463,30 @@ public abstract class FusionValue
                 out.append(join);
             }
 
-            values[i].display(out);
+            FusionValue.display(out, values[i]);
+        }
+    }
+
+    public static void displayMany(StringBuilder out, Object[] values, int first)
+    {
+        for (int i = first; i < values.length; i++)
+        {
+            FusionValue.display(out, values[i]);
         }
     }
 
 
-    static String display(FusionValue[] values, String join)
+    public static String displayManyToString(Object[] values, String join)
     {
         StringBuilder out = new StringBuilder();
-        try
-        {
-            display(out, values, join);
-        }
-        catch (IOException e) {}
+        displayMany(out, values, join);
+        return out.toString();
+    }
+
+    public static String displayManyToString(Object[] values, int first)
+    {
+        StringBuilder out = new StringBuilder();
+        displayMany(out, values, first);
         return out.toString();
     }
 }

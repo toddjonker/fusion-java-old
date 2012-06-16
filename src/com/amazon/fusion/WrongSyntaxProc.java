@@ -25,13 +25,9 @@ public class WrongSyntaxProc
         checkArityAtLeast(1, args);
         IonValue stx = checkIonArg(0, args);
 
-        String message = "";
-        for (int i = 1; i < args.length; i++)
-        {
-            message += args[i].display();
-        }
-
         String name = null; // TODO infer name
+        String message = FusionValue.displayManyToString(args, 1);
+
         throw new SyntaxFailure(name, message, stx);
     }
 }

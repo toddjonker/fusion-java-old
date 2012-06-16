@@ -38,13 +38,14 @@ final class AssertKeyword
         String message;
         if (expr.size() > 2)
         {
-            message = "";
+            StringBuilder buf = new StringBuilder();
             for (int i = 2; i < expr.size(); i++)
             {
                 IonValue messageExpr = expr.get(i);
                 FusionValue messageValue = eval.eval(env, messageExpr);
-                message += messageValue.display();
+                FusionValue.display(buf, messageValue);
             }
+            message = buf.toString();
         }
         else
         {
