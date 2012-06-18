@@ -234,43 +234,90 @@ public class BooleanTest
 
     }
 
-    @Ignore
-    public void testEqualsInvalid()
+    @Test
+    public void testLessThan()
         throws Exception
     {
-        expectContractFailure("(= 1 true)");
-        expectContractFailure("(= 1 \"hello\")");
-        expectContractFailure("(= 1 2008-08-28)");
-        expectContractFailure("(= 1 2007-08-28T16:37:24.0000Z)");
-        expectContractFailure("(= 1 null.int)");
-        expectContractFailure("(= 1 undef)");
+        assertEval(false, "(< 2 1)");
+        assertEval(false, "(< 1 1)");
+        assertEval(true,  "(< 1 2)");
 
-        expectContractFailure("(= true 1)");
-        expectContractFailure("(= true \"hello\")");
-        expectContractFailure("(= true 2008-08-28)");
-        expectContractFailure("(= true 2007-08-28T16:37:24.0000Z)");
-        expectContractFailure("(= true null.bool)");
-        expectContractFailure("(= true undef)");
+        // date-only timestamp test
+        assertEval(true,  "(< 2008-08-28 2008-08-29)");
+        assertEval(false, "(< 2008-08-29 2008-08-28)");
+        assertEval(false, "(< 2008-08-29 2008-08-29)");
 
-        expectContractFailure("(= \"hello\" 1)");
-        expectContractFailure("(= \"hello\" true)");
-        expectContractFailure("(= \"hello\" 2008-08-28)");
-        expectContractFailure("(= \"hello\" 2007-08-28T16:37:24.0000Z)");
-        expectContractFailure("(= \"hello\" null.string)");
-        expectContractFailure("(= \"hello\" undef)");
+        // date-and-time timestamp test
+        assertEval(true,  "(< 2007-08-28T16:37:24.0000Z 2007-08-28T16:37:25.0000Z)");
+        assertEval(false, "(< 2007-08-28T16:37:24.0000Z 2007-08-28T16:37:24.0000Z)");
+        assertEval(false, "(< 2007-08-28T16:37:25.0000Z 2007-08-28T16:37:24.0000Z)");
 
-        expectContractFailure("(= 2008-08-28 1)");
-        expectContractFailure("(= 2008-08-28 \"hello\")");
-        expectContractFailure("(= 2008-08-28 true)");
-        expectContractFailure("(= 2008-08-28 null.timestamp)");
-        expectContractFailure("(= 2008-08-28 undef)");
+        // mixed-state timestamp test
+        assertEval(true,  "(< 2008-08-28 2008-08-28T16:37:24.0000Z)");
+        assertEval(false, "(< 2007-08-28 2007-08-28T00:00Z)");
+        assertEval(false, "(< 2007-08-29 2007-08-28T00:00Z)");
+    }
 
-        expectContractFailure("(= 2007-08-28T16:37:24.0000Z true)");
-        expectContractFailure("(= 2007-08-28T16:37:24.0000Z 1)");
-        expectContractFailure("(= 2007-08-28T16:37:24.0000Z \"hello\")");
-        expectContractFailure("(= 2008-08-28T16:37:24.0000Z  null.timestamp)");
-        expectContractFailure("(= 2008-08-28T16:37:24.0000Z  undef)");
+    @Test
+    public void testGreaterThan()
+            throws Exception
+    {
+        assertEval(true, "(> 2 1)");
+        assertEval(false, "(> 1 1)");
+        assertEval(false,  "(> 1 2)");
 
+        // date-only timestamp test
+        assertEval(false,  "(> 2008-08-28 2008-08-29)");
+        assertEval(true, "(> 2008-08-29 2008-08-28)");
+        assertEval(false, "(> 2008-08-29 2008-08-29)");
+
+        // date-and-time timestamp test
+        assertEval(false,  "(> 2007-08-28T16:37:24.0000Z 2007-08-28T16:37:25.0000Z)");
+        assertEval(false, "(> 2007-08-28T16:37:24.0000Z 2007-08-28T16:37:24.0000Z)");
+        assertEval(true, "(> 2007-08-28T16:37:25.0000Z 2007-08-28T16:37:24.0000Z)");
+
+        // mixed-state timestamp test
+        assertEval(false,  "(> 2008-08-28 2008-08-28T16:37:24.0000Z)");
+        assertEval(false, "(> 2007-08-28 2007-08-28T00:00Z)");
+        assertEval(true, "(> 2007-08-29 2007-08-28T00:00Z)");
+    }
+
+    @Test
+    public void testComparisonFail()
+        throws Exception
+    {
+        String [] ops = {"<", "=", ">"};
+
+        for (int i = 0; i < ops.length; i++)
+        {
+            expectContractFailure("("+ops[i]+" 1 true)");
+            expectContractFailure("("+ops[i]+" 1 \"hello\")");
+            expectContractFailure("("+ops[i]+" 1 2008-08-28)");
+            expectContractFailure("("+ops[i]+" 1 2007-08-28T16:37:24.0000Z)");
+            expectContractFailure("("+ops[i]+" 1 undef)");
+
+            expectContractFailure("("+ops[i]+" true 1)");
+            expectContractFailure("("+ops[i]+" true \"hello\")");
+            expectContractFailure("("+ops[i]+" true 2008-08-28)");
+            expectContractFailure("("+ops[i]+" true 2007-08-28T16:37:24.0000Z)");
+            expectContractFailure("("+ops[i]+" true undef)");
+
+            expectContractFailure("("+ops[i]+" \"hello\" 1)");
+            expectContractFailure("("+ops[i]+" \"hello\" true)");
+            expectContractFailure("("+ops[i]+" \"hello\" 2008-08-28)");
+            expectContractFailure("("+ops[i]+" \"hello\" 2007-08-28T16:37:24.0000Z)");
+            expectContractFailure("("+ops[i]+" \"hello\" undef)");
+
+            expectContractFailure("("+ops[i]+" 2008-08-28 1)");
+            expectContractFailure("("+ops[i]+" 2008-08-28 \"hello\")");
+            expectContractFailure("("+ops[i]+" 2008-08-28 true)");
+            expectContractFailure("("+ops[i]+" 2008-08-28 undef)");
+
+            expectContractFailure("("+ops[i]+" 2007-08-28T16:37:24.0000Z true)");
+            expectContractFailure("("+ops[i]+" 2007-08-28T16:37:24.0000Z 1)");
+            expectContractFailure("("+ops[i]+" 2007-08-28T16:37:24.0000Z \"hello\")");
+            expectContractFailure("("+ops[i]+" 2008-08-28T16:37:24.0000Z  undef)");
+        }
     }
 
     @Test

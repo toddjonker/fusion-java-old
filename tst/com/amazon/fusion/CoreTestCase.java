@@ -262,13 +262,18 @@ public class CoreTestCase
     <T extends FusionException> T expectFailure(Class<T> klass, String expr)
         throws Exception
     {
+        return expectException(klass, expr);
+    }
+
+    <T> T expectException(Class<T> klass, String expr)
+        throws Exception
+    {
         try
         {
             eval(expr);
             Assert.fail("Expected exception from " + expr);
-            return null; // Dummy for compiler
-        }
-        catch (Exception e)
+            return null;
+        } catch (Exception e)
         {
             if (klass.isInstance(e))
             {
@@ -304,11 +309,23 @@ public class CoreTestCase
         expectFailure(ArityFailure.class, expr);
     }
 
-
     void expectArgTypeFailure(String expr, int badArgNum)
         throws Exception
     {
         ArgTypeFailure e = expectFailure(ArgTypeFailure.class, expr);
         assertEquals("argument #", badArgNum, e.getArgNum());
     }
+
+    void expectOutOfBoundsException(String expr)
+        throws Exception
+    {
+        expectException(IndexOutOfBoundsException.class, expr);
+    }
+
+    void expectNullPointerException(String expr)
+        throws Exception
+    {
+        expectException(NullPointerException.class, expr);
+    }
+
 }

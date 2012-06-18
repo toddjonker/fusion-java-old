@@ -8,7 +8,9 @@
   (define +              (java_new "com.amazon.fusion.SumProc"))
   (define -              (java_new "com.amazon.fusion.DifferenceProc"))
   (define .              (java_new "com.amazon.fusion.DotProc"))
+  (define <              (java_new "com.amazon.fusion.LessThanProc"))
   (define =              (java_new "com.amazon.fusion.EqualProc"))
+  (define >              (java_new "com.amazon.fusion.GreaterThanProc"))
   (define add            (java_new "com.amazon.fusion.AddProc"))
   (define and            (java_new "com.amazon.fusion.AndKeyword"))
   (define apply          (java_new "com.amazon.fusion.ApplyProc"))
@@ -19,6 +21,7 @@
   (define exit           (java_new "com.amazon.fusion.ExitProc"))
   (define for_each_field (java_new "com.amazon.fusion.ForEachFieldProc"))
   (define for_list       (java_new "com.amazon.fusion.ForListKeyword"))
+  (define get            (java_new "com.amazon.fusion.GetFromListAtIndexProc"))
   (define help           (java_new "com.amazon.fusion.HelpProc"))
   (define if             (java_new "com.amazon.fusion.IfKeyword"))
   (define is_null        (java_new "com.amazon.fusion.IsNullProc"))
@@ -49,9 +52,9 @@ VALUE.
       (java_new "com.amazon.fusion.DynamicParameter" value)))
 
 
-  (provide * + - . = add and apply assert begin concatenate current_directory
+  (provide * + - . < = > add and apply assert begin concatenate current_directory
     define define_syntax display
-    eval_file exit for_each_field for_list
+    eval_file exit for_each_field for_list get
     help
     if is_null is_undef lambda let letrec list_bindings
     make_parameter make_sexp module not or parameterize quote read remove

@@ -1,0 +1,57 @@
+(module function 'fusion/base'
+
+  (provide
+    first
+    last
+    listBuilder
+    rest
+    subseq
+  )
+
+  (define first
+    (lambda (lst)
+      '''
+Returns the first element in the list
+      '''
+
+     (get lst 0)))
+
+  //==========================================================================
+
+  (define last
+    (lambda (lst)
+      '''
+Returns the last element in the list
+      '''
+
+     (get lst (- (size lst) 1))))
+
+  //==========================================================================
+
+  (define listBuilder
+   (lambda (lst rslt idx end)
+     '''
+Builds the result set for rest
+      '''
+     (if (= idx end) rslt
+      (listBuilder lst (add rslt (get lst idx)) (+ idx 1) end))))
+
+  //==========================================================================
+
+  (define rest
+   (lambda (lst idx)
+     '''
+Returns the rest of the list starting at index
+      '''
+      (listBuilder lst [] idx (size lst))))
+
+  //==========================================================================
+
+  (define subseq
+   (lambda (lst start end)
+      '''
+Returns the subsequence of a list in the range of two indices [low, hi], inclusive
+      '''
+     (if (> start end) undef (listBuilder lst [] start (+ end 1)))))
+
+) // end module
