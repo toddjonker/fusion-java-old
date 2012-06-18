@@ -15,6 +15,7 @@ public class StringTest
     public void testStringConcat()
         throws Exception
     {
+        assertString("", "(concatenate)");
         assertString("hello","(concatenate \"hello\")");
         assertString("hello world", "(concatenate \"hello \" \"world\")");
         assertString("I like pie", "(concatenate \"I \" \"like \" \"pie\")");

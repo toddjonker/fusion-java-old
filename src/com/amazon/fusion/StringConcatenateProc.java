@@ -19,21 +19,14 @@ class StringConcatenateProc
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        String result = "";
+        StringBuilder resultBuilder = new StringBuilder();
 
         for (int i = 0; i < args.length; i++)
         {
-            String v;
-            try
-            {
-                v = checkStringArg(i, args);
-            } catch (ArgTypeFailure af)
-            {
-                v = checkTextArg(i, args);
-            }
-            result += v;
+            String v = checkTextArg(i, args);
+            resultBuilder.append(v);
         }
 
-        return eval.newString(result);
+        return eval.newString(resultBuilder.toString());
     }
 }

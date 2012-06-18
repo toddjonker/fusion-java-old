@@ -217,15 +217,12 @@ public class CoreTestCase
     {
         FusionValue fv = myRuntime.eval(expressionIon);
         IonValue iv = fv.ionValue();
-        if (iv != null)
+        if (iv instanceof IonString)
         {
-            if (iv instanceof IonString)
-            {
-                IonString is = (IonString)iv;
-                String result = is.stringValue();
-                assertEquals(expressionIon, expectedString, result);
-                return;
-            }
+            IonString is = (IonString)iv;
+            String result = is.stringValue();
+            assertEquals(expressionIon, expectedString, result);
+            return;
         }
         Assert.fail("Input arg is of invalid type.");
     }
