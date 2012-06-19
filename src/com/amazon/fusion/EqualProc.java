@@ -18,19 +18,15 @@ final class EqualProc
     {
         //    "                                                                               |
         super("Returns true if the arguments are equal if the a arguments are of type \n" +
-              "integer, boolean, string, or timestamp.");
-    }
 
-    void emitContractFailure()
-        throws FusionException
-    {
-        throw new ContractFailure("Mismatched or invalid type equivalence cannot be determined.");
+                "integer, boolean, string, or timestamp.");
     }
-
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
+        checkArityExact(2, args);
+
         IonValue leftVal = args[0].ionValue();
         IonValue rightVal = args[1].ionValue();
         boolean result = false;

@@ -276,4 +276,10 @@ abstract class Procedure
 
         throw new ArgTypeFailure(this, "procedure", argNum, args);
     }
+
+    void emitContractFailure()
+        throws FusionException
+    {
+        throw new ContractFailure("Mismatched or invalid type equivalence cannot be determined.");
+    }
 }

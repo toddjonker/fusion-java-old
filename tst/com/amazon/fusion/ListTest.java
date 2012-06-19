@@ -151,36 +151,15 @@ public class ListTest
     }
 
     @Test
-    public void testGetAtIndex()
-        throws Exception
-    {
-        assertEval(0, "(get medList 0)");
-
-        eval("(define thisUniqueList [null,\"hello\",[2,3,[],4]])");
-        assertEval("[2,3,[],4]","(get thisUniqueList 2)");
-    }
-
-    @Test
-    public void testGetFail()
-        throws Exception
-    {
-        // arity
-        expectArityFailure("(get)");
-        expectArityFailure("(get 1)");
-        expectArityFailure("(get 1 3 4)");
-
-        expectArgTypeFailure("(get \"hello\" 1)", 0);
-        expectOutOfBoundsException("(get "+ionListGenerator(3)+" 3)");
-        expectOutOfBoundsException("(get [] 0)");
-    }
-
-    @Test
     public void testRest()
         throws Exception
     {
         assertEval("[0]","(rest smList 0)");
         assertEval("[1,2]","(rest medList 1)");
         assertEval(ionListGeneratorWithOffset(8887,1), "(rest lgList 1)");
+
+        assertUndef("(rest [] 1)");
+        assertUndef("(rest lgList 10000)");
     }
 
     @Test
@@ -192,8 +171,6 @@ public class ListTest
         expectArityFailure("(rest [])");
 
         expectArgTypeFailure("(rest \"hello\" 0)", 0);
-        expectOutOfBoundsException("(rest [] 1)");
-        expectOutOfBoundsException("(rest lgList 10000)");
     }
 
     @Test
@@ -208,6 +185,8 @@ public class ListTest
         // TODO design question: undef to signal error -
         // but don't want to crash pgrm
         assertUndef("(subseq lgList 8886 6666)");
+        assertUndef("(subseq smList 5 8)");
+        assertUndef("(subseq lgList 5555 88888)");
     }
 
     @Test
@@ -219,8 +198,6 @@ public class ListTest
         expectArityFailure("(subseq [])");
 
         expectArgTypeFailure("(subseq \"optimus prime\" 2 3)", 0);
-        expectOutOfBoundsException("(subseq smList 5 8)");
-        expectOutOfBoundsException("(subseq lgList 5555 88888)");
     }
 
     @Test
@@ -230,6 +207,8 @@ public class ListTest
         assertEval(0,"(last smList)");
         assertEval(2,"(last medList)");
         assertEval(8887,"(last lgList)");
+
+        assertUndef("(last [])");
     }
 
     @Test
@@ -240,7 +219,6 @@ public class ListTest
         expectArityFailure("(last [] 2)");
 
         expectArgTypeFailure("(last \"pikachu\")", 0);
-        expectOutOfBoundsException("(last [])");
     }
 
     @Test
@@ -250,6 +228,8 @@ public class ListTest
         assertEval(0,"(first smList)");
         assertEval(0,"(first medList)");
         assertEval(4000,"(first "+ionListGeneratorWithOffset(1000,4000)+")");
+
+        assertUndef("(first [])");
     }
 
     @Test
@@ -260,6 +240,6 @@ public class ListTest
         expectArityFailure("(first [] 2)");
 
         expectArgTypeFailure("(first \"boeing\")", 0);
-        expectOutOfBoundsException("(first [])");
+
     }
 }

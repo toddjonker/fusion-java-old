@@ -21,7 +21,6 @@
   (define exit           (java_new "com.amazon.fusion.ExitProc"))
   (define for_each_field (java_new "com.amazon.fusion.ForEachFieldProc"))
   (define for_list       (java_new "com.amazon.fusion.ForListKeyword"))
-  (define get            (java_new "com.amazon.fusion.GetFromListAtIndexProc"))
   (define help           (java_new "com.amazon.fusion.HelpProc"))
   (define if             (java_new "com.amazon.fusion.IfKeyword"))
   (define is_null        (java_new "com.amazon.fusion.IsNullProc"))
@@ -54,7 +53,7 @@ VALUE.
 
   (provide * + - . < = > add and apply assert begin concatenate current_directory
     define define_syntax display
-    eval_file exit for_each_field for_list get
+    eval_file exit for_each_field for_list
     help
     if is_null is_undef lambda let letrec list_bindings
     make_parameter make_sexp module not or parameterize quote read remove

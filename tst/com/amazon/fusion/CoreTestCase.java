@@ -258,14 +258,7 @@ public class CoreTestCase
 
     //========================================================================
 
-
     <T extends FusionException> T expectFailure(Class<T> klass, String expr)
-        throws Exception
-    {
-        return expectException(klass, expr);
-    }
-
-    <T> T expectException(Class<T> klass, String expr)
         throws Exception
     {
         try
@@ -314,18 +307,6 @@ public class CoreTestCase
     {
         ArgTypeFailure e = expectFailure(ArgTypeFailure.class, expr);
         assertEquals("argument #", badArgNum, e.getArgNum());
-    }
-
-    void expectOutOfBoundsException(String expr)
-        throws Exception
-    {
-        expectException(IndexOutOfBoundsException.class, expr);
-    }
-
-    void expectNullPointerException(String expr)
-        throws Exception
-    {
-        expectException(NullPointerException.class, expr);
     }
 
 }

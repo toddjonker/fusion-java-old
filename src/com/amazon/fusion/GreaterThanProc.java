@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonBool;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonTimestamp;
 import com.amazon.ion.IonValue;
@@ -21,20 +20,16 @@ final class GreaterThanProc
                 " valid ones.");
     }
 
-    void emitContractFailure()
-        throws FusionException
-    {
-        throw new ContractFailure("Mismatched or invalid type equivalence cannot be determined.");
-    }
-
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
+        checkArityExact(2, args);
+
         IonValue leftVal = args[0].ionValue();
         IonValue rightVal = args[1].ionValue();
         boolean result = false;
-        IonBool resultDom = null;
+        FusionValue fusionResult;
 
         if (leftVal == null || rightVal == null)
         {
@@ -45,20 +40,19 @@ final class GreaterThanProc
             IonInt left  = (IonInt) leftVal;
             IonInt right = (IonInt) rightVal;
             result = left.longValue() > right.longValue();
-            resultDom = left.getSystem().newBool(result);
+
         } else if (leftVal instanceof IonTimestamp && rightVal instanceof IonTimestamp)
         {
             IonTimestamp left = (IonTimestamp) leftVal;
             IonTimestamp right = (IonTimestamp) rightVal;
             int compareVal = left.timestampValue().compareTo(right.timestampValue());
             result = (compareVal == 1);
-            resultDom = left.getSystem().newBool(result);
         } else
         {
             emitContractFailure();
         }
-
-        return new DomValue(resultDom);
+        fusionResult = eval.newBool(result);
+        return fusionResult;
 
     }
 }

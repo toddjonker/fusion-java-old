@@ -1,57 +1,59 @@
-(module function 'fusion/base'
+(module list 'fusion/base'
 
   (provide
     first
     last
-    listBuilder
     rest
     subseq
   )
 
   (define first
-    (lambda (lst)
+    (lambda (list)
       '''
 Returns the first element in the list
       '''
 
-     (get lst 0)))
+     (. list 0)))
 
   //==========================================================================
 
   (define last
-    (lambda (lst)
+    (lambda (list)
       '''
 Returns the last element in the list
       '''
 
-     (get lst (- (size lst) 1))))
+     (if (= (size list) 0) undef (. list (- (size list) 1)))))
 
   //==========================================================================
 
-  (define listBuilder
-   (lambda (lst rslt idx end)
+  (define list_builder
+   (lambda (list rslt idx end)
      '''
-Builds the result set for rest
+Helper method for rest - appends elements to the end of a result list until
+the end of the original list is reached
       '''
      (if (= idx end) rslt
-      (listBuilder lst (add rslt (get lst idx)) (+ idx 1) end))))
+      (list_builder list (add rslt (. list idx)) (+ idx 1) end))))
 
   //==========================================================================
 
   (define rest
-   (lambda (lst idx)
+   (lambda (list idx)
      '''
 Returns the rest of the list starting at index
       '''
-      (listBuilder lst [] idx (size lst))))
+      (if (or (= idx (size list)) (> idx (size list)))
+       undef (list_builder list [] idx (size list)))))
 
   //==========================================================================
 
   (define subseq
-   (lambda (lst start end)
+   (lambda (list start end)
       '''
-Returns the subsequence of a list in the range of two indices [low, hi], inclusive
+Returns the subsequence of a list in the range of two indices [start,end], inclusive
       '''
-     (if (> start end) undef (listBuilder lst [] start (+ end 1)))))
+     (if (or (> start end) (= end (size list)) (> end (size list)))
+      undef (list_builder list [] start (+ end 1)))))
 
 ) // end module
