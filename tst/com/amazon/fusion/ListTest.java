@@ -128,17 +128,21 @@ public class ListTest
 
     public String ionListGeneratorWithOffset(int length, int offset)
     {
-        String str = "[";
+        StringBuilder resultStr = new StringBuilder("[");
 
         for (int i = 0; i < length; i++)
         {
-            str += Integer.toString(i+offset);
-            str += ",";
+            resultStr.append(Integer.toString(i+offset));
+            if (i != length-1)
+            {
+                resultStr.append(",");
+            }
+
         }
 
-        str += "]";
+        resultStr.append("]");
 
-        return str;
+        return resultStr.toString();
     }
 
     public String ionListGenerator(int length)
