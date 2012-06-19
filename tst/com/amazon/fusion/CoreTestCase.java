@@ -198,21 +198,6 @@ public class CoreTestCase
         }
     }
 
-    protected void assertString(String expectedString, String expressionIon)
-        throws FusionException
-    {
-        FusionValue fv = myRuntime.eval(expressionIon); 
-        IonValue iv = fv.ionValue(); 
-        if (iv instanceof IonString)
-        {
-            IonString is = (IonString)iv;
-            String result = is.stringValue();
-            assertEquals(expressionIon, expectedString, result); 
-            return;
-        }
-        Assert.fail("Input arg is of invalid type."); 
-    }
-
     protected void assertEval(boolean expectedBool, String expressionIon)
         throws FusionException
     {
