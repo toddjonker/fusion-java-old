@@ -30,7 +30,6 @@ final class EqualProc
         IonValue leftVal = args[0].ionValue();
         IonValue rightVal = args[1].ionValue();
         boolean result = false;
-        IonBool resultDom = null;
 
         if (leftVal == null || rightVal == null)
         {
@@ -41,31 +40,27 @@ final class EqualProc
             IonInt left  = (IonInt) leftVal;
             IonInt right = (IonInt) rightVal;
             result = left.longValue() == right.longValue();
-            resultDom = left.getSystem().newBool(result);
         } else if (leftVal instanceof IonBool && rightVal instanceof IonBool)
         {
             IonBool left  = (IonBool) leftVal;
             IonBool right = (IonBool) rightVal;
             result = left.booleanValue() == right.booleanValue();
-            resultDom = left.getSystem().newBool(result);
         } else if (leftVal instanceof IonString && rightVal instanceof IonString)
         {
             IonString left  = (IonString) leftVal;
             IonString right = (IonString) rightVal;
             result = left.stringValue().equals(right.stringValue());
-            resultDom = left.getSystem().newBool(result);
         } else if (leftVal instanceof IonTimestamp && rightVal instanceof IonTimestamp)
         {
             IonTimestamp left = (IonTimestamp) leftVal;
             IonTimestamp right = (IonTimestamp) rightVal;
             int compareVal = left.timestampValue().compareTo(right.timestampValue());
             result = (compareVal == 0);
-            resultDom = left.getSystem().newBool(result);
         } else
         {
             emitContractFailure();
         }
 
-        return new DomValue(resultDom);
+        return eval.newBool(result);
     }
 }
