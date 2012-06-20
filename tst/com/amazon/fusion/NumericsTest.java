@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import java.math.BigInteger;
 import org.junit.Test;
 
 public class NumericsTest
@@ -89,5 +90,52 @@ public class NumericsTest
             expr = "(- 1 " + form + " 3)";
             expectArgTypeFailure(expr, 1);
         }
+    }
+
+    @Test
+    public void testAtoi()
+        throws Exception
+    {
+        assertBigInt(5, "(to_int \"5\")");
+        assertBigInt(-2, "(to_int \"-2\")");
+
+        String bigIntStr = "8888888888888888888888888888888888888888888888888888888888";
+        BigInteger expected = new BigInteger(bigIntStr);
+        assertEval(expected,"(to_int \""+bigIntStr+"\")");
+    }
+
+    @Test
+    public void testAtoiFail()
+        throws Exception
+    {
+        expectFusionException("(to_int \"hello\")");
+        expectArityFailure("(to_int)");
+
+        expectArgTypeFailure("(to_int 2)",0);
+        expectArgTypeFailure("(to_int null.string)", 0);
+        expectArgTypeFailure("(to_int \"2.33332\")", 0);
+    }
+
+    @Test
+    public void testItoa()
+       throws Exception
+    {
+        assertString("5","(to_string 5)");
+        assertString("-2","(to_string -2)");
+        assertString("hello","(to_string \"hello\")");
+
+        String reallyBigNumber = "8888888888888888888888888888888888888888888888888888888888";
+        assertEval("\""+reallyBigNumber+"\"", "(to_string "+reallyBigNumber+")");
+    }
+
+    @Test
+    public void testItoaFail()
+       throws Exception
+    {
+        expectArgTypeFailure("(to_string 2.33332)", 0);
+        expectArgTypeFailure("(to_string null.int)", 0);
+
+        expectArityFailure("(to_string)");
+        expectArityFailure("(to_string 2 2)");
     }
 }

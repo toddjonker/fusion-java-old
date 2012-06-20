@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import com.amazon.fusion.ArityFailure.Variability;
 import com.amazon.ion.IonContainer;
+import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
@@ -15,6 +16,8 @@ import com.amazon.ion.IonValue;
 import com.amazon.ion.NullValueException;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * Base class for invocable procedures, both built-in and user-defined.
@@ -167,8 +170,53 @@ abstract class Procedure
         }
         catch (ClassCastException e) {}
         catch (NullValueException e) {}
+        catch (NullPointerException e) {}
 
         throw new ArgTypeFailure(this, "int", argNum, args);
+    }
+
+    BigInteger checkBigIntArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        FusionValue arg = args[argNum];
+
+        try
+        {
+            IonValue dom = arg.ionValue();
+            if (dom instanceof IonInt)
+            {
+                IonInt iv = (IonInt)dom;
+                BigInteger result = iv.bigIntegerValue();
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+         }
+         catch (ClassCastException e) { }
+
+         throw new ArgTypeFailure(this, "int", argNum, args);
+
+    }
+
+    BigDecimal checkBigDecimalArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        FusionValue arg = args[argNum];
+
+        try
+        {
+            DomValue dom = (DomValue) arg;
+            IonDecimal iv = (IonDecimal)dom.ionValue();
+            BigDecimal result = iv.bigDecimalValue();
+            if (result != null)
+            {
+                return iv.bigDecimalValue();
+            }
+        }
+        catch (ClassCastException e) {}
+
+        throw new ArgTypeFailure(this, "decimal", argNum, args);
     }
 
 

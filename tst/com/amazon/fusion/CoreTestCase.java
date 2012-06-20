@@ -15,12 +15,12 @@ import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.system.IonSystemBuilder;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.junit.After;
 import org.junit.Assert;
-
 
 public class CoreTestCase
 {
@@ -212,10 +212,36 @@ public class CoreTestCase
         assertEval(expected, expressionIon);
     }
 
+    protected void assertEval(BigInteger expectedInt, String expressionIon)
+        throws FusionException
+    {
+        FusionValue fv = myRuntime.eval(expressionIon);
+        IonValue observed = fv.ionValue();
+        if (observed instanceof IonInt)
+        {
+            IonInt iObsExp = (IonInt)observed;
+            BigInteger obsExp = iObsExp.bigIntegerValue();
+            if (obsExp.compareTo(expectedInt) == 0)
+            {
+                return;
+            }
+            Assert.fail("Discrepency: Observed "+obsExp.toString()+", expected "+expectedInt.toString());
+        }
+        Assert.fail("Invalid type.");
+    }
+
+    protected void assertBigInt(int expectedInt, String expressionIon)
+        throws FusionException
+    {
+        BigInteger bExpInt = BigInteger.valueOf(expectedInt);
+        assertEval(bExpInt, expressionIon);
+    }
+
     protected void assertString(String expectedString, String expressionIon)
         throws FusionException
     {
         FusionValue fv = myRuntime.eval(expressionIon);
+        IonValue observed = fv.ionValue();
         IonValue iv = fv.ionValue();
         if (iv instanceof IonString)
         {
@@ -259,14 +285,15 @@ public class CoreTestCase
     //========================================================================
 
     <T extends FusionException> T expectFailure(Class<T> klass, String expr)
-        throws Exception
+            throws Exception
     {
         try
         {
             eval(expr);
             Assert.fail("Expected exception from " + expr);
-            return null;
-        } catch (Exception e)
+            return null; // Dummy for compiler
+        }
+        catch (Exception e)
         {
             if (klass.isInstance(e))
             {

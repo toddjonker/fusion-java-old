@@ -4,7 +4,9 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.cloneIfContained;
 import static com.amazon.fusion.FusionValue.UNDEF;
+
 import com.amazon.ion.IonBool;
+import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSexp;
@@ -14,6 +16,8 @@ import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -148,6 +152,18 @@ final class Evaluator
     FusionValue newString(String value)
     {
         IonString dom = mySystem.newString(value);
+        return new DomValue(dom);
+    }
+
+    FusionValue newInt(BigInteger value)
+    {
+        IonInt dom = mySystem.newInt(value);
+        return new DomValue(dom);
+    }
+
+    FusionValue newDecimal(BigDecimal value)
+    {
+        IonDecimal dom = mySystem.newDecimal(value);
         return new DomValue(dom);
     }
 

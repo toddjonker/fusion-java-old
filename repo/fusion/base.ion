@@ -37,6 +37,8 @@
   (define read           (java_new "com.amazon.fusion.ReadProc"))
   (define remove         (java_new "com.amazon.fusion.RemoveProc"))
   (define size           (java_new "com.amazon.fusion.SizeProc"))
+  (define to_int         (java_new "com.amazon.fusion.ToIntProc"))
+  (define to_string      (java_new "com.amazon.fusion.ToStringProc"))
   (define when           (java_new "com.amazon.fusion.WhenKeyword"))
   (define write          (java_new "com.amazon.fusion.WriteProc"))
   (define unless         (java_new "com.amazon.fusion.UnlessKeyword"))
@@ -58,6 +60,7 @@ VALUE.
     if is_null is_undef lambda let letrec list_bindings
     make_parameter make_sexp module not or parameterize quote read remove
     size
+    to_int to_string
     undef
     unless
     use
