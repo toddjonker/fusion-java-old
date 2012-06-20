@@ -1,4 +1,4 @@
-(module 'fusion/stream' (quote '#%kernel')
+(module stream (quote '#%kernel')
 
   // We start with #%kernel for access to java_new
   (use 'fusion/base')

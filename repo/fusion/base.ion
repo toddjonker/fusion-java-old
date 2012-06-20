@@ -1,4 +1,4 @@
-(module 'fusion/base' (quote '#%kernel')
+(module base (quote '#%kernel')
 
 /*
   (define current_directory (make_parameter (java_system_property "user.dir")))

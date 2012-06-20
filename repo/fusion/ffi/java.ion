@@ -1,2 +1,2 @@
-(module 'fusion/ffi/java' (quote '#%kernel')
+(module java (quote '#%kernel')
   (provide java_new))
