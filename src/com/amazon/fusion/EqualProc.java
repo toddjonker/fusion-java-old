@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonBool;
+import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonTimestamp;
@@ -39,7 +40,14 @@ final class EqualProc
         {
             IonInt left  = (IonInt) leftVal;
             IonInt right = (IonInt) rightVal;
-            result = left.longValue() == right.longValue();
+            int compareVal = left.bigIntegerValue().compareTo(right.bigIntegerValue());
+            result = (compareVal == 0);
+        } else if (leftVal instanceof IonDecimal && rightVal instanceof IonDecimal)
+        {
+            IonDecimal left = (IonDecimal) leftVal;
+            IonDecimal right = (IonDecimal) rightVal;
+            int compareVal = left.bigDecimalValue().compareTo(right.bigDecimalValue());
+            result = (compareVal == 0);
         } else if (leftVal instanceof IonBool && rightVal instanceof IonBool)
         {
             IonBool left  = (IonBool) leftVal;

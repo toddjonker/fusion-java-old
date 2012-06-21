@@ -210,6 +210,20 @@ public class BooleanTest
         assertEval(true,  "(= 1 1)");
         assertEval(false, "(= 1 2)");
 
+        // decimal test
+        assertEval(true, "(= 1.6666 1.6666)");
+        assertEval(false, "(= 1.6667 1.6666)");
+
+        // big int test
+        String reallyBigNumber = "8888888888888888888888888888888888888888888888888888888888";
+        assertEval(true,  "(= "+reallyBigNumber+" "+reallyBigNumber+")");
+        assertEval(false, "(= "+reallyBigNumber+" "+reallyBigNumber+"8)");
+
+        // big dec test
+        String reallyBigDec = "8888888888888888888888888888888888888888888888888888888888.88";
+        assertEval(true, "(= "+reallyBigDec+" "+reallyBigDec+")");
+        assertEval(false, "(= "+reallyBigDec+" "+reallyBigDec+"8)");
+
         // boolean test
         assertEval(true,  "(= true true)");
         assertEval(false, "(= false true)");
@@ -238,9 +252,26 @@ public class BooleanTest
     public void testLessThan()
         throws Exception
     {
+        // int test
         assertEval(false, "(< 2 1)");
         assertEval(false, "(< 1 1)");
         assertEval(true,  "(< 1 2)");
+
+        // decimal test
+        assertEval(false, "(< 1.6666 1.6666)");
+        assertEval(true,  "(< 1.6666 1.6667)");
+
+        // big int test
+        String reallyBigNumber = "8888888888888888888888888888888888888888888888888888888888";
+        assertEval(false,  "(< "+reallyBigNumber+" "+reallyBigNumber+")");
+        assertEval(true, "(< "+reallyBigNumber+" "+reallyBigNumber+"8)");
+        assertEval(false, "(< "+reallyBigNumber+" 1)");
+
+        // big dec test
+        String reallyBigDec = "8888888888888888888888888888888888888888888888888888888888.88";
+        assertEval(false, "(< "+reallyBigDec+" "+reallyBigDec+")");
+        assertEval(true,  "(< "+reallyBigDec+" "+reallyBigDec+"8)");
+        assertEval(false, "(< "+reallyBigDec+" 1.02)");
 
         // date-only timestamp test
         assertEval(true,  "(< 2008-08-28 2008-08-29)");
@@ -262,13 +293,29 @@ public class BooleanTest
     public void testGreaterThan()
             throws Exception
     {
-        assertEval(true, "(> 2 1)");
+        // int
+        assertEval(true,  "(> 2 1)");
         assertEval(false, "(> 1 1)");
-        assertEval(false,  "(> 1 2)");
+        assertEval(false, "(> 1 2)");
+
+        // decimal test
+        assertEval(false, "(> 1.6666 1.6666)");
+        assertEval(true,  "(> 1.6667 1.6666)");
+
+        // big int test
+        String reallyBigNumber = "8888888888888888888888888888888888888888888888888888888888";
+        assertEval(false,  "(> "+reallyBigNumber+" "+reallyBigNumber+")");
+        assertEval(true, "(> "+reallyBigNumber+"88 "+reallyBigNumber+"8)");
+
+        // big dec test
+        String reallyBigDec = "8888888888888888888888888888888888888888888888888888888888.88";
+        assertEval(false, "(> "+reallyBigDec+" "+reallyBigDec+")");
+        assertEval(true,  "(> "+reallyBigDec+"88 "+reallyBigDec+"8)");
+        assertEval(true, "(> "+reallyBigDec+" 1.02)");
 
         // date-only timestamp test
-        assertEval(false,  "(> 2008-08-28 2008-08-29)");
-        assertEval(true, "(> 2008-08-29 2008-08-28)");
+        assertEval(false, "(> 2008-08-28 2008-08-29)");
+        assertEval(true,  "(> 2008-08-29 2008-08-28)");
         assertEval(false, "(> 2008-08-29 2008-08-29)");
 
         // date-and-time timestamp test
@@ -287,6 +334,8 @@ public class BooleanTest
         throws Exception
     {
         String [] ops = {"<", "=", ">"};
+        String reallyBigNumber = "8888888888888888888888888888888888888888888888888888888888";
+        String reallyBigDec = "8888888888888888888888888888888888888888888888888888888888.88";
 
         for (int i = 0; i < ops.length; i++)
         {
@@ -295,28 +344,42 @@ public class BooleanTest
             expectContractFailure("("+ops[i]+" 1 2008-08-28)");
             expectContractFailure("("+ops[i]+" 1 2007-08-28T16:37:24.0000Z)");
             expectContractFailure("("+ops[i]+" 1 undef)");
+            expectContractFailure("("+ops[i]+" 1 1.667)");
+            expectContractFailure("("+ops[i]+" 1 "+reallyBigDec+")");
 
             expectContractFailure("("+ops[i]+" true 1)");
             expectContractFailure("("+ops[i]+" true \"hello\")");
             expectContractFailure("("+ops[i]+" true 2008-08-28)");
             expectContractFailure("("+ops[i]+" true 2007-08-28T16:37:24.0000Z)");
             expectContractFailure("("+ops[i]+" true undef)");
+            expectContractFailure("("+ops[i]+" true 1.667)");
+            expectContractFailure("("+ops[i]+" true "+reallyBigNumber+")");
+            expectContractFailure("("+ops[i]+" true "+reallyBigDec+")");
 
             expectContractFailure("("+ops[i]+" \"hello\" 1)");
             expectContractFailure("("+ops[i]+" \"hello\" true)");
             expectContractFailure("("+ops[i]+" \"hello\" 2008-08-28)");
             expectContractFailure("("+ops[i]+" \"hello\" 2007-08-28T16:37:24.0000Z)");
             expectContractFailure("("+ops[i]+" \"hello\" undef)");
+            expectContractFailure("("+ops[i]+" \"hello\" 1.667)");
+            expectContractFailure("("+ops[i]+" \"hello\" "+reallyBigNumber+")");
+            expectContractFailure("("+ops[i]+" \"hello\" "+reallyBigDec+")");
 
             expectContractFailure("("+ops[i]+" 2008-08-28 1)");
             expectContractFailure("("+ops[i]+" 2008-08-28 \"hello\")");
             expectContractFailure("("+ops[i]+" 2008-08-28 true)");
             expectContractFailure("("+ops[i]+" 2008-08-28 undef)");
+            expectContractFailure("("+ops[i]+" 2008-08-28 1.667)");
+            expectContractFailure("("+ops[i]+" 2008-08-28 "+reallyBigNumber+")");
+            expectContractFailure("("+ops[i]+" 2008-08-28 "+reallyBigDec+")");
 
             expectContractFailure("("+ops[i]+" 2007-08-28T16:37:24.0000Z true)");
             expectContractFailure("("+ops[i]+" 2007-08-28T16:37:24.0000Z 1)");
             expectContractFailure("("+ops[i]+" 2007-08-28T16:37:24.0000Z \"hello\")");
             expectContractFailure("("+ops[i]+" 2008-08-28T16:37:24.0000Z  undef)");
+            expectContractFailure("("+ops[i]+" 2008-08-28T16:37:24.0000Z 1.667)");
+            expectContractFailure("("+ops[i]+" 2008-08-28T16:37:24.0000Z "+reallyBigNumber+")");
+            expectContractFailure("("+ops[i]+" 2008-08-28T16:37:24.0000Z "+reallyBigDec+")");
         }
     }
 
