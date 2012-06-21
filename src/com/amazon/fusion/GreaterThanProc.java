@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonTimestamp;
 import com.amazon.ion.IonValue;
@@ -30,6 +31,7 @@ final class GreaterThanProc
         IonValue rightVal = FusionValue.toIonValue(args[1]);
         boolean result = false;
         FusionValue fusionResult;
+        int compareVal = 0;
 
         if (leftVal == null || rightVal == null)
         {
@@ -39,18 +41,22 @@ final class GreaterThanProc
         {
             IonInt left  = (IonInt) leftVal;
             IonInt right = (IonInt) rightVal;
-            result = left.longValue() > right.longValue();
-
+            compareVal = left.bigIntegerValue().compareTo(right.bigIntegerValue());
+        } else if (leftVal instanceof IonDecimal && rightVal instanceof IonDecimal)
+        {
+            IonDecimal left = (IonDecimal) leftVal;
+            IonDecimal right = (IonDecimal) rightVal;
+            compareVal = left.bigDecimalValue().compareTo(right.bigDecimalValue());
         } else if (leftVal instanceof IonTimestamp && rightVal instanceof IonTimestamp)
         {
             IonTimestamp left = (IonTimestamp) leftVal;
             IonTimestamp right = (IonTimestamp) rightVal;
-            int compareVal = left.timestampValue().compareTo(right.timestampValue());
-            result = (compareVal == 1);
+            compareVal = left.timestampValue().compareTo(right.timestampValue());
         } else
         {
             emitContractFailure();
         }
+        result = (compareVal == 1);
         fusionResult = eval.newBool(result);
         return fusionResult;
 
