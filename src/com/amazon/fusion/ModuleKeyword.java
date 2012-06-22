@@ -40,10 +40,20 @@ final class ModuleKeyword
         IonValue initialBindingsStx = requiredForm("initial module path", 2, expr);
 
         Namespace ns = env.namespace();
-        ModuleIdentity initialBindingsId =
-            myModuleNameResolver.resolve(eval, initialBindingsStx);
         Namespace moduleNamespace = eval.newEmptyNamespace(ns);
-        moduleNamespace.use(initialBindingsId);
+
+        try
+        {
+            ModuleIdentity initialBindingsId =
+                myModuleNameResolver.resolve(eval, initialBindingsStx);
+            moduleNamespace.use(initialBindingsId);
+        }
+        catch (FusionException e)
+        {
+            String message =
+                "Error installing initial bindings: " + e.getMessage();
+            throw new FusionException(message, e);
+        }
 
         ArrayList<IonSexp> provideForms = new ArrayList<IonSexp>();
 

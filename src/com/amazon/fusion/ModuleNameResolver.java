@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.ion.util.IonTextUtils.printString;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonSymbol;
@@ -85,9 +86,16 @@ final class ModuleNameResolver
         throws FusionException
     {
         // TODO libName should not be absolute
-        libName += ".ion"; // TODO ugly hard-coding
+        String fileName = libName + ".ion"; // TODO ugly hard-coding
         File repo = findRepository();
-        File pathFile = new File(repo, libName);
+        File pathFile = new File(repo, fileName);
+        if (! pathFile.exists())
+        {
+            String message =
+                "Library not found: " + printString(libName);
+            throw new FusionException(message);
+        }
+
         return resolve(eval, pathFile);
     }
 

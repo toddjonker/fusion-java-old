@@ -26,6 +26,10 @@ final class LoadHandler
     }
 
 
+    /**
+     * Resolve a relative path against the {@code current_directory} param.
+     * If file is absolute it is returned as-is.
+     */
     private File resolvePath(Evaluator eval, File file)
         throws FusionException
     {
@@ -38,6 +42,10 @@ final class LoadHandler
         return file;
     }
 
+    /**
+     * Resolve a relative path against the {@code current_directory} param.
+     * If the path is absolute it is returned as-is.
+     */
     private File resolvePath(Evaluator eval, String path)
         throws FusionException
     {
@@ -141,24 +149,37 @@ final class LoadHandler
     }
 
 
+    /**
+     * @param path may be relative, in which case it is resolved relative to
+     * the {@code current_directory} parameter.
+     */
     ModuleInstance loadModule(Evaluator eval, File path)
         throws FusionException
     {
-        File file = resolvePath(eval, path);
-        IonValue moduleDeclaration = readModuleDeclaration(eval, file);
+        try
+        {
+            File file = resolvePath(eval, path);
+            IonValue moduleDeclaration = readModuleDeclaration(eval, file);
 
-        String dirPath = file.getParentFile().getAbsolutePath();
-        Evaluator bodyEval =
-            eval.markedContinuation(myCurrentLoadRelativeDirectory,
-                                    eval.newString(dirPath));
+            String dirPath = file.getParentFile().getAbsolutePath();
+            Evaluator bodyEval =
+                eval.markedContinuation(myCurrentLoadRelativeDirectory,
+                                        eval.newString(dirPath));
 
-        // TODO Do we need an Evaluator with no continuation marks?
-        // This namespace ensures correct binding for 'module'
+            // TODO Do we need an Evaluator with no continuation marks?
+            // This namespace ensures correct binding for 'module'
 
-        ModuleRegistry reg = eval.getModuleRegistry();
-        Namespace namespace = eval.newModuleNamespace(reg);
-        FusionValue result = bodyEval.eval(namespace, moduleDeclaration);
-        // TODO tail call handling
-        return (ModuleInstance) result;
+            ModuleRegistry reg = eval.getModuleRegistry();
+            Namespace namespace = eval.newModuleNamespace(reg);
+            FusionValue result = bodyEval.eval(namespace, moduleDeclaration);
+            // TODO tail call handling
+            return (ModuleInstance) result;
+        }
+        catch (FusionException e)
+        {
+            String message =
+                "Failure loading module from " + path + ": " + e.getMessage();
+            throw new FusionException(message, e);
+        }
     }
 }
