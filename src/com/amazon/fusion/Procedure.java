@@ -157,6 +157,25 @@ abstract class Procedure
         return checkBoolArg(argNum, arg);
     }
 
+    double checkDecimalArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        FusionValue arg = args[argNum];
+
+        try
+        {
+            DomValue dom = (DomValue) arg;
+            IonDecimal iv = (IonDecimal) dom.ionValue();
+            return iv.doubleValue();
+        }
+        catch (ClassCastException e) {}
+        catch (NullValueException e) {}
+        catch (NullPointerException e) {}
+
+        throw new ArgTypeFailure(this, "double", argNum, args);
+    }
+
+
     long checkLongArg(int argNum, FusionValue... args)
         throws ArgTypeFailure
     {

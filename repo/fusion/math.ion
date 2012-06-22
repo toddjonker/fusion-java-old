@@ -1,0 +1,12 @@
+(module 'fusion/math' (quote '#%kernel')
+
+  (use 'fusion/base')
+
+  (provide ceil
+           floor
+           rand)
+
+    (define ceil           (java_new "com.amazon.fusion.CeilingProc"))
+    (define floor          (java_new "com.amazon.fusion.FloorProc"))
+    (define rand           (java_new "com.amazon.fusion.RandomProc"))
+)

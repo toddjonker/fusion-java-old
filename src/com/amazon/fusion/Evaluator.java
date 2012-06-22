@@ -167,6 +167,13 @@ final class Evaluator
         return new DomValue(dom);
     }
 
+    FusionValue newDecimal(double value)
+    {
+        IonDecimal dom = mySystem.newDecimal(value);
+        return new DomValue(dom);
+    }
+
+
 
     //========================================================================
 
