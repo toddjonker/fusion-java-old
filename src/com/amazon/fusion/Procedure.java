@@ -12,6 +12,7 @@ import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonText;
+import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.NullValueException;
 import com.amazon.ion.util.IonTextUtils;
@@ -238,6 +239,34 @@ abstract class Procedure
         throw new ArgTypeFailure(this, "decimal", argNum, args);
     }
 
+    Number checkBigArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        try
+        {
+            IonValue ionValue = FusionValue.toIonValue(args[argNum]);
+            Number result = null;
+            if (ionValue instanceof IonInt)
+            {
+                IonInt iv = (IonInt)ionValue;
+                result = iv.bigIntegerValue();
+            } else if (ionValue instanceof IonDecimal)
+            {
+                IonDecimal iv = (IonDecimal)ionValue;
+                result = iv.bigDecimalValue();
+            }
+
+            if (result != null)
+            {
+                return result;
+            }
+        }
+        catch (ClassCastException e) {}
+        catch (NullPointerException e) {} // in case toIonValue() ==> null
+
+        throw new ArgTypeFailure(this, "int or decimal", argNum, args);
+    }
+
 
     IonValue checkIonArg(int argNum, FusionValue... args)
         throws ArgTypeFailure
@@ -347,6 +376,35 @@ abstract class Procedure
     void emitContractFailure()
         throws FusionException
     {
-        throw new ContractFailure("Mismatched or invalid type equivalence cannot be determined.");
+        throw new ContractFailure("Mismatched or invalid type.");
     }
+
+    void emitContractFailure(String expected, String observed)
+        throws FusionException
+    {
+        contractFailure("Mismatched or invalid type: expected "+expected+", observed "+observed);
+    }
+
+    void emitContractFailure(String expected, IonType ionType)
+        throws FusionException
+    {
+        emitContractFailure(expected, ionType.name().toLowerCase());
+    }
+
+    void emitContractFailure(String expected, Object obj)
+        throws FusionException
+    {
+        if (obj instanceof FusionValue)
+        {
+            emitContractFailure(expected, ((FusionValue)obj).write());
+        }
+        IonValue ionValue = FusionValue.toIonValue(obj);
+        String observed = "unknown type";
+        if (ionValue != null)
+        {
+            observed = ionValue.getType().name().toLowerCase();
+        }
+        emitContractFailure(expected, observed);
+    }
+
 }

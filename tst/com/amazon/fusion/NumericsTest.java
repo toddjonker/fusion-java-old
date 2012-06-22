@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,83 +22,150 @@ public class NumericsTest
     public void testSum()
         throws Exception
     {
-        assertEval(0, "(+)");
-        assertEval(1, "(+ 1)");
-        assertEval(2, "(+ 1 1)");
-        assertEval(40, "(+ 1 19 20)");
+        //assertEval(0, "(+)");
+        assertBigInt(1, "(+ 1)");
+        assertBigInt(2, "(+ 1 1)");
+        assertBigInt(40, "(+ 1 19 20)");
         eval("(define ten 10)");
-        assertEval(20, "(+ ten (+ ten (+ 3 -3)))");
+        assertBigInt(20, "(+ ten (+ ten (+ 3 -3)))");
+
+        // big integer test suite
+        String bigIntStr = "8888888888888888888888888888888888888888888888888888888888";
+        String expectedStr = "8888888888888888888888888888888888888888888888888888888889";
+        BigInteger expected = new BigInteger(expectedStr);
+        assertEval(expected,"(+ "+bigIntStr+" 1)");
+
+        String largerExpectedStr = "17777777777777777777777777777777777777777777777777777777776";
+        BigInteger largerExpected = new BigInteger(largerExpectedStr);
+        assertEval(largerExpected,"(+ "+bigIntStr+" "+bigIntStr+")");
+    }
+
+    @Test
+    public void testSumMixed()
+        throws Exception
+    {
+        assertEval("10.0", "(+ 100d-1)");
+        assertEval("10.25", "(+ 100d-1 0.25)");
+        assertEval("12.25", "(+ 100d-1 0.25 2)");
+        assertEval("12.00", "(+ 100d-1 0.25 2.0 -0.25)");
+        eval("(define quarter 0.25)");
+        assertEval("10.50", "(+ quarter (+ quarter (+ 0.0 10)))");
+
+        // big integer test suite
+        String bigIntStr = "8888888888888888888888888888888888888888888888888888888888";
+        String expectedStr = "8888888888888888888888888888888888888888888888888888888888.5";
+        BigDecimal expected = new BigDecimal(expectedStr);
+        assertEval(expected,"(+ "+bigIntStr+" 0.5)");
+
+        // big decimal test suite
+        String bigDecStr = "8888888888888888888888888888888888888888888888888888888888.5";
+        String expectedStr2 = "8888888888888888888888888888888888888888888888888888888888.25";
+        BigDecimal expected2 = new BigDecimal(expectedStr2);
+        assertEval(expected2,"(+ "+bigDecStr+" -0.25)");
     }
 
     @Test
     public void testSumArgType()
         throws Exception
     {
-        for (String form : nonIntExpressions())
-        {
-            String expr = "(+ " + form + ")";
-            expectArgTypeFailure(expr, 0);
-
-            expr = "(+ 1 " + form + " 3)";
-            expectArgTypeFailure(expr, 1);
-        }
+        expectArgTypeFailure("(+ 10 10e-2)",1);
     }
 
     @Test
     public void testProduct()
         throws Exception
     {
-        assertEval(1, "(*)");
-        assertEval(4, "(* 4)");
-        assertEval(20, "(* 4 5)");
-        assertEval(-20, "(* 4 -5)");
-        assertEval(40, "(* 4 5 2)");
+        assertBigInt(1, "(*)");
+        assertBigInt(4, "(* 4)");
+        assertBigInt(20, "(* 4 5)");
+        assertBigInt(-20, "(* 4 -5)");
+        assertBigInt(40, "(* 4 5 2)");
         eval("(define ten 10)");
-        assertEval(11, "(+ ten (+ ten (* 3 -3)))");
+        assertBigInt(11, "(+ ten (+ ten (* 3 -3)))");
+
+        // big integer test suite
+        String bigIntStr = "8888888888888888888888888888888888888888888888888888888888";
+        String expectedStr = "17777777777777777777777777777777777777777777777777777777776";
+        BigInteger expected = new BigInteger(expectedStr);
+        assertEval(expected,"(* "+bigIntStr+" 2)");
+
+        BigInteger expected2 = new BigInteger("-"+bigIntStr);
+        assertEval(expected2,"(* "+bigIntStr+" -1)");
+    }
+
+    @Test
+    public void testProductMixed()
+        throws Exception
+    {
+        assertEval("10.0", "(* 100d-1)");
+        assertEval("2.500", "(* 100d-1 0.25)");
+        assertEval("5.000", "(* 100d-1 0.25 2)");
+        assertEval("-1.250000", "(* 100d-1 0.25 2.0 -0.25)");
+        eval("(define quarter 0.25)");
+        assertEval("1.25000", "(* quarter (* quarter (* 2.0 10)))");
+
+        // big integer test suite
+        String bigIntStr = "8888888888888888888888888888888888888888888888888888888888";
+        String expectedStr = "4444444444444444444444444444444444444444444444444444444444";
+        BigDecimal expected = new BigDecimal(expectedStr);
+        assertEval(expected,"(* "+bigIntStr+" 0.5)");
     }
 
     @Test
     public void testProductArgType()
         throws Exception
     {
-        for (String form : nonIntExpressions())
-        {
-            String expr = "(* " + form + ")";
-            expectArgTypeFailure(expr, 0);
-
-            expr = "(* 1 " + form + " 3)";
-            expectArgTypeFailure(expr, 1);
-        }
+        expectArgTypeFailure("(* 10 10e-2)",1);
     }
 
     @Test
     public void testDifference()
         throws Exception
     {
-        assertEval(-1, "(- 1)");
-        assertEval(-1, "(- 3 4)");
-        assertEval(-6, "(- 3 4 5)");
+        assertBigInt(-1, "(- 1)");
+        assertBigInt(-1, "(- 3 4)");
+        assertBigInt(-6, "(- 3 4 5)");
+
+        // big integer test suite
+        String bigIntStr = "8888888888888888888888888888888888888888888888888888888888";
+        String expectedStr = "4444444444444444444444444444444444444444444444444444444444";
+        BigInteger expected = new BigInteger(expectedStr);
+        assertEval(expected,"(- "+bigIntStr+" "+expectedStr+")");
+
+        BigInteger expected2 = new BigInteger("-"+expectedStr);
+        assertEval(expected2,"(- "+bigIntStr+" "+expectedStr+" "+expectedStr+" "+expectedStr+")");
     }
 
-    @Test(expected = ArityFailure.class)
+    @Test
+    public void testDifferenceMixed()
+        throws Exception
+    {
+        //assertEval("-10.0", "(- 100d-1)");
+        //assertEval("9.75", "(- 100d-1 0.25)");
+        assertEval("7.75", "(- 100d-1 0.25 2)");
+        assertEval("8.00", "(- 100d-1 0.25 2.0 -0.25)");
+        eval("(define quarter 0.25)");
+        assertEval("-7.99", "(- 0.26 (- quarter (- 2.0 10)))");
+
+        // big integer test suite
+        String bigIntStr = "8888888888888888888888888888888888888888888888888888888888";
+        String expectedStr = "8888888888888888888888888888888888888888888888888888888887.75";
+        BigDecimal expected = new BigDecimal(expectedStr);
+        assertEval(expected,"(- "+bigIntStr+" 0.25)");
+    }
+
+    @Test
     public void testDifferenceNoArgs()
         throws Exception
     {
-        eval("(-)");
+        expectArityFailure("(-)");
     }
 
     @Test
     public void testDifferenceArgType()
         throws Exception
     {
-        for (String form : nonIntExpressions())
-        {
-            String expr = "(- " + form + ")";
-            expectArgTypeFailure(expr, 0);
-
-            expr = "(- 1 " + form + " 3)";
-            expectArgTypeFailure(expr, 1);
-        }
+        expectArgTypeFailure("(- 10 10e-2)",1);
     }
 
     @Test

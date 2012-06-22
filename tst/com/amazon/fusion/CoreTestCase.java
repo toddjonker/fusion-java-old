@@ -4,7 +4,9 @@ package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import com.amazon.ion.IonContainer;
+import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
@@ -14,6 +16,7 @@ import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.system.IonSystemBuilder;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -228,6 +231,24 @@ public class CoreTestCase
         }
         Assert.fail("Invalid type.");
     }
+
+    protected void assertEval(BigDecimal expected, String expressionIon)
+            throws FusionException
+        {
+            Object fv = myRuntime.eval(expressionIon);
+            IonValue observed = FusionValue.toIonValue(fv);
+            if (observed instanceof IonDecimal)
+            {
+                IonDecimal iObsExp = (IonDecimal)observed;
+                BigDecimal obsExp = iObsExp.bigDecimalValue();
+                if (obsExp.compareTo(expected) == 0)
+                {
+                    return;
+                }
+                Assert.fail("Discrepency: Observed "+obsExp.toString()+", expected "+expected.toString());
+            }
+            Assert.fail("Invalid type.");
+        }
 
     protected void assertBigInt(int expectedInt, String expressionIon)
         throws FusionException

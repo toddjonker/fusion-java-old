@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.ion.util.IonTextUtils.printString;
+
 import java.io.File;
 import org.junit.Before;
 import org.junit.Ignore;

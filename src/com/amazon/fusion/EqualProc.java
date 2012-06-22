@@ -20,7 +20,7 @@ final class EqualProc
         //    "                                                                               |
         super("Returns true if the arguments are equal if the a arguments are of type \n" +
 
-                "integer, boolean, string, or timestamp.");
+                "integer, decimal, boolean, string, or timestamp.");
     }
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
@@ -31,6 +31,7 @@ final class EqualProc
         IonValue leftVal  = FusionValue.toIonValue(args[0]);
         IonValue rightVal = FusionValue.toIonValue(args[1]);
         boolean result = false;
+        int compareVal = 0;
 
         if (leftVal == null || rightVal == null)
         {
@@ -40,13 +41,13 @@ final class EqualProc
         {
             IonInt left  = (IonInt) leftVal;
             IonInt right = (IonInt) rightVal;
-            int compareVal = left.bigIntegerValue().compareTo(right.bigIntegerValue());
+            compareVal = left.bigIntegerValue().compareTo(right.bigIntegerValue());
             result = (compareVal == 0);
         } else if (leftVal instanceof IonDecimal && rightVal instanceof IonDecimal)
         {
             IonDecimal left = (IonDecimal) leftVal;
             IonDecimal right = (IonDecimal) rightVal;
-            int compareVal = left.bigDecimalValue().compareTo(right.bigDecimalValue());
+            compareVal = left.bigDecimalValue().compareTo(right.bigDecimalValue());
             result = (compareVal == 0);
         } else if (leftVal instanceof IonBool && rightVal instanceof IonBool)
         {
@@ -62,7 +63,7 @@ final class EqualProc
         {
             IonTimestamp left = (IonTimestamp) leftVal;
             IonTimestamp right = (IonTimestamp) rightVal;
-            int compareVal = left.timestampValue().compareTo(right.timestampValue());
+            compareVal = left.timestampValue().compareTo(right.timestampValue());
             result = (compareVal == 0);
         } else
         {
