@@ -42,11 +42,6 @@ final class SumProc
             newResult = op1.add(op2);
         }
 
-        if (newResult == null)
-        {
-            emitContractFailure("int or decimal", operand);
-        }
-
         return newResult;
     }
 
@@ -60,6 +55,11 @@ final class SumProc
         for (int i = 0; i < args.length; i++)
         {
             Number operandNum = checkBigArg(i, args);
+            if (operandNum == null)
+            {
+                throw contractFailure("Expected: int or decimal; observed: "+
+                                      FusionValue.writeToString(args[i]));
+            }
             result = add(result,operandNum);
         }
 

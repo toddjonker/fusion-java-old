@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -10,6 +11,14 @@ import org.junit.Test;
 public class StructTest
     extends CoreTestCase
 {
+    @Before
+    public void setupTest()
+        throws FusionException
+    {
+        eval("(use 'fusion/struct')");
+    }
+
+
     @Test
     public void testSize()
         throws Exception
@@ -125,5 +134,70 @@ public class StructTest
             String expr = "(for_each_field add_name " + form + ")";
             expectArgTypeFailure(expr, 1);
         }
+    }
+
+    @Test
+    public void makeStruct()
+        throws Exception
+    {
+         assertEval("{}","(struct_make)");
+         assertEval("{f:3}","(struct_make \"f\" 3)");
+         assertEval("{hello:\"world\"}", "(struct_make \"hello\" \"world\")");
+         assertEval("{f:3,g:\"hello\"}","(struct_make \"f\" 3 \"g\" \"hello\")");
+         assertEval("{A:3,B:[true,false,[]]}","(struct_make \"A\" 3 \"B\" [true,false,[]])");
+         assertEval("{hello:\"world\"}", "(struct_make \"hello\" \"hello\" \"hello\" \"world\")");
+    }
+
+    @Test
+    public void makeStructFail()
+        throws Exception
+    {
+        expectContractFailure("(struct_make \"hello\")");
+        expectContractFailure("(struct_make \"hello\" 13 \"world\")");
+
+        expectArgTypeFailure("(struct_make 15 14)",0);
+    }
+
+    @Test
+    public void structZip()
+        throws Exception
+    {
+        assertEval("{f:3}","(struct_zip [\"f\"] [3])");
+        assertEval("{hello:\"world\"}", "(struct_zip [\"hello\"] [\"world\"])");
+        assertEval("{f:3,g:\"hello\"}","(struct_zip [\"f\",\"g\"] [3,\"hello\"])");
+        assertEval("{A:3,B:[true,false,[]]}","(struct_zip [\"A\",\"B\"] [3,[true,false,[]]])");
+        assertEval("{A:3}","(struct_zip [\"A\",\"A\"] [[true,false,[]],3])");
+        assertEval("{A:3}","(struct_zip [\"A\",\"B\"] [3])");
+    }
+
+    @Test
+    public void structZipFail()
+        throws Exception
+    {
+        eval("(define elemList [1,2,3])");
+        expectArityFailure("(struct_zip)");
+        expectArityFailure("(struct_zip elemList)");
+        expectArityFailure("(struct_zip elemList elemList elemList)");
+
+        expectContractFailure("(struct_zip [\"hello\",2,\"world\"] elemList)");
+    }
+
+    @Test
+    public void structUnion()
+        throws Exception
+    {
+        assertEval("{f:3}","(struct_union {f:3})");
+        assertEval("{}","(struct_union)");
+        assertEval("{}","(struct_union {} {})");
+        assertEval("{f:4}","(struct_union {f:3} {f:4})");
+        assertEval("{f:3,g:4}","(struct_union {f:3} {g:4})");
+        assertEval("{f:3,g:4,h:5}","(struct_union {f:3} {g:4,h:5})");
+    }
+
+    @Test
+    public void structUnionFail()
+        throws Exception
+    {
+        expectArgTypeFailure("(struct_union {f:3} 4)",1);
     }
 }

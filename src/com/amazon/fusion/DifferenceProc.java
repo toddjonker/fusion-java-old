@@ -45,11 +45,6 @@ final class DifferenceProc
                 newResult = op1.subtract(op2);
             }
 
-            if (newResult == null)
-            {
-                emitContractFailure("int or decimal", operand);
-            }
-
             return newResult;
         }
 
@@ -72,6 +67,11 @@ final class DifferenceProc
                 for (int i = 1; i < args.length; i++)
                 {
                     operandNum = checkBigArg(i, args);
+                    if (operandNum == null)
+                    {
+                        throw contractFailure("Expected: int or decimal; observed: "+
+                                              FusionValue.writeToString(args[i]));
+                    }
                     result = subtract(result,operandNum);
                 }
             }

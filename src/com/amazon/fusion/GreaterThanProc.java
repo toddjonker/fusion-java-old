@@ -35,7 +35,10 @@ final class GreaterThanProc
 
         if (leftVal == null || rightVal == null)
         {
-            emitContractFailure();
+            throw contractFailure("One or more arguments are not IonValues: "+
+                                  "Expected: int, decimal, or timestamp; "+
+                                  "observed: "+ FusionValue.writeToString(args[0]) +
+                                  " and " + FusionValue.writeToString(args[1]));
         }
         if (leftVal instanceof IonInt && rightVal instanceof IonInt)
         {
@@ -54,7 +57,10 @@ final class GreaterThanProc
             compareVal = left.timestampValue().compareTo(right.timestampValue());
         } else
         {
-            emitContractFailure();
+            throw contractFailure("One or more args is not of a valid Ion type."+
+                                  "Expected: int, decimal, or timestamp; "+
+                                  "observed: "+ FusionValue.writeToString(args[0]) +
+                                  " and " + FusionValue.writeToString(args[1]));
         }
         result = (compareVal == 1);
         fusionResult = eval.newBool(result);

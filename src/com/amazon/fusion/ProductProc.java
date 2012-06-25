@@ -43,11 +43,6 @@ final class ProductProc
                 newResult = op1.multiply(op2);
             }
 
-            if (newResult == null)
-            {
-                emitContractFailure("int or decimal", operand);
-            }
-
             return newResult;
         }
 
@@ -61,6 +56,11 @@ final class ProductProc
             for (int i = 0; i < args.length; i++)
             {
                 Number operandNum = checkBigArg(i, args);
+                if (operandNum == null)
+                {
+                    throw contractFailure("Expected: int or decimal; observed: "+
+                                          FusionValue.writeToString(args[i]));
+                }
                 result = multiply(result,operandNum);
             }
 
@@ -71,6 +71,7 @@ final class ProductProc
             {
                 finalResult = eval.newDecimal((BigDecimal)result);
             }
+
 
             return finalResult;
         }

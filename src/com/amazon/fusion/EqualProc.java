@@ -35,7 +35,10 @@ final class EqualProc
 
         if (leftVal == null || rightVal == null)
         {
-            emitContractFailure();
+            throw contractFailure("One or more args is not of a valid Ion type."+
+                    "Expected: int, decimal, bool, or timestamp; "+
+                    "observed: "+ FusionValue.writeToString(args[0]) +
+                    " and " + FusionValue.writeToString(args[1]));
         }
         if (leftVal instanceof IonInt && rightVal instanceof IonInt)
         {
@@ -67,7 +70,10 @@ final class EqualProc
             result = (compareVal == 0);
         } else
         {
-            emitContractFailure();
+            throw contractFailure("One or more args is not of a valid Ion type."+
+                                  "Expected: int, decimal, bool, or timestamp; "+
+                                  "observed: "+ FusionValue.writeToString(args[0]) +
+                                  " and " + FusionValue.writeToString(args[1]));
         }
 
         return eval.newBool(result);

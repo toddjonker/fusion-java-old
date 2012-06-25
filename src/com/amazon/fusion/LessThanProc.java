@@ -35,7 +35,10 @@ final class LessThanProc
 
         if (leftVal == null || rightVal == null)
         {
-            emitContractFailure();
+            throw contractFailure("One or more arguments are not IonValues: "+
+                                  "Expected: int, decimal, or timestamp; "+
+                                  "observed: "+ FusionValue.writeToString(args[0]) +
+                                  " and " + FusionValue.writeToString(args[1]));
         }
         if (leftVal instanceof IonInt && rightVal instanceof IonInt)
         {
@@ -54,7 +57,10 @@ final class LessThanProc
             compareVal = left.timestampValue().compareTo(right.timestampValue());
         } else
         {
-            emitContractFailure();
+            throw contractFailure("One or more arguments are not IonValues: "+
+                                  "Expected: int, decimal, or timestamp; "+
+                                  "observed: "+ FusionValue.writeToString(args[0]) +
+                                  " and " + FusionValue.writeToString(args[1]));
         }
         result = (compareVal == -1);
         fusionResult = eval.newBool(result);

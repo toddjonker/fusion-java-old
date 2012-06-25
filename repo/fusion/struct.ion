@@ -1,0 +1,13 @@
+(module 'fusion/struct' (quote '#%kernel')
+
+  // We start with #%kernel for access to java_new
+  (use 'fusion/base')
+
+  (provide struct_union
+           struct_make
+           struct_zip)
+
+  (define struct_union   (java_new "com.amazon.fusion.StructUnionAllProc"))
+  (define struct_make    (java_new "com.amazon.fusion.StructMakeProc"))
+  (define struct_zip     (java_new "com.amazon.fusion.StructZipProc"))
+)

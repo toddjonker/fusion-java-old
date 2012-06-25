@@ -12,7 +12,6 @@ import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonText;
-import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.NullValueException;
 import com.amazon.ion.util.IonTextUtils;
@@ -371,40 +370,6 @@ abstract class Procedure
         catch (ClassCastException e) {}
 
         throw new ArgTypeFailure(this, "procedure", argNum, args);
-    }
-
-    void emitContractFailure()
-        throws FusionException
-    {
-        throw new ContractFailure("Mismatched or invalid type.");
-    }
-
-    void emitContractFailure(String expected, String observed)
-        throws FusionException
-    {
-        contractFailure("Mismatched or invalid type: expected "+expected+", observed "+observed);
-    }
-
-    void emitContractFailure(String expected, IonType ionType)
-        throws FusionException
-    {
-        emitContractFailure(expected, ionType.name().toLowerCase());
-    }
-
-    void emitContractFailure(String expected, Object obj)
-        throws FusionException
-    {
-        if (obj instanceof FusionValue)
-        {
-            emitContractFailure(expected, ((FusionValue)obj).write());
-        }
-        IonValue ionValue = FusionValue.toIonValue(obj);
-        String observed = "unknown type";
-        if (ionValue != null)
-        {
-            observed = ionValue.getType().name().toLowerCase();
-        }
-        emitContractFailure(expected, observed);
     }
 
 }
