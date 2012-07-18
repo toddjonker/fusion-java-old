@@ -6,7 +6,6 @@ import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
-import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -86,8 +85,7 @@ final class ModuleKeyword
         String current = myCurrentModuleDeclareName.asString(eval);
         if (current != null)
         {
-            File file = new File(current);
-            id = ModuleIdentity.intern(file);
+            id = ModuleIdentity.intern(current);
         }
         else
         {

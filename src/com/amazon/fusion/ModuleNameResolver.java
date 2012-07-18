@@ -87,6 +87,13 @@ final class ModuleNameResolver
     {
         // TODO libName should not be absolute
         String fileName = libName + ".ion"; // TODO ugly hard-coding
+
+        if (getClass().getResource("/FUSION-REPO/" + fileName) != null)
+        {
+            ModuleIdentity id = ModuleIdentity.internFromJar(fileName);
+            return resolve(eval, id);
+        }
+
         File repo = findRepository();
         File pathFile = new File(repo, fileName);
         if (! pathFile.exists())
@@ -124,24 +131,29 @@ final class ModuleNameResolver
     }
 
 
-    private ModuleIdentity resolve(Evaluator eval, File pathFile)
+    private ModuleIdentity resolve(Evaluator eval, File pathFile) // inline
+        throws FusionException
+    {
+        ModuleIdentity id = ModuleIdentity.intern(pathFile);
+        return resolve(eval, id);
+    }
+
+    private ModuleIdentity resolve(Evaluator eval, ModuleIdentity id)
         throws FusionException
     {
         ModuleRegistry reg = eval.getModuleRegistry();
-        ModuleIdentity id = ModuleIdentity.intern(pathFile);
         if (reg.lookup(id) == null)
         {
-            FusionValue idString = eval.newString(id.toString());
+            FusionValue idString = eval.newString(id.internString());
             Evaluator loadEval =
                 eval.markedContinuation(myCurrentModuleDeclareName, idString);
             ModuleInstance module =
-                myLoadHandler.loadModule(loadEval, pathFile);
+                myLoadHandler.loadModule(loadEval, id);
             reg.register(module);
         }
 
         return id;
     }
-
 
 
     File findRepository()

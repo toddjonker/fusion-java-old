@@ -3,6 +3,9 @@
 package com.amazon.fusion;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,20 +13,45 @@ import java.util.Map;
  * A unique identitier for modules available to the Fusion runtime system.
  * This plays the same role as Racket's "resolved module path".
  */
-final class ModuleIdentity
+class ModuleIdentity
 {
     private static final Map<String,ModuleIdentity> ourInternedIdentities =
         new HashMap<String,ModuleIdentity>();
 
     static ModuleIdentity intern(String name)
     {
-        assert ! name.startsWith("/");
-
         ModuleIdentity interned = ourInternedIdentities.get(name);
         if (interned != null) return interned;
 
         ModuleIdentity id = new ModuleIdentity(name);
         ourInternedIdentities.put(name, id);
+        return id;
+    }
+
+    static ModuleIdentity internFromJar(final String name)
+    {
+        assert ! name.startsWith("/");
+
+        ModuleIdentity interned = ourInternedIdentities.get("jar:" + name);
+        if (interned != null) return interned;
+
+        ModuleIdentity id = new ModuleIdentity(name)
+        {
+            @Override
+            public String internString()
+            {
+                return "jar:" + super.internString();
+            }
+
+            @Override
+            InputStream open()
+                throws IOException
+            {
+                return getClass().getResourceAsStream("/FUSION-REPO/" + name);
+            }
+        };
+
+        ourInternedIdentities.put("jar:" + name, id);
         return id;
     }
 
@@ -36,7 +64,24 @@ final class ModuleIdentity
         ModuleIdentity interned = ourInternedIdentities.get(name);
         if (interned != null) return interned;
 
-        ModuleIdentity id = new ModuleIdentity(name);
+        ModuleIdentity id = new ModuleIdentity(name)
+        {
+            @Override
+            InputStream open()
+                throws IOException
+            {
+                File file = new File(internString());
+                return new FileInputStream(file);
+            }
+
+            @Override
+            String parentDirectory()
+            {
+                File file = new File(internString());
+                return file.getParentFile().getAbsolutePath();
+            }
+        };
+
         ourInternedIdentities.put(name, id);
         return id;
     }
@@ -49,12 +94,33 @@ final class ModuleIdentity
     }
 
 
+    InputStream open()
+        throws IOException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    String parentDirectory()
+    {
+        return null;
+    }
+
+    String identify()
+    {
+        return myName;  // TODO this is wrong for Jar resources
+    }
+
+
     @Override
     public String toString()
     {
         return myName;
     }
 
+    public String internString()
+    {
+        return myName;
+    }
 
     @Override
     public int hashCode()

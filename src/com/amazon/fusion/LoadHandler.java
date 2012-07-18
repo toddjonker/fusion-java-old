@@ -8,6 +8,7 @@ import com.amazon.ion.IonValue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 
 /**
@@ -88,19 +89,19 @@ final class LoadHandler
     }
 
 
-    private IonValue readSingleTopLevelValue(Evaluator eval, File file)
+    private IonValue readSingleTopLevelValue(Evaluator eval, ModuleIdentity id)
         throws FusionException
     {
         try
         {
-            FileInputStream in = new FileInputStream(file);
+            InputStream in = id.open();
             try
             {
                 Iterator<IonValue> i = eval.getSystem().iterate(in);
                 if (! i.hasNext())
                 {
                     String message =
-                        "Module file has no top-level forms: " + file;
+                        "Module file has no top-level forms: " + id;
                    throw new FusionException(message);
                 }
 
@@ -109,7 +110,7 @@ final class LoadHandler
                 {
                     String message =
                         "Module file has more than one top-level form: " +
-                        file;
+                        id;
                     throw new FusionException(message);
                 }
 
@@ -127,10 +128,10 @@ final class LoadHandler
     }
 
 
-    private IonSexp readModuleDeclaration(Evaluator eval, File path)
+    private IonSexp readModuleDeclaration(Evaluator eval, ModuleIdentity id)
         throws FusionException
     {
-        IonValue topLevel = readSingleTopLevelValue(eval, path);
+        IonValue topLevel = readSingleTopLevelValue(eval, id);
         try {
             IonSexp moduleDeclaration = (IonSexp) topLevel;
             if (moduleDeclaration.size() > 1)
@@ -144,7 +145,7 @@ final class LoadHandler
         }
         catch (ClassCastException e) { /* fall through */ }
 
-        String message = "Top-level form isn't (module ...): " + path;
+        String message = "Top-level form isn't (module ...): " + id;
         throw new FusionException(message);
     }
 
@@ -153,18 +154,21 @@ final class LoadHandler
      * @param path may be relative, in which case it is resolved relative to
      * the {@code current_directory} parameter.
      */
-    ModuleInstance loadModule(Evaluator eval, File path)
+    ModuleInstance loadModule(Evaluator eval, ModuleIdentity id)
         throws FusionException
     {
         try
         {
-            File file = resolvePath(eval, path);
-            IonValue moduleDeclaration = readModuleDeclaration(eval, file);
+            IonValue moduleDeclaration = readModuleDeclaration(eval, id);
 
-            String dirPath = file.getParentFile().getAbsolutePath();
-            Evaluator bodyEval =
-                eval.markedContinuation(myCurrentLoadRelativeDirectory,
-                                        eval.newString(dirPath));
+            Evaluator bodyEval = eval;
+            String dirPath = id.parentDirectory();
+            if (dirPath != null)
+            {
+                bodyEval =
+                    eval.markedContinuation(myCurrentLoadRelativeDirectory,
+                                            eval.newString(dirPath));
+            }
 
             // TODO Do we need an Evaluator with no continuation marks?
             // This namespace ensures correct binding for 'module'
@@ -178,7 +182,8 @@ final class LoadHandler
         catch (FusionException e)
         {
             String message =
-                "Failure loading module from " + path + ": " + e.getMessage();
+                "Failure loading module from " + id.identify() +
+                ": " + e.getMessage();
             throw new FusionException(message, e);
         }
     }
