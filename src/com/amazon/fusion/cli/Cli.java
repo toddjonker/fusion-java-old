@@ -5,7 +5,7 @@ package com.amazon.fusion.cli;
 import java.io.IOException;
 
 /**
- * The Fusion command-line interface.
+ * The Fusion command-line interface, just here to provide a {@link #main} method.
  */
 public final class Cli
 {

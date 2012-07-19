@@ -114,7 +114,7 @@ abstract class NamedValue
      * <pre>
      * if (somethingBadHappened)
      * {
-     *   throw failure("somebody screwed up");
+     *   throw contractFailure("somebody screwed up");
      * }
      * </pre>
      *
