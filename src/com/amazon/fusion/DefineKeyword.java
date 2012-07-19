@@ -17,11 +17,13 @@ final class DefineKeyword
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+    FusionValue invoke(Evaluator eval, Environment env, IonSexp stx)
         throws FusionException
     {
-        IonSymbol name = (IonSymbol) expr.get(1);
-        IonValue ionValue = expr.get(2);
+        SyntaxChecker check = new SyntaxChecker(getInferredName(), stx);
+        check.arityExact(3);
+        IonSymbol name = check.requiredSymbol("identifier to define", 1);
+        IonValue ionValue = stx.get(2);
 
         FusionValue fusionValue = eval.eval(env, ionValue);
 
