@@ -10,7 +10,7 @@ import java.util.Iterator;
 /**
  *
  */
-final class StructUnionAllProc
+public final class StructUnionAllProc
     extends Procedure
 {
     StructUnionAllProc()
@@ -18,6 +18,7 @@ final class StructUnionAllProc
         //    "                                                                               |
         super("Constructs a struct by performing a union of up to two structs");
     }
+
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException

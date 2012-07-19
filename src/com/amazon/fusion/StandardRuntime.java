@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionValue.UNDEF;
+
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
@@ -11,7 +12,7 @@ import com.amazon.ion.system.IonSystemBuilder;
 /**
  *
  */
-final class StandardRuntime
+public final class StandardRuntime
     implements FusionRuntime
 {
     private final IonSystem mySystem;
@@ -25,7 +26,7 @@ final class StandardRuntime
      *
      * @see {@link FusionValueTest#testIonValue()}.
      */
-    StandardRuntime()
+    public StandardRuntime()
     {
         mySystem = IonSystemBuilder.standard().build();
         myEvaluator = new Evaluator(mySystem);
@@ -78,4 +79,10 @@ final class StandardRuntime
 
         return result;
     }
+
+    public void bind (String name, FusionValue value)
+    {
+        myEnvironment.namespace().bind(name, value);
+    }
+
 }

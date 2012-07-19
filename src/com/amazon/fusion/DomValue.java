@@ -12,7 +12,7 @@ import java.io.IOException;
 /**
  * A {@link FusionValue} that contains an {@link IonValue}.
  */
-final class DomValue
+public final class DomValue
     extends FusionValue
     implements Writeable
 {
@@ -21,7 +21,7 @@ final class DomValue
     /**
      * @param dom must not be null.
      */
-    DomValue(IonValue dom)
+    public DomValue(IonValue dom)
     {
         assert dom != null;
         myDom = dom;

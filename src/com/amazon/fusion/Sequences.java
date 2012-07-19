@@ -9,9 +9,9 @@ import java.util.Iterator;
 /**
  *
  */
-class Sequences
+public class Sequences
 {
-    private static final class DomStream extends Stream
+    public static final class DomStream extends Stream
     {
         private final Iterator<IonValue> myIonIterator;
 
@@ -65,7 +65,7 @@ class Sequences
         return Sequences.streamFor(new DomValue(ionSeq));
     }
 
-    static Stream streamFor(Iterator<IonValue> iter)
+    public static Stream streamFor(Iterator<IonValue> iter)
     {
         return new DomStream(iter);
     }

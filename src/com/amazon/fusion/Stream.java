@@ -10,7 +10,7 @@ import java.io.IOException;
  * These are not equivalent to Racket streams, since those are functional and
  * these are stateful.
  */
-abstract class Stream
+public abstract class Stream
     extends FusionValue
 {
     abstract boolean hasNext() throws FusionException;

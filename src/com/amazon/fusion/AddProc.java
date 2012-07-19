@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.cloneIfContained;
+
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonValue;
 

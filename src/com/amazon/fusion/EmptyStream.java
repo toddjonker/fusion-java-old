@@ -6,7 +6,7 @@ package com.amazon.fusion;
 /**
  * Class to express empty streams
  */
-class EmptyStream
+public class EmptyStream
     extends Stream
 {
     @Override

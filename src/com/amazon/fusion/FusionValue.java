@@ -2,7 +2,9 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.Sequences.DomStream;
 import com.amazon.ion.IonBool;
+import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonType;
@@ -10,6 +12,7 @@ import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Iterator;
 
 /**
  * The core features of a Fusion run-time value.  Note that the set of Fusion
@@ -467,7 +470,7 @@ public abstract class FusionValue
      *
      * @return null if this value's type isn't an Ion type.
      */
-    static IonValue toIonValue(Object value)
+    public static IonValue toIonValue(Object value)
     {
         if (value instanceof DomValue)
         {
@@ -547,4 +550,28 @@ public abstract class FusionValue
         }
         return null;
     }
+
+    public static Stream streamFor(IonSequence ionSeq)
+        throws ContractFailure
+    {
+        return Sequences.streamFor(new DomValue(ionSeq));
+    }
+
+    public static Stream streamFor(Iterator<IonValue> iter)
+    {
+        return new DomStream(iter);
+    }
+
+    public static boolean streamHasNext(Stream s)
+        throws FusionException
+    {
+        return s.hasNext();
+    }
+
+    public static FusionValue streamNext(Stream s)
+        throws FusionException
+    {
+        return s.next();
+    }
+
 }
