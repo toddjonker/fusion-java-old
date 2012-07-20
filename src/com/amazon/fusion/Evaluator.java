@@ -4,17 +4,13 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.cloneIfContained;
 import static com.amazon.fusion.FusionValue.UNDEF;
-
-import com.amazon.ion.IonBool;
-import com.amazon.ion.IonDecimal;
-import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
+import com.amazon.ion.Timestamp;
 import com.amazon.ion.ValueFactory;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -136,44 +132,91 @@ final class Evaluator
 
     //========================================================================
 
+    FusionValue newNull()
+    {
+        IonValue dom = mySystem.newNull();
+        return new DomValue(dom);
+    }
 
     FusionValue newBool(boolean value)
     {
-        IonBool dom = mySystem.newBool(value);
+        IonValue dom = mySystem.newBool(value);
+        return new DomValue(dom);
+    }
+
+    FusionValue newBool(Boolean value)
+    {
+        IonValue dom = mySystem.newBool(value);
         return new DomValue(dom);
     }
 
     FusionValue newInt(long value)
     {
-        IonInt dom = mySystem.newInt(value);
+        IonValue dom = mySystem.newInt(value);
         return new DomValue(dom);
     }
 
     FusionValue newString(String value)
     {
-        IonString dom = mySystem.newString(value);
+        IonValue dom = mySystem.newString(value);
+        return new DomValue(dom);
+    }
+
+    FusionValue newSymbol(String value)
+    {
+        IonValue dom = mySystem.newSymbol(value);
         return new DomValue(dom);
     }
 
     FusionValue newInt(BigInteger value)
     {
-        IonInt dom = mySystem.newInt(value);
+        IonValue dom = mySystem.newInt(value);
         return new DomValue(dom);
     }
 
     FusionValue newDecimal(BigDecimal value)
     {
-        IonDecimal dom = mySystem.newDecimal(value);
+        IonValue dom = mySystem.newDecimal(value);
         return new DomValue(dom);
     }
 
     FusionValue newDecimal(double value)
     {
-        IonDecimal dom = mySystem.newDecimal(value);
+        IonValue dom = mySystem.newDecimal(value);
         return new DomValue(dom);
     }
 
+    FusionValue newFloat(double value)
+    {
+        IonValue dom = mySystem.newFloat(value);
+        return new DomValue(dom);
+    }
 
+    FusionValue newFloat(Double value)
+    {
+        IonValue dom = (value == null
+                           ? mySystem.newNullFloat()
+                           : mySystem.newFloat(value));
+        return new DomValue(dom);
+    }
+
+    FusionValue newTimestamp(Timestamp value)
+    {
+        IonValue dom = mySystem.newTimestamp(value);
+        return new DomValue(dom);
+    }
+
+    FusionValue newBlob(byte[] value)
+    {
+        IonValue dom = mySystem.newBlob(value);
+        return new DomValue(dom);
+    }
+
+    FusionValue newClob(byte[] value)
+    {
+        IonValue dom = mySystem.newClob(value);
+        return new DomValue(dom);
+    }
 
     //========================================================================
 
