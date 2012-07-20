@@ -14,7 +14,7 @@ public class FusionRuntimeBuilder
         return new FusionRuntimeBuilder();
     }
 
-    public FusionRuntime build()
+    public static FusionRuntime build()
     {
         return new StandardRuntime();
     }

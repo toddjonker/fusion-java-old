@@ -7,9 +7,9 @@ import com.amazon.ion.IonValue;
 import java.util.Iterator;
 
 /**
- *
+ * Implements StreamFor and DomStream
  */
-public class Sequences
+class Sequences
 {
     public static final class DomStream extends Stream
     {
@@ -65,7 +65,7 @@ public class Sequences
         return Sequences.streamFor(new DomValue(ionSeq));
     }
 
-    public static Stream streamFor(Iterator<IonValue> iter)
+    static Stream streamFor(Iterator<IonValue> iter)
     {
         return new DomStream(iter);
     }

@@ -50,8 +50,8 @@ public class StreamTest
     public void testEmptyStream()
         throws Exception
     {
-        assertEval("[]","(stream_to_list (empty_stream) )");
-        assertEval(false,"(is_null (stream_has_next (empty_stream)))");
+        assertEval("[]","(stream_to_list empty_stream)");
+        assertEval(false,"(is_null (stream_has_next empty_stream))");
     }
 
     @Test
@@ -80,7 +80,6 @@ public class StreamTest
     public void testStreamClassArityCheck()
         throws Exception
     {
-        expectArityFailure("(empty_stream 1)");
         expectArityFailure("(stream_to_list)");
         expectArityFailure("(stream_for)");
         expectArityFailure("(inject_stream)");
@@ -116,7 +115,7 @@ public class StreamTest
     public void testHasNext()
         throws Exception
     {
-        assertEval(false,"(stream_has_next (empty_stream))");
+        assertEval(false,"(stream_has_next empty_stream)");
         assertEval(true, "(stream_has_next (stream_for [8]))");
     }
 
@@ -127,12 +126,12 @@ public class StreamTest
         assertEval("[]",
                    "(stream_to_list" +
                    " (stream_union" +
-                   "  (empty_stream)" +
-                   "   (empty_stream)) )");
+                   "  empty_stream" +
+                   "   empty_stream) )");
         assertEval("[1,2]",
                    "(stream_to_list" +
                    " (stream_union" +
-                   "  (empty_stream)"+
+                   "  empty_stream"+
                    "   (stream_for [1,2]) ) )");
         assertEval("[1,2,3,4]",
                    "(stream_to_list" +
@@ -330,7 +329,7 @@ public class StreamTest
          assertEval(false,
                     "(is_stream 0)");
          assertEval(true,
-                    "(is_stream (empty_stream))");
+                    "(is_stream empty_stream)");
          assertEval(false,
                     "(is_stream [0,1,2])");
          assertEval(false,

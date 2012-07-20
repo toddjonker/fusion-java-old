@@ -83,6 +83,6 @@ public class FunctionalOperatorTest
         eval("(define is_not_stream (negate is_stream))");
         assertEval(true, "(is_not_stream 1)");
         assertEval(false, "(is_not_stream (stream_for [1]))");
-        assertEval(false, "(is_not_stream (empty_stream))");
+        assertEval(false, "(is_not_stream empty_stream)");
     }
 }

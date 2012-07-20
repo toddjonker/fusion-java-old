@@ -12,7 +12,7 @@ import com.amazon.ion.system.IonSystemBuilder;
 /**
  *
  */
-public final class StandardRuntime
+final class StandardRuntime
     implements FusionRuntime
 {
     private final IonSystem mySystem;
@@ -26,7 +26,7 @@ public final class StandardRuntime
      *
      * @see {@link FusionValueTest#testIonValue()}.
      */
-    public StandardRuntime()
+    StandardRuntime()
     {
         mySystem = IonSystemBuilder.standard().build();
         myEvaluator = new Evaluator(mySystem);
@@ -80,6 +80,10 @@ public final class StandardRuntime
         return result;
     }
 
+    /**
+     * @param value should not be null.
+     */
+    @Override
     public void bind (String name, FusionValue value)
     {
         myEnvironment.namespace().bind(name, value);

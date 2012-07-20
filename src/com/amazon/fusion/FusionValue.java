@@ -38,6 +38,8 @@ public abstract class FusionValue
     /** The singular {@code undef} value. */
     public final static FusionValue UNDEF = new Undef();
 
+    /** An empty stream */
+    public final static FusionValue EMPTY_STREAM = new EmptyStream();
 
     //========================================================================
 
@@ -470,7 +472,7 @@ public abstract class FusionValue
      *
      * @return null if this value's type isn't an Ion type.
      */
-    public static IonValue toIonValue(Object value)
+    static IonValue toIonValue(Object value)
     {
         if (value instanceof DomValue)
         {
@@ -492,7 +494,7 @@ public abstract class FusionValue
      * @return null if this value's type isn't an Ion type (for example,
      * Fusion procedures).
      */
-    static IonValue toIonValue(Object value, ValueFactory factory)
+    public static IonValue toIonValue(Object value, ValueFactory factory)
     {
         if (value instanceof DomValue)
         {
@@ -551,27 +553,54 @@ public abstract class FusionValue
         return null;
     }
 
-    public static Stream streamFor(IonSequence ionSeq)
+    /**
+     * Returns all the elements in the list in stream form. Original
+     * order is maintained.
+     */
+    static Stream streamFor(IonSequence ionSeq)
         throws ContractFailure
     {
         return Sequences.streamFor(new DomValue(ionSeq));
     }
 
+    /**
+     * Returns all the values stored inside the iterator as elements
+     * inside a Fusion stream. Original order is maintained.
+     */
     public static Stream streamFor(Iterator<IonValue> iter)
     {
         return new DomStream(iter);
     }
 
-    public static boolean streamHasNext(Stream s)
+    /**
+     * Returns a boolean indicating whether a stream has any more elements to
+     * be fetched
+     *
+     * @throws {@code ContractFailure} if input value is not a Fusion stream
+     */
+    static boolean streamHasNext(FusionValue val)
         throws FusionException
     {
-        return s.hasNext();
+        if (val instanceof Stream)
+        {
+            return ((Stream)val).hasNext();
+        }
+        throw new ContractFailure("Cannot invoke Stream.next() on this non-Stream value: "+val.toString());
     }
 
-    public static FusionValue streamNext(Stream s)
+    /**
+     * Returns the next element in the stream
+     *
+     * @throws {@code ContractFailure} if input value is not a Fusion stream
+     */
+    static FusionValue streamNext(FusionValue val)
         throws FusionException
     {
-        return s.next();
+        if (val instanceof Stream)
+        {
+            return ((Stream)val).next();
+        }
+        throw new ContractFailure("Cannot invoke Stream.next() on this non-Stream value: "+val.toString());
     }
 
 }

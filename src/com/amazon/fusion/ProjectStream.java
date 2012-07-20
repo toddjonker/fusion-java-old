@@ -2,12 +2,6 @@
 
 package com.amazon.fusion;
 
-
-
-
-
-
-
 /**
  * Class to return the projection of a stream based on some procedure.
  */

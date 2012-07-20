@@ -20,7 +20,6 @@
   )
 
 
-  (define empty_stream         (java_new "com.amazon.fusion.EmptyStreamProc"))
   (define inject_stream        (java_new "com.amazon.fusion.StreamInjectProc"))
   (define is_stream            (java_new "com.amazon.fusion.IsStreamProc"))
   (define stream_cross_apply   (java_new "com.amazon.fusion.StreamCrossApplyProc"))

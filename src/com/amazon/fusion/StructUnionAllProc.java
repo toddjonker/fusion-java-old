@@ -10,7 +10,7 @@ import java.util.Iterator;
 /**
  *
  */
-public final class StructUnionAllProc
+final class StructUnionAllProc
     extends Procedure
 {
     StructUnionAllProc()

@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.ion.util.IonTextUtils.printString;
+
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonSymbol;
@@ -95,6 +96,7 @@ final class ModuleNameResolver
         }
 
         File repo = findRepository();
+        //File pathFile = new File(repo.toString()+"../../FusionJava/repo");
         File pathFile = new File(repo, fileName);
         if (! pathFile.exists())
         {
