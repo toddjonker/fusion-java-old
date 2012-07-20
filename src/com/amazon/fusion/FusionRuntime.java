@@ -37,9 +37,6 @@ public interface FusionRuntime
 
     /**
      * Binds an identifier with a value in this {@link FusionRuntime}'s namespace.
-     *
-     * @param source must not be null.
-     * @return not null, but perhaps {@link FusionValue#UNDEF}.
      */
     public void bind(String name, FusionValue value);
 

@@ -96,7 +96,6 @@ final class ModuleNameResolver
         }
 
         File repo = findRepository();
-        //File pathFile = new File(repo.toString()+"../../FusionJava/repo");
         File pathFile = new File(repo, fileName);
         if (! pathFile.exists())
         {
