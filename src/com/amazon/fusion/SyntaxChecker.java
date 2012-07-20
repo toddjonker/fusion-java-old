@@ -30,22 +30,27 @@ final class SyntaxChecker
         return new SyntaxFailure(myFormName, message, myForm);
     }
 
-
+    /**
+     * Arity includes the initial keyword!
+     */
     final void arityExact(int count)
         throws SyntaxFailure
     {
         if (myForm.size() != count)
         {
-            throw failure("expected " + count + " subforms");
+            throw failure("expected " + (count-1) + " subforms");
         }
     }
 
+    /**
+     * Arity includes the initial keyword!
+     */
     final void arityAtLeast(int count)
         throws SyntaxFailure
     {
         if (myForm.size() < count)
         {
-            throw failure("expect at least " + count + " subforms");
+            throw failure("expect at least " + (count-1) + " subforms");
         }
     }
 

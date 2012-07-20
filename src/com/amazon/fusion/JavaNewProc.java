@@ -79,7 +79,10 @@ final class JavaNewProc
         }
         catch (InstantiationException e)
         {
-            throw contractFailure("Error constructing Java class: " + klass);
+            String message =
+                "Unable to instantiate Java class: " + klass +
+                "; does it have a no-argument constructor?";
+            throw contractFailure(message);
         }
         catch (IllegalAccessException e)
         {
