@@ -2,19 +2,14 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonValue;
-
-/**
- *
- */
 @SuppressWarnings("serial")
 final class FusionAssertionFailure
     extends FusionException
 {
-    private final IonValue myExpr;
+    private final SyntaxValue myExpr;
     private final FusionValue myResult;
 
-    FusionAssertionFailure(String message, IonValue expr, FusionValue result)
+    FusionAssertionFailure(String message, SyntaxValue expr, FusionValue result)
     {
         super(message);
         myExpr = expr;

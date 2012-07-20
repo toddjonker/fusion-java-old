@@ -2,8 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonValue;
-
 /**
  * Indicates a reference to an unbound identifier.
  */
@@ -11,7 +9,7 @@ import com.amazon.ion.IonValue;
 public final class UnboundIdentifierFailure
     extends SyntaxFailure
 {
-    public UnboundIdentifierFailure(String name, IonValue... exprs)
+    public UnboundIdentifierFailure(String name, SyntaxValue... exprs)
     {
         super(name, "unbound identifier", exprs);
     }

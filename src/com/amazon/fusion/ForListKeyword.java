@@ -3,9 +3,6 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonList;
-import com.amazon.ion.IonSequence;
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
 
 /**
@@ -23,13 +20,13 @@ final class ForListKeyword
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp forStx)
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp forStx)
         throws FusionException
     {
         SyntaxChecker check = new SyntaxChecker(getInferredName(), forStx);
         check.arityAtLeast(2);
 
-        IonSequence bindingForms =
+        SyntaxSequence bindingForms =
             check.requiredSequence("sequence of bindings", 1);
 
         final int numBindings = bindingForms.size();
@@ -43,13 +40,13 @@ final class ForListKeyword
 
             for (int i = 0; i < numBindings; i++)
             {
-                IonSexp binding =
+                SyntaxSexp binding =
                     requiredSexp("name/value binding", i, bindingForms);
-                IonSymbol name =
+                SyntaxSymbol name =
                     requiredSymbol("name/value binding", 0, binding);
                 boundNames[i] = name.stringValue();
 
-                IonValue boundExpr =
+                SyntaxValue boundExpr =
                     requiredForm("name/value binding", 1, binding);
                 FusionValue boundValue = eval.eval(env, boundExpr);
                 streams[i] = Sequences.streamFor(boundValue);
@@ -72,7 +69,7 @@ final class ForListKeyword
                 Object nextResult = null;
                 for (int i = 2; i < forStx.size(); i++)
                 {
-                    IonValue bodyStx = forStx.get(i);
+                    SyntaxValue bodyStx = forStx.get(i);
                     nextResult = eval.eval(bodyEnv, bodyStx);
                 }
 

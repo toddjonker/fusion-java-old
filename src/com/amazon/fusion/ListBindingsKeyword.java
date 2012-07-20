@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonList;
-import com.amazon.ion.IonSexp;
 import com.amazon.ion.ValueFactory;
 import java.util.TreeSet;
 
@@ -24,12 +23,12 @@ final class ListBindingsKeyword
 
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
     {
         TreeSet<String> names = new TreeSet<String>();
         env.collectNames(names);
 
-        ValueFactory factory = expr.getSystem();
+        ValueFactory factory = eval.getSystem();
         IonList result = factory.newEmptyList();
 
         for (String name : names)

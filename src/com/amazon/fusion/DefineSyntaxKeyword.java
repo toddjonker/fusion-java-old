@@ -2,9 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonValue;
-
 final class DefineSyntaxKeyword
     extends KeywordValue
 {
@@ -18,7 +15,7 @@ final class DefineSyntaxKeyword
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp stx)
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
         SyntaxChecker check = new SyntaxChecker(getInferredName(), stx);
@@ -26,7 +23,7 @@ final class DefineSyntaxKeyword
 
         String keyword = check.requiredNonEmptySymbol("identifier", 1);
 
-        IonValue valueStx = stx.get(2);
+        SyntaxValue valueStx = stx.get(2);
         FusionValue xform = eval.eval(env, valueStx);
 
         // TODO check result type

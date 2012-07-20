@@ -2,10 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonValue;
-import com.amazon.ion.ValueFactory;
-
 /**
  * The {@code when} syntactic form.
  */
@@ -24,14 +20,14 @@ final class WhenKeyword
      * Transforms
      * {@code (when c b...)}
      * to
-     * {@code (if c (begin b...) undef}
+     * {@code (if c (begin b...) undef)}
      *
      * @param env
      * @param expr the input expression, including the keyword symbol.
      * @return
      */
     @Override
-    IonValue expand(IonSexp expr)
+    SyntaxValue expand(SyntaxSexp expr)
         throws SyntaxFailure
     {
         int whenExprSize = expr.size();
@@ -40,24 +36,14 @@ final class WhenKeyword
            throw new SyntaxFailure(getEffectiveName(), "", expr);
         }
 
-        int bindingPos = 1;
+        SyntaxValue conditionForm = expr.get(1);
 
-        ValueFactory vf = expr.getSystem();
-        IonSexp ifForm = vf.newEmptySexp();
+        SyntaxSexp beginForm = BeginKeyword.makeSyntax(expr, 2);
 
-        ifForm.add().newSymbol("if");
-        IonValue conditionForm = expr.get(1).clone();
-        ifForm.add(conditionForm);
-
-        IonSexp beginForm = ifForm.add().newEmptySexp();
-        beginForm.add().newSymbol("begin");
-        for (int i = bindingPos + 1; i < whenExprSize; i++)
-        {
-            IonValue bodyForm = expr.get(i).clone();
-            beginForm.add(bodyForm);
-        }
-        ifForm.add().newSymbol("undef");
-
+        SyntaxSexp ifForm = SyntaxSexp.make(SyntaxSymbol.make("if"),
+                                            conditionForm,
+                                            beginForm,
+                                            SyntaxSymbol.make("undef"));
         return ifForm;
     }
 }

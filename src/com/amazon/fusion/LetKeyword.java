@@ -2,12 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSequence;
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonSymbol;
-import com.amazon.ion.IonType;
-import com.amazon.ion.IonValue;
-import com.amazon.ion.ValueFactory;
 
 /**
  *
@@ -36,10 +30,10 @@ final class LetKeyword
      * {@code ((letrec ((f (lambda (v ...) b ...))) f) e ...)}
      */
     @Override
-    IonValue expand(IonSexp letExpr)
+    SyntaxValue expand(SyntaxSexp letExpr)
         throws SyntaxFailure
     {
-        String loopName = checkForName(letExpr);
+        SyntaxSymbol loopName = checkForName(letExpr);
         int bindingPos = (loopName == null ? 1 : 2);
 
         final int letExprSize = letExpr.size();
@@ -48,59 +42,59 @@ final class LetKeyword
             throw new SyntaxFailure(getEffectiveName(), "", letExpr);
         }
 
-        IonSequence bindingForms =
+        SyntaxSequence bindingForms =
             requiredSequence("sequence of bindings", bindingPos, letExpr);
 
-        ValueFactory vf = letExpr.getSystem();
-        IonSexp result = vf.newEmptySexp();
+        SyntaxSexp result = SyntaxSexp.makeEmpty();
 
-        IonSexp lambdaForm;
+        SyntaxSexp lambdaForm = SyntaxSexp.makeEmpty();
         if (loopName != null)
         {
-            IonSexp letrec = result.add().newEmptySexp();
-            letrec.add().newSymbol("letrec");
-            IonSexp bindings = letrec.add().newEmptySexp();
-            IonSexp binding = bindings.add().newEmptySexp();
-            binding.add().newSymbol(loopName);
-            lambdaForm = binding.add().newEmptySexp();
-            letrec.add().newSymbol(loopName);
+            SyntaxSexp binding  = SyntaxSexp.make(loopName, lambdaForm);
+            SyntaxSexp bindings = SyntaxSexp.make(binding);
+            SyntaxSexp letrec   = SyntaxSexp.make(SyntaxSymbol.make("letrec"),
+                                                  bindings,
+                                                  loopName);
+            result.add(letrec);
         }
         else
         {
-            lambdaForm = result.add().newEmptySexp();
+            result.add(lambdaForm);
         }
 
-        lambdaForm.add().newSymbol("lambda");
-        IonSexp formals = lambdaForm.add().newEmptySexp();
+        lambdaForm.add(SyntaxSymbol.make("lambda"));
+        SyntaxSexp formals = SyntaxSexp.makeEmpty();
+        lambdaForm.add(formals);
         for (int i = bindingPos + 1; i < letExprSize; i++)
         {
-            IonValue bodyForm = letExpr.get(i).clone();
+            SyntaxValue bodyForm = letExpr.get(i);
             lambdaForm.add(bodyForm);
         }
 
-        for (IonValue bindingForm : bindingForms)
+        for (int i = 0; i < bindingForms.size(); i++)
         {
-            IonSexp binding =
+            SyntaxValue bindingForm = bindingForms.get(i);
+            SyntaxSexp binding =
                 requiredSexp("name/value binding", bindingForm);
-            IonSymbol boundName =
+            SyntaxSymbol boundName =
                 requiredSymbol("name/value binding", 0, binding);
-            IonValue boundValue =
+            SyntaxValue boundValue =
                 requiredForm("name/value binding", 1, binding);
 
-            formals.add(boundName.clone());
-            result.add(boundValue.clone());
+            formals.add(boundName);
+            result.add(boundValue);
         }
 
         return result;
     }
 
-    String checkForName(IonSexp letExpr)
+    SyntaxSymbol checkForName(SyntaxSexp letExpr)
         throws SyntaxFailure
     {
-        IonValue maybeName = requiredForm("", 1, letExpr);
-        if (maybeName.getType() == IonType.SYMBOL)
+        SyntaxValue maybeName = requiredForm("", 1, letExpr);
+        if (maybeName.getType() == SyntaxValue.Type.SYMBOL)
         {
-            return ((IonSymbol) maybeName).stringValue();
+            return (SyntaxSymbol) maybeName;
         }
         return null;
     }

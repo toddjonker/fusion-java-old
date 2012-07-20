@@ -1,5 +1,9 @@
 (module syntax (quote '#%kernel')
-  (provide wrong_syntax)
+  (provide define_syntax quasisyntax syntax_add syntax_get syntax_size wrong_syntax)
 
+  (define quasisyntax  (java_new "com.amazon.fusion.QuasiSyntaxKeyword"))
+  (define syntax_add   (java_new "com.amazon.fusion.SyntaxAddProc"))
+  (define syntax_get   (java_new "com.amazon.fusion.SyntaxGetProc"))
+  (define syntax_size  (java_new "com.amazon.fusion.SyntaxSizeProc"))
   (define wrong_syntax (java_new "com.amazon.fusion.WrongSyntaxProc"))
 )

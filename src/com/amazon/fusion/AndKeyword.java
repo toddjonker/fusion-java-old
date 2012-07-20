@@ -2,12 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonValue;
-
-/**
- *
- */
 class AndKeyword
     extends KeywordValue
 {
@@ -21,14 +15,14 @@ class AndKeyword
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
         // TODO FUSION-12 tail optimization
 
         for (int i = 1; i < expr.size(); i++)
         {
-            IonValue testExpr = expr.get(i);
+            SyntaxValue testExpr = expr.get(i);
             FusionValue v = eval.eval(env, testExpr);
             if (! checkBoolArg(i - 1, v))
             {

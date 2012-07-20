@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonSequence;
-import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
@@ -73,7 +72,7 @@ public abstract class FusionValue
      *
      * @throws FusionException if there's a failure in the fusion code.
      */
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
         throw new FusionException("not invokable: " + this);
@@ -329,6 +328,10 @@ public abstract class FusionValue
         if (value instanceof FusionValue)
         {
             ((FusionValue) value).display(out);
+        }
+        else if (value instanceof SyntaxValue)
+        {
+            ((SyntaxValue) value).write(out);
         }
         else
         {

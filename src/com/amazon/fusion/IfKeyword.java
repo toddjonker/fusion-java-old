@@ -2,9 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonValue;
-
 /**
  * The {@code if} syntactic form.
  */
@@ -22,7 +19,7 @@ final class IfKeyword
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
         if (expr.size() != 4)
@@ -31,7 +28,7 @@ final class IfKeyword
                                     "3 subexpressions required", expr);
         }
 
-        IonValue source = expr.get(1);
+        SyntaxValue source = expr.get(1);
         FusionValue result = eval.eval(env, source);
 
         boolean test = checkBoolArg(0, result);

@@ -2,8 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonValue;
 
 /**
  *
@@ -22,13 +20,11 @@ final class MacroTransformer
 
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
-        DomValue exprValue = new DomValue(expr);
-        Object resultFv = eval.applyNonTail(myTransformer, exprValue);
-        IonValue resultIv = FusionValue.toIonValue(resultFv);
+        Object resultFv = eval.applyNonTail(myTransformer, expr);
         // TODO error check
-        return eval.bounceTailExpression(env, resultIv);
+        return eval.bounceTailExpression(env, resultFv);
     }
 }

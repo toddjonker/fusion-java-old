@@ -2,16 +2,10 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionUtils.cloneIfContained;
 import static com.amazon.fusion.FusionValue.UNDEF;
-import com.amazon.ion.IonList;
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonStruct;
-import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
-import com.amazon.ion.ValueFactory;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -99,7 +93,7 @@ final class Evaluator
     {
         Namespace ns = new Namespace(registry);
         UseKeyword useKeyword = myKernel.getUseKeyword();
-        IonValue baseRef = mySystem.singleValue("'fusion/base'");
+        SyntaxValue baseRef = SyntaxSymbol.make("fusion/base");
         useKeyword.use(this, ns, baseRef);
         return ns;
     }
@@ -263,103 +257,34 @@ final class Evaluator
     /**
      * @return not null
      */
-    FusionValue eval(Environment env, IonValue expr)
+    FusionValue eval(Environment env, SyntaxValue expr)
         throws FusionException
     {
         moreEval: while (true)
         {
-            switch (expr.getType())
+            FusionValue result = expr.eval(this, env);
+            while (true)
             {
-                case LIST:
+                if (result == null)
                 {
-                    return eval(env, (IonList) expr);
+                    return UNDEF;
                 }
-                case STRUCT:
+                if (result instanceof TailExpression)
                 {
-                    return eval(env, (IonStruct) expr);
+                    TailExpression tail = (TailExpression) result;
+                    env = tail.myEnv;
+                    expr = tail.myTailExpr;
+                    continue moreEval;
                 }
-                case SEXP:
+                if (result instanceof TailCall)
                 {
-                    FusionValue result = eval(env, (IonSexp) expr);
-                    while (true)
-                    {
-                        if (result == null)
-                        {
-                            return UNDEF;
-                        }
-                        if (result instanceof TailExpression)
-                        {
-                            TailExpression tail = (TailExpression) result;
-                            env = tail.myEnv;
-                            expr = tail.myTailExpr;
-                            continue moreEval;
-                        }
-                        if (result instanceof TailCall)
-                        {
-                            TailCall tail = (TailCall) result;
-                            result = tail.myProc.invoke(this, tail.myArgs);
-                            continue;
-                        }
-                        return result;
-                    }
+                    TailCall tail = (TailCall) result;
+                    result = tail.myProc.invoke(this, tail.myArgs);
+                    continue;
                 }
-                case SYMBOL:
-                {
-                    return eval(env, (IonSymbol) expr);
-                }
-                case DATAGRAM:
-                {
-                    throw new IllegalStateException("Shouldn't have datagram here");
-                }
-                default:
-                {
-                    return new DomValue(expr);
-                }
+                return result;
             }
         }
-    }
-
-
-    /**
-     * @return not null
-     */
-    private FusionValue eval(Environment env, IonSymbol expr)
-        throws FusionException
-    {
-        String name = expr.stringValue();
-        if (name == null)
-        {
-            throw new SyntaxFailure(null, "null.symbol is not an expression",
-                                    expr);
-        }
-
-        FusionValue result = env.lookup(name);
-        if (result == null)
-        {
-            throw new UnboundIdentifierFailure(null, expr);
-        }
-        return result;
-    }
-
-
-    /**
-     * @return not null
-     */
-    private FusionValue eval(Environment env, IonSexp expr)
-        throws FusionException
-    {
-        int len = expr.size();
-        if (len == 0)
-        {
-            throw new SyntaxFailure(null, expr + " is not an expression",
-                                    expr);
-        }
-
-        IonValue first = expr.get(0);
-
-        FusionValue form = eval(env, first);
-        FusionValue result = form.invoke(this, env, expr);
-        return result;
     }
 
 
@@ -376,7 +301,7 @@ final class Evaluator
         {
             TailExpression tail = (TailExpression) result;
             Environment env = tail.myEnv;
-            IonValue expr = tail.myTailExpr;
+            SyntaxValue expr = tail.myTailExpr;
             result = eval(env, expr);
         }
         // TODO handle TailCall, but nothing triggers this path yet.
@@ -388,60 +313,6 @@ final class Evaluator
     }
 
 
-    /**
-     * @return not null.
-     */
-    DomValue eval(Environment env, IonList expr)
-        throws FusionException
-    {
-        IonList resultDom;
-        if (expr.isNullValue())
-        {
-            resultDom = expr;
-        }
-        else
-        {
-            ValueFactory vf = expr.getSystem();
-            resultDom = vf.newEmptyList();
-            for (IonValue elementExpr : expr)
-            {
-                DomValue elementValue = (DomValue) eval(env, elementExpr);
-                IonValue elementDom = elementValue.ionValue();
-                elementDom = cloneIfContained(elementDom);
-                resultDom.add(elementDom);
-            }
-        }
-        return new DomValue(resultDom);
-    }
-
-
-    /**
-     * @return not null
-     */
-    DomValue eval(Environment env, IonStruct expr)
-        throws FusionException
-    {
-        IonStruct resultDom;
-        if (expr.isNullValue())
-        {
-            resultDom = expr;
-        }
-        else
-        {
-            ValueFactory vf = expr.getSystem();
-            resultDom = vf.newEmptyStruct();
-            for (IonValue elementExpr : expr)
-            {
-                DomValue elementValue = (DomValue) eval(env, elementExpr);
-                IonValue elementDom = elementValue.ionValue();
-                elementDom = cloneIfContained(elementDom);
-                resultDom.add(elementExpr.getFieldName(), elementDom);
-            }
-        }
-        return new DomValue(resultDom);
-    }
-
-
     //========================================================================
 
 
@@ -449,9 +320,31 @@ final class Evaluator
      * Wraps an expression for evaluation in tail position.
      * Must be returned back to this {@link Evaluator} for proper behavior.
      */
-    FusionValue bounceTailExpression(Environment env, IonValue tailExpr)
+    FusionValue bounceTailExpression(Environment env, SyntaxValue tailExpr)
     {
         return new TailExpression(env, tailExpr);
+    }
+
+    /**
+     * Wraps an expression for evaluation in tail position.
+     * Must be returned back to this {@link Evaluator} for proper behavior.
+     *
+     * @throws ContractFailure if the given tail isn't a {@link SyntaxValue}.
+     */
+    FusionValue bounceTailExpression(Environment env, Object tailExpr)
+        throws FusionException
+    {
+        SyntaxValue stx;
+        try
+        {
+            stx = (SyntaxValue) tailExpr;
+        }
+        catch (ClassCastException e)
+        {
+            throw new ContractFailure("Expected SyntaxValue, got " +
+                                      FusionValue.writeToString(tailExpr));
+        }
+        return bounceTailExpression(env, stx);
     }
 
 
@@ -465,9 +358,9 @@ final class Evaluator
         extends FusionValue
     {
         final Environment myEnv;
-        final IonValue myTailExpr;
+        final SyntaxValue myTailExpr;
 
-        TailExpression(Environment env, IonValue tailExpr)
+        TailExpression(Environment env, SyntaxValue tailExpr)
         {
             myEnv = env;
             myTailExpr = tailExpr;

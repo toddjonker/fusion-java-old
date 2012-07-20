@@ -2,12 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonValue;
-
-/**
- *
- */
 final class AssertKeyword
     extends KeywordValue
 {
@@ -20,7 +14,7 @@ final class AssertKeyword
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
         int size = expr.size();
@@ -31,7 +25,7 @@ final class AssertKeyword
                                     expr);
         }
 
-        IonValue testExpr = expr.get(1);
+        SyntaxValue testExpr = expr.get(1);
         FusionValue result = eval.eval(env, testExpr);
         if (checkBoolArg(0 /* argNum */, result)) return UNDEF;
 
@@ -41,7 +35,7 @@ final class AssertKeyword
             StringBuilder buf = new StringBuilder();
             for (int i = 2; i < expr.size(); i++)
             {
-                IonValue messageExpr = expr.get(i);
+                SyntaxValue messageExpr = expr.get(i);
                 FusionValue messageValue = eval.eval(env, messageExpr);
                 FusionValue.display(buf, messageValue);
             }

@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonValue;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.util.Arrays;
@@ -15,16 +14,16 @@ public class SyntaxFailure
     extends FusionException
 {
     private final String myName;
-    private IonValue[] mySources;
+    private SyntaxValue[] mySources;
 
-    SyntaxFailure(String name, String message, IonValue... sources)
+    SyntaxFailure(String name, String message, SyntaxValue... sources)
     {
         super(message);
         myName = name;
         mySources = sources;
     }
 
-    void addContext(IonValue syntax)
+    void addContext(SyntaxValue syntax)
     {
         int len = mySources.length;
         mySources = Arrays.copyOf(mySources, len + 1);
@@ -50,10 +49,10 @@ public class SyntaxFailure
             if (mySources.length != 0)
             {
                 out.append("\nSources:");
-                for (IonValue expr : mySources)
+                for (SyntaxValue expr : mySources)
                 {
                     out.append("\n  ");
-                    FusionUtils.writeIon(out, expr);
+                    expr.write(out);
                 }
             }
         }

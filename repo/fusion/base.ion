@@ -54,7 +54,7 @@ VALUE.
       (java_new "com.amazon.fusion.DynamicParameter" value)))
 
   (provide * + - . < = > add and apply assert begin concatenate contains
-    current_directory define define_syntax display
+    current_directory define display
     eval_file exit for_each_field for_list
     help
     if is_null is_undef lambda let letrec list_bindings

@@ -2,11 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSequence;
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonString;
-import com.amazon.ion.IonSymbol;
-import com.amazon.ion.IonValue;
 
 /**
  * Helper class for checking syntactic forms.
@@ -14,9 +9,9 @@ import com.amazon.ion.IonValue;
 final class SyntaxChecker
 {
     private final String myFormName;
-    private final IonSexp myForm;
+    private final SyntaxSexp myForm;
 
-    SyntaxChecker(String formName, IonSexp form)
+    SyntaxChecker(String formName, SyntaxSexp form)
     {
         myFormName = formName;
         myForm = form;
@@ -55,7 +50,7 @@ final class SyntaxChecker
     }
 
 
-    final IonValue requiredForm(String expectation, int argNum)
+    final SyntaxValue requiredForm(String expectation, int argNum)
         throws SyntaxFailure
     {
         try
@@ -68,55 +63,55 @@ final class SyntaxChecker
     }
 
 
-    final IonSequence requiredSequence(String expectation, int argNum)
+    final SyntaxSequence requiredSequence(String expectation, int argNum)
         throws SyntaxFailure
     {
-        IonValue form = requiredForm(expectation, argNum);
-        return checkSyntax(IonSequence.class, expectation,
+        SyntaxValue form = requiredForm(expectation, argNum);
+        return checkSyntax(SyntaxSequence.class, expectation,
                            false /* nullable */, form);
     }
 
 
-    final IonString requiredString(String expectation, int argNum)
+    final String requiredString(String expectation, int argNum)
         throws SyntaxFailure
     {
-        IonValue form = requiredForm(expectation, argNum);
-        return checkSyntax(IonString.class, expectation,
-                           false /* nullable */, form);
+        SyntaxValue form = requiredForm(expectation, argNum);
+        return checkSyntax(SyntaxString.class, expectation,
+                           false /* nullable */, form).stringValue();
     }
 
 
     final String requiredNonEmptyString(String expectation, int argNum)
         throws SyntaxFailure
     {
-        IonString sym = requiredString(expectation, argNum);
+        String str = requiredString(expectation, argNum);
         // TODO check emptyness
-        return sym.stringValue();
+        return str;
     }
 
 
 
-    final IonSymbol requiredSymbol(String expectation, int argNum)
+    final SyntaxSymbol requiredSymbol(String expectation, int argNum)
         throws SyntaxFailure
     {
-        IonValue form = requiredForm(expectation, argNum);
-        return checkSyntax(IonSymbol.class, expectation,
+        SyntaxValue form = requiredForm(expectation, argNum);
+        return checkSyntax(SyntaxSymbol.class, expectation,
                            false /* nullable */, form);
     }
 
     final String requiredNonEmptySymbol(String expectation, int argNum)
         throws SyntaxFailure
     {
-        IonSymbol sym = requiredSymbol(expectation, argNum);
+        SyntaxSymbol sym = requiredSymbol(expectation, argNum);
         // TODO check emptyness
         return sym.stringValue();
     }
 
 
-    final <T extends IonValue> T checkSyntax(Class<T> klass,
-                                             String expectation,
-                                             boolean nullable,
-                                             IonValue form)
+    final <T extends SyntaxValue> T checkSyntax(Class<T> klass,
+                                               String expectation,
+                                               boolean nullable,
+                                               SyntaxValue form)
         throws SyntaxFailure
     {
         try

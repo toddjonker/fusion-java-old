@@ -2,9 +2,7 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
-import com.amazon.ion.IonValue;
 
 /**
  * This is syntax because we currently evaluate the file in the invoker's
@@ -28,12 +26,12 @@ final class EvalFileKeyword
 
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
         String fileName;
         {
-            IonValue argExpr = expr.get(1);
+            SyntaxValue argExpr = expr.get(1);
             FusionValue argValue = eval.eval(env, argExpr);
             IonString nameDom = (IonString) ((DomValue) argValue).ionValue();
             fileName = nameDom.stringValue();

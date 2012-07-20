@@ -3,9 +3,6 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.ArityFailure.Variability;
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonSymbol;
-import com.amazon.ion.IonValue;
 
 /**
  * A user-defined procedure, the result of evaluating a {@link LambdaKeyword}.
@@ -14,7 +11,7 @@ final class Closure
     extends Procedure
 {
     private final Environment myEnclosure;
-    private final IonSexp myDefinition;
+    private final SyntaxSexp myDefinition;
 
     /**
      * Index within {@link #myDefinition} of the first body form.
@@ -30,23 +27,24 @@ final class Closure
      *  here.
      * @param definition the source text of the {@code lambda} expression.
      */
-    Closure(Environment enclosure, IonSexp definition, String doc,
+    Closure(Environment enclosure, SyntaxSexp definition, String doc,
             int bodyStartIndex)
     {
-        super(doc, determineParams((IonSexp) definition.get(1)));
+        super(doc, determineParams((SyntaxSexp) definition.get(1)));
 
         myEnclosure = enclosure;
         myDefinition = definition;
         myBodyStart = bodyStartIndex;
     }
 
-    private static String[] determineParams(IonSexp paramsExpr)
+    private static String[] determineParams(SyntaxSexp paramsExpr)
     {
         int size = paramsExpr.size();
         String[] params = new String[size];
         for (int i = 0; i < size; i++)
         {
-            IonSymbol param = (IonSymbol) paramsExpr.get(i);
+            // TODO typecheck
+            SyntaxSymbol param = (SyntaxSymbol) paramsExpr.get(i);
             params[i] = param.stringValue();
         }
         return params;
@@ -77,11 +75,11 @@ final class Closure
         final int bodyEnd = myDefinition.size() - 1;
         for (int i = myBodyStart; i < bodyEnd; i++)
         {
-            IonValue expr = myDefinition.get(i);
+            SyntaxValue expr = myDefinition.get(i);
             result = eval.eval(bodyEnv, expr);
         }
 
-        IonValue expr = myDefinition.get(bodyEnd);
+        SyntaxValue expr = myDefinition.get(bodyEnd);
 
         result = eval.bounceTailExpression(bodyEnv, expr);
 

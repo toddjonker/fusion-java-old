@@ -2,15 +2,25 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonValue;
-
 /**
  * The {@code begin} syntactic form.
  */
 final class BeginKeyword
     extends KeywordValue
 {
+    static SyntaxSexp makeSyntax(SyntaxSequence seq, int from)
+    {
+        int size = seq.size();
+        SyntaxSexp beginForm = SyntaxSexp.make(SyntaxSymbol.make("begin"));
+        for (int i = from; i < size; i++)
+        {
+            SyntaxValue bodyForm = seq.get(i);
+            beginForm.add(bodyForm);
+        }
+        return beginForm;
+    }
+
+
     BeginKeyword()
     {
         //    "                                                                               |
@@ -20,7 +30,7 @@ final class BeginKeyword
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
         final int size = expr.size();
@@ -30,11 +40,11 @@ final class BeginKeyword
         final int last = size - 1;
         for (int i = 1; i < last; i++)
         {
-            IonValue source = expr.get(i);
+            SyntaxValue source = expr.get(i);
             result = eval.eval(env, source);
         }
 
-        IonValue source = expr.get(last);
+        SyntaxValue source = expr.get(last);
         result = eval.bounceTailExpression(env, source);
         return result;
     }

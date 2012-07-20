@@ -2,11 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonString;
-import com.amazon.ion.IonType;
-import com.amazon.ion.IonValue;
-
 /**
  * The {@code lambda} syntactic form, which evaluates to a {@link Closure}.
  */
@@ -25,16 +20,16 @@ final class LambdaKeyword
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
     {
         String doc;
         int bodyStart;
 
-        IonValue maybeDoc = expr.get(2);
-        if (maybeDoc.getType() == IonType.STRING
+        SyntaxValue maybeDoc = expr.get(2);
+        if (maybeDoc.getType() == SyntaxValue.Type.STRING
             && expr.size() > 3)
         {
-            doc = ((IonString) maybeDoc).stringValue();
+            doc = ((SyntaxString) maybeDoc).stringValue();
             if (doc != null) doc = doc.trim();
             bodyStart = 3;
         }

@@ -8,7 +8,6 @@ import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
-import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonText;
@@ -52,7 +51,7 @@ abstract class Procedure
      * @see Evaluator#bounceTailExpression(Environment, IonValue)
      */
     @Override
-    final FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+    final FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
         int argCount = expr.size() - 1;
@@ -67,7 +66,7 @@ abstract class Procedure
             args = new FusionValue[argCount];
             for (int i = 0; i < argCount; i++)
             {
-                IonValue argumentExpr = expr.get(i + 1);
+                SyntaxValue argumentExpr = expr.get(i + 1);
                 try
                 {
                     FusionValue argumentValue = eval.eval(env, argumentExpr);
@@ -366,6 +365,60 @@ abstract class Procedure
         catch (ClassCastException e) {}
 
         throw new ArgTypeFailure(this, typeName, argNum, args);
+    }
+
+
+    SyntaxValue checkSyntaxArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        FusionValue arg = args[argNum];
+
+        try
+        {
+            return (SyntaxValue) arg;
+        }
+        catch (ClassCastException e) {}
+
+        throw new ArgTypeFailure(this, "Syntax value", argNum, args);
+    }
+
+    <T extends SyntaxValue> T checkSyntaxArg(Class<T> klass, String typeName,
+                                             boolean nullable,
+                                             int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        FusionValue arg = args[argNum];
+
+        try
+        {
+            SyntaxValue stx = (SyntaxValue) arg;
+            if (nullable || ! stx.isNullValue())
+            {
+                return klass.cast(stx);
+            }
+        }
+        catch (ClassCastException e) {}
+
+        throw new ArgTypeFailure(this, typeName, argNum, args);
+    }
+
+
+    SyntaxContainer checkSyntaxContainerArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        return checkSyntaxArg(SyntaxContainer.class,
+                              "syntax_list, sexp, or struct",
+                              true /* nullable */, argNum, args);
+    }
+
+
+
+    SyntaxSequence checkSyntaxSequenceArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        return checkSyntaxArg(SyntaxSequence.class,
+                              "syntax_list or syntax_sexp",
+                              true /* nullable */, argNum, args);
     }
 
     /** Ensures that an argument is a {@link Procedure}. */

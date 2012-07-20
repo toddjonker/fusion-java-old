@@ -2,13 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSequence;
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonValue;
-
-/**
- *
- */
 final class ParameterizeKeyword
     extends KeywordValue
 {
@@ -26,7 +19,7 @@ final class ParameterizeKeyword
 
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
         final int letrecExprSize = expr.size();
@@ -35,17 +28,17 @@ final class ParameterizeKeyword
             throw new SyntaxFailure(getEffectiveName(), "", expr);
         }
 
-        IonSequence bindingForms =
-            requiredSequence("sequence of parameterizations", 1, expr);
+        SyntaxSexp bindingForms =
+            requiredSexp("sequence of parameterizations", 1, expr);
 
         final int numBindings = bindingForms.size();
         DynamicParameter[] parameters = new DynamicParameter[numBindings];
-        IonValue[] boundExprs = new IonValue[numBindings];
+        SyntaxValue[] boundExprs = new SyntaxValue[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
-            IonSexp binding =
+            SyntaxSexp binding =
                 requiredSexp("parameter/value binding", i, bindingForms);
-            IonValue paramExpr = requiredForm("parameter/value binding", 0, binding);
+            SyntaxValue paramExpr = requiredForm("parameter/value binding", 0, binding);
 
             FusionValue paramValue = eval.eval(env, paramExpr);
             // TODO error handling
@@ -56,7 +49,7 @@ final class ParameterizeKeyword
         FusionValue[] boundValues = new FusionValue[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
-            IonValue boundExpr = boundExprs[i];
+            SyntaxValue boundExpr = boundExprs[i];
             FusionValue boundValue = eval.eval(env, boundExpr);
             boundValues[i] = boundValue;
         }
@@ -68,7 +61,7 @@ final class ParameterizeKeyword
         final int bodyEnd = letrecExprSize/* - 1*/;
         for (int i = 2; i < bodyEnd; i++)
         {
-            IonValue bodyExpr = expr.get(i);
+            SyntaxValue bodyExpr = expr.get(i);
             result = bodyEval.eval(env, bodyExpr);
         }
 /*

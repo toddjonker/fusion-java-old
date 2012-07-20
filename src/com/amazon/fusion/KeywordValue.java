@@ -2,10 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSequence;
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonSymbol;
-import com.amazon.ion.IonValue;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 
@@ -27,7 +23,7 @@ abstract class KeywordValue
     @Override
     abstract FusionValue invoke(Evaluator eval,
                                 Environment env,
-                                IonSexp expr)
+                                SyntaxSexp expr)
         throws FusionException;
 
 
@@ -69,9 +65,9 @@ abstract class KeywordValue
     // Type-checking helpers
 
 
-    final IonValue requiredForm(String expectation,
-                                int argNum,
-                                IonSequence parent)
+    final SyntaxValue requiredForm(String expectation,
+                                  int argNum,
+                                  SyntaxSequence parent)
         throws SyntaxFailure
     {
         try
@@ -86,64 +82,64 @@ abstract class KeywordValue
     }
 
 
-    final IonSymbol requiredSymbol(String expectation,
-                                   int argNum,
-                                   IonSequence parent)
+    final SyntaxSymbol requiredSymbol(String expectation,
+                                      int argNum,
+                                      SyntaxSequence parent)
         throws SyntaxFailure
     {
-        IonValue form = requiredForm(expectation, argNum, parent);
-        return checkSyntax(IonSymbol.class, expectation,
+        SyntaxValue form = requiredForm(expectation, argNum, parent);
+        return checkSyntax(SyntaxSymbol.class, expectation,
                            false /* nullable */, form);
     }
 
-    final IonSymbol requiredSymbol(String expectation, IonValue arg)
+    final SyntaxSymbol requiredSymbol(String expectation, SyntaxValue arg)
         throws SyntaxFailure
     {
-        return checkSyntax(IonSymbol.class, expectation,
+        return checkSyntax(SyntaxSymbol.class, expectation,
                            false /* nullable */, arg);
     }
 
 
-    final IonSequence requiredSequence(String expectation,
-                                       int argNum,
-                                       IonSequence parent)
+    final SyntaxSequence requiredSequence(String expectation,
+                                          int argNum,
+                                          SyntaxSequence parent)
         throws SyntaxFailure
     {
-        IonValue form = requiredForm(expectation, argNum, parent);
-        return checkSyntax(IonSequence.class, expectation,
+        SyntaxValue form = requiredForm(expectation, argNum, parent);
+        return checkSyntax(SyntaxSequence.class, expectation,
                            false /* nullable */, form);
     }
 
-    final IonSequence requiredSequence(String expectation, IonValue arg)
+    final SyntaxSequence requiredSequence(String expectation, SyntaxValue arg)
         throws SyntaxFailure
     {
-        return checkSyntax(IonSequence.class, expectation,
+        return checkSyntax(SyntaxSequence.class, expectation,
                            false /* nullable */, arg);
     }
 
 
-    final IonSexp requiredSexp(String expectation,
-                               int argNum,
-                               IonSequence parent)
+    final SyntaxSexp requiredSexp(String expectation,
+                                  int argNum,
+                                  SyntaxSequence parent)
         throws SyntaxFailure
     {
-        IonValue form = requiredForm(expectation, argNum, parent);
-        return checkSyntax(IonSexp.class, expectation,
+        SyntaxValue form = requiredForm(expectation, argNum, parent);
+        return checkSyntax(SyntaxSexp.class, expectation,
                            false /* nullable */, form);
     }
 
-    final IonSexp requiredSexp(String expectation, IonValue arg)
+    final SyntaxSexp requiredSexp(String expectation, SyntaxValue arg)
         throws SyntaxFailure
     {
-        return checkSyntax(IonSexp.class, expectation,
+        return checkSyntax(SyntaxSexp.class, expectation,
                            false /* nullable */, arg);
     }
 
 
-    final <T extends IonValue> T checkSyntax(Class<T> klass,
-                                             String expectation,
-                                             boolean nullable,
-                                             IonValue form)
+    final <T extends SyntaxValue> T checkSyntax(Class<T> klass,
+                                               String expectation,
+                                               boolean nullable,
+                                               SyntaxValue form)
         throws SyntaxFailure
     {
         try

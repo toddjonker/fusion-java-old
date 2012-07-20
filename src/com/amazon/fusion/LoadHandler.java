@@ -2,14 +2,11 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonSymbol;
-import com.amazon.ion.IonValue;
+import com.amazon.ion.IonReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
 
 /**
  *
@@ -66,11 +63,11 @@ final class LoadHandler
             {
                 FusionValue result = null;
 
-                Iterator<IonValue> i = eval.getSystem().iterate(in);
-                while (i.hasNext())
+                IonReader reader = eval.getSystem().newReader(in);
+                while (reader.next() != null)
                 {
                     result = null;  // Don't hold onto garbage
-                    IonValue fileExpr = i.next();
+                    SyntaxValue fileExpr = Syntax.read(reader);
                     result = eval.eval(namespace, fileExpr);
                     // TODO tail call handling
                 }
@@ -89,7 +86,7 @@ final class LoadHandler
     }
 
 
-    private IonValue readSingleTopLevelValue(Evaluator eval, ModuleIdentity id)
+    private SyntaxValue readSingleTopLevelValue(Evaluator eval, ModuleIdentity id)
         throws FusionException
     {
         try
@@ -97,16 +94,16 @@ final class LoadHandler
             InputStream in = id.open();
             try
             {
-                Iterator<IonValue> i = eval.getSystem().iterate(in);
-                if (! i.hasNext())
+                IonReader reader = eval.getSystem().newReader(in);
+                if (reader.next() == null)
                 {
                     String message =
                         "Module file has no top-level forms: " + id;
                    throw new FusionException(message);
                 }
 
-                IonValue firstTopLevel = i.next();
-                if (i.hasNext())
+                SyntaxValue firstTopLevel = Syntax.read(reader);
+                if (reader.next() != null)
                 {
                     String message =
                         "Module file has more than one top-level form: " +
@@ -128,15 +125,16 @@ final class LoadHandler
     }
 
 
-    private IonSexp readModuleDeclaration(Evaluator eval, ModuleIdentity id)
+    private SyntaxSexp readModuleDeclaration(Evaluator eval, ModuleIdentity id)
         throws FusionException
     {
-        IonValue topLevel = readSingleTopLevelValue(eval, id);
+        SyntaxValue topLevel = readSingleTopLevelValue(eval, id);
         try {
-            IonSexp moduleDeclaration = (IonSexp) topLevel;
+            SyntaxSexp moduleDeclaration = (SyntaxSexp) topLevel;
             if (moduleDeclaration.size() > 1)
             {
-                IonSymbol moduleSym = (IonSymbol) moduleDeclaration.get(0);
+                SyntaxSymbol moduleSym = (SyntaxSymbol)
+                    moduleDeclaration.get(0);
                 if ("module".equals(moduleSym.stringValue()))
                 {
                     return moduleDeclaration;
@@ -159,7 +157,7 @@ final class LoadHandler
     {
         try
         {
-            IonValue moduleDeclaration = readModuleDeclaration(eval, id);
+            SyntaxValue moduleDeclaration = readModuleDeclaration(eval, id);
 
             Evaluator bodyEval = eval;
             String dirPath = id.parentDirectory();

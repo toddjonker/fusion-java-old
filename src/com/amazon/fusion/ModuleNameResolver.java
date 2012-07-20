@@ -3,11 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.ion.util.IonTextUtils.printString;
-
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonString;
-import com.amazon.ion.IonSymbol;
-import com.amazon.ion.IonValue;
 import java.io.File;
 
 /**
@@ -32,25 +27,25 @@ final class ModuleNameResolver
     }
 
 
-    ModuleIdentity resolve(Evaluator eval, IonValue pathStx)
+    ModuleIdentity resolve(Evaluator eval, SyntaxValue pathStx)
         throws FusionException
     {
         switch (pathStx.getType())
         {
             case SYMBOL:
             {
-                String libName = ((IonSymbol) pathStx).stringValue();
+                String libName = ((SyntaxSymbol) pathStx).stringValue();
                 // TODO check null/empty
                 return resolveLib(eval, libName);
             }
             case STRING:
             {
-                String path = ((IonString) pathStx).stringValue();
+                String path = ((SyntaxString) pathStx).stringValue();
                 return resolve(eval, path);
             }
             case SEXP:
             {
-                IonSexp pathSexp = (IonSexp) pathStx;
+                SyntaxSexp pathSexp = (SyntaxSexp) pathStx;
                 return resolve(eval, pathSexp);
             }
         }
@@ -59,7 +54,7 @@ final class ModuleNameResolver
     }
 
 
-    ModuleIdentity resolve(Evaluator eval, IonSexp pathStx)
+    ModuleIdentity resolve(Evaluator eval, SyntaxSexp pathStx)
         throws FusionException
     {
         SyntaxChecker check = new SyntaxChecker("module path", pathStx);

@@ -2,10 +2,8 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonValue;
-
 /**
- *
+ * Fusion procedure to raise a syntax error.
  */
 public class WrongSyntaxProc
     extends Procedure
@@ -23,7 +21,7 @@ public class WrongSyntaxProc
         throws FusionException
     {
         checkArityAtLeast(1, args);
-        IonValue stx = checkIonArg(0, args);
+        SyntaxValue stx = checkSyntaxArg(0, args);
 
         String name = null; // TODO infer name
         String message = FusionValue.displayManyToString(args, 1);

@@ -2,14 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSequence;
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonSymbol;
-import com.amazon.ion.IonValue;
-
-/**
- *
- */
 final class LetrecKeyword
     extends KeywordValue
 {
@@ -25,7 +17,7 @@ final class LetrecKeyword
 
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
         final int letrecExprSize = expr.size();
@@ -34,17 +26,17 @@ final class LetrecKeyword
             throw new SyntaxFailure(getEffectiveName(), "", expr);
         }
 
-        IonSequence bindingForms =
-            requiredSequence("sequence of bindings", 1, expr);
+        SyntaxSexp bindingForms =
+            requiredSexp("sequence of bindings", 1, expr);
 
         final int numBindings = bindingForms.size();
-        String[]   boundNames = new String[numBindings];
-        IonValue[] boundExprs = new IonValue[numBindings];
+        String[]     boundNames = new String[numBindings];
+        SyntaxValue[] boundExprs = new SyntaxValue[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
-            IonSexp binding =
+            SyntaxSexp binding =
                 requiredSexp("name/value binding", i, bindingForms);
-            IonSymbol name = requiredSymbol("name/value binding", 0, binding);
+            SyntaxSymbol name = requiredSymbol("name/value binding", 0, binding);
             boundNames[i] = name.stringValue();
             boundExprs[i] = requiredForm("name/value binding", 1, binding);
         }
@@ -55,7 +47,7 @@ final class LetrecKeyword
 
         for (int i = 0; i < numBindings; i++)
         {
-            IonValue boundExpr = boundExprs[i];
+            SyntaxValue boundExpr = boundExprs[i];
             FusionValue boundValue = eval.eval(bodyEnv, boundExpr);
             boundValues[i] = boundValue;
         }
@@ -64,11 +56,11 @@ final class LetrecKeyword
         final int bodyEnd = letrecExprSize - 1;
         for (int i = 2; i < bodyEnd; i++)
         {
-            IonValue bodyExpr = expr.get(i);
+            SyntaxValue bodyExpr = expr.get(i);
             result = eval.eval(bodyEnv, bodyExpr);
         }
 
-        IonValue bodyExpr = expr.get(bodyEnd);
+        SyntaxValue bodyExpr = expr.get(bodyEnd);
         result = eval.bounceTailExpression(bodyEnv, bodyExpr);
         return result;
     }

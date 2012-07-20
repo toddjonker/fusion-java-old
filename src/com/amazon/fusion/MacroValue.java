@@ -2,9 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonValue;
-
 /**
  * Base class for Fusion macros, performing syntax expansion.
  */
@@ -24,15 +21,15 @@ abstract class MacroValue
      * @param expr the input expression, including the keyword symbol.
      * @return
      */
-    abstract IonValue expand(IonSexp expr)
+    abstract SyntaxValue expand(SyntaxSexp expr)
         throws SyntaxFailure;
 
 
     @Override
-    final FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+    final FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
-        IonValue expanded = expand(expr);
+        SyntaxValue expanded = expand(expr);
         return eval.bounceTailExpression(env, expanded);
     }
 }

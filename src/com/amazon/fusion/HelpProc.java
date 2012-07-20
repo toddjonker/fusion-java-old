@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSexp;
 import java.io.IOException;
 
 /**
@@ -35,7 +34,7 @@ final class HelpProc
         }
 
         @Override
-        FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+        FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
             throws FusionException
         {
             throw new FusionException("not invokable");

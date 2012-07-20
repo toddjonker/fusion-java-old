@@ -2,10 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonSymbol;
-import com.amazon.ion.IonValue;
-
 final class DefineKeyword
     extends KeywordValue
 {
@@ -17,15 +13,15 @@ final class DefineKeyword
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp stx)
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
         SyntaxChecker check = new SyntaxChecker(getInferredName(), stx);
         check.arityExact(3);
-        IonSymbol name = check.requiredSymbol("identifier to define", 1);
-        IonValue ionValue = stx.get(2);
+        SyntaxSymbol name = (SyntaxSymbol) stx.get(1);
+        SyntaxValue valueStx = stx.get(2);
 
-        FusionValue fusionValue = eval.eval(env, ionValue);
+        FusionValue fusionValue = eval.eval(env, valueStx);
 
         Namespace ns = env.namespace();
         ns.bind(name.stringValue(), fusionValue);

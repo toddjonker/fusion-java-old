@@ -6,7 +6,6 @@ import static com.amazon.fusion.FusionValue.UNDEF;
 
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
-import com.amazon.ion.IonValue;
 import com.amazon.ion.system.IonSystemBuilder;
 
 /**
@@ -73,7 +72,7 @@ final class StandardRuntime
 
         while (source.next() != null)
         {
-            IonValue sourceExpr = mySystem.newValue(source);
+            SyntaxValue sourceExpr = Syntax.read(source);
             result = myEvaluator.eval(myEnvironment, sourceExpr);
         }
 

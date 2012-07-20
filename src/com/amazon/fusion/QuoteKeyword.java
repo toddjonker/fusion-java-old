@@ -2,9 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSexp;
-import com.amazon.ion.IonValue;
-
 /**
  * The {@code quote} syntactic form.
  */
@@ -19,9 +16,9 @@ final class QuoteKeyword
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, IonSexp expr)
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
     {
-        IonValue datum = expr.get(1);
-        return new DomValue(datum);
+        SyntaxValue quotedStx = expr.get(1);
+        return quotedStx.quote(eval);
     }
 }
