@@ -3,11 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonContainer;
-import com.amazon.ion.IonInt;
 
-/**
- *
- */
 final class SizeProc
     extends Procedure
 {
@@ -25,7 +21,6 @@ final class SizeProc
     {
         checkArityExact(1, args);
         IonContainer c = checkContainerArg(0, args);
-        IonInt result = c.getSystem().newInt(c.size());
-        return new DomValue(result);
+        return eval.newInt(c.size());
     }
 }

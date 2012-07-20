@@ -1,3 +1,5 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
 package com.amazon.fusion;
 
 import com.amazon.ion.IonList;
@@ -6,11 +8,11 @@ import com.amazon.ion.IonValue;
 final class GetFromListAtIndexProc
     extends Procedure
 {
-    // (get [list] idx)
     GetFromListAtIndexProc()
     {
         //    "                                                                               |
-        super("Returns the element at index in list");
+        super("Returns the element at INDEX in LIST",
+              "list", "index");
     }
 
 
@@ -26,6 +28,6 @@ final class GetFromListAtIndexProc
 
         IonValue ionValue = ionList.get(index);
 
-        return new DomValue(ionValue); // Don't need to re-wrap the input struct
+        return new DomValue(ionValue);
     }
 }
