@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc. All rights reserved.
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -11,9 +11,11 @@ class AddProc
 {
     AddProc()
     {
-        super("Adds the Ion DATUM to the end of the SEQUENCE (IonList or sexp).",
-              "sequence","datum");
+        //    "                                                                               |
+        super("Adds the Ion DATUM to the end of the SEQUENCE (Ion list or sexp).",
+              "sequence", "datum");
     }
+
 
     static void invoke(IonSequence seq, IonValue value)
     {
@@ -21,16 +23,17 @@ class AddProc
         seq.add(value);
     }
 
+
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-         checkArityExact(2,args);
-         IonSequence seq = checkSequenceArg(0,args);
-         IonValue value = checkIonArg(1,args);
+        checkArityExact(2, args);
+        IonSequence seq = checkSequenceArg(0, args);
+        IonValue value = checkIonArg(1, args);
 
-         invoke(seq,value);
+        invoke(seq, value);
 
-         return args[0];
+        return args[0]; // Return the original FusionValue, no need to rewrap
     }
 }

@@ -11,7 +11,7 @@ import java.util.Iterator;
  */
 class Sequences
 {
-    public static final class DomStream extends Stream
+    private static final class DomStream extends Stream
     {
         private final Iterator<IonValue> myIonIterator;
 

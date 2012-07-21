@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.ModuleIdentity.intern;
-
 import com.amazon.ion.IonType;
 
 
@@ -55,7 +54,7 @@ final class KernelModule
         ns.bind("java_new", new JavaNewProc());
         ns.bind("module", myModuleKeyword);
         ns.bind("undef", FusionValue.UNDEF);
-        ns.bind("empty_stream",FusionValue.EMPTY_STREAM);
+        ns.bind("empty_stream", FusionValue.EMPTY_STREAM);
         ns.bind("use", myUseKeyword);
 
         for (IonType t : IonType.values())

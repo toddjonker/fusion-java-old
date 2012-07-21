@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 /**
- *
+ * Builder for acquiring a {@link FusionRuntime}.
  */
 public class FusionRuntimeBuilder
 {
@@ -14,7 +14,7 @@ public class FusionRuntimeBuilder
         return new FusionRuntimeBuilder();
     }
 
-    public static FusionRuntime build()
+    public FusionRuntime build()
     {
         return new StandardRuntime();
     }

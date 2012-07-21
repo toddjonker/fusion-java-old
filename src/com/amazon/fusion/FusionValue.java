@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.Sequences.DomStream;
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonSexp;
@@ -557,19 +556,19 @@ public abstract class FusionValue
      * Returns all the elements in the list in stream form. Original
      * order is maintained.
      */
-    static Stream streamFor(IonSequence ionSeq)
+    static Object streamFor(IonSequence ionSeq)
         throws ContractFailure
     {
-        return Sequences.streamFor(new DomValue(ionSeq));
+        return Sequences.streamFor(ionSeq);
     }
 
     /**
      * Returns all the values stored inside the iterator as elements
      * inside a Fusion stream. Original order is maintained.
      */
-    public static Stream streamFor(Iterator<IonValue> iter)
+    public static Object streamFor(Iterator<IonValue> iter)
     {
-        return new DomStream(iter);
+        return Sequences.streamFor(iter);
     }
 
     /**
@@ -578,14 +577,15 @@ public abstract class FusionValue
      *
      * @throws {@code ContractFailure} if input value is not a Fusion stream
      */
-    static boolean streamHasNext(FusionValue val)
+    static boolean streamHasNext(Object val)
         throws FusionException
     {
         if (val instanceof Stream)
         {
             return ((Stream)val).hasNext();
         }
-        throw new ContractFailure("Cannot invoke Stream.next() on this non-Stream value: "+val.toString());
+        throw new ContractFailure("Argument is not a stream: "
+                                    + writeToString(val));
     }
 
     /**
@@ -593,14 +593,15 @@ public abstract class FusionValue
      *
      * @throws {@code ContractFailure} if input value is not a Fusion stream
      */
-    static FusionValue streamNext(FusionValue val)
+    static Object streamNext(Object val)
         throws FusionException
     {
         if (val instanceof Stream)
         {
             return ((Stream)val).next();
         }
-        throw new ContractFailure("Cannot invoke Stream.next() on this non-Stream value: "+val.toString());
+        throw new ContractFailure("Argument is not a stream: "
+                                    + writeToString(val));
     }
 
 }
