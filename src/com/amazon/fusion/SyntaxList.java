@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.cloneIfContained;
+import static com.amazon.fusion.SourceLocation.currentLocation;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonType;
@@ -14,18 +15,22 @@ import java.io.IOException;
 final class SyntaxList
     extends SyntaxSequence
 {
-    private SyntaxList() { }
+    private SyntaxList(SourceLocation loc)
+    {
+        super(loc);
+    }
 
     static SyntaxList read(IonReader source)
     {
-        SyntaxList seq = new SyntaxList();
+        SourceLocation loc = currentLocation(source);
+        SyntaxList seq = new SyntaxList(loc);
         seq.readChildren(source);
         return seq;
     }
 
     static SyntaxList make(SyntaxValue... children)
     {
-        SyntaxList seq = new SyntaxList();
+        SyntaxList seq = new SyntaxList(null);
         seq.add(children);
         return seq;
     }

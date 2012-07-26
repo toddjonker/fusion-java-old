@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonReader;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -13,14 +12,15 @@ final class SyntaxInt
     private final BigInteger myValue;
 
 
-    private SyntaxInt(BigInteger value)
+    private SyntaxInt(BigInteger value, SourceLocation loc)
     {
+        super(loc);
         myValue = value;
     }
 
-    static SyntaxInt read(IonReader source)
+    static SyntaxInt make(BigInteger value, SourceLocation loc)
     {
-        return new SyntaxInt(source.bigIntegerValue());
+        return new SyntaxInt(value, loc);
     }
 
 

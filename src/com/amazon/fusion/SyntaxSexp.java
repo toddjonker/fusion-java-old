@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.SourceLocation.currentLocation;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
@@ -11,25 +12,29 @@ import java.io.IOException;
 final class SyntaxSexp
     extends SyntaxSequence
 {
-    private SyntaxSexp() { }
+    private SyntaxSexp(SourceLocation loc)
+    {
+        super(loc);
+    }
 
     static SyntaxSexp read(IonReader source)
     {
-        SyntaxSexp seq = new SyntaxSexp();
+        SourceLocation loc = currentLocation(source);
+        SyntaxSexp seq = new SyntaxSexp(loc);
         seq.readChildren(source);
         return seq;
     }
 
     static SyntaxSexp makeEmpty()
     {
-        SyntaxSexp seq = new SyntaxSexp();
+        SyntaxSexp seq = new SyntaxSexp(null);
         seq.ensureNotNull();
         return seq;
     }
 
     static SyntaxSexp make(SyntaxValue... children)
     {
-        SyntaxSexp seq = new SyntaxSexp();
+        SyntaxSexp seq = new SyntaxSexp(null);
         seq.add(children);
         return seq;
     }

@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonReader;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
@@ -12,15 +11,15 @@ final class SyntaxBlob
     private final byte[] myValue;
 
 
-    private SyntaxBlob(byte[] value)
+    private SyntaxBlob(byte[] value, SourceLocation loc)
     {
+        super(loc);
         myValue = value;
     }
 
-    static SyntaxBlob read(IonReader source)
+    static SyntaxBlob make(byte[] value, SourceLocation loc)
     {
-        byte[] value = (source.isNullValue() ? null : source.newBytes());
-        return new SyntaxBlob(value);
+        return new SyntaxBlob(value, loc);
     }
 
 

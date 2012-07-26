@@ -18,6 +18,11 @@ abstract class SyntaxSequence
 {
     List<SyntaxValue> myChildren;
 
+    SyntaxSequence(SourceLocation loc)
+    {
+        super(loc);
+    }
+
 
     final void readChildren(IonReader source)
     {

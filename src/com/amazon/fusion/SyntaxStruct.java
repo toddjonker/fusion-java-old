@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.cloneIfContained;
+import static com.amazon.fusion.SourceLocation.currentLocation;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonType;
@@ -27,13 +28,16 @@ final class SyntaxStruct
     /**
      * @param map may be null
      */
-    private SyntaxStruct(Map<String, Object> map)
+    private SyntaxStruct(Map<String, Object> map, SourceLocation loc)
     {
+        super(loc);
         myMap = map;
     }
 
     static SyntaxStruct read(IonReader source)
     {
+        SourceLocation loc = currentLocation(source);
+
         Map<String, Object> map;
 
         if (source.isNullValue())
@@ -70,7 +74,7 @@ final class SyntaxStruct
             source.stepOut();
         }
 
-        return new SyntaxStruct(map);
+        return new SyntaxStruct(map, loc);
     }
 
 

@@ -20,6 +20,21 @@ abstract class SyntaxValue
         STRING, SYMBOL, LIST, SEXP, STRUCT
     }
 
+
+    private final SourceLocation mySrcLoc;
+
+
+    SyntaxValue(SourceLocation loc)
+    {
+        mySrcLoc = loc;
+    }
+
+
+    SourceLocation getLocation()
+    {
+        return mySrcLoc;
+    }
+
     abstract Type getType();
 
     abstract FusionValue eval(Evaluator eval, Environment env)

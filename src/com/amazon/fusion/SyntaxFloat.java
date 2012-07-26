@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonReader;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
@@ -12,16 +11,15 @@ final class SyntaxFloat
     private final Double myValue;
 
 
-    private SyntaxFloat(Double value)
+    private SyntaxFloat(Double value, SourceLocation loc)
     {
+        super(loc);
         myValue = value;
     }
 
-    static SyntaxFloat read(IonReader source)
+    static SyntaxFloat make(Double value, SourceLocation loc)
     {
-        Double value =
-            (source.isNullValue() ? null : source.doubleValue());
-        return new SyntaxFloat(value);
+        return new SyntaxFloat(value, loc);
     }
 
 

@@ -10,8 +10,9 @@ abstract class SyntaxText
     /**
      * @param text may be null.
      */
-    public SyntaxText(String text)
+    SyntaxText(String text, SourceLocation loc)
     {
+        super(loc);
         myText = text;
     }
 

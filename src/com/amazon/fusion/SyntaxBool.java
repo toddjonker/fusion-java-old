@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonReader;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
@@ -13,16 +12,15 @@ final class SyntaxBool
     private final Boolean myValue;
 
 
-    private SyntaxBool(Boolean value)
+    private SyntaxBool(Boolean value, SourceLocation loc)
     {
+        super(loc);
         myValue = value;
     }
 
-    static SyntaxBool read(IonReader source)
+    static SyntaxBool make(Boolean value, SourceLocation loc)
     {
-        Boolean value =
-            (source.isNullValue() ? null : source.booleanValue());
-        return new SyntaxBool(value);
+        return new SyntaxBool(value, loc);
     }
 
 

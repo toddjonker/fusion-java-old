@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonReader;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.Timestamp;
 import java.io.IOException;
@@ -13,15 +12,15 @@ final class SyntaxTimestamp
     private final Timestamp myValue;
 
 
-    private SyntaxTimestamp(Timestamp value)
+    private SyntaxTimestamp(Timestamp value, SourceLocation loc)
     {
+        super(loc);
         myValue = value;
     }
 
-    static SyntaxTimestamp read(IonReader source)
+    static SyntaxTimestamp make(Timestamp value, SourceLocation loc)
     {
-        Timestamp value = source.timestampValue();
-        return new SyntaxTimestamp(value);
+        return new SyntaxTimestamp(value, loc);
     }
 
 

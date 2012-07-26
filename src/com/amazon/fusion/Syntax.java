@@ -2,8 +2,11 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.SourceLocation.currentLocation;
+import com.amazon.ion.Decimal;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonType;
+import com.amazon.ion.Timestamp;
 
 /**
  * Utilities for working with {@link SyntaxValue}s.
@@ -15,47 +18,63 @@ final class Syntax
         IonType type = source.getType();
         assert type != null;
 
+        SourceLocation loc = currentLocation(source);
+
         switch (type)
         {
             case NULL:
             {
-                return SyntaxNull.read(source);
+                return SyntaxNull.make(loc);
             }
             case BOOL:
             {
-                return SyntaxBool.read(source);
+                Boolean value =
+                    (source.isNullValue() ? null : source.booleanValue());
+                return SyntaxBool.make(value, loc);
             }
             case INT:
             {
-                return SyntaxInt.read(source);
+                return SyntaxInt.make(source.bigIntegerValue(), loc);
             }
             case DECIMAL:
             {
-                return SyntaxDecimal.read(source);
+                // TODO WORKAROUND ION-290 this check shouldn't be needed
+                Decimal value =
+                    (source.isNullValue() ? null : source.decimalValue());
+                return SyntaxDecimal.make(value, loc);
             }
             case FLOAT:
             {
-                return SyntaxFloat.read(source);
+                Double value =
+                    (source.isNullValue() ? null : source.doubleValue());
+                return SyntaxFloat.make(value, loc);
             }
             case TIMESTAMP:
             {
-                return SyntaxTimestamp.read(source);
+                Timestamp value = source.timestampValue();
+                return SyntaxTimestamp.make(value, loc);
             }
             case STRING:
             {
-                return SyntaxString.read(source);
+                String value = source.stringValue();
+                return SyntaxString.make(value, loc);
             }
             case SYMBOL:
             {
-                return SyntaxSymbol.read(source);
+                String value = source.stringValue();
+                return SyntaxSymbol.make(value, loc);
             }
             case BLOB:
             {
-                return SyntaxBlob.read(source);
+                byte[] value =
+                    (source.isNullValue() ? null : source.newBytes());
+                return SyntaxBlob.make(value, loc);
             }
             case CLOB:
             {
-                return SyntaxClob.read(source);
+                byte[] value =
+                    (source.isNullValue() ? null : source.newBytes());
+                return SyntaxClob.make(value, loc);
             }
             case LIST:
             {

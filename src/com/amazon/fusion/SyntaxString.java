@@ -2,22 +2,20 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonReader;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
 final class SyntaxString
     extends SyntaxText
 {
-    private SyntaxString(String text)
+    private SyntaxString(String value, SourceLocation loc)
     {
-        super(text);
+        super(value, loc);
     }
 
-    static SyntaxString read(IonReader source)
+    static SyntaxString make(String value, SourceLocation loc)
     {
-        String text = source.stringValue();
-        return new SyntaxString(text);
+        return new SyntaxString(value, loc);
     }
 
 

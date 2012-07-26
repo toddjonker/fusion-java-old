@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonReader;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -13,14 +12,15 @@ final class SyntaxDecimal
     private final BigDecimal myValue;
 
 
-    private SyntaxDecimal(BigDecimal value)
+    private SyntaxDecimal(BigDecimal value, SourceLocation loc)
     {
+        super(loc);
         myValue = value;
     }
 
-    static SyntaxDecimal read(IonReader source)
+    static SyntaxDecimal make(BigDecimal value, SourceLocation loc)
     {
-        return new SyntaxDecimal(source.bigDecimalValue());
+        return new SyntaxDecimal(value, loc);
     }
 
 

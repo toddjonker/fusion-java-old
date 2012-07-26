@@ -2,28 +2,25 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonReader;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
 final class SyntaxSymbol
     extends SyntaxText
 {
-    static SyntaxSymbol make(String text)
+    private SyntaxSymbol(String value, SourceLocation loc)
     {
-        return new SyntaxSymbol(text);
+        super(value, loc);
     }
 
-
-    private SyntaxSymbol(String text)
+    static SyntaxSymbol make(String value)
     {
-        super(text);
+        return new SyntaxSymbol(value, null);
     }
 
-    static SyntaxSymbol read(IonReader source)
+    static SyntaxSymbol make(String value, SourceLocation loc)
     {
-        String text = source.stringValue();
-        return new SyntaxSymbol(text);
+        return new SyntaxSymbol(value, loc);
     }
 
 

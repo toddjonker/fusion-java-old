@@ -48,6 +48,16 @@ public class SyntaxFailure
 
             if (mySources.length != 0)
             {
+                SourceLocation loc = mySources[0].getLocation();
+                if (loc != null)
+                {
+                    out.append("\nat ");
+                    FusionUtils.writeFriendlyIndex(out, loc.myLine);
+                    out.append(" line, ");
+                    FusionUtils.writeFriendlyIndex(out, loc.myColumn);
+                    out.append(" column");
+                }
+
                 out.append("\nSources:");
                 for (SyntaxValue expr : mySources)
                 {

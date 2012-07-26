@@ -2,19 +2,22 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonReader;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
 final class SyntaxNull
     extends SyntaxValue
 {
-    private SyntaxNull() { }
-
-    static SyntaxNull read(IonReader source)
+    private SyntaxNull(SourceLocation loc)
     {
-        return new SyntaxNull();
+        super(loc);
     }
+
+    static SyntaxNull make(SourceLocation loc)
+    {
+        return new SyntaxNull(loc);
+    }
+
 
     @Override
     Type getType()

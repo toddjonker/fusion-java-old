@@ -26,9 +26,9 @@ final class FusionUtils
     }
 
 
-    static String friendlySuffix(int i)
+    static String friendlySuffix(long i)
     {
-        int lastDigit = i % 10;
+        long lastDigit = i % 10;
         if (lastDigit == 1 && i != 11)
         {
             return "st";
@@ -53,11 +53,11 @@ final class FusionUtils
      * @param i
      * @throws IOException
      */
-    static void writeFriendlyIndex(Appendable out, int i)
+    static void writeFriendlyIndex(Appendable out, long i)
         throws IOException
     {
         i++;
-        out.append(Integer.toString(i));
+        out.append(Long.toString(i));
         String suffix = friendlySuffix(i);
         out.append(suffix);
     }
