@@ -200,4 +200,24 @@ public class StructTest
     {
         expectArgTypeFailure("(struct_union {f:3} 4)",1);
     }
+
+
+    @Test
+    public void testStructIntersect()
+        throws Exception
+    {
+        assertEval("{a:3}", "(struct_intersect {a:3,c:5} {a:3,b:4})");
+        assertEval("{a:3}", "(struct_intersect {c:5,a:3} {a:3,b:4})");
+        assertEval("{}",    "(struct_intersect {a:3} {b:4})");
+    }
+
+    @Test
+    public void testStructIntersectFail()
+        throws Exception
+    {
+        expectArgTypeFailure("(struct_intersect {} [])",1);
+
+        expectArityFailure("(struct_intersect)");
+        expectArityFailure("(struct_intersect {})");
+    }
 }

@@ -242,4 +242,68 @@ public class ListTest
         expectArgTypeFailure("(first \"boeing\")", 0);
 
     }
+
+    @Test
+    public void testListIntersect()
+        throws Exception
+    {
+        assertEval("[3]", "(list_intersect [3,5] [3,4])");
+        assertEval("[3]", "(list_intersect [5,3] [3,4])");
+        assertEval("[]",  "(list_intersect [[[]]] [[]])");
+    }
+
+    @Test
+    public void testListIntersectFail()
+        throws Exception
+    {
+        expectArgTypeFailure("(list_intersect {} [])",0);
+
+        expectArityFailure("(list_intersect)");
+        expectArityFailure("(list_intersect [])");
+    }
+
+    @Test
+    public void testListContains()
+        throws Exception
+    {
+        assertEval(true,  "(contains [3,3,5,3] 5)");
+        assertEval(false, "(contains [] 5)");
+        assertEval(false, "(contains [[5]] 5)");
+
+        String smallList = "[1,2,3]";
+        assertEval(true,  "(contains "+smallList+" 2)");
+        assertEval(false, "(contains "+smallList+" 4)");
+        assertEval(false, "(contains "+smallList+" "+smallList+")");
+        assertEval(true,  "(contains ["+smallList+"] "+smallList+")");
+        assertEval(true,  "(contains ["+smallList+",{A:3}] {A:3})");
+        assertEval(true,  "(contains [{A:3,B:2},{A:3,B:1}] {A:3, B:1})");
+        assertEval(false, "(contains [] null.int)");
+        assertEval(false, "(contains [] 5)");
+
+    }
+
+    @Test
+    public void listContainsFail()
+        throws Exception
+    {
+        expectArityFailure("(contains)");
+        expectArityFailure("(contains [] [] [])");
+
+        expectContractFailure("(contains 1 1)");
+        expectContractFailure("(contains \"hello\" \"hello\")");
+    }
+
+    @Test
+    public void testIsList()
+        throws Exception
+    {
+        assertEval(true, "(is_list [])");
+        assertEval(true, "(is_list [1,3])");
+        assertEval(true, "(is_list [[[]],[3,3]])");
+        assertEval(true, "(is_list [{a:3},{a:3}])");
+
+        assertEval(false, "(is_list undef)");
+        assertEval(false, "(is_list {})");
+        assertEval(false, "(is_list \"[1,2,3]\")");
+    }
 }

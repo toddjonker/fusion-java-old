@@ -1,8 +1,13 @@
 (module list 'fusion/base'
 
+  // Enable java_new support
+  (use 'fusion/ffi/java')
+
   (provide
     first
     last
+    list_empty
+    list_intersect
     rest
     subseq
   )
@@ -23,7 +28,7 @@ Returns the first element in the list
 Returns the last element in the list
       '''
 
-     (if (= (size list) 0) undef (. list (- (size list) 1)))))
+     (if (list_empty list) undef (. list (- (size list) 1)))))
 
   //==========================================================================
 
@@ -55,5 +60,29 @@ Returns the subsequence of a list in the range of two indices [start,end], inclu
       '''
      (if (or (> start end) (= end (size list)) (> end (size list)))
       undef (list_builder list [] start (+ end 1)))))
+
+  //==========================================================================
+
+  (define list_empty
+   (lambda (list)
+      '''
+Returns true if list is empty otherwise returns false
+      '''
+     (= 0 (size list))))
+
+  //==========================================================================
+
+  (define list_contains
+   (lambda (list val)
+      '''
+Returns true if list contains value otherwise returns false
+      '''
+      (if (list_empty list) false
+       (or (= val (first list))
+        (list_contains (subseq list 1 (size list)) val)))))
+
+  //==========================================================================
+
+  (define list_intersect     (java_new "com.amazon.fusion.ListIntersectProc"))
 
 ) // end module
