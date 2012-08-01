@@ -12,8 +12,10 @@ import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonText;
+import com.amazon.ion.IonTimestamp;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.NullValueException;
+import com.amazon.ion.Timestamp;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -264,6 +266,14 @@ abstract class Procedure
         catch (NullPointerException e) {} // in case toIonValue() ==> null
 
         throw new ArgTypeFailure(this, "int or decimal", argNum, args);
+    }
+
+    Timestamp checkTimestampArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        IonTimestamp iv = checkDomArg(IonTimestamp.class, "timestamp",
+                                  true /* nullable */, argNum, args);
+        return iv.timestampValue();
     }
 
 

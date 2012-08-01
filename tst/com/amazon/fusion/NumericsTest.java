@@ -16,6 +16,7 @@ public class NumericsTest
         throws FusionException
     {
         eval("(use 'fusion/math')");
+        eval("(use 'fusion/timestamp')");
     }
 
     @Test

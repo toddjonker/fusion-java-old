@@ -1,0 +1,9 @@
+(module timestamp (quote '#%kernel')
+
+  (use 'fusion/base')
+
+  (provide timestamp_now)
+
+  (define timestamp_now  (java_new "com.amazon.fusion.TimestampNowProc"))
+
+)
