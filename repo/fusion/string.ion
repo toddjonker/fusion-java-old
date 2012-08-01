@@ -1,0 +1,11 @@
+(module 'fusion/string' (quote '#%kernel')
+
+  // We start with #%kernel for access to java_new
+  (use 'fusion/base')
+
+  (provide string_to_lower
+           string_to_upper)
+
+  (define string_to_lower   (java_new "com.amazon.fusion.StringToLowerProc"))
+  (define string_to_upper   (java_new "com.amazon.fusion.StringToUpperProc"))
+)
