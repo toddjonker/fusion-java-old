@@ -7,7 +7,7 @@ import com.amazon.ion.IonValue;
 
 
 /**
- *
+ * Constructs a struct from a sequence of alternating strings and Ion Values
  */
 final class StructMakeProc
     extends Procedure

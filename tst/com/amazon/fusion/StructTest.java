@@ -201,7 +201,6 @@ public class StructTest
         expectArgTypeFailure("(struct_union {f:3} 4)",1);
     }
 
-
     @Test
     public void testStructIntersect()
         throws Exception
@@ -219,5 +218,25 @@ public class StructTest
 
         expectArityFailure("(struct_intersect)");
         expectArityFailure("(struct_intersect {})");
+    }
+
+    @Test
+    public void structPrune()
+        throws Exception
+    {
+        eval("(define testStruct {a:1,b:3,c:2})");
+        assertEval("{a:1,c:2}","(struct_prune testStruct \"a\" \"c\")");
+        assertEval("{}","(struct_prune testStruct)");
+        assertEval("{a:3}", "(struct_prune {a:3} \"a\")");
+    }
+
+    @Test
+    public void structPruneFail()
+        throws Exception
+    {
+        expectArityFailure("(struct_prune)");
+
+        expectContractFailure("(struct_prune [\"a\"] \"a\")");
+        expectContractFailure("(struct_prune {} \"a\")");
     }
 }
