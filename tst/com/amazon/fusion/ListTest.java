@@ -262,24 +262,20 @@ public class ListTest
         expectArityFailure("(list_intersect [])");
     }
 
-    @Test
-    public void testListContains()
+    public void listContains()
         throws Exception
     {
-        assertEval(true,  "(contains [3,3,5,3] 5)");
-        assertEval(false, "(contains [] 5)");
-        assertEval(false, "(contains [[5]] 5)");
-
         String smallList = "[1,2,3]";
+
         assertEval(true,  "(contains "+smallList+" 2)");
         assertEval(false, "(contains "+smallList+" 4)");
         assertEval(false, "(contains "+smallList+" "+smallList+")");
         assertEval(true,  "(contains ["+smallList+"] "+smallList+")");
         assertEval(true,  "(contains ["+smallList+",{A:3}] {A:3})");
-        assertEval(true,  "(contains [{A:3,B:2},{A:3,B:1}] {A:3, B:1})");
+        assertEval(true,  "(contains [{A:3, B:2}, {A:3, B:1}] {A:3, B:1})");
+        assertEval(false, "(contains [{A:3, B:2}, {A:3, B:1}] {A:3, B:4})");
         assertEval(false, "(contains [] null.int)");
         assertEval(false, "(contains [] 5)");
-
     }
 
     @Test

@@ -3,23 +3,23 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonContainer;
-import com.amazon.ion.IonList;
 import com.amazon.ion.IonValue;
 import java.util.Iterator;
 
 
 /**
- * Accepts a list or struct as input and an ion value and returns true if the structure
- * contains the ion value and false otherwise
+ * Accepts a container, such as a list or struct, as input and
+ * an ion value and returns true if the the ion value is in the
+ * container and false otherwise
  */
-class ContainsProc
+final class ContainsProc
     extends Procedure
 {
     ContainsProc()
     {
-        super("Accepts a list or struct as input and an ion value and " +
-            "returns true if the structure contains the ion value and " +
-            "false otherwise.");
+        super("Accepts a container, such as a list or struct, as input and " +
+              "and an ion value and returns true if the ion value is " +
+              "in the container and false otherwise");
     }
 
     @Override
@@ -28,29 +28,21 @@ class ContainsProc
     {
         checkArityExact(2,arg);
 
-        //IonValue container = FusionValue.toIonValue(arg[0]);
-        IonContainer container = checkContainerArg(0,arg);
+        IonContainer thisList = checkContainerArg(0, arg);
         IonValue test = FusionValue.toIonValue(arg[1]);
 
         boolean contained = false;
 
-        if (container instanceof IonContainer)
+        Iterator<IonValue> listIterator = thisList.iterator();
+
+        while(listIterator.hasNext())
         {
-            IonList thisList = (IonList)container;
-            Iterator<IonValue> listIterator = thisList.listIterator();
-            while (listIterator.hasNext())
+            IonValue ionValue = listIterator.next();
+            if (ionValue.equals(test))
             {
-                IonValue ionValue = listIterator.next();
-                if (ionValue.equals(test))
-                {
-                    contained = true;
-                    break;
-                }
+                contained = true;
+                break;
             }
-        } else
-        {
-            throw contractFailure ("Expected: IonList or IonStruct in the first arg; "+
-                                   "observed: "+FusionValue.writeToString(arg[0]));
         }
 
         return eval.newBool(contained);
