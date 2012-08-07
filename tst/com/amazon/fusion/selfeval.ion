@@ -15,6 +15,11 @@ null.int
 
 null.decimal
 123.45
+0.
+0.0
+-0.0
+-0d0
+-0.000
 
 null.float
 123.45e0
