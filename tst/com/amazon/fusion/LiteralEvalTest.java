@@ -98,6 +98,15 @@ public class LiteralEvalTest
     }
 
     @Test
+    public void testQuotedAnnotations()
+        throws Exception
+    {
+        assertEval("ann::99", "(quote ann::99)");
+        assertEval("a::{f:a::b::99}", "(quote a::{f:a::b::99})");
+    }
+
+
+    @Test
     public void testUndef()
         throws Exception
     {
