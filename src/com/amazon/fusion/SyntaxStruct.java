@@ -28,13 +28,14 @@ final class SyntaxStruct
     /**
      * @param map may be null
      */
-    private SyntaxStruct(Map<String, Object> map, SourceLocation loc)
+    private SyntaxStruct(Map<String, Object> map, String[] anns,
+                         SourceLocation loc)
     {
-        super(loc);
+        super(anns, loc);
         myMap = map;
     }
 
-    static SyntaxStruct read(IonReader source)
+    static SyntaxStruct read(IonReader source, String[] anns)
     {
         SourceLocation loc = currentLocation(source);
 
@@ -74,7 +75,7 @@ final class SyntaxStruct
             source.stepOut();
         }
 
-        return new SyntaxStruct(map, loc);
+        return new SyntaxStruct(map, anns, loc);
     }
 
 
@@ -131,6 +132,7 @@ final class SyntaxStruct
                 }
             }
         }
+        resultDom.setTypeAnnotations(getAnnotations());
         return new DomValue(resultDom);
     }
 

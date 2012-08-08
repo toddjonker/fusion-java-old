@@ -11,15 +11,15 @@ final class SyntaxFloat
     private final Double myValue;
 
 
-    private SyntaxFloat(Double value, SourceLocation loc)
+    private SyntaxFloat(Double value, String[] anns, SourceLocation loc)
     {
-        super(loc);
+        super(anns, loc);
         myValue = value;
     }
 
-    static SyntaxFloat make(Double value, SourceLocation loc)
+    static SyntaxFloat make(Double value, String[] anns, SourceLocation loc)
     {
-        return new SyntaxFloat(value, loc);
+        return new SyntaxFloat(value, anns, loc);
     }
 
 
@@ -40,7 +40,7 @@ final class SyntaxFloat
     @Override
     FusionValue quote(Evaluator eval)
     {
-        return eval.newFloat(myValue);
+        return eval.newFloat(myValue, getAnnotations());
     }
 
 

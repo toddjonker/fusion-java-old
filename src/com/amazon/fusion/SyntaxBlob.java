@@ -11,15 +11,15 @@ final class SyntaxBlob
     private final byte[] myValue;
 
 
-    private SyntaxBlob(byte[] value, SourceLocation loc)
+    private SyntaxBlob(byte[] value, String[] anns, SourceLocation loc)
     {
-        super(loc);
+        super(anns, loc);
         myValue = value;
     }
 
-    static SyntaxBlob make(byte[] value, SourceLocation loc)
+    static SyntaxBlob make(byte[] value, String[] anns, SourceLocation loc)
     {
-        return new SyntaxBlob(value, loc);
+        return new SyntaxBlob(value, anns, loc);
     }
 
 
@@ -40,7 +40,7 @@ final class SyntaxBlob
     @Override
     FusionValue quote(Evaluator eval)
     {
-        return eval.newBlob(myValue);
+        return eval.newBlob(myValue, getAnnotations());
     }
 
 

@@ -16,6 +16,9 @@ final class FusionUtils
     private FusionUtils() { }
 
 
+    static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+
     static IonValue cloneIfContained(IonValue value)
     {
         if (value.getContainer() != null)

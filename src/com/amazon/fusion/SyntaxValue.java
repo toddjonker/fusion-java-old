@@ -21,15 +21,34 @@ abstract class SyntaxValue
     }
 
 
+    private final String[] myAnnotations;
     private final SourceLocation mySrcLoc;
 
 
-    SyntaxValue(SourceLocation loc)
+    /**
+     *
+     * @param annotations the new instance assumes ownership of the array and
+     * it must not be modified later. Must not be null.
+     *
+     * @param loc may be null;
+     */
+    SyntaxValue(String[] annotations, SourceLocation loc)
     {
+        assert annotations != null : "annotations must not be null";
+        myAnnotations = annotations;
         mySrcLoc = loc;
     }
 
 
+    String[] getAnnotations()
+    {
+        return myAnnotations;
+    }
+
+    /**
+     * Gets the location associated with this syntax node, if it exists.
+     * @return may be null.
+     */
     SourceLocation getLocation()
     {
         return mySrcLoc;

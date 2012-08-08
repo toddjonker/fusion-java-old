@@ -8,14 +8,14 @@ import java.io.IOException;
 final class SyntaxString
     extends SyntaxText
 {
-    private SyntaxString(String value, SourceLocation loc)
+    private SyntaxString(String value, String[] anns, SourceLocation loc)
     {
-        super(value, loc);
+        super(value, anns, loc);
     }
 
-    static SyntaxString make(String value, SourceLocation loc)
+    static SyntaxString make(String value, String[] anns, SourceLocation loc)
     {
-        return new SyntaxString(value, loc);
+        return new SyntaxString(value, anns, loc);
     }
 
 
@@ -29,7 +29,7 @@ final class SyntaxString
     @Override
     FusionValue quote(Evaluator eval)
     {
-        return eval.newString(myText);
+        return eval.newString(myText, getAnnotations());
     }
 
 

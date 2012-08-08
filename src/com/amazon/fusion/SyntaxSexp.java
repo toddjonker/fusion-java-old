@@ -2,8 +2,10 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.SourceLocation.currentLocation;
 import com.amazon.ion.IonReader;
+import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
@@ -12,29 +14,29 @@ import java.io.IOException;
 final class SyntaxSexp
     extends SyntaxSequence
 {
-    private SyntaxSexp(SourceLocation loc)
+    private SyntaxSexp(String[] anns, SourceLocation loc)
     {
-        super(loc);
+        super(anns, loc);
     }
 
-    static SyntaxSexp read(IonReader source)
+    static SyntaxSexp read(IonReader source, String[] anns)
     {
         SourceLocation loc = currentLocation(source);
-        SyntaxSexp seq = new SyntaxSexp(loc);
+        SyntaxSexp seq = new SyntaxSexp(anns, loc);
         seq.readChildren(source);
         return seq;
     }
 
     static SyntaxSexp makeEmpty()
     {
-        SyntaxSexp seq = new SyntaxSexp(null);
+        SyntaxSexp seq = new SyntaxSexp(EMPTY_STRING_ARRAY, null);
         seq.ensureNotNull();
         return seq;
     }
 
     static SyntaxSexp make(SyntaxValue... children)
     {
-        SyntaxSexp seq = new SyntaxSexp(null);
+        SyntaxSexp seq = new SyntaxSexp(EMPTY_STRING_ARRAY, null);
         seq.add(children);
         return seq;
     }
@@ -48,10 +50,9 @@ final class SyntaxSexp
 
 
     @Override
-    FusionValue quote(Evaluator eval)
+    IonSequence makeNull(ValueFactory factory)
     {
-        ValueFactory vf = eval.getSystem();
-        return addQuotedChildren(eval, vf, vf.newNullSexp());
+        return factory.newNullSexp();
     }
 
 

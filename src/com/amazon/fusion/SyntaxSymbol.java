@@ -2,25 +2,26 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
 final class SyntaxSymbol
     extends SyntaxText
 {
-    private SyntaxSymbol(String value, SourceLocation loc)
+    private SyntaxSymbol(String value, String[] anns, SourceLocation loc)
     {
-        super(value, loc);
+        super(value, anns, loc);
     }
 
     static SyntaxSymbol make(String value)
     {
-        return new SyntaxSymbol(value, null);
+        return new SyntaxSymbol(value, EMPTY_STRING_ARRAY, null);
     }
 
-    static SyntaxSymbol make(String value, SourceLocation loc)
+    static SyntaxSymbol make(String value, String[] anns, SourceLocation loc)
     {
-        return new SyntaxSymbol(value, loc);
+        return new SyntaxSymbol(value, anns, loc);
     }
 
 
@@ -34,7 +35,7 @@ final class SyntaxSymbol
     @Override
     FusionValue quote(Evaluator eval)
     {
-        return eval.newSymbol(myText);
+        return eval.newSymbol(myText, getAnnotations());
     }
 
 

@@ -5,8 +5,8 @@ package com.amazon.fusion;
 abstract class SyntaxContainer
     extends SyntaxValue
 {
-    SyntaxContainer(SourceLocation loc)
+    SyntaxContainer(String[] anns, SourceLocation loc)
     {
-        super(loc);
+        super(anns, loc);
     }
 }

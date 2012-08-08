@@ -12,15 +12,15 @@ final class SyntaxInt
     private final BigInteger myValue;
 
 
-    private SyntaxInt(BigInteger value, SourceLocation loc)
+    private SyntaxInt(BigInteger value, String[] anns, SourceLocation loc)
     {
-        super(loc);
+        super(anns, loc);
         myValue = value;
     }
 
-    static SyntaxInt make(BigInteger value, SourceLocation loc)
+    static SyntaxInt make(BigInteger value, String[] anns, SourceLocation loc)
     {
-        return new SyntaxInt(value, loc);
+        return new SyntaxInt(value, anns, loc);
     }
 
 
@@ -41,7 +41,7 @@ final class SyntaxInt
     @Override
     FusionValue quote(Evaluator eval)
     {
-        return eval.newInt(myValue);
+        return eval.newInt(myValue, getAnnotations());
     }
 
 

@@ -12,15 +12,15 @@ final class SyntaxBool
     private final Boolean myValue;
 
 
-    private SyntaxBool(Boolean value, SourceLocation loc)
+    private SyntaxBool(Boolean value, String[] anns, SourceLocation loc)
     {
-        super(loc);
+        super(anns, loc);
         myValue = value;
     }
 
-    static SyntaxBool make(Boolean value, SourceLocation loc)
+    static SyntaxBool make(Boolean value, String[] anns, SourceLocation loc)
     {
-        return new SyntaxBool(value, loc);
+        return new SyntaxBool(value, anns, loc);
     }
 
 
@@ -39,7 +39,7 @@ final class SyntaxBool
     @Override
     FusionValue quote(Evaluator eval)
     {
-        return eval.newBool(myValue);
+        return eval.newBool(myValue, getAnnotations());
     }
 
     @Override

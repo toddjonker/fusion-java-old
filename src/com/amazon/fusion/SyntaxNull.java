@@ -8,14 +8,14 @@ import java.io.IOException;
 final class SyntaxNull
     extends SyntaxValue
 {
-    private SyntaxNull(SourceLocation loc)
+    private SyntaxNull(String[] anns, SourceLocation loc)
     {
-        super(loc);
+        super(anns, loc);
     }
 
-    static SyntaxNull make(SourceLocation loc)
+    static SyntaxNull make(String[] anns, SourceLocation loc)
     {
-        return new SyntaxNull(loc);
+        return new SyntaxNull(anns, loc);
     }
 
 
@@ -34,7 +34,7 @@ final class SyntaxNull
     @Override
     FusionValue quote(Evaluator eval)
     {
-        return eval.newNull();
+        return eval.newNull(getAnnotations());
     }
 
     @Override

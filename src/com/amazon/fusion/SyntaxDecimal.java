@@ -12,15 +12,16 @@ final class SyntaxDecimal
     private final BigDecimal myValue;
 
 
-    private SyntaxDecimal(BigDecimal value, SourceLocation loc)
+    private SyntaxDecimal(BigDecimal value, String[] anns, SourceLocation loc)
     {
-        super(loc);
+        super(anns, loc);
         myValue = value;
     }
 
-    static SyntaxDecimal make(BigDecimal value, SourceLocation loc)
+    static SyntaxDecimal make(BigDecimal value, String[] anns,
+                              SourceLocation loc)
     {
-        return new SyntaxDecimal(value, loc);
+        return new SyntaxDecimal(value, anns, loc);
     }
 
 
@@ -41,7 +42,7 @@ final class SyntaxDecimal
     @Override
     FusionValue quote(Evaluator eval)
     {
-        return eval.newDecimal(myValue);
+        return eval.newDecimal(myValue, getAnnotations());
     }
 
 

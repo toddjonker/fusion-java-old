@@ -2,10 +2,12 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionUtils.cloneIfContained;
 import static com.amazon.fusion.SourceLocation.currentLocation;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonReader;
+import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
@@ -15,22 +17,22 @@ import java.io.IOException;
 final class SyntaxList
     extends SyntaxSequence
 {
-    private SyntaxList(SourceLocation loc)
+    private SyntaxList(String[] anns, SourceLocation loc)
     {
-        super(loc);
+        super(anns, loc);
     }
 
-    static SyntaxList read(IonReader source)
+    static SyntaxList read(IonReader source, String[] anns)
     {
         SourceLocation loc = currentLocation(source);
-        SyntaxList seq = new SyntaxList(loc);
+        SyntaxList seq = new SyntaxList(anns, loc);
         seq.readChildren(source);
         return seq;
     }
 
     static SyntaxList make(SyntaxValue... children)
     {
-        SyntaxList seq = new SyntaxList(null);
+        SyntaxList seq = new SyntaxList(EMPTY_STRING_ARRAY, null);
         seq.add(children);
         return seq;
     }
@@ -43,10 +45,9 @@ final class SyntaxList
 
 
     @Override
-    FusionValue quote(Evaluator eval)
+    IonSequence makeNull(ValueFactory factory)
     {
-        ValueFactory vf = eval.getSystem();
-        return addQuotedChildren(eval, vf, vf.newNullList());
+        return factory.newNullList();
     }
 
 

@@ -12,15 +12,16 @@ final class SyntaxTimestamp
     private final Timestamp myValue;
 
 
-    private SyntaxTimestamp(Timestamp value, SourceLocation loc)
+    private SyntaxTimestamp(Timestamp value, String[] anns, SourceLocation loc)
     {
-        super(loc);
+        super(anns, loc);
         myValue = value;
     }
 
-    static SyntaxTimestamp make(Timestamp value, SourceLocation loc)
+    static SyntaxTimestamp make(Timestamp value, String[] anns,
+                                SourceLocation loc)
     {
-        return new SyntaxTimestamp(value, loc);
+        return new SyntaxTimestamp(value, anns, loc);
     }
 
 
@@ -41,7 +42,7 @@ final class SyntaxTimestamp
     @Override
     FusionValue quote(Evaluator eval)
     {
-        return eval.newTimestamp(myValue);
+        return eval.newTimestamp(myValue, getAnnotations());
     }
 
 

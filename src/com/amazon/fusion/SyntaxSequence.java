@@ -18,9 +18,9 @@ abstract class SyntaxSequence
 {
     List<SyntaxValue> myChildren;
 
-    SyntaxSequence(SourceLocation loc)
+    SyntaxSequence(String[] anns, SourceLocation loc)
     {
-        super(loc);
+        super(anns, loc);
     }
 
 
@@ -71,16 +71,27 @@ abstract class SyntaxSequence
         Collections.addAll(myChildren, children);
     }
 
-    final FusionValue addQuotedChildren(Evaluator eval,
-                                        ValueFactory factory,
-                                        IonSequence list)
+
+    /**
+     * Construct a null value of the appropriate type.
+     * @param factory must not be null.
+     * @return a new instance.
+     */
+    abstract IonSequence makeNull(ValueFactory factory);
+
+
+    /*final*/ @Override
+    FusionValue quote(Evaluator eval)
     {
-        assert list.isNullValue();
+        ValueFactory factory = eval.getSystem();
+        IonSequence seq = makeNull(factory);
+        seq.setTypeAnnotations(getAnnotations());
+
         int size = size();
 
         if (size == 0)
         {
-            list.clear();
+            seq.clear();
         }
         else
         {
@@ -89,11 +100,11 @@ abstract class SyntaxSequence
                 SyntaxValue s = get(i);
                 FusionValue fv = s.quote(eval);
                 IonValue iv = FusionValue.toIonValue(fv, factory);
-                list.add(iv);
+                seq.add(iv);
             }
         }
 
-        return new DomValue(list);
+        return new DomValue(seq);
     }
 
     final void writeTo(IonWriter writer, IonType type)

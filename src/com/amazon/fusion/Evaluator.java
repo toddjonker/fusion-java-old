@@ -126,9 +126,10 @@ final class Evaluator
 
     //========================================================================
 
-    FusionValue newNull()
+    FusionValue newNull(String... annotations)
     {
         IonValue dom = mySystem.newNull();
+        if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
@@ -138,51 +139,78 @@ final class Evaluator
         return new DomValue(dom);
     }
 
+    FusionValue newBool(boolean value, String... annotations)
+    {
+        IonValue dom = mySystem.newBool(value);
+        if (annotations != null) dom.setTypeAnnotations(annotations);
+        return new DomValue(dom);
+    }
+
     FusionValue newBool(Boolean value)
     {
         IonValue dom = mySystem.newBool(value);
         return new DomValue(dom);
     }
 
-    FusionValue newInt(long value)
+    FusionValue newBool(Boolean value, String... annotations)
     {
-        IonValue dom = mySystem.newInt(value);
+        IonValue dom = mySystem.newBool(value);
+        if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newString(String value)
+    FusionValue newInt(long value, String... annotations)
+    {
+        IonValue dom = mySystem.newInt(value);
+        if (annotations != null) dom.setTypeAnnotations(annotations);
+        return new DomValue(dom);
+    }
+
+    FusionValue newInt(BigInteger value, String... annotations)
+    {
+        IonValue dom = mySystem.newInt(value);
+        if (annotations != null) dom.setTypeAnnotations(annotations);
+        return new DomValue(dom);
+    }
+
+    FusionValue newString(String value, String... annotations)
     {
         IonValue dom = mySystem.newString(value);
+        if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newSymbol(String value)
+    FusionValue newSymbol(String value, String... annotations)
     {
         IonValue dom = mySystem.newSymbol(value);
+        if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newInt(BigInteger value)
-    {
-        IonValue dom = mySystem.newInt(value);
-        return new DomValue(dom);
-    }
-
-    FusionValue newDecimal(BigDecimal value)
+    FusionValue newDecimal(BigDecimal value, String... annotations)
     {
         IonValue dom = mySystem.newDecimal(value);
+        if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newDecimal(double value)
+    FusionValue newDecimal(double value, String... annotations)
     {
         IonValue dom = mySystem.newDecimal(value);
+        if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
     FusionValue newFloat(double value)
     {
         IonValue dom = mySystem.newFloat(value);
+        return new DomValue(dom);
+    }
+
+    FusionValue newFloat(double value, String... annotations)
+    {
+        IonValue dom = mySystem.newFloat(value);
+        if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
@@ -194,21 +222,33 @@ final class Evaluator
         return new DomValue(dom);
     }
 
-    FusionValue newTimestamp(Timestamp value)
+    FusionValue newFloat(Double value, String... annotations)
+    {
+        IonValue dom = (value == null
+                           ? mySystem.newNullFloat()
+                           : mySystem.newFloat(value));
+        if (annotations != null) dom.setTypeAnnotations(annotations);
+        return new DomValue(dom);
+    }
+
+    FusionValue newTimestamp(Timestamp value, String... annotations)
     {
         IonValue dom = mySystem.newTimestamp(value);
+        if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newBlob(byte[] value)
+    FusionValue newBlob(byte[] value, String... annotations)
     {
         IonValue dom = mySystem.newBlob(value);
+        if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newClob(byte[] value)
+    FusionValue newClob(byte[] value, String... annotations)
     {
         IonValue dom = mySystem.newClob(value);
+        if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
