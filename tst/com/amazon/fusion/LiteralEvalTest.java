@@ -101,7 +101,18 @@ public class LiteralEvalTest
     public void testQuotedAnnotations()
         throws Exception
     {
+        assertEval("ann::null", "(quote ann::null)");
+        assertEval("ann::true", "(quote ann::true)");
         assertEval("ann::99", "(quote ann::99)");
+        assertEval("ann::1.2", "(quote ann::1.2)");
+        assertEval("ann::1e2", "(quote ann::1e2)");
+        assertEval("ann::1982T", "(quote ann::1982T)");
+        assertEval("ann::\"s\"", "(quote ann::\"s\")");
+        assertEval("ann::s", "(quote ann::s)");
+        assertEval("ann::{{}}", "(quote ann::{{}})");
+        assertEval("ann::{{\"\"}}", "(quote ann::{{\"\"}})");
+        assertEval("a::[a::b::true]", "(quote a::[a::b::true])");
+        assertEval("a::(a::b::true)", "(quote a::(a::b::true))");
         assertEval("a::{f:a::b::99}", "(quote a::{f:a::b::99})");
     }
 
