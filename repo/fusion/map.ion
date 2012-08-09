@@ -1,6 +1,6 @@
 (module map 'fusion/base'
 
-  (provide map for_each chew_stdin)
+  (provide map filter for_each chew_stdin)
 
   (define map
     (lambda (proc list)
@@ -16,6 +16,26 @@ new list of the results in order.
             (loop
               (+ 1 index)
               (add result (proc (. list index)))))))))
+
+  //==========================================================================
+
+  (define filter
+    (lambda (pred list)
+      '''
+Applies the one-parameter predicate PRED to each element of LIST, returning a
+new list of the elements (in order) for which PRED returns true.
+      '''
+      (let ((len (size list)))
+        (let loop ((index  0)
+                   (result []))
+          (if (= index len)
+            result
+            (let ((elt (. list index)))
+              (loop
+                (+ 1 index)
+                (if (pred elt)
+                  (add result elt)
+                  result))))))))
 
   //==========================================================================
 
