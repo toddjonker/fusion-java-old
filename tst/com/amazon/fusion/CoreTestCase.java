@@ -4,11 +4,11 @@ package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
+import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
@@ -279,6 +279,12 @@ public class CoreTestCase
     }
 
     protected FusionValue eval(String expressionIon)
+        throws FusionException
+    {
+        return myRuntime.eval(expressionIon);
+    }
+
+    protected FusionValue eval(IonReader expressionIon)
         throws FusionException
     {
         return myRuntime.eval(expressionIon);
