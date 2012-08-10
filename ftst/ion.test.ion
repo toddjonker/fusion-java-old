@@ -1,0 +1,33 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(use 'fusion/ion')
+(use 'fusion/list')
+
+(assert (list_empty (ion_annotations true)))
+
+(define check_equal
+  (lambda (actual expected descr)
+    (assert (= actual expected)
+      descr " not equal.\nActual: " actual "\nExpected: " expected)))
+
+(define check_list_eq  // TODO bad name  TODO doesn't handle deep values
+  (lambda (actual expected)
+    (assert (= (size actual) (size expected))
+      "list lengths don't match. Actual: " actual " Expected: " expected)
+    (let loop ((i 0))
+      (when (< i (size actual))
+        (check_equal (. actual i) (. expected i) "list element") // TODO bad descr
+        (loop (+ 1 i))))))
+
+(define check_annotations
+  (lambda (value expected)
+    (let ((anns (ion_annotations value)))
+      (check_list_eq anns expected))))
+
+(check_annotations null [])
+(check_annotations (quote a::true) ["a"])
+(check_annotations (quote a::a::true) ["a", "a"])
+(check_annotations (quote a::b::true) ["a", "b"])
+(check_annotations (quote [a::true]) [])
+
+"PASSED" // Helpful output if you run this stand-alone
