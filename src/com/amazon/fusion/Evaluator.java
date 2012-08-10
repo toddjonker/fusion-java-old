@@ -302,6 +302,14 @@ final class Evaluator
     {
         moreEval: while (true)
         {
+            if (expr.getAnnotations().length != 0)
+            {
+                String message =
+                    "Annotations not supported in raw syntax. You probably " +
+                    "want to quote this value";
+                throw new SyntaxFailure(null, message, expr);
+            }
+
             FusionValue result = expr.eval(this, env);
             while (true)
             {
