@@ -47,7 +47,7 @@ final class SyntaxTimestamp
 
 
     @Override
-    void writeTo(IonWriter writer) throws IOException
+    void writeContentTo(IonWriter writer) throws IOException
     {
         writer.writeTimestamp(myValue);
     }

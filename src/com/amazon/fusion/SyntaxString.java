@@ -42,7 +42,7 @@ final class SyntaxString
 
 
     @Override
-    void writeTo(IonWriter writer)
+    void writeContentTo(IonWriter writer)
         throws IOException
     {
         writer.writeString(myText);

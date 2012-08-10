@@ -74,7 +74,19 @@ abstract class SyntaxValue
     }
 
 
-    abstract void writeTo(IonWriter writer)
+    /**
+     * Writes this syntax in Ion form.
+     * @param writer must not be null.
+     */
+    final void writeTo(IonWriter writer)
+        throws IOException
+    {
+        writer.setTypeAnnotations(myAnnotations);
+        writeContentTo(writer);
+    }
+
+    /** Write the content (not including annotations) to a writer. */
+    abstract void writeContentTo(IonWriter writer)
         throws IOException;
 
     abstract boolean isNullValue();

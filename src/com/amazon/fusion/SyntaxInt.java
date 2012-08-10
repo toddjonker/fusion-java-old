@@ -46,7 +46,7 @@ final class SyntaxInt
 
 
     @Override
-    void writeTo(IonWriter writer) throws IOException
+    void writeContentTo(IonWriter writer) throws IOException
     {
         writer.writeInt(myValue);
     }

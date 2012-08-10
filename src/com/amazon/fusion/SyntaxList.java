@@ -79,9 +79,9 @@ final class SyntaxList
 
 
     @Override
-    void writeTo(IonWriter writer)
+    void writeContentTo(IonWriter writer)
         throws IOException
     {
-        writeTo(writer, IonType.LIST);
+        writeContentTo(writer, IonType.LIST);
     }
 }

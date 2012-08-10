@@ -75,9 +75,9 @@ final class SyntaxSexp
 
 
     @Override
-    void writeTo(IonWriter writer)
+    void writeContentTo(IonWriter writer)
         throws IOException
     {
-        writeTo(writer, IonType.SEXP);
+        writeContentTo(writer, IonType.SEXP);
     }
 }

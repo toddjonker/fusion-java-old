@@ -187,7 +187,7 @@ final class SyntaxStruct
 
 
     @Override
-    void writeTo(IonWriter writer) throws IOException
+    void writeContentTo(IonWriter writer) throws IOException
     {
         if (isNullValue())
         {

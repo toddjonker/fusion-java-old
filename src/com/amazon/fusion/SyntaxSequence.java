@@ -107,7 +107,7 @@ abstract class SyntaxSequence
         return new DomValue(seq);
     }
 
-    final void writeTo(IonWriter writer, IonType type)
+    final void writeContentTo(IonWriter writer, IonType type)
         throws IOException
     {
         if (isNullValue())

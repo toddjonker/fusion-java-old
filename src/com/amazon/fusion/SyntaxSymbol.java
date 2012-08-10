@@ -59,7 +59,7 @@ final class SyntaxSymbol
 
 
     @Override
-    void writeTo(IonWriter writer)
+    void writeContentTo(IonWriter writer)
         throws IOException
     {
         writer.writeSymbol(myText);

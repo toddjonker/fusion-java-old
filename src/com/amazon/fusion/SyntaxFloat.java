@@ -45,7 +45,7 @@ final class SyntaxFloat
 
 
     @Override
-    void writeTo(IonWriter writer) throws IOException
+    void writeContentTo(IonWriter writer) throws IOException
     {
         writer.writeFloat(myValue);
     }
