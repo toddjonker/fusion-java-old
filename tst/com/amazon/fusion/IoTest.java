@@ -26,10 +26,10 @@ public class IoTest
         String userDir = System.getProperty("user.dir");
         assertEval(printString(userDir), "(current_directory)");
 
-        String newDir = userDir + "/tst/com";
+        String newDir = userDir + "/tst-data";
         assertEval("\"hello\"",
                    "(parameterize" +
                    "  ((current_directory " + printString(newDir) + "))" +
-                   "  (eval_file \"amazon/fusion/hello.ion\"))");
+                   "  (eval_file \"hello.ion\"))");
     }
 }

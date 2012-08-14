@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.ion.util.IonTextUtils.printString;
-
 import java.io.File;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -13,7 +12,7 @@ import org.junit.Test;
  * Contains test cases for the stream classes and operations
  */
 public class StreamTest
-    extends ExternalTest
+    extends CoreTestCase
 {
     @Override @Before
     public void setUp()
@@ -312,7 +311,7 @@ public class StreamTest
     public void testStreamForFile()
         throws Exception
     {
-        File f = getProjectFile("tst/com/amazon/fusion/ints.ion");
+        File f = new File("tst-data/ints.ion");
         String path = f.getAbsolutePath();
         eval("(define s (stream_for_file " + printString(path) + "))");
         assertEval(0, "(stream_next s)");

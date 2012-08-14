@@ -51,8 +51,7 @@ public class RuntimeTest
     public void testModuleInUserRepository()
         throws Exception
     {
-        File tstRepo = new File("tst-repo");
-        runtimeBuilder().addRepositoryDirectory(tstRepo);
+        useTstRepo();
         eval("(use grain)");
         assertString("soup", "barley");
     }

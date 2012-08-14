@@ -97,6 +97,12 @@ public class CoreTestCase
         return myRuntimeBuilder;
     }
 
+    protected void useTstRepo()
+    {
+        File tstRepo = new File("tst-repo");
+        runtimeBuilder().addRepositoryDirectory(tstRepo);
+    }
+
     protected FusionRuntime runtime()
     {
         if (myRuntime == null)

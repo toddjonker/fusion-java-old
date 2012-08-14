@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonValue;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Iterator;
 import org.junit.Test;
@@ -15,7 +16,7 @@ public class LiteralEvalTest
     public void testSelfEval()
         throws Exception
     {
-        InputStream data = getClass().getResourceAsStream("selfeval.ion");
+        InputStream data = new FileInputStream("tst-data/selfeval.ion");
         Iterator<IonValue> clauses = system().iterate(data);
         do {
             IonValue expr = clauses.next();

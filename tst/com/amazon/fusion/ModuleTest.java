@@ -11,19 +11,12 @@ import org.junit.Test;
 public class ModuleTest
     extends CoreTestCase
 {
-    @Test
-    public void testUseModuleFromFile()
-        throws Exception
-    {
-        eval("(use \"tst/com/amazon/fusion/Module1\")");
-        assertEval(214, "X");
-    }
-
     @Test(expected = UnboundIdentifierFailure.class)
     public void testUseModuleWithNoProvides()
         throws Exception
     {
-        eval("(use \"tst/com/amazon/fusion/NoProvides\")");
+        useTstRepo();
+        eval("(use 'NoProvides')");
         eval("X");
     }
 
@@ -31,21 +24,22 @@ public class ModuleTest
     public void testUseNonSexp()
         throws Exception
     {
-        eval("(use \"tst/com/amazon/fusion/hello.ion\")");
+        eval("(use \"tst-data/hello.ion\")");
     }
 
     @Test(expected = FusionException.class)
     public void testUseNonModule()
         throws Exception
     {
-        eval("(use \"tst/com/amazon/fusion/trivialDefine.ion\")");
+        eval("(use \"tst-data/trivialDefine.ion\")");
     }
 
     @Test
     public void testTransitiveLoad()
         throws Exception
     {
-        eval("(use \"tst/com/amazon/fusion/root_module.ion\")");
+        useTstRepo();
+        eval("(use root_module)");
         assertEval(437, "leaf_var");
         FusionValue rootFn = eval("root_fn");
         FusionValue midFn  = eval("mid_fn");
