@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- *
+ * Parallel to Racket's load handler.
  */
 final class LoadHandler
 {
@@ -52,6 +52,17 @@ final class LoadHandler
     }
 
 
+    /**
+     * Reads top-level syntax forms from a file, evaluating each in sequence.
+     *
+     * @param eval
+     * @param namespace
+     * @param path the file to read; may be relative, in which case it is
+     * resolved relative to the {@code current_directory} parameter.
+
+     * @return the value of the last form in the file, or null if the file
+     * contains no forms.
+     */
     FusionValue loadTopLevel(Evaluator eval, Namespace namespace, String path)
         throws FusionException
     {
@@ -86,7 +97,8 @@ final class LoadHandler
     }
 
 
-    private SyntaxValue readSingleTopLevelValue(Evaluator eval, ModuleIdentity id)
+    private SyntaxValue readSingleTopLevelValue(Evaluator eval,
+                                                ModuleIdentity id)
         throws FusionException
     {
         try
@@ -149,8 +161,7 @@ final class LoadHandler
 
 
     /**
-     * @param path may be relative, in which case it is resolved relative to
-     * the {@code current_directory} parameter.
+     *
      */
     ModuleInstance loadModule(Evaluator eval, ModuleIdentity id)
         throws FusionException

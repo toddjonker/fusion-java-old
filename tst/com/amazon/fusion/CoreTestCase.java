@@ -17,6 +17,7 @@ import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.system.IonSystemBuilder;
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -70,6 +71,9 @@ public class CoreTestCase
         mySystem = IonSystemBuilder.standard().build();
 
         FusionRuntimeBuilder frb = FusionRuntimeBuilder.standard();
+        File userDir = new File(System.getProperty("user.dir"));
+        File repoDir = new File(userDir, "repo");
+        frb.addRepositoryDirectory(repoDir);
         myRuntime = frb.build();
     }
 

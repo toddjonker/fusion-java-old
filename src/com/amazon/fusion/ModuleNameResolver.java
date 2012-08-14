@@ -14,16 +14,20 @@ final class ModuleNameResolver
     private final DynamicParameter myCurrentLoadRelativeDirectory;
     private final DynamicParameter myCurrentDirectory;
     private final DynamicParameter myCurrentModuleDeclareName;
+    private final ModuleRepository[] myRepositories;
+
 
     ModuleNameResolver(LoadHandler loadHandler,
                        DynamicParameter currentLoadRelativeDirectory,
                        DynamicParameter currentDirectory,
-                       DynamicParameter currentModuleDeclareName)
+                       DynamicParameter currentModuleDeclareName,
+                       ModuleRepository[] repositories)
     {
         myLoadHandler = loadHandler;
         myCurrentLoadRelativeDirectory = currentLoadRelativeDirectory;
         myCurrentDirectory = currentDirectory;
         myCurrentModuleDeclareName = currentModuleDeclareName;
+        myRepositories = repositories;
     }
 
 
@@ -81,28 +85,31 @@ final class ModuleNameResolver
     private ModuleIdentity resolveLib(Evaluator eval, String libName)
         throws FusionException
     {
-        // TODO libName should not be absolute
-        String fileName = libName + ".ion"; // TODO ugly hard-coding
-
-        if (getClass().getResource("/FUSION-REPO/" + fileName) != null)
+        for (ModuleRepository repo : myRepositories)
         {
-            ModuleIdentity id = ModuleIdentity.internFromJar(fileName);
-            return resolve(eval, id);
+            ModuleIdentity id = repo.resolveLib(eval, libName);
+            if (id != null)
+            {
+                return loadModule(eval, id);
+            }
         }
 
-        File repo = findRepository();
-        File pathFile = new File(repo, fileName);
-        if (! pathFile.exists())
-        {
-            String message =
-                "Library not found: " + printString(libName);
-            throw new FusionException(message);
-        }
-
-        return resolve(eval, pathFile);
+        String message = "Library not found: " + printString(libName);
+        throw new FusionException(message);
     }
 
 
+    /**
+     * Resolve a file path to a module identity and load the module into the
+     * current {@link ModuleRegistry}.
+     *
+     * @param eval the current evaluation context; not null.
+     * @param path the file to resolve and load. If relative, its resolved
+     * relative to the {@code current_load_relative_directory} parameter if
+     * its set, or else the {@code current_directory} parameter.
+     *
+     * @return the identity of the loaded module.
+     */
     ModuleIdentity resolve(Evaluator eval, String path)
         throws FusionException
     {
@@ -111,6 +118,9 @@ final class ModuleNameResolver
         File pathFile = new File(path);
         if (! pathFile.isAbsolute())
         {
+            // TODO if we're loading a module, this should be relative to it
+            //      and not to these directories.
+
             String base = myCurrentLoadRelativeDirectory.asString(eval);
             if (base == null)
             {
@@ -123,20 +133,16 @@ final class ModuleNameResolver
             pathFile = new File(base, path);
         }
 
-        return resolve(eval, pathFile);
-    }
-
-
-    private ModuleIdentity resolve(Evaluator eval, File pathFile) // inline
-        throws FusionException
-    {
         ModuleIdentity id = ModuleIdentity.intern(pathFile);
-        return resolve(eval, id);
+        return loadModule(eval, id);
     }
 
-    private ModuleIdentity resolve(Evaluator eval, ModuleIdentity id)
+
+    private ModuleIdentity loadModule(Evaluator eval, ModuleIdentity id)
         throws FusionException
     {
+        // TODO Need a way to resolve only, avoid loading, as per Racket.
+
         ModuleRegistry reg = eval.getModuleRegistry();
         if (reg.lookup(id) == null)
         {
@@ -149,37 +155,5 @@ final class ModuleNameResolver
         }
 
         return id;
-    }
-
-
-    File findRepository()
-    {
-        // TODO this is really the wrong place to have this logic
-        String fusionRepoDir = System.getProperty("com.amazon.fusion.repoDir");
-        if (fusionRepoDir != null)
-        {
-            File repo = new File(fusionRepoDir);
-            assert repo.isAbsolute()
-                : "com.amazon.fusion.repoDir is not absolute: " + repo;
-
-            return repo;
-        }
-
-        File home = findFusionHomeDir();
-        File repo = new File(home, "repo");
-        return repo;
-    }
-
-    File findFusionHomeDir()
-    {
-        // TODO this is really the wrong place to have this logic
-        // TODO error handling
-        String fusionHomeDir = System.getProperty("com.amazon.fusion.home");
-        if (fusionHomeDir == null)
-        {
-            fusionHomeDir = System.getProperty("user.dir");
-        }
-
-        return new File(fusionHomeDir);
     }
 }

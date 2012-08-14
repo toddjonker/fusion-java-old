@@ -41,7 +41,8 @@ final class KernelModule
             new ModuleNameResolver(loadHandler,
                                    currentLoadRelativeDirectory,
                                    currentDirectory,
-                                   currentModuleDeclareName);
+                                   currentModuleDeclareName,
+                                   builder.buildModuleRepositories());
         myModuleKeyword =
             new ModuleKeyword(resolver, currentModuleDeclareName);
         myUseKeyword = new UseKeyword(resolver);
