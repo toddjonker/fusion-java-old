@@ -30,22 +30,22 @@ public class FusionRuntimeBuilder
     //=========================================================================
 
 
-    public File getCurrentDirectory()
+    public File getInitialCurrentDirectory()
     {
         return myCurrentDirectory;
     }
 
 
     /**
-     * Sets the default value of the {@code current_directory} parameter,
-     * which is the working directory of all Fusion code.
+     * Sets the initial value of the {@code current_directory} parameter,
+     * which is the working directory for Fusion code.
      *
-     * @param directory may be null, which causes the builder to use
-     * the {@code "user.dir"} JVM system property.
+     * @param directory may be null, which causes the builder to use the
+     * {@code "user.dir"} JVM system property when {@link #build()} is called.
      * If a relative path is given, it is immediately resolved as per
      * {@link File#getAbsolutePath()}.
      */
-    public void setCurrentDirectory(File directory)
+    public void setInitialCurrentDirectory(File directory)
     {
         if (! directory.isAbsolute())
         {
@@ -53,8 +53,7 @@ public class FusionRuntimeBuilder
         }
         if (! directory.isDirectory())
         {
-            String message =
-                "currentDirectory is not a directory: " + directory;
+            String message = "Argument is not a directory: " + directory;
             throw new IllegalArgumentException(message);
         }
 
@@ -115,6 +114,11 @@ public class FusionRuntimeBuilder
     }
 
 
+    /**
+     * Builds a new runtime based on the current configuration of this builder.
+     *
+     * @return a new builder instance.
+     */
     public FusionRuntime build()
     {
         FusionRuntimeBuilder b = fillDefaults();

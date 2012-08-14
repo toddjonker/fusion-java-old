@@ -23,7 +23,7 @@ public class RuntimeTest
     {
         File file = new File("no-such-file");
         assertFalse(file.exists());
-        runtimeBuilder().setCurrentDirectory(file);
+        runtimeBuilder().setInitialCurrentDirectory(file);
     }
 
 
@@ -32,7 +32,7 @@ public class RuntimeTest
     {
         File file = new File("build.xml");
         assertTrue(file.isFile());
-        runtimeBuilder().setCurrentDirectory(file);
+        runtimeBuilder().setInitialCurrentDirectory(file);
     }
 
 
@@ -41,7 +41,7 @@ public class RuntimeTest
         throws Exception
     {
         File tstRepo = new File("tst-repo");
-        runtimeBuilder().setCurrentDirectory(tstRepo);
+        runtimeBuilder().setInitialCurrentDirectory(tstRepo);
         eval("(use \"grain\")");
         assertString("soup", "barley");
     }

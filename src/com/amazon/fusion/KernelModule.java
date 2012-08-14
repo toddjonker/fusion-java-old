@@ -28,7 +28,7 @@ final class KernelModule
         inferName(NAME);
 
         FusionValue userDir =
-            new DomValue(system.newString(builder.getCurrentDirectory().toString()));
+            new DomValue(system.newString(builder.getInitialCurrentDirectory().toString()));
         DynamicParameter currentDirectory =
             new DynamicParameter(userDir);
         DynamicParameter currentLoadRelativeDirectory =
