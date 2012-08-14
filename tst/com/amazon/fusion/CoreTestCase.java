@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
@@ -23,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 
 public class CoreTestCase
 {
@@ -58,8 +60,18 @@ public class CoreTestCase
     //========================================================================
 
 
-    private IonSystem mySystem = IonSystemBuilder.standard().build();
-    private FusionRuntime myRuntime = FusionRuntimeBuilder.standard().build();
+    private IonSystem mySystem;
+    private FusionRuntime myRuntime;
+
+    @Before
+    public void setUp()
+        throws Exception
+    {
+        mySystem = IonSystemBuilder.standard().build();
+
+        FusionRuntimeBuilder frb = FusionRuntimeBuilder.standard();
+        myRuntime = frb.build();
+    }
 
     @After
     public void tearDown()

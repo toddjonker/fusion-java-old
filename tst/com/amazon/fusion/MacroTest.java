@@ -8,10 +8,11 @@ import org.junit.Test;
 public class MacroTest
     extends CoreTestCase
 {
-    @Before
+    @Override @Before
     public void setUp()
         throws Exception
     {
+        super.setUp();
         eval("(use 'fusion/syntax')");
     }
 

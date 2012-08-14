@@ -15,10 +15,11 @@ import org.junit.Test;
 public class StreamTest
     extends ExternalTest
 {
-    @Before
+    @Override @Before
     public void setUp()
         throws Exception
     {
+        super.setUp();
         eval("(use 'fusion/stream')");
     }
 

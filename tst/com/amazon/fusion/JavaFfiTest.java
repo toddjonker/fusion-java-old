@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.ion.util.IonTextUtils.printString;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -12,10 +13,11 @@ import org.junit.Test;
 public class JavaFfiTest
     extends CoreTestCase
 {
-    @Before
+    @Override @Before
     public void setUp()
         throws Exception
     {
+        super.setUp();
         eval("(use 'fusion/ffi/java')");
     }
 
