@@ -195,7 +195,7 @@ public abstract class FusionValue
 
 
     /**
-     * Writes a representation of this value, following Ion syntax where
+     * Writes a representation of a value, following Ion syntax where
      * possible, including for strings.
      * The result will be invalid if the value contains any non-Ion data like
      * closures.
@@ -220,7 +220,7 @@ public abstract class FusionValue
 
 
     /**
-     * Writes a representation of this value, following Ion syntax where
+     * Writes a representation of a value, following Ion syntax where
      * possible, including for strings.
      * The result will be invalid if the value contains any non-Ion data like
      * closures.
@@ -296,7 +296,8 @@ public abstract class FusionValue
      * @param values must not be null.
      * @param join must not be null.
      */
-    public static void writeMany(StringBuilder out, Object[] values, String join)
+    public static void writeMany(StringBuilder out, Object[] values,
+                                 String join)
     {
         for (int i = 0; i < values.length; i++)
         {
@@ -310,6 +311,12 @@ public abstract class FusionValue
     }
 
 
+    /**
+     * Returns the output of {@link #writeMany(StringBuilder,Object[],String)}
+     * as a {@link String}.
+     *
+     * @return not null.
+     */
     public static String writeManyToString(Object[] values, String join)
     {
         StringBuilder out = new StringBuilder();
@@ -472,7 +479,7 @@ public abstract class FusionValue
      * a singular IonSystem or ValueFactory.  Different subsystems may have
      * different needs, some using a lazy dom others with full materialization.
      *
-     * @return null if this value's type isn't an Ion type.
+     * @return null if the value's type isn't an Ion type.
      */
     static IonValue toIonValue(Object value)
     {
@@ -487,13 +494,13 @@ public abstract class FusionValue
     }
 
     /**
-     * Returns the DOM representation of this value, if its type falls within
+     * Returns the DOM representation of a value, if its type falls within
      * the Ion type system. The {@link IonValue} will use the given factory
      * and will not have a container.
      *
      * @param factory must not be null.
      *
-     * @return null if this value's type isn't an Ion type (for example,
+     * @return null if the value's type isn't an Ion type (for example,
      * Fusion procedures).
      */
     public static IonValue toIonValue(Object value, ValueFactory factory)
