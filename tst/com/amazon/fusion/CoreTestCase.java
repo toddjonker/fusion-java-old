@@ -85,6 +85,11 @@ public class CoreTestCase
         return mySystem;
     }
 
+    protected FusionRuntime runtime()
+    {
+        return myRuntime;
+    }
+
 
     //========================================================================
 

@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionValue.UNDEF;
-
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.system.IonSystemBuilder;
@@ -28,7 +27,20 @@ final class StandardRuntime
     StandardRuntime()
     {
         mySystem = IonSystemBuilder.standard().build();
-        myEvaluator = new Evaluator(mySystem);
+
+        final ModuleRegistry defaultRegistry = new ModuleRegistry();
+        try
+        {
+            Namespace ns = new Namespace(defaultRegistry);
+            ModuleInstance kernel = new KernelModule(mySystem, ns);
+            defaultRegistry.register(kernel);
+        }
+        catch (FusionException e)
+        {
+            throw new RuntimeException("Should not happen", e);
+        }
+
+        myEvaluator = new Evaluator(mySystem, defaultRegistry);
         try
         {
             myEnvironment = myEvaluator.newBaseNamespace();

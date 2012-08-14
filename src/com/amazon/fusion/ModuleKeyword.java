@@ -70,7 +70,10 @@ final class ModuleKeyword
             processProvides(provideForms, moduleNamespace);
 
         ModuleIdentity id = determineIdentity(eval, declaredName);
-        return new ModuleInstance(id, moduleNamespace, providedNames);
+        ModuleInstance module =
+            new ModuleInstance(id, moduleNamespace, providedNames);
+        moduleNamespace.getRegistry().register(module);
+        return module;
     }
 
     private ModuleIdentity determineIdentity(Evaluator eval,

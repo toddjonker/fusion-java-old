@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.ModuleIdentity.intern;
+import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonType;
 
 
@@ -20,14 +21,14 @@ final class KernelModule
     private final UseKeyword   myUseKeyword;
 
 
-    KernelModule(Evaluator eval, Namespace ns)
+    KernelModule(IonSystem system, Namespace ns)
         throws FusionException
     {
         super(IDENTITY, ns);
         inferName(NAME);
 
         FusionValue userDir =
-            eval.newString(System.getProperty("user.dir"));
+            new DomValue(system.newString(System.getProperty("user.dir")));
         DynamicParameter currentDirectory =
             new DynamicParameter(userDir);
         DynamicParameter currentLoadRelativeDirectory =

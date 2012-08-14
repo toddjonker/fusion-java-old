@@ -18,36 +18,22 @@ final class Evaluator
 {
     private final IonSystem mySystem;
     private final ModuleRegistry myDefaultRegistry;
-    private final KernelModule myKernel;
     private final Evaluator myOuterFrame;
     private final Map<FusionValue, FusionValue> myContinuationMarks;
 
 
-    Evaluator(IonSystem system)
+    Evaluator(IonSystem system, ModuleRegistry defaultRegistry)
     {
         mySystem = system;
+        myDefaultRegistry = defaultRegistry;
         myOuterFrame = null;
         myContinuationMarks = null;
-
-        myDefaultRegistry = new ModuleRegistry();
-        Namespace ns = new Namespace(myDefaultRegistry);
-        try
-        {
-            myKernel = new KernelModule(this, ns);
-            // The module constructor registers itself with the ModuleRegistry
-        }
-        catch (FusionException e)
-        {
-            throw new RuntimeException("Should not happen", e);
-        }
-
     }
 
     private Evaluator(IonSystem system, Evaluator outerBindings)
     {
         mySystem = system;
         myDefaultRegistry = outerBindings.myDefaultRegistry;
-        myKernel = outerBindings.myKernel;
         myOuterFrame = outerBindings;
         myContinuationMarks = new HashMap<FusionValue, FusionValue>();
     }
@@ -65,11 +51,17 @@ final class Evaluator
     //========================================================================
 
 
+    private KernelModule findKernel()
+    {
+        return (KernelModule) myDefaultRegistry.lookup(KernelModule.IDENTITY);
+    }
+
+
     Namespace newModuleNamespace(ModuleRegistry registry)
         throws FusionException
     {
         Namespace ns = new Namespace(registry);
-        ns.bind("module", myKernel.getModuleKeyword());
+        ns.bind("module", findKernel().getModuleKeyword());
         return ns;
     }
 
@@ -92,7 +84,7 @@ final class Evaluator
         throws FusionException
     {
         Namespace ns = new Namespace(registry);
-        UseKeyword useKeyword = myKernel.getUseKeyword();
+        UseKeyword useKeyword = findKernel().getUseKeyword();
         SyntaxValue baseRef = SyntaxSymbol.make("fusion/base");
         useKeyword.use(this, ns, baseRef);
         return ns;

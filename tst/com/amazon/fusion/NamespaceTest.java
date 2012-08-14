@@ -13,17 +13,27 @@ public class NamespaceTest
     extends CoreTestCase
 {
     @Test
-    public void testBaseNamespace() // TODO move to EvaluatorTest
+    public void testBaseNamespace()
         throws Exception
     {
-        Evaluator eval = new Evaluator(system());
+        runtime().bind("callback", new Procedure("callback")
+        {
+            @Override
+            FusionValue invoke(Evaluator eval, FusionValue[] args)
+                throws FusionException
+            {
+                Namespace ns = eval.newBaseNamespace();
+                assertTrue(ns.lookup("module") instanceof ModuleKeyword);
 
-        Namespace ns = eval.newBaseNamespace();
-        assertTrue(ns.lookup("module") instanceof ModuleKeyword);
+                ModuleRegistry reg = ns.getRegistry();
+                ModuleInstance kernel = reg.lookup(KernelModule.IDENTITY);
+                assertTrue(kernel instanceof KernelModule);
 
-        ModuleRegistry reg = ns.getRegistry();
-        ModuleInstance kernel = reg.lookup(KernelModule.IDENTITY);
-        assertTrue(kernel instanceof KernelModule);
+                return null;
+            }
+        });
+
+        eval("(callback)");
     }
 
 
@@ -31,23 +41,37 @@ public class NamespaceTest
     public void testBasicLookup()
         throws Exception
     {
-        ModuleRegistry registry = new ModuleRegistry();
-        Namespace ns = new Namespace(registry);
+        runtime().bind("callback", new Procedure("callback")
+        {
+            @Override
+            FusionValue invoke(Evaluator eval, FusionValue[] args)
+                throws FusionException
+            {
+                ModuleRegistry registry = eval.getModuleRegistry();
+                Namespace ns = eval.newBaseNamespace();
 
-        ModuleIdentity id = ModuleIdentity.intern("dummy");
-        assertSame(id, ModuleIdentity.intern("dummy"));
 
-        ModuleInstance mod = new ModuleInstance(id, ns);
-        assertSame(mod, registry.lookup(id));
+                ModuleIdentity id = ModuleIdentity.intern("dummy");
+                assertSame(id, ModuleIdentity.intern("dummy"));
 
-        // TODO test registering two instances w/ same identity
-        Namespace ns2 = new Namespace(new ModuleRegistry());
-        ModuleInstance mod2 = new ModuleInstance(id, ns2);
+                ModuleInstance mod = new ModuleInstance(id, ns);
+                registry.register(mod);
+                assertSame(mod, registry.lookup(id));
 
-        try {
-            registry.register(mod2);
-        }
-        catch (ContractFailure e) { }
+                // TODO test registering two instances w/ same identity
+                Namespace ns2 = new Namespace(new ModuleRegistry());
+                ModuleInstance mod2 = new ModuleInstance(id, ns2);
+
+                try {
+                    registry.register(mod2);
+                }
+                catch (ContractFailure e) { }
+
+                return null;
+            }
+        });
+
+        eval("(callback)");
     }
 
 }

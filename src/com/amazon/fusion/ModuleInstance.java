@@ -41,11 +41,9 @@ class ModuleInstance
     {
         myIdentity = identity;
         myNamespace = namespace;
-
-        namespace.getRegistry().register(this);
-        inferName(identity.toString());
-
         myProvidedNames = providedNames;
+
+        inferName(identity.toString());
     }
 
 
