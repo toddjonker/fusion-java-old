@@ -24,7 +24,7 @@ final class StandardRuntime
      *
      * @see {@link FusionValueTest#testIonValue()}.
      */
-    StandardRuntime()
+    StandardRuntime(FusionRuntimeBuilder builder)
     {
         mySystem = IonSystemBuilder.standard().build();
 
@@ -32,7 +32,7 @@ final class StandardRuntime
         try
         {
             Namespace ns = new Namespace(defaultRegistry);
-            ModuleInstance kernel = new KernelModule(mySystem, ns);
+            ModuleInstance kernel = new KernelModule(mySystem, builder, ns);
             defaultRegistry.register(kernel);
         }
         catch (FusionException e)

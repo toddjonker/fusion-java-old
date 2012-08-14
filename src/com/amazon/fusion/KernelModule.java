@@ -21,14 +21,14 @@ final class KernelModule
     private final UseKeyword   myUseKeyword;
 
 
-    KernelModule(IonSystem system, Namespace ns)
+    KernelModule(IonSystem system, FusionRuntimeBuilder builder, Namespace ns)
         throws FusionException
     {
         super(IDENTITY, ns);
         inferName(NAME);
 
         FusionValue userDir =
-            new DomValue(system.newString(System.getProperty("user.dir")));
+            new DomValue(system.newString(builder.getCurrentDirectory().toString()));
         DynamicParameter currentDirectory =
             new DynamicParameter(userDir);
         DynamicParameter currentLoadRelativeDirectory =
