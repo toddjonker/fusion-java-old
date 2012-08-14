@@ -40,19 +40,25 @@ public class FusionRuntimeBuilder
      * Sets the default value of the {@code current_directory} parameter,
      * which is the working directory of all Fusion code.
      *
-     * @param currentDirectory may be null, which causes the builder to use
+     * @param directory may be null, which causes the builder to use
      * the {@code "user.dir"} JVM system property.
+     * If a relative path is given, it is immediately resolved as per
+     * {@link File#getAbsolutePath()}.
      */
-    public void setCurrentDirectory(File currentDirectory)
+    public void setCurrentDirectory(File directory)
     {
-        if (currentDirectory != null && ! currentDirectory.isDirectory())
+        if (! directory.isAbsolute())
+        {
+            directory = directory.getAbsoluteFile();
+        }
+        if (! directory.isDirectory())
         {
             String message =
-                "currentDirectory is not a directory: " + currentDirectory;
+                "currentDirectory is not a directory: " + directory;
             throw new IllegalArgumentException(message);
         }
 
-        myCurrentDirectory = currentDirectory;
+        myCurrentDirectory = directory;
     }
 
 
@@ -60,12 +66,20 @@ public class FusionRuntimeBuilder
 
 
     /**
+     * Declares another repository from which Fusion modules are loaded.
      * Repositories are searched in the order they are declared.
      *
-     * @param directory must be a valid, readable directory.
+     * @param directory must be a path to a readable directory.
+     * If a relative path is given, it is immediately resolved as per
+     * {@link File#getAbsolutePath()}.
      */
     public void addRepositoryDirectory(File directory)
     {
+        if (! directory.isAbsolute())
+        {
+            directory = directory.getAbsoluteFile();
+        }
+
         if (myRepositoryDirectories == null)
         {
             myRepositoryDirectories = new ArrayList<File>();

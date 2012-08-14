@@ -17,8 +17,12 @@ class FileSystemModuleRepository
         myRepoDir = findRepository();
     }
 
+    /**
+     * @param repoDir must be absolute.
+     */
     FileSystemModuleRepository(File repoDir)
     {
+        assert repoDir.isAbsolute();
         myRepoDir = repoDir;
     }
 

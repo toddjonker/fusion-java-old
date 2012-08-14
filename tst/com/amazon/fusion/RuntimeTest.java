@@ -1,0 +1,59 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+package com.amazon.fusion;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import java.io.File;
+import org.junit.Test;
+
+public class RuntimeTest
+    extends CoreTestCase
+{
+    @Test
+    public void testDefaultCurrentDirectory()
+        throws Exception
+    {
+        assertString(System.getProperty("user.dir"), "(current_directory)");
+    }
+
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCurrentDirectoryDoesNotExist()
+    {
+        File file = new File("no-such-file");
+        assertFalse(file.exists());
+        runtimeBuilder().setCurrentDirectory(file);
+    }
+
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCurrentDirectoryIsNormalFile()
+    {
+        File file = new File("build.xml");
+        assertTrue(file.isFile());
+        runtimeBuilder().setCurrentDirectory(file);
+    }
+
+
+    @Test
+    public void testUseFromCurrentDirectory()
+        throws Exception
+    {
+        File tstRepo = new File("tst-repo");
+        runtimeBuilder().setCurrentDirectory(tstRepo);
+        eval("(use \"grain\")");
+        assertString("soup", "barley");
+    }
+
+
+    @Test
+    public void testModuleInUserRepository()
+        throws Exception
+    {
+        File tstRepo = new File("tst-repo");
+        runtimeBuilder().addRepositoryDirectory(tstRepo);
+        eval("(use grain)");
+        assertString("soup", "barley");
+    }
+}
