@@ -8,7 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Iterator;
 
-public class StreamForFileProc
+final class StreamForFileProc
     extends Procedure
 {
     StreamForFileProc()

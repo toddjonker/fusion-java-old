@@ -5,7 +5,7 @@ package com.amazon.fusion;
 /**
  * Class to express union'd streams
  */
-class UnionStream
+final class UnionStream
     extends Stream
 {
 

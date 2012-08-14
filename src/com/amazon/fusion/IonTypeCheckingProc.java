@@ -7,7 +7,7 @@ import com.amazon.ion.IonType;
 /**
  * Implements all the {@code is_TYPE} procedures for the Ion types.
  */
-public class IonTypeCheckingProc
+final class IonTypeCheckingProc
     extends Procedure
 {
     private final IonType myType;

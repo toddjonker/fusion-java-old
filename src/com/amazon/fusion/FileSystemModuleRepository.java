@@ -4,10 +4,7 @@ package com.amazon.fusion;
 
 import java.io.File;
 
-/**
- *
- */
-class FileSystemModuleRepository
+final class FileSystemModuleRepository
     extends ModuleRepository
 {
     private final File myRepoDir;

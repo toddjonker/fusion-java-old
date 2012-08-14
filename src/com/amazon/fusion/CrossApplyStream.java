@@ -9,7 +9,7 @@ package com.amazon.fusion;
  * Class to express the cross apply of a stream as a result of the predicate
  * User defined functions can return single elt, list, or stream
  */
-class CrossApplyStream
+final class CrossApplyStream
     extends Stream
 {
 

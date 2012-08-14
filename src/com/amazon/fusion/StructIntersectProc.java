@@ -10,7 +10,7 @@ import java.util.Iterator;
 /**
  * Performs intersection of struct - constructed with matching fields and values
  */
-class StructIntersectProc
+final class StructIntersectProc
     extends Procedure
 {
     StructIntersectProc()

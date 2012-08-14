@@ -2,10 +2,7 @@
 
 package com.amazon.fusion;
 
-/**
- *
- */
-class JarModuleRepository
+final class JarModuleRepository
     extends ModuleRepository
 {
     @Override

@@ -9,14 +9,13 @@ import java.util.ArrayList;
 /**
  * Class to express the cross product of 2 streams
  */
-class CrossProductStream
+final class CrossProductStream
     extends Stream
 {
-
     private final Stream mySource1;
     private final Evaluator eval;
     private final ArrayList<FusionValue> cloneSource2;
-    private static int index;
+    private int index;
     private FusionValue first;
 
     public CrossProductStream(Evaluator eval, Stream source1, Stream source2)

@@ -5,7 +5,7 @@ package com.amazon.fusion;
 /*
  * Converts all the characters in a string to lower-case letters
  */
-class StringToLowerProc
+final class StringToLowerProc
     extends Procedure
 {
     StringToLowerProc()

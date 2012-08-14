@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-class AndKeyword
+final class AndKeyword
     extends KeywordValue
 {
     AndKeyword()

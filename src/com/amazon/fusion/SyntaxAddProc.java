@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-class SyntaxAddProc
+final class SyntaxAddProc
     extends Procedure
 {
     SyntaxAddProc()

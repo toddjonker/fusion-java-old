@@ -5,7 +5,7 @@ package com.amazon.fusion;
 /**
  * Fusion procedure to raise a syntax error.
  */
-public class WrongSyntaxProc
+final class WrongSyntaxProc
     extends Procedure
 {
     WrongSyntaxProc()

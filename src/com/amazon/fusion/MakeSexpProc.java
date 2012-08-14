@@ -5,10 +5,7 @@ package com.amazon.fusion;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonValue;
 
-/**
- *
- */
-class MakeSexpProc
+final class MakeSexpProc
     extends Procedure
 {
     MakeSexpProc()

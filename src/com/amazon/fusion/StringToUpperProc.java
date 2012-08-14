@@ -5,7 +5,7 @@ package com.amazon.fusion;
 /*
  * Converts all the characters in a string to upper-case letters
  */
-class StringToUpperProc
+final class StringToUpperProc
     extends Procedure
 {
     StringToUpperProc()

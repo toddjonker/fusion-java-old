@@ -12,7 +12,7 @@ import java.util.Map;
  * Performs intersection by constructing a list elements that
  * are contained in both input lists - in O(n) time
  */
-class ListIntersectProc
+final class ListIntersectProc
     extends Procedure
 {
     ListIntersectProc()

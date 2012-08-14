@@ -6,7 +6,7 @@ package com.amazon.fusion;
 /**
  * Stateful stream for injection
  */
-class InjectStream
+final class InjectStream
     extends Stream
 {
     private FusionValue mySource;

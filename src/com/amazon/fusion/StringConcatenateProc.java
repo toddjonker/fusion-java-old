@@ -6,7 +6,7 @@ package com.amazon.fusion;
 /**
  * Concatenates 0 or more strings and returns the result
  */
-class StringConcatenateProc
+final class StringConcatenateProc
     extends Procedure
 {
     StringConcatenateProc()

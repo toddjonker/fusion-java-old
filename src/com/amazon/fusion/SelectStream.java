@@ -6,7 +6,7 @@ package com.amazon.fusion;
 /**
  * Class to express streams for the select operator
  */
-class SelectStream
+final class SelectStream
     extends Stream
 {
     private final Stream mySource;
