@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
@@ -62,6 +61,7 @@ public class CoreTestCase
 
 
     private IonSystem mySystem;
+    private FusionRuntimeBuilder myRuntimeBuilder;
     private FusionRuntime myRuntime;
 
     @Before
@@ -69,18 +69,14 @@ public class CoreTestCase
         throws Exception
     {
         mySystem = IonSystemBuilder.standard().build();
-
-        FusionRuntimeBuilder frb = FusionRuntimeBuilder.standard();
-        File userDir = new File(System.getProperty("user.dir"));
-        File repoDir = new File(userDir, "repo");
-        frb.addRepositoryDirectory(repoDir);
-        myRuntime = frb.build();
     }
 
     @After
     public void tearDown()
+        throws Exception
     {
         mySystem = null;
+        myRuntimeBuilder = null;
         myRuntime = null;
     }
 
@@ -89,8 +85,24 @@ public class CoreTestCase
         return mySystem;
     }
 
+    protected FusionRuntimeBuilder runtimeBuilder()
+    {
+        if (myRuntimeBuilder == null)
+        {
+            myRuntimeBuilder = FusionRuntimeBuilder.standard();
+            File userDir = new File(System.getProperty("user.dir"));
+            File repoDir = new File(userDir, "repo");
+            myRuntimeBuilder.addRepositoryDirectory(repoDir);
+        }
+        return myRuntimeBuilder;
+    }
+
     protected FusionRuntime runtime()
     {
+        if (myRuntime == null)
+        {
+            myRuntime = runtimeBuilder().build();
+        }
         return myRuntime;
     }
 
@@ -188,7 +200,8 @@ public class CoreTestCase
     protected void assertEval(IonValue expected, String source)
         throws FusionException
     {
-        Object fv = myRuntime.eval(source);
+        FusionRuntime runtime = runtime();
+        Object fv = runtime.eval(source);
         IonValue iv = FusionValue.toIonValue(fv);
         if (iv == null)
         {
@@ -214,7 +227,8 @@ public class CoreTestCase
     protected void assertUndef(String expressionIon)
         throws FusionException
     {
-        Object fv = myRuntime.eval(expressionIon);
+        FusionRuntime runtime = runtime();
+        Object fv = runtime.eval(expressionIon);
         if (fv != FusionValue.UNDEF)
         {
             Assert.fail("Result isn't undef: " + fv + "\nSource: " + expressionIon);
@@ -238,7 +252,8 @@ public class CoreTestCase
     protected void assertEval(BigInteger expectedInt, String expressionIon)
         throws FusionException
     {
-        Object fv = myRuntime.eval(expressionIon);
+        FusionRuntime runtime = runtime();
+        Object fv = runtime.eval(expressionIon);
         IonValue observed = FusionValue.toIonValue(fv);
         if (observed instanceof IonInt)
         {
@@ -254,22 +269,23 @@ public class CoreTestCase
     }
 
     protected void assertEval(BigDecimal expected, String expressionIon)
-            throws FusionException
+        throws FusionException
+    {
+        FusionRuntime runtime = runtime();
+        Object fv = runtime.eval(expressionIon);
+        IonValue observed = FusionValue.toIonValue(fv);
+        if (observed instanceof IonDecimal)
         {
-            Object fv = myRuntime.eval(expressionIon);
-            IonValue observed = FusionValue.toIonValue(fv);
-            if (observed instanceof IonDecimal)
+            IonDecimal iObsExp = (IonDecimal)observed;
+            BigDecimal obsExp = iObsExp.bigDecimalValue();
+            if (obsExp.compareTo(expected) == 0)
             {
-                IonDecimal iObsExp = (IonDecimal)observed;
-                BigDecimal obsExp = iObsExp.bigDecimalValue();
-                if (obsExp.compareTo(expected) == 0)
-                {
-                    return;
-                }
-                Assert.fail("Discrepency: Observed "+obsExp.toString()+", expected "+expected.toString());
+                return;
             }
-            Assert.fail("Invalid type.");
+            Assert.fail("Discrepency: Observed "+obsExp.toString()+", expected "+expected.toString());
         }
+        Assert.fail("Invalid type.");
+    }
 
     protected void assertBigInt(int expectedInt, String expressionIon)
         throws FusionException
@@ -281,7 +297,8 @@ public class CoreTestCase
     protected void assertString(String expectedString, String expressionIon)
         throws FusionException
     {
-        Object fv = myRuntime.eval(expressionIon);
+        FusionRuntime runtime = runtime();
+        Object fv = runtime.eval(expressionIon);
         IonValue iv = FusionValue.toIonValue(fv);
         if (iv instanceof IonString)
         {
@@ -302,13 +319,15 @@ public class CoreTestCase
     protected FusionValue eval(String expressionIon)
         throws FusionException
     {
-        return myRuntime.eval(expressionIon);
+        FusionRuntime runtime = runtime();
+        return runtime.eval(expressionIon);
     }
 
     protected FusionValue eval(IonReader expressionIon)
         throws FusionException
     {
-        return myRuntime.eval(expressionIon);
+        FusionRuntime runtime = runtime();
+        return runtime.eval(expressionIon);
     }
 
     protected IonValue evalToIon(String expressionIon)
