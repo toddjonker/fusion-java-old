@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionValue.UNDEF;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.system.IonSystemBuilder;
+import java.io.File;
 
 /**
  *
@@ -15,7 +16,7 @@ final class StandardRuntime
 {
     private final IonSystem mySystem;
     private final Evaluator myEvaluator;
-    private final Environment myEnvironment;
+    private final Namespace myNamespace;
 
 
     /**
@@ -43,7 +44,7 @@ final class StandardRuntime
         myEvaluator = new Evaluator(mySystem, defaultRegistry);
         try
         {
-            myEnvironment = myEvaluator.newBaseNamespace();
+            myNamespace = myEvaluator.newBaseNamespace();
         }
         catch (FusionException e)
         {
@@ -55,10 +56,6 @@ final class StandardRuntime
     //========================================================================
 
 
-    /**
-     * @param source must not be null.
-     * @return not null, but perhaps {@link FusionValue#UNDEF}.
-     */
     @Override
     public FusionValue eval(String source)
         throws ExitException, FusionException
@@ -68,12 +65,6 @@ final class StandardRuntime
     }
 
 
-    /**
-     * @param source must not be null.
-     * @return not null, but perhaps {@link FusionValue#UNDEF}.
-     *
-     * @throws ExitException
-     */
     @Override
     public FusionValue eval(IonReader source)
         throws ExitException, FusionException
@@ -85,19 +76,29 @@ final class StandardRuntime
         while (source.next() != null)
         {
             SyntaxValue sourceExpr = Syntax.read(source);
-            result = myEvaluator.eval(myEnvironment, sourceExpr);
+            result = myEvaluator.eval(myNamespace, sourceExpr);
         }
 
         return result;
     }
 
+
+    @Override
+    public Object load(File source)
+        throws ExitException, FusionException
+    {
+        KernelModule kernel = myEvaluator.findKernel();
+        LoadHandler load = kernel.getLoadHandler();
+        return load.loadTopLevel(myEvaluator, myNamespace, source.toString());
+    }
+
+
     /**
      * @param value should not be null.
      */
     @Override
-    public void bind (String name, FusionValue value)
+    public void bind(String name, FusionValue value)
     {
-        myEnvironment.namespace().bind(name, value);
+        myNamespace.bind(name, value);
     }
-
 }

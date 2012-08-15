@@ -26,12 +26,15 @@ final class EvalFileKeyword
 
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
+        SyntaxChecker check = new SyntaxChecker(getInferredName(), stx);
+        check.arityExact(2);
+
         String fileName;
         {
-            SyntaxValue argExpr = expr.get(1);
+            SyntaxValue argExpr = stx.get(1);
             FusionValue argValue = eval.eval(env, argExpr);
             IonString nameDom = (IonString) ((DomValue) argValue).ionValue();
             fileName = nameDom.stringValue();

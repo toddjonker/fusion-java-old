@@ -17,6 +17,7 @@ final class KernelModule
     static final String NAME = "#%kernel";
     static final ModuleIdentity IDENTITY = intern(NAME);
 
+    private final LoadHandler  myLoadHandler;
     private final KeywordValue myModuleKeyword;
     private final UseKeyword   myUseKeyword;
 
@@ -35,10 +36,10 @@ final class KernelModule
             new DynamicParameter(UNDEF);
         DynamicParameter currentModuleDeclareName =
             new DynamicParameter(UNDEF);
-        LoadHandler loadHandler =
+        myLoadHandler =
             new LoadHandler(currentLoadRelativeDirectory, currentDirectory);
         ModuleNameResolver resolver =
-            new ModuleNameResolver(loadHandler,
+            new ModuleNameResolver(myLoadHandler,
                                    currentLoadRelativeDirectory,
                                    currentDirectory,
                                    currentModuleDeclareName,
@@ -47,7 +48,7 @@ final class KernelModule
             new ModuleKeyword(resolver, currentModuleDeclareName);
         myUseKeyword = new UseKeyword(resolver);
         EvalFileKeyword evalFile =
-            new EvalFileKeyword(loadHandler);
+            new EvalFileKeyword(myLoadHandler);
 
         ns.bind("current_directory", currentDirectory);
         ns.bind("define", new DefineKeyword());
@@ -69,6 +70,11 @@ final class KernelModule
         }
     }
 
+
+    LoadHandler getLoadHandler()
+    {
+        return myLoadHandler;
+    }
 
     KeywordValue getModuleKeyword()
     {

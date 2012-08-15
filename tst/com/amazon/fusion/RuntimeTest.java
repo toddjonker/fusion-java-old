@@ -55,4 +55,20 @@ public class RuntimeTest
         eval("(use grain)");
         assertString("soup", "barley");
     }
+
+
+    @Test
+    public void testLoadFile()
+        throws Exception
+    {
+        checkString("hello", loadFile("tst-data/hello.ion"));
+
+        // Test that eval'd define affects the visible namespace
+        loadFile("tst-data/trivialDefine.ion");
+        assertEval(3328, "x");
+
+        // Test eval'ing a module
+        Object mod = loadFile("tst-repo/grain.ion");
+        assertTrue(mod instanceof ModuleInstance);
+    }
 }

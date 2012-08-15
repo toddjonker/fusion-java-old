@@ -51,7 +51,7 @@ final class Evaluator
     //========================================================================
 
 
-    private KernelModule findKernel()
+    KernelModule findKernel()
     {
         return (KernelModule) myDefaultRegistry.lookup(KernelModule.IDENTITY);
     }

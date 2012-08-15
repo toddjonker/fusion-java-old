@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
@@ -203,6 +204,34 @@ public class CoreTestCase
     //========================================================================
 
 
+    <T extends IonValue> T checkIon(Class<T> ionClass, Object actual)
+    {
+        IonValue iv = FusionValue.toIonValue(actual);
+        if (! ionClass.isInstance(iv))
+        {
+            fail("Not " + ionClass.getSimpleName()  + ": " + actual);
+        }
+        return ionClass.cast(iv);
+    }
+
+
+    void checkInt(int expected, Object actual)
+    {
+        IonInt v = checkIon(IonInt.class, actual);
+        assertEquals(expected, v.intValue());
+    }
+
+
+    void checkString(String expected, Object actual)
+    {
+        IonString v = checkIon(IonString.class, actual);
+        assertEquals(expected, v.stringValue());
+    }
+
+
+    //========================================================================
+
+
     protected void assertEval(IonValue expected, String source)
         throws FusionException
     {
@@ -303,8 +332,7 @@ public class CoreTestCase
     protected void assertString(String expectedString, String expressionIon)
         throws FusionException
     {
-        FusionRuntime runtime = runtime();
-        Object fv = runtime.eval(expressionIon);
+        Object fv = eval(expressionIon);
         IonValue iv = FusionValue.toIonValue(fv);
         if (iv instanceof IonString)
         {
@@ -334,6 +362,14 @@ public class CoreTestCase
     {
         FusionRuntime runtime = runtime();
         return runtime.eval(expressionIon);
+    }
+
+    protected Object loadFile(String path)
+        throws FusionException
+    {
+        File file = new File(path);
+        FusionRuntime runtime = runtime();
+        return runtime.load(file);
     }
 
     protected IonValue evalToIon(String expressionIon)
