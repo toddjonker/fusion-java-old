@@ -20,6 +20,21 @@ abstract class KeywordValue
         myDoc = doc;
     }
 
+
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+        throws SyntaxFailure
+    {
+        int size = source.size();
+        for (int i = 1; i < size; i++)
+        {
+            SyntaxValue subform = source.get(i);
+            SyntaxValue expanded = subform.prepare(eval, env);
+            if (expanded != subform) source.set(i, expanded);
+        }
+        return source;
+    }
+
+
     @Override
     abstract FusionValue invoke(Evaluator eval,
                                 Environment env,

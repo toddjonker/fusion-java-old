@@ -12,9 +12,14 @@ import java.util.Map;
 class Namespace
     implements Environment
 {
+    class NsBinding implements Binding
+    {
+        FusionValue myValue;
+    }
+
     private final ModuleRegistry myRegistry;
-    private final Map<String,FusionValue> myBindings =
-        new HashMap<String,FusionValue>();
+    private final Map<String,NsBinding> myBindings =
+        new HashMap<String,NsBinding>();
 
     Namespace(ModuleRegistry registry)
     {
@@ -40,7 +45,17 @@ class Namespace
     public void bind(String name, FusionValue value)
     {
         value.inferName(name);
-        myBindings.put(name, value);
+        NsBinding binding = myBindings.get(name);
+        if (binding == null)
+        {
+            binding = new NsBinding();
+            binding.myValue = value;
+            myBindings.put(name, binding);
+        }
+        else
+        {
+            binding.myValue = value;
+        }
     }
 
     void use(ModuleIdentity id)
@@ -54,17 +69,27 @@ class Namespace
         module.visitProvidedBindings(new BindingVisitor()
         {
             @Override
-            public void visitBinding(String name, FusionValue value)
+            public void visitBinding(String name, NsBinding binding)
             {
-                myBindings.put(name, value);
+                myBindings.put(name, binding);
             }
         });
     }
 
+
+    @Override
+    public NsBinding resolve(String name)
+    {
+        return myBindings.get(name);
+    }
+
+
     @Override
     public FusionValue lookup(String name)
     {
-        return myBindings.get(name);
+        NsBinding binding = myBindings.get(name);
+        if (binding != null) return binding.myValue;
+        return null;
     }
 
     @Override
@@ -76,7 +101,7 @@ class Namespace
 
     void visitAllBindings(BindingVisitor v)
     {
-        for (Map.Entry<String, FusionValue> entry : myBindings.entrySet())
+        for (Map.Entry<String, NsBinding> entry : myBindings.entrySet())
         {
             v.visitBinding(entry.getKey(), entry.getValue());
         }

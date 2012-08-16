@@ -73,7 +73,6 @@ final class Evaluator
      * Must not be null.
      */
     Namespace newEmptyNamespace(Namespace ns)
-        throws FusionException
     {
         ModuleRegistry registry = ns.getRegistry();
         return new Namespace(registry);
@@ -284,6 +283,21 @@ final class Evaluator
 
 
     //========================================================================
+
+
+    FusionValue prepareAndEval(Environment env, SyntaxValue source)
+        throws FusionException
+    {
+        source = source.prepare(this, env);
+        return eval(env, source);
+    }
+
+
+    SyntaxValue prepare(Environment env, SyntaxValue source)
+        throws SyntaxFailure
+    {
+        return source.prepare(this, env);
+    }
 
 
     /**

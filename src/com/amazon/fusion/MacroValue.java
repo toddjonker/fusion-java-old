@@ -14,6 +14,14 @@ abstract class MacroValue
     }
 
 
+    @Override
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp stx)
+        throws SyntaxFailure
+    {
+        SyntaxValue expanded = expand(stx);
+        return expanded.prepare(eval, env);
+    }
+
     /**
      * Performs a single "level" of macro expansion.
      *

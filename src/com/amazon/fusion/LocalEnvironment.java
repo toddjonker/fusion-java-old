@@ -34,6 +34,22 @@ final class LocalEnvironment
 
 
     @Override
+    public Binding resolve(String name)
+    {
+        final int paramCount = myNames.length;
+        for (int i = 0; i < paramCount; i++)
+        {
+            if (name.equals(myNames[i]))
+            {
+                return new Binding(){};
+            }
+        }
+
+        return myEnclosure.resolve(name);
+    }
+
+
+    @Override
     public FusionValue lookup(String name)
     {
         final int paramCount = myNames.length;

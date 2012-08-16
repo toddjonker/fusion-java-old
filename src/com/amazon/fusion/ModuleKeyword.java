@@ -2,19 +2,26 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.Environment.Binding;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 
 /**
- *
+ * @see <a href="http://docs.racket-lang.org/reference/module.html">Racket
+ * modules</a>
  */
 final class ModuleKeyword
     extends KeywordValue
 {
     private final DynamicParameter myCurrentModuleDeclareName;
     private final ModuleNameResolver myModuleNameResolver;
+    private final Binding myDefineBinding;
+    private final Binding myDefineSyntaxBinding;
+    private final IdentityHashMap<Binding, Object> myPartialExpansionStops;
 
     ModuleKeyword(ModuleNameResolver moduleNameResolver,
-                  DynamicParameter currentModuleDeclareName)
+                  DynamicParameter currentModuleDeclareName,
+                  Namespace kernelNamespace)
     {
         //    "                                                                               |
         super("NAME BODY ...+",
@@ -22,7 +29,142 @@ final class ModuleKeyword
 
         myCurrentModuleDeclareName = currentModuleDeclareName;
         myModuleNameResolver = moduleNameResolver;
+        myDefineBinding = kernelNamespace.resolve("define");
+        myDefineSyntaxBinding = kernelNamespace.resolve("define_syntax");
+
+        myPartialExpansionStops = new IdentityHashMap<Binding, Object>();
+        myPartialExpansionStops.put(myDefineBinding, Boolean.TRUE);
+        myPartialExpansionStops.put(myDefineSyntaxBinding, Boolean.TRUE);
     }
+
+
+    @Override
+    SyntaxValue prepare(Evaluator eval,
+                        Environment envOutsideModule,
+                        SyntaxSexp source)
+        throws SyntaxFailure
+    {
+        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
+
+        SyntaxSymbol moduleNameSymbol = check.requiredSymbol("module name", 1);
+        String declaredName = moduleNameSymbol.stringValue();
+        // TODO check null/empty
+
+        SyntaxValue initialBindingsStx =
+            check.requiredForm("initial module path", 2);
+
+        Namespace outsideNamespace = envOutsideModule.namespace();
+        Namespace moduleNamespace = eval.newEmptyNamespace(outsideNamespace);
+
+        try
+        {
+            ModuleIdentity initialBindingsId =
+                myModuleNameResolver.resolve(eval, initialBindingsStx);
+            moduleNamespace.use(initialBindingsId);
+        }
+        catch (FusionException e)
+        {
+            String message =
+                "Error installing initial bindings: " + e.getMessage();
+            throw check.failure(message);
+        }
+
+
+        // Pass 1: locate definitions and install dummy bindings
+
+        ArrayList<SyntaxSexp> provideForms = new ArrayList<SyntaxSexp>();
+        ArrayList<SyntaxValue> otherForms = new ArrayList<SyntaxValue>();
+
+        for (int i = 3; i < source.size(); i++)
+        {
+            SyntaxValue form = source.get(i);
+            SyntaxSexp provide = formIsProvide(form);
+            if (provide != null)
+            {
+                provideForms.add(provide);
+            }
+            else
+            {
+                SyntaxValue expanded;
+                if (form instanceof SyntaxSexp)
+                {
+                    expanded =
+                        ((SyntaxSexp)form).partialExpand(eval, moduleNamespace,
+                                                         myPartialExpansionStops);
+                    if (expanded instanceof SyntaxSexp)
+                    {
+                        SyntaxSexp sexp = (SyntaxSexp)expanded;
+                        Binding binding = firstBinding(sexp);
+
+                        // TODO if 'use' then do it now!
+
+                        if (binding == myDefineBinding)
+                        {
+                            String name =
+                                DefineKeyword.boundName(eval, moduleNamespace,
+                                                        sexp);
+                            moduleNamespace.bind(name, UNDEF);
+                        }
+                        else if (binding == myDefineSyntaxBinding)
+                        {
+                            try
+                            {
+                                eval.prepareAndEval(moduleNamespace, expanded);
+                            }
+                            catch (FusionException e)
+                            {
+                                String message = e.getMessage();
+                                throw new SyntaxFailure("define_syntax",
+                                                        message, form);
+                            }
+                            // TODO shouldn't need to keep this for later,
+                            // but we throw away all this work at the moment
+                            // and do it all again during invoke()
+//                          expanded = null;
+                        }
+                    }
+                }
+                else
+                {
+                    expanded = form.prepare(eval, moduleNamespace);
+                }
+
+                if (expanded != null) otherForms.add(expanded);
+            }
+        }
+
+        // Pass 2: Expand the expressions. We also rearrange the forms,
+        // but that's not really for any functional reason.
+
+        SyntaxSexp result = SyntaxSexp.make(source.get(0),  // module
+                                            source.get(1),  // name
+                                            source.get(2)); // language
+
+        for (SyntaxValue stx : otherForms)
+        {
+            stx = stx.prepare(eval, moduleNamespace);
+            result.add(stx);
+        }
+
+        result.addAll(provideForms);
+        return result;
+    }
+
+
+    Binding firstBinding(SyntaxSexp form)
+    {
+        if (form.size() != 0)
+        {
+            SyntaxValue first = form.get(0);
+            if (first instanceof SyntaxSymbol)
+            {
+                Binding binding = ((SyntaxSymbol)first).getBinding();
+                return binding;
+            }
+        }
+        return null;
+    }
+
 
     @Override
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)

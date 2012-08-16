@@ -65,10 +65,22 @@ abstract class SyntaxSequence
         return myChildren.get(index);
     }
 
+    final void set(int index, SyntaxValue v)
+    {
+        myChildren.set(index, v);
+    }
+
+
     final void add(SyntaxValue... children)
     {
         ensureNotNull();
         Collections.addAll(myChildren, children);
+    }
+
+    final void addAll(List<? extends SyntaxValue> children)
+    {
+        ensureNotNull();
+        myChildren.addAll(children);
     }
 
 

@@ -7,5 +7,5 @@ package com.amazon.fusion;
  */
 interface BindingVisitor
 {
-    void visitBinding(String name, FusionValue value);
+    void visitBinding(String name, Namespace.NsBinding binding);
 }

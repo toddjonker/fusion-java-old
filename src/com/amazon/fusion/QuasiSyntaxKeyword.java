@@ -11,6 +11,67 @@ final class QuasiSyntaxKeyword
         // TODO Auto-generated constructor stub
     }
 
+
+    @Override
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp stx)
+        throws SyntaxFailure
+    {
+        int size = stx.size();
+        if (size != 2)
+        {
+            throw new SyntaxFailure(getEffectiveName(),
+                                    "a single template required",
+                                    stx);
+        }
+
+        SyntaxValue subform = stx.get(1);
+        SyntaxValue expanded = quasiPrepare(eval, env, subform);
+        if (expanded != subform) stx.set(1, expanded);
+        return stx;
+    }
+
+    SyntaxValue quasiPrepare(Evaluator eval, Environment env, SyntaxValue stx)
+        throws SyntaxFailure
+    {
+        if (stx instanceof SyntaxSexp)
+        {
+            return quasiPrepare(eval, env, (SyntaxSexp) stx);
+        }
+        else
+        {
+            return stx;
+        }
+    }
+
+    SyntaxValue quasiPrepare(Evaluator eval, Environment env, SyntaxSexp stx)
+        throws SyntaxFailure
+    {
+        int size = stx.size();
+        if (size == 0) return stx;
+
+        if (size == 2)
+        {
+            SyntaxValue first = stx.get(0);
+            if (first instanceof SyntaxSymbol
+                && "unsyntax".equals(((SyntaxSymbol)first).stringValue()))
+            {
+                SyntaxValue subform = stx.get(1);
+                SyntaxValue expanded = subform.prepare(eval, env);
+                if (expanded != subform) stx.set(1, expanded);
+                return stx;
+            }
+        }
+
+        for (int i = 0; i < size; i++)
+        {
+            SyntaxValue subform = stx.get(i);
+            SyntaxValue expanded = quasiPrepare(eval, env, subform);
+            if (expanded != subform) stx.set(i, expanded);
+        }
+        return stx;
+    }
+
+
     @Override
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException

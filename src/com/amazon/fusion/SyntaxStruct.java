@@ -145,6 +145,36 @@ final class SyntaxStruct
 
 
     @Override
+    SyntaxValue prepare(Evaluator eval, Environment env)
+        throws SyntaxFailure
+    {
+        if (myMap != null)
+        {
+            for (Map.Entry<String, Object> entry : myMap.entrySet())
+            {
+                Object value = entry.getValue();
+                if (value instanceof SyntaxValue)
+                {
+                    SyntaxValue subform = (SyntaxValue) value;
+                    SyntaxValue expanded = subform.prepare(eval, env);
+                    if (expanded != subform) entry.setValue(expanded);
+                }
+                else
+                {
+                    SyntaxValue[] children = (SyntaxValue[]) value;
+                    for (int i = 0; i < children.length; i++)
+                    {
+                        SyntaxValue subform = children[i];
+                        SyntaxValue expanded = subform.prepare(eval, env);
+                        if (expanded != subform) children[i] = subform;
+                    }
+                }
+            }
+        }
+        return this;
+    }
+
+    @Override
     FusionValue eval(Evaluator eval, Environment env)
         throws FusionException
     {

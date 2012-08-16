@@ -15,6 +15,24 @@ final class DefineSyntaxKeyword
               "value.");
     }
 
+
+    @Override
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp stx)
+        throws SyntaxFailure
+    {
+        SyntaxChecker check = new SyntaxChecker(getInferredName(), stx);
+        check.arityExact(3);
+
+        String keyword = check.requiredNonEmptySymbol("identifier", 1);
+
+        SyntaxValue valueStx = stx.get(2);
+        SyntaxValue expanded = valueStx.prepare(eval, env);
+        if (expanded != valueStx) stx.set(2, expanded);
+
+        return stx;
+    }
+
+
     @Override
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException

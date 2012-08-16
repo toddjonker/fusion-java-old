@@ -28,26 +28,13 @@ final class Closure
      * @param definition the source text of the {@code lambda} expression.
      */
     Closure(Environment enclosure, SyntaxSexp definition, String doc,
-            int bodyStartIndex)
+            String[] params, int bodyStartIndex)
     {
-        super(doc, determineParams((SyntaxSexp) definition.get(1)));
+        super(doc, params);
 
         myEnclosure = enclosure;
         myDefinition = definition;
         myBodyStart = bodyStartIndex;
-    }
-
-    private static String[] determineParams(SyntaxSexp paramsExpr)
-    {
-        int size = paramsExpr.size();
-        String[] params = new String[size];
-        for (int i = 0; i < size; i++)
-        {
-            // TODO typecheck
-            SyntaxSymbol param = (SyntaxSymbol) paramsExpr.get(i);
-            params[i] = param.stringValue();
-        }
-        return params;
     }
 
 

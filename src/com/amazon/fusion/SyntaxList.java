@@ -52,6 +52,20 @@ final class SyntaxList
 
 
     @Override
+    SyntaxValue prepare(Evaluator eval, Environment env)
+        throws SyntaxFailure
+    {
+        int len = size();
+        for (int i = 0; i < len; i++)
+        {
+            SyntaxValue subform = myChildren.get(i);
+            SyntaxValue expanded = subform.prepare(eval, env);
+            if (expanded != subform) myChildren.set(i, expanded);
+        }
+        return this;
+    }
+
+    @Override
     public FusionValue eval(Evaluator eval, Environment env)
         throws FusionException
     {

@@ -10,7 +10,14 @@ import java.util.Collection;
  */
 interface Environment
 {
+    interface Binding {}
+
+
     Namespace namespace();
+
+
+    Binding resolve(String name);
+
 
     /**
      * Finds the value bound to a given name.

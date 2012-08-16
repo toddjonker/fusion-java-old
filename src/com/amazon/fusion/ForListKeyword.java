@@ -19,6 +19,53 @@ final class ForListKeyword
               "BODY. Returns a new list of the results.");
     }
 
+
+    @Override
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp forStx)
+        throws SyntaxFailure
+    {
+        SyntaxChecker check = new SyntaxChecker(getInferredName(), forStx);
+        check.arityAtLeast(2);
+
+        SyntaxSequence bindingForms =
+            check.requiredSequence("sequence of bindings", 1);
+
+        final int numBindings = bindingForms.size();
+        if (numBindings != 0)
+        {
+            String[] boundNames = new String[numBindings];
+
+            for (int i = 0; i < numBindings; i++)
+            {
+                SyntaxSexp binding =
+                    requiredSexp("name/value binding", i, bindingForms);
+                SyntaxSymbol name =
+                    requiredSymbol("name/value binding", 0, binding);
+                boundNames[i] = name.stringValue();
+
+                SyntaxValue boundExpr =
+                    requiredForm("name/value binding", 1, binding);
+                SyntaxValue expanded = boundExpr.prepare(eval, env);
+                if (expanded != boundExpr) binding.set(1, expanded);
+            }
+
+            FusionValue[] boundValues = new FusionValue[numBindings];
+            Environment bodyEnv =
+                new LocalEnvironment(env, boundNames, boundValues);
+
+            // Prepare the body.
+            for (int i = 2; i < forStx.size(); i++)
+            {
+                SyntaxValue bodyStx = forStx.get(i);
+                SyntaxValue expanded = bodyStx.prepare(eval, bodyEnv);
+                if (expanded != bodyStx) forStx.set(i, expanded);
+            }
+        }
+
+        return forStx;
+    }
+
+
     @Override
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp forStx)
         throws FusionException

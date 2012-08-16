@@ -56,6 +56,13 @@ abstract class SyntaxValue
 
     abstract Type getType();
 
+
+    SyntaxValue prepare(Evaluator eval, Environment env)
+        throws SyntaxFailure
+    {
+        return this;
+    }
+
     abstract FusionValue eval(Evaluator eval, Environment env)
         throws FusionException;
 

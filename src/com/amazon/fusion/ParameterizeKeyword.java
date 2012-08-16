@@ -19,6 +19,46 @@ final class ParameterizeKeyword
 
 
     @Override
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp expr)
+        throws SyntaxFailure
+    {
+        SyntaxChecker check = new SyntaxChecker(getInferredName(), expr);
+        final int exprSize = check.arityAtLeast(3);
+
+        SyntaxSexp bindingForms =
+            check.requiredSexp("sequence of parameterizations", 1);
+
+        final int numBindings = bindingForms.size();
+        for (int i = 0; i < numBindings; i++)
+        {
+            SyntaxSexp binding =
+                requiredSexp("parameter/value binding", i, bindingForms);
+
+            SyntaxValue paramExpr =
+                requiredForm("parameter/value binding", 0, binding);
+            SyntaxValue expanded = paramExpr.prepare(eval, env);
+            if (expanded != paramExpr) binding.set(0, expanded);
+
+            SyntaxValue boundExpr =
+                requiredForm("parameter/value binding", 1, binding);
+            expanded = boundExpr.prepare(eval, env);
+            if (expanded != boundExpr) binding.set(1, expanded);
+        }
+
+        // Expand the body expressions
+
+        for (int i = 2; i < exprSize; i++)
+        {
+            SyntaxValue bodyExpr = expr.get(i);
+            SyntaxValue expanded = bodyExpr.prepare(eval, env);
+            if (expanded != bodyExpr) expr.set(i, expanded);
+        }
+
+        return expr;
+    }
+
+
+    @Override
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {

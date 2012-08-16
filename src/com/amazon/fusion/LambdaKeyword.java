@@ -19,6 +19,49 @@ final class LambdaKeyword
               "procedure invocation.");
     }
 
+
+    @Override
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp expr)
+        throws SyntaxFailure
+    {
+        int bodyStart;
+
+        SyntaxValue maybeDoc = expr.get(2);
+        if (maybeDoc.getType() == SyntaxValue.Type.STRING
+            && expr.size() > 3)
+        {
+            bodyStart = 3;
+        }
+        else
+        {
+            bodyStart = 2;
+        }
+
+        String[] params = determineParams((SyntaxSexp) expr.get(1));
+        int paramCount = params.length;
+
+        Environment bodyEnv;
+        if (paramCount == 0)
+        {
+            bodyEnv = env;
+        }
+        else
+        {
+            bodyEnv =
+                new LocalEnvironment(env, params, new FusionValue[paramCount]);
+        }
+
+        final int bodyEnd = expr.size();
+        for (int i = bodyStart; i < bodyEnd; i++)
+        {
+            SyntaxValue bodyForm = expr.get(i);
+            SyntaxValue expanded = bodyForm.prepare(eval, bodyEnv);
+            if (expanded != bodyForm) expr.set(i, expanded);
+        }
+        return expr;
+    }
+
+
     @Override
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
     {
@@ -39,6 +82,20 @@ final class LambdaKeyword
             bodyStart = 2;
         }
 
-        return new Closure(env, expr, doc, bodyStart);
+        String[] params = determineParams((SyntaxSexp) expr.get(1));
+        return new Closure(env, expr, doc, params, bodyStart);
+    }
+
+    private static String[] determineParams(SyntaxSexp paramsExpr)
+    {
+        int size = paramsExpr.size();
+        String[] params = new String[size];
+        for (int i = 0; i < size; i++)
+        {
+            // TODO typecheck
+            SyntaxSymbol param = (SyntaxSymbol) paramsExpr.get(i);
+            params[i] = param.stringValue();
+        }
+        return params;
     }
 }

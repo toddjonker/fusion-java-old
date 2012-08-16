@@ -79,7 +79,7 @@ final class LoadHandler
                 {
                     result = null;  // Don't hold onto garbage
                     SyntaxValue fileExpr = Syntax.read(reader);
-                    result = eval.eval(namespace, fileExpr);
+                    result = eval.prepareAndEval(namespace, fileExpr);
                     // TODO tail call handling
                 }
 
@@ -184,7 +184,8 @@ final class LoadHandler
 
             ModuleRegistry reg = eval.getModuleRegistry();
             Namespace namespace = eval.newModuleNamespace(reg);
-            FusionValue result = bodyEval.eval(namespace, moduleDeclaration);
+            FusionValue result =
+                bodyEval.prepareAndEval(namespace, moduleDeclaration);
             // TODO tail call handling
             return (ModuleInstance) result;
         }

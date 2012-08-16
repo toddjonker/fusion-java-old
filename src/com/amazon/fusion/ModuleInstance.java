@@ -72,8 +72,8 @@ class ModuleInstance
         {
             for (String name : myProvidedNames)
             {
-                FusionValue value = myNamespace.lookup(name);
-                v.visitBinding(name, value);
+                Namespace.NsBinding b = myNamespace.resolve(name);
+                v.visitBinding(name, b);
             }
         }
     }

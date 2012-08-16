@@ -15,6 +15,16 @@ final class QuoteKeyword
               "Returns the Ion DATUM as-is, without evaluation.");
     }
 
+
+    @Override
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+        throws SyntaxFailure
+    {
+        // Nothing to do here.
+        return source;
+    }
+
+
     @Override
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
     {

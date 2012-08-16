@@ -44,15 +44,19 @@ final class KernelModule
                                    currentDirectory,
                                    currentModuleDeclareName,
                                    builder.buildModuleRepositories());
+
+        // These must be bound before 'module' since we need the bindings
+        // for the partial-expansion stop-list.
+        ns.bind("define", new DefineKeyword());
+        ns.bind("define_syntax", new DefineSyntaxKeyword());
+
         myModuleKeyword =
-            new ModuleKeyword(resolver, currentModuleDeclareName);
+            new ModuleKeyword(resolver, currentModuleDeclareName, ns);
         myUseKeyword = new UseKeyword(resolver);
         EvalFileKeyword evalFile =
             new EvalFileKeyword(myLoadHandler);
 
         ns.bind("current_directory", currentDirectory);
-        ns.bind("define", new DefineKeyword());
-        ns.bind("define_syntax", new DefineSyntaxKeyword());
         ns.bind("eval_file", evalFile);
         ns.bind("java_new", new JavaNewProc());
         ns.bind("module", myModuleKeyword);
