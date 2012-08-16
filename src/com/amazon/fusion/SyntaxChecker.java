@@ -39,14 +39,17 @@ final class SyntaxChecker
 
     /**
      * Arity includes the initial keyword!
+     * @return the actual arity (including the initial keyword).
      */
-    final void arityAtLeast(int count)
+    final int arityAtLeast(int count)
         throws SyntaxFailure
     {
-        if (myForm.size() < count)
+        int size = myForm.size();
+        if (size < count)
         {
             throw failure("expect at least " + (count-1) + " subforms");
         }
+        return size;
     }
 
 
@@ -68,6 +71,15 @@ final class SyntaxChecker
     {
         SyntaxValue form = requiredForm(expectation, argNum);
         return checkSyntax(SyntaxSequence.class, expectation,
+                           false /* nullable */, form);
+    }
+
+
+    final SyntaxSexp requiredSexp(String expectation, int argNum)
+        throws SyntaxFailure
+    {
+        SyntaxValue form = requiredForm(expectation, argNum);
+        return checkSyntax(SyntaxSexp.class, expectation,
                            false /* nullable */, form);
     }
 
