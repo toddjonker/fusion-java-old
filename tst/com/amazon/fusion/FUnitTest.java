@@ -37,6 +37,8 @@ public class FUnitTest
     public void run()
         throws Exception
     {
+        useTstRepo();
+
         FileInputStream source = new FileInputStream(myTestFile);
         try
         {
