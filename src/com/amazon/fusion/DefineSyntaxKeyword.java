@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+
 final class DefineSyntaxKeyword
     extends KeywordValue
 {
@@ -26,12 +27,25 @@ final class DefineSyntaxKeyword
         SyntaxValue valueStx = stx.get(2);
         FusionValue xform = eval.eval(env, valueStx);
 
-        // TODO check result type
-        Procedure xformProc = (Procedure) xform;
-        MacroTransformer macro = new MacroTransformer(xformProc);
+        KeywordValue result;
+        if (xform instanceof KeywordValue)
+        {
+            result = (KeywordValue) xform;
+        }
+        else if (xform instanceof Procedure)
+        {
+            Procedure xformProc = (Procedure) xform;
+            result = new MacroTransformer(xformProc);
+        }
+        else
+        {
+            String message =
+                "value is not a transformer: " + displayToString(xform);
+            throw check.failure(message);
+        }
 
         Namespace ns = env.namespace();
-        ns.bind(keyword, macro);
+        ns.bind(keyword, result);
 
         return UNDEF;
     }
