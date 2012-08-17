@@ -1,0 +1,33 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(use 'fusion/syntax')
+(use check)
+
+
+// Very basic macro
+(define_syntax S1
+  (lambda (stx) (quasisyntax 99)))
+
+(check_equal (S1) 99 "S1 macro expansion")
+
+
+// Test use of macro as body of define_syntax
+(define_syntax S2
+  (let ((xform (lambda (stx) (quasisyntax 99))))
+    xform))
+
+(check_equal (S2) 99 "S2 macro expansion")
+
+
+// (D v i) => (define i (lambda () v))
+(define_syntax D
+  (lambda (stx)
+    (quasisyntax
+      (define (unsyntax (syntax_get stx 2))
+        (lambda () (unsyntax (syntax_get stx 1)))))))
+
+(D 67 x)
+(check_equal (x) 67 "D macro expansion")
+
+
+"PASSED" // Helpful output if you run this stand-alone
