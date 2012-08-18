@@ -77,6 +77,7 @@ final class EvalFileKeyword
                 }
             }
 
+            // TODO FUSION-49 separate env and store
             Namespace namespace = (Namespace) store.runtimeNamespace();
             return myLoadHandler.loadTopLevel(eval, namespace, fileName);
         }

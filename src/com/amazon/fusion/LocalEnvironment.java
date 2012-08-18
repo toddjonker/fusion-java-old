@@ -127,6 +127,7 @@ final class LocalEnvironment
     @Override
     public Namespace namespace()
     {
+        // TODO FUSION-53 link directly to namespace
         return myEnclosure.namespace();
     }
 

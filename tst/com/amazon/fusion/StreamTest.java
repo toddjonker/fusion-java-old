@@ -161,9 +161,6 @@ public class StreamTest
         throws Exception
     {
         expectContractFailure("(stream_union [1,2,3] [])");
-        // TODO invalid TCs
-        // expectContractFailure("(stream_union [1,2,3] s)");
-        // expectContractFailure("(stream_union (stream_for [1,2,3]) s)");
     }
 
     @Test
@@ -190,9 +187,6 @@ public class StreamTest
         throws Exception
     {
         expectContractFailure("(stream_project [1,2,3] 1)");
-        // TODO invalid TC
-        // expectContractFailure("(stream_project [1,2,3] p)");
-        // expectContractFailure("(stream_project (stream_for [1,2,3]) p)");
     }
 
 
@@ -229,14 +223,6 @@ public class StreamTest
         throws Exception
     {
         expectContractFailure("(stream_select [1,2,3] 1)");
-
-        // TODO invalid test case
-        //expectContractFailure("(stream_select [1,2,3] p)");
-
-        // TODO invalid test case
-        // eval("(define is_one (lambda (x) (= x 1)))");
-        //expectFusionException("(stream_select (stream_for [[1,2,3]," +
-        //                      "1,[2,3],[]]) is_one)");
     }
 
     @Test

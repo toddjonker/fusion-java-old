@@ -49,7 +49,7 @@ final class FreeBinding implements Binding
 
         FreeBinding that = (FreeBinding) other;
 
-        // TODO intern symbol names and use ==
+        // TODO FUSION-47 intern symbol names and use ==
         return this.myName.equals(that.myName);
     }
 

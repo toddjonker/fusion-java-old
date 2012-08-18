@@ -119,6 +119,7 @@ final class ForListKeyword
     private final class CompiledForList
         implements CompiledForm
     {
+        // TODO FUSION-48 don't retain bindings
         private final LexicalBinding[] myBindings;
         private final CompiledForm[]   myValueForms;
         private final CompiledForm     myBody;
@@ -150,9 +151,10 @@ final class ForListKeyword
                     streams[i] = Sequences.streamFor(boundValue);
                 }
 
+                // TODO FUSION-49 separate Store from Environment
                 FusionValue[] boundValues = new FusionValue[numBindings];
                 LocalEnvironment bodyEnv =
-                    new LocalEnvironment((Environment) store, // TODO remove cast
+                    new LocalEnvironment((Environment) store,
                                          myBindings, boundValues);
 
                 while (Sequences.allHaveNext(streams))

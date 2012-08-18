@@ -32,7 +32,7 @@ final class DefineSyntaxKeyword
         SyntaxSymbol stripped = identifier.stripImmediateEnvWrap(env);
 
         // If at module top-level, this has already been done.
-        // TODO we should know the context where this is happening...
+        // TODO FUSION-51 should know the context where this is happening...
         Namespace ns = env.namespace();
         ns.predefine(stripped);
 
@@ -74,6 +74,7 @@ final class DefineSyntaxKeyword
     private final class CompiledDefineSyntax
         implements CompiledForm
     {
+        // TODO FUSION-48 don't retain Bindings in compiled form
         private final NsBinding    myBinding;
         private final CompiledForm myValueForm;
 
@@ -87,7 +88,7 @@ final class DefineSyntaxKeyword
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            // TODO this shouldn't do anything during phase-0 evaluation.
+            // TODO FUSION-32 this shouldn't do anything during phase-0
             Object value = eval.eval(store, myValueForm);
 
             if (value instanceof Procedure)

@@ -104,11 +104,11 @@ public class FusionRuntimeBuilder
                 throw new IllegalStateException(message);
             }
 
-            // TODO copy the builder so user's instance isn't changed.
+            // TODO FUSION-45 copy the builder so user's instance isn't changed.
             b.myCurrentDirectory = new File(userDir);
         }
 
-        // TODO make immutable? Currently we don't retain this instance so
+        // TODO FUSION-45 make immutable? Currently we don't retain this instance so
         // it doesn't matter.
         return b;
     }

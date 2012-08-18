@@ -299,6 +299,7 @@ final class Evaluator
     FusionValue prepareAndEvalTopLevelForm(SyntaxValue source, Namespace ns)
         throws FusionException
     {
+        // TODO FUSION-44 handle (module ...) properly
         source = ns.syntaxIntroduce(source);
         source = source.expand(this, ns);
         CompiledForm compiled = source.doCompile(this, ns);
@@ -317,10 +318,11 @@ final class Evaluator
     }
 
 
-    @Deprecated // not used
-    SyntaxValue prepare(Environment env, SyntaxValue source)
+    // TODO FUSION-43 expansion should recur through here
+    SyntaxValue expand(Environment env, SyntaxValue source)
         throws SyntaxFailure
     {
+        // TODO FUSION-43 Fail if there are annotations
         return source.expand(this, env);
     }
 

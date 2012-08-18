@@ -127,7 +127,7 @@ final class ModuleNameResolver
                 base = myCurrentDirectory.asString(eval);
             }
 
-            // TODO The parameters should guard their values to ensure this
+            // TODO FUSION-50 parameter guard should ensure this
             File baseFile = new File(base);
             assert baseFile.isAbsolute() : "Base is not absolute: " + baseFile;
             pathFile = new File(base, path);

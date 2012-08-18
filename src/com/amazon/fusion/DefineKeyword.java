@@ -43,7 +43,7 @@ final class DefineKeyword
         SyntaxSymbol stripped = identifier.stripImmediateEnvWrap(env);
 
         // If at module top-level, this has already been done.
-        // TODO we should know the context where this is happening...
+        // TODO FUSION-51 should know the context where this is happening...
         Namespace ns = env.namespace();
         ns.predefine(stripped);
 
@@ -85,6 +85,7 @@ final class DefineKeyword
     private static final class CompiledDefine
         implements CompiledForm
     {
+        // TODO FUSION-48 don't retain Bindings in compiled form
         private final NsBinding    myBinding;
         private final CompiledForm myValueForm;
 

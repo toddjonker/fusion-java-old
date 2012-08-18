@@ -50,6 +50,7 @@ final class QuoteKeyword
     private static final class CompiledQuote
         implements CompiledForm
     {
+        // TODO FUSION-35 don't retain syntax tree, it has too much info
         private final SyntaxValue mySyntax;
 
         CompiledQuote(SyntaxValue syntax)

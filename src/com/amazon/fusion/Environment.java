@@ -9,7 +9,7 @@ import java.util.Set;
  * Environments are generally arranged in a hierarchy of lexical scopes.
  */
 interface Environment
-    extends Store // TODO temporary!
+    extends Store            // TODO FUSION-49 separate Store from Environment
 {
     Namespace namespace();
 

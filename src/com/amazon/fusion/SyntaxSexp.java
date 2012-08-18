@@ -287,7 +287,8 @@ final class SyntaxSexp
                 for (int i = 0; i < argCount; i++)
                 {
                     Object arg = eval.eval(store, myArgForms[i]);
-                    args[i] = (FusionValue) arg;           // TODO remove cast
+                    // TODO FUSION-41 remove cast
+                    args[i] = (FusionValue) arg;
                 }
             }
 

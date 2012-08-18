@@ -122,6 +122,7 @@ final class LetrecKeyword
     private static final class CompiledLetrec
         implements CompiledForm
     {
+        // TODO FUSION-48 don't retain Bindings
         private final LexicalBinding[] myBindings;
         private final CompiledForm[]   myValueForms;
         private final CompiledForm     myBody;
@@ -141,9 +142,10 @@ final class LetrecKeyword
         {
             final int numBindings = myBindings.length;
 
+            // TODO FUSION-49 separate Store from Environment
             FusionValue[] boundValues = new FusionValue[numBindings];
             LocalEnvironment bodyEnv =
-                new LocalEnvironment((Environment) store, // TODO remove cast
+                new LocalEnvironment((Environment) store,
                                      myBindings, boundValues);
 
             for (int i = 0; i < numBindings; i++)

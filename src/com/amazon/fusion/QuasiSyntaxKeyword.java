@@ -48,6 +48,7 @@ final class QuasiSyntaxKeyword
                                SyntaxValue source, int depth)
         throws SyntaxFailure
     {
+        // TODO FUSION-46 handle unsyntax inside lists and structs
         if (source instanceof SyntaxSexp)
         {
             return expand(eval, env, (SyntaxSexp) source, depth);

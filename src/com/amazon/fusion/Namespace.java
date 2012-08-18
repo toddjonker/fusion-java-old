@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
+// TODO FUSION-49 separate Store and Environment
 class Namespace
     implements Environment, RuntimeNamespace
 {
@@ -259,6 +260,8 @@ class Namespace
     @Override
     public void bindPredefined(NsBinding binding, Object value)
     {
+        // TODO FUSION-48 don't retain Bindings in compiled form
+
         int address = binding.myAddress;
         if (address < myBindings.size())
         {
@@ -271,7 +274,7 @@ class Namespace
         }
 
         FusionValue fv = (FusionValue) value;
-        bind(binding, fv);  // TODO this is inefficient
+        bind(binding, fv);
     }
 
     /**

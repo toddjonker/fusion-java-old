@@ -10,6 +10,7 @@ import com.amazon.fusion.LocalEnvironment.LexicalBinding;
 final class Closure
     extends Procedure
 {
+    // TODO FUSION-48 Don't retain Bindings, they retain too much data.
     private final Store            myEnclosure;
     private final LexicalBinding[] myParams;
     private final CompiledForm     myBody;
@@ -41,7 +42,7 @@ final class Closure
     {
         checkArityExact(args);
 
-        // TODO remove cast
+        // TODO FUSION-49 separate Store from Environment
         Environment bodyEnv =
             new LocalEnvironment((Environment) myEnclosure, myParams, args);
 

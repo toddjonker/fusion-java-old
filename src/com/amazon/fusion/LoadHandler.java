@@ -195,6 +195,9 @@ final class LoadHandler
                                             eval.newString(dirPath));
             }
 
+            // TODO FUSION-40 separate module declaration from instantiation
+            // This should result in a declaration, no instantiation or visit.
+
             // TODO Do we need an Evaluator with no continuation marks?
             // This namespace ensures correct binding for 'module'
 
