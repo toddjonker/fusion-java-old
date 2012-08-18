@@ -26,12 +26,19 @@ final class EvalFileKeyword
 
 
     @Override
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+        throws SyntaxFailure
+    {
+        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
+        check.arityExact(2);
+        return super.prepare(eval, env, source);
+    }
+
+
+    @Override
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), stx);
-        check.arityExact(2);
-
         String fileName;
         {
             SyntaxValue argExpr = stx.get(1);

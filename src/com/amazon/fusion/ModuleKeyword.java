@@ -170,17 +170,12 @@ final class ModuleKeyword
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
-        SyntaxSymbol name = requiredSymbol("module name", 1, expr);
-        String declaredName = name.stringValue();
-        // TODO check null/empty
-
-        SyntaxValue initialBindingsStx = requiredForm("initial module path", 2, expr);
-
         Namespace ns = env.namespace();
         Namespace moduleNamespace = eval.newEmptyNamespace(ns);
 
         try
         {
+            SyntaxValue initialBindingsStx = expr.get(2);
             ModuleIdentity initialBindingsId =
                 myModuleNameResolver.resolve(eval, initialBindingsStx);
             moduleNamespace.use(initialBindingsId);
@@ -211,6 +206,7 @@ final class ModuleKeyword
         String[] providedNames =
             processProvides(provideForms, moduleNamespace);
 
+        String declaredName = ((SyntaxSymbol) expr.get(1)).stringValue();
         ModuleIdentity id = determineIdentity(eval, declaredName);
         ModuleInstance module =
             new ModuleInstance(id, moduleNamespace, providedNames);

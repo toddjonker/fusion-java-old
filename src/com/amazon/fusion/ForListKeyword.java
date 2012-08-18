@@ -70,11 +70,7 @@ final class ForListKeyword
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp forStx)
         throws FusionException
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), forStx);
-        check.arityAtLeast(2);
-
-        SyntaxSequence bindingForms =
-            check.requiredSequence("sequence of bindings", 1);
+        SyntaxSequence bindingForms = (SyntaxSequence) forStx.get(1);
 
         final int numBindings = bindingForms.size();
 
@@ -87,14 +83,12 @@ final class ForListKeyword
 
             for (int i = 0; i < numBindings; i++)
             {
-                SyntaxSexp binding =
-                    requiredSexp("name/value binding", i, bindingForms);
-                SyntaxSymbol name =
-                    requiredSymbol("name/value binding", 0, binding);
+                SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
+                SyntaxSymbol name = (SyntaxSymbol) binding.get(0);
                 boundNames[i] = name.stringValue();
 
-                SyntaxValue boundExpr =
-                    requiredForm("name/value binding", 1, binding);
+                SyntaxValue boundExpr = binding.get(1);
+
                 FusionValue boundValue = eval.eval(env, boundExpr);
                 streams[i] = Sequences.streamFor(boundValue);
             }

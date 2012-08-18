@@ -37,7 +37,6 @@ abstract class MacroValue
     final FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
-        SyntaxValue expanded = expand(expr);
-        return eval.bounceTailExpression(env, expanded);
+        throw new IllegalStateException("Macros should be expanded already!");
     }
 }

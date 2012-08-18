@@ -64,25 +64,17 @@ final class LetrecKeyword
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
-        final int letrecExprSize = expr.size();
-        if (letrecExprSize < 3)
-        {
-            throw new SyntaxFailure(getEffectiveName(), "", expr);
-        }
-
-        SyntaxSexp bindingForms =
-            requiredSexp("sequence of bindings", 1, expr);
+        SyntaxSexp bindingForms = (SyntaxSexp) expr.get(1);
 
         final int numBindings = bindingForms.size();
         String[]     boundNames = new String[numBindings];
         SyntaxValue[] boundExprs = new SyntaxValue[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
-            SyntaxSexp binding =
-                requiredSexp("name/value binding", i, bindingForms);
-            SyntaxSymbol name = requiredSymbol("name/value binding", 0, binding);
+            SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
+            SyntaxSymbol name = (SyntaxSymbol) binding.get(0);
             boundNames[i] = name.stringValue();
-            boundExprs[i] = requiredForm("name/value binding", 1, binding);
+            boundExprs[i] = binding.get(1);
         }
 
         FusionValue[] boundValues = new FusionValue[numBindings];
@@ -97,7 +89,7 @@ final class LetrecKeyword
         }
 
         FusionValue result;
-        final int bodyEnd = letrecExprSize - 1;
+        final int bodyEnd = expr.size() - 1;
         for (int i = 2; i < bodyEnd; i++)
         {
             SyntaxValue bodyExpr = expr.get(i);

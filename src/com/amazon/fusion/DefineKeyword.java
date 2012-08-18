@@ -49,8 +49,6 @@ final class DefineKeyword
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), stx);
-        check.arityExact(3);
         SyntaxSymbol name = (SyntaxSymbol) stx.get(1);
         SyntaxValue valueStx = stx.get(2);
 

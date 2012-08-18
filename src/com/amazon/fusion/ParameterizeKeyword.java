@@ -62,23 +62,15 @@ final class ParameterizeKeyword
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
-        final int letrecExprSize = expr.size();
-        if (letrecExprSize < 3)
-        {
-            throw new SyntaxFailure(getEffectiveName(), "", expr);
-        }
-
-        SyntaxSexp bindingForms =
-            requiredSexp("sequence of parameterizations", 1, expr);
+        SyntaxSexp bindingForms = (SyntaxSexp) expr.get(1);
 
         final int numBindings = bindingForms.size();
         DynamicParameter[] parameters = new DynamicParameter[numBindings];
         SyntaxValue[] boundExprs = new SyntaxValue[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
-            SyntaxSexp binding =
-                requiredSexp("parameter/value binding", i, bindingForms);
-            SyntaxValue paramExpr = requiredForm("parameter/value binding", 0, binding);
+            SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
+            SyntaxValue paramExpr = binding.get(0);
 
             FusionValue paramValue = eval.eval(env, paramExpr);
             // TODO error handling
@@ -98,7 +90,7 @@ final class ParameterizeKeyword
 
         // TODO tail recursion
         FusionValue result = null;
-        final int bodyEnd = letrecExprSize/* - 1*/;
+        final int bodyEnd = expr.size() /* - 1 */;
         for (int i = 2; i < bodyEnd; i++)
         {
             SyntaxValue bodyExpr = expr.get(i);

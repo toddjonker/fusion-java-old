@@ -157,14 +157,7 @@ final class SyntaxSexp
     public FusionValue eval(Evaluator eval, Environment env)
         throws FusionException
     {
-        int len = size();
-        if (len == 0)
-        {
-            throw new SyntaxFailure(null, "not an expression", this);
-        }
-
         SyntaxValue first = get(0);
-
         FusionValue form = eval.eval(env, first);
         FusionValue result = form.invoke(eval, env, this);
         return result;

@@ -38,8 +38,8 @@ final class UseKeyword
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
-        // TODO this shouldn't be needed
-        SyntaxValue modStx = requiredForm("module spec", 1, expr);
+        // TODO this shouldn't be needed but module preparation is discarded!
+        SyntaxValue modStx = expr.get(1);
         Namespace namespace = env.namespace();
         use(eval, namespace, modStx);
         return UNDEF;

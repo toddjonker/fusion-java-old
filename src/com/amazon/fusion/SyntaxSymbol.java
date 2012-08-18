@@ -75,21 +75,10 @@ final class SyntaxSymbol
     FusionValue eval(Evaluator eval, Environment env)
         throws FusionException
     {
-        if (myBinding == null)
-        {
-            throw new SyntaxFailure(null, "Unprepared symbol", this);
-        }
-        if (myText == null)
-        {
-            throw new SyntaxFailure(null, "null.symbol is not an expression",
-                                    this);
-        }
-
+        assert myBinding != null;
+        // TODO use the binding
         FusionValue result = env.lookup(myText);
-        if (result == null)
-        {
-            throw new UnboundIdentifierFailure(null, this);
-        }
+        assert result != null;
         return result;
     }
 

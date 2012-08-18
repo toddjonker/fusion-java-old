@@ -18,16 +18,21 @@ final class IfKeyword
               "Note that only one of THEN or ELSE is evaluated, and both are in tail position.");
     }
 
+
+    @Override
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+        throws SyntaxFailure
+    {
+        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
+        check.arityExact(4);
+        return super.prepare(eval, env, source);
+    }
+
+
     @Override
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
-        if (expr.size() != 4)
-        {
-            throw new SyntaxFailure(getEffectiveName(),
-                                    "3 subexpressions required", expr);
-        }
-
         SyntaxValue source = expr.get(1);
         FusionValue result = eval.eval(env, source);
 
