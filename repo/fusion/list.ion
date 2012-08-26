@@ -17,8 +17,7 @@
       '''
 Returns the first element in the list
       '''
-
-     (. list 0)))
+      (. list 0)))
 
   //==========================================================================
 
@@ -27,59 +26,63 @@ Returns the first element in the list
       '''
 Returns the last element in the list
       '''
-
-     (if (list_empty list) undef (. list (- (size list) 1)))))
+      (if (list_empty list) undef (. list (- (size list) 1)))))
 
   //==========================================================================
 
   (define list_builder
-   (lambda (list rslt idx end)
-     '''
+    (lambda (list rslt idx end)
+      '''
 Helper method for rest - appends elements to the end of a result list until
 the end of the original list is reached
       '''
-     (if (= idx end) rslt
-      (list_builder list (add rslt (. list idx)) (+ idx 1) end))))
+      (if (= idx end)
+        rslt
+        (list_builder list (add rslt (. list idx)) (+ idx 1) end))))
 
   //==========================================================================
 
   (define rest
-   (lambda (list idx)
-     '''
+    (lambda (list idx)
+      '''
 Returns the rest of the list starting at index
       '''
       (if (or (= idx (size list)) (> idx (size list)))
-       undef (list_builder list [] idx (size list)))))
+        undef
+        (list_builder list [] idx (size list)))))
 
   //==========================================================================
 
   (define subseq
-   (lambda (list start end)
+    (lambda (list start end)
       '''
-Returns the subsequence of a list in the range of two indices [start,end], inclusive
+Returns the subsequence of a list in the range of two indices [start,end],
+inclusive.
       '''
-     (if (or (> start end) (= end (size list)) (> end (size list)))
-      undef (list_builder list [] start (+ end 1)))))
+      (if (or (> start end) (= end (size list)) (> end (size list)))
+        undef
+        (list_builder list [] start (+ end 1)))))
 
   //==========================================================================
 
   (define list_empty
-   (lambda (list)
+    (lambda (list)
       '''
 Returns true if list is empty otherwise returns false
       '''
-     (= 0 (size list))))
+      (= 0 (size list))))
 
   //==========================================================================
 
   (define list_contains
-   (lambda (list val)
+    (lambda (list val)
       '''
 Returns true if list contains value otherwise returns false
       '''
-      (if (list_empty list) false
-       (or (= val (first list))
-        (list_contains (subseq list 1 (size list)) val)))))
+      (if (list_empty list)
+        false
+        (or (= val (first list))
+            (list_contains (subseq list 1 (size list)) val)))))
 
   //==========================================================================
 
