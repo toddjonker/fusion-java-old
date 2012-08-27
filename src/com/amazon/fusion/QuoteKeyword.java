@@ -20,7 +20,9 @@ final class QuoteKeyword
     SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        // Nothing to do here.
+        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
+        check.arityExact(2);
+
         return source;
     }
 

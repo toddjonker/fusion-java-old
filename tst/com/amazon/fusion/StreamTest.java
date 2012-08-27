@@ -5,7 +5,6 @@ package com.amazon.fusion;
 import static com.amazon.ion.util.IonTextUtils.printString;
 import java.io.File;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -339,13 +338,4 @@ public class StreamTest
          assertEval(true,
                     "(is_stream (stream_for [[[]],null,\"hello\",[0,1,2]]))");
     }
-
-    @Test @Ignore
-    public void testForListAsStream()
-        throws Exception
-    {
-        assertEval("[]","(for_list((s (empty_stream))) s)");
-        //assertEval("[2,3,4,5]","(list_to_stream(for_list (stream_for [1,2,3,4]) (+ x 1)))");
-    }
-
 }

@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.TailCallTest.STACK_OVERFLOW_DEPTH;
-
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -30,7 +29,7 @@ public class BooleanTest
     };
 
 
-    @Test @Ignore
+    @Test
     public void testBasicIf()
         throws Exception
     {
@@ -132,7 +131,7 @@ public class BooleanTest
     //========================================================================
 
 
-    @Test @Ignore
+    @Test
     public void testOr()
         throws Exception
     {
@@ -383,6 +382,7 @@ public class BooleanTest
         }
     }
 
+
     @Test
     public void testUnless()
         throws Exception
@@ -395,6 +395,8 @@ public class BooleanTest
         assertEval(3, "(unless false 1 2 3)");
     }
 
+
+    @Test
     public void testWhen()
          throws Exception
     {
@@ -405,5 +407,4 @@ public class BooleanTest
 
         assertEval(3, "(when true 1 2 3)");
     }
-
 }

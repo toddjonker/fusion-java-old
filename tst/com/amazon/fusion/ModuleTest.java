@@ -20,6 +20,16 @@ public class ModuleTest
         eval("X");
     }
 
+
+    @Test(expected = UnboundIdentifierFailure.class)
+    public void testIntialModuleImportsWithNoProvides()
+        throws Exception
+    {
+        useTstRepo();
+        eval("(module M 'NoProvides' X)");
+    }
+
+
     @Test(expected = FusionException.class)
     public void testUseNonSexp()
         throws Exception

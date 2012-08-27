@@ -99,6 +99,14 @@ public class LiteralEvalTest
     }
 
     @Test
+    public void testQuoteArity()
+        throws Exception
+    {
+        expectSyntaxFailure("(quote)");
+        expectSyntaxFailure("(quote quote quote)");
+    }
+
+    @Test
     public void testQuotedAnnotations()
         throws Exception
     {
