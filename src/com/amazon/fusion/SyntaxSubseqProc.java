@@ -2,8 +2,6 @@
 
 package com.amazon.fusion;
 
-import java.util.ArrayList;
-import java.util.List;
 
 final class SyntaxSubseqProc
     extends Procedure
@@ -25,14 +23,8 @@ final class SyntaxSubseqProc
         int from = (int) checkLongArg(1, args); // TODO type-safety
         int size = sequence.size();
 
-        List<SyntaxValue> subseq = sequence.myChildren.subList(from, size);
-        // That's a view into the original sequence, make a stand-alone copy
-        // so changes to the original don't affect our result.
-        ArrayList<SyntaxValue> children =
-            new ArrayList<SyntaxValue>(subseq.size());
-        children.addAll(subseq);
 
-        SyntaxSexp result = SyntaxSexp.make(/* location */ null, children);
+        SyntaxSequence result = sequence.makeSubseq(from, size);
         return result;
     }
 }

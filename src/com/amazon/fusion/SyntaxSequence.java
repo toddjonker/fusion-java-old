@@ -10,33 +10,47 @@ import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 abstract class SyntaxSequence
     extends SyntaxContainer
 {
-    List<SyntaxValue> myChildren;
+    private final List<SyntaxValue> myChildren;
 
     SyntaxSequence(String[] anns, SourceLocation loc)
     {
         super(anns, loc);
+        myChildren = null;
+    }
+
+    /**
+     * Instance will be {@link #isNullValue()} if children is null.
+     *
+     * @param children this instance takes ownership and it must not be modified!
+     */
+    SyntaxSequence(String[] anns, SourceLocation loc,
+                   List<SyntaxValue> children)
+    {
+        super(anns, loc);
+        myChildren = children;
     }
 
 
-    final void readChildren(IonReader source)
+    static List<SyntaxValue> readChildren(IonReader source)
     {
-        if (! source.isNullValue())
+        if (source.isNullValue()) return null;
+
+        List<SyntaxValue> children = new ArrayList<SyntaxValue>();
+
+        source.stepIn();
+        while (source.next() != null)
         {
-            ensureNotNull();
-            source.stepIn();
-            while (source.next() != null)
-            {
-                SyntaxValue child = Syntax.read(source);
-                add(child);
-            }
-            source.stepOut();
+            SyntaxValue child = Syntax.read(source);
+            children.add(child);
         }
+        source.stepOut();
+
+        return children;
     }
 
 
@@ -61,14 +75,6 @@ abstract class SyntaxSequence
         return myChildren == null;
     }
 
-    /** Turns null into empty sequence, otherwise leaves things alone. */
-    final void ensureNotNull()
-    {
-        if (myChildren == null)
-        {
-            myChildren = new ArrayList<SyntaxValue>();
-        }
-    }
 
     final int size()
     {
@@ -81,22 +87,26 @@ abstract class SyntaxSequence
         return myChildren.get(index);
     }
 
-    final void set(int index, SyntaxValue v)
+
+    /** Creates a new sequence of the same type, with the children. */
+    abstract SyntaxSequence makeSimilar(List<SyntaxValue> children);
+
+
+    /** Creates a new sequence with this + the other. */
+    SyntaxSequence makeAppended(SyntaxSequence that)
     {
-        myChildren.set(index, v);
+        ArrayList<SyntaxValue> children =
+            new ArrayList<SyntaxValue>(this.size() + that.size());
+        if (this.myChildren != null) children.addAll(this.myChildren);
+        if (that.myChildren != null) children.addAll(that.myChildren);
+        return makeSimilar(children);
     }
 
-
-    final void add(SyntaxValue... children)
+    SyntaxSequence makeSubseq(int from, int to)
     {
-        ensureNotNull();
-        Collections.addAll(myChildren, children);
-    }
-
-    final void addAll(List<? extends SyntaxValue> children)
-    {
-        ensureNotNull();
-        myChildren.addAll(children);
+        List<SyntaxValue> children =
+            (myChildren == null ? null : myChildren.subList(from, to));
+        return makeSimilar(children);
     }
 
 
@@ -138,7 +148,7 @@ abstract class SyntaxSequence
     final void writeContentTo(IonWriter writer, IonType type)
         throws IOException
     {
-        if (isNullValue())
+        if (myChildren == null)
         {
             writer.writeNull(type);
         }

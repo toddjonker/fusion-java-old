@@ -19,16 +19,17 @@ final class ParameterizeKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp expr)
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), expr);
+        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
         final int exprSize = check.arityAtLeast(3);
 
         SyntaxSexp bindingForms =
             check.requiredSexp("sequence of parameterizations", 1);
 
         final int numBindings = bindingForms.size();
+        SyntaxValue[] expandedForms = new SyntaxValue[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
             SyntaxSexp binding =
@@ -36,25 +37,34 @@ final class ParameterizeKeyword
 
             SyntaxValue paramExpr =
                 requiredForm("parameter/value binding", 0, binding);
-            SyntaxValue expanded = paramExpr.prepare(eval, env);
-            if (expanded != paramExpr) binding.set(0, expanded);
+            paramExpr = paramExpr.prepare(eval, env);
 
             SyntaxValue boundExpr =
                 requiredForm("parameter/value binding", 1, binding);
-            expanded = boundExpr.prepare(eval, env);
-            if (expanded != boundExpr) binding.set(1, expanded);
+            boundExpr = boundExpr.prepare(eval, env);
+
+
+            binding = SyntaxSexp.make(binding.getLocation(),
+                                      paramExpr, boundExpr);
+            expandedForms[i] = binding;
         }
 
+        bindingForms = SyntaxSexp.make(bindingForms.getLocation(),
+                                       expandedForms);
+
         // Expand the body expressions
+        expandedForms = new SyntaxValue[exprSize];
+        expandedForms[0] = source.get(0);
+        expandedForms[1] = bindingForms;
 
         for (int i = 2; i < exprSize; i++)
         {
-            SyntaxValue bodyExpr = expr.get(i);
-            SyntaxValue expanded = bodyExpr.prepare(eval, env);
-            if (expanded != bodyExpr) expr.set(i, expanded);
+            SyntaxValue bodyExpr = source.get(i);
+            expandedForms[i] = bodyExpr.prepare(eval, env);
         }
 
-        return expr;
+        source = SyntaxSexp.make(source.getLocation(), expandedForms);
+        return source;
     }
 
 

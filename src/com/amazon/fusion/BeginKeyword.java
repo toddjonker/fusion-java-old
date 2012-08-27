@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import java.util.ArrayList;
+
 /**
  * The {@code begin} syntactic form.
  */
@@ -12,12 +14,21 @@ final class BeginKeyword
     {
         SyntaxValue begin = eval.makeKernelIdentifier("begin");
         int size = seq.size();
-        SyntaxSexp beginForm = SyntaxSexp.make(begin);
+        if (size <= from)
+        {
+            return SyntaxSexp.make(begin);
+        }
+
+        ArrayList<SyntaxValue> subforms = new ArrayList<SyntaxValue>();
+        subforms.add(begin);
+
         for (int i = from; i < size; i++)
         {
             SyntaxValue bodyForm = seq.get(i);
-            beginForm.add(bodyForm);
+            subforms.add(bodyForm);
         }
+
+        SyntaxSexp beginForm = SyntaxSexp.make(/* location */ null, subforms);
         return beginForm;
     }
 

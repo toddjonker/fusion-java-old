@@ -164,17 +164,20 @@ final class ModuleKeyword
         // Pass 2: Expand the expressions. We also rearrange the forms,
         // but that's not really for any functional reason.
 
-        SyntaxSexp result = SyntaxSexp.make(source.get(0),  // module
-                                            source.get(1),  // name
-                                            source.get(2)); // language
+        ArrayList<SyntaxValue> subforms = new ArrayList<SyntaxValue>();
+        subforms.add(source.get(0)); // module
+        subforms.add(source.get(1)); // name
+        subforms.add(source.get(2)); // language
 
         for (SyntaxValue stx : otherForms)
         {
             stx = stx.prepare(eval, moduleNamespace);
-            result.add(stx);
+            subforms.add(stx);
         }
 
-        result.addAll(provideForms);
+        subforms.addAll(provideForms);
+
+        SyntaxSexp result = SyntaxSexp.make(source.getLocation(), subforms);
         return result;
     }
 

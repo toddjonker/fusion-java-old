@@ -23,25 +23,27 @@ final class DefineKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp stx)
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), stx);
+        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
         check.arityExact(3);
-        SyntaxSymbol name = (SyntaxSymbol) stx.get(1);
-        SyntaxValue valueStx = stx.get(2);
+        SyntaxSymbol name = (SyntaxSymbol) source.get(1); // TODO type-check
+        SyntaxValue valueStx = source.get(2);
 
         Namespace ns = env.namespace();
         if (ns.lookup(name.stringValue()) == null)
         {
             // If at module top-level, this has already been done.
+            // TODO we should know the context where this is happening...
             ns.predefine(name.stringValue());
         }
 
-        SyntaxValue expanded = valueStx.prepare(eval, env);
-        if (expanded != valueStx) stx.set(2, expanded);
+        valueStx = valueStx.prepare(eval, env);
 
-        return stx;
+        source = SyntaxSexp.make(source.getLocation(),
+                                 source.get(0), name, valueStx);
+        return source;
     }
 
 

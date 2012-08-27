@@ -13,6 +13,8 @@ import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 final class SyntaxList
     extends SyntaxSequence
@@ -22,20 +24,55 @@ final class SyntaxList
         super(anns, loc);
     }
 
+    /**
+     * Instance will be {@link #isNullValue()} if children is null.
+     *
+     * @param children this instance takes ownership and it must not be modified!
+     */
+    private SyntaxList(String[] anns, SourceLocation loc,
+                       List<SyntaxValue> children)
+    {
+        super(anns, loc, children);
+    }
+
+
     static SyntaxList read(IonReader source, String[] anns)
     {
         SourceLocation loc = currentLocation(source);
-        SyntaxList seq = new SyntaxList(anns, loc);
-        seq.readChildren(source);
+        SyntaxList seq = new SyntaxList(anns, loc, readChildren(source));
         return seq;
     }
 
-    static SyntaxList make(SyntaxValue... children)
+    /**
+     * Instance will be {@link #isNullValue()} if children is null.
+     */
+    static SyntaxList make(SourceLocation loc, SyntaxValue... children)
     {
-        SyntaxList seq = new SyntaxList(EMPTY_STRING_ARRAY, null);
-        seq.add(children);
+        SyntaxList seq;
+        if (children == null)
+        {
+            seq = new SyntaxList(EMPTY_STRING_ARRAY, loc);
+            assert seq.isNullValue();
+        }
+        else
+        {
+            List<SyntaxValue> childs = Arrays.asList(children);
+            seq = new SyntaxList(EMPTY_STRING_ARRAY, loc, childs);
+        }
+
         return seq;
     }
+
+    /**
+     * Instance will be {@link #isNullValue()} if children is null.
+     *
+     * @param children this instance takes ownership and it must not be modified!
+     */
+    static SyntaxList make(SourceLocation loc, List<SyntaxValue> children)
+    {
+        return new SyntaxList(EMPTY_STRING_ARRAY, loc, children);
+    }
+
 
     @Override
     Type getType()
@@ -52,19 +89,29 @@ final class SyntaxList
 
 
     @Override
+    SyntaxList makeSimilar(List<SyntaxValue> children)
+    {
+        return make(null, children);
+    }
+
+
+    @Override
     SyntaxValue prepare(Evaluator eval, Environment env)
         throws SyntaxFailure
     {
-        pushAnyWraps();
-
         int len = size();
+        SyntaxValue[] expandedChildren =
+            (isNullValue() ? null : new SyntaxValue[len]);
+
         for (int i = 0; i < len; i++)
         {
-            SyntaxValue subform = myChildren.get(i);
-            SyntaxValue expanded = subform.prepare(eval, env);
-            if (expanded != subform) myChildren.set(i, expanded);
+            SyntaxValue subform = get(i);
+            expandedChildren[i] = subform.prepare(eval, env);
         }
-        return this;
+
+        SyntaxList expanded =
+            SyntaxList.make(this.getLocation(), expandedChildren);
+        return expanded;
     }
 
     @Override

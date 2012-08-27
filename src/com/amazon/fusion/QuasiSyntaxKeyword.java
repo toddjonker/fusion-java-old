@@ -16,8 +16,7 @@ final class QuasiSyntaxKeyword
     SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp stx)
         throws SyntaxFailure
     {
-        int size = stx.size();
-        if (size != 2)
+        if (stx.size() != 2)
         {
             throw new SyntaxFailure(getEffectiveName(),
                                     "a single template required",
@@ -25,8 +24,9 @@ final class QuasiSyntaxKeyword
         }
 
         SyntaxValue subform = stx.get(1);
-        SyntaxValue expanded = quasiPrepare(eval, env, subform);
-        if (expanded != subform) stx.set(1, expanded);
+        subform = quasiPrepare(eval, env, subform);
+
+        stx = SyntaxSexp.make(stx.getLocation(), stx.get(0), subform);
         return stx;
     }
 
@@ -56,18 +56,21 @@ final class QuasiSyntaxKeyword
                 && "unsyntax".equals(((SyntaxSymbol)first).stringValue()))
             {
                 SyntaxValue subform = stx.get(1);
-                SyntaxValue expanded = subform.prepare(eval, env);
-                if (expanded != subform) stx.set(1, expanded);
+                subform = subform.prepare(eval, env);
+
+                stx = SyntaxSexp.make(stx.getLocation(), stx.get(0), subform);
                 return stx;
             }
         }
 
+        SyntaxValue[] expandedForms = new SyntaxValue[size];
         for (int i = 0; i < size; i++)
         {
             SyntaxValue subform = stx.get(i);
-            SyntaxValue expanded = quasiPrepare(eval, env, subform);
-            if (expanded != subform) stx.set(i, expanded);
+            expandedForms[i] = quasiPrepare(eval, env, subform);
         }
+
+        stx = SyntaxSexp.make(stx.getLocation(), expandedForms);
         return stx;
     }
 
@@ -76,14 +79,6 @@ final class QuasiSyntaxKeyword
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        int size = stx.size();
-        if (size != 2)
-        {
-            throw new SyntaxFailure(getEffectiveName(),
-                                    "a single template required",
-                                    stx);
-        }
-
         SyntaxValue node = stx.get(1);
         return quasiSyntax(eval, env, node);
     }
@@ -124,9 +119,8 @@ final class QuasiSyntaxKeyword
         for (int i = 0; i < size; i++)
         {
             SyntaxValue orig = stx.get(i);
-            SyntaxValue done = quasiSyntax(eval, env, orig);
-            children[i] = done;
+            children[i] = quasiSyntax(eval, env, orig);
         }
-        return SyntaxSexp.make(children);
+        return SyntaxSexp.make(stx.getLocation(), children);
     }
 }

@@ -17,25 +17,23 @@ final class LetrecKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp expr)
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), expr);
+        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
         final int letrecExprSize = check.arityAtLeast(3);
 
         SyntaxSexp bindingForms =
             check.requiredSexp("sequence of bindings", 1);
 
         final int numBindings = bindingForms.size();
-        String[]     boundNames = new String[numBindings];
-        SyntaxValue[] boundExprs = new SyntaxValue[numBindings];
+        String[] boundNames = new String[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
             SyntaxSexp binding =
                 requiredSexp("name/value binding", i, bindingForms);
             SyntaxSymbol name = requiredSymbol("name/value binding", 0, binding);
             boundNames[i] = name.stringValue();
-            boundExprs[i] = requiredForm("name/value binding", 1, binding);
         }
 
         FusionValue[] boundValues = new FusionValue[numBindings];
@@ -43,23 +41,37 @@ final class LetrecKeyword
             new LocalEnvironment(env, boundNames, boundValues);
         SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
 
+        // Expand the bound-value expressions
+        SyntaxValue[] expandedForms = new SyntaxValue[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
-            SyntaxValue subform = boundExprs[i];
-            subform.addWrap(localWrap);
-            SyntaxValue expanded = subform.prepare(eval, bodyEnv);
-            if (expanded != subform) boundExprs[i] = expanded;
+            SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
+            SyntaxValue boundExpr =
+                requiredForm("name/value binding", 1, binding);
+            boundExpr.addWrap(localWrap);
+            boundExpr = boundExpr.prepare(eval, bodyEnv);
+            binding = SyntaxSexp.make(binding.getLocation(),
+                                      binding.get(0),
+                                      boundExpr);
+            expandedForms[i] = binding;
         }
+
+        bindingForms = SyntaxSexp.make(bindingForms.getLocation(),
+                                       expandedForms);
+
+        expandedForms = new SyntaxValue[letrecExprSize];
+        expandedForms[0] = source.get(0);
+        expandedForms[1] = bindingForms;
 
         for (int i = 2; i < letrecExprSize; i++)
         {
-            SyntaxValue subform = expr.get(i);
+            SyntaxValue subform = source.get(i);
             subform.addWrap(localWrap);
-            SyntaxValue expanded = subform.prepare(eval, bodyEnv);
-            if (expanded != subform) boundExprs[i] = expanded;
+            expandedForms[i] = subform.prepare(eval, bodyEnv);
         }
 
-        return expr;
+        source = SyntaxSexp.make(source.getLocation(), expandedForms);
+        return source;
     }
 
 

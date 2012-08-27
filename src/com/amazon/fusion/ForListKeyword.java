@@ -21,52 +21,61 @@ final class ForListKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp forStx)
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), forStx);
+        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
         check.arityAtLeast(2);
 
         SyntaxSequence bindingForms =
             check.requiredSequence("sequence of bindings", 1);
 
         final int numBindings = bindingForms.size();
-        if (numBindings != 0)
+        String[] boundNames = new String[numBindings];
+
+        SyntaxValue[] expandedForms = new SyntaxValue[numBindings];
+        for (int i = 0; i < numBindings; i++)
         {
-            String[] boundNames = new String[numBindings];
+            SyntaxSexp binding =
+                requiredSexp("name/value binding", i, bindingForms);
+            SyntaxSymbol name =
+                requiredSymbol("name/value binding", 0, binding);
+            boundNames[i] = name.stringValue();
 
-            for (int i = 0; i < numBindings; i++)
-            {
-                SyntaxSexp binding =
-                    requiredSexp("name/value binding", i, bindingForms);
-                SyntaxSymbol name =
-                    requiredSymbol("name/value binding", 0, binding);
-                boundNames[i] = name.stringValue();
+            SyntaxValue subform =
+                requiredForm("name/value binding", 1, binding);
 
-                SyntaxValue boundExpr =
-                    requiredForm("name/value binding", 1, binding);
-                SyntaxValue expanded = boundExpr.prepare(eval, env);
-                if (expanded != boundExpr) binding.set(1, expanded);
-            }
-
-            FusionValue[] boundValues = new FusionValue[numBindings];
-            Environment bodyEnv =
-                new LocalEnvironment(env, boundNames, boundValues);
-
-            SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
-
-            // Prepare the body.
-            for (int i = 2; i < forStx.size(); i++)
-            {
-                SyntaxValue bodyStx = forStx.get(i);
-                bodyStx.addWrap(localWrap);
-
-                SyntaxValue expanded = bodyStx.prepare(eval, bodyEnv);
-                if (expanded != bodyStx) forStx.set(i, expanded);
-            }
+            subform = subform.prepare(eval, env);
+            binding = SyntaxSexp.make(binding.getLocation(),
+                                      binding.get(0),
+                                      subform);
+            expandedForms[i] = binding;
         }
 
-        return forStx;
+        bindingForms = SyntaxSexp.make(bindingForms.getLocation(),
+                                       expandedForms);
+
+
+        FusionValue[] boundValues = new FusionValue[numBindings];
+        Environment bodyEnv =
+            new LocalEnvironment(env, boundNames, boundValues);
+
+        SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
+
+        // Prepare the body.
+        expandedForms = new SyntaxValue[source.size()];
+        expandedForms[0] = source.get(0);
+        expandedForms[1] = bindingForms;
+
+        for (int i = 2; i < source.size(); i++)
+        {
+            SyntaxValue bodyStx = source.get(i);
+            bodyStx.addWrap(localWrap);
+            expandedForms[i] = bodyStx.prepare(eval, bodyEnv);
+        }
+
+        source = SyntaxSexp.make(source.getLocation(), expandedForms);
+        return source;
     }
 
 

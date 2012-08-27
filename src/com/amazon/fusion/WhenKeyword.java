@@ -38,7 +38,8 @@ final class WhenKeyword
 
         SyntaxSexp beginForm = BeginKeyword.makeSyntax(eval, expr, 2);
 
-        SyntaxSexp ifForm = SyntaxSexp.make(eval.makeKernelIdentifier("if"),
+        SyntaxSexp ifForm = SyntaxSexp.make(expr.getLocation(),
+                                            eval.makeKernelIdentifier("if"),
                                             conditionForm,
                                             beginForm,
                                             eval.makeKernelIdentifier("undef"));

@@ -17,19 +17,20 @@ final class DefineSyntaxKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp stx)
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), stx);
+        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
         check.arityExact(3);
 
         String keyword = check.requiredNonEmptySymbol("identifier", 1);
 
-        SyntaxValue valueStx = stx.get(2);
-        SyntaxValue expanded = valueStx.prepare(eval, env);
-        if (expanded != valueStx) stx.set(2, expanded);
+        SyntaxValue valueStx = source.get(2);
+        valueStx = valueStx.prepare(eval, env);
 
-        return stx;
+        source = SyntaxSexp.make(source.getLocation(),
+                                 source.get(0), source.get(1), valueStx);
+        return source;
     }
 
 

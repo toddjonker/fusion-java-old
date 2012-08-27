@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import java.util.ArrayList;
 
 final class SyntaxAppendProc
     extends Procedure
@@ -22,13 +21,7 @@ final class SyntaxAppendProc
         checkArityExact(2, args);
         SyntaxSequence head = checkSyntaxSequenceArg(0, args);
         SyntaxSequence tail = checkSyntaxSequenceArg(1, args);
-
-        ArrayList<SyntaxValue> children =
-            new ArrayList<SyntaxValue>(head.size() + tail.size());
-        children.addAll(head.myChildren);
-        children.addAll(tail.myChildren);
-
-        SyntaxSexp result = SyntaxSexp.make(/* location */ null, children);
+        SyntaxSequence result = head.makeAppended(tail);
         return result;
     }
 }

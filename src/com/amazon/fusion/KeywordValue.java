@@ -25,13 +25,16 @@ abstract class KeywordValue
         throws SyntaxFailure
     {
         int size = source.size();
+
+        SyntaxValue[] expandedChildren = new SyntaxValue[size];
+        expandedChildren[0] = source.get(0);
+
         for (int i = 1; i < size; i++)
         {
             SyntaxValue subform = source.get(i);
-            SyntaxValue expanded = subform.prepare(eval, env);
-            if (expanded != subform) source.set(i, expanded);
+            expandedChildren[i] = subform.prepare(eval, env);
         }
-        return source;
+        return SyntaxSexp.make(source.getLocation(), expandedChildren);
     }
 
 

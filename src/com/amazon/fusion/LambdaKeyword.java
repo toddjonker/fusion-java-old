@@ -21,14 +21,14 @@ final class LambdaKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp expr)
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         int bodyStart;
 
-        SyntaxValue maybeDoc = expr.get(2);
+        SyntaxValue maybeDoc = source.get(2);
         if (maybeDoc.getType() == SyntaxValue.Type.STRING
-            && expr.size() > 3)
+            && source.size() > 3)
         {
             bodyStart = 3;
         }
@@ -37,7 +37,7 @@ final class LambdaKeyword
             bodyStart = 2;
         }
 
-        String[] params = determineParams((SyntaxSexp) expr.get(1));
+        String[] params = determineParams((SyntaxSexp) source.get(1));
         int paramCount = params.length;
 
         Environment bodyEnv;
@@ -55,16 +55,24 @@ final class LambdaKeyword
         // local definitions that will be added to the wrap.
         SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
 
-        final int bodyEnd = expr.size();
-        for (int i = bodyStart; i < bodyEnd; i++)
-        {
-            SyntaxValue bodyForm = expr.get(i);
-            bodyForm.addWrap(localWrap);
+        final int bodyEnd = source.size();
+        SyntaxValue[] expandedChildren = new SyntaxValue[bodyEnd];
 
-            SyntaxValue expanded = bodyForm.prepare(eval, bodyEnv);
-            if (expanded != bodyForm) expr.set(i, expanded);
+        for (int i = 0; i < bodyEnd; i++)
+        {
+            SyntaxValue bodyForm = source.get(i);
+
+            if (i >= bodyStart)
+            {
+                bodyForm.addWrap(localWrap);
+                bodyForm = bodyForm.prepare(eval, bodyEnv);
+            }
+
+            expandedChildren[i] = bodyForm;
         }
-        return expr;
+
+        source = SyntaxSexp.make(source.getLocation(), expandedChildren);
+        return source;
     }
 
 

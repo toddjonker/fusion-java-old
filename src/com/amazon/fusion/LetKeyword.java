@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import java.util.ArrayList;
+
 
 /**
  *
@@ -30,24 +32,53 @@ final class LetKeyword
      * {@code ((letrec ((f (lambda (v ...) b ...))) f) e ...)}
      */
     @Override
-    SyntaxValue expand(Evaluator eval, SyntaxSexp letExpr)
+    SyntaxValue expand(Evaluator eval, SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxSymbol loopName = checkForName(letExpr);
+        SyntaxSymbol loopName = checkForName(source);
         int bindingPos = (loopName == null ? 1 : 2);
 
-        final int letExprSize = letExpr.size();
+        final int letExprSize = source.size();
         if (letExprSize < bindingPos + 2)
         {
-            throw new SyntaxFailure(getEffectiveName(), "", letExpr);
+            throw new SyntaxFailure(getEffectiveName(), "", source);
         }
 
         SyntaxSequence bindingForms =
-            requiredSequence("sequence of bindings", bindingPos, letExpr);
+            requiredSequence("sequence of bindings", bindingPos, source);
+        int bindingCount = bindingForms.size();
 
-        SyntaxSexp result = SyntaxSexp.makeEmpty();
+        // Build the lambda's formal parameter list
+        ArrayList<SyntaxValue> subforms =
+            new ArrayList<SyntaxValue>(bindingCount);
+        for (int i = 0; i < bindingCount; i++)
+        {
+            SyntaxValue bindingForm = bindingForms.get(i);
+            SyntaxSexp binding =
+                requiredSexp("name/value binding", bindingForm);
+            SyntaxSymbol boundName =
+                requiredSymbol("name/value binding", 0, binding);
 
-        SyntaxSexp lambdaForm = SyntaxSexp.makeEmpty();
+            subforms.add(boundName);
+        }
+        SyntaxSexp formals = SyntaxSexp.make(null, subforms);
+
+
+        // Build the lambda
+        subforms = new ArrayList<SyntaxValue>();
+        subforms.add(eval.makeKernelIdentifier("lambda"));
+        subforms.add(formals);
+        for (int i = bindingPos + 1; i < letExprSize; i++)
+        {
+            SyntaxValue bodyForm = source.get(i);
+            subforms.add(bodyForm);
+        }
+        SyntaxSexp lambdaForm = SyntaxSexp.make(null, subforms);
+
+
+        // Build the outer result expression
+        subforms = new ArrayList<SyntaxValue>();
+
         if (loopName != null)
         {
             SyntaxSexp binding  = SyntaxSexp.make(loopName, lambdaForm);
@@ -56,36 +87,24 @@ final class LetKeyword
                 SyntaxSexp.make(eval.makeKernelIdentifier("letrec"),
                                 bindings,
                                 loopName);
-            result.add(letrec);
+            subforms.add(letrec);
         }
         else
         {
-            result.add(lambdaForm);
-        }
-
-        lambdaForm.add(eval.makeKernelIdentifier("lambda"));
-        SyntaxSexp formals = SyntaxSexp.makeEmpty();
-        lambdaForm.add(formals);
-        for (int i = bindingPos + 1; i < letExprSize; i++)
-        {
-            SyntaxValue bodyForm = letExpr.get(i);
-            lambdaForm.add(bodyForm);
+            subforms.add(lambdaForm);
         }
 
         for (int i = 0; i < bindingForms.size(); i++)
         {
-            SyntaxValue bindingForm = bindingForms.get(i);
-            SyntaxSexp binding =
-                requiredSexp("name/value binding", bindingForm);
-            SyntaxSymbol boundName =
-                requiredSymbol("name/value binding", 0, binding);
+            // Already type-checked this above
+            SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
             SyntaxValue boundValue =
                 requiredForm("name/value binding", 1, binding);
 
-            formals.add(boundName);
-            result.add(boundValue);
+            subforms.add(boundValue);
         }
 
+        SyntaxSexp result = SyntaxSexp.make(source.getLocation(), subforms);
         return result;
     }
 
