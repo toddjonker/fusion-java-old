@@ -40,6 +40,21 @@ abstract class SyntaxSequence
     }
 
 
+    void pushAnyWraps()
+    {
+        if (myWraps != null)
+        {
+            if (myChildren != null)
+            {
+                for (SyntaxValue child : myChildren)
+                {
+                    child.addWraps(myWraps);
+                }
+            }
+            myWraps = null;
+        }
+    }
+
     @Override
     final boolean isNullValue()
     {
@@ -62,6 +77,7 @@ abstract class SyntaxSequence
 
     final SyntaxValue get(int index)
     {
+        pushAnyWraps();
         return myChildren.get(index);
     }
 

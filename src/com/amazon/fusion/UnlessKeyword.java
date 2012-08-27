@@ -22,12 +22,10 @@ final class UnlessKeyword
      * to
      * {@code (if c undef (begin b...))}
      *
-     * @param env
      * @param expr the input expression, including the keyword symbol.
-     * @return
      */
     @Override
-    SyntaxValue expand(SyntaxSexp expr)
+    SyntaxValue expand(Evaluator eval, SyntaxSexp expr)
         throws SyntaxFailure
     {
         int unlessExprSize = expr.size();
@@ -38,11 +36,11 @@ final class UnlessKeyword
 
         SyntaxValue conditionForm = expr.get(1);
 
-        SyntaxSexp beginForm = BeginKeyword.makeSyntax(expr, 2);
+        SyntaxSexp beginForm = BeginKeyword.makeSyntax(eval, expr, 2);
 
-        SyntaxSexp ifForm = SyntaxSexp.make(SyntaxSymbol.make("if"),
+        SyntaxSexp ifForm = SyntaxSexp.make(eval.makeKernelIdentifier("if"),
                                             conditionForm,
-                                            SyntaxSymbol.make("undef"),
+                                            eval.makeKernelIdentifier("undef"),
                                             beginForm);
         return ifForm;
     }

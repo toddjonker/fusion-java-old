@@ -56,13 +56,21 @@ final class Evaluator
         return (KernelModule) myDefaultRegistry.lookup(KernelModule.IDENTITY);
     }
 
+    /**
+     * Returns an identifier (a wrapped syntax symbol) that has the bindings
+     * of the {@link KernelModule} ({@code #%kernel}).
+     */
+    SyntaxSymbol makeKernelIdentifier(String symbol)
+    {
+        SyntaxSymbol sym = SyntaxSymbol.make(symbol);
+        sym.addWrap(new ModuleRenameWrap(findKernel()));
+        return sym;
+    }
 
     Namespace newModuleNamespace(ModuleRegistry registry)
         throws FusionException
     {
-        Namespace ns = new Namespace(registry);
-        ns.bind("module", findKernel().getModuleKeyword());
-        return ns;
+        return new Namespace(registry);
     }
 
 
@@ -283,6 +291,24 @@ final class Evaluator
 
 
     //========================================================================
+
+    SyntaxValue namespaceSyntaxIntroduce(SyntaxValue source, Namespace ns)
+    {
+        SyntaxWrap wrap = new EnvironmentRenameWrap(ns);
+        source.addWrap(wrap);
+        return source; // TODO should make copy to be compliant w/ Racket
+    }
+
+    /**
+     * Equivalent to Racket's {@code eval} (but incomplete at the moment.)
+     */
+    FusionValue prepareAndEvalTopLevelForm(SyntaxValue source, Namespace ns)
+        throws FusionException
+    {
+        source = namespaceSyntaxIntroduce(source, ns);
+        source = source.prepare(this, ns);
+        return eval(ns, source);
+    }
 
 
     FusionValue prepareAndEval(Environment env, SyntaxValue source)

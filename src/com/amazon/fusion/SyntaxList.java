@@ -55,6 +55,8 @@ final class SyntaxList
     SyntaxValue prepare(Evaluator eval, Environment env)
         throws SyntaxFailure
     {
+        pushAnyWraps();
+
         int len = size();
         for (int i = 0; i < len; i++)
         {

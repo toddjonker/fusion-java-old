@@ -41,10 +41,12 @@ final class LetrecKeyword
         FusionValue[] boundValues = new FusionValue[numBindings];
         Environment bodyEnv =
             new LocalEnvironment(env, boundNames, boundValues);
+        SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
 
         for (int i = 0; i < numBindings; i++)
         {
             SyntaxValue subform = boundExprs[i];
+            subform.addWrap(localWrap);
             SyntaxValue expanded = subform.prepare(eval, bodyEnv);
             if (expanded != subform) boundExprs[i] = expanded;
         }
@@ -52,6 +54,7 @@ final class LetrecKeyword
         for (int i = 2; i < letrecExprSize; i++)
         {
             SyntaxValue subform = expr.get(i);
+            subform.addWrap(localWrap);
             SyntaxValue expanded = subform.prepare(eval, bodyEnv);
             if (expanded != subform) boundExprs[i] = expanded;
         }

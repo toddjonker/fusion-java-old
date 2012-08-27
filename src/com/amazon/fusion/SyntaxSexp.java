@@ -78,6 +78,8 @@ final class SyntaxSexp
     SyntaxValue prepare(Evaluator eval, Environment env)
         throws SyntaxFailure
     {
+        pushAnyWraps();
+
         int len = size();
         if (len == 0)
         {
@@ -88,20 +90,22 @@ final class SyntaxSexp
         SyntaxValue first = myChildren.get(0);
         if (first instanceof SyntaxSymbol)
         {
-            SyntaxSymbol maybeKeyword = (SyntaxSymbol) first; // TODO remove
-            SyntaxValue expanded = maybeKeyword.prepare(eval, env);
-            if (expanded != maybeKeyword) myChildren.set(0, expanded);
+            SyntaxValue expanded = first.prepare(eval, env);
+            if (expanded != first) myChildren.set(0, expanded);
 
             // Expansion could produce something else
             if (expanded instanceof SyntaxSymbol)
             {
-                String text = ((SyntaxSymbol)expanded).stringValue();
-                // TODO what if the binding is to a different namespace?
-                FusionValue resolved = env.lookup(text);
+                Environment.Binding binding =
+                    ((SyntaxSymbol) expanded).getBinding();
+                FusionValue resolved = binding.lookup(env);
                 if (resolved instanceof KeywordValue)
                 {
                     // We found a static top-level keyword binding!
-                    return ((KeywordValue)resolved).prepare(eval, env, this);
+                    // Continue the preparation process.
+                    expanded =
+                        ((KeywordValue)resolved).prepare(eval, env, this);
+                    return expanded;
                 }
             }
 
@@ -130,19 +134,21 @@ final class SyntaxSexp
             throw new SyntaxFailure(null, "not a valid syntactic form", this);
         }
 
-        SyntaxValue first = get(0);
+        SyntaxValue first = get(0); // calls pushAnyWraps()
         if (first instanceof SyntaxSymbol)
         {
             SyntaxSymbol maybeKeyword = (SyntaxSymbol) first;
             SyntaxValue prepared = maybeKeyword.prepare(eval, env);
             // Make sure we don't have to structurally change this sexp
             assert prepared == maybeKeyword;
-            if (stops.get(maybeKeyword.getBinding()) != null)
+
+            Environment.Binding binding = maybeKeyword.getBinding();
+            if (stops.get(binding) != null)
             {
                 return this;
             }
 
-            FusionValue resolved = env.lookup(maybeKeyword.stringValue());
+            FusionValue resolved = binding.lookup(env);
             if (resolved instanceof MacroTransformer)
             {
                 // We found a static top-level keyword binding!
@@ -156,6 +162,7 @@ final class SyntaxSexp
                 }
                 return expanded;
             }
+            // else not a macro, so just stop here.
         }
 
         return this;

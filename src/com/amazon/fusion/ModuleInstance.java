@@ -79,6 +79,21 @@ class ModuleInstance
     }
 
 
+    Environment.Binding resolveProvidedBinding(String name)
+    {
+        if (myProvidedNames == null) return myNamespace.resolve(name);
+
+        for (String n : myProvidedNames)  // TODO inefficient algorithm
+        {
+            if (n.equals(name))
+            {
+                return myNamespace.resolve(name);
+            }
+        }
+
+        return null;
+    }
+
     //========================================================================
 
 

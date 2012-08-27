@@ -76,7 +76,7 @@ final class StandardRuntime
         while (source.next() != null)
         {
             SyntaxValue sourceExpr = Syntax.read(source);
-            result = myEvaluator.prepareAndEval(myNamespace, sourceExpr);
+            result = myEvaluator.prepareAndEvalTopLevelForm(sourceExpr, myNamespace);
         }
 
         return result;

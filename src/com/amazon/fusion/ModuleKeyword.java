@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static java.lang.Boolean.TRUE;
 import com.amazon.fusion.Environment.Binding;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -17,6 +18,7 @@ final class ModuleKeyword
     private final ModuleNameResolver myModuleNameResolver;
     private final Binding myDefineBinding;
     private final Binding myDefineSyntaxBinding;
+    private final Binding myUseSyntaxBinding;
     private final IdentityHashMap<Binding, Object> myPartialExpansionStops;
 
     ModuleKeyword(ModuleNameResolver moduleNameResolver,
@@ -29,12 +31,14 @@ final class ModuleKeyword
 
         myCurrentModuleDeclareName = currentModuleDeclareName;
         myModuleNameResolver = moduleNameResolver;
-        myDefineBinding = kernelNamespace.resolve("define");
+        myDefineBinding       = kernelNamespace.resolve("define");
         myDefineSyntaxBinding = kernelNamespace.resolve("define_syntax");
+        myUseSyntaxBinding    = kernelNamespace.resolve("use");
 
         myPartialExpansionStops = new IdentityHashMap<Binding, Object>();
-        myPartialExpansionStops.put(myDefineBinding, Boolean.TRUE);
-        myPartialExpansionStops.put(myDefineSyntaxBinding, Boolean.TRUE);
+        myPartialExpansionStops.put(myDefineBinding,       TRUE);
+        myPartialExpansionStops.put(myDefineSyntaxBinding, TRUE);
+        myPartialExpansionStops.put(myUseSyntaxBinding,    TRUE);
     }
 
 
@@ -53,14 +57,20 @@ final class ModuleKeyword
         SyntaxValue initialBindingsStx =
             check.requiredForm("initial module path", 2);
 
-        Namespace outsideNamespace = envOutsideModule.namespace();
-        Namespace moduleNamespace = eval.newEmptyNamespace(outsideNamespace);
+        // The new namespace shares the registry of current-namespace
+        Namespace moduleNamespace =
+            eval.newEmptyNamespace(envOutsideModule.namespace());
 
+        SyntaxWrap moduleWrap = new EnvironmentRenameWrap(moduleNamespace);
+
+        SyntaxWrap initialWrap;
         try
         {
             ModuleIdentity initialBindingsId =
                 myModuleNameResolver.resolve(eval, initialBindingsStx);
-            moduleNamespace.use(initialBindingsId);
+            ModuleInstance initial =
+                moduleNamespace.getRegistry().lookup(initialBindingsId);
+            initialWrap = new ModuleRenameWrap(initial);
         }
         catch (FusionException e)
         {
@@ -78,6 +88,9 @@ final class ModuleKeyword
         for (int i = 3; i < source.size(); i++)
         {
             SyntaxValue form = source.get(i);
+            form.addWrap(initialWrap);
+            form.addWrap(moduleWrap);
+
             SyntaxSexp provide = formIsProvide(form);
             if (provide != null)
             {
@@ -96,14 +109,12 @@ final class ModuleKeyword
                         SyntaxSexp sexp = (SyntaxSexp)expanded;
                         Binding binding = firstBinding(sexp);
 
-                        // TODO if 'use' then do it now!
-
                         if (binding == myDefineBinding)
                         {
                             String name =
                                 DefineKeyword.boundName(eval, moduleNamespace,
                                                         sexp);
-                            moduleNamespace.bind(name, UNDEF);
+                            moduleNamespace.predefine(name);
                         }
                         else if (binding == myDefineSyntaxBinding)
                         {
@@ -115,6 +126,23 @@ final class ModuleKeyword
                             {
                                 String message = e.getMessage();
                                 throw new SyntaxFailure("define_syntax",
+                                                        message, form);
+                            }
+                            // TODO shouldn't need to keep this for later,
+                            // but we throw away all this work at the moment
+                            // and do it all again during invoke()
+//                          expanded = null;
+                        }
+                        else if (binding == myUseSyntaxBinding)
+                        {
+                            try
+                            {
+                                eval.prepareAndEval(moduleNamespace, expanded);
+                            }
+                            catch (FusionException e)
+                            {
+                                String message = e.getMessage();
+                                throw new SyntaxFailure("use",
                                                         message, form);
                             }
                             // TODO shouldn't need to keep this for later,

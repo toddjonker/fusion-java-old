@@ -30,7 +30,7 @@ final class LetKeyword
      * {@code ((letrec ((f (lambda (v ...) b ...))) f) e ...)}
      */
     @Override
-    SyntaxValue expand(SyntaxSexp letExpr)
+    SyntaxValue expand(Evaluator eval, SyntaxSexp letExpr)
         throws SyntaxFailure
     {
         SyntaxSymbol loopName = checkForName(letExpr);
@@ -52,9 +52,10 @@ final class LetKeyword
         {
             SyntaxSexp binding  = SyntaxSexp.make(loopName, lambdaForm);
             SyntaxSexp bindings = SyntaxSexp.make(binding);
-            SyntaxSexp letrec   = SyntaxSexp.make(SyntaxSymbol.make("letrec"),
-                                                  bindings,
-                                                  loopName);
+            SyntaxSexp letrec   =
+                SyntaxSexp.make(eval.makeKernelIdentifier("letrec"),
+                                bindings,
+                                loopName);
             result.add(letrec);
         }
         else
@@ -62,7 +63,7 @@ final class LetKeyword
             result.add(lambdaForm);
         }
 
-        lambdaForm.add(SyntaxSymbol.make("lambda"));
+        lambdaForm.add(eval.makeKernelIdentifier("lambda"));
         SyntaxSexp formals = SyntaxSexp.makeEmpty();
         lambdaForm.add(formals);
         for (int i = bindingPos + 1; i < letExprSize; i++)

@@ -1,0 +1,19 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+// Tests referential transparency through macro expansion.
+
+(use reftrans1)
+(use reftrans2)
+(use check)
+
+(check_equal one 1 "")
+(check_equal two 2 "")
+
+(define lambda null)
+(define let null)
+
+(check_equal one 1 "")
+(check_equal two 2 "")
+
+
+"PASSED" // Helpful output if you run this stand-alone

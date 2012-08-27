@@ -15,21 +15,19 @@ abstract class MacroValue
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp stx)
+    final SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp stx)
         throws SyntaxFailure
     {
-        SyntaxValue expanded = expand(stx);
+        SyntaxValue expanded = expand(eval, stx);
         return expanded.prepare(eval, env);
     }
 
     /**
      * Performs a single "level" of macro expansion.
      *
-     * @param env
      * @param expr the input expression, including the keyword symbol.
-     * @return
      */
-    abstract SyntaxValue expand(SyntaxSexp expr)
+    abstract SyntaxValue expand(Evaluator eval, SyntaxSexp expr)
         throws SyntaxFailure;
 
 

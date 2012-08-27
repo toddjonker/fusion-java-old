@@ -43,21 +43,39 @@ final class SyntaxSymbol
         return myBinding;
     }
 
+    /** Expand-time binding resolution. */
+    Environment.Binding resolve()
+    {
+        if (myWraps == null) return null;
+
+        for (SyntaxWrap w : myWraps)
+        {
+            Environment.Binding resolution = w.resolve(myText);
+            if (resolution != null) return resolution;
+        }
+        return null;
+    }
 
     @Override
     SyntaxValue prepare(Evaluator eval, Environment env)
         throws SyntaxFailure
     {
-        if (myText == null)
+        if (myBinding == null)  // Otherwise we've already been prepared
         {
-            throw new SyntaxFailure(null, "null.symbol is not an expression",
-                                    this);
-        }
+            if (myText == null)
+            {
+                throw new SyntaxFailure(null,
+                                        "null.symbol is not an expression",
+                                        this);
+            }
 
-        myBinding = env.resolve(myText);
-        if (myBinding == null)
-        {
-            throw new UnboundIdentifierFailure(myText, this);
+            myBinding = resolve();
+            if (myBinding == null)
+            {
+                throw new UnboundIdentifierFailure(myText, this);
+            }
+
+            myWraps = null;
         }
 
         return this;
@@ -76,9 +94,8 @@ final class SyntaxSymbol
         throws FusionException
     {
         assert myBinding != null;
-        // TODO use the binding
-        FusionValue result = env.lookup(myText);
-        assert result != null;
+        FusionValue result = myBinding.lookup(env);
+        assert result != null : "No value for " + myText;
         return result;
     }
 

@@ -53,10 +53,14 @@ final class ForListKeyword
             Environment bodyEnv =
                 new LocalEnvironment(env, boundNames, boundValues);
 
+            SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
+
             // Prepare the body.
             for (int i = 2; i < forStx.size(); i++)
             {
                 SyntaxValue bodyStx = forStx.get(i);
+                bodyStx.addWrap(localWrap);
+
                 SyntaxValue expanded = bodyStx.prepare(eval, bodyEnv);
                 if (expanded != bodyStx) forStx.set(i, expanded);
             }

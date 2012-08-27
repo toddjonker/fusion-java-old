@@ -34,14 +34,22 @@ final class LocalEnvironment
 
 
     @Override
-    public Binding resolve(String name)
+    public Binding resolve(final String name)
     {
         final int paramCount = myNames.length;
         for (int i = 0; i < paramCount; i++)
         {
             if (name.equals(myNames[i]))
             {
-                return new Binding(){};
+                return new Binding()
+                {
+                    @Override
+                    public FusionValue lookup(Environment env)
+                    {
+                        // TODO Auto-generated method stub
+                        return env.lookup(name);
+                    }
+                };
             }
         }
 

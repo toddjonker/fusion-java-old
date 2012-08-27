@@ -156,6 +156,7 @@ final class SyntaxStruct
                 if (value instanceof SyntaxValue)
                 {
                     SyntaxValue subform = (SyntaxValue) value;
+                    if (myWraps != null) subform.addWraps(myWraps);
                     SyntaxValue expanded = subform.prepare(eval, env);
                     if (expanded != subform) entry.setValue(expanded);
                 }
@@ -165,11 +166,13 @@ final class SyntaxStruct
                     for (int i = 0; i < children.length; i++)
                     {
                         SyntaxValue subform = children[i];
+                        if (myWraps != null) subform.addWraps(myWraps);
                         SyntaxValue expanded = subform.prepare(eval, env);
                         if (expanded != subform) children[i] = subform;
                     }
                 }
             }
+            myWraps = null;
         }
         return this;
     }

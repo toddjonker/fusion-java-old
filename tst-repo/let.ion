@@ -1,0 +1,3 @@
+(module let 'fusion/base'
+  (provide define let)
+)

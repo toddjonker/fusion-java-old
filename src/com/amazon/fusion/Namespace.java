@@ -14,7 +14,30 @@ class Namespace
 {
     class NsBinding implements Binding
     {
+        final String myName;
         FusionValue myValue;
+
+        private NsBinding(String name) { myName = name; }
+
+        @Override
+        public FusionValue lookup(Environment env)
+        {
+            if (myValue == null) // var had no value at compile-time
+            {
+                // This should only happen for references to top-level
+                // definitions from within the same module.
+                // FIXME this is not at all right
+                // TODO assert that the NS we get here is the same we expect
+                return env.namespace().lookup(myName);
+            }
+            return myValue;
+        }
+
+        @Override
+        public String toString()
+        {
+            return "{{NsBinding " + myName + " = " + myValue + "}}";
+        }
     }
 
     private final ModuleRegistry myRegistry;
@@ -42,13 +65,35 @@ class Namespace
     //========================================================================
 
 
-    public void bind(String name, FusionValue value)
+    /**
+     * Creates a binding, but no value, for a name.
+     * Used during preparation phase, before evaluating the right-hand side.
+     */
+    public void predefine(String name)
     {
-        value.inferName(name);
         NsBinding binding = myBindings.get(name);
         if (binding == null)
         {
-            binding = new NsBinding();
+            binding = new NsBinding(name);
+            myBindings.put(name, binding);
+        }
+    }
+
+
+    /**
+     * Creates or updates a namespace-level binding.
+     * Allows rebinding of existing names!
+     *
+     * @param value must not be null
+     */
+    public void bind(String name, FusionValue value)
+    {
+        value.inferName(name);
+
+        NsBinding binding = myBindings.get(name);
+        if (binding == null)
+        {
+            binding = new NsBinding(name);
             binding.myValue = value;
             myBindings.put(name, binding);
         }

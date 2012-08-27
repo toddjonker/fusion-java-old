@@ -51,10 +51,16 @@ final class LambdaKeyword
                 new LocalEnvironment(env, params, new FusionValue[paramCount]);
         }
 
+        // We create a wrap even if there's no params, because there may be
+        // local definitions that will be added to the wrap.
+        SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
+
         final int bodyEnd = expr.size();
         for (int i = bodyStart; i < bodyEnd; i++)
         {
             SyntaxValue bodyForm = expr.get(i);
+            bodyForm.addWrap(localWrap);
+
             SyntaxValue expanded = bodyForm.prepare(eval, bodyEnv);
             if (expanded != bodyForm) expr.set(i, expanded);
         }

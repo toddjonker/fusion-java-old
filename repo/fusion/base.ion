@@ -8,12 +8,8 @@
 
   (define_syntax and           (java_new "com.amazon.fusion.AndKeyword"))
   (define_syntax assert        (java_new "com.amazon.fusion.AssertKeyword"))
-  (define_syntax begin         (java_new "com.amazon.fusion.BeginKeyword"))
   (define_syntax for_list      (java_new "com.amazon.fusion.ForListKeyword"))
-  (define_syntax if            (java_new "com.amazon.fusion.IfKeyword"))
-  (define_syntax lambda        (java_new "com.amazon.fusion.LambdaKeyword"))
   (define_syntax let           (java_new "com.amazon.fusion.LetKeyword"))
-  (define_syntax letrec        (java_new "com.amazon.fusion.LetrecKeyword"))
   (define_syntax list_bindings (java_new "com.amazon.fusion.ListBindingsKeyword"))
   (define_syntax or            (java_new "com.amazon.fusion.OrKeyword"))
   (define_syntax parameterize  (java_new "com.amazon.fusion.ParameterizeKeyword"))

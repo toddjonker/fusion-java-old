@@ -79,7 +79,7 @@ final class LoadHandler
                 {
                     result = null;  // Don't hold onto garbage
                     SyntaxValue fileExpr = Syntax.read(reader);
-                    result = eval.prepareAndEval(namespace, fileExpr);
+                    result = eval.prepareAndEvalTopLevelForm(fileExpr, namespace);
                     // TODO tail call handling
                 }
 
@@ -159,6 +159,17 @@ final class LoadHandler
         throw new FusionException(message);
     }
 
+    private SyntaxSexp wrapModuleKeywordWithKernalBindings(Evaluator eval,
+                                                           SyntaxSexp moduleStx)
+    {
+        // We already verified this type-safety
+        SyntaxSymbol moduleSym = (SyntaxSymbol) moduleStx.get(0);
+
+        KernelModule kernel = eval.findKernel();
+        moduleSym.addWrap(new ModuleRenameWrap(kernel));
+
+        return moduleStx;
+    }
 
     /**
      *
@@ -168,7 +179,10 @@ final class LoadHandler
     {
         try
         {
-            SyntaxValue moduleDeclaration = readModuleDeclaration(eval, id);
+            SyntaxSexp moduleDeclaration = readModuleDeclaration(eval, id);
+
+            moduleDeclaration =
+                wrapModuleKeywordWithKernalBindings(eval, moduleDeclaration);
 
             Evaluator bodyEval = eval;
             String dirPath = id.parentDirectory();
@@ -184,7 +198,7 @@ final class LoadHandler
 
             ModuleRegistry reg = eval.getModuleRegistry();
             Namespace namespace = eval.newModuleNamespace(reg);
-            FusionValue result =
+            FusionValue result = // TODO use evalTopLevel ?
                 bodyEval.prepareAndEval(namespace, moduleDeclaration);
             // TODO tail call handling
             return (ModuleInstance) result;

@@ -35,7 +35,7 @@ final class DefineKeyword
         if (ns.lookup(name.stringValue()) == null)
         {
             // If at module top-level, this has already been done.
-            ns.bind(name.stringValue(), UNDEF);
+            ns.predefine(name.stringValue());
         }
 
         SyntaxValue expanded = valueStx.prepare(eval, env);

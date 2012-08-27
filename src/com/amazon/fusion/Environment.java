@@ -10,7 +10,9 @@ import java.util.Collection;
  */
 interface Environment
 {
-    interface Binding {}
+    interface Binding {
+        FusionValue lookup(Environment store);
+    }
 
 
     Namespace namespace();

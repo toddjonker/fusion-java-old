@@ -6,6 +6,8 @@ import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.system.IonTextWriterBuilder;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * Models Fusion source code, using a custom DOM implementation of Ion.
@@ -24,6 +26,14 @@ abstract class SyntaxValue
     private final String[] myAnnotations;
     private final SourceLocation mySrcLoc;
 
+    /**
+     * The sequence of wraps around this value.
+     * Wraps only affect symbols; a wrapped symbol is an identifier.
+     * If this is a container, any wraps are just being held here lazily,
+     * waiting to be pushed down to all children (prepended onto their existing
+     * wraps) once any are requested.
+     */
+    LinkedList<SyntaxWrap> myWraps;
 
     /**
      *
@@ -55,6 +65,36 @@ abstract class SyntaxValue
     }
 
     abstract Type getType();
+
+
+    void addWrap(SyntaxWrap wrap)
+    {
+        if (myWraps == null) {
+            myWraps = new LinkedList<SyntaxWrap>();
+        }
+        myWraps.addFirst(wrap);
+    }
+
+    /**
+     * Prepends a sequence of wraps onto our existing ones.
+     * It is assumed that the given list will not be modified later and can
+     * therefore be shared.
+     */
+    void addWraps(LinkedList<SyntaxWrap> wraps)
+    {
+        if (myWraps == null)
+        {
+            myWraps = wraps;
+        }
+        else
+        {
+            Iterator<SyntaxWrap> i = wraps.descendingIterator();
+            while (i.hasNext())
+            {
+                myWraps.addFirst(i.next());
+            }
+        }
+    }
 
 
     SyntaxValue prepare(Evaluator eval, Environment env)

@@ -8,10 +8,11 @@ package com.amazon.fusion;
 final class BeginKeyword
     extends KeywordValue
 {
-    static SyntaxSexp makeSyntax(SyntaxSequence seq, int from)
+    static SyntaxSexp makeSyntax(Evaluator eval, SyntaxSequence seq, int from)
     {
+        SyntaxValue begin = eval.makeKernelIdentifier("begin");
         int size = seq.size();
-        SyntaxSexp beginForm = SyntaxSexp.make(SyntaxSymbol.make("begin"));
+        SyntaxSexp beginForm = SyntaxSexp.make(begin);
         for (int i = from; i < size; i++)
         {
             SyntaxValue bodyForm = seq.get(i);

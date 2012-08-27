@@ -56,12 +56,16 @@ final class KernelModule
         EvalFileKeyword evalFile =
             new EvalFileKeyword(myLoadHandler);
 
+        ns.bind("begin", new BeginKeyword());    // Needed by hard-coded macro
         ns.bind("current_directory", currentDirectory);
+        ns.bind("empty_stream", FusionValue.EMPTY_STREAM);
         ns.bind("eval_file", evalFile);
+        ns.bind("if", new IfKeyword());          // Needed by hard-coded macro
         ns.bind("java_new", new JavaNewProc());
+        ns.bind("lambda", new LambdaKeyword());  // Needed by hard-coded macro
+        ns.bind("letrec", new LetrecKeyword());  // Needed by hard-coded macro
         ns.bind("module", myModuleKeyword);
         ns.bind("undef", FusionValue.UNDEF);
-        ns.bind("empty_stream", FusionValue.EMPTY_STREAM);
         ns.bind("use", myUseKeyword);
 
         for (IonType t : IonType.values())
