@@ -30,4 +30,27 @@
 (check_equal (x) 67 "D macro expansion")
 
 
+(define_syntax when2
+  (lambda (when_stx)
+
+    // Transforms:  (when C B ...)  -->  (if C (begin B ...) undef)
+
+    (if (= 1 (syntax_size when_stx))
+      (wrong_syntax when_stx "expected condition")
+      (quasisyntax
+        (if
+          (unsyntax (syntax_get when_stx 1))
+          (unsyntax (syntax_append (quasisyntax (begin))
+                                   (syntax_subseq when_stx 2)))
+          undef)))))
+
+
+(check_equal (when2 true)       undef "when 0")
+(check_equal (when2 true 1)     1 "when 1")
+(check_equal (when2 true 1 2)   2 "when 2")
+(check_equal (when2 true 1 2 3) 3 "when 3")
+
+(check_equal (when2 false 1 2 3) undef "when false")
+
+
 "PASSED" // Helpful output if you run this stand-alone

@@ -51,6 +51,14 @@ final class SyntaxSexp
         return seq;
     }
 
+    static SyntaxSexp make(SourceLocation loc,
+                           List<? extends SyntaxValue> children)
+    {
+        SyntaxSexp seq = new SyntaxSexp(EMPTY_STRING_ARRAY, loc);
+        seq.addAll(children);
+        return seq;
+    }
+
 
     @Override
     Type getType()

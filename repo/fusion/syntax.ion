@@ -1,9 +1,11 @@
 (module syntax (quote '#%kernel')
-  (provide define_syntax quasisyntax syntax_add syntax_get syntax_size wrong_syntax)
+  (provide define_syntax quasisyntax syntax_append syntax_get syntax_size
+    syntax_subseq wrong_syntax)
 
-  (define quasisyntax  (java_new "com.amazon.fusion.QuasiSyntaxKeyword"))
-  (define syntax_add   (java_new "com.amazon.fusion.SyntaxAddProc"))
-  (define syntax_get   (java_new "com.amazon.fusion.SyntaxGetProc"))
-  (define syntax_size  (java_new "com.amazon.fusion.SyntaxSizeProc"))
-  (define wrong_syntax (java_new "com.amazon.fusion.WrongSyntaxProc"))
+  (define quasisyntax   (java_new "com.amazon.fusion.QuasiSyntaxKeyword"))
+  (define syntax_append (java_new "com.amazon.fusion.SyntaxAppendProc"))
+  (define syntax_get    (java_new "com.amazon.fusion.SyntaxGetProc"))
+  (define syntax_size   (java_new "com.amazon.fusion.SyntaxSizeProc"))
+  (define syntax_subseq (java_new "com.amazon.fusion.SyntaxSubseqProc"))
+  (define wrong_syntax  (java_new "com.amazon.fusion.WrongSyntaxProc"))
 )
