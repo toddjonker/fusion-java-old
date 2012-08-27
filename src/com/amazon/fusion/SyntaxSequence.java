@@ -97,13 +97,23 @@ abstract class SyntaxSequence
     {
         ArrayList<SyntaxValue> children =
             new ArrayList<SyntaxValue>(this.size() + that.size());
-        if (this.myChildren != null) children.addAll(this.myChildren);
-        if (that.myChildren != null) children.addAll(that.myChildren);
+        if (this.myChildren != null)
+        {
+            this.pushAnyWraps();
+            children.addAll(this.myChildren);
+        }
+        if (that.myChildren != null)
+        {
+            that.pushAnyWraps();
+            children.addAll(that.myChildren);
+        }
+
         return makeSimilar(children);
     }
 
     SyntaxSequence makeSubseq(int from, int to)
     {
+        pushAnyWraps();
         List<SyntaxValue> children =
             (myChildren == null ? null : myChildren.subList(from, to));
         return makeSimilar(children);

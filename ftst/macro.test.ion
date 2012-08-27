@@ -30,6 +30,37 @@
 (check_equal (x) 67 "D macro expansion")
 
 
+//============================================================================
+// syntax_append
+
+(define_syntax join
+  (lambda (stx)
+    (syntax_append (syntax_get stx 1) (syntax_get stx 2))))
+
+(check_equal (let ((x 3)) (join (+ 10 x) (x))) 16 "")
+
+
+//============================================================================
+// syntax_subseq
+
+(define_syntax from1
+  (lambda (stx)
+    (syntax_subseq (syntax_get stx 1) 1)))
+
+(check_equal (from1 (ignored + 2 3)) 5 "")
+
+(define_syntax prepend_from1
+  (lambda (stx)
+    (syntax_append (quasisyntax (+ 1)) (syntax_subseq (syntax_get stx 1) 1))))
+
+// Test syntax_subseq with index over size
+(check_equal (prepend_from1 (2 3)) 4 "")
+(check_equal (prepend_from1 (2  )) 1 "")
+(check_equal (prepend_from1 (   )) 1 "")
+
+
+//============================================================================
+
 (define_syntax when2
   (lambda (when_stx)
 
