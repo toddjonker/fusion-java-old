@@ -1,0 +1,23 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+// Alternative syntaxes for lambda
+
+(module altlambda 'fusion/base'
+  (use 'fusion/syntax')
+
+  //  (| x ... | body ...)  ->  (lambda (x ...) body ...)
+
+  (provide |)
+  (define_syntax |
+    (lambda (stx)
+      (let loop ((parms (quasisyntax ()))
+                 (rest  (syntax_subseq stx 1)))
+        (if (free_identifier_equal (syntax_get rest 0) (quote_syntax |))
+            (let ((body (syntax_subseq rest 1)))
+              (quasisyntax
+                (lambda (unsyntax parms)
+                  (unsyntax (syntax_cons begin body)))))
+            (loop
+              (syntax_append parms (quasisyntax ((unsyntax (syntax_get rest 0)))))
+              (syntax_subseq rest 1))))))
+)

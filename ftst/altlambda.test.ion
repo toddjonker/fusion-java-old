@@ -1,0 +1,20 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(use 'fusion/experimental/altlambda')
+(use 'fusion/syntax')
+(use check)
+
+(define sub1
+  (|x| (- x 1)))
+(check_equal (sub1 2) 1 "1")
+
+(define_syntax dont_capture_pipe
+  (lambda (stx)
+    (let ((name (syntax_get stx 1))
+          (body (syntax_get stx 2)))
+      (quasisyntax
+        (| (unsyntax name) | (unsyntax body))))))
+(define pipearg
+  (let ((| "dummy"))  // Ensure a different binding for | than the global
+    (dont_capture_pipe | (+ | 2))))
+(check_equal (pipearg 0) 2 "2")
