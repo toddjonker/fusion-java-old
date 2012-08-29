@@ -2,6 +2,9 @@
 
 // Tests referential transparency through macro expansion.
 
+// Note that we're using the very limited 'let' language, which doesn't
+// export 'lambda'.  Yet we can still use 'let' which expands to use it.
+
 (module reftrans1 let
 
   // This tests that we can use 'let' where 'lambda' is not visible.
