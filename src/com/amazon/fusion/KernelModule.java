@@ -44,15 +44,16 @@ final class KernelModule
                                    currentDirectory,
                                    currentModuleDeclareName,
                                    builder.buildModuleRepositories());
+        myUseKeyword = new UseKeyword(resolver);
 
         // These must be bound before 'module' since we need the bindings
         // for the partial-expansion stop-list.
         ns.bind("define", new DefineKeyword());
         ns.bind("define_syntax", new DefineSyntaxKeyword());
+        ns.bind("use", myUseKeyword);
 
         myModuleKeyword =
             new ModuleKeyword(resolver, currentModuleDeclareName, ns);
-        myUseKeyword = new UseKeyword(resolver);
         EvalFileKeyword evalFile =
             new EvalFileKeyword(myLoadHandler);
 
@@ -66,7 +67,6 @@ final class KernelModule
         ns.bind("letrec", new LetrecKeyword());  // Needed by hard-coded macro
         ns.bind("module", myModuleKeyword);
         ns.bind("undef", FusionValue.UNDEF);
-        ns.bind("use", myUseKeyword);
 
         for (IonType t : IonType.values())
         {

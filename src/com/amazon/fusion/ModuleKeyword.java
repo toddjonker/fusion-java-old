@@ -31,16 +31,20 @@ final class ModuleKeyword
 
         myCurrentModuleDeclareName = currentModuleDeclareName;
         myModuleNameResolver = moduleNameResolver;
-        myDefineBinding       = kernelNamespace.resolve("define");
-        myDefineSyntaxBinding = kernelNamespace.resolve("define_syntax");
-        myUseSyntaxBinding    = kernelNamespace.resolve("use");
 
         myPartialExpansionStops = new IdentityHashMap<Binding, Object>();
-        myPartialExpansionStops.put(myDefineBinding,       TRUE);
-        myPartialExpansionStops.put(myDefineSyntaxBinding, TRUE);
-        myPartialExpansionStops.put(myUseSyntaxBinding,    TRUE);
+        myDefineBinding       = stopBinding(kernelNamespace, "define");
+        myDefineSyntaxBinding = stopBinding(kernelNamespace, "define_syntax");
+        myUseSyntaxBinding    = stopBinding(kernelNamespace, "use");
     }
 
+    private Binding stopBinding(Namespace kernel, String name)
+    {
+        Binding b = kernel.resolve(name);
+        assert b != null;
+        myPartialExpansionStops.put(b, TRUE);
+        return b;
+    }
 
     @Override
     SyntaxValue prepare(Evaluator eval,
