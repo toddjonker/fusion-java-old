@@ -68,7 +68,6 @@ class Repl
         myOut.println("\n\033[1;31mWelcome to Fusion!\033[m\n");
         myOut.println("Type...");
         myOut.println("  (exit)            to exit");
-        myOut.println("  (list_bindings)   to see available forms");
         myOut.println("  (help SOMETHING)  to see documentation; try '(help help)'!\n");
     }
 

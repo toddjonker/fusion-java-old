@@ -10,7 +10,6 @@
   (define_syntax assert        (java_new "com.amazon.fusion.AssertKeyword"))
   (define_syntax for_list      (java_new "com.amazon.fusion.ForListKeyword"))
   (define_syntax let           (java_new "com.amazon.fusion.LetKeyword"))
-  (define_syntax list_bindings (java_new "com.amazon.fusion.ListBindingsKeyword"))
   (define_syntax or            (java_new "com.amazon.fusion.OrKeyword"))
   (define_syntax parameterize  (java_new "com.amazon.fusion.ParameterizeKeyword"))
   (define_syntax quote         (java_new "com.amazon.fusion.QuoteKeyword"))
@@ -56,7 +55,7 @@ VALUE.
     current_directory define display
     eval_file exit for_each_field for_list
     help
-    if is_null is_undef lambda let letrec list_bindings
+    if is_null is_undef lambda let letrec
     make_parameter make_sexp module not or parameterize quote read remove
     size
     to_int to_string
