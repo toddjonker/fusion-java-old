@@ -3,9 +3,12 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
+
 import com.amazon.fusion.Environment.Binding;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Set;
 
 final class SyntaxSymbol
     extends SyntaxText
@@ -107,6 +110,15 @@ final class SyntaxSymbol
         return copy(newWraps);
     }
 
+
+    /**
+     * @return not null.
+     */
+    Set<Integer> computeMarks()
+    {
+        if (myWraps == null) return Collections.emptySet();
+        return myWraps.computeMarks();
+    }
 
 
     /** Not set until {@link #prepare}. */

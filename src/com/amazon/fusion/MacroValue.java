@@ -2,12 +2,16 @@
 
 package com.amazon.fusion;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Base class for Fusion macros, performing syntax expansion.
  */
 abstract class MacroValue
     extends KeywordValue
 {
+    private final AtomicInteger ourMarkCounter = new AtomicInteger();
+
     MacroValue(String bodyPattern, String doc)
     {
         super(bodyPattern, doc);
@@ -18,8 +22,13 @@ abstract class MacroValue
     final SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp stx)
         throws SyntaxFailure
     {
-        SyntaxValue expanded = expand(eval, stx);
-        return expanded.prepare(eval, env);
+        final int mark = ourMarkCounter.incrementAndGet();
+
+        stx = (SyntaxSexp) stx.addOrRemoveMark(mark);
+        stx = (SyntaxSexp) expand(eval, stx);
+        stx = (SyntaxSexp) stx.addOrRemoveMark(mark);
+
+        return stx.prepare(eval, env);
     }
 
     /**

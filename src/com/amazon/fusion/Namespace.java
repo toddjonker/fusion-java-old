@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 final class Namespace
     implements Environment
@@ -122,16 +123,22 @@ final class Namespace
     }
 
     /**
+     * @param marks not null.
+     *
      * @return null if identifier isn't bound here.
      */
-    NsBinding localSubstitute(Binding binding)
+    NsBinding localSubstitute(Binding binding, Set<Integer> marks)
     {
         for (NsBinding b : myBindings)
         {
             Binding resolvedBoundId = b.myIdentifier.resolve();
             if (resolvedBoundId.equals(binding))
             {
-                return b;
+                Set<Integer> boundMarks = b.myIdentifier.computeMarks();
+                if (marks.equals(boundMarks))
+                {
+                    return b;
+                }
             }
         }
 
@@ -139,9 +146,9 @@ final class Namespace
     }
 
     @Override
-    public Binding substitute(Binding binding)
+    public Binding substitute(Binding binding, Set<Integer> marks)
     {
-        Binding subst = localSubstitute(binding);
+        Binding subst = localSubstitute(binding, marks);
         if (subst == null) subst = binding;
         return subst;
     }
@@ -153,7 +160,8 @@ final class Namespace
     NsBinding localResolve(SyntaxSymbol identifier)
     {
         Binding resolvedRequestedId = identifier.resolve();
-        return localSubstitute(resolvedRequestedId);
+        Set<Integer> marks = identifier.computeMarks();
+        return localSubstitute(resolvedRequestedId, marks);
     }
 
 

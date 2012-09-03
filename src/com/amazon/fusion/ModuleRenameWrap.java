@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import com.amazon.fusion.Environment.Binding;
 import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Syntax wrap that adds all exported bindings from a specific module.
@@ -20,13 +21,15 @@ class ModuleRenameWrap
 
 
     @Override
-    Binding resolve(SyntaxSymbol identifier, Iterator<SyntaxWrap> moreWraps)
+    Binding resolve(SyntaxSymbol identifier,
+                    Iterator<SyntaxWrap> moreWraps,
+                    Set<Integer> returnMarks)
     {
         Binding b;
         if (moreWraps.hasNext())
         {
             SyntaxWrap nextWrap = moreWraps.next();
-            b = nextWrap.resolve(identifier, moreWraps);
+            b = nextWrap.resolve(identifier, moreWraps, returnMarks);
         }
         else
         {

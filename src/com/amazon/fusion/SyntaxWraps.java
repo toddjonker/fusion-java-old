@@ -3,7 +3,10 @@
 package com.amazon.fusion;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 class SyntaxWraps
 {
@@ -57,6 +60,7 @@ class SyntaxWraps
         return new SyntaxWraps(combined);
     }
 
+
     SyntaxWraps stripImmediateEnvWrap(Environment env)
     {
         int length = myWraps.length;
@@ -91,15 +95,47 @@ class SyntaxWraps
         return new SyntaxWraps(stripped);
     }
 
+
+    /**
+     * @return not null.
+     */
+    public Set<Integer> computeMarks()
+    {
+        Set<Integer> marks = null;
+
+        for (SyntaxWrap wrap : myWraps)
+        {
+            if (wrap instanceof MarkWrap)
+            {
+                int mark = ((MarkWrap)wrap).getMark();
+
+                if (marks == null)
+                {
+                    marks = new HashSet<Integer>();
+                    marks.add(mark);
+                }
+                else if (! marks.remove(mark))
+                {
+                    marks.add(mark);
+                }
+            }
+        }
+
+        if (marks == null) marks = Collections.emptySet();
+        return marks;
+    }
+
+
     /**
      * @return not null
      */
     Environment.Binding resolve(SyntaxSymbol ident)
     {
         Iterator<SyntaxWrap> i = Arrays.asList(myWraps).iterator();
+        Set<Integer> marks = new HashSet<Integer>();
 
         // We always have at least one wrap
         SyntaxWrap wrap = i.next();
-        return wrap.resolve(ident, i);
+        return wrap.resolve(ident, i, marks);
     }
 }

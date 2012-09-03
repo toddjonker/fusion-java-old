@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import java.util.Set;
+
 final class LocalEnvironment
     implements Environment
 {
@@ -86,14 +88,18 @@ final class LocalEnvironment
 
 
     @Override
-    public Binding substitute(Binding binding)
+    public Binding substitute(Binding binding, Set<Integer> marks)
     {
         for (LexicalBinding b : myBindings)
         {
             Binding resolvedBoundId = b.myIdentifier.resolve();
             if (resolvedBoundId.equals(binding))
             {
-                return b;
+                Set<Integer> boundMarks = b.myIdentifier.computeMarks();
+                if (marks.equals(boundMarks))
+                {
+                    return b;
+                }
             }
         }
         return binding;

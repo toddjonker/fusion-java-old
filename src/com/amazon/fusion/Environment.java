@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import java.util.Set;
+
 /**
  * Binds identifiers to {@link FusionValue}s.
  * Environments are generally arranged in a hierarchy of lexical scopes.
@@ -23,9 +25,11 @@ interface Environment
     /**
      * NOT RECURSIVE TO ENCLOSING ENVIRONMENTS!
      *
+     * @param marks not null.
+     *
      * @return given binding if not substituted here; not null.
      */
-    Binding substitute(Binding binding);
+    Binding substitute(Binding binding, Set<Integer> marks);
 
 
     /**

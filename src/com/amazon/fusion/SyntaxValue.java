@@ -105,6 +105,12 @@ abstract class SyntaxValue
     }
 
 
+    SyntaxValue addOrRemoveMark(int mark)
+    {
+        SyntaxWrap wrap = new MarkWrap(mark);
+        return addWrap(wrap);
+    }
+
     SyntaxValue prepare(Evaluator eval, Environment env)
         throws SyntaxFailure
     {

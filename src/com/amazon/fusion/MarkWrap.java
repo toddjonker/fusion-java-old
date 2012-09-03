@@ -7,22 +7,23 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * Syntax wrap that adds all bindings from a specific namespace.
+ * Syntax wrap holding marks applied by the macro expander.
  */
-class EnvironmentRenameWrap
+class MarkWrap
     extends SyntaxWrap
 {
-    private final Environment myEnvironment;
+    private final int myMark;
 
-    EnvironmentRenameWrap(Environment environment)
+    MarkWrap(int mark)
     {
-        myEnvironment = environment;
+        myMark = mark;
     }
 
-    Environment getEnvironment()
+    int getMark()
     {
-        return myEnvironment;
+        return myMark;
     }
+
 
     @Override
     Binding resolve(SyntaxSymbol identifier,
@@ -40,14 +41,18 @@ class EnvironmentRenameWrap
             b = new FreeBinding(identifier.stringValue());
         }
 
-        Binding subst = myEnvironment.substitute(b, returnMarks);
-        return subst;
+        if (! returnMarks.add(myMark))
+        {
+            returnMarks.remove(myMark);
+        }
+
+        return b;
     }
 
 
     @Override
     public String toString()
     {
-        return "/* Environment renames */";
+        return "{{mark " + myMark + "}}";
     }
 }

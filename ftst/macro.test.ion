@@ -80,8 +80,33 @@
 (check_equal (when2 true 1)     1 "when 1")
 (check_equal (when2 true 1 2)   2 "when 2")
 (check_equal (when2 true 1 2 3) 3 "when 3")
-
 (check_equal (when2 false 1 2 3) undef "when false")
+
+
+//============================================================================
+// Hygiene tests
+
+// Macro must not capture bindings from outside.
+
+(define_syntax dont_capture
+  (lambda (stx)
+    (quasisyntax
+      (let ((x 9))
+        (unsyntax (syntax_get stx 1))))))
+
+(check_equal (let ((x 3)) (dont_capture x)) 3 "macro capture")
+
+
+// Macro use must not capture bindings from inside the macro.
+
+(define_syntax or2 // 2-part or
+  (lambda (stx)
+    (let ((e1 (syntax_get stx 1))
+          (e2 (syntax_get stx 2)))
+      (quasisyntax
+        (let ((t (unsyntax e1))) (if t t (unsyntax e2)))))))
+
+(check_equal (let ((t true) (if false)) (or2 if t)) true "or2")
 
 
 "PASSED" // Helpful output if you run this stand-alone

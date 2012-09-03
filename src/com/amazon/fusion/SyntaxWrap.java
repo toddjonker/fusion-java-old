@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import com.amazon.fusion.Environment.Binding;
 import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Linked-list of lexical information wrapped around a {@link SyntaxValue}
@@ -12,8 +13,12 @@ import java.util.Iterator;
 abstract class SyntaxWrap
 {
     /**
+     * @param returnMarks <em>returns</em> the marks from this wrap and those
+     * deeper. Must be mutable and not null.
+     *
      * @return not null
      */
     abstract Binding resolve(SyntaxSymbol ident,
-                             Iterator<SyntaxWrap> moreWraps);
+                             Iterator<SyntaxWrap> moreWraps,
+                             Set<Integer> returnMarks);
 }
