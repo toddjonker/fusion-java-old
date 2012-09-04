@@ -31,9 +31,12 @@ abstract class Procedure
     final static String DOTDOTDOT = "...";
     final static String DOTDOTDOTPLUS = "...+";
 
-    final String[] myParams;
+    private final String[] myParams;
     private final String myDoc;
 
+    /**
+     * @param params are used purely for documentation
+     */
     Procedure(String doc, String... params)
     {
         assert doc == null || ! doc.endsWith("\n");
@@ -69,8 +72,7 @@ abstract class Procedure
                 SyntaxValue argumentExpr = expr.get(i + 1);
                 try
                 {
-                    FusionValue argumentValue = eval.eval(env, argumentExpr);
-                    args[i] = argumentValue;
+                    args[i] = eval.eval(env, argumentExpr);
                 }
                 catch (SyntaxFailure e)
                 {

@@ -13,12 +13,12 @@ final class DefineKeyword
     }
 
 
-    static String boundName(Evaluator eval, Environment env, SyntaxSexp stx)
+    static SyntaxSymbol boundIdentifier(Evaluator eval, Environment env,
+                                        SyntaxSexp stx)
         throws SyntaxFailure
     {
         // TODO error checking
-        SyntaxSymbol name = (SyntaxSymbol) stx.get(1);
-        return name.stringValue();
+        return (SyntaxSymbol) stx.get(1);
     }
 
 
@@ -28,21 +28,29 @@ final class DefineKeyword
     {
         SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
         check.arityExact(3);
-        SyntaxSymbol name = (SyntaxSymbol) source.get(1); // TODO type-check
-        SyntaxValue valueStx = source.get(2);
+        SyntaxSymbol identifier = (SyntaxSymbol) source.get(1); // TODO type-check
 
+        // We need to strip off the module-level wrap that's already been
+        // applied to the identifier. Otherwise we'll loop forever trying to
+        // resolve it! This is a bit of a hack, really.
+        //identifier = identifier.stripImmediateEnvWrap(env);
+        SyntaxSymbol stripped = identifier.stripImmediateEnvWrap(env);
+
+        // If at module top-level, this has already been done.
+        // TODO we should know the context where this is happening...
         Namespace ns = env.namespace();
-        if (ns.lookup(name.stringValue()) == null)
-        {
-            // If at module top-level, this has already been done.
-            // TODO we should know the context where this is happening...
-            ns.predefine(name.stringValue());
-        }
+        ns.predefine(stripped);
 
+        // Update the identifier with its binding.
+        // This is just a way to pass the binding instance through to the
+        // runtime stage so invoke() below can reuse it.
+        identifier = (SyntaxSymbol) identifier.prepare(eval, env);
+
+        SyntaxValue valueStx = source.get(2);
         valueStx = valueStx.prepare(eval, env);
 
         source = SyntaxSexp.make(source.getLocation(),
-                                 source.get(0), name, valueStx);
+                                 source.get(0), identifier, valueStx);
         return source;
     }
 
@@ -51,14 +59,13 @@ final class DefineKeyword
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxSymbol name = (SyntaxSymbol) stx.get(1);
         SyntaxValue valueStx = stx.get(2);
+        FusionValue value = eval.eval(env, valueStx);
 
-        FusionValue fusionValue = eval.eval(env, valueStx);
-
+        SyntaxSymbol identifier = (SyntaxSymbol) stx.get(1);
         Namespace ns = env.namespace();
-        ns.bind(name.stringValue(), fusionValue);
+        ns.bindPredefined(identifier, value);
 
-        return fusionValue;
+        return value;
     }
 }

@@ -6,8 +6,6 @@ import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.system.IonTextWriterBuilder;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 /**
  * Models Fusion source code, using a custom DOM implementation of Ion.
@@ -33,7 +31,7 @@ abstract class SyntaxValue
      * waiting to be pushed down to all children (prepended onto their existing
      * wraps) once any are requested.
      */
-    LinkedList<SyntaxWrap> myWraps;
+    SyntaxWraps myWraps;  // FIXME should be immutable
 
     /**
      *
@@ -49,8 +47,16 @@ abstract class SyntaxValue
         mySrcLoc = loc;
     }
 
+    SyntaxValue(String[] annotations, SourceLocation loc, SyntaxWraps wraps)
+    {
+        assert annotations != null : "annotations must not be null";
+        myAnnotations = annotations;
+        mySrcLoc = loc;
+        myWraps = wraps;
+    }
 
-    String[] getAnnotations()
+
+    final String[] getAnnotations()
     {
         return myAnnotations;
     }
@@ -67,20 +73,25 @@ abstract class SyntaxValue
     abstract Type getType();
 
 
-    void addWrap(SyntaxWrap wrap)
+    SyntaxValue addWrap(SyntaxWrap wrap)
     {
-        if (myWraps == null) {
-            myWraps = new LinkedList<SyntaxWrap>();
+        if (myWraps == null)
+        {
+            myWraps = SyntaxWraps.make(wrap);
         }
-        myWraps.addFirst(wrap);
+        else
+        {
+            myWraps = myWraps.addWrap(wrap);
+        }
+        return this;  // TODO fixme!
     }
 
     /**
-     * Prepends a sequence of wraps onto our existing ones.
+     * Prepends a sequence of wraps onto our existing wraps.
      * It is assumed that the given list will not be modified later and can
      * therefore be shared.
      */
-    void addWraps(LinkedList<SyntaxWrap> wraps)
+    SyntaxValue addWraps(SyntaxWraps wraps)
     {
         if (myWraps == null)
         {
@@ -88,12 +99,9 @@ abstract class SyntaxValue
         }
         else
         {
-            Iterator<SyntaxWrap> i = wraps.descendingIterator();
-            while (i.hasNext())
-            {
-                myWraps.addFirst(i.next());
-            }
+            myWraps = myWraps.addWraps(wraps);
         }
+        return this;  // TODO fixme!
     }
 
 

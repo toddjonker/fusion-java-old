@@ -162,12 +162,14 @@ final class LoadHandler
     private SyntaxSexp wrapModuleKeywordWithKernalBindings(Evaluator eval,
                                                            SyntaxSexp moduleStx)
     {
+        SyntaxValue[] children = moduleStx.extract();
+
         // We already verified this type-safety
-        SyntaxSymbol moduleSym = (SyntaxSymbol) moduleStx.get(0);
+        assert ((SyntaxSymbol) children[0]).stringValue().equals("module");
 
-        KernelModule kernel = eval.findKernel();
-        moduleSym.addWrap(new ModuleRenameWrap(kernel));
+        children[0] = eval.makeKernelIdentifier("module");
 
+        moduleStx = SyntaxSexp.make(moduleStx.getLocation(), children);
         return moduleStx;
     }
 

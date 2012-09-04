@@ -2,10 +2,14 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static java.lang.Boolean.TRUE;
 import com.amazon.fusion.Environment.Binding;
+import com.amazon.fusion.ModuleInstance.ModuleBinding;
+import com.amazon.fusion.Namespace.NsBinding;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
+import java.util.Map;
 
 /**
  * @see <a href="http://docs.racket-lang.org/reference/module.html">Racket
@@ -16,10 +20,6 @@ final class ModuleKeyword
 {
     private final DynamicParameter myCurrentModuleDeclareName;
     private final ModuleNameResolver myModuleNameResolver;
-    private final Binding myDefineBinding;
-    private final Binding myDefineSyntaxBinding;
-    private final Binding myUseSyntaxBinding;
-    private final IdentityHashMap<Binding, Object> myPartialExpansionStops;
 
     ModuleKeyword(ModuleNameResolver moduleNameResolver,
                   DynamicParameter currentModuleDeclareName,
@@ -31,20 +31,19 @@ final class ModuleKeyword
 
         myCurrentModuleDeclareName = currentModuleDeclareName;
         myModuleNameResolver = moduleNameResolver;
-
-        myPartialExpansionStops = new IdentityHashMap<Binding, Object>();
-        myDefineBinding       = stopBinding(kernelNamespace, "define");
-        myDefineSyntaxBinding = stopBinding(kernelNamespace, "define_syntax");
-        myUseSyntaxBinding    = stopBinding(kernelNamespace, "use");
     }
 
-    private Binding stopBinding(Namespace kernel, String name)
+
+    private Binding stopBinding(ModuleInstance kernel,
+                                Map<Binding, Object> stops,
+                                String name)
     {
-        Binding b = kernel.resolve(name);
+        Binding b = kernel.resolveProvidedName(name);
         assert b != null;
-        myPartialExpansionStops.put(b, TRUE);
+        stops.put(b, TRUE);
         return b;
     }
+
 
     @Override
     SyntaxValue prepare(Evaluator eval,
@@ -54,6 +53,15 @@ final class ModuleKeyword
     {
         SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
 
+        ModuleInstance kernel = eval.findKernel();
+
+        // TODO precompute this?
+        IdentityHashMap<Binding, Object> stops =
+            new IdentityHashMap<Binding, Object>();
+        Binding defineBinding       = stopBinding(kernel, stops, "define");
+        Binding defineSyntaxBinding = stopBinding(kernel, stops, "define_syntax");
+        Binding useSyntaxBinding    = stopBinding(kernel, stops, "use");
+
         SyntaxSymbol moduleNameSymbol = check.requiredSymbol("module name", 1);
         String declaredName = moduleNameSymbol.stringValue();
         // TODO check null/empty
@@ -61,20 +69,14 @@ final class ModuleKeyword
         SyntaxValue initialBindingsStx =
             check.requiredForm("initial module path", 2);
 
-        // The new namespace shares the registry of current-namespace
-        Namespace moduleNamespace =
-            eval.newEmptyNamespace(envOutsideModule.namespace());
+        ModuleRegistry registry = envOutsideModule.namespace().getRegistry();
 
-        SyntaxWrap moduleWrap = new EnvironmentRenameWrap(moduleNamespace);
-
-        SyntaxWrap initialWrap;
+        ModuleInstance language;
         try
         {
             ModuleIdentity initialBindingsId =
                 myModuleNameResolver.resolve(eval, initialBindingsStx);
-            ModuleInstance initial =
-                moduleNamespace.getRegistry().lookup(initialBindingsId);
-            initialWrap = new ModuleRenameWrap(initial);
+            language = registry.lookup(initialBindingsId);
         }
         catch (FusionException e)
         {
@@ -83,6 +85,8 @@ final class ModuleKeyword
             throw check.failure(message);
         }
 
+        // The new namespace shares the registry of current-namespace
+        Namespace moduleNamespace = new Namespace(registry, language);
 
         // Pass 1: locate definitions and install dummy bindings
 
@@ -92,8 +96,7 @@ final class ModuleKeyword
         for (int i = 3; i < source.size(); i++)
         {
             SyntaxValue form = source.get(i);
-            form.addWrap(initialWrap);
-            form.addWrap(moduleWrap);
+            form = moduleNamespace.syntaxIntroduce(form);
 
             SyntaxSexp provide = formIsProvide(form);
             if (provide != null)
@@ -107,20 +110,22 @@ final class ModuleKeyword
                 {
                     expanded =
                         ((SyntaxSexp)form).partialExpand(eval, moduleNamespace,
-                                                         myPartialExpansionStops);
+                                                         stops);
                     if (expanded instanceof SyntaxSexp)
                     {
                         SyntaxSexp sexp = (SyntaxSexp)expanded;
                         Binding binding = firstBinding(sexp);
 
-                        if (binding == myDefineBinding)
+                        if (binding == defineBinding)
                         {
-                            String name =
-                                DefineKeyword.boundName(eval, moduleNamespace,
-                                                        sexp);
-                            moduleNamespace.predefine(name);
+                            SyntaxSymbol identifier =
+                                DefineKeyword.boundIdentifier(eval,
+                                                              moduleNamespace,
+                                                              sexp);
+                            identifier = identifier.stripImmediateEnvWrap(moduleNamespace);
+                            moduleNamespace.predefine(identifier);
                         }
-                        else if (binding == myDefineSyntaxBinding)
+                        else if (binding == defineSyntaxBinding)
                         {
                             try
                             {
@@ -137,7 +142,7 @@ final class ModuleKeyword
                             // and do it all again during invoke()
 //                          expanded = null;
                         }
-                        else if (binding == myUseSyntaxBinding)
+                        else if (binding == useSyntaxBinding)
                         {
                             try
                             {
@@ -179,7 +184,11 @@ final class ModuleKeyword
             subforms.add(stx);
         }
 
-        subforms.addAll(provideForms);
+        for (SyntaxSexp stx : provideForms)
+        {
+            stx = prepareProvide(stx, moduleNamespace);
+            subforms.add(stx);
+        }
 
         SyntaxSexp result = SyntaxSexp.make(source.getLocation(), subforms);
         return result;
@@ -238,13 +247,12 @@ final class ModuleKeyword
             }
         }
 
-        String[] providedNames =
-            processProvides(provideForms, moduleNamespace);
+        SyntaxSymbol[] providedIdentifiers = providedSymbols(provideForms);
 
         String declaredName = ((SyntaxSymbol) expr.get(1)).stringValue();
         ModuleIdentity id = determineIdentity(eval, declaredName);
         ModuleInstance module =
-            new ModuleInstance(id, moduleNamespace, providedNames);
+            new ModuleInstance(id, moduleNamespace, providedIdentifiers);
         moduleNamespace.getRegistry().register(module);
         return module;
     }
@@ -265,6 +273,10 @@ final class ModuleKeyword
         }
         return id;
     }
+
+
+    //========================================================================
+
 
     private SyntaxSexp formIsProvide(SyntaxValue form)
     {
@@ -289,31 +301,65 @@ final class ModuleKeyword
      * @param moduleNamespace
      * @return
      */
-    private String[] processProvides(ArrayList<SyntaxSexp> provideForms,
-                                     Namespace moduleNamespace)
+    private SyntaxSexp prepareProvide(SyntaxSexp form,
+                                      Namespace moduleNamespace)
         throws SyntaxFailure
     {
-        ArrayList<String> names = new ArrayList<String>();
+        int size = form.size();
+        SyntaxChecker check = new SyntaxChecker("provide", form);
+        for (int i = 1; i < size; i++)
+        {
+            check.requiredNonEmptySymbol("bound identifier", i);
+
+            SyntaxSymbol identifier = (SyntaxSymbol) form.get(i);
+            String publicName = identifier.stringValue();
+
+            String freeName;
+            Binding b = identifier.resolve();
+            if (b instanceof NsBinding)
+            {
+                assert moduleNamespace == ((NsBinding)b).getNamespace();
+                freeName = ((NsBinding)b).getIdentifier().stringValue();
+            }
+            else
+            {
+                freeName = ((ModuleBinding)b).getName();
+            }
+
+            if (! publicName.equals(freeName))
+            {
+                String message =
+                    "cannot export binding since symbolic name " +
+                    printQuotedSymbol(publicName) +
+                    " differs from resolved name " +
+                    printQuotedSymbol(freeName);
+                throw check.failure(message);
+            }
+        }
+
+        return form;
+    }
+
+
+    /**
+     * @return not null.
+     */
+    private SyntaxSymbol[] providedSymbols(ArrayList<SyntaxSexp> provideForms)
+        throws SyntaxFailure
+    {
+        ArrayList<SyntaxSymbol> identifiers = new ArrayList<SyntaxSymbol>();
 
         for (SyntaxSexp form : provideForms)
         {
             int size = form.size();
-            SyntaxChecker check = new SyntaxChecker("provide", form);
             for (int i = 1; i < size; i++)
             {
-                String name =
-                    check.requiredNonEmptySymbol("bound identifier", i);
-
-                if (moduleNamespace.lookup(name) == null)
-                {
-                    throw check.failure("name is not bound: " + name);
-                }
-
-                names.add(name);
+                SyntaxSymbol identifier = (SyntaxSymbol) form.get(i);
+                identifiers.add(identifier);
             }
         }
 
-        return names.toArray(new String[names.size()]);
+        return identifiers.toArray(new SyntaxSymbol[identifiers.size()]);
     }
 
 }

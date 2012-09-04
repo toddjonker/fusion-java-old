@@ -4,11 +4,9 @@ package com.amazon.fusion;
 
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertSame;
+import com.amazon.fusion.Environment.Binding;
 import org.junit.Test;
 
-/**
- *
- */
 public class NamespaceTest
     extends CoreTestCase
 {
@@ -23,7 +21,8 @@ public class NamespaceTest
                 throws FusionException
             {
                 Namespace ns = eval.newBaseNamespace();
-                assertTrue(ns.lookup("module") instanceof ModuleKeyword);
+                Binding b = ns.resolve("module");
+                assertTrue(b.lookup(ns) instanceof ModuleKeyword);
 
                 ModuleRegistry reg = ns.getRegistry();
                 ModuleInstance kernel = reg.lookup(KernelModule.IDENTITY);

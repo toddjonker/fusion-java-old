@@ -2,51 +2,84 @@
 
 package com.amazon.fusion;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 
-/**
- *
- */
-class Namespace
+final class Namespace
     implements Environment
 {
-    class NsBinding implements Binding
+    final class NsBinding implements Binding
     {
-        final String myName;
-        FusionValue myValue;
+        private final SyntaxSymbol myIdentifier;
+        private final int myAddress;
 
-        private NsBinding(String name) { myName = name; }
+        private NsBinding(SyntaxSymbol identifier, int address)
+        {
+            assert
+                identifier == identifier.stripImmediateEnvWrap(Namespace.this);
+            myIdentifier = identifier;
+            myAddress = address;
+        }
+
+        Namespace getNamespace()
+        {
+            return Namespace.this;
+        }
+
+        SyntaxSymbol getIdentifier()
+        {
+            return myIdentifier;
+        }
 
         @Override
         public FusionValue lookup(Environment env)
         {
-            if (myValue == null) // var had no value at compile-time
-            {
-                // This should only happen for references to top-level
-                // definitions from within the same module.
-                // FIXME this is not at all right
-                // TODO assert that the NS we get here is the same we expect
-                return env.namespace().lookup(myName);
-            }
-            return myValue;
+            // Skip over any lexical environments and go straight to the top.
+            return env.namespace().lookup(this);
+        }
+
+
+        @Override
+        public boolean equals(Object other)
+        {
+            return this == other;
         }
 
         @Override
         public String toString()
         {
-            return "{{NsBinding " + myName + " = " + myValue + "}}";
+            return "{{NsBinding " + myIdentifier + "}}";
         }
     }
 
     private final ModuleRegistry myRegistry;
-    private final Map<String,NsBinding> myBindings =
-        new HashMap<String,NsBinding>();
+    private SyntaxWraps myWraps;
+    private final ArrayList<NsBinding> myBindings =
+        new ArrayList<NsBinding>();
+    private final ArrayList<FusionValue> myValues =
+        new ArrayList<FusionValue>();
 
     Namespace(ModuleRegistry registry)
     {
         myRegistry = registry;
+
+        SyntaxWrap wrap = new EnvironmentRenameWrap(this);
+        SyntaxWraps wraps = SyntaxWraps.make(wrap);
+
+        myWraps = wraps;
+    }
+
+    Namespace(ModuleRegistry registry, ModuleInstance language)
+    {
+        myRegistry = registry;
+
+        SyntaxWrap wrap = new ModuleRenameWrap(language);
+        SyntaxWraps wraps = SyntaxWraps.make(wrap);
+        wrap = new EnvironmentRenameWrap(this);
+        wraps = wraps.addWrap(wrap);
+
+        myWraps = wraps;
     }
 
 
@@ -61,22 +94,91 @@ class Namespace
         return this;
     }
 
+    Collection<NsBinding> getBindings()
+    {
+        return Collections.unmodifiableCollection(myBindings);
+    }
 
     //========================================================================
+
+    /**
+     * Adds wraps to the syntax object to give it the bindings of this
+     * namespace and of required modules.
+     */
+    SyntaxValue syntaxIntroduce(SyntaxValue source)
+    {
+        source = source.addWraps(myWraps);
+        return source;
+    }
+
+    boolean ownsBinding(Binding binding)
+    {
+        if (binding instanceof NsBinding)
+        {
+            NsBinding b = (NsBinding) binding;
+            return b.getNamespace() == this;
+        }
+        return false;
+    }
+
+    /**
+     * @return null if identifier isn't bound here.
+     */
+    NsBinding localSubstitute(Binding binding)
+    {
+        for (NsBinding b : myBindings)
+        {
+            Binding resolvedBoundId = b.myIdentifier.resolve();
+            if (resolvedBoundId.equals(binding))
+            {
+                return b;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public Binding substitute(Binding binding)
+    {
+        Binding subst = localSubstitute(binding);
+        if (subst == null) subst = binding;
+        return subst;
+    }
+
+
+    /**
+     * @return null if identifier isn't bound here.
+     */
+    NsBinding localResolve(SyntaxSymbol identifier)
+    {
+        Binding resolvedRequestedId = identifier.resolve();
+        return localSubstitute(resolvedRequestedId);
+    }
+
+
+    Binding resolve(String name)
+    {
+        SyntaxSymbol identifier = SyntaxSymbol.make(name);
+        identifier = (SyntaxSymbol) syntaxIntroduce(identifier);
+        return identifier.resolve();
+    }
 
 
     /**
      * Creates a binding, but no value, for a name.
      * Used during preparation phase, before evaluating the right-hand side.
      */
-    public void predefine(String name)
+    public NsBinding predefine(SyntaxSymbol identifier)
     {
-        NsBinding binding = myBindings.get(name);
+        NsBinding binding = localResolve(identifier);
         if (binding == null)
         {
-            binding = new NsBinding(name);
-            myBindings.put(name, binding);
+            int address = myBindings.size();
+            binding = new NsBinding(identifier, address);
+            myBindings.add(binding);
         }
+        return binding;
     }
 
 
@@ -86,22 +188,66 @@ class Namespace
      *
      * @param value must not be null
      */
-    public void bind(String name, FusionValue value)
+    void bind(NsBinding binding, FusionValue value)
     {
-        value.inferName(name);
-
-        NsBinding binding = myBindings.get(name);
-        if (binding == null)
+        int address = binding.myAddress;
+        int size = myValues.size();
+        if (address < size)
         {
-            binding = new NsBinding(name);
-            binding.myValue = value;
-            myBindings.put(name, binding);
+            myValues.set(address, value);
+        }
+        else // We need to grow myValues. Annoying lack of API to do this.
+        {
+            myValues.ensureCapacity(myBindings.size()); // Grow all at once
+            for (int i = size; i < address; i++)
+            {
+                myValues.add(null);
+            }
+            myValues.add(value);
+        }
+    }
+
+    /**
+     * Creates or updates a namespace-level binding.
+     * Allows rebinding of existing names!
+     *
+     * @param value must not be null
+     */
+    public void bindPredefined(SyntaxSymbol identifier, FusionValue value)
+    {
+        NsBinding binding = (NsBinding) identifier.getBinding();
+        assert binding != null;
+
+        int address = binding.myAddress;
+        if (address < myBindings.size())
+        {
+            assert binding == myBindings.get(address);
         }
         else
         {
-            binding.myValue = value;
+            assert address == myBindings.size();
+            myBindings.add(binding);
         }
+        bind(binding, value);
+
+        value.inferName(identifier.stringValue());
     }
+
+    /**
+     * Creates or updates a namespace-level binding.
+     * Allows rebinding of existing names!
+     *
+     * @param value must not be null
+     */
+    public void bind(String name, FusionValue value)
+    {
+        SyntaxSymbol identifier = SyntaxSymbol.make(name);
+        value.inferName(identifier.stringValue());
+
+        NsBinding binding = predefine(identifier);
+        bind(binding, value);
+    }
+
 
     void use(ModuleIdentity id)
     {
@@ -109,47 +255,35 @@ class Namespace
         use(module);
     }
 
-    void use(ModuleInstance module)
+    void use(final ModuleInstance module)
     {
-        module.visitProvidedBindings(new BindingVisitor()
+        SyntaxWrap wrap = new ModuleRenameWrap(module);
+        myWraps = myWraps.addWrap(wrap);
+    }
+
+
+    @Override
+    public FusionValue lookup(Binding binding)
+    {
+        if (binding instanceof NsBinding)    // else it can't possibly be ours
         {
-            @Override
-            public void visitBinding(String name, NsBinding binding)
-            {
-                myBindings.put(name, binding);
-            }
-        });
-    }
-
-
-    @Override
-    public NsBinding resolve(String name)
-    {
-        return myBindings.get(name);
-    }
-
-
-    @Override
-    public FusionValue lookup(String name)
-    {
-        NsBinding binding = myBindings.get(name);
-        if (binding != null) return binding.myValue;
+            return lookup((NsBinding) binding);
+        }
         return null;
     }
 
-    @Override
-    public void collectNames(Collection<String> names)
+    public FusionValue lookup(NsBinding binding)
     {
-        names.addAll(myBindings.keySet());
-    }
-
-
-    void visitAllBindings(BindingVisitor v)
-    {
-        for (Map.Entry<String, NsBinding> entry : myBindings.entrySet())
+        int address = binding.myAddress;
+        if (address < myValues.size())              // for prepare-time lookup
         {
-            v.visitBinding(entry.getKey(), entry.getValue());
+            NsBinding localBinding = myBindings.get(address);
+            if (binding.equals(localBinding))
+            {
+                return myValues.get(address);
+            }
         }
+        return null;
     }
 
 

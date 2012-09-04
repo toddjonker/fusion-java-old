@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.Environment.Binding;
+import java.util.Iterator;
+
 /**
  * Syntax wrap that adds all exported bindings from a specific module.
  */
@@ -17,12 +20,32 @@ class ModuleRenameWrap
 
 
     @Override
-    Environment.Binding resolve(String ident)
+    Binding resolve(SyntaxSymbol identifier, Iterator<SyntaxWrap> moreWraps)
     {
-        // Don't go directly to the module's namespace, it exposes things
-        // that are not exported!
-        return myModule.resolveProvidedBinding(ident);
+        Binding b;
+        if (moreWraps.hasNext())
+        {
+            SyntaxWrap nextWrap = moreWraps.next();
+            b = nextWrap.resolve(identifier, moreWraps);
+        }
+        else
+        {
+            b = null;
+        }
+
+        if (b == null || b instanceof FreeBinding)
+        {
+            String name = identifier.stringValue();
+            b = myModule.resolveProvidedName(name);
+            if (b == null)
+            {
+                b = new FreeBinding(name);
+            }
+        }
+
+        return b;
     }
+
 
     @Override
     public String toString()

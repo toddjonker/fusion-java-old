@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.Environment.Binding;
+import java.util.Iterator;
+
 /**
  * Syntax wrap that adds all bindings from a specific namespace.
  */
@@ -15,16 +18,33 @@ class EnvironmentRenameWrap
         myEnvironment = environment;
     }
 
+    Environment getEnvironment()
+    {
+        return myEnvironment;
+    }
 
     @Override
-    Environment.Binding resolve(String ident)
+    Binding resolve(SyntaxSymbol identifier, Iterator<SyntaxWrap> moreWraps)
     {
-        return myEnvironment.resolve(ident);
+        Binding b;
+        if (moreWraps.hasNext())
+        {
+            SyntaxWrap nextWrap = moreWraps.next();
+            b = nextWrap.resolve(identifier, moreWraps);
+        }
+        else
+        {
+            b = new FreeBinding(identifier.stringValue());
+        }
+
+        Binding subst = myEnvironment.substitute(b);
+        return subst;
     }
+
 
     @Override
     public String toString()
     {
-        return "/* Namespace renames */";
+        return "/* Environment renames */";
     }
 }

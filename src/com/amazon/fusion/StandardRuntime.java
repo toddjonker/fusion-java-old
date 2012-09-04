@@ -93,9 +93,6 @@ final class StandardRuntime
     }
 
 
-    /**
-     * @param value should not be null.
-     */
     @Override
     public void bind(String name, FusionValue value)
     {

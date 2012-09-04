@@ -55,7 +55,10 @@ public interface FusionRuntime
 
 
     /**
-     * Binds an identifier with a value in this {@link FusionRuntime}'s namespace.
+     * Binds an identifier with a value in this {@link FusionRuntime}'s
+     * namespace.
+     *
+     * @param value must not be null.
      */
     public void bind(String name, FusionValue value);
 

@@ -112,44 +112,37 @@ final class SyntaxSexp
             throw new SyntaxFailure(null, "not a valid syntactic form", this);
         }
 
-        SyntaxValue[] expandedChildren = new SyntaxValue[len];
+        SyntaxValue[] children = extract();
 
-        int i = 0;
-        SyntaxValue first = get(0);
+        SyntaxValue first = children[0];
+        first = first.prepare(eval, env);
+        children[0] = first;
         if (first instanceof SyntaxSymbol)
         {
-            first = first.prepare(eval, env);
-            expandedChildren[0] = first;
-
-            // Expansion could produce something else
-            if (first instanceof SyntaxSymbol)
+            Binding binding = ((SyntaxSymbol) first).getBinding();
+            FusionValue resolved = binding.lookup(env);
+            if (resolved instanceof KeywordValue)
             {
-                Environment.Binding binding =
-                    ((SyntaxSymbol) first).getBinding();
-                FusionValue resolved = binding.lookup(env);
-                if (resolved instanceof KeywordValue)
-                {
-                    // We found a static top-level keyword binding!
-                    // Continue the preparation process.
-                    // TODO tail-call
-                    SyntaxValue expandedExpr =
-                        ((KeywordValue)resolved).prepare(eval, env, this);
-                    return expandedExpr;
-                }
-            }
+                // We found a static top-level keyword binding!
+                // Continue the preparation process.
+                // TODO tail-call
 
-            expandedChildren[0] = first;
-            i++;  // Don't re-prepare the first subform
+                SyntaxSexp form =
+                    SyntaxSexp.make(getLocation(), children);
+                SyntaxValue expandedExpr =
+                    ((KeywordValue)resolved).prepare(eval, env, form);
+                return expandedExpr;
+            }
         }
 
         // else we have a procedure application, prepare each subform
-        for ( ; i < len; i++)
+        for (int i = 1; i < len; i++)
         {
-            SyntaxValue subform = get(i);
-            expandedChildren[i] = subform.prepare(eval, env);
+            SyntaxValue subform = children[i];
+            children[i] = subform.prepare(eval, env);
         }
 
-        SyntaxSexp result = SyntaxSexp.make(getLocation(), expandedChildren);
+        SyntaxSexp result = SyntaxSexp.make(getLocation(), children);
         return result;
     }
 
@@ -172,7 +165,7 @@ final class SyntaxSexp
             // Make sure we don't have to structurally change this sexp
             assert prepared == maybeKeyword;
 
-            Environment.Binding binding = maybeKeyword.getBinding();
+            Binding binding = maybeKeyword.getBinding();
             if (stops.get(binding) != null)
             {
                 return this;

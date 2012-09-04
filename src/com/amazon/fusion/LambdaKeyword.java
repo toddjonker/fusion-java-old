@@ -37,41 +37,34 @@ final class LambdaKeyword
             bodyStart = 2;
         }
 
-        String[] params = determineParams((SyntaxSexp) source.get(1));
-        int paramCount = params.length;
-
-        Environment bodyEnv;
-        if (paramCount == 0)
-        {
-            bodyEnv = env;
-        }
-        else
-        {
-            bodyEnv =
-                new LocalEnvironment(env, params, new FusionValue[paramCount]);
-        }
+        SyntaxValue[] children = source.extract();
+        SyntaxSymbol[] params = determineParams((SyntaxSexp) children[1]);
 
         // We create a wrap even if there's no params, because there may be
         // local definitions that will be added to the wrap.
+        Environment bodyEnv = new LocalEnvironment(env, params);
         SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
 
-        final int bodyEnd = source.size();
-        SyntaxValue[] expandedChildren = new SyntaxValue[bodyEnd];
-
-        for (int i = 0; i < bodyEnd; i++)
+        // Prepare the bound names so they resolve to their own binding.
+        for (int i = 0; i < params.length; i++)
         {
-            SyntaxValue bodyForm = source.get(i);
-
-            if (i >= bodyStart)
-            {
-                bodyForm.addWrap(localWrap);
-                bodyForm = bodyForm.prepare(eval, bodyEnv);
-            }
-
-            expandedChildren[i] = bodyForm;
+            SyntaxSymbol param = params[i];
+            param = param.addWrap(localWrap);
+            param.resolve();
+            params[i] = param;
         }
 
-        source = SyntaxSexp.make(source.getLocation(), expandedChildren);
+        children[1] = SyntaxSexp.make(children[1].getLocation(), params);
+
+        for (int i = bodyStart; i < children.length; i++)
+        {
+            SyntaxValue bodyForm = children[i];
+            bodyForm = bodyForm.addWrap(localWrap);
+            bodyForm = bodyForm.prepare(eval, bodyEnv);
+            children[i] = bodyForm;
+        }
+
+        source = SyntaxSexp.make(source.getLocation(), children);
         return source;
     }
 
@@ -96,19 +89,20 @@ final class LambdaKeyword
             bodyStart = 2;
         }
 
-        String[] params = determineParams((SyntaxSexp) expr.get(1));
+        SyntaxSymbol[] params = determineParams((SyntaxSexp) expr.get(1));
         return new Closure(env, expr, doc, params, bodyStart);
     }
 
-    private static String[] determineParams(SyntaxSexp paramsExpr)
+    private static SyntaxSymbol[] determineParams(SyntaxSexp paramsExpr)
     {
         int size = paramsExpr.size();
-        String[] params = new String[size];
+        if (size == 0) return SyntaxSymbol.EMPTY_ARRAY;
+
+        SyntaxSymbol[] params = new SyntaxSymbol[size];
         for (int i = 0; i < size; i++)
         {
             // TODO typecheck
-            SyntaxSymbol param = (SyntaxSymbol) paramsExpr.get(i);
-            params[i] = param.stringValue();
+            params[i] = (SyntaxSymbol) paramsExpr.get(i);
         }
         return params;
     }

@@ -2,26 +2,78 @@
 
 package com.amazon.fusion;
 
-import java.util.Collection;
-
-/**
- *
- */
 final class LocalEnvironment
     implements Environment
 {
-    private final Environment   myEnclosure;
-    private final String[]      myNames;
-    private final FusionValue[] myValues;
+    final class LexicalBinding implements Binding
+    {
+        private final SyntaxSymbol myIdentifier;
+        private final int myAddress;
+
+        private LexicalBinding(SyntaxSymbol identifier, int address)
+        {
+            myIdentifier = identifier;
+            myAddress = address;
+        }
+
+        @Override
+        public FusionValue lookup(Environment store)
+        {
+            return store.lookup(this);
+        }
 
 
+        @Override
+        public boolean equals(Object other)
+        {
+            return this == other;
+        }
+
+        @Override
+        public String toString()
+        {
+            return "{{LexicalBinding " + myIdentifier + "}}";
+        }
+    }
+
+
+    /** Not null */
+    private final Environment      myEnclosure;
+    private final LexicalBinding[] myBindings;
+    private final FusionValue[]    myValues;
+
+
+    /** Expand-time environment construction */
     LocalEnvironment(Environment enclosure,
-                     String[] names,
+                     SyntaxSymbol[] identifiers)
+    {
+        myEnclosure = enclosure;
+
+        int count = identifiers.length;
+        myBindings = new LexicalBinding[count];
+        for (int i = 0; i < count; i++)
+        {
+            myBindings[i] = new LexicalBinding(identifiers[i], i);
+        }
+
+        myValues = null;
+    }
+
+    /** Run-time environment construction */
+    LocalEnvironment(Environment enclosure,
+                     SyntaxSymbol[] identifiers,
                      FusionValue[] values)
     {
-        assert names.length == values.length;
+        assert identifiers.length == values.length;
         myEnclosure = enclosure;
-        myNames = names;
+
+        int count = identifiers.length;
+        myBindings = new LexicalBinding[count];
+        for (int i = 0; i < count; i++)
+        {
+            myBindings[i] = (LexicalBinding) identifiers[i].resolve();
+        }
+
         myValues = values;
     }
 
@@ -34,51 +86,43 @@ final class LocalEnvironment
 
 
     @Override
-    public Binding resolve(final String name)
+    public Binding substitute(Binding binding)
     {
-        final int paramCount = myNames.length;
-        for (int i = 0; i < paramCount; i++)
+        for (LexicalBinding b : myBindings)
         {
-            if (name.equals(myNames[i]))
+            Binding resolvedBoundId = b.myIdentifier.resolve();
+            if (resolvedBoundId.equals(binding))
             {
-                return new Binding()
+                return b;
+            }
+        }
+        return binding;
+    }
+
+
+    void bind(int address, FusionValue value)
+    {
+        myValues[address] = value;
+    }
+
+
+    @Override
+    public FusionValue lookup(Binding binding)
+    {
+        // Sometimes this is called during prepare pass, when there are not
+        // any values bound.
+        if (myValues != null && binding instanceof LexicalBinding)
+        {
+            int address = ((LexicalBinding) binding).myAddress;
+            if (address < myBindings.length)
+            {
+                Binding localBinding = myBindings[address];
+                if (binding.equals(localBinding))
                 {
-                    @Override
-                    public FusionValue lookup(Environment env)
-                    {
-                        // TODO Auto-generated method stub
-                        return env.lookup(name);
-                    }
-                };
+                    return myValues[address];
+                }
             }
         }
-
-        return myEnclosure.resolve(name);
-    }
-
-
-    @Override
-    public FusionValue lookup(String name)
-    {
-        final int paramCount = myNames.length;
-        for (int i = 0; i < paramCount; i++)
-        {
-            if (name.equals(myNames[i]))
-            {
-                return myValues[i];
-            }
-        }
-
-        return myEnclosure.lookup(name);
-    }
-
-    @Override
-    public void collectNames(Collection<String> names)
-    {
-        for (String name : myNames)
-        {
-            names.add(name);
-        }
-        myEnclosure.collectNames(names);
+        return myEnclosure.lookup(binding);
     }
 }

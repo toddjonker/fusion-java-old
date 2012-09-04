@@ -23,13 +23,29 @@ final class DefineSyntaxKeyword
         SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
         check.arityExact(3);
 
-        String keyword = check.requiredNonEmptySymbol("identifier", 1);
+        check.requiredNonEmptySymbol("identifier", 1);
+        SyntaxSymbol identifier = (SyntaxSymbol) source.get(1);
+
+        // We need to strip off the module-level wrap that's already been
+        // applied to the identifier. Otherwise we'll loop forever trying to
+        // resolve it! This is a bit of a hack, really.
+        SyntaxSymbol stripped = identifier.stripImmediateEnvWrap(env);
+
+        // If at module top-level, this has already been done.
+        // TODO we should know the context where this is happening...
+        Namespace ns = env.namespace();
+        ns.predefine(stripped);
+
+        // Update the identifier with its binding.
+        // This is just a way to pass the binding instance through to the
+        // runtime stage so invoke() below can reuse it.
+        identifier = (SyntaxSymbol) identifier.prepare(eval, env);
 
         SyntaxValue valueStx = source.get(2);
         valueStx = valueStx.prepare(eval, env);
 
         source = SyntaxSexp.make(source.getLocation(),
-                                 source.get(0), source.get(1), valueStx);
+                                 source.get(0), identifier, valueStx);
         return source;
     }
 
@@ -38,33 +54,25 @@ final class DefineSyntaxKeyword
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), stx);
-        check.arityExact(3);
-
-        String keyword = check.requiredNonEmptySymbol("identifier", 1);
-
         SyntaxValue valueStx = stx.get(2);
-        FusionValue xform = eval.eval(env, valueStx);
+        FusionValue value = eval.eval(env, valueStx);
 
-        KeywordValue result;
-        if (xform instanceof KeywordValue)
+        if (value instanceof Procedure)
         {
-            result = (KeywordValue) xform;
+            Procedure xformProc = (Procedure) value;
+            value = new MacroTransformer(xformProc);
         }
-        else if (xform instanceof Procedure)
+        else if (! (value instanceof KeywordValue))
         {
-            Procedure xformProc = (Procedure) xform;
-            result = new MacroTransformer(xformProc);
-        }
-        else
-        {
+            SyntaxChecker check = new SyntaxChecker(getInferredName(), stx);
             String message =
-                "value is not a transformer: " + displayToString(xform);
+                "value is not a transformer: " + displayToString(value);
             throw check.failure(message);
         }
 
+        SyntaxSymbol identifier = (SyntaxSymbol) stx.get(1);
         Namespace ns = env.namespace();
-        ns.bind(keyword, result);
+        ns.bindPredefined(identifier, value);
 
         return UNDEF;
     }

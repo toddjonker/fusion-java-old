@@ -76,6 +76,8 @@ final class KernelModule
                 ns.bind(name, new IonTypeCheckingProc(t));
             }
         }
+
+        provideEverything();
     }
 
 

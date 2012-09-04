@@ -27,31 +27,32 @@ final class LetrecKeyword
             check.requiredSexp("sequence of bindings", 1);
 
         final int numBindings = bindingForms.size();
-        String[] boundNames = new String[numBindings];
+        SyntaxSymbol[] boundNames = new SyntaxSymbol[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
             SyntaxSexp binding =
                 requiredSexp("name/value binding", i, bindingForms);
-            SyntaxSymbol name = requiredSymbol("name/value binding", 0, binding);
-            boundNames[i] = name.stringValue();
+            boundNames[i] = requiredSymbol("name/value binding", 0, binding);
         }
 
-        FusionValue[] boundValues = new FusionValue[numBindings];
-        Environment bodyEnv =
-            new LocalEnvironment(env, boundNames, boundValues);
+        Environment bodyEnv = new LocalEnvironment(env, boundNames);
         SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
 
         // Expand the bound-value expressions
         SyntaxValue[] expandedForms = new SyntaxValue[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
+            // Wrap the bound names so they resolve to their own binding.
+            SyntaxSymbol name = boundNames[i].addWrap(localWrap);
+            name.resolve();
+
             SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
             SyntaxValue boundExpr =
                 requiredForm("name/value binding", 1, binding);
-            boundExpr.addWrap(localWrap);
+            boundExpr = boundExpr.addWrap(localWrap);
             boundExpr = boundExpr.prepare(eval, bodyEnv);
             binding = SyntaxSexp.make(binding.getLocation(),
-                                      binding.get(0),
+                                      name,
                                       boundExpr);
             expandedForms[i] = binding;
         }
@@ -66,7 +67,7 @@ final class LetrecKeyword
         for (int i = 2; i < letrecExprSize; i++)
         {
             SyntaxValue subform = source.get(i);
-            subform.addWrap(localWrap);
+            subform = subform.addWrap(localWrap);
             expandedForms[i] = subform.prepare(eval, bodyEnv);
         }
 
@@ -82,25 +83,23 @@ final class LetrecKeyword
         SyntaxSexp bindingForms = (SyntaxSexp) expr.get(1);
 
         final int numBindings = bindingForms.size();
-        String[]     boundNames = new String[numBindings];
-        SyntaxValue[] boundExprs = new SyntaxValue[numBindings];
+        SyntaxSymbol[] boundIdentifiers = new SyntaxSymbol[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
             SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
-            SyntaxSymbol name = (SyntaxSymbol) binding.get(0);
-            boundNames[i] = name.stringValue();
-            boundExprs[i] = binding.get(1);
+            boundIdentifiers[i] = (SyntaxSymbol) binding.get(0);
         }
 
         FusionValue[] boundValues = new FusionValue[numBindings];
-        Environment bodyEnv =
-            new LocalEnvironment(env, boundNames, boundValues);
+        LocalEnvironment bodyEnv =
+            new LocalEnvironment(env, boundIdentifiers, boundValues);
 
         for (int i = 0; i < numBindings; i++)
         {
-            SyntaxValue boundExpr = boundExprs[i];
+            SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
+            SyntaxValue boundExpr = binding.get(1);
             FusionValue boundValue = eval.eval(bodyEnv, boundExpr);
-            boundValues[i] = boundValue;
+            bodyEnv.bind(i, boundValue);
         }
 
         FusionValue result;

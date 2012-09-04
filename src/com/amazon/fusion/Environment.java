@@ -2,15 +2,17 @@
 
 package com.amazon.fusion;
 
-import java.util.Collection;
-
 /**
- * Binds names to {@link FusionValue}s.
+ * Binds identifiers to {@link FusionValue}s.
  * Environments are generally arranged in a hierarchy of lexical scopes.
  */
 interface Environment
 {
-    interface Binding {
+    interface Binding
+    {
+        /**
+         * @return null if there's no value associated with the binding.
+         */
         FusionValue lookup(Environment store);
     }
 
@@ -18,7 +20,12 @@ interface Environment
     Namespace namespace();
 
 
-    Binding resolve(String name);
+    /**
+     * NOT RECURSIVE TO ENCLOSING ENVIRONMENTS!
+     *
+     * @return given binding if not substituted here; not null.
+     */
+    Binding substitute(Binding binding);
 
 
     /**
@@ -26,14 +33,7 @@ interface Environment
      *
      * @param name must not be null or empty.
      *
-     * @return the bound value, or null if there's no binding.
+     * @return the bound value, or null if there's no value.
      */
-    FusionValue lookup(String name);
-
-    /**
-     * Adds all names visible in this environment to a collection.
-     *
-     * @param names must not be null.
-     */
-    void collectNames(Collection<String> names);
+    FusionValue lookup(Binding binding);
 }

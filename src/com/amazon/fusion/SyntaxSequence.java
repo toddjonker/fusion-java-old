@@ -60,9 +60,11 @@ abstract class SyntaxSequence
         {
             if (myChildren != null)
             {
-                for (SyntaxValue child : myChildren)
+                for (int i = 0; i < myChildren.size(); i++)
                 {
-                    child.addWraps(myWraps);
+                    SyntaxValue child = myChildren.get(i);
+                    SyntaxValue wrapped = child.addWraps(myWraps);
+                    myChildren.set(i, wrapped);
                 }
             }
             myWraps = null;
@@ -73,6 +75,23 @@ abstract class SyntaxSequence
     final boolean isNullValue()
     {
         return myChildren == null;
+    }
+
+
+
+    /**
+     * Gets all the children of this sequence as a new array.
+     * Useful for making changes and then building a replacement sequence.
+     *
+     * @return a new array.
+     */
+    SyntaxValue[] extract()
+    {
+        if (myChildren == null) return null;
+
+        pushAnyWraps();
+        SyntaxValue[] extracted = new SyntaxValue[size()];
+        return myChildren.toArray(extracted);
     }
 
 

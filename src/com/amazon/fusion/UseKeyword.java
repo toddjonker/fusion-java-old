@@ -18,18 +18,7 @@ final class UseKeyword
     SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxValue modStx = requiredForm("module spec", 1, source);
-        Namespace namespace = env.namespace();
-        try
-        {
-            use(eval, namespace, modStx);
-        }
-        catch (FusionException e)
-        {
-            // TODO SyntaxFailure should hold its nested cause.
-            String message = "Error loading module:" + e.getMessage();
-            throw new SyntaxFailure(getInferredName(), message, source);
-        }
+        requiredForm("module spec", 1, source);
         return source;
     }
 

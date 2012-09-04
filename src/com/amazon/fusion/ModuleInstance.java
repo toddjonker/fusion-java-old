@@ -2,8 +2,12 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.Environment.Binding;
+import com.amazon.fusion.Namespace.NsBinding;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A module that's been instantiated for use by one or more other modules.
@@ -13,9 +17,53 @@ import java.io.IOException;
 class ModuleInstance
     extends NamedValue
 {
+    class ModuleBinding
+        implements Binding
+    {
+        private final String myName;
+        private final NsBinding myInternalBinding;
+
+        private ModuleBinding(String name, NsBinding binding)
+        {
+            myName = name;
+            myInternalBinding = binding;
+            assert myInternalBinding != null;
+        }
+
+        ModuleInstance getModule()
+        {
+            return ModuleInstance.this;
+        }
+
+        String getName()
+        {
+            return myName;
+        }
+
+
+        @Override
+        public FusionValue lookup(Environment store)
+        {
+            // TODO optimize this path
+            return myNamespace.lookup(myInternalBinding);
+        }
+
+        @Override
+        public boolean equals(Object other)
+        {
+            return this == other;
+        }
+
+        @Override
+        public String toString()
+        {
+            return "{{ModuleBinding " + myIdentity + ' ' + myName + "}}";
+        }
+    }
+
     private final ModuleIdentity myIdentity;
     private final Namespace myNamespace;
-    private final String[] myProvidedNames;
+    private final Map<String,ModuleBinding> myProvidedBindings;
 
     /**
      * Creates a module that {@code provide}s all names in its namespace.
@@ -36,12 +84,41 @@ class ModuleInstance
      * module with the given identity.
      */
     ModuleInstance(ModuleIdentity identity, Namespace namespace,
-                   String[] providedNames)
+                   SyntaxSymbol[] providedIdentifiers)
         throws FusionException, ContractFailure
     {
         myIdentity = identity;
         myNamespace = namespace;
-        myProvidedNames = providedNames;
+
+        if (providedIdentifiers == null)
+        {
+            myProvidedBindings = new HashMap<String,ModuleBinding>();
+        }
+        else
+        {
+            myProvidedBindings =
+                new HashMap<String,ModuleBinding>(providedIdentifiers.length);
+
+            for (SyntaxSymbol identifier : providedIdentifiers)
+            {
+                String name = identifier.stringValue();
+
+                ModuleBinding externalBinding;
+                Binding internalBinding = identifier.resolve();
+                if (internalBinding instanceof ModuleBinding)
+                {
+                    // Export of a binding from another module, just use it.
+                    externalBinding = (ModuleBinding) internalBinding;
+                }
+                else
+                {
+                    externalBinding =
+                        new ModuleBinding(name, (NsBinding) internalBinding);
+                }
+
+                myProvidedBindings.put(name, externalBinding);
+            }
+        }
 
         inferName(identity.toString());
     }
@@ -61,37 +138,31 @@ class ModuleInstance
 
     //========================================================================
 
-
-    void visitProvidedBindings(BindingVisitor v)
+    /**
+     * Magic for the {@link KernelModule} constructor.
+     */
+    void provideEverything()
     {
-        if (myProvidedNames == null)
+        assert myProvidedBindings.size() == 0;
+
+        for (NsBinding internalBinding : myNamespace.getBindings())
         {
-            myNamespace.visitAllBindings(v);
-        }
-        else
-        {
-            for (String name : myProvidedNames)
-            {
-                Namespace.NsBinding b = myNamespace.resolve(name);
-                v.visitBinding(name, b);
-            }
+            String name = internalBinding.getIdentifier().stringValue();
+
+            ModuleBinding externalBinding =
+                new ModuleBinding(name, internalBinding);
+
+            myProvidedBindings.put(name, externalBinding);
         }
     }
 
 
-    Environment.Binding resolveProvidedBinding(String name)
+    /**
+     * @return null if the name isn't provided by this module.
+     */
+    ModuleBinding resolveProvidedName(String name)
     {
-        if (myProvidedNames == null) return myNamespace.resolve(name);
-
-        for (String n : myProvidedNames)  // TODO inefficient algorithm
-        {
-            if (n.equals(name))
-            {
-                return myNamespace.resolve(name);
-            }
-        }
-
-        return null;
+        return myProvidedBindings.get(name);
     }
 
     //========================================================================

@@ -99,18 +99,19 @@ final class SyntaxList
     SyntaxValue prepare(Evaluator eval, Environment env)
         throws SyntaxFailure
     {
+        pushAnyWraps();          // Wraps go away if we bail out on empty list
         int len = size();
-        SyntaxValue[] expandedChildren =
-            (isNullValue() ? null : new SyntaxValue[len]);
+        if (len == 0) return this;
+
+        SyntaxValue[] children = extract();
 
         for (int i = 0; i < len; i++)
         {
-            SyntaxValue subform = get(i);
-            expandedChildren[i] = subform.prepare(eval, env);
+            SyntaxValue subform = children[i];
+            children[i] = subform.prepare(eval, env);
         }
 
-        SyntaxList expanded =
-            SyntaxList.make(this.getLocation(), expandedChildren);
+        SyntaxList expanded = SyntaxList.make(this.getLocation(), children);
         return expanded;
     }
 

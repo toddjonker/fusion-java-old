@@ -11,6 +11,7 @@ final class Closure
     extends Procedure
 {
     private final Environment myEnclosure;
+    private final SyntaxSymbol[] myParams;
     private final SyntaxSexp myDefinition;
 
     /**
@@ -28,11 +29,12 @@ final class Closure
      * @param definition the source text of the {@code lambda} expression.
      */
     Closure(Environment enclosure, SyntaxSexp definition, String doc,
-            String[] params, int bodyStartIndex)
+            SyntaxSymbol[] params, int bodyStartIndex)
     {
-        super(doc, params);
+        super(doc, SyntaxSymbol.toNames(params));
 
         myEnclosure = enclosure;
+        myParams = params;
         myDefinition = definition;
         myBodyStart = bodyStartIndex;
     }
