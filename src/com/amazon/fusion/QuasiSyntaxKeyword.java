@@ -2,13 +2,27 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.Environment.Binding;
+import com.amazon.fusion.Namespace.NsBinding;
+
 final class QuasiSyntaxKeyword
     extends KeywordValue
 {
-    QuasiSyntaxKeyword()
+    private final Binding myQsBinding;
+    private final Binding myUsBinding;
+
+    public QuasiSyntaxKeyword(FusionValue qsIdentifier,
+                              FusionValue usIdentifier)
     {
         super("template", "...");
-        // TODO Auto-generated constructor stub
+
+        SyntaxSymbol id = (SyntaxSymbol) qsIdentifier;
+        myQsBinding = id.resolve();
+        assert myQsBinding instanceof NsBinding;
+
+        id = (SyntaxSymbol) usIdentifier;
+        myUsBinding = id.resolve();
+        assert myUsBinding instanceof NsBinding;
     }
 
 
@@ -56,11 +70,13 @@ final class QuasiSyntaxKeyword
         SyntaxValue first = children[0];
         if (first instanceof SyntaxSymbol)
         {
-            // TODO test using bindings
-            String name = ((SyntaxSymbol)first).stringValue();
-            if ("unsyntax".equals(name))
+            // Be careful that we don't force a binding too early.
+            Binding binding = ((SyntaxSymbol)first).uncachedResolve();
+            binding = binding.originalBinding();
+
+            if (myUsBinding == binding)
             {
-                SyntaxChecker check = new SyntaxChecker("quasisyntax", stx);
+                SyntaxChecker check = new SyntaxChecker(getInferredName(), stx);
                 check.arityExact(2);
 
                 if (depth < 1)
@@ -73,9 +89,9 @@ final class QuasiSyntaxKeyword
 
                 depth--;
             }
-            else if ("quasisyntax".equals(name))
+            else if (myQsBinding == binding)
             {
-                SyntaxChecker check = new SyntaxChecker("quasisyntax", stx);
+                SyntaxChecker check = new SyntaxChecker(getInferredName(), stx);
                 check.arityExact(2);
 
                 depth++;
@@ -127,9 +143,10 @@ final class QuasiSyntaxKeyword
             SyntaxValue first = stx.get(0);
             if (first instanceof SyntaxSymbol)
             {
-                // TODO test using bindings
-                String name = ((SyntaxSymbol)first).stringValue();
-                if ("unsyntax".equals(name))
+                Binding binding = ((SyntaxSymbol)first).uncachedResolve();
+                binding = binding.originalBinding();
+
+                if (myUsBinding == binding)
                 {
                     if (depth == 0)
                     {
@@ -148,7 +165,7 @@ final class QuasiSyntaxKeyword
                     }
                     depth--;
                 }
-                else if ("quasisyntax".equals(name))
+                else if (myQsBinding == binding)
                 {
                     depth++;
                 }

@@ -20,6 +20,13 @@ final class FreeBinding implements Binding
 
 
     @Override
+    public Binding originalBinding()
+    {
+        return this;
+    }
+
+
+    @Override
     public FusionValue lookup(Environment store)
     {
         return null;

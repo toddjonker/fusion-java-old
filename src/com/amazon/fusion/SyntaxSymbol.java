@@ -121,7 +121,7 @@ final class SyntaxSymbol
     }
 
 
-    /** Not set until {@link #prepare}. */
+    /** Not set until {@link #resolve} or {@link #prepare}. */
     Binding getBinding()
     {
         return myBinding;
@@ -148,6 +148,19 @@ final class SyntaxSymbol
         return myBinding;
     }
 
+
+    /**
+     *
+     * @return not null, but maybe a {@link FreeBinding}.
+     */
+    Binding uncachedResolve()
+    {
+        if (myBinding != null) return myBinding;
+        if (myWraps   == null) return new FreeBinding(stringValue());
+        return myWraps.resolve(this);
+    }
+
+
     @Override
     SyntaxValue prepare(Evaluator eval, Environment env)
         throws SyntaxFailure
@@ -170,6 +183,16 @@ final class SyntaxSymbol
         }
 
         return this;
+    }
+
+
+    FusionValue freeIdentifierEquals(Evaluator eval, SyntaxSymbol that)
+    {
+        Binding thisBinding = this.uncachedResolve().originalBinding();
+        Binding thatBinding = that.uncachedResolve().originalBinding();
+
+        boolean result = thisBinding.equals(thatBinding);
+        return eval.newBool(result);
     }
 
 

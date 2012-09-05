@@ -85,6 +85,14 @@ public class SyntaxTest
     }
 
     @Test
+    public void unsyntaxOutOfQuasisyntax()
+        throws Exception
+    {
+        expectSyntaxFailure("(unsyntax)");
+        expectSyntaxFailure("(unsyntax foo)");
+    }
+
+    @Test
     public void transformerReturnsNonSyntax()
         throws Exception
     {

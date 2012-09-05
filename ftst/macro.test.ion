@@ -117,13 +117,15 @@
           (n    (syntax_get stx 2)))
       (quasisyntax
         (define_syntax (unsyntax name)  // usage: (name init)
-          (lambda (stx)
-            (let ((init (syntax_get stx 1)))
+          (lambda (stx1)
+            (let ((init (syntax_get stx1 1)))
               (quasisyntax
                 (let ((x (unsyntax init)))
-                  (+ x (unsyntax (unsyntax n))))))))))))
+                  (+ x (unsyntax (quote_syntax (unsyntax n)))))))))))))
 
 (make_plus_N plus10 10)
+
+(check_equal (plus10 3) 13 "use of plus10")
 
 
 "PASSED" // Helpful output if you run this stand-alone

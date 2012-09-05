@@ -50,7 +50,7 @@ final class LambdaKeyword
         {
             SyntaxSymbol param = params[i];
             param = param.addWrap(localWrap);
-            param.resolve();
+            param.resolve();           // Caches the binding in the identifier
             params[i] = param;
         }
 

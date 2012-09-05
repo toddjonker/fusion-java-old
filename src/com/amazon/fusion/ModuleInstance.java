@@ -42,6 +42,13 @@ class ModuleInstance
 
 
         @Override
+        public Binding originalBinding()
+        {
+            return myInternalBinding;
+        }
+
+
+        @Override
         public FusionValue lookup(Environment store)
         {
             // TODO optimize this path

@@ -18,6 +18,14 @@ final class LocalEnvironment
             myAddress = address;
         }
 
+
+        @Override
+        public Binding originalBinding()
+        {
+            return this;
+        }
+
+
         @Override
         public FusionValue lookup(Environment store)
         {
@@ -55,7 +63,14 @@ final class LocalEnvironment
         myBindings = new LexicalBinding[count];
         for (int i = 0; i < count; i++)
         {
-            myBindings[i] = new LexicalBinding(identifiers[i], i);
+            SyntaxSymbol identifier = identifiers[i];
+
+            // This helps make sure we're not preparing the same code twice.
+            assert identifier.getBinding() == null
+                : "Identifier " + identifier + " already bound to " +
+                  identifier.getBinding();
+
+            myBindings[i] = new LexicalBinding(identifier, i);
         }
 
         myValues = null;

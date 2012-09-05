@@ -4,11 +4,13 @@ package com.amazon.fusion;
 
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static java.lang.Boolean.TRUE;
+
 import com.amazon.fusion.Environment.Binding;
 import com.amazon.fusion.ModuleInstance.ModuleBinding;
 import com.amazon.fusion.Namespace.NsBinding;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -92,6 +94,7 @@ final class ModuleKeyword
 
         ArrayList<SyntaxSexp> provideForms = new ArrayList<SyntaxSexp>();
         ArrayList<SyntaxValue> otherForms = new ArrayList<SyntaxValue>();
+        ArrayList<Boolean> preparedFormFlags = new ArrayList<Boolean>();
 
         for (int i = 3; i < source.size(); i++)
         {
@@ -105,6 +108,7 @@ final class ModuleKeyword
             }
             else
             {
+                boolean formIsPrepared = false;
                 SyntaxValue expanded;
                 if (form instanceof SyntaxSexp)
                 {
@@ -129,7 +133,9 @@ final class ModuleKeyword
                         {
                             try
                             {
-                                eval.prepareAndEval(moduleNamespace, expanded);
+                                expanded = expanded.prepare(eval,
+                                                            moduleNamespace);
+                                eval.eval(moduleNamespace, expanded);
                             }
                             catch (FusionException e)
                             {
@@ -141,12 +147,15 @@ final class ModuleKeyword
                             // but we throw away all this work at the moment
                             // and do it all again during invoke()
 //                          expanded = null;
+                            formIsPrepared = true;
                         }
                         else if (binding == useSyntaxBinding)
                         {
                             try
                             {
-                                eval.prepareAndEval(moduleNamespace, expanded);
+                                expanded = expanded.prepare(eval,
+                                                            moduleNamespace);
+                                eval.eval(moduleNamespace, expanded);
                             }
                             catch (FusionException e)
                             {
@@ -158,15 +167,20 @@ final class ModuleKeyword
                             // but we throw away all this work at the moment
                             // and do it all again during invoke()
 //                          expanded = null;
+                            formIsPrepared = true;
                         }
                     }
                 }
                 else
                 {
-                    expanded = form.prepare(eval, moduleNamespace);
+                    expanded = form;
                 }
 
-                if (expanded != null) otherForms.add(expanded);
+                if (expanded != null)
+                {
+                    otherForms.add(expanded);
+                    preparedFormFlags.add(formIsPrepared);
+                }
             }
         }
 
@@ -178,9 +192,13 @@ final class ModuleKeyword
         subforms.add(source.get(1)); // name
         subforms.add(source.get(2)); // language
 
+        Iterator<Boolean> prepared = preparedFormFlags.iterator();
         for (SyntaxValue stx : otherForms)
         {
-            stx = stx.prepare(eval, moduleNamespace);
+            if (! prepared.next())
+            {
+                stx = stx.prepare(eval, moduleNamespace);
+            }
             subforms.add(stx);
         }
 

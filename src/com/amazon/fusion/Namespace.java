@@ -34,6 +34,12 @@ final class Namespace
         }
 
         @Override
+        public Binding originalBinding()
+        {
+            return this;
+        }
+
+        @Override
         public FusionValue lookup(Environment env)
         {
             // Skip over any lexical environments and go straight to the top.
