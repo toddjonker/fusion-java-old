@@ -24,18 +24,19 @@ final class QuasiSyntaxKeyword
         }
 
         SyntaxValue subform = stx.get(1);
-        subform = quasiPrepare(eval, env, subform);
+        subform = quasiPrepare(eval, env, subform, 0);
 
         stx = SyntaxSexp.make(stx.getLocation(), stx.get(0), subform);
         return stx;
     }
 
-    SyntaxValue quasiPrepare(Evaluator eval, Environment env, SyntaxValue stx)
+    SyntaxValue quasiPrepare(Evaluator eval, Environment env, SyntaxValue stx,
+                             int depth)
         throws SyntaxFailure
     {
         if (stx instanceof SyntaxSexp)
         {
-            return quasiPrepare(eval, env, (SyntaxSexp) stx);
+            return quasiPrepare(eval, env, (SyntaxSexp) stx, depth);
         }
         else
         {
@@ -43,34 +44,51 @@ final class QuasiSyntaxKeyword
         }
     }
 
-    SyntaxValue quasiPrepare(Evaluator eval, Environment env, SyntaxSexp stx)
+    SyntaxValue quasiPrepare(Evaluator eval, Environment env, SyntaxSexp stx,
+                             int depth)
         throws SyntaxFailure
     {
+        stx.pushAnyWraps();                // Gets rid of wraps when size == 0
         int size = stx.size();
         if (size == 0) return stx;
 
-        if (size == 2)
+        SyntaxValue[] children = stx.extract();
+        SyntaxValue first = children[0];
+        if (first instanceof SyntaxSymbol)
         {
-            SyntaxValue first = stx.get(0);
-            if (first instanceof SyntaxSymbol
-                && "unsyntax".equals(((SyntaxSymbol)first).stringValue()))
+            // TODO test using bindings
+            String name = ((SyntaxSymbol)first).stringValue();
+            if ("unsyntax".equals(name))
             {
-                SyntaxValue subform = stx.get(1);
-                subform = subform.prepare(eval, env);
+                SyntaxChecker check = new SyntaxChecker("quasisyntax", stx);
+                check.arityExact(2);
 
-                stx = SyntaxSexp.make(stx.getLocation(), stx.get(0), subform);
-                return stx;
+                if (depth < 1)
+                {
+                    SyntaxValue subform = children[1];
+                    subform = subform.prepare(eval, env);
+                    stx = SyntaxSexp.make(stx.getLocation(), children);
+                    return stx;
+                }
+
+                depth--;
+            }
+            else if ("quasisyntax".equals(name))
+            {
+                SyntaxChecker check = new SyntaxChecker("quasisyntax", stx);
+                check.arityExact(2);
+
+                depth++;
             }
         }
 
-        SyntaxValue[] expandedForms = new SyntaxValue[size];
         for (int i = 0; i < size; i++)
         {
             SyntaxValue subform = stx.get(i);
-            expandedForms[i] = quasiPrepare(eval, env, subform);
+            children[i] = quasiPrepare(eval, env, subform, depth);
         }
 
-        stx = SyntaxSexp.make(stx.getLocation(), expandedForms);
+        stx = SyntaxSexp.make(stx.getLocation(), children);
         return stx;
     }
 
@@ -80,15 +98,16 @@ final class QuasiSyntaxKeyword
         throws FusionException
     {
         SyntaxValue node = stx.get(1);
-        return quasiSyntax(eval, env, node);
+        return invokeQuasi(eval, env, node, 0);
     }
 
-    SyntaxValue quasiSyntax(Evaluator eval, Environment env, SyntaxValue stx)
+    SyntaxValue invokeQuasi(Evaluator eval, Environment env, SyntaxValue stx,
+                            int depth)
         throws FusionException
     {
         if (stx instanceof SyntaxSexp)
         {
-            return quasiSyntax(eval, env, (SyntaxSexp) stx);
+            return invokeQuasi(eval, env, (SyntaxSexp) stx, depth);
         }
         else
         {
@@ -96,7 +115,8 @@ final class QuasiSyntaxKeyword
         }
     }
 
-    SyntaxValue quasiSyntax(Evaluator eval, Environment env, SyntaxSexp stx)
+    SyntaxValue invokeQuasi(Evaluator eval, Environment env, SyntaxSexp stx,
+                            int depth)
         throws FusionException
     {
         int size = stx.size();
@@ -105,13 +125,33 @@ final class QuasiSyntaxKeyword
         if (size == 2)
         {
             SyntaxValue first = stx.get(0);
-            if (first instanceof SyntaxSymbol
-                && "unsyntax".equals(((SyntaxSymbol)first).stringValue()))
+            if (first instanceof SyntaxSymbol)
             {
-                FusionValue unquoted = eval.eval(env, stx.get(1));
+                // TODO test using bindings
+                String name = ((SyntaxSymbol)first).stringValue();
+                if ("unsyntax".equals(name))
+                {
+                    if (depth == 0)
+                    {
+                        FusionValue unquoted = eval.eval(env, stx.get(1));
+                        try
+                        {
+                            return (SyntaxValue) unquoted;
+                        }
+                        catch (ClassCastException e) {}
 
-                // TODO type check
-                return (SyntaxValue) unquoted;
+                        String message =
+                            "Result of " + displayToString(stx) +
+                            " isn't a syntax value: " +
+                            displayToString(unquoted);
+                        throw new ContractFailure(message);
+                    }
+                    depth--;
+                }
+                else if ("quasisyntax".equals(name))
+                {
+                    depth++;
+                }
             }
         }
 
@@ -119,7 +159,7 @@ final class QuasiSyntaxKeyword
         for (int i = 0; i < size; i++)
         {
             SyntaxValue orig = stx.get(i);
-            children[i] = quasiSyntax(eval, env, orig);
+            children[i] = invokeQuasi(eval, env, orig, depth);
         }
         return SyntaxSexp.make(stx.getLocation(), children);
     }

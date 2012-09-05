@@ -2,10 +2,6 @@
 
 package com.amazon.fusion;
 
-
-/**
- *
- */
 final class MacroTransformer
     extends KeywordValue
 {
@@ -14,7 +10,7 @@ final class MacroTransformer
 
     MacroTransformer(Procedure transformer)
     {
-        super(null, null); // TODO
+        super(null, null); // TODO Get docs from declaration, like procedures?
         myTransformer = transformer;
     }
 
@@ -24,8 +20,20 @@ final class MacroTransformer
     {
         try
         {
-            // TODO error check
-            return (SyntaxValue) eval.applyNonTail(myTransformer, expr);
+            FusionValue expanded = eval.applyNonTail(myTransformer, expr);
+
+            try
+            {
+                return (SyntaxValue) expanded;
+            }
+            catch (ClassCastException e)
+            {
+                String message =
+                    "Transformer returned non-syntax result: " +
+                     displayToString(expanded);
+                throw new SyntaxFailure(myTransformer.identify(), message,
+                                        expr);
+            }
         }
         catch (SyntaxFailure e)
         {
@@ -50,12 +58,11 @@ final class MacroTransformer
         return expanded.prepare(eval, env);
     }
 
+
     @Override
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
-        Object resultFv = eval.applyNonTail(myTransformer, expr);
-        // TODO error check
-        return eval.bounceTailExpression(env, resultFv);
+        throw new IllegalStateException();
     }
 }

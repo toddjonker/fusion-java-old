@@ -109,4 +109,21 @@
 (check_equal (let ((t true) (if false)) (or2 if t)) true "or2")
 
 
+// Macro-defining macros require multiple syntax marks to maintain hygiene.
+
+(define_syntax make_plus_N  // usage: (make_plus_N name n)
+  (lambda (stx)
+    (let ((name (syntax_get stx 1))
+          (n    (syntax_get stx 2)))
+      (quasisyntax
+        (define_syntax (unsyntax name)  // usage: (name init)
+          (lambda (stx)
+            (let ((init (syntax_get stx 1)))
+              (quasisyntax
+                (let ((x (unsyntax init)))
+                  (+ x (unsyntax (unsyntax n))))))))))))
+
+(make_plus_N plus10 10)
+
+
 "PASSED" // Helpful output if you run this stand-alone

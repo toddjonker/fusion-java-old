@@ -184,7 +184,7 @@ final class SyntaxSymbol
     FusionValue eval(Evaluator eval, Environment env)
         throws FusionException
     {
-        assert myBinding != null;
+        assert myBinding != null : "No binding for " + myText;
         FusionValue result = myBinding.lookup(env);
         assert result != null : "No value for " + myText;
         return result;
