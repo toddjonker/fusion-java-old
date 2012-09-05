@@ -15,6 +15,16 @@ public class SyntaxTest
         eval("(use 'fusion/syntax')");
     }
 
+
+    @Test
+    public void quoteSyntaxArity()
+        throws Exception
+    {
+        expectSyntaxFailure("(quote_syntax)");
+        expectSyntaxFailure("(quote_syntax foo bar)");
+    }
+
+
     @Test
     public void syntaxAppendArity()
         throws Exception
