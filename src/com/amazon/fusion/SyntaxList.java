@@ -4,73 +4,71 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionUtils.cloneIfContained;
-import static com.amazon.fusion.SourceLocation.currentLocation;
+
 import com.amazon.ion.IonList;
-import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 final class SyntaxList
     extends SyntaxSequence
 {
-    private SyntaxList(String[] anns, SourceLocation loc)
-    {
-        super(anns, loc);
-    }
-
     /**
      * Instance will be {@link #isNullValue()} if children is null.
      *
-     * @param children this instance takes ownership and it must not be modified!
+     * @param children the children of the new list.
+     * This method takes ownership of the array; the array and its elements
+     * must not be changed by calling code afterwards!
+     * @param anns must not be null.
      */
-    private SyntaxList(String[] anns, SourceLocation loc,
-                       List<SyntaxValue> children)
+    private SyntaxList(SyntaxValue[] children, String[] anns,
+                       SourceLocation loc)
     {
-        super(anns, loc, children);
+        super(children, anns, loc);
     }
 
-
-    static SyntaxList read(IonReader source, String[] anns)
+    /** Copy constructor shares children and replaces unpushed wraps. */
+    private SyntaxList(SyntaxList that, SyntaxWraps wraps)
     {
-        SourceLocation loc = currentLocation(source);
-        SyntaxList seq = new SyntaxList(anns, loc, readChildren(source));
-        return seq;
+        super(that, wraps);
     }
+
 
     /**
      * Instance will be {@link #isNullValue()} if children is null.
+
+     * @param children the children of the new list.
+     * This method takes ownership of the array; the array and its elements
+     * must not be changed by calling code afterwards!
+     * @param anns must not be null.
+     */
+    static SyntaxList make(SyntaxValue[] children, String[] anns,
+                           SourceLocation loc)
+    {
+        return new SyntaxList(children, anns, loc);
+    }
+
+
+    /**
+     * Instance will be {@link #isNullValue()} if children is null.
+
+     * @param children the children of the new list.
+     * This method takes ownership of the array; the array and its elements
+     * must not be changed by calling code afterwards!
      */
     static SyntaxList make(SourceLocation loc, SyntaxValue... children)
     {
-        SyntaxList seq;
-        if (children == null)
-        {
-            seq = new SyntaxList(EMPTY_STRING_ARRAY, loc);
-            assert seq.isNullValue();
-        }
-        else
-        {
-            List<SyntaxValue> childs = Arrays.asList(children);
-            seq = new SyntaxList(EMPTY_STRING_ARRAY, loc, childs);
-        }
-
-        return seq;
+        return new SyntaxList(children, EMPTY_STRING_ARRAY, loc);
     }
 
-    /**
-     * Instance will be {@link #isNullValue()} if children is null.
-     *
-     * @param children this instance takes ownership and it must not be modified!
-     */
-    static SyntaxList make(SourceLocation loc, List<SyntaxValue> children)
+
+    @Override
+    SyntaxList copyReplacingWraps(SyntaxWraps wraps)
     {
-        return new SyntaxList(EMPTY_STRING_ARRAY, loc, children);
+        return new SyntaxList(this, wraps);
     }
 
 
@@ -89,7 +87,7 @@ final class SyntaxList
 
 
     @Override
-    SyntaxList makeSimilar(List<SyntaxValue> children)
+    SyntaxList makeSimilar(SyntaxValue[] children)
     {
         return make(null, children);
     }
@@ -99,7 +97,6 @@ final class SyntaxList
     SyntaxValue prepare(Evaluator eval, Environment env)
         throws SyntaxFailure
     {
-        pushAnyWraps();          // Wraps go away if we bail out on empty list
         int len = size();
         if (len == 0) return this;
 
@@ -114,6 +111,7 @@ final class SyntaxList
         SyntaxList expanded = SyntaxList.make(this.getLocation(), children);
         return expanded;
     }
+
 
     @Override
     public FusionValue eval(Evaluator eval, Environment env)

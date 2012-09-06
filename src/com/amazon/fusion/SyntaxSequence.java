@@ -2,74 +2,81 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonReader;
+import static java.lang.System.arraycopy;
+import static java.util.Arrays.copyOfRange;
+
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 abstract class SyntaxSequence
     extends SyntaxContainer
 {
-    private final List<SyntaxValue> myChildren;
+    /**
+     * Both the array and its content may be shared with other instances.
+     * When we push down wraps, we copy the array and the children.
+     * We push lazily to aggregate as many wraps here and only push once.
+     * That avoids repeated cloning of the children.
+     */
+    private SyntaxValue[] myChildren;
 
-    SyntaxSequence(String[] anns, SourceLocation loc)
-    {
-        super(anns, loc);
-        myChildren = null;
-    }
 
     /**
      * Instance will be {@link #isNullValue()} if children is null.
      *
-     * @param children this instance takes ownership and it must not be modified!
+     * @param children the children of the new list.
+     * This method takes ownership of the array; the array and its elements
+     * must not be changed by calling code afterwards!
+     * @param anns must not be null.
      */
-    SyntaxSequence(String[] anns, SourceLocation loc,
-                   List<SyntaxValue> children)
+    SyntaxSequence(SyntaxValue[] children, String[] anns, SourceLocation loc)
     {
-        super(anns, loc);
+        super(anns, loc, null);
         myChildren = children;
     }
 
-
-    static List<SyntaxValue> readChildren(IonReader source)
+    /**
+     * Copy constructor, shares the myChildren array and replaces wraps.
+     * The array will be copied when wraps are pushed but not before.
+     */
+    SyntaxSequence(SyntaxSequence that, SyntaxWraps wraps)
     {
-        if (source.isNullValue()) return null;
-
-        List<SyntaxValue> children = new ArrayList<SyntaxValue>();
-
-        source.stepIn();
-        while (source.next() != null)
-        {
-            SyntaxValue child = Syntax.read(source);
-            children.add(child);
-        }
-        source.stepOut();
-
-        return children;
+        super(that.getAnnotations(), that.getLocation(), wraps);
+        assert that.myChildren.length != 0 && wraps != null;
+        myChildren = that.myChildren;
     }
 
 
-    void pushAnyWraps()
+    /**
+     * If we have wraps cached here, push them down into fresh copies of all
+     * children. This must be called before exposing any children outside of
+     * this instance, so that it appears as if the wraps were pushed when they
+     * were created.
+     */
+    private void pushAnyWraps()
     {
-        if (myWraps != null)
+        if (myWraps != null)  // We only have wraps when we have children.
         {
-            if (myChildren != null)
+            boolean changed = false;
+            int len = myChildren.length;
+            SyntaxValue[] newChildren = new SyntaxValue[len];
+            for (int i = 0; i < len; i++)
             {
-                for (int i = 0; i < myChildren.size(); i++)
-                {
-                    SyntaxValue child = myChildren.get(i);
-                    SyntaxValue wrapped = child.addWraps(myWraps);
-                    myChildren.set(i, wrapped);
-                }
+                SyntaxValue child = myChildren[i];
+                SyntaxValue wrapped = child.addWraps(myWraps);
+                newChildren[i] = wrapped;
+                changed |= wrapped != child;
             }
+
+            if (changed) myChildren = newChildren; // Keep sharing when we can
+
             myWraps = null;
         }
     }
+
 
     @Override
     final boolean isNullValue()
@@ -77,6 +84,18 @@ abstract class SyntaxSequence
         return myChildren == null;
     }
 
+
+    @Override
+    final boolean hasNoChildren()
+    {
+        return myChildren == null || myChildren.length == 0;
+    }
+
+
+    final int size()
+    {
+        return (myChildren == null ? 0 : myChildren.length);
+    }
 
 
     /**
@@ -90,52 +109,18 @@ abstract class SyntaxSequence
         if (myChildren == null) return null;
 
         pushAnyWraps();
-        SyntaxValue[] extracted = new SyntaxValue[size()];
-        return myChildren.toArray(extracted);
+
+        int len = myChildren.length;
+        SyntaxValue[] extracted = new SyntaxValue[len];
+        arraycopy(myChildren, 0, extracted, 0, len);
+        return extracted;
     }
 
-
-    final int size()
-    {
-        return (myChildren == null ? 0 : myChildren.size());
-    }
 
     final SyntaxValue get(int index)
     {
         pushAnyWraps();
-        return myChildren.get(index);
-    }
-
-
-    /** Creates a new sequence of the same type, with the children. */
-    abstract SyntaxSequence makeSimilar(List<SyntaxValue> children);
-
-
-    /** Creates a new sequence with this + the other. */
-    SyntaxSequence makeAppended(SyntaxSequence that)
-    {
-        ArrayList<SyntaxValue> children =
-            new ArrayList<SyntaxValue>(this.size() + that.size());
-        if (this.myChildren != null)
-        {
-            this.pushAnyWraps();
-            children.addAll(this.myChildren);
-        }
-        if (that.myChildren != null)
-        {
-            that.pushAnyWraps();
-            children.addAll(that.myChildren);
-        }
-
-        return makeSimilar(children);
-    }
-
-    SyntaxSequence makeSubseq(int from, int to)
-    {
-        pushAnyWraps();
-        List<SyntaxValue> children =
-            (myChildren == null ? null : myChildren.subList(from, to));
-        return makeSimilar(children);
+        return myChildren[index];
     }
 
 
@@ -147,8 +132,52 @@ abstract class SyntaxSequence
     abstract IonSequence makeNull(ValueFactory factory);
 
 
-    /*final*/ @Override
-    FusionValue quote(Evaluator eval)
+    /** Creates a new sequence of the same type, with the children. */
+    abstract SyntaxSequence makeSimilar(SyntaxValue[] children);
+
+
+    /** Creates a new sequence with this + that. */
+    SyntaxSequence makeAppended(SyntaxSequence that)
+    {
+        int thisLength = this.size();
+        int thatLength = that.size();
+        int newLength  = thisLength + thatLength;
+
+        SyntaxValue[] children;
+        if (newLength == 0)
+        {
+            children = SyntaxValue.EMPTY_ARRAY;
+        }
+        else
+        {
+            children = new SyntaxValue[thisLength + thatLength];
+            if (thisLength != 0)
+            {
+                this.pushAnyWraps();
+                arraycopy(this.myChildren, 0, children, 0, thisLength);
+            }
+            if (thatLength != 0)
+            {
+                that.pushAnyWraps();
+                arraycopy(that.myChildren, 0, children, thisLength, thatLength);
+            }
+        }
+
+        return makeSimilar(children);
+    }
+
+
+    SyntaxSequence makeSubseq(int from, int to)
+    {
+        pushAnyWraps();
+        SyntaxValue[] children =
+            (myChildren == null ? null : copyOfRange(myChildren, from, to));
+        return makeSimilar(children);
+    }
+
+
+    @Override
+    final FusionValue quote(Evaluator eval)
     {
         ValueFactory factory = eval.getSystem();
         IonSequence seq = makeNull(factory);

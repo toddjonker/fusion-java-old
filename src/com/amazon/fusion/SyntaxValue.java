@@ -20,18 +20,11 @@ abstract class SyntaxValue
         STRING, SYMBOL, LIST, SEXP, STRUCT
     }
 
+    /** A zero-lengeth array. */
+    final static SyntaxValue[] EMPTY_ARRAY = new SyntaxValue[0];
 
     private final String[] myAnnotations;
     private final SourceLocation mySrcLoc;
-
-    /**
-     * The sequence of wraps around this value.
-     * Wraps only affect symbols; a wrapped symbol is an identifier.
-     * If this is a container, any wraps are just being held here lazily,
-     * waiting to be pushed down to all children (prepended onto their existing
-     * wraps) once any are requested.
-     */
-    SyntaxWraps myWraps;  // FIXME should be immutable
 
     /**
      *
@@ -45,14 +38,6 @@ abstract class SyntaxValue
         assert annotations != null : "annotations must not be null";
         myAnnotations = annotations;
         mySrcLoc = loc;
-    }
-
-    SyntaxValue(String[] annotations, SourceLocation loc, SyntaxWraps wraps)
-    {
-        assert annotations != null : "annotations must not be null";
-        myAnnotations = annotations;
-        mySrcLoc = loc;
-        myWraps = wraps;
     }
 
 
@@ -73,35 +58,22 @@ abstract class SyntaxValue
     abstract Type getType();
 
 
+    /**
+     * Prepends a wrap onto our existing wraps.
+     * This will return a new instance as necessary to preserve immutability.
+     */
     SyntaxValue addWrap(SyntaxWrap wrap)
     {
-        if (myWraps == null)
-        {
-            myWraps = SyntaxWraps.make(wrap);
-        }
-        else
-        {
-            myWraps = myWraps.addWrap(wrap);
-        }
-        return this;  // TODO fixme!
+        return this;
     }
 
     /**
      * Prepends a sequence of wraps onto our existing wraps.
-     * It is assumed that the given list will not be modified later and can
-     * therefore be shared.
+     * This will return a new instance as necessary to preserve immutability.
      */
     SyntaxValue addWraps(SyntaxWraps wraps)
     {
-        if (myWraps == null)
-        {
-            myWraps = wraps;
-        }
-        else
-        {
-            myWraps = myWraps.addWraps(wraps);
-        }
-        return this;  // TODO fixme!
+        return this;
     }
 
 

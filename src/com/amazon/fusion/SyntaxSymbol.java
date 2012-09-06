@@ -38,30 +38,32 @@ final class SyntaxSymbol
     /** Initialized during {@link #prepare} */
     private Binding myBinding;
 
+    final SyntaxWraps myWraps;
 
-    private SyntaxSymbol(String value, String[] anns, SourceLocation loc)
+    private SyntaxSymbol(String value, String[] anns, SourceLocation loc,
+                         SyntaxWraps wraps)
     {
         super(value, anns, loc);
+        myWraps = wraps;
     }
 
     static SyntaxSymbol make(String value)
     {
-        return new SyntaxSymbol(value, EMPTY_STRING_ARRAY, null);
+        return new SyntaxSymbol(value, EMPTY_STRING_ARRAY, null, null);
     }
 
     static SyntaxSymbol make(String value, String[] anns, SourceLocation loc)
     {
-        return new SyntaxSymbol(value, anns, loc);
+        return new SyntaxSymbol(value, anns, loc, null);
     }
 
-    SyntaxSymbol copy(SyntaxWraps wraps)
+    private SyntaxSymbol copyReplacingWraps(SyntaxWraps wraps)
     {
         // We intentionally don't copy the binding, since the wraps are
         // probably different, so the binding may be different.
 
         SyntaxSymbol copy =
-            new SyntaxSymbol(myText, getAnnotations(), getLocation());
-        copy.myWraps = wraps;  // TODO thread through constructors
+            new SyntaxSymbol(myText, getAnnotations(), getLocation(), wraps);
         return copy;
     }
 
@@ -70,7 +72,7 @@ final class SyntaxSymbol
         if (myWraps == null) return this;
         SyntaxWraps wraps = myWraps.stripImmediateEnvWrap(env);
         if (wraps == myWraps) return this;
-        return copy(wraps);
+        return copyReplacingWraps(wraps);
     }
 
     @Override
@@ -92,7 +94,7 @@ final class SyntaxSymbol
         {
             newWraps = myWraps.addWrap(wrap);
         }
-        return copy(newWraps);
+        return copyReplacingWraps(newWraps);
     }
 
     @Override
@@ -107,7 +109,7 @@ final class SyntaxSymbol
         {
             newWraps = myWraps.addWraps(wraps);
         }
-        return copy(newWraps);
+        return copyReplacingWraps(newWraps);
     }
 
 

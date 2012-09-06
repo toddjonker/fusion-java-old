@@ -3,47 +3,60 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
-import static com.amazon.fusion.SourceLocation.currentLocation;
+
 import com.amazon.fusion.Environment.Binding;
-import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.List;
 
 final class SyntaxSexp
     extends SyntaxSequence
 {
-    private SyntaxSexp(String[] anns, SourceLocation loc)
-    {
-        super(anns, loc);
-    }
-
     /**
      * Instance will be {@link #isNullValue()} if children is null.
      *
-     * @param children this instance takes ownership and it must not be modified!
+     * @param children the children of the new sexp.
+     * This method takes ownership of the array; the array and its elements
+     * must not be changed by calling code afterwards!
+     * @param anns must not be null.
      */
-    private SyntaxSexp(String[] anns, SourceLocation loc,
-                       List<SyntaxValue> children)
+    private SyntaxSexp(SyntaxValue[] children, String[] anns,
+                       SourceLocation loc)
     {
-        super(anns, loc, children);
+        super(children, anns, loc);
     }
 
-    static SyntaxSexp read(IonReader source, String[] anns)
+    /** Copy constructor shares children and replaces unpushed wraps. */
+    private SyntaxSexp(SyntaxSexp that, SyntaxWraps wraps)
     {
-        SourceLocation loc = currentLocation(source);
-        SyntaxSexp seq = new SyntaxSexp(anns, loc, readChildren(source));
-        return seq;
+        super(that, wraps);
     }
 
 
     /**
      * Instance will be {@link #isNullValue()} if children is null.
+
+     * @param children the children of the new sexp.
+     * This method takes ownership of the array; the array and its elements
+     * must not be changed by calling code afterwards!
+     * @param anns must not be null.
+     */
+    static SyntaxSexp make(SyntaxValue[] children, String[] anns,
+                           SourceLocation loc)
+    {
+        return new SyntaxSexp(children, anns, loc);
+    }
+
+    /**
+     * Instance will be {@link #isNullValue()} if children is null.
+
+     * @param children the children of the new sexp.
+     * This method takes ownership of the array; the array and its elements
+     * must not be changed by calling code afterwards!
      */
     static SyntaxSexp make(SyntaxValue... children)
     {
@@ -52,32 +65,34 @@ final class SyntaxSexp
 
     /**
      * Instance will be {@link #isNullValue()} if children is null.
+
+     * @param children the children of the new sexp.
+     * This method takes ownership of the array; the array and its elements
+     * must not be changed by calling code afterwards!
      */
     static SyntaxSexp make(SourceLocation loc, SyntaxValue... children)
     {
-        SyntaxSexp seq;
-        if (children == null)
-        {
-            seq = new SyntaxSexp(EMPTY_STRING_ARRAY, loc);
-            assert seq.isNullValue();
-        }
-        else
-        {
-            List<SyntaxValue> childs = Arrays.asList(children);
-            seq = new SyntaxSexp(EMPTY_STRING_ARRAY, loc, childs);
-        }
-
-        return seq;
+        return new SyntaxSexp(children, EMPTY_STRING_ARRAY, loc);
     }
 
     /**
      * Instance will be {@link #isNullValue()} if children is null.
      *
-     * @param children this instance takes ownership and it must not be modified!
+     * @param children this instance takes ownership of the child elements
+     * and they must not be changed by calling code afterwards!
      */
     static SyntaxSexp make(SourceLocation loc, List<SyntaxValue> children)
     {
-        return new SyntaxSexp(EMPTY_STRING_ARRAY, loc, children);
+        SyntaxValue[] childs = new SyntaxValue[children.size()];
+        children.toArray(childs);
+        return new SyntaxSexp(childs, EMPTY_STRING_ARRAY, loc);
+    }
+
+
+    @Override
+    SyntaxSexp copyReplacingWraps(SyntaxWraps wraps)
+    {
+        return new SyntaxSexp(this, wraps);
     }
 
 
@@ -96,7 +111,7 @@ final class SyntaxSexp
 
 
     @Override
-    SyntaxSexp makeSimilar(List<SyntaxValue> children)
+    SyntaxSexp makeSimilar(SyntaxValue[] children)
     {
         return make(null, children);
     }

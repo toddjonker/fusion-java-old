@@ -62,7 +62,6 @@ final class QuasiSyntaxKeyword
                              int depth)
         throws SyntaxFailure
     {
-        stx.pushAnyWraps();                // Gets rid of wraps when size == 0
         int size = stx.size();
         if (size == 0) return stx;
 

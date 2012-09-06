@@ -5,8 +5,71 @@ package com.amazon.fusion;
 abstract class SyntaxContainer
     extends SyntaxValue
 {
-    SyntaxContainer(String[] anns, SourceLocation loc)
+    /**
+     * The sequence of wraps around this value.
+     * Semantically, wraps only affect symbols and they should act as if they
+     * are always pushed down immediately.  However, we cache them at
+     * containers as an optimization. Any wraps are just being held here
+     * lazily, waiting to be pushed down to all children once one is requested.
+     */
+    SyntaxWraps myWraps;
+
+    SyntaxContainer(String[] anns, SourceLocation loc, SyntaxWraps wraps)
     {
         super(anns, loc);
+        myWraps = wraps;
+    }
+
+
+    /**
+     * Equivalent to size() == 0.  Computing size of {@link SyntaxStruct} is
+     * expensive so we do this instead.
+     */
+    abstract boolean hasNoChildren();
+
+    /**
+     * Only called when this container has children.
+     * @param wraps is not null.
+     */
+    abstract SyntaxValue copyReplacingWraps(SyntaxWraps wraps);
+
+
+    @Override
+    final SyntaxValue addWrap(SyntaxWrap wrap)
+    {
+        // Don't bother if this is an empty container.
+        if (hasNoChildren()) return this;
+
+        SyntaxWraps newWraps;
+        if (myWraps == null)
+        {
+            newWraps = SyntaxWraps.make(wrap);
+        }
+        else
+        {
+            newWraps = myWraps.addWrap(wrap);
+        }
+        return copyReplacingWraps(newWraps);
+    }
+
+    /**
+     * Prepends a sequence of wraps onto our existing wraps.
+     */
+    @Override
+    SyntaxValue addWraps(SyntaxWraps wraps)
+    {
+        // Don't bother if this is an empty container.
+        if (hasNoChildren()) return this;
+
+        SyntaxWraps newWraps;
+        if (myWraps == null)
+        {
+            newWraps = wraps;
+        }
+        else
+        {
+            newWraps = myWraps.addWraps(wraps);
+        }
+        return copyReplacingWraps(newWraps);
     }
 }

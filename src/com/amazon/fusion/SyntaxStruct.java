@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.cloneIfContained;
 import static com.amazon.fusion.SourceLocation.currentLocation;
+
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonType;
@@ -21,19 +22,45 @@ final class SyntaxStruct
     /**
      * For repeated fields, the value is SyntaxValue[] otherwise it's
      * SyntaxValue.
+     * <p>
+     * <em>DO NOT MUTATE THIS OBJECT AND ITS CONTENTS AFTER CONSTRUCTION!</em>
      */
     private final Map<String, Object> myMap;
 
 
     /**
-     * @param map may be null
+     * @param map may be null but may only be non-null when map has children.
      */
     private SyntaxStruct(Map<String, Object> map, String[] anns,
-                         SourceLocation loc)
+                         SourceLocation loc, SyntaxWraps wraps)
     {
-        super(anns, loc);
+        super(anns, loc, wraps);
+        assert (wraps == null) || (map != null && ! map.isEmpty());
         myMap = map;
     }
+
+
+    @Override
+    boolean isNullValue()
+    {
+        return myMap == null;
+    }
+
+
+    @Override
+    boolean hasNoChildren()
+    {
+        return myMap == null || myMap.isEmpty();
+    }
+
+
+    @Override
+    SyntaxStruct copyReplacingWraps(SyntaxWraps wraps)
+    {
+        // We can share the Map because its never mutated.
+        return new SyntaxStruct(myMap, getAnnotations(), getLocation(), wraps);
+    }
+
 
     static SyntaxStruct read(IonReader source, String[] anns)
     {
@@ -75,7 +102,7 @@ final class SyntaxStruct
             source.stepOut();
         }
 
-        return new SyntaxStruct(map, anns, loc);
+        return new SyntaxStruct(map, anns, loc, null);
     }
 
 
@@ -88,6 +115,9 @@ final class SyntaxStruct
 
     SyntaxValue get(String fieldName)
     {
+        // This should only be called at runtime, after wraps are pushed.
+        assert myWraps == null;
+
         Object result = myMap.get(fieldName);
         if (result == null) return null;
         if (result instanceof SyntaxValue)
@@ -102,6 +132,10 @@ final class SyntaxStruct
     @Override
     FusionValue quote(Evaluator eval)
     {
+        // TODO quote should strip wraps at compile time
+        // This should only be called at runtime, after wraps are pushed.
+        //assert myWraps == null;
+
         ValueFactory vf = eval.getSystem();
         IonStruct resultDom;
         if (isNullValue())
@@ -148,9 +182,14 @@ final class SyntaxStruct
     SyntaxValue prepare(Evaluator eval, Environment env)
         throws SyntaxFailure
     {
+        Map<String, Object> newMap = null;
         if (myMap != null)
         {
-            for (Map.Entry<String, Object> entry : myMap.entrySet())
+            // Make a copy of the map, then mutate it to replace children
+            // as necessary.
+            newMap = new HashMap<String, Object>(myMap);
+
+            for (Map.Entry<String, Object> entry : newMap.entrySet())
             {
                 Object value = entry.getValue();
                 if (value instanceof SyntaxValue)
@@ -166,26 +205,34 @@ final class SyntaxStruct
                 else
                 {
                     SyntaxValue[] children = (SyntaxValue[]) value;
-                    for (int i = 0; i < children.length; i++)
+                    int childCount = children.length;
+
+                    SyntaxValue[] newChildren = new SyntaxValue[childCount];
+                    for (int i = 0; i < childCount; i++)
                     {
                         SyntaxValue subform = children[i];
                         if (myWraps != null)
                         {
                             subform = subform.addWraps(myWraps);
                         }
-                        children[i] = subform.prepare(eval, env);
+                        newChildren[i] = subform.prepare(eval, env);
                     }
+                    entry.setValue(newChildren);
                 }
             }
-            myWraps = null;
         }
-        return this;
+
+        // Wraps have been pushed down so the copy doesn't need them.
+        return new SyntaxStruct(newMap, getAnnotations(), getLocation(), null);
     }
 
     @Override
     FusionValue eval(Evaluator eval, Environment env)
         throws FusionException
     {
+        // This should only be called at runtime, after wraps are pushed.
+        assert myWraps == null;
+
         ValueFactory vf = eval.getSystem();
         IonStruct resultDom;
         if (isNullValue())
@@ -256,12 +303,5 @@ final class SyntaxStruct
             }
             writer.stepOut();
         }
-    }
-
-
-    @Override
-    boolean isNullValue()
-    {
-        return myMap == null;
     }
 }
