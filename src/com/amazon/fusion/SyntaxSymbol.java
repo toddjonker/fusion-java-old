@@ -57,6 +57,9 @@ final class SyntaxSymbol
         return new SyntaxSymbol(value, anns, loc, null);
     }
 
+    /**
+     * @param wraps may be null.
+     */
     private SyntaxSymbol copyReplacingWraps(SyntaxWraps wraps)
     {
         // We intentionally don't copy the binding, since the wraps are
@@ -110,6 +113,14 @@ final class SyntaxSymbol
             newWraps = myWraps.addWraps(wraps);
         }
         return copyReplacingWraps(newWraps);
+    }
+
+
+    @Override
+    SyntaxSymbol stripWraps()
+    {
+        if (myWraps == null) return this;
+        return copyReplacingWraps(null);
     }
 
 

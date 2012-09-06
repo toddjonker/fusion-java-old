@@ -83,6 +83,18 @@ abstract class SyntaxValue
         return addWrap(wrap);
     }
 
+
+    /**
+     * Removes any wraps from this value and any children.
+     * @return an equivalent syntax value with no wraps.
+     * May return this instance when that's already the case.
+     */
+    SyntaxValue stripWraps()
+    {
+        return this;
+    }
+
+
     SyntaxValue prepare(Evaluator eval, Environment env)
         throws SyntaxFailure
     {

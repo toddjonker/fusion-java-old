@@ -2,9 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
-
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
@@ -79,6 +79,30 @@ abstract class SyntaxSequence
 
 
     @Override
+    SyntaxSequence stripWraps()
+    {
+        if (hasNoChildren()) return this;  // No children, no marks, all okay!
+
+        // Even if we have no marks, some children may have them.
+        boolean mustCopy = (myWraps != null);
+
+        int len = myChildren.length;
+        SyntaxValue[] newChildren = new SyntaxValue[len];
+        for (int i = 0; i < len; i++)
+        {
+            SyntaxValue child = myChildren[i];
+            SyntaxValue stripped = child.stripWraps();
+            newChildren[i] = stripped;
+            mustCopy |= stripped != child;
+        }
+
+        if (! mustCopy) return this;
+
+        return makeSimilar(newChildren, getAnnotations(), getLocation());
+    }
+
+
+    @Override
     final boolean isNullValue()
     {
         return myChildren == null;
@@ -132,8 +156,14 @@ abstract class SyntaxSequence
     abstract IonSequence makeNull(ValueFactory factory);
 
 
-    /** Creates a new sequence of the same type, with the children. */
-    abstract SyntaxSequence makeSimilar(SyntaxValue[] children);
+    /**
+     * Creates a new sequence of the same type, with the children.
+     *
+     * @param anns must not be null.
+     */
+    abstract SyntaxSequence makeSimilar(SyntaxValue[] children,
+                                        String[] anns,
+                                        SourceLocation loc);
 
 
     /** Creates a new sequence with this + that. */
@@ -163,7 +193,7 @@ abstract class SyntaxSequence
             }
         }
 
-        return makeSimilar(children);
+        return makeSimilar(children, EMPTY_STRING_ARRAY, null);
     }
 
 
@@ -172,7 +202,7 @@ abstract class SyntaxSequence
         pushAnyWraps();
         SyntaxValue[] children =
             (myChildren == null ? null : copyOfRange(myChildren, from, to));
-        return makeSimilar(children);
+        return makeSimilar(children, EMPTY_STRING_ARRAY, null);
     }
 
 

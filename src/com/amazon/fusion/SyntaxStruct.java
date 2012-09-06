@@ -62,6 +62,63 @@ final class SyntaxStruct
     }
 
 
+    @Override
+    SyntaxStruct stripWraps()
+    {
+        if (hasNoChildren()) return this;  // No children, no marks, all okay!
+
+        // Even if we have no marks, some children may have them.
+        boolean mustReplace = (myWraps != null);
+
+        // Make a copy of the map, then mutate it to replace children
+        // as necessary.
+        Map<String, Object> newMap = new HashMap<String, Object>(myMap);
+
+        for (Map.Entry<String, Object> entry : newMap.entrySet())
+        {
+            Object value = entry.getValue();
+            if (value instanceof SyntaxValue)
+            {
+                SyntaxValue child = (SyntaxValue) value;
+                SyntaxValue stripped = child.stripWraps();
+                if (stripped != child)
+                {
+                    entry.setValue(stripped);
+                    mustReplace = true;
+                }
+            }
+            else
+            {
+                SyntaxValue[] children = (SyntaxValue[]) value;
+                int childCount = children.length;
+
+                boolean mustReplaceArray = false;
+                SyntaxValue[] newChildren = new SyntaxValue[childCount];
+                for (int i = 0; i < childCount; i++)
+                {
+                    SyntaxValue child = children[i];
+                    SyntaxValue stripped = child.stripWraps();
+                    if (stripped != child)
+                    {
+                        newChildren[i] = stripped;
+                        mustReplaceArray = true;
+                    }
+                }
+
+                if (mustReplaceArray)
+                {
+                    entry.setValue(newChildren);
+                    mustReplace = true;
+                }
+            }
+        }
+
+        if (! mustReplace) return this;
+
+        return new SyntaxStruct(newMap, getAnnotations(), getLocation(), null);
+    }
+
+
     static SyntaxStruct read(IonReader source, String[] anns)
     {
         SourceLocation loc = currentLocation(source);

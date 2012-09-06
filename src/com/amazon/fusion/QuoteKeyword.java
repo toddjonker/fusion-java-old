@@ -20,9 +20,14 @@ final class QuoteKeyword
     SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
+        SyntaxChecker check = check(source);
         check.arityExact(2);
 
+        SyntaxValue[] children = source.extract();
+        SyntaxValue quoted = children[1];
+        children[1] = quoted.stripWraps();
+
+        source = SyntaxSexp.make(source.getLocation(), children);
         return source;
     }
 

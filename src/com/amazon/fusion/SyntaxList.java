@@ -87,9 +87,10 @@ final class SyntaxList
 
 
     @Override
-    SyntaxList makeSimilar(SyntaxValue[] children)
+    SyntaxList makeSimilar(SyntaxValue[] children, String[] anns,
+                           SourceLocation loc)
     {
-        return make(null, children);
+        return new SyntaxList(children, anns, loc);
     }
 
 

@@ -111,9 +111,10 @@ final class SyntaxSexp
 
 
     @Override
-    SyntaxSexp makeSimilar(SyntaxValue[] children)
+    SyntaxSexp makeSimilar(SyntaxValue[] children, String[] anns,
+                           SourceLocation loc)
     {
-        return make(null, children);
+        return new SyntaxSexp(children, anns, loc);
     }
 
 
