@@ -183,23 +183,24 @@ abstract class SyntaxSequence
         IonSequence seq = makeNull(factory);
         seq.setTypeAnnotations(getAnnotations());
 
-        int size = size();
-
-        if (size == 0)
+        if (! isNullValue())
         {
-            seq.clear();
-        }
-        else
-        {
-            for (int i = 0; i < size; i++)
+            int size = size();
+            if (size == 0)
             {
-                SyntaxValue s = get(i);
-                FusionValue fv = s.quote(eval);
-                IonValue iv = FusionValue.toIonValue(fv, factory);
-                seq.add(iv);
+                seq.clear();  // Turns null sequence into empty sequence
+            }
+            else
+            {
+                for (int i = 0; i < size; i++)
+                {
+                    SyntaxValue s = get(i);
+                    FusionValue fv = s.quote(eval);
+                    IonValue iv = FusionValue.toIonValue(fv, factory);
+                    seq.add(iv);
+                }
             }
         }
-
         return new DomValue(seq);
     }
 

@@ -99,6 +99,19 @@ public class LiteralEvalTest
     }
 
     @Test
+    public void testQuoteNulls()
+        throws Exception
+    {
+        assertEval("null",        "(quote null.null)");
+        assertEval("null.bool",   "(quote null.bool)");
+        assertEval("null.string", "(quote null.string)");
+        assertEval("null.symbol", "(quote null.symbol)");
+        assertEval("null.sexp",   "(quote null.sexp)");
+        assertEval("null.list",   "(quote null.list)");
+        assertEval("null.struct", "(quote null.struct)");
+    }
+
+    @Test
     public void testQuoteArity()
         throws Exception
     {
