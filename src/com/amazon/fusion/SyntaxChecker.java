@@ -6,29 +6,40 @@ package com.amazon.fusion;
 /**
  * Helper class for checking syntactic forms.
  */
-final class SyntaxChecker
+class SyntaxChecker
 {
-    private final String myFormName;
-    private final SyntaxSexp myForm;
+    final String myFormName;
+    final SyntaxSequence myForm;
 
-    SyntaxChecker(String formName, SyntaxSexp form)
+    SyntaxChecker(String formName, SyntaxSequence form)
     {
         myFormName = formName;
         myForm = form;
     }
 
 
+    SyntaxSequence form()
+    {
+        return myForm;
+    }
+
+
     //========================================================================
 
-    final SyntaxFailure failure(String message)
+    SyntaxFailure failure(String message)
     {
         return new SyntaxFailure(myFormName, message, myForm);
+    }
+
+    SyntaxFailure failure(String message, SyntaxValue subform)
+    {
+        return new SyntaxFailure(myFormName, message, subform, myForm);
     }
 
     /**
      * Arity includes the initial keyword!
      */
-    final void arityExact(int count)
+    void arityExact(int count)
         throws SyntaxFailure
     {
         if (myForm.size() != count)
@@ -135,7 +146,76 @@ final class SyntaxChecker
         }
         catch (ClassCastException e) {}
 
-        throw new SyntaxFailure(myFormName,
-                                "expected " + expectation, form);
+        throw failure("expected " + expectation, form);
+    }
+
+    //========================================================================
+
+    SyntaxChecker subformSexp(String description, int index)
+        throws SyntaxFailure
+    {
+        SyntaxSexp subsexp = requiredSexp(description, index);
+        return new SubformChecker(this, description, subsexp);
+    }
+
+    SyntaxChecker subformSeq(String description, int index)
+        throws SyntaxFailure
+    {
+        SyntaxSequence subsexp = requiredSequence(description, index);
+        return new SubformChecker(this, description, subsexp);
+    }
+
+    static class SubformChecker extends SyntaxChecker
+    {
+        private final SyntaxChecker myBaseForm;
+
+        SubformChecker(SyntaxChecker base, String description,
+                       SyntaxSequence form)
+        {
+            super(description, form);
+            myBaseForm = base;
+        }
+
+        @Override
+        SyntaxFailure failure(String message)
+        {
+            return new SyntaxFailure(myBaseForm.myFormName, message,
+                                     myForm, myBaseForm.myForm);
+        }
+
+        @Override
+        SyntaxFailure failure(String message, SyntaxValue subform)
+        {
+            return new SyntaxFailure(myBaseForm.myFormName, message,
+                                     subform, myBaseForm.myForm);
+        }
+
+        @Override
+        void arityExact(int count)
+            throws SyntaxFailure
+        {
+            if (myForm.size() != count)
+            {
+                String message =
+                    "expected " + count + " subforms in " + myFormName;
+                throw failure(message);
+            }
+        }
+
+        @Override
+        SyntaxChecker subformSexp(String description, int index)
+            throws SyntaxFailure
+        {
+            SyntaxSexp subsexp = requiredSexp(description, index);
+            return new SubformChecker(myBaseForm, description, subsexp);
+        }
+
+        @Override
+        SyntaxChecker subformSeq(String description, int index)
+            throws SyntaxFailure
+        {
+            SyntaxSequence subsexp = requiredSequence(description, index);
+            return new SubformChecker(myBaseForm, description, subsexp);
+        }
     }
 }

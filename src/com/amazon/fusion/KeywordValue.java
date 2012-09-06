@@ -82,6 +82,11 @@ abstract class KeywordValue
     //========================================================================
     // Type-checking helpers
 
+    final SyntaxChecker check(SyntaxSexp form)
+    {
+        return new SyntaxChecker(getInferredName(), form);
+    }
+
 
     final SyntaxValue requiredForm(String expectation,
                                   int argNum,

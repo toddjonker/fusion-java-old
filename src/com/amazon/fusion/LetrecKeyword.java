@@ -20,19 +20,21 @@ final class LetrecKeyword
     SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
+        SyntaxChecker check = check(source);
         final int letrecExprSize = check.arityAtLeast(3);
 
-        SyntaxSexp bindingForms =
-            check.requiredSexp("sequence of bindings", 1);
+        SyntaxChecker checkBindings =
+            check.subformSeq("sequence of bindings", 1);
+        SyntaxSequence bindingForms = checkBindings.form();
 
         final int numBindings = bindingForms.size();
         SyntaxSymbol[] boundNames = new SyntaxSymbol[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
-            SyntaxSexp binding =
-                requiredSexp("name/value binding", i, bindingForms);
-            boundNames[i] = requiredSymbol("name/value binding", 0, binding);
+            SyntaxChecker checkPair =
+                checkBindings.subformSexp("binding pair", i);
+            checkPair.arityExact(2);
+            boundNames[i] = checkPair.requiredSymbol("bound name", 0);
         }
 
         Environment bodyEnv = new LocalEnvironment(env, boundNames);
@@ -46,9 +48,9 @@ final class LetrecKeyword
             SyntaxSymbol name = boundNames[i].addWrap(localWrap);
             name.resolve();
 
+            // Already type- and arity-checked this above
             SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
-            SyntaxValue boundExpr =
-                requiredForm("name/value binding", 1, binding);
+            SyntaxValue boundExpr = binding.get(1);
             boundExpr = boundExpr.addWrap(localWrap);
             boundExpr = boundExpr.prepare(eval, bodyEnv);
             binding = SyntaxSexp.make(binding.getLocation(),

@@ -5,9 +5,6 @@ package com.amazon.fusion;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonValue;
 
-/**
- *
- */
 final class ForListKeyword
     extends KeywordValue
 {
@@ -24,11 +21,12 @@ final class ForListKeyword
     SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
+        SyntaxChecker check = check(source);
         check.arityAtLeast(2);
 
-        SyntaxSequence bindingForms =
-            check.requiredSequence("sequence of bindings", 1);
+        SyntaxChecker checkBindings =
+            check.subformSeq("sequence of bindings", 1);
+        SyntaxSequence bindingForms = checkBindings.form();
 
         final int numBindings = bindingForms.size();
         SyntaxSymbol[] boundNames    = new SyntaxSymbol[numBindings];
@@ -36,13 +34,13 @@ final class ForListKeyword
         SyntaxValue[]  expandedForms = new SyntaxValue [numBindings];
         for (int i = 0; i < numBindings; i++)
         {
-            SyntaxSexp binding =
-                requiredSexp("name/value binding", i, bindingForms);
-            boundNames[i] =
-                requiredSymbol("name/value binding", 0, binding);
+            SyntaxChecker checkPair =
+                checkBindings.subformSexp("binding pair", i);
+            checkPair.arityExact(2);
 
-            SyntaxValue subform =
-                requiredForm("name/value binding", 1, binding);
+            boundNames[i] = checkPair.requiredSymbol("bound name", 0);
+
+            SyntaxValue subform = checkPair.requiredForm("bound value", 1);
 
             // Bound values use the outer lexical environment
             boundValues[i] = subform.prepare(eval, env);

@@ -16,6 +16,15 @@ public class LambdaTest
     }
 
     @Test
+    public void testLambdaArity()
+        throws Exception
+    {
+        expectSyntaxFailure("(lambda)");
+        expectSyntaxFailure("(lambda (parm))");
+        expectSyntaxFailure("(lambda rest 12)"); // TODO FUSION-27 rest params
+    }
+
+    @Test
     public void testDefineLambda()
         throws Exception
     {

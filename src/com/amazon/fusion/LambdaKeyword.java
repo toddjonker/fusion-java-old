@@ -24,11 +24,14 @@ final class LambdaKeyword
     SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        int bodyStart;
+        SyntaxChecker check = check(source);
+        int arity = check.arityAtLeast(3);
 
-        SyntaxValue maybeDoc = source.get(2);
-        if (maybeDoc.getType() == SyntaxValue.Type.STRING
-            && source.size() > 3)
+        SyntaxValue[] children = source.extract();
+
+        int bodyStart;
+        SyntaxValue maybeDoc = children[2];
+        if (maybeDoc.getType() == SyntaxValue.Type.STRING && arity > 3)
         {
             bodyStart = 3;
         }
@@ -37,7 +40,7 @@ final class LambdaKeyword
             bodyStart = 2;
         }
 
-        SyntaxValue[] children = source.extract();
+        check.requiredSexp("formal parameters", 1);
         SyntaxSymbol[] params = determineParams((SyntaxSexp) children[1]);
 
         // We create a wrap even if there's no params, because there may be

@@ -44,6 +44,13 @@ public class BindingTest
 
 
     @Test
+    public void testNoBindings()
+        throws Exception
+    {
+        assertEval(2, "(let () 2)");
+    }
+
+    @Test
     public void testLetMultipleBodyForms()
         throws Exception
     {
@@ -60,8 +67,11 @@ public class BindingTest
         expectSyntaxFailure("(let 12 13)");
         expectSyntaxFailure("(let null.sexp 13)");
         expectSyntaxFailure("(let (12) 13)");
+        expectSyntaxFailure("(let (1 2) 13)");
         expectSyntaxFailure("(let (()) 13)");
+        expectSyntaxFailure("(let ((n 1 2)) 13)");
         expectSyntaxFailure("(let ((12)) 13)");
+        expectSyntaxFailure("(let ((1 2)) 13)");
         expectSyntaxFailure("(let ((name)) 13)");
         expectSyntaxFailure("(let ((name 1) ()) 13)");
         expectSyntaxFailure("(let ((name 1) (name2)) 13)");
@@ -116,9 +126,12 @@ public class BindingTest
         expectSyntaxFailure("(letrec 12 13)");
         expectSyntaxFailure("(letrec null.sexp 13)");
         expectSyntaxFailure("(letrec (12) 13)");
+        expectSyntaxFailure("(letrec (1 2) 13)");
         expectSyntaxFailure("(letrec (()) 13)");
         expectSyntaxFailure("(letrec ((12)) 13)");
+        expectSyntaxFailure("(letrec ((1 2)) 13)");
         expectSyntaxFailure("(letrec ((name)) 13)");
+        expectSyntaxFailure("(letrec ((name 1 2)) 13)");
         expectSyntaxFailure("(letrec ((name 1) ()) 13)");
         expectSyntaxFailure("(letrec ((name 1) (name2)) 13)");
     }

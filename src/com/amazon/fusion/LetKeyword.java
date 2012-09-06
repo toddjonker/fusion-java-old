@@ -29,28 +29,30 @@ final class LetKeyword
     SyntaxValue expand(Evaluator eval, SyntaxSexp source)
         throws SyntaxFailure
     {
+        SyntaxChecker check = check(source);
+        final int letExprSize = check.arityAtLeast(3);
+
         SyntaxSymbol loopName = checkForName(source);
         int bindingPos = (loopName == null ? 1 : 2);
-
-        final int letExprSize = source.size();
         if (letExprSize < bindingPos + 2)
         {
-            throw new SyntaxFailure(getEffectiveName(), "", source);
+            throw check.failure("no body");
         }
 
-        SyntaxSequence bindingForms =
-            requiredSequence("sequence of bindings", bindingPos, source);
-        int bindingCount = bindingForms.size();
+        SyntaxChecker checkBindings =
+            check.subformSeq("sequence of bindings", bindingPos);
+        SyntaxSequence bindingForms = checkBindings.form();
 
         // Build the lambda's formal parameter list
+        int bindingCount = bindingForms.size();
         SyntaxValue[] subforms = new SyntaxValue[bindingCount];
         for (int i = 0; i < bindingCount; i++)
         {
-            SyntaxValue bindingForm = bindingForms.get(i);
-            SyntaxSexp binding =
-                requiredSexp("name/value binding", bindingForm);
+            SyntaxChecker checkPair =
+                checkBindings.subformSexp("binding pair", i);
+            checkPair.arityExact(2);
             SyntaxSymbol boundName =
-                requiredSymbol("name/value binding", 0, binding);
+                checkPair.requiredSymbol("bound name", 0);
 
             subforms[i] = boundName;
         }
@@ -89,12 +91,9 @@ final class LetKeyword
 
         for (int i = 0; i < bindingForms.size(); i++)
         {
-            // Already type-checked this above
+            // Already type- and arity-checked this above
             SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
-            SyntaxValue boundValue =
-                requiredForm("name/value binding", 1, binding);
-
-            subforms[i + 1] = boundValue;
+            subforms[i + 1] = binding.get(1);
         }
 
         SyntaxSexp result = SyntaxSexp.make(source.getLocation(), subforms);
@@ -104,7 +103,8 @@ final class LetKeyword
     SyntaxSymbol checkForName(SyntaxSexp letExpr)
         throws SyntaxFailure
     {
-        SyntaxValue maybeName = requiredForm("", 1, letExpr);
+        SyntaxValue maybeName =
+            requiredForm("name or binding pairs", 1, letExpr);
         if (maybeName.getType() == SyntaxValue.Type.SYMBOL)
         {
             return (SyntaxSymbol) maybeName;

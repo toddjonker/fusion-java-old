@@ -8,6 +8,10 @@
 
 
 (check_list_eq
+  (for_list ((e [])) /* no body */)
+  [])
+
+(check_list_eq
   (for_list ((e [])) 73)
   [])
 
