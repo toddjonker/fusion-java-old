@@ -10,22 +10,15 @@ import java.util.Set;
 final class Namespace
     implements Environment
 {
-    final class NsBinding implements Binding
+    static final class NsBinding implements Binding
     {
         private final SyntaxSymbol myIdentifier;
         private final int myAddress;
 
         private NsBinding(SyntaxSymbol identifier, int address)
         {
-            assert
-                identifier == identifier.stripImmediateEnvWrap(Namespace.this);
             myIdentifier = identifier;
             myAddress = address;
-        }
-
-        Namespace getNamespace()
-        {
-            return Namespace.this;
         }
 
         SyntaxSymbol getIdentifier()
@@ -118,15 +111,6 @@ final class Namespace
         return source;
     }
 
-    boolean ownsBinding(Binding binding)
-    {
-        if (binding instanceof NsBinding)
-        {
-            NsBinding b = (NsBinding) binding;
-            return b.getNamespace() == this;
-        }
-        return false;
-    }
 
     /**
      * @param marks not null.

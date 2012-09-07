@@ -7,7 +7,7 @@ import java.util.Set;
 final class LocalEnvironment
     implements Environment
 {
-    final class LexicalBinding implements Binding
+    static final class LexicalBinding implements Binding
     {
         private final SyntaxSymbol myIdentifier;
         private final int myAddress;

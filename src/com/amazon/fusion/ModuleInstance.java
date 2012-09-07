@@ -50,7 +50,6 @@ class ModuleInstance
         @Override
         public FusionValue lookup(Environment store)
         {
-            // TODO optimize this path
             return myNamespace.lookup(myInternalBinding);
         }
 

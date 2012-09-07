@@ -337,7 +337,6 @@ final class ModuleKeyword
             Binding b = identifier.resolve();
             if (b instanceof NsBinding)
             {
-                assert moduleNamespace == ((NsBinding)b).getNamespace();
                 freeName = ((NsBinding)b).getIdentifier().stringValue();
             }
             else
