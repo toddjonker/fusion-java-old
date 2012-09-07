@@ -5,7 +5,6 @@ package com.amazon.fusion;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static java.lang.Boolean.TRUE;
 
-import com.amazon.fusion.Environment.Binding;
 import com.amazon.fusion.ModuleInstance.ModuleBinding;
 import com.amazon.fusion.Namespace.NsBinding;
 import java.util.ArrayList;

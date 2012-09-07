@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 
-import com.amazon.fusion.Environment.Binding;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 import java.util.Collections;

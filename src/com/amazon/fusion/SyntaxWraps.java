@@ -129,7 +129,7 @@ class SyntaxWraps
     /**
      * @return not null
      */
-    Environment.Binding resolve(SyntaxSymbol ident)
+    Binding resolve(SyntaxSymbol ident)
     {
         Iterator<SyntaxWrap> i = Arrays.asList(myWraps).iterator();
         Set<Integer> marks = new HashSet<Integer>();

@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertSame;
-import com.amazon.fusion.Environment.Binding;
 import org.junit.Test;
 
 public class NamespaceTest

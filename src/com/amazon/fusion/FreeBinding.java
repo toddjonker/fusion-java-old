@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.Environment.Binding;
 
 final class FreeBinding implements Binding
 {

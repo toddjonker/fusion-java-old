@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.Environment.Binding;
 import com.amazon.fusion.Namespace.NsBinding;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
