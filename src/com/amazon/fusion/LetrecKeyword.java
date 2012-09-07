@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.LocalEnvironment.LexicalBinding;
+
 final class LetrecKeyword
     extends KeywordValue
 {
@@ -78,42 +80,78 @@ final class LetrecKeyword
     }
 
 
+    //========================================================================
+
+
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
         SyntaxSexp bindingForms = (SyntaxSexp) expr.get(1);
 
         final int numBindings = bindingForms.size();
-        SyntaxSymbol[] boundIdentifiers = new SyntaxSymbol[numBindings];
+
+        LexicalBinding[] bindings = new LexicalBinding[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
             SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
-            boundIdentifiers[i] = (SyntaxSymbol) binding.get(0);
+            SyntaxSymbol boundIdentifier = (SyntaxSymbol) binding.get(0);
+            bindings[i] = (LexicalBinding) boundIdentifier.resolve();
         }
 
-        FusionValue[] boundValues = new FusionValue[numBindings];
-        LocalEnvironment bodyEnv =
-            new LocalEnvironment(env, boundIdentifiers, boundValues);
-
+        CompiledForm[] valueForms = new CompiledForm[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
             SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
             SyntaxValue boundExpr = binding.get(1);
-            FusionValue boundValue = eval.eval(bodyEnv, boundExpr);
-            bodyEnv.bind(i, boundValue);
+            valueForms[i] = eval.compile(env, boundExpr);
         }
 
-        FusionValue result;
-        final int bodyEnd = expr.size() - 1;
-        for (int i = 2; i < bodyEnd; i++)
+        CompiledForm body = BeginKeyword.compile(eval, env, expr, 2);
+
+        return new CompiledLetrec(bindings, valueForms, body);
+    }
+
+
+    //========================================================================
+
+
+    private static final class CompiledLetrec
+        implements CompiledForm
+    {
+        private final LexicalBinding[] myBindings;
+        private final CompiledForm[]   myValueForms;
+        private final CompiledForm     myBody;
+
+        CompiledLetrec(LexicalBinding[] bindings,
+                       CompiledForm[]   valueForms,
+                       CompiledForm     body)
         {
-            SyntaxValue bodyExpr = expr.get(i);
-            result = eval.eval(bodyEnv, bodyExpr);
+            myBindings   = bindings;
+            myValueForms = valueForms;
+            myBody       = body;
         }
 
-        SyntaxValue bodyExpr = expr.get(bodyEnd);
-        result = eval.bounceTailExpression(bodyEnv, bodyExpr);
-        return result;
+        @Override
+        public Object doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            final int numBindings = myBindings.length;
+
+            FusionValue[] boundValues = new FusionValue[numBindings];
+            LocalEnvironment bodyEnv =
+                new LocalEnvironment((Environment) store, // TODO remove cast
+                                     myBindings, boundValues);
+
+            for (int i = 0; i < numBindings; i++)
+            {
+                CompiledForm form = myValueForms[i];
+                FusionValue boundValue = (FusionValue)
+                    eval.exec(bodyEnv, form);
+                bodyEnv.bind(i, boundValue);
+            }
+
+            return eval.bounceTailForm(bodyEnv, myBody);
+        }
     }
 }

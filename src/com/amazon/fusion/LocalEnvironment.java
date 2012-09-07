@@ -9,6 +9,8 @@ final class LocalEnvironment
 {
     static final class LexicalBinding implements Binding
     {
+        static final LexicalBinding[] EMPTY_ARRAY = new LexicalBinding[0];
+
         private final SyntaxSymbol myIdentifier;
         private final int myAddress;
 
@@ -44,6 +46,25 @@ final class LocalEnvironment
         {
             return "{{LexicalBinding " + myIdentifier + "}}";
         }
+
+
+        /** Extract the names from an array of bindings. */
+        static String[] toNames(LexicalBinding[] bindings)
+        {
+            if (bindings == null || bindings.length == 0)
+            {
+                return FusionUtils.EMPTY_STRING_ARRAY;
+            }
+            else
+            {
+                String[] names = new String[bindings.length];
+                for (int i = 0; i < bindings.length; i++)
+                {
+                    names[i] = bindings[i].myIdentifier.stringValue();
+                }
+                return names;
+            }
+        }
     }
 
 
@@ -78,25 +99,24 @@ final class LocalEnvironment
 
     /** Run-time environment construction */
     LocalEnvironment(Environment enclosure,
-                     SyntaxSymbol[] identifiers,
+                     LexicalBinding[] bindings,
                      FusionValue[] values)
     {
-        assert identifiers.length == values.length;
+        assert bindings.length == values.length;
         myEnclosure = enclosure;
-
-        int count = identifiers.length;
-        myBindings = new LexicalBinding[count];
-        for (int i = 0; i < count; i++)
-        {
-            myBindings[i] = (LexicalBinding) identifiers[i].resolve();
-        }
-
+        myBindings = bindings;
         myValues = values;
     }
 
 
     @Override
     public Namespace namespace()
+    {
+        return myEnclosure.namespace();
+    }
+
+    @Override
+    public Namespace runtimeNamespace()
     {
         return myEnclosure.namespace();
     }

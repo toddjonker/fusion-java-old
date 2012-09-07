@@ -38,11 +38,20 @@ abstract class KeywordValue
     }
 
 
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
+        throws FusionException
+    {
+        return source;
+    }
+
+
     @Override
-    abstract FusionValue invoke(Evaluator eval,
-                                Environment env,
-                                SyntaxSexp expr)
-        throws FusionException;
+    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
+        throws FusionException
+    {
+        CompiledForm compiled = compile(eval, env, expr);
+        return eval.bounceTailForm(env, compiled);
+    }
 
 
     @Override

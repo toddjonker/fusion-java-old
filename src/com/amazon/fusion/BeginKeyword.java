@@ -39,23 +39,120 @@ final class BeginKeyword
               "The last EXPR is in tail position. If there are no EXPRs the result is undef.");
     }
 
+
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
+    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+        throws SyntaxFailure
+    {
+        int size = source.size();
+
+        SyntaxValue[] expandedChildren = new SyntaxValue[size];
+        expandedChildren[0] = source.get(0);
+
+        for (int i = 1; i < size; i++)
+        {
+            SyntaxValue subform = source.get(i);
+            expandedChildren[i] = subform.prepare(eval, env);
+        }
+        return SyntaxSexp.make(source.getLocation(), expandedChildren);
+    }
+
+
+    //========================================================================
+
+
+    @Override
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
         throws FusionException
     {
-        final int size = expr.size();
-        if (size == 1) return UNDEF;
+        final int size = source.size();
 
-        FusionValue result;
-        final int last = size - 1;
-        for (int i = 1; i < last; i++)
+        CompiledForm compiled;
+        if (size == 1)
         {
-            SyntaxValue source = expr.get(i);
-            result = eval.eval(env, source);
+            // TODO FUSION-33 this shouldn't happen after begin-lifting
+            compiled = new CompiledUndef();  // TODO singleton
+        }
+        else
+        {
+            compiled = compile(eval, env, source, 1, size);
+        }
+        return compiled;
+    }
+
+
+    static CompiledForm compile(Evaluator eval, Environment env,
+                                SyntaxSexp source, int from, int to)
+        throws FusionException
+    {
+        int size = to - from;
+
+        CompiledForm compiled;
+        if (size == 1)
+        {
+            compiled = eval.compile(env, source.get(from));
+        }
+        else
+        {
+            CompiledForm[] subforms = new CompiledForm[size];
+            for (int i = from; i < to; i++)
+            {
+                SyntaxValue subform = source.get(i);
+                subforms[i - from] = eval.compile(env, subform);
+            }
+            compiled = new CompiledBegin(subforms);
         }
 
-        SyntaxValue source = expr.get(last);
-        result = eval.bounceTailExpression(env, source);
-        return result;
+        return compiled;
+    }
+
+
+    static CompiledForm compile(Evaluator eval, Environment env,
+                                SyntaxSexp source, int from)
+        throws FusionException
+    {
+        return compile(eval, env, source, from, source.size());
+    }
+
+
+    //========================================================================
+
+
+    private static final class CompiledUndef
+        implements CompiledForm
+    {
+        @Override
+        public FusionValue doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            return UNDEF;
+        }
+    }
+
+
+    private static final class CompiledBegin
+        implements CompiledForm
+    {
+        final CompiledForm[] myBody;
+
+        CompiledBegin(CompiledForm[] body)
+        {
+            myBody = body;
+        }
+
+        @Override
+        public FusionValue doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            final int last = myBody.length - 1;
+            for (int i = 0; i < last; i++)
+            {
+                CompiledForm form = myBody[i];
+                eval.exec(store, form);
+            }
+
+            CompiledForm form = myBody[last];
+            return eval.bounceTailForm(store, form);
+        }
     }
 }

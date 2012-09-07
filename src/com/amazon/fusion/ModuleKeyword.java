@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static java.lang.Boolean.TRUE;
-
 import com.amazon.fusion.ModuleInstance.ModuleBinding;
 import com.amazon.fusion.Namespace.NsBinding;
 import java.util.ArrayList;
@@ -132,9 +131,12 @@ final class ModuleKeyword
                         {
                             try
                             {
-                                expanded = expanded.prepare(eval,
-                                                            moduleNamespace);
-                                eval.eval(moduleNamespace, expanded);
+                                expanded =
+                                    expanded.prepare(eval, moduleNamespace);
+                                // TODO this is getting compiled twice
+                                CompiledForm compiled =
+                                    eval.compile(moduleNamespace, expanded);
+                                eval.exec(moduleNamespace, compiled);
                             }
                             catch (FusionException e)
                             {
@@ -230,27 +232,30 @@ final class ModuleKeyword
 
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
-        Namespace ns = env.namespace();
-        Namespace moduleNamespace = eval.newEmptyNamespace(ns);
+        // TODO We repeat work here that was done during expansion.
+        // Racket stashed the necessary data in syntax properties.
+        // See Racket reference 11.9.1
+        // http://docs.racket-lang.org/reference/Expanding_Top-Level_Forms.html#%28part._modinfo%29
 
+        ModuleIdentity initialBindingsId;
         try
         {
             SyntaxValue initialBindingsStx = expr.get(2);
-            ModuleIdentity initialBindingsId =
+            initialBindingsId =
                 myModuleNameResolver.resolve(eval, initialBindingsStx);
-            moduleNamespace.use(initialBindingsId);
         }
         catch (FusionException e)
         {
             String message =
-                "Error installing initial bindings: " + e.getMessage();
+                "Error resolving initial-bindings module: " + e.getMessage();
             throw new FusionException(message, e);
         }
 
         ArrayList<SyntaxSexp> provideForms = new ArrayList<SyntaxSexp>();
+        ArrayList<CompiledForm> otherForms = new ArrayList<CompiledForm>();
 
         for (int i = 3; i < expr.size(); i++)
         {
@@ -262,18 +267,21 @@ final class ModuleKeyword
             }
             else
             {
-                eval.eval(moduleNamespace, form);
+                CompiledForm compiled = eval.compile(env, form);
+                otherForms.add(compiled);
             }
         }
 
         SyntaxSymbol[] providedIdentifiers = providedSymbols(provideForms);
 
+        CompiledForm[] otherFormsArray =
+            otherForms.toArray(new CompiledForm[otherForms.size()]);
+
         String declaredName = ((SyntaxSymbol) expr.get(1)).stringValue();
         ModuleIdentity id = determineIdentity(eval, declaredName);
-        ModuleInstance module =
-            new ModuleInstance(id, moduleNamespace, providedIdentifiers);
-        moduleNamespace.getRegistry().register(module);
-        return module;
+
+        return new CompiledModule(id, initialBindingsId, providedIdentifiers,
+                                  otherFormsArray);
     }
 
     private ModuleIdentity determineIdentity(Evaluator eval,
@@ -317,7 +325,7 @@ final class ModuleKeyword
 
     /**
      * @param provideForms
-     * @param moduleNamespace
+     * @param myNamespace
      * @return
      */
     private SyntaxSexp prepareProvide(SyntaxSexp form,
@@ -380,4 +388,49 @@ final class ModuleKeyword
         return identifiers.toArray(new SyntaxSymbol[identifiers.size()]);
     }
 
+
+    //========================================================================
+
+
+    private static final class CompiledModule
+        implements CompiledForm
+    {
+        private final ModuleIdentity myId;
+        private final ModuleIdentity myInitialBindingsId;
+        private final SyntaxSymbol[] myProvidedIdentifiers;
+        private final CompiledForm[] myBody;
+
+        private CompiledModule(ModuleIdentity id,
+                               ModuleIdentity initialBindingsId,
+                               SyntaxSymbol[] providedIdentifiers,
+                               CompiledForm[] body)
+        {
+            myId = id;
+            myInitialBindingsId = initialBindingsId;
+            myProvidedIdentifiers = providedIdentifiers;
+            myBody = body;
+        }
+
+        @Override
+        public FusionValue doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            // TODO Use the original Bindings to populate the namespace?
+            // Allocate just enough space for the top-level bindings.
+            ModuleRegistry registry = eval.getModuleRegistry();
+            Namespace namespace = eval.newModuleNamespace(registry);
+            namespace.use(myInitialBindingsId);
+
+            ModuleInstance module =
+                new ModuleInstance(myId, namespace, myProvidedIdentifiers);
+            registry.register(module);
+
+            for (CompiledForm form : myBody)
+            {
+                eval.exec(namespace, form);
+            }
+
+            return module;
+        }
+    }
 }

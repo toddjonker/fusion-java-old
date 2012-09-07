@@ -23,10 +23,32 @@ final class QuoteSyntaxKeyword
 
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp source)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
         throws FusionException
     {
-        SyntaxValue quotedStx = source.get(1);
-        return quotedStx;
+        SyntaxValue quoted = source.get(1);
+        return new CompiledQuoteSyntax(quoted);
+    }
+
+
+    //========================================================================
+
+
+    private static final class CompiledQuoteSyntax
+        implements CompiledForm
+    {
+        private final SyntaxValue myQuoted;
+
+        CompiledQuoteSyntax(SyntaxValue quoted)
+        {
+            myQuoted = quoted;
+        }
+
+        @Override
+        public Object doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            return myQuoted;
+        }
     }
 }

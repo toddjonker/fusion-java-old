@@ -9,6 +9,7 @@ import java.util.Set;
  * Environments are generally arranged in a hierarchy of lexical scopes.
  */
 interface Environment
+    extends Store // TODO temporary!
 {
     Namespace namespace();
 
@@ -30,5 +31,6 @@ interface Environment
      *
      * @return the bound value, or null if there's no value.
      */
+    @Override
     FusionValue lookup(Binding binding);
 }

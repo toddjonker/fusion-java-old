@@ -29,16 +29,45 @@ final class IfKeyword
 
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
-        SyntaxValue source = expr.get(1);
-        FusionValue result = eval.eval(env, source);
+        CompiledForm testForm = eval.compile(env, expr.get(1));
+        CompiledForm thenForm = eval.compile(env, expr.get(2));
+        CompiledForm elseForm = eval.compile(env, expr.get(3));
 
-        boolean test = checkBoolArg(0, result);
-        int branch = (test ? 2 : 3);
-        source = expr.get(branch);
+        return new CompiledIf(testForm, thenForm, elseForm);
+    }
 
-        return eval.bounceTailExpression(env, source);
+
+    //========================================================================
+
+
+    private final class CompiledIf
+        implements CompiledForm
+    {
+        private final CompiledForm myTestForm;
+        private final CompiledForm myThenForm;
+        private final CompiledForm myElseForm;
+
+        CompiledIf(CompiledForm testForm, CompiledForm thenForm,
+                   CompiledForm elseForm)
+        {
+            myTestForm = testForm;
+            myThenForm = thenForm;
+            myElseForm = elseForm;
+        }
+
+        @Override
+        public Object doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            FusionValue result = (FusionValue) eval.exec(store, myTestForm);
+
+            boolean test = checkBoolArg(0, result);
+            CompiledForm branch = (test ? myThenForm : myElseForm);
+
+            return eval.bounceTailForm(store, branch);
+        }
     }
 }

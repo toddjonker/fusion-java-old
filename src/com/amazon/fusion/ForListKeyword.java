@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.LocalEnvironment.LexicalBinding;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonValue;
 
@@ -79,65 +80,103 @@ final class ForListKeyword
     }
 
 
+    //========================================================================
+
+
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp forStx)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp forStx)
         throws FusionException
     {
         SyntaxSequence bindingForms = (SyntaxSequence) forStx.get(1);
 
         final int numBindings = bindingForms.size();
 
-        IonList result = eval.getSystem().newEmptyList();
+        LexicalBinding[] bindings = new LexicalBinding[numBindings];
+        CompiledForm[] valueForms = new CompiledForm[numBindings];
 
-        if (numBindings != 0)
+        for (int i = 0; i < numBindings; i++)
         {
-            SyntaxSymbol[] boundNames = new SyntaxSymbol[numBindings];
-            Stream[] streams = new Stream[numBindings];
+            SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
+            SyntaxSymbol boundIdentifier = (SyntaxSymbol) binding.get(0);
+            bindings[i] = (LexicalBinding) boundIdentifier.resolve();
 
-            for (int i = 0; i < numBindings; i++)
+            SyntaxValue boundExpr = binding.get(1);
+            valueForms[i] = eval.compile(env, boundExpr);
+        }
+
+        CompiledForm body = BeginKeyword.compile(eval, env, forStx, 2);
+
+        return new CompiledForList(bindings, valueForms, body);
+    }
+
+
+    //========================================================================
+
+
+    private final class CompiledForList
+        implements CompiledForm
+    {
+        private final LexicalBinding[] myBindings;
+        private final CompiledForm[]   myValueForms;
+        private final CompiledForm     myBody;
+
+        CompiledForList(LexicalBinding[] bindings, CompiledForm[] valueForms,
+                        CompiledForm body)
+        {
+            myBindings   = bindings;
+            myValueForms = valueForms;
+            myBody       = body;
+        }
+
+        @Override
+        public Object doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            final int numBindings = myBindings.length;
+
+            IonList result = eval.getSystem().newEmptyList();
+
+            if (numBindings != 0)
             {
-                SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
-                boundNames[i] = (SyntaxSymbol) binding.get(0);
+                Stream[] streams = new Stream[numBindings];
 
-                SyntaxValue boundExpr = binding.get(1);
-
-                FusionValue boundValue = eval.eval(env, boundExpr);
-                streams[i] = Sequences.streamFor(boundValue);
-            }
-
-            FusionValue[] boundValues = new FusionValue[numBindings];
-            LocalEnvironment bodyEnv =
-                new LocalEnvironment(env, boundNames, boundValues);
-
-            while (Sequences.allHaveNext(streams))
-            {
-                // Determine the next round of bound values
                 for (int i = 0; i < numBindings; i++)
                 {
-                    Stream s = streams[i];
-                    bodyEnv.bind(i, s.next());
+                    CompiledForm form = myValueForms[i];
+                    FusionValue boundValue = (FusionValue)
+                        eval.exec(store, form);
+
+                    streams[i] = Sequences.streamFor(boundValue);
                 }
 
-                // Evaluate the body.
-                Object nextResult = null;
-                for (int i = 2; i < forStx.size(); i++)
-                {
-                    SyntaxValue bodyStx = forStx.get(i);
-                    nextResult = eval.eval(bodyEnv, bodyStx);
-                }
+                FusionValue[] boundValues = new FusionValue[numBindings];
+                LocalEnvironment bodyEnv =
+                    new LocalEnvironment((Environment) store, // TODO remove cast
+                                         myBindings, boundValues);
 
-                IonValue value = toIonValue(nextResult);
-                if (value != null)
+                while (Sequences.allHaveNext(streams))
                 {
-                    AddProc.invoke(result, value);
-                }
-                else
-                {
-                    throw contractFailure("body returned non-Ion value: "
-                                          + writeToString(nextResult));
+                    // Determine the next round of bound values
+                    for (int i = 0; i < numBindings; i++)
+                    {
+                        Stream s = streams[i];
+                        bodyEnv.bind(i, s.next());
+                    }
+
+                    Object nextResult = eval.exec(bodyEnv, myBody);
+                    IonValue value = toIonValue(nextResult);
+                    if (value != null)
+                    {
+                        AddProc.invoke(result, value);
+                    }
+                    else
+                    {
+                        throw contractFailure("body returned non-Ion value: "
+                            + writeToString(nextResult));
+                    }
                 }
             }
+            return new DomValue(result);
         }
-        return new DomValue(result);
     }
 }

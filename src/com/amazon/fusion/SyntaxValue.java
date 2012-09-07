@@ -14,6 +14,7 @@ import java.io.IOException;
  */
 abstract class SyntaxValue
     extends FusionValue
+    implements CompiledForm // TODO temporary!
 {
     enum Type {
         NULL, BOOL, INT, DECIMAL, FLOAT, TIMESTAMP, BLOB, CLOB,
@@ -101,8 +102,27 @@ abstract class SyntaxValue
         return this;
     }
 
-    abstract FusionValue eval(Evaluator eval, Environment env)
-        throws FusionException;
+
+    /** Don't call directly! Go through the evaluator. */
+    CompiledForm doCompile(Evaluator eval, Environment env)
+        throws FusionException
+    {
+        return this;
+    }
+
+    @Override
+    public FusionValue doExec(Evaluator eval, Store env)
+        throws FusionException
+    {
+        return eval(eval, (Environment) env);
+    }
+
+    FusionValue eval(Evaluator eval, Environment env)
+        throws FusionException
+    {
+        CompiledForm compiled = eval.compile(env, this);
+        return eval.bounceTailForm(env, compiled);
+    }
 
     /**
      * Transform this syntax into plain values.

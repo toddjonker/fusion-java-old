@@ -216,20 +216,47 @@ final class SyntaxSymbol
 
 
     @Override
-    FusionValue eval(Evaluator eval, Environment env)
-        throws FusionException
-    {
-        assert myBinding != null : "No binding for " + myText;
-        FusionValue result = myBinding.lookup(env);
-        assert result != null : "No value for " + myText;
-        return result;
-    }
-
-
-    @Override
     void writeContentTo(IonWriter writer)
         throws IOException
     {
         writer.writeSymbol(myText);
+    }
+
+
+    //========================================================================
+
+
+    @Override
+    CompiledForm doCompile(Evaluator eval, Environment env)
+        throws FusionException
+    {
+        assert myBinding != null : "No binding for " + myText;
+        assert ! (myBinding instanceof FreeBinding);
+        return new CompiledVariable(myBinding);
+    }
+
+
+    //========================================================================
+
+
+    private static final class CompiledVariable
+        implements CompiledForm
+    {
+        private final Binding myBinding;
+
+        CompiledVariable(Binding binding)
+        {
+            myBinding = binding;
+        }
+
+
+        @Override
+        public Object doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            FusionValue result = myBinding.lookup((Environment) store);
+            assert result != null : "No value for " + myBinding;
+            return result;
+        }
     }
 }

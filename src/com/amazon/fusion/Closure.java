@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.ArityFailure.Variability;
+import com.amazon.fusion.LocalEnvironment.LexicalBinding;
 
 /**
  * A user-defined procedure, the result of evaluating a {@link LambdaKeyword}.
@@ -10,42 +11,36 @@ import com.amazon.fusion.ArityFailure.Variability;
 final class Closure
     extends Procedure
 {
-    private final Environment myEnclosure;
-    private final SyntaxSymbol[] myParams;
-    private final SyntaxSexp myDefinition;
+    private final Store            myEnclosure;
+    private final LexicalBinding[] myParams;
+    private final CompiledForm     myBody;
 
-    /**
-     * Index within {@link #myDefinition} of the first body form.
-     */
-    private final int myBodyStart;
 
     /**
      * Constructs a new closure from its source and enclosing lexical
      * environment.
      *
-     * @param enclosure the lexical environment surrounding the source of this
+     * @param enclosure the store lexically surrounding the source of this
      *  closure.  Any free variables in the procedure are expected to be bound
      *  here.
-     * @param definition the source text of the {@code lambda} expression.
      */
-    Closure(Environment enclosure, SyntaxSexp definition, String doc,
-            SyntaxSymbol[] params, int bodyStartIndex)
+    Closure(Store enclosure, String doc, LexicalBinding[] params,
+            CompiledForm body)
     {
         // Don't pre-compute param names every time we create a closure.
         // Instead we extract them on-demand by overriding getParamNames().
         super(doc, FusionUtils.EMPTY_STRING_ARRAY);
 
         myEnclosure = enclosure;
-        myParams = params;
-        myDefinition = definition;
-        myBodyStart = bodyStartIndex;
+        myParams    = params;
+        myBody      = body;
     }
 
 
     @Override
     String[] getParamNames()
     {
-        return SyntaxSymbol.toNames(myParams);
+        return LexicalBinding.toNames(myParams);
     }
 
 
@@ -59,20 +54,10 @@ final class Closure
             throw new ArityFailure(this, paramCount, Variability.EXACT, args);
         }
 
-        Environment bodyEnv = new LocalEnvironment(myEnclosure, myParams, args);
+        // TODO remove cast
+        Environment bodyEnv =
+            new LocalEnvironment((Environment) myEnclosure, myParams, args);
 
-        FusionValue result;
-        final int bodyEnd = myDefinition.size() - 1;
-        for (int i = myBodyStart; i < bodyEnd; i++)
-        {
-            SyntaxValue expr = myDefinition.get(i);
-            result = eval.eval(bodyEnv, expr);
-        }
-
-        SyntaxValue expr = myDefinition.get(bodyEnd);
-
-        result = eval.bounceTailExpression(bodyEnv, expr);
-
-        return result;
+        return eval.bounceTailForm(bodyEnv, myBody);
     }
 }

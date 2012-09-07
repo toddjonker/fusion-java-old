@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.Namespace.NsBinding;
+
 final class DefineKeyword
     extends KeywordValue
 {
@@ -47,7 +49,7 @@ final class DefineKeyword
 
         // Update the identifier with its binding.
         // This is just a way to pass the binding instance through to the
-        // runtime stage so invoke() below can reuse it.
+        // runtime stage so compile() below can reuse it.
         identifier = (SyntaxSymbol) identifier.prepare(eval, env);
 
         SyntaxValue valueStx = source.get(2);
@@ -59,17 +61,47 @@ final class DefineKeyword
     }
 
 
+    //========================================================================
+
+
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
         throws FusionException
     {
-        SyntaxValue valueStx = stx.get(2);
-        FusionValue value = eval.eval(env, valueStx);
+        SyntaxValue valueSource = source.get(2);
+        CompiledForm valueForm = eval.compile(env, valueSource);
 
-        SyntaxSymbol identifier = (SyntaxSymbol) stx.get(1);
-        Namespace ns = env.namespace();
-        ns.bindPredefined(identifier, value);
+        SyntaxSymbol identifier = (SyntaxSymbol) source.get(1);
+        NsBinding binding = (NsBinding) identifier.getBinding();
+        assert binding != null;
 
-        return value;
+        return new CompiledDefine(binding, valueForm);
+    }
+
+
+    //========================================================================
+
+
+    private static final class CompiledDefine
+        implements CompiledForm
+    {
+        private final NsBinding    myBinding;
+        private final CompiledForm myValueForm;
+
+        private CompiledDefine(NsBinding binding, CompiledForm valueForm)
+        {
+            myBinding   = binding;
+            myValueForm = valueForm;
+        }
+
+        @Override
+        public Object doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Object value = eval.exec(store, myValueForm);
+            RuntimeNamespace ns = store.runtimeNamespace();
+            ns.bindPredefined(myBinding, value);
+            return value;
+        }
     }
 }

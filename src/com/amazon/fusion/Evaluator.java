@@ -301,7 +301,8 @@ final class Evaluator
     {
         source = ns.syntaxIntroduce(source);
         source = source.prepare(this, ns);
-        return eval(ns, source);
+        CompiledForm compiled = source.doCompile(this, ns);
+        return eval(ns, compiled);
     }
 
 
@@ -309,10 +310,12 @@ final class Evaluator
         throws FusionException
     {
         source = source.prepare(this, env);
-        return eval(env, source);
+        CompiledForm compiled = source.doCompile(this, env);
+        return eval(env, compiled);
     }
 
 
+    @Deprecated // not used
     SyntaxValue prepare(Environment env, SyntaxValue source)
         throws SyntaxFailure
     {
@@ -320,14 +323,29 @@ final class Evaluator
     }
 
 
+    CompiledForm compile(Environment env, SyntaxValue source)
+        throws FusionException
+    {
+        return source.doCompile(this, env);
+    }
+
+
+    Object exec(Store store, CompiledForm form)
+        throws FusionException
+    {
+        return eval((Environment) store, form);
+    }
+
+
     /**
      * @return not null
      */
-    FusionValue eval(Environment env, SyntaxValue expr)
+    FusionValue eval(Environment env, CompiledForm expr)
         throws FusionException
     {
         moreEval: while (true)
         {
+            /*
             if (expr.getAnnotations().length != 0)
             {
                 String message =
@@ -335,8 +353,9 @@ final class Evaluator
                     "want to quote this value";
                 throw new SyntaxFailure(null, message, expr);
             }
+*/
 
-            FusionValue result = expr.eval(this, env);
+            Object result = expr.doExec(this, env);
             while (true)
             {
                 if (result == null)
@@ -356,7 +375,7 @@ final class Evaluator
                     result = tail.myProc.invoke(this, tail.myArgs);
                     continue;
                 }
-                return result;
+                return (FusionValue) result;
             }
         }
     }
@@ -375,7 +394,7 @@ final class Evaluator
         {
             TailExpression tail = (TailExpression) result;
             Environment env = tail.myEnv;
-            SyntaxValue expr = tail.myTailExpr;
+            CompiledForm expr = tail.myTailExpr;
             result = eval(env, expr);
         }
         // TODO handle TailCall, but nothing triggers this path yet.
@@ -397,6 +416,15 @@ final class Evaluator
     FusionValue bounceTailExpression(Environment env, SyntaxValue tailExpr)
     {
         return new TailExpression(env, tailExpr);
+    }
+
+    /**
+     * Wraps an expression for evaluation in tail position.
+     * Must be returned back to this {@link Evaluator} for proper behavior.
+     */
+    FusionValue bounceTailForm(Store store, CompiledForm form)
+    {
+        return new TailExpression((Environment) store, form);
     }
 
     /**
@@ -432,9 +460,9 @@ final class Evaluator
         extends FusionValue
     {
         final Environment myEnv;
-        final SyntaxValue myTailExpr;
+        final CompiledForm myTailExpr;
 
-        TailExpression(Environment env, SyntaxValue tailExpr)
+        TailExpression(Environment env, CompiledForm tailExpr)
         {
             myEnv = env;
             myTailExpr = tailExpr;

@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.Namespace.NsBinding;
 
 final class DefineSyntaxKeyword
     extends KeywordValue
@@ -49,30 +50,61 @@ final class DefineSyntaxKeyword
     }
 
 
+    //========================================================================
+
+
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
         throws FusionException
     {
-        SyntaxValue valueStx = stx.get(2);
-        FusionValue value = eval.eval(env, valueStx);
+        SyntaxValue valueSource = source.get(2);
+        CompiledForm valueForm = eval.compile(env, valueSource);
 
-        if (value instanceof Procedure)
+        SyntaxSymbol identifier = (SyntaxSymbol) source.get(1);
+        NsBinding binding = (NsBinding) identifier.getBinding();
+        assert binding != null;
+
+        return new CompiledDefineSyntax(binding, valueForm);
+    }
+
+
+    //========================================================================
+
+
+    private final class CompiledDefineSyntax
+        implements CompiledForm
+    {
+        private final NsBinding    myBinding;
+        private final CompiledForm myValueForm;
+
+        private CompiledDefineSyntax(NsBinding binding, CompiledForm valueForm)
         {
-            Procedure xformProc = (Procedure) value;
-            value = new MacroTransformer(xformProc);
+            myBinding   = binding;
+            myValueForm = valueForm;
         }
-        else if (! (value instanceof KeywordValue))
+
+        @Override
+        public Object doExec(Evaluator eval, Store store)
+            throws FusionException
         {
-            SyntaxChecker check = check(stx);
-            String message =
-                "value is not a transformer: " + writeToString(value);
-            throw check.failure(message);
+            // TODO this shouldn't do anything during phase-0 evaluation.
+            Object value = eval.exec(store, myValueForm);
+
+            if (value instanceof Procedure)
+            {
+                Procedure xformProc = (Procedure) value;
+                value = new MacroTransformer(xformProc);
+            }
+            else if (! (value instanceof KeywordValue))
+            {
+                String message =
+                    "value is not a transformer: " + writeToString(value);
+                throw contractFailure(message);
+            }
+
+            RuntimeNamespace ns = store.runtimeNamespace();
+            ns.bindPredefined(myBinding, value);
+            return UNDEF;
         }
-
-        SyntaxSymbol identifier = (SyntaxSymbol) stx.get(1);
-        Namespace ns = env.namespace();
-        ns.bindPredefined(identifier, value);
-
-        return UNDEF;
     }
 }

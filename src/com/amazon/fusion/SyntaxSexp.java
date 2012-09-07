@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
-
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
@@ -205,6 +204,31 @@ final class SyntaxSexp
 
         return this;
     }
+
+
+    @Override
+    CompiledForm doCompile(Evaluator eval, Environment env)
+        throws FusionException
+    {
+        SyntaxValue first = get(0);
+        if (first instanceof SyntaxSymbol)
+        {
+            Binding binding = ((SyntaxSymbol) first).getBinding();
+            FusionValue resolved = binding.lookup(env);
+            if (resolved instanceof KeywordValue)
+            {
+                // We found a static top-level keyword binding!
+                // Continue the compilation process.
+                // TODO bounce the tail-call?
+
+                CompiledForm compiled =
+                    ((KeywordValue)resolved).compile(eval, env, this);
+                return compiled;
+            }
+        }
+        return this;
+    }
+
 
     @Override
     public FusionValue eval(Evaluator eval, Environment env)

@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.Set;
 
 final class Namespace
-    implements Environment
+    implements Environment, RuntimeNamespace
 {
     static final class NsBinding implements Binding
     {
@@ -90,6 +90,12 @@ final class Namespace
 
     @Override
     public Namespace namespace()
+    {
+        return this;
+    }
+
+    @Override
+    public RuntimeNamespace runtimeNamespace()
     {
         return this;
     }
@@ -203,7 +209,11 @@ final class Namespace
             }
             myValues.add(value);
         }
+
+        String inferredName = binding.myIdentifier.stringValue();
+        if (inferredName != null) value.inferName(inferredName);
     }
+
 
     /**
      * Creates or updates a namespace-level binding.
@@ -211,11 +221,9 @@ final class Namespace
      *
      * @param value must not be null
      */
-    public void bindPredefined(SyntaxSymbol identifier, FusionValue value)
+    @Override
+    public void bindPredefined(NsBinding binding, Object value)
     {
-        NsBinding binding = (NsBinding) identifier.getBinding();
-        assert binding != null;
-
         int address = binding.myAddress;
         if (address < myBindings.size())
         {
@@ -226,9 +234,9 @@ final class Namespace
             assert address == myBindings.size();
             myBindings.add(binding);
         }
-        bind(binding, value);
 
-        value.inferName(identifier.stringValue());
+        FusionValue fv = (FusionValue) value;
+        bind(binding, fv);  // TODO this is inefficient
     }
 
     /**
@@ -240,8 +248,6 @@ final class Namespace
     public void bind(String name, FusionValue value)
     {
         SyntaxSymbol identifier = SyntaxSymbol.make(name);
-        value.inferName(identifier.stringValue());
-
         NsBinding binding = predefine(identifier);
         bind(binding, value);
     }
