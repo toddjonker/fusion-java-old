@@ -50,15 +50,7 @@ final class Closure
             throw new ArityFailure(this, paramCount, Variability.EXACT, args);
         }
 
-        Environment bodyEnv;
-        if (paramCount == 0)
-        {
-            bodyEnv = myEnclosure;
-        }
-        else
-        {
-            bodyEnv = new LocalEnvironment(myEnclosure, myParams, args);
-        }
+        Environment bodyEnv = new LocalEnvironment(myEnclosure, myParams, args);
 
         FusionValue result;
         final int bodyEnd = myDefinition.size() - 1;
@@ -74,5 +66,4 @@ final class Closure
 
         return result;
     }
-
 }
