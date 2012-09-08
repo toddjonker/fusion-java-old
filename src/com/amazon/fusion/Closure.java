@@ -31,12 +31,21 @@ final class Closure
     Closure(Environment enclosure, SyntaxSexp definition, String doc,
             SyntaxSymbol[] params, int bodyStartIndex)
     {
-        super(doc, SyntaxSymbol.toNames(params));
+        // Don't pre-compute param names every time we create a closure.
+        // Instead we extract them on-demand by overriding getParamNames().
+        super(doc, FusionUtils.EMPTY_STRING_ARRAY);
 
         myEnclosure = enclosure;
         myParams = params;
         myDefinition = definition;
         myBodyStart = bodyStartIndex;
+    }
+
+
+    @Override
+    String[] getParamNames()
+    {
+        return SyntaxSymbol.toNames(myParams);
     }
 
 

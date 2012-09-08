@@ -102,13 +102,23 @@ abstract class Procedure
     }
 
 
+    /**
+     * Allows subclass to override and compute param names on-demand.
+     * @return not null.
+     */
+    String[] getParamNames()
+    {
+        return myParams;
+    }
+
+
     @Override
     final void displayHelp(Appendable out)
         throws IOException
     {
         out.append("[PROCEDURE]  (");
         out.append(getEffectiveName());
-        for (String formal : myParams)
+        for (String formal : getParamNames())
         {
             out.append(' ');
             out.append(formal);
