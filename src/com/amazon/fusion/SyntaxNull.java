@@ -26,7 +26,8 @@ final class SyntaxNull
     }
 
     @Override
-    FusionValue eval(Evaluator eval, Environment env) throws FusionException
+    FusionValue doCompileIonConstant(Evaluator eval, Environment env)
+        throws FusionException
     {
         return eval.newNull();
     }

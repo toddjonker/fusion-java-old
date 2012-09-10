@@ -189,9 +189,8 @@ final class SyntaxStruct
     @Override
     FusionValue quote(Evaluator eval)
     {
-        // TODO quote should strip wraps at compile time
         // This should only be called at runtime, after wraps are pushed.
-        //assert myWraps == null;
+        assert myWraps == null;
 
         ValueFactory vf = eval.getSystem();
         IonStruct resultDom;
@@ -283,50 +282,6 @@ final class SyntaxStruct
         return new SyntaxStruct(newMap, getAnnotations(), getLocation(), null);
     }
 
-    @Override
-    FusionValue eval(Evaluator eval, Environment env)
-        throws FusionException
-    {
-        // This should only be called at runtime, after wraps are pushed.
-        assert myWraps == null;
-
-        ValueFactory vf = eval.getSystem();
-        IonStruct resultDom;
-        if (isNullValue())
-        {
-            resultDom = vf.newNullStruct();
-        }
-        else
-        {
-            resultDom = vf.newEmptyStruct();
-            for (Map.Entry<String, Object> entry : myMap.entrySet())
-            {
-                String fieldName = entry.getKey();
-                Object value = entry.getValue();
-                if (value instanceof SyntaxValue)
-                {
-                    SyntaxValue child = (SyntaxValue) value;
-                    FusionValue childValue = eval.eval(env, child);
-                    IonValue childDom = FusionValue.toIonValue(childValue);
-                    childDom = cloneIfContained(childDom);
-                    resultDom.add(fieldName, childDom);
-                }
-                else
-                {
-                    SyntaxValue[] children = (SyntaxValue[]) value;
-                    for (SyntaxValue child : children)
-                    {
-                        FusionValue childValue = eval.eval(env, child);
-                        IonValue childDom = FusionValue.toIonValue(childValue);
-                        childDom = cloneIfContained(childDom);
-                        resultDom.add(fieldName, childDom);
-                    }
-                }
-            }
-        }
-        return new DomValue(resultDom);
-    }
-
 
     @Override
     void writeContentTo(IonWriter writer) throws IOException
@@ -359,6 +314,119 @@ final class SyntaxStruct
                 }
             }
             writer.stepOut();
+        }
+    }
+
+
+    //========================================================================
+
+
+    @Override
+    CompiledForm doCompile(Evaluator eval, Environment env)
+        throws FusionException
+    {
+        assert myWraps == null;
+
+        ValueFactory vf = eval.getSystem();
+        if (isNullValue())
+        {
+            IonStruct s = vf.newNullStruct();
+            return new CompiledIonConstant(s);
+        }
+
+        if (myMap.size() == 0)
+        {
+            IonStruct s = vf.newEmptyStruct();
+            return new CompiledIonConstant(s);
+        }
+
+        // Pre-compute the size so we can allocate arrays all at once.
+        int size = 0;
+        for (Object value : myMap.values())
+        {
+            if (value instanceof SyntaxValue)
+            {
+                size += 1;
+            }
+            else
+            {
+                SyntaxValue[] children = (SyntaxValue[]) value;
+                size += children.length;
+            }
+        }
+
+        String[]       fieldNames = new String[size];
+        CompiledForm[] fieldForms = new CompiledForm[size];
+        int i = 0;
+
+        for (Map.Entry<String, Object> entry : myMap.entrySet())
+        {
+            String fieldName = entry.getKey();
+
+            Object value = entry.getValue();
+            if (value instanceof SyntaxValue)
+            {
+                SyntaxValue child = (SyntaxValue) value;
+                CompiledForm form = eval.compile(env, child);
+
+                fieldNames[i] = fieldName;
+                fieldForms[i] = form;
+                i++;
+            }
+            else
+            {
+                SyntaxValue[] children = (SyntaxValue[]) value;
+                for (SyntaxValue child : children)
+                {
+                    CompiledForm form = eval.compile(env, child);
+
+                    fieldNames[i] = fieldName;
+                    fieldForms[i] = form;
+                    i++;
+                }
+            }
+        }
+        assert i == size;
+
+        return new CompiledStruct(fieldNames, fieldForms);
+    }
+
+
+    //========================================================================
+
+
+    private static final class CompiledStruct
+        implements CompiledForm
+    {
+        private final String[]       myFieldNames;
+        private final CompiledForm[] myFieldForms;
+
+        CompiledStruct(String[] fieldNames, CompiledForm[] fieldForms)
+        {
+            myFieldNames = fieldNames;
+            myFieldForms = fieldForms;
+        }
+
+        @Override
+        public Object doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            ValueFactory vf = eval.getSystem();
+
+            IonStruct resultDom = vf.newEmptyStruct();
+
+            for (int i = 0; i < myFieldNames.length; i++)
+            {
+                CompiledForm form = myFieldForms[i];
+                Object childValue = eval.exec(store, form);
+                IonValue childDom = FusionValue.toIonValue(childValue);
+                childDom = cloneIfContained(childDom);
+
+                String fieldName = myFieldNames[i];
+                resultDom.add(fieldName, childDom);
+            }
+
+            return new DomValue(resultDom);
         }
     }
 }

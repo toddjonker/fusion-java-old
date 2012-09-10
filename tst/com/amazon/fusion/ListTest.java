@@ -36,6 +36,19 @@ public class ListTest
     }
 
     @Test
+    public void testMutationOfConstants()
+        throws Exception
+    {
+        eval("(define nl (lambda () null.list))");
+        assertEval("[1]", "(add (nl) 1)");
+        assertEval("[2]", "(add (nl) 2)");
+
+        eval("(define l (lambda () [1]))");
+        assertEval("[1, 2]", "(add (l) 2)");
+        assertEval("[1, 3]", "(add (l) 3)");
+    }
+
+    @Test
     public void testAddAnyIon()
         throws Exception
     {

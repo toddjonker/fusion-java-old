@@ -115,6 +115,16 @@ final class SyntaxSexp
         return new SyntaxSexp(children, anns, loc);
     }
 
+    @Override
+    void writeContentTo(IonWriter writer)
+        throws IOException
+    {
+        writeContentTo(writer, IonType.SEXP);
+    }
+
+
+    //========================================================================
+
 
     @Override
     SyntaxValue prepare(Evaluator eval, Environment env)
@@ -206,6 +216,9 @@ final class SyntaxSexp
     }
 
 
+    //========================================================================
+
+
     @Override
     CompiledForm doCompile(Evaluator eval, Environment env)
         throws FusionException
@@ -226,25 +239,53 @@ final class SyntaxSexp
                 return compiled;
             }
         }
-        return this;
+
+        CompiledForm procForm = eval.compile(env, first);
+        CompiledForm[] argForms = eval.compile(env, this, 1);
+        return new CompiledPlainApp(procForm, argForms);
     }
 
 
-    @Override
-    public FusionValue eval(Evaluator eval, Environment env)
-        throws FusionException
-    {
-        SyntaxValue first = get(0);
-        FusionValue form = eval.eval(env, first);
-        FusionValue result = form.invoke(eval, env, this);
-        return result;
-    }
+    //========================================================================
 
 
-    @Override
-    void writeContentTo(IonWriter writer)
-        throws IOException
+    private static final class CompiledPlainApp
+        implements CompiledForm
     {
-        writeContentTo(writer, IonType.SEXP);
+        private final CompiledForm   myProcForm;
+        private final CompiledForm[] myArgForms;
+
+        CompiledPlainApp(CompiledForm procForm, CompiledForm[] argForms)
+        {
+            myProcForm = procForm;
+            myArgForms = argForms;
+        }
+
+        @Override
+        public Object doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Object proc = eval.exec(store, myProcForm);
+            Procedure p = (Procedure) proc;
+
+            int argCount = myArgForms.length;
+
+            FusionValue[] args;
+            if (argCount == 0)
+            {
+                args = FusionValue.EMPTY_ARRAY;
+            }
+            else
+            {
+                args = new FusionValue[argCount];
+                for (int i = 0; i < argCount; i++)
+                {
+                    Object arg = eval.exec(store, myArgForms[i]);
+                    args[i] = (FusionValue) arg;           // TODO remove cast
+                }
+            }
+
+            return p.invoke(eval, args);
+        }
     }
 }

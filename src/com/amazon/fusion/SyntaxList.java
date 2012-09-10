@@ -115,36 +115,68 @@ final class SyntaxList
 
 
     @Override
-    public FusionValue eval(Evaluator eval, Environment env)
-        throws FusionException
-    {
-        ValueFactory vf = eval.getSystem();
-        IonList resultDom;
-        if (isNullValue())
-        {
-            resultDom = vf.newNullList();
-        }
-        else
-        {
-            resultDom = vf.newEmptyList();
-            int len = size();
-            for (int i = 0; i < len; i++)
-            {
-                SyntaxValue elementExpr = get(i);
-                FusionValue elementValue = eval.eval(env, elementExpr);
-                IonValue elementDom = FusionValue.toIonValue(elementValue);
-                elementDom = cloneIfContained(elementDom);
-                resultDom.add(elementDom);
-            }
-        }
-        return new DomValue(resultDom);
-    }
-
-
-    @Override
     void writeContentTo(IonWriter writer)
         throws IOException
     {
         writeContentTo(writer, IonType.LIST);
+    }
+
+
+    //========================================================================
+
+
+    @Override
+    CompiledForm doCompile(Evaluator eval, Environment env)
+        throws FusionException
+    {
+        ValueFactory vf = eval.getSystem();
+        if (isNullValue())
+        {
+            IonList list = vf.newNullList();
+            return new CompiledIonConstant(list);
+        }
+
+        int len = size();
+        CompiledForm[] children = new CompiledForm[len];
+        for (int i = 0; i < len; i++)
+        {
+            SyntaxValue elementExpr = get(i);
+            CompiledForm child = eval.compile(env, elementExpr);
+            children[i] = child;
+        }
+        return new CompiledList(children);
+
+    }
+
+
+    //========================================================================
+
+
+    private static final class CompiledList
+        implements CompiledForm
+    {
+        private final CompiledForm[] myChildForms;
+
+        CompiledList(CompiledForm[] childForms)
+        {
+            myChildForms = childForms;
+        }
+
+        @Override
+        public Object doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            ValueFactory vf = eval.getSystem();
+            IonList resultDom = vf.newEmptyList();
+            int len = myChildForms.length;
+            for (int i = 0; i < len; i++)
+            {
+                Object childValue = eval.exec(store, myChildForms[i]);
+                IonValue childDom = FusionValue.toIonValue(childValue);
+                childDom = cloneIfContained(childDom);
+                resultDom.add(childDom);
+            }
+            return new DomValue(resultDom);
+        }
     }
 }

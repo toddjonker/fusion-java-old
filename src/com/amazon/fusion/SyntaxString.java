@@ -34,7 +34,7 @@ final class SyntaxString
 
 
     @Override
-    FusionValue eval(Evaluator eval, Environment env)
+    FusionValue doCompileIonConstant(Evaluator eval, Environment env)
         throws FusionException
     {
         return eval.newString(myText);

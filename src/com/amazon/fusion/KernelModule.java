@@ -66,6 +66,7 @@ final class KernelModule
         ns.bind("lambda", new LambdaKeyword());  // Needed by hard-coded macro
         ns.bind("letrec", new LetrecKeyword());  // Needed by hard-coded macro
         ns.bind("module", myModuleKeyword);
+        ns.bind("quote_syntax", new QuoteSyntaxKeyword()); // For fusion/syntax
         ns.bind("undef", FusionValue.UNDEF);
 
         for (IonType t : IonType.values())

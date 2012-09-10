@@ -32,7 +32,8 @@ final class SyntaxInt
 
 
     @Override
-    FusionValue eval(Evaluator eval, Environment env) throws FusionException
+    FusionValue doCompileIonConstant(Evaluator eval, Environment env)
+        throws FusionException
     {
         return eval.newInt(myValue);
     }
