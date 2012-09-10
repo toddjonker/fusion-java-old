@@ -20,11 +20,10 @@ final class DefineSyntaxKeyword
     SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
+        SyntaxChecker check = check(source);
         check.arityExact(3);
 
-        check.requiredNonEmptySymbol("identifier", 1);
-        SyntaxSymbol identifier = (SyntaxSymbol) source.get(1);
+        SyntaxSymbol identifier = check.requiredIdentifier(1);
 
         // We need to strip off the module-level wrap that's already been
         // applied to the identifier. Otherwise we'll loop forever trying to
@@ -64,9 +63,9 @@ final class DefineSyntaxKeyword
         }
         else if (! (value instanceof KeywordValue))
         {
-            SyntaxChecker check = new SyntaxChecker(getInferredName(), stx);
+            SyntaxChecker check = check(stx);
             String message =
-                "value is not a transformer: " + displayToString(value);
+                "value is not a transformer: " + writeToString(value);
             throw check.failure(message);
         }
 

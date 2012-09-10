@@ -74,8 +74,7 @@ final class QuasiSyntaxKeyword
 
             if (myUsBinding == binding)
             {
-                SyntaxChecker check = new SyntaxChecker(getInferredName(), stx);
-                check.arityExact(2);
+                check(stx).arityExact(2);
 
                 if (depth < 1)
                 {
@@ -89,8 +88,7 @@ final class QuasiSyntaxKeyword
             }
             else if (myQsBinding == binding)
             {
-                SyntaxChecker check = new SyntaxChecker(getInferredName(), stx);
-                check.arityExact(2);
+                check(stx).arityExact(2);
 
                 depth++;
             }
@@ -156,9 +154,9 @@ final class QuasiSyntaxKeyword
                         catch (ClassCastException e) {}
 
                         String message =
-                            "Result of " + displayToString(stx) +
+                            "Result of " + writeToString(stx) +
                             " isn't a syntax value: " +
-                            displayToString(unquoted);
+                            writeToString(unquoted);
                         throw new ContractFailure(message);
                     }
                     depth--;

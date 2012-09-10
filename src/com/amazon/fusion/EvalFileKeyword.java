@@ -29,8 +29,7 @@ final class EvalFileKeyword
     SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
-        check.arityExact(2);
+        check(source).arityExact(2);
         return super.prepare(eval, env, source);
     }
 
@@ -43,8 +42,15 @@ final class EvalFileKeyword
         {
             SyntaxValue argExpr = stx.get(1);
             FusionValue argValue = eval.eval(env, argExpr);
-            IonString nameDom = (IonString) ((DomValue) argValue).ionValue();
-            fileName = nameDom.stringValue();
+            try
+            {
+                IonString nameDom = (IonString) ((DomValue) argValue).ionValue();
+                fileName = nameDom.stringValue();
+            }
+            catch (ClassCastException e)
+            {
+                throw new ArgTypeFailure(this, "string", 0, argValue);
+            }
         }
 
         Namespace namespace = env.namespace();

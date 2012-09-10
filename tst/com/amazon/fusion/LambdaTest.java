@@ -104,6 +104,15 @@ public class LambdaTest
     }
 
     @Test
+    public void testFormalsSyntaxFailure()
+        throws Exception
+    {
+        expectSyntaxFailure("(lambda (1) 1)");
+        expectSyntaxFailure("(lambda (a 2) 1)");
+        expectSyntaxFailure("(lambda (a []) 1)");
+    }
+
+    @Test
     public void testArgSyntaxFailure()
         throws Exception
     {

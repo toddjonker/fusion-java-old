@@ -30,7 +30,7 @@ final class MacroTransformer
             {
                 String message =
                     "Transformer returned non-syntax result: " +
-                     displayToString(expanded);
+                     writeToString(expanded);
                 throw new SyntaxFailure(myTransformer.identify(), message,
                                         expr);
             }

@@ -22,27 +22,28 @@ final class ParameterizeKeyword
     SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
+        SyntaxChecker check = check(source);
         final int exprSize = check.arityAtLeast(3);
 
-        SyntaxSexp bindingForms =
-            check.requiredSexp("sequence of parameterizations", 1);
+        SyntaxChecker checkBindings =
+            check.subformSeq("sequence of parameterizations", 1);
+        SyntaxSequence bindingForms = checkBindings.form();
 
         final int numBindings = bindingForms.size();
         SyntaxValue[] expandedForms = new SyntaxValue[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
-            SyntaxSexp binding =
-                requiredSexp("parameter/value binding", i, bindingForms);
+            SyntaxChecker checkPair =
+                checkBindings.subformSexp("parameter/value pair", i);
+            checkPair.arityExact(2);
 
-            SyntaxValue paramExpr =
-                requiredForm("parameter/value binding", 0, binding);
+            SyntaxSexp binding = (SyntaxSexp) checkPair.form();
+
+            SyntaxValue paramExpr = binding.get(0);
             paramExpr = paramExpr.prepare(eval, env);
 
-            SyntaxValue boundExpr =
-                requiredForm("parameter/value binding", 1, binding);
+            SyntaxValue boundExpr = binding.get(1);
             boundExpr = boundExpr.prepare(eval, env);
-
 
             binding = SyntaxSexp.make(binding.getLocation(),
                                       paramExpr, boundExpr);
@@ -84,7 +85,17 @@ final class ParameterizeKeyword
 
             FusionValue paramValue = eval.eval(env, paramExpr);
             // TODO error handling
-            parameters[i] = (DynamicParameter) paramValue;
+            try
+            {
+                parameters[i] = (DynamicParameter) paramValue;
+            }
+            catch (ClassCastException e)
+            {
+                String message =
+                    "Parameter expression evaluated to non-parameter: " +
+                    writeToString(paramValue);
+                throw contractFailure(message);
+            }
             boundExprs[i] = requiredForm("parameter/value binding", 1, binding);
         }
 

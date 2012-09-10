@@ -40,8 +40,8 @@ final class LambdaKeyword
             bodyStart = 2;
         }
 
-        check.requiredSexp("formal parameters", 1);
-        SyntaxSymbol[] params = determineParams((SyntaxSexp) children[1]);
+        SyntaxChecker checkFormals = check.subformSexp("formal parameters", 1);
+        SyntaxSymbol[] params = determineParams(checkFormals);
 
         // We create a wrap even if there's no params, because there may be
         // local definitions that will be added to the wrap.
@@ -74,6 +74,7 @@ final class LambdaKeyword
 
     @Override
     FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
+        throws FusionException
     {
         String doc;
         int bodyStart;
@@ -92,20 +93,23 @@ final class LambdaKeyword
             bodyStart = 2;
         }
 
-        SyntaxSymbol[] params = determineParams((SyntaxSexp) expr.get(1));
+        SyntaxChecker checkFormals =
+            check(expr).subformSexp("formal parameters", 1);
+        SyntaxSymbol[] params = determineParams(checkFormals);
         return new Closure(env, expr, doc, params, bodyStart);
     }
 
-    private static SyntaxSymbol[] determineParams(SyntaxSexp paramsExpr)
+    private static SyntaxSymbol[] determineParams(SyntaxChecker checkParams)
+        throws SyntaxFailure
     {
+        SyntaxSexp paramsExpr = (SyntaxSexp) checkParams.form();
         int size = paramsExpr.size();
         if (size == 0) return SyntaxSymbol.EMPTY_ARRAY;
 
         SyntaxSymbol[] params = new SyntaxSymbol[size];
         for (int i = 0; i < size; i++)
         {
-            // TODO typecheck
-            params[i] = (SyntaxSymbol) paramsExpr.get(i);
+            params[i] = checkParams.requiredSymbol("formal parameter name", i);
         }
         return params;
     }

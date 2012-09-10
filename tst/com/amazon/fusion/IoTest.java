@@ -32,4 +32,14 @@ public class IoTest
                    "  ((current_directory " + printString(newDir) + "))" +
                    "  (eval_file \"hello.ion\"))");
     }
+
+    @Test
+    public void testEvalFileSyntax()
+        throws Exception
+    {
+        expectSyntaxFailure("(eval_file)");
+        expectSyntaxFailure("(eval_file \"x\" \"y\")");
+
+        expectContractFailure("(eval_file 12)");
+    }
 }

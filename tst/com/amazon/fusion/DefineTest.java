@@ -21,4 +21,15 @@ public class DefineTest
         assertEval(99, "x");
         assertEval(93, "y");
     }
+
+    @Test
+    public void badDefineSyntax()
+        throws Exception
+    {
+        expectSyntaxFailure("(define)");
+        expectSyntaxFailure("(define x)");
+        expectSyntaxFailure("(define x 2 3)");
+        expectSyntaxFailure("(define 1 2)");
+        expectSyntaxFailure("(define null.symbol 2)");
+    }
 }

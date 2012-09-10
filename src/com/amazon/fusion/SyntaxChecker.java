@@ -122,6 +122,23 @@ class SyntaxChecker
                            false /* nullable */, form);
     }
 
+
+    final SyntaxSymbol requiredIdentifier(String expectation, int argNum)
+        throws SyntaxFailure
+    {
+        SyntaxValue form = requiredForm(expectation, argNum);
+        // TODO check emptyness
+        return checkSyntax(SyntaxSymbol.class, expectation,
+                           false /* nullable */, form);
+    }
+
+    final SyntaxSymbol requiredIdentifier(int argNum)
+        throws SyntaxFailure
+    {
+        return requiredIdentifier("identifier", argNum);
+    }
+
+
     final String requiredNonEmptySymbol(String expectation, int argNum)
         throws SyntaxFailure
     {

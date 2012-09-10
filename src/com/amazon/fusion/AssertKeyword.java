@@ -18,8 +18,7 @@ final class AssertKeyword
     SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
-        check.arityAtLeast(2);
+        check(source).arityAtLeast(2);
         return super.prepare(eval, env, source);
     }
 

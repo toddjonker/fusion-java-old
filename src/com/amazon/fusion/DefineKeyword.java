@@ -14,11 +14,14 @@ final class DefineKeyword
 
 
     static SyntaxSymbol boundIdentifier(Evaluator eval, Environment env,
-                                        SyntaxSexp stx)
+                                        SyntaxSexp source)
         throws SyntaxFailure
     {
-        // TODO error checking
-        return (SyntaxSymbol) stx.get(1);
+        SyntaxChecker check = new SyntaxChecker("define", source);
+        check.arityExact(3);
+
+        SyntaxSymbol identifier = check.requiredIdentifier(1);
+        return identifier;
     }
 
 
@@ -26,9 +29,10 @@ final class DefineKeyword
     SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
+        SyntaxChecker check = check(source);
         check.arityExact(3);
-        SyntaxSymbol identifier = (SyntaxSymbol) source.get(1); // TODO type-check
+
+        SyntaxSymbol identifier = check.requiredIdentifier(1);
 
         // We need to strip off the module-level wrap that's already been
         // applied to the identifier. Otherwise we'll loop forever trying to

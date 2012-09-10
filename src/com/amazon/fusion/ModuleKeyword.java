@@ -52,7 +52,7 @@ final class ModuleKeyword
                         SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
+        SyntaxChecker check = check(source);
 
         ModuleInstance kernel = eval.findKernel();
 

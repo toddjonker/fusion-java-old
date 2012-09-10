@@ -23,8 +23,7 @@ final class IfKeyword
     SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
-        SyntaxChecker check = new SyntaxChecker(getInferredName(), source);
-        check.arityExact(4);
+        check(source).arityExact(4);
         return super.prepare(eval, env, source);
     }
 
