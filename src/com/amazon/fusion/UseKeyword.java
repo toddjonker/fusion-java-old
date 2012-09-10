@@ -24,20 +24,44 @@ final class UseKeyword
 
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
-        // TODO this shouldn't be needed but module preparation is discarded!
-        SyntaxValue modStx = expr.get(1);
-        Namespace namespace = env.namespace();
-        use(eval, namespace, modStx);
-        return UNDEF;
+        // TODO Should we resolve the name at compile-time?
+        SyntaxValue moduleSpec = expr.get(1);
+        ModuleIdentity id = myModuleNameResolver.resolve(eval, moduleSpec);
+        return new CompiledUse(id);
     }
+
 
     void use(Evaluator eval, Namespace ns, SyntaxValue moduleSpec)
         throws FusionException
     {
         ModuleIdentity id = myModuleNameResolver.resolve(eval, moduleSpec);
         ns.use(id);
+    }
+
+
+    //========================================================================
+
+
+    private static final class CompiledUse
+        implements CompiledForm
+    {
+        private final ModuleIdentity myUsedModuleId;
+
+        public CompiledUse(ModuleIdentity usedModuleId)
+        {
+            myUsedModuleId = usedModuleId;
+        }
+
+        @Override
+        public Object doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Namespace namespace = (Namespace) store.runtimeNamespace();
+            namespace.use(myUsedModuleId);
+            return UNDEF;
+        }
     }
 }

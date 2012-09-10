@@ -144,19 +144,14 @@ final class ModuleKeyword
                                 throw new SyntaxFailure("define_syntax",
                                                         message, form);
                             }
-                            // TODO shouldn't need to keep this for later,
-                            // but we throw away all this work at the moment
-                            // and do it all again during invoke()
-//                          expanded = null;
                             formIsPrepared = true;
                         }
                         else if (binding == useSyntaxBinding)
                         {
                             try
                             {
-                                expanded = expanded.prepare(eval,
-                                                            moduleNamespace);
-                                eval.eval(moduleNamespace, expanded);
+                                eval.prepareAndEvalTopLevelForm(expanded,
+                                                                moduleNamespace);
                             }
                             catch (FusionException e)
                             {
@@ -164,11 +159,7 @@ final class ModuleKeyword
                                 throw new SyntaxFailure("use",
                                                         message, form);
                             }
-                            // TODO shouldn't need to keep this for later,
-                            // but we throw away all this work at the moment
-                            // and do it all again during invoke()
-//                          expanded = null;
-                            formIsPrepared = true;
+                            expanded = null;
                         }
                     }
                 }
