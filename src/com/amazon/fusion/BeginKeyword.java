@@ -94,12 +94,7 @@ final class BeginKeyword
         }
         else
         {
-            CompiledForm[] subforms = new CompiledForm[size];
-            for (int i = from; i < to; i++)
-            {
-                SyntaxValue subform = source.get(i);
-                subforms[i - from] = eval.compile(env, subform);
-            }
+            CompiledForm[] subforms = eval.compile(env, source, from, to);
             compiled = new CompiledBegin(subforms);
         }
 

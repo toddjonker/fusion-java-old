@@ -7,9 +7,9 @@ final class FusionAssertionFailure
     extends FusionException
 {
     private final SyntaxValue myExpr;
-    private final FusionValue myResult;
+    private final Object      myResult;
 
-    FusionAssertionFailure(String message, SyntaxValue expr, FusionValue result)
+    FusionAssertionFailure(String message, SyntaxValue expr, Object result)
     {
         super(message);
         myExpr = expr;

@@ -16,11 +16,11 @@ final class ArgTypeFailure
     private final NamedValue myName;
     private final String myExpectedType;
     private final int myArgNum;
-    private final FusionValue[] myActuals;
+    private final Object[] myActuals;
 
 
     ArgTypeFailure(NamedValue name, String expectedType,
-                   int argNum, FusionValue[] actuals)
+                   int argNum, Object[] actuals)
     {
         super("arg type failure");
         assert name != null && actuals.length != 0;
@@ -33,14 +33,14 @@ final class ArgTypeFailure
     }
 
     ArgTypeFailure(NamedValue name, String expectedType,
-                   int argNum, FusionValue actuals)
+                   int argNum, Object actuals)
     {
         super("arg type failure");
         assert name != null && actuals != null;
         myName = name;
         myExpectedType = expectedType;
         myArgNum = argNum;
-        myActuals = new FusionValue[]{ actuals };
+        myActuals = new Object[]{ actuals };
     }
 
 

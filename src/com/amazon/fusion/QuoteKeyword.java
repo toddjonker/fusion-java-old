@@ -32,10 +32,38 @@ final class QuoteKeyword
     }
 
 
+    //========================================================================
+
+
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
+        throws FusionException
     {
-        SyntaxValue quotedStx = expr.get(1);
-        return quotedStx.quote(eval);
+        SyntaxValue quotedSource = source.get(1);
+        return new CompiledQuote(quotedSource);
+    }
+
+
+    //========================================================================
+
+
+    private static final class CompiledQuote
+        implements CompiledForm
+    {
+        private final SyntaxValue mySyntax;
+
+        CompiledQuote(SyntaxValue syntax)
+        {
+            mySyntax = syntax;
+        }
+
+
+        @Override
+        public Object doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            FusionValue result = mySyntax.quote(eval);
+            return result;
+        }
     }
 }

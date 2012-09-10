@@ -70,7 +70,7 @@ abstract class NamedValue
     //========================================================================
     // Type-checking helpers
 
-    final boolean checkBoolArg(FusionValue arg)
+    final boolean checkBoolArg(Object arg)
         throws ContractFailure
     {
         try
@@ -85,7 +85,7 @@ abstract class NamedValue
         throw contractFailure("Expected true or false: " + arg);
     }
 
-    boolean checkBoolArg(int argNum, FusionValue arg)
+    boolean checkBoolArg(int argNum, Object arg)
         throws ArgTypeFailure
     {
         try

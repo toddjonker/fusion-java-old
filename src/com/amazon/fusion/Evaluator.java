@@ -329,6 +329,36 @@ final class Evaluator
         return source.doCompile(this, env);
     }
 
+    /**
+     * @return not null, but perhaps {@link CompiledForm#EMPTY_ARRAY}.
+     */
+    CompiledForm[] compile(Environment env, SyntaxSequence source,
+                           int from, int to)
+        throws FusionException
+    {
+        int size = to - from;
+
+        if (size == 0) return CompiledForm.EMPTY_ARRAY;
+
+        CompiledForm[] forms = new CompiledForm[size];
+        for (int i = from; i < to; i++)
+        {
+            SyntaxValue form = source.get(i);
+            forms[i - from] = compile(env, form);
+        }
+
+        return forms;
+    }
+
+    /**
+     * @return not null, but perhaps {@link CompiledForm#EMPTY_ARRAY}.
+     */
+    CompiledForm[] compile(Environment env, SyntaxSequence source, int from)
+        throws FusionException
+    {
+        return compile(env, source, from, source.size());
+    }
+
 
     Object exec(Store store, CompiledForm form)
         throws FusionException

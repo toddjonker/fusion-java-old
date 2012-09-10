@@ -14,21 +14,46 @@ final class OrKeyword
               "non-boolean value.");
     }
 
+
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
         throws FusionException
     {
-        // TODO FUSION-12 tail optimization
+        // Cannot optimize single-form scenario, because we need to type-check
+        // the result.
 
-        for (int i = 1; i < expr.size(); i++)
+        CompiledForm[] forms = eval.compile(env, source, 1);
+        return new CompiledOr(forms);
+    }
+
+
+    //========================================================================
+
+
+    private final class CompiledOr
+        implements CompiledForm
+    {
+        private final CompiledForm[] myForms;
+
+        CompiledOr(CompiledForm[] forms)
         {
-            SyntaxValue testExpr = expr.get(i);
-            FusionValue v = eval.eval(env, testExpr);
-            if (checkBoolArg(i - 1, v))
-            {
-                return eval.newBool(true);
-            }
+            myForms = forms;
         }
-        return eval.newBool(false);
+
+        @Override
+        public Object doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            for (int i = 0; i < myForms.length; i++)
+            {
+                CompiledForm form = myForms[i];
+                Object v = eval.exec(store, form);
+                if (checkBoolArg(i, v))
+                {
+                    return eval.newBool(true);
+                }
+            }
+            return eval.newBool(false);
+        }
     }
 }

@@ -7,6 +7,10 @@ package com.amazon.fusion;
  */
 interface CompiledForm
 {
+    /** A zero-length array. */
+    static final CompiledForm[] EMPTY_ARRAY = new CompiledForm[0];
+
+
     Object doExec(Evaluator eval, Store store)
         throws FusionException;
 }

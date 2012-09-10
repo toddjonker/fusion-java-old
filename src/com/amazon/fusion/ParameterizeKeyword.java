@@ -69,58 +69,94 @@ final class ParameterizeKeyword
     }
 
 
+    //========================================================================
+
+
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
         throws FusionException
     {
-        SyntaxSexp bindingForms = (SyntaxSexp) expr.get(1);
+        SyntaxSexp bindingForms = (SyntaxSexp) source.get(1);
 
         final int numBindings = bindingForms.size();
-        DynamicParameter[] parameters = new DynamicParameter[numBindings];
-        SyntaxValue[] boundExprs = new SyntaxValue[numBindings];
+
+        CompiledForm[] parameterForms = new CompiledForm[numBindings];
+        CompiledForm[] valueForms     = new CompiledForm[numBindings];
+
         for (int i = 0; i < numBindings; i++)
         {
             SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
+
             SyntaxValue paramExpr = binding.get(0);
+            parameterForms[i] = eval.compile(env, paramExpr);
 
-            FusionValue paramValue = eval.eval(env, paramExpr);
-            // TODO error handling
-            try
-            {
-                parameters[i] = (DynamicParameter) paramValue;
-            }
-            catch (ClassCastException e)
-            {
-                String message =
-                    "Parameter expression evaluated to non-parameter: " +
-                    writeToString(paramValue);
-                throw contractFailure(message);
-            }
-            boundExprs[i] = requiredForm("parameter/value binding", 1, binding);
+            SyntaxValue valueExpr = binding.get(1);
+            valueForms[i] = eval.compile(env, valueExpr);
         }
 
-        FusionValue[] boundValues = new FusionValue[numBindings];
-        for (int i = 0; i < numBindings; i++)
+        CompiledForm body = BeginKeyword.compile(eval, env, source, 2);
+
+        return new CompiledParameterize(parameterForms, valueForms, body);
+    }
+
+
+    //========================================================================
+
+
+    private final class CompiledParameterize
+        implements CompiledForm
+    {
+        private final CompiledForm[] myParameterForms;
+        private final CompiledForm[] myValueForms;
+        private final CompiledForm   myBody;
+
+        CompiledParameterize(CompiledForm[] parameterForms,
+                             CompiledForm[] valueForms,
+                             CompiledForm   body)
         {
-            SyntaxValue boundExpr = boundExprs[i];
-            FusionValue boundValue = eval.eval(env, boundExpr);
-            boundValues[i] = boundValue;
+            myParameterForms = parameterForms;
+            myValueForms     = valueForms;
+            myBody           = body;
         }
 
-        Evaluator bodyEval = eval.markedContinuation(parameters, boundValues);
 
-        // TODO tail recursion
-        FusionValue result = null;
-        final int bodyEnd = expr.size() /* - 1 */;
-        for (int i = 2; i < bodyEnd; i++)
+        @Override
+        public Object doExec(Evaluator eval, Store store)
+            throws FusionException
         {
-            SyntaxValue bodyExpr = expr.get(i);
-            result = bodyEval.eval(env, bodyExpr);
+            final int numBindings = myParameterForms.length;
+
+            DynamicParameter[] parameters = new DynamicParameter[numBindings];
+            for (int i = 0; i < numBindings; i++)
+            {
+                CompiledForm paramForm = myParameterForms[i];
+                Object paramValue = eval.exec(store, paramForm);
+                try
+                {
+                    parameters[i] = (DynamicParameter) paramValue;
+                }
+                catch (ClassCastException e)
+                {
+                    String message =
+                        "Parameter expression evaluated to non-parameter: " +
+                        writeToString(paramValue);
+                    throw contractFailure(message);
+                }
+            }
+
+            FusionValue[] boundValues = new FusionValue[numBindings];
+            for (int i = 0; i < numBindings; i++)
+            {
+                CompiledForm valueForm = myValueForms[i];
+                Object value = eval.exec(store, valueForm);
+                boundValues[i] = (FusionValue) value;
+            }
+
+            Evaluator bodyEval = eval.markedContinuation(parameters, boundValues);
+
+            // TODO tail recursion
+            Object result = bodyEval.exec(store, myBody);
+            return result;
         }
-/*
-        IonValue bodyExpr = expr.get(bodyEnd);
-        result = eval.bounceTailExpression(env, bodyExpr);
-        */
-        return result;
     }
 }

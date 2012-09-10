@@ -35,25 +35,50 @@ final class EvalFileKeyword
 
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
         throws FusionException
     {
-        String fileName;
+        SyntaxValue argSource = source.get(1);
+        CompiledForm form = eval.compile(env, argSource);
+        return new CompiledEvalFile(form);
+    }
+
+
+    //========================================================================
+
+
+    private final class CompiledEvalFile
+        implements CompiledForm
+    {
+        private final CompiledForm myFileNameForm;
+
+        CompiledEvalFile(CompiledForm fileNameForm)
         {
-            SyntaxValue argExpr = stx.get(1);
-            FusionValue argValue = eval.eval(env, argExpr);
-            try
-            {
-                IonString nameDom = (IonString) ((DomValue) argValue).ionValue();
-                fileName = nameDom.stringValue();
-            }
-            catch (ClassCastException e)
-            {
-                throw new ArgTypeFailure(this, "string", 0, argValue);
-            }
+            myFileNameForm = fileNameForm;
         }
 
-        Namespace namespace = env.namespace();
-        return myLoadHandler.loadTopLevel(eval, namespace, fileName);
+        @Override
+        public Object doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            String fileName;
+            {
+                Object argValue = eval.exec(store, myFileNameForm);
+                try
+                {
+                    IonString nameDom = (IonString)
+                        ((DomValue) argValue).ionValue();
+                    fileName = nameDom.stringValue();
+                }
+                catch (ClassCastException e)
+                {
+                    throw new ArgTypeFailure(EvalFileKeyword.this, "string",
+                                             0, argValue);
+                }
+            }
+
+            Namespace namespace = (Namespace) store.runtimeNamespace();
+            return myLoadHandler.loadTopLevel(eval, namespace, fileName);
+        }
     }
 }

@@ -24,31 +24,60 @@ final class AssertKeyword
 
 
     @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
         throws FusionException
     {
-        SyntaxValue testExpr = expr.get(1);
-        FusionValue result = eval.eval(env, testExpr);
-        if (checkBoolArg(0 /* argNum */, result)) return UNDEF;
+        SyntaxValue testFormSyntax = source.get(1);
+        CompiledForm testForm = eval.compile(env, testFormSyntax);
 
-        String message;
-        int size = expr.size();
-        if (size > 2)
+        CompiledForm[] messageForms = eval.compile(env, source, 2);
+        return new CompiledAssert(testFormSyntax, testForm, messageForms);
+    }
+
+
+    //========================================================================
+
+
+    private final class CompiledAssert
+        implements CompiledForm
+    {
+        private final SyntaxValue    myTestFormSyntax; // For error reporting
+        private final CompiledForm   myTestForm;
+        private final CompiledForm[] myMessageForms;
+
+        CompiledAssert(SyntaxValue testFormSyntax, CompiledForm testForm,
+                       CompiledForm[] messageForms)
         {
-            StringBuilder buf = new StringBuilder();
-            for (int i = 2; i < size; i++)
+            myTestFormSyntax = testFormSyntax;
+            myTestForm       = testForm;
+            myMessageForms   = messageForms;
+        }
+
+        @Override
+        public Object doExec(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Object result = eval.exec(store, myTestForm);
+            if (checkBoolArg(0 /* argNum */, result)) return UNDEF;
+
+            String message;
+            int size = myMessageForms.length;
+            if (size != 0)
             {
-                SyntaxValue messageExpr = expr.get(i);
-                FusionValue messageValue = eval.eval(env, messageExpr);
-                FusionValue.display(buf, messageValue);
+                StringBuilder buf = new StringBuilder();
+                for (CompiledForm messageForm : myMessageForms)
+                {
+                    Object messageValue = eval.exec(store, messageForm);
+                    FusionValue.display(buf, messageValue);
+                }
+                message = buf.toString();
             }
-            message = buf.toString();
-        }
-        else
-        {
-            message = null;
-        }
+            else
+            {
+                message = null;
+            }
 
-        throw new FusionAssertionFailure(message, testExpr, result);
+            throw new FusionAssertionFailure(message, myTestFormSyntax, result);
+        }
     }
 }
