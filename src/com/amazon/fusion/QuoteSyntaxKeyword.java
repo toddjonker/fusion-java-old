@@ -34,7 +34,7 @@ final class QuoteSyntaxKeyword
     //========================================================================
 
 
-    private static final class CompiledQuoteSyntax
+    static final class CompiledQuoteSyntax
         implements CompiledForm
     {
         private final SyntaxValue myQuoted;
@@ -45,7 +45,7 @@ final class QuoteSyntaxKeyword
         }
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public SyntaxValue doExec(Evaluator eval, Store store)
             throws FusionException
         {
             return myQuoted;
