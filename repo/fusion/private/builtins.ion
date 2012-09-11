@@ -1,0 +1,53 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(module builtins (quote '#%kernel')
+
+  // #%kernel bindings we pass through
+  (provide begin current_directory define eval_file
+    if lambda letrec module undef use)
+  (provide is_bool is_int is_float is_decimal is_timestamp is_symbol
+      is_string is_clob is_blob is_list is_sexp is_struct)
+
+
+  (define_syntax and           (java_new "com.amazon.fusion.AndKeyword"))
+  (define_syntax assert        (java_new "com.amazon.fusion.AssertKeyword"))
+  (define_syntax for_list      (java_new "com.amazon.fusion.ForListKeyword"))
+  (define_syntax let           (java_new "com.amazon.fusion.LetKeyword"))
+  (define_syntax or            (java_new "com.amazon.fusion.OrKeyword"))
+  (define_syntax quote         (java_new "com.amazon.fusion.QuoteKeyword"))
+  (define_syntax unless        (java_new "com.amazon.fusion.UnlessKeyword"))
+  (define_syntax when          (java_new "com.amazon.fusion.WhenKeyword"))
+
+  (provide and assert for_list let or quote unless when)
+
+
+  (define *              (java_new "com.amazon.fusion.ProductProc"))
+  (define +              (java_new "com.amazon.fusion.SumProc"))
+  (define -              (java_new "com.amazon.fusion.DifferenceProc"))
+  (define .              (java_new "com.amazon.fusion.DotProc"))
+  (define <              (java_new "com.amazon.fusion.LessThanProc"))
+  (define =              (java_new "com.amazon.fusion.EqualProc"))
+  (define >              (java_new "com.amazon.fusion.GreaterThanProc"))
+  (define add            (java_new "com.amazon.fusion.AddProc"))
+  (define apply          (java_new "com.amazon.fusion.ApplyProc"))
+  (define concatenate    (java_new "com.amazon.fusion.StringConcatenateProc"))
+  (define contains       (java_new "com.amazon.fusion.ContainsProc"))
+  (define display        (java_new "com.amazon.fusion.DisplayProc"))
+  (define exit           (java_new "com.amazon.fusion.ExitProc"))
+  (define for_each_field (java_new "com.amazon.fusion.ForEachFieldProc"))
+  (define help           (java_new "com.amazon.fusion.HelpProc"))
+  (define is_null        (java_new "com.amazon.fusion.IsNullProc"))
+  (define is_undef       (java_new "com.amazon.fusion.IsUndefProc"))
+  (define make_sexp      (java_new "com.amazon.fusion.MakeSexpProc"))
+  (define not            (java_new "com.amazon.fusion.NotProc"))
+  (define read           (java_new "com.amazon.fusion.ReadProc"))
+  (define remove         (java_new "com.amazon.fusion.RemoveProc"))
+  (define size           (java_new "com.amazon.fusion.SizeProc"))
+  (define to_int         (java_new "com.amazon.fusion.ToIntProc"))
+  (define to_string      (java_new "com.amazon.fusion.ToStringProc"))
+  (define write          (java_new "com.amazon.fusion.WriteProc"))
+
+  (provide * + - . < = > add apply concatenate contains display exit
+    for_each_field help is_null is_undef make_sexp not read remove
+    size to_int to_string write)
+)

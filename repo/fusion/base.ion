@@ -1,73 +1,51 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module base (quote '#%kernel')
-
-/*
-  (define current_directory (make_parameter (java_system_property "user.dir")))
-*/
-
-  (define_syntax and           (java_new "com.amazon.fusion.AndKeyword"))
-  (define_syntax assert        (java_new "com.amazon.fusion.AssertKeyword"))
-  (define_syntax for_list      (java_new "com.amazon.fusion.ForListKeyword"))
-  (define_syntax let           (java_new "com.amazon.fusion.LetKeyword"))
-  (define_syntax or            (java_new "com.amazon.fusion.OrKeyword"))
-  (define_syntax parameterize  (java_new "com.amazon.fusion.ParameterizeKeyword"))
-  (define_syntax quote         (java_new "com.amazon.fusion.QuoteKeyword"))
-  (define_syntax when          (java_new "com.amazon.fusion.WhenKeyword"))
-  (define_syntax unless        (java_new "com.amazon.fusion.UnlessKeyword"))
-
-  (define *              (java_new "com.amazon.fusion.ProductProc"))
-  (define +              (java_new "com.amazon.fusion.SumProc"))
-  (define -              (java_new "com.amazon.fusion.DifferenceProc"))
-  (define .              (java_new "com.amazon.fusion.DotProc"))
-  (define <              (java_new "com.amazon.fusion.LessThanProc"))
-  (define =              (java_new "com.amazon.fusion.EqualProc"))
-  (define >              (java_new "com.amazon.fusion.GreaterThanProc"))
-  (define add            (java_new "com.amazon.fusion.AddProc"))
-  (define apply          (java_new "com.amazon.fusion.ApplyProc"))
-  (define contains       (java_new "com.amazon.fusion.ContainsProc"))
-  (define concatenate    (java_new "com.amazon.fusion.StringConcatenateProc"))
-  (define display        (java_new "com.amazon.fusion.DisplayProc"))
-  (define exit           (java_new "com.amazon.fusion.ExitProc"))
-  (define for_each_field (java_new "com.amazon.fusion.ForEachFieldProc"))
-  (define help           (java_new "com.amazon.fusion.HelpProc"))
-  (define is_null        (java_new "com.amazon.fusion.IsNullProc"))
-  (define is_undef       (java_new "com.amazon.fusion.IsUndefProc"))
-  (define make_sexp      (java_new "com.amazon.fusion.MakeSexpProc"))
-  (define not            (java_new "com.amazon.fusion.NotProc"))
-  (define read           (java_new "com.amazon.fusion.ReadProc"))
-  (define remove         (java_new "com.amazon.fusion.RemoveProc"))
-  (define size           (java_new "com.amazon.fusion.SizeProc"))
-  (define to_int         (java_new "com.amazon.fusion.ToIntProc"))
-  (define to_string      (java_new "com.amazon.fusion.ToStringProc"))
-  (define write          (java_new "com.amazon.fusion.WriteProc"))
+(module base 'fusion/private/builtins'
 
 
-  (define make_parameter
-    (lambda (value)
-      '''
-Makes a new dynamic parameter procedure. The initial value of the parameter is
-VALUE.
-      '''
-      (java_new "com.amazon.fusion.DynamicParameter" value)))
-
-  (provide * + - . < = > add and apply assert begin concatenate contains
-    current_directory define display
-    eval_file exit for_each_field for_list
-    help
-    if is_null is_undef lambda let letrec
-    make_parameter make_sexp module not or parameterize quote read remove
-    size
-    to_int to_string
-    undef
-    unless
-    use
-    when
-    write)
-
+  // Pass-through bindings from #%kernel
+  (provide begin current_directory define eval_file
+    if lambda letrec module undef use)
+  (provide is_bool is_int is_float is_decimal is_timestamp is_symbol
+      is_string is_clob is_blob is_list is_sexp is_struct)
   // Note that there's no is_null type checker, since that's used to
   // check for *any* null value.
 
-  (provide is_bool is_int is_float is_decimal is_timestamp is_symbol
-      is_string is_clob is_blob is_list is_sexp is_struct)
+
+  // Pass-through bindings from builtins
+  (provide and assert for_list let or quote unless when)
+  (provide * + - . < = > add apply concatenate contains display exit
+    for_each_field help is_null is_undef make_sexp not read remove
+    size to_int to_string write)
+
+
+  (use 'fusion/params')
+  (provide make_parameter parameterize)
+
+
+
+  (use 'fusion/syntax')
+
+// TODO FUSION-36  Support internal definitions in body sequences.
+// Shouldn't use begin since that doesn't delimit the new scope that's needed.
+
+  (provide cond)
+  (define_syntax cond
+    (lambda (stx)
+      (let ((size (syntax_size stx)))
+        (if (= 1 size)               // (cond) with no clauses
+          (quote_syntax undef)
+          (let ((clause (syntax_get    stx 1))
+                (tail   (syntax_subseq stx 2)))
+            (when (> 1 (syntax_size clause))
+              (wrong_syntax stx "cond: bad clause " clause))
+            (let ((test (syntax_get    clause 0))
+                  (body (syntax_subseq clause 1)))
+              (let ((begin_body (syntax_append (quote_syntax (begin)) body))
+                    (cond_tail  (syntax_append (quote_syntax (cond)) tail)))
+                (quasisyntax
+                  (if (unsyntax test)
+                      (unsyntax begin_body)
+                      (unsyntax cond_tail))))))))))
+
 )

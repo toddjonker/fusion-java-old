@@ -1,0 +1,22 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(use check)
+
+(check_equal (cond) undef "(cond)")
+
+(check_equal (cond (true 1)) 1 "1")
+
+(check_equal (cond (true 1 2)) 2 "2")
+
+(check_equal (cond (false 3)) undef "3")
+
+(check_equal (let ((x 2))
+               (cond ((= 1 x) (+ x "hi"))
+                     ((= x 3) x)
+                     (true    (+ x 2))))
+   4 "4")
+
+(check_equal (cond ((= 1 2) "bad")
+                   ((= 3 3) "body stuff" 5)
+                   (true    "bad"))
+   5 "5")

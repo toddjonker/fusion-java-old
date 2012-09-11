@@ -1,0 +1,16 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(module params (quote '#%kernel')
+
+  (provide make_parameter parameterize)
+
+  (define_syntax parameterize  (java_new "com.amazon.fusion.ParameterizeKeyword"))
+
+  (define  make_parameter
+    (lambda (value)
+      '''
+Makes a new dynamic parameter procedure. The initial value of the parameter is
+VALUE.
+      '''
+      (java_new "com.amazon.fusion.DynamicParameter" value)))
+)
