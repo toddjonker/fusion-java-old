@@ -25,10 +25,11 @@ abstract class MacroValue
         final int mark = ourMarkCounter.incrementAndGet();
 
         stx = (SyntaxSexp) stx.addOrRemoveMark(mark);
-        stx = (SyntaxSexp) expand(eval, stx);
-        stx = (SyntaxSexp) stx.addOrRemoveMark(mark);
 
-        return stx.prepare(eval, env);
+        SyntaxValue expanded = expandOnce(eval, stx);
+        expanded = expanded.addOrRemoveMark(mark);
+
+        return expanded.prepare(eval, env);
     }
 
     /**
@@ -36,7 +37,7 @@ abstract class MacroValue
      *
      * @param expr the input expression, including the keyword symbol.
      */
-    abstract SyntaxValue expand(Evaluator eval, SyntaxSexp expr)
+    abstract SyntaxValue expandOnce(Evaluator eval, SyntaxSexp expr)
         throws SyntaxFailure;
 
 

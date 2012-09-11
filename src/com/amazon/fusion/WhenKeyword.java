@@ -25,7 +25,7 @@ final class WhenKeyword
      * @param expr the input expression, including the keyword symbol.
      */
     @Override
-    SyntaxValue expand(Evaluator eval, SyntaxSexp expr)
+    SyntaxValue expandOnce(Evaluator eval, SyntaxSexp expr)
         throws SyntaxFailure
     {
         int whenExprSize = expr.size();

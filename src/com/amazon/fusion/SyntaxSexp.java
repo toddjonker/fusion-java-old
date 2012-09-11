@@ -191,7 +191,7 @@ final class SyntaxSexp
             {
                 // We found a static top-level keyword binding!
                 SyntaxValue expanded =
-                    ((MacroTransformer)resolved).expandOnce(eval, env, this);
+                    ((MacroTransformer)resolved).expandOnce(eval, this);
                 if (expanded instanceof SyntaxSexp)
                 {
                     // TODO replace recursion with iteration

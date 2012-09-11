@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 final class MacroTransformer
-    extends KeywordValue
+    extends MacroValue
 {
     private final Procedure myTransformer;
 
@@ -15,25 +15,14 @@ final class MacroTransformer
     }
 
 
-    SyntaxValue expandOnce(Evaluator eval, Environment env, SyntaxSexp expr)
+    @Override
+    SyntaxValue expandOnce(Evaluator eval, SyntaxSexp expr)
         throws SyntaxFailure
     {
+        FusionValue expanded;
         try
         {
-            FusionValue expanded = eval.applyNonTail(myTransformer, expr);
-
-            try
-            {
-                return (SyntaxValue) expanded;
-            }
-            catch (ClassCastException e)
-            {
-                String message =
-                    "Transformer returned non-syntax result: " +
-                     writeToString(expanded);
-                throw new SyntaxFailure(myTransformer.identify(), message,
-                                        expr);
-            }
+            expanded = eval.applyNonTail(myTransformer, expr);
         }
         catch (SyntaxFailure e)
         {
@@ -46,23 +35,18 @@ final class MacroTransformer
                 "Error expanding macro: " + e.getMessage();
             throw new SyntaxFailure(getInferredName(), message, expr);
         }
-    }
 
-
-    @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp expr)
-        throws SyntaxFailure
-    {
-        SyntaxValue expanded = expandOnce(eval, env, expr);
-
-        return expanded.prepare(eval, env);
-    }
-
-
-    @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
-        throws FusionException
-    {
-        throw new IllegalStateException();
+        try
+        {
+            return (SyntaxValue) expanded;
+        }
+        catch (ClassCastException e)
+        {
+            String message =
+                "Transformer returned non-syntax result: " +
+                 writeToString(expanded);
+            throw new SyntaxFailure(myTransformer.identify(), message,
+                                    expr);
+        }
     }
 }

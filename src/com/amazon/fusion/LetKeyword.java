@@ -26,7 +26,7 @@ final class LetKeyword
      * {@code ((letrec ((f (lambda (v ...) b ...))) f) e ...)}
      */
     @Override
-    SyntaxValue expand(Evaluator eval, SyntaxSexp source)
+    SyntaxValue expandOnce(Evaluator eval, SyntaxSexp source)
         throws SyntaxFailure
     {
         SyntaxChecker check = check(source);
