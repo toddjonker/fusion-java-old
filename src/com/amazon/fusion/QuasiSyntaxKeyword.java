@@ -80,7 +80,7 @@ final class QuasiSyntaxKeyword
                 if (depth < 1)
                 {
                     SyntaxValue subform = children[1];
-                    subform = subform.expand(eval, env);
+                    children[1] = subform.expand(eval, env);
                     source = SyntaxSexp.make(source.getLocation(), children);
                     return source;
                 }
@@ -247,8 +247,8 @@ final class QuasiSyntaxKeyword
             catch (ClassCastException e) {}
 
             String message =
-                "Result of " + writeToString(myUnquotedSyntax) +
-                " isn't a syntax value: " +
+                "Result of (unsyntax " + writeToString(myUnquotedSyntax) +
+                ") isn't a syntax value: " +
                 writeToString(unquoted);
             throw new ContractFailure(message);
         }

@@ -30,6 +30,15 @@
 (check_equal (x) 67 "D macro expansion")
 
 
+// Macro inside of unsyntax
+(define_syntax D2
+  (lambda (stx)
+    (quasisyntax
+      ( + 2 (unsyntax (let ((x (quote_syntax 220)))
+                        (quasisyntax (unsyntax x))))))))
+(check_equal (D2) 222 "D2")
+
+
 //============================================================================
 // syntax_append
 

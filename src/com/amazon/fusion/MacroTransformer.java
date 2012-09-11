@@ -33,7 +33,10 @@ final class MacroTransformer
         {
             String message =
                 "Error expanding macro: " + e.getMessage();
-            throw new SyntaxFailure(getInferredName(), message, expr);
+            SyntaxFailure fail =
+                new SyntaxFailure(getInferredName(), message, expr);
+            fail.initCause(e);
+            throw fail;
         }
 
         try
