@@ -41,13 +41,13 @@ final class AndKeyword
         }
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
             for (int i = 0; i < myForms.length; i++)
             {
                 CompiledForm form = myForms[i];
-                Object v = eval.exec(store, form);
+                Object v = eval.eval(store, form);
                 if (! checkBoolArg(i, v))
                 {
                     return eval.newBool(false);

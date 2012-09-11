@@ -19,7 +19,7 @@ final class MacroTransformer
     SyntaxValue expandOnce(Evaluator eval, SyntaxSexp expr)
         throws SyntaxFailure
     {
-        FusionValue expanded;
+        Object expanded;
         try
         {
             expanded = eval.applyNonTail(myTransformer, expr);

@@ -32,13 +32,6 @@ final class HelpProc
                 arg.displayHelp(out);
             }
         }
-
-        @Override
-        FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
-            throws FusionException
-        {
-            throw new FusionException("not invokable");
-        }
     }
 
 

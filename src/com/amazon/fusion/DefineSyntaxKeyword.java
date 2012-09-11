@@ -18,7 +18,7 @@ final class DefineSyntaxKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         SyntaxChecker check = check(source);
@@ -39,10 +39,10 @@ final class DefineSyntaxKeyword
         // Update the identifier with its binding.
         // This is just a way to pass the binding instance through to the
         // runtime stage so invoke() below can reuse it.
-        identifier = (SyntaxSymbol) identifier.prepare(eval, env);
+        identifier = (SyntaxSymbol) identifier.expand(eval, env);
 
         SyntaxValue valueStx = source.get(2);
-        valueStx = valueStx.prepare(eval, env);
+        valueStx = valueStx.expand(eval, env);
 
         source = SyntaxSexp.make(source.getLocation(),
                                  source.get(0), identifier, valueStx);
@@ -84,11 +84,11 @@ final class DefineSyntaxKeyword
         }
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
             // TODO this shouldn't do anything during phase-0 evaluation.
-            Object value = eval.exec(store, myValueForm);
+            Object value = eval.eval(store, myValueForm);
 
             if (value instanceof Procedure)
             {

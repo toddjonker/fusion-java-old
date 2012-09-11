@@ -60,28 +60,6 @@ public abstract class FusionValue
     //========================================================================
 
     /**
-     * Invokes the value as the first position in an S-expression.
-     *
-     * @param eval the evaluation engine to use for sub-expressions; not null.
-     * @param env the lexical environment, containing visible bindings;
-     *  not null.
-     * @param expr the source expression being invoked; not null.
-     *  The first child element is the source for this value.
-     *
-     * @return the invocation result.
-     *
-     * @throws FusionException if there's a failure in the fusion code.
-     */
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
-        throws FusionException
-    {
-        throw new FusionException("not invokable: " + this);
-    }
-
-
-    //========================================================================
-
-    /**
      * Writes a representation of this value, following Ion syntax where
      * possible, including for strings.
      * The result will be invalid if the value contains any non-Ion data like

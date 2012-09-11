@@ -235,7 +235,7 @@ final class SyntaxStruct
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env)
+    SyntaxValue expand(Evaluator eval, Environment env)
         throws SyntaxFailure
     {
         Map<String, Object> newMap = null;
@@ -255,7 +255,7 @@ final class SyntaxStruct
                     {
                         subform = subform.addWraps(myWraps);
                     }
-                    subform = subform.prepare(eval, env);
+                    subform = subform.expand(eval, env);
                     entry.setValue(subform);
                 }
                 else
@@ -271,7 +271,7 @@ final class SyntaxStruct
                         {
                             subform = subform.addWraps(myWraps);
                         }
-                        newChildren[i] = subform.prepare(eval, env);
+                        newChildren[i] = subform.expand(eval, env);
                     }
                     entry.setValue(newChildren);
                 }
@@ -408,7 +408,7 @@ final class SyntaxStruct
         }
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
             ValueFactory vf = eval.getSystem();
@@ -418,7 +418,7 @@ final class SyntaxStruct
             for (int i = 0; i < myFieldNames.length; i++)
             {
                 CompiledForm form = myFieldForms[i];
-                Object childValue = eval.exec(store, form);
+                Object childValue = eval.eval(store, form);
                 IonValue childDom = FusionValue.toIonValue(childValue);
                 childDom = cloneIfContained(childDom);
 

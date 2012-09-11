@@ -15,11 +15,11 @@ final class AssertKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         check(source).arityAtLeast(2);
-        return super.prepare(eval, env, source);
+        return super.expand(eval, env, source);
     }
 
 
@@ -54,10 +54,10 @@ final class AssertKeyword
         }
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            Object result = eval.exec(store, myTestForm);
+            Object result = eval.eval(store, myTestForm);
             if (checkBoolArg(0 /* argNum */, result)) return UNDEF;
 
             String message;
@@ -67,7 +67,7 @@ final class AssertKeyword
                 StringBuilder buf = new StringBuilder();
                 for (CompiledForm messageForm : myMessageForms)
                 {
-                    Object messageValue = eval.exec(store, messageForm);
+                    Object messageValue = eval.eval(store, messageForm);
                     FusionValue.display(buf, messageValue);
                 }
                 message = buf.toString();

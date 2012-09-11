@@ -19,7 +19,7 @@ final class ParameterizeKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         SyntaxChecker check = check(source);
@@ -40,10 +40,10 @@ final class ParameterizeKeyword
             SyntaxSexp binding = (SyntaxSexp) checkPair.form();
 
             SyntaxValue paramExpr = binding.get(0);
-            paramExpr = paramExpr.prepare(eval, env);
+            paramExpr = paramExpr.expand(eval, env);
 
             SyntaxValue boundExpr = binding.get(1);
-            boundExpr = boundExpr.prepare(eval, env);
+            boundExpr = boundExpr.expand(eval, env);
 
             binding = SyntaxSexp.make(binding.getLocation(),
                                       paramExpr, boundExpr);
@@ -61,7 +61,7 @@ final class ParameterizeKeyword
         for (int i = 2; i < exprSize; i++)
         {
             SyntaxValue bodyExpr = source.get(i);
-            expandedForms[i] = bodyExpr.prepare(eval, env);
+            expandedForms[i] = bodyExpr.expand(eval, env);
         }
 
         source = SyntaxSexp.make(source.getLocation(), expandedForms);
@@ -121,7 +121,7 @@ final class ParameterizeKeyword
 
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
             final int numBindings = myParameterForms.length;
@@ -130,7 +130,7 @@ final class ParameterizeKeyword
             for (int i = 0; i < numBindings; i++)
             {
                 CompiledForm paramForm = myParameterForms[i];
-                Object paramValue = eval.exec(store, paramForm);
+                Object paramValue = eval.eval(store, paramForm);
                 try
                 {
                     parameters[i] = (DynamicParameter) paramValue;
@@ -148,14 +148,14 @@ final class ParameterizeKeyword
             for (int i = 0; i < numBindings; i++)
             {
                 CompiledForm valueForm = myValueForms[i];
-                Object value = eval.exec(store, valueForm);
+                Object value = eval.eval(store, valueForm);
                 boundValues[i] = (FusionValue) value;
             }
 
             Evaluator bodyEval = eval.markedContinuation(parameters, boundValues);
 
             // TODO tail recursion
-            Object result = bodyEval.exec(store, myBody);
+            Object result = bodyEval.eval(store, myBody);
             return result;
         }
     }

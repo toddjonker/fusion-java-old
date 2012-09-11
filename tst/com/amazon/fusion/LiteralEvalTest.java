@@ -207,4 +207,12 @@ public class LiteralEvalTest
             eval("(is_null " + e + ")");
         }
     }
+
+    @Test
+    public void testApplyNonProcedure()
+        throws Exception
+    {
+        expectFusionException("(1)");
+        expectFusionException("(1 2)");
+    }
 }

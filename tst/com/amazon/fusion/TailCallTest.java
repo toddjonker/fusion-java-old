@@ -7,7 +7,7 @@ import org.junit.Test;
 public class TailCallTest
     extends CoreTestCase
 {
-    public static final int STACK_OVERFLOW_DEPTH = 8500;
+    public static final int STACK_OVERFLOW_DEPTH = 10000;
 
     /**
      * Test that {@link #STACK_OVERFLOW_DEPTH} is large enough to cause a

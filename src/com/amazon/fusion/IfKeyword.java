@@ -20,11 +20,11 @@ final class IfKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         check(source).arityExact(4);
-        return super.prepare(eval, env, source);
+        return super.expand(eval, env, source);
     }
 
 
@@ -59,10 +59,10 @@ final class IfKeyword
         }
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            FusionValue result = (FusionValue) eval.exec(store, myTestForm);
+            Object result = eval.eval(store, myTestForm);
 
             boolean test = checkBoolArg(0, result);
             CompiledForm branch = (test ? myThenForm : myElseForm);

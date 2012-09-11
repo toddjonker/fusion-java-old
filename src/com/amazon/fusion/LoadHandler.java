@@ -63,7 +63,7 @@ final class LoadHandler
      * @return the value of the last form in the file, or null if the file
      * contains no forms.
      */
-    FusionValue loadTopLevel(Evaluator eval, Namespace namespace, String path)
+    Object loadTopLevel(Evaluator eval, Namespace namespace, String path)
         throws FusionException
     {
         File file = resolvePath(eval, path);
@@ -72,7 +72,7 @@ final class LoadHandler
             FileInputStream in = new FileInputStream(file);
             try
             {
-                FusionValue result = null;
+                Object result = null;
 
                 IonReader reader = eval.getSystem().newReader(in);
                 while (reader.next() != null)
@@ -200,7 +200,7 @@ final class LoadHandler
 
             ModuleRegistry reg = eval.getModuleRegistry();
             Namespace namespace = eval.newModuleNamespace(reg);
-            FusionValue result = // TODO use evalTopLevel ?
+            Object result = // TODO use evalTopLevel ?
                 bodyEval.prepareAndEval(namespace, moduleDeclaration);
             // TODO tail call handling
             return (ModuleInstance) result;

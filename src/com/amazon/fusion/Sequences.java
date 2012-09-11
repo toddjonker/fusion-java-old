@@ -40,24 +40,22 @@ class Sequences
     }
 
 
-    static Stream streamFor(FusionValue value)
+    static Stream streamFor(Object value)
         throws ContractFailure
     {
-        if (value instanceof DomValue)
+        IonValue iv = FusionValue.toIonValue(value);
+        if (iv instanceof IonSequence)
         {
-            IonValue iv = FusionValue.toIonValue(value);
-            if (iv instanceof IonSequence)
-            {
-                return new DomStream((IonSequence) iv);
-            } else if (value instanceof Stream)
-            {
-                return (Stream)value;
-            }
+            return new DomStream((IonSequence) iv);
+        }
+        else if (value instanceof Stream)
+        {
+            return (Stream)value;
         }
 
         throw new ContractFailure("value is not streamable: "
                                   + FusionValue.writeToString(value));
-     }
+    }
 
     static Stream streamFor(IonSequence ionSeq)
         throws ContractFailure

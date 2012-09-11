@@ -174,7 +174,7 @@ final class SyntaxSymbol
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env)
+    SyntaxValue expand(Evaluator eval, Environment env)
         throws SyntaxFailure
     {
         if (myBinding == null)        // Otherwise we've already been prepared
@@ -251,7 +251,7 @@ final class SyntaxSymbol
 
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
             FusionValue result = myBinding.lookup((Environment) store);

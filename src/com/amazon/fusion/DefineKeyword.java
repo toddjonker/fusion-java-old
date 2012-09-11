@@ -28,7 +28,7 @@ final class DefineKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         SyntaxChecker check = check(source);
@@ -50,10 +50,10 @@ final class DefineKeyword
         // Update the identifier with its binding.
         // This is just a way to pass the binding instance through to the
         // runtime stage so compile() below can reuse it.
-        identifier = (SyntaxSymbol) identifier.prepare(eval, env);
+        identifier = (SyntaxSymbol) identifier.expand(eval, env);
 
         SyntaxValue valueStx = source.get(2);
-        valueStx = valueStx.prepare(eval, env);
+        valueStx = valueStx.expand(eval, env);
 
         source = SyntaxSexp.make(source.getLocation(),
                                  source.get(0), identifier, valueStx);
@@ -95,10 +95,10 @@ final class DefineKeyword
         }
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            Object value = eval.exec(store, myValueForm);
+            Object value = eval.eval(store, myValueForm);
             RuntimeNamespace ns = store.runtimeNamespace();
             ns.bindPredefined(myBinding, value);
             return value;

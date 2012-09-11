@@ -46,45 +46,6 @@ abstract class Procedure
     }
 
 
-    /**
-     * Do not call directly! Only for use by the {@link Evaluator} which can
-     * properly handle bounced tail expressions.
-     *
-     * @see Evaluator#applyNonTail(Procedure, FusionValue...)
-     * @see Evaluator#bounceTailExpression(Environment, IonValue)
-     */
-    @Override
-    final FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
-        throws FusionException
-    {
-        int argCount = expr.size() - 1;
-
-        FusionValue[] args;
-        if (argCount == 0)
-        {
-            args = FusionValue.EMPTY_ARRAY;
-        }
-        else
-        {
-            args = new FusionValue[argCount];
-            for (int i = 0; i < argCount; i++)
-            {
-                SyntaxValue argumentExpr = expr.get(i + 1);
-                try
-                {
-                    args[i] = eval.eval(env, argumentExpr);
-                }
-                catch (SyntaxFailure e)
-                {
-                    e.addContext(expr);
-                    throw e;
-                }
-            }
-        }
-
-        return invoke(eval, args);
-    }
-
     @Override
     final void identify(Appendable out)
         throws IOException

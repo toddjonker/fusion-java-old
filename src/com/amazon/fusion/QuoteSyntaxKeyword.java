@@ -13,7 +13,7 @@ final class QuoteSyntaxKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         check(source).arityExact(2);
@@ -45,7 +45,7 @@ final class QuoteSyntaxKeyword
         }
 
         @Override
-        public SyntaxValue doExec(Evaluator eval, Store store)
+        public SyntaxValue doEval(Evaluator eval, Store store)
             throws FusionException
         {
             return myQuoted;

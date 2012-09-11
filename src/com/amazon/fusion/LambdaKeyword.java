@@ -23,7 +23,7 @@ final class LambdaKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         SyntaxChecker check = check(source);
@@ -65,7 +65,7 @@ final class LambdaKeyword
         {
             SyntaxValue bodyForm = children[i];
             bodyForm = bodyForm.addWrap(localWrap);
-            bodyForm = bodyForm.prepare(eval, bodyEnv);
+            bodyForm = bodyForm.expand(eval, bodyEnv);
             children[i] = bodyForm;
         }
 
@@ -155,7 +155,7 @@ final class LambdaKeyword
         }
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
             return new Closure(store, myDoc, myParams, myBody);

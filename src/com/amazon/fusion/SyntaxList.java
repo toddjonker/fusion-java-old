@@ -95,7 +95,7 @@ final class SyntaxList
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env)
+    SyntaxValue expand(Evaluator eval, Environment env)
         throws SyntaxFailure
     {
         int len = size();
@@ -106,7 +106,7 @@ final class SyntaxList
         for (int i = 0; i < len; i++)
         {
             SyntaxValue subform = children[i];
-            children[i] = subform.prepare(eval, env);
+            children[i] = subform.expand(eval, env);
         }
 
         SyntaxList expanded = SyntaxList.make(this.getLocation(), children);
@@ -163,7 +163,7 @@ final class SyntaxList
         }
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
             ValueFactory vf = eval.getSystem();
@@ -171,7 +171,7 @@ final class SyntaxList
             int len = myChildForms.length;
             for (int i = 0; i < len; i++)
             {
-                Object childValue = eval.exec(store, myChildForms[i]);
+                Object childValue = eval.eval(store, myChildForms[i]);
                 IonValue childDom = FusionValue.toIonValue(childValue);
                 childDom = cloneIfContained(childDom);
                 resultDom.add(childDom);

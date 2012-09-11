@@ -19,7 +19,7 @@ final class LetrecKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         SyntaxChecker check = check(source);
@@ -54,7 +54,7 @@ final class LetrecKeyword
             SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
             SyntaxValue boundExpr = binding.get(1);
             boundExpr = boundExpr.addWrap(localWrap);
-            boundExpr = boundExpr.prepare(eval, bodyEnv);
+            boundExpr = boundExpr.expand(eval, bodyEnv);
             binding = SyntaxSexp.make(binding.getLocation(),
                                       name,
                                       boundExpr);
@@ -72,7 +72,7 @@ final class LetrecKeyword
         {
             SyntaxValue subform = source.get(i);
             subform = subform.addWrap(localWrap);
-            expandedForms[i] = subform.prepare(eval, bodyEnv);
+            expandedForms[i] = subform.expand(eval, bodyEnv);
         }
 
         source = SyntaxSexp.make(source.getLocation(), expandedForms);
@@ -133,7 +133,7 @@ final class LetrecKeyword
         }
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
             final int numBindings = myBindings.length;
@@ -147,7 +147,7 @@ final class LetrecKeyword
             {
                 CompiledForm form = myValueForms[i];
                 FusionValue boundValue = (FusionValue)
-                    eval.exec(bodyEnv, form);
+                    eval.eval(bodyEnv, form);
                 bodyEnv.bind(i, boundValue);
             }
 

@@ -26,11 +26,11 @@ final class EvalFileKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         check(source).arityExact(2);
-        return super.prepare(eval, env, source);
+        return super.expand(eval, env, source);
     }
 
 
@@ -58,12 +58,12 @@ final class EvalFileKeyword
         }
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
             String fileName;
             {
-                Object argValue = eval.exec(store, myFileNameForm);
+                Object argValue = eval.eval(store, myFileNameForm);
                 try
                 {
                     IonString nameDom = (IonString)

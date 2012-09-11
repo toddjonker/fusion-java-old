@@ -15,7 +15,7 @@ final class UseKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         requiredForm("module spec", 1, source);
@@ -56,7 +56,7 @@ final class UseKeyword
         }
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
             Namespace namespace = (Namespace) store.runtimeNamespace();

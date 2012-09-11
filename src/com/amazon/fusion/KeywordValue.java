@@ -21,7 +21,7 @@ abstract class KeywordValue
     }
 
 
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         int size = source.size();
@@ -32,26 +32,14 @@ abstract class KeywordValue
         for (int i = 1; i < size; i++)
         {
             SyntaxValue subform = source.get(i);
-            expandedChildren[i] = subform.prepare(eval, env);
+            expandedChildren[i] = subform.expand(eval, env);
         }
         return SyntaxSexp.make(source.getLocation(), expandedChildren);
     }
 
 
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
-        throws FusionException
-    {
-        return source;
-    }
-
-
-    @Override
-    FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
-        throws FusionException
-    {
-        CompiledForm compiled = compile(eval, env, expr);
-        return eval.bounceTailForm(env, compiled);
-    }
+    abstract CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
+        throws FusionException;
 
 
     @Override

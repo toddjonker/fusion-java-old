@@ -19,7 +19,7 @@ abstract class MacroValue
 
 
     @Override
-    final SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp stx)
+    final SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp stx)
         throws SyntaxFailure
     {
         final int mark = ourMarkCounter.incrementAndGet();
@@ -29,7 +29,7 @@ abstract class MacroValue
         SyntaxValue expanded = expandOnce(eval, stx);
         expanded = expanded.addOrRemoveMark(mark);
 
-        return expanded.prepare(eval, env);
+        return expanded.expand(eval, env);
     }
 
     /**
@@ -42,7 +42,8 @@ abstract class MacroValue
 
 
     @Override
-    final FusionValue invoke(Evaluator eval, Environment env, SyntaxSexp expr)
+    final CompiledForm compile(Evaluator eval, Environment env,
+                               SyntaxSexp source)
         throws FusionException
     {
         throw new IllegalStateException("Macros should be expanded already!");

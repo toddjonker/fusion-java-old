@@ -46,7 +46,7 @@ final class ModuleKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval,
+    SyntaxValue expand(Evaluator eval,
                         Environment envOutsideModule,
                         SyntaxSexp source)
         throws SyntaxFailure
@@ -132,11 +132,11 @@ final class ModuleKeyword
                             try
                             {
                                 expanded =
-                                    expanded.prepare(eval, moduleNamespace);
+                                    expanded.expand(eval, moduleNamespace);
                                 // TODO this is getting compiled twice
                                 CompiledForm compiled =
                                     eval.compile(moduleNamespace, expanded);
-                                eval.exec(moduleNamespace, compiled);
+                                eval.eval(moduleNamespace, compiled);
                             }
                             catch (FusionException e)
                             {
@@ -191,7 +191,7 @@ final class ModuleKeyword
         {
             if (! prepared.next())
             {
-                stx = stx.prepare(eval, moduleNamespace);
+                stx = stx.expand(eval, moduleNamespace);
             }
             subforms[i++] = stx;
         }
@@ -403,7 +403,7 @@ final class ModuleKeyword
         }
 
         @Override
-        public FusionValue doExec(Evaluator eval, Store store)
+        public FusionValue doEval(Evaluator eval, Store store)
             throws FusionException
         {
             // TODO Use the original Bindings to populate the namespace?
@@ -418,7 +418,7 @@ final class ModuleKeyword
 
             for (CompiledForm form : myBody)
             {
-                eval.exec(namespace, form);
+                eval.eval(namespace, form);
             }
 
             return module;

@@ -14,7 +14,6 @@ import java.io.IOException;
  */
 abstract class SyntaxValue
     extends FusionValue
-    implements CompiledForm // TODO temporary!
 {
     enum Type {
         NULL, BOOL, INT, DECIMAL, FLOAT, TIMESTAMP, BLOB, CLOB,
@@ -96,7 +95,7 @@ abstract class SyntaxValue
     }
 
 
-    SyntaxValue prepare(Evaluator eval, Environment env)
+    SyntaxValue expand(Evaluator eval, Environment env)
         throws SyntaxFailure
     {
         return this;
@@ -111,12 +110,6 @@ abstract class SyntaxValue
         return new CompiledIonConstant(constant);
     }
 
-    @Override
-    public FusionValue doExec(Evaluator eval, Store env)
-        throws FusionException
-    {
-        throw new IllegalStateException();
-    }
 
     FusionValue doCompileIonConstant(Evaluator eval, Environment env)
         throws FusionException
@@ -180,7 +173,7 @@ abstract class SyntaxValue
         }
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
             return new DomValue(myConstant.clone());

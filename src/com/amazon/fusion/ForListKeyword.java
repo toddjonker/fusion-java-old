@@ -19,7 +19,7 @@ final class ForListKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         SyntaxChecker check = check(source);
@@ -44,7 +44,7 @@ final class ForListKeyword
             SyntaxValue subform = checkPair.requiredForm("bound value", 1);
 
             // Bound values use the outer lexical environment
-            boundValues[i] = subform.prepare(eval, env);
+            boundValues[i] = subform.expand(eval, env);
         }
 
         LocalEnvironment bodyEnv = new LocalEnvironment(env, boundNames);
@@ -72,7 +72,7 @@ final class ForListKeyword
         {
             SyntaxValue bodyStx = source.get(i);
             bodyStx = bodyStx.addWrap(localWrap);
-            expandedForms[i] = bodyStx.prepare(eval, bodyEnv);
+            expandedForms[i] = bodyStx.expand(eval, bodyEnv);
         }
 
         source = SyntaxSexp.make(source.getLocation(), expandedForms);
@@ -129,7 +129,7 @@ final class ForListKeyword
         }
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
             final int numBindings = myBindings.length;
@@ -143,9 +143,7 @@ final class ForListKeyword
                 for (int i = 0; i < numBindings; i++)
                 {
                     CompiledForm form = myValueForms[i];
-                    FusionValue boundValue = (FusionValue)
-                        eval.exec(store, form);
-
+                    Object boundValue = eval.eval(store, form);
                     streams[i] = Sequences.streamFor(boundValue);
                 }
 
@@ -163,7 +161,7 @@ final class ForListKeyword
                         bodyEnv.bind(i, s.next());
                     }
 
-                    Object nextResult = eval.exec(bodyEnv, myBody);
+                    Object nextResult = eval.eval(bodyEnv, myBody);
                     IonValue value = toIonValue(nextResult);
                     if (value != null)
                     {

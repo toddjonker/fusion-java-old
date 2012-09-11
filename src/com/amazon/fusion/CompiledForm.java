@@ -11,6 +11,7 @@ interface CompiledForm
     static final CompiledForm[] EMPTY_ARRAY = new CompiledForm[0];
 
 
-    Object doExec(Evaluator eval, Store store)
+    /** Don't call directly! Go through the evaluator. */
+    Object doEval(Evaluator eval, Store store)
         throws FusionException;
 }

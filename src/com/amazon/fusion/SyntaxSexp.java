@@ -127,7 +127,7 @@ final class SyntaxSexp
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env)
+    SyntaxValue expand(Evaluator eval, Environment env)
         throws SyntaxFailure
     {
         int len = size();
@@ -139,7 +139,7 @@ final class SyntaxSexp
         SyntaxValue[] children = extract();
 
         SyntaxValue first = children[0];
-        first = first.prepare(eval, env);
+        first = first.expand(eval, env);
         children[0] = first;
         if (first instanceof SyntaxSymbol)
         {
@@ -147,23 +147,22 @@ final class SyntaxSexp
             FusionValue resolved = binding.lookup(env);
             if (resolved instanceof KeywordValue)
             {
-                // We found a static top-level keyword binding!
-                // Continue the preparation process.
-                // TODO tail-call
+                // We found a static top-level binding to a built-in form or
+                // to a macro. Continue the expansion process.
 
                 SyntaxSexp form =
                     SyntaxSexp.make(getLocation(), children);
                 SyntaxValue expandedExpr =
-                    ((KeywordValue)resolved).prepare(eval, env, form);
+                    ((KeywordValue)resolved).expand(eval, env, form);
                 return expandedExpr;
             }
         }
 
-        // else we have a procedure application, prepare each subform
+        // else we have a procedure application, expand each subform
         for (int i = 1; i < len; i++)
         {
             SyntaxValue subform = children[i];
-            children[i] = subform.prepare(eval, env);
+            children[i] = subform.expand(eval, env);
         }
 
         SyntaxSexp result = SyntaxSexp.make(getLocation(), children);
@@ -185,7 +184,7 @@ final class SyntaxSexp
         if (first instanceof SyntaxSymbol)
         {
             SyntaxSymbol maybeKeyword = (SyntaxSymbol) first;
-            SyntaxValue prepared = maybeKeyword.prepare(eval, env);
+            SyntaxValue prepared = maybeKeyword.expand(eval, env);
             // Make sure we don't have to structurally change this sexp
             assert prepared == maybeKeyword;
 
@@ -262,11 +261,10 @@ final class SyntaxSexp
         }
 
         @Override
-        public Object doExec(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            Object proc = eval.exec(store, myProcForm);
-            Procedure p = (Procedure) proc;
+            Object proc = eval.eval(store, myProcForm);
 
             int argCount = myArgForms.length;
 
@@ -280,9 +278,29 @@ final class SyntaxSexp
                 args = new FusionValue[argCount];
                 for (int i = 0; i < argCount; i++)
                 {
-                    Object arg = eval.exec(store, myArgForms[i]);
+                    Object arg = eval.eval(store, myArgForms[i]);
                     args[i] = (FusionValue) arg;           // TODO remove cast
                 }
+            }
+
+            Procedure p;
+            try
+            {
+                p = (Procedure) proc;
+            }
+            catch (ClassCastException e)
+            {
+                StringBuilder b = new StringBuilder();
+                b.append("Application expected procedure, given: ");
+                write(b, proc);
+                b.append("\nArguments were: ");
+                for (int i = 0; i < args.length; i++)
+                {
+                    b.append("\n  ");
+                    write(b, args[i]);
+                }
+
+                throw new FusionException(b.toString());
             }
 
             return p.invoke(eval, args);

@@ -300,17 +300,19 @@ final class Evaluator
         throws FusionException
     {
         source = ns.syntaxIntroduce(source);
-        source = source.prepare(this, ns);
+        source = source.expand(this, ns);
         CompiledForm compiled = source.doCompile(this, ns);
+        source = null; // Don't hold garbage
         return eval(ns, compiled);
     }
 
 
-    FusionValue prepareAndEval(Environment env, SyntaxValue source)
+    Object prepareAndEval(Environment env, SyntaxValue source)
         throws FusionException
     {
-        source = source.prepare(this, env);
+        source = source.expand(this, env);
         CompiledForm compiled = source.doCompile(this, env);
+        source = null; // Don't hold garbage
         return eval(env, compiled);
     }
 
@@ -319,7 +321,7 @@ final class Evaluator
     SyntaxValue prepare(Environment env, SyntaxValue source)
         throws SyntaxFailure
     {
-        return source.prepare(this, env);
+        return source.expand(this, env);
     }
 
 
@@ -360,17 +362,10 @@ final class Evaluator
     }
 
 
-    Object exec(Store store, CompiledForm form)
-        throws FusionException
-    {
-        return eval((Environment) store, form);
-    }
-
-
     /**
      * @return not null
      */
-    FusionValue eval(Environment env, CompiledForm expr)
+    FusionValue eval(Store store, CompiledForm form)
         throws FusionException
     {
         moreEval: while (true)
@@ -385,18 +380,18 @@ final class Evaluator
             }
 */
 
-            Object result = expr.doExec(this, env);
+            Object result = form.doEval(this, store);
             while (true)
             {
                 if (result == null)
                 {
                     return UNDEF;
                 }
-                if (result instanceof TailExpression)
+                if (result instanceof TailForm)
                 {
-                    TailExpression tail = (TailExpression) result;
-                    env = tail.myEnv;
-                    expr = tail.myTailExpr;
+                    TailForm tail = (TailForm) result;
+                    store = tail.myStore;
+                    form  = tail.myForm;
                     continue moreEval;
                 }
                 if (result instanceof TailCall)
@@ -420,12 +415,10 @@ final class Evaluator
         throws FusionException
     {
         FusionValue result = proc.invoke(this, args);
-        if (result instanceof TailExpression)
+        if (result instanceof TailForm)
         {
-            TailExpression tail = (TailExpression) result;
-            Environment env = tail.myEnv;
-            CompiledForm expr = tail.myTailExpr;
-            result = eval(env, expr);
+            TailForm tail = (TailForm) result;
+            result = eval(tail.myStore, tail.myForm);
         }
         // TODO handle TailCall, but nothing triggers this path yet.
         else if (result == null)
@@ -443,40 +436,9 @@ final class Evaluator
      * Wraps an expression for evaluation in tail position.
      * Must be returned back to this {@link Evaluator} for proper behavior.
      */
-    FusionValue bounceTailExpression(Environment env, SyntaxValue tailExpr)
-    {
-        return new TailExpression(env, tailExpr);
-    }
-
-    /**
-     * Wraps an expression for evaluation in tail position.
-     * Must be returned back to this {@link Evaluator} for proper behavior.
-     */
     FusionValue bounceTailForm(Store store, CompiledForm form)
     {
-        return new TailExpression((Environment) store, form);
-    }
-
-    /**
-     * Wraps an expression for evaluation in tail position.
-     * Must be returned back to this {@link Evaluator} for proper behavior.
-     *
-     * @throws ContractFailure if the given tail isn't a {@link SyntaxValue}.
-     */
-    FusionValue bounceTailExpression(Environment env, Object tailExpr)
-        throws FusionException
-    {
-        SyntaxValue stx;
-        try
-        {
-            stx = (SyntaxValue) tailExpr;
-        }
-        catch (ClassCastException e)
-        {
-            throw new ContractFailure("Expected SyntaxValue, got " +
-                                      FusionValue.writeToString(tailExpr));
-        }
-        return bounceTailExpression(env, stx);
+        return new TailForm(store, form);
     }
 
 
@@ -486,16 +448,16 @@ final class Evaluator
      * the tail call without growing the stack.  Not the most efficient
      * implementation, but it works.
      */
-    private static final class TailExpression
+    private static final class TailForm
         extends FusionValue
     {
-        final Environment myEnv;
-        final CompiledForm myTailExpr;
+        final Store        myStore;
+        final CompiledForm myForm;
 
-        TailExpression(Environment env, CompiledForm tailExpr)
+        TailForm(Store store, CompiledForm form)
         {
-            myEnv = env;
-            myTailExpr = tailExpr;
+            myStore = store;
+            myForm  = form;
         }
 
         @Override

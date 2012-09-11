@@ -41,7 +41,7 @@ final class BeginKeyword
 
 
     @Override
-    SyntaxValue prepare(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         int size = source.size();
@@ -52,7 +52,7 @@ final class BeginKeyword
         for (int i = 1; i < size; i++)
         {
             SyntaxValue subform = source.get(i);
-            expandedChildren[i] = subform.prepare(eval, env);
+            expandedChildren[i] = subform.expand(eval, env);
         }
         return SyntaxSexp.make(source.getLocation(), expandedChildren);
     }
@@ -117,7 +117,7 @@ final class BeginKeyword
         implements CompiledForm
     {
         @Override
-        public FusionValue doExec(Evaluator eval, Store store)
+        public FusionValue doEval(Evaluator eval, Store store)
             throws FusionException
         {
             return UNDEF;
@@ -136,14 +136,14 @@ final class BeginKeyword
         }
 
         @Override
-        public FusionValue doExec(Evaluator eval, Store store)
+        public FusionValue doEval(Evaluator eval, Store store)
             throws FusionException
         {
             final int last = myBody.length - 1;
             for (int i = 0; i < last; i++)
             {
                 CompiledForm form = myBody[i];
-                eval.exec(store, form);
+                eval.eval(store, form);
             }
 
             CompiledForm form = myBody[last];
