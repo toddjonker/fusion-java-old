@@ -351,9 +351,18 @@ final class ModuleKeyword
             {
                 freeName = ((NsBinding)b).getName();
             }
-            else
+            else if (b instanceof ModuleBinding)
             {
                 freeName = ((ModuleBinding)b).getName();
+            }
+            else
+            {
+                assert b instanceof FreeBinding;
+
+                String message =
+                    "cannot export " + printQuotedSymbol(publicName) +
+                    " since it has no definition.";
+                throw check.failure(message);
             }
 
             if (! publicName.equals(freeName))
