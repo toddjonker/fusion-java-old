@@ -7,23 +7,29 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-final class Namespace
+class Namespace
     implements Environment, RuntimeNamespace
 {
-    static final class NsBinding implements Binding
+    static class NsBinding implements Binding
     {
         private final SyntaxSymbol myIdentifier;
         private final int myAddress;
 
-        private NsBinding(SyntaxSymbol identifier, int address)
+        NsBinding(SyntaxSymbol identifier, int address)
         {
+            assert identifier.resolve() instanceof FreeBinding;
             myIdentifier = identifier;
             myAddress = address;
         }
 
-        SyntaxSymbol getIdentifier()
+        final SyntaxSymbol getIdentifier()
         {
             return myIdentifier;
+        }
+
+        final String getName()
+        {
+            return myIdentifier.stringValue();
         }
 
         @Override
@@ -92,6 +98,11 @@ final class Namespace
     public Namespace namespace()
     {
         return this;
+    }
+
+    ModuleIdentity getModuleId()
+    {
+        return null;
     }
 
     @Override
@@ -169,6 +180,12 @@ final class Namespace
     }
 
 
+    NsBinding newBinding(SyntaxSymbol identifier, int address)
+    {
+        return new NsBinding(identifier, address);
+    }
+
+
     /**
      * Creates a binding, but no value, for a name.
      * Used during preparation phase, before evaluating the right-hand side.
@@ -179,7 +196,7 @@ final class Namespace
         if (binding == null)
         {
             int address = myBindings.size();
-            binding = new NsBinding(identifier, address);
+            binding = newBinding(identifier, address);
             myBindings.add(binding);
         }
         return binding;

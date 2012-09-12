@@ -199,7 +199,7 @@ final class LoadHandler
             // This namespace ensures correct binding for 'module'
 
             ModuleRegistry reg = eval.getModuleRegistry();
-            Namespace namespace = eval.newModuleNamespace(reg);
+            Namespace namespace = new ModuleNamespace(reg, id);
             Object result = // TODO use evalTopLevel ?
                 bodyEval.prepareAndEval(namespace, moduleDeclaration);
             // TODO tail call handling

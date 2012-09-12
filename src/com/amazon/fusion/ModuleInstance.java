@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.ModuleNamespace.ModuleTopBinding;
 import com.amazon.fusion.Namespace.NsBinding;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
@@ -19,14 +20,12 @@ class ModuleInstance
     class ModuleBinding
         implements Binding
     {
-        private final String myName;
         private final NsBinding myInternalBinding;
 
         private ModuleBinding(String name, NsBinding binding)
         {
-            myName = name;
+            assert binding.getName().equals(name);
             myInternalBinding = binding;
-            assert myInternalBinding != null;
         }
 
         ModuleInstance getModule()
@@ -36,7 +35,7 @@ class ModuleInstance
 
         String getName()
         {
-            return myName;
+            return myInternalBinding.getName();
         }
 
 
@@ -62,13 +61,20 @@ class ModuleInstance
         @Override
         public String toString()
         {
-            return "{{ModuleBinding " + myIdentity + ' ' + myName + "}}";
+            return "{{ModuleBinding " + myIdentity + ' ' + getName() + "}}";
         }
     }
 
+
     private final ModuleIdentity myIdentity;
-    private final Namespace myNamespace;
+    private final ModuleNamespace myNamespace;
+
+    /**
+     * Not all of these bindings are for this module; names that are imported
+     * and exported have their bindings passed through.
+     */
     private final Map<String,ModuleBinding> myProvidedBindings;
+
 
     /**
      * Creates a module that {@code provide}s all names in its namespace.
@@ -76,7 +82,7 @@ class ModuleInstance
      * @throws ContractFailure if the namespace's registry already has a
      * module with the given identity.
      */
-    ModuleInstance(ModuleIdentity identity, Namespace namespace)
+    ModuleInstance(ModuleIdentity identity, ModuleNamespace namespace)
         throws FusionException, ContractFailure
     {
         this(identity, namespace, null);
@@ -88,10 +94,12 @@ class ModuleInstance
      * @throws ContractFailure if the namespace's registry already has a
      * module with the given identity.
      */
-    ModuleInstance(ModuleIdentity identity, Namespace namespace,
+    ModuleInstance(ModuleIdentity identity, ModuleNamespace namespace,
                    SyntaxSymbol[] providedIdentifiers)
         throws FusionException, ContractFailure
     {
+        assert identity == namespace.getModuleId();
+
         myIdentity = identity;
         myNamespace = namespace;
 
@@ -118,7 +126,8 @@ class ModuleInstance
                 else
                 {
                     externalBinding =
-                        new ModuleBinding(name, (NsBinding) internalBinding);
+                        new ModuleBinding(name,
+                                          (ModuleTopBinding) internalBinding);
                 }
 
                 myProvidedBindings.put(name, externalBinding);
@@ -152,7 +161,7 @@ class ModuleInstance
 
         for (NsBinding internalBinding : myNamespace.getBindings())
         {
-            String name = internalBinding.getIdentifier().stringValue();
+            String name = internalBinding.getName();
 
             ModuleBinding externalBinding =
                 new ModuleBinding(name, internalBinding);

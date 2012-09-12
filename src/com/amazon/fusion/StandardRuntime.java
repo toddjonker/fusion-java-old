@@ -32,7 +32,8 @@ final class StandardRuntime
         final ModuleRegistry defaultRegistry = new ModuleRegistry();
         try
         {
-            Namespace ns = new Namespace(defaultRegistry);
+            ModuleNamespace ns = new ModuleNamespace(defaultRegistry,
+                                                     KernelModule.IDENTITY);
             ModuleInstance kernel = new KernelModule(mySystem, builder, ns);
             defaultRegistry.register(kernel);
         }

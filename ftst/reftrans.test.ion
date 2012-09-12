@@ -16,4 +16,10 @@
 (check_equal two 2 "")
 
 
+(use reftrans3)
+(check_equal (three) 3 "3")
+
+// TODO test "export" of a lexical binding
+
+
 "PASSED" // Helpful output if you run this stand-alone

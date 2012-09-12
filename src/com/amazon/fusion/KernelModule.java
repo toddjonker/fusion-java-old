@@ -22,7 +22,8 @@ final class KernelModule
     private final UseKeyword   myUseKeyword;
 
 
-    KernelModule(IonSystem system, FusionRuntimeBuilder builder, Namespace ns)
+    KernelModule(IonSystem system, FusionRuntimeBuilder builder,
+                 ModuleNamespace ns)
         throws FusionException
     {
         super(IDENTITY, ns);

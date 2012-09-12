@@ -86,7 +86,20 @@ final class ModuleKeyword
         }
 
         // The new namespace shares the registry of current-namespace
-        Namespace moduleNamespace = new Namespace(registry, language);
+        ModuleIdentity id;
+        try
+        {
+            id = determineIdentity(eval, declaredName);
+        }
+        catch (FusionException e)
+        {
+            String message =
+                "Error determining module identity: " + e.getMessage();
+            throw check.failure(message);
+        }
+
+        Namespace moduleNamespace =
+            new ModuleNamespace(registry, language, id);
 
         // Pass 1: locate definitions and install dummy bindings
 
@@ -336,7 +349,7 @@ final class ModuleKeyword
             Binding b = identifier.resolve();
             if (b instanceof NsBinding)
             {
-                freeName = ((NsBinding)b).getIdentifier().stringValue();
+                freeName = ((NsBinding)b).getName();
             }
             else
             {
@@ -409,7 +422,7 @@ final class ModuleKeyword
             // TODO Use the original Bindings to populate the namespace?
             // Allocate just enough space for the top-level bindings.
             ModuleRegistry registry = eval.getModuleRegistry();
-            Namespace namespace = eval.newModuleNamespace(registry);
+            ModuleNamespace namespace = new ModuleNamespace(registry, myId);
             namespace.use(myInitialBindingsId);
 
             ModuleInstance module =

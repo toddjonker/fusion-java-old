@@ -46,18 +46,18 @@ public class NamespaceTest
                 throws FusionException
             {
                 ModuleRegistry registry = eval.getModuleRegistry();
-                Namespace ns = eval.newBaseNamespace();
-
 
                 ModuleIdentity id = ModuleIdentity.intern("dummy");
                 assertSame(id, ModuleIdentity.intern("dummy"));
 
+                ModuleNamespace ns = new ModuleNamespace(registry, id);
                 ModuleInstance mod = new ModuleInstance(id, ns);
                 registry.register(mod);
                 assertSame(mod, registry.lookup(id));
 
-                // TODO test registering two instances w/ same identity
-                Namespace ns2 = new Namespace(new ModuleRegistry());
+                // Test registering two instances w/ same identity
+                ModuleNamespace ns2 = new ModuleNamespace(new ModuleRegistry(),
+                                                          id);
                 ModuleInstance mod2 = new ModuleInstance(id, ns2);
 
                 try {
