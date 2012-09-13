@@ -36,7 +36,7 @@
         (wrong_syntax stx "expected condition")
         (let ((test (syntax_get    stx 1))
               (body (syntax_subseq stx 2)))
-          (let ((begin_body (syntax_append (quote_syntax (begin)) body)))
+          (let ((begin_body (syntax_cons begin body)))
             (quasisyntax
               (if (unsyntax test)
                   (unsyntax begin_body)
@@ -52,7 +52,7 @@
         (wrong_syntax stx "expected condition")
         (let ((test (syntax_get    stx 1))
               (body (syntax_subseq stx 2)))
-          (let ((begin_body (syntax_append (quote_syntax (begin)) body)))
+          (let ((begin_body (syntax_cons begin body)))
             (quasisyntax
               (if (unsyntax test)
                   undef
@@ -74,8 +74,8 @@
               (wrong_syntax stx "cond: bad clause " clause))
             (let ((test (syntax_get    clause 0))
                   (body (syntax_subseq clause 1)))
-              (let ((begin_body (syntax_append (quote_syntax (begin)) body))
-                    (cond_tail  (syntax_append (quote_syntax (cond)) tail)))
+              (let ((begin_body (syntax_cons begin body))
+                    (cond_tail  (syntax_cons cond  tail)))
                 (quasisyntax
                   (if (unsyntax test)
                       (unsyntax begin_body)

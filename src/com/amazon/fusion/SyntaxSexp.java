@@ -226,6 +226,14 @@ final class SyntaxSexp
         if (first instanceof SyntaxSymbol)
         {
             Binding binding = ((SyntaxSymbol) first).getBinding();
+
+            // NOTE: Failure to get a binding indicates use of a built-in
+            // syntactic form that's defined (probably via java_new) in the
+            // same module. That's not supported! Such modules need to be
+            // broken apart to meet this requirement.  This won't affect
+            // users unless we open the whole compiler APIs so they can add
+            // new "built-in" syntax.
+
             FusionValue resolved = binding.lookup(env);
             if (resolved instanceof KeywordValue)
             {

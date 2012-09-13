@@ -1,0 +1,17 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(module syntax_builtins (quote '#%kernel')
+  (use 'fusion/private/builtins')
+
+  (provide define_syntax quasisyntax quote_syntax unsyntax wrong_syntax)
+
+  (define wrong_syntax (java_new "com.amazon.fusion.WrongSyntaxProc"))
+
+  (define_syntax unsyntax
+    (lambda (stx)
+      (wrong_syntax stx "must be used inside quasisyntax")))
+
+  (define_syntax quasisyntax (java_new "com.amazon.fusion.QuasiSyntaxKeyword"
+                                       (quote_syntax quasisyntax)
+                                       (quote_syntax unsyntax)))
+)
