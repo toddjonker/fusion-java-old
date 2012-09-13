@@ -15,10 +15,8 @@
   (define_syntax let           (java_new "com.amazon.fusion.LetKeyword"))
   (define_syntax or            (java_new "com.amazon.fusion.OrKeyword"))
   (define_syntax quote         (java_new "com.amazon.fusion.QuoteKeyword"))
-  (define_syntax unless        (java_new "com.amazon.fusion.UnlessKeyword"))
-  (define_syntax when          (java_new "com.amazon.fusion.WhenKeyword"))
 
-  (provide and assert for_list let or quote unless when)
+  (provide and assert for_list let or quote)
 
 
   (define *              (java_new "com.amazon.fusion.ProductProc"))

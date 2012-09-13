@@ -13,7 +13,7 @@
 
 
   // Pass-through bindings from builtins
-  (provide and assert for_list let or quote unless when)
+  (provide and assert for_list let or quote)
   (provide * + - . < = > add apply concatenate contains display exit
     for_each_field help is_null is_undef make_sexp not read remove
     size to_int to_string write)
@@ -25,6 +25,39 @@
 
 
   (use 'fusion/syntax')
+
+  (provide when)
+  (define_syntax when
+    (lambda (stx)
+
+      // (when TEST BODY ...)  -->  (if TEST (begin BODY ...) undef)
+
+      (if (= 1 (syntax_size stx))
+        (wrong_syntax stx "expected condition")
+        (let ((test (syntax_get    stx 1))
+              (body (syntax_subseq stx 2)))
+          (let ((begin_body (syntax_append (quote_syntax (begin)) body)))
+            (quasisyntax
+              (if (unsyntax test)
+                  (unsyntax begin_body)
+                  undef)))))))
+
+  (provide unless)
+  (define_syntax unless
+    (lambda (stx)
+
+      // (unless TEST BODY ...)  -->  (if TEST undef (begin BODY ...))
+
+      (if (= 1 (syntax_size stx))
+        (wrong_syntax stx "expected condition")
+        (let ((test (syntax_get    stx 1))
+              (body (syntax_subseq stx 2)))
+          (let ((begin_body (syntax_append (quote_syntax (begin)) body)))
+            (quasisyntax
+              (if (unsyntax test)
+                  undef
+                  (unsyntax begin_body))))))))
+
 
 // TODO FUSION-36  Support internal definitions in body sequences.
 // Shouldn't use begin since that doesn't delimit the new scope that's needed.
