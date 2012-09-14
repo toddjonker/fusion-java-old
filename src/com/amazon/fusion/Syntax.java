@@ -117,4 +117,12 @@ final class Syntax
         children.toArray(childs);
         return childs;
     }
+
+
+    static SyntaxValue datumToSyntax(SyntaxSymbol context, SyntaxValue datum)
+    {
+        datum = datum.stripWraps();
+        datum = context.copyWrapsTo(datum);
+        return datum;
+    }
 }

@@ -376,6 +376,14 @@ abstract class Procedure
     }
 
 
+    SyntaxSymbol checkSyntaxSymbolArg(int argNum, FusionValue... args)
+        throws ArgTypeFailure
+    {
+        return checkSyntaxArg(SyntaxSymbol.class, "syntax symbol",
+                              true /* nullable */, argNum, args);
+    }
+
+
     SyntaxContainer checkSyntaxContainerArg(int argNum, FusionValue... args)
         throws ArgTypeFailure
     {

@@ -137,4 +137,19 @@
 (check_equal (plus10 3) 13 "use of plus10")
 
 
+//============================================================================
+// Breaking hygiene via datum_to_syntax
+
+(define_syntax capture  // capture use of 'c'
+  (lambda (stx)
+    (let ((arg (syntax_get stx 1)))
+      (quasisyntax
+        (let ((c 2))
+          (unsyntax (datum_to_syntax (quote_syntax here) arg)))))))
+(check_equal
+  (let ((c 5))
+    (capture (* 10 c)))
+  20 "20")
+
+
 "PASSED" // Helpful output if you run this stand-alone

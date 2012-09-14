@@ -123,6 +123,16 @@ final class SyntaxSymbol
         return copyReplacingWraps(null);
     }
 
+    /**
+     * Adds the wraps on this symbol onto those already on another value.
+     * @return syntax matching the source, after adding the wraps from this
+     * symbol.
+     */
+    SyntaxValue copyWrapsTo(SyntaxValue source)
+    {
+        if (myWraps == null) return source;
+        return source.addWraps(myWraps);
+    }
 
     /**
      * @return not null.
