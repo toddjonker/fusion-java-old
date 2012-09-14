@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 abstract class MacroValue
     extends KeywordValue
 {
-    private final AtomicInteger ourMarkCounter = new AtomicInteger();
+    private static final AtomicInteger ourMarkCounter = new AtomicInteger();
 
     MacroValue(String bodyPattern, String doc)
     {
@@ -22,6 +22,7 @@ abstract class MacroValue
     final SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp stx)
         throws SyntaxFailure
     {
+        // TODO FUSION-39 we create two MarkWrap instances here
         final int mark = ourMarkCounter.incrementAndGet();
 
         stx = (SyntaxSexp) stx.addOrRemoveMark(mark);
