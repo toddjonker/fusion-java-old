@@ -1,0 +1,16 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(module defines 'fusion/base'
+  (use 'fusion/syntax')
+  (provide defpub)
+
+  (define_syntax defpub  // (defpub name value)
+    (lambda (stx)
+      (let ((name  (syntax_get stx 1))
+            (value (syntax_get stx 2)))
+        (quasisyntax
+          (begin
+            (define (unsyntax name) (unsyntax value))
+            (provide (unsyntax name)))))))
+)
+

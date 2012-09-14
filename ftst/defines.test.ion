@@ -1,0 +1,7 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(use 'fusion/base')
+(use defpub_use)
+(use check)
+
+(check_equal jonny 39 "defpub exported var")
