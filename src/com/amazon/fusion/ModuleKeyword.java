@@ -9,6 +9,7 @@ import com.amazon.fusion.Namespace.NsBinding;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -61,6 +62,7 @@ final class ModuleKeyword
         Binding defineBinding       = stopBinding(kernel, stops, "define");
         Binding defineSyntaxBinding = stopBinding(kernel, stops, "define_syntax");
         Binding useSyntaxBinding    = stopBinding(kernel, stops, "use");
+        Binding beginBinding        = stopBinding(kernel, stops, "begin");
 
         SyntaxSymbol moduleNameSymbol = check.requiredSymbol("module name", 1);
         String declaredName = moduleNameSymbol.stringValue();
@@ -101,16 +103,36 @@ final class ModuleKeyword
         Namespace moduleNamespace =
             new ModuleNamespace(registry, language, id);
 
+        // TODO handle #%module-begin and #%plain-module-begin
+
         // Pass 1: locate definitions and install dummy bindings
+
+        // TODO FUSION-38 Imported names scope should be the whole module.
+        // Probably need to have the module-level wrap extended with the
+        // imports, so we don't have to backtrack and add more wraps to
+        // earlier forms.  Or maybe scan for the imports first?
 
         ArrayList<SyntaxSexp> provideForms = new ArrayList<SyntaxSexp>();
         ArrayList<SyntaxValue> otherForms = new ArrayList<SyntaxValue>();
         ArrayList<Boolean> preparedFormFlags = new ArrayList<Boolean>();
 
-        for (int i = 3; i < source.size(); i++)
+        LinkedList<SyntaxValue> forms = new LinkedList<SyntaxValue>();
+        source.extract(forms, 3);
+
+        int formsAlreadyWrapped = 0;
+        while (! forms.isEmpty())
         {
-            SyntaxValue form = source.get(i);
-            form = moduleNamespace.syntaxIntroduce(form);
+            SyntaxValue form = forms.pop();
+            if (formsAlreadyWrapped == 0)
+            {
+                // This is ugly, but we don't want to do this twice. Forms
+                // that were spliced by 'begin' have already had this done.
+                form = moduleNamespace.syntaxIntroduce(form);
+            }
+            else
+            {
+                formsAlreadyWrapped--;
+            }
 
             SyntaxSexp provide = formIsProvide(form);
             if (provide != null)
@@ -172,6 +194,17 @@ final class ModuleKeyword
                                 throw new SyntaxFailure("use",
                                                         message, form);
                             }
+                            expanded = null;
+                        }
+                        else if (binding == beginBinding)
+                        {
+                            // Top-level 'begin' is spliced into the module
+                            int last = sexp.size() - 1;
+                            for (int i = last; i != 0;  i--)
+                            {
+                                forms.push(sexp.get(i));
+                            }
+                            formsAlreadyWrapped += last;
                             expanded = null;
                         }
                     }

@@ -1,0 +1,8 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(use begin_splice)
+(use check)
+
+(check_equal top "top" "top")
+(check_equal middle "middle" "middle")
+(check_equal bottom "bottom" "bottom")

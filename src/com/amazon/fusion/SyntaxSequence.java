@@ -11,6 +11,7 @@ import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
+import java.util.List;
 
 abstract class SyntaxSequence
     extends SyntaxContainer
@@ -138,6 +139,19 @@ abstract class SyntaxSequence
         SyntaxValue[] extracted = new SyntaxValue[len];
         arraycopy(myChildren, 0, extracted, 0, len);
         return extracted;
+    }
+
+
+    void extract(List<SyntaxValue> list, int from)
+    {
+        if (myChildren != null)
+        {
+            pushAnyWraps();
+            for (int i = from; i < myChildren.length; i++)
+            {
+                list.add(myChildren[i]);
+            }
+        }
     }
 
 
