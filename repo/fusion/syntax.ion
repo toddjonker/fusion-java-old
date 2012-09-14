@@ -9,7 +9,8 @@
 
   (use 'fusion/private/metasyntax')
 
-  (provide datum_to_syntax define_syntax quasisyntax quote_syntax
+  (provide datum_to_syntax define_syntax free_identifier_equal
+    quasisyntax quote_syntax
     syntax_append syntax_cons syntax_get syntax_size
     syntax_subseq unsyntax wrong_syntax)
 
@@ -20,6 +21,7 @@
   (define syntax_size     (java_new "com.amazon.fusion.SyntaxSizeProc"))
   (define syntax_subseq   (java_new "com.amazon.fusion.SyntaxSubseqProc"))
 
+  (define free_identifier_equal (java_new "com.amazon.fusion.FreeIdentifierEqualProc"))
 
   (define_syntax syntax_cons
     (lambda (stx)

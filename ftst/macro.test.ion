@@ -40,6 +40,35 @@
 
 
 //============================================================================
+// identifier bindings
+
+(define_syntax fie
+  (lambda (stx)
+    (let ((id1 (syntax_get stx 1))
+          (id2 (syntax_get stx 2)))
+      (if (free_identifier_equal id1 id2)
+        (quote_syntax true)
+        (quote_syntax false)))))
+(check_equal (fie < <) true  "fie1")
+(check_equal (fie < >) false "fie2")
+(check_equal (fie unbound unbound) true "fie unbound")
+
+// Generate two identifiers with the same name but different marks.
+// They are not free_identifier_equal because of those marks.
+(define_syntax make_id
+  (lambda (stx)
+    (quote_syntax
+      (let ((id "dummy"))       // Each use of make_id makes a fresh id
+        (quote_syntax id)))))
+(define_syntax compare_diff_ids
+  (lambda (stx)
+    (let ((id1 (make_id))
+          (id2 (make_id)))
+      (quasisyntax (fie (unsyntax id1) (unsyntax id2))))))
+(check_equal (compare_diff_ids) false "fie3")
+
+
+//============================================================================
 // syntax_append
 
 (define_syntax join

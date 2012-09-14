@@ -209,8 +209,10 @@ final class SyntaxSymbol
     }
 
 
-    FusionValue freeIdentifierEquals(Evaluator eval, SyntaxSymbol that)
+    FusionValue freeIdentifierEqual(Evaluator eval, SyntaxSymbol that)
     {
+        // Use originalBinding() so that a reference to an exported binding
+        // from outside the module is equivalent to its internal binding.
         Binding thisBinding = this.uncachedResolve().originalBinding();
         Binding thatBinding = that.uncachedResolve().originalBinding();
 
