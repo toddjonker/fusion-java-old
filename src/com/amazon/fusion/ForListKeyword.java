@@ -104,6 +104,9 @@ final class ForListKeyword
             valueForms[i] = eval.compile(env, boundExpr);
         }
 
+        // Dummy environment to keep track of depth
+        env = new LocalEnvironment(env, SyntaxSymbol.EMPTY_ARRAY);
+
         CompiledForm body = BeginKeyword.compile(eval, env, forStx, 2);
 
         return new CompiledForList(bindings, valueForms, body);

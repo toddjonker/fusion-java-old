@@ -106,6 +106,18 @@ class Namespace
         return this;
     }
 
+    @Override
+    public int getDepth()
+    {
+        return 0;
+    }
+
+    @Override
+    public Object lookup(int rib, int address)
+    {
+        throw new IllegalStateException("Rib not found");
+    }
+
     ModuleIdentity getModuleId()
     {
         return null;
@@ -353,7 +365,7 @@ class Namespace
         {
             RuntimeNamespace ns = store.runtimeNamespace();
             Object result = ns.lookup(myAddress);
-            assert result != null : "No value for " + myAddress;
+            assert result != null : "No value for namespace address " + myAddress;
             return result;
         }
     }

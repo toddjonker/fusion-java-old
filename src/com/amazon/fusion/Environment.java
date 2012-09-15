@@ -14,6 +14,10 @@ interface Environment
     Namespace namespace();
 
 
+    /** What's the lexical depth?  0 == top-level */
+    int getDepth();
+
+
     /**
      * NOT RECURSIVE TO ENCLOSING ENVIRONMENTS!
      *
@@ -31,6 +35,5 @@ interface Environment
      *
      * @return the bound value, or null if there's no value.
      */
-    @Override
     FusionValue lookup(Binding binding);
 }

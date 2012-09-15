@@ -12,12 +12,15 @@ final class LocalEnvironment
         static final LexicalBinding[] EMPTY_ARRAY = new LexicalBinding[0];
 
         private final SyntaxSymbol myIdentifier;
-        private final int myAddress;
+        private final int          myDepth;
+        private final int          myAddress;
 
-        private LexicalBinding(SyntaxSymbol identifier, int address)
+        private LexicalBinding(SyntaxSymbol identifier, int depth, int address)
         {
+            assert depth > 0;
             myIdentifier = identifier;
-            myAddress = address;
+            myDepth      = depth;
+            myAddress    = address;
         }
 
 
@@ -39,7 +42,8 @@ final class LocalEnvironment
         public CompiledForm compile(Evaluator eval, Environment env)
             throws FusionException
         {
-            return new CompiledLocalVariable(this);
+            int rib = env.getDepth() - myDepth;
+            return new CompiledLocalVariable(rib, myAddress);
         }
 
 
@@ -78,6 +82,7 @@ final class LocalEnvironment
 
     /** Not null */
     private final Environment      myEnclosure;
+    private final int              myDepth;
     private final LexicalBinding[] myBindings;
     private final FusionValue[]    myValues;
 
@@ -87,6 +92,7 @@ final class LocalEnvironment
                      SyntaxSymbol[] identifiers)
     {
         myEnclosure = enclosure;
+        myDepth = 1 + enclosure.getDepth();
 
         int count = identifiers.length;
         myBindings = new LexicalBinding[count];
@@ -99,7 +105,7 @@ final class LocalEnvironment
                 : "Identifier " + identifier + " already bound to " +
                   identifier.getBinding();
 
-            myBindings[i] = new LexicalBinding(identifier, i);
+            myBindings[i] = new LexicalBinding(identifier, myDepth, i);
         }
 
         myValues = null;
@@ -112,6 +118,7 @@ final class LocalEnvironment
     {
         assert bindings.length == values.length;
         myEnclosure = enclosure;
+        myDepth = 0;  // Not used at runtime
         myBindings = bindings;
         myValues = values;
     }
@@ -121,6 +128,12 @@ final class LocalEnvironment
     public Namespace namespace()
     {
         return myEnclosure.namespace();
+    }
+
+    @Override
+    public int getDepth()
+    {
+        return myDepth;
     }
 
     @Override
@@ -158,7 +171,7 @@ final class LocalEnvironment
     @Override
     public FusionValue lookup(Binding binding)
     {
-        // Sometimes this is called during prepare pass, when there are not
+        // Sometimes this is called during expansion, when there are not
         // any values bound.
         if (myValues != null && binding instanceof LexicalBinding)
         {
@@ -176,26 +189,39 @@ final class LocalEnvironment
     }
 
 
+    @Override
+    public Object lookup(int rib, int address)
+    {
+        if (rib == 0) return myValues[address];
+        return myEnclosure.lookup(rib - 1, address);
+    }
+
+
     //========================================================================
 
+
+    // TODO optimize for rib zero which should be a very common case.
 
     private static final class CompiledLocalVariable
         implements CompiledForm
     {
-        private final LexicalBinding myBinding;
+        private final int myRib;
+        private final int myAddress;
 
-        CompiledLocalVariable(LexicalBinding binding)
+        CompiledLocalVariable(int rib, int address)
         {
-            myBinding = binding;
+            assert rib >= 0;
+            myRib     = rib;
+            myAddress = address;
         }
-
 
         @Override
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            FusionValue result = store.lookup(myBinding);
-            assert result != null : "No value for " + myBinding;
+            Object result = store.lookup(myRib, myAddress);
+            assert result != null
+                : "No value for rib " + myRib + " address " + myAddress;
             return result;
         }
     }

@@ -99,6 +99,9 @@ final class LetrecKeyword
             bindings[i] = (LexicalBinding) boundIdentifier.resolve();
         }
 
+        // Dummy environment to keep track of depth
+        env = new LocalEnvironment(env, SyntaxSymbol.EMPTY_ARRAY);
+
         CompiledForm[] valueForms = new CompiledForm[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
@@ -146,8 +149,7 @@ final class LetrecKeyword
             for (int i = 0; i < numBindings; i++)
             {
                 CompiledForm form = myValueForms[i];
-                FusionValue boundValue = (FusionValue)
-                    eval.eval(bodyEnv, form);
+                FusionValue boundValue = eval.eval(bodyEnv, form);
                 bodyEnv.bind(i, boundValue);
             }
 

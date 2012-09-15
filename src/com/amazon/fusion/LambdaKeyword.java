@@ -131,6 +131,9 @@ final class LambdaKeyword
         LexicalBinding[] params =
             determineBindings((SyntaxSexp) source.get(1));
 
+        // Dummy environment to keep track of depth
+        env = new LocalEnvironment(env, SyntaxSymbol.EMPTY_ARRAY);
+
         CompiledForm body = BeginKeyword.compile(eval, env, source, bodyStart);
 
         return new CompiledLambda(doc, params, body);

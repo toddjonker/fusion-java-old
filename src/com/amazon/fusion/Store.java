@@ -8,14 +8,14 @@ package com.amazon.fusion;
 interface Store
 {
     /**
-     * Finds the value bound to a given name.
+     * Finds the value bound at a given address.
      *
-     * @param name must not be null or empty.
+     * @param rib the number of lexical binding layers to go "up"
+     * @param address the index within the rib
      *
-     * @return the bound value, or null if there's no value.
+     * @return not null.
      */
-    FusionValue lookup(Binding binding);
-
+    Object lookup(int rib, int address);
 
     RuntimeNamespace runtimeNamespace();
 }
