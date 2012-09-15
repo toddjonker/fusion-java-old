@@ -19,15 +19,16 @@ abstract class MacroValue
 
 
     @Override
-    final SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp stx)
+    final SyntaxValue expand(Evaluator eval, Environment env,
+                             SyntaxSexp source)
         throws SyntaxFailure
     {
         // TODO FUSION-39 we create two MarkWrap instances here
         final int mark = ourMarkCounter.incrementAndGet();
 
-        stx = (SyntaxSexp) stx.addOrRemoveMark(mark);
+        source = (SyntaxSexp) source.addOrRemoveMark(mark);
 
-        SyntaxValue expanded = expandOnce(eval, stx);
+        SyntaxValue expanded = expandOnce(eval, source);
         expanded = expanded.addOrRemoveMark(mark);
 
         return expanded.expand(eval, env);
@@ -36,9 +37,9 @@ abstract class MacroValue
     /**
      * Performs a single "level" of macro expansion.
      *
-     * @param expr the input expression, including the keyword symbol.
+     * @param source the input expression, including the keyword symbol.
      */
-    abstract SyntaxValue expandOnce(Evaluator eval, SyntaxSexp expr)
+    abstract SyntaxValue expandOnce(Evaluator eval, SyntaxSexp source)
         throws SyntaxFailure;
 
 

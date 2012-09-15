@@ -16,17 +16,17 @@ final class MacroTransformer
 
 
     @Override
-    SyntaxValue expandOnce(Evaluator eval, SyntaxSexp expr)
+    SyntaxValue expandOnce(Evaluator eval, SyntaxSexp source)
         throws SyntaxFailure
     {
         Object expanded;
         try
         {
-            expanded = eval.applyNonTail(myTransformer, expr);
+            expanded = eval.applyNonTail(myTransformer, source);
         }
         catch (SyntaxFailure e)
         {
-            e.addContext(expr);
+            e.addContext(source);
             throw e;
         }
         catch (FusionException e)
@@ -34,7 +34,7 @@ final class MacroTransformer
             String message =
                 "Error expanding macro: " + e.getMessage();
             SyntaxFailure fail =
-                new SyntaxFailure(getInferredName(), message, expr);
+                new SyntaxFailure(getInferredName(), message, source);
             fail.initCause(e);
             throw fail;
         }
@@ -49,7 +49,7 @@ final class MacroTransformer
                 "Transformer returned non-syntax result: " +
                  writeToString(expanded);
             throw new SyntaxFailure(myTransformer.identify(), message,
-                                    expr);
+                                    source);
         }
     }
 }
