@@ -25,6 +25,7 @@ class ModuleInstance
         private ModuleBinding(String name, NsBinding binding)
         {
             assert binding.getName().equals(name);
+            assert binding instanceof ModuleTopBinding;
             myInternalBinding = binding;
         }
 
@@ -50,6 +51,16 @@ class ModuleInstance
         public FusionValue lookup(Environment store)
         {
             return myNamespace.lookup(myInternalBinding);
+        }
+
+        @Override
+        public CompiledForm compile(Evaluator eval, Environment env)
+            throws FusionException
+        {
+            // Can probably optimize this since this is only used from
+            // outside the module providing the binding.
+            assert myIdentity != env.namespace().getModuleId();
+            return myInternalBinding.compile(eval, env);
         }
 
         @Override
@@ -144,7 +155,7 @@ class ModuleInstance
     }
 
 
-    Namespace getNamespace()
+    ModuleNamespace getNamespace()
     {
         return myNamespace;
     }

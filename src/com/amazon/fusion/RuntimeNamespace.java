@@ -13,4 +13,6 @@ interface RuntimeNamespace
      * @param value must not be null
      */
     void bindPredefined(NsBinding binding, Object value);
+
+    Object lookup(int address);
 }

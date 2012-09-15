@@ -18,4 +18,7 @@ public interface Binding
      * @return null if there's no value associated with the binding.
      */
     FusionValue lookup(Environment store);
+
+    CompiledForm compile(Evaluator eval, Environment env)
+        throws FusionException;
 }

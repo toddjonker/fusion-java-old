@@ -36,6 +36,14 @@ final class LocalEnvironment
 
 
         @Override
+        public CompiledForm compile(Evaluator eval, Environment env)
+            throws FusionException
+        {
+            return new CompiledLocalVariable(this);
+        }
+
+
+        @Override
         public boolean equals(Object other)
         {
             return this == other;
@@ -165,5 +173,30 @@ final class LocalEnvironment
             }
         }
         return myEnclosure.lookup(binding);
+    }
+
+
+    //========================================================================
+
+
+    private static final class CompiledLocalVariable
+        implements CompiledForm
+    {
+        private final LexicalBinding myBinding;
+
+        CompiledLocalVariable(LexicalBinding binding)
+        {
+            myBinding = binding;
+        }
+
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            FusionValue result = store.lookup(myBinding);
+            assert result != null : "No value for " + myBinding;
+            return result;
+        }
     }
 }

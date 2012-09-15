@@ -10,6 +10,7 @@ package com.amazon.fusion;
 class ModuleNamespace
     extends Namespace
 {
+    /** These are compiled away, unlike some bindings. */
     class ModuleTopBinding extends NsBinding
     {
         private final ModuleIdentity myModuleId;
@@ -41,6 +42,28 @@ class ModuleNamespace
             }
 
             return localNamespace.lookup(this);
+        }
+
+        @Override
+        public CompiledForm compile(Evaluator eval, Environment env)
+            throws FusionException
+        {
+            Namespace localNamespace = env.namespace();
+            if (localNamespace.getModuleId() != myModuleId)
+            {
+                // We have a reference to a binding from another module!
+                // Compiled form must include link to the module since it
+                // won't be the top of the runtime environment chain.
+
+                ModuleInstance module =
+                    localNamespace.getRegistry().lookup(myModuleId);
+                assert module != null : "Module not found: " + myModuleId;
+
+                ModuleNamespace ns = module.getNamespace();
+                return new CompiledImportedVariable(ns, myAddress);
+            }
+
+            return super.compile(eval, env);
         }
 
         @Override
@@ -78,5 +101,35 @@ class ModuleNamespace
     NsBinding newBinding(SyntaxSymbol identifier, int address)
     {
         return new ModuleTopBinding(identifier, address, myModuleId);
+    }
+
+
+    //========================================================================
+
+
+    /**
+     * A reference to a top-level binding in a namespace that is not the one
+     * in our lexical context.
+     */
+    private static final class CompiledImportedVariable
+        implements CompiledForm
+    {
+        private final ModuleNamespace myNamespace;
+        private final int             myAddress;
+
+        CompiledImportedVariable(ModuleNamespace namespace, int address)
+        {
+            myNamespace = namespace;
+            myAddress   = address;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Object result = myNamespace.lookup(myAddress);
+            assert result != null : "No value for " + myAddress;
+            return result;
+        }
     }
 }

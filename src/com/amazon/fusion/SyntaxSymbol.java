@@ -3,8 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
-import com.amazon.fusion.ModuleNamespace.ModuleTopBinding;
-import com.amazon.fusion.Namespace.NsBinding;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 import java.util.Collections;
@@ -244,81 +242,7 @@ final class SyntaxSymbol
         throws FusionException
     {
         assert myBinding != null : "No binding for " + myText;
-        assert ! (myBinding instanceof FreeBinding);
-        if (myBinding instanceof ModuleTopBinding)
-        {
-            ModuleTopBinding top = (ModuleTopBinding) myBinding;
 
-            ModuleIdentity moduleId = top.getModuleId();
-            Namespace localNamespace = env.namespace();
-            if (localNamespace.getModuleId() != moduleId)
-            {
-                // We have a reference to a binding from another module!
-                // Compiled form must include link to the module since it
-                // won't be the top of the runtime environment chain.
-
-                ModuleInstance module =
-                    localNamespace.getRegistry().lookup(moduleId);
-                assert module != null : "Module not found: " + moduleId;
-
-                Namespace ns = module.getNamespace();
-                return new CompiledNamespaceVariable(ns, top);
-            }
-            // TODO replace ModuleTopBinding here too, its too confusing.
-        }
-
-        return new CompiledVariable(myBinding);
-    }
-
-
-    //========================================================================
-
-
-    private static final class CompiledVariable
-        implements CompiledForm
-    {
-        private final Binding myBinding;
-
-        CompiledVariable(Binding binding)
-        {
-            myBinding = binding;
-        }
-
-
-        @Override
-        public Object doEval(Evaluator eval, Store store)
-            throws FusionException
-        {
-            FusionValue result = myBinding.lookup((Environment) store);
-            assert result != null : "No value for " + myBinding;
-            return result;
-        }
-    }
-
-
-    /**
-     * A reference to a top-level binding in a namespace that is not the one
-     * in our lexical context.
-     */
-    private static final class CompiledNamespaceVariable
-        implements CompiledForm
-    {
-        private final Namespace myNamespace;
-        private final NsBinding myBinding;
-
-        CompiledNamespaceVariable(Namespace namespace, NsBinding binding)
-        {
-            myNamespace = namespace;
-            myBinding   = binding;
-        }
-
-        @Override
-        public Object doEval(Evaluator eval, Store store)
-            throws FusionException
-        {
-            FusionValue result = myNamespace.lookup(myBinding);
-            assert result != null : "No value for " + myBinding;
-            return result;
-        }
+        return myBinding.compile(eval, env);
     }
 }

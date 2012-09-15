@@ -13,7 +13,7 @@ class Namespace
     static class NsBinding implements Binding
     {
         private final SyntaxSymbol myIdentifier;
-        private final int myAddress;
+        final int myAddress;
 
         NsBinding(SyntaxSymbol identifier, int address)
         {
@@ -45,6 +45,12 @@ class Namespace
             return env.namespace().lookup(this);
         }
 
+        @Override
+        public CompiledForm compile(Evaluator eval, Environment env)
+            throws FusionException
+        {
+            return new CompiledTopVariable(myAddress);
+        }
 
         @Override
         public boolean equals(Object other)
@@ -307,6 +313,11 @@ class Namespace
         return null;
     }
 
+    @Override
+    public Object lookup(int address)
+    {
+        return myValues.get(address);
+    }
 
     //========================================================================
 
@@ -317,5 +328,33 @@ class Namespace
     Namespace emptyNamespace()
     {
         return new Namespace(myRegistry);
+    }
+
+
+    //========================================================================
+
+
+    /**
+     * A reference to a top-level binding in the lexically-enclosing namespace.
+     */
+    private static final class CompiledTopVariable
+        implements CompiledForm
+    {
+        private final int myAddress;
+
+        CompiledTopVariable(int address)
+        {
+            myAddress = address;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            RuntimeNamespace ns = store.runtimeNamespace();
+            Object result = ns.lookup(myAddress);
+            assert result != null : "No value for " + myAddress;
+            return result;
+        }
     }
 }

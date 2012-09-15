@@ -31,6 +31,15 @@ final class FreeBinding implements Binding
         return null;
     }
 
+    @Override
+    public CompiledForm compile(Evaluator eval, Environment env)
+        throws FusionException
+    {
+        String message =
+            "Free binding shouldn't make it to compilation: " + this;
+        throw new IllegalStateException(message);
+    }
+
 
     @Override
     public boolean equals(Object other)
