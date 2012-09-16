@@ -18,7 +18,7 @@ final class SyntaxAppendProc
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(2, args);
+        checkArityExact(args);
         SyntaxSequence head = checkSyntaxSequenceArg(0, args);
         SyntaxSequence tail = checkSyntaxSequenceArg(1, args);
         SyntaxSequence result = head.makeAppended(tail);

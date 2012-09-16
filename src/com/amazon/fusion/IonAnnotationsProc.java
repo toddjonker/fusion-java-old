@@ -21,7 +21,7 @@ final class IonAnnotationsProc
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(1, args);
+        checkArityExact(args);
         IonValue value = checkIonArg(0, args);
 
         IonSystem system = eval.getSystem();

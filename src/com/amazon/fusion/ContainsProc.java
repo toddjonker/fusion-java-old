@@ -19,14 +19,15 @@ final class ContainsProc
     {
         super("Accepts a container, such as a list or struct, as input and " +
               "and an ion value and returns true if the ion value is " +
-              "in the container and false otherwise");
+              "in the container and false otherwise",
+              "container", "value");
     }
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] arg)
         throws FusionException
     {
-        checkArityExact(2,arg);
+        checkArityExact(arg);
 
         IonContainer thisList = checkContainerArg(0, arg);
         IonValue test = FusionValue.toIonValue(arg[1]);

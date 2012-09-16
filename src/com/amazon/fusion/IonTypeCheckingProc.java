@@ -18,7 +18,7 @@ final class IonTypeCheckingProc
         super("Determines whether a VALUE is an Ion "
                  + type.name().toLowerCase()
                  + ", returning true or false.",
-              "VALUE");
+              "value");
 
         myType = type;
     }
@@ -27,7 +27,7 @@ final class IonTypeCheckingProc
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(1, args);
+        checkArityExact(args);
         Object fv = args[0];
         boolean result = (FusionValue.ionType(fv) == myType);
         return eval.newBool(result);

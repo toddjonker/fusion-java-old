@@ -2,9 +2,6 @@
 
 package com.amazon.fusion;
 
-/**
- *
- */
 final class IsStreamProc
     extends Procedure
 {
@@ -12,14 +9,15 @@ final class IsStreamProc
     {
         //    "                                                                               |
         super("Checks if the input argument is a stream. Returns true if it is, \n" +
-              "false otherwise.");
+              "false otherwise.",
+              "value");
     }
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(1, args);
+        checkArityExact(args);
         boolean b = (args[0] instanceof Stream);
         return eval.newBool(b);
     }

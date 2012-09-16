@@ -20,7 +20,7 @@ final class GetFromListAtIndexProc
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(2, args);
+        checkArityExact(args);
 
         IonList ionList = checkListArg(0, args);
 

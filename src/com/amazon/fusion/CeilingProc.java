@@ -19,14 +19,15 @@ final class CeilingProc
     CeilingProc()
     {
         //    "                                                                               |
-        super("Returns the smallest number larger than or equal to the input number");
+        super("Returns the smallest number larger than or equal to the input number",
+              "number");
     }
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(1,args);
+        checkArityExact(args);
 
         IonValue arg = FusionValue.toIonValue(args[0]);
 

@@ -2,9 +2,6 @@
 
 package com.amazon.fusion;
 
-/**
- *
- */
 final class IsUndefProc
     extends Procedure
 {
@@ -19,7 +16,7 @@ final class IsUndefProc
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(1, args);
+        checkArityExact(args);
         FusionValue arg = args[0];
         boolean isUndef = (arg == UNDEF);
         return eval.newBool(isUndef);

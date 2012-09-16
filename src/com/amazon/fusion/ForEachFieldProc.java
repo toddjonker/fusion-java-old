@@ -23,7 +23,7 @@ final class ForEachFieldProc
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(2, args);
+        checkArityExact(args);
 
         Procedure proc = checkProcArg(0, args);
         IonStruct s = checkStructArg(1, args);

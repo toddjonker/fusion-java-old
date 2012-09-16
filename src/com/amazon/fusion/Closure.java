@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.ArityFailure.Variability;
 import com.amazon.fusion.LocalEnvironment.LexicalBinding;
 
 /**
@@ -40,11 +39,7 @@ final class Closure
     FusionValue invoke(Evaluator eval, final FusionValue[] args)
         throws FusionException
     {
-        final int paramCount = myParams.length;
-        if (paramCount != args.length)
-        {
-            throw new ArityFailure(this, paramCount, Variability.EXACT, args);
-        }
+        checkArityExact(args);
 
         // TODO remove cast
         Environment bodyEnv =

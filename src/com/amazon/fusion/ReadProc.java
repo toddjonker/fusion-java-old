@@ -24,7 +24,7 @@ final class ReadProc
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(0, args);
+        checkArityExact(args);
 
         if (myInputValues == null)
         {

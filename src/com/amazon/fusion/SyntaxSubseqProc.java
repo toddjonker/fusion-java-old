@@ -10,7 +10,7 @@ final class SyntaxSubseqProc
     {
         //    "                                                                               |
         super("Returns a new syntax sexp that copies children from SEQUENCE starting at FROM.\n" +
-            "If FROM is beyond the end of the SEQUENCE, the result is an empty sequence.",
+              "If FROM is beyond the end of the SEQUENCE, the result is an empty sequence.",
               "sequence", "from");
     }
 
@@ -19,7 +19,7 @@ final class SyntaxSubseqProc
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(2, args);
+        checkArityExact(args);
         SyntaxSequence sequence = checkSyntaxSequenceArg(0, args);
         int from = (int) checkLongArg(1, args); // TODO type-safety
         int size = sequence.size();

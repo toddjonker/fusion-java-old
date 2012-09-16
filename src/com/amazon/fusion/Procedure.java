@@ -106,7 +106,7 @@ abstract class Procedure
     // Type-checking helpers
 
 
-    void checkArityExact(int argCount, FusionValue... args)
+    void checkArityExact(int argCount, Object[] args)
         throws ArityFailure
     {
         if (args.length != argCount)
@@ -115,7 +115,18 @@ abstract class Procedure
         }
     }
 
-    void checkArityAtLeast(int atLeast, FusionValue... args)
+
+    /**
+     * Checks arity against the documented argument names.
+     */
+    void checkArityExact(Object[] args)
+        throws ArityFailure
+    {
+        checkArityExact(myArgNames.length, args);
+    }
+
+
+    void checkArityAtLeast(int atLeast, Object[] args)
         throws ArityFailure
     {
         if (args.length < atLeast)
@@ -123,6 +134,7 @@ abstract class Procedure
             throw new ArityFailure(this, atLeast, Variability.AT_LEAST, args);
         }
     }
+
 
     final boolean checkBoolArg(int argNum, FusionValue[] args)
         throws ArgTypeFailure

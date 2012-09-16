@@ -17,13 +17,13 @@ final class ArityFailure
     private final Procedure myProc;
     private final int myArity;
     private final Variability myVariability;
-    private final FusionValue[] myActuals;
+    private final Object[] myActuals;
 
     /**
      * @param procName must not be null or empty
      */
     ArityFailure(Procedure proc, int arity, Variability variability,
-                 FusionValue... actuals)
+                 Object... actuals)
     {
         super("arity failure");
         assert proc != null && actuals != null;

@@ -19,7 +19,7 @@ final class SizeProc
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(1, args);
+        checkArityExact(args);
         IonContainer c = checkContainerArg(0, args);
         return eval.newInt(c.size());
     }

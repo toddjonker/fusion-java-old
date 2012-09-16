@@ -44,7 +44,7 @@ final class DynamicParameter
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(0, args);
+        checkArityExact(args);
         return currentValue(eval);
     }
 }

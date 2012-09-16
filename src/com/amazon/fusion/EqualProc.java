@@ -18,15 +18,15 @@ final class EqualProc
     EqualProc()
     {
         //    "                                                                               |
-        super("Returns true if the arguments are equal if the a arguments are of type \n" +
-
-                "integer, decimal, boolean, string, or timestamp.");
+        super("Returns true if the arguments are equal if the arguments are of type \n" +
+              "integer, decimal, boolean, string, or timestamp.",
+              "value1", "value2");
     }
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(2, args);
+        checkArityExact(args);
 
         IonValue leftVal  = FusionValue.toIonValue(args[0]);
         IonValue rightVal = FusionValue.toIonValue(args[1]);

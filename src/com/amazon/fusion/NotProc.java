@@ -13,14 +13,14 @@ final class NotProc
         //    "                                                                               |
         super("Returns true if BOOL is false, false if BOOL is true. Throws an exception\n" +
               "otherwise.",
-              "BOOL");
+              "bool");
     }
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(1, args);
+        checkArityExact(args);
         boolean b = checkBoolArg(0, args);
         return eval.newBool(! b);
     }

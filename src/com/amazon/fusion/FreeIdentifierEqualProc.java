@@ -10,14 +10,14 @@ class FreeIdentifierEqualProc
         //    "                                                                               |
         super("Compares two syntax symbols to determine whether they both refer to the same\n" +
               "binding.",
-              "IDENT1", "IDENT2");
+              "identifier1", "identifier2");
     }
 
     @Override
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(2, args);
+        checkArityExact(args);
         SyntaxSymbol id1 = checkSyntaxSymbolArg(0, args);
         SyntaxSymbol id2 = checkSyntaxSymbolArg(1, args);
 

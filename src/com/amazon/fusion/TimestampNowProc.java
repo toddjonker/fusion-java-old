@@ -17,7 +17,7 @@ final class TimestampNowProc
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(0, args);
+        checkArityExact(args);
 
         IonTimestamp ionTime = eval.getSystem().newCurrentUtcTimestamp();
 

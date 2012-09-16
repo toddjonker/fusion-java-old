@@ -28,7 +28,7 @@ final class AddProc
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(2, args);
+        checkArityExact(args);
         IonSequence seq = checkSequenceArg(0, args);
         IonValue value = checkIonArg(1, args);
 

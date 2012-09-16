@@ -21,7 +21,7 @@ final class StreamForFileProc
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(1, args);
+        checkArityExact(args);
         String path = checkTextArg(0, args);
 
         IonSystem system = eval.getSystem();

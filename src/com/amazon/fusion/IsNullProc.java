@@ -2,10 +2,6 @@
 
 package com.amazon.fusion;
 
-
-/**
- *
- */
 final class IsNullProc
     extends Procedure
 {
@@ -20,7 +16,7 @@ final class IsNullProc
     FusionValue invoke(Evaluator eval, FusionValue[] args)
         throws FusionException
     {
-        checkArityExact(1, args);
+        checkArityExact(args);
 
         boolean isNull = FusionValue.isAnyIonNull(args[0]);
         return eval.newBool(isNull);
