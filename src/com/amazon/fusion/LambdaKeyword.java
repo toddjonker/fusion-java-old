@@ -147,6 +147,7 @@ final class LambdaKeyword
         implements CompiledForm
     {
         private final String           myDoc;
+        private final String[]         myArgNames;
         private final LexicalBinding[] myParams;
         private final CompiledForm     myBody;
 
@@ -155,13 +156,15 @@ final class LambdaKeyword
             myDoc    = doc;
             myParams = params;
             myBody   = body;
+
+            myArgNames = LexicalBinding.toNames(myParams);
         }
 
         @Override
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            return new Closure(store, myDoc, myParams, myBody);
+            return new Closure(store, myDoc, myArgNames, myParams, myBody);
         }
     }
 }

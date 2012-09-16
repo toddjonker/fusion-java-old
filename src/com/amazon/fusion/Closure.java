@@ -24,23 +24,15 @@ final class Closure
      *  closure.  Any free variables in the procedure are expected to be bound
      *  here.
      */
-    Closure(Store enclosure, String doc, LexicalBinding[] params,
+    Closure(Store enclosure, String doc, String[] argNames,
+            LexicalBinding[] params,
             CompiledForm body)
     {
-        // Don't pre-compute param names every time we create a closure.
-        // Instead we extract them on-demand by overriding getParamNames().
-        super(doc, FusionUtils.EMPTY_STRING_ARRAY);
+        super(doc, argNames);
 
         myEnclosure = enclosure;
         myParams    = params;
         myBody      = body;
-    }
-
-
-    @Override
-    String[] getParamNames()
-    {
-        return LexicalBinding.toNames(myParams);
     }
 
 

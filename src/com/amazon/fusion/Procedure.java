@@ -31,17 +31,17 @@ abstract class Procedure
     final static String DOTDOTDOT = "...";
     final static String DOTDOTDOTPLUS = "...+";
 
-    private final String[] myParams;
+    private final String[] myArgNames;
     private final String myDoc;
 
     /**
-     * @param params are used purely for documentation
+     * @param argNames are used purely for documentation
      */
-    Procedure(String doc, String... params)
+    Procedure(String doc, String... argNames)
     {
         assert doc == null || ! doc.endsWith("\n");
-        assert params != null;
-        myParams = params;
+        assert argNames != null;
+        myArgNames = argNames;
         myDoc = doc;
     }
 
@@ -67,9 +67,9 @@ abstract class Procedure
      * Allows subclass to override and compute param names on-demand.
      * @return not null.
      */
-    String[] getParamNames()
+    String[] getArgNames()
     {
-        return myParams;
+        return myArgNames;
     }
 
 
@@ -79,7 +79,7 @@ abstract class Procedure
     {
         out.append("[PROCEDURE]  (");
         out.append(getEffectiveName());
-        for (String formal : getParamNames())
+        for (String formal : getArgNames())
         {
             out.append(' ');
             out.append(formal);
