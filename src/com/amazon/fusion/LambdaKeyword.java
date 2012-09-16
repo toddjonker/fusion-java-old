@@ -2,8 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.LocalEnvironment.LexicalBinding;
-
 /**
  * The {@code lambda} syntactic form, which evaluates to a {@link Closure}.
  */
@@ -92,16 +90,17 @@ final class LambdaKeyword
     //========================================================================
 
 
-    private static LexicalBinding[] determineBindings(SyntaxSexp paramsExpr)
+    private static String[] determineArgNames(SyntaxSexp paramsExpr)
     {
         int size = paramsExpr.size();
-        if (size == 0) return LexicalBinding.EMPTY_ARRAY;
+        if (size == 0) return FusionUtils.EMPTY_STRING_ARRAY;
 
-        LexicalBinding[] params = new LexicalBinding[size];
+        String[] params = new String[size];
         for (int i = 0; i < size; i++)
         {
             SyntaxSymbol identifier = (SyntaxSymbol) paramsExpr.get(i);
-            params[i] = (LexicalBinding) identifier.resolve();
+            Binding binding = identifier.resolve();
+            params[i] = binding.getName();
         }
         return params;
     }
@@ -114,29 +113,29 @@ final class LambdaKeyword
         String doc;
         int bodyStart;
 
-        SyntaxValue maybeDoc = source.get(2);
-        if (maybeDoc.getType() == SyntaxValue.Type.STRING
-            && source.size() > 3)
         {
-            doc = ((SyntaxString) maybeDoc).stringValue();
-            if (doc != null) doc = doc.trim();
-            bodyStart = 3;
+            SyntaxValue maybeDoc = source.get(2);
+            if (maybeDoc.getType() == SyntaxValue.Type.STRING
+                && source.size() > 3)
+            {
+                doc = ((SyntaxString) maybeDoc).stringValue();
+                if (doc != null) doc = doc.trim();
+                bodyStart = 3;
+            }
+            else
+            {
+                doc = null;
+                bodyStart = 2;
+            }
         }
-        else
-        {
-            doc = null;
-            bodyStart = 2;
-        }
-
-        LexicalBinding[] params =
-            determineBindings((SyntaxSexp) source.get(1));
 
         // Dummy environment to keep track of depth
         env = new LocalEnvironment(env, SyntaxSymbol.EMPTY_ARRAY);
 
         CompiledForm body = BeginKeyword.compile(eval, env, source, bodyStart);
 
-        return new CompiledLambda(doc, params, body);
+        String[] argNames = determineArgNames((SyntaxSexp) source.get(1));
+        return new CompiledLambda(doc, argNames, body);
     }
 
 
@@ -146,25 +145,22 @@ final class LambdaKeyword
     private static final class CompiledLambda
         implements CompiledForm
     {
-        private final String           myDoc;
-        private final String[]         myArgNames;
-        private final LexicalBinding[] myParams;
-        private final CompiledForm     myBody;
+        private final String       myDoc;
+        private final String[]     myArgNames;
+        private final CompiledForm myBody;
 
-        CompiledLambda(String doc, LexicalBinding[] params, CompiledForm body)
+        CompiledLambda(String doc, String[] argNames, CompiledForm body)
         {
-            myDoc    = doc;
-            myParams = params;
-            myBody   = body;
-
-            myArgNames = LexicalBinding.toNames(myParams);
+            myDoc      = doc;
+            myBody     = body;
+            myArgNames = argNames;
         }
 
         @Override
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            return new Closure(store, myDoc, myArgNames, myParams, myBody);
+            return new Closure(store, myDoc, myArgNames, myBody);
         }
     }
 }

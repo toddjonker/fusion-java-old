@@ -7,6 +7,12 @@ package com.amazon.fusion;
  */
 interface Store
 {
+    /* *
+     * Assigns a variable a new value.
+     * This is the implementation of {@code set!}.
+     */
+//  void set(int address, Object value);
+
     /**
      * Finds the value bound at a given address.
      *
@@ -17,5 +23,5 @@ interface Store
      */
     Object lookup(int rib, int address);
 
-    RuntimeNamespace runtimeNamespace();
+    NamespaceStore namespace();
 }

@@ -3,15 +3,15 @@
 package com.amazon.fusion;
 
 /**
- * Extended {@link Namespace} that knows it's a module.
+ * Extended prepare-time {@link Namespace} that knows it's a module.
  * This exists to create special bindings that can refer module variables that
  * are not exported (but that are accessible through macro-generated code).
  */
 class ModuleNamespace
     extends Namespace
 {
-    /** These are compiled away, unlike some bindings. */
-    static final class ModuleTopBinding extends NsBinding
+    private static final class ModuleTopBinding
+        extends NsBinding
     {
         private final ModuleIdentity myModuleId;
 
@@ -21,12 +21,6 @@ class ModuleNamespace
             super(identifier, address);
             myModuleId = moduleId;
         }
-
-        ModuleIdentity getModuleId()
-        {
-            return myModuleId;
-        }
-
 
         @Override
         public FusionValue lookup(Environment env)
@@ -43,15 +37,15 @@ class ModuleNamespace
                     localNamespace.getRegistry().lookup(myModuleId);
                 assert module != null : "Module not found: " + myModuleId;
 
-                ModuleNamespace ns = module.getNamespace();
-                return ns.lookup(this);
+                NamespaceStore ns = module.getNamespace();
+                return (FusionValue) ns.lookup(myAddress);
             }
 
             return localNamespace.lookup(this);
         }
 
         @Override
-        public CompiledForm compile(Evaluator eval, Environment env)
+        public CompiledForm compileReference(Evaluator eval, Environment env)
             throws FusionException
         {
             Namespace localNamespace = env.namespace();
@@ -65,17 +59,17 @@ class ModuleNamespace
                     localNamespace.getRegistry().lookup(myModuleId);
                 assert module != null : "Module not found: " + myModuleId;
 
-                ModuleNamespace ns = module.getNamespace();
+                NamespaceStore ns = module.getNamespace();
                 return new CompiledImportedVariable(ns, myAddress);
             }
 
-            return super.compile(eval, env);
+            return super.compileReference(eval, env);
         }
 
         @Override
         public String toString()
         {
-            return "{{ModuleTopBinding " + getIdentifier() + "}}";
+            return "{{ModuleTopBinding " + getName() + "}}";
         }
     }
 
@@ -106,6 +100,7 @@ class ModuleNamespace
     @Override
     NsBinding newBinding(SyntaxSymbol identifier, int address)
     {
+        assert identifier.uncachedResolve() instanceof FreeBinding;
         return new ModuleTopBinding(identifier, address, myModuleId);
     }
 
@@ -114,16 +109,16 @@ class ModuleNamespace
 
 
     /**
-     * A reference to a top-level binding in a namespace that is not the one
+     * A reference to a top-level variable in a namespace that is not the one
      * in our lexical context.
      */
     private static final class CompiledImportedVariable
         implements CompiledForm
     {
-        private final ModuleNamespace myNamespace;
-        private final int             myAddress;
+        private final NamespaceStore myNamespace;
+        private final int            myAddress;
 
-        CompiledImportedVariable(ModuleNamespace namespace, int address)
+        CompiledImportedVariable(NamespaceStore namespace, int address)
         {
             myNamespace = namespace;
             myAddress   = address;
@@ -138,4 +133,5 @@ class ModuleNamespace
             return result;
         }
     }
+
 }

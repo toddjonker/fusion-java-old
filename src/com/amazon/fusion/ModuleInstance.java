@@ -17,7 +17,7 @@ class ModuleInstance
     extends NamedValue
 {
     private final ModuleIdentity myIdentity;
-    private final ModuleNamespace myNamespace;
+    private final NamespaceStore myNamespace;
 
     /**
      * Not all of these bindings are for this module; names that are imported
@@ -44,11 +44,11 @@ class ModuleInstance
      * @throws ContractFailure if the namespace's registry already has a
      * module with the given identity.
      */
-    ModuleInstance(ModuleIdentity identity, ModuleNamespace namespace,
+    ModuleInstance(ModuleIdentity identity, NamespaceStore namespace,
                    SyntaxSymbol[] providedIdentifiers)
         throws FusionException, ContractFailure
     {
-        assert identity == namespace.getModuleId();
+//        assert identity == namespace.getModuleId();
 
         myIdentity = identity;
         myNamespace = namespace;
@@ -81,7 +81,7 @@ class ModuleInstance
     }
 
 
-    ModuleNamespace getNamespace()
+    NamespaceStore getNamespace()
     {
         return myNamespace;
     }
@@ -96,7 +96,7 @@ class ModuleInstance
     {
         assert myProvidedBindings.size() == 0;
 
-        for (NsBinding binding : myNamespace.getBindings())
+        for (NsBinding binding : ((Namespace)myNamespace).getBindings())
         {
             String name = binding.getName();
 

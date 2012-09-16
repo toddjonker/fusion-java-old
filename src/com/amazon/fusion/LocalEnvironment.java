@@ -23,6 +23,11 @@ final class LocalEnvironment
             myAddress    = address;
         }
 
+        @Override
+        public String getName()
+        {
+            return myIdentifier.stringValue();
+        }
 
         @Override
         public Binding originalBinding()
@@ -32,14 +37,14 @@ final class LocalEnvironment
 
 
         @Override
-        public FusionValue lookup(Environment store)
+        public FusionValue lookup(Environment env)
         {
-            return store.lookup(this);
+            return env.lookup(this);
         }
 
 
         @Override
-        public CompiledForm compile(Evaluator eval, Environment env)
+        public CompiledForm compileReference(Evaluator eval, Environment env)
             throws FusionException
         {
             int rib = env.getDepth() - myDepth;
@@ -137,12 +142,6 @@ final class LocalEnvironment
         return myDepth;
     }
 
-    @Override
-    public Namespace runtimeNamespace()
-    {
-        return myEnclosure.namespace();
-    }
-
 
     @Override
     public Binding substitute(Binding binding, Set<Integer> marks)
@@ -187,14 +186,6 @@ final class LocalEnvironment
             }
         }
         return myEnclosure.lookup(binding);
-    }
-
-
-    @Override
-    public Object lookup(int rib, int address)
-    {
-        if (rib == 0) return myValues[address];
-        return myEnclosure.lookup(rib - 1, address);
     }
 
 

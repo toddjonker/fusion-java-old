@@ -73,36 +73,6 @@ final class DefineKeyword
 
         SyntaxSymbol identifier = (SyntaxSymbol) source.get(1);
         NsBinding binding = (NsBinding) identifier.getBinding();
-        assert binding != null;
-
-        return new CompiledDefine(binding, valueForm);
-    }
-
-
-    //========================================================================
-
-
-    private static final class CompiledDefine
-        implements CompiledForm
-    {
-        // TODO FUSION-48 don't retain Bindings in compiled form
-        private final NsBinding    myBinding;
-        private final CompiledForm myValueForm;
-
-        private CompiledDefine(NsBinding binding, CompiledForm valueForm)
-        {
-            myBinding   = binding;
-            myValueForm = valueForm;
-        }
-
-        @Override
-        public Object doEval(Evaluator eval, Store store)
-            throws FusionException
-        {
-            Object value = eval.eval(store, myValueForm);
-            RuntimeNamespace ns = store.runtimeNamespace();
-            ns.bindPredefined(myBinding, value);
-            return value;
-        }
+        return binding.compileDefine(eval, env, valueForm);
     }
 }

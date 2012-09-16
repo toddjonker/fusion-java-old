@@ -2,8 +2,14 @@
 
 package com.amazon.fusion;
 
+/**
+ * Bindings are used at prepare-time to identify a specific binding site.
+ * They are compiled away and are not used at eval-time.
+ */
 public interface Binding
 {
+    String getName();
+
     /**
      * Gets the original binding this represents.
      * If this is a free, lexical, or namespace-level binding, return this.
@@ -19,6 +25,7 @@ public interface Binding
      */
     FusionValue lookup(Environment store);
 
-    CompiledForm compile(Evaluator eval, Environment env)
+    /** Compile a reference to the variable denoted by this binding. */
+    CompiledForm compileReference(Evaluator eval, Environment env)
         throws FusionException;
 }

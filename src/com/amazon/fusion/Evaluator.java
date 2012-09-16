@@ -308,7 +308,7 @@ final class Evaluator
     }
 
 
-    Object prepareAndEval(Environment env, SyntaxValue source)
+    Object prepareAndEval(Namespace env, SyntaxValue source)
         throws FusionException
     {
         source = source.expand(this, env);

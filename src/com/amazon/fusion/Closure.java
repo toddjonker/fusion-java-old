@@ -2,18 +2,14 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.LocalEnvironment.LexicalBinding;
-
 /**
  * A user-defined procedure, the result of evaluating a {@link LambdaKeyword}.
  */
 final class Closure
     extends Procedure
 {
-    // TODO FUSION-48 Don't retain Bindings, they retain too much data.
-    private final Store            myEnclosure;
-    private final LexicalBinding[] myParams;
-    private final CompiledForm     myBody;
+    private final Store        myEnclosure;
+    private final CompiledForm myBody;
 
 
     /**
@@ -24,14 +20,11 @@ final class Closure
      *  closure.  Any free variables in the procedure are expected to be bound
      *  here.
      */
-    Closure(Store enclosure, String doc, String[] argNames,
-            LexicalBinding[] params,
-            CompiledForm body)
+    Closure(Store enclosure, String doc, String[] argNames, CompiledForm body)
     {
         super(doc, argNames);
 
         myEnclosure = enclosure;
-        myParams    = params;
         myBody      = body;
     }
 
@@ -42,10 +35,8 @@ final class Closure
     {
         checkArityExact(args);
 
-        // TODO FUSION-49 separate Store from Environment
-        Environment bodyEnv =
-            new LocalEnvironment((Environment) myEnclosure, myParams, args);
+        Store bodyStore = new LexicalStore(myEnclosure, args);
 
-        return eval.bounceTailForm(bodyEnv, myBody);
+        return eval.bounceTailForm(bodyStore, myBody);
     }
 }

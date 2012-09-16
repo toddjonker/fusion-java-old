@@ -58,4 +58,9 @@ final class SyntaxInt
     {
         return myValue == null;
     }
+
+    BigInteger bigIntegerValue()
+    {
+        return myValue;
+    }
 }

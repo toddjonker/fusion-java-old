@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.LocalEnvironment.LexicalBinding;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonValue;
 
@@ -91,15 +90,11 @@ final class ForListKeyword
 
         final int numBindings = bindingForms.size();
 
-        LexicalBinding[] bindings = new LexicalBinding[numBindings];
         CompiledForm[] valueForms = new CompiledForm[numBindings];
 
         for (int i = 0; i < numBindings; i++)
         {
             SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
-            SyntaxSymbol boundIdentifier = (SyntaxSymbol) binding.get(0);
-            bindings[i] = (LexicalBinding) boundIdentifier.resolve();
-
             SyntaxValue boundExpr = binding.get(1);
             valueForms[i] = eval.compile(env, boundExpr);
         }
@@ -109,7 +104,7 @@ final class ForListKeyword
 
         CompiledForm body = BeginKeyword.compile(eval, env, forStx, 2);
 
-        return new CompiledForList(bindings, valueForms, body);
+        return new CompiledForList(valueForms, body);
     }
 
 
@@ -119,15 +114,11 @@ final class ForListKeyword
     private final class CompiledForList
         implements CompiledForm
     {
-        // TODO FUSION-48 don't retain bindings
-        private final LexicalBinding[] myBindings;
-        private final CompiledForm[]   myValueForms;
-        private final CompiledForm     myBody;
+        private final CompiledForm[] myValueForms;
+        private final CompiledForm   myBody;
 
-        CompiledForList(LexicalBinding[] bindings, CompiledForm[] valueForms,
-                        CompiledForm body)
+        CompiledForList(CompiledForm[] valueForms, CompiledForm body)
         {
-            myBindings   = bindings;
             myValueForms = valueForms;
             myBody       = body;
         }
@@ -136,7 +127,7 @@ final class ForListKeyword
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            final int numBindings = myBindings.length;
+            final int numBindings = myValueForms.length;
 
             IonList result = eval.getSystem().newEmptyList();
 
@@ -151,11 +142,8 @@ final class ForListKeyword
                     streams[i] = Sequences.streamFor(boundValue);
                 }
 
-                // TODO FUSION-49 separate Store from Environment
                 FusionValue[] boundValues = new FusionValue[numBindings];
-                LocalEnvironment bodyEnv =
-                    new LocalEnvironment((Environment) store,
-                                         myBindings, boundValues);
+                store = new LexicalStore(store, boundValues);
 
                 while (Sequences.allHaveNext(streams))
                 {
@@ -163,10 +151,10 @@ final class ForListKeyword
                     for (int i = 0; i < numBindings; i++)
                     {
                         Stream s = streams[i];
-                        bodyEnv.bind(i, s.next());
+                        boundValues[i] = s.next();
                     }
 
-                    Object nextResult = eval.eval(bodyEnv, myBody);
+                    Object nextResult = eval.eval(store, myBody);
                     IonValue value = toIonValue(nextResult);
                     if (value != null)
                     {

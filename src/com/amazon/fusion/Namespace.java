@@ -2,14 +2,19 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionValue.UNDEF;
+import static com.amazon.fusion.FusionValue.writeToString;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-// TODO FUSION-49 separate Store and Environment
+/**
+ * Expand- and compile-time environment for all top-level sequences, and
+ * eval-time store for non-module top levels.
+ */
 class Namespace
-    implements Environment, RuntimeNamespace
+    implements Environment, NamespaceStore
 {
     static class NsBinding implements Binding
     {
@@ -23,12 +28,8 @@ class Namespace
             myAddress = address;
         }
 
-        final SyntaxSymbol getIdentifier()
-        {
-            return myIdentifier;
-        }
-
-        final String getName()
+        @Override
+        public final String getName()
         {
             return myIdentifier.stringValue();
         }
@@ -47,10 +48,26 @@ class Namespace
         }
 
         @Override
-        public CompiledForm compile(Evaluator eval, Environment env)
+        public CompiledForm compileReference(Evaluator eval, Environment env)
             throws FusionException
         {
             return new CompiledTopVariable(myAddress);
+        }
+
+        CompiledForm compileDefine(Evaluator eval,
+                                   Environment env,
+                                   CompiledForm valueForm)
+        {
+            String name = getName();
+            return new CompiledTopDefine(name, myAddress, valueForm);
+        }
+
+        CompiledForm compileDefineSyntax(Evaluator eval,
+                                         Environment env,
+                                         CompiledForm valueForm)
+        {
+            String name = getName();
+            return new CompiledTopDefineSyntax(name, myAddress, valueForm);
         }
 
         @Override
@@ -122,12 +139,6 @@ class Namespace
     ModuleIdentity getModuleId()
     {
         return null;
-    }
-
-    @Override
-    public RuntimeNamespace runtimeNamespace()
-    {
-        return this;
     }
 
     Collection<NsBinding> getBindings()
@@ -230,11 +241,26 @@ class Namespace
      */
     void bind(NsBinding binding, FusionValue value)
     {
-        int address = binding.myAddress;
+        set(binding.myAddress, value);
+
+        String inferredName = binding.getName();
+        if (inferredName != null) value.inferName(inferredName);
+    }
+
+
+    /**
+     * Updates a pre-defined namespace-level variable.
+     * Allows rebinding of existing names!
+     *
+     * @param value must not be null
+     */
+    @Override
+    public void set(int address, Object value)
+    {
         int size = myValues.size();
         if (address < size)
         {
-            myValues.set(address, value);
+            myValues.set(address, (FusionValue) value);
         }
         else // We need to grow myValues. Annoying lack of API to do this.
         {
@@ -243,39 +269,10 @@ class Namespace
             {
                 myValues.add(null);
             }
-            myValues.add(value);
+            myValues.add((FusionValue) value);
         }
-
-        String inferredName = binding.myIdentifier.stringValue();
-        if (inferredName != null) value.inferName(inferredName);
     }
 
-
-    /**
-     * Creates or updates a namespace-level binding.
-     * Allows rebinding of existing names!
-     *
-     * @param value must not be null
-     */
-    @Override
-    public void bindPredefined(NsBinding binding, Object value)
-    {
-        // TODO FUSION-48 don't retain Bindings in compiled form
-
-        int address = binding.myAddress;
-        if (address < myBindings.size())
-        {
-            assert binding == myBindings.get(address);
-        }
-        else
-        {
-            assert address == myBindings.size();
-            myBindings.add(binding);
-        }
-
-        FusionValue fv = (FusionValue) value;
-        bind(binding, fv);
-    }
 
     /**
      * Creates or updates a namespace-level binding.
@@ -350,7 +347,7 @@ class Namespace
 
 
     /**
-     * A reference to a top-level binding in the lexically-enclosing namespace.
+     * A reference to a top-level variable in the lexically-enclosing namespace.
      */
     private static final class CompiledTopVariable
         implements CompiledForm
@@ -366,10 +363,92 @@ class Namespace
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            RuntimeNamespace ns = store.runtimeNamespace();
+            NamespaceStore ns = store.namespace();
             Object result = ns.lookup(myAddress);
             assert result != null : "No value for namespace address " + myAddress;
             return result;
+        }
+    }
+
+
+    private static final class CompiledTopDefine
+        implements CompiledForm
+    {
+        private final String       myName;
+        private final int          myAddress;
+        private final CompiledForm myValueForm;
+
+        private CompiledTopDefine(String name, int address,
+                                  CompiledForm valueForm)
+        {
+            assert name != null;
+            myName      = name;
+            myAddress   = address;
+            myValueForm = valueForm;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Object value = eval.eval(store, myValueForm);
+            NamespaceStore ns = store.namespace();
+            ns.set(myAddress, value);
+
+            if (value instanceof NamedValue)
+            {
+                ((NamedValue)value).inferName(myName);
+            }
+
+            return value;
+        }
+    }
+
+
+    private static final class CompiledTopDefineSyntax
+        implements CompiledForm
+    {
+        private final String       myName;
+        private final int          myAddress;
+        private final CompiledForm myValueForm;
+
+        private CompiledTopDefineSyntax(String name, int address,
+                                        CompiledForm valueForm)
+        {
+            assert name != null;
+            myName      = name;
+            myAddress   = address;
+            myValueForm = valueForm;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Object value = eval.eval(store, myValueForm);
+
+            if (value instanceof Procedure)
+            {
+                Procedure xformProc = (Procedure) value;
+                value = new MacroTransformer(xformProc);
+            }
+            else if (! (value instanceof KeywordValue))
+            {
+                String message =
+                    "define_syntax value is not a transformer: " +
+                    writeToString(value);
+                throw new ContractFailure(message);
+            }
+
+            NamespaceStore ns = store.namespace();
+            ns.set(myAddress, value);
+
+            if (value instanceof NamedValue)
+            {
+                ((NamedValue)value).inferName(myName);
+            }
+
+            return UNDEF;
         }
     }
 }

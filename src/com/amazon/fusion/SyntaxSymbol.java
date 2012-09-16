@@ -243,6 +243,6 @@ final class SyntaxSymbol
     {
         assert myBinding != null : "No binding for " + myText;
 
-        return myBinding.compile(eval, env);
+        return myBinding.compileReference(eval, env);
     }
 }

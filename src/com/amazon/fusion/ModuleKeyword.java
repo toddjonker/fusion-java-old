@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static java.lang.Boolean.TRUE;
 import com.amazon.fusion.Namespace.NsBinding;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -225,11 +226,17 @@ final class ModuleKeyword
         // but that's not really for any functional reason.
 
         SyntaxValue[] subforms =
-            new SyntaxValue[3 + otherForms.size() + provideForms.size()];
+            new SyntaxValue[4 + otherForms.size() + provideForms.size()];
         subforms[0] = source.get(0); // module
         subforms[1] = source.get(1); // name
         subforms[2] = source.get(2); // language
-        int i = 3;
+
+        // FIXME a ludicrous hack to communicate this data to the compiler!
+        int variableCount = moduleNamespace.getBindings().size();
+        subforms[3] = SyntaxInt.make(BigInteger.valueOf(variableCount),
+                                     new String[] { "InjectedModuleVarCount" },
+                                     null);
+        int i = 4;
 
         Iterator<Boolean> prepared = preparedFormFlags.iterator();
         for (SyntaxValue stx : otherForms)
@@ -293,7 +300,13 @@ final class ModuleKeyword
         ArrayList<SyntaxSexp> provideForms = new ArrayList<SyntaxSexp>();
         ArrayList<CompiledForm> otherForms = new ArrayList<CompiledForm>();
 
-        for (int i = 3; i < expr.size(); i++)
+        int variableCount;
+        {
+            SyntaxInt form = (SyntaxInt) expr.get(3);
+            variableCount = form.bigIntegerValue().intValue();
+        }
+
+        for (int i = 4; i < expr.size(); i++)
         {
             SyntaxValue form = expr.get(i);
             SyntaxSexp provide = formIsProvide(form);
@@ -316,8 +329,8 @@ final class ModuleKeyword
         String declaredName = ((SyntaxSymbol) expr.get(1)).stringValue();
         ModuleIdentity id = determineIdentity(eval, declaredName);
 
-        return new CompiledModule(id, initialBindingsId, providedIdentifiers,
-                                  otherFormsArray);
+        return new CompiledModule(id, initialBindingsId, variableCount,
+                                  providedIdentifiers, otherFormsArray);
     }
 
     private ModuleIdentity determineIdentity(Evaluator eval,
@@ -377,22 +390,18 @@ final class ModuleKeyword
             SyntaxSymbol identifier = (SyntaxSymbol) form.get(i);
             String publicName = identifier.stringValue();
 
-            String freeName;
             Binding b = identifier.resolve();
-            if (b instanceof NsBinding)
+            if (b instanceof FreeBinding)
             {
-                freeName = ((NsBinding)b).getName();
-            }
-            else
-            {
-                assert b instanceof FreeBinding;
-
                 String message =
                     "cannot export " + printQuotedSymbol(publicName) +
                     " since it has no definition.";
                 throw check.failure(message);
             }
 
+            assert b instanceof NsBinding;
+
+            String freeName = b.getName();
             if (! publicName.equals(freeName))
             {
                 String message =
@@ -438,37 +447,38 @@ final class ModuleKeyword
     {
         private final ModuleIdentity myId;
         private final ModuleIdentity myInitialBindingsId;
+        private final int            myVariableCount;
         private final SyntaxSymbol[] myProvidedIdentifiers;
         private final CompiledForm[] myBody;
 
         private CompiledModule(ModuleIdentity id,
                                ModuleIdentity initialBindingsId,
+                               int            variableCount,
                                SyntaxSymbol[] providedIdentifiers,
                                CompiledForm[] body)
         {
-            myId = id;
-            myInitialBindingsId = initialBindingsId;
+            myId                  = id;
+            myInitialBindingsId   = initialBindingsId;
+            myVariableCount       = variableCount;
             myProvidedIdentifiers = providedIdentifiers;
-            myBody = body;
+            myBody                = body;
         }
 
         @Override
-        public FusionValue doEval(Evaluator eval, Store store)
+        public FusionValue doEval(Evaluator eval, Store ignored)
             throws FusionException
         {
-            // TODO Use the original Bindings to populate the namespace?
             // Allocate just enough space for the top-level bindings.
-            ModuleRegistry registry = eval.getModuleRegistry();
-            ModuleNamespace namespace = new ModuleNamespace(registry, myId);
-            namespace.use(myInitialBindingsId);
+            ModuleStore store = new ModuleStore(myVariableCount);
 
             ModuleInstance module =
-                new ModuleInstance(myId, namespace, myProvidedIdentifiers);
-            registry.register(module);
+                new ModuleInstance(myId, store, myProvidedIdentifiers);
+
+            eval.getModuleRegistry().register(module);
 
             for (CompiledForm form : myBody)
             {
-                eval.eval(namespace, form);
+                eval.eval(store, form);
             }
 
             return module;

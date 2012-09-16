@@ -50,7 +50,7 @@ final class UseKeyword
     {
         private final ModuleIdentity myUsedModuleId;
 
-        public CompiledUse(ModuleIdentity usedModuleId)
+        private CompiledUse(ModuleIdentity usedModuleId)
         {
             myUsedModuleId = usedModuleId;
         }
@@ -59,7 +59,9 @@ final class UseKeyword
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            Namespace namespace = (Namespace) store.runtimeNamespace();
+            // These forms are evaluated during expansion of a module.
+            // So it's never entered with a "real" Store.
+            Namespace namespace = (Namespace) store.namespace();
             namespace.use(myUsedModuleId);
             return UNDEF;
         }

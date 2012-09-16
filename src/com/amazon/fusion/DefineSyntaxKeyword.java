@@ -62,50 +62,6 @@ final class DefineSyntaxKeyword
 
         SyntaxSymbol identifier = (SyntaxSymbol) source.get(1);
         NsBinding binding = (NsBinding) identifier.getBinding();
-        assert binding != null;
-
-        return new CompiledDefineSyntax(binding, valueForm);
-    }
-
-
-    //========================================================================
-
-
-    private final class CompiledDefineSyntax
-        implements CompiledForm
-    {
-        // TODO FUSION-48 don't retain Bindings in compiled form
-        private final NsBinding    myBinding;
-        private final CompiledForm myValueForm;
-
-        private CompiledDefineSyntax(NsBinding binding, CompiledForm valueForm)
-        {
-            myBinding   = binding;
-            myValueForm = valueForm;
-        }
-
-        @Override
-        public Object doEval(Evaluator eval, Store store)
-            throws FusionException
-        {
-            // TODO FUSION-32 this shouldn't do anything during phase-0
-            Object value = eval.eval(store, myValueForm);
-
-            if (value instanceof Procedure)
-            {
-                Procedure xformProc = (Procedure) value;
-                value = new MacroTransformer(xformProc);
-            }
-            else if (! (value instanceof KeywordValue))
-            {
-                String message =
-                    "value is not a transformer: " + writeToString(value);
-                throw contractFailure(message);
-            }
-
-            RuntimeNamespace ns = store.runtimeNamespace();
-            ns.bindPredefined(myBinding, value);
-            return UNDEF;
-        }
+        return binding.compileDefineSyntax(eval, env, valueForm);
     }
 }

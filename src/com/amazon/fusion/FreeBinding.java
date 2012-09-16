@@ -12,7 +12,8 @@ final class FreeBinding implements Binding
         myName = name;
     }
 
-    String getName()
+    @Override
+    public String getName()
     {
         return myName;
     }
@@ -32,7 +33,7 @@ final class FreeBinding implements Binding
     }
 
     @Override
-    public CompiledForm compile(Evaluator eval, Environment env)
+    public CompiledForm compileReference(Evaluator eval, Environment env)
         throws FusionException
     {
         String message =
