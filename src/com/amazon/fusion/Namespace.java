@@ -371,15 +371,14 @@ class Namespace
     }
 
 
-    private static final class CompiledTopDefine
+    private static class CompiledTopDefine
         implements CompiledForm
     {
         private final String       myName;
         private final int          myAddress;
         private final CompiledForm myValueForm;
 
-        private CompiledTopDefine(String name, int address,
-                                  CompiledForm valueForm)
+        CompiledTopDefine(String name, int address, CompiledForm valueForm)
         {
             assert name != null;
             myName      = name;
@@ -392,6 +391,9 @@ class Namespace
             throws FusionException
         {
             Object value = eval.eval(store, myValueForm);
+
+            value = processValue(eval, store, value);
+
             NamespaceStore ns = store.namespace();
             ns.set(myAddress, value);
 
@@ -400,33 +402,30 @@ class Namespace
                 ((NamedValue)value).inferName(myName);
             }
 
+            return UNDEF;
+        }
+
+        Object processValue(Evaluator eval, Store store, Object value)
+            throws FusionException
+        {
             return value;
         }
     }
 
 
     private static final class CompiledTopDefineSyntax
-        implements CompiledForm
+        extends CompiledTopDefine
     {
-        private final String       myName;
-        private final int          myAddress;
-        private final CompiledForm myValueForm;
-
         private CompiledTopDefineSyntax(String name, int address,
                                         CompiledForm valueForm)
         {
-            assert name != null;
-            myName      = name;
-            myAddress   = address;
-            myValueForm = valueForm;
+            super(name, address, valueForm);
         }
 
         @Override
-        public Object doEval(Evaluator eval, Store store)
+        Object processValue(Evaluator eval, Store store, Object value)
             throws FusionException
         {
-            Object value = eval.eval(store, myValueForm);
-
             if (value instanceof Procedure)
             {
                 Procedure xformProc = (Procedure) value;
@@ -440,15 +439,7 @@ class Namespace
                 throw new ContractFailure(message);
             }
 
-            NamespaceStore ns = store.namespace();
-            ns.set(myAddress, value);
-
-            if (value instanceof NamedValue)
-            {
-                ((NamedValue)value).inferName(myName);
-            }
-
-            return UNDEF;
+            return value;
         }
     }
 }

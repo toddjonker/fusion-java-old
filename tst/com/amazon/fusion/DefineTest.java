@@ -12,12 +12,12 @@ public class DefineTest
     public void testRedefine()
         throws Exception
     {
-        assertEval(93, "(define x 93)");
+        eval("(define x 93)");
         assertEval(93, "x");
-        assertEval(93, "(define y x)");
+        eval("(define y x)");
         assertEval(93, "x");
         assertEval(93, "y");
-        assertEval(99, "(define x 99)");
+        eval("(define x 99)");
         assertEval(99, "x");
         assertEval(93, "y");
     }
