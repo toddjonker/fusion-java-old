@@ -13,12 +13,11 @@ final class IsUndefProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityExact(args);
-        FusionValue arg = args[0];
-        boolean isUndef = (arg == UNDEF);
+        boolean isUndef = (args[0] == UNDEF);
         return eval.newBool(isUndef);
     }
 }

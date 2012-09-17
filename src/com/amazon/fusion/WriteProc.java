@@ -7,9 +7,6 @@ import com.amazon.ion.system.IonTextWriterBuilder;
 import java.io.IOException;
 import java.io.OutputStream;
 
-/**
- *
- */
 final class WriteProc
     extends Procedure
 {
@@ -21,7 +18,7 @@ final class WriteProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
     {
         Writeable value = (Writeable) args[0];
 

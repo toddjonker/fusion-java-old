@@ -6,10 +6,6 @@ import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonValue;
 import java.util.Iterator;
 
-
-/**
- *
- */
 final class StructUnionAllProc
     extends Procedure
 {
@@ -20,7 +16,7 @@ final class StructUnionAllProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         // even # of args = list of structs?

@@ -14,12 +14,11 @@ final class IsStreamProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityExact(args);
         boolean b = (args[0] instanceof Stream);
         return eval.newBool(b);
     }
-
 }

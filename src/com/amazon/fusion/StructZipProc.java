@@ -8,10 +8,6 @@ import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonValue;
 import java.util.ListIterator;
 
-
-/**
- *
- */
 final class StructZipProc
     extends Procedure
 {
@@ -20,8 +16,9 @@ final class StructZipProc
         //    "                                                                               |
         super("Constructs a struct from a list of field names and a list of values");
     }
+
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         // even # of args = list of structs?

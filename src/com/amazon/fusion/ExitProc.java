@@ -17,7 +17,7 @@ final class ExitProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] arg)
+    Object doApply(Evaluator eval, Object[] arg)
         throws ExitException
     {
         throw new ExitException();

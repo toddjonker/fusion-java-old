@@ -17,9 +17,11 @@ final class RandomProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
+        checkArityExact(args);
+
         double result = Math.random();
 
         return eval.newDecimal(result);

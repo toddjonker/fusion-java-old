@@ -401,7 +401,7 @@ final class Evaluator
                 if (result instanceof TailCall)
                 {
                     TailCall tail = (TailCall) result;
-                    result = tail.myProc.invoke(this, tail.myArgs);
+                    result = tail.myProc.doApply(this, tail.myArgs);
                     continue;
                 }
                 return (FusionValue) result;
@@ -511,7 +511,7 @@ final class Evaluator
      *
      * @return not null
      */
-    FusionValue bounceTailCall(Procedure proc, FusionValue... args)
+    FusionValue bounceTailCall(Procedure proc, Object... args)
         throws FusionException
     {
         return new TailCall(proc, args);
@@ -528,9 +528,9 @@ final class Evaluator
         extends FusionValue
     {
         final Procedure myProc;
-        final FusionValue[] myArgs;
+        final Object[]  myArgs;
 
-        TailCall(Procedure proc, FusionValue... args)
+        TailCall(Procedure proc, Object... args)
         {
             myProc = proc;
             myArgs = args;

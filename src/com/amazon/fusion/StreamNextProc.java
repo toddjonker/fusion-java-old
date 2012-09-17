@@ -1,5 +1,6 @@
-package com.amazon.fusion;
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
+package com.amazon.fusion;
 
 /**
  * Returns the next fusion value in the stream
@@ -9,14 +10,16 @@ final class StreamNextProc
 {
     StreamNextProc()
     {
-        super("Returns the next fusion value in the stream");
+        super("Returns the next fusion value in the STREAM.",
+              "stream");
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
-        checkArityExact(1, args);
+        checkArityExact(args);
+
         Stream source = checkStreamArg(0,args);
         if (source.hasNext())
         {

@@ -10,14 +10,15 @@ final class StringToLowerProc
 {
     StringToLowerProc()
     {
-        super("Converts all the characters in a string to lower-case letters");
+        super("Converts all the characters in a STRING to lower-case letters",
+              "string");
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
-        checkArityExact(1, args);
+        checkArityExact(args);
 
         String input = checkTextArg(0, args);
 

@@ -1,3 +1,5 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
 package com.amazon.fusion;
 
 import com.amazon.ion.IonList;
@@ -15,7 +17,7 @@ final class IonListToStreamProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityExact(1, args);

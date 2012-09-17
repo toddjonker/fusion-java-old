@@ -22,7 +22,7 @@ final class LessThanProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityExact(2, args);
@@ -30,7 +30,6 @@ final class LessThanProc
         IonValue leftVal  = FusionValue.toIonValue(args[0]);
         IonValue rightVal = FusionValue.toIonValue(args[1]);
         boolean result = false;
-        FusionValue fusionResult;
         int compareVal = 0;
 
         if (leftVal == null || rightVal == null)
@@ -63,8 +62,6 @@ final class LessThanProc
                                   " and " + FusionValue.writeToString(args[1]));
         }
         result = (compareVal == -1);
-        fusionResult = eval.newBool(result);
-        return fusionResult;
-
+        return eval.newBool(result);
     }
 }

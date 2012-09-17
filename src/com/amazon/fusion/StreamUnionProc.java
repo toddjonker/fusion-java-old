@@ -1,5 +1,6 @@
-package com.amazon.fusion;
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
+package com.amazon.fusion;
 
 /**
  * Takes the union of 2 streams
@@ -15,7 +16,7 @@ final class StreamUnionProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityExact(2, args);

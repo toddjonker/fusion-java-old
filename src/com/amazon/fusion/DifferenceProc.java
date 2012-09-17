@@ -49,19 +49,19 @@ final class DifferenceProc
         }
 
         @Override
-        FusionValue invoke(Evaluator eval, FusionValue[] args)
+        Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
             checkArityAtLeast(1,args);
 
-            FusionValue finalResult = null;
             Number result;
 
             Number operandNum = checkBigArg(0, args);
             if (args.length == 1)
             {
                 result = subtract(BigInteger.ZERO,operandNum);
-            } else
+            }
+            else
             {
                 result = operandNum;
                 for (int i = 1; i < args.length; i++)
@@ -76,11 +76,13 @@ final class DifferenceProc
                 }
             }
 
+            Object finalResult = null;
             if (result instanceof BigInteger)
             {
                 BigInteger iResult = (BigInteger)result;
                 finalResult = eval.newInt(iResult);
-            } else if (result instanceof BigDecimal)
+            }
+            else if (result instanceof BigDecimal)
             {
                 BigDecimal dResult = (BigDecimal)result;
                 finalResult = eval.newDecimal(dResult);

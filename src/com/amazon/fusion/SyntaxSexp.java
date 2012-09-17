@@ -276,19 +276,17 @@ final class SyntaxSexp
 
             int argCount = myArgForms.length;
 
-            FusionValue[] args;
+            Object[] args;
             if (argCount == 0)
             {
-                args = FusionValue.EMPTY_ARRAY;
+                args = FusionUtils.EMPTY_OBJECT_ARRAY;
             }
             else
             {
-                args = new FusionValue[argCount];
+                args = new Object[argCount];
                 for (int i = 0; i < argCount; i++)
                 {
-                    Object arg = eval.eval(store, myArgForms[i]);
-                    // TODO FUSION-41 remove cast
-                    args[i] = (FusionValue) arg;
+                    args[i] = eval.eval(store, myArgForms[i]);
                 }
             }
 

@@ -24,7 +24,7 @@ final class ContainsProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] arg)
+    Object doApply(Evaluator eval, Object[] arg)
         throws FusionException
     {
         checkArityExact(arg);

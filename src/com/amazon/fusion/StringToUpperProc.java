@@ -10,14 +10,15 @@ final class StringToUpperProc
 {
     StringToUpperProc()
     {
-        super("Converts all the characters in a string to upper-case letters");
+        super("Converts all the characters in a STRING to upper-case letters",
+              "string");
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
-        checkArityExact(1, args);
+        checkArityExact(args);
 
         String input = checkTextArg(0, args);
 

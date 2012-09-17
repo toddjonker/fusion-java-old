@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-
 final class SyntaxSubseqProc
     extends Procedure
 {
@@ -16,7 +15,7 @@ final class SyntaxSubseqProc
 
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityExact(args);

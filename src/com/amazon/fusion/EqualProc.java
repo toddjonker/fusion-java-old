@@ -9,9 +9,6 @@ import com.amazon.ion.IonString;
 import com.amazon.ion.IonTimestamp;
 import com.amazon.ion.IonValue;
 
-/**
- *
- */
 final class EqualProc
     extends Procedure
 {
@@ -22,8 +19,9 @@ final class EqualProc
               "integer, decimal, boolean, string, or timestamp.",
               "value1", "value2");
     }
+
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityExact(args);

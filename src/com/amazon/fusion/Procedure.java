@@ -156,21 +156,19 @@ abstract class Procedure
     }
 
 
-    final boolean checkBoolArg(int argNum, FusionValue[] args)
+    final boolean checkBoolArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
-        FusionValue arg = args[argNum];
+        Object arg = args[argNum];
         return checkBoolArg(argNum, arg);
     }
 
-    double checkDecimalArg(int argNum, FusionValue... args)
+    double checkDecimalArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
-        FusionValue arg = args[argNum];
-
         try
         {
-            DomValue dom = (DomValue) arg;
+            DomValue dom = (DomValue) args[argNum];
             IonDecimal iv = (IonDecimal) dom.ionValue();
             return iv.doubleValue();
         }
@@ -182,14 +180,12 @@ abstract class Procedure
     }
 
 
-    long checkLongArg(int argNum, FusionValue... args)
+    long checkLongArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
-        FusionValue arg = args[argNum];
-
         try
         {
-            DomValue dom = (DomValue) arg;
+            DomValue dom = (DomValue) args[argNum];
             IonInt iv = (IonInt) dom.ionValue();
             return iv.longValue();
         }
@@ -200,38 +196,32 @@ abstract class Procedure
         throw new ArgTypeFailure(this, "int", argNum, args);
     }
 
-    BigInteger checkBigIntArg(int argNum, FusionValue... args)
+    BigInteger checkBigIntArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
-        Object arg = args[argNum];
+        IonValue dom = FusionValue.toIonValue(args[argNum]);
 
         try
         {
-            IonValue dom = FusionValue.toIonValue(arg);
-            if (dom instanceof IonInt)
+            IonInt iv = (IonInt)dom;
+            BigInteger result = iv.bigIntegerValue();
+            if (result != null)
             {
-                IonInt iv = (IonInt)dom;
-                BigInteger result = iv.bigIntegerValue();
-                if (result != null)
-                {
-                    return result;
-                }
+                return result;
             }
-         }
-         catch (ClassCastException e) { }
+        }
+        catch (ClassCastException e)   {}
+        catch (NullPointerException e) {}
 
-         throw new ArgTypeFailure(this, "int", argNum, args);
-
+        throw new ArgTypeFailure(this, "int", argNum, args);
     }
 
-    BigDecimal checkBigDecimalArg(int argNum, FusionValue... args)
+    BigDecimal checkBigDecimalArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
-        FusionValue arg = args[argNum];
-
         try
         {
-            DomValue dom = (DomValue) arg;
+            DomValue dom = (DomValue) args[argNum];
             IonDecimal iv = (IonDecimal)dom.ionValue();
             BigDecimal result = iv.bigDecimalValue();
             if (result != null)
@@ -244,7 +234,7 @@ abstract class Procedure
         throw new ArgTypeFailure(this, "decimal", argNum, args);
     }
 
-    Number checkBigArg(int argNum, FusionValue... args)
+    Number checkBigArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
         try
@@ -272,7 +262,7 @@ abstract class Procedure
         throw new ArgTypeFailure(this, "int or decimal", argNum, args);
     }
 
-    Timestamp checkTimestampArg(int argNum, FusionValue... args)
+    Timestamp checkTimestampArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
         IonTimestamp iv = checkDomArg(IonTimestamp.class, "timestamp",
@@ -281,7 +271,7 @@ abstract class Procedure
     }
 
 
-    IonValue checkIonArg(int argNum, FusionValue... args)
+    IonValue checkIonArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
         IonValue iv = checkDomArg(IonValue.class, "Ion datum",
@@ -293,7 +283,7 @@ abstract class Procedure
     /**
      * @return not null
      */
-    String checkTextArg(int argNum, FusionValue... args)
+    String checkTextArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
         IonText iv = checkDomArg(IonText.class, "text",
@@ -301,7 +291,7 @@ abstract class Procedure
         return iv.stringValue();
     }
 
-    String checkStringArg(int argNum, FusionValue... args)
+    String checkStringArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
         IonString iv = checkDomArg(IonString.class, "text",
@@ -309,7 +299,7 @@ abstract class Procedure
         return iv.stringValue();
     }
 
-    IonContainer checkContainerArg(int argNum, FusionValue... args)
+    IonContainer checkContainerArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
         return checkDomArg(IonContainer.class, "list, sexp, or struct",
@@ -317,7 +307,7 @@ abstract class Procedure
     }
 
 
-    IonSequence checkSequenceArg(int argNum, FusionValue... args)
+    IonSequence checkSequenceArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
         return checkDomArg(IonSequence.class, "list or sexp",
@@ -325,7 +315,7 @@ abstract class Procedure
     }
 
 
-    IonList checkListArg(int argNum, FusionValue... args)
+    IonList checkListArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
         return checkDomArg(IonList.class, "list",
@@ -333,34 +323,33 @@ abstract class Procedure
     }
 
 
-    IonStruct checkStructArg(int argNum, FusionValue... args)
+    IonStruct checkStructArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
         return checkDomArg(IonStruct.class, "struct",
                            true /* nullable */, argNum, args);
     }
 
-    Stream checkStreamArg(int argNum, FusionValue... args)
+    Stream checkStreamArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
         try
         {
-            return (Stream)args[argNum];
-        } catch (ClassCastException e) { }
+            return (Stream) args[argNum];
+        }
+        catch (ClassCastException e) { }
 
         throw new ArgTypeFailure(this, "stream", argNum, args);
     }
 
     <T extends IonValue> T checkDomArg(Class<T> klass, String typeName,
                                        boolean nullable,
-                                       int argNum, FusionValue... args)
+                                       int argNum, Object... args)
         throws ArgTypeFailure
     {
-        FusionValue arg = args[argNum];
-
         try
         {
-            DomValue dom = (DomValue) arg;
+            DomValue dom = (DomValue) args[argNum];
             IonValue iv = dom.ionValue();
             if (nullable || ! iv.isNullValue())
             {
@@ -373,14 +362,12 @@ abstract class Procedure
     }
 
 
-    SyntaxValue checkSyntaxArg(int argNum, FusionValue... args)
+    SyntaxValue checkSyntaxArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
-        FusionValue arg = args[argNum];
-
         try
         {
-            return (SyntaxValue) arg;
+            return (SyntaxValue) args[argNum];
         }
         catch (ClassCastException e) {}
 
@@ -389,10 +376,10 @@ abstract class Procedure
 
     <T extends SyntaxValue> T checkSyntaxArg(Class<T> klass, String typeName,
                                              boolean nullable,
-                                             int argNum, FusionValue... args)
+                                             int argNum, Object... args)
         throws ArgTypeFailure
     {
-        FusionValue arg = args[argNum];
+        Object arg = args[argNum];
 
         try
         {
@@ -408,7 +395,7 @@ abstract class Procedure
     }
 
 
-    SyntaxSymbol checkSyntaxSymbolArg(int argNum, FusionValue... args)
+    SyntaxSymbol checkSyntaxSymbolArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
         return checkSyntaxArg(SyntaxSymbol.class, "syntax symbol",
@@ -416,7 +403,7 @@ abstract class Procedure
     }
 
 
-    SyntaxContainer checkSyntaxContainerArg(int argNum, FusionValue... args)
+    SyntaxContainer checkSyntaxContainerArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
         return checkSyntaxArg(SyntaxContainer.class,
@@ -426,7 +413,7 @@ abstract class Procedure
 
 
 
-    SyntaxSequence checkSyntaxSequenceArg(int argNum, FusionValue... args)
+    SyntaxSequence checkSyntaxSequenceArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
         return checkSyntaxArg(SyntaxSequence.class,
@@ -435,13 +422,12 @@ abstract class Procedure
     }
 
     /** Ensures that an argument is a {@link Procedure}. */
-    Procedure checkProcArg(int argNum, FusionValue... args)
+    Procedure checkProcArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
-        FusionValue arg = args[argNum];
         try
         {
-            return (Procedure) arg;
+            return (Procedure) args[argNum];
         }
         catch (ClassCastException e) {}
 

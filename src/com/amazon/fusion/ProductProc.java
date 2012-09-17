@@ -47,10 +47,9 @@ final class ProductProc
         }
 
         @Override
-        FusionValue invoke(Evaluator eval, FusionValue[] args)
+        Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            FusionValue finalResult = null;
             Number result = BigInteger.ONE;
 
             for (int i = 0; i < args.length; i++)
@@ -64,14 +63,15 @@ final class ProductProc
                 result = multiply(result,operandNum);
             }
 
+            Object finalResult = null;
             if (result instanceof BigInteger)
             {
                 finalResult = eval.newInt((BigInteger)result);
-            } else if (result instanceof BigDecimal)
+            }
+            else if (result instanceof BigDecimal)
             {
                 finalResult = eval.newDecimal((BigDecimal)result);
             }
-
 
             return finalResult;
         }

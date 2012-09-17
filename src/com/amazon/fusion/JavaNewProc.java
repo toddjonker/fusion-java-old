@@ -23,7 +23,7 @@ final class JavaNewProc
 
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityAtLeast(1, args);
@@ -38,8 +38,10 @@ final class JavaNewProc
         }
         else
         {
+            // TODO FUSION-41 this should work for other types
             FusionValue[] constructorArgs =
-                Arrays.copyOfRange(args, 1, args.length);
+                Arrays.copyOfRange(args, 1, args.length,
+                                   FusionValue[].class);
             Constructor<?> constructor =
                 determineConstructor(klass, constructorArgs);
             result = callConstructor(constructor, constructorArgs);
@@ -47,7 +49,7 @@ final class JavaNewProc
 
         try
         {
-            return (FusionValue) result;
+            return result;
         }
         catch (ClassCastException e)
         {

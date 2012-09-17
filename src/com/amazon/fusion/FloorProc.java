@@ -23,32 +23,26 @@ final class FloorProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityExact(1,args);
 
         IonValue arg = FusionValue.toIonValue(args[0]);
 
-        FusionValue result = null;
-
         if (arg instanceof IonInt)
         {
-            result = args[0];
-        } else if (arg instanceof IonDecimal)
+            return args[0];
+        }
+
+        if (arg instanceof IonDecimal)
         {
             IonDecimal dArg = (IonDecimal)arg;
             BigDecimal dVal = dArg.bigDecimalValue();
             BigInteger iVal = dVal.setScale(0, RoundingMode.FLOOR).toBigInteger();
-            result = eval.newInt(iVal);
-        }
-
-        if (result != null)
-        {
-            return result;
+            return eval.newInt(iVal);
         }
 
         throw new ContractFailure("Incorrect type input to perform ceiling operation");
     }
-
 }

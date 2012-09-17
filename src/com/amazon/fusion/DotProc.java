@@ -9,9 +9,6 @@ import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonValue;
 import java.io.IOException;
 
-/**
- *
- */
 final class DotProc
     extends Procedure
 {
@@ -26,7 +23,7 @@ final class DotProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityAtLeast(1, args);
@@ -80,7 +77,7 @@ final class DotProc
                         out.append(" argument, had: ");
                         FusionUtils.writeIon(out, value);
                         out.append("\nArguments were:");
-                        for (FusionValue arg : args)
+                        for (Object arg : args)
                         {
                             out.append("\n  ");
                             FusionValue.write(out, arg);

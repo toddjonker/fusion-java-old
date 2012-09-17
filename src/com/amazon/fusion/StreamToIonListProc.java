@@ -13,7 +13,8 @@ final class StreamToIonListProc
 {
     StreamToIonListProc()
     {
-        super("Converts a stream to an ion list");
+        super("Converts a STREAM to an ion list.",
+              "stream");
     }
 
     static IonList transform(Evaluator eval, Stream stream)
@@ -31,15 +32,14 @@ final class StreamToIonListProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
-        checkArityExact(1, args);
+        checkArityExact(args);
 
         // check if first arg is of stream class
         Stream source = checkStreamArg(0,args);
         IonList ionList = transform(eval, source);
         return new DomValue(ionList);
     }
-
 }

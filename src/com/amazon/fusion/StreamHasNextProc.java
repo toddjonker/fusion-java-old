@@ -1,6 +1,6 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
 package com.amazon.fusion;
-
-
 
 /**
  * Checks whether there are FusionValues left to fetch in the stream
@@ -10,14 +10,15 @@ final class StreamHasNextProc
 {
     StreamHasNextProc()
     {
-        super("Returns whether there are FusionValues left to fetch in the stream");
+        super("Returns whether there are FusionValues left to fetch in the STREAM.",
+              "stream");
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
-        checkArityExact(1, args);
+        checkArityExact(args);
         Stream source = checkStreamArg(0, args);
 
         boolean hasNext = source.hasNext();

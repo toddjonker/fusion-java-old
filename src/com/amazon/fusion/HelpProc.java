@@ -15,9 +15,9 @@ final class HelpProc
     private static final class HelpDocument
         extends FusionValue
     {
-        private final FusionValue[] myArgs;
+        private final Object[] myArgs;
 
-        private HelpDocument(FusionValue[] args)
+        private HelpDocument(Object[] args)
         {
             myArgs = args;
         }
@@ -26,10 +26,12 @@ final class HelpProc
         public void write(Appendable out)
             throws IOException
         {
-            for (FusionValue arg : myArgs)
+            for (Object arg : myArgs)
             {
                 out.append('\n');
-                arg.displayHelp(out);
+
+                // TODO FUSION-41 support displayHelp for non FusionValue?
+                ((FusionValue)arg).displayHelp(out);
             }
         }
     }
@@ -43,7 +45,7 @@ final class HelpProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, final FusionValue[] args)
+    Object doApply(Evaluator eval, final Object[] args)
     {
         // TODO write directly to current_output_port
         return new HelpDocument(args);

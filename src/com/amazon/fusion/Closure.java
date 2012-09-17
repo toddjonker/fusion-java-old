@@ -30,7 +30,7 @@ final class Closure
 
 
     @Override
-    FusionValue invoke(Evaluator eval, final FusionValue[] args)
+    Object doApply(Evaluator eval, final Object[] args)
         throws FusionException
     {
         checkArityExact(args);

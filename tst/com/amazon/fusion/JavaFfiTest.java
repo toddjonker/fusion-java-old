@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.ion.util.IonTextUtils.printString;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,7 +30,7 @@ public class JavaFfiTest
         }
 
         @Override
-        FusionValue invoke(Evaluator eval, FusionValue[] args)
+        Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
             return null;

@@ -21,7 +21,7 @@ final class ReadProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityExact(args);
@@ -31,7 +31,7 @@ final class ReadProc
             myInputValues = eval.getSystem().iterate(System.in);
         }
 
-        FusionValue result;
+        Object result;
         if (myInputValues.hasNext())
         {
             IonValue v = myInputValues.next();

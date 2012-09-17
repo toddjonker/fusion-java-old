@@ -4,9 +4,6 @@ package com.amazon.fusion;
 
 import java.math.BigInteger;
 
-/**
- *
- */
 final class ToIntProc
     extends Procedure
 {
@@ -18,7 +15,7 @@ final class ToIntProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityExact(1,args);
@@ -28,12 +25,14 @@ final class ToIntProc
         {
             String val = checkTextArg(0,args);
             result = new BigInteger(val);
-        } catch (NumberFormatException e)
+        }
+        catch (NumberFormatException e)
         {
             try
             {
                 result = checkBigIntArg(0,args);
-            } catch (NumberFormatException e2) { }
+            }
+            catch (NumberFormatException e2) { }
         }
 
         if (result != null)

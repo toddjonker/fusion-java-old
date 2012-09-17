@@ -1,8 +1,6 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
 package com.amazon.fusion;
-
-
-
-
 
 /**
  * Applies a predicate to a stream and generates a flat-structured stream
@@ -17,10 +15,9 @@ final class StreamCrossApplyProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, final FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
-
         checkArityExact(2, args);
 
         Stream source = checkStreamArg(0,args);

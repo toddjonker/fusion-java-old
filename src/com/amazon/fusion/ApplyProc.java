@@ -19,7 +19,7 @@ final class ApplyProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityAtLeast(2, args);
@@ -31,7 +31,7 @@ final class ApplyProc
         int restLen = rest.size();
 
         int procArity = restLen + arity - 2;
-        FusionValue[] procArgs = new FusionValue[procArity];
+        Object[] procArgs = new Object[procArity];
 
         int arg = 0;
         for (int i = 1; i < arity - 1; i++)

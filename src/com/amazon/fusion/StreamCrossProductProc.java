@@ -1,8 +1,6 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
 package com.amazon.fusion;
-
-
-
-
 
 /**
  * Generates the stream to represent the cross product of 2 streams
@@ -17,10 +15,9 @@ final class StreamCrossProductProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, final FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
-
         checkArityExact(2, args);
 
         Stream source1 = checkStreamArg(0,args);

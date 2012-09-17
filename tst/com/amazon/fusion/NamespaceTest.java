@@ -16,7 +16,7 @@ public class NamespaceTest
         runtime().bind("callback", new Procedure("callback")
         {
             @Override
-            FusionValue invoke(Evaluator eval, FusionValue[] args)
+            Object doApply(Evaluator eval, Object[] args)
                 throws FusionException
             {
                 Namespace ns = eval.newBaseNamespace();
@@ -42,7 +42,7 @@ public class NamespaceTest
         runtime().bind("callback", new Procedure("callback")
         {
             @Override
-            FusionValue invoke(Evaluator eval, FusionValue[] args)
+            Object doApply(Evaluator eval, Object[] args)
                 throws FusionException
             {
                 ModuleRegistry registry = eval.getModuleRegistry();

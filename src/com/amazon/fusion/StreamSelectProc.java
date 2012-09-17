@@ -1,6 +1,6 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
 package com.amazon.fusion;
-
-
 
 /**
  * Selects elements from a stream if they satisfy some
@@ -11,15 +11,15 @@ final class StreamSelectProc
 {
     StreamSelectProc()
     {
-        super("Selects elements from a stream if they satisfy some " +
-              "user-defined conditional procedure.");
+        super("Selects elements from a STREAM if they satisfy the PREDICATE.",
+              "stream", "predicate");
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
-        checkArityExact(2, args);
+        checkArityExact(args);
 
         Stream source = checkStreamArg(0,args);
         Procedure proc = checkProcArg(1,args);

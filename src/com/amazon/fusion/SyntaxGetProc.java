@@ -19,7 +19,7 @@ final class SyntaxGetProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityAtLeast(1, args);
@@ -73,7 +73,7 @@ final class SyntaxGetProc
                         out.append(" argument, had: ");
                         value.write(out);
                         out.append("\nArguments were:");
-                        for (FusionValue arg : args)
+                        for (Object arg : args)
                         {
                             out.append("\n  ");
                             FusionValue.write(out, arg);

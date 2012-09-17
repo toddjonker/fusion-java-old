@@ -24,19 +24,20 @@ final class CeilingProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityExact(args);
 
         IonValue arg = FusionValue.toIonValue(args[0]);
 
-        FusionValue result = null;
+        Object result = null;
 
         if (arg instanceof IonInt)
         {
             result = args[0];
-        } else if (arg instanceof IonDecimal)
+        }
+        else if (arg instanceof IonDecimal)
         {
             IonDecimal dArg = (IonDecimal)arg;
             BigDecimal dVal = dArg.bigDecimalValue();

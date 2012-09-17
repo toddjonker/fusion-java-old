@@ -14,14 +14,14 @@ final class StreamInjectProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityExact(1, args);
 
-        InjectStream injectStream = new InjectStream(args[0]);
+        // TODO FUSION-41 support non-FV
+        InjectStream injectStream = new InjectStream( (FusionValue) args[0]);
 
         return injectStream;
-
     }
 }

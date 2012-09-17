@@ -5,9 +5,6 @@ package com.amazon.fusion;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
-/**
- *
- */
 final class DisplayProc
     extends Procedure
 {
@@ -20,7 +17,7 @@ final class DisplayProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         try

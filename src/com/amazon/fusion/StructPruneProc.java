@@ -23,11 +23,12 @@ final class StructPruneProc
     {
         //    "                                                                               |
         super("Constructs a struct with copies of values from an input struct with " +
-              "matching filed names that are specified by the user", "struct", "fields", DOTDOTDOT);
+              "matching filed names that are specified by the user",
+              "struct", "fields", DOTDOTDOT);
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityAtLeast(1,args);

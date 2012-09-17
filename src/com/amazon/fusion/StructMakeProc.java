@@ -18,7 +18,7 @@ final class StructMakeProc
         super("Constructs a struct from a sequence of alternating strings and Ion Values");
     }
 
-    void checkArityEven(FusionValue... args)
+    void checkArityEven(Object... args)
         throws FusionException
     {
         if ((args.length % 2) == 1)
@@ -30,7 +30,7 @@ final class StructMakeProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityEven(args);

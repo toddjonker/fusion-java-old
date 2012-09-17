@@ -16,7 +16,7 @@ final class StringConcatenateProc
     }
 
     @Override
-    FusionValue invoke(Evaluator eval, FusionValue[] args)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         StringBuilder resultBuilder = new StringBuilder();
