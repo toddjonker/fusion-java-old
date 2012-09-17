@@ -10,13 +10,13 @@ package com.amazon.fusion;
 class ModuleNamespace
     extends Namespace
 {
-    private static final class ModuleTopBinding
-        extends NsBinding
+    private static final class ModuleBinding
+        extends TopBinding
     {
         private final ModuleIdentity myModuleId;
 
-        private ModuleTopBinding(SyntaxSymbol identifier, int address,
-                                 ModuleIdentity moduleId)
+        private ModuleBinding(SyntaxSymbol identifier, int address,
+                              ModuleIdentity moduleId)
         {
             super(identifier, address);
             myModuleId = moduleId;
@@ -60,7 +60,7 @@ class ModuleNamespace
                 assert module != null : "Module not found: " + myModuleId;
 
                 NamespaceStore ns = module.getNamespace();
-                return new CompiledImportedVariable(ns, myAddress);
+                return new CompiledImportedVariableReference(ns, myAddress);
             }
 
             return super.compileReference(eval, env);
@@ -69,7 +69,7 @@ class ModuleNamespace
         @Override
         public String toString()
         {
-            return "{{ModuleTopBinding " + getName() + "}}";
+            return "{{ModuleBinding " + getName() + "}}";
         }
     }
 
@@ -98,10 +98,10 @@ class ModuleNamespace
 
 
     @Override
-    NsBinding newBinding(SyntaxSymbol identifier, int address)
+    TopBinding newBinding(SyntaxSymbol identifier, int address)
     {
         assert identifier.uncachedResolve() instanceof FreeBinding;
-        return new ModuleTopBinding(identifier, address, myModuleId);
+        return new ModuleBinding(identifier, address, myModuleId);
     }
 
 
@@ -112,13 +112,13 @@ class ModuleNamespace
      * A reference to a top-level variable in a namespace that is not the one
      * in our lexical context.
      */
-    private static final class CompiledImportedVariable
+    private static final class CompiledImportedVariableReference
         implements CompiledForm
     {
         private final NamespaceStore myNamespace;
         private final int            myAddress;
 
-        CompiledImportedVariable(NamespaceStore namespace, int address)
+        CompiledImportedVariableReference(NamespaceStore namespace, int address)
         {
             myNamespace = namespace;
             myAddress   = address;

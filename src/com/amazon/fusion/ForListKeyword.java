@@ -143,7 +143,7 @@ final class ForListKeyword
                 }
 
                 FusionValue[] boundValues = new FusionValue[numBindings];
-                store = new LexicalStore(store, boundValues);
+                store = new LocalStore(store, boundValues);
 
                 while (Sequences.allHaveNext(streams))
                 {

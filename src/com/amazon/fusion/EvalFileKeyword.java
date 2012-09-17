@@ -77,6 +77,9 @@ final class EvalFileKeyword
                 }
             }
 
+            // TODO FUSION-55 incorrect namespace handling
+            // If our lexical Store is a module, the cast will fail since
+            // Namespace is a prepare-time object.
             // TODO FUSION-49 separate env and store
             Namespace namespace = (Namespace) store.namespace();
             return myLoadHandler.loadTopLevel(eval, namespace, fileName);

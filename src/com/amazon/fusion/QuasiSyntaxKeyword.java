@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.Namespace.NsBinding;
+import com.amazon.fusion.Namespace.TopBinding;
 import com.amazon.fusion.QuoteSyntaxKeyword.CompiledQuoteSyntax;
 
 final class QuasiSyntaxKeyword
@@ -18,11 +18,11 @@ final class QuasiSyntaxKeyword
 
         SyntaxSymbol id = (SyntaxSymbol) qsIdentifier;
         myQsBinding = id.resolve();
-        assert myQsBinding instanceof NsBinding;
+        assert myQsBinding instanceof TopBinding;
 
         id = (SyntaxSymbol) usIdentifier;
         myUsBinding = id.resolve();
-        assert myUsBinding instanceof NsBinding;
+        assert myUsBinding instanceof TopBinding;
     }
 
 

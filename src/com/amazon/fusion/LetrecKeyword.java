@@ -130,15 +130,15 @@ final class LetrecKeyword
             Object[] boundValues = new Object[numBindings];
             // FIXME fill with UNDEF ?
 
-            Store bodyEnv = new LexicalStore(store, boundValues);
+            Store localStore = new LocalStore(store, boundValues);
 
             for (int i = 0; i < numBindings; i++)
             {
                 CompiledForm form = myValueForms[i];
-                boundValues[i] = eval.eval(bodyEnv, form);
+                boundValues[i] = eval.eval(localStore, form);
             }
 
-            return eval.bounceTailForm(bodyEnv, myBody);
+            return eval.bounceTailForm(localStore, myBody);
         }
     }
 }

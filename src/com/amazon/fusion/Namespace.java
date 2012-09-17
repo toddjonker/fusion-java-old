@@ -16,12 +16,12 @@ import java.util.Set;
 class Namespace
     implements Environment, NamespaceStore
 {
-    static class NsBinding implements Binding
+    static class TopBinding implements Binding
     {
         private final SyntaxSymbol myIdentifier;
         final int myAddress;
 
-        NsBinding(SyntaxSymbol identifier, int address)
+        TopBinding(SyntaxSymbol identifier, int address)
         {
             assert identifier.resolve() instanceof FreeBinding;
             myIdentifier = identifier;
@@ -51,7 +51,7 @@ class Namespace
         public CompiledForm compileReference(Evaluator eval, Environment env)
             throws FusionException
         {
-            return new CompiledTopVariable(myAddress);
+            return new CompiledTopVariableReference(myAddress);
         }
 
         CompiledForm compileDefine(Evaluator eval,
@@ -79,14 +79,14 @@ class Namespace
         @Override
         public String toString()
         {
-            return "{{NsBinding " + myIdentifier + "}}";
+            return "{{TopBinding " + myIdentifier + "}}";
         }
     }
 
     private final ModuleRegistry myRegistry;
     private SyntaxWraps myWraps;
-    private final ArrayList<NsBinding> myBindings =
-        new ArrayList<NsBinding>();
+    private final ArrayList<TopBinding> myBindings =
+        new ArrayList<TopBinding>();
     private final ArrayList<FusionValue> myValues =
         new ArrayList<FusionValue>();
 
@@ -141,7 +141,7 @@ class Namespace
         return null;
     }
 
-    Collection<NsBinding> getBindings()
+    Collection<TopBinding> getBindings()
     {
         return Collections.unmodifiableCollection(myBindings);
     }
@@ -164,9 +164,9 @@ class Namespace
      *
      * @return null if identifier isn't bound here.
      */
-    NsBinding localSubstitute(Binding binding, Set<Integer> marks)
+    TopBinding localSubstitute(Binding binding, Set<Integer> marks)
     {
-        for (NsBinding b : myBindings)
+        for (TopBinding b : myBindings)
         {
             Binding resolvedBoundId = b.myIdentifier.resolve();
             if (resolvedBoundId.equals(binding))
@@ -194,7 +194,7 @@ class Namespace
     /**
      * @return null if identifier isn't bound here.
      */
-    NsBinding localResolve(SyntaxSymbol identifier)
+    TopBinding localResolve(SyntaxSymbol identifier)
     {
         Binding resolvedRequestedId = identifier.resolve();
         Set<Integer> marks = identifier.computeMarks();
@@ -210,9 +210,9 @@ class Namespace
     }
 
 
-    NsBinding newBinding(SyntaxSymbol identifier, int address)
+    TopBinding newBinding(SyntaxSymbol identifier, int address)
     {
-        return new NsBinding(identifier, address);
+        return new TopBinding(identifier, address);
     }
 
 
@@ -220,9 +220,9 @@ class Namespace
      * Creates a binding, but no value, for a name.
      * Used during preparation phase, before evaluating the right-hand side.
      */
-    public NsBinding predefine(SyntaxSymbol identifier)
+    public TopBinding predefine(SyntaxSymbol identifier)
     {
-        NsBinding binding = localResolve(identifier);
+        TopBinding binding = localResolve(identifier);
         if (binding == null)
         {
             int address = myBindings.size();
@@ -239,7 +239,7 @@ class Namespace
      *
      * @param value must not be null
      */
-    void bind(NsBinding binding, FusionValue value)
+    void bind(TopBinding binding, FusionValue value)
     {
         set(binding.myAddress, value);
 
@@ -283,7 +283,7 @@ class Namespace
     public void bind(String name, FusionValue value)
     {
         SyntaxSymbol identifier = SyntaxSymbol.make(name);
-        NsBinding binding = predefine(identifier);
+        TopBinding binding = predefine(identifier);
         bind(binding, value);
     }
 
@@ -304,19 +304,19 @@ class Namespace
     @Override
     public FusionValue lookup(Binding binding)
     {
-        if (binding instanceof NsBinding)    // else it can't possibly be ours
+        if (binding instanceof TopBinding)    // else it can't possibly be ours
         {
-            return lookup((NsBinding) binding);
+            return lookup((TopBinding) binding);
         }
         return null;
     }
 
-    public FusionValue lookup(NsBinding binding)
+    public FusionValue lookup(TopBinding binding)
     {
         int address = binding.myAddress;
         if (address < myValues.size())              // for prepare-time lookup
         {
-            NsBinding localBinding = myBindings.get(address);
+            TopBinding localBinding = myBindings.get(address);
             if (binding.equals(localBinding))
             {
                 return myValues.get(address);
@@ -349,12 +349,12 @@ class Namespace
     /**
      * A reference to a top-level variable in the lexically-enclosing namespace.
      */
-    private static final class CompiledTopVariable
+    private static final class CompiledTopVariableReference
         implements CompiledForm
     {
         private final int myAddress;
 
-        CompiledTopVariable(int address)
+        CompiledTopVariableReference(int address)
         {
             myAddress = address;
         }

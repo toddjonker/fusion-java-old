@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.Namespace.NsBinding;
+import com.amazon.fusion.Namespace.TopBinding;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 /**
  * A module that's been instantiated for use by one or more other modules.
- * A module has a unique {@link ModuleIdentity} and a {@link Namespace}
+ * A module has a unique {@link ModuleIdentity} and a {@link NamespaceStore}
  * holding its top-level bindings.
  */
 class ModuleInstance
@@ -96,7 +96,7 @@ class ModuleInstance
     {
         assert myProvidedBindings.size() == 0;
 
-        for (NsBinding binding : ((Namespace)myNamespace).getBindings())
+        for (TopBinding binding : ((Namespace)myNamespace).getBindings())
         {
             String name = binding.getName();
 

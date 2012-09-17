@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.Namespace.NsBinding;
+import com.amazon.fusion.Namespace.TopBinding;
 
 final class DefineKeyword
     extends KeywordValue
@@ -72,7 +72,7 @@ final class DefineKeyword
         CompiledForm valueForm = eval.compile(env, valueSource);
 
         SyntaxSymbol identifier = (SyntaxSymbol) source.get(1);
-        NsBinding binding = (NsBinding) identifier.getBinding();
+        TopBinding binding = (TopBinding) identifier.getBinding();
         return binding.compileDefine(eval, env, valueForm);
     }
 }

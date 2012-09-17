@@ -5,16 +5,18 @@ package com.amazon.fusion;
 /**
  * Eval-time storage for a lexical scope.
  */
-final class LexicalStore
+final class LocalStore
     implements Store
 {
     private final Store    myEnclosure;
     private final Object[] myValues;
 
     /**
-     * @param values CALLEE ASSUMES OWNERSHIP OF THIS ARRAY
+     * @param values CALLEE ASSUMES OWNERSHIP OF THIS ARRAY.
+     * Caller can (and does) mutate the array elements after constructing the
+     * store!
      */
-    LexicalStore(Store enclosure, Object[] values)
+    LocalStore(Store enclosure, Object[] values)
     {
         myEnclosure = enclosure;
         myValues    = values;

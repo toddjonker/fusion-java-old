@@ -7,15 +7,15 @@ import java.util.Set;
 final class LocalEnvironment
     implements Environment
 {
-    static final class LexicalBinding implements Binding
+    static final class LocalBinding implements Binding
     {
-        static final LexicalBinding[] EMPTY_ARRAY = new LexicalBinding[0];
+        static final LocalBinding[] EMPTY_ARRAY = new LocalBinding[0];
 
         private final SyntaxSymbol myIdentifier;
         private final int          myDepth;
         private final int          myAddress;
 
-        private LexicalBinding(SyntaxSymbol identifier, int depth, int address)
+        private LocalBinding(SyntaxSymbol identifier, int depth, int address)
         {
             assert depth > 0;
             myIdentifier = identifier;
@@ -48,7 +48,7 @@ final class LocalEnvironment
             throws FusionException
         {
             int rib = env.getDepth() - myDepth;
-            return new CompiledLocalVariable(rib, myAddress);
+            return new CompiledLocalVariableReference(rib, myAddress);
         }
 
 
@@ -61,12 +61,12 @@ final class LocalEnvironment
         @Override
         public String toString()
         {
-            return "{{LexicalBinding " + myIdentifier + "}}";
+            return "{{LocalBinding " + myIdentifier + "}}";
         }
 
 
         /** Extract the names from an array of bindings. */
-        static String[] toNames(LexicalBinding[] bindings)
+        static String[] toNames(LocalBinding[] bindings)
         {
             if (bindings == null || bindings.length == 0)
             {
@@ -86,10 +86,10 @@ final class LocalEnvironment
 
 
     /** Not null */
-    private final Environment      myEnclosure;
-    private final int              myDepth;
-    private final LexicalBinding[] myBindings;
-    private final FusionValue[]    myValues;
+    private final Environment    myEnclosure;
+    private final int            myDepth;
+    private final LocalBinding[] myBindings;
+    private final FusionValue[]  myValues;
 
 
     /** Expand-time environment construction */
@@ -100,7 +100,7 @@ final class LocalEnvironment
         myDepth = 1 + enclosure.getDepth();
 
         int count = identifiers.length;
-        myBindings = new LexicalBinding[count];
+        myBindings = new LocalBinding[count];
         for (int i = 0; i < count; i++)
         {
             SyntaxSymbol identifier = identifiers[i];
@@ -110,7 +110,7 @@ final class LocalEnvironment
                 : "Identifier " + identifier + " already bound to " +
                   identifier.getBinding();
 
-            myBindings[i] = new LexicalBinding(identifier, myDepth, i);
+            myBindings[i] = new LocalBinding(identifier, myDepth, i);
         }
 
         myValues = null;
@@ -118,7 +118,7 @@ final class LocalEnvironment
 
     /** Run-time environment construction */
     LocalEnvironment(Environment enclosure,
-                     LexicalBinding[] bindings,
+                     LocalBinding[] bindings,
                      FusionValue[] values)
     {
         assert bindings.length == values.length;
@@ -146,7 +146,7 @@ final class LocalEnvironment
     @Override
     public Binding substitute(Binding binding, Set<Integer> marks)
     {
-        for (LexicalBinding b : myBindings)
+        for (LocalBinding b : myBindings)
         {
             Binding resolvedBoundId = b.myIdentifier.resolve();
             if (resolvedBoundId.equals(binding))
@@ -173,9 +173,9 @@ final class LocalEnvironment
     {
         // Sometimes this is called during expansion, when there are not
         // any values bound.
-        if (myValues != null && binding instanceof LexicalBinding)
+        if (myValues != null && binding instanceof LocalBinding)
         {
-            int address = ((LexicalBinding) binding).myAddress;
+            int address = ((LocalBinding) binding).myAddress;
             if (address < myBindings.length)
             {
                 Binding localBinding = myBindings[address];
@@ -194,13 +194,13 @@ final class LocalEnvironment
 
     // TODO optimize for rib zero which should be a very common case.
 
-    private static final class CompiledLocalVariable
+    private static final class CompiledLocalVariableReference
         implements CompiledForm
     {
         private final int myRib;
         private final int myAddress;
 
-        CompiledLocalVariable(int rib, int address)
+        CompiledLocalVariableReference(int rib, int address)
         {
             assert rib >= 0;
             myRib     = rib;

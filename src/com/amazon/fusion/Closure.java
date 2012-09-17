@@ -35,8 +35,8 @@ final class Closure
     {
         checkArityExact(args);
 
-        Store bodyStore = new LexicalStore(myEnclosure, args);
+        Store localStore = new LocalStore(myEnclosure, args);
 
-        return eval.bounceTailForm(bodyStore, myBody);
+        return eval.bounceTailForm(localStore, myBody);
     }
 }

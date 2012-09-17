@@ -4,7 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static java.lang.Boolean.TRUE;
-import com.amazon.fusion.Namespace.NsBinding;
+import com.amazon.fusion.Namespace.TopBinding;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -279,7 +279,7 @@ final class ModuleKeyword
         throws FusionException
     {
         // TODO We repeat work here that was done during expansion.
-        // Racket stashed the necessary data in syntax properties.
+        // Racket stashes the necessary data in syntax properties.
         // See Racket reference 11.9.1
         // http://docs.racket-lang.org/reference/Expanding_Top-Level_Forms.html#%28part._modinfo%29
 
@@ -399,7 +399,7 @@ final class ModuleKeyword
                 throw check.failure(message);
             }
 
-            assert b instanceof NsBinding;
+            assert b instanceof TopBinding;
 
             String freeName = b.getName();
             if (! publicName.equals(freeName))

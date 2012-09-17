@@ -308,6 +308,8 @@ final class Evaluator
     }
 
 
+    // TODO FUSION-49 I'm not confident that 'Namespace' is correct here
+    // Maybe it is, assuming this is only for use at non-module top level.
     Object prepareAndEval(Namespace env, SyntaxValue source)
         throws FusionException
     {
