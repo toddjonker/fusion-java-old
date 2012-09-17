@@ -312,7 +312,7 @@ final class SyntaxSexp
                 throw new FusionException(b.toString());
             }
 
-            return p.invoke(eval, args);
+            return eval.bounceTailCall(p, args);
         }
     }
 }

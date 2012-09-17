@@ -34,10 +34,8 @@ final class SelectStream
     {
         if (mySource.hasNext())
         {
-            FusionValue fv;
-            fv = this.mySource.next();
-            FusionValue [] newArg = { fv };
-            FusionValue boolResult = this.eval.applyNonTail(proc,newArg);
+            FusionValue fv = this.mySource.next();
+            Object boolResult = eval.callNonTail(proc, fv);
             Boolean bv = FusionValue.asBoolean(boolResult);
             if (bv != null)
             {

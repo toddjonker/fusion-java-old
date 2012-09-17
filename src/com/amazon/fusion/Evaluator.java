@@ -412,13 +412,45 @@ final class Evaluator
 
     /**
      * Makes a <b>non-tail</b> procedure call.
+     * Whenever possible, you should use tail calls instead.
      *
      * @return not null
+     *
+     * @see #bounceTailCall(Procedure, FusionValue...)
+     *
+     * @deprecated Use {@link #callNonTail(Procedure, Object...)} instead.
      */
+    @Deprecated
     FusionValue applyNonTail(Procedure proc, FusionValue... args)
         throws FusionException
     {
-        FusionValue result = proc.invoke(this, args);
+        FusionValue result = (FusionValue) proc.invoke(this, args);
+        if (result instanceof TailForm)
+        {
+            TailForm tail = (TailForm) result;
+            result = eval(tail.myStore, tail.myForm);
+        }
+        // TODO handle TailCall, but nothing triggers this path yet.
+        else if (result == null)
+        {
+            result = UNDEF;
+        }
+        return result;
+    }
+
+
+    /**
+     * Makes a <b>non-tail</b> procedure call.
+     * Whenever possible, you should use tail calls instead.
+     *
+     * @return not null
+     *
+     * @see #bounceTailCall(Procedure, FusionValue...)
+     */
+    Object callNonTail(Procedure proc, Object... args)
+        throws FusionException
+    {
+        Object result = proc.doApply(this, args);
         if (result instanceof TailForm)
         {
             TailForm tail = (TailForm) result;

@@ -32,11 +32,11 @@ final class ForEachFieldProc
         {
             String name = field.getFieldName();
             IonString nameDom = eval.getSystem().newString(name);
-            DomValue nameValue = new DomValue(nameDom);
 
-            DomValue fieldValue = new DomValue(field);
+            Object nameValue  = new DomValue(nameDom);
+            Object fieldValue = new DomValue(field);
 
-            eval.applyNonTail(proc, nameValue, fieldValue);
+            eval.callNonTail(proc, nameValue, fieldValue);
         }
 
         return args[1]; // Don't need to re-wrap the input struct

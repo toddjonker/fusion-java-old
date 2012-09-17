@@ -22,7 +22,7 @@ final class MacroTransformer
         Object expanded;
         try
         {
-            expanded = eval.applyNonTail(myTransformer, source);
+            expanded = eval.callNonTail(myTransformer, source);
         }
         catch (SyntaxFailure e)
         {

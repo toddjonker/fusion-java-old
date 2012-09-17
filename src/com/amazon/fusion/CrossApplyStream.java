@@ -48,8 +48,8 @@ final class CrossApplyStream
         {
             return false;
         }
-        FusionValue fv = mySource.next();
-        FusionValue rv = eval.applyNonTail(proc, fv);
+        Object fv = mySource.next();
+        Object rv = eval.callNonTail(proc, fv);
         if (rv instanceof Stream) // defensive checking
         {
              Stream strv = (Stream)rv;
@@ -61,17 +61,9 @@ final class CrossApplyStream
              return true;
         }
         else
-
         {
-            //try
-            //{
-                this.myResults = Sequences.streamFor(rv);
-                return true;
-            /* } catch (ContractFailure cf)
-            {
-                nextResult = rv;
-                return true;
-            } */
+            myResults = Sequences.streamFor(rv);
+            return true;
         }
     }
 

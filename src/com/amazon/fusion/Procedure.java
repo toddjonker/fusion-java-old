@@ -19,6 +19,7 @@ import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 
 /**
  * Base class for invocable procedures, both built-in and user-defined.
@@ -97,9 +98,28 @@ abstract class Procedure
     /**
      * @param args must not be null, and none of its elements may be null.
      * @return null is a synonym for {@link #UNDEF}.
+     *
+     * @deprecated Subclasses should implement
+     * {@link #doApply(Evaluator, Object[])} instead
      */
-    abstract FusionValue invoke(Evaluator eval, FusionValue[] args)
-        throws FusionException;
+    @Deprecated
+    Object invoke(Evaluator eval, FusionValue[] args)
+        throws FusionException
+    {
+        return doApply(eval, args);
+    }
+
+
+    /**
+     * Do not call directly!
+     */
+    Object doApply(Evaluator eval, Object[] args)
+        throws FusionException
+    {
+        FusionValue[] fArgs =
+            Arrays.copyOf(args, args.length, FusionValue[].class);
+        return invoke(eval, fArgs);
+    }
 
 
     //========================================================================
