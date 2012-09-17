@@ -11,7 +11,7 @@ class ModuleNamespace
     extends Namespace
 {
     /** These are compiled away, unlike some bindings. */
-    class ModuleTopBinding extends NsBinding
+    static final class ModuleTopBinding extends NsBinding
     {
         private final ModuleIdentity myModuleId;
 
@@ -38,7 +38,13 @@ class ModuleNamespace
                 // it and go directly to our own namespace.
                 // This case doesn't happen at runtime, instead the binding
                 // is compiled into a special form.
-                return ModuleNamespace.this.lookup(this);
+
+                ModuleInstance module =
+                    localNamespace.getRegistry().lookup(myModuleId);
+                assert module != null : "Module not found: " + myModuleId;
+
+                ModuleNamespace ns = module.getNamespace();
+                return ns.lookup(this);
             }
 
             return localNamespace.lookup(this);

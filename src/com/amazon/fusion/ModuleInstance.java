@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.ModuleNamespace.ModuleTopBinding;
 import com.amazon.fusion.Namespace.NsBinding;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
@@ -17,66 +16,6 @@ import java.util.Map;
 class ModuleInstance
     extends NamedValue
 {
-    class ModuleBinding
-        implements Binding
-    {
-        private final NsBinding myInternalBinding;
-
-        private ModuleBinding(String name, NsBinding binding)
-        {
-            assert binding.getName().equals(name);
-            assert binding instanceof ModuleTopBinding;
-            myInternalBinding = binding;
-        }
-
-        ModuleInstance getModule()
-        {
-            return ModuleInstance.this;
-        }
-
-        String getName()
-        {
-            return myInternalBinding.getName();
-        }
-
-
-        @Override
-        public Binding originalBinding()
-        {
-            return myInternalBinding;
-        }
-
-
-        @Override
-        public FusionValue lookup(Environment store)
-        {
-            return myNamespace.lookup(myInternalBinding);
-        }
-
-        @Override
-        public CompiledForm compile(Evaluator eval, Environment env)
-            throws FusionException
-        {
-            // Can probably optimize this since this is only used from
-            // outside the module providing the binding.
-            assert myIdentity != env.namespace().getModuleId();
-            return myInternalBinding.compile(eval, env);
-        }
-
-        @Override
-        public boolean equals(Object other)
-        {
-            return this == other;
-        }
-
-        @Override
-        public String toString()
-        {
-            return "{{ModuleBinding " + myIdentity + ' ' + getName() + "}}";
-        }
-    }
-
-
     private final ModuleIdentity myIdentity;
     private final ModuleNamespace myNamespace;
 
@@ -84,7 +23,7 @@ class ModuleInstance
      * Not all of these bindings are for this module; names that are imported
      * and exported have their bindings passed through.
      */
-    private final Map<String,ModuleBinding> myProvidedBindings;
+    private final Map<String,Binding> myProvidedBindings;
 
 
     /**
@@ -116,32 +55,19 @@ class ModuleInstance
 
         if (providedIdentifiers == null)
         {
-            myProvidedBindings = new HashMap<String,ModuleBinding>();
+            myProvidedBindings = new HashMap<String,Binding>();
         }
         else
         {
             myProvidedBindings =
-                new HashMap<String,ModuleBinding>(providedIdentifiers.length);
+                new HashMap<String,Binding>(providedIdentifiers.length);
 
             for (SyntaxSymbol identifier : providedIdentifiers)
             {
-                String name = identifier.stringValue();
+                String  name    = identifier.stringValue();
+                Binding binding = identifier.resolve();
 
-                ModuleBinding externalBinding;
-                Binding internalBinding = identifier.resolve();
-                if (internalBinding instanceof ModuleBinding)
-                {
-                    // Export of a binding from another module, just use it.
-                    externalBinding = (ModuleBinding) internalBinding;
-                }
-                else
-                {
-                    externalBinding =
-                        new ModuleBinding(name,
-                                          (ModuleTopBinding) internalBinding);
-                }
-
-                myProvidedBindings.put(name, externalBinding);
+                myProvidedBindings.put(name, binding);
             }
         }
 
@@ -170,14 +96,11 @@ class ModuleInstance
     {
         assert myProvidedBindings.size() == 0;
 
-        for (NsBinding internalBinding : myNamespace.getBindings())
+        for (NsBinding binding : myNamespace.getBindings())
         {
-            String name = internalBinding.getName();
+            String name = binding.getName();
 
-            ModuleBinding externalBinding =
-                new ModuleBinding(name, internalBinding);
-
-            myProvidedBindings.put(name, externalBinding);
+            myProvidedBindings.put(name, binding);
         }
     }
 
@@ -185,7 +108,7 @@ class ModuleInstance
     /**
      * @return null if the name isn't provided by this module.
      */
-    ModuleBinding resolveProvidedName(String name)
+    Binding resolveProvidedName(String name)
     {
         return myProvidedBindings.get(name);
     }
