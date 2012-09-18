@@ -111,7 +111,10 @@ abstract class Procedure
 
 
     /**
-     * Do not call directly!
+     * Executes a procedure's logic; <b>DO NOT CALL DIRECTLY!</b>
+     *
+     * @param args must not be null, and none of its elements may be null.
+     * @return null is a synonym for {@link #UNDEF}.
      */
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException
