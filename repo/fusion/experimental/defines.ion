@@ -1,8 +1,10 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module defines 'fusion/base'
+(module defines 'fusion/private/builtins'
+
   (use 'fusion/syntax')
-  (provide defpub)
+
+  (provide defpub defpub_syntax)
 
   (define_syntax defpub  // (defpub name value)
     (lambda (stx)
@@ -11,6 +13,16 @@
         (quasisyntax
           (begin
             (define (unsyntax name) (unsyntax value))
+            (provide (unsyntax name)))))))
+
+
+  (define_syntax defpub_syntax  // (defpub_syntax name value)
+    (lambda (stx)
+      (let ((name  (syntax_get stx 1))
+            (value (syntax_get stx 2)))
+        (quasisyntax
+          (begin
+            (define_syntax (unsyntax name) (unsyntax value))
             (provide (unsyntax name)))))))
 )
 

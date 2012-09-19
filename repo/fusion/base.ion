@@ -2,6 +2,9 @@
 
 (module base 'fusion/private/builtins'
 
+  (use 'fusion/syntax')
+  (use 'fusion/experimental/defines')
+
 
   // Pass-through bindings from #%kernel
   (provide begin current_directory define eval_file
@@ -14,7 +17,7 @@
 
   // Pass-through bindings from builtins
   (provide and assert for_list let or quote)
-  (provide * + - . < = > add apply concatenate contains display exit
+  (provide * + - . < = add apply concatenate contains display exit
     for_each_field help is_null is_undef make_sexp not read remove
     size to_int to_string write)
 
@@ -23,11 +26,23 @@
   (provide make_parameter parameterize)
 
 
+  //==========================================================================
+  // Basic procedures
 
-  (use 'fusion/syntax')
+  (defpub >
+    (lambda (a b) (< b a)))
 
-  (provide when)
-  (define_syntax when
+  (defpub <=
+    (lambda (a b) (not (< b a))))
+
+  (defpub >=
+    (lambda (a b) (not (< a b))))
+
+
+  //==========================================================================
+  // Control forms
+
+  (defpub_syntax when
     (lambda (stx)
 
       // (when TEST BODY ...)  -->  (if TEST (begin BODY ...) undef)
@@ -42,8 +57,7 @@
                   (unsyntax begin_body)
                   undef)))))))
 
-  (provide unless)
-  (define_syntax unless
+  (defpub_syntax unless
     (lambda (stx)
 
       // (unless TEST BODY ...)  -->  (if TEST undef (begin BODY ...))
@@ -62,8 +76,7 @@
 // TODO FUSION-36  Support internal definitions in body sequences.
 // Shouldn't use begin since that doesn't delimit the new scope that's needed.
 
-  (provide cond)
-  (define_syntax cond
+  (defpub_syntax cond
     (lambda (stx)
       (let ((size (syntax_size stx)))
         (if (= 1 size)               // (cond) with no clauses

@@ -25,7 +25,6 @@
   (define .              (java_new "com.amazon.fusion.DotProc"))
   (define <              (java_new "com.amazon.fusion.LessThanProc"))
   (define =              (java_new "com.amazon.fusion.EqualProc"))
-  (define >              (java_new "com.amazon.fusion.GreaterThanProc"))
   (define add            (java_new "com.amazon.fusion.AddProc"))
   (define apply          (java_new "com.amazon.fusion.ApplyProc"))
   (define concatenate    (java_new "com.amazon.fusion.StringConcatenateProc"))
@@ -45,7 +44,7 @@
   (define to_string      (java_new "com.amazon.fusion.ToStringProc"))
   (define write          (java_new "com.amazon.fusion.WriteProc"))
 
-  (provide * + - . < = > add apply concatenate contains display exit
+  (provide * + - . < = add apply concatenate contains display exit
     for_each_field help is_null is_undef make_sexp not read remove
     size to_int to_string write)
 )

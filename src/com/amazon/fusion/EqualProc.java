@@ -20,6 +20,9 @@ final class EqualProc
               "value1", "value2");
     }
 
+    private static final String EXPECTATION =
+        "non-null bool, int, decimal, string, or timestamp";
+
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException
@@ -34,9 +37,7 @@ final class EqualProc
         if (leftVal  == null || leftVal.isNullValue() ||
             rightVal == null || rightVal.isNullValue())
         {
-            throw new ArgTypeFailure(this,
-                                     "non-null int, decimal, bool, or timestamp",
-                                     -1, args);
+            throw new ArgTypeFailure(this, EXPECTATION, -1, args);
         }
 
         if (leftVal instanceof IonInt && rightVal instanceof IonInt)
@@ -45,33 +46,37 @@ final class EqualProc
             IonInt right = (IonInt) rightVal;
             compareVal = left.bigIntegerValue().compareTo(right.bigIntegerValue());
             result = (compareVal == 0);
-        } else if (leftVal instanceof IonDecimal && rightVal instanceof IonDecimal)
+        }
+        else if (leftVal instanceof IonDecimal && rightVal instanceof IonDecimal)
         {
             IonDecimal left = (IonDecimal) leftVal;
             IonDecimal right = (IonDecimal) rightVal;
             compareVal = left.bigDecimalValue().compareTo(right.bigDecimalValue());
             result = (compareVal == 0);
-        } else if (leftVal instanceof IonBool && rightVal instanceof IonBool)
-        {
-            IonBool left  = (IonBool) leftVal;
-            IonBool right = (IonBool) rightVal;
-            result = left.booleanValue() == right.booleanValue();
-        } else if (leftVal instanceof IonString && rightVal instanceof IonString)
+        }
+        else if (leftVal instanceof IonString && rightVal instanceof IonString)
         {
             IonString left  = (IonString) leftVal;
             IonString right = (IonString) rightVal;
             result = left.stringValue().equals(right.stringValue());
-        } else if (leftVal instanceof IonTimestamp && rightVal instanceof IonTimestamp)
+        }
+        else if (leftVal instanceof IonTimestamp && rightVal instanceof IonTimestamp)
         {
             IonTimestamp left = (IonTimestamp) leftVal;
             IonTimestamp right = (IonTimestamp) rightVal;
             compareVal = left.timestampValue().compareTo(right.timestampValue());
             result = (compareVal == 0);
-        } else
+        }
+        else if (leftVal instanceof IonBool && rightVal instanceof IonBool)
         {
-            throw new ArgTypeFailure(this,
-                                     "non-null int, decimal, bool, or timestamp",
-                                     -1, args);
+            // Bool is checked last since it's least likely to be used, I assume.
+            IonBool left  = (IonBool) leftVal;
+            IonBool right = (IonBool) rightVal;
+            result = left.booleanValue() == right.booleanValue();
+        }
+        else
+        {
+            throw new ArgTypeFailure(this, EXPECTATION, -1, args);
         }
 
         return eval.newBool(result);
