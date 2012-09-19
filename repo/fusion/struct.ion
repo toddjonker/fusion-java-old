@@ -1,16 +1,14 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
 (module struct 'fusion/base'
 
   (use 'fusion/ffi/java')
+  (use 'fusion/experimental/defines')
 
-  (provide struct_intersect
-           struct_make
-           struct_prune
-           struct_union
-           struct_zip)
 
-  (define struct_intersect (java_new "com.amazon.fusion.StructIntersectProc"))
-  (define struct_make    (java_new "com.amazon.fusion.StructMakeProc"))
-  (define struct_prune   (java_new "com.amazon.fusion.StructPruneProc"))
-  (define struct_union   (java_new "com.amazon.fusion.StructUnionAllProc"))
-  (define struct_zip     (java_new "com.amazon.fusion.StructZipProc"))
+  (defpub struct_intersect (java_new "com.amazon.fusion.StructIntersectProc"))
+  (defpub struct_make    (java_new "com.amazon.fusion.StructMakeProc"))
+  (defpub struct_prune   (java_new "com.amazon.fusion.StructPruneProc"))
+  (defpub struct_union   (java_new "com.amazon.fusion.StructUnionAllProc"))
+  (defpub struct_zip     (java_new "com.amazon.fusion.StructZipProc"))
 )

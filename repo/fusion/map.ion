@@ -1,8 +1,11 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
 (module map 'fusion/base'
 
-  (provide map filter for_each chew_stdin)
+  (use 'fusion/experimental/defines')
 
-  (define map
+
+  (defpub map
     (lambda (proc list)
       '''
 Applies the one-parameter procedure PROC to each element of LIST, returning a
@@ -19,7 +22,7 @@ new list of the results in order.
 
   //==========================================================================
 
-  (define filter
+  (defpub filter
     (lambda (pred list)
       '''
 Applies the one-parameter predicate PRED to each element of LIST, returning a
@@ -39,7 +42,7 @@ new list of the elements (in order) for which PRED returns true.
 
   //==========================================================================
 
-  (define for_each
+  (defpub for_each
     (lambda (proc list)
       '''
 Applies the one-parameter procedure PROC to each element of LIST, ignoring any
@@ -55,7 +58,7 @@ results.
 
   //==========================================================================
 
-  (define chew_stdin
+  (defpub chew_stdin
     (lambda (proc)
       '''
 Reads each Ion value from stdin, applies the PROC to it, and writes the result

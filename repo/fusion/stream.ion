@@ -1,32 +1,22 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
 (module stream (quote '#%kernel')
 
-  (provide
-    empty_stream
-    inject_stream
-    is_stream
-    stream_cross_apply
-    stream_cross_product
-    stream_for
-    stream_for_file
-    stream_has_next
-    stream_next
-    stream_project
-    stream_select
-    stream_to_list
-    stream_union
-  )
+  (use 'fusion/experimental/defines')
 
+  // Defined in the kernel for some reason
+  (provide empty_stream)
 
-  (define inject_stream        (java_new "com.amazon.fusion.StreamInjectProc"))
-  (define is_stream            (java_new "com.amazon.fusion.IsStreamProc"))
-  (define stream_cross_apply   (java_new "com.amazon.fusion.StreamCrossApplyProc"))
-  (define stream_cross_product (java_new "com.amazon.fusion.StreamCrossProductProc"))
-  (define stream_for           (java_new "com.amazon.fusion.IonListToStreamProc"))
-  (define stream_for_file      (java_new "com.amazon.fusion.StreamForFileProc"))
-  (define stream_has_next      (java_new "com.amazon.fusion.StreamHasNextProc"))
-  (define stream_next          (java_new "com.amazon.fusion.StreamNextProc"))
-  (define stream_project       (java_new "com.amazon.fusion.StreamProjectProc"))
-  (define stream_select        (java_new "com.amazon.fusion.StreamSelectProc"))
-  (define stream_to_list       (java_new "com.amazon.fusion.StreamToIonListProc"))
-  (define stream_union         (java_new "com.amazon.fusion.StreamUnionProc"))
+  (defpub inject_stream        (java_new "com.amazon.fusion.StreamInjectProc"))
+  (defpub is_stream            (java_new "com.amazon.fusion.IsStreamProc"))
+  (defpub stream_cross_apply   (java_new "com.amazon.fusion.StreamCrossApplyProc"))
+  (defpub stream_cross_product (java_new "com.amazon.fusion.StreamCrossProductProc"))
+  (defpub stream_for           (java_new "com.amazon.fusion.IonListToStreamProc"))
+  (defpub stream_for_file      (java_new "com.amazon.fusion.StreamForFileProc"))
+  (defpub stream_has_next      (java_new "com.amazon.fusion.StreamHasNextProc"))
+  (defpub stream_next          (java_new "com.amazon.fusion.StreamNextProc"))
+  (defpub stream_project       (java_new "com.amazon.fusion.StreamProjectProc"))
+  (defpub stream_select        (java_new "com.amazon.fusion.StreamSelectProc"))
+  (defpub stream_to_list       (java_new "com.amazon.fusion.StreamToIonListProc"))
+  (defpub stream_union         (java_new "com.amazon.fusion.StreamUnionProc"))
 )

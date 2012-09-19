@@ -1,12 +1,11 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
 (module math (quote '#%kernel')
 
-  (use 'fusion/base')
+  (use 'fusion/experimental/defines')
 
-  (provide ceil
-           floor
-           rand)
 
-  (define ceil           (java_new "com.amazon.fusion.CeilingProc"))
-  (define floor          (java_new "com.amazon.fusion.FloorProc"))
-  (define rand           (java_new "com.amazon.fusion.RandomProc"))
+  (defpub ceil           (java_new "com.amazon.fusion.CeilingProc"))
+  (defpub floor          (java_new "com.amazon.fusion.FloorProc"))
+  (defpub rand           (java_new "com.amazon.fusion.RandomProc"))
 )

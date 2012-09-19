@@ -1,14 +1,11 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
 (module function 'fusion/base'
 
-  (provide
-    compose
-    negate
-    predicate_and
-    predicate_or
-  )
+  (use 'fusion/experimental/defines')
 
 
-  (define compose
+  (defpub compose
     (lambda (p1 p2)
       '''
 Applies function p1 to the result of (p2 x), returning another function that
@@ -20,7 +17,7 @@ accepts a single input
 
   //==========================================================================
 
-  (define predicate_and
+  (defpub predicate_and
    (lambda (p1 p2)
      '''
 Applies procedures p1 and p2 to an input x and returns the boolean value
@@ -32,7 +29,7 @@ that p1 and p2 return boolean values.
 
   //==========================================================================
 
-  (define predicate_or
+  (defpub predicate_or
    (lambda (p1 p2)
       '''
 Applies procedures p1 and p2 to an input x and returns the boolean value
@@ -44,7 +41,7 @@ that p1 and p2 return boolean values.
 
   //==========================================================================
 
-  (define negate
+  (defpub negate
    (lambda (p)
       '''
 Takes a procedure that returns a boolean value and returns a procedure that

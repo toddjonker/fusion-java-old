@@ -4,7 +4,8 @@
 
   (provide make_parameter parameterize)
 
-  (define_syntax parameterize  (java_new "com.amazon.fusion.ParameterizeKeyword"))
+  (define_syntax parameterize
+    (java_new "com.amazon.fusion.ParameterizeKeyword"))
 
   (define  make_parameter
     (lambda (value)

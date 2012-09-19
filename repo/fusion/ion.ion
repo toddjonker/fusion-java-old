@@ -1,8 +1,8 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module base (quote '#%kernel')
+(module ion (quote '#%kernel')
 
-  (provide ion_annotations)
+  (use 'fusion/experimental/defines')
 
-  (define ion_annotations (java_new "com.amazon.fusion.IonAnnotationsProc"))
+  (defpub ion_annotations (java_new "com.amazon.fusion.IonAnnotationsProc"))
 )

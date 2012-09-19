@@ -1,9 +1,9 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
 (module timestamp (quote '#%kernel')
 
-  (use 'fusion/base')
+  (use 'fusion/experimental/defines')
 
-  (provide timestamp_now)
 
-  (define timestamp_now  (java_new "com.amazon.fusion.TimestampNowProc"))
-
+  (defpub timestamp_now  (java_new "com.amazon.fusion.TimestampNowProc"))
 )

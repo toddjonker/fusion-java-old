@@ -1,11 +1,11 @@
-(module 'fusion/string' (quote '#%kernel')
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-  // We start with #%kernel for access to java_new
-  (use 'fusion/base')
+(module string 'fusion/base'
 
-  (provide string_to_lower
-           string_to_upper)
+  (use 'fusion/ffi/java')
+  (use 'fusion/experimental/defines')
 
-  (define string_to_lower   (java_new "com.amazon.fusion.StringToLowerProc"))
-  (define string_to_upper   (java_new "com.amazon.fusion.StringToUpperProc"))
+
+  (defpub string_to_lower   (java_new "com.amazon.fusion.StringToLowerProc"))
+  (defpub string_to_upper   (java_new "com.amazon.fusion.StringToUpperProc"))
 )
