@@ -159,6 +159,21 @@ abstract class Procedure
     }
 
 
+
+    <T> T checkArg(Class<T> klass, String desc, int argNum, Object... args)
+        throws ArgTypeFailure
+    {
+        try
+        {
+            T arg = klass.cast(args[argNum]);
+            return klass.cast(arg);
+        }
+        catch (ClassCastException e) {}
+
+        throw new ArgTypeFailure(this, desc, argNum, args);
+    }
+
+
     final boolean checkBoolArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
@@ -183,6 +198,31 @@ abstract class Procedure
     }
 
 
+    /**
+     * Checks that an argument fits safely into Java's {@code int} type.
+     */
+    int checkIntArg(int argNum, Object... args)
+        throws ArgTypeFailure
+    {
+        try
+        {
+            DomValue dom = (DomValue) args[argNum];
+            IonInt iv = (IonInt) dom.ionValue();
+            long v = iv.longValue();
+            if (Integer.MAX_VALUE < v)
+            {
+                throw new ArgTypeFailure(this, "32-bit int", argNum, args);
+            }
+            return (int) v;
+        }
+        catch (ClassCastException e) {}
+        catch (NullValueException e) {}
+        catch (NullPointerException e) {}
+
+        throw new ArgTypeFailure(this, "int", argNum, args);
+    }
+
+
     long checkLongArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
@@ -190,6 +230,7 @@ abstract class Procedure
         {
             DomValue dom = (DomValue) args[argNum];
             IonInt iv = (IonInt) dom.ionValue();
+            // TODO range check
             return iv.longValue();
         }
         catch (ClassCastException e) {}
@@ -310,6 +351,7 @@ abstract class Procedure
     }
 
 
+    /** Allows null.list and null.sexp */
     IonSequence checkSequenceArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
@@ -317,7 +359,7 @@ abstract class Procedure
                            true /* nullable */, argNum, args);
     }
 
-
+    /** Allows null.list */
     IonList checkListArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
@@ -326,6 +368,7 @@ abstract class Procedure
     }
 
 
+    /** Allows null.struct */
     IonStruct checkStructArg(int argNum, Object... args)
         throws ArgTypeFailure
     {

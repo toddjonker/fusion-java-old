@@ -39,6 +39,14 @@
 (check_equal (D2) 222 "D2")
 
 
+// Macro with tail call
+(define s3
+  (lambda () (quote_syntax 99)))
+(define_syntax S3
+  (lambda (stx) (apply s3 [])))
+(check_equal (S3) 99 "S3 macro expansion")
+
+
 //============================================================================
 // identifier bindings
 

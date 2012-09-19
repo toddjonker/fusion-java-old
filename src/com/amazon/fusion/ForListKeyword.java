@@ -142,7 +142,7 @@ final class ForListKeyword
                     streams[i] = Sequences.streamFor(boundValue);
                 }
 
-                FusionValue[] boundValues = new FusionValue[numBindings];
+                Object[] boundValues = new Object[numBindings];
                 store = new LocalStore(store, boundValues);
 
                 while (Sequences.allHaveNext(streams))

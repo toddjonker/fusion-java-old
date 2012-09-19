@@ -7,11 +7,15 @@
 
   (define check_equal
     (lambda (actual expected descr)
-      (if (is_undef expected)
-        (assert (is_undef actual)
-          descr " not equal.\nActual: " actual "\nExpected: " expected)
-        (assert (= actual expected)
-          descr " not equal.\nActual: " actual "\nExpected: " expected))))
+      (cond
+        ((is_undef expected)
+         (assert (is_undef actual)
+           descr " not equal.\nActual: " actual "\nExpected: " expected))
+        ((is_list expected)
+         (check_list_eq actual expected))
+        (true
+         (assert (= actual expected)
+           descr " not equal.\nActual: " actual "\nExpected: " expected)))))
 
   (define check_list_eq  // TODO bad name  TODO doesn't handle deep values
     (lambda (actual expected)

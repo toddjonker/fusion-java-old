@@ -31,13 +31,14 @@ final class EqualProc
         boolean result = false;
         int compareVal = 0;
 
-        if (leftVal == null || rightVal == null)
+        if (leftVal  == null || leftVal.isNullValue() ||
+            rightVal == null || rightVal.isNullValue())
         {
-            throw contractFailure("One or more args is not of a valid Ion type."+
-                    "Expected: int, decimal, bool, or timestamp; "+
-                    "observed: "+ FusionValue.writeToString(args[0]) +
-                    " and " + FusionValue.writeToString(args[1]));
+            throw new ArgTypeFailure(this,
+                                     "non-null int, decimal, bool, or timestamp",
+                                     -1, args);
         }
+
         if (leftVal instanceof IonInt && rightVal instanceof IonInt)
         {
             IonInt left  = (IonInt) leftVal;
@@ -68,10 +69,9 @@ final class EqualProc
             result = (compareVal == 0);
         } else
         {
-            throw contractFailure("One or more args is not of a valid Ion type."+
-                                  "Expected: int, decimal, bool, or timestamp; "+
-                                  "observed: "+ FusionValue.writeToString(args[0]) +
-                                  " and " + FusionValue.writeToString(args[1]));
+            throw new ArgTypeFailure(this,
+                                     "non-null int, decimal, bool, or timestamp",
+                                     -1, args);
         }
 
         return eval.newBool(result);
