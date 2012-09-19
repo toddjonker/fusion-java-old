@@ -440,7 +440,7 @@ public class CoreTestCase
         throws Exception
     {
         ArgTypeFailure e = expectFailure(ArgTypeFailure.class, expr);
-        assertEquals("argument #", badArgNum, e.getArgNum());
+        assertEquals("argument #", badArgNum, e.getBadPos());
     }
 
 }
