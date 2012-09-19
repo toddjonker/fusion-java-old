@@ -164,42 +164,46 @@ public class ListTest
     }
 
     @Test
-    public void testRest()
+    public void testListTail()
         throws Exception
     {
-        assertEval("[0]","(rest smList 0)");
-        assertEval("[1,2]","(rest medList 1)");
-        assertEval(ionListGeneratorWithOffset(8887,1), "(rest lgList 1)");
+        assertEval("[0]",   "(list_tail smList 0)");
+        assertEval("[1,2]", "(list_tail medList 1)");
+        assertEval(ionListGeneratorWithOffset(8887,1), "(list_tail lgList 1)");
 
-        assertUndef("(rest [] 1)");
-        assertUndef("(rest lgList 10000)");
     }
 
     @Test
-    public void testRestFail()
+    public void testListTailFailures()
         throws Exception
     {
-        expectArityFailure("(rest)");
-        expectArityFailure("(rest 1 2 3 4)");
-        expectArityFailure("(rest [])");
+        expectArityFailure("(list_tail)");
+        expectArityFailure("(list_tail 1 2 3 4)");
+        expectArityFailure("(list_tail [])");
 
-        expectArgTypeFailure("(rest \"hello\" 0)", 0);
+        expectArgTypeFailure("(list_tail \"hello\" 0)", 0);
+
+        expectArgTypeFailure("(list_tail null.list 1)", 1);
+        expectArgTypeFailure("(list_tail [] 1)", 1);
+        expectArgTypeFailure("(list_tail lgList 10000)", 1);
     }
+
 
     @Test
     public void testSubsequence()
         throws Exception
     {
-        assertEval("[0]", "(subseq smList 0 0)");
-        assertEval("[1,2]", "(subseq medList 1 2)");
+        assertEval("[]",    "(subseq [] 0 0)");
+        assertEval("[]",    "(subseq smList 0 0)");
+        assertEval("[0]",   "(subseq smList 0 1)");
+        assertEval("[1]",   "(subseq medList 1 2)");
+        assertEval("[1,2]", "(subseq medList 1 3)");
         assertEval(ionListGeneratorWithOffset(1000,4000),
-                "(subseq lgList 4000 4999)");
+                "(subseq lgList 4000 5000)");
 
-        // TODO design question: undef to signal error -
-        // but don't want to crash pgrm
-        assertUndef("(subseq lgList 8886 6666)");
-        assertUndef("(subseq smList 5 8)");
-        assertUndef("(subseq lgList 5555 88888)");
+        // I'm not certain how to specify the result in this case.
+        // Should it return null.list or [] ?
+        eval("(subseq null.list 0 0)");
     }
 
     @Test
@@ -211,7 +215,15 @@ public class ListTest
         expectArityFailure("(subseq [])");
 
         expectArgTypeFailure("(subseq \"optimus prime\" 2 3)", 0);
+
+        // Problem here is index too large, not null.list
+        expectArgTypeFailure("(subseq null.list 0 1)", 2);
+
+        expectArgTypeFailure("(subseq lgList 8886 6666)", 1);
+        expectArgTypeFailure("(subseq smList 5 8)", 2);
+        expectArgTypeFailure("(subseq lgList 5555 88888)", 2);
     }
+
 
     @Test
     public void testLast()

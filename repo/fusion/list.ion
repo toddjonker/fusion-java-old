@@ -1,18 +1,17 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
 (module list 'fusion/base'
 
   // Enable java_new support
   (use 'fusion/ffi/java')
+  (use 'fusion/experimental/defines')
 
-  (provide
-    first
-    last
-    list_empty
-    list_intersect
-    rest
-    subseq
-  )
 
-  (define first
+  (defpub subseq         (java_new "com.amazon.fusion.IonSubseqProc"))
+  (defpub list_intersect (java_new "com.amazon.fusion.ListIntersectProc"))
+
+
+  (defpub first
     (lambda (list)
       '''
 Returns the first element in the list
@@ -21,51 +20,27 @@ Returns the first element in the list
 
   //==========================================================================
 
-  (define last
+  (defpub last
     (lambda (list)
       '''
 Returns the last element in the list
       '''
       (if (list_empty list) undef (. list (- (size list) 1)))))
 
-  //==========================================================================
-
-  (define list_builder
-    (lambda (list rslt idx end)
-      '''
-Helper method for rest - appends elements to the end of a result list until
-the end of the original list is reached
-      '''
-      (if (= idx end)
-        rslt
-        (list_builder list (add rslt (. list idx)) (+ idx 1) end))))
 
   //==========================================================================
 
-  (define rest
-    (lambda (list idx)
+  (defpub list_tail
+    (lambda (list from)
       '''
-Returns the rest of the list starting at index
+Returns the list after the first FROM elements of LIST.
       '''
-      (if (or (= idx (size list)) (> idx (size list)))
-        undef
-        (list_builder list [] idx (size list)))))
+      // TODO if 'from' is to large, error message has wrong proc name
+      (subseq list from (size list))))
 
   //==========================================================================
 
-  (define subseq
-    (lambda (list start end)
-      '''
-Returns the subsequence of a list in the range of two indices [start,end],
-inclusive.
-      '''
-      (if (or (> start end) (= end (size list)) (> end (size list)))
-        undef
-        (list_builder list [] start (+ end 1)))))
-
-  //==========================================================================
-
-  (define list_empty
+  (defpub list_empty
     (lambda (list)
       '''
 Returns true if list is empty otherwise returns false
@@ -74,6 +49,8 @@ Returns true if list is empty otherwise returns false
 
   //==========================================================================
 
+
+  // TODO not exported since the equality comparison contract is poorly defined.
   (define list_contains
     (lambda (list val)
       '''
@@ -83,9 +60,5 @@ Returns true if list contains value otherwise returns false
         false
         (or (= val (first list))
             (list_contains (subseq list 1 (size list)) val)))))
-
-  //==========================================================================
-
-  (define list_intersect     (java_new "com.amazon.fusion.ListIntersectProc"))
 
 ) // end module
