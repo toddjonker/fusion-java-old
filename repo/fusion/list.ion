@@ -49,6 +49,38 @@ Returns true if list is empty otherwise returns false
 
   //==========================================================================
 
+  // Per SRFI-1
+  (defpub find
+    (lambda (proc list)
+      '''
+Applies the PROC to each element of LIST in turn; if the PROC returns a truthy
+value that element is returned.
+      '''
+      (let ((len (size list)))
+        (let loop ((i 0))
+          (if (= i len)
+            false
+            (let ((elt (. list i)))
+              (if (proc elt)
+                elt
+                (loop (+ i 1)))))))))
+
+  // Per SRFI-1
+  (defpub any
+    (lambda (proc list)
+      '''
+Applies the PROC to each element of LIST in turn; if the PROC returns a truthy
+value that value is returned.
+      '''
+      (let ((len (size list)))
+        (let loop ((i 0))
+          (if (= i len)
+            false
+            (let ((elt (. list i)))
+              (let ((result (proc elt)))
+                (if result result
+                  (loop (+ i 1))))))))))
+
 
   // TODO not exported since the equality comparison contract is poorly defined.
   (define list_contains
@@ -60,5 +92,60 @@ Returns true if list contains value otherwise returns false
         false
         (or (= val (first list))
             (list_contains (subseq list 1 (size list)) val)))))
+
+
+  //==========================================================================
+  // Iteration
+
+  // Per SRFI-1
+  (defpub map
+    (lambda (proc list)
+      '''
+Applies the one-parameter procedure PROC to each element of LIST, returning a
+new list of the results in order.
+      '''
+      (let ((len (size list)))
+        (let loop ((i 0)
+                   (result []))
+          (if (= i len)
+            result
+            (loop
+              (+ 1 i)
+              (add result (proc (. list i)))))))))
+
+
+  // Per SRFI-1
+  (defpub filter
+    (lambda (pred list)
+      '''
+Applies the one-parameter predicate PRED to each element of LIST, returning a
+new list of the elements (in order) for which PRED returns true.
+      '''
+      (let ((len (size list)))
+        (let loop ((i 0)
+                   (result []))
+          (if (= i len)
+            result
+            (let ((elt (. list i)))
+              (loop
+                (+ 1 i)
+                (if (pred elt)
+                  (add result elt)
+                  result))))))))
+
+  // Per SRFI-1
+  (defpub for_each
+    (lambda (proc list)
+      '''
+Applies the one-parameter procedure PROC to each element of LIST, ignoring any
+results.
+      '''
+      (let ((len (size list)))
+        (let loop ((i 0))
+          (if (= i len)
+            undef
+            (begin
+              (proc (. list i))
+              (loop (+ 1 i))))))))
 
 ) // end module

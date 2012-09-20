@@ -76,7 +76,7 @@ public class ModuleTest
     public void testRepositoryLoad()
         throws Exception
     {
-        eval("(use (lib \"fusion/map\"))");
+        eval("(use (lib \"fusion/list\"))");
         assertEval("[]", "(map + [])");
     }
 
@@ -87,8 +87,8 @@ public class ModuleTest
         expectSyntaxFailure("(use {})");
         expectSyntaxFailure("(use ())");
         expectSyntaxFailure("(use (lib))");
-        expectSyntaxFailure("(use (lib \"fusion/map\" \"map\"))");
-        expectSyntaxFailure("(use (lib 'fusion/map'))");
-        expectSyntaxFailure("(use (lib fusion/map))");
+        expectSyntaxFailure("(use (lib \"fusion/list\" \"list\"))");
+        expectSyntaxFailure("(use (lib 'fusion/list'))");
+        expectSyntaxFailure("(use (lib fusion/list))");
     }
 }

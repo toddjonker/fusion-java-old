@@ -4,57 +4,9 @@
 
   (use 'fusion/experimental/defines')
 
+  (use 'fusion/list')
+  (provide filter for_each map)
 
-  (defpub map
-    (lambda (proc list)
-      '''
-Applies the one-parameter procedure PROC to each element of LIST, returning a
-new list of the results in order.
-      '''
-      (let ((len (size list)))
-        (let loop ((index  0)
-                   (result []))
-          (if (= index len)
-            result
-            (loop
-              (+ 1 index)
-              (add result (proc (. list index)))))))))
-
-  //==========================================================================
-
-  (defpub filter
-    (lambda (pred list)
-      '''
-Applies the one-parameter predicate PRED to each element of LIST, returning a
-new list of the elements (in order) for which PRED returns true.
-      '''
-      (let ((len (size list)))
-        (let loop ((index  0)
-                   (result []))
-          (if (= index len)
-            result
-            (let ((elt (. list index)))
-              (loop
-                (+ 1 index)
-                (if (pred elt)
-                  (add result elt)
-                  result))))))))
-
-  //==========================================================================
-
-  (defpub for_each
-    (lambda (proc list)
-      '''
-Applies the one-parameter procedure PROC to each element of LIST, ignoring any
-results.
-      '''
-      (let ((len (size list)))
-        (let loop ((index  0))
-          (if (= index len)
-            undef
-            (begin
-              (proc (. list index))
-              (loop (+ 1 index))))))))
 
   //==========================================================================
 

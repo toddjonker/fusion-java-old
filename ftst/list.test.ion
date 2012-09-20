@@ -1,0 +1,39 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(use 'fusion/list')
+(use check)
+
+(define F (lambda (e) false))
+(define T (lambda (e) true))
+
+(check_equal (find F []) false "")
+(check_equal (find F [1, 2]) false "")
+(check_equal (find T [1, 2]) 1 "")
+
+(check_equal (find (lambda (e) (= e "hi")) ["oh", "hi"]) "hi" "")
+
+
+(check_equal (any T []) false "")
+(check_equal (any F [1, 2]) false "")
+(check_equal (any T [1, 2]) true "")
+
+(check_equal (any (lambda (e) (= e "hi")) ["oh", "hi"]) true "")
+(check_equal (any (lambda (e) (= e "hi")) ["oh", "hi"]) true "")
+
+
+//==========================================================================
+
+(check_equal (map + []) [] "map1")
+(check_equal (map + [1, 2]) [1, 2] "map2")
+(check_equal (map (lambda (n) (+ 3 n)) [1, 2]) [4, 5] "map3")
+
+(check_equal (filter T []) [] "filter1")
+(check_equal (filter F []) [] "filter2")
+(check_equal (filter T [1, 2]) [1, 2] "filter3")
+(check_equal (filter F [1, 2]) [] "filter4")
+
+(check_equal (filter (lambda (n) (< 10 n)) [1, 11, 10, 12]) [11, 12] "filter5")
+
+
+// We don't have a way to test side-effects so just make sure the thing runs.
+(for_each T [1, 2, true])
