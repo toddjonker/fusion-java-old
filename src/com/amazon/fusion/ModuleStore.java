@@ -22,6 +22,13 @@ final class ModuleStore
     }
 
     @Override
+    public void set(int rib, int address, Object value)
+    {
+        throw new IllegalStateException("Rib not found");
+    }
+
+
+    @Override
     public NamespaceStore namespace()
     {
         return this;

@@ -28,4 +28,9 @@ public interface Binding
     /** Compile a reference to the variable denoted by this binding. */
     CompiledForm compileReference(Evaluator eval, Environment env)
         throws FusionException;
+
+    /** Compile a mutation of the variable denoted by this binding. */
+    CompiledForm compileSet(Evaluator eval, Environment env,
+                            CompiledForm valueForm)
+        throws FusionException;
 }

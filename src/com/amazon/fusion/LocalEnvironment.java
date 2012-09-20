@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionValue.UNDEF;
 import java.util.Set;
 
 final class LocalEnvironment
@@ -49,6 +50,15 @@ final class LocalEnvironment
         {
             int rib = env.getDepth() - myDepth;
             return new CompiledLocalVariableReference(rib, myAddress);
+        }
+
+        @Override
+        public CompiledForm compileSet(Evaluator eval, Environment env,
+                                       CompiledForm valueForm)
+            throws FusionException
+        {
+            int rib = env.getDepth() - myDepth;
+            return new CompiledLocalVariableSet(rib, myAddress, valueForm);
         }
 
 
@@ -215,6 +225,32 @@ final class LocalEnvironment
             assert result != null
                 : "No value for rib " + myRib + " address " + myAddress;
             return result;
+        }
+    }
+
+
+    private static final class CompiledLocalVariableSet
+        implements CompiledForm
+    {
+        private final int          myRib;
+        private final int          myAddress;
+        private final CompiledForm myValueForm;
+
+        CompiledLocalVariableSet(int rib, int address, CompiledForm valueForm)
+        {
+            assert rib >= 0;
+            myRib       = rib;
+            myAddress   = address;
+            myValueForm = valueForm;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Object value = eval.eval(store, myValueForm);
+            store.set(myRib, myAddress, value);
+            return UNDEF;
         }
     }
 }

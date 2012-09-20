@@ -15,8 +15,9 @@
   (define_syntax let           (java_new "com.amazon.fusion.LetKeyword"))
   (define_syntax or            (java_new "com.amazon.fusion.OrKeyword"))
   (define_syntax quote         (java_new "com.amazon.fusion.QuoteKeyword"))
+  (define_syntax set           (java_new "com.amazon.fusion.SetKeyword"))
 
-  (provide and assert for_list let or quote)
+  (provide and assert for_list let or quote set)
 
 
   (define *              (java_new "com.amazon.fusion.ProductProc"))

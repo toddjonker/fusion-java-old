@@ -54,6 +54,16 @@ class Namespace
             return new CompiledTopVariableReference(myAddress);
         }
 
+        @Override
+        public CompiledForm compileSet(Evaluator eval, Environment env,
+                                       CompiledForm valueForm)
+            throws FusionException
+        {
+            String message =
+                "Mutation of top-level variables is not supported";
+            throw new ContractFailure(message);
+        }
+
         CompiledForm compileDefine(Evaluator eval,
                                    Environment env,
                                    CompiledForm valueForm)
@@ -132,6 +142,12 @@ class Namespace
 
     @Override
     public Object lookup(int rib, int address)
+    {
+        throw new IllegalStateException("Rib not found");
+    }
+
+    @Override
+    public void set(int rib, int address, Object value)
     {
         throw new IllegalStateException("Rib not found");
     }

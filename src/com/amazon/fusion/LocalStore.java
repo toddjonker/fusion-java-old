@@ -35,4 +35,17 @@ final class LocalStore
         if (rib == 0) return myValues[address];
         return myEnclosure.lookup(rib - 1, address);
     }
+
+    @Override
+    public void set(int rib, int address, Object value)
+    {
+        if (rib == 0)
+        {
+            myValues[address] = value;
+        }
+        else
+        {
+            myEnclosure.set(rib - 1, address, value);
+        }
+    }
 }

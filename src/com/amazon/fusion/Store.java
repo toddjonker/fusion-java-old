@@ -7,12 +7,6 @@ package com.amazon.fusion;
  */
 interface Store
 {
-    /* *
-     * Assigns a variable a new value.
-     * This is the implementation of {@code set!}.
-     */
-//  void set(int address, Object value);
-
     /**
      * Finds the value bound at a given address.
      *
@@ -22,6 +16,13 @@ interface Store
      * @return not null.
      */
     Object lookup(int rib, int address);
+
+
+    /**
+     * Assigns a variable a new value.
+     * This is the implementation of {@code set!}.
+     */
+    void set(int rib, int address, Object value);
 
     NamespaceStore namespace();
 }
