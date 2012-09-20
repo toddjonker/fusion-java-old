@@ -9,7 +9,6 @@ import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
-import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
@@ -357,12 +356,6 @@ public class CoreTestCase
         return runtime.eval(expressionIon);
     }
 
-    protected FusionValue eval(IonReader expressionIon)
-        throws FusionException
-    {
-        FusionRuntime runtime = runtime();
-        return runtime.eval(expressionIon);
-    }
 
     protected Object loadFile(String path)
         throws FusionException

@@ -7,6 +7,7 @@ import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntime;
 import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.fusion.FusionValue;
+import com.amazon.fusion.SourceName;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
@@ -87,11 +88,12 @@ final class Eval
     private FusionValue evalFile(String fileName)
         throws FusionException, IOException
     {
+        SourceName name = SourceName.forFile(fileName);
         FileInputStream in = new FileInputStream(fileName);
         try
         {
             IonReader i = mySystem.newReader(in);
-            return myRuntime.eval(i);
+            return myRuntime.eval(i, name);
         }
         finally
         {

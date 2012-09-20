@@ -58,16 +58,24 @@ final class StandardRuntime
 
 
     @Override
-    public FusionValue eval(String source)
+    public FusionValue eval(String source, SourceName name)
         throws ExitException, FusionException
     {
         IonReader i = mySystem.newReader(source);
-        return eval(i);
+        return eval(i, name);
     }
 
 
     @Override
-    public FusionValue eval(IonReader source)
+    public FusionValue eval(String source)
+        throws ExitException, FusionException
+    {
+        return eval(source, null);
+    }
+
+
+    @Override
+    public FusionValue eval(IonReader source, SourceName name)
         throws ExitException, FusionException
     {
         FusionValue result = UNDEF;
@@ -76,11 +84,19 @@ final class StandardRuntime
 
         while (source.next() != null)
         {
-            SyntaxValue sourceExpr = Syntax.read(source);
+            SyntaxValue sourceExpr = Syntax.read(source, name);
             result = myEvaluator.prepareAndEvalTopLevelForm(sourceExpr, myNamespace);
         }
 
         return result;
+    }
+
+
+    @Override
+    public FusionValue eval(IonReader source)
+        throws ExitException, FusionException
+    {
+        return eval(source, null);
     }
 
 

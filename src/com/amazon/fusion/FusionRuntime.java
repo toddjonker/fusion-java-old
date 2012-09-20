@@ -20,12 +20,32 @@ public interface FusionRuntime
      * visible to later calls.
      *
      * @param source must not be null.
+     * @param name identifies the source for error reporting. May be null.
      * @return not null, but perhaps {@link FusionValue#UNDEF}.
      *
      * @throws ExitException if the Fusion {@code exit} procedure is invoked.
      */
+    public FusionValue eval(String source, SourceName name)
+        throws ExitException, FusionException;
+
+    /**
+     * Evaluates top-level forms within this {@link FusionRuntime}'s namespace.
+     * Top-level {@code define} forms will alter the environment and will be
+     * visible to later calls.
+     * <p>
+     * {@link #eval(String,SourceName)} should be preferred to this method,
+     * since it can provide better error reporting.
+     *
+     * @param source must not be null.
+     * @return not null, but perhaps {@link FusionValue#UNDEF}.
+     *
+     * @throws ExitException if the Fusion {@code exit} procedure is invoked.
+     *
+     * @see #eval(String,SourceName)
+     */
     public FusionValue eval(String source)
         throws ExitException, FusionException;
+
 
     /**
      * Evaluates top-level forms within this {@link FusionRuntime}'s namespace.
@@ -33,12 +53,32 @@ public interface FusionRuntime
      * visible to later calls.
      *
      * @param source must not be null.
+     * @param name identifies the source for error reporting. May be null.
      * @return not null, but perhaps {@link FusionValue#UNDEF}.
      *
      * @throws ExitException if the Fusion {@code exit} procedure is invoked.
      */
+    FusionValue eval(IonReader source, SourceName name)
+        throws ExitException, FusionException;
+
+    /**
+     * Evaluates top-level forms within this {@link FusionRuntime}'s namespace.
+     * Top-level {@code define} forms will alter the environment and will be
+     * visible to later calls.
+     * <p>
+     * {@link #eval(IonReader,SourceName)} should be preferred to this method,
+     * since it can provide better error reporting.
+     *
+     * @param source must not be null.
+     * @return not null, but perhaps {@link FusionValue#UNDEF}.
+     *
+     * @throws ExitException if the Fusion {@code exit} procedure is invoked.
+     *
+     * @see #eval(IonReader,SourceName)
+     */
     public FusionValue eval(IonReader source)
         throws ExitException, FusionException;
+
 
     /**
      * Evaluates top-level forms within this {@link FusionRuntime}'s namespace.

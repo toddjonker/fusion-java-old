@@ -8,6 +8,7 @@ import com.amazon.ion.util.Spans;
 
 final class SourceLocation
 {
+    final SourceName myName;
     /** Zero-based */
     final long myLine;
     /** Zero-based */
@@ -19,13 +20,14 @@ final class SourceLocation
      * This currently only supports Ion text sources, and only captures the
      * start position.
      */
-    static SourceLocation currentLocation(IonReader source)
+    static SourceLocation currentLocation(IonReader source, SourceName name)
     {
         TextSpan ts = Spans.currentSpan(TextSpan.class, source);
         if (ts != null)
         {
             // Convert from one-based to zero-based.
-            return new SourceLocation(ts.getStartLine() - 1,
+            return new SourceLocation(name,
+                                      ts.getStartLine() - 1,
                                       ts.getStartColumn() - 1);
         }
         return null;
@@ -36,8 +38,9 @@ final class SourceLocation
      * @param line zero-based
      * @param column zero-based
      */
-    SourceLocation(long line, long column)
+    private SourceLocation(SourceName name, long line, long column)
     {
+        myName = name;
         myLine = line;
         myColumn = column;
     }

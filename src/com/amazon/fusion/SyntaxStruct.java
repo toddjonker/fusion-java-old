@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.cloneIfContained;
 import static com.amazon.fusion.SourceLocation.currentLocation;
-
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonType;
@@ -119,9 +118,9 @@ final class SyntaxStruct
     }
 
 
-    static SyntaxStruct read(IonReader source, String[] anns)
+    static SyntaxStruct read(IonReader source, SourceName name, String[] anns)
     {
-        SourceLocation loc = currentLocation(source);
+        SourceLocation loc = currentLocation(source, name);
 
         Map<String, Object> map;
 
@@ -136,7 +135,7 @@ final class SyntaxStruct
             while (source.next() != null)
             {
                 String field = source.getFieldName();
-                SyntaxValue child = Syntax.read(source);
+                SyntaxValue child = Syntax.read(source, name);
                 Object prev = map.put(field, child);
                 if (prev != null)
                 {

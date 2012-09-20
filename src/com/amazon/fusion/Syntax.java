@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.SourceLocation.currentLocation;
-
 import com.amazon.ion.Decimal;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonType;
@@ -15,13 +14,13 @@ import java.util.ArrayList;
  */
 final class Syntax
 {
-    static SyntaxValue read(IonReader source)
+    static SyntaxValue read(IonReader source, SourceName name)
     {
         IonType type = source.getType();
         assert type != null;
 
         String[] anns = source.getTypeAnnotations();
-        SourceLocation loc = currentLocation(source);
+        SourceLocation loc = currentLocation(source, name);
 
         switch (type)
         {
@@ -81,17 +80,17 @@ final class Syntax
             }
             case LIST:
             {
-                SyntaxValue[] value = readSequence(source);
+                SyntaxValue[] value = readSequence(source, name);
                 return SyntaxList.make(value, anns, loc);
             }
             case SEXP:
             {
-                SyntaxValue[] value = readSequence(source);
+                SyntaxValue[] value = readSequence(source, name);
                 return SyntaxSexp.make(value, anns, loc);
             }
             case STRUCT:
             {
-                return SyntaxStruct.read(source, anns);
+                return SyntaxStruct.read(source, name, anns);
             }
         }
 
@@ -99,7 +98,7 @@ final class Syntax
     }
 
 
-    static SyntaxValue[] readSequence(IonReader source)
+    static SyntaxValue[] readSequence(IonReader source, SourceName name)
     {
         if (source.isNullValue()) return null;
 
@@ -108,7 +107,7 @@ final class Syntax
         source.stepIn();
         while (source.next() != null)
         {
-            SyntaxValue child = Syntax.read(source);
+            SyntaxValue child = Syntax.read(source, name);
             children.add(child);
         }
         source.stepOut();

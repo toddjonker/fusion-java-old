@@ -72,13 +72,14 @@ final class LoadHandler
             FileInputStream in = new FileInputStream(file);
             try
             {
+                SourceName name = SourceName.forFile(file);
                 Object result = null;
 
                 IonReader reader = eval.getSystem().newReader(in);
                 while (reader.next() != null)
                 {
                     result = null;  // Don't hold onto garbage
-                    SyntaxValue fileExpr = Syntax.read(reader);
+                    SyntaxValue fileExpr = Syntax.read(reader, name);
                     result = eval.prepareAndEvalTopLevelForm(fileExpr, namespace);
                     // TODO tail call handling
                 }
@@ -114,7 +115,8 @@ final class LoadHandler
                    throw new FusionException(message);
                 }
 
-                SyntaxValue firstTopLevel = Syntax.read(reader);
+                SourceName name = SourceName.forModule(id);
+                SyntaxValue firstTopLevel = Syntax.read(reader, name);
                 if (reader.next() != null)
                 {
                     String message =

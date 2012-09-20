@@ -56,6 +56,12 @@ public class SyntaxFailure
                     out.append(" line, ");
                     FusionUtils.writeFriendlyIndex(out, loc.myColumn);
                     out.append(" column");
+
+                    if (loc.myName != null)
+                    {
+                        out.append("\nof ");
+                        out.append(loc.myName.display());
+                    }
                 }
 
                 out.append("\nSources:");
