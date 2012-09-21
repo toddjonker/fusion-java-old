@@ -40,6 +40,7 @@
   (defpub_j is_undef              "com.amazon.fusion.IsUndefProc")
   (defpub_j make_sexp             "com.amazon.fusion.MakeSexpProc")
   (defpub_j not                   "com.amazon.fusion.NotProc")
+  (defpub_j raise_argument_error  "com.amazon.fusion.RaiseArgumentErrorProc")
   (defpub_j read                  "com.amazon.fusion.ReadProc")
   (defpub_j remove                "com.amazon.fusion.RemoveProc")
   (defpub_j size                  "com.amazon.fusion.SizeProc")
