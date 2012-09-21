@@ -24,11 +24,27 @@ final class FusionAssertionFailure
     @Override
     public String getMessage()
     {
+        StringBuilder out = new StringBuilder();
+        out.append("Assertion failure: ");
+
         String superMessage = super.getMessage();
-        String message =
-            "Assertion failure: " + (superMessage == null ? "" : superMessage) +
-            "\nExpression: " + myExpr +
-            "\nResult: " + FusionValue.writeToString(myResult);
-        return message;
+        if (superMessage != null)
+        {
+            out.append(superMessage);
+        }
+
+        SourceLocation location = myExpr.getLocation();
+        if (location != null)
+        {
+            out.append("\nLocation: ");
+            location.display(out);
+        }
+
+        out.append("\nExpression: ");
+        FusionValue.write(out, myExpr);
+        out.append("\nResult: ");
+        FusionValue.write(out, myResult);
+
+        return out.toString();
     }
 }
