@@ -3,8 +3,14 @@
 (module check 'fusion/base'
 
   (use 'fusion/experimental/defines')
+  (use 'fusion/ffi/java')
   (use 'fusion/ion')
+  (use 'fusion/syntax')
   (use 'fusion/vector')
+
+
+  // NOT PUBLIC YET
+  (define raise_check_failure (java_new "com.amazon.fusion.CheckFailureProc"))
 
 
   (defpub check_equal
@@ -51,4 +57,81 @@
       (let ((anns (ion_annotations value)))
         (check_list_equal anns expected))))
 
+
+/* This is nowhere near working yet...
+  (defpub_syntax define_simple_check
+    (lambda (stx)
+      (let ((bindings (syntax_get stx 1))
+            (body_sexp (syntax_subseq stx 2)))
+        (let ((name (syntax_get bindings 0))
+              (params (syntax_subseq bindings 1))
+              (body_begin (syntax_cons begin body_sexp)))
+
+          (quasisyntax
+            (define (unsyntax name)
+              (lambda (stx)
+
+              )))))))
+*/
+
+  (define_syntax do_check  // private
+    (lambda (stx)
+      '''
+(do_check ORIG_STX OP VAL1 VAL2 MSG ...)
+
+Ensures that (OP VAL1 VAL2) is truthy.
+      '''
+      (let ((orig_stx (syntax_get stx 1))
+            (op_stx   (syntax_get stx 2))
+            (val1_stx (syntax_get stx 3))
+            (val2_stx (syntax_get stx 4))
+            (msg_sexp (syntax_subseq stx 5)))
+        (quasisyntax
+          (let ((op   (unsyntax op_stx))
+                (val1 (unsyntax val1_stx))
+                (val2 (unsyntax val2_stx)))
+            (unless (op val1 val2)
+              (unsyntax
+                (syntax_append
+                  (quasisyntax
+                    (raise_check_failure
+                      (quote_syntax (unsyntax orig_stx))))
+                  msg_sexp
+                  (quasisyntax
+                    ("\n params:\n  " op
+                     "\n  " val1
+                     "\n  " val2))))))))))
+
+  (defpub_syntax check
+    (lambda (stx)
+      '''
+(check OP VAL1 VAL2 MSG ...)
+
+Ensures that (OP VAL1 VAL2) is truthy.
+      '''
+      (syntax_append
+        (quasisyntax (do_check (unsyntax stx)))
+        (syntax_subseq stx 1))))
+
+
+  // The failure message isn't the greatest, its in terms of the inner check
+  (defpub_syntax check_true
+    (lambda (stx)
+      (let ((val1_stx (syntax_get stx 1))
+            (msg_sexp (syntax_subseq stx 2)))
+        (syntax_append
+          (quasisyntax
+            (do_check (unsyntax stx) = (unsyntax val1_stx) true))
+          msg_sexp))))
+
+
+  // The failure message isn't the greatest, its in terms of the inner check
+  (defpub_syntax check_false
+    (lambda (stx)
+      (let ((val1_stx (syntax_get stx 1))
+            (msg_sexp (syntax_subseq stx 2)))
+        (syntax_append
+          (quasisyntax
+            (do_check (unsyntax stx) = (unsyntax val1_stx) false))
+          msg_sexp))))
 )

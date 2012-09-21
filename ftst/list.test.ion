@@ -7,19 +7,19 @@
 (define F (lambda (e) false))
 (define T (lambda (e) true))
 
-(check_equal (find F []) false "")
-(check_equal (find F [1, 2]) false "")
-(check_equal (find T [1, 2]) 1 "")
+(check = (find F [])     false)
+(check = (find F [1, 2]) false)
+(check = (find T [1, 2]) 1)
 
-(check_equal (find (lambda (e) (= e "hi")) ["oh", "hi"]) "hi" "")
+(check = (find (lambda (e) (= e "hi")) ["oh", "hi"]) "hi")
 
 
-(check_equal (any T []) false "")
-(check_equal (any F [1, 2]) false "")
-(check_equal (any T [1, 2]) true "")
+(check_false (any T []))
+(check_false (any F [1, 2]))
+(check_true  (any T [1, 2]))
 
-(check_equal (any (lambda (e) (= e "hi")) ["oh", "hi"]) true "")
-(check_equal (any (lambda (e) (= e "hi")) ["oh", "hi"]) true "")
+(check_true (any (lambda (e) (= e "hi")) ["oh", "hi"]))
+(check_true (any (lambda (e) (= e "hi")) ["oh", "hi"]))
 
 
 //==========================================================================
@@ -34,10 +34,6 @@
 (check_equal (filter F [1, 2]) [] "filter4")
 
 (check_equal (filter (lambda (n) (< 10 n)) [1, 11, 10, 12]) [11, 12] "filter5")
-
-
-// We don't have a way to test side-effects so just make sure the thing runs.
-(for_each T [1, 2, true])
 
 
 (check_equal (for_each (lambda (x) (+ 1 x)) [2, 3])

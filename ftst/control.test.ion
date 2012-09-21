@@ -12,11 +12,14 @@
 //============================================================================
 // if
 
+(check_true  (if true  true false))
+(check_false (if false true false))
+
 // Using exit ensure we don't evaluate the other branch
 
-(check_equal (if true  1 (exit)) 1 "if 1")
-(check_equal (if false (exit) 2) 2 "if 3")
-(check_equal (if (if false false true) 4 2) 4 "if 4")
+(check = (if true  1 (exit)) 1)
+(check = (if false (exit) 2) 2)
+(check = (if (if false false true) 4 2) 4)
 
 
 //============================================================================
