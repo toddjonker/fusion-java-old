@@ -44,4 +44,19 @@ final class SourceLocation
         myLine = line;
         myColumn = column;
     }
+
+
+    void display(StringBuilder out)
+    {
+        FusionUtils.writeFriendlyIndex(out, myLine);
+        out.append(" line, ");
+        FusionUtils.writeFriendlyIndex(out, myColumn);
+        out.append(" column");
+
+        if (myName != null)
+        {
+            out.append(" of ");
+            out.append(myName.display());
+        }
+    }
 }

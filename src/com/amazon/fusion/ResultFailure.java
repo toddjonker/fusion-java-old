@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
 import static com.amazon.fusion.FusionValue.write;
-import java.io.IOException;
 
 /**
  * Indicates a contractual failure of a result from some computation.
@@ -57,34 +56,31 @@ final class ResultFailure
         int actualsLen = myActuals.length;
 
         StringBuilder b = new StringBuilder();
-        try {
-            b.append(myName);
-            b.append(" expects ");
-            b.append(myExpectation);
-            b.append(", received ");
-            write(b, myActuals[actualsLen == 1 ? 0 : myBadPos]);
+        b.append(myName);
+        b.append(" expects ");
+        b.append(myExpectation);
+        b.append(", received ");
+        write(b, myActuals[actualsLen == 1 ? 0 : myBadPos]);
 
-            if (0 <= myBadPos && 1 < actualsLen)
-            {
-                b.append("\n as ");
-                writeFriendlyIndex(b, myBadPos);
-                b.append(" result");
-            }
+        if (0 <= myBadPos && 1 < actualsLen)
+        {
+            b.append("\n as ");
+            writeFriendlyIndex(b, myBadPos);
+            b.append(" result");
+        }
 
-            if (1 < actualsLen)
+        if (1 < actualsLen)
+        {
+            b.append("\n Other results were:");
+            for (int i = 0; i < actualsLen; i++)
             {
-                b.append("\n Other results were:");
-                for (int i = 0; i < actualsLen; i++)
+                if (i != myBadPos)
                 {
-                    if (i != myBadPos)
-                    {
-                        b.append("\n  ");
-                        write(b, myActuals[i]);
-                    }
+                    b.append("\n  ");
+                    write(b, myActuals[i]);
                 }
             }
         }
-        catch (IOException e) {}
 
         return b.toString();
     }

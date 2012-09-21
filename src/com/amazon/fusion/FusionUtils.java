@@ -66,6 +66,23 @@ final class FusionUtils
         out.append(suffix);
     }
 
+
+    /**
+     * Writes a zero-based index as a one-based position like
+     * "1st", "12th, or "23rd".
+     *
+     * @param out
+     * @param i
+     * @throws IOException
+     */
+    static void writeFriendlyIndex(StringBuilder out, long i)
+    {
+        i++;
+        out.append(Long.toString(i));
+        String suffix = friendlySuffix(i);
+        out.append(suffix);
+    }
+
     static void writeIon(Appendable out, IonValue v)
         throws IOException
     {

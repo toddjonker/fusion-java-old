@@ -52,16 +52,7 @@ public class SyntaxFailure
                 if (loc != null)
                 {
                     out.append("\nat ");
-                    FusionUtils.writeFriendlyIndex(out, loc.myLine);
-                    out.append(" line, ");
-                    FusionUtils.writeFriendlyIndex(out, loc.myColumn);
-                    out.append(" column");
-
-                    if (loc.myName != null)
-                    {
-                        out.append("\nof ");
-                        out.append(loc.myName.display());
-                    }
+                    loc.display(out);
                 }
 
                 out.append("\nSources:");
