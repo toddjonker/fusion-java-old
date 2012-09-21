@@ -30,8 +30,6 @@ public class SyntaxTest
         throws Exception
     {
         expectArityFailure("(syntax_append)");
-        expectArityFailure("(syntax_append (quasisyntax 1))");
-        expectArityFailure("(syntax_append (quasisyntax 1)(quasisyntax 2)(quasisyntax 3))");
     }
 
 

@@ -10,7 +10,7 @@ final class SyntaxAppendProc
     {
         //    "                                                                               |
         super("Returns a new syntax sexp that combines the HEAD and TAIL sequences.",
-              "head", "tail");
+              "head", "tail", DOTDOTDOT);
     }
 
 
@@ -18,10 +18,13 @@ final class SyntaxAppendProc
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
-        checkArityExact(args);
-        SyntaxSequence head = checkSyntaxSequenceArg(0, args);
-        SyntaxSequence tail = checkSyntaxSequenceArg(1, args);
-        SyntaxSequence result = head.makeAppended(tail);
-        return result;
+        checkArityAtLeast(1, args);
+        SyntaxSequence seq = checkSyntaxSequenceArg(0, args);
+        for (int i = 1; i < args.length; i++)
+        {
+            SyntaxSequence next = checkSyntaxSequenceArg(i, args);
+            seq = seq.makeAppended(next);
+        }
+        return seq;
     }
 }
