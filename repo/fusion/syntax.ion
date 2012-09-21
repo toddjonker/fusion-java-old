@@ -17,8 +17,11 @@
 
   (define datum_to_syntax (java_new "com.amazon.fusion.DatumToSyntaxProc"))
   (define syntax_append   (java_new "com.amazon.fusion.SyntaxAppendProc"))
+  (define syntax_column   (java_new "com.amazon.fusion.SyntaxColumnProc"))
   (define syntax_get      (java_new "com.amazon.fusion.SyntaxGetProc"))
+  (define syntax_line     (java_new "com.amazon.fusion.SyntaxLineProc"))
   (define syntax_size     (java_new "com.amazon.fusion.SyntaxSizeProc"))
+  (define syntax_source   (java_new "com.amazon.fusion.SyntaxSourceProc"))
   (define syntax_subseq   (java_new "com.amazon.fusion.SyntaxSubseqProc"))
 
   (define free_identifier_equal (java_new "com.amazon.fusion.FreeIdentifierEqualProc"))
