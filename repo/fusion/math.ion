@@ -5,7 +5,7 @@
   (use 'fusion/experimental/defines')
 
 
-  (defpub ceil           (java_new "com.amazon.fusion.CeilingProc"))
-  (defpub floor          (java_new "com.amazon.fusion.FloorProc"))
-  (defpub rand           (java_new "com.amazon.fusion.RandomProc"))
+  (defpub_j ceil            "com.amazon.fusion.CeilingProc")
+  (defpub_j floor           "com.amazon.fusion.FloorProc")
+  (defpub_j rand            "com.amazon.fusion.RandomProc")
 )

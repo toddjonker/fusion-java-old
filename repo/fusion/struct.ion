@@ -6,9 +6,9 @@
   (use 'fusion/experimental/defines')
 
 
-  (defpub struct_intersect (java_new "com.amazon.fusion.StructIntersectProc"))
-  (defpub struct_make    (java_new "com.amazon.fusion.StructMakeProc"))
-  (defpub struct_prune   (java_new "com.amazon.fusion.StructPruneProc"))
-  (defpub struct_union   (java_new "com.amazon.fusion.StructUnionAllProc"))
-  (defpub struct_zip     (java_new "com.amazon.fusion.StructZipProc"))
+  (defpub_j struct_intersect  "com.amazon.fusion.StructIntersectProc")
+  (defpub_j struct_make       "com.amazon.fusion.StructMakeProc")
+  (defpub_j struct_prune      "com.amazon.fusion.StructPruneProc")
+  (defpub_j struct_union      "com.amazon.fusion.StructUnionAllProc")
+  (defpub_j struct_zip        "com.amazon.fusion.StructZipProc")
 )

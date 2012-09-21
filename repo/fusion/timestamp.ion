@@ -5,5 +5,5 @@
   (use 'fusion/experimental/defines')
 
 
-  (defpub timestamp_now  (java_new "com.amazon.fusion.TimestampNowProc"))
+  (defpub_j timestamp_now   "com.amazon.fusion.TimestampNowProc")
 )

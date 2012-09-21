@@ -1,28 +1,40 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module defines 'fusion/private/builtins'
+(module defines (quote '#%kernel')
 
   (use 'fusion/syntax')
 
-  (provide defpub defpub_syntax)
+  (provide defpub defpub_j defpub_syntax defpub_j_syntax)
 
   (define_syntax defpub  // (defpub name value)
     (lambda (stx)
-      (let ((name  (syntax_get stx 1))
-            (value (syntax_get stx 2)))
-        (quasisyntax
-          (begin
-            (define (unsyntax name) (unsyntax value))
-            (provide (unsyntax name)))))))
+      (quasisyntax
+        (begin
+          (define (unsyntax (syntax_get stx 1))
+            (unsyntax (syntax_get stx 2)))
+          (provide (unsyntax (syntax_get stx 1)))))))
+
+
+  (define_syntax defpub_j  // (defpub_j name "java.class.Name")
+    (lambda (stx)
+      (quasisyntax
+        (defpub (unsyntax (syntax_get stx 1))
+          (java_new (unsyntax (syntax_get stx 2)))))))
 
 
   (define_syntax defpub_syntax  // (defpub_syntax name value)
     (lambda (stx)
-      (let ((name  (syntax_get stx 1))
-            (value (syntax_get stx 2)))
-        (quasisyntax
-          (begin
-            (define_syntax (unsyntax name) (unsyntax value))
-            (provide (unsyntax name)))))))
+      (quasisyntax
+        (begin
+          (define_syntax (unsyntax (syntax_get stx 1))
+            (unsyntax (syntax_get stx 2)))
+          (provide (unsyntax (syntax_get stx 1)))))))
+
+
+  (define_syntax defpub_j_syntax  // (defpub_j_syntax name "java.class.Name")
+    (lambda (stx)
+      (quasisyntax
+        (defpub_syntax (unsyntax (syntax_get stx 1))
+          (java_new (unsyntax (syntax_get stx 2)))))))
 )
 

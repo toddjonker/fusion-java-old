@@ -1,7 +1,6 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module syntax 'fusion/private/builtins'
-  (use 'fusion/ffi/java')
+(module syntax (quote '#%kernel')
 
   // This is split into two files because the compiler requires that built-in
   // syntactic forms must be imported from another module.
@@ -28,8 +27,7 @@
 
   (define_syntax syntax_cons
     (lambda (stx)
-      (let ((first (syntax_get stx 1))
-            (rest  (syntax_get stx 2)))
-        (quasisyntax (syntax_append (quote_syntax ((unsyntax first)))
-                                    (unsyntax rest))))))
+      (quasisyntax
+        (syntax_append (quote_syntax ((unsyntax (syntax_get stx 1))))
+                       (unsyntax (syntax_get stx 2))))))
 )

@@ -6,6 +6,6 @@
   (use 'fusion/experimental/defines')
 
 
-  (defpub string_to_lower   (java_new "com.amazon.fusion.StringToLowerProc"))
-  (defpub string_to_upper   (java_new "com.amazon.fusion.StringToUpperProc"))
+  (defpub_j string_to_lower    "com.amazon.fusion.StringToLowerProc")
+  (defpub_j string_to_upper    "com.amazon.fusion.StringToUpperProc")
 )

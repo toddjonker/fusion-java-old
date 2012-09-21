@@ -2,6 +2,9 @@
 
 (module builtins (quote '#%kernel')
 
+  (use 'fusion/experimental/defines')
+
+
   // #%kernel bindings we pass through
   (provide begin current_directory define eval_file
     if lambda letrec module undef use)
@@ -9,43 +12,39 @@
       is_string is_clob is_blob is_list is_sexp is_struct)
 
 
-  (define_syntax and           (java_new "com.amazon.fusion.AndKeyword"))
-  (define_syntax assert        (java_new "com.amazon.fusion.AssertKeyword"))
-  (define_syntax for_list      (java_new "com.amazon.fusion.ForListKeyword"))
-  (define_syntax let           (java_new "com.amazon.fusion.LetKeyword"))
-  (define_syntax or            (java_new "com.amazon.fusion.OrKeyword"))
-  (define_syntax quote         (java_new "com.amazon.fusion.QuoteKeyword"))
-  (define_syntax set           (java_new "com.amazon.fusion.SetKeyword"))
-
-  (provide and assert for_list let or quote set)
+  (defpub_j_syntax and            "com.amazon.fusion.AndKeyword")
+  (defpub_j_syntax assert         "com.amazon.fusion.AssertKeyword")
+  (defpub_j_syntax for_list       "com.amazon.fusion.ForListKeyword")
+  (defpub_j_syntax let            "com.amazon.fusion.LetKeyword")
+  (defpub_j_syntax or             "com.amazon.fusion.OrKeyword")
+  (defpub_j_syntax quote          "com.amazon.fusion.QuoteKeyword")
+  (defpub_j_syntax set            "com.amazon.fusion.SetKeyword")
 
 
-  (define *              (java_new "com.amazon.fusion.ProductProc"))
-  (define +              (java_new "com.amazon.fusion.SumProc"))
-  (define -              (java_new "com.amazon.fusion.DifferenceProc"))
-  (define .              (java_new "com.amazon.fusion.DotProc"))
-  (define <              (java_new "com.amazon.fusion.LessThanProc"))
-  (define =              (java_new "com.amazon.fusion.EqualProc"))
-  (define add            (java_new "com.amazon.fusion.AddProc"))
-  (define apply          (java_new "com.amazon.fusion.ApplyProc"))
-  (define concatenate    (java_new "com.amazon.fusion.StringConcatenateProc"))
-  (define contains       (java_new "com.amazon.fusion.ContainsProc"))
-  (define display        (java_new "com.amazon.fusion.DisplayProc"))
-  (define exit           (java_new "com.amazon.fusion.ExitProc"))
-  (define for_each_field (java_new "com.amazon.fusion.ForEachFieldProc"))
-  (define help           (java_new "com.amazon.fusion.HelpProc"))
-  (define is_null        (java_new "com.amazon.fusion.IsNullProc"))
-  (define is_undef       (java_new "com.amazon.fusion.IsUndefProc"))
-  (define make_sexp      (java_new "com.amazon.fusion.MakeSexpProc"))
-  (define not            (java_new "com.amazon.fusion.NotProc"))
-  (define read           (java_new "com.amazon.fusion.ReadProc"))
-  (define remove         (java_new "com.amazon.fusion.RemoveProc"))
-  (define size           (java_new "com.amazon.fusion.SizeProc"))
-  (define to_int         (java_new "com.amazon.fusion.ToIntProc"))
-  (define to_string      (java_new "com.amazon.fusion.ToStringProc"))
-  (define write          (java_new "com.amazon.fusion.WriteProc"))
+  (defpub_j *                     "com.amazon.fusion.ProductProc")
+  (defpub_j +                     "com.amazon.fusion.SumProc")
+  (defpub_j -                     "com.amazon.fusion.DifferenceProc")
+  (defpub_j .                     "com.amazon.fusion.DotProc")
+  (defpub_j <                     "com.amazon.fusion.LessThanProc")
+  (defpub_j =                     "com.amazon.fusion.EqualProc")
 
-  (provide * + - . < = add apply concatenate contains display exit
-    for_each_field help is_null is_undef make_sexp not read remove
-    size to_int to_string write)
+  (defpub_j add                   "com.amazon.fusion.AddProc")
+  (defpub_j apply                 "com.amazon.fusion.ApplyProc")
+  (defpub_j concatenate           "com.amazon.fusion.StringConcatenateProc")
+  (defpub_j contains              "com.amazon.fusion.ContainsProc")
+  (defpub_j display               "com.amazon.fusion.DisplayProc")
+  (defpub_j exit                  "com.amazon.fusion.ExitProc")
+  (defpub_j for_each_field        "com.amazon.fusion.ForEachFieldProc")
+  (defpub_j help                  "com.amazon.fusion.HelpProc")
+  (defpub_j is_null               "com.amazon.fusion.IsNullProc")
+  (defpub_j is_undef              "com.amazon.fusion.IsUndefProc")
+  (defpub_j make_sexp             "com.amazon.fusion.MakeSexpProc")
+  (defpub_j not                   "com.amazon.fusion.NotProc")
+  (defpub_j read                  "com.amazon.fusion.ReadProc")
+  (defpub_j remove                "com.amazon.fusion.RemoveProc")
+  (defpub_j size                  "com.amazon.fusion.SizeProc")
+  (defpub_j to_int                "com.amazon.fusion.ToIntProc")
+  (defpub_j to_string             "com.amazon.fusion.ToStringProc")
+  (defpub_j write                 "com.amazon.fusion.WriteProc")
+
 )

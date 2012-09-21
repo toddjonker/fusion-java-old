@@ -4,5 +4,5 @@
 
   (use 'fusion/experimental/defines')
 
-  (defpub ion_annotations (java_new "com.amazon.fusion.IonAnnotationsProc"))
+  (defpub_j ion_annotations  "com.amazon.fusion.IonAnnotationsProc")
 )

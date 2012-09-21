@@ -1,7 +1,6 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
 (module syntax_builtins (quote '#%kernel')
-  (use 'fusion/private/builtins')
 
   (provide define_syntax quasisyntax quote_syntax unsyntax wrong_syntax)
 

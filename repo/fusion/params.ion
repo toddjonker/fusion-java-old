@@ -2,12 +2,11 @@
 
 (module params (quote '#%kernel')
 
-  (provide make_parameter parameterize)
+  (use 'fusion/experimental/defines')
 
-  (define_syntax parameterize
-    (java_new "com.amazon.fusion.ParameterizeKeyword"))
+  (defpub_j_syntax parameterize "com.amazon.fusion.ParameterizeKeyword")
 
-  (define  make_parameter
+  (defpub make_parameter
     (lambda (value)
       '''
 Makes a new dynamic parameter procedure. The initial value of the parameter is

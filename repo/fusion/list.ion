@@ -7,8 +7,8 @@
   (use 'fusion/experimental/defines')
 
 
-  (defpub subseq         (java_new "com.amazon.fusion.IonSubseqProc"))
-  (defpub list_intersect (java_new "com.amazon.fusion.ListIntersectProc"))
+  (defpub_j subseq          "com.amazon.fusion.IonSubseqProc")
+  (defpub_j list_intersect  "com.amazon.fusion.ListIntersectProc")
 
 
   (defpub first
