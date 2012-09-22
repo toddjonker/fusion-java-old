@@ -99,7 +99,6 @@ final class LocalEnvironment
     private final Environment    myEnclosure;
     private final int            myDepth;
     private final LocalBinding[] myBindings;
-    private final FusionValue[]  myValues;
 
 
     /** Expand-time environment construction */
@@ -122,20 +121,6 @@ final class LocalEnvironment
 
             myBindings[i] = new LocalBinding(identifier, myDepth, i);
         }
-
-        myValues = null;
-    }
-
-    /** Run-time environment construction */
-    LocalEnvironment(Environment enclosure,
-                     LocalBinding[] bindings,
-                     FusionValue[] values)
-    {
-        assert bindings.length == values.length;
-        myEnclosure = enclosure;
-        myDepth = 0;  // Not used at runtime
-        myBindings = bindings;
-        myValues = values;
     }
 
 
@@ -172,29 +157,9 @@ final class LocalEnvironment
     }
 
 
-    void bind(int address, FusionValue value)
-    {
-        myValues[address] = value;
-    }
-
-
     @Override
     public FusionValue lookup(Binding binding)
     {
-        // Sometimes this is called during expansion, when there are not
-        // any values bound.
-        if (myValues != null && binding instanceof LocalBinding)
-        {
-            int address = ((LocalBinding) binding).myAddress;
-            if (address < myBindings.length)
-            {
-                Binding localBinding = myBindings[address];
-                if (binding.equals(localBinding))
-                {
-                    return myValues[address];
-                }
-            }
-        }
         return myEnclosure.lookup(binding);
     }
 

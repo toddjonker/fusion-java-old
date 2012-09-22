@@ -30,8 +30,6 @@ class ModuleNamespace
             {
                 // The local context is a different module, so we must ignore
                 // it and go directly to our own namespace.
-                // This case doesn't happen at runtime, instead the binding
-                // is compiled into a special form.
 
                 ModuleInstance module =
                     localNamespace.getRegistry().lookup(myModuleId);
