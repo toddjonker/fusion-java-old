@@ -19,7 +19,7 @@
   (provide and assert for_list let or quote set)
   (provide * + - . < = add apply concatenate contains display exit
     for_each_field help is_null is_undef make_sexp not
-    raise_argument_error read remove
+    raise_argument_error raise_result_error read remove
     size to_int to_string write)
 
 
