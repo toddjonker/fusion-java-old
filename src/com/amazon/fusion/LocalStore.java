@@ -8,8 +8,9 @@ package com.amazon.fusion;
 final class LocalStore
     implements Store
 {
-    private final Store    myEnclosure;
-    private final Object[] myValues;
+    private final Store          myEnclosure;
+    private final NamespaceStore myNamespace;
+    private final Object[]       myValues;
 
     /**
      * @param values CALLEE ASSUMES OWNERSHIP OF THIS ARRAY.
@@ -19,14 +20,14 @@ final class LocalStore
     LocalStore(Store enclosure, Object[] values)
     {
         myEnclosure = enclosure;
+        myNamespace = enclosure.namespace();
         myValues    = values;
     }
 
     @Override
     public NamespaceStore namespace()
     {
-        // TODO FUSION-53 link directly to namespace
-        return myEnclosure.namespace();
+        return myNamespace;
     }
 
     @Override

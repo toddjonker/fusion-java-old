@@ -97,6 +97,7 @@ final class LocalEnvironment
 
     /** Not null */
     private final Environment    myEnclosure;
+    private final Namespace      myNamespace;
     private final int            myDepth;
     private final LocalBinding[] myBindings;
 
@@ -106,6 +107,7 @@ final class LocalEnvironment
                      SyntaxSymbol[] identifiers)
     {
         myEnclosure = enclosure;
+        myNamespace = enclosure.namespace();
         myDepth = 1 + enclosure.getDepth();
 
         int count = identifiers.length;
@@ -127,8 +129,7 @@ final class LocalEnvironment
     @Override
     public Namespace namespace()
     {
-        // TODO FUSION-53 link directly to namespace
-        return myEnclosure.namespace();
+        return myNamespace;
     }
 
     @Override
