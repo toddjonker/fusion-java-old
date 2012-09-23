@@ -31,14 +31,14 @@ final class SyntaxBool
     }
 
     @Override
-    FusionValue doCompileIonConstant(Evaluator eval, Environment env)
+    Object doCompileIonConstant(Evaluator eval, Environment env)
         throws FusionException
     {
         return eval.newBool(myValue);
     }
 
     @Override
-    FusionValue quote(Evaluator eval)
+    Object quote(Evaluator eval)
     {
         return eval.newBool(myValue, getAnnotations());
     }

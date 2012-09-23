@@ -13,7 +13,7 @@ final class SelectStream
     private final Procedure proc;
     // TODO FUSION-25 stashing of evaluators is incorrect
     private final Evaluator eval;
-    private FusionValue nextResult;
+    private Object nextResult;
 
     public SelectStream(Evaluator eval, Procedure proc, Stream source)
     {
@@ -34,7 +34,7 @@ final class SelectStream
     {
         if (mySource.hasNext())
         {
-            FusionValue fv = this.mySource.next();
+            Object fv = this.mySource.next();
             Object boolResult = eval.callNonTail(proc, fv);
             Boolean bv = FusionValue.asBoolean(boolResult);
             if (bv != null)
@@ -52,7 +52,7 @@ final class SelectStream
     }
 
     @Override
-    FusionValue next()
+    Object next()
         throws FusionException
     {
         if (nextResult == null)
@@ -62,7 +62,7 @@ final class SelectStream
                 throw new FusionException("No new elements to fetch from stream");
             }
         }
-        FusionValue rv = nextResult;
+        Object rv = nextResult;
         nextResult = null;
         return rv;
     }

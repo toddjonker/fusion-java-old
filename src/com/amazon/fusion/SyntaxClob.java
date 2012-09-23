@@ -31,7 +31,7 @@ final class SyntaxClob
 
 
     @Override
-    FusionValue doCompileIonConstant(Evaluator eval, Environment env)
+    Object doCompileIonConstant(Evaluator eval, Environment env)
         throws FusionException
     {
         return eval.newClob(myValue);
@@ -39,7 +39,7 @@ final class SyntaxClob
 
 
     @Override
-    FusionValue quote(Evaluator eval)
+    Object quote(Evaluator eval)
     {
         return eval.newClob(myValue, getAnnotations());
     }

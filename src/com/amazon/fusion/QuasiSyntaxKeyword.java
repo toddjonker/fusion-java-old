@@ -11,8 +11,8 @@ final class QuasiSyntaxKeyword
     private final Binding myQsBinding;
     private final Binding myUsBinding;
 
-    public QuasiSyntaxKeyword(FusionValue qsIdentifier,
-                              FusionValue usIdentifier)
+    public QuasiSyntaxKeyword(Object qsIdentifier,
+                              Object usIdentifier)
     {
         super("template", "...");
 

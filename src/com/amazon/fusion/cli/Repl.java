@@ -86,7 +86,7 @@ class Repl
 
         try
         {
-            FusionValue result = myRuntime.eval(line);
+            Object result = myRuntime.eval(line);
             print(result);
         }
         catch (ExitException e)
@@ -108,7 +108,7 @@ class Repl
         return true;
     }
 
-    private void print(FusionValue v)
+    private void print(Object v)
         throws FusionException
     {
         if (v == FusionValue.UNDEF) return;

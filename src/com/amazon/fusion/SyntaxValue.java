@@ -106,12 +106,12 @@ abstract class SyntaxValue
     CompiledForm doCompile(Evaluator eval, Environment env)
         throws FusionException
     {
-        FusionValue constant = doCompileIonConstant(eval, env);
+        Object constant = doCompileIonConstant(eval, env);
         return new CompiledIonConstant(constant);
     }
 
 
-    FusionValue doCompileIonConstant(Evaluator eval, Environment env)
+    Object doCompileIonConstant(Evaluator eval, Environment env)
         throws FusionException
     {
         throw new IllegalStateException();
@@ -120,7 +120,7 @@ abstract class SyntaxValue
     /**
      * Transform this syntax into plain values.
      */
-    abstract FusionValue quote(Evaluator eval);
+    abstract Object quote(Evaluator eval);
 
     @Override
     void write(Appendable out)
@@ -164,7 +164,7 @@ abstract class SyntaxValue
             myConstant = constant;
         }
 
-        CompiledIonConstant(FusionValue constant)
+        CompiledIonConstant(Object constant)
         {
             DomValue dv = (DomValue) constant;
             IonValue iv = dv.ionValue();

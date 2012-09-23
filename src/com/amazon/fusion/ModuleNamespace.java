@@ -23,7 +23,7 @@ class ModuleNamespace
         }
 
         @Override
-        public FusionValue lookup(Environment env)
+        public Object lookup(Environment env)
         {
             Namespace localNamespace = env.namespace();
             if (localNamespace.getModuleId() != myModuleId)
@@ -36,7 +36,7 @@ class ModuleNamespace
                 assert module != null : "Module not found: " + myModuleId;
 
                 NamespaceStore ns = module.getNamespace();
-                return (FusionValue) ns.lookup(myAddress);
+                return ns.lookup(myAddress);
             }
 
             return localNamespace.lookup(this);

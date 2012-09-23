@@ -16,7 +16,7 @@ final class EmptyStream
     }
 
     @Override
-    FusionValue next()
+    Object next()
         throws ContractFailure
     {
         throw new ContractFailure("No objects available in an empty stream");

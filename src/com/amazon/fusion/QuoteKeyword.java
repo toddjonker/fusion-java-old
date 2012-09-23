@@ -63,8 +63,7 @@ final class QuoteKeyword
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            FusionValue result = mySyntax.quote(eval);
-            return result;
+            return mySyntax.quote(eval);
         }
     }
 }

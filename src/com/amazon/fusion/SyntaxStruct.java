@@ -186,7 +186,7 @@ final class SyntaxStruct
 
 
     @Override
-    FusionValue quote(Evaluator eval)
+    Object quote(Evaluator eval)
     {
         // This should only be called at runtime, after wraps are pushed.
         assert myWraps == null;
@@ -228,7 +228,7 @@ final class SyntaxStruct
 
     private IonValue quoteChild(Evaluator eval, SyntaxValue child)
     {
-        FusionValue childValue = child.quote(eval);
+        Object childValue = child.quote(eval);
         return FusionValue.toIonValue(childValue);
     }
 

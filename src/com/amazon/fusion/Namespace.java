@@ -41,7 +41,7 @@ class Namespace
         }
 
         @Override
-        public FusionValue lookup(Environment env)
+        public Object lookup(Environment env)
         {
             // Skip over any lexical environments and go straight to the top.
             return env.namespace().lookup(this);
@@ -97,8 +97,8 @@ class Namespace
     private SyntaxWraps myWraps;
     private final ArrayList<TopBinding> myBindings =
         new ArrayList<TopBinding>();
-    private final ArrayList<FusionValue> myValues =
-        new ArrayList<FusionValue>();
+    private final ArrayList<Object> myValues =
+        new ArrayList<Object>();
 
     Namespace(ModuleRegistry registry)
     {
@@ -255,12 +255,18 @@ class Namespace
      *
      * @param value must not be null
      */
-    void bind(TopBinding binding, FusionValue value)
+    void bind(TopBinding binding, Object value)
     {
         set(binding.myAddress, value);
 
-        String inferredName = binding.getName();
-        if (inferredName != null) value.inferName(inferredName);
+        if (value instanceof NamedValue)
+        {
+            String inferredName = binding.getName();
+            if (inferredName != null)
+            {
+                ((NamedValue)value).inferName(inferredName);
+            }
+        }
     }
 
 
@@ -276,7 +282,7 @@ class Namespace
         int size = myValues.size();
         if (address < size)
         {
-            myValues.set(address, (FusionValue) value);
+            myValues.set(address, value);
         }
         else // We need to grow myValues. Annoying lack of API to do this.
         {
@@ -285,7 +291,7 @@ class Namespace
             {
                 myValues.add(null);
             }
-            myValues.add((FusionValue) value);
+            myValues.add(value);
         }
     }
 
@@ -296,7 +302,7 @@ class Namespace
      *
      * @param value must not be null
      */
-    public void bind(String name, FusionValue value)
+    public void bind(String name, Object value)
     {
         SyntaxSymbol identifier = SyntaxSymbol.make(name);
         TopBinding binding = predefine(identifier);
@@ -318,7 +324,7 @@ class Namespace
 
 
     @Override
-    public FusionValue lookup(Binding binding)
+    public Object lookup(Binding binding)
     {
         if (binding instanceof TopBinding)    // else it can't possibly be ours
         {
@@ -327,7 +333,7 @@ class Namespace
         return null;
     }
 
-    public FusionValue lookup(TopBinding binding)
+    public Object lookup(TopBinding binding)
     {
         int address = binding.myAddress;
         if (address < myValues.size())              // for prepare-time lookup

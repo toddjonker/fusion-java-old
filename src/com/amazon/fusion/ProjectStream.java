@@ -29,10 +29,10 @@ final class ProjectStream
     }
 
     @Override
-    FusionValue next()
+    Object next()
         throws FusionException
     {
-        FusionValue fv = mySource.next();
-        return (FusionValue) eval.callNonTail(proc, fv);
+        Object fv = mySource.next();
+        return eval.callNonTail(proc, fv);
     }
 }

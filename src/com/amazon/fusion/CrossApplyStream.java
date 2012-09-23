@@ -18,7 +18,7 @@ final class CrossApplyStream
     private final Procedure proc;
     // TODO FUSION-25 stashing of evaluators is incorrect
     private final Evaluator eval;
-    private FusionValue nextResult;
+    private Object nextResult;
 
     public CrossApplyStream(Evaluator eval, Procedure proc, Stream source)
     {
@@ -68,10 +68,10 @@ final class CrossApplyStream
     }
 
     @Override
-    FusionValue next()
+    Object next()
         throws FusionException
     {
-        FusionValue rv = null;
+        Object rv = null;
         // TODO unionize results / eliminate repeats
         if (nextResult == null && myResults == null)
         {

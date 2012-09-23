@@ -27,7 +27,7 @@ final class FreeBinding implements Binding
 
 
     @Override
-    public FusionValue lookup(Environment store)
+    public Object lookup(Environment store)
     {
         return null;
     }

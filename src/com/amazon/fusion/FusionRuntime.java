@@ -25,7 +25,7 @@ public interface FusionRuntime
      *
      * @throws ExitException if the Fusion {@code exit} procedure is invoked.
      */
-    public FusionValue eval(String source, SourceName name)
+    public Object eval(String source, SourceName name)
         throws ExitException, FusionException;
 
     /**
@@ -43,7 +43,7 @@ public interface FusionRuntime
      *
      * @see #eval(String,SourceName)
      */
-    public FusionValue eval(String source)
+    public Object eval(String source)
         throws ExitException, FusionException;
 
 
@@ -58,7 +58,7 @@ public interface FusionRuntime
      *
      * @throws ExitException if the Fusion {@code exit} procedure is invoked.
      */
-    FusionValue eval(IonReader source, SourceName name)
+    Object eval(IonReader source, SourceName name)
         throws ExitException, FusionException;
 
     /**
@@ -76,7 +76,7 @@ public interface FusionRuntime
      *
      * @see #eval(IonReader,SourceName)
      */
-    public FusionValue eval(IonReader source)
+    public Object eval(IonReader source)
         throws ExitException, FusionException;
 
 
@@ -100,7 +100,7 @@ public interface FusionRuntime
      *
      * @param value must not be null.
      */
-    public void bind(String name, FusionValue value);
+    public void bind(String name, Object value);
 
 
     // TODO require(File)

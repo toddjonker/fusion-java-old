@@ -221,7 +221,7 @@ abstract class SyntaxSequence
 
 
     @Override
-    final FusionValue quote(Evaluator eval)
+    final Object quote(Evaluator eval)
     {
         ValueFactory factory = eval.getSystem();
         IonSequence seq = makeNull(factory);
@@ -239,7 +239,7 @@ abstract class SyntaxSequence
                 for (int i = 0; i < size; i++)
                 {
                     SyntaxValue s = get(i);
-                    FusionValue fv = s.quote(eval);
+                    Object fv = s.quote(eval);
                     IonValue iv = FusionValue.toIonValue(fv, factory);
                     seq.add(iv);
                 }

@@ -19,7 +19,6 @@ import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
 
 /**
  * Base class for invocable procedures, both built-in and user-defined.

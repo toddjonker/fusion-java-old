@@ -31,7 +31,7 @@ final class SyntaxFloat
 
 
     @Override
-    FusionValue doCompileIonConstant(Evaluator eval, Environment env)
+    Object doCompileIonConstant(Evaluator eval, Environment env)
         throws FusionException
     {
         return eval.newFloat(myValue);
@@ -39,7 +39,7 @@ final class SyntaxFloat
 
 
     @Override
-    FusionValue quote(Evaluator eval)
+    Object quote(Evaluator eval)
     {
         return eval.newFloat(myValue, getAnnotations());
     }

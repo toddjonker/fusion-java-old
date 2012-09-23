@@ -23,7 +23,7 @@ public interface Binding
     /**
      * @return null if there's no value associated with the binding.
      */
-    FusionValue lookup(Environment store);
+    Object lookup(Environment store);
 
     /** Compile a reference to the variable denoted by this binding. */
     CompiledForm compileReference(Evaluator eval, Environment env)

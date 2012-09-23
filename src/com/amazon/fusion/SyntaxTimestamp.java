@@ -33,7 +33,7 @@ final class SyntaxTimestamp
 
 
     @Override
-    FusionValue doCompileIonConstant(Evaluator eval, Environment env)
+    Object doCompileIonConstant(Evaluator eval, Environment env)
         throws FusionException
     {
         return eval.newTimestamp(myValue);
@@ -41,7 +41,7 @@ final class SyntaxTimestamp
 
 
     @Override
-    FusionValue quote(Evaluator eval)
+    Object quote(Evaluator eval)
     {
         return eval.newTimestamp(myValue, getAnnotations());
     }

@@ -29,7 +29,7 @@ final class KernelModule
         super(IDENTITY, ns);
         inferName(NAME);
 
-        FusionValue userDir =
+        Object userDir =
             new DomValue(system.newString(builder.getInitialCurrentDirectory().toString()));
         DynamicParameter currentDirectory =
             new DynamicParameter(userDir);

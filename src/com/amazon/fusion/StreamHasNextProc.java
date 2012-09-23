@@ -2,15 +2,13 @@
 
 package com.amazon.fusion;
 
-/**
- * Checks whether there are FusionValues left to fetch in the stream
- */
+
 final class StreamHasNextProc
     extends Procedure
 {
     StreamHasNextProc()
     {
-        super("Returns whether there are FusionValues left to fetch in the STREAM.",
+        super("Returns whether there are values left to fetch in the STREAM.",
               "stream");
     }
 

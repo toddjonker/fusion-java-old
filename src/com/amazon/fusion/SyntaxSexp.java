@@ -144,7 +144,7 @@ final class SyntaxSexp
         if (first instanceof SyntaxSymbol)
         {
             Binding binding = ((SyntaxSymbol) first).getBinding();
-            FusionValue resolved = binding.lookup(env);
+            Object resolved = binding.lookup(env);
             if (resolved instanceof KeywordValue)
             {
                 // We found a static top-level binding to a built-in form or
@@ -194,7 +194,7 @@ final class SyntaxSexp
                 return this;
             }
 
-            FusionValue resolved = binding.lookup(env);
+            Object resolved = binding.lookup(env);
             if (resolved instanceof MacroTransformer)
             {
                 // We found a static top-level keyword binding!
@@ -234,7 +234,7 @@ final class SyntaxSexp
             // users unless we open the whole compiler APIs so they can add
             // new "built-in" syntax.
 
-            FusionValue resolved = binding.lookup(env);
+            Object resolved = binding.lookup(env);
             if (resolved instanceof KeywordValue)
             {
                 // We found a static top-level keyword binding!

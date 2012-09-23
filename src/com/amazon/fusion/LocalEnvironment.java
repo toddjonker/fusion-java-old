@@ -38,7 +38,7 @@ final class LocalEnvironment
 
 
         @Override
-        public FusionValue lookup(Environment env)
+        public Object lookup(Environment env)
         {
             return env.lookup(this);
         }
@@ -167,7 +167,7 @@ final class LocalEnvironment
 
 
     @Override
-    public FusionValue lookup(Binding binding)
+    public Object lookup(Binding binding)
     {
         return myEnclosure.lookup(binding);
     }

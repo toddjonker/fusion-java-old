@@ -349,7 +349,7 @@ public class CoreTestCase
         assertEval(expressionIon, expressionIon);
     }
 
-    protected FusionValue eval(String expressionIon)
+    protected Object eval(String expressionIon)
         throws FusionException
     {
         FusionRuntime runtime = runtime();

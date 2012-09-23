@@ -15,7 +15,7 @@ abstract class Stream
 {
     abstract boolean hasNext() throws FusionException;
 
-    abstract FusionValue next() throws ContractFailure, FusionException;
+    abstract Object next() throws ContractFailure, FusionException;
 
     @Override
     public void write(Appendable out) throws IOException

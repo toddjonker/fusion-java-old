@@ -51,9 +51,9 @@ public class ModuleTest
         useTstRepo();
         eval("(use root_module)");
         assertEval(437, "leaf_var");
-        FusionValue rootFn = eval("root_fn");
-        FusionValue midFn  = eval("mid_fn");
-        FusionValue leafFn = eval("leaf_fn");
+        Object rootFn = eval("root_fn");
+        Object midFn  = eval("mid_fn");
+        Object leafFn = eval("leaf_fn");
         assertSame(leafFn, rootFn);
         assertSame(leafFn, midFn);
     }

@@ -465,7 +465,7 @@ final class ModuleKeyword
         }
 
         @Override
-        public FusionValue doEval(Evaluator eval, Store ignored)
+        public Object doEval(Evaluator eval, Store ignored)
             throws FusionException
         {
             // Allocate just enough space for the top-level bindings.

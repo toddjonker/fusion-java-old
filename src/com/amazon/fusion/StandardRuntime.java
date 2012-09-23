@@ -58,7 +58,7 @@ final class StandardRuntime
 
 
     @Override
-    public FusionValue eval(String source, SourceName name)
+    public Object eval(String source, SourceName name)
         throws ExitException, FusionException
     {
         IonReader i = mySystem.newReader(source);
@@ -67,7 +67,7 @@ final class StandardRuntime
 
 
     @Override
-    public FusionValue eval(String source)
+    public Object eval(String source)
         throws ExitException, FusionException
     {
         return eval(source, null);
@@ -75,10 +75,10 @@ final class StandardRuntime
 
 
     @Override
-    public FusionValue eval(IonReader source, SourceName name)
+    public Object eval(IonReader source, SourceName name)
         throws ExitException, FusionException
     {
-        FusionValue result = UNDEF;
+        Object result = UNDEF;
 
         // TODO should work even if already positioned on first value
 
@@ -93,7 +93,7 @@ final class StandardRuntime
 
 
     @Override
-    public FusionValue eval(IonReader source)
+    public Object eval(IonReader source)
         throws ExitException, FusionException
     {
         return eval(source, null);
@@ -111,7 +111,7 @@ final class StandardRuntime
 
 
     @Override
-    public void bind(String name, FusionValue value)
+    public void bind(String name, Object value)
     {
         myNamespace.bind(name, value);
     }

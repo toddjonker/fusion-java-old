@@ -59,7 +59,7 @@ final class Eval
         {
             try
             {
-                FusionValue result = evalFile(myFileName);
+                Object result = evalFile(myFileName);
                 if (result != FusionValue.UNDEF)
                 {
                     FusionValue.write(System.out, result);
@@ -85,7 +85,7 @@ final class Eval
     /**
      * @return not null.
      */
-    private FusionValue evalFile(String fileName)
+    private Object evalFile(String fileName)
         throws FusionException, IOException
     {
         SourceName name = SourceName.forFile(fileName);

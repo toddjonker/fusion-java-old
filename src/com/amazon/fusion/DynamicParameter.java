@@ -9,25 +9,25 @@ package com.amazon.fusion;
 final class DynamicParameter
     extends Procedure
 {
-    private final FusionValue myInitialValue;
+    private final Object myInitialValue;
 
 
-    public DynamicParameter(FusionValue initialValue)
+    public DynamicParameter(Object initialValue)
     {
         super(null);
         myInitialValue = initialValue;
     }
 
 
-    FusionValue getInitialValue()
+    Object getInitialValue()
     {
         return myInitialValue;
     }
 
 
-    FusionValue currentValue(Evaluator eval)
+    Object currentValue(Evaluator eval)
     {
-        FusionValue result = eval.firstContinuationMark(this);
+        Object result = eval.firstContinuationMark(this);
         return (result == null ? myInitialValue : result);
     }
 

@@ -19,7 +19,7 @@ final class Evaluator
     private final IonSystem mySystem;
     private final ModuleRegistry myDefaultRegistry;
     private final Evaluator myOuterFrame;
-    private final Map<FusionValue, FusionValue> myContinuationMarks;
+    private final Map<Object, Object> myContinuationMarks;
 
 
     Evaluator(IonSystem system, ModuleRegistry defaultRegistry)
@@ -35,7 +35,7 @@ final class Evaluator
         mySystem = system;
         myDefaultRegistry = outerBindings.myDefaultRegistry;
         myOuterFrame = outerBindings;
-        myContinuationMarks = new HashMap<FusionValue, FusionValue>();
+        myContinuationMarks = new HashMap<Object, Object>();
     }
 
     IonSystem getSystem()
@@ -125,95 +125,116 @@ final class Evaluator
 
     //========================================================================
 
-    FusionValue newNull(String... annotations)
+    /**
+     * Transforms a Java value to a Fusion value, where possible.
+     * @param javaValue
+     *
+     * @return the injected value, or {@code null} if the value isn't
+     * acceptable to the Fusion runtime.
+     */
+    Object inject(Object javaValue)
+    {
+        if (javaValue instanceof FusionValue)
+        {
+            return javaValue;
+        }
+
+        return null;
+    }
+
+
+    //========================================================================
+
+
+    Object newNull(String... annotations)
     {
         IonValue dom = mySystem.newNull();
         if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newBool(boolean value)
+    Object newBool(boolean value)
     {
         IonValue dom = mySystem.newBool(value);
         return new DomValue(dom);
     }
 
-    FusionValue newBool(boolean value, String... annotations)
-    {
-        IonValue dom = mySystem.newBool(value);
-        if (annotations != null) dom.setTypeAnnotations(annotations);
-        return new DomValue(dom);
-    }
-
-    FusionValue newBool(Boolean value)
-    {
-        IonValue dom = mySystem.newBool(value);
-        return new DomValue(dom);
-    }
-
-    FusionValue newBool(Boolean value, String... annotations)
+    Object newBool(boolean value, String... annotations)
     {
         IonValue dom = mySystem.newBool(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newInt(long value, String... annotations)
+    Object newBool(Boolean value)
+    {
+        IonValue dom = mySystem.newBool(value);
+        return new DomValue(dom);
+    }
+
+    Object newBool(Boolean value, String... annotations)
+    {
+        IonValue dom = mySystem.newBool(value);
+        if (annotations != null) dom.setTypeAnnotations(annotations);
+        return new DomValue(dom);
+    }
+
+    Object newInt(long value, String... annotations)
     {
         IonValue dom = mySystem.newInt(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newInt(BigInteger value, String... annotations)
+    Object newInt(BigInteger value, String... annotations)
     {
         IonValue dom = mySystem.newInt(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newString(String value, String... annotations)
+    Object newString(String value, String... annotations)
     {
         IonValue dom = mySystem.newString(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newSymbol(String value, String... annotations)
+    Object newSymbol(String value, String... annotations)
     {
         IonValue dom = mySystem.newSymbol(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newDecimal(BigDecimal value, String... annotations)
+    Object newDecimal(BigDecimal value, String... annotations)
     {
         IonValue dom = mySystem.newDecimal(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newDecimal(double value, String... annotations)
+    Object newDecimal(double value, String... annotations)
     {
         IonValue dom = mySystem.newDecimal(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newFloat(double value)
+    Object newFloat(double value)
     {
         IonValue dom = mySystem.newFloat(value);
         return new DomValue(dom);
     }
 
-    FusionValue newFloat(double value, String... annotations)
+    Object newFloat(double value, String... annotations)
     {
         IonValue dom = mySystem.newFloat(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newFloat(Double value)
+    Object newFloat(Double value)
     {
         IonValue dom = (value == null
                            ? mySystem.newNullFloat()
@@ -221,7 +242,7 @@ final class Evaluator
         return new DomValue(dom);
     }
 
-    FusionValue newFloat(Double value, String... annotations)
+    Object newFloat(Double value, String... annotations)
     {
         IonValue dom = (value == null
                            ? mySystem.newNullFloat()
@@ -230,21 +251,21 @@ final class Evaluator
         return new DomValue(dom);
     }
 
-    FusionValue newTimestamp(Timestamp value, String... annotations)
+    Object newTimestamp(Timestamp value, String... annotations)
     {
         IonValue dom = mySystem.newTimestamp(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newBlob(byte[] value, String... annotations)
+    Object newBlob(byte[] value, String... annotations)
     {
         IonValue dom = mySystem.newBlob(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
         return new DomValue(dom);
     }
 
-    FusionValue newClob(byte[] value, String... annotations)
+    Object newClob(byte[] value, String... annotations)
     {
         IonValue dom = mySystem.newClob(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
@@ -257,12 +278,15 @@ final class Evaluator
     // It's not full featured: we don't create every continuation frame, so we
     // can't implement the primitive with-continuation-mark.
 
-    FusionValue firstContinuationMark(FusionValue key)
+    Object firstContinuationMark(Object key)
     {
+        // The keys must be hashable and equals-able!
+        assert key instanceof DynamicParameter;
+
         Evaluator e = this;
         while (e.myOuterFrame != null)
         {
-            FusionValue value = e.myContinuationMarks.get(key);
+            Object value = e.myContinuationMarks.get(key);
             if (value != null) return value;
             e = e.myOuterFrame;
         }
@@ -270,20 +294,26 @@ final class Evaluator
     }
 
 
-    Evaluator markedContinuation(FusionValue key, FusionValue mark)
+    Evaluator markedContinuation(Object key, Object mark)
     {
+        // The keys must be hashable and equals-able!
+        assert key instanceof DynamicParameter;
+
         Evaluator innerFrame = new Evaluator(mySystem, this);
         innerFrame.myContinuationMarks.put(key, mark);
         return innerFrame;
     }
 
-    Evaluator markedContinuation(FusionValue[] keys, FusionValue[] marks)
+    Evaluator markedContinuation(Object[] keys, Object[] marks)
     {
         assert keys.length == marks.length;
 
         Evaluator innerFrame = new Evaluator(mySystem, this);
         for (int i = 0; i < keys.length; i++)
         {
+            // The keys must be hashable and equals-able!
+            assert keys[i] instanceof DynamicParameter;
+
             innerFrame.myContinuationMarks.put(keys[i], marks[i]);
         }
         return innerFrame;
@@ -296,7 +326,7 @@ final class Evaluator
     /**
      * Equivalent to Racket's {@code eval} (but incomplete at the moment.)
      */
-    FusionValue prepareAndEvalTopLevelForm(SyntaxValue source, Namespace ns)
+    Object prepareAndEvalTopLevelForm(SyntaxValue source, Namespace ns)
         throws FusionException
     {
         // TODO FUSION-44 handle (module ...) properly
@@ -369,7 +399,7 @@ final class Evaluator
     /**
      * @return not null
      */
-    FusionValue eval(Store store, CompiledForm form)
+    Object eval(Store store, CompiledForm form)
         throws FusionException
     {
         moreEval: while (true)
@@ -404,7 +434,7 @@ final class Evaluator
                     result = tail.myProc.doApply(this, tail.myArgs);
                     continue;
                 }
-                return (FusionValue) result;
+                return result;
             }
         }
     }
@@ -416,7 +446,7 @@ final class Evaluator
      *
      * @return not null
      *
-     * @see #bounceTailCall(Procedure, FusionValue...)
+     * @see #bounceTailCall(Procedure, Object...)
      */
     Object callNonTail(Procedure proc, Object... args)
         throws FusionException
@@ -443,7 +473,7 @@ final class Evaluator
      * Wraps an expression for evaluation in tail position.
      * Must be returned back to this {@link Evaluator} for proper behavior.
      */
-    FusionValue bounceTailForm(Store store, CompiledForm form)
+    Object bounceTailForm(Store store, CompiledForm form)
     {
         return new TailForm(store, form);
     }
@@ -482,7 +512,7 @@ final class Evaluator
      *
      * @return not null
      */
-    FusionValue bounceTailCall(Procedure proc, Object... args)
+    Object bounceTailCall(Procedure proc, Object... args)
         throws FusionException
     {
         return new TailCall(proc, args);

@@ -34,6 +34,6 @@ final class AddProc
 
         invoke(seq, value);
 
-        return args[0]; // Return the original FusionValue, no need to rewrap
+        return args[0]; // Return the original arg, no need to rewrap
     }
 }

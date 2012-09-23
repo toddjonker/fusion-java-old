@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static java.util.Arrays.copyOfRange;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -17,7 +18,7 @@ final class JavaNewProc
         //    "                                                                               |
         super("Instantiates a new Fusion value that's implemented by a Java class. CLASSNAME\n" +
               "is the fully-qualified Java class name. A constructor with the appropriate\n" +
-              "number of FusionValue parameters will be invoked and the result returned.",
+              "number of Object parameters will be invoked and the result returned.",
               "CLASSNAME", "ARG", DOTDOTDOT);
     }
 
@@ -38,23 +39,23 @@ final class JavaNewProc
         }
         else
         {
-            // TODO FUSION-41 this should work for other types
-            FusionValue[] constructorArgs =
-                Arrays.copyOfRange(args, 1, args.length,
-                                   FusionValue[].class);
+            Object[] constructorArgs = copyOfRange(args, 1, args.length);
             Constructor<?> constructor =
                 determineConstructor(klass, constructorArgs);
             result = callConstructor(constructor, constructorArgs);
         }
 
-        try
+        result = eval.inject(result);
+
+        if (result == null)
         {
-            return result;
+            String message =
+                "Java class cannot be injected into the Fusion runtime: " +
+                className;
+            throw contractFailure(message);
         }
-        catch (ClassCastException e)
-        {
-            throw contractFailure("Java class isn't a FusionValue: " + className);
-        }
+
+        return result;
     }
 
 
@@ -94,11 +95,11 @@ final class JavaNewProc
 
 
     private Constructor<?> determineConstructor(Class<?> klass,
-                                                FusionValue[] args)
+                                                Object[] args)
         throws FusionException
     {
         Class<?>[] parameterTypes = new Class[args.length];
-        Arrays.fill(parameterTypes, FusionValue.class);
+        Arrays.fill(parameterTypes, Object.class);
 
         try
         {
@@ -115,18 +116,18 @@ final class JavaNewProc
         {
             String message =
                 "Java class doesn't have a public constructor accepting " +
-                args.length + " FusionValues: " + klass;
+                args.length + " Objects: " + klass;
             throw contractFailure(message);
         }
     }
 
 
-    private Object callConstructor(Constructor<?> constructor, FusionValue[] args)
+    private Object callConstructor(Constructor<?> constructor, Object[] args)
         throws FusionException
     {
         try
         {
-            return constructor.newInstance((Object[]) args);
+            return constructor.newInstance(args);
         }
         catch (IllegalAccessException e)
         {

@@ -30,9 +30,6 @@ public abstract class FusionValue
     }
 
 
-    /** A zero-length array. */
-    public static final FusionValue[] EMPTY_ARRAY = new FusionValue[0];
-
     /** The singular {@code undef} value. */
     public final static FusionValue UNDEF = new Undef();
 
@@ -256,7 +253,7 @@ public abstract class FusionValue
                     out.append(join);
                 }
 
-                FusionValue.write(out, values[i]);
+                write(out, values[i]);
             }
         }
         catch (IOException e)
@@ -284,7 +281,7 @@ public abstract class FusionValue
                 out.append(join);
             }
 
-            FusionValue.write(out, values[i]);
+            write(out, values[i]);
         }
     }
 
@@ -390,7 +387,7 @@ public abstract class FusionValue
                     out.append(join);
                 }
 
-                FusionValue.display(out, values[i]);
+                display(out, values[i]);
             }
         }
         catch (IOException e)
@@ -417,7 +414,7 @@ public abstract class FusionValue
                 out.append(join);
             }
 
-            FusionValue.display(out, values[i]);
+            display(out, values[i]);
         }
     }
 
@@ -425,7 +422,7 @@ public abstract class FusionValue
     {
         for (int i = first; i < values.length; i++)
         {
-            FusionValue.display(out, values[i]);
+            display(out, values[i]);
         }
     }
 

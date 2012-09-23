@@ -144,12 +144,12 @@ final class ParameterizeKeyword
                 }
             }
 
-            FusionValue[] boundValues = new FusionValue[numBindings];
+            Object[] boundValues = new Object[numBindings];
             for (int i = 0; i < numBindings; i++)
             {
                 CompiledForm valueForm = myValueForms[i];
                 Object value = eval.eval(store, valueForm);
-                boundValues[i] = (FusionValue) value;
+                boundValues[i] = value;
             }
 
             Evaluator bodyEval = eval.markedContinuation(parameters, boundValues);

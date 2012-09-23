@@ -14,15 +14,15 @@ final class CrossProductStream
 {
     private final Stream mySource1;
     private final Evaluator eval;
-    private final ArrayList<FusionValue> cloneSource2;
+    private final ArrayList<Object> cloneSource2;
     private int index;
-    private FusionValue first;
+    private Object first;
 
     public CrossProductStream(Evaluator eval, Stream source1, Stream source2)
         throws FusionException
     {
         this.mySource1 = source1;
-        cloneSource2 = new ArrayList<FusionValue>();
+        cloneSource2 = new ArrayList<Object>();
         cloneSourceObjects(source2);
 
         // TODO FUSION-25 stashing of evaluators is incorrect
@@ -45,13 +45,13 @@ final class CrossProductStream
     {
         while (originSource.hasNext())
         {
-            FusionValue fv = originSource.next();
+            Object fv = originSource.next();
             cloneSource2.add(fv);
         }
     }
 
     @Override
-    FusionValue next()
+    Object next()
         throws FusionException
     {
         // TODO unionize results
@@ -62,7 +62,7 @@ final class CrossProductStream
             IonValue ivFirst = FusionValue.toIonValue(first);
             IonValue cloneFirst = ivFirst.clone();
             ionList.add(cloneFirst);
-            FusionValue second = cloneSource2.get(index);
+            Object second = cloneSource2.get(index);
             IonValue ivSecond = FusionValue.toIonValue(second);
             IonValue cloneSecond = ivSecond.clone();
             ionList.add(cloneSecond);

@@ -207,7 +207,7 @@ final class SyntaxSymbol
     }
 
 
-    FusionValue freeIdentifierEqual(Evaluator eval, SyntaxSymbol that)
+    Object freeIdentifierEqual(Evaluator eval, SyntaxSymbol that)
     {
         // Use originalBinding() so that a reference to an exported binding
         // from outside the module is equivalent to its internal binding.
@@ -220,7 +220,7 @@ final class SyntaxSymbol
 
 
     @Override
-    FusionValue quote(Evaluator eval)
+    Object quote(Evaluator eval)
     {
         return eval.newSymbol(myText, getAnnotations());
     }

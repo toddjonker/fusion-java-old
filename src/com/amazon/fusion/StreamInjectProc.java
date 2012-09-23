@@ -19,8 +19,7 @@ final class StreamInjectProc
     {
         checkArityExact(1, args);
 
-        // TODO FUSION-41 support non-FV
-        InjectStream injectStream = new InjectStream( (FusionValue) args[0]);
+        InjectStream injectStream = new InjectStream(args[0]);
 
         return injectStream;
     }

@@ -32,7 +32,7 @@ class Sequences
         }
 
         @Override
-        public FusionValue next()
+        public Object next()
         {
             return new DomValue(myIonIterator.next());
         }

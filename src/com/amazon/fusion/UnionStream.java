@@ -26,7 +26,7 @@ final class UnionStream
     }
 
     @Override
-    FusionValue next()
+    Object next()
         throws ContractFailure, FusionException
     {
 

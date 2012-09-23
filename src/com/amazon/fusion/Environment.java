@@ -5,8 +5,9 @@ package com.amazon.fusion;
 import java.util.Set;
 
 /**
- * Binds identifiers to {@link FusionValue}s.
- * Environments are generally arranged in a hierarchy of lexical scopes.
+ * Maps identifiers to {@link Binding}s.
+ * Environments are compile-time entities, arranged in a hierarchy of lexical
+ * scopes.
  */
 interface Environment
 {
@@ -34,5 +35,5 @@ interface Environment
      *
      * @return the bound value, or null if there's no value.
      */
-    FusionValue lookup(Binding binding);
+    Object lookup(Binding binding);
 }

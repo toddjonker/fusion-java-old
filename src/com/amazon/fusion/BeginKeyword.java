@@ -117,7 +117,7 @@ final class BeginKeyword
         implements CompiledForm
     {
         @Override
-        public FusionValue doEval(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
             return UNDEF;
@@ -136,7 +136,7 @@ final class BeginKeyword
         }
 
         @Override
-        public FusionValue doEval(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
             final int last = myBody.length - 1;

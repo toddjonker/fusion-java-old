@@ -9,9 +9,9 @@ package com.amazon.fusion;
 final class InjectStream
     extends Stream
 {
-    private FusionValue mySource;
+    private Object mySource;
 
-    InjectStream(FusionValue source)
+    InjectStream(Object source)
     {
         this.mySource = source;
     }
@@ -23,10 +23,10 @@ final class InjectStream
     }
 
     @Override
-    FusionValue next()
+    Object next()
         throws ContractFailure
     {
-        FusionValue result = mySource;
+        Object result = mySource;
         if (result == null)
         {
             throw new ContractFailure("Out of arguments to fetch from stream");

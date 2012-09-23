@@ -28,10 +28,13 @@ final class HelpProc
         {
             for (Object arg : myArgs)
             {
-                out.append('\n');
+                if (arg instanceof FusionValue)
+                {
+                    out.append('\n');
 
-                // TODO FUSION-41 support displayHelp for non FusionValue?
-                ((FusionValue)arg).displayHelp(out);
+                    // TODO support displayHelp for non FusionValue?
+                    ((FusionValue) arg).displayHelp(out);
+                }
             }
         }
     }

@@ -27,7 +27,7 @@ class FusionIterator
         myNextProc    = nextProc;
     }
 
-    public FusionIterator(FusionValue hasNextProc, FusionValue nextProc)
+    public FusionIterator(Object hasNextProc, Object nextProc)
     {
         myHasNextProc = (Procedure) hasNextProc;
         myNextProc    = (Procedure) nextProc;

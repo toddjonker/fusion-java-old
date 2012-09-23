@@ -146,7 +146,7 @@ final class ModuleNameResolver
         ModuleRegistry reg = eval.getModuleRegistry();
         if (reg.lookup(id) == null)
         {
-            FusionValue idString = eval.newString(id.internString());
+            Object idString = eval.newString(id.internString());
             Evaluator loadEval =
                 eval.markedContinuation(myCurrentModuleDeclareName, idString);
             ModuleInstance module =
