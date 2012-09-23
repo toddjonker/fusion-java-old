@@ -283,20 +283,6 @@ final class ModuleKeyword
         // See Racket reference 11.9.1
         // http://docs.racket-lang.org/reference/Expanding_Top-Level_Forms.html#%28part._modinfo%29
 
-        ModuleIdentity initialBindingsId;
-        try
-        {
-            SyntaxValue initialBindingsStx = expr.get(2);
-            initialBindingsId =
-                myModuleNameResolver.resolve(eval, initialBindingsStx);
-        }
-        catch (FusionException e)
-        {
-            String message =
-                "Error resolving initial-bindings module: " + e.getMessage();
-            throw new FusionException(message, e);
-        }
-
         ArrayList<SyntaxSexp> provideForms = new ArrayList<SyntaxSexp>();
         ArrayList<CompiledForm> otherForms = new ArrayList<CompiledForm>();
 
@@ -329,7 +315,7 @@ final class ModuleKeyword
         String declaredName = ((SyntaxSymbol) expr.get(1)).stringValue();
         ModuleIdentity id = determineIdentity(eval, declaredName);
 
-        return new CompiledModule(id, initialBindingsId, variableCount,
+        return new CompiledModule(id, variableCount,
                                   providedIdentifiers, otherFormsArray);
     }
 
@@ -446,19 +432,16 @@ final class ModuleKeyword
         implements CompiledForm
     {
         private final ModuleIdentity myId;
-        private final ModuleIdentity myInitialBindingsId;
         private final int            myVariableCount;
         private final SyntaxSymbol[] myProvidedIdentifiers;
         private final CompiledForm[] myBody;
 
         private CompiledModule(ModuleIdentity id,
-                               ModuleIdentity initialBindingsId,
                                int            variableCount,
                                SyntaxSymbol[] providedIdentifiers,
                                CompiledForm[] body)
         {
             myId                  = id;
-            myInitialBindingsId   = initialBindingsId;
             myVariableCount       = variableCount;
             myProvidedIdentifiers = providedIdentifiers;
             myBody                = body;

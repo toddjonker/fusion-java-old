@@ -20,7 +20,7 @@ final class ArityFailure
     private final Object[] myActuals;
 
     /**
-     * @param procName must not be null or empty
+     * @param proc must not be null
      */
     ArityFailure(Procedure proc, int arity, Variability variability,
                  Object... actuals)

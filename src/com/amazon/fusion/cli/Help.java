@@ -115,7 +115,7 @@ class Help
 
         String[] aliases = command.getAliases();
         int len = aliases.length;
-        if ((aliases != null) && (len != 0))
+        if (len != 0)
         {
             out.print(" (");
             for (int i = 0; i < len; i++ )

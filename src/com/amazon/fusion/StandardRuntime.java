@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionValue.UNDEF;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
+import com.amazon.ion.ValueFactory;
 import com.amazon.ion.system.IonSystemBuilder;
 import java.io.File;
 
@@ -21,9 +22,9 @@ final class StandardRuntime
 
     /**
      * WARNING: if the IonSystem is ever configurable, be sure to verify that
-     * {@link FusionValue#ionValue(com.amazon.ion.ValueFactory)} works right!
+     * {@link FusionValue#toIonValue(Object, ValueFactory)} works right!
      *
-     * @see {@link FusionValueTest#testIonValue()}.
+     * @see FusionValueTest#testIonValue()
      */
     StandardRuntime(FusionRuntimeBuilder builder)
     {

@@ -31,7 +31,7 @@ interface Environment
     /**
      * Finds the value bound to a given name.
      *
-     * @param name must not be null or empty.
+     * @param binding must not be null.
      *
      * @return the bound value, or null if there's no value.
      */

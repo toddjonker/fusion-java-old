@@ -142,7 +142,7 @@ final class SyntaxSymbol
     }
 
 
-    /** Not set until {@link #resolve} or {@link #prepare}. */
+    /** Not set until {@link #resolve} or {@link #expand}. */
     Binding getBinding()
     {
         return myBinding;

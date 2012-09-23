@@ -53,9 +53,10 @@ final class FusionUtils
      * Writes a zero-based index as a one-based position like
      * "1st", "12th, or "23rd".
      *
-     * @param out
-     * @param i
-     * @throws IOException
+     * @param out must not be null.
+     * @param i the zero-based index to display.
+     *
+     * @throws IOException if thrown by {@code out}.
      */
     static void writeFriendlyIndex(Appendable out, long i)
         throws IOException
@@ -71,9 +72,8 @@ final class FusionUtils
      * Writes a zero-based index as a one-based position like
      * "1st", "12th, or "23rd".
      *
-     * @param out
-     * @param i
-     * @throws IOException
+     * @param out must not be null.
+     * @param i the zero-based index to display.
      */
     static void writeFriendlyIndex(StringBuilder out, long i)
     {

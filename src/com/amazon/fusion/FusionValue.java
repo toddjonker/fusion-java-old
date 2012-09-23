@@ -560,7 +560,7 @@ public abstract class FusionValue
      * Returns a boolean indicating whether a stream has any more elements to
      * be fetched
      *
-     * @throws {@code ContractFailure} if input value is not a Fusion stream
+     * @throws ContractFailure if input value is not a Fusion stream
      */
     static boolean streamHasNext(Object val)
         throws FusionException
@@ -576,7 +576,7 @@ public abstract class FusionValue
     /**
      * Returns the next element in the stream
      *
-     * @throws {@code ContractFailure} if input value is not a Fusion stream
+     * @throws ContractFailure if input value is not a Fusion stream
      */
     static Object streamNext(Object val)
         throws FusionException
