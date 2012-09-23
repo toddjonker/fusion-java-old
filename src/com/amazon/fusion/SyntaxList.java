@@ -179,7 +179,8 @@ final class SyntaxList
                 childDom = cloneIfContained(childDom);
                 resultDom.add(childDom);
             }
-            return new DomValue(resultDom);
+
+            return eval.inject(resultDom);
         }
     }
 }

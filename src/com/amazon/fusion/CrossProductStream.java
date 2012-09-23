@@ -73,6 +73,6 @@ final class CrossProductStream
         {
             throw new ContractFailure("No more args to fetch from stream");
         }
-        return new DomValue(ionList);
+        return FusionValue.forIonValue(ionList);
     }
 }

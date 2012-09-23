@@ -7,8 +7,10 @@ import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonSystem;
+import com.amazon.ion.IonText;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
+import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -155,12 +157,48 @@ public abstract class FusionValue
     // Static write methods
 
 
+    private static void dispatchWrite(IonWriter out, Object value)
+        throws IOException, ContractFailure
+    {
+        if (value instanceof Writeable)
+        {
+            ((Writeable) value).write(out);
+        }
+        else if (value instanceof IonValue)
+        {
+            ((IonValue)value).writeTo(out);
+        }
+        else
+        {
+            throw new ContractFailure("Cannot write non-Ion data " + value);
+        }
+    }
+
+
+    static void write(IonWriter out, Object value)
+        throws FusionException
+    {
+        try
+        {
+            dispatchWrite(out, value);
+        }
+        catch (IOException e)
+        {
+            throw new FusionException("I/O exception", e);
+        }
+    }
+
+
     private static void dispatchWrite(Appendable out, Object value)
         throws IOException
     {
         if (value instanceof FusionValue)
         {
             ((FusionValue) value).write(out);
+        }
+        else if (value instanceof IonValue)
+        {
+            FusionUtils.writeIon(out, (IonValue) value);
         }
         else
         {
@@ -313,6 +351,19 @@ public abstract class FusionValue
         {
             ((FusionValue) value).display(out);
         }
+        else if (value instanceof IonValue)
+        {
+            IonValue iv = (IonValue) value;
+            if (iv instanceof IonText)
+            {
+                String text = ((IonText) iv).stringValue();
+                out.append(text);
+            }
+            else
+            {
+                FusionUtils.writeIon(out, iv);
+            }
+        }
         else if (value instanceof SyntaxValue)
         {
             ((SyntaxValue) value).write(out);
@@ -463,6 +514,11 @@ public abstract class FusionValue
     @Deprecated
     static IonValue toIonValue(Object value)
     {
+        if (value instanceof IonValue)
+        {
+            return (IonValue) value;
+        }
+
         if (value instanceof DomValue)
         {
             return ((DomValue) value).ionValue();
@@ -480,6 +536,11 @@ public abstract class FusionValue
      */
     static IonValue unsafeCastToIonValue(Object value)
     {
+        if (value instanceof IonValue)
+        {
+            return (IonValue) value;
+        }
+
         return ((DomValue) value).ionValue();
     }
 
@@ -495,6 +556,11 @@ public abstract class FusionValue
      */
     static IonValue castToIonValueMaybe(Object value)
     {
+        if (value instanceof IonValue)
+        {
+            return (IonValue) value;
+        }
+
         if (value instanceof DomValue)
         {
             return ((DomValue) value).ionValue();
@@ -533,6 +599,20 @@ public abstract class FusionValue
     @Deprecated
     public static IonValue toIonValue(Object value, ValueFactory factory)
     {
+        if (value instanceof IonValue)
+        {
+            IonValue iv = (IonValue) value;
+
+            // TODO this isn't really the proper comparison
+            if (iv.getSystem() == factory && iv.getContainer() == null)
+            {
+                return iv;
+            }
+
+            // FIXME this is horrible hack
+            return ((IonSystem) factory).clone(iv);
+        }
+
         if (value instanceof DomValue)
         {
             return ((DomValue) value).ionValue(factory);
@@ -555,6 +635,13 @@ public abstract class FusionValue
     public static IonValue copyToIonValue(Object value, ValueFactory factory)
         throws FusionException
     {
+        if (value instanceof IonValue)
+        {
+            IonValue iv = (IonValue) value;
+            // TODO FUSION-67 ION-125 should be able to clone via ValueFactory
+            return ((IonSystem)factory).clone(iv);
+        }
+
         if (value instanceof DomValue)
         {
             IonValue iv = ((DomValue) value).ionValue();
@@ -576,7 +663,7 @@ public abstract class FusionValue
     static Object forIonValue(IonValue dom)
     {
         dom.getClass();  // Forces a null check
-        return new DomValue(dom);
+        return dom;
     }
 
 
@@ -598,13 +685,10 @@ public abstract class FusionValue
      */
     static String asJavaString(Object value)
     {
-        if (value instanceof DomValue)
+        IonValue iv = castToIonValueMaybe(value);
+        if (iv != null && iv.getType() == IonType.STRING)
         {
-            IonValue iv = ((DomValue) value).ionValue();
-            if (iv.getType() == IonType.STRING)
-            {
-                return ((IonString) iv).stringValue();
-            }
+            return ((IonString) iv).stringValue();
         }
         return null;
     }
@@ -616,13 +700,10 @@ public abstract class FusionValue
      */
     static Boolean asBoolean(Object value)
     {
-        if (value instanceof DomValue)
+        IonValue iv = castToIonValueMaybe(value);
+        if (iv != null && iv.getType() == IonType.BOOL && ! iv.isNullValue())
         {
-            IonValue iv = ((DomValue) value).ionValue();
-            if (iv.getType() == IonType.BOOL && ! iv.isNullValue())
-            {
-                return ((IonBool) iv).booleanValue();
-            }
+            return ((IonBool) iv).booleanValue();
         }
         return null;
     }

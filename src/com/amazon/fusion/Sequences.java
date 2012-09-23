@@ -62,7 +62,7 @@ class Sequences
     static Stream streamFor(IonSequence ionSeq)
         throws FusionException
     {
-        return Sequences.streamFor(new DomValue(ionSeq));
+        return Sequences.streamFor(FusionValue.forIonValue(ionSeq));
     }
 
     static Stream streamFor(Iterator<IonValue> iter)

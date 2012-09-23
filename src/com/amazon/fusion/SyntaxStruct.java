@@ -223,7 +223,7 @@ final class SyntaxStruct
             }
         }
         resultDom.setTypeAnnotations(getAnnotations());
-        return new DomValue(resultDom);
+        return eval.inject(resultDom);
     }
 
 
@@ -431,7 +431,7 @@ final class SyntaxStruct
                 resultDom.add(fieldName, childDom);
             }
 
-            return new DomValue(resultDom);
+            return eval.inject(resultDom);
         }
     }
 }

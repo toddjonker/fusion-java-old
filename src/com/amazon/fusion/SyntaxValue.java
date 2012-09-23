@@ -107,7 +107,9 @@ abstract class SyntaxValue
         throws FusionException
     {
         Object constant = doCompileIonConstant(eval, env);
-        return new CompiledIonConstant(constant);
+        IonValue iv = FusionValue.castToIonValueMaybe(constant);
+        assert iv != null;
+        return new CompiledIonConstant(iv);
     }
 
 
@@ -165,19 +167,11 @@ abstract class SyntaxValue
             myConstant = constant;
         }
 
-        CompiledIonConstant(Object constant)
-        {
-            DomValue dv = (DomValue) constant;
-            IonValue iv = dv.ionValue();
-            iv.makeReadOnly();
-            myConstant = iv;
-        }
-
         @Override
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            return new DomValue(myConstant.clone());
+            return eval.inject(myConstant.clone());
         }
     }
 }

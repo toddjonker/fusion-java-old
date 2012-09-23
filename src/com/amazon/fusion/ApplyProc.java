@@ -41,7 +41,7 @@ final class ApplyProc
 
         for (IonValue dom : rest)
         {
-            procArgs[arg++] = new DomValue(dom);
+            procArgs[arg++] = eval.inject(dom);
         }
         assert arg == procArity;
 

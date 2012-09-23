@@ -58,6 +58,6 @@ final class IonSubseqProc
             result.add(e);
         }
 
-        return new DomValue(result);
+        return eval.inject(result);
     }
 }

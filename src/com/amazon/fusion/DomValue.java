@@ -11,7 +11,10 @@ import java.io.IOException;
 
 /**
  * A {@link FusionValue} that contains an {@link IonValue}.
+ *
+ * @deprecated Should use {@link FusionValue#forIonValue(IonValue)} instead.
  */
+@Deprecated
 final class DomValue
     extends FusionValue
     implements Writeable

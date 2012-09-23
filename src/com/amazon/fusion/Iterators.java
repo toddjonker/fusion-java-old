@@ -15,6 +15,7 @@ final class Iterators
     private Iterators() { }
 
 
+    // TODO specified whether array elements need injecting
     static Object iterate(Object[] array)
     {
         // TODO optimize this
@@ -104,7 +105,7 @@ final class Iterators
         @Override
         public Object next(Evaluator eval)
         {
-            return new DomValue(myIonIterator.next());
+            return eval.inject(myIonIterator.next());
         }
     }
 }

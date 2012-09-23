@@ -41,6 +41,6 @@ final class StreamToIonListProc
         // check if first arg is of stream class
         Stream source = checkStreamArg(0,args);
         IonList ionList = transform(eval, source);
-        return new DomValue(ionList);
+        return eval.inject(ionList);
     }
 }

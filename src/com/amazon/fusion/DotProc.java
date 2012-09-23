@@ -90,7 +90,7 @@ final class DotProc
             }
         }
 
-        return new DomValue(value);
+        return eval.inject(value);
     }
 
 }

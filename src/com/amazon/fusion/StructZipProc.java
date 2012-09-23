@@ -48,6 +48,6 @@ final class StructZipProc
             }
         }
 
-        return new DomValue(result);
+        return eval.inject(result);
     }
 }

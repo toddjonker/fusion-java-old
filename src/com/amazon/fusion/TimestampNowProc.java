@@ -21,7 +21,6 @@ final class TimestampNowProc
 
         IonTimestamp ionTime = eval.getSystem().newCurrentUtcTimestamp();
 
-        return new DomValue(ionTime);
-
+        return eval.inject(ionTime);
     }
 }

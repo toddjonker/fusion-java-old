@@ -35,7 +35,7 @@ final class ReadProc
         if (myInputValues.hasNext())
         {
             IonValue v = myInputValues.next();
-            result = new DomValue(v);
+            result = eval.inject(v);
         }
         else
         {

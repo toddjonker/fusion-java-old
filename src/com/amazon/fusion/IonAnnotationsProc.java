@@ -32,6 +32,7 @@ final class IonAnnotationsProc
         {
             result.add(system.newString(ann));
         }
-        return new DomValue(result);
+
+        return eval.inject(result);
     }
 }

@@ -30,6 +30,6 @@ final class MakeSexpProc
         }
 
         IonSexp sexp = eval.getSystem().newSexp(values);
-        return new DomValue(sexp);
+        return eval.inject(sexp);
     }
 }

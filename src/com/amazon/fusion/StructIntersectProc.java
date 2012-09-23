@@ -42,6 +42,6 @@ final class StructIntersectProc
             }
         }
 
-        return new DomValue(unionStruct);
+        return eval.inject(unionStruct);
     }
 }

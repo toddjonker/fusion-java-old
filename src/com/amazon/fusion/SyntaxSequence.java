@@ -247,7 +247,7 @@ abstract class SyntaxSequence
                 }
             }
         }
-        return new DomValue(seq);
+        return eval.inject(seq);
     }
 
     final void writeContentTo(IonWriter writer, IonType type)

@@ -54,6 +54,6 @@ final class StructPruneProc
             }
         }
 
-        return new DomValue(result);
+        return eval.inject(result);
     }
 }

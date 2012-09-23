@@ -37,6 +37,6 @@ final class StructUnionAllProc
             }
         }
 
-        return new DomValue(result);
+        return eval.inject(result);
     }
 }

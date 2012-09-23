@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonValue;
 
@@ -31,10 +30,9 @@ final class ForEachFieldProc
         for (IonValue field : s)
         {
             String name = field.getFieldName();
-            IonString nameDom = eval.getSystem().newString(name);
 
-            Object nameValue  = new DomValue(nameDom);
-            Object fieldValue = new DomValue(field);
+            Object nameValue  = eval.newString(name);
+            Object fieldValue = eval.inject(field);
 
             eval.callNonTail(proc, nameValue, fieldValue);
         }

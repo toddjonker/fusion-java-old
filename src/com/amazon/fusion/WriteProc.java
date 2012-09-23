@@ -19,12 +19,13 @@ final class WriteProc
 
     @Override
     Object doApply(Evaluator eval, Object[] args)
+        throws FusionException
     {
-        Writeable value = (Writeable) args[0];
-
         IonTextWriterBuilder b = IonTextWriterBuilder.pretty();
         IonWriter writer = b.build((OutputStream) System.out);
-        value.write(writer);
+
+        FusionValue.write(writer, args[0]);
+
         try
         {
             writer.flush();

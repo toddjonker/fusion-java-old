@@ -130,15 +130,15 @@ final class Evaluator
      * It is an error for modifications to be made to the argument instance
      * (or anything it refers to) after it is passed to this method.
      *
-     * @param dom may be null, meaning {@code null.null}.
+     * @param value may be null, meaning {@code null.null}.
      */
-    Object inject(IonValue dom)
+    Object inject(IonValue value)
     {
-        if (dom == null)
+        if (value == null)
         {
-            dom = mySystem.newNull();
+            value = mySystem.newNull();
         }
-        return new DomValue(dom);
+        return value;
     }
 
 
@@ -178,88 +178,88 @@ final class Evaluator
     {
         IonValue dom = mySystem.newNull();
         if (annotations != null) dom.setTypeAnnotations(annotations);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newBool(boolean value)
     {
         IonValue dom = mySystem.newBool(value);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newBool(boolean value, String... annotations)
     {
         IonValue dom = mySystem.newBool(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newBool(Boolean value)
     {
         IonValue dom = mySystem.newBool(value);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newBool(Boolean value, String... annotations)
     {
         IonValue dom = mySystem.newBool(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newInt(long value, String... annotations)
     {
         IonValue dom = mySystem.newInt(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newInt(BigInteger value, String... annotations)
     {
         IonValue dom = mySystem.newInt(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newString(String value, String... annotations)
     {
         IonValue dom = mySystem.newString(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newSymbol(String value, String... annotations)
     {
         IonValue dom = mySystem.newSymbol(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newDecimal(BigDecimal value, String... annotations)
     {
         IonValue dom = mySystem.newDecimal(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newDecimal(double value, String... annotations)
     {
         IonValue dom = mySystem.newDecimal(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newFloat(double value)
     {
         IonValue dom = mySystem.newFloat(value);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newFloat(double value, String... annotations)
     {
         IonValue dom = mySystem.newFloat(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newFloat(Double value)
@@ -267,7 +267,7 @@ final class Evaluator
         IonValue dom = (value == null
                            ? mySystem.newNullFloat()
                            : mySystem.newFloat(value));
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newFloat(Double value, String... annotations)
@@ -276,28 +276,28 @@ final class Evaluator
                            ? mySystem.newNullFloat()
                            : mySystem.newFloat(value));
         if (annotations != null) dom.setTypeAnnotations(annotations);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newTimestamp(Timestamp value, String... annotations)
     {
         IonValue dom = mySystem.newTimestamp(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newBlob(byte[] value, String... annotations)
     {
         IonValue dom = mySystem.newBlob(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     Object newClob(byte[] value, String... annotations)
     {
         IonValue dom = mySystem.newClob(value);
         if (annotations != null) dom.setTypeAnnotations(annotations);
-        return new DomValue(dom);
+        return inject(dom);
     }
 
     //========================================================================

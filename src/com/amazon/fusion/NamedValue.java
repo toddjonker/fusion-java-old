@@ -75,11 +75,11 @@ abstract class NamedValue
     {
         try
         {
-            DomValue dom = (DomValue) arg;
-            IonBool iv = (IonBool) dom.ionValue();
+            IonBool iv = (IonBool) FusionValue.castToIonValueMaybe(arg);
             return iv.booleanValue();
         }
         catch (ClassCastException e) {}
+        catch (NullPointerException e) {}
         catch (NullValueException e) {}
 
         throw contractFailure("Expected true or false: " + arg);
@@ -90,11 +90,11 @@ abstract class NamedValue
     {
         try
         {
-            DomValue dom = (DomValue) arg;
-            IonBool iv = (IonBool) dom.ionValue();
+            IonBool iv = (IonBool) FusionValue.castToIonValueMaybe(arg);
             return iv.booleanValue();
         }
         catch (ClassCastException e) {}
+        catch (NullPointerException e) {}
         catch (NullValueException e) {}
 
         throw new ArgTypeFailure(this, "true or false", argNum, arg);

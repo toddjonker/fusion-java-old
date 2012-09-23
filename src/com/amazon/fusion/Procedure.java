@@ -166,13 +166,12 @@ abstract class Procedure
     {
         try
         {
-            DomValue dom = (DomValue) args[argNum];
-            IonDecimal iv = (IonDecimal) dom.ionValue();
+            IonDecimal iv = (IonDecimal) castToIonValueMaybe(args[argNum]);
             return iv.doubleValue();
         }
         catch (ClassCastException e) {}
         catch (NullValueException e) {}
-        catch (NullPointerException e) {}
+        catch (NullPointerException e) {} // in case toIonValue() ==> null
 
         throw new ArgTypeFailure(this, "double", argNum, args);
     }
@@ -186,8 +185,7 @@ abstract class Procedure
     {
         try
         {
-            DomValue dom = (DomValue) args[argNum];
-            IonInt iv = (IonInt) dom.ionValue();
+            IonInt iv = (IonInt) castToIonValueMaybe(args[argNum]);
             long v = iv.longValue();
             if (Integer.MAX_VALUE < v || v < Integer.MIN_VALUE)
             {
@@ -197,7 +195,7 @@ abstract class Procedure
         }
         catch (ClassCastException e) {}
         catch (NullValueException e) {}
-        catch (NullPointerException e) {}
+        catch (NullPointerException e) {} // in case toIonValue() ==> null
 
         throw new ArgTypeFailure(this, "int", argNum, args);
     }
@@ -208,14 +206,13 @@ abstract class Procedure
     {
         try
         {
-            DomValue dom = (DomValue) args[argNum];
-            IonInt iv = (IonInt) dom.ionValue();
+            IonInt iv = (IonInt) castToIonValueMaybe(args[argNum]);
             // TODO range check
             return iv.longValue();
         }
         catch (ClassCastException e) {}
         catch (NullValueException e) {}
-        catch (NullPointerException e) {}
+        catch (NullPointerException e) {} // in case toIonValue() ==> null
 
         throw new ArgTypeFailure(this, "int", argNum, args);
     }
@@ -235,7 +232,7 @@ abstract class Procedure
             }
         }
         catch (ClassCastException e)   {}
-        catch (NullPointerException e) {}
+        catch (NullPointerException e) {} // in case toIonValue() ==> null
 
         throw new ArgTypeFailure(this, "int", argNum, args);
     }
@@ -245,8 +242,7 @@ abstract class Procedure
     {
         try
         {
-            DomValue dom = (DomValue) args[argNum];
-            IonDecimal iv = (IonDecimal)dom.ionValue();
+            IonDecimal iv = (IonDecimal) castToIonValueMaybe(args[argNum]);
             BigDecimal result = iv.bigDecimalValue();
             if (result != null)
             {
@@ -254,6 +250,7 @@ abstract class Procedure
             }
         }
         catch (ClassCastException e) {}
+        catch (NullPointerException e) {} // in case toIonValue() ==> null
 
         throw new ArgTypeFailure(this, "decimal", argNum, args);
     }
@@ -269,7 +266,8 @@ abstract class Procedure
             {
                 IonInt iv = (IonInt)ionValue;
                 result = iv.bigIntegerValue();
-            } else if (ionValue instanceof IonDecimal)
+            }
+            else if (ionValue instanceof IonDecimal)
             {
                 IonDecimal iv = (IonDecimal)ionValue;
                 result = iv.bigDecimalValue();
@@ -375,9 +373,8 @@ abstract class Procedure
     {
         try
         {
-            DomValue dom = (DomValue) args[argNum];
-            IonValue iv = dom.ionValue();
-            if (nullable || ! iv.isNullValue())
+            IonValue iv = castToIonValueMaybe(args[argNum]);
+            if (iv != null && (nullable || ! iv.isNullValue()))
             {
                 return klass.cast(iv);
             }

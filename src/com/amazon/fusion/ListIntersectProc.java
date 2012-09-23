@@ -54,6 +54,6 @@ final class ListIntersectProc
             }
         }
 
-        return new DomValue(resultList);
+        return eval.inject(resultList);
     }
 }

@@ -67,10 +67,15 @@ final class EvalFileKeyword
                 try
                 {
                     IonString nameDom = (IonString)
-                        ((DomValue) argValue).ionValue();
+                        castToIonValueMaybe(argValue);
                     fileName = nameDom.stringValue();
                 }
                 catch (ClassCastException e)
+                {
+                    throw new ArgTypeFailure(EvalFileKeyword.this, "string",
+                                             0, argValue);
+                }
+                catch (NullPointerException e)
                 {
                     throw new ArgTypeFailure(EvalFileKeyword.this, "string",
                                              0, argValue);

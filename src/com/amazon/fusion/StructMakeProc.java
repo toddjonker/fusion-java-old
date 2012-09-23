@@ -45,6 +45,6 @@ final class StructMakeProc
             result.put(key, value.clone());
         }
 
-        return new DomValue(result);
+        return eval.inject(result);
     }
 }
