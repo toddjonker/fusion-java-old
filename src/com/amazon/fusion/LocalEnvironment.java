@@ -49,6 +49,10 @@ final class LocalEnvironment
             throws FusionException
         {
             int rib = env.getDepth() - myDepth;
+            if (rib == 0)
+            {
+                return new CompiledImmediateVariableReference(myAddress);
+            }
             return new CompiledLocalVariableReference(rib, myAddress);
         }
 
@@ -58,6 +62,10 @@ final class LocalEnvironment
             throws FusionException
         {
             int rib = env.getDepth() - myDepth;
+            if (rib == 0)
+            {
+                return new CompiledImmediateVariableSet(myAddress, valueForm);
+            }
             return new CompiledLocalVariableSet(rib, myAddress, valueForm);
         }
 
@@ -168,7 +176,28 @@ final class LocalEnvironment
     //========================================================================
 
 
-    // TODO optimize for rib zero which should be a very common case.
+    /** Reference to a var in the immediately-enclosing environment. */
+    private static final class CompiledImmediateVariableReference
+        implements CompiledForm
+    {
+        private final int myAddress;
+
+        CompiledImmediateVariableReference(int address)
+        {
+            myAddress = address;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Object result = store.lookup(myAddress);
+            assert result != null
+                : "No value for immediate var @" + myAddress;
+            return result;
+        }
+    }
+
 
     private static final class CompiledLocalVariableReference
         implements CompiledForm
@@ -178,7 +207,7 @@ final class LocalEnvironment
 
         CompiledLocalVariableReference(int rib, int address)
         {
-            assert rib >= 0;
+            assert rib > 0;
             myRib     = rib;
             myAddress = address;
         }
@@ -195,6 +224,29 @@ final class LocalEnvironment
     }
 
 
+    private static final class CompiledImmediateVariableSet
+        implements CompiledForm
+    {
+        private final int          myAddress;
+        private final CompiledForm myValueForm;
+
+        CompiledImmediateVariableSet(int address, CompiledForm valueForm)
+        {
+            myAddress   = address;
+            myValueForm = valueForm;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Object value = eval.eval(store, myValueForm);
+            store.set(myAddress, value);
+            return UNDEF;
+        }
+    }
+
+
     private static final class CompiledLocalVariableSet
         implements CompiledForm
     {
@@ -204,7 +256,7 @@ final class LocalEnvironment
 
         CompiledLocalVariableSet(int rib, int address, CompiledForm valueForm)
         {
-            assert rib >= 0;
+            assert rib > 0;
             myRib       = rib;
             myAddress   = address;
             myValueForm = valueForm;

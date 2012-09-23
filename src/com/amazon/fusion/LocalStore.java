@@ -31,10 +31,22 @@ final class LocalStore
     }
 
     @Override
+    public Object lookup(int address)
+    {
+        return myValues[address];
+    }
+
+    @Override
     public Object lookup(int rib, int address)
     {
         if (rib == 0) return myValues[address];
         return myEnclosure.lookup(rib - 1, address);
+    }
+
+    @Override
+    public void set(int address, Object value)
+    {
+        myValues[address] = value;
     }
 
     @Override
