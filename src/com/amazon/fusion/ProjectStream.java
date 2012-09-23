@@ -33,6 +33,6 @@ final class ProjectStream
         throws FusionException
     {
         FusionValue fv = mySource.next();
-        return eval.applyNonTail(proc, fv);
+        return (FusionValue) eval.callNonTail(proc, fv);
     }
 }

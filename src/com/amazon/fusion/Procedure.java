@@ -95,20 +95,6 @@ abstract class Procedure
         }
     }
 
-    /**
-     * @param args must not be null, and none of its elements may be null.
-     * @return null is a synonym for {@link #UNDEF}.
-     *
-     * @deprecated Subclasses should implement
-     * {@link #doApply(Evaluator, Object[])} instead
-     */
-    @Deprecated
-    Object invoke(Evaluator eval, FusionValue[] args)
-        throws FusionException
-    {
-        return doApply(eval, args);
-    }
-
 
     /**
      * Executes a procedure's logic; <b>DO NOT CALL DIRECTLY!</b>
@@ -116,13 +102,8 @@ abstract class Procedure
      * @param args must not be null, and none of its elements may be null.
      * @return null is a synonym for {@link #UNDEF}.
      */
-    Object doApply(Evaluator eval, Object[] args)
-        throws FusionException
-    {
-        FusionValue[] fArgs =
-            Arrays.copyOf(args, args.length, FusionValue[].class);
-        return invoke(eval, fArgs);
-    }
+    abstract Object doApply(Evaluator eval, Object[] args)
+        throws FusionException;
 
 
     //========================================================================
