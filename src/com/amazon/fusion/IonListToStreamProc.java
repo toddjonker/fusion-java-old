@@ -9,21 +9,20 @@ import com.amazon.ion.IonList;
  * Class serves as a wrapper for {@link Sequences}.streamFor()
  */
 final class IonListToStreamProc
-    extends Procedure
+    extends Procedure1
 {
     IonListToStreamProc()
     {
-        super("Converts an ion list to a stream");
+        super("Converts a LIST to a stream",
+              "list");
     }
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        checkArityExact(1, args);
-
         // check if first arg is of IonList class
-        IonList ionList = checkListArg(0, args);
+        IonList ionList = checkListArg(0, arg);
 
         return Sequences.streamFor(ionList);
     }

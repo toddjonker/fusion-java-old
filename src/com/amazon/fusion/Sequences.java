@@ -13,14 +13,14 @@ class Sequences
 {
     private static final class DomStream extends Stream
     {
-        private final Iterator<IonValue> myIonIterator;
+        private final Iterator<?> myIonIterator;
 
         DomStream(IonSequence seq)
         {
             myIonIterator = seq.iterator();
         }
 
-        DomStream(Iterator<IonValue> iter)
+        DomStream(Iterator<?> iter)
         {
             myIonIterator = iter;
         }
@@ -34,7 +34,8 @@ class Sequences
         @Override
         public Object next()
         {
-            return new DomValue(myIonIterator.next());
+            Object next = myIonIterator.next();
+            return new DomValue((IonValue) next);
         }
 
     }
@@ -48,7 +49,8 @@ class Sequences
         {
             return new DomStream((IonSequence) iv);
         }
-        else if (value instanceof Stream)
+
+        if (value instanceof Stream)
         {
             return (Stream)value;
         }

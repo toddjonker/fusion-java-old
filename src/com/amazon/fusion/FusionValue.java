@@ -468,6 +468,20 @@ public abstract class FusionValue
         }
     }
 
+
+    static IonValue toIonValue(Object[] value, ValueFactory factory)
+    {
+        int len = value.length;
+        IonValue[] ions = new IonValue[len];
+        for (int i = 0; i < len; i++)
+        {
+            ions[i] = toIonValue(value[i], factory);
+        }
+
+        return factory.newList(ions);
+    }
+
+
     /**
      * Returns the DOM representation of a value, if its type falls within
      * the Ion type system. The {@link IonValue} will use the given factory
@@ -484,11 +498,22 @@ public abstract class FusionValue
         {
             return ((DomValue) value).ionValue(factory);
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
+
+
+    /**
+     * EXPERIMENTAL - better to use {@link Evaluator#inject(IonValue)}.
+     *
+     * @param dom must not be null.
+     */
+    static Object forIonValue(IonValue dom)
+    {
+        dom.getClass();  // Forces a null check
+        return dom;
+    }
+
 
     static IonType ionType(Object value)
     {

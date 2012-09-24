@@ -126,20 +126,48 @@ final class Evaluator
     //========================================================================
 
     /**
-     * Transforms a Java value to a Fusion value, where possible.
-     * @param javaValue
+     * Injects an Ion DOM into the equivalent Fusion runtime objects.
+     * It is an error for modifications to be made to the argument instance
+     * (or anything it refers to) after it is passed to this method.
      *
-     * @return the injected value, or {@code null} if the value isn't
-     * acceptable to the Fusion runtime.
+     * @param dom may be null, meaning {@code null.null}.
+     */
+    Object inject(IonValue dom)
+    {
+        if (dom == null)
+        {
+            dom = mySystem.newNull();
+        }
+        return new DomValue(dom);
+    }
+
+
+    /**
+     * Transforms a Java value to a Fusion value, where possible.
+     * It is an error for modifications to be made to the argument instance
+     * (or anything it refers to) after it is passed to this method.
+     *
+     * @param javaValue may be null, meaning {@code null.null}.
+     *
+     * @return the injected value.
+     *
+     * @throws IllegalArgumentException if the value isn't acceptable to the
+     * Fusion runtime.
      */
     Object inject(Object javaValue)
     {
+        if (javaValue == null || javaValue instanceof IonValue)
+        {
+            return inject((IonValue) javaValue);
+        }
+
         if (javaValue instanceof FusionValue)
         {
             return javaValue;
         }
 
-        return null;
+        String message = "Unacceptable type: " + javaValue.getClass();
+        throw new IllegalArgumentException(message);
     }
 
 

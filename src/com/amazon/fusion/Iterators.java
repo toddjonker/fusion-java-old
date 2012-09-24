@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonValue;
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -12,6 +13,13 @@ import java.util.Iterator;
 final class Iterators
 {
     private Iterators() { }
+
+
+    static Object iterate(Object[] array)
+    {
+        // TODO optimize this
+        return new IteratorAdaptor(Arrays.asList(array).iterator());
+    }
 
 
     /**
@@ -52,6 +60,31 @@ final class Iterators
     }
 
 
+    private static final class IteratorAdaptor
+        extends AbstractIterator
+    {
+        private final Iterator<?> myIterator;
+
+        IteratorAdaptor(Iterator<?> iter)
+        {
+            myIterator = iter;
+        }
+
+        @Override
+        public boolean hasNext(Evaluator eval)
+        {
+            return myIterator.hasNext();
+        }
+
+        @Override
+        public Object next(Evaluator eval)
+        {
+            return eval.inject(myIterator.next());
+        }
+    }
+
+
+    /** Custom class avoid some dynamic dispatch. */
     private static final class IonIteratorAdaptor
         extends AbstractIterator
     {

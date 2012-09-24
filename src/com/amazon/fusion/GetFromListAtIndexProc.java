@@ -24,10 +24,10 @@ final class GetFromListAtIndexProc
 
         IonList ionList = checkListArg(0, args);
 
-        int index = (int)checkLongArg(1, args);
+        int index = checkIntArg(1, args);
 
         IonValue ionValue = ionList.get(index);
 
-        return new DomValue(ionValue);
+        return eval.inject(ionValue);
     }
 }
