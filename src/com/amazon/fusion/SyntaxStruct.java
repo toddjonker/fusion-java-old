@@ -421,6 +421,10 @@ final class SyntaxStruct
                 CompiledForm form = myFieldForms[i];
                 Object childValue = eval.eval(store, form);
                 IonValue childDom = FusionValue.castToIonValueMaybe(childValue);
+                if (childDom == null)
+                {
+                    throw new ResultFailure("struct literal", "Ion data", i, childValue);
+                }
                 childDom = cloneIfContained(childDom);
 
                 String fieldName = myFieldNames[i];

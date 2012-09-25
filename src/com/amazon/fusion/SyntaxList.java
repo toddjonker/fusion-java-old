@@ -172,6 +172,10 @@ final class SyntaxList
             {
                 Object childValue = eval.eval(store, myChildForms[i]);
                 IonValue childDom = FusionValue.castToIonValueMaybe(childValue);
+                if (childDom == null)
+                {
+                    throw new ResultFailure("list literal", "Ion data", i, childValue);
+                }
                 childDom = cloneIfContained(childDom);
                 resultDom.add(childDom);
             }

@@ -70,6 +70,14 @@ public class LiteralEvalTest
     }
 
     @Test
+    public void testBadListLiteral()
+        throws Exception
+    {
+        expectContractFailure("[undef]");
+    }
+
+
+    @Test
     public void testStruct()
         throws Exception
     {
@@ -87,6 +95,14 @@ public class LiteralEvalTest
         eval("(define x 33)");
         assertEval("{a:{b:33}}", "(z)");
     }
+
+    @Test
+    public void testBadStructLiteral()
+        throws Exception
+    {
+        expectContractFailure("{f:undef}");
+    }
+
 
     @Test
     public void testQuote()
