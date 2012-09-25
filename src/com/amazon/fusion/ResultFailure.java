@@ -18,30 +18,50 @@ final class ResultFailure
     private final Object[]   myActuals;
 
 
-    ResultFailure(String name, String expectation, Object actuals)
+
+    /**
+     *
+     * @param name must not be null.
+     * @param badPos the zero-based index of the problematic value.
+     *   -1 means a specific position isn't implicated.
+     * @param actual must not be null.
+     */
+    ResultFailure(String name, String expectation,
+                  int badPos, Object actual)
     {
         super("result failure");
-        assert name != null && actuals != null;
+        assert name != null && actual != null;
 
         myName = name;
         myExpectation = expectation;
-        myBadPos = -1;
-        myActuals = new Object[]{ actuals };
+        myBadPos = badPos;
+        myActuals = new Object[]{ actual };
+    }
+
+    /**
+     *
+     * @param name must not be null.
+     * @param actual must not be null.
+     */
+    ResultFailure(String name, String expectation, Object actual)
+    {
+        this(name, expectation, -1, actual);
     }
 
     /**
      *
      * @param name
      * @param expectation
-     * @param badPos is zero-based
-     * @param actuals
+     * @param badPos the zero-based index of the problematic value.
+     *   -1 means a specific position isn't implicated.
+     * @param actuals must not be null or zero-length.
      */
     ResultFailure(String name, String expectation,
                   int badPos, Object[] actuals)
     {
         super("result failure");
         assert name != null && actuals.length != 0;
-        assert 0 <= badPos && badPos < actuals.length;
+        assert badPos < actuals.length;
 
         myName = name;
         myExpectation = expectation;
@@ -59,19 +79,21 @@ final class ResultFailure
         b.append(myName);
         b.append(" expects ");
         b.append(myExpectation);
-        b.append(", received ");
-        write(b, myActuals[actualsLen == 1 ? 0 : myBadPos]);
 
-        if (0 <= myBadPos && 1 < actualsLen)
+        if (0 <= myBadPos)
         {
-            b.append("\n as ");
+            b.append(" as ");
             writeFriendlyIndex(b, myBadPos);
-            b.append(" result");
+            b.append(" result, given ");
+            write(b, myActuals[actualsLen == 1 ? 0 : myBadPos]);
         }
 
-        if (1 < actualsLen)
+        if (actualsLen != 1 || myBadPos < 0)
         {
-            b.append("\n Other results were:");
+            b.append(myBadPos < 0
+                     ? "\nResults were:"
+                     : "\nOther results were:");
+
             for (int i = 0; i < actualsLen; i++)
             {
                 if (i != myBadPos)

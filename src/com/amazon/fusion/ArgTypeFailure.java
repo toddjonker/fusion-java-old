@@ -19,8 +19,8 @@ final class ArgTypeFailure
 
 
     /**
-     * @param badPos the zero-based index of the problematic argument.
-     *   -1 means a specific arg isn't implicated.
+     * @param badPos the zero-based index of the problematic value.
+     *   -1 means a specific position isn't implicated.
      * @param actuals must not be null or zero-length.
      */
     ArgTypeFailure(String name, String expectation,
@@ -37,8 +37,8 @@ final class ArgTypeFailure
     }
 
     /**
-     * @param badPos the zero-based index of the problematic argument.
-     *   -1 means a specific arg isn't implicated.
+     * @param badPos the zero-based index of the problematic value.
+     *   -1 means a specific position isn't implicated.
      * @param actuals must not be null or zero-length.
      */
     ArgTypeFailure(NamedValue name, String expectation,
@@ -50,16 +50,17 @@ final class ArgTypeFailure
     /**
      * @param badPos the index of the problematic argument.
      *   -1 means a specific arg isn't implicated.
+     * @param actual must not be null.
      */
     ArgTypeFailure(NamedValue name, String expectation,
-                   int badPos, Object actuals)
+                   int badPos, Object actual)
     {
         super("arg type failure");
-        assert name != null && actuals != null;
+        assert name != null && actual != null;
         myName = name.identify();
         myExpectation = expectation;
         myBadPos = badPos;
-        myActuals = new Object[]{ actuals };
+        myActuals = new Object[]{ actual };
     }
 
 
