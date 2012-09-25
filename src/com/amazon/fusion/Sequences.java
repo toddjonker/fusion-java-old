@@ -35,16 +35,16 @@ class Sequences
         public Object next()
         {
             Object next = myIonIterator.next();
-            return new DomValue((IonValue) next);
+            return FusionValue.forIonValue((IonValue) next);
         }
 
     }
 
 
     static Stream streamFor(Object value)
-        throws ContractFailure
+        throws FusionException
     {
-        IonValue iv = FusionValue.toIonValue(value);
+        IonValue iv = FusionValue.castToIonValueMaybe(value);
         if (iv instanceof IonSequence)
         {
             return new DomStream((IonSequence) iv);
@@ -60,7 +60,7 @@ class Sequences
     }
 
     static Stream streamFor(IonSequence ionSeq)
-        throws ContractFailure
+        throws FusionException
     {
         return Sequences.streamFor(new DomValue(ionSeq));
     }

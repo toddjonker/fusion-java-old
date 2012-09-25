@@ -45,7 +45,7 @@ final class DomValue
             return myDom;
         }
 
-        // FIXME this is horrible hack
+        // TODO FUSION-67 ION-125 should be able to clone via ValueFactory
         return ((IonSystem)factory).clone(myDom);
     }
 

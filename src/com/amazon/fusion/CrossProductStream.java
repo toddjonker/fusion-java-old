@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonList;
+import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import java.util.ArrayList;
 
@@ -54,18 +55,18 @@ final class CrossProductStream
     Object next()
         throws FusionException
     {
+        IonSystem system = eval.getSystem();
+
         // TODO unionize results
-        IonList ionList = eval.getSystem().newEmptyList();
+        IonList ionList = system.newEmptyList();
         if (hasNext())
         {
             first = (index > 0) ? first : mySource1.next();
-            IonValue ivFirst = FusionValue.toIonValue(first);
-            IonValue cloneFirst = ivFirst.clone();
-            ionList.add(cloneFirst);
+            IonValue ivFirst = FusionValue.copyToIonValue(first, system);
+            ionList.add(ivFirst);
             Object second = cloneSource2.get(index);
-            IonValue ivSecond = FusionValue.toIonValue(second);
-            IonValue cloneSecond = ivSecond.clone();
-            ionList.add(cloneSecond);
+            IonValue ivSecond = FusionValue.copyToIonValue(second, system);
+            ionList.add(ivSecond);
             index = ((index+1) == cloneSource2.size()) ? 0 : index+1;
         }
         else

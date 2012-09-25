@@ -223,7 +223,7 @@ abstract class Procedure
     BigInteger checkBigIntArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
-        IonValue dom = FusionValue.toIonValue(args[argNum]);
+        IonValue dom = FusionValue.castToIonValueMaybe(args[argNum]);
 
         try
         {
@@ -263,7 +263,7 @@ abstract class Procedure
     {
         try
         {
-            IonValue ionValue = FusionValue.toIonValue(args[argNum]);
+            IonValue ionValue = FusionValue.castToIonValueMaybe(args[argNum]);
             Number result = null;
             if (ionValue instanceof IonInt)
             {

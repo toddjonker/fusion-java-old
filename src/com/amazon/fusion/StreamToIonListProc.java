@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonList;
+import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 
 /**
@@ -20,13 +21,13 @@ final class StreamToIonListProc
     static IonList transform(Evaluator eval, Stream stream)
         throws ContractFailure, FusionException
     {
-        IonList ionList = eval.getSystem().newEmptyList();
+        IonSystem system = eval.getSystem();
+        IonList ionList = system.newEmptyList();
         while (stream.hasNext())
         {
             Object fv = stream.next();
-            IonValue iv = FusionValue.toIonValue(fv);
-            IonValue iv2 = FusionUtils.cloneIfContained(iv);
-            ionList.add(iv2);
+            IonValue iv = FusionValue.copyToIonValue(fv, system);
+            ionList.add(iv);
         }
         return ionList;
     }

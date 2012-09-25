@@ -187,6 +187,7 @@ final class SyntaxStruct
 
     @Override
     Object quote(Evaluator eval)
+        throws FusionException
     {
         // This should only be called at runtime, after wraps are pushed.
         assert myWraps == null;
@@ -227,9 +228,10 @@ final class SyntaxStruct
 
 
     private IonValue quoteChild(Evaluator eval, SyntaxValue child)
+        throws FusionException
     {
         Object childValue = child.quote(eval);
-        return FusionValue.toIonValue(childValue);
+        return FusionValue.unsafeCastToIonValue(childValue);
     }
 
 
@@ -418,7 +420,7 @@ final class SyntaxStruct
             {
                 CompiledForm form = myFieldForms[i];
                 Object childValue = eval.eval(store, form);
-                IonValue childDom = FusionValue.toIonValue(childValue);
+                IonValue childDom = FusionValue.castToIonValueMaybe(childValue);
                 childDom = cloneIfContained(childDom);
 
                 String fieldName = myFieldNames[i];

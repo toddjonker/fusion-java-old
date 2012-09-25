@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
@@ -152,7 +151,7 @@ public class CoreTestCase
         for (String expr : allTypeExpressions())
         {
             Object v = eval(expr);
-            IonValue dom = FusionValue.toIonValue(v);
+            IonValue dom = FusionValue.castToIonValueMaybe(v);
             if (dom == null || ! klass.isInstance(dom))
             {
                 exprs.add(expr);
@@ -203,28 +202,10 @@ public class CoreTestCase
     //========================================================================
 
 
-    <T extends IonValue> T checkIon(Class<T> ionClass, Object actual)
-    {
-        IonValue iv = FusionValue.toIonValue(actual);
-        if (! ionClass.isInstance(iv))
-        {
-            fail("Not " + ionClass.getSimpleName()  + ": " + actual);
-        }
-        return ionClass.cast(iv);
-    }
-
-
-    void checkInt(int expected, Object actual)
-    {
-        IonInt v = checkIon(IonInt.class, actual);
-        assertEquals(expected, v.intValue());
-    }
-
-
     void checkString(String expected, Object actual)
     {
-        IonString v = checkIon(IonString.class, actual);
-        assertEquals(expected, v.stringValue());
+        String actualString = FusionValue.asJavaString(actual);
+        assertEquals(expected, actualString);
     }
 
 
@@ -236,7 +217,7 @@ public class CoreTestCase
     {
         FusionRuntime runtime = runtime();
         Object fv = runtime.eval(source);
-        IonValue iv = FusionValue.toIonValue(fv);
+        IonValue iv = FusionValue.castToIonValueMaybe(fv);
         if (iv == null)
         {
             Assert.fail("Result isn't ion: " + fv + "\nSource: " + source);
@@ -288,7 +269,7 @@ public class CoreTestCase
     {
         FusionRuntime runtime = runtime();
         Object fv = runtime.eval(expressionIon);
-        IonValue observed = FusionValue.toIonValue(fv);
+        IonValue observed = FusionValue.castToIonValueMaybe(fv);
         if (observed instanceof IonInt)
         {
             IonInt iObsExp = (IonInt)observed;
@@ -307,7 +288,7 @@ public class CoreTestCase
     {
         FusionRuntime runtime = runtime();
         Object fv = runtime.eval(expressionIon);
-        IonValue observed = FusionValue.toIonValue(fv);
+        IonValue observed = FusionValue.castToIonValueMaybe(fv);
         if (observed instanceof IonDecimal)
         {
             IonDecimal iObsExp = (IonDecimal)observed;
@@ -332,7 +313,7 @@ public class CoreTestCase
         throws FusionException
     {
         Object fv = eval(expressionIon);
-        IonValue iv = FusionValue.toIonValue(fv);
+        IonValue iv = FusionValue.castToIonValueMaybe(fv);
         if (iv instanceof IonString)
         {
             IonString is = (IonString)iv;
@@ -369,7 +350,7 @@ public class CoreTestCase
         throws FusionException
     {
         Object fv = eval(expressionIon);
-        IonValue iv = FusionValue.toIonValue(fv);
+        IonValue iv = FusionValue.castToIonValueMaybe(fv);
         assertNotNull("Result isn't Ion", iv);
         return iv;
     }

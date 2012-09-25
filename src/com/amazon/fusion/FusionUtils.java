@@ -20,6 +20,9 @@ final class FusionUtils
     static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 
+    /**
+     * @param value must not be null.
+     */
     static IonValue cloneIfContained(IonValue value)
     {
         if (value.getContainer() != null)

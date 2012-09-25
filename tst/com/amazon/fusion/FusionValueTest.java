@@ -16,18 +16,24 @@ public class FusionValueTest
     // the FusionRuntime's IonSystem.
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testIonValue()
         throws Exception
     {
         Object fv = eval("12");
         IonValue iv = FusionValue.toIonValue(fv);
         assertEquals(12, ((IonInt)iv).intValue());
+        iv = FusionValue.castToIonValueMaybe(fv);
+        assertEquals(12, ((IonInt)iv).intValue());
         iv = FusionValue.toIonValue(fv, system());
+        assertEquals(12, ((IonInt)iv).intValue());
+        iv = FusionValue.copyToIonValue(fv, system());
         assertEquals(12, ((IonInt)iv).intValue());
 
         fv = eval("(lambda () 12)");
         assertSame(null, FusionValue.toIonValue(fv));
         assertSame(null, FusionValue.toIonValue(fv, system()));
+        assertSame(null, FusionValue.castToIonValueMaybe(fv));
 
         fv = eval("(. [12] 0)");
         iv = FusionValue.toIonValue(fv);

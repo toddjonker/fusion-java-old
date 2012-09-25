@@ -28,7 +28,7 @@ final class FloorProc
     {
         checkArityExact(1,args);
 
-        IonValue arg = FusionValue.toIonValue(args[0]);
+        IonValue arg = FusionValue.castToIonValueMaybe(args[0]);
 
         if (arg instanceof IonInt)
         {

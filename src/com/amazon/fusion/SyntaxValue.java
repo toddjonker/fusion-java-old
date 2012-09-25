@@ -120,7 +120,8 @@ abstract class SyntaxValue
     /**
      * Transform this syntax into plain values.
      */
-    abstract Object quote(Evaluator eval);
+    abstract Object quote(Evaluator eval)
+        throws FusionException;
 
     @Override
     void write(Appendable out)

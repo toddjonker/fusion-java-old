@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionUtils.cloneIfContained;
-
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
@@ -172,7 +171,7 @@ final class SyntaxList
             for (int i = 0; i < len; i++)
             {
                 Object childValue = eval.eval(store, myChildForms[i]);
-                IonValue childDom = FusionValue.toIonValue(childValue);
+                IonValue childDom = FusionValue.castToIonValueMaybe(childValue);
                 childDom = cloneIfContained(childDom);
                 resultDom.add(childDom);
             }

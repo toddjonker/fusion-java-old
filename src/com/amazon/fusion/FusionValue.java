@@ -3,8 +3,10 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonBool;
+import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonString;
+import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
@@ -455,7 +457,10 @@ public abstract class FusionValue
      * different needs, some using a lazy dom others with full materialization.
      *
      * @return null if the value's type isn't an Ion type.
+     *
+     * @deprecated Renamed to {@link #castToIonValueMaybe(Object)}
      */
+    @Deprecated
     static IonValue toIonValue(Object value)
     {
         if (value instanceof DomValue)
@@ -469,13 +474,44 @@ public abstract class FusionValue
     }
 
 
-    static IonValue toIonValue(Object[] value, ValueFactory factory)
+    /**
+     * @param value must not be null
+     * @return not null.
+     */
+    static IonValue unsafeCastToIonValue(Object value)
+    {
+        return ((DomValue) value).ionValue();
+    }
+
+
+    /**
+     * Performs an immediate cast (not conversion) of the given Fusion value
+     * to an IonValue. The result may have a container!
+     * <p>
+     * This isn't public because I'm not convinced that the runtime should have
+     * IonValues at all.
+     *
+     * @return null if the value's type isn't an Ion type.
+     */
+    static IonValue castToIonValueMaybe(Object value)
+    {
+        if (value instanceof DomValue)
+        {
+            return ((DomValue) value).ionValue();
+        }
+
+        return null;
+    }
+
+
+    static IonList copyToIonList(Object[] value, ValueFactory factory)
+        throws FusionException
     {
         int len = value.length;
         IonValue[] ions = new IonValue[len];
         for (int i = 0; i < len; i++)
         {
-            ions[i] = toIonValue(value[i], factory);
+            ions[i] = copyToIonValue(value[i], factory);
         }
 
         return factory.newList(ions);
@@ -491,7 +527,10 @@ public abstract class FusionValue
      *
      * @return null if the value's type isn't an Ion type (for example,
      * Fusion procedures).
+     *
+     * @deprecated Replaced with {@link #copyToIonValue(Object, ValueFactory)}.
      */
+    @Deprecated
     public static IonValue toIonValue(Object value, ValueFactory factory)
     {
         if (value instanceof DomValue)
@@ -504,6 +543,32 @@ public abstract class FusionValue
 
 
     /**
+     * Returns a new {@link IonValue} representation of a Fusion value,
+     * if its type falls within the Ion type system.
+     * The {@link IonValue} will use the given factory and will not have a
+     * container.
+     *
+     * @param factory must not be null.
+     *
+     * @throws FusionException if the value cannot be converted to Ion.
+     */
+    public static IonValue copyToIonValue(Object value, ValueFactory factory)
+        throws FusionException
+    {
+        if (value instanceof DomValue)
+        {
+            IonValue iv = ((DomValue) value).ionValue();
+            // TODO FUSION-67 ION-125 should be able to clone via ValueFactory
+            return ((IonSystem)factory).clone(iv);
+        }
+
+        String message =
+            "Value is not convertable to Ion: " + writeToString(value);
+        throw new ContractFailure(message);
+    }
+
+
+    /**
      * EXPERIMENTAL - better to use {@link Evaluator#inject(IonValue)}.
      *
      * @param dom must not be null.
@@ -511,19 +576,19 @@ public abstract class FusionValue
     static Object forIonValue(IonValue dom)
     {
         dom.getClass();  // Forces a null check
-        return dom;
+        return new DomValue(dom);
     }
 
 
     static IonType ionType(Object value)
     {
-        IonValue iv = toIonValue(value);
+        IonValue iv = castToIonValueMaybe(value);
         return (iv != null ? iv.getType() : null);
     }
 
     static boolean isAnyIonNull(Object value)
     {
-        IonValue iv = toIonValue(value);
+        IonValue iv = castToIonValueMaybe(value);
         return (iv != null ? iv.isNullValue() : false);
     }
 
@@ -562,12 +627,14 @@ public abstract class FusionValue
         return null;
     }
 
+
+
     /**
      * Returns all the elements in the list in stream form. Original
      * order is maintained.
      */
     static Object streamFor(IonSequence ionSeq)
-        throws ContractFailure
+        throws FusionException
     {
         return Sequences.streamFor(ionSeq);
     }

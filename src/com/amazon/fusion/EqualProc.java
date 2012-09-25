@@ -29,8 +29,8 @@ final class EqualProc
     {
         checkArityExact(args);
 
-        IonValue leftVal  = FusionValue.toIonValue(args[0]);
-        IonValue rightVal = FusionValue.toIonValue(args[1]);
+        IonValue leftVal  = FusionValue.castToIonValueMaybe(args[0]);
+        IonValue rightVal = FusionValue.castToIonValueMaybe(args[1]);
         boolean result = false;
         int compareVal = 0;
 

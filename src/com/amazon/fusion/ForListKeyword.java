@@ -155,7 +155,7 @@ final class ForListKeyword
                     }
 
                     Object nextResult = eval.eval(store, myBody);
-                    IonValue value = toIonValue(nextResult);
+                    IonValue value = castToIonValueMaybe(nextResult);
                     if (value != null)
                     {
                         AddProc.invoke(result, value);

@@ -24,13 +24,13 @@ final class ContainsProc
     }
 
     @Override
-    Object doApply(Evaluator eval, Object[] arg)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
-        checkArityExact(arg);
+        checkArityExact(args);
 
-        IonContainer thisList = checkContainerArg(0, arg);
-        IonValue test = FusionValue.toIonValue(arg[1]);
+        IonContainer thisList = checkContainerArg(0, args);
+        IonValue test = checkIonArg(1, args);
 
         boolean contained = false;
 
