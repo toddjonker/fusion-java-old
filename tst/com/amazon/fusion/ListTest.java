@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static org.junit.Assert.assertEquals;
 import com.amazon.ion.IonList;
 import org.junit.Assert;
 import org.junit.Before;
@@ -222,6 +223,15 @@ public class ListTest
         expectArgTypeFailure("(subseq lgList 8886 6666)", 1);
         expectArgTypeFailure("(subseq smList 5 8)", 2);
         expectArgTypeFailure("(subseq lgList 5555 88888)", 2);
+
+        // Test conversion of long to int
+        long big = 4294967298L;
+        assertEquals(2, (int)big);
+        expectArgTypeFailure("(subseq smList " + big + " " + (big + 1) + ")", 1);
+
+        big = -9223372036854775806L;
+        assertEquals(2, (int)big);
+        expectArgTypeFailure("(subseq smList " + big + " " + (big + 1) + ")", 1);
     }
 
 

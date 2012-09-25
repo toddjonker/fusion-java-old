@@ -189,7 +189,7 @@ abstract class Procedure
             DomValue dom = (DomValue) args[argNum];
             IonInt iv = (IonInt) dom.ionValue();
             long v = iv.longValue();
-            if (Integer.MAX_VALUE < v)
+            if (Integer.MAX_VALUE < v || v < Integer.MIN_VALUE)
             {
                 throw new ArgTypeFailure(this, "32-bit int", argNum, args);
             }
