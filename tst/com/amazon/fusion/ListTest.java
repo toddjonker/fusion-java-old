@@ -278,25 +278,8 @@ public class ListTest
 
     }
 
-    @Test
-    public void testListIntersect()
-        throws Exception
-    {
-        assertEval("[3]", "(list_intersect [3,5] [3,4])");
-        assertEval("[3]", "(list_intersect [5,3] [3,4])");
-        assertEval("[]",  "(list_intersect [[[]]] [[]])");
-    }
 
     @Test
-    public void testListIntersectFail()
-        throws Exception
-    {
-        expectArgTypeFailure("(list_intersect {} [])",0);
-
-        expectArityFailure("(list_intersect)");
-        expectArityFailure("(list_intersect [])");
-    }
-
     public void listContains()
         throws Exception
     {
