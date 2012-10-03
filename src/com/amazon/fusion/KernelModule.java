@@ -78,12 +78,16 @@ final class KernelModule
 
         for (IonType t : IonType.values())
         {
-            if (t != IonType.NULL && t != IonType.DATAGRAM)
+            if (t != IonType.NULL &&
+                t != IonType.DATAGRAM &&
+                t != IonType.LIST)
             {
                 String name = "is_" + t.name().toLowerCase();
                 ns.bind(name, new IonTypeCheckingProc(t));
             }
         }
+
+        ns.bind("is_list", new IsListProc());
 
         provideEverything();
     }

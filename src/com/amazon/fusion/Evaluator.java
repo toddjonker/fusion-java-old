@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionValue.UNDEF;
+import static com.amazon.fusion.FusionVector.isVector;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
@@ -166,6 +167,12 @@ final class Evaluator
             return javaValue;
         }
 
+        if (javaValue instanceof Object[])
+        {
+            // TODO recurse through array?
+            return FusionVector.makeVectorFrom(this, (Object[]) javaValue);
+        }
+
         String message = "Unacceptable type: " + javaValue.getClass();
         throw new IllegalArgumentException(message);
     }
@@ -299,6 +306,34 @@ final class Evaluator
         if (annotations != null) dom.setTypeAnnotations(annotations);
         return inject(dom);
     }
+
+
+    //========================================================================
+
+
+    /**
+     * Casts or copies as necessary. Throws if vector contains non-Ion data!
+     *
+     * @deprecated This is of questionable design, and should probably be
+     * removed. Please limit use carefully.
+     */
+    @Deprecated
+    IonValue convertToIonValueMaybe(Object value)
+        throws FusionException
+    {
+        if (value instanceof IonValue)
+        {
+            return (IonValue) value;
+        }
+
+        if (isVector(value))
+        {
+            return FusionVector.unsafeCopyToIonList(value, mySystem);
+        }
+
+        return null;
+    }
+
 
     //========================================================================
 

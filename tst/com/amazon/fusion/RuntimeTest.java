@@ -2,8 +2,12 @@
 
 package com.amazon.fusion;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import com.amazon.ion.IonInt;
+import com.amazon.ion.IonValue;
 import java.io.File;
 import org.junit.Test;
 
@@ -70,5 +74,28 @@ public class RuntimeTest
         // Test eval'ing a module
         Object mod = loadFile("tst-repo/grain.ion");
         assertTrue(mod instanceof ModuleInstance);
+    }
+
+
+    @Test
+    public void testIonize()
+        throws Exception
+    {
+        Object fv = eval("12");
+        IonValue iv = runtime().ionizeMaybe(fv, system());
+        assertEquals(12, ((IonInt)iv).intValue());
+        iv = runtime().ionize(fv, system());
+        assertEquals(12, ((IonInt)iv).intValue());
+
+        fv = eval("(lambda () 12)");
+        assertSame(null, runtime().ionizeMaybe(fv, system()));
+    }
+
+    @Test(expected = FusionException.class)
+    public void testBadIonize()
+        throws Exception
+    {
+        Object fv = eval("(lambda () 12)");
+        runtime().ionize(fv, system());
     }
 }

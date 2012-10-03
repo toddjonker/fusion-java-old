@@ -35,14 +35,19 @@ final class StructMakeProc
     {
         checkArityEven(args);
 
-        IonStruct result = eval.getSystem().newEmptyStruct().clone();
+        IonStruct result = eval.getSystem().newEmptyStruct();
 
         for (int i = 0; i < args.length; i++)
         {
             String key = checkTextArg(i, args);
             i++;
-            IonValue value = checkIonArg(i, args);
-            result.put(key, value.clone());
+            IonValue value = eval.convertToIonValueMaybe(args[i]);
+            if (value == null)
+            {
+                throw argFailure("Ion value", i, args);
+            }
+            value = FusionUtils.cloneIfContained(value);
+            result.put(key, value);
         }
 
         return eval.inject(result);

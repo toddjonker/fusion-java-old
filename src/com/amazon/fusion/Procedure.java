@@ -2,12 +2,12 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVector.isVector;
 import com.amazon.fusion.ArityFailure.Variability;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
-import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonText;
@@ -138,6 +138,11 @@ abstract class Procedure
         }
     }
 
+
+    FusionException argFailure(String expectation, int badPos, Object... actuals)
+    {
+        return new ArgTypeFailure(this, expectation, badPos, actuals);
+    }
 
 
     <T> T checkArg(Class<T> klass, String desc, int argNum, Object... args)
@@ -293,15 +298,6 @@ abstract class Procedure
     }
 
 
-    IonValue checkIonArg(int argNum, Object... args)
-        throws ArgTypeFailure
-    {
-        IonValue iv = checkDomArg(IonValue.class, "Ion datum",
-                                  true /* nullable */, argNum, args);
-        return iv;
-    }
-
-
     /**
      * @return not null
      */
@@ -321,7 +317,7 @@ abstract class Procedure
         return iv.stringValue();
     }
 
-    IonContainer checkContainerArg(int argNum, Object... args)
+    IonContainer checkIonContainerArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
         return checkDomArg(IonContainer.class, "list, sexp, or struct",
@@ -329,16 +325,19 @@ abstract class Procedure
     }
 
 
-    /** Allows null.list and null.sexp */
-    IonSequence checkSequenceArg(int argNum, Object... args)
+    /** Allows null.list and vectors. */
+    Object checkListArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
-        return checkDomArg(IonSequence.class, "list or sexp",
+        Object arg = args[argNum];
+        if (isVector(arg)) return arg;
+
+        return checkDomArg(IonList.class, "list",
                            true /* nullable */, argNum, args);
     }
 
     /** Allows null.list */
-    IonList checkListArg(int argNum, Object... args)
+    IonList checkIonListArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
         return checkDomArg(IonList.class, "list",
@@ -366,14 +365,14 @@ abstract class Procedure
         throw new ArgTypeFailure(this, "stream", argNum, args);
     }
 
-    <T extends IonValue> T checkDomArg(Class<T> klass, String typeName,
-                                       boolean nullable,
-                                       int argNum, Object... args)
+    private <T extends IonValue> T checkDomArg(Class<T> klass, String typeName,
+                                               boolean nullable,
+                                               int argNum, Object... args)
         throws ArgTypeFailure
     {
         try
         {
-            IonValue iv = castToIonValueMaybe(args[argNum]);
+            IonValue iv = castToIonValueMaybe(args[argNum]);  // TODO copy?!?
             if (iv != null && (nullable || ! iv.isNullValue()))
             {
                 return klass.cast(iv);

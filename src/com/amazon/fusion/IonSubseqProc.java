@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVector.isVector;
+import static com.amazon.fusion.FusionVector.unsafeVectorSize;
+import static com.amazon.fusion.FusionVector.unsafeVectorSubseq;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonSystem;
@@ -27,10 +30,22 @@ final class IonSubseqProc
     {
         checkArityExact(args);
 
-        IonList sequence = checkListArg(0, args);
+        IonList sequence = null;
+        int size;
+
+        boolean seqIsVector = isVector(eval, args[0]);
+        if (seqIsVector)
+        {
+            size = unsafeVectorSize(eval, args[0]);
+        }
+        else
+        {
+            sequence = checkIonListArg(0, args);
+            size = sequence.size();
+        }
+
         int from = checkIntArg(1, args);
         int to   = checkIntArg(2, args);
-        int size = sequence.size();
 
         if (to < from)
         {
@@ -46,6 +61,12 @@ final class IonSubseqProc
         assert from <= to && to <= size;
 
         if (from == 0 && to == size) return args[0];
+
+        if (seqIsVector)
+        {
+            int len = to - from;
+            return unsafeVectorSubseq(eval, args[0], from, len);
+        }
 
         IonSystem system = eval.getSystem();
         IonSequence result = (IonSequence) system.newNull(sequence.getType());

@@ -15,6 +15,13 @@ final class Iterators
     private Iterators() { }
 
 
+    /** Iterated values must not need injecting. */
+    static Object iterate(Iterator<?> iterator)
+    {
+        return new IteratorAdaptor(iterator);
+    }
+
+
     // TODO specified whether array elements need injecting
     static Object iterate(Object[] array)
     {

@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVector.isVector;
+import static com.amazon.fusion.FusionVector.unsafeVectorCopy;
+import static com.amazon.fusion.FusionVector.unsafeVectorSize;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonValue;
 
@@ -27,8 +30,23 @@ final class ApplyProc
         int arity = args.length;
 
         Procedure proc = checkProcArg(0, args);
-        IonSequence rest = checkSequenceArg(arity - 1, args);
-        int restLen = rest.size();
+
+        Object rest = args[arity - 1];
+        boolean restIsVector = isVector(eval, rest);
+
+        int restLen;
+        if (restIsVector)
+        {
+            restLen = unsafeVectorSize(eval, rest);
+        }
+        else if (rest instanceof IonSequence)
+        {
+            restLen = ((IonSequence) rest).size();
+        }
+        else
+        {
+            throw argFailure("list or sexp", arity - 1, args);
+        }
 
         int procArity = restLen + arity - 2;
         Object[] procArgs = new Object[procArity];
@@ -39,11 +57,18 @@ final class ApplyProc
             procArgs[arg++] = args[i];
         }
 
-        for (IonValue dom : rest)
+        if (restIsVector)
         {
-            procArgs[arg++] = eval.inject(dom);
+            unsafeVectorCopy(eval, rest, 0, procArgs, arg, restLen);
         }
-        assert arg == procArity;
+        else
+        {
+            for (IonValue dom : (IonSequence) rest)
+            {
+                procArgs[arg++] = eval.inject(dom);
+            }
+            assert arg == procArity;
+        }
 
         return eval.bounceTailCall(proc, procArgs);
     }

@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonList;
 
 /**
  * Converts an ion list to a stream
@@ -21,9 +20,8 @@ final class IonListToStreamProc
     Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        // check if first arg is of IonList class
-        IonList ionList = checkListArg(0, arg);
+        Object list = checkListArg(0, arg);
 
-        return Sequences.streamFor(ionList);
+        return Sequences.streamFor(list);
     }
 }

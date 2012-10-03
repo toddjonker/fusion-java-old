@@ -221,7 +221,7 @@ abstract class SyntaxSequence
 
 
     @Override
-    final Object quote(Evaluator eval)
+    Object quote(Evaluator eval)
         throws FusionException
     {
         ValueFactory factory = eval.getSystem();

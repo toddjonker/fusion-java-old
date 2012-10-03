@@ -1,0 +1,80 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(use check)
+(use 'fusion/unsafe/vector')
+(use 'fusion/vector')
+
+
+(assert (is_vector []))
+(assert (is_vector [0]))
+(assert (is_vector (quote [])))
+
+(assert (is_immutable_vector []))
+(assert (is_immutable_vector [0]))
+(assert (is_immutable_vector (quote [])))
+
+(assert (not (is_vector (quote ()))))
+
+
+(assert (is_vector (vector)))
+(assert (is_vector (vector 1)))
+
+(assert (is_mutable_vector (vector)))
+(assert (is_mutable_vector (vector 1)))
+
+(assert (not (is_immutable_vector (vector))))
+
+(check_equal []  (vector)   "(vector)")
+(check_equal [3] (vector 3) "(vector 3)")
+
+
+// Size
+
+(check_equal 0 (vector_size [])  "[] size 0")
+
+(check_equal 1 (vector_size [1]) "[] size 1")
+(check_equal 0 (unsafe_vector_size [])  "[] unsafe size 0")
+(check_equal 1 (unsafe_vector_size [1]) "[] unsafe size 1")
+
+
+(check_equal 0 (vector_size (vector))   "vector size 0")
+(check_equal 1 (vector_size (vector 1)) "vector size 1")
+
+(check_equal 0 (unsafe_vector_size (vector))   "vector unsafe size 0")
+(check_equal 1 (unsafe_vector_size (vector 1)) "vector unsafe size 1")
+
+
+// Ref
+
+(check_equal [2] (vector_ref [0,1,[2],3] 2)  "[] ref 2")
+(check_equal  3  (vector_ref [0,1,[2],3] 3)  "[] ref 3")
+
+(check_equal [2] (vector_ref (vector 0 1 [2] 3) 2)  "vector ref 2")
+(check_equal  3  (vector_ref (vector 0 1 [2] 3) 3)  "vector ref 3")
+
+
+// Set
+
+(check_equal [1] (let ((v (vector 0)))
+                   (vector_set v 0 1)
+                   v)
+  "vector_set 1")
+
+
+// Vectors can hold any type!
+
+(define F (lambda () false))
+(define T (lambda () true))
+
+(assert ((vector_ref (vector F T) 1)))
+
+
+// Add
+
+(let ((added (vector_add [] 1)))
+  (assert (is_immutable_vector added))
+  (check_equal [1] added "[] add 1"))
+
+(let ((added (vector_add (vector) 1)))
+  (assert (is_mutable_vector added))
+  (check_equal [1] added "(vector) add 1"))

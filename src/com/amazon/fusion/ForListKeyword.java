@@ -2,8 +2,9 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonList;
+import static com.amazon.fusion.FusionVector.makeVectorFrom;
 import com.amazon.ion.IonValue;
+import java.util.ArrayList;
 
 final class ForListKeyword
     extends KeywordValue
@@ -129,7 +130,7 @@ final class ForListKeyword
         {
             final int numBindings = myValueForms.length;
 
-            IonList result = eval.getSystem().newEmptyList();
+            ArrayList<Object> result = new ArrayList<Object>();
 
             if (numBindings != 0)
             {
@@ -158,7 +159,7 @@ final class ForListKeyword
                     IonValue value = castToIonValueMaybe(nextResult);
                     if (value != null)
                     {
-                        AddProc.invoke(result, value);
+                        result.add(value);
                     }
                     else
                     {
@@ -168,7 +169,7 @@ final class ForListKeyword
                 }
             }
 
-            return eval.inject(result);
+            return makeVectorFrom(eval, result);
         }
     }
 }

@@ -93,12 +93,6 @@ public class ListTest
             String expr = "(add " + form + " 12)";
             expectArgTypeFailure(expr, 0);
         }
-
-        for (String form : nonIonExpressions())
-        {
-            String expr = "(add [] " + form + ")";
-            expectArgTypeFailure(expr, 1);
-        }
     }
 
 

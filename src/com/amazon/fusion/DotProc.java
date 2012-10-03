@@ -3,11 +3,12 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
+import static com.amazon.fusion.FusionVector.isVector;
+import static com.amazon.fusion.FusionVector.unsafeVectorSize;
+import static com.amazon.fusion.FusionVector.unsafeVectorRef;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonStruct;
-import com.amazon.ion.IonValue;
-import java.io.IOException;
 
 final class DotProc
     extends Procedure
@@ -22,41 +23,67 @@ final class DotProc
               "container", "part", DOTDOTDOT);
     }
 
+    @SuppressWarnings("cast")
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityAtLeast(1, args);
-        IonContainer c = checkContainerArg(0, args);
-        IonValue value = c;
+
+        boolean cIsVector = isVector(eval, args[0]);
+
+        Object c;
+        if (cIsVector)
+        {
+            c = args[0];
+        }
+        else
+        {
+            c = checkIonContainerArg(0, args);
+        }
+        Object value = c;
 
         final int lastArg = args.length - 1;
         for (int i = 1; i <= lastArg; i++)
         {
-            switch (c.getType())
+            if (cIsVector)
             {
-                case LIST:
-                case SEXP:
+                int index = checkIntArg(i, args);
+                if (unsafeVectorSize(eval, c) <= index)
                 {
-                    long index = checkLongArg(i, args);
-                    if (c.size() <= index)
+                    return UNDEF;
+                }
+                value = unsafeVectorRef(eval, c, index);
+            }
+            else
+            {
+                IonContainer ic = (IonContainer) c;
+
+                switch (ic.getType())
+                {
+                    case LIST:
+                    case SEXP:
                     {
-                        return UNDEF;
+                        long index = checkLongArg(i, args);
+                        if (ic.size() <= index)
+                        {
+                            return UNDEF;
+                        }
+                        IonSequence s = (IonSequence) ic;
+                        value = s.get((int) index);
+                        break;
                     }
-                    IonSequence s = (IonSequence) c;
-                    value = s.get((int) index);
-                    break;
-                }
-                case STRUCT:
-                {
-                    String field = checkTextArg(i, args);
-                    IonStruct s = (IonStruct) c;
-                    value = s.get(field);
-                    break;
-                }
-                default:
-                {
-                    throw new IllegalStateException();
+                    case STRUCT:
+                    {
+                        String field = checkTextArg(i, args);
+                        IonStruct s = (IonStruct) ic;
+                        value = s.get(field);
+                        break;
+                    }
+                    default:
+                    {
+                        throw new IllegalStateException();
+                    }
                 }
             }
 
@@ -64,26 +91,28 @@ final class DotProc
 
             if (i < lastArg)
             {
-                try
+                cIsVector = isVector(eval, value);
+                if (cIsVector)
+                {
+                    c = value;
+                }
+                else try
                 {
                     c = (IonContainer) value;
                 }
                 catch (ClassCastException cce)
                 {
                     StringBuilder out = new StringBuilder();
-                    try {
-                        out.append("expected container before traversing ");
-                        writeFriendlyIndex(out, i + 1);
-                        out.append(" argument, had: ");
-                        FusionUtils.writeIon(out, value);
-                        out.append("\nArguments were:");
-                        for (Object arg : args)
-                        {
-                            out.append("\n  ");
-                            FusionValue.write(out, arg);
-                        }
+                    out.append("expected container before traversing ");
+                    writeFriendlyIndex(out, i + 1);
+                    out.append(" argument, had: ");
+                    FusionValue.write(out, value);
+                    out.append("\nArguments were:");
+                    for (Object arg : args)
+                    {
+                        out.append("\n  ");
+                        FusionValue.write(out, arg);
                     }
-                    catch (IOException ioe) {}
                     String message = out.toString();
                     throw contractFailure(message);
                 }

@@ -2,7 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVector.isVector;
 import com.amazon.ion.IonBool;
+import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonString;
@@ -158,7 +160,7 @@ public abstract class FusionValue
 
 
     private static void dispatchWrite(IonWriter out, Object value)
-        throws IOException, ContractFailure
+        throws IOException, FusionException
     {
         if (value instanceof Writeable)
         {
@@ -189,7 +191,7 @@ public abstract class FusionValue
     }
 
 
-    private static void dispatchWrite(Appendable out, Object value)
+    static void dispatchWrite(Appendable out, Object value)
         throws IOException
     {
         if (value instanceof FusionValue)
@@ -569,6 +571,11 @@ public abstract class FusionValue
             return ((IonSystem)factory).clone(iv);
         }
 
+        if (isVector(value))
+        {
+            return FusionVector.unsafeCopyToIonValueMaybe(value, factory);
+        }
+
         return null;
     }
 
@@ -593,6 +600,11 @@ public abstract class FusionValue
             IonValue iv = (IonValue) value;
             // TODO FUSION-67 ION-125 should be able to clone via ValueFactory
             return ((IonSystem)factory).clone(iv);
+        }
+
+        if (isVector(value))
+        {
+            return FusionVector.unsafeCopyToIonList(value, factory);
         }
 
         String message =
@@ -708,4 +720,16 @@ public abstract class FusionValue
                                     + writeToString(val));
     }
 
+
+    /**
+     * @param value must be vector or IonContainer
+     */
+    static Iterator<?> unsafeJavaIterate(Object value)
+    {
+        if (isVector(value))
+        {
+            return FusionVector.unsafeJavaIterate(value);
+        }
+        return ((IonContainer)value).iterator();
+    }
 }

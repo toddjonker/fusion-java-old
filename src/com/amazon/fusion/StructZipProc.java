@@ -2,11 +2,9 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonList;
-import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonValue;
-import java.util.ListIterator;
+import java.util.Iterator;
 
 final class StructZipProc
     extends Procedure
@@ -16,6 +14,7 @@ final class StructZipProc
         //    "                                                                               |
         super("Constructs a struct from a list of field names and a list of values");
     }
+
 
     @Override
     Object doApply(Evaluator eval, Object[] args)
@@ -27,25 +26,25 @@ final class StructZipProc
 
         IonStruct result = eval.getSystem().newEmptyStruct();
 
-        IonList fieldList = checkListArg(0, args);
-        IonList valueList = checkListArg(1, args);
+        Object fieldList = checkListArg(0, args);
+        Object valueList = checkListArg(1, args);
 
-        ListIterator<IonValue> fieldListIterator = fieldList.listIterator();
-        ListIterator<IonValue> valueListIterator = valueList.listIterator();
+        Iterator<?> fieldIterator = unsafeJavaIterate(fieldList);
+        Iterator<?> valueIterator = unsafeJavaIterate(valueList);
 
-        while (fieldListIterator.hasNext() && valueListIterator.hasNext())
+        while (fieldIterator.hasNext() && valueIterator.hasNext())
         {
-            IonValue ionField = fieldListIterator.next();
-            IonValue ionValue = valueListIterator.next();
-            if (ionField instanceof IonString)
+            Object nameObj = fieldIterator.next();
+            String name = FusionValue.asJavaString(nameObj);
+            if (name == null)
             {
-                String fieldName = ((IonString)ionField).stringValue();
-                result.put(fieldName, ionValue.clone());
-            } else
-            {
-                throw contractFailure("Expected: string"+
-                                      "; observed: "+ionField.getType().toString());
+                throw contractFailure("Expected: string; received: " +
+                                      writeToString(nameObj));
             }
+
+            Object valueObj = valueIterator.next();
+            IonValue value = copyToIonValue(valueObj, eval.getSystem());
+            result.put(name, value);
         }
 
         return eval.inject(result);

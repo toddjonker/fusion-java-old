@@ -2,10 +2,12 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVector.isVector;
+import static com.amazon.fusion.FusionVector.unsafeVectorSize;
 import com.amazon.ion.IonContainer;
 
 final class SizeProc
-    extends Procedure
+    extends Procedure1
 {
     SizeProc()
     {
@@ -16,11 +18,20 @@ final class SizeProc
     }
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        checkArityExact(args);
-        IonContainer c = checkContainerArg(0, args);
-        return eval.newInt(c.size());
+        int size;
+        if (isVector(eval, arg))
+        {
+            size = unsafeVectorSize(eval, arg);
+        }
+        else
+        {
+            IonContainer c = checkIonContainerArg(0, arg);
+            size = c.size();
+        }
+
+        return eval.newInt(size);
     }
 }

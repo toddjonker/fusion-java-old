@@ -35,7 +35,11 @@ class Sequences
         public Object next()
         {
             Object next = myIonIterator.next();
-            return FusionValue.forIonValue((IonValue) next);
+            if (next instanceof IonValue)
+            {
+                next = FusionValue.forIonValue((IonValue) next);
+            }
+            return next;
         }
 
     }
@@ -53,6 +57,11 @@ class Sequences
         if (value instanceof Stream)
         {
             return (Stream)value;
+        }
+
+        if (FusionVector.isVector(value))
+        {
+            return new DomStream(FusionVector.unsafeJavaIterate(value));
         }
 
         throw new ContractFailure("value is not streamable: "

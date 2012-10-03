@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVector.isVector;
 import com.amazon.ion.IonList;
 
 final class IterateListProc
@@ -19,8 +20,12 @@ final class IterateListProc
     {
         checkArityExact(args);
 
-        // check if first arg is of IonList class
-        IonList ionList = checkListArg(0, args);
+        if (isVector(eval, args[0]))
+        {
+            return Iterators.iterate(FusionVector.unsafeJavaIterate(args[0]));
+        }
+
+        IonList ionList = checkIonListArg(0, args);
 
         return Iterators.iterateIonSequence(ionList);
     }

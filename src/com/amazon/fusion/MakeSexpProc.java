@@ -24,7 +24,11 @@ final class MakeSexpProc
 
         for (int i = 0; i < len; i++)
         {
-            IonValue iv = checkIonArg(i, args);
+            IonValue iv = eval.convertToIonValueMaybe(args[i]);
+            if (iv == null)
+            {
+                throw argFailure("Ion value", i, args);
+            }
             iv = FusionUtils.cloneIfContained(iv);
             values[i] = iv;
         }

@@ -1,0 +1,19 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(module unsafe_vector 'fusion/base'
+
+  (use 'fusion/experimental/defines')
+
+
+  (defpub_j unsafe_vector_size
+    "com.amazon.fusion.FusionVector$UnsafeVectorSizeProc")
+
+  (defpub_j unsafe_vector_ref
+    "com.amazon.fusion.FusionVector$UnsafeVectorRefProc")
+
+  (defpub_j unsafe_vector_set
+    "com.amazon.fusion.FusionVector$UnsafeVectorSetProc")
+
+  (defpub_j unsafe_vector_add
+    "com.amazon.fusion.FusionVector$UnsafeVectorAddProc")
+)

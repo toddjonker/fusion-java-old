@@ -2,12 +2,11 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonList;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 
 final class IonAnnotationsProc
-    extends Procedure
+    extends Procedure1
 {
     IonAnnotationsProc()
     {
@@ -18,19 +17,27 @@ final class IonAnnotationsProc
     }
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        checkArityExact(args);
-        IonValue value = checkIonArg(0, args);
+        IonValue value = FusionValue.castToIonValueMaybe(arg);
 
-        IonSystem system = eval.getSystem();
-        IonList result = system.newEmptyList();
+        Object[] result = FusionUtils.EMPTY_OBJECT_ARRAY;
 
-        String[] anns = value.getTypeAnnotations();
-        for (String ann : anns)
+        if (value != null)
         {
-            result.add(system.newString(ann));
+            IonSystem system = eval.getSystem();
+
+            String[] anns = value.getTypeAnnotations();
+            int length = anns.length;
+            if (length != 0)
+            {
+                result = new Object[length];
+                for (int i = 0; i < length; i++)
+                {
+                    result[i] = system.newString(anns[i]);
+                }
+            }
         }
 
         return eval.inject(result);

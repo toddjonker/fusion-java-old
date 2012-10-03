@@ -9,5 +9,6 @@ import com.amazon.ion.IonWriter;
  */
 public interface Writeable
 {
-    void write(IonWriter out);
+    void write(IonWriter out)
+        throws FusionException;
 }

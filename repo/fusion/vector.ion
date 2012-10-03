@@ -1,0 +1,67 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(module vector 'fusion/base'
+
+  (use 'fusion/experimental/defines')
+  (use 'fusion/unsafe/vector')         // NOT exported!
+
+
+  (defpub_j is_vector
+    "com.amazon.fusion.FusionVector$IsVectorProc")
+  (defpub_j is_immutable_vector
+    "com.amazon.fusion.FusionVector$IsImmutableVectorProc")
+  (defpub_j is_mutable_vector
+    "com.amazon.fusion.FusionVector$IsMutableVectorProc")
+  (defpub_j vector
+    "com.amazon.fusion.FusionVector$VectorProc")
+
+
+  (defpub vector_size
+    (lambda (vector)
+      '''
+Returns the size of VECTOR.
+      '''
+      (unless (is_vector vector)
+        (raise_argument_error "vector_size" "vector" 0 vector))
+      (unsafe_vector_size vector)))
+
+
+  (defpub vector_ref
+    (lambda (vector pos)
+      '''
+Returns the element of VECTOR at slot POS (zero-based).
+      '''
+      (unless (is_vector vector)
+        (raise_argument_error "vector_ref" "vector" 0 vector pos))
+      (unless (is_int pos)
+        (raise_argument_error "vector_ref" "int" 1 vector pos))
+      (when (or (< pos 0) (<= (unsafe_vector_size vector) pos))
+        (raise_argument_error "vector_ref" "valid position" 1 vector pos))
+      (unsafe_vector_ref vector pos)))
+
+
+  (defpub vector_set
+    (lambda (vector pos value)
+      '''
+Changes the element of a mutable VECTOR at slot POS (zero-based).
+      '''
+      (unless (is_mutable_vector vector)
+        (raise_argument_error "vector_set" "mutable vector" 0 vector pos value))
+      (unless (is_int pos)
+        (raise_argument_error "vector_set" "int" 1 vector pos value))
+      (when (or (< pos 0) (<= (unsafe_vector_size vector) pos))
+        (raise_argument_error "vector_set" "valid position" 1 vector pos value))
+      (unsafe_vector_set vector pos value)))
+
+
+  (defpub vector_add
+    (lambda (vector value)
+      '''
+Returns a vector similar to VECTOR with the VALUE added to the end. The given
+VECTOR is not mutated.
+      '''
+      (unless (is_vector vector)
+        (raise_argument_error "vector_add" "vector" 0 vector value))
+      (unsafe_vector_add vector value)))
+
+)

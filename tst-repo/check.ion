@@ -4,6 +4,7 @@
 
   (use 'fusion/experimental/defines')
   (use 'fusion/ion')
+  (use 'fusion/vector')
 
 
   (defpub check_equal
@@ -14,6 +15,8 @@
            descr " not equal.\nActual: " actual "\nExpected: " expected))
         ((is_list expected)
          (check_list_equal actual expected))
+        ((is_vector expected)
+         (check_vector_equal actual expected))
         (true
          (assert (= actual expected)
            descr " not equal.\nActual: " actual "\nExpected: " expected)))))
@@ -26,6 +29,17 @@
         (when (< i (size actual))
           (check_equal (. actual i) (. expected i) "list element") // TODO bad descr
           (loop (+ 1 i))))))
+
+  (defpub check_vector_equal
+    (lambda (actual expected)
+      (assert (= (vector_size actual) (vector_size expected))
+        "vector sizes don't match. Actual: " actual " Expected: " expected)
+      (let loop ((i 0))
+        (when (< i (vector_size actual))
+          (check_equal (vector_ref actual i) (vector_ref expected i)
+            "vector element") // TODO bad descr
+          (loop (+ 1 i))))))
+
 
   (defpub check_annotations
     (lambda (value expected)

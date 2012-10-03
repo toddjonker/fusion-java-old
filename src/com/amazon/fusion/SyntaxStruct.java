@@ -433,7 +433,7 @@ final class SyntaxStruct
             {
                 CompiledForm form = myFieldForms[i];
                 Object childValue = eval.eval(store, form);
-                IonValue childDom = FusionValue.castToIonValueMaybe(childValue);
+                IonValue childDom = eval.convertToIonValueMaybe(childValue);
                 if (childDom == null)
                 {
                     throw new ResultFailure("struct literal", "Ion data", i, childValue);

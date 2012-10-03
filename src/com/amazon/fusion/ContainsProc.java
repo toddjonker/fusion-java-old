@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVector.isVector;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonValue;
 import java.util.Iterator;
@@ -29,17 +30,26 @@ final class ContainsProc
     {
         checkArityExact(args);
 
-        IonContainer thisList = checkContainerArg(0, args);
-        IonValue test = checkIonArg(1, args);
+        Object container = args[0];
+        if (! (isVector(eval, container) || container instanceof IonContainer))
+        {
+            throw argFailure("container", 0, args);
+        }
+
+        IonValue target = eval.convertToIonValueMaybe(args[1]);
+        if (target == null)
+        {
+            throw argFailure("Ion value", 1, args);
+        }
 
         boolean contained = false;
 
-        Iterator<IonValue> listIterator = thisList.iterator();
+        Iterator<?> listIterator = unsafeJavaIterate(container);
 
         while(listIterator.hasNext())
         {
-            IonValue ionValue = listIterator.next();
-            if (ionValue.equals(test))
+            Object ionValue = eval.convertToIonValueMaybe(listIterator.next());
+            if (ionValue.equals(target))
             {
                 contained = true;
                 break;

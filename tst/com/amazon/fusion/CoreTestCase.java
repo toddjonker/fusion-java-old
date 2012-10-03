@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
@@ -143,12 +142,15 @@ public class CoreTestCase
         return top.load(file);
     }
 
-    protected IonValue evalToIon(String expressionIon)
+    protected IonValue evalToIon(String source)
         throws FusionException
     {
-        Object fv = eval(expressionIon);
-        IonValue iv = FusionValue.castToIonValueMaybe(fv);
-        assertNotNull("Result isn't Ion", iv);
+        Object fv = eval(source);
+        IonValue iv = runtime().ionizeMaybe(fv, system());
+        if (iv == null)
+        {
+            Assert.fail("Result isn't ion: " + fv + "\nSource: " + source);
+        }
         return iv;
     }
 
@@ -199,7 +201,7 @@ public class CoreTestCase
         for (String expr : allTypeExpressions())
         {
             Object v = eval(expr);
-            IonValue dom = FusionValue.castToIonValueMaybe(v);
+            IonValue dom = runtime().ionizeMaybe(v, system());
             if (dom == null || ! klass.isInstance(dom))
             {
                 exprs.add(expr);
@@ -263,27 +265,22 @@ public class CoreTestCase
     protected void assertEval(IonValue expected, String source)
         throws FusionException
     {
-        Object fv = eval(source);
-        IonValue iv = FusionValue.castToIonValueMaybe(fv);
-        if (iv == null)
-        {
-            Assert.fail("Result isn't ion: " + fv + "\nSource: " + source);
-        }
+        IonValue iv = evalToIon(source);
         assertEquals(source, expected, iv);
     }
 
-    protected void assertEval(IonValue expected, IonValue expression)
+    protected void assertEval(IonValue expected, IonValue source)
         throws FusionException
     {
-        String source = expression.toString();
-        assertEval(expected, source);
+        String sourceText = source.toString();
+        assertEval(expected, sourceText);
     }
 
-    protected void assertEval(String expectedIon, String expressionIon)
+    protected void assertEval(String expectedIon, String sourceIon)
         throws FusionException
     {
         IonValue expected = mySystem.singleValue(expectedIon);
-        assertEval(expected, expressionIon);
+        assertEval(expected, sourceIon);
     }
 
     protected void assertUndef(String expressionIon)

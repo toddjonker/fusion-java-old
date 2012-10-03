@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
-import static com.amazon.fusion.FusionUtils.cloneIfContained;
+import static com.amazon.fusion.FusionVector.isVector;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
@@ -121,6 +121,40 @@ final class SyntaxList
     }
 
 
+    @Override
+    Object quote(Evaluator eval)
+        throws FusionException
+    {
+        if (getAnnotations().length != 0)
+        {
+            return super.quote(eval);
+        }
+
+        if (isNullValue())
+        {
+
+            ValueFactory factory = eval.getSystem();
+            IonSequence seq = makeNull(factory);
+            return eval.inject(seq);
+        }
+
+        int size = size();
+        if (size == 0)
+        {
+            return FusionVector.EMPTY_IMMUTABLE_VECTOR;
+        }
+
+        Object[] children = new Object[size];
+        for (int i = 0; i < size; i++)
+        {
+            SyntaxValue s = get(i);
+            children[i] = s.quote(eval);
+        }
+
+        return FusionVector.makeImmutableVectorFrom(eval, children);
+    }
+
+
     //========================================================================
 
 
@@ -165,22 +199,25 @@ final class SyntaxList
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            ValueFactory vf = eval.getSystem();
-            IonList resultDom = vf.newEmptyList();
             int len = myChildForms.length;
+            Object[] children = new Object[len];
             for (int i = 0; i < len; i++)
             {
                 Object childValue = eval.eval(store, myChildForms[i]);
-                IonValue childDom = FusionValue.castToIonValueMaybe(childValue);
-                if (childDom == null)
+                if (! isVector(eval, childValue))
                 {
-                    throw new ResultFailure("list literal", "Ion data", i, childValue);
+                    IonValue childDom = FusionValue.castToIonValueMaybe(childValue);
+                    if (childDom == null)
+                    {
+                        throw new ResultFailure("list literal", "Ion data", i,
+                                                childValue);
+                    }
                 }
-                childDom = cloneIfContained(childDom);
-                resultDom.add(childDom);
+
+                children[i] = childValue;
             }
 
-            return eval.inject(resultDom);
+            return FusionVector.makeImmutableVectorFrom(eval, children);
         }
     }
 }

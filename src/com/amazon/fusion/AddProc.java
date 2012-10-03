@@ -3,6 +3,8 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.cloneIfContained;
+import static com.amazon.fusion.FusionVector.isVector;
+import static com.amazon.fusion.FusionVector.unsafeVectorAdd;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonValue;
 
@@ -17,23 +19,33 @@ final class AddProc
     }
 
 
-    static void invoke(IonSequence seq, IonValue value)
-    {
-        value = cloneIfContained(value);
-        seq.add(value);
-    }
-
-
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityExact(args);
-        IonSequence seq = checkSequenceArg(0, args);
-        IonValue value = checkIonArg(1, args);
 
-        invoke(seq, value);
+        boolean seqIsVector = isVector(eval, args[0]);
+        if (seqIsVector)
+        {
+            return unsafeVectorAdd(eval, args[0], args[1]);
+        }
 
-        return args[0]; // Return the original arg, no need to rewrap
+        IonValue seq = eval.convertToIonValueMaybe(args[0]);
+        if (! (seq instanceof IonSequence))
+        {
+            throw argFailure("Ion sequence", 0, args);
+        }
+
+        IonValue value = eval.convertToIonValueMaybe(args[1]);
+        if (value == null)
+        {
+            throw new ArgTypeFailure(this, "Ion value", 1, args);
+        }
+
+        value = cloneIfContained(value);
+        ((IonSequence) seq).add(value);
+
+        return seq;
     }
 }

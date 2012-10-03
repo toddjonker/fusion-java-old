@@ -2,9 +2,7 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonList;
-import com.amazon.ion.IonSystem;
-import com.amazon.ion.IonValue;
+import java.util.ArrayList;
 
 /**
  * Converts a stream to an ion list
@@ -18,20 +16,6 @@ final class StreamToIonListProc
               "stream");
     }
 
-    static IonList transform(Evaluator eval, Stream stream)
-        throws ContractFailure, FusionException
-    {
-        IonSystem system = eval.getSystem();
-        IonList ionList = system.newEmptyList();
-        while (stream.hasNext())
-        {
-            Object fv = stream.next();
-            IonValue iv = FusionValue.copyToIonValue(fv, system);
-            ionList.add(iv);
-        }
-        return ionList;
-    }
-
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException
@@ -40,7 +24,15 @@ final class StreamToIonListProc
 
         // check if first arg is of stream class
         Stream source = checkStreamArg(0,args);
-        IonList ionList = transform(eval, source);
-        return eval.inject(ionList);
+
+        ArrayList<Object> children = new ArrayList<Object>();
+
+        while (source.hasNext())
+        {
+            Object fv = source.next();
+            children.add(fv);
+        }
+
+        return FusionVector.makeVectorFrom(eval, children);
     }
 }
