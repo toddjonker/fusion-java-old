@@ -500,37 +500,6 @@ public abstract class FusionValue
 
 
     /**
-     * Returns the DOM representation of a value, if its type falls within
-     * the Ion type system. The result may have a container!
-     * <p>
-     * This isn't public because I'm not convinced that the runtime should have
-     * a singular IonSystem or ValueFactory.  Different subsystems may have
-     * different needs, some using a lazy dom others with full materialization.
-     *
-     * @return null if the value's type isn't an Ion type.
-     *
-     * @deprecated Renamed to {@link #castToIonValueMaybe(Object)}
-     */
-    @Deprecated
-    static IonValue toIonValue(Object value)
-    {
-        if (value instanceof IonValue)
-        {
-            return (IonValue) value;
-        }
-
-        if (value instanceof DomValue)
-        {
-            return ((DomValue) value).ionValue();
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-
-    /**
      * @param value must not be null
      * @return not null.
      */
@@ -581,44 +550,6 @@ public abstract class FusionValue
         }
 
         return factory.newList(ions);
-    }
-
-
-    /**
-     * Returns the DOM representation of a value, if its type falls within
-     * the Ion type system. The {@link IonValue} will use the given factory
-     * and will not have a container.
-     *
-     * @param factory must not be null.
-     *
-     * @return null if the value's type isn't an Ion type (for example,
-     * Fusion procedures).
-     *
-     * @deprecated Replaced with {@link #copyToIonValue(Object, ValueFactory)}.
-     */
-    @Deprecated
-    public static IonValue toIonValue(Object value, ValueFactory factory)
-    {
-        if (value instanceof IonValue)
-        {
-            IonValue iv = (IonValue) value;
-
-            // TODO this isn't really the proper comparison
-            if (iv.getSystem() == factory && iv.getContainer() == null)
-            {
-                return iv;
-            }
-
-            // FIXME this is horrible hack
-            return ((IonSystem) factory).clone(iv);
-        }
-
-        if (value instanceof DomValue)
-        {
-            return ((DomValue) value).ionValue(factory);
-        }
-
-        return null;
     }
 
 
