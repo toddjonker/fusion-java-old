@@ -505,12 +505,7 @@ public abstract class FusionValue
      */
     static IonValue unsafeCastToIonValue(Object value)
     {
-        if (value instanceof IonValue)
-        {
-            return (IonValue) value;
-        }
-
-        return ((DomValue) value).ionValue();
+        return (IonValue) value;
     }
 
 
@@ -528,11 +523,6 @@ public abstract class FusionValue
         if (value instanceof IonValue)
         {
             return (IonValue) value;
-        }
-
-        if (value instanceof DomValue)
-        {
-            return ((DomValue) value).ionValue();
         }
 
         return null;
@@ -569,13 +559,6 @@ public abstract class FusionValue
         if (value instanceof IonValue)
         {
             IonValue iv = (IonValue) value;
-            // TODO FUSION-67 ION-125 should be able to clone via ValueFactory
-            return ((IonSystem)factory).clone(iv);
-        }
-
-        if (value instanceof DomValue)
-        {
-            IonValue iv = ((DomValue) value).ionValue();
             // TODO FUSION-67 ION-125 should be able to clone via ValueFactory
             return ((IonSystem)factory).clone(iv);
         }
