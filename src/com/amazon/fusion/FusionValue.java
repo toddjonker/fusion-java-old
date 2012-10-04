@@ -551,7 +551,39 @@ public abstract class FusionValue
      *
      * @param factory must not be null.
      *
+     * @return a fresh instance, without a container, or null if the value is
+     * not handled by the default ionization strategy.
+     *
+     * @throws FusionException if something goes wrong during ionization.
+     *
+     * @see FusionRuntime#ionizeMaybe(Object, ValueFactory)
+     */
+    public static IonValue copyToIonValueMaybe(Object value,
+                                               ValueFactory factory)
+        throws FusionException
+    {
+        if (value instanceof IonValue)
+        {
+            IonValue iv = (IonValue) value;
+            // TODO FUSION-67 ION-125 should be able to clone via ValueFactory
+            return ((IonSystem)factory).clone(iv);
+        }
+
+        return null;
+    }
+
+
+    /**
+     * Returns a new {@link IonValue} representation of a Fusion value,
+     * if its type falls within the Ion type system.
+     * The {@link IonValue} will use the given factory and will not have a
+     * container.
+     *
+     * @param factory must not be null.
+     *
      * @throws FusionException if the value cannot be converted to Ion.
+     *
+     * @see FusionRuntime#ionize(Object, ValueFactory)
      */
     public static IonValue copyToIonValue(Object value, ValueFactory factory)
         throws FusionException
