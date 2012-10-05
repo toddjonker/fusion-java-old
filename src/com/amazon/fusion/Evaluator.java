@@ -67,10 +67,16 @@ final class Evaluator
         return sym;
     }
 
-    Namespace newModuleNamespace(ModuleRegistry registry)
+
+    Namespace newNamespaceWithLanguage(ModuleRegistry registry,
+                                       String modulePath)
         throws FusionException
     {
-        return new Namespace(registry);
+        Namespace ns = new Namespace(registry);
+        UseKeyword useKeyword = findKernel().getUseKeyword();
+        SyntaxValue baseRef = SyntaxSymbol.make(modulePath);
+        useKeyword.use(this, ns, baseRef);
+        return ns;
     }
 
 
@@ -90,11 +96,7 @@ final class Evaluator
     private Namespace newBaseNamespace(ModuleRegistry registry)
         throws FusionException
     {
-        Namespace ns = new Namespace(registry);
-        UseKeyword useKeyword = findKernel().getUseKeyword();
-        SyntaxValue baseRef = SyntaxSymbol.make("fusion/base");
-        useKeyword.use(this, ns, baseRef);
-        return ns;
+        return newNamespaceWithLanguage(registry, "fusion/base");
     }
 
 

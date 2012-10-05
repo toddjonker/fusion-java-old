@@ -9,12 +9,49 @@ import java.io.File;
 
 /**
  * Primary entry point for embedding Fusion within a Java program.
+ * The runtime contains resource common to many evaluations, in particular the
+ * registry of built-in modules. Most applications are expected to construct
+ * exactly one runtime, and probably multiple {@link TopLevel}s to isolate
+ * state between different code fragments.
  * <p>
- * The runtime maintains a top-level environment within which expressions can
- * be evaluated. The environment is maintained between calls.
+ * The runtime maintains a {@link TopLevel} namespace within which expressions
+ * can be evaluated. The namespace bindings and state are maintained between
+ * calls.  Applications that need isolated evaluation should create additional
+ * top levels by calling one of the {@link #makeTopLevel} methods.
+ * <p>
+ * To create a {@link FusionRuntime}, use a {@link FusionRuntimeBuilder}.
  */
 public interface FusionRuntime
 {
+    /**
+     * Returns a singular {@link TopLevel} for this runtime; each call returns
+     * the same instance.  All uses of the instance will share bindings and
+     * state, so applications that require isolated state must create
+     * additional {@link TopLevel}s via {@link #makeTopLevel()}.
+     *
+     * @return not null.
+     */
+    public TopLevel getDefaultTopLevel()
+        throws FusionException;
+
+    /**
+     * Returns a fresh {@link TopLevel} instance.
+     *
+     * @return not null.
+     */
+    public TopLevel makeTopLevel()
+        throws FusionException;
+
+
+    /**
+     * Returns a fresh {@link TopLevel} instance, populated with bindings from
+     * a given module.
+     *
+     * @return not null.
+     */
+    public TopLevel makeTopLevel(String initialModulePath)
+        throws FusionException;
+
 
     /**
      * Evaluates top-level forms within this {@link FusionRuntime}'s namespace.
@@ -27,6 +64,7 @@ public interface FusionRuntime
      *
      * @throws ExitException if the Fusion {@code exit} procedure is invoked.
      */
+    @Deprecated
     public Object eval(String source, SourceName name)
         throws ExitException, FusionException;
 
@@ -45,6 +83,7 @@ public interface FusionRuntime
      *
      * @see #eval(String,SourceName)
      */
+    @Deprecated
     public Object eval(String source)
         throws ExitException, FusionException;
 
@@ -60,6 +99,7 @@ public interface FusionRuntime
      *
      * @throws ExitException if the Fusion {@code exit} procedure is invoked.
      */
+    @Deprecated
     Object eval(IonReader source, SourceName name)
         throws ExitException, FusionException;
 
@@ -78,6 +118,7 @@ public interface FusionRuntime
      *
      * @see #eval(IonReader,SourceName)
      */
+    @Deprecated
     public Object eval(IonReader source)
         throws ExitException, FusionException;
 
@@ -92,6 +133,7 @@ public interface FusionRuntime
      *
      * @throws ExitException if the Fusion {@code exit} procedure is invoked.
      */
+    @Deprecated
     public Object load(File source)
         throws ExitException, FusionException;
 
@@ -102,6 +144,7 @@ public interface FusionRuntime
      *
      * @param value must not be null.
      */
+    @Deprecated
     public void bind(String name, Object value);
 
 

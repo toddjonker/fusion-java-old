@@ -44,7 +44,7 @@ public class FUnitTest
         {
             SourceName name = SourceName.forFile(myTestFile);
             IonReader reader = system().newReader(source);
-            runtime().eval(reader, name);
+            topLevel().eval(reader, name);
         }
         finally
         {

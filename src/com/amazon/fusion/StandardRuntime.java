@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionValue.UNDEF;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
@@ -10,43 +9,60 @@ import com.amazon.ion.ValueFactory;
 import com.amazon.ion.system.IonSystemBuilder;
 import java.io.File;
 
-/**
- *
- */
+
 final class StandardRuntime
     implements FusionRuntime
 {
-    private final IonSystem mySystem;
-    private final Evaluator myEvaluator;
-    private final Namespace myNamespace;
+    private final IonSystem      mySystem;
+    private final ModuleRegistry myRegistry;
+    private final TopLevel       myTopLevel;
 
 
     StandardRuntime(FusionRuntimeBuilder builder)
     {
-        mySystem = IonSystemBuilder.standard().build();
+        mySystem   = IonSystemBuilder.standard().build();
+        myRegistry = new ModuleRegistry();
 
-        final ModuleRegistry defaultRegistry = new ModuleRegistry();
         try
         {
-            ModuleNamespace ns = new ModuleNamespace(defaultRegistry,
+            ModuleNamespace ns = new ModuleNamespace(myRegistry,
                                                      KernelModule.IDENTITY);
             ModuleInstance kernel = new KernelModule(mySystem, builder, ns);
-            defaultRegistry.register(kernel);
+            myRegistry.register(kernel);
+
+            myTopLevel = makeTopLevel();
         }
         catch (FusionException e)
         {
             throw new RuntimeException("Should not happen", e);
         }
+    }
 
-        myEvaluator = new Evaluator(mySystem, defaultRegistry);
-        try
-        {
-            myNamespace = myEvaluator.newBaseNamespace();
-        }
-        catch (FusionException e)
-        {
-            throw new RuntimeException("This shouldn't happen!", e);
-        }
+
+    //========================================================================
+
+
+    @Override
+    public TopLevel getDefaultTopLevel()
+        throws FusionException
+    {
+        return myTopLevel;
+    }
+
+
+    @Override
+    public TopLevel makeTopLevel(String initialModulePath)
+        throws FusionException
+    {
+        return new StandardTopLevel(mySystem, myRegistry, initialModulePath);
+    }
+
+
+    @Override
+    public TopLevel makeTopLevel()
+        throws FusionException
+    {
+        return makeTopLevel("fusion/base");
     }
 
 
@@ -57,8 +73,7 @@ final class StandardRuntime
     public Object eval(String source, SourceName name)
         throws ExitException, FusionException
     {
-        IonReader i = mySystem.newReader(source);
-        return eval(i, name);
+        return myTopLevel.eval(source, name);
     }
 
 
@@ -66,7 +81,7 @@ final class StandardRuntime
     public Object eval(String source)
         throws ExitException, FusionException
     {
-        return eval(source, null);
+        return myTopLevel.eval(source);
     }
 
 
@@ -74,17 +89,7 @@ final class StandardRuntime
     public Object eval(IonReader source, SourceName name)
         throws ExitException, FusionException
     {
-        Object result = UNDEF;
-
-        // TODO should work even if already positioned on first value
-
-        while (source.next() != null)
-        {
-            SyntaxValue sourceExpr = Syntax.read(source, name);
-            result = myEvaluator.prepareAndEvalTopLevelForm(sourceExpr, myNamespace);
-        }
-
-        return result;
+        return myTopLevel.eval(source, name);
     }
 
 
@@ -92,7 +97,7 @@ final class StandardRuntime
     public Object eval(IonReader source)
         throws ExitException, FusionException
     {
-        return eval(source, null);
+        return myTopLevel.eval(source);
     }
 
 
@@ -100,16 +105,14 @@ final class StandardRuntime
     public Object load(File source)
         throws ExitException, FusionException
     {
-        KernelModule kernel = myEvaluator.findKernel();
-        LoadHandler load = kernel.getLoadHandler();
-        return load.loadTopLevel(myEvaluator, myNamespace, source.toString());
+        return myTopLevel.load(source);
     }
 
 
     @Override
     public void bind(String name, Object value)
     {
-        myNamespace.bind(name, value);
+        myTopLevel.define(name, value);
     }
 
     //========================================================================

@@ -7,6 +7,7 @@ import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntime;
 import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.fusion.FusionValue;
+import com.amazon.fusion.TopLevel;
 import com.amazon.ion.IonException;
 import java.io.Console;
 import java.io.PrintWriter;
@@ -66,10 +67,13 @@ class Repl
 
         @Override
         public void execute()
+            throws FusionException
         {
             welcome();
 
-            while (rep())
+            TopLevel top = myRuntime.getDefaultTopLevel();
+
+            while (rep(top))
             {
                 // loop!
             }
@@ -85,7 +89,7 @@ class Repl
         }
 
 
-        private boolean rep()
+        private boolean rep(TopLevel top)
         {
             String line = myConsole.readLine("$ ");
 
@@ -99,7 +103,7 @@ class Repl
 
             try
             {
-                Object result = myRuntime.eval(line);
+                Object result = top.eval(line);
                 print(result);
             }
             catch (ExitException e)

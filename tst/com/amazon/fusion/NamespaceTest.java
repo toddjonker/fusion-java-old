@@ -13,7 +13,7 @@ public class NamespaceTest
     public void testBaseNamespace()
         throws Exception
     {
-        runtime().bind("callback", new Procedure("callback")
+        topLevel().define("callback", new Procedure("callback")
         {
             @Override
             Object doApply(Evaluator eval, Object[] args)
@@ -39,7 +39,7 @@ public class NamespaceTest
     public void testBasicLookup()
         throws Exception
     {
-        runtime().bind("callback", new Procedure("callback")
+        topLevel().define("callback", new Procedure("callback")
         {
             @Override
             Object doApply(Evaluator eval, Object[] args)

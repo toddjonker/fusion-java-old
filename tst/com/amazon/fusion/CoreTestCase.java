@@ -62,6 +62,7 @@ public class CoreTestCase
     private IonSystem mySystem;
     private FusionRuntimeBuilder myRuntimeBuilder;
     private FusionRuntime myRuntime;
+    private TopLevel myTopLevel;
 
     @Before
     public void setUp()
@@ -77,6 +78,7 @@ public class CoreTestCase
         mySystem = null;
         myRuntimeBuilder = null;
         myRuntime = null;
+        myTopLevel = null;
     }
 
     protected IonSystem system()
@@ -111,6 +113,16 @@ public class CoreTestCase
         return myRuntime;
     }
 
+    protected TopLevel topLevel()
+        throws FusionException
+    {
+        if (myTopLevel == null)
+        {
+            myTopLevel = runtime().getDefaultTopLevel();
+        }
+        return myTopLevel;
+    }
+
 
     //========================================================================
     // Basic evaluation
@@ -118,7 +130,7 @@ public class CoreTestCase
     protected Object eval(String expressionIon)
         throws FusionException
     {
-        FusionRuntime top = runtime();
+        TopLevel top = topLevel();
         return top.eval(expressionIon);
     }
 
@@ -127,7 +139,7 @@ public class CoreTestCase
         throws FusionException
     {
         File file = new File(path);
-        FusionRuntime top = runtime();
+        TopLevel top = topLevel();
         return top.load(file);
     }
 
