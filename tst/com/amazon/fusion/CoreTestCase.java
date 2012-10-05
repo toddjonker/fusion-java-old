@@ -113,6 +113,42 @@ public class CoreTestCase
 
 
     //========================================================================
+    // Basic evaluation
+
+    protected Object eval(String expressionIon)
+        throws FusionException
+    {
+        FusionRuntime top = runtime();
+        return top.eval(expressionIon);
+    }
+
+
+    protected Object loadFile(String path)
+        throws FusionException
+    {
+        File file = new File(path);
+        FusionRuntime top = runtime();
+        return top.load(file);
+    }
+
+    protected IonValue evalToIon(String expressionIon)
+        throws FusionException
+    {
+        Object fv = eval(expressionIon);
+        IonValue iv = FusionValue.castToIonValueMaybe(fv);
+        assertNotNull("Result isn't Ion", iv);
+        return iv;
+    }
+
+    protected Procedure evalToProcedure(String expressionIon)
+        throws FusionException
+    {
+        Object result = eval(expressionIon);
+        return (Procedure) result;
+    }
+
+
+    //========================================================================
 
     List<String> allTypeExpressions()
     {
@@ -215,8 +251,7 @@ public class CoreTestCase
     protected void assertEval(IonValue expected, String source)
         throws FusionException
     {
-        FusionRuntime runtime = runtime();
-        Object fv = runtime.eval(source);
+        Object fv = eval(source);
         IonValue iv = FusionValue.castToIonValueMaybe(fv);
         if (iv == null)
         {
@@ -242,8 +277,7 @@ public class CoreTestCase
     protected void assertUndef(String expressionIon)
         throws FusionException
     {
-        FusionRuntime runtime = runtime();
-        Object fv = runtime.eval(expressionIon);
+        Object fv = eval(expressionIon);
         if (fv != FusionValue.UNDEF)
         {
             Assert.fail("Result isn't undef: " + fv + "\nSource: " + expressionIon);
@@ -267,8 +301,7 @@ public class CoreTestCase
     protected void assertEval(BigInteger expectedInt, String expressionIon)
         throws FusionException
     {
-        FusionRuntime runtime = runtime();
-        Object fv = runtime.eval(expressionIon);
+        Object fv = eval(expressionIon);
         IonValue observed = FusionValue.castToIonValueMaybe(fv);
         if (observed instanceof IonInt)
         {
@@ -286,8 +319,7 @@ public class CoreTestCase
     protected void assertEval(BigDecimal expected, String expressionIon)
         throws FusionException
     {
-        FusionRuntime runtime = runtime();
-        Object fv = runtime.eval(expressionIon);
+        Object fv = eval(expressionIon);
         IonValue observed = FusionValue.castToIonValueMaybe(fv);
         if (observed instanceof IonDecimal)
         {
@@ -328,38 +360,6 @@ public class CoreTestCase
         throws FusionException
     {
         assertEval(expressionIon, expressionIon);
-    }
-
-    protected Object eval(String expressionIon)
-        throws FusionException
-    {
-        FusionRuntime runtime = runtime();
-        return runtime.eval(expressionIon);
-    }
-
-
-    protected Object loadFile(String path)
-        throws FusionException
-    {
-        File file = new File(path);
-        FusionRuntime runtime = runtime();
-        return runtime.load(file);
-    }
-
-    protected IonValue evalToIon(String expressionIon)
-        throws FusionException
-    {
-        Object fv = eval(expressionIon);
-        IonValue iv = FusionValue.castToIonValueMaybe(fv);
-        assertNotNull("Result isn't Ion", iv);
-        return iv;
-    }
-
-    protected Procedure evalToProcedure(String expressionIon)
-        throws FusionException
-    {
-        Object result = eval(expressionIon);
-        return (Procedure) result;
     }
 
 
