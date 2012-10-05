@@ -27,93 +27,109 @@ class Repl
         "redirected.";
 
 
-    private final Console     myConsole;
-    private final PrintWriter myOut;
-    private final FusionRuntime myRuntime = FusionRuntimeBuilder.standard().build();
-
-
     Repl()
     {
         super("repl");
         putHelpText(HELP_ONE_LINER, HELP_USAGE, HELP_BODY);
-
-        myConsole = System.console();
-        myOut = (myConsole == null ? null : myConsole.writer());
     }
 
 
     //=========================================================================
-    // Command Processing Methods
 
     @Override
-    boolean processArguments(String[] args)
+    Executor processArguments(String[] args)
     {
-        return (args.length == 0) && (myConsole != null);
-    }
-
-
-    @Override
-    void execute()
-    {
-        welcome();
-        while (rep())
+        Console console = System.console();
+        if ((args.length == 0) && (console != null))
         {
-            // loop!
+            return new Executor(console);
         }
+        return null;
     }
 
 
-    private void welcome()
+    private static class Executor
+        implements Command.Executor
     {
-        myOut.println("\n\033[1;31mWelcome to Fusion!\033[m\n");
-        myOut.println("Type...");
-        myOut.println("  (exit)            to exit");
-        myOut.println("  (help SOMETHING)  to see documentation; try '(help help)'!\n");
-    }
+        private final Console       myConsole;
+        private final PrintWriter   myOut;
+        private final FusionRuntime myRuntime;
 
 
-    private boolean rep()
-    {
-        String line = myConsole.readLine("$ ");
-
-        if (line == null)
+        Executor(Console console)
         {
-            // Print a newline otherwise the user's shell prompt will be on
-            // the same line, and that's ugly.
+            myConsole = console;
+            myOut     = console.writer();
+            myRuntime = FusionRuntimeBuilder.standard().build();
+        }
+
+
+        @Override
+        public void execute()
+        {
+            welcome();
+
+            while (rep())
+            {
+                // loop!
+            }
+        }
+
+
+        private void welcome()
+        {
+            myOut.println("\n\033[1;31mWelcome to Fusion!\033[m\n");
+            myOut.println("Type...");
+            myOut.println("  (exit)            to exit");
+            myOut.println("  (help SOMETHING)  to see documentation; try '(help help)'!\n");
+        }
+
+
+        private boolean rep()
+        {
+            String line = myConsole.readLine("$ ");
+
+            if (line == null)
+            {
+                // Print a newline otherwise the user's shell prompt will be on
+                // the same line, and that's ugly.
+                myOut.println();
+                return false;
+            }
+
+            try
+            {
+                Object result = myRuntime.eval(line);
+                print(result);
+            }
+            catch (ExitException e)
+            {
+                myOut.println("// Goodbye!");
+                return false;
+            }
+            catch (FusionException e)
+            {
+                myOut.print("// ");
+                myOut.println(e.getMessage());
+            }
+            catch (IonException e)
+            {
+                myOut.print("// ");
+                myOut.println(e.getMessage());
+            }
+
+            return true;
+        }
+
+
+        private void print(Object v)
+            throws FusionException
+        {
+            if (v == FusionValue.UNDEF) return;
+
+            FusionValue.write(myOut, v);
             myOut.println();
-            return false;
         }
-
-        try
-        {
-            Object result = myRuntime.eval(line);
-            print(result);
-        }
-        catch (ExitException e)
-        {
-            myOut.println("// Goodbye!");
-            return false;
-        }
-        catch (FusionException e)
-        {
-            myOut.print("// ");
-            myOut.println(e.getMessage());
-        }
-        catch (IonException e)
-        {
-            myOut.print("// ");
-            myOut.println(e.getMessage());
-        }
-
-        return true;
-    }
-
-    private void print(Object v)
-        throws FusionException
-    {
-        if (v == FusionValue.UNDEF) return;
-
-        FusionValue.write(myOut, v);
-        myOut.println();
     }
 }
+

@@ -29,11 +29,6 @@ final class Eval
     private static final String HELP_BODY =
         "Evaluates the Fusion script in the given FILE.";
 
-
-    private final IonSystem mySystem = IonSystemBuilder.standard().build();
-    private final FusionRuntime myRuntime = FusionRuntimeBuilder.standard().build();
-    private String myFileName;
-
     Eval()
     {
         super("eval");
@@ -41,63 +36,80 @@ final class Eval
     }
 
     @Override
-    boolean processArguments(String[] args)
+    Executor processArguments(String[] args)
     {
-        boolean ok = (args.length == 1);
-        if (ok)
-        {
-            myFileName = args[0];
-            ok = (myFileName.length() != 0);
-        }
-        return ok;
+        if (args.length != 1) return null;
+
+        String fileName = args[0];
+        if (fileName.length() == 0) return null;
+
+        return new Executor(fileName);
     }
 
-    @Override
-    void execute()
+
+    private static class Executor
+        implements Command.Executor
     {
-        try
+        private final IonSystem     mySystem;
+        private final FusionRuntime myRuntime;
+        private final String        myFileName;
+
+
+        private Executor(String fileName)
+        {
+            mySystem   = IonSystemBuilder.standard().build();
+            myRuntime  = FusionRuntimeBuilder.standard().build();
+            myFileName = fileName;
+        }
+
+
+        @Override
+        public void execute()
         {
             try
             {
-                Object result = evalFile(myFileName);
-                if (result != FusionValue.UNDEF)
+                try
                 {
-                    FusionValue.write(System.out, result);
-                    System.out.println();
+                    Object result = evalFile(myFileName);
+                    if (result != FusionValue.UNDEF)
+                    {
+                        FusionValue.write(System.out, result);
+                        System.out.println();
+                    }
+                }
+                catch (ExitException e)
+                {
+                    // Do nothing.
+                }
+                catch (FusionException e)
+                {
+                    e.printStackTrace(System.err);
                 }
             }
-            catch (ExitException e)
+            catch (IOException e)
             {
-                // Do nothing.
-            }
-            catch (FusionException e)
-            {
-                e.printStackTrace(System.err);
+                throw new IonException(e);
             }
         }
-        catch (IOException e)
-        {
-            throw new IonException(e);
-        }
-    }
 
 
-    /**
-     * @return not null.
-     */
-    private Object evalFile(String fileName)
-        throws FusionException, IOException
-    {
-        SourceName name = SourceName.forFile(fileName);
-        FileInputStream in = new FileInputStream(fileName);
-        try
+        /**
+         * @return not null.
+         */
+        private Object evalFile(String fileName)
+            throws FusionException, IOException
         {
-            IonReader i = mySystem.newReader(in);
-            return myRuntime.eval(i, name);
-        }
-        finally
-        {
-            in.close();
+            SourceName name = SourceName.forFile(fileName);
+            FileInputStream in = new FileInputStream(fileName);
+            try
+            {
+                IonReader i = mySystem.newReader(in);
+                return myRuntime.eval(i, name);
+            }
+            finally
+            {
+                in.close();
+            }
         }
     }
 }

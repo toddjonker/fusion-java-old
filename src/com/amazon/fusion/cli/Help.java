@@ -27,9 +27,6 @@ class Help
         "\n                                *      *      *\n\n";
 
 
-    private String[] myCommands;
-
-
     //=========================================================================
     // Constructors
 
@@ -41,112 +38,123 @@ class Help
 
 
     //=========================================================================
-    // Command Processing Methods
 
 
     @Override
-    boolean processArguments(String[] arguments)
+    Executor processArguments(String[] arguments)
     {
-        myCommands = arguments;
-        return true;
+        return new Executor(arguments);
     }
 
 
-    @Override
-    void execute()
+    private static class Executor
+        implements Command.Executor
     {
-        PrintWriter out = new PrintWriter(System.out);
+        private final String[] myCommands;
 
-        try
+        private Executor(String[] commands)
         {
-            if ((myCommands == null) || (myCommands.length == 0))
+            myCommands = commands;
+        }
+
+
+        @Override
+        public void execute()
+        {
+            PrintWriter out = new PrintWriter(System.out);
+
+            try
             {
-                out.println(APP_HELP_TEXT_INTRO);
-
-                TablePrinter table = new TablePrinter();
-                table.setIndent(2);
-
-                Command[] allCommands = CommandFactory.getAllCommands();
-                for (int i = 0; i < allCommands.length; i++)
+                if ((myCommands == null) || (myCommands.length == 0))
                 {
-                    Command command = allCommands[i];
+                    out.println(APP_HELP_TEXT_INTRO);
 
-                    String[] row =
+                    TablePrinter table = new TablePrinter();
+                    table.setIndent(2);
+
+                    Command[] allCommands = CommandFactory.getAllCommands();
+                    for (int i = 0; i < allCommands.length; i++)
+                    {
+                        Command command = allCommands[i];
+
+                        String[] row =
                         { command.getCommand(), command.getHelpOneLiner() };
 
-                    table.addRow(row);
-                }
+                        table.addRow(row);
+                    }
 
-                table.render(out);
-            }
-            else
-            {
-                for (int i = 0; i < myCommands.length; i++)
+                    table.render(out);
+                }
+                else
                 {
-                    if (i != 0)
+                    for (int i = 0; i < myCommands.length; i++)
                     {
-                        out.print(FULL_HELP_SEPARATOR);
-                    }
-                    String command = myCommands[i];
+                        if (i != 0)
+                        {
+                            out.print(FULL_HELP_SEPARATOR);
+                        }
+                        String command = myCommands[i];
 
-                    Command commandObj =
-                        CommandFactory.getMatchingCommand(command);
-                    if (commandObj == null)
-                    {
-                        out.println("Unknown command: '" + command + "'");
-                    }
-                    else
-                    {
-                        renderFullHelp(commandObj, out);
+                        Command commandObj =
+                            CommandFactory.getMatchingCommand(command);
+                        if (commandObj == null)
+                        {
+                            out.println("Unknown command: '" + command + "'");
+                        }
+                        else
+                        {
+                            renderFullHelp(commandObj, out);
+                        }
                     }
                 }
             }
-        }
-        finally
-        {
-            out.close();
-        }
-    }
-
-
-    private void renderCommandAndAliases(Command command, PrintWriter out)
-    {
-        out.print(command.getCommand());
-
-        String[] aliases = command.getAliases();
-        int len = aliases.length;
-        if (len != 0)
-        {
-            out.print(" (");
-            for (int i = 0; i < len; i++ )
+            finally
             {
-                if (i != 0) out.print(", ");
-                out.print(aliases[i]);
+                out.close();
             }
-            out.print(")");
-        }
-    }
-
-    private void renderFullHelp(Command command, PrintWriter out)
-    {
-        String oneLiner = command.getHelpOneLiner();
-        if (oneLiner != null)
-        {
-            renderCommandAndAliases(command, out);
-            out.println();
-//            out.print(": ");
-            out.print("  ");
-            out.println(oneLiner);
-            out.println();
-            out.print("Usage: ");
-            out.println(command.getHelpUsage());
         }
 
-        String helpBody = command.getHelpBody();
-        if (helpBody != null)
+
+        private void renderCommandAndAliases(Command command, PrintWriter out)
         {
-            out.println();
-            out.println(helpBody);
+            out.print(command.getCommand());
+
+            String[] aliases = command.getAliases();
+            int len = aliases.length;
+            if (len != 0)
+            {
+                out.print(" (");
+                for (int i = 0; i < len; i++ )
+                {
+                    if (i != 0) out.print(", ");
+                    out.print(aliases[i]);
+                }
+                out.print(")");
+            }
+        }
+
+
+        private void renderFullHelp(Command command, PrintWriter out)
+        {
+            String oneLiner = command.getHelpOneLiner();
+            if (oneLiner != null)
+            {
+                renderCommandAndAliases(command, out);
+                out.println();
+                //            out.print(": ");
+                out.print("  ");
+                out.println(oneLiner);
+                out.println();
+                out.print("Usage: ");
+                out.println(command.getHelpUsage());
+            }
+
+            String helpBody = command.getHelpBody();
+            if (helpBody != null)
+            {
+                out.println();
+                out.println(helpBody);
+            }
         }
     }
 }

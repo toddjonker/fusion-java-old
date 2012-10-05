@@ -2,6 +2,8 @@
 
 package com.amazon.fusion.cli;
 
+import com.amazon.fusion.cli.Command.Executor;
+
 class CommandFactory
 {
     public static final String APP_NAME = "fusion";
@@ -45,7 +47,7 @@ class CommandFactory
      *
      * @return <code>null</code> if the command-line is unusable.
      */
-    public static Command makeCommand(String[] commandLine)
+    public static Executor makeCommand(String[] commandLine)
     {
         if (commandLine.length == 0)
         {
@@ -60,28 +62,26 @@ class CommandFactory
         {
             System.err.println("Unknown command: '" + command + "'");
             System.err.println(TYPE_HELP_MSG);
+            return null;
         }
-        else
+
+        int argCount = commandLine.length - 1;
+        String[] args = new String[argCount];
+        System.arraycopy(commandLine, 1, args, 0, argCount);
+
+        Executor exec = cmd.prepare(args);
+        if (exec == null)
         {
-            int argCount = commandLine.length - 1;
-            String[] args = new String[argCount];
-            System.arraycopy(commandLine, 1, args, 0, argCount);
+            System.err.print("Usage: ");
+            System.err.println(cmd.getHelpUsage());
+            System.err.print("Type '" + APP_NAME + " help ");
+            System.err.print(command);
+            System.err.println("' for more information.");
 
-            boolean commandLineOk = cmd.prepare(args);
-
-            if (! commandLineOk)
-            {
-                System.err.print("Usage: ");
-                System.err.println(cmd.getHelpUsage());
-                System.err.print("Type '" + APP_NAME + " help ");
-                System.err.print(command);
-                System.err.println("' for more information.");
-
-                return null;
-            }
+            return null;
         }
 
-        return cmd;
+        return exec;
     }
 
     /**
@@ -97,9 +97,9 @@ class CommandFactory
             if (";".equals(commandLine[i])) {
                 int len = i-curStartPos;
                 if (len > 0) {
-                    Command cmd = doExecutePartial(commandLine,
-                                                   curStartPos,
-                                                   len);
+                    Executor cmd = doExecutePartial(commandLine,
+                                                    curStartPos,
+                                                    len);
                     if (cmd == null) {
                         success = false;
                     }
@@ -109,21 +109,21 @@ class CommandFactory
         }
         int len = commandLine.length-curStartPos;
         if (success) {
-            Command cmd = doExecutePartial(commandLine,
-                                           curStartPos,
-                                           len);
+            Executor cmd = doExecutePartial(commandLine,
+                                            curStartPos,
+                                            len);
             success = (cmd != null);
         }
         return success;
     }
 
-    private static Command doExecutePartial(String[] commandLine,
-                                            int start,
-                                            int len)
+    private static Executor doExecutePartial(String[] commandLine,
+                                             int start,
+                                             int len)
     {
         String[] partial = new String[len];
         System.arraycopy(commandLine, start, partial, 0, len);
-        Command cmd = makeCommand(partial);
+        Executor cmd = makeCommand(partial);
         if (cmd != null)
         {
             cmd.execute();
@@ -147,15 +147,9 @@ class CommandFactory
         }
 
         @Override
-        public boolean processArguments(String[] arguments)
+        public Executor processArguments(String[] arguments)
         {
-            return false;
-        }
-
-        @Override
-        public void execute()
-        {
-            // NO OP
+            return null;
         }
     }
 }

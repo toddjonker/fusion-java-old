@@ -4,6 +4,15 @@ package com.amazon.fusion.cli;
 
 abstract class Command
 {
+    interface Executor
+    {
+        /**
+         * Execute this command.
+         */
+        void execute();
+    }
+
+
     private final String   myCommand;
     private final String[] myAliases;
 
@@ -112,7 +121,7 @@ abstract class Command
     }
 
     //=========================================================================
-    // Command Processing Methods
+    // CLI Argument Processing Methods
 
     /**
      * Verify that the command string used to invoke the command matches
@@ -131,10 +140,11 @@ abstract class Command
 
     /**
      * Perform pre-processing, including in particular argument processing.
+     *
      * @param args to process
      * @return true if the command can be appropriately prepared for use
      */
-    boolean prepare(String[] args)
+    Executor prepare(String[] args)
     {
         String[] cmdArgs = extractOptions(args);
 
@@ -143,19 +153,14 @@ abstract class Command
 
 
     /**
-     * Parses the command-line arguments.
+     * Parses the command-line arguments to build a {@link Executor} for
+     * execution.
      * Note that any options (<em>i.e.</em>, arguments prefixed by
-     * <code>"--"</code>) will have already been extracted from the
-     * <code>arguments</code> array.
+     * {@code "--"}) will have already been extracted from the
+     * {@code arguments} array.
      *
      * @param arguments to parse
-     * @return true if the arguments are appropriate and sufficient.
+     * @return null if the arguments are inappropriate or insufficient.
      */
-    abstract boolean processArguments(String[] arguments);
-
-
-    /**
-     * Execute this command.
-     */
-    abstract void execute();
+    abstract Executor processArguments(String[] arguments);
 }
