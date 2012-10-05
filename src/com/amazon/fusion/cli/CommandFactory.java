@@ -88,6 +88,7 @@ class CommandFactory
      *
      */
     public static boolean executeCommandLine(String[] commandLine)
+        throws Exception
     {
         boolean success = true;
 
@@ -120,6 +121,7 @@ class CommandFactory
     private static Executor doExecutePartial(String[] commandLine,
                                              int start,
                                              int len)
+        throws Exception
     {
         String[] partial = new String[len];
         System.arraycopy(commandLine, start, partial, 0, len);

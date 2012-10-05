@@ -7,9 +7,11 @@ abstract class Command
     interface Executor
     {
         /**
-         * Execute this command.
+         * Execute this command.  Any exception that's thrown will cause the
+         * CLI to display the stack trace to {@link System#err}.
          */
-        void execute();
+        void execute()
+            throws Exception;
     }
 
 

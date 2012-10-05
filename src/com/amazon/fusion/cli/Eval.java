@@ -8,7 +8,6 @@ import com.amazon.fusion.FusionRuntime;
 import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.fusion.FusionValue;
 import com.amazon.fusion.SourceName;
-import com.amazon.ion.IonException;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.system.IonSystemBuilder;
@@ -65,30 +64,20 @@ final class Eval
 
         @Override
         public void execute()
+            throws Exception
         {
             try
             {
-                try
+                Object result = evalFile(myFileName);
+                if (result != FusionValue.UNDEF)
                 {
-                    Object result = evalFile(myFileName);
-                    if (result != FusionValue.UNDEF)
-                    {
-                        FusionValue.write(System.out, result);
-                        System.out.println();
-                    }
-                }
-                catch (ExitException e)
-                {
-                    // Do nothing.
-                }
-                catch (FusionException e)
-                {
-                    e.printStackTrace(System.err);
+                    FusionValue.write(System.out, result);
+                    System.out.println();
                 }
             }
-            catch (IOException e)
+            catch (ExitException e)
             {
-                throw new IonException(e);
+                // Do nothing, just return successfully.
             }
         }
 

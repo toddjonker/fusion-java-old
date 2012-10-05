@@ -11,7 +11,17 @@ public final class Cli
 {
     public static void main(String[] args) throws IOException
     {
-        boolean success = CommandFactory.executeCommandLine(args);
+        boolean success;
+
+        try
+        {
+            success = CommandFactory.executeCommandLine(args);
+        }
+        catch (Throwable e)
+        {
+            success = false;
+            e.printStackTrace(System.err);
+        }
 
         System.out.flush();
         System.err.flush();
