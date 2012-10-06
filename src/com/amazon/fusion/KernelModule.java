@@ -17,13 +17,14 @@ final class KernelModule
     static final String NAME = "#%kernel";
     static final ModuleIdentity IDENTITY = intern(NAME);
 
-    private final LoadHandler  myLoadHandler;
-    private final KeywordValue myModuleKeyword;
-    private final UseKeyword   myUseKeyword;
+    private final LoadHandler      myLoadHandler;
+    private final KeywordValue     myModuleKeyword;
+    private final UseKeyword       myUseKeyword;
+    private final DynamicParameter myCurrentNamespaceParam;
 
 
     KernelModule(IonSystem system, FusionRuntimeBuilder builder,
-                 ModuleNamespace ns)
+                 ModuleNamespace ns, Namespace currentNamespace)
         throws FusionException
     {
         super(IDENTITY, ns);
@@ -37,6 +38,8 @@ final class KernelModule
             new DynamicParameter(UNDEF);
         DynamicParameter currentModuleDeclareName =
             new DynamicParameter(UNDEF);
+        myCurrentNamespaceParam =
+            new DynamicParameter(currentNamespace);
         myLoadHandler =
             new LoadHandler(currentLoadRelativeDirectory, currentDirectory);
         ModuleNameResolver resolver =
@@ -57,15 +60,18 @@ final class KernelModule
             new ModuleKeyword(resolver, currentModuleDeclareName, ns);
         EvalFileKeyword evalFile =
             new EvalFileKeyword(myLoadHandler);
+        LoadProc loadProc = new LoadProc(myLoadHandler);
 
         ns.bind("begin", new BeginKeyword());    // Needed by hard-coded macro
         ns.bind("current_directory", currentDirectory);
+        ns.bind("current_namespace", myCurrentNamespaceParam);
         ns.bind("empty_stream", FusionValue.EMPTY_STREAM);
         ns.bind("eval_file", evalFile);
         ns.bind("if", new IfKeyword());          // Needed by hard-coded macro
         ns.bind("java_new", new JavaNewProc());
         ns.bind("lambda", new LambdaKeyword());  // Needed by hard-coded macro
         ns.bind("letrec", new LetrecKeyword());  // Needed by hard-coded macro
+        ns.bind("load", loadProc);
         ns.bind("module", myModuleKeyword);
         ns.bind("quote_syntax", new QuoteSyntaxKeyword()); // For fusion/syntax
         ns.bind("undef", FusionValue.UNDEF);
@@ -82,6 +88,11 @@ final class KernelModule
         provideEverything();
     }
 
+
+    DynamicParameter getCurrentNamespaceParameter()
+    {
+        return myCurrentNamespaceParam;
+    }
 
     LoadHandler getLoadHandler()
     {

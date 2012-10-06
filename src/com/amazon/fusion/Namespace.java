@@ -310,6 +310,14 @@ class Namespace
     }
 
 
+    void use(Evaluator eval, String modulePath)
+        throws FusionException
+    {
+        UseKeyword useKeyword = eval.findKernel().getUseKeyword();
+        SyntaxValue baseRef = SyntaxSymbol.make(modulePath);
+        useKeyword.use(eval, this, baseRef);
+    }
+
     void use(ModuleIdentity id)
     {
         ModuleInstance module = myRegistry.lookup(id);

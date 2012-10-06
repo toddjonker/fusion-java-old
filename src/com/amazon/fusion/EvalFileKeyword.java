@@ -7,7 +7,10 @@ import com.amazon.ion.IonString;
 /**
  * This is syntax because we currently evaluate the file in the invoker's
  * environment. That's not right but there's no access on anything else now.
+ *
+ * @deprecated Replaced by {@link LoadProc}.
  */
+@Deprecated
 final class EvalFileKeyword
     extends KeywordValue
 {

@@ -73,9 +73,7 @@ final class Evaluator
         throws FusionException
     {
         Namespace ns = new Namespace(registry);
-        UseKeyword useKeyword = findKernel().getUseKeyword();
-        SyntaxValue baseRef = SyntaxSymbol.make(modulePath);
-        useKeyword.use(this, ns, baseRef);
+        ns.use(this, modulePath);
         return ns;
     }
 
@@ -352,31 +350,77 @@ final class Evaluator
 
     //========================================================================
 
+    Namespace findCurrentNamespace()
+    {
+        DynamicParameter param = findKernel().getCurrentNamespaceParameter();
+        return (Namespace) param.currentValue(this);
+    }
+
+
+    private Evaluator parameterizeCurrentNamespace(Namespace ns)
+    {
+        if (ns == null) return this;
+
+        DynamicParameter param = findKernel().getCurrentNamespaceParameter();
+        return markedContinuation(param, ns);
+    }
+
 
     /**
-     * Equivalent to Racket's {@code eval} (but incomplete at the moment.)
+     * Calls the current evaluation handler, evaluating the given source
+     * within the current namespace.
+     *
+     * @see <a href="http://docs.racket-lang.org/reference/eval.html#%28def._%28%28quote._~23~25kernel%29._current-eval%29%29">
+         Racket's <code>eval</code></a>
      */
-    Object prepareAndEvalTopLevelForm(SyntaxValue source, Namespace ns)
+    Object callCurrentEval(SyntaxValue source)
         throws FusionException
     {
-        // TODO FUSION-44 handle (module ...) properly
-        source = ns.syntaxIntroduce(source);
-        source = source.expand(this, ns);
-        CompiledForm compiled = source.doCompile(this, ns);
+        Namespace ns = findCurrentNamespace();
+
+        // TODO this should partial-expand and splice begins
+
+        source = expand(ns, source);
+        CompiledForm compiled = compile(ns, source);
         source = null; // Don't hold garbage
+
         return eval(ns, compiled);
     }
 
 
-    // TODO FUSION-49 I'm not confident that 'Namespace' is correct here
-    // Maybe it is, assuming this is only for use at non-module top level.
-    Object prepareAndEval(Namespace env, SyntaxValue source)
+    /**
+     * Expands, compiles, and evaluates a single top-level form.
+     * <p>
+     * Equivalent to Racket's {@code eval} (but incomplete at the moment.)
+     *
+     * @param ns may be null to use {@link #findCurrentNamespace()}.
+     */
+    Object eval(SyntaxValue source, Namespace ns)
         throws FusionException
     {
-        source = source.expand(this, env);
-        CompiledForm compiled = source.doCompile(this, env);
-        source = null; // Don't hold garbage
-        return eval(env, compiled);
+        Evaluator eval = parameterizeCurrentNamespace(ns);
+
+        // TODO FUSION-44 handle (module ...) properly
+        source = eval.findCurrentNamespace().syntaxIntroduce(source);
+
+        // TODO this should be a tail call
+        return eval.callCurrentEval(source);
+    }
+
+
+    /**
+     * Like {@link #eval(SyntaxValue, Namespace)},
+     * but does not enrich the source's lexical context.
+     *
+     * @param ns may be null to use {@link #findCurrentNamespace()}.
+     */
+    Object evalSyntax(SyntaxValue source, Namespace ns)
+        throws FusionException
+    {
+        Evaluator eval = parameterizeCurrentNamespace(ns);
+
+        // TODO this should be a tail call
+        return eval.callCurrentEval(source);
     }
 
 

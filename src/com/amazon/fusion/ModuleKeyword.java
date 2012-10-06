@@ -167,7 +167,7 @@ final class ModuleKeyword
                             try
                             {
                                 expanded =
-                                    expanded.expand(eval, moduleNamespace);
+                                    eval.expand(moduleNamespace, expanded);
                                 // TODO this is getting compiled twice
                                 CompiledForm compiled =
                                     eval.compile(moduleNamespace, expanded);
@@ -185,8 +185,7 @@ final class ModuleKeyword
                         {
                             try
                             {
-                                eval.prepareAndEvalTopLevelForm(expanded,
-                                                                moduleNamespace);
+                                eval.evalSyntax(expanded, moduleNamespace);
                             }
                             catch (FusionException e)
                             {

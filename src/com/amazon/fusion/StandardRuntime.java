@@ -25,12 +25,15 @@ final class StandardRuntime
 
         try
         {
+            Namespace topNs = new Namespace(myRegistry);
             ModuleNamespace ns = new ModuleNamespace(myRegistry,
                                                      KernelModule.IDENTITY);
-            ModuleInstance kernel = new KernelModule(mySystem, builder, ns);
+            ModuleInstance kernel = new KernelModule(mySystem, builder, ns,
+                                                     topNs);
             myRegistry.register(kernel);
 
-            myTopLevel = makeTopLevel();
+            myTopLevel = new StandardTopLevel(mySystem, myRegistry,
+                                              topNs, "fusion/base");
         }
         catch (FusionException e)
         {

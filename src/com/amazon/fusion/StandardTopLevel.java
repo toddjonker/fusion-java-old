@@ -18,13 +18,22 @@ final class StandardTopLevel
 
     StandardTopLevel(IonSystem system,
                      ModuleRegistry registry,
+                     Namespace namespace,
                      String initialModulePath)
         throws FusionException
     {
         mySystem    = system;
         myEvaluator = new Evaluator(mySystem, registry);
-        myNamespace =
-            myEvaluator.newNamespaceWithLanguage(registry, initialModulePath);
+        myNamespace = namespace;
+        namespace.use(myEvaluator, initialModulePath);
+    }
+
+    StandardTopLevel(IonSystem system,
+                     ModuleRegistry registry,
+                     String initialModulePath)
+        throws FusionException
+    {
+        this(system, registry, new Namespace(registry), initialModulePath);
     }
 
 
@@ -59,7 +68,7 @@ final class StandardTopLevel
         while (source.next() != null)
         {
             SyntaxValue sourceExpr = Syntax.read(source, name);
-            result = myEvaluator.prepareAndEvalTopLevelForm(sourceExpr, myNamespace);
+            result = myEvaluator.eval(sourceExpr, myNamespace);
         }
 
         return result;

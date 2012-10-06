@@ -56,7 +56,8 @@ final class LoadHandler
      * Reads top-level syntax forms from a file, evaluating each in sequence.
      *
      * @param eval
-     * @param namespace
+     * @param namespace may be null, to use
+     *   {@link Evaluator#findCurrentNamespace()}.
      * @param path the file to read; may be relative, in which case it is
      * resolved relative to the {@code current_directory} parameter.
 
@@ -80,7 +81,7 @@ final class LoadHandler
                 {
                     result = null;  // Don't hold onto garbage
                     SyntaxValue fileExpr = Syntax.read(reader, name);
-                    result = eval.prepareAndEvalTopLevelForm(fileExpr, namespace);
+                    result = eval.eval(fileExpr, namespace);
                     // TODO tail call handling
                 }
 
@@ -203,10 +204,7 @@ final class LoadHandler
             // TODO Do we need an Evaluator with no continuation marks?
             // This namespace ensures correct binding for 'module'
 
-            ModuleRegistry reg = eval.getModuleRegistry();
-            Namespace namespace = new Namespace(reg);
-            Object result = // TODO use evalTopLevel ?
-                bodyEval.prepareAndEval(namespace, moduleDeclaration);
+            Object result = bodyEval.callCurrentEval(moduleDeclaration);
             // TODO tail call handling
             return (ModuleInstance) result;
         }
