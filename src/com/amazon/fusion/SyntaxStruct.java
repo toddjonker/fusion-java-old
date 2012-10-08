@@ -39,6 +39,19 @@ final class SyntaxStruct
     }
 
 
+    static SyntaxStruct make(String[] names, SyntaxValue[] values,
+                             String[] anns)
+    {
+        Map<String, Object> map = new HashMap<String, Object>(names.length);
+        for (int i = 0; i < names.length; i++)
+        {
+            map.put(names[i], values[i]);
+        }
+
+        return new SyntaxStruct(map, anns, null, null);
+    }
+
+
     @Override
     boolean isNullValue()
     {

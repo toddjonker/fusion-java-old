@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -21,6 +22,12 @@ final class SyntaxInt
     static SyntaxInt make(BigInteger value, String[] anns, SourceLocation loc)
     {
         return new SyntaxInt(value, anns, loc);
+    }
+
+    static SyntaxInt make(int value)
+    {
+        return new SyntaxInt(BigInteger.valueOf(value),
+                             EMPTY_STRING_ARRAY, null);
     }
 
 

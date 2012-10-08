@@ -5,7 +5,6 @@ package com.amazon.fusion;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static java.lang.Boolean.TRUE;
 import com.amazon.fusion.Namespace.TopBinding;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -227,16 +226,24 @@ final class ModuleKeyword
 
         SyntaxValue[] subforms =
             new SyntaxValue[4 + otherForms.size() + provideForms.size()];
-        subforms[0] = source.get(0); // module
-        subforms[1] = source.get(1); // name
-        subforms[2] = source.get(2); // language
+
+        int i = 0;
+        subforms[i++] = source.get(0); // module
+        subforms[i++] = source.get(1); // name
+        subforms[i++] = source.get(2); // language
 
         // FIXME a ludicrous hack to communicate this data to the compiler!
-        int variableCount = moduleNamespace.getBindings().size();
-        subforms[3] = SyntaxInt.make(BigInteger.valueOf(variableCount),
-                                     new String[] { "InjectedModuleVarCount" },
-                                     null);
-        int i = 4;
+        {
+            SyntaxInt variableCount =
+                SyntaxInt.make(moduleNamespace.getBindings().size());
+
+            SyntaxStruct meta =
+                SyntaxStruct.make(new String[] { "variable_count" },
+                                  new SyntaxValue[] { variableCount },
+                                  new String[] { "InjectedMetadata" });
+
+            subforms[i++] = meta;
+        }
 
         Iterator<Boolean> prepared = preparedFormFlags.iterator();
         for (SyntaxValue stx : otherForms)
@@ -283,12 +290,14 @@ final class ModuleKeyword
         // See Racket reference 11.9.1
         // http://docs.racket-lang.org/reference/Expanding_Top-Level_Forms.html#%28part._modinfo%29
 
+        SyntaxStruct meta = (SyntaxStruct) expr.get(3);
+
         ArrayList<SyntaxSexp> provideForms = new ArrayList<SyntaxSexp>();
         ArrayList<CompiledForm> otherForms = new ArrayList<CompiledForm>();
 
         int variableCount;
         {
-            SyntaxInt form = (SyntaxInt) expr.get(3);
+            SyntaxInt form = (SyntaxInt) meta.get("variable_count");
             variableCount = form.bigIntegerValue().intValue();
         }
 
