@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
@@ -16,6 +17,11 @@ final class SyntaxString
     static SyntaxString make(String value, String[] anns, SourceLocation loc)
     {
         return new SyntaxString(value, anns, loc);
+    }
+
+    static SyntaxString make(String value)
+    {
+        return new SyntaxString(value, EMPTY_STRING_ARRAY, null);
     }
 
 

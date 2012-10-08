@@ -91,4 +91,20 @@ public class ModuleTest
         expectSyntaxFailure("(use (lib 'fusion/list'))");
         expectSyntaxFailure("(use (lib fusion/list))");
     }
+
+    @Test
+    public void testModuleAtTopLevel()
+        throws Exception
+    {
+        eval("(module mod 'fusion/base'" +
+             "  (define M 1054)" +
+            "   (define N (lambda () (+ 1 M)))" +
+             "  (provide M N))");
+        expectSyntaxFailure("M");
+
+        expectFusionException("(use mod)");
+
+        eval("(use (quote mod))");
+        assertEval(1054, "M");
+    }
 }

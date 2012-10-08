@@ -67,15 +67,16 @@ final class ModuleKeyword
         String declaredName = moduleNameSymbol.stringValue();
         // TODO check null/empty
 
-        SyntaxValue initialBindingsStx =
-            check.requiredForm("initial module path", 2);
 
         ModuleRegistry registry = envOutsideModule.namespace().getRegistry();
 
+        ModuleIdentity initialBindingsId;
         ModuleInstance language;
         try
         {
-            ModuleIdentity initialBindingsId =
+            SyntaxValue initialBindingsStx =
+                check.requiredForm("initial module path", 2);
+            initialBindingsId =
                 myModuleNameResolver.resolve(eval, initialBindingsStx);
             language = registry.lookup(initialBindingsId);
         }
@@ -237,9 +238,19 @@ final class ModuleKeyword
             SyntaxInt variableCount =
                 SyntaxInt.make(moduleNamespace.getBindings().size());
 
+            SyntaxString identity =
+                SyntaxString.make(id.internString());
+
+            SyntaxString languageIdentity =
+                SyntaxString.make(initialBindingsId.internString());
+
             SyntaxStruct meta =
-                SyntaxStruct.make(new String[] { "variable_count" },
-                                  new SyntaxValue[] { variableCount },
+                SyntaxStruct.make(new String[] { "variable_count",
+                                                 "identity",
+                                                 "language_identity" },
+                                  new SyntaxValue[] { variableCount,
+                                                      identity,
+                                                      languageIdentity },
                                   new String[] { "InjectedMetadata" });
 
             subforms[i++] = meta;
@@ -282,7 +293,8 @@ final class ModuleKeyword
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp expr)
+    CompiledForm compile(Evaluator eval, Environment envOutsideModule,
+                         SyntaxSexp source)
         throws FusionException
     {
         // TODO We repeat work here that was done during expansion.
@@ -290,10 +302,27 @@ final class ModuleKeyword
         // See Racket reference 11.9.1
         // http://docs.racket-lang.org/reference/Expanding_Top-Level_Forms.html#%28part._modinfo%29
 
-        SyntaxStruct meta = (SyntaxStruct) expr.get(3);
+        SyntaxStruct meta = (SyntaxStruct) source.get(3);
 
-        ArrayList<SyntaxSexp> provideForms = new ArrayList<SyntaxSexp>();
-        ArrayList<CompiledForm> otherForms = new ArrayList<CompiledForm>();
+        ModuleIdentity id;
+        {
+            SyntaxText form = (SyntaxText) meta.get("identity");
+            String identity = form.stringValue();
+            id = ModuleIdentity.intern(identity);
+        }
+
+        Namespace moduleNamespace;
+        {
+            SyntaxText form = (SyntaxText) meta.get("language_identity");
+            String identity = form.stringValue();
+            ModuleIdentity languageId = ModuleIdentity.intern(identity);
+
+            ModuleRegistry registry =
+                envOutsideModule.namespace().getRegistry();
+            ModuleInstance language = registry.lookup(languageId);
+
+            moduleNamespace = new ModuleNamespace(registry, language, id);
+        }
 
         int variableCount;
         {
@@ -301,9 +330,12 @@ final class ModuleKeyword
             variableCount = form.bigIntegerValue().intValue();
         }
 
-        for (int i = 4; i < expr.size(); i++)
+        ArrayList<SyntaxSexp> provideForms = new ArrayList<SyntaxSexp>();
+        ArrayList<CompiledForm> otherForms = new ArrayList<CompiledForm>();
+
+        for (int i = 4; i < source.size(); i++)
         {
-            SyntaxValue form = expr.get(i);
+            SyntaxValue form = source.get(i);
             SyntaxSexp provide = formIsProvide(form);
             if (provide != null)
             {
@@ -311,7 +343,7 @@ final class ModuleKeyword
             }
             else
             {
-                CompiledForm compiled = eval.compile(env, form);
+                CompiledForm compiled = eval.compile(moduleNamespace, form);
                 otherForms.add(compiled);
             }
         }
@@ -320,9 +352,6 @@ final class ModuleKeyword
 
         CompiledForm[] otherFormsArray =
             otherForms.toArray(new CompiledForm[otherForms.size()]);
-
-        String declaredName = ((SyntaxSymbol) expr.get(1)).stringValue();
-        ModuleIdentity id = determineIdentity(eval, declaredName);
 
         return new CompiledModule(id, variableCount,
                                   providedIdentifiers, otherFormsArray);
