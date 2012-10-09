@@ -355,6 +355,13 @@ class Namespace
         return null;
     }
 
+    Object lookup(String name)
+    {
+        Binding b = resolve(name);
+        return lookup(b);
+    }
+
+
     @Override
     public Object lookup(int address)
     {

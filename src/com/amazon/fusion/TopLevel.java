@@ -114,10 +114,35 @@ public interface TopLevel
 
 
     /**
+     * Imports the bindings from a named module into this namespace.
+     *
+     * @param moduleIdentifier names the required module.
+     */
+    public void requireModule(String moduleIdentifier)
+        throws FusionException;
+
+
+    /**
      * Binds an identifier with a value in this namespace.
      *
      * @param value must be of a type supported by the Fusion runtime.
      * Must not be null.
      */
     public void define(String name, Object value);
+
+
+    /**
+     * Calls a Fusion procedure by name.
+     *
+     * @param procedureName must name a visible procedure, either defined in
+     * this namespace or imported from a module.
+     *
+     * @param arguments must be Fusion values created by the related runtime.
+     *
+     * @return the resulting Fusion value; typically the value of the last
+     * expression in the source. May be null (if no value results) or an
+     * {@code Object[]} (if there are multiple values).
+     */
+    public Object call(String procedureName, Object... arguments)
+        throws FusionException;
 }

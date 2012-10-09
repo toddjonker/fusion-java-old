@@ -3,6 +3,8 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionValue.UNDEF;
+import static com.amazon.fusion.FusionValue.writeToString;
+import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
 import java.io.File;
@@ -94,8 +96,40 @@ final class StandardTopLevel
 
 
     @Override
+    public void requireModule(String moduleIdentifier)
+        throws FusionException
+    {
+        myNamespace.use(myEvaluator, moduleIdentifier);
+    }
+
+
+    @Override
     public void define(String name, Object value)
     {
         myNamespace.bind(name, value);
+    }
+
+
+    @Override
+    public Object call(String procedureName, Object... arguments)
+        throws FusionException
+    {
+        SyntaxSymbol id = SyntaxSymbol.make(procedureName);
+
+        Object proc = myEvaluator.eval(id, myNamespace);
+        if (proc instanceof Procedure)
+        {
+            return myEvaluator.callNonTail((Procedure) proc, arguments);
+        }
+
+        if (proc == null)
+        {
+            throw new FusionException(printQuotedSymbol(procedureName) +
+                                      " is not defined");
+        }
+
+        throw new FusionException(printQuotedSymbol(procedureName) +
+                                  " is not a procedure: " +
+                                  writeToString(proc));
     }
 }
