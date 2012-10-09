@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * This class must be thread-safe.
  */
 final class ModuleRegistry
 {
@@ -14,7 +14,7 @@ final class ModuleRegistry
         new HashMap<ModuleIdentity,ModuleInstance>();
 
 
-    ModuleInstance lookup(ModuleIdentity identity)
+    synchronized ModuleInstance lookup(ModuleIdentity identity)
     {
         return myModules.get(identity);
     }
@@ -23,7 +23,7 @@ final class ModuleRegistry
      * @throws ContractFailure if a module is already registered with the same
      * {@link ModuleIdentity}.
      */
-    void register(ModuleInstance instance)
+    synchronized void register(ModuleInstance instance)
         throws FusionException, ContractFailure
     {
         ModuleIdentity id = instance.getIdentity();

@@ -99,8 +99,7 @@ final class LoadHandler
     }
 
 
-    private SyntaxValue readSingleTopLevelValue(Evaluator eval,
-                                                ModuleIdentity id)
+    private SyntaxValue readModuleSyntax(Evaluator eval, ModuleIdentity id)
         throws FusionException
     {
         try
@@ -143,7 +142,7 @@ final class LoadHandler
     private SyntaxSexp readModuleDeclaration(Evaluator eval, ModuleIdentity id)
         throws FusionException
     {
-        SyntaxValue topLevel = readSingleTopLevelValue(eval, id);
+        SyntaxValue topLevel = readModuleSyntax(eval, id);
         try {
             SyntaxSexp moduleDeclaration = (SyntaxSexp) topLevel;
             if (moduleDeclaration.size() > 1)
@@ -158,8 +157,8 @@ final class LoadHandler
         }
         catch (ClassCastException e) { /* fall through */ }
 
-        String message = "Top-level form isn't (module ...): " + id;
-        throw new FusionException(message);
+        String message = "Top-level form isn't (module ...)";
+        throw new SyntaxFailure("load handler", message, topLevel);
     }
 
     private SyntaxSexp wrapModuleKeywordWithKernalBindings(Evaluator eval,
@@ -179,7 +178,7 @@ final class LoadHandler
     /**
      *
      */
-    ModuleInstance loadModule(Evaluator eval, ModuleIdentity id)
+    void loadModule(Evaluator eval, ModuleIdentity id)
         throws FusionException
     {
         try
@@ -204,9 +203,8 @@ final class LoadHandler
             // TODO Do we need an Evaluator with no continuation marks?
             // This namespace ensures correct binding for 'module'
 
-            Object result = bodyEval.callCurrentEval(moduleDeclaration);
+            bodyEval.callCurrentEval(moduleDeclaration);
             // TODO tail call handling
-            return (ModuleInstance) result;
         }
         catch (FusionException e)
         {

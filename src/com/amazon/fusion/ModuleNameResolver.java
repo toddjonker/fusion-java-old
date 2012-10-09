@@ -144,14 +144,19 @@ final class ModuleNameResolver
         // TODO Need a way to resolve only, avoid loading, as per Racket.
 
         ModuleRegistry reg = eval.getModuleRegistry();
-        if (reg.lookup(id) == null)
+
+        // Ensure that we don't try to load the module twice simultaneously.
+        // TODO FUSION-73 This is probably far too coarse-grained in general.
+        synchronized (reg)
         {
-            Object idString = eval.newString(id.internString());
-            Evaluator loadEval =
-                eval.markedContinuation(myCurrentModuleDeclareName, idString);
-            ModuleInstance module =
+            if (reg.lookup(id) == null)
+            {
+                Object idString = eval.newString(id.internString());
+                Evaluator loadEval =
+                    eval.markedContinuation(myCurrentModuleDeclareName, idString);
                 myLoadHandler.loadModule(loadEval, id);
-            reg.register(module);
+                // Evaluation of 'module' registers the ModuleInstance
+            }
         }
 
         return id;
