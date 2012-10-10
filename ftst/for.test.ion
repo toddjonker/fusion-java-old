@@ -2,34 +2,34 @@
 
 (use check)
 
-(check_list_eq
+(check_list_equal
   (for_list () 73)
   [])
 
 
-(check_list_eq
+(check_list_equal
   (for_list ((e [])) /* no body */)
   [])
 
-(check_list_eq
+(check_list_equal
   (for_list ((e [])) 73)
   [])
 
-(check_list_eq
+(check_list_equal
   (for_list ((e [1])) 73)
   [73])
 
-(check_list_eq
+(check_list_equal
   (for_list ((e [1])) e)
   [1])
 
-(check_list_eq
+(check_list_equal
   (for_list ((e [1, 2, 3])
              (f [1, 2, 3]))
     (+ e f))
   [2, 4, 6])
 
-(check_list_eq
+(check_list_equal
   (for_list ((e [1, 2, 3])
              (f [1, 2]))
     (+ e f))
@@ -37,7 +37,7 @@
 
 
 // Sexp works too
-(check_list_eq
+(check_list_equal
   (for_list ((e (quote (1 2)))
              (f [1, 2, 3]))
     (+ e f))
@@ -45,13 +45,13 @@
 
 
 // Macro in bound-value position
-(check_list_eq
+(check_list_equal
   (for_list ((e (let ((list [1])) list))) (+ e 73))
   [74])
 
 
 // Macro in body position
-(check_list_eq
+(check_list_equal
   (for_list ((e [1])) (let ((v 73)) (+ e 73)))
   [74])
 

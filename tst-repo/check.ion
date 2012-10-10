@@ -2,22 +2,23 @@
 
 (module check 'fusion/base'
 
+  (use 'fusion/experimental/defines')
   (use 'fusion/ion')
 
 
-  (define check_equal
+  (defpub check_equal
     (lambda (actual expected descr)
       (cond
         ((is_undef expected)
          (assert (is_undef actual)
            descr " not equal.\nActual: " actual "\nExpected: " expected))
         ((is_list expected)
-         (check_list_eq actual expected))
+         (check_list_equal actual expected))
         (true
          (assert (= actual expected)
            descr " not equal.\nActual: " actual "\nExpected: " expected)))))
 
-  (define check_list_eq  // TODO bad name  TODO doesn't handle deep values
+  (defpub check_list_equal
     (lambda (actual expected)
       (assert (= (size actual) (size expected))
         "list lengths don't match. Actual: " actual " Expected: " expected)
@@ -26,11 +27,9 @@
           (check_equal (. actual i) (. expected i) "list element") // TODO bad descr
           (loop (+ 1 i))))))
 
-  (define check_annotations
+  (defpub check_annotations
     (lambda (value expected)
       (let ((anns (ion_annotations value)))
-        (check_list_eq anns expected))))
+        (check_list_equal anns expected))))
 
-
-  (provide check_annotations check_equal check_list_eq)
 )
