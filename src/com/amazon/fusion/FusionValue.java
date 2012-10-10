@@ -8,7 +8,6 @@ import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonString;
-import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
@@ -567,8 +566,7 @@ public abstract class FusionValue
         if (value instanceof IonValue)
         {
             IonValue iv = (IonValue) value;
-            // TODO FUSION-67 ION-125 should be able to clone via ValueFactory
-            return ((IonSystem)factory).clone(iv);
+            return factory.clone(iv);
         }
 
         if (isVector(value))
@@ -598,8 +596,7 @@ public abstract class FusionValue
         if (value instanceof IonValue)
         {
             IonValue iv = (IonValue) value;
-            // TODO FUSION-67 ION-125 should be able to clone via ValueFactory
-            return ((IonSystem)factory).clone(iv);
+            return factory.clone(iv);
         }
 
         if (isVector(value))
