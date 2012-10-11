@@ -8,7 +8,7 @@ package com.amazon.fusion;
  * Random number generator
  */
 final class RandomProc
-    extends Procedure
+    extends Procedure0
 {
     RandomProc()
     {
@@ -17,11 +17,9 @@ final class RandomProc
     }
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval)
         throws FusionException
     {
-        checkArityExact(args);
-
         double result = Math.random();
 
         return eval.newDecimal(result);

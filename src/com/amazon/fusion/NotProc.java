@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 final class NotProc
-    extends Procedure
+    extends Procedure1
 {
     NotProc()
     {
@@ -14,11 +14,10 @@ final class NotProc
     }
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        checkArityExact(args);
-        boolean b = checkBoolArg(0, args);
+        boolean b = checkBoolArg(0, arg);
         return eval.newBool(! b);
     }
 }

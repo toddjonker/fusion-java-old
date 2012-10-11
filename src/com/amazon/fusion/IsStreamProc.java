@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 final class IsStreamProc
-    extends Procedure
+    extends Procedure1
 {
     IsStreamProc()
     {
@@ -14,11 +14,10 @@ final class IsStreamProc
     }
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        checkArityExact(args);
-        boolean b = (args[0] instanceof Stream);
+        boolean b = (arg instanceof Stream);
         return eval.newBool(b);
     }
 }

@@ -6,7 +6,7 @@ import static com.amazon.fusion.FusionVector.isVector;
 import com.amazon.ion.IonList;
 
 final class IterateListProc
-    extends Procedure
+    extends Procedure1
 {
     IterateListProc()
     {
@@ -15,17 +15,15 @@ final class IterateListProc
     }
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        checkArityExact(args);
-
-        if (isVector(eval, args[0]))
+        if (isVector(eval, arg))
         {
-            return Iterators.iterate(FusionVector.unsafeJavaIterate(args[0]));
+            return Iterators.iterate(FusionVector.unsafeJavaIterate(arg));
         }
 
-        IonList ionList = checkIonListArg(0, args);
+        IonList ionList = checkIonListArg(0, arg);
 
         return Iterators.iterateIonSequence(ionList);
     }

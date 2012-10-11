@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 final class IsUndefProc
-    extends Procedure
+    extends Procedure1
 {
     IsUndefProc()
     {
@@ -13,11 +13,10 @@ final class IsUndefProc
     }
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        checkArityExact(args);
-        boolean isUndef = (args[0] == UNDEF);
+        boolean isUndef = (arg == UNDEF);
         return eval.newBool(isUndef);
     }
 }

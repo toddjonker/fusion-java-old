@@ -14,25 +14,24 @@ import java.math.RoundingMode;
  * Returns the largest number smaller than or equal to the input number
  */
 final class FloorProc
-    extends Procedure
+    extends Procedure1
 {
     FloorProc()
     {
         //    "                                                                               |
-        super("Returns the largest number smaller than or equal to the input number");
+        super("Returns the largest number smaller than or equal to the input number",
+              "number");
     }
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval, Object arg0)
         throws FusionException
     {
-        checkArityExact(1,args);
-
-        IonValue arg = FusionValue.castToIonValueMaybe(args[0]);
+        IonValue arg = FusionValue.castToIonValueMaybe(arg0);
 
         if (arg instanceof IonInt)
         {
-            return args[0];
+            return arg0;
         }
 
         if (arg instanceof IonDecimal)

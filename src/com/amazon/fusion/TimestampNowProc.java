@@ -1,26 +1,24 @@
 package com.amazon.fusion;
 
-import com.amazon.ion.IonTimestamp;
+import com.amazon.ion.Timestamp;
 
 /*
  * Generates the current timestamp
  */
 final class TimestampNowProc
-    extends Procedure
+    extends Procedure0
 {
     TimestampNowProc()
     {
-        super("Generates the current timestamp");
+        //    "                                                                               |
+        super("Returns a timestamp representing \"now\".");
     }
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval)
         throws FusionException
     {
-        checkArityExact(args);
-
-        IonTimestamp ionTime = eval.getSystem().newCurrentUtcTimestamp();
-
-        return eval.inject(ionTime);
+        Timestamp now = Timestamp.now();
+        return eval.newTimestamp(now);
     }
 }

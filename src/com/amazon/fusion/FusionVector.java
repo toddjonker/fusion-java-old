@@ -437,7 +437,7 @@ final class FusionVector
 
 
     static final class UnsafeVectorRefProc
-        extends Procedure
+        extends Procedure2
     {
         UnsafeVectorRefProc()
         {
@@ -447,13 +447,10 @@ final class FusionVector
         }
 
         @Override
-        Object doApply(Evaluator eval, Object[] args)
+        Object doApply(Evaluator eval, Object vector, Object posArg)
             throws FusionException
         {
-            checkArityExact(args);
-
-            BaseVector vector = (BaseVector) args[0];
-            int pos = ((IonInt) args[1]).intValue();
+            int pos = ((IonInt) posArg).intValue();
 
             return unsafeVectorRef(eval, vector, pos);
         }
@@ -488,7 +485,7 @@ final class FusionVector
 
 
     static final class UnsafeVectorAddProc
-        extends Procedure
+        extends Procedure2
     {
         UnsafeVectorAddProc()
         {
@@ -498,14 +495,10 @@ final class FusionVector
         }
 
         @Override
-        Object doApply(Evaluator eval, Object[] args)
+        Object doApply(Evaluator eval, Object vector, Object value)
             throws FusionException
         {
-            checkArityExact(args);
-
-            BaseVector vector = (BaseVector) args[0];
-
-            return unsafeVectorAdd(eval, vector, args[1]);
+            return unsafeVectorAdd(eval, vector, value);
         }
     }
 }

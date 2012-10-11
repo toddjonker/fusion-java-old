@@ -8,7 +8,7 @@ import com.amazon.ion.IonType;
  * Implements all the {@code is_TYPE} procedures for the Ion types.
  */
 final class IonTypeCheckingProc
-    extends Procedure
+    extends Procedure1
 {
     private final IonType myType;
 
@@ -24,12 +24,10 @@ final class IonTypeCheckingProc
     }
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        checkArityExact(args);
-        Object fv = args[0];
-        boolean result = (FusionValue.ionType(fv) == myType);
+        boolean result = (FusionValue.ionType(arg) == myType);
         return eval.newBool(result);
     }
 }

@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 final class IsNullProc
-    extends Procedure
+    extends Procedure1
 {
     IsNullProc()
     {
@@ -13,12 +13,10 @@ final class IsNullProc
     }
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        checkArityExact(args);
-
-        boolean isNull = FusionValue.isAnyIonNull(args[0]);
+        boolean isNull = FusionValue.isAnyIonNull(arg);
         return eval.newBool(isNull);
     }
 }

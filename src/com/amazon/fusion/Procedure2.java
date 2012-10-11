@@ -1,0 +1,28 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+package com.amazon.fusion;
+
+/**
+ * A procedure of exactly two arguments.
+ * This class performs arity checking before invoking the subclass
+ * implementation of {@link #doApply(Evaluator, Object, Object)}.
+ */
+abstract class Procedure2
+    extends Procedure
+{
+    Procedure2(String doc, String arg0Name, String arg1Name)
+    {
+        super(doc, arg0Name, arg1Name);
+    }
+
+    abstract Object doApply(Evaluator eval, Object arg0, Object arg1)
+        throws FusionException;
+
+    @Override
+    final Object doApply(Evaluator eval, Object[] args)
+        throws FusionException
+    {
+        checkArityExact(2, args);
+        return doApply(eval, args[0], args[1]);
+    }
+}

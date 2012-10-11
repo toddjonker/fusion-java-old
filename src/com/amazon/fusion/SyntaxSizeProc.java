@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 final class SyntaxSizeProc
-    extends Procedure
+    extends Procedure1
 {
     SyntaxSizeProc()
     {
@@ -14,11 +14,10 @@ final class SyntaxSizeProc
     }
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        checkArityExact(1, args);
-        SyntaxSequence c = checkSyntaxSequenceArg(0, args);
+        SyntaxSequence c = checkSyntaxSequenceArg(0, arg);
         return eval.newInt(c.size());
     }
 }
