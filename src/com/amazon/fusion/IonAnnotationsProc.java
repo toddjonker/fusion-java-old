@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSystem;
+import static com.amazon.fusion.FusionVector.makeImmutableVectorFrom;
 import com.amazon.ion.IonValue;
 
 final class IonAnnotationsProc
@@ -11,8 +11,8 @@ final class IonAnnotationsProc
     IonAnnotationsProc()
     {
         //    "                                                                               |
-        super("Returns a non-null list of strings containing the user type annotations on the\n" +
-              "VALUE.",
+        super("Returns a non-null immutable vector of strings containing the user type\n" +
+              "annotations on the VALUE.",
               "value");
     }
 
@@ -26,8 +26,6 @@ final class IonAnnotationsProc
 
         if (value != null)
         {
-            IonSystem system = eval.getSystem();
-
             String[] anns = value.getTypeAnnotations();
             int length = anns.length;
             if (length != 0)
@@ -35,11 +33,13 @@ final class IonAnnotationsProc
                 result = new Object[length];
                 for (int i = 0; i < length; i++)
                 {
-                    result[i] = system.newString(anns[i]);
+                    result[i] = eval.newString(anns[i]);
                 }
             }
         }
 
-        return eval.inject(result);
+        // Returning immutable vector allows us to return a shared structure
+        // when possible, avoiding copies.
+        return makeImmutableVectorFrom(eval, result);
     }
 }
