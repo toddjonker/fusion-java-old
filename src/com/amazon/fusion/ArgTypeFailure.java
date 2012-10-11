@@ -39,6 +39,17 @@ final class ArgTypeFailure
     /**
      * @param badPos the zero-based index of the problematic value.
      *   -1 means a specific position isn't implicated.
+     * @param actual must not be null.
+     */
+    ArgTypeFailure(String name, String expectation,
+                   int badPos, Object actual)
+    {
+        this(name, expectation, badPos, new Object[] { actual });
+    }
+
+    /**
+     * @param badPos the zero-based index of the problematic value.
+     *   -1 means a specific position isn't implicated.
      * @param actuals must not be null or zero-length.
      */
     ArgTypeFailure(NamedValue name, String expectation,
