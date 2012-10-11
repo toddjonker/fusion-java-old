@@ -30,20 +30,7 @@ public class IoTest
         assertEval("\"hello\"",
                    "(parameterize" +
                    "  ((current_directory " + printString(newDir) + "))" +
-                   "  (eval_file \"hello.ion\"))");
-
-        assertEval("\"hello\"",
-                   "(parameterize" +
-                   "  ((current_directory " + printString(newDir) + "))" +
                    "  (load \"hello.ion\"))");
-    }
-
-    @Test
-    public void testCurrentNamespace()
-        throws Exception
-    {
-        eval("(eval_file \"tst-data/trivialDefine.ion\")");
-        assertEval(3328, "x");
     }
 
     @Test
@@ -52,16 +39,6 @@ public class IoTest
     {
         eval("(load \"tst-data/trivialDefine.ion\")");
         assertEval(3328, "x");
-    }
-
-    @Test
-    public void testEvalFileSyntax()
-        throws Exception
-    {
-        expectSyntaxFailure("(eval_file)");
-        expectSyntaxFailure("(eval_file \"x\" \"y\")");
-
-        expectContractFailure("(eval_file 12)");
     }
 
     @Test

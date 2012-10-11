@@ -7,7 +7,7 @@
 
 
   // Pass-through bindings from #%kernel
-  (provide begin current_directory define eval_file
+  (provide begin current_directory define
     if lambda letrec load module undef use)
   (provide is_bool is_int is_float is_decimal is_timestamp is_symbol
       is_string is_clob is_blob is_list is_sexp is_struct)

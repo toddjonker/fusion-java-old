@@ -58,15 +58,12 @@ final class KernelModule
 
         myModuleKeyword =
             new ModuleKeyword(resolver, currentModuleDeclareName, ns);
-        EvalFileKeyword evalFile =
-            new EvalFileKeyword(myLoadHandler);
         LoadProc loadProc = new LoadProc(myLoadHandler);
 
         ns.bind("begin", new BeginKeyword());    // Needed by hard-coded macro
         ns.bind("current_directory", currentDirectory);
         ns.bind("current_namespace", myCurrentNamespaceParam);
         ns.bind("empty_stream", FusionValue.EMPTY_STREAM);
-        ns.bind("eval_file", evalFile);
         ns.bind("if", new IfKeyword());          // Needed by hard-coded macro
         ns.bind("java_new", new JavaNewProc());
         ns.bind("lambda", new LambdaKeyword());  // Needed by hard-coded macro
