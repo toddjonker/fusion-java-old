@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonValue;
-import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -19,14 +18,6 @@ final class Iterators
     static Object iterate(Iterator<?> iterator)
     {
         return new IteratorAdaptor(iterator);
-    }
-
-
-    // TODO specified whether array elements need injecting
-    static Object iterate(Object[] array)
-    {
-        // TODO optimize this
-        return new IteratorAdaptor(Arrays.asList(array).iterator());
     }
 
 
@@ -73,6 +64,7 @@ final class Iterators
     {
         private final Iterator<?> myIterator;
 
+        /** Iterated values must not need injecting. */
         IteratorAdaptor(Iterator<?> iter)
         {
             myIterator = iter;
@@ -87,7 +79,7 @@ final class Iterators
         @Override
         public Object next(Evaluator eval)
         {
-            return eval.inject(myIterator.next());
+            return myIterator.next();
         }
     }
 
@@ -112,6 +104,8 @@ final class Iterators
         @Override
         public Object next(Evaluator eval)
         {
+            // Don't assume that IonValue is a Fusion value.
+            // It may need converting to another form.
             return eval.inject(myIonIterator.next());
         }
     }

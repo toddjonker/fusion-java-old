@@ -4,8 +4,8 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
 import static com.amazon.fusion.FusionVector.isVector;
-import static com.amazon.fusion.FusionVector.unsafeVectorSize;
 import static com.amazon.fusion.FusionVector.unsafeVectorRef;
+import static com.amazon.fusion.FusionVector.unsafeVectorSize;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonStruct;
@@ -119,7 +119,7 @@ final class DotProc
             }
         }
 
-        return eval.inject(value);
+        return value;
     }
 
 }

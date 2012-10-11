@@ -132,16 +132,19 @@ public interface TopLevel
 
 
     /**
-     * Calls a Fusion procedure by name.
+     * Calls a Fusion procedure by name, converting Java types to Fusion types
+     * where possible.
      *
      * @param procedureName must name a visible procedure, either defined in
      * this namespace or imported from a module.
      *
-     * @param arguments must be Fusion values created by the related runtime.
+     * @param arguments the procedure arguments. It is unspecified whether the
+     * arguments will be copied in whole or in part. Values may be mutated by
+     * the procedure.
      *
-     * @return the resulting Fusion value; typically the value of the last
-     * expression in the source. May be null (if no value results) or an
-     * {@code Object[]} (if there are multiple values).
+     * @return the resulting Fusion value.
+     * May be null (if no value results) or an {@code Object[]} (if there are
+     * multiple values).
      */
     public Object call(String procedureName, Object... arguments)
         throws FusionException;

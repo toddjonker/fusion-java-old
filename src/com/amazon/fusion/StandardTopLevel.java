@@ -110,8 +110,7 @@ final class StandardTopLevel
     }
 
 
-    @Override
-    public Object call(String procedureName, Object... arguments)
+    private Procedure lookupProcedure(String procedureName)
         throws FusionException
     {
         SyntaxSymbol id = SyntaxSymbol.make(procedureName);
@@ -119,7 +118,7 @@ final class StandardTopLevel
         Object proc = myEvaluator.eval(id, myNamespace);
         if (proc instanceof Procedure)
         {
-            return myEvaluator.callNonTail((Procedure) proc, arguments);
+            return (Procedure) proc;
         }
 
         if (proc == null)
@@ -131,5 +130,27 @@ final class StandardTopLevel
         throw new FusionException(printQuotedSymbol(procedureName) +
                                   " is not a procedure: " +
                                   writeToString(proc));
+    }
+
+    @Override
+    public Object call(String procedureName, Object... arguments)
+        throws FusionException
+    {
+        Procedure proc = lookupProcedure(procedureName);
+
+        for (int i = 0; i < arguments.length; i++)
+        {
+            Object arg = arguments[i];
+            arg = myEvaluator.injectMaybe(arg);
+            if (arg == null)
+            {
+                throw new ArgTypeFailure("TopLevel.injectAndCall",
+                                         "injectable Java type",
+                                         i, arguments[i]);
+            }
+            arguments[i] = arg;
+        }
+
+        return myEvaluator.callNonTail(proc, arguments);
     }
 }

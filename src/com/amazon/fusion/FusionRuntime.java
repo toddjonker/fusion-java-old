@@ -148,11 +148,6 @@ public interface FusionRuntime
     public void bind(String name, Object value);
 
 
-    // TODO require(File)
-
-    // TODO main(String...)
-
-
     //========================================================================
 
 

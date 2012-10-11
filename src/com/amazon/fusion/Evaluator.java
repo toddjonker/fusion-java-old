@@ -150,31 +150,32 @@ final class Evaluator
      *
      * @param javaValue may be null, meaning {@code null.null}.
      *
-     * @return the injected value.
-     *
-     * @throws IllegalArgumentException if the value isn't acceptable to the
-     * Fusion runtime.
+     * @return the injected value, or null if the value cannot be injected.
      */
-    Object inject(Object javaValue)
+    Object injectMaybe(Object javaValue)
     {
-        if (javaValue == null || javaValue instanceof IonValue)
-        {
-            return inject((IonValue) javaValue);
-        }
-
         if (javaValue instanceof FusionValue)
         {
             return javaValue;
         }
-
-        if (javaValue instanceof Object[])
+        else if (javaValue instanceof IonValue)
         {
-            // TODO recurse through array?
-            return FusionVector.makeVectorFrom(this, (Object[]) javaValue);
+            return javaValue;
+        }
+        else if (javaValue instanceof String)
+        {
+            return newString((String) javaValue);
+        }
+        else if (javaValue instanceof Integer)
+        {
+            return newInt(((Integer) javaValue).longValue());
+        }
+        else if (javaValue == null)
+        {
+            return newNull();
         }
 
-        String message = "Unacceptable type: " + javaValue.getClass();
-        throw new IllegalArgumentException(message);
+        return null;
     }
 
 

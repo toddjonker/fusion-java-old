@@ -45,7 +45,7 @@ final class JavaNewProc
             result = callConstructor(constructor, constructorArgs);
         }
 
-        result = eval.inject(result);
+        result = eval.injectMaybe(result);
 
         if (result == null)
         {
