@@ -13,7 +13,6 @@
 
 
   (defpub_j is_iterator       "com.amazon.fusion.FusionIterator$IsIteratorProc")
-  (defpub_j iterate_list      "com.amazon.fusion.IterateListProc")
   (defpub_j iterator_has_next "com.amazon.fusion.FusionIterator$HasNextProc")
   (defpub_j iterator_next     "com.amazon.fusion.FusionIterator$NextProc")
 
@@ -37,19 +36,6 @@
         (make_iterator
           (lambda () (has_next))
           (lambda () (next))))))
-
-
-  (defpub iterator_to_list
-    (lambda (iter)
-      '''
-Creates a list with the contents of ITERATOR, in the same order.
-      '''
-      (unless (is_iterator iter)
-        (raise_argument_error "iterator_to_list" "iterator" 0 iter))
-      (let loop ((result []))
-        (if (iterator_has_next iter)
-          (loop (add result (iterator_next iter)))
-          result))))
 
 
   (defpub iterator_map

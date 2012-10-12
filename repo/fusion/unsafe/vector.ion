@@ -16,4 +16,7 @@
 
   (defpub_j unsafe_vector_add
     "com.amazon.fusion.FusionVector$UnsafeVectorAddProc")
+
+  (defpub_j unsafe_vector_iterate
+    "com.amazon.fusion.FusionVector$UnsafeVectorIterateProc")
 )

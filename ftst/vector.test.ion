@@ -1,6 +1,7 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
 (use check)
+(use 'fusion/list')
 (use 'fusion/unsafe/vector')
 (use 'fusion/vector')
 
@@ -78,3 +79,11 @@
 (let ((added (vector_add (vector) 1)))
   (assert (is_mutable_vector added))
   (check_equal [1] added "(vector) add 1"))
+
+
+(define str (vector 1 2 3))
+
+(check_equal (iterator_to_list (vector_iterate str))
+  [1,2,3] "iteration round-trip")
+(check_equal (iterator_to_list (iterate_list str))
+  [1,2,3] "iteration round-trip")

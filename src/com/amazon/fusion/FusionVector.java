@@ -105,12 +105,6 @@ final class FusionVector
     }
 
 
-    @Deprecated
-    static Iterator<?> unsafeJavaIterate(Object vector)
-    {
-        return ((BaseVector) vector).javaIterate();
-    }
-
     static void unsafeVectorSet(Evaluator eval, Object vector,
                                 int pos, Object value)
     {
@@ -120,6 +114,18 @@ final class FusionVector
     static Object unsafeVectorAdd(Evaluator eval, Object vector, Object value)
     {
         return ((BaseVector) vector).add(value);
+    }
+
+
+    @Deprecated
+    static Iterator<?> unsafeJavaIterate(Object vector)
+    {
+        return ((BaseVector) vector).javaIterate();
+    }
+
+    static Object unsafeVectorIterate(Evaluator eval, Object vector)
+    {
+        return Iterators.iterate(unsafeJavaIterate(vector));
     }
 
 
@@ -499,6 +505,25 @@ final class FusionVector
             throws FusionException
         {
             return unsafeVectorAdd(eval, vector, value);
+        }
+    }
+
+
+    static final class UnsafeVectorIterateProc
+        extends Procedure1
+    {
+        UnsafeVectorIterateProc()
+        {
+            //    "                                                                               |
+            super("Returns an iterator over the content of VECTOR.",
+                  "vector");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object vector)
+            throws FusionException
+        {
+            return unsafeVectorIterate(eval, vector);
         }
     }
 }

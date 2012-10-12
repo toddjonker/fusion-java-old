@@ -2,9 +2,9 @@
 
 (module list 'fusion/base'
 
-  // Enable java_new support
-  (use 'fusion/ffi/java')
   (use 'fusion/experimental/defines')
+  (use 'fusion/ffi/java')
+  (use 'fusion/iterator')
 
 
   (defpub_j subseq          "com.amazon.fusion.IonSubseqProc")
@@ -95,6 +95,29 @@ Returns true if list contains value otherwise returns false
 
   //==========================================================================
   // Iteration
+
+  // TODO I don't like how this is working...
+  (define iterate_ion_seq (java_new "com.amazon.fusion.IterateListProc"))
+  (use 'fusion/vector') // TODO ugly coupling
+  (defpub iterate_list
+    (lambda (list)
+      "Returns an iterator that produces the elements of a LIST (or vector)."
+      (if (is_vector list)
+        (vector_iterate list)
+        (iterate_ion_seq list))))
+
+  (defpub iterator_to_list
+    (lambda (iter)
+      '''
+Creates a list with the contents of ITERATOR, in the same order.
+      '''
+      (unless (is_iterator iter)
+        (raise_argument_error "iterator_to_list" "iterator" 0 iter))
+      (let loop ((result []))
+        (if (iterator_has_next iter)
+          (loop (add result (iterator_next iter)))
+          result))))
+
 
   // Per SRFI-1
   (defpub map

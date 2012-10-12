@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionVector.isVector;
 import com.amazon.ion.IonList;
 
 final class IterateListProc
@@ -10,19 +9,14 @@ final class IterateListProc
 {
     IterateListProc()
     {
-        super("Returns an iterator that produces the elements of a LIST.",
-              "list");
+        super("Returns an iterator that produces the elements of an Ion LIST_OR_SEXP.",
+              "list_or_sexp");
     }
 
     @Override
     Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        if (isVector(eval, arg))
-        {
-            return Iterators.iterate(FusionVector.unsafeJavaIterate(arg));
-        }
-
         IonList ionList = checkIonListArg(0, arg);
 
         return Iterators.iterateIonSequence(ionList);

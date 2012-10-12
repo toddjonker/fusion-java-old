@@ -64,4 +64,11 @@ VECTOR is not mutated.
         (raise_argument_error "vector_add" "vector" 0 vector value))
       (unsafe_vector_add vector value)))
 
+
+  (defpub vector_iterate
+    (lambda (vector)
+      "Returns an iterator over the content of VECTOR."
+      (unless (is_vector vector)
+        (raise_argument_error "vector_iterate" "vector" 0 vector))
+      (unsafe_vector_iterate vector)))
 )
