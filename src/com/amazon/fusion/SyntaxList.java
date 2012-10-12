@@ -3,11 +3,9 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
-import static com.amazon.fusion.FusionVector.isVector;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
-import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
@@ -203,18 +201,7 @@ final class SyntaxList
             Object[] children = new Object[len];
             for (int i = 0; i < len; i++)
             {
-                Object childValue = eval.eval(store, myChildForms[i]);
-                if (! isVector(eval, childValue))
-                {
-                    IonValue childDom = FusionValue.castToIonValueMaybe(childValue);
-                    if (childDom == null)
-                    {
-                        throw new ResultFailure("list literal", "Ion data", i,
-                                                childValue);
-                    }
-                }
-
-                children[i] = childValue;
+                children[i] = eval.eval(store, myChildForms[i]);
             }
 
             return FusionVector.makeImmutableVectorFrom(eval, children);

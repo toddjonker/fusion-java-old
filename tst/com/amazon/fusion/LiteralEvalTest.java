@@ -69,13 +69,6 @@ public class LiteralEvalTest
         assertEval("[33]", "(z)");
     }
 
-    @Test
-    public void testBadListLiteral()
-        throws Exception
-    {
-        expectContractFailure("[undef]");
-    }
-
 
     @Test
     public void testStruct()
