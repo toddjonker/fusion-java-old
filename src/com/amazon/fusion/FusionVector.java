@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 
 final class FusionVector
@@ -63,6 +64,16 @@ final class FusionVector
     }
 
 
+    /**
+     * Caller must have injected children.
+     * @param values must not be null
+     */
+    static Object stretchyVector(Evaluator eval, Object[] values)
+    {
+        return new StretchyVector(values);
+    }
+
+
     //========================================================================
     // Predicates
 
@@ -86,6 +97,11 @@ final class FusionVector
     static boolean isMutableVector(Evaluator eval, Object v)
     {
         return (v instanceof MutableVector);
+    }
+
+    static boolean isStretchyVector(Evaluator eval, Object v)
+    {
+        return (v instanceof StretchyVector);
     }
 
 
@@ -114,6 +130,11 @@ final class FusionVector
     static Object unsafeVectorAdd(Evaluator eval, Object vector, Object value)
     {
         return ((BaseVector) vector).add(value);
+    }
+
+    static Object unsafeVectorAddM(Evaluator eval, Object vector, Object value)
+    {
+        return ((BaseVector) vector).addM(value);
     }
 
 
@@ -181,8 +202,9 @@ final class FusionVector
     static IonList unsafeCopyToIonList(Object vector, ValueFactory factory)
         throws FusionException
     {
-        Object[] v = arrayFor(vector);
-        int len = v.length;
+        BaseVector base = (BaseVector) vector;
+        Object[] v = base.myValues;
+        int len = base.size();
         IonValue[] ions = new IonValue[len];
         for (int i = 0; i < len; i++)
         {
@@ -202,8 +224,9 @@ final class FusionVector
                                              ValueFactory factory)
         throws FusionException
     {
-        Object[] v = arrayFor(vector);
-        int len = v.length;
+        BaseVector base = (BaseVector) vector;
+        Object[] v = base.myValues;
+        int len = base.size();
         IonValue[] ions = new IonValue[len];
         for (int i = 0; i < len; i++)
         {
@@ -228,7 +251,7 @@ final class FusionVector
         extends FusionValue
         implements Writeable
     {
-        final Object[] myValues;
+        Object[] myValues;
 
         BaseVector(Object[] values)
         {
@@ -250,27 +273,31 @@ final class FusionVector
             return myValues[i];
         }
 
-        Iterator<?> javaIterate()
-        {
-            return Arrays.asList(myValues).iterator();
-        }
-
 
         BaseVector add(Object value)
         {
-            int len = myValues.length;
+            int len = size();
             Object[] copy = Arrays.copyOf(myValues, len + 1);
             copy[len] = value;
             return makeSimilar(copy);
         }
 
+        BaseVector addM(Object value)
+        {
+            return add(value);
+        }
+
+        Iterator<?> javaIterate()
+        {
+            return Arrays.asList(myValues).iterator();
+        }
 
         @Override
         void write(Appendable out) throws IOException
         {
             out.append('[');
 
-            int length = myValues.length;
+            int length = size();
             for (int i = 0; i < length; i++)
             {
                 if (i != 0) out.append(", ");
@@ -288,7 +315,7 @@ final class FusionVector
             try
             {
                 out.stepIn(IonType.LIST);
-                for (int i = 0; i < myValues.length; i++)
+                for (int i = 0; i < size(); i++)
                 {
                     FusionValue.write(out, myValues[i]);
                 }
@@ -302,7 +329,7 @@ final class FusionVector
     }
 
 
-    private static final class MutableVector
+    private static class MutableVector
         extends BaseVector
     {
         MutableVector(Object[] values)
@@ -338,6 +365,74 @@ final class FusionVector
         }
     }
 
+
+    private static class StretchyVector
+        extends MutableVector
+    {
+        private int size;
+
+        StretchyVector(Object[] values)
+        {
+            super(values);
+            size = values.length;
+        }
+
+        @Override
+        BaseVector makeSimilar(Object[] values)
+        {
+            return new StretchyVector(values);
+        }
+
+        @Override
+        int size()
+        {
+            return size;
+        }
+
+        @Override
+        BaseVector addM(Object value)
+        {
+            if (size == myValues.length)
+            {
+                // This expansion math is what's used by ArrayList, so I'm
+                // assuming that it works well in practice.
+                int newLength = (size * 3) / 2 + 1;
+                myValues = Arrays.copyOf(myValues, newLength);
+            }
+
+            myValues[size++] = value;
+            return this;
+        }
+
+        @Override
+        Iterator<?> javaIterate()
+        {
+            Iterator<Object> iterator = new Iterator<Object>()
+            {
+                private int i = 0;
+
+                @Override
+                public boolean hasNext()
+                {
+                    return (i < size);
+                }
+
+                @Override
+                public Object next()
+                {
+                    if (i < size) return myValues[i++];
+                    throw new NoSuchElementException();
+                }
+
+                @Override
+                public void remove()
+                {
+                    throw new UnsupportedOperationException();
+                }
+            };
+            return iterator;
+        }
+    }
 
 
     //========================================================================
@@ -403,6 +498,26 @@ final class FusionVector
     }
 
 
+    static final class IsStretchyVectorProc
+        extends Procedure1
+    {
+        IsStretchyVectorProc()
+        {
+            //    "                                                                               |
+            super("Determines whether a VALUE is an stretchy vector, returning true or false.",
+                  "value");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object vector)
+            throws FusionException
+        {
+            boolean result = isStretchyVector(eval, vector);
+            return eval.newBool(result);
+        }
+    }
+
+
     static final class VectorProc
         extends Procedure
     {
@@ -418,6 +533,25 @@ final class FusionVector
             throws FusionException
         {
             return FusionVector.makeVectorFrom(eval, args);
+        }
+    }
+
+
+    static final class StretchyVectorProc
+        extends Procedure
+    {
+        StretchyVectorProc()
+        {
+            //    "                                                                               |
+            super("Makes a fresh, stretchy vector containing the given VALUEs.",
+                  "value", DOTDOTDOT);
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            return FusionVector.stretchyVector(eval, args);
         }
     }
 
@@ -505,6 +639,26 @@ final class FusionVector
             throws FusionException
         {
             return unsafeVectorAdd(eval, vector, value);
+        }
+    }
+
+
+    static final class UnsafeVectorAddMProc
+        extends Procedure2
+    {
+        UnsafeVectorAddMProc()
+        {
+            //    "                                                                               |
+            super("Returns a vector similar to VECTOR with the VALUE added to the end. The result\n" +
+                  "may share structure with the VECTOR, and VECTOR may be mutated.",
+                  "vector", "value");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object vector, Object value)
+            throws FusionException
+        {
+            return unsafeVectorAddM(eval, vector, value);
         }
     }
 

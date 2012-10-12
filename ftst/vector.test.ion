@@ -3,87 +3,189 @@
 (use check)
 (use 'fusion/list')
 (use 'fusion/unsafe/vector')
+(use 'fusion/iterator')
 (use 'fusion/vector')
 
-
-(assert (is_vector []))
-(assert (is_vector [0]))
-(assert (is_vector (quote [])))
-
-(assert (is_immutable_vector []))
-(assert (is_immutable_vector [0]))
-(assert (is_immutable_vector (quote [])))
-
-(assert (not (is_vector (quote ()))))
-
-
-(assert (is_vector (vector)))
-(assert (is_vector (vector 1)))
-
-(assert (is_mutable_vector (vector)))
-(assert (is_mutable_vector (vector 1)))
-
-(assert (not (is_immutable_vector (vector))))
-
-(check_equal []  (vector)   "(vector)")
-(check_equal [3] (vector 3) "(vector 3)")
-
-
-// Size
-
-(check_equal 0 (vector_size [])  "[] size 0")
-
-(check_equal 1 (vector_size [1]) "[] size 1")
-(check_equal 0 (unsafe_vector_size [])  "[] unsafe size 0")
-(check_equal 1 (unsafe_vector_size [1]) "[] unsafe size 1")
-
-
-(check_equal 0 (vector_size (vector))   "vector size 0")
-(check_equal 1 (vector_size (vector 1)) "vector size 1")
-
-(check_equal 0 (unsafe_vector_size (vector))   "vector unsafe size 0")
-(check_equal 1 (unsafe_vector_size (vector 1)) "vector unsafe size 1")
-
-
-// Ref
-
-(check_equal [2] (vector_ref [0,1,[2],3] 2)  "[] ref 2")
-(check_equal  3  (vector_ref [0,1,[2],3] 3)  "[] ref 3")
-
-(check_equal [2] (vector_ref (vector 0 1 [2] 3) 2)  "vector ref 2")
-(check_equal  3  (vector_ref (vector 0 1 [2] 3) 3)  "vector ref 3")
-
-
-// Set
-
-(check_equal [1] (let ((v (vector 0)))
-                   (vector_set v 0 1)
-                   v)
-  "vector_set 1")
-
-
-// Vectors can hold any type!
 
 (define F (lambda () false))
 (define T (lambda () true))
 
+
+(assert (not (is_vector           (quote ()))))
+(assert (not (is_mutable_vector   (quote ()))))
+(assert (not (is_immutable_vector (quote ()))))
+(assert (not (is_stretchy_vector  (quote ()))))
+
+
+(define test_predicates
+  (lambda (vector mutable stretchy)
+    (assert (is_vector vector))
+    (check_equal (is_mutable_vector vector)
+       mutable "is mutable")
+    (check_equal (is_immutable_vector vector)
+      (not mutable) "is immutable")
+    (check_equal (is_stretchy_vector vector)
+      stretchy "is stretchy")))
+
+
+// Construction via literals
+
+(define x "anything")
+
+(test_predicates []     false false)
+(test_predicates [0]    false false)
+(test_predicates [0, T] false false)
+
+(test_predicates (quote [])     false false)
+(test_predicates (quote [0])    false false)
+(test_predicates (quote [0, T]) false false)
+
+
+// Construction via procedures
+
+(define test_makers
+  (lambda (maker mutable stretchy)
+    (test_predicates (apply maker (quote ())) mutable stretchy)
+    (test_predicates (apply maker (quote (0))) mutable stretchy)
+    (check_equal (apply maker (quote ()))
+      [] "[]")
+    (check_equal (apply maker (quote (0 1)))
+      [0, 1] "[0, 1]")))
+
+(test_makers vector true false)
+(test_makers stretchy_vector true true)
+
+
+// Size
+
+(define imm0 [])
+(define imm1 [0])
+(define imm2 [0, [1]])
+
+(define mut0 (vector))
+(define mut1 (vector 0))
+(define mut2 (vector 0 [1]))
+
+(define str0 (stretchy_vector))
+(define str1 (stretchy_vector 0))
+(define str2 (stretchy_vector 0 [1]))
+
+
+(check_equal (vector_size imm0) 0 "imm size 0")
+(check_equal (vector_size mut0) 0 "mut size 0")
+(check_equal (vector_size str0) 0 "str size 0")
+
+(check_equal (vector_size imm1) 1 "imm size 1")
+(check_equal (vector_size mut1) 1 "mut size 1")
+(check_equal (vector_size str1) 1 "str size 1")
+
+(check_equal (unsafe_vector_size imm2) 2 "imm unsafe size 2")
+(check_equal (unsafe_vector_size mut2) 2 "mut unsafe size 2")
+(check_equal (unsafe_vector_size str2) 2 "str unsafe size 2")
+
+
+// Ref
+
+(define test_ref
+  (lambda (vec2)
+    (check_equal (vector_ref vec2 0)
+      0 "ref 0")
+    (check_equal (unsafe_vector_ref vec2 0)
+      0 "unsafe ref 0")
+    (check_equal (vector_ref vec2 1)
+      [1] "ref 1")
+    (check_equal (unsafe_vector_ref vec2 1)
+      [1] "unsafe ref 1")))
+
+(test_ref imm2)
+(test_ref mut2)
+(test_ref str2)
+
+
+// Set
+
+(check_equal (let ((v (vector 0)))
+               (vector_set v 0 1)
+               v)
+  [1] "vector_set 1")
+
+(check_equal (let ((v (stretchy_vector 0)))
+               (vector_set v 0 1)
+               v)
+  [1] "vector_set stretchy 1")
+
+
+// Vectors can hold any type!
+
+(assert ((vector_ref [F, T] 1)))
 (assert ((vector_ref (vector F T) 1)))
+(assert ((vector_ref (stretchy_vector F T) 1)))
 
 
 // Add
 
-(let ((added (vector_add [] 1)))
-  (assert (is_immutable_vector added))
-  (check_equal [1] added "[] add 1"))
+(define test_add
+  (lambda (v0)
+    (let [(mutable (is_mutable_vector v0)),
+          (stretchy (is_stretchy_vector v0)),
+          (v1 (vector_add v0 1))]
+      (check_equal (is_mutable_vector v1) mutable "mutable 1")
+      (check_equal (is_stretchy_vector v1) stretchy"stretchy 1")
+      (check_equal v0  [] "v0 not modified")
+      (check_equal v1 [1] "v1")
+      (let ((v2 (vector_add v1 2)))
+        (check_equal (is_mutable_vector v2) mutable "mutable 2")
+        (check_equal (is_stretchy_vector v2) stretchy "stretchy 2")
+        (check_equal v0 []      "v0 not modified")
+        (check_equal v1 [1]     "v1 not modified")
+        (check_equal v2 [1, 2]  "v2")))))
 
-(let ((added (vector_add (vector) 1)))
-  (assert (is_mutable_vector added))
-  (check_equal [1] added "(vector) add 1"))
+(test_add [])
+(test_add (vector))
+(test_add (stretchy_vector))
 
 
-(define str (vector 1 2 3))
+(define test_add_m
+  (lambda (v0)
+    (let [(mutable (is_mutable_vector v0)),
+          (stretchy (is_stretchy_vector v0)),
+          (v1 (vector_add_m v0 1))]
+      (check_equal (is_mutable_vector v1) mutable "mutable 1")
+      (check_equal (is_stretchy_vector v1) stretchy "stretchy 1")
+      (if stretchy
+        (check_equal v0 [1] "v0 should be modified")
+        (check_equal v0 []  "v0 not modified"))
+      (check_equal [1] v1 "v1")
+      (let ((v2 (vector_add_m v1 2)))
+        (check_equal (is_mutable_vector v2) mutable "mutable 2")
+        (check_equal (is_stretchy_vector v2) stretchy "stretchy 2")
+        (if stretchy
+          (begin
+            (check_equal v0 [1, 2] "v0 should be modified")
+            (check_equal v1 [1, 2] "v1 should be modified")
+            )
+          (begin
+            (check_equal v0 []  "v0 not modified")
+            (check_equal v1 [1] "v1 not modified")))
+        (check_equal v2 [1, 2] "v2")
+
+        // Test that we use the right size when its less than capacity
+        (let ((v3 (vector_add_m v2 3)))
+          (let ((v4 (vector_add v3 4)))  // NOT vector_add_m!
+            (check_equal v4 [1,2,3,4] "v4")))))))
+
+
+(test_add_m [])
+(test_add_m (vector))
+(test_add_m (stretchy_vector))
+
+(define str (stretchy_vector 1 2))
+(vector_add_m str 3)
+{ a: str }  // Once broken due to the null in the stretchy vector after 3
+
 
 (check_equal (iterator_to_list (vector_iterate str))
   [1,2,3] "iteration round-trip")
+
 (check_equal (iterator_to_list (iterate_list str))
   [1,2,3] "iteration round-trip")

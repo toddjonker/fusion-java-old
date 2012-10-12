@@ -3,6 +3,7 @@
 (module vector 'fusion/base'
 
   (use 'fusion/experimental/defines')
+  (use 'fusion/iterator')
   (use 'fusion/unsafe/vector')         // NOT exported!
 
 
@@ -12,8 +13,13 @@
     "com.amazon.fusion.FusionVector$IsImmutableVectorProc")
   (defpub_j is_mutable_vector
     "com.amazon.fusion.FusionVector$IsMutableVectorProc")
+  (defpub_j is_stretchy_vector
+    "com.amazon.fusion.FusionVector$IsStretchyVectorProc")
+
   (defpub_j vector
     "com.amazon.fusion.FusionVector$VectorProc")
+  (defpub_j stretchy_vector
+    "com.amazon.fusion.FusionVector$StretchyVectorProc")
 
 
   (defpub vector_size
@@ -65,10 +71,34 @@ VECTOR is not mutated.
       (unsafe_vector_add vector value)))
 
 
+  (defpub vector_add_m
+    (lambda (vector value)
+      '''
+Returns a vector similar to VECTOR with the VALUE added to the end. The result
+may share structure with the VECTOR, and VECTOR may be mutated.
+      '''
+      (unless (is_vector vector)
+        (raise_argument_error "vector_add_m" "vector" 0 vector value))
+      (unsafe_vector_add_m vector value)))
+
+
   (defpub vector_iterate
     (lambda (vector)
       "Returns an iterator over the content of VECTOR."
       (unless (is_vector vector)
         (raise_argument_error "vector_iterate" "vector" 0 vector))
       (unsafe_vector_iterate vector)))
+
+
+  (defpub vector_from_iterator
+    (lambda (iter)
+      '''
+Creates a stretchy vector with the contents of ITERATOR, in the same order.
+      '''
+      (unless (is_iterator iter)
+        (raise_argument_error "vector_from_iterator" "iterator" 0 iter))
+      (let loop ((result (stretchy_vector)))
+        (if (iterator_has_next iter)
+          (loop (vector_add_m result (iterator_next iter)))
+          result))))
 )

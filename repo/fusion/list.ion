@@ -113,9 +113,9 @@ Creates a list with the contents of ITERATOR, in the same order.
       '''
       (unless (is_iterator iter)
         (raise_argument_error "iterator_to_list" "iterator" 0 iter))
-      (let loop ((result []))
+      (let loop ((result (stretchy_vector)))
         (if (iterator_has_next iter)
-          (loop (add result (iterator_next iter)))
+          (loop (vector_add_m result (iterator_next iter)))
           result))))
 
 
@@ -128,12 +128,12 @@ new list of the results in order.
       '''
       (let ((len (size list)))
         (let loop ((i 0)
-                   (result []))
+                   (result (stretchy_vector)))
           (if (= i len)
             result
             (loop
               (+ 1 i)
-              (add result (proc (. list i)))))))))
+              (vector_add_m result (proc (. list i)))))))))
 
 
   // Per SRFI-1
@@ -145,14 +145,14 @@ new list of the elements (in order) for which PRED returns true.
       '''
       (let ((len (size list)))
         (let loop ((i 0)
-                   (result []))
+                   (result (stretchy_vector)))
           (if (= i len)
             result
             (let ((elt (. list i)))
               (loop
                 (+ 1 i)
                 (if (pred elt)
-                  (add result elt)
+                  (vector_add_m result elt)
                   result))))))))
 
   // Per SRFI-1
