@@ -1,0 +1,7 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(use 'fusion/list')
+(use 'fusion/struct')
+(use check)
+
+(check_equal (. (quote {f:[]}) "f") [] "[] in quoted struct")

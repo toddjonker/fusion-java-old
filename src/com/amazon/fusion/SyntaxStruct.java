@@ -244,7 +244,12 @@ final class SyntaxStruct
         throws FusionException
     {
         Object childValue = child.quote(eval);
-        return FusionValue.unsafeCastToIonValue(childValue);
+        IonValue ion = eval.convertToIonValueMaybe(childValue);
+        if (ion == null)
+        {
+            throw new ArgTypeFailure("quote", "Ionizable data", -1, childValue);
+        }
+        return ion;
     }
 
 
