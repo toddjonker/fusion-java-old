@@ -4,8 +4,10 @@ package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonValue;
 import java.io.File;
@@ -97,5 +99,56 @@ public class RuntimeTest
     {
         Object fv = eval("(lambda () 12)");
         runtime().ionize(fv, system());
+    }
+
+
+    @Test
+    public void testModuleRegistration()
+        throws Exception
+    {
+        final ModuleIdentity id = ModuleIdentity.intern("#%dummy");
+        assertSame(id, ModuleIdentity.intern("#%dummy"));
+
+        ModuleBuilder builder = runtime().makeModuleBuilder("#%dummy");
+        builder.instantiate();
+
+        topLevel().define("callback", new Procedure0("callback")
+        {
+            @Override
+            Object doApply(Evaluator eval)
+                throws FusionException
+            {
+                ModuleRegistry registry =
+                    eval.findCurrentNamespace().getRegistry();
+                ModuleInstance mod = registry.lookup(id);
+                assertNotNull(mod);
+
+                return null;
+            }
+        });
+
+        eval("(callback)");
+
+
+        // Test registering two instances w/ same identity
+        builder = runtime().makeModuleBuilder("#%dummy");
+        try {
+            builder.instantiate();
+            fail("expected exception");
+        }
+        catch (ContractFailure e) { }
+
+
+        try {
+            runtime().makeModuleBuilder("dummy");
+            fail("expected exception");
+        }
+        catch (IllegalArgumentException e) { }
+
+        try {
+            runtime().makeModuleBuilder("dum/my");
+            fail("expected exception");
+        }
+        catch (IllegalArgumentException e) { }
     }
 }

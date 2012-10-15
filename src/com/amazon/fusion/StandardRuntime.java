@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.ModuleIdentity.intern;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
@@ -26,13 +27,10 @@ final class StandardRuntime
         try
         {
             Namespace topNs = new Namespace(myRegistry);
-            ModuleNamespace ns = new ModuleNamespace(myRegistry,
-                                                     KernelModule.IDENTITY);
-            KernelModule kernel = new KernelModule(ionSystem, builder, ns,
-                                                   topNs);
-            myRegistry.register(kernel);
 
-            myGlobalState = kernel.getGlobalState();
+            myGlobalState =
+                GlobalState.initialize(ionSystem, builder, myRegistry, topNs);
+
             myTopLevel =
                 new StandardTopLevel(myGlobalState, topNs, "fusion/base");
         }
@@ -70,6 +68,21 @@ final class StandardRuntime
         return makeTopLevel("fusion/base");
     }
 
+
+    @Override
+    public ModuleBuilder makeModuleBuilder(String moduleName)
+    {
+        if (! moduleName.startsWith("#%") || moduleName.contains("/"))
+        {
+            String message =
+                "Built-in module names must start with '#%' and must not " +
+                "contain '/'.";
+            throw new IllegalArgumentException(message);
+        }
+
+        ModuleIdentity id = intern(moduleName);
+        return new ModuleBuilderImpl(myRegistry, id);
+    }
 
     //========================================================================
 

@@ -54,6 +54,17 @@ public interface FusionRuntime
 
 
     /**
+     * Returns a builder for constructing modules via Java.
+     *
+     * @param moduleName must start with {@code "#%"} and must not contain
+     * {@code "/"}.
+     * @return a new module builder.
+     */
+    public ModuleBuilder makeModuleBuilder(String moduleName)
+        throws FusionException;
+
+
+    /**
      * Evaluates top-level forms within this {@link FusionRuntime}'s namespace.
      * Top-level {@code define} forms will alter the environment and will be
      * visible to later calls.

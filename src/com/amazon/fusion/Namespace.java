@@ -368,6 +368,14 @@ class Namespace
         return myValues.get(address);
     }
 
+
+    Object[] extractValues()
+    {
+        Object[] values = new Object[myValues.size()];
+        myValues.toArray(values);
+        return values;
+    }
+
     //========================================================================
 
 

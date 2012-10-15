@@ -61,7 +61,10 @@ final class Evaluator
 
     /**
      * Returns an identifier (a wrapped syntax symbol) that has the bindings
-     * of the {@link KernelModule} ({@code #%kernel}).
+     * of the {@code #%kernel} module.
+     * <p>
+     * This shouldn't be exposed as a public API since the contents of the
+     * kernel are not specified.
      */
     SyntaxSymbol makeKernelIdentifier(String symbol)
     {

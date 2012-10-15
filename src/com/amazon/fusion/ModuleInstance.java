@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import com.amazon.fusion.Namespace.TopBinding;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +14,7 @@ import java.util.Map;
  * A module has a unique {@link ModuleIdentity} and a {@link NamespaceStore}
  * holding its top-level bindings.
  */
-class ModuleInstance
+final class ModuleInstance
     extends NamedValue
 {
     private final ModuleIdentity myIdentity;
@@ -26,52 +27,50 @@ class ModuleInstance
     private final Map<String,Binding> myProvidedBindings;
 
 
-    /**
-     * Creates a module that {@code provide}s all names in its namespace.
-     *
-     * @throws ContractFailure if the namespace's registry already has a
-     * module with the given identity.
-     */
-    ModuleInstance(ModuleIdentity identity, ModuleNamespace namespace)
+    private ModuleInstance(ModuleIdentity identity, NamespaceStore namespace,
+                           int bindingCount)
         throws FusionException, ContractFailure
     {
-        this(identity, namespace, null);
+        myIdentity = identity;
+        myNamespace = namespace;
+        myProvidedBindings = new HashMap<String,Binding>(bindingCount);
+
+        inferName(identity.toString());
     }
 
     /**
-     * Creates a module that {@code provide}s only the given names.
-     *
-     * @throws ContractFailure if the namespace's registry already has a
-     * module with the given identity.
+     * Creates a module that {@code provide}s the given bindings.
+     */
+    ModuleInstance(ModuleIdentity identity, NamespaceStore namespace,
+                   Collection<TopBinding> bindings)
+        throws FusionException, ContractFailure
+    {
+        this(identity, namespace, bindings.size());
+
+        for (TopBinding binding : bindings)
+        {
+            String name = binding.getName();
+
+            myProvidedBindings.put(name, binding);
+        }
+    }
+
+    /**
+     * Creates a module that {@code provide}s the given bound identifiers.
      */
     ModuleInstance(ModuleIdentity identity, NamespaceStore namespace,
                    SyntaxSymbol[] providedIdentifiers)
         throws FusionException, ContractFailure
     {
-//        assert identity == namespace.getModuleId();
+        this(identity, namespace, providedIdentifiers.length);
 
-        myIdentity = identity;
-        myNamespace = namespace;
-
-        if (providedIdentifiers == null)
+        for (SyntaxSymbol identifier : providedIdentifiers)
         {
-            myProvidedBindings = new HashMap<String,Binding>();
+            String  name    = identifier.stringValue();
+            Binding binding = identifier.resolve();
+
+            myProvidedBindings.put(name, binding);
         }
-        else
-        {
-            myProvidedBindings =
-                new HashMap<String,Binding>(providedIdentifiers.length);
-
-            for (SyntaxSymbol identifier : providedIdentifiers)
-            {
-                String  name    = identifier.stringValue();
-                Binding binding = identifier.resolve();
-
-                myProvidedBindings.put(name, binding);
-            }
-        }
-
-        inferName(identity.toString());
     }
 
 
@@ -88,22 +87,6 @@ class ModuleInstance
 
 
     //========================================================================
-
-    /**
-     * Magic for the {@link KernelModule} constructor.
-     */
-    void provideEverything()
-    {
-        assert myProvidedBindings.size() == 0;
-
-        for (TopBinding binding : ((Namespace)myNamespace).getBindings())
-        {
-            String name = binding.getName();
-
-            myProvidedBindings.put(name, binding);
-        }
-    }
-
 
     /**
      * @return null if the name isn't provided by this module.

@@ -15,6 +15,11 @@ final class ModuleStore
         myValues = new Object[topLevelVariableCount];
     }
 
+    ModuleStore(Object[] values)
+    {
+        myValues = values;
+    }
+
     @Override
     public Object lookup(int rib, int address)
     {

@@ -22,8 +22,7 @@ final class ModuleKeyword
     private final ModuleNameResolver myModuleNameResolver;
 
     ModuleKeyword(ModuleNameResolver moduleNameResolver,
-                  DynamicParameter currentModuleDeclareName,
-                  Namespace kernelNamespace)
+                  DynamicParameter currentModuleDeclareName)
     {
         //    "                                                                               |
         super("NAME BODY ...+",
