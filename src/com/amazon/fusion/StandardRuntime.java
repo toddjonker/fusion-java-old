@@ -13,14 +13,14 @@ import java.io.File;
 final class StandardRuntime
     implements FusionRuntime
 {
-    private final IonSystem      mySystem;
+    private final GlobalState    myGlobalState;
     private final ModuleRegistry myRegistry;
     private final TopLevel       myTopLevel;
 
 
     StandardRuntime(FusionRuntimeBuilder builder)
     {
-        mySystem   = IonSystemBuilder.standard().build();
+        IonSystem ionSystem = IonSystemBuilder.standard().build();
         myRegistry = new ModuleRegistry();
 
         try
@@ -28,12 +28,13 @@ final class StandardRuntime
             Namespace topNs = new Namespace(myRegistry);
             ModuleNamespace ns = new ModuleNamespace(myRegistry,
                                                      KernelModule.IDENTITY);
-            ModuleInstance kernel = new KernelModule(mySystem, builder, ns,
-                                                     topNs);
+            KernelModule kernel = new KernelModule(ionSystem, builder, ns,
+                                                   topNs);
             myRegistry.register(kernel);
 
-            myTopLevel = new StandardTopLevel(mySystem, myRegistry,
-                                              topNs, "fusion/base");
+            myGlobalState = kernel.getGlobalState();
+            myTopLevel =
+                new StandardTopLevel(myGlobalState, topNs, "fusion/base");
         }
         catch (FusionException e)
         {
@@ -57,7 +58,8 @@ final class StandardRuntime
     public TopLevel makeTopLevel(String initialModulePath)
         throws FusionException
     {
-        return new StandardTopLevel(mySystem, myRegistry, initialModulePath);
+        return new StandardTopLevel(myGlobalState, myRegistry,
+                                    initialModulePath);
     }
 
 

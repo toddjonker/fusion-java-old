@@ -17,25 +17,25 @@ import java.util.Map;
  */
 final class Evaluator
 {
+    private final GlobalState myGlobalState;
     private final IonSystem mySystem;
-    private final ModuleRegistry myDefaultRegistry;
     private final Evaluator myOuterFrame;
     private final Map<Object, Object> myContinuationMarks;
 
 
-    Evaluator(IonSystem system, ModuleRegistry defaultRegistry)
+    Evaluator(GlobalState globalState)
     {
-        mySystem = system;
-        myDefaultRegistry = defaultRegistry;
+        myGlobalState = globalState;
+        mySystem      = globalState.myIonSystem;
         myOuterFrame = null;
         myContinuationMarks = null;
     }
 
-    private Evaluator(IonSystem system, Evaluator outerBindings)
+    private Evaluator(Evaluator outerBindings)
     {
-        mySystem = system;
-        myDefaultRegistry = outerBindings.myDefaultRegistry;
-        myOuterFrame = outerBindings;
+        myGlobalState     = outerBindings.myGlobalState;
+        mySystem          = outerBindings.mySystem;
+        myOuterFrame      = outerBindings;
         myContinuationMarks = new HashMap<Object, Object>();
     }
 
@@ -44,12 +44,19 @@ final class Evaluator
         return mySystem;
     }
 
+
+    GlobalState getGlobalState()
+    {
+        return myGlobalState;
+    }
+
+
     //========================================================================
 
 
-    KernelModule findKernel()
+    ModuleInstance findKernel()
     {
-        return (KernelModule) myDefaultRegistry.lookup(KernelModule.IDENTITY);
+        return myGlobalState.myKernelModule;
     }
 
     /**
@@ -359,7 +366,7 @@ final class Evaluator
         // The keys must be hashable and equals-able!
         assert key instanceof DynamicParameter;
 
-        Evaluator innerFrame = new Evaluator(mySystem, this);
+        Evaluator innerFrame = new Evaluator(this);
         innerFrame.myContinuationMarks.put(key, mark);
         return innerFrame;
     }
@@ -368,7 +375,7 @@ final class Evaluator
     {
         assert keys.length == marks.length;
 
-        Evaluator innerFrame = new Evaluator(mySystem, this);
+        Evaluator innerFrame = new Evaluator(this);
         for (int i = 0; i < keys.length; i++)
         {
             // The keys must be hashable and equals-able!
@@ -384,7 +391,7 @@ final class Evaluator
 
     Namespace findCurrentNamespace()
     {
-        DynamicParameter param = findKernel().getCurrentNamespaceParameter();
+        DynamicParameter param = getGlobalState().myCurrentNamespaceParam;
         return (Namespace) param.currentValue(this);
     }
 
@@ -393,7 +400,7 @@ final class Evaluator
     {
         if (ns == null) return this;
 
-        DynamicParameter param = findKernel().getCurrentNamespaceParameter();
+        DynamicParameter param = getGlobalState().myCurrentNamespaceParam;
         return markedContinuation(param, ns);
     }
 

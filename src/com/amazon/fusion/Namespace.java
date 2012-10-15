@@ -313,7 +313,7 @@ class Namespace
     void use(Evaluator eval, String modulePath)
         throws FusionException
     {
-        UseKeyword useKeyword = eval.findKernel().getUseKeyword();
+        UseKeyword useKeyword = eval.getGlobalState().myUseKeyword;
         SyntaxValue baseRef = SyntaxSymbol.make(modulePath);
         useKeyword.use(eval, this, baseRef);
     }

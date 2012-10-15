@@ -13,29 +13,26 @@ import java.io.File;
 final class StandardTopLevel
     implements TopLevel
 {
-    private final IonSystem mySystem;
     private final Evaluator myEvaluator;
     private final Namespace myNamespace;
 
 
-    StandardTopLevel(IonSystem system,
-                     ModuleRegistry registry,
+    StandardTopLevel(GlobalState globalState,
                      Namespace namespace,
                      String initialModulePath)
         throws FusionException
     {
-        mySystem    = system;
-        myEvaluator = new Evaluator(mySystem, registry);
+        myEvaluator = new Evaluator(globalState);
         myNamespace = namespace;
         namespace.use(myEvaluator, initialModulePath);
     }
 
-    StandardTopLevel(IonSystem system,
+    StandardTopLevel(GlobalState globalState,
                      ModuleRegistry registry,
                      String initialModulePath)
         throws FusionException
     {
-        this(system, registry, new Namespace(registry), initialModulePath);
+        this(globalState, new Namespace(registry), initialModulePath);
     }
 
 
@@ -46,7 +43,8 @@ final class StandardTopLevel
     public Object eval(String source, SourceName name)
         throws ExitException, FusionException
     {
-        IonReader i = mySystem.newReader(source);
+        IonSystem system = myEvaluator.getGlobalState().myIonSystem;
+        IonReader i = system.newReader(source);
         return eval(i, name);
     }
 
@@ -89,8 +87,7 @@ final class StandardTopLevel
     public Object load(File source)
         throws ExitException, FusionException
     {
-        KernelModule kernel = myEvaluator.findKernel();
-        LoadHandler load = kernel.getLoadHandler();
+        LoadHandler load = myEvaluator.getGlobalState().myLoadHandler;
         return load.loadTopLevel(myEvaluator, myNamespace, source.toString());
     }
 

@@ -17,10 +17,8 @@ final class KernelModule
     static final String NAME = "#%kernel";
     static final ModuleIdentity IDENTITY = intern(NAME);
 
-    private final LoadHandler      myLoadHandler;
-    private final KeywordValue     myModuleKeyword;
-    private final UseKeyword       myUseKeyword;
-    private final DynamicParameter myCurrentNamespaceParam;
+
+    private final GlobalState myGlobalState;
 
 
     KernelModule(IonSystem system, FusionRuntimeBuilder builder,
@@ -38,38 +36,38 @@ final class KernelModule
             new DynamicParameter(UNDEF);
         DynamicParameter currentModuleDeclareName =
             new DynamicParameter(UNDEF);
-        myCurrentNamespaceParam =
+        DynamicParameter currentNamespaceParam =
             new DynamicParameter(currentNamespace);
-        myLoadHandler =
+        LoadHandler loadHandler =
             new LoadHandler(currentLoadRelativeDirectory, currentDirectory);
         ModuleNameResolver resolver =
-            new ModuleNameResolver(myLoadHandler,
+            new ModuleNameResolver(loadHandler,
                                    currentLoadRelativeDirectory,
                                    currentDirectory,
                                    currentModuleDeclareName,
                                    builder.buildModuleRepositories());
-        myUseKeyword = new UseKeyword(resolver);
+        UseKeyword useKeyword = new UseKeyword(resolver);
 
         // These must be bound before 'module' since we need the bindings
         // for the partial-expansion stop-list.
         ns.bind("define", new DefineKeyword());
         ns.bind("define_syntax", new DefineSyntaxKeyword());
-        ns.bind("use", myUseKeyword);
+        ns.bind("use", useKeyword);
 
-        myModuleKeyword =
+        KeywordValue moduleKeyword =
             new ModuleKeyword(resolver, currentModuleDeclareName, ns);
-        LoadProc loadProc = new LoadProc(myLoadHandler);
+        LoadProc loadProc = new LoadProc(loadHandler);
 
         ns.bind("begin", new BeginKeyword());    // Needed by hard-coded macro
         ns.bind("current_directory", currentDirectory);
-        ns.bind("current_namespace", myCurrentNamespaceParam);
+        ns.bind("current_namespace", currentNamespaceParam);
         ns.bind("empty_stream", FusionValue.EMPTY_STREAM);
         ns.bind("if", new IfKeyword());          // Needed by hard-coded macro
         ns.bind("java_new", new JavaNewProc());
         ns.bind("lambda", new LambdaKeyword());  // Needed by hard-coded macro
         ns.bind("letrec", new LetrecKeyword());  // Needed by hard-coded macro
         ns.bind("load", loadProc);
-        ns.bind("module", myModuleKeyword);
+        ns.bind("module", moduleKeyword);
         ns.bind("quote_syntax", new QuoteSyntaxKeyword()); // For fusion/syntax
         ns.bind("undef", FusionValue.UNDEF);
 
@@ -87,26 +85,12 @@ final class KernelModule
         ns.bind("is_list", new IsListProc());
 
         provideEverything();
+
+        myGlobalState = new GlobalState(system, this, loadHandler, useKeyword, currentNamespaceParam);
     }
 
-
-    DynamicParameter getCurrentNamespaceParameter()
+    GlobalState getGlobalState()
     {
-        return myCurrentNamespaceParam;
-    }
-
-    LoadHandler getLoadHandler()
-    {
-        return myLoadHandler;
-    }
-
-    KeywordValue getModuleKeyword()
-    {
-        return myModuleKeyword;
-    }
-
-    UseKeyword getUseKeyword()
-    {
-        return myUseKeyword;
+        return myGlobalState;
     }
 }
