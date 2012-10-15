@@ -494,7 +494,7 @@ final class ModuleKeyword
             ModuleInstance module =
                 new ModuleInstance(myId, store, myProvidedIdentifiers);
 
-            eval.getModuleRegistry().register(module);
+            eval.findCurrentNamespace().getRegistry().register(module);
 
             for (CompiledForm form : myBody)
             {

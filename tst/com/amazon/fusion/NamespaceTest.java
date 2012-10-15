@@ -45,7 +45,8 @@ public class NamespaceTest
             Object doApply(Evaluator eval, Object[] args)
                 throws FusionException
             {
-                ModuleRegistry registry = eval.getModuleRegistry();
+                ModuleRegistry registry =
+                    eval.findCurrentNamespace().getRegistry();
 
                 ModuleIdentity id = ModuleIdentity.intern("dummy");
                 assertSame(id, ModuleIdentity.intern("dummy"));

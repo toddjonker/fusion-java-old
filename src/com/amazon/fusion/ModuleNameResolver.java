@@ -143,7 +143,7 @@ final class ModuleNameResolver
     {
         // TODO Need a way to resolve only, avoid loading, as per Racket.
 
-        ModuleRegistry reg = eval.getModuleRegistry();
+        ModuleRegistry reg = eval.findCurrentNamespace().getRegistry();
 
         // Ensure that we don't try to load the module twice simultaneously.
         // TODO FUSION-73 This is probably far too coarse-grained in general.

@@ -44,11 +44,6 @@ final class Evaluator
         return mySystem;
     }
 
-    ModuleRegistry getModuleRegistry()
-    {
-        return myDefaultRegistry;
-    }
-
     //========================================================================
 
 
@@ -106,7 +101,8 @@ final class Evaluator
     Namespace newBaseNamespace()
         throws FusionException
     {
-        return newBaseNamespace(myDefaultRegistry);
+        ModuleRegistry registry = findCurrentNamespace().getRegistry();
+        return newBaseNamespace(registry);
     }
 
 
