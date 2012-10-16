@@ -74,62 +74,6 @@ final class Evaluator
     }
 
 
-    Namespace newNamespaceWithLanguage(ModuleRegistry registry,
-                                       String modulePath)
-        throws FusionException
-    {
-        Namespace ns = new Namespace(registry);
-        ns.use(this, modulePath);
-        return ns;
-    }
-
-
-    /**
-     * Creates a new namespace sharing a namespace's registry.
-     *
-     * @param ns carries the {@link ModuleRegistry} to share.
-     * Must not be null.
-     */
-    Namespace newEmptyNamespace(Namespace ns)
-    {
-        ModuleRegistry registry = ns.getRegistry();
-        return new Namespace(registry);
-    }
-
-
-    private Namespace newBaseNamespace(ModuleRegistry registry)
-        throws FusionException
-    {
-        return newNamespaceWithLanguage(registry, "fusion/base");
-    }
-
-
-    /**
-     * Creates a new namespace sharing this {@link Evaluator}'s default
-     * registry and {@code use}ing {@code fusion/base}.
-     */
-    Namespace newBaseNamespace()
-        throws FusionException
-    {
-        ModuleRegistry registry = findCurrentNamespace().getRegistry();
-        return newBaseNamespace(registry);
-    }
-
-
-    /**
-     * Creates a new namespace sharing a namespace's registry
-     * and {@code use}ing {@code fusion/base}.
-     *
-     * @param ns carries the {@link ModuleRegistry} to share.
-     * Must not be null.
-     */
-    Namespace newBaseNamespace(Namespace ns)
-        throws FusionException
-    {
-        ModuleRegistry registry = ns.getRegistry();
-        return newBaseNamespace(registry);
-    }
-
     //========================================================================
 
     /**

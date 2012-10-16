@@ -1,0 +1,14 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(module vector 'fusion/base'
+
+  (use 'fusion/experimental/defines')
+  (use (quote '#%kernel'))
+
+  (provide current_namespace)  // From kernel
+
+
+  (defpub_j make_namespace_with_language
+    "com.amazon.fusion.FusionNamespace$MakeNamespaceWithLanguageProc")
+
+)

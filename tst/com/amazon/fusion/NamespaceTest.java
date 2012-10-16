@@ -6,22 +6,31 @@ import static com.amazon.fusion.GlobalState.KERNEL_MODULE_IDENTITY;
 import static com.amazon.fusion.GlobalState.KERNEL_MODULE_NAME;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import org.junit.Before;
 import org.junit.Test;
 
 public class NamespaceTest
     extends CoreTestCase
 {
+    @Before
+    public void requires()
+        throws FusionException
+    {
+        topLevel().requireModule("fusion/namespace");
+    }
+
+
     @Test
     public void testBaseNamespace()
         throws Exception
     {
-        topLevel().define("callback", new Procedure0("callback")
+        topLevel().define("callback", new Procedure1("callback", "namespace")
         {
             @Override
-            Object doApply(Evaluator eval)
+            Object doApply(Evaluator eval, Object arg)
                 throws FusionException
             {
-                Namespace ns = eval.newBaseNamespace();
+                Namespace ns = (Namespace) arg;
                 Binding b = ns.resolve("module");
                 assertTrue(b.lookup(ns) instanceof ModuleKeyword);
 
@@ -33,6 +42,18 @@ public class NamespaceTest
             }
         });
 
-        eval("(callback)");
+        eval("(callback (make_namespace_with_language \"/fusion/base\"))");
+    }
+
+
+    @Test
+    public void testBadLanguage()
+        throws Exception
+    {
+        expectArgTypeFailure("(make_namespace_with_language 23)", 0);
+        expectArgTypeFailure("(make_namespace_with_language \"\")", 0);
+
+        // Not absolute module path
+        expectArgTypeFailure("(make_namespace_with_language \"foo\")", 0);
     }
 }
