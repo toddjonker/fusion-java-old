@@ -12,10 +12,10 @@ public class StructTest
     extends CoreTestCase
 {
     @Before
-    public void setupTest()
+    public void requires()
         throws FusionException
     {
-        eval("(use 'fusion/struct')");
+        topLevel().requireModule("/fusion/struct");
     }
 
 

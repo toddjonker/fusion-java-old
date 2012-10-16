@@ -18,7 +18,7 @@ public class ListTest
     public void listTestBegin()
         throws Exception
     {
-        eval("(use 'fusion/list')");
+        topLevel().requireModule("/fusion/list");
 
         eval("(define smList "+ionListGenerator(1)+")");
         eval("(define medList "+ionListGenerator(3)+")");

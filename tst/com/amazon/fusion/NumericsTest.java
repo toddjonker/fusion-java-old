@@ -10,13 +10,12 @@ import org.junit.Test;
 public class NumericsTest
     extends CoreTestCase
 {
-
     @Before
-    public void setupTest()
+    public void requires()
         throws FusionException
     {
-        eval("(use 'fusion/math')");
-        eval("(use 'fusion/timestamp')");
+        topLevel().requireModule("/fusion/math");
+        topLevel().requireModule("/fusion/timestamp");
     }
 
     @Test

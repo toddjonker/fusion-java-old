@@ -96,6 +96,11 @@ final class StandardTopLevel
     public void requireModule(String moduleIdentifier)
         throws FusionException
     {
+        // TODO FUSION-74 don't do this conversion!
+        if (moduleIdentifier.startsWith("/"))
+        {
+            moduleIdentifier = moduleIdentifier.substring(1);
+        }
         myNamespace.use(myEvaluator, moduleIdentifier);
     }
 

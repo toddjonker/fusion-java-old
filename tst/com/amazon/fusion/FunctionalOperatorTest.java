@@ -11,13 +11,12 @@ import org.junit.Test;
 public class FunctionalOperatorTest
     extends CoreTestCase
 {
-    @Override @Before
-    public void setUp()
+    @Before
+    public void requires()
         throws Exception
     {
-        super.setUp();
-        eval("(use 'fusion/function')");
-        eval("(use 'fusion/stream')");
+        topLevel().requireModule("/fusion/function");
+        topLevel().requireModule("/fusion/stream");
     }
 
     @Test

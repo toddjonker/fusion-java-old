@@ -16,7 +16,7 @@ public class NamespaceTest
     public void requires()
         throws FusionException
     {
-        topLevel().requireModule("fusion/namespace");
+        topLevel().requireModule("/fusion/namespace");
     }
 
 

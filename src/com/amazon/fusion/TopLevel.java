@@ -116,7 +116,8 @@ public interface TopLevel
     /**
      * Imports the bindings from a named module into this namespace.
      *
-     * @param moduleIdentifier names the required module.
+     * @param moduleIdentifier names the required module. It may be either an
+     * absolute or relative path.
      */
     public void requireModule(String moduleIdentifier)
         throws FusionException;

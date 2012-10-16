@@ -6,18 +6,15 @@ import static com.amazon.ion.util.IonTextUtils.printString;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- *
- */
+
 public class JavaFfiTest
     extends CoreTestCase
 {
-    @Override @Before
-    public void setUp()
+    @Before
+    public void requires()
         throws Exception
     {
-        super.setUp();
-        eval("(use 'fusion/ffi/java')");
+        topLevel().requireModule("/fusion/ffi/java");
     }
 
     public class Uninstantiable extends Procedure

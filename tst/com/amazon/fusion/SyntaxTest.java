@@ -9,10 +9,10 @@ public class SyntaxTest
     extends CoreTestCase
 {
     @Before
-    public void uses()
+    public void requires()
         throws Exception
     {
-        eval("(use 'fusion/syntax')");
+        topLevel().requireModule("/fusion/syntax");
     }
 
 

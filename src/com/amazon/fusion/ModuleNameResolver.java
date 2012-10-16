@@ -118,8 +118,9 @@ final class ModuleNameResolver
         File pathFile = new File(path);
         if (! pathFile.isAbsolute())
         {
-            // TODO if we're loading a module, this should be relative to it
-            //      and not to these directories.
+            // TODO FUSION-74 if we're loading from within a module, the
+            //  requested path should be resolve relative to the requiring
+            //  module, not to these directories.
 
             String base = myCurrentLoadRelativeDirectory.asString(eval);
             if (base == null)

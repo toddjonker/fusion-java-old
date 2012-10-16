@@ -5,18 +5,15 @@ package com.amazon.fusion;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * Contains test cases for the stream classes and operations
- */
+
 public class StringTest
     extends CoreTestCase
 {
-
     @Before
-    public void setupTest()
+    public void requires()
         throws FusionException
     {
-        eval("(use 'fusion/string')");
+        topLevel().requireModule("/fusion/string");
     }
 
     @Test

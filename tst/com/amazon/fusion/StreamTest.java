@@ -13,12 +13,11 @@ import org.junit.Test;
 public class StreamTest
     extends CoreTestCase
 {
-    @Override @Before
-    public void setUp()
+    @Before
+    public void requires()
         throws Exception
     {
-        super.setUp();
-        eval("(use 'fusion/stream')");
+        topLevel().requireModule("/fusion/stream");
     }
 
 
