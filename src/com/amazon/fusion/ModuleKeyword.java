@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionEval.evalSyntax;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static java.lang.Boolean.TRUE;
 import com.amazon.fusion.Namespace.TopBinding;
@@ -184,7 +185,7 @@ final class ModuleKeyword
                         {
                             try
                             {
-                                eval.evalSyntax(expanded, moduleNamespace);
+                                evalSyntax(eval, expanded, moduleNamespace);
                             }
                             catch (FusionException e)
                             {

@@ -2,8 +2,12 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.Syntax.datumToSyntax;
+import static com.amazon.fusion.Syntax.isIdentifier;
+
+
 class DatumToSyntaxProc
-    extends Procedure
+    extends Procedure2
 {
     DatumToSyntaxProc()
     {
@@ -14,15 +18,23 @@ class DatumToSyntaxProc
     }
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval, Object arg0, Object arg1)
         throws FusionException
     {
-        checkArityExact(args);
+        SyntaxSymbol context;
+        if (isIdentifier(eval, arg0))
+        {
+            context = (SyntaxSymbol) arg0;
+        }
+        else if (isNullNull(eval, arg0))
+        {
+            context = null;
+        }
+        else
+        {
+            throw argFailure("syntax identifier, or null", 0, arg0, arg1);
+        }
 
-        SyntaxSymbol context = checkSyntaxSymbolArg(0, args);
-        SyntaxValue datum = checkSyntaxArg(1, args);
-         // TODO allow other types and convert
-
-        return Syntax.datumToSyntax(context, datum);
+        return datumToSyntax(eval, context, arg1);
     }
 }

@@ -24,7 +24,7 @@ final class ArgTypeFailure
      * @param actuals must not be null or zero-length.
      */
     ArgTypeFailure(String name, String expectation,
-                   int badPos, Object[] actuals)
+                   int badPos, Object... actuals)
     {
         super("arg type failure");
         assert name != null && actuals.length != 0;
@@ -53,7 +53,7 @@ final class ArgTypeFailure
      * @param actuals must not be null or zero-length.
      */
     ArgTypeFailure(NamedValue name, String expectation,
-                   int badPos, Object[] actuals)
+                   int badPos, Object... actuals)
     {
         this(name.identify(), expectation, badPos, actuals);
     }

@@ -1,0 +1,20 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(use 'check')
+(use 'fusion/syntax')
+
+(define id (quote_syntax identifier))
+(define some_syntax (quote_syntax (op arg)))
+
+(datum_to_syntax id some_syntax)
+
+// This should strip lexical data (and per Racket, location and properties)
+(datum_to_syntax null some_syntax)
+
+(datum_to_syntax id null)
+(datum_to_syntax id "hello")
+(datum_to_syntax id (quote s))
+
+(datum_to_syntax id null.list)
+(datum_to_syntax id [])
+(datum_to_syntax id [id])

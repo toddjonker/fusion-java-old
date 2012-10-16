@@ -59,6 +59,12 @@ public abstract class FusionValue
     }
 
 
+    static boolean isNullNull(Evaluator eval, Object value)
+    {
+        IonValue iv = castToIonValueMaybe(value);
+        return (iv != null && iv.getType() == IonType.NULL);
+    }
+
     //========================================================================
 
     /**

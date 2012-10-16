@@ -68,7 +68,7 @@ final class StandardTopLevel
         while (source.next() != null)
         {
             SyntaxValue sourceExpr = Syntax.read(source, name);
-            result = myEvaluator.eval(sourceExpr, myNamespace);
+            result = FusionEval.eval(myEvaluator, sourceExpr, myNamespace);
         }
 
         return result;
@@ -117,7 +117,7 @@ final class StandardTopLevel
     {
         SyntaxSymbol id = SyntaxSymbol.make(procedureName);
 
-        Object proc = myEvaluator.eval(id, myNamespace);
+        Object proc = FusionEval.eval(myEvaluator, id, myNamespace);
         if (proc instanceof Procedure)
         {
             return (Procedure) proc;

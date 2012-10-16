@@ -2,10 +2,15 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionValue.castToIonValueMaybe;
+import static com.amazon.fusion.FusionVector.isVector;
+import static com.amazon.fusion.FusionVector.unsafeVectorRef;
+import static com.amazon.fusion.FusionVector.unsafeVectorSize;
 import static com.amazon.fusion.SourceLocation.currentLocation;
 import com.amazon.ion.Decimal;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonType;
+import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
 import java.util.ArrayList;
 
@@ -14,6 +19,18 @@ import java.util.ArrayList;
  */
 final class Syntax
 {
+    private Syntax() {}
+
+    static boolean isSyntax(Evaluator eval, Object value)
+    {
+        return (value instanceof SyntaxValue);
+    }
+
+    static boolean isIdentifier(Evaluator eval, Object value)
+    {
+        return (value instanceof SyntaxSymbol);
+    }
+
     static SyntaxValue read(IonReader source, SourceName name)
     {
         IonType type = source.getType();
@@ -118,10 +135,105 @@ final class Syntax
     }
 
 
-    static SyntaxValue datumToSyntax(SyntaxSymbol context, SyntaxValue datum)
+    private static SyntaxValue applyContext(Evaluator eval,
+                                            SyntaxSymbol context,
+                                            SyntaxValue datum)
     {
-        datum = datum.stripWraps();
-        datum = context.copyWrapsTo(datum);
+        if (context != null)
+        {
+            datum = context.copyWrapsTo(datum);
+        }
         return datum;
+    }
+
+    /**
+     * @param context may be null
+     */
+    static SyntaxValue datumToSyntax(Evaluator eval,
+                                     SyntaxSymbol context,
+                                     SyntaxValue datum)
+        throws FusionException
+    {
+        // TODO Should strip location and properties
+        datum = datum.stripWraps();
+        return applyContext(eval, context, datum);
+    }
+
+
+    /**
+     * We apply the context only once at the top, so it propagates lazily.
+     */
+    private static SyntaxValue datumToStrippedSyntaxMaybe(Evaluator eval,
+                                                          SyntaxSymbol context,
+                                                          Object datum)
+        throws FusionException
+    {
+        if (isSyntax(eval, datum))
+        {
+            // TODO Should strip location and properties
+            return ((SyntaxValue) datum).stripWraps();
+        }
+
+        IonValue iv = castToIonValueMaybe(datum);
+        if (iv != null)
+        {
+            IonReader r = eval.getSystem().newReader(iv);
+            r.next();
+            return read(r, null);
+            // No need to strip wraps here
+        }
+
+        if (isVector(eval, datum))
+        {
+            int size = unsafeVectorSize(eval, datum);
+            SyntaxValue[] children = new SyntaxValue[size];
+            for (int i = 0; i < size; i++)
+            {
+                Object rawChild = unsafeVectorRef(eval, datum, i);
+                SyntaxValue child =
+                    datumToStrippedSyntaxMaybe(eval, context, rawChild);
+                if (child == null)
+                {
+                    // Hit something that's not syntax-able
+                    return null;
+                }
+                children[i] = child;
+            }
+            return SyntaxList.make(null, children);
+        }
+
+        return null;
+    }
+
+    static SyntaxValue datumToSyntaxMaybe(Evaluator eval,
+                                          SyntaxSymbol context,
+                                          Object datum)
+        throws FusionException
+    {
+        if (isSyntax(eval, datum))
+        {
+            return datumToSyntax(eval, context, (SyntaxValue) datum);
+        }
+
+        SyntaxValue stx = datumToStrippedSyntaxMaybe(eval, context, datum);
+        if (stx == null) return null;
+
+        return applyContext(eval, context, stx);
+    }
+
+    static SyntaxValue datumToSyntax(Evaluator eval,
+                                     SyntaxSymbol context,
+                                     Object datum)
+        throws FusionException
+    {
+        SyntaxValue stx = datumToSyntaxMaybe(eval, context, datum);
+        if (stx == null)
+        {
+            throw new ArgTypeFailure("datum_to_syntax",
+                                     "Syntax object or Ionizable data",
+                                     1, context, datum);
+        }
+
+        return stx;
     }
 }

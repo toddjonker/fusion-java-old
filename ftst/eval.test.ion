@@ -1,0 +1,33 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(use 'check')
+(use 'fusion/eval')
+(use 'fusion/namespace')
+(use 'fusion/syntax')
+
+
+(define ns (make_namespace_with_language "/grain")) // In test repo
+
+(check_equal (eval (quote_syntax barley) ns)
+  "soup" "eval 1")
+
+(check_equal
+  (parameterize ((current_namespace ns))
+    (eval (quote_syntax barley) null))
+  "soup" "eval 2")
+
+
+(check_equal (eval (quote barley) ns)
+  "soup" "eval 3")
+
+(check_equal (eval [] ns)
+  [] "eval 4")
+
+
+(define ns (make_namespace_with_language "/fusion/base"))
+
+(eval (quote (define something 1150)) ns)
+(check_equal (eval (quote something) ns) 1150 "eval 1150")
+
+(check_equal (eval (quote [something, something]) ns)
+  [1150, 1150] "eval [1150,1150]")

@@ -1,0 +1,7 @@
+(module eval (quote '#%kernel')
+
+  (use 'fusion/experimental/defines')
+
+  (defpub_j eval "com.amazon.fusion.FusionEval$EvalProc")
+
+)

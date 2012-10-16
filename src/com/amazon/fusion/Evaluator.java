@@ -343,7 +343,7 @@ final class Evaluator
     }
 
 
-    private Evaluator parameterizeCurrentNamespace(Namespace ns)
+    Evaluator parameterizeCurrentNamespace(Namespace ns)
     {
         if (ns == null) return this;
 
@@ -351,63 +351,6 @@ final class Evaluator
         return markedContinuation(param, ns);
     }
 
-
-    /**
-     * Calls the current evaluation handler, evaluating the given source
-     * within the current namespace.
-     *
-     * @see <a href="http://docs.racket-lang.org/reference/eval.html#%28def._%28%28quote._~23~25kernel%29._current-eval%29%29">
-         Racket's <code>eval</code></a>
-     */
-    Object callCurrentEval(SyntaxValue source)
-        throws FusionException
-    {
-        Namespace ns = findCurrentNamespace();
-
-        // TODO this should partial-expand and splice begins
-
-        source = expand(ns, source);
-        CompiledForm compiled = compile(ns, source);
-        source = null; // Don't hold garbage
-
-        return eval(ns, compiled);
-    }
-
-
-    /**
-     * Expands, compiles, and evaluates a single top-level form.
-     * <p>
-     * Equivalent to Racket's {@code eval} (but incomplete at the moment.)
-     *
-     * @param ns may be null to use {@link #findCurrentNamespace()}.
-     */
-    Object eval(SyntaxValue source, Namespace ns)
-        throws FusionException
-    {
-        Evaluator eval = parameterizeCurrentNamespace(ns);
-
-        // TODO FUSION-44 handle (module ...) properly
-        source = eval.findCurrentNamespace().syntaxIntroduce(source);
-
-        // TODO this should be a tail call
-        return eval.callCurrentEval(source);
-    }
-
-
-    /**
-     * Like {@link #eval(SyntaxValue, Namespace)},
-     * but does not enrich the source's lexical context.
-     *
-     * @param ns may be null to use {@link #findCurrentNamespace()}.
-     */
-    Object evalSyntax(SyntaxValue source, Namespace ns)
-        throws FusionException
-    {
-        Evaluator eval = parameterizeCurrentNamespace(ns);
-
-        // TODO this should be a tail call
-        return eval.callCurrentEval(source);
-    }
 
 
     // TODO FUSION-43 expansion should recur through here

@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionEval.callCurrentEval;
 import com.amazon.ion.IonReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -81,8 +82,8 @@ final class LoadHandler
                 {
                     result = null;  // Don't hold onto garbage
                     SyntaxValue fileExpr = Syntax.read(reader, name);
-                    result = eval.eval(fileExpr, namespace);
-                    // TODO tail call handling
+                    result = FusionEval.eval(eval, fileExpr, namespace);
+                    // TODO TAIL
                 }
 
                 return result;
@@ -201,10 +202,9 @@ final class LoadHandler
             // This should result in a declaration, no instantiation or visit.
 
             // TODO Do we need an Evaluator with no continuation marks?
-            // This namespace ensures correct binding for 'module'
 
-            bodyEval.callCurrentEval(moduleDeclaration);
-            // TODO tail call handling
+            callCurrentEval(bodyEval, moduleDeclaration);
+            // TODO TAIL
         }
         catch (FusionException e)
         {
