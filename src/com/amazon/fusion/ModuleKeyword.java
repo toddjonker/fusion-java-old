@@ -72,19 +72,25 @@ final class ModuleKeyword
 
         ModuleIdentity initialBindingsId;
         ModuleInstance language;
-        try
         {
             SyntaxValue initialBindingsStx =
                 check.requiredForm("initial module path", 2);
-            initialBindingsId =
-                myModuleNameResolver.resolve(eval, initialBindingsStx);
-            language = registry.lookup(initialBindingsId);
-        }
-        catch (FusionException e)
-        {
-            String message =
-                "Error installing initial bindings: " + e.getMessage();
-            throw check.failure(message);
+            try
+            {
+                initialBindingsId =
+                    myModuleNameResolver.resolve(eval, initialBindingsStx);
+                language = registry.lookup(initialBindingsId);
+            }
+            catch (FusionException e)
+            {
+                String message =
+                    "Error installing initial bindings: " + e.getMessage();
+                SyntaxFailure ex =
+                    new SyntaxFailure(getInferredName(), message,
+                                      initialBindingsStx);
+                ex.initCause(e);
+                throw ex;
+            }
         }
 
         // The new namespace shares the registry of current-namespace
@@ -97,7 +103,9 @@ final class ModuleKeyword
         {
             String message =
                 "Error determining module identity: " + e.getMessage();
-            throw check.failure(message);
+            SyntaxFailure ex = check.failure(message);
+            ex.initCause(e);
+            throw ex;
         }
 
         Namespace moduleNamespace =
