@@ -258,6 +258,12 @@ public class CoreTestCase
         assertEquals(expected, actualString);
     }
 
+    void checkLong(Integer expected, Object actual)
+    {
+        Long actualLong = FusionValue.asJavaLong(actual);
+        assertEquals(expected.longValue(), actualLong.longValue());
+    }
+
 
     //========================================================================
 

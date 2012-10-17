@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionVector.isVector;
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonContainer;
+import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonString;
@@ -650,6 +651,16 @@ public abstract class FusionValue
         if (iv != null && iv.getType() == IonType.STRING)
         {
             return ((IonString) iv).stringValue();
+        }
+        return null;
+    }
+
+    static Long asJavaLong(Object value)
+    {
+        IonValue iv = castToIonValueMaybe(value);
+        if (iv != null && iv.getType() == IonType.INT)
+        {
+            return ((IonInt) iv).longValue();
         }
         return null;
     }

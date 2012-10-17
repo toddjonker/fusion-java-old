@@ -47,4 +47,42 @@ public class TailCallTest
         assertEval(STACK_OVERFLOW_DEPTH,
                    "(countup 0 " + STACK_OVERFLOW_DEPTH + ")");
     }
+
+
+    private static final class CountupProc
+        extends Procedure2
+    {
+        CountupProc()
+        {
+            super("countup", "i", "limit");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object arg0, Object arg1)
+            throws FusionException
+        {
+            int i     = checkIntArg(0, arg0, arg1);
+            int limit = checkIntArg(1, arg0, arg1);
+
+            if (i == limit) return arg0;
+
+            Object newI = eval.newInt(i+ 1);
+            return eval.bounceTailCall(this, newI, arg1);
+        }
+    }
+
+
+    @Test
+    public void testCustomTailCall()
+        throws Exception
+    {
+        topLevel().define("countup", new CountupProc());
+
+        assertEval(STACK_OVERFLOW_DEPTH,
+                   "(countup 0 " + STACK_OVERFLOW_DEPTH + ")");
+
+        // This invokes a slightly different code path
+        checkLong(STACK_OVERFLOW_DEPTH,
+                  topLevel().call("countup", 0, STACK_OVERFLOW_DEPTH));
+    }
 }

@@ -405,7 +405,7 @@ final class Evaluator
     Object eval(Store store, CompiledForm form)
         throws FusionException
     {
-        moreEval: while (true)
+        evaluating: while (true)
         {
             /*
             if (expr.getAnnotations().length != 0)
@@ -418,24 +418,25 @@ final class Evaluator
 */
 
             Object result = form.doEval(this, store);
-            while (true)
+
+            checkingResult: while (true)
             {
-                if (result == null)
-                {
-                    return UNDEF;
-                }
                 if (result instanceof TailForm)
                 {
                     TailForm tail = (TailForm) result;
                     store = tail.myStore;
                     form  = tail.myForm;
-                    continue moreEval;
+                    continue evaluating;
                 }
                 if (result instanceof TailCall)
                 {
                     TailCall tail = (TailCall) result;
                     result = tail.myProc.doApply(this, tail.myArgs);
-                    continue;
+                    continue checkingResult;
+                }
+                if (result == null)
+                {
+                    result = UNDEF;
                 }
                 return result;
             }
@@ -454,18 +455,32 @@ final class Evaluator
     Object callNonTail(Procedure proc, Object... args)
         throws FusionException
     {
-        Object result = proc.doApply(this, args);
-        if (result instanceof TailForm)
+        calling: while (true)
         {
-            TailForm tail = (TailForm) result;
-            result = eval(tail.myStore, tail.myForm);
+            Object result = proc.doApply(this, args);
+
+            checkingResult: while (true)
+            {
+                if (result instanceof TailForm)
+                {
+                    TailForm tail = (TailForm) result;
+                    result = tail.myForm.doEval(this, tail.myStore);
+                    continue checkingResult;
+                }
+                if (result instanceof TailCall)
+                {
+                    TailCall tail = (TailCall) result;
+                    proc = tail.myProc;
+                    args = tail.myArgs;
+                    continue calling;
+                }
+                if (result == null)
+                {
+                    result = UNDEF;
+                }
+                return result;
+            }
         }
-        // TODO handle TailCall, but nothing triggers this path yet.
-        else if (result == null)
-        {
-            result = UNDEF;
-        }
-        return result;
     }
 
 
