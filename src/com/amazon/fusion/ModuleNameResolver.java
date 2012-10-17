@@ -134,8 +134,17 @@ final class ModuleNameResolver
             pathFile = new File(base, path);
         }
 
-        ModuleIdentity id = ModuleIdentity.intern(pathFile);
-        return loadModule(eval, id);
+        if (pathFile.exists())
+        {
+            ModuleIdentity id = ModuleIdentity.intern(pathFile);
+            return loadModule(eval, id);
+        }
+
+        String message =
+            "Module file not found: " + pathFile + "\n" +
+            "The syntax in use looks for a relative file, and does not search the\n" +
+            "registered repositories.";
+        throw new FusionException(message);
     }
 
 

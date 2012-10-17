@@ -151,4 +151,13 @@ public class RuntimeTest
         }
         catch (IllegalArgumentException e) { }
     }
+
+    @Test
+    public void testTopLevel()
+        throws Exception
+    {
+        useTstRepo();
+        runtime().makeTopLevel("leaf_module");
+
+    }
 }
