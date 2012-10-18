@@ -236,8 +236,6 @@ public class ListTest
         assertEval(0,"(last smList)");
         assertEval(2,"(last medList)");
         assertEval(8887,"(last lgList)");
-
-        assertUndef("(last [])");
     }
 
     @Test
@@ -247,8 +245,10 @@ public class ListTest
         expectArityFailure("(last)");
         expectArityFailure("(last [] 2)");
 
+        expectArgTypeFailure("(last [])", 0);
         expectArgTypeFailure("(last \"pikachu\")", 0);
     }
+
 
     @Test
     public void testFirst()
@@ -257,8 +257,6 @@ public class ListTest
         assertEval(0,"(first smList)");
         assertEval(0,"(first medList)");
         assertEval(4000,"(first "+ionListGeneratorWithOffset(1000,4000)+")");
-
-        assertUndef("(first [])");
     }
 
     @Test
@@ -268,8 +266,8 @@ public class ListTest
         expectArityFailure("(first)");
         expectArityFailure("(first [] 2)");
 
+        expectArgTypeFailure("(first [])", 0);
         expectArgTypeFailure("(first \"boeing\")", 0);
-
     }
 
 

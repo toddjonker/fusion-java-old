@@ -11,20 +11,26 @@
 
 
   (defpub first
-    (lambda (list)
+    (lambda (sequence)
       '''
-Returns the first element in the list
+Returns the first element in the SEQUENCE. Fails if the sequence has no
+elements.
       '''
-      (. list 0)))
+      (if (= 0 (size sequence))
+        (raise_argument_error "first" "non-empty sequence" 0 sequence)
+        (. sequence 0))))
 
-  //==========================================================================
 
   (defpub last
-    (lambda (list)
+    (lambda (sequence)
       '''
-Returns the last element in the list
+Returns the last element in the SEQUENCE. Fails if the sequence has no
+elements.
       '''
-      (if (list_empty list) undef (. list (- (size list) 1)))))
+      (let ((s (size sequence)))
+        (if (= 0 s)
+          (raise_argument_error "last" "non-empty sequence" 0 sequence)
+          (. sequence (- s 1))))))
 
 
   //==========================================================================
