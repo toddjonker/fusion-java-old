@@ -22,8 +22,7 @@
        (java_new "com.amazon.fusion.FusionIterator" has_next_proc next_proc)))
 
   (defpub empty_iterator
-    (make_iterator FALSE (lambda () undef)))
-  // TODO (next) should throw an exception
+    (make_iterator FALSE BAD_NEXT))
 
 
   (defpub iterate_value
