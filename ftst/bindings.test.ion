@@ -14,9 +14,25 @@
 (check_equal (counter) 2 "counter2")
 (check_equal (counter) 3 "counter3")
 
+
+//==========================================================================
+// letrec
+
 (check_equal
   (letrec
     [(x y),
      (y 2)]
     x)
   undef "letrec undef'd binding")
+
+
+//==========================================================================
+// is_undef
+//   ... tested here because undef should only come out of letrec
+
+(check_equal (is_undef undef)  true  "is_undef undef")
+(check_equal (is_undef null)   false "is_undef null")
+(check_equal (is_undef true)   false "is_undef true")
+(check_equal (is_undef false)  false "is_undef false")
+(check_equal (is_undef 0)      false "is_undef 0")
+(check_equal (is_undef "")     false "is_undef \"\"")

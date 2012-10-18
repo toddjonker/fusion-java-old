@@ -1,0 +1,62 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(use check)
+
+
+(check_equal (begin)  undef  "(begin)")
+(check_equal (begin 1)    1  "(begin 1)")
+(check_equal (begin 1 2)  2  "(begin 1 2)")
+(check_equal (begin 1 []) [] "(begin 1 2 [])")
+
+
+//============================================================================
+// if
+
+// Using exit ensure we don't evaluate the other branch
+
+(check_equal (if true  1 (exit)) 1 "if 1")
+(check_equal (if false (exit) 2) 2 "if 3")
+(check_equal (if (if false false true) 4 2) 4 "if 4")
+
+
+//============================================================================
+// when
+
+(check_equal (when true)    undef  "when")
+(check_equal (when false 1) undef  "when 1")
+(check_equal (when true 2)         2  "when 2")
+(check_equal (when true (begin 3)) 3  "when 3")
+(check_equal (when (not false) 1 2 3 4) 4 "when 4")
+(check_equal (when (not true) 1 2 3 4 5) undef "when 5")
+
+
+//============================================================================
+// unless
+
+(check_equal (unless false)  undef  "unless")
+(check_equal (unless true 1) undef  "unless 1")
+(check_equal (unless false 2)         2  "unless 2")
+(check_equal (unless false (begin 3)) 3  "unless 3")
+(check_equal (unless (not true) 1 2 3 4) 4 "unless 4")
+(check_equal (unless (not false) 1 2 3 4 5) undef "unless 5")
+
+
+//============================================================================
+// cond
+
+(check_equal (cond) undef "(cond)")
+
+(check_equal (cond (true 1)) 1 "1")
+(check_equal (cond (true 1 2)) 2 "2")
+(check_equal (cond (false 3)) undef "3")
+
+(check_equal (let ((x 2))
+               (cond ((= 1 x) (+ x "hi"))
+                     ((= x 3) x)
+                     (true    (+ x 2))))
+   4 "4")
+
+(check_equal (cond ((= 1 2) "bad")
+                   ((= 3 3) "body stuff" 5)
+                   (true    "bad"))
+   5 "5")

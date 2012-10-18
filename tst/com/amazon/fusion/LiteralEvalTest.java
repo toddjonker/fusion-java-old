@@ -149,38 +149,11 @@ public class LiteralEvalTest
 
 
     @Test
-    public void testUndef()
-        throws Exception
-    {
-        assertEval(true,  "(is_undef undef)");
-        assertEval(false, "(is_undef null)");
-        assertEval(false, "(is_undef true)");
-        assertEval(false, "(is_undef false)");
-        assertEval(false, "(is_undef null.bool)");
-        assertEval(false, "(is_undef 0)");
-        assertEval(false, "(is_undef (quote f))");
-        assertEval(false, "(is_undef \"\")");
-        assertEval(false, "(is_undef [])");
-        assertEval(false, "(is_undef (quote ()))");
-        assertEval(false, "(is_undef {})");
-    }
-
-    @Test
     public void testIsUndefArity()
         throws Exception
     {
         expectArityFailure("(is_undef)");
         expectArityFailure("(is_undef undef 2)");
-    }
-
-    @Test
-    public void testIsUndefLeniency()
-        throws Exception
-    {
-        for (String e : allTypeExpressions())
-        {
-            eval("(is_undef " + e + ")");
-        }
     }
 
 

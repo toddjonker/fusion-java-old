@@ -23,6 +23,7 @@
 
   (defpub check_list_equal
     (lambda (actual expected)
+      (assert (is_list actual) "expected list, received: " actual)
       (assert (= (size actual) (size expected))
         "list lengths don't match. Actual: " actual " Expected: " expected)
       (let loop ((i 0))
@@ -32,6 +33,7 @@
 
   (defpub check_vector_equal
     (lambda (actual expected)
+      (assert (is_vector actual) "expected vector, received: " actual)
       (assert (= (vector_size actual) (vector_size expected))
         "vector sizes don't match. Actual: " actual " Expected: " expected)
       (let loop ((i 0))

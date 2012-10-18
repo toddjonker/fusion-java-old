@@ -29,22 +29,6 @@ public class BooleanTest
     };
 
 
-    @Test
-    public void testBasicIf()
-        throws Exception
-    {
-        assertEval(1, "(if true 1 2)");
-        assertEval(2, "(if false 1 2)");
-        assertEval(1, "(if (if false false true) 1 2)");
-    }
-
-    @Test
-    public void testNotEvaluatingOtherBranch()
-        throws Exception
-    {
-        assertEval(1, "(if true 1 (exit))");
-        assertEval(2, "(if false (exit) 2)");
-    }
 
     @Test @Ignore
     public void testTruthiness()
@@ -380,31 +364,5 @@ public class BooleanTest
             expectContractFailure("("+ops[i]+" 2008-08-28T16:37:24.0000Z "+reallyBigNumber+")");
             expectContractFailure("("+ops[i]+" 2008-08-28T16:37:24.0000Z "+reallyBigDec+")");
         }
-    }
-
-
-    @Test
-    public void testUnless()
-        throws Exception
-    {
-        assertUndef("(unless true 1)");
-        assertEval(1, "(unless false 1)");
-
-        assertEval(3, "(unless false (begin 3))");
-
-        assertEval(3, "(unless false 1 2 3)");
-    }
-
-
-    @Test
-    public void testWhen()
-         throws Exception
-    {
-        assertUndef("(when false 1)");
-        assertEval(1,"(when true 1)");
-
-        assertEval(3, "(when true (begin 3))");
-
-        assertEval(3, "(when true 1 2 3)");
     }
 }
