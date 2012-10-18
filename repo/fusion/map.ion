@@ -14,13 +14,13 @@
     (lambda (proc)
       '''
 Reads each Ion value from stdin, applies the PROC to it, and writes the result
-to stdout.  When PROC returns undef, nothing is written.
+to stdout.  When PROC returns void, nothing is written.
       '''
       (let ((value (read)))
-        (if (is_undef value)
+        (if (is_void value)
           value
           (let ((result (proc value)))
-            (if (is_undef result) result
+            (unless (is_void result)
               (write result))
             (chew_stdin proc))))))
 

@@ -17,6 +17,9 @@
          (check_list_equal actual expected))
         ((is_vector expected)
          (check_vector_equal actual expected))
+        ((is_void expected)
+         (assert (is_void actual)
+           descr " not equal.\nActual: " actual "\nExpected: " expected))
         (true
          (assert (= actual expected)
            descr " not equal.\nActual: " actual "\nExpected: " expected)))))

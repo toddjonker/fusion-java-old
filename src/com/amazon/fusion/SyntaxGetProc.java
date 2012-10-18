@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
+import static com.amazon.fusion.FusionVoid.voidValue;
 import java.io.IOException;
 
 final class SyntaxGetProc
@@ -38,7 +39,7 @@ final class SyntaxGetProc
                     SyntaxSequence s = (SyntaxSequence) stx;
                     if (s.size() <= index)
                     {
-                        return UNDEF;
+                        return voidValue(eval);
                     }
                     value = s.get((int) index);
                     break;
@@ -56,7 +57,7 @@ final class SyntaxGetProc
                 }
             }
 
-            if (value == null) return UNDEF;
+            if (value == null) return voidValue(eval);
 
             if (i < lastArg)
             {

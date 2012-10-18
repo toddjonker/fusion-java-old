@@ -2,8 +2,8 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionValue.UNDEF;
 import static com.amazon.fusion.FusionVector.isVector;
+import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
@@ -436,7 +436,7 @@ final class Evaluator
                 }
                 if (result == null)
                 {
-                    result = UNDEF;
+                    result = voidValue(this);
                 }
                 return result;
             }
@@ -476,7 +476,7 @@ final class Evaluator
                 }
                 if (result == null)
                 {
-                    result = UNDEF;
+                    result = voidValue(this);
                 }
                 return result;
             }

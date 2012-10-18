@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVoid.voidValue;
+
 final class AssertKeyword
     extends KeywordValue
 {
@@ -58,7 +60,10 @@ final class AssertKeyword
             throws FusionException
         {
             Object result = eval.eval(store, myTestForm);
-            if (checkBoolArg(0 /* argNum */, result)) return UNDEF;
+            if (checkBoolArg(0 /* argNum */, result))
+            {
+                return voidValue(eval);
+            }
 
             String message;
             int size = myMessageForms.length;

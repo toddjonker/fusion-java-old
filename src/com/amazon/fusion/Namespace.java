@@ -2,8 +2,8 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionValue.UNDEF;
 import static com.amazon.fusion.FusionValue.writeToString;
+import static com.amazon.fusion.FusionVoid.voidValue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -447,7 +447,7 @@ class Namespace
                 ((NamedValue)value).inferName(myName);
             }
 
-            return UNDEF;
+            return voidValue(eval);
         }
 
         Object processValue(Evaluator eval, Store store, Object value)

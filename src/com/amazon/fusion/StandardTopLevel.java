@@ -2,8 +2,8 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionValue.UNDEF;
 import static com.amazon.fusion.FusionValue.writeToString;
+import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
@@ -61,7 +61,7 @@ final class StandardTopLevel
     public Object eval(IonReader source, SourceName name)
         throws ExitException, FusionException
     {
-        Object result = UNDEF;
+        Object result = voidValue(myEvaluator);
 
         // TODO should work even if already positioned on first value
 

@@ -31,6 +31,7 @@
 //   ... tested here because undef should only come out of letrec
 
 (check_equal (is_undef undef)  true  "is_undef undef")
+// (check_equal (is_undef (void)) false "is_undef void") // TODO FUSION-71 FIXME
 (check_equal (is_undef null)   false "is_undef null")
 (check_equal (is_undef true)   false "is_undef true")
 (check_equal (is_undef false)  false "is_undef false")

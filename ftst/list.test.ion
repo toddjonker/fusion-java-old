@@ -1,7 +1,8 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(use 'fusion/list')
 (use check)
+(use 'fusion/list')
+(use 'fusion/vector')
 
 (define F (lambda (e) false))
 (define T (lambda (e) true))
@@ -37,3 +38,11 @@
 
 // We don't have a way to test side-effects so just make sure the thing runs.
 (for_each T [1, 2, true])
+
+
+(check_equal (for_each (lambda (x) (+ 1 x)) [2, 3])
+   (void) "for_each returns void")
+
+(let [(v (stretchy_vector))]
+  (for_each (lambda (x) (vector_add_m v (+ 1 x))) [2, 3])
+  (check_equal v [3, 4] "for_each side effects"))

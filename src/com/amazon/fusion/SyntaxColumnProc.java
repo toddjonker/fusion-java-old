@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVoid.voidValue;
+
 
 public class SyntaxColumnProc
     extends Procedure1
@@ -23,6 +25,6 @@ public class SyntaxColumnProc
         {
             return eval.newInt(location.myColumn);
         }
-        return UNDEF;
+        return voidValue(eval);
     }
 }

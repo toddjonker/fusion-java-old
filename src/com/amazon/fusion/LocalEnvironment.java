@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionValue.UNDEF;
+import static com.amazon.fusion.FusionVoid.voidValue;
 import java.util.Set;
 
 final class LocalEnvironment
@@ -242,7 +242,7 @@ final class LocalEnvironment
         {
             Object value = eval.eval(store, myValueForm);
             store.set(myAddress, value);
-            return UNDEF;
+            return voidValue(eval);
         }
     }
 
@@ -268,7 +268,7 @@ final class LocalEnvironment
         {
             Object value = eval.eval(store, myValueForm);
             store.set(myRib, myAddress, value);
-            return UNDEF;
+            return voidValue(eval);
         }
     }
 }

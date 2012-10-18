@@ -2,6 +2,7 @@
 
 package com.amazon.fusion.cli;
 
+import static com.amazon.fusion.FusionVoid.isVoid;
 import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntime;
@@ -129,7 +130,7 @@ class Repl
         private void print(Object v)
             throws FusionException
         {
-            if (v == FusionValue.UNDEF) return;
+            if (isVoid(v)) return;
 
             FusionValue.write(myOut, v);
             myOut.println();

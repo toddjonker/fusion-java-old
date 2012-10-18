@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVoid.isVoid;
 import static org.junit.Assert.assertEquals;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonDecimal;
@@ -289,13 +290,14 @@ public class CoreTestCase
         assertEval(expected, sourceIon);
     }
 
-    protected void assertUndef(String expressionIon)
+    protected void assertVoid(String expressionIon)
         throws FusionException
     {
         Object fv = eval(expressionIon);
-        if (fv != FusionValue.UNDEF)
+        if (! isVoid(fv))
         {
-            Assert.fail("Result isn't undef: " + fv + "\nSource: " + expressionIon);
+            Assert.fail("Result isn't void: " + fv +
+                        "\nSource: " + expressionIon);
         }
     }
 

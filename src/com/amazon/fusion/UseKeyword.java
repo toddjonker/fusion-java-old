@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVoid.voidValue;
+
 final class UseKeyword
     extends KeywordValue
 {
@@ -63,7 +65,7 @@ final class UseKeyword
             // So it's never entered with a "real" Store.
             Namespace namespace = (Namespace) store.namespace();
             namespace.use(myUsedModuleId);
-            return UNDEF;
+            return voidValue(eval);
         }
     }
 }

@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVoid.voidValue;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
@@ -40,6 +41,6 @@ final class DisplayProc
             throw new FusionException(e);
         }
 
-        return UNDEF;
+        return voidValue(eval);
     }
 }

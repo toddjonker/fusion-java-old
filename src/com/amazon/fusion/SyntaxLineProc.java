@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVoid.voidValue;
+
 
 public class SyntaxLineProc
     extends Procedure1
@@ -23,6 +25,6 @@ public class SyntaxLineProc
         {
             return eval.newInt(location.myLine);
         }
-        return UNDEF;
+        return voidValue(eval);
     }
 }

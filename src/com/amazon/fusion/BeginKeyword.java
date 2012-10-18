@@ -36,7 +36,7 @@ final class BeginKeyword
         //    "                                                                               |
         super("EXPR ...",
               "Evaluates the EXPRs in order, returning the final result.\n" +
-              "The last EXPR is in tail position. If there are no EXPRs the result is undef.");
+              "The last EXPR is in tail position. If there are no EXPRs the result is void.");
     }
 
 
@@ -65,19 +65,7 @@ final class BeginKeyword
     CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
         throws FusionException
     {
-        final int size = source.size();
-
-        CompiledForm compiled;
-        if (size == 1)
-        {
-            // TODO FUSION-33 this shouldn't happen after begin-lifting
-            compiled = new CompiledUndef();  // TODO singleton
-        }
-        else
-        {
-            compiled = compile(eval, env, source, 1, size);
-        }
-        return compiled;
+        return compile(eval, env, source, 1, source.size());
     }
 
 
@@ -87,18 +75,12 @@ final class BeginKeyword
     {
         int size = to - from;
 
-        CompiledForm compiled;
-        if (size == 1)
-        {
-            compiled = eval.compile(env, source.get(from));
-        }
-        else
-        {
-            CompiledForm[] subforms = eval.compile(env, source, from, to);
-            compiled = new CompiledBegin(subforms);
-        }
+        if (size == 0) return CompiledVoid.SINGLETON;
 
-        return compiled;
+        if (size == 1) return eval.compile(env, source.get(from));
+
+        CompiledForm[] subforms = eval.compile(env, source, from, to);
+        return new CompiledBegin(subforms);
     }
 
 
@@ -111,18 +93,6 @@ final class BeginKeyword
 
 
     //========================================================================
-
-
-    private static final class CompiledUndef
-        implements CompiledForm
-    {
-        @Override
-        public Object doEval(Evaluator eval, Store store)
-            throws FusionException
-        {
-            return UNDEF;
-        }
-    }
 
 
     private static final class CompiledBegin

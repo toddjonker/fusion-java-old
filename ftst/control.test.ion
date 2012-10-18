@@ -3,7 +3,7 @@
 (use check)
 
 
-(check_equal (begin)  undef  "(begin)")
+(check_equal (begin)  (void) "(begin)")
 (check_equal (begin 1)    1  "(begin 1)")
 (check_equal (begin 1 2)  2  "(begin 1 2)")
 (check_equal (begin 1 []) [] "(begin 1 2 [])")
@@ -22,33 +22,33 @@
 //============================================================================
 // when
 
-(check_equal (when true)    undef  "when")
-(check_equal (when false 1) undef  "when 1")
+(check_equal (when true)    (void)    "when")
+(check_equal (when false 1) (void)    "when 1")
 (check_equal (when true 2)         2  "when 2")
 (check_equal (when true (begin 3)) 3  "when 3")
 (check_equal (when (not false) 1 2 3 4) 4 "when 4")
-(check_equal (when (not true) 1 2 3 4 5) undef "when 5")
+(check_equal (when (not true) 1 2 3 4 5) (void) "when 5")
 
 
 //============================================================================
 // unless
 
-(check_equal (unless false)  undef  "unless")
-(check_equal (unless true 1) undef  "unless 1")
+(check_equal (unless false)  (void)      "unless")
+(check_equal (unless true 1) (void)      "unless 1")
 (check_equal (unless false 2)         2  "unless 2")
 (check_equal (unless false (begin 3)) 3  "unless 3")
 (check_equal (unless (not true) 1 2 3 4) 4 "unless 4")
-(check_equal (unless (not false) 1 2 3 4 5) undef "unless 5")
+(check_equal (unless (not false) 1 2 3 4 5) (void) "unless 5")
 
 
 //============================================================================
 // cond
 
-(check_equal (cond) undef "(cond)")
+(check_equal (cond) (void) "(cond)")
 
 (check_equal (cond (true 1)) 1 "1")
 (check_equal (cond (true 1 2)) 2 "2")
-(check_equal (cond (false 3)) undef "3")
+(check_equal (cond (false 3)) (void) "3")
 
 (check_equal (let ((x 2))
                (cond ((= 1 x) (+ x "hi"))

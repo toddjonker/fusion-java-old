@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVoid.voidValue;
+
 
 public class SyntaxSourceProc
     extends Procedure1
@@ -27,6 +29,6 @@ public class SyntaxSourceProc
                 return eval.newString(name.display());
             }
         }
-        return UNDEF;
+        return voidValue(eval);
     }
 }
