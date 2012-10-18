@@ -13,3 +13,10 @@
 (check_equal (counter) 1 "counter1")
 (check_equal (counter) 2 "counter2")
 (check_equal (counter) 3 "counter3")
+
+(check_equal
+  (letrec
+    [(x y),
+     (y 2)]
+    x)
+  undef "letrec undef'd binding")

@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import java.util.Arrays;
+
 final class LetrecKeyword
     extends KeywordValue
 {
@@ -128,7 +130,7 @@ final class LetrecKeyword
             final int numBindings = myValueForms.length;
 
             Object[] boundValues = new Object[numBindings];
-            // FIXME fill with UNDEF ?
+            Arrays.fill(boundValues, UNDEF);
 
             Store localStore = new LocalStore(store, boundValues);
 
