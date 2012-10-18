@@ -14,7 +14,7 @@ final class SetKeyword
 
     @Override
     SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
-        throws SyntaxFailure
+        throws FusionException
     {
         SyntaxChecker check = check(source);
         check.arityExact(3);

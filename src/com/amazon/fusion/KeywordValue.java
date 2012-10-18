@@ -22,7 +22,7 @@ abstract class KeywordValue
 
 
     SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
-        throws SyntaxFailure
+        throws FusionException
     {
         int size = source.size();
 

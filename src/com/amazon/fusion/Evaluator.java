@@ -355,7 +355,7 @@ final class Evaluator
 
     // TODO FUSION-43 expansion should recur through here
     SyntaxValue expand(Environment env, SyntaxValue source)
-        throws SyntaxFailure
+        throws FusionException
     {
         // TODO FUSION-43 Fail if there are annotations
         return source.expand(this, env);

@@ -21,7 +21,7 @@ abstract class MacroValue
     @Override
     final SyntaxValue expand(Evaluator eval, Environment env,
                              SyntaxSexp source)
-        throws SyntaxFailure
+        throws FusionException
     {
         // TODO FUSION-39 we create two MarkWrap instances here
         final int mark = ourMarkCounter.incrementAndGet();

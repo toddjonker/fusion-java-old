@@ -22,7 +22,7 @@ final class LambdaKeyword
 
     @Override
     SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
-        throws SyntaxFailure
+        throws FusionException
     {
         SyntaxChecker check = check(source);
         int arity = check.arityAtLeast(3);

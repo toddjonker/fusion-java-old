@@ -93,7 +93,7 @@ final class SyntaxList
 
     @Override
     SyntaxValue expand(Evaluator eval, Environment env)
-        throws SyntaxFailure
+        throws FusionException
     {
         int len = size();
         if (len == 0) return this;

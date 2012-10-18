@@ -255,7 +255,7 @@ final class SyntaxStruct
 
     @Override
     SyntaxValue expand(Evaluator eval, Environment env)
-        throws SyntaxFailure
+        throws FusionException
     {
         Map<String, Object> newMap = null;
         if (myMap != null)

@@ -20,7 +20,7 @@ final class ParameterizeKeyword
 
     @Override
     SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
-        throws SyntaxFailure
+        throws FusionException
     {
         SyntaxChecker check = check(source);
         final int exprSize = check.arityAtLeast(3);

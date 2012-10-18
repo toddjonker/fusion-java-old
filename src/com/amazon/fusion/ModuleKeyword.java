@@ -49,7 +49,7 @@ final class ModuleKeyword
     SyntaxValue expand(Evaluator eval,
                         Environment envOutsideModule,
                         SyntaxSexp source)
-        throws SyntaxFailure
+        throws FusionException
     {
         SyntaxChecker check = check(source);
 

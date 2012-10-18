@@ -21,7 +21,7 @@ final class IfKeyword
 
     @Override
     SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
-        throws SyntaxFailure
+        throws FusionException
     {
         check(source).arityExact(4);
         return super.expand(eval, env, source);

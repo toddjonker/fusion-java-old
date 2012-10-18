@@ -16,7 +16,7 @@ final class AssertKeyword
 
     @Override
     SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
-        throws SyntaxFailure
+        throws FusionException
     {
         check(source).arityAtLeast(2);
         return super.expand(eval, env, source);

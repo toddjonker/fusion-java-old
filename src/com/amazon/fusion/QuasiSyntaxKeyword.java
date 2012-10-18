@@ -28,7 +28,7 @@ final class QuasiSyntaxKeyword
 
     @Override
     SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp stx)
-        throws SyntaxFailure
+        throws FusionException
     {
         if (stx.size() != 2)
         {
@@ -46,7 +46,7 @@ final class QuasiSyntaxKeyword
 
     private SyntaxValue expand(Evaluator eval, Environment env,
                                SyntaxValue source, int depth)
-        throws SyntaxFailure
+        throws FusionException
     {
         // TODO FUSION-46 handle unsyntax inside lists and structs
         if (source instanceof SyntaxSexp)
@@ -61,7 +61,7 @@ final class QuasiSyntaxKeyword
 
     private SyntaxValue expand(Evaluator eval, Environment env,
                                SyntaxSexp source, int depth)
-        throws SyntaxFailure
+        throws FusionException
     {
         int size = source.size();
         if (size == 0) return source;

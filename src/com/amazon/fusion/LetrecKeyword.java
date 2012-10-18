@@ -18,7 +18,7 @@ final class LetrecKeyword
 
     @Override
     SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
-        throws SyntaxFailure
+        throws FusionException
     {
         SyntaxChecker check = check(source);
         final int letrecExprSize = check.arityAtLeast(3);

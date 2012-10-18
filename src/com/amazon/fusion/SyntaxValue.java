@@ -96,7 +96,7 @@ abstract class SyntaxValue
 
 
     SyntaxValue expand(Evaluator eval, Environment env)
-        throws SyntaxFailure
+        throws FusionException
     {
         return this;
     }
