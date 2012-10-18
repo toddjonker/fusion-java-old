@@ -80,6 +80,12 @@ final class ModuleKeyword
                 initialBindingsId =
                     myModuleNameResolver.resolve(eval, initialBindingsStx);
                 language = registry.lookup(initialBindingsId);
+                assert language != null;  // Otherwise resolve should fail
+            }
+            catch (ModuleNotFoundFailure e)
+            {
+                e.addContext(initialBindingsStx);
+                throw e;
             }
             catch (FusionException e)
             {

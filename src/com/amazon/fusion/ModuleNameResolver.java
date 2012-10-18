@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static com.amazon.ion.util.IonTextUtils.printString;
 import java.io.File;
 
@@ -31,6 +32,12 @@ final class ModuleNameResolver
     }
 
 
+    /**
+     * Locates and loads a module, dispatching on the concrete syntax of the
+     * request.
+     *
+     * @throws ModuleNotFoundFailure if the module could not be found.
+     */
     ModuleIdentity resolve(Evaluator eval, SyntaxValue pathStx)
         throws FusionException
     {
@@ -40,12 +47,12 @@ final class ModuleNameResolver
             {
                 String libName = ((SyntaxSymbol) pathStx).stringValue();
                 // TODO check null/empty
-                return resolveLib(eval, libName);
+                return resolveLib(eval, libName, pathStx);
             }
             case STRING:
             {
                 String path = ((SyntaxString) pathStx).stringValue();
-                return resolve(eval, path);
+                return resolve(eval, path, pathStx);
             }
             case SEXP:
             {
@@ -58,6 +65,12 @@ final class ModuleNameResolver
     }
 
 
+    /**
+     * Locates and loads a module, dispatching on the concrete syntax of the
+     * request.
+     *
+     * @throws ModuleNotFoundFailure if the module could not be found.
+     */
     ModuleIdentity resolve(Evaluator eval, SyntaxSexp pathStx)
         throws FusionException
     {
@@ -68,21 +81,34 @@ final class ModuleNameResolver
         if ("lib".equals(form))
         {
             String libName = check.requiredNonEmptyString("module name", 1);
-            return resolveLib(eval, libName);
+            return resolveLib(eval, libName, pathStx);
         }
 
         if ("quote".equals(form))
         {
             String libName = check.requiredNonEmptySymbol("module name", 1);
             ModuleIdentity id = ModuleIdentity.intern(libName);
+
+            ModuleRegistry reg = eval.findCurrentNamespace().getRegistry();
+            if (reg.lookup(id) == null)
+            {
+                throw new ModuleNotFoundFailure("Module not found", pathStx);
+            }
             return id;
         }
 
         throw check.failure("unrecognized form");
     }
 
-
-    private ModuleIdentity resolveLib(Evaluator eval, String libName)
+    /**
+     * Locates and loads a module from the registered repositories.
+     *
+     * @param stx is used for error messaging
+     *
+     * @throws ModuleNotFoundFailure if the module could not be found.
+     */
+    private ModuleIdentity resolveLib(Evaluator eval, String libName,
+                                      SyntaxValue stx)
         throws FusionException
     {
         for (ModuleRepository repo : myRepositories)
@@ -94,8 +120,11 @@ final class ModuleNameResolver
             }
         }
 
-        String message = "Library not found: " + printString(libName);
-        throw new FusionException(message);
+        String message =
+            "A module named " + printQuotedSymbol(libName) +
+            " could not be found in the registered repositories.";
+        // TODO explain where we looked
+        throw new ModuleNotFoundFailure(message, stx);
     }
 
 
@@ -107,10 +136,13 @@ final class ModuleNameResolver
      * @param path the file to resolve and load. If relative, its resolved
      * relative to the {@code current_load_relative_directory} parameter if
      * its set, or else the {@code current_directory} parameter.
+     * @param stx is used for error messaging
      *
      * @return the identity of the loaded module.
+     *
+     * @throws ModuleNotFoundFailure if the module could not be found.
      */
-    ModuleIdentity resolve(Evaluator eval, String path)
+    ModuleIdentity resolve(Evaluator eval, String path, SyntaxValue stx)
         throws FusionException
     {
         if (! path.endsWith(".ion")) path += ".ion";
@@ -141,10 +173,12 @@ final class ModuleNameResolver
         }
 
         String message =
-            "Module file not found: " + pathFile + "\n" +
-            "The syntax in use looks for a relative file, and does not search the\n" +
-            "registered repositories.";
-        throw new FusionException(message);
+            "A module file could not be found at the requested path " +
+            printString(path)+ "\n" +
+            "The syntax in use looks for a relative file, and does not " +
+            "search any registered repositories.";
+        // TODO explain where we looked
+        throw new ModuleNotFoundFailure(message, stx);
     }
 
 

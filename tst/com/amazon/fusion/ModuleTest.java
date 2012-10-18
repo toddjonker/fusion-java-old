@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static org.junit.Assert.assertSame;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -11,11 +12,53 @@ import org.junit.Test;
 public class ModuleTest
     extends CoreTestCase
 {
+    @Before
+    public void requires()
+    {
+        useTstRepo();
+    }
+
+    @Test(expected = ModuleNotFoundFailure.class)
+    public void testBadLanguageSymbolInTopLevelModule()
+        throws Exception
+    {
+        eval("(module m 'no_such_module' (define x 1))");
+    }
+
+    @Test(expected = ModuleNotFoundFailure.class)
+    public void testBadQuotedLanguageSymbolInTopLevelModule()
+        throws Exception
+    {
+        eval("(module m (quote 'no_such_module') (define x 1))");
+    }
+
+    @Test(expected = ModuleNotFoundFailure.class)
+    public void testBadLanguageStringInTopLevelModule()
+        throws Exception
+    {
+        eval("(module m \"no_such_module\" (define x 1))");
+    }
+
+    @Test(expected = FusionException.class) // ModuleNotFoundFailure gets wrapped
+    public void testBadLanguageSymbolInRepoModule()
+        throws Exception
+    {
+        eval("(use 'module/bad_lang_symbol')");
+    }
+
+    @Test(expected = FusionException.class) // ModuleNotFoundFailure gets wrapped
+    public void testBadQuotedLanguageSymbolInRepoModule()
+        throws Exception
+    {
+        eval("(use 'module/bad_quoted_lang_symbol')");
+    }
+
+    // TODO similar tests for 'use'
+
     @Test(expected = UnboundIdentifierFailure.class)
     public void testUseModuleWithNoProvides()
         throws Exception
     {
-        useTstRepo();
         eval("(use 'NoProvides')");
         eval("X");
     }
@@ -25,7 +68,6 @@ public class ModuleTest
     public void testIntialModuleImportsWithNoProvides()
         throws Exception
     {
-        useTstRepo();
         eval("(module M 'NoProvides' X)");
     }
 
@@ -48,7 +90,6 @@ public class ModuleTest
     public void testTransitiveLoad()
         throws Exception
     {
-        useTstRepo();
         eval("(use root_module)");
         assertEval(437, "leaf_var");
         Object rootFn = eval("root_fn");

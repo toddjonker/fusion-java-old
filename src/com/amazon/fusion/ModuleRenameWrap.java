@@ -15,6 +15,7 @@ class ModuleRenameWrap
 
     ModuleRenameWrap(ModuleInstance module)
     {
+        assert module != null;
         myModule = module;
     }
 

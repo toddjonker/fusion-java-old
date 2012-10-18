@@ -14,6 +14,13 @@ final class ModuleRegistry
         new HashMap<ModuleIdentity,ModuleInstance>();
 
 
+    /**
+     * Finds a module in this registry.
+     *
+     * @param identity the desired module
+     *
+     * @return null if the module doesn't exist in this registry.
+     */
     synchronized ModuleInstance lookup(ModuleIdentity identity)
     {
         return myModules.get(identity);
