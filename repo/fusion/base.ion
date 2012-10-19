@@ -16,7 +16,7 @@
 
 
   // Pass-through bindings from builtins
-  (provide and assert for_list let or quote set)
+  (provide assert for_list let quote set)
   (provide * + - . < = add apply concatenate contains display exit
     for_each_field help is_null is_undef make_sexp not
     raise_argument_error raise_result_error read remove
@@ -45,6 +45,64 @@
 
   //==========================================================================
   // Control forms
+
+  (defpub_syntax and
+    (lambda (stx)
+      '''
+(and expr ...)
+
+Evaluates the EXPRs from left to right, returning the first untruthy value
+that results (and ignoring further expressions). If they all return truthy
+values, the last one is returned.
+
+The last EXPR is in tail position. Given no EXPRs, the result is true.
+      '''
+
+      // (and)          -->  true
+      // (and A)        -->  A
+      // (and A B ...)  -->  (let [(a A)] (if a (and B ...) a))
+
+      (let [(size (syntax_size stx))]
+        (if (= 1 size)
+          (quote_syntax true)
+          (if (= 2 size)
+            (syntax_get stx 1)
+            (let [(first (syntax_get    stx 1)),
+                  (rest  (syntax_subseq stx 2))]
+              (let [(inner (syntax_cons and rest))]
+                (quasisyntax
+                  (let ((a (unsyntax first)))
+                    (if a (unsyntax inner) a))))))))))
+
+
+  (defpub_syntax or
+    (lambda (stx)
+      '''
+(or expr ...)
+
+Evaluates the EXPRs from left to right, returning the first truthy value
+that results (and ignoring further expressions). If they all return untruthy
+values, the last one is returned.
+
+The last EXPR is in tail position. Given no EXPRs, the result is false.
+      '''
+
+      // (or)          -->  false
+      // (or A)        -->  A
+      // (or A B ...)  -->  (let [(a A)] (if a a (and B ...)))
+
+      (let [(size (syntax_size stx))]
+        (if (= 1 size)
+          (quote_syntax false)
+          (if (= 2 size)
+            (syntax_get stx 1)
+            (let [(first (syntax_get    stx 1)),
+                  (rest  (syntax_subseq stx 2))]
+              (let [(inner (syntax_cons or rest))]
+                (quasisyntax
+                  (let ((a (unsyntax first)))
+                    (if a a (unsyntax inner)))))))))))
+
 
   (defpub_syntax when
     (lambda (stx)

@@ -159,13 +159,6 @@ abstract class Procedure
     }
 
 
-    final boolean checkBoolArg(int argNum, Object... args)
-        throws ArgTypeFailure
-    {
-        Object arg = args[argNum];
-        return checkBoolArg(argNum, arg);
-    }
-
     double checkDecimalArg(int argNum, Object... args)
         throws ArgTypeFailure
     {

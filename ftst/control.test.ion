@@ -33,6 +33,65 @@
 
 
 //============================================================================
+// and
+
+(check_true (and))
+(check_true (and true))
+(check_true (and true true))
+(check_true (and (= 1 1) true))
+
+(check_false (and false))
+(check_false (and true false))
+(check_false (and false (exit)))
+(check_false (and true false true (exit)))
+
+
+(check = (and 1  0) 0)
+(check = (and 1. 0.) 0.)
+
+(check_true (is_void (and true (void))))
+
+(check_true (is_null (and null)))
+(check_true (is_null (and true null)))
+
+
+//============================================================================
+// or
+
+(check_true (or true))
+(check_true (or true (exit)))
+(check_true (or false (= 1 1) (exit)))
+
+(check_false (or))
+(check_false (or false))
+(check_false (or false false))
+
+(check = (or 1      0) 1)
+(check = (or null   0) 0)
+(check = (or (void) 0) 0)
+
+(check_true (is_void (or false (void))))
+
+(check_true (is_null (or null)))
+(check_true (is_null (or null null)))
+
+
+//============================================================================
+// not
+
+(check_true (not false))
+(check_true (not null))
+(check_true (not null.bool))
+(check_true (not (void)))
+
+(check_false (not true))
+(check_false (not 0))
+(check_false (not 1))
+
+(check_false (not (not null.bool)))
+
+
+//============================================================================
 // when
 
 (check_equal (when true)    (void)    "when")

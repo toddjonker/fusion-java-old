@@ -100,58 +100,7 @@ public class BooleanTest
 
 
     @Test
-    public void testAnd()
-        throws Exception
-    {
-        assertEval(true, "(and)");
-        assertEval(true, "(and true)");
-        assertEval(true, "(and true true)");
-        assertEval(true, "(and (= 1 1) true)");
-
-        assertEval(false, "(and false)");
-        assertEval(false, "(and true false)");
-        assertEval(false, "(and false (exit))");
-        assertEval(false, "(and true false true (exit))");
-    }
-
-
-    @Test
-    public void testAndArgType()
-        throws Exception
-    {
-        expectArgTypeFailure("(and null)", 0);
-        expectArgTypeFailure("(and true null)", 1);
-    }
-
-
-    //========================================================================
-
-
-    @Test
-    public void testOr()
-        throws Exception
-    {
-        assertEval(true, "(or true)");
-        assertEval(true, "(or true (exit))");
-        assertEval(true, "(or false (= 1 1) (exit))");
-
-        assertEval(false, "(or)");
-        assertEval(false, "(or false)");
-        assertEval(false, "(or false false)");
-    }
-
-
-    @Test
-    public void testOrArgType()
-        throws Exception
-    {
-        expectArgTypeFailure("(or null)", 0);
-        expectArgTypeFailure("(or false null)", 1);
-    }
-
-
-    @Test @Ignore
-    public void testAndOrTailCall()        // TODO FUSION-12 tail optimization
+    public void testAndOrTailCall()
         throws Exception
     {
         assertEval(true,
@@ -166,15 +115,6 @@ public class BooleanTest
 
 
     //========================================================================
-
-
-    @Test
-    public void testNot()
-        throws Exception
-    {
-        assertEval(true,  "(not false)");
-        assertEval(false, "(not true)");
-    }
 
 
     @Test
