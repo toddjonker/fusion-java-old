@@ -13,21 +13,43 @@ public class BooleanTest
     {
         "true",
         "((lambda () true))",
+        "0",
+        "1",
+        "0.",
+        "nan",
+        "+inf",
+        "-inf",
+        "0e0",
+        "2012-10-19T12:54-08:00",
+        "\"\"",
+        "(quote 'sym')", // TODO add empty symbol
+        "{{}}",
+        "{{\"\"}}",
+        "[]",
+        "(quote ())",
+        "{}",
+        // "(letrec [(x y), (y 2)] x)",  TODO FUSION-71 undef should be truthy
     };
 
     public static final String[] UNTRUTHY_EXPRESSIONS =
     {
         "false",
         "((lambda () false))",
+        "null",
+        "null.bool",
+        "null.int",
+        "null.decimal",
+        "null.float",
+        "null.timestamp",
+        "null.string",
+        "(quote null.symbol)",
+        "null.blob",
+        "null.clob",
+        "null.list",
+        "(quote null.sexp)",
+        "null.struct",
+        "(quote ann::null)",  // Annotations don't affect truthiness
     };
-
-    public static final String[] FAILING_FORMS =
-    {
-         "null.bool",
-         "undef",
-         "(lambda () true)",
-    };
-
 
 
     @Test @Ignore
@@ -62,16 +84,6 @@ public class BooleanTest
         }
     }
 
-    @Test
-    public void testIfArgType()
-        throws Exception
-    {
-        for (String form : FAILING_FORMS)
-        {
-            String expr = "(if " + form + " 1 2)";
-            expectArgTypeFailure(expr, 0);
-        }
-    }
 
     @Test
     public void testIfArity()
@@ -175,15 +187,25 @@ public class BooleanTest
 
 
     @Test
-    public void testNotArgType()
+    public void testTruthyNot()
         throws Exception
     {
-        for (String form : FAILING_FORMS)
+        for (String form : TRUTHY_EXPRESSIONS)
         {
-            String expr = "(not " + form + ")";
-            expectArgTypeFailure(expr, 0);
+            assertEval(false, "(not " + form + ")");
         }
     }
+
+    @Test
+    public void testUntruthyNot()
+        throws Exception
+    {
+        for (String form : UNTRUTHY_EXPRESSIONS)
+        {
+            assertEval(true, "(not " + form + ")");
+        }
+    }
+
 
     @Test
     public void testEqual()

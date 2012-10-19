@@ -21,6 +21,16 @@
 (check = (if false (exit) 2) 2)
 (check = (if (if false false true) 4 2) 4)
 
+// Truthiness of other types
+
+(check_true  (if 0  true false))
+(check_true  (if "" true false))
+// TODO FUSION-71 undef should be truthy
+
+(check_false (if (void) true false))
+(check_false (if null true false))
+(check_false (if null.bool true false))
+
 
 //============================================================================
 // when

@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVector.isVector;
+import static com.amazon.fusion.FusionVoid.isVoid;
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonInt;
@@ -65,6 +66,27 @@ public abstract class FusionValue
         IonValue iv = castToIonValueMaybe(value);
         return (iv != null && iv.getType() == IonType.NULL);
     }
+
+
+    static boolean isTruthy(Evaluator eval, Object result)
+        throws FusionException
+    {
+        if (isVoid(eval, result)) return false;
+
+        IonValue iv = FusionValue.castToIonValueMaybe(result);
+        if (iv == null) return true;
+
+        if (iv.isNullValue()) return false;
+
+        if (iv instanceof IonBool)
+        {
+            IonBool bv = (IonBool) iv;
+            return bv.booleanValue();
+        }
+
+        return true;
+    }
+
 
     //========================================================================
 

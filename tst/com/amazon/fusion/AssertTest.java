@@ -88,11 +88,4 @@ public class AssertTest
     {
         expectSyntaxFailure("(assert)");
     }
-
-    @Test
-    public void testAssertArgType()
-        throws Exception
-    {
-        expectArgTypeFailure("(assert 3)", 0);
-    }
 }

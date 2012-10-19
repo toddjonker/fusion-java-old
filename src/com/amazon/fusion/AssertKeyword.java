@@ -11,7 +11,8 @@ final class AssertKeyword
     {
         //    "                                                                               |
         super("EXPR MESSAGE ...",
-              "Evaluates the EXPR, throwing an exception if the result isn't true.\n" +
+              "Evaluates the EXPR, throwing an exception if the result isn't truthy (as\n" +
+              "defined by 'if'.\n" +
               "The exception displays the MESSAGEs, which are only evaluated on failure.");
     }
 
@@ -60,7 +61,7 @@ final class AssertKeyword
             throws FusionException
         {
             Object result = eval.eval(store, myTestForm);
-            if (checkBoolArg(0 /* argNum */, result))
+            if (isTruthy(eval, result))
             {
                 return voidValue(eval);
             }

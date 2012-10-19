@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+
 /**
  * The {@code if} syntactic form.
  */
@@ -12,9 +13,12 @@ final class IfKeyword
     {
         //    "                                                                               |
         super("TEST THEN ELSE",
-              "Evaluates the TEST expression first. If the result is true, evaluates the THEN\n" +
-              "expression and returns its value. If the result is false, evaluates the ELSE\n" +
-              "expression and returns its value.\n" +
+              "Evaluates the TEST expression first. If the result is truthy, evaluates the THEN\n" +
+              "expression and returns its value. Otherwise, evaluates the ELSE expression and\n" +
+              "returns its value.\n" +
+              "\n" +
+              "All values are \"truthy\" except for false, void, and any variant of null.\n" +
+              "\n" +
               "Note that only one of THEN or ELSE is evaluated, and both are in tail position.");
     }
 
@@ -64,8 +68,9 @@ final class IfKeyword
         {
             Object result = eval.eval(store, myTestForm);
 
-            boolean test = checkBoolArg(0, result);
-            CompiledForm branch = (test ? myThenForm : myElseForm);
+            boolean truthy = isTruthy(eval, result);
+
+            CompiledForm branch = truthy ? myThenForm : myElseForm;
 
             return eval.bounceTailForm(store, branch);
         }
