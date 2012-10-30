@@ -35,7 +35,12 @@ final class Iterators
     //========================================================================
 
 
-    private static class AbstractIterator
+    /**
+     * Base class for Fusion iterators implemented in Java.
+     * Subclasses just need to implement hasNext and next, and next must
+     * return Fusion values.
+     */
+    static class AbstractIterator
         extends FusionIterator
     {
         AbstractIterator()

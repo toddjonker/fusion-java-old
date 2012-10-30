@@ -19,6 +19,10 @@
 
   (defpub make_iterator
     (lambda (has_next_proc next_proc)
+      '''
+Returns an iterator that delegates iterator_has_next and iterator_next to the
+given procedures, which are usually closures with shared state.
+      '''
        (java_new "com.amazon.fusion.FusionIterator" has_next_proc next_proc)))
 
   (defpub empty_iterator
@@ -27,6 +31,9 @@
 
   (defpub iterate_value
     (lambda (value)
+      '''
+Returns an iterator that produces a single VALUE.
+      '''
       (letrec ((has_next TRUE)
                (next (lambda ()
                        (set has_next FALSE)
