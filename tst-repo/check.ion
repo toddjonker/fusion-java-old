@@ -109,6 +109,8 @@ Ensures that (OP VAL1 VAL2) is truthy.
 
 Ensures that (OP VAL1 VAL2) is truthy.
       '''
+      (when (< (syntax_size stx) 4)
+        (wrong_syntax stx "check requires at least three args: (check OP VAL1 VAL2 MSG ...)"))
       (syntax_append
         (quasisyntax (do_check (unsyntax stx)))
         (syntax_subseq stx 1))))
