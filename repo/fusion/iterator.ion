@@ -102,19 +102,19 @@ ITER, splicing the inner sequences into a single outer sequence.
 
 
   (defpub iterator_filter
-    (lambda (proc iter)
+    (lambda (pred iter)
       '''
-Returns a lazy iterator that returns elements of ITER for which PROC returns
-true when applied to the element.
+Returns a lazy iterator that returns the elements of ITER for which PRED
+returns a truthy value when applied to the element.
       '''
-      // TODO type-check proc
+      // TODO type-check pred
       (unless (is_iterator iter)
-        (raise_argument_error "iterator_filter" "iterator" 1 proc iter))
+        (raise_argument_error "iterator_filter" "iterator" 1 pred iter))
       (letrec [(find_next
                  (lambda ()
                    (if (iterator_has_next iter)
                      (let [(v (iterator_next iter))]
-                       (if (proc v)
+                       (if (pred v)
                          (begin
                            (set has_next TRUE)
                            (set next
@@ -133,6 +133,18 @@ true when applied to the element.
         (make_iterator
           (lambda () (has_next))
           (lambda () (next))))))
+
+
+(defpub iterator_find
+  (lambda (pred iter)
+      '''
+Returns the first element of ITER that satisfies predicate PRED; void if no
+element satisfies it.
+      '''
+    (let [(filtered (iterator_filter pred iter))]
+      (if (iterator_has_next filtered)
+        (iterator_next filtered)
+        (void)))))
 
 
   (defpub iterator_append
