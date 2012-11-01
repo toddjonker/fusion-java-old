@@ -4,11 +4,7 @@ package com.amazon.fusion;
 
 import java.io.IOException;
 
-/**
- * The {@code help} built-in procedure.
- * <p>
- * TODO add a Documentation model and move this to user space.
- */
+
 final class HelpProc
     extends Procedure
 {
@@ -28,12 +24,33 @@ final class HelpProc
         {
             for (Object arg : myArgs)
             {
+                // TODO support for non FusionValue?
                 if (arg instanceof FusionValue)
                 {
                     out.append('\n');
 
-                    // TODO support displayHelp for non FusionValue?
-                    ((FusionValue) arg).displayHelp(out);
+                    FeatureDocumentation doc = ((FusionValue) arg).document();
+
+                    if (doc == null)
+                    {
+                        out.append("No documentation available.\n");
+                    }
+                    else
+                    {
+                        out.append('[');
+                        // Using enum toString() allows display name to be changed
+                        out.append(doc.myKind.toString());
+                        out.append("]  ");
+                        out.append(doc.myUsage);
+                        out.append('\n');
+
+                        if (doc.myBody != null)
+                        {
+                            out.append('\n');
+                            out.append(doc.myBody);
+                            out.append('\n');
+                        }
+                    }
                 }
             }
         }

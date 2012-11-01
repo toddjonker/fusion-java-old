@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.FeatureDocumentation.Kind;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 
@@ -60,19 +61,23 @@ abstract class KeywordValue
 
 
     @Override
-    void displayHelp(Appendable out)
-        throws IOException
+    FeatureDocumentation document()
     {
-        out.append("[SYNTAX]  (");
-        out.append(getEffectiveName());
+        String name = getEffectiveName();
+
+        StringBuilder buf = new StringBuilder();
+        buf.append('(');
+        buf.append(name);
+
         if (myBodyPattern != null)
         {
-            out.append(' ');
-            out.append(myBodyPattern);
+            buf.append(' ');
+            buf.append(myBodyPattern);
         }
-        out.append(")\n\n");
-        out.append(myDoc);
-        out.append('\n');
+        buf.append(')');
+        String usage = buf.toString();
+
+        return new FeatureDocumentation(name, Kind.SYNTAX, usage, myDoc);
     }
 
 

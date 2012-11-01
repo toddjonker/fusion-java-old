@@ -166,20 +166,13 @@ public abstract class FusionValue
 
 
     /**
-     * Displays the documentation of this value.
-     * Implementations should try to ensure that a final newline is printed.
-     * <p>
-     * TODO This API should be refactored to use a Documentation abstraction
-     * that can be output in various ways.
+     * Returns the documentation of this value.
      *
-     * @param out the output stream; not null.
-     *
-     * @throws IOException Propagated from the output stream.
+     * @return the documentation model, or null if there's no documentation.
      */
-    void displayHelp(Appendable out)
-        throws IOException
+    FeatureDocumentation document()
     {
-        out.append("No documentation.\n");
+        return null;
     }
 
 

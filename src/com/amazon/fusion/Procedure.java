@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVector.isVector;
 import com.amazon.fusion.ArityFailure.Variability;
+import com.amazon.fusion.FeatureDocumentation.Kind;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
@@ -74,24 +75,22 @@ abstract class Procedure
 
 
     @Override
-    final void displayHelp(Appendable out)
-        throws IOException
+    FeatureDocumentation document()
     {
-        out.append("[PROCEDURE]  (");
-        out.append(getEffectiveName());
+        String name = getEffectiveName();
+
+        StringBuilder buf = new StringBuilder();
+        buf.append('(');
+        buf.append(name);
         for (String formal : getArgNames())
         {
-            out.append(' ');
-            out.append(formal);
+            buf.append(' ');
+            buf.append(formal);
         }
-        out.append(")\n");
+        buf.append(')');
+        String usage = buf.toString();
 
-        if (myDoc != null)
-        {
-            out.append('\n');
-            out.append(myDoc);
-            out.append('\n');
-        }
+        return new FeatureDocumentation(name, Kind.PROCEDURE, usage, myDoc);
     }
 
 
