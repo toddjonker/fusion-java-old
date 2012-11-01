@@ -5,7 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionVoid.voidValue;
 
 
-public class SyntaxSourceProc
+class SyntaxSourceProc
     extends Procedure1
 {
     SyntaxSourceProc()

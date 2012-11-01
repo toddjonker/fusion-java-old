@@ -3,10 +3,11 @@
 package com.amazon.fusion;
 
 /**
- * Bindings are used at prepare-time to identify a specific binding site.
+ * Bindings are used during expansion and compilation to identify a specific
+ * binding site.
  * They are compiled away and are not used at eval-time.
  */
-public interface Binding
+interface Binding
 {
     String getName();
 
