@@ -111,6 +111,8 @@ final class ModuleNameResolver
                                       SyntaxValue stx)
         throws FusionException
     {
+        if (! libName.startsWith("/")) libName = "/" + libName;
+
         for (ModuleRepository repo : myRepositories)
         {
             ModuleIdentity id = repo.resolveLib(eval, libName);

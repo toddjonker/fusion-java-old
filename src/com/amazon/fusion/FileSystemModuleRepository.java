@@ -28,8 +28,10 @@ final class FileSystemModuleRepository
     ModuleIdentity resolveLib(Evaluator eval, String libName)
         throws FusionException
     {
-        // TODO libName should not be absolute
-        String fileName = libName + ".ion"; // TODO ugly hard-coding
+        assert libName.startsWith("/");
+
+        // TODO absolute vs relative paths
+        String fileName = libName.substring(1) + ".ion"; // TODO ugly hard-coding
 
         File libFile = new File(myRepoDir, fileName);
         if (libFile.exists())

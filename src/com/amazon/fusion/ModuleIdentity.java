@@ -30,7 +30,7 @@ class ModuleIdentity
 
     static ModuleIdentity internFromJar(final String name)
     {
-        assert ! name.startsWith("/");
+        assert ! name.startsWith("/");  // Because it's a file name
 
         ModuleIdentity interned = ourInternedIdentities.get("jar:" + name);
         if (interned != null) return interned;
