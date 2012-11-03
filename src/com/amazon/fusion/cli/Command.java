@@ -142,9 +142,12 @@ abstract class Command
 
     /**
      * Perform pre-processing, including in particular argument processing.
+     * A null result causes the framework to emit command-specific usage help.
      *
      * @param args to process
-     * @return true if the command can be appropriately prepared for use
+     *
+     * @return an {@link Executor} to execute the command; null if there are
+     * command-line errors preventing the command from being used.
      */
     Executor prepare(String[] args)
     {

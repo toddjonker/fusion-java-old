@@ -103,12 +103,12 @@ final class ModuleNameResolver
     /**
      * Locates and loads a module from the registered repositories.
      *
-     * @param stx is used for error messaging
+     * @param stx is used for error messaging; may be null.
      *
      * @throws ModuleNotFoundFailure if the module could not be found.
      */
-    private ModuleIdentity resolveLib(Evaluator eval, String libName,
-                                      SyntaxValue stx)
+    ModuleIdentity resolveLib(Evaluator eval, String libName,
+                              SyntaxValue stx)
         throws FusionException
     {
         if (! libName.startsWith("/")) libName = "/" + libName;
@@ -126,7 +126,14 @@ final class ModuleNameResolver
             "A module named " + printQuotedSymbol(libName) +
             " could not be found in the registered repositories.";
         // TODO explain where we looked
-        throw new ModuleNotFoundFailure(message, stx);
+        if (stx == null)
+        {
+            throw new ModuleNotFoundFailure(message);
+        }
+        else
+        {
+            throw new ModuleNotFoundFailure(message, stx);
+        }
     }
 
 

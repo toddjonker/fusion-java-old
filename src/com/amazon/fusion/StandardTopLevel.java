@@ -38,6 +38,12 @@ final class StandardTopLevel
 
     //========================================================================
 
+    // NOT PUBLIC
+    Evaluator getEvaluator()
+    {
+        return myEvaluator;
+    }
+
 
     @Override
     public Object eval(String source, SourceName name)

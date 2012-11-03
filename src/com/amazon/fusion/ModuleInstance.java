@@ -2,12 +2,15 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import com.amazon.fusion.Namespace.TopBinding;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A module that's been instantiated for use by one or more other modules.
@@ -24,7 +27,7 @@ final class ModuleInstance
      * Not all of these bindings are for this module; names that are imported
      * and exported have their bindings passed through.
      */
-    private final Map<String,Binding> myProvidedBindings;
+    private final Map<String,ModuleBinding> myProvidedBindings;
 
 
     private ModuleInstance(ModuleIdentity identity, NamespaceStore namespace,
@@ -33,7 +36,7 @@ final class ModuleInstance
     {
         myIdentity = identity;
         myNamespace = namespace;
-        myProvidedBindings = new HashMap<String,Binding>(bindingCount);
+        myProvidedBindings = new HashMap<String,ModuleBinding>(bindingCount);
 
         inferName(identity.toString());
     }
@@ -51,7 +54,7 @@ final class ModuleInstance
         {
             String name = binding.getName();
 
-            myProvidedBindings.put(name, binding);
+            myProvidedBindings.put(name, (ModuleBinding) binding);
         }
     }
 
@@ -69,7 +72,7 @@ final class ModuleInstance
             String  name    = identifier.stringValue();
             Binding binding = identifier.resolve();
 
-            myProvidedBindings.put(name, binding);
+            myProvidedBindings.put(name, (ModuleBinding) binding);
         }
     }
 
@@ -88,13 +91,20 @@ final class ModuleInstance
 
     //========================================================================
 
+    Set<String> providedNames()
+    {
+        return Collections.unmodifiableSet(myProvidedBindings.keySet());
+    }
+
+
     /**
      * @return null if the name isn't provided by this module.
      */
-    Binding resolveProvidedName(String name)
+    ModuleBinding resolveProvidedName(String name)
     {
         return myProvidedBindings.get(name);
     }
+
 
     //========================================================================
 

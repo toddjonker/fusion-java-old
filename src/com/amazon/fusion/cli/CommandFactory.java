@@ -20,6 +20,7 @@ class CommandFactory
                 new Eval(),
                 new Separator(),
                 new Help(),
+                new Document(),
             };
 
         return commands;

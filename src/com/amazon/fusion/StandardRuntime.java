@@ -14,9 +14,9 @@ import java.io.File;
 final class StandardRuntime
     implements FusionRuntime
 {
-    private final GlobalState    myGlobalState;
-    private final ModuleRegistry myRegistry;
-    private final TopLevel       myTopLevel;
+    private final GlobalState      myGlobalState;
+    private final ModuleRegistry   myRegistry;
+    private final StandardTopLevel myTopLevel;
 
 
     StandardRuntime(FusionRuntimeBuilder builder)
@@ -41,11 +41,24 @@ final class StandardRuntime
     }
 
 
+    // Not public
+    GlobalState getGlobalState()
+    {
+        return myGlobalState;
+    }
+
+    // Not public
+    ModuleRegistry getDefaultRegistry()
+    {
+        return myRegistry;
+    }
+
+
     //========================================================================
 
 
     @Override
-    public TopLevel getDefaultTopLevel()
+    public StandardTopLevel getDefaultTopLevel()
         throws FusionException
     {
         return myTopLevel;

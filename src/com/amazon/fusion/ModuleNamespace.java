@@ -10,7 +10,7 @@ package com.amazon.fusion;
 class ModuleNamespace
     extends Namespace
 {
-    private static final class ModuleBinding
+    static final class ModuleBinding
         extends TopBinding
     {
         private final ModuleIdentity myModuleId;
@@ -40,6 +40,19 @@ class ModuleNamespace
             }
 
             return localNamespace.lookup(this);
+        }
+
+        // TODO FUSION-83 registry shouldn't be needed
+        Object lookup(ModuleInstance module, ModuleRegistry registry)
+        {
+            if (module.getIdentity() != myModuleId)
+            {
+                module = registry.lookup(myModuleId);
+                assert module != null : "Module not found: " + myModuleId;
+            }
+
+            NamespaceStore ns = module.getNamespace();
+            return ns.lookup(myAddress);
         }
 
         @Override

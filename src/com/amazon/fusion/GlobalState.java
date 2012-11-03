@@ -17,21 +17,24 @@ final class GlobalState
     static final ModuleIdentity KERNEL_MODULE_IDENTITY =
         intern(KERNEL_MODULE_NAME);
 
-    final IonSystem        myIonSystem;
-    final ModuleInstance   myKernelModule;
-    final LoadHandler      myLoadHandler;
-    final UseKeyword       myUseKeyword;
-    final DynamicParameter myCurrentNamespaceParam;
+    final IonSystem          myIonSystem;
+    final ModuleInstance     myKernelModule;
+    final ModuleNameResolver myModuleNameResolver;
+    final LoadHandler        myLoadHandler;
+    final UseKeyword         myUseKeyword;
+    final DynamicParameter   myCurrentNamespaceParam;
 
 
-    private GlobalState(IonSystem        ionSystem,
-                        ModuleInstance   kernel,
-                        LoadHandler      loadHandler,
-                        UseKeyword       useKeyword,
-                        DynamicParameter currentNamespaceParam)
+    private GlobalState(IonSystem          ionSystem,
+                        ModuleInstance     kernel,
+                        ModuleNameResolver resolver,
+                        LoadHandler        loadHandler,
+                        UseKeyword         useKeyword,
+                        DynamicParameter   currentNamespaceParam)
     {
         myIonSystem             = ionSystem;
         myKernelModule          = kernel;
+        myModuleNameResolver    = resolver;
         myLoadHandler           = loadHandler;
         myUseKeyword            = useKeyword;
         myCurrentNamespaceParam = currentNamespaceParam;
@@ -107,7 +110,7 @@ final class GlobalState
         registry.register(kernel);
 
         GlobalState globals =
-            new GlobalState(system, kernel, loadHandler, useKeyword,
+            new GlobalState(system, kernel, resolver, loadHandler, useKeyword,
                             currentNamespaceParam);
         return globals;
     }
