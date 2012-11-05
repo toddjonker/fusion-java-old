@@ -22,6 +22,15 @@ final class Iterators
 
 
     /**
+     * Builds a Fusion iterator from an IonValue iterator.
+     */
+    static Object iterateIon(Iterator<IonValue> iterator)
+    {
+        return new IonIteratorAdaptor(iterator);
+    }
+
+
+    /**
      * Builds a Fusion iterator over the contents of an Ion sequence.
      */
     static Object iterateIonSequence(IonSequence seq)
