@@ -20,8 +20,8 @@ public class LambdaTest
         throws Exception
     {
         expectSyntaxFailure("(lambda)");
-        expectSyntaxFailure("(lambda (parm))");
-        expectSyntaxFailure("(lambda rest 12)"); // TODO FUSION-27 rest params
+        expectSyntaxFailure("(lambda (arg))");
+        expectSyntaxFailure("(lambda rest 12)"); // TODO FUSION-27 rest args
     }
 
     @Test
@@ -33,7 +33,7 @@ public class LambdaTest
     }
 
     @Test
-    public void testParamShadowsTopLevel()
+    public void testArgShadowsTopLevel()
         throws Exception
     {
         eval("(define p 19)");
@@ -53,7 +53,7 @@ public class LambdaTest
     }
 
     @Test
-    public void testBodySeesOuterParam()
+    public void testBodySeesOuterArg()
         throws Exception
     {
         eval("(define p 19)");
@@ -75,7 +75,7 @@ public class LambdaTest
     }
 
     @Test
-    public void testNoParams()
+    public void testNoArgs()
         throws Exception
     {
         assertEval("true", "((lambda () true))");

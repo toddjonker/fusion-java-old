@@ -422,7 +422,7 @@ final class ModuleForm
         SyntaxChecker check = new SyntaxChecker("provide", form);
         for (int i = 1; i < size; i++)
         {
-            check.requiredNonEmptySymbol("bound identifier", i);
+            check.requiredIdentifier("bound identifier", i);
 
             SyntaxSymbol identifier = (SyntaxSymbol) form.get(i);
             String publicName = identifier.stringValue();

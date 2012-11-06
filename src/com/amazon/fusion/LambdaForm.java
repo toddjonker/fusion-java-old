@@ -11,9 +11,9 @@ final class LambdaForm
     LambdaForm()
     {
         //    "                                                                               |
-        super("(PARAM ...) DOC? BODY",
+        super("(ARG ...) DOC? BODY",
               "Returns a new procedure. When invoked, the caller's arguments are bound to the\n" +
-              "PARAMs and the BODY is evaluated and returned.\n" +
+              "ARG identifiers and the BODY is evaluated and returned.\n" +
               "DOC is an optional documentation string.\n" +
               "BODY may be one or more forms; the result of the last form is the result of the\n" +
               "procedure invocation.");
@@ -40,24 +40,24 @@ final class LambdaForm
             bodyStart = 2;
         }
 
-        SyntaxChecker checkFormals = check.subformSexp("formal parameters", 1);
-        SyntaxSymbol[] params = determineParams(checkFormals);
+        SyntaxChecker checkFormals = check.subformSexp("formal arguments", 1);
+        SyntaxSymbol[] args = determineArgs(checkFormals);
 
-        // We create a wrap even if there's no params, because there may be
+        // We create a wrap even if there's no arguments, because there may be
         // local definitions that will be added to the wrap.
-        Environment bodyEnv = new LocalEnvironment(env, params);
+        Environment bodyEnv = new LocalEnvironment(env, args);
         SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
 
         // Prepare the bound names so they resolve to their own binding.
-        for (int i = 0; i < params.length; i++)
+        for (int i = 0; i < args.length; i++)
         {
-            SyntaxSymbol param = params[i];
-            param = param.addWrap(localWrap);
-            param.resolve();           // Caches the binding in the identifier
-            params[i] = param;
+            SyntaxSymbol arg = args[i];
+            arg = arg.addWrap(localWrap);
+            arg.resolve();           // Caches the binding in the identifier
+            args[i] = arg;
         }
 
-        children[1] = SyntaxSexp.make(children[1].getLocation(), params);
+        children[1] = SyntaxSexp.make(children[1].getLocation(), args);
 
         for (int i = bodyStart; i < children.length; i++)
         {
@@ -72,37 +72,37 @@ final class LambdaForm
     }
 
 
-    private static SyntaxSymbol[] determineParams(SyntaxChecker checkParams)
+    private static SyntaxSymbol[] determineArgs(SyntaxChecker checkArgs)
         throws SyntaxFailure
     {
-        SyntaxSexp paramsExpr = (SyntaxSexp) checkParams.form();
-        int size = paramsExpr.size();
+        SyntaxSexp argSexp = (SyntaxSexp) checkArgs.form();
+        int size = argSexp.size();
         if (size == 0) return SyntaxSymbol.EMPTY_ARRAY;
 
-        SyntaxSymbol[] params = new SyntaxSymbol[size];
+        SyntaxSymbol[] args = new SyntaxSymbol[size];
         for (int i = 0; i < size; i++)
         {
-            params[i] = checkParams.requiredSymbol("formal parameter name", i);
+            args[i] = checkArgs.requiredIdentifier("formal argument name", i);
         }
-        return params;
+        return args;
     }
 
     //========================================================================
 
 
-    private static String[] determineArgNames(SyntaxSexp paramsExpr)
+    private static String[] determineArgNames(SyntaxSexp argSexp)
     {
-        int size = paramsExpr.size();
+        int size = argSexp.size();
         if (size == 0) return FusionUtils.EMPTY_STRING_ARRAY;
 
-        String[] params = new String[size];
+        String[] args = new String[size];
         for (int i = 0; i < size; i++)
         {
-            SyntaxSymbol identifier = (SyntaxSymbol) paramsExpr.get(i);
+            SyntaxSymbol identifier = (SyntaxSymbol) argSexp.get(i);
             Binding binding = identifier.resolve();
-            params[i] = binding.getName();
+            args[i] = binding.getName();
         }
-        return params;
+        return args;
     }
 
 

@@ -77,7 +77,7 @@ final class ModuleNameResolver
         SyntaxChecker check = new SyntaxChecker("module path", pathStx);
         check.arityExact(2);
 
-        String form = check.requiredNonEmptySymbol("symbol", 0);
+        String form = check.requiredIdentifier("symbol", 0).stringValue();
         if ("lib".equals(form))
         {
             String libName = check.requiredNonEmptyString("module name", 1);

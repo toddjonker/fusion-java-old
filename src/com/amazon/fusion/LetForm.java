@@ -52,7 +52,7 @@ final class LetForm
                 checkBindings.subformSexp("binding pair", i);
             checkPair.arityExact(2);
             SyntaxSymbol boundName =
-                checkPair.requiredSymbol("bound name", 0);
+                checkPair.requiredIdentifier("bound name", 0);
 
             subforms[i] = boundName;
         }

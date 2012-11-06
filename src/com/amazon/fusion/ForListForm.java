@@ -39,7 +39,7 @@ final class ForListForm
                 checkBindings.subformSexp("binding pair", i);
             checkPair.arityExact(2);
 
-            boundNames[i] = checkPair.requiredSymbol("bound name", 0);
+            boundNames[i] = checkPair.requiredIdentifier("bound name", 0);
 
             SyntaxValue subform = checkPair.requiredForm("bound value", 1);
 
