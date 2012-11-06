@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 final class MacroTransformer
-    extends MacroValue
+    extends MacroForm
 {
     private final Procedure myTransformer;
 

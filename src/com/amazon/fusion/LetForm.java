@@ -2,10 +2,10 @@
 
 package com.amazon.fusion;
 
-final class LetKeyword
-    extends MacroValue
+final class LetForm
+    extends MacroForm
 {
-    LetKeyword()
+    LetForm()
     {
         //    "                                                                               |
         super("((IDENT EXPR) ...) BODY ...+",

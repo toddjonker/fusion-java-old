@@ -7,12 +7,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Base class for Fusion macros, performing syntax expansion.
  */
-abstract class MacroValue
-    extends KeywordValue
+abstract class MacroForm
+    extends SyntacticForm
 {
     private static final AtomicInteger ourMarkCounter = new AtomicInteger();
 
-    MacroValue(String bodyPattern, String doc)
+    MacroForm(String bodyPattern, String doc)
     {
         super(bodyPattern, doc);
     }
@@ -37,7 +37,7 @@ abstract class MacroValue
     /**
      * Performs a single "level" of macro expansion.
      *
-     * @param source the input expression, including the keyword symbol.
+     * @param source the input expression, including the macro identifier.
      */
     abstract SyntaxValue expandOnce(Evaluator eval, SyntaxSexp source)
         throws SyntaxFailure;

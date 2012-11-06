@@ -4,10 +4,10 @@ package com.amazon.fusion;
 
 import com.amazon.fusion.Namespace.TopBinding;
 
-final class DefineKeyword
-    extends KeywordValue
+final class DefineForm
+    extends SyntacticForm
 {
-    DefineKeyword()
+    DefineForm()
     {
         //    "                                                                               |
         super("VAR VALUE",

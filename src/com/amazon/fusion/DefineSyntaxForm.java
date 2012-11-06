@@ -4,16 +4,15 @@ package com.amazon.fusion;
 
 import com.amazon.fusion.Namespace.TopBinding;
 
-final class DefineSyntaxKeyword
-    extends KeywordValue
+final class DefineSyntaxForm
+    extends SyntacticForm
 {
-    DefineSyntaxKeyword()
+    DefineSyntaxForm()
     {
         //    "                                                                               |
         super("ID XFORM",
-              "Defines a syntax keyword ID with the given syntax transformer XFORM. The\n" +
-              "transformer must be a procedure that accepts an Ion value and returns and Ion\n" +
-              "value.");
+              "Binds the identifier ID to a syntax transformer XFORM. The transformer must be\n" +
+              "a procedure that accepts an syntax object and returns a syntax object.");
     }
 
 

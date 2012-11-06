@@ -10,7 +10,7 @@
     (lambda (stx)
       (wrong_syntax stx "must be used inside quasisyntax")))
 
-  (define_syntax quasisyntax (java_new "com.amazon.fusion.QuasiSyntaxKeyword"
+  (define_syntax quasisyntax (java_new "com.amazon.fusion.QuasiSyntaxForm"
                                        (quote_syntax quasisyntax)
                                        (quote_syntax unsyntax)))
 )

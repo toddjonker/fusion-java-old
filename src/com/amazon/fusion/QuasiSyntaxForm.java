@@ -3,16 +3,16 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.Namespace.TopBinding;
-import com.amazon.fusion.QuoteSyntaxKeyword.CompiledQuoteSyntax;
+import com.amazon.fusion.QuoteSyntaxForm.CompiledQuoteSyntax;
 
-final class QuasiSyntaxKeyword
-    extends KeywordValue
+final class QuasiSyntaxForm
+    extends SyntacticForm
 {
     private final Binding myQsBinding;
     private final Binding myUsBinding;
 
-    public QuasiSyntaxKeyword(Object qsIdentifier,
-                              Object usIdentifier)
+    public QuasiSyntaxForm(Object qsIdentifier,
+                           Object usIdentifier)
     {
         super("template", "...");
 

@@ -37,7 +37,7 @@ class SyntaxChecker
     }
 
     /**
-     * Arity includes the initial keyword!
+     * Arity includes the initial syntactic form identifier!
      */
     void arityExact(int count)
         throws SyntaxFailure
@@ -49,8 +49,9 @@ class SyntaxChecker
     }
 
     /**
-     * Arity includes the initial keyword!
-     * @return the actual arity (including the initial keyword).
+     * Arity includes the initial syntactic form identifier!
+     * @return the actual arity (including the initial syntactic form
+     * identifier).
      */
     final int arityAtLeast(int count)
         throws SyntaxFailure

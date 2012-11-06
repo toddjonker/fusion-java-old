@@ -313,9 +313,9 @@ class Namespace
     void use(Evaluator eval, String modulePath)
         throws FusionException
     {
-        UseKeyword useKeyword = eval.getGlobalState().myUseKeyword;
+        UseForm useForm = eval.getGlobalState().myUseForm;
         SyntaxValue baseRef = SyntaxSymbol.make(modulePath);
-        useKeyword.use(eval, this, baseRef);
+        useForm.use(eval, this, baseRef);
     }
 
     void use(ModuleIdentity id)
@@ -476,7 +476,7 @@ class Namespace
                 Procedure xformProc = (Procedure) value;
                 value = new MacroTransformer(xformProc);
             }
-            else if (! (value instanceof KeywordValue))
+            else if (! (value instanceof SyntacticForm))
             {
                 String message =
                     "define_syntax value is not a transformer: " +

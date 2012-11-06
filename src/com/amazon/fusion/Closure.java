@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 /**
- * A user-defined procedure, the result of evaluating a {@link LambdaKeyword}.
+ * A user-defined procedure, the result of evaluating a {@link LambdaForm}.
  */
 final class Closure
     extends Procedure

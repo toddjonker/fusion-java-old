@@ -5,10 +5,10 @@ package com.amazon.fusion;
 /**
  * The {@code lambda} syntactic form, which evaluates to a {@link Closure}.
  */
-final class LambdaKeyword
-    extends KeywordValue
+final class LambdaForm
+    extends SyntacticForm
 {
-    LambdaKeyword()
+    LambdaForm()
     {
         //    "                                                                               |
         super("(PARAM ...) DOC? BODY",
@@ -132,7 +132,7 @@ final class LambdaKeyword
         // Dummy environment to keep track of depth
         env = new LocalEnvironment(env, SyntaxSymbol.EMPTY_ARRAY);
 
-        CompiledForm body = BeginKeyword.compile(eval, env, source, bodyStart);
+        CompiledForm body = BeginForm.compile(eval, env, source, bodyStart);
 
         String[] argNames = determineArgNames((SyntaxSexp) source.get(1));
         return new CompiledLambda(doc, argNames, body);

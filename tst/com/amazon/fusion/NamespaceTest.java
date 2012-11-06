@@ -32,7 +32,7 @@ public class NamespaceTest
             {
                 Namespace ns = (Namespace) arg;
                 Binding b = ns.resolve("module");
-                assertTrue(b.lookup(ns) instanceof ModuleKeyword);
+                assertTrue(b.lookup(ns) instanceof ModuleForm);
 
                 ModuleRegistry reg = ns.getRegistry();
                 ModuleInstance kernel = reg.lookup(KERNEL_MODULE_IDENTITY);

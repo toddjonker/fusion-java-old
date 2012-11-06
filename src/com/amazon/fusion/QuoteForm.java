@@ -5,10 +5,10 @@ package com.amazon.fusion;
 /**
  * The {@code quote} syntactic form.
  */
-final class QuoteKeyword
-    extends KeywordValue
+final class QuoteForm
+    extends SyntacticForm
 {
-    QuoteKeyword()
+    QuoteForm()
     {
         //    "                                                                               |
         super("DATUM",

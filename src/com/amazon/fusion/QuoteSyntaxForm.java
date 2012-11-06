@@ -2,10 +2,10 @@
 
 package com.amazon.fusion;
 
-final class QuoteSyntaxKeyword
-    extends KeywordValue
+final class QuoteSyntaxForm
+    extends SyntacticForm
 {
-    QuoteSyntaxKeyword()
+    QuoteSyntaxForm()
     {
         super("DATUM",
               "Returns a syntax object retaining the lexical information of DATUM.");

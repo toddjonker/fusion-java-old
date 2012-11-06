@@ -162,8 +162,8 @@ final class LoadHandler
         throw new SyntaxFailure("load handler", message, topLevel);
     }
 
-    private SyntaxSexp wrapModuleKeywordWithKernalBindings(Evaluator eval,
-                                                           SyntaxSexp moduleStx)
+    private SyntaxSexp wrapModuleFormWithKernalBindings(Evaluator eval,
+                                                        SyntaxSexp moduleStx)
     {
         SyntaxValue[] children = moduleStx.extract();
 
@@ -187,7 +187,7 @@ final class LoadHandler
             SyntaxSexp moduleDeclaration = readModuleDeclaration(eval, id);
 
             moduleDeclaration =
-                wrapModuleKeywordWithKernalBindings(eval, moduleDeclaration);
+                wrapModuleFormWithKernalBindings(eval, moduleDeclaration);
 
             Evaluator bodyEval = eval;
             String dirPath = id.parentDirectory();

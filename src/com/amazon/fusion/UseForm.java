@@ -4,12 +4,12 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.voidValue;
 
-final class UseKeyword
-    extends KeywordValue
+final class UseForm
+    extends SyntacticForm
 {
     private final ModuleNameResolver myModuleNameResolver;
 
-    UseKeyword(ModuleNameResolver moduleNameResolver)
+    UseForm(ModuleNameResolver moduleNameResolver)
     {
         super("MODULE", "doc");
         myModuleNameResolver = moduleNameResolver;

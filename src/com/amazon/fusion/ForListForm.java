@@ -6,10 +6,10 @@ import static com.amazon.fusion.FusionVector.makeVectorFrom;
 import com.amazon.ion.IonValue;
 import java.util.ArrayList;
 
-final class ForListKeyword
-    extends KeywordValue
+final class ForListForm
+    extends SyntacticForm
 {
-    ForListKeyword()
+    ForListForm()
     {
         //    "                                                                               |
         super("((IDENT SEQ-EXPR)) BODY ...+",
@@ -103,7 +103,7 @@ final class ForListKeyword
         // Dummy environment to keep track of depth
         env = new LocalEnvironment(env, SyntaxSymbol.EMPTY_ARRAY);
 
-        CompiledForm body = BeginKeyword.compile(eval, env, forStx, 2);
+        CompiledForm body = BeginForm.compile(eval, env, forStx, 2);
 
         return new CompiledForList(valueForms, body);
     }

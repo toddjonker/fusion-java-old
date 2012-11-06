@@ -7,15 +7,15 @@ import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 
 /**
- * Base class for syntactic keywords.
+ * Base class for syntactic forms.
  */
-abstract class KeywordValue
+abstract class SyntacticForm
     extends NamedValue
 {
     protected final String myBodyPattern;
     protected final String myDoc;
 
-    KeywordValue(String bodyPattern, String doc)
+    SyntacticForm(String bodyPattern, String doc)
     {
         myBodyPattern = bodyPattern;
         myDoc = doc;
@@ -54,7 +54,7 @@ abstract class KeywordValue
         }
         else
         {
-            out.append("keyword ");
+            out.append("syntax ");
             IonTextUtils.printQuotedSymbol(out, name);
         }
     }

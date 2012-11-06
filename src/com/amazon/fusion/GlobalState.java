@@ -21,7 +21,7 @@ final class GlobalState
     final ModuleInstance     myKernelModule;
     final ModuleNameResolver myModuleNameResolver;
     final LoadHandler        myLoadHandler;
-    final UseKeyword         myUseKeyword;
+    final UseForm            myUseForm;
     final DynamicParameter   myCurrentNamespaceParam;
 
 
@@ -29,14 +29,14 @@ final class GlobalState
                         ModuleInstance     kernel,
                         ModuleNameResolver resolver,
                         LoadHandler        loadHandler,
-                        UseKeyword         useKeyword,
+                        UseForm            useForm,
                         DynamicParameter   currentNamespaceParam)
     {
         myIonSystem             = ionSystem;
         myKernelModule          = kernel;
         myModuleNameResolver    = resolver;
         myLoadHandler           = loadHandler;
-        myUseKeyword            = useKeyword;
+        myUseForm               = useForm;
         myCurrentNamespaceParam = currentNamespaceParam;
     }
 
@@ -68,29 +68,29 @@ final class GlobalState
                                    currentDirectory,
                                    currentModuleDeclareName,
                                    builder.buildModuleRepositories());
-        UseKeyword useKeyword = new UseKeyword(resolver);
+        UseForm useForm = new UseForm(resolver);
 
         // These must be bound before 'module' since we need the bindings
         // for the partial-expansion stop-list.
-        ns.define("define", new DefineKeyword());
-        ns.define("define_syntax", new DefineSyntaxKeyword());
-        ns.define("use", useKeyword);
+        ns.define("define", new DefineForm());
+        ns.define("define_syntax", new DefineSyntaxForm());
+        ns.define("use", useForm);
 
-        KeywordValue moduleKeyword =
-            new ModuleKeyword(resolver, currentModuleDeclareName);
+        SyntacticForm moduleForm =
+            new ModuleForm(resolver, currentModuleDeclareName);
         LoadProc loadProc = new LoadProc(loadHandler);
 
-        ns.define("begin", new BeginKeyword());    // Needed by hard-coded macro
+        ns.define("begin", new BeginForm());    // Needed by hard-coded macro
         ns.define("current_directory", currentDirectory);
         ns.define("current_namespace", currentNamespaceParam);
         ns.define("empty_stream", FusionValue.EMPTY_STREAM);
-        ns.define("if", new IfKeyword());          // Needed by hard-coded macro
+        ns.define("if", new IfForm());          // Needed by hard-coded macro
         ns.define("java_new", new JavaNewProc());
-        ns.define("lambda", new LambdaKeyword());  // Needed by hard-coded macro
-        ns.define("letrec", new LetrecKeyword());  // Needed by hard-coded macro
+        ns.define("lambda", new LambdaForm());  // Needed by hard-coded macro
+        ns.define("letrec", new LetrecForm());  // Needed by hard-coded macro
         ns.define("load", loadProc);
-        ns.define("module", moduleKeyword);
-        ns.define("quote_syntax", new QuoteSyntaxKeyword()); // For fusion/syntax
+        ns.define("module", moduleForm);
+        ns.define("quote_syntax", new QuoteSyntaxForm()); // For fusion/syntax
         ns.define("undef", FusionValue.UNDEF);
 
         for (IonType t : IonType.values())
@@ -110,7 +110,7 @@ final class GlobalState
         registry.register(kernel);
 
         GlobalState globals =
-            new GlobalState(system, kernel, resolver, loadHandler, useKeyword,
+            new GlobalState(system, kernel, resolver, loadHandler, useForm,
                             currentNamespaceParam);
         return globals;
     }

@@ -16,14 +16,14 @@ import java.util.Map;
  * @see <a href="http://docs.racket-lang.org/reference/module.html">Racket
  * modules</a>
  */
-final class ModuleKeyword
-    extends KeywordValue
+final class ModuleForm
+    extends SyntacticForm
 {
     private final DynamicParameter myCurrentModuleDeclareName;
     private final ModuleNameResolver myModuleNameResolver;
 
-    ModuleKeyword(ModuleNameResolver moduleNameResolver,
-                  DynamicParameter currentModuleDeclareName)
+    ModuleForm(ModuleNameResolver moduleNameResolver,
+               DynamicParameter currentModuleDeclareName)
     {
         //    "                                                                               |
         super("NAME BODY ...+",
@@ -170,9 +170,9 @@ final class ModuleKeyword
                         if (binding == defineBinding)
                         {
                             SyntaxSymbol identifier =
-                                DefineKeyword.boundIdentifier(eval,
-                                                              moduleNamespace,
-                                                              sexp);
+                                DefineForm.boundIdentifier(eval,
+                                                           moduleNamespace,
+                                                           sexp);
                             identifier = identifier.stripImmediateEnvWrap(moduleNamespace);
                             moduleNamespace.predefine(identifier);
                         }

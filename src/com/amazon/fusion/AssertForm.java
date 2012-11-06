@@ -4,10 +4,10 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.voidValue;
 
-final class AssertKeyword
-    extends KeywordValue
+final class AssertForm
+    extends SyntacticForm
 {
-    AssertKeyword()
+    AssertForm()
     {
         //    "                                                                               |
         super("EXPR MESSAGE ...",

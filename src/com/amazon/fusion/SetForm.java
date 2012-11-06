@@ -2,10 +2,10 @@
 
 package com.amazon.fusion;
 
-final class SetKeyword
-    extends KeywordValue
+final class SetForm
+    extends SyntacticForm
 {
-    SetKeyword()
+    SetForm()
     {
         super("VAR VALUE",
               "Mutates the given variable, assigning it the VALUE.");

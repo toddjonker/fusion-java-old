@@ -2,10 +2,10 @@
 
 package com.amazon.fusion;
 
-final class ParameterizeKeyword
-    extends KeywordValue
+final class ParameterizeForm
+    extends SyntacticForm
 {
-    ParameterizeKeyword()
+    ParameterizeForm()
     {
         //    "                                                                               |
         super("((PARAM EXPR) ...) BODY ...+",
@@ -94,7 +94,7 @@ final class ParameterizeKeyword
             valueForms[i] = eval.compile(env, valueExpr);
         }
 
-        CompiledForm body = BeginKeyword.compile(eval, env, source, 2);
+        CompiledForm body = BeginForm.compile(eval, env, source, 2);
 
         return new CompiledParameterize(parameterForms, valueForms, body);
     }

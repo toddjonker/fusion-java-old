@@ -4,7 +4,7 @@
 
   (use 'fusion/experimental/defines')
 
-  (defpub_j_syntax parameterize "com.amazon.fusion.ParameterizeKeyword")
+  (defpub_j_syntax parameterize "com.amazon.fusion.ParameterizeForm")
 
   (defpub make_parameter
     (lambda (value)

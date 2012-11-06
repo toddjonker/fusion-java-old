@@ -145,7 +145,7 @@ final class SyntaxSexp
         {
             Binding binding = ((SyntaxSymbol) first).getBinding();
             Object resolved = binding.lookup(env);
-            if (resolved instanceof KeywordValue)
+            if (resolved instanceof SyntacticForm)
             {
                 // We found a static top-level binding to a built-in form or
                 // to a macro. Continue the expansion process.
@@ -153,7 +153,7 @@ final class SyntaxSexp
                 SyntaxSexp form =
                     SyntaxSexp.make(getLocation(), children);
                 SyntaxValue expandedExpr =
-                    ((KeywordValue)resolved).expand(eval, env, form);
+                    ((SyntacticForm)resolved).expand(eval, env, form);
                 return expandedExpr;
             }
         }
@@ -183,12 +183,12 @@ final class SyntaxSexp
         SyntaxValue first = get(0); // calls pushAnyWraps()
         if (first instanceof SyntaxSymbol)
         {
-            SyntaxSymbol maybeKeyword = (SyntaxSymbol) first;
-            SyntaxValue prepared = maybeKeyword.expand(eval, env);
+            SyntaxSymbol maybeMacro = (SyntaxSymbol) first;
+            SyntaxValue prepared = maybeMacro.expand(eval, env);
             // Make sure we don't have to structurally change this sexp
-            assert prepared == maybeKeyword;
+            assert prepared == maybeMacro;
 
-            Binding binding = maybeKeyword.getBinding();
+            Binding binding = maybeMacro.getBinding();
             if (stops.get(binding) != null)
             {
                 return this;
@@ -197,7 +197,7 @@ final class SyntaxSexp
             Object resolved = binding.lookup(env);
             if (resolved instanceof MacroTransformer)
             {
-                // We found a static top-level keyword binding!
+                // We found a static top-level macro binding!
                 SyntaxValue expanded =
                     ((MacroTransformer)resolved).expandOnce(eval, this);
                 if (expanded instanceof SyntaxSexp)
@@ -235,14 +235,14 @@ final class SyntaxSexp
             // new "built-in" syntax.
 
             Object resolved = binding.lookup(env);
-            if (resolved instanceof KeywordValue)
+            if (resolved instanceof SyntacticForm)
             {
-                // We found a static top-level keyword binding!
+                // We found a static top-level syntax binding!
                 // Continue the compilation process.
                 // TODO bounce the tail-call?
 
                 CompiledForm compiled =
-                    ((KeywordValue)resolved).compile(eval, env, this);
+                    ((SyntacticForm)resolved).compile(eval, env, this);
                 return compiled;
             }
         }

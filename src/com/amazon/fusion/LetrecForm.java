@@ -4,10 +4,10 @@ package com.amazon.fusion;
 
 import java.util.Arrays;
 
-final class LetrecKeyword
-    extends KeywordValue
+final class LetrecForm
+    extends SyntacticForm
 {
-    LetrecKeyword()
+    LetrecForm()
     {
         //    "                                                                               |
         super("((IDENT EXPR) ...) BODY ...+",
@@ -102,7 +102,7 @@ final class LetrecKeyword
             valueForms[i] = eval.compile(env, boundExpr);
         }
 
-        CompiledForm body = BeginKeyword.compile(eval, env, expr, 2);
+        CompiledForm body = BeginForm.compile(eval, env, expr, 2);
 
         return new CompiledLetrec(valueForms, body);
     }

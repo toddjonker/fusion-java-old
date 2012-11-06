@@ -6,10 +6,10 @@ package com.amazon.fusion;
 /**
  * The {@code if} syntactic form.
  */
-final class IfKeyword
-    extends KeywordValue
+final class IfForm
+    extends SyntacticForm
 {
-    IfKeyword()
+    IfForm()
     {
         //    "                                                                               |
         super("TEST THEN ELSE",

@@ -5,8 +5,8 @@ package com.amazon.fusion;
 /**
  * The {@code begin} syntactic form.
  */
-final class BeginKeyword
-    extends KeywordValue
+final class BeginForm
+    extends SyntacticForm
 {
     static SyntaxSexp makeSyntax(Evaluator eval, SyntaxSequence seq, int from)
     {
@@ -31,7 +31,7 @@ final class BeginKeyword
     }
 
 
-    BeginKeyword()
+    BeginForm()
     {
         //    "                                                                               |
         super("EXPR ...",
