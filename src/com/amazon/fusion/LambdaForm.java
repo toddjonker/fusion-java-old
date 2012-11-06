@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVector.makeImmutableVectorFrom;
+
 /**
  * The {@code lambda} syntactic form, which evaluates to a {@link Closure}.
  */
@@ -11,12 +13,17 @@ final class LambdaForm
     LambdaForm()
     {
         //    "                                                                               |
-        super("(ARG ...) DOC? BODY",
+        super("(ARG ...) DOC? BODY ...+",
               "Returns a new procedure. When invoked, the caller's arguments are bound to the\n" +
               "ARG identifiers and the BODY is evaluated and returned.\n" +
               "DOC is an optional documentation string.\n" +
               "BODY may be one or more forms; the result of the last form is the result of the\n" +
-              "procedure invocation.");
+              "procedure invocation.\n" +
+              "\n" +
+              "    (lambda REST_ID DOC? BODY ...+)\n" +
+              "\n" +
+              "This variant returns a procedure that accepts any number of arguments, which\n" +
+              "are collected into an immutable vector and bound to REST_ID.");
     }
 
 
@@ -40,8 +47,21 @@ final class LambdaForm
             bodyStart = 2;
         }
 
-        SyntaxChecker checkFormals = check.subformSexp("formal arguments", 1);
-        SyntaxSymbol[] args = determineArgs(checkFormals);
+        boolean isRest = (children[1] instanceof SyntaxSymbol);
+
+        SyntaxSymbol[] args;
+        if (isRest)
+        {
+            // Check for null/empty symbol
+            SyntaxSymbol rest = check.requiredIdentifier("rest parameter", 1);
+            args = new SyntaxSymbol[]{ rest };
+        }
+        else
+        {
+            SyntaxChecker checkFormals =
+                check.subformSexp("formal arguments", 1);
+            args = determineArgs(checkFormals);
+        }
 
         // We create a wrap even if there's no arguments, because there may be
         // local definitions that will be added to the wrap.
@@ -57,7 +77,9 @@ final class LambdaForm
             args[i] = arg;
         }
 
-        children[1] = SyntaxSexp.make(children[1].getLocation(), args);
+        children[1] = (isRest
+                          ? args[0]
+                          : SyntaxSexp.make(children[1].getLocation(), args));
 
         for (int i = bodyStart; i < children.length; i++)
         {
@@ -134,8 +156,18 @@ final class LambdaForm
 
         CompiledForm body = BeginForm.compile(eval, env, source, bodyStart);
 
-        String[] argNames = determineArgNames((SyntaxSexp) source.get(1));
-        return new CompiledLambda(doc, argNames, body);
+        boolean isRest = (source.get(1) instanceof SyntaxSymbol);
+        if (isRest)
+        {
+            SyntaxSymbol identifier = (SyntaxSymbol) source.get(1);
+            Binding binding = identifier.resolve();
+            return new CompiledLambdaRest(doc, binding.getName(), body);
+        }
+        else
+        {
+            String[] argNames = determineArgNames((SyntaxSexp) source.get(1));
+            return new CompiledLambda(doc, argNames, body);
+        }
     }
 
 
@@ -197,6 +229,69 @@ final class LambdaForm
             checkArityExact(args);
 
             Store localStore = new LocalStore(myEnclosure, args);
+
+            return eval.bounceTailForm(localStore, myBody);
+        }
+    }
+    
+
+    //========================================================================
+
+
+    private static final class CompiledLambdaRest
+        implements CompiledForm
+    {
+        private final String       myDoc;
+        private final String[]     myArgNames;
+        private final CompiledForm myBody;
+
+        CompiledLambdaRest(String doc, String restArgName, CompiledForm body)
+        {
+            myDoc      = doc;
+            myBody     = body;
+            myArgNames = new String[]{ restArgName, Procedure.DOTDOTDOT };
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            return new ClosureRest(store, myDoc, myArgNames, myBody);
+        }
+    }
+
+
+    private static final class ClosureRest
+        extends Procedure
+    {
+        private final Store        myEnclosure;
+        private final CompiledForm myBody;
+
+        /**
+         * Constructs a new closure from its source and enclosing lexical
+         * environment.
+         *
+         * @param enclosure the store lexically surrounding the source of this
+         *  closure.  Any free variables in the procedure are expected to be
+         *  bound here.
+         */
+        ClosureRest(Store enclosure, String doc, String[] argNames,
+                    CompiledForm body)
+        {
+            super(doc, argNames);
+
+            myEnclosure = enclosure;
+            myBody      = body;
+        }
+
+        @Override
+        Object doApply(Evaluator eval, final Object[] args)
+            throws FusionException
+        {
+            Object rest = makeImmutableVectorFrom(eval, args);
+
+            Store localStore = new LocalStore(myEnclosure,
+                                              new Object[]{ rest });
 
             return eval.bounceTailForm(localStore, myBody);
         }

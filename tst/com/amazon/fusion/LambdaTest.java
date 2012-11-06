@@ -21,7 +21,6 @@ public class LambdaTest
     {
         expectSyntaxFailure("(lambda)");
         expectSyntaxFailure("(lambda (arg))");
-        expectSyntaxFailure("(lambda rest 12)"); // TODO FUSION-27 rest args
     }
 
     @Test

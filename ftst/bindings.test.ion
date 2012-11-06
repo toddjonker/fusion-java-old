@@ -1,6 +1,25 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
 (use check)
+(use 'fusion/vector')
+
+
+(define rester
+  (lambda rest
+    (assert (is_immutable_vector rest))
+    rest))
+
+(check_equal (rester)       []      "rest param 0")
+(check_equal (rester 1)     [1]     "rest param 1")
+(check_equal (rester 1 2 3) [1,2,3] "rest param 3")
+
+(check_equal (apply rester [])         []        "apply rester 0")
+(check_equal (apply rester [1])        [1]       "apply rester 1")
+(check_equal (apply rester 1 2 [3, 4]) [1,2,3,4] "apply rester 4")
+
+
+//==========================================================================
+// set
 
 (check_equal ((lambda (x) (set x (+ x 1)) x) 0) 1 "set1")
 
