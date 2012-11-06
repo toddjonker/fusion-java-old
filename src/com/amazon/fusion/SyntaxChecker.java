@@ -114,7 +114,8 @@ class SyntaxChecker
     }
 
 
-
+    // TODO problematic WRT keywords
+    @Deprecated
     final SyntaxSymbol requiredSymbol(String expectation, int argNum)
         throws SyntaxFailure
     {
@@ -137,6 +138,13 @@ class SyntaxChecker
         throws SyntaxFailure
     {
         SyntaxValue form = requiredForm(expectation, argNum);
+        // Special case for better error messaging
+        if (form instanceof SyntaxKeyword)
+        {
+            String message =
+                "expected " + expectation + ", not a keyword";
+            throw failure(message, form);
+        }
         // TODO check emptyness
         return checkSyntax(SyntaxSymbol.class, expectation,
                            false /* nullable */, form);
@@ -149,6 +157,7 @@ class SyntaxChecker
     }
 
 
+    @Deprecated
     final String requiredNonEmptySymbol(String expectation, int argNum)
         throws SyntaxFailure
     {

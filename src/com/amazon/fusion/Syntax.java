@@ -94,6 +94,12 @@ final class Syntax
             case SYMBOL:
             {
                 String value = source.stringValue();
+                if (value != null &&
+                    value.startsWith("_") &&
+                    value.endsWith("_"))
+                {
+                    return SyntaxKeyword.make(value, anns, loc);
+                }
                 return SyntaxSymbol.make(value, anns, loc);
             }
             case BLOB:

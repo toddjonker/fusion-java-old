@@ -17,7 +17,7 @@ abstract class SyntaxValue
 {
     enum Type {
         NULL, BOOL, INT, DECIMAL, FLOAT, TIMESTAMP, BLOB, CLOB,
-        STRING, SYMBOL, LIST, SEXP, STRUCT
+        STRING, SYMBOL, LIST, SEXP, STRUCT, KEYWORD
     }
 
     /** A zero-lengeth array. */
