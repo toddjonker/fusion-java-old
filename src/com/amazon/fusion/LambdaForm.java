@@ -166,7 +166,15 @@ final class LambdaForm
         else
         {
             String[] argNames = determineArgNames((SyntaxSexp) source.get(1));
-            return new CompiledLambda(doc, argNames, body);
+            switch (argNames.length)
+            {
+                case 1:
+                    return new CompiledLambda1(doc, argNames, body);
+                case 2:
+                    return new CompiledLambda2(doc, argNames, body);
+                default:
+                    return new CompiledLambda(doc, argNames, body);
+            }
         }
     }
 
@@ -174,18 +182,18 @@ final class LambdaForm
     //========================================================================
 
 
-    private static final class CompiledLambda
+    private static class CompiledLambda
         implements CompiledForm
     {
-        private final String       myDoc;
-        private final String[]     myArgNames;
-        private final CompiledForm myBody;
+        final String       myDoc;
+        final String[]     myArgNames;
+        final CompiledForm myBody;
 
         CompiledLambda(String doc, String[] argNames, CompiledForm body)
         {
             myDoc      = doc;
-            myBody     = body;
             myArgNames = argNames;
+            myBody     = body;
         }
 
         @Override
@@ -197,12 +205,11 @@ final class LambdaForm
     }
 
 
-    private static final class Closure
+    private static class Closure
         extends Procedure
     {
-        private final Store        myEnclosure;
-        private final CompiledForm myBody;
-
+        final Store        myEnclosure;
+        final CompiledForm myBody;
 
         /**
          * Constructs a new closure from its source and enclosing lexical
@@ -221,9 +228,8 @@ final class LambdaForm
             myBody      = body;
         }
 
-
         @Override
-        Object doApply(Evaluator eval, final Object[] args)
+        Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
             checkArityExact(args);
@@ -233,23 +239,103 @@ final class LambdaForm
             return eval.bounceTailForm(localStore, myBody);
         }
     }
-    
+
+
+    //========================================================================
+
+
+    private static final class CompiledLambda1
+        extends CompiledLambda
+    {
+        CompiledLambda1(String doc, String[] argNames, CompiledForm body)
+        {
+            super(doc, argNames, body);
+            assert argNames.length == 1;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            return new Closure1(store, myDoc, myArgNames, myBody);
+        }
+    }
+
+
+    private static final class Closure1
+        extends Closure
+    {
+        Closure1(Store enclosure, String doc, String[] argNames,
+                 CompiledForm body)
+        {
+            super(enclosure, doc, argNames, body);
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(1, args);
+
+            Store localStore = new LocalStore1(myEnclosure, args[0]);
+
+            return eval.bounceTailForm(localStore, myBody);
+        }
+    }
+
+
+    //========================================================================
+
+
+    private static final class CompiledLambda2
+        extends CompiledLambda
+    {
+        CompiledLambda2(String doc, String[] argNames, CompiledForm body)
+        {
+            super(doc, argNames, body);
+            assert argNames.length == 2;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            return new Closure2(store, myDoc, myArgNames, myBody);
+        }
+    }
+
+
+    private static final class Closure2
+        extends Closure
+    {
+        Closure2(Store enclosure, String doc, String[] argNames,
+                 CompiledForm body)
+        {
+            super(enclosure, doc, argNames, body);
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(2, args);
+
+            Store localStore = new LocalStore2(myEnclosure, args[0], args[1]);
+
+            return eval.bounceTailForm(localStore, myBody);
+        }
+    }
+
 
     //========================================================================
 
 
     private static final class CompiledLambdaRest
-        implements CompiledForm
+        extends CompiledLambda
     {
-        private final String       myDoc;
-        private final String[]     myArgNames;
-        private final CompiledForm myBody;
-
         CompiledLambdaRest(String doc, String restArgName, CompiledForm body)
         {
-            myDoc      = doc;
-            myBody     = body;
-            myArgNames = new String[]{ restArgName, Procedure.DOTDOTDOT };
+            super(doc, new String[]{ restArgName, Procedure.DOTDOTDOT }, body);
         }
 
         @Override
@@ -262,36 +348,21 @@ final class LambdaForm
 
 
     private static final class ClosureRest
-        extends Procedure
+        extends Closure
     {
-        private final Store        myEnclosure;
-        private final CompiledForm myBody;
-
-        /**
-         * Constructs a new closure from its source and enclosing lexical
-         * environment.
-         *
-         * @param enclosure the store lexically surrounding the source of this
-         *  closure.  Any free variables in the procedure are expected to be
-         *  bound here.
-         */
         ClosureRest(Store enclosure, String doc, String[] argNames,
                     CompiledForm body)
         {
-            super(doc, argNames);
-
-            myEnclosure = enclosure;
-            myBody      = body;
+            super(enclosure, doc, argNames, body);
         }
 
         @Override
-        Object doApply(Evaluator eval, final Object[] args)
+        Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
             Object rest = makeImmutableVectorFrom(eval, args);
 
-            Store localStore = new LocalStore(myEnclosure,
-                                              new Object[]{ rest });
+            Store localStore = new LocalStore1(myEnclosure, rest);
 
             return eval.bounceTailForm(localStore, myBody);
         }

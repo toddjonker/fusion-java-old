@@ -104,7 +104,15 @@ final class LetrecForm
 
         CompiledForm body = BeginForm.compile(eval, env, expr, 2);
 
-        return new CompiledLetrec(valueForms, body);
+        switch (valueForms.length)
+        {
+            case 1:
+                return new CompiledLetrec1(valueForms, body);
+            case 2:
+                return new CompiledLetrec2(valueForms, body);
+            default:
+                return new CompiledLetrec(valueForms, body);
+        }
     }
 
 
@@ -139,6 +147,63 @@ final class LetrecForm
                 CompiledForm form = myValueForms[i];
                 boundValues[i] = eval.eval(localStore, form);
             }
+
+            return eval.bounceTailForm(localStore, myBody);
+        }
+    }
+
+
+    private static final class CompiledLetrec1
+        implements CompiledForm
+    {
+        private final CompiledForm myValueForm0;
+        private final CompiledForm myBody;
+
+        CompiledLetrec1(CompiledForm[] valueForms, CompiledForm body)
+        {
+            myValueForm0 = valueForms[0];
+            myBody       = body;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Store localStore = new LocalStore1(store, UNDEF);
+
+            Object value = eval.eval(localStore, myValueForm0);
+            localStore.set(0, value);
+
+            return eval.bounceTailForm(localStore, myBody);
+        }
+    }
+
+
+    private static final class CompiledLetrec2
+        implements CompiledForm
+    {
+        private final CompiledForm myValueForm0;
+        private final CompiledForm myValueForm1;
+        private final CompiledForm myBody;
+
+        CompiledLetrec2(CompiledForm[] valueForms, CompiledForm body)
+        {
+            myValueForm0 = valueForms[0];
+            myValueForm1 = valueForms[1];
+            myBody       = body;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Store localStore = new LocalStore2(store, UNDEF, UNDEF);
+
+            Object value = eval.eval(localStore, myValueForm0);
+            localStore.set(0, value);
+
+            value = eval.eval(localStore, myValueForm1);
+            localStore.set(1, value);
 
             return eval.bounceTailForm(localStore, myBody);
         }
