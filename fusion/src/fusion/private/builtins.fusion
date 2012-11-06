@@ -52,7 +52,6 @@ containing quoted datum.
 
 
 
-  (defpub_j_syntax let            "com.amazon.fusion.LetForm")
   (defpub_j_syntax set            "com.amazon.fusion.SetForm")
   (defpub_j_syntax '#%top'        "com.amazon.fusion.TopForm")
 

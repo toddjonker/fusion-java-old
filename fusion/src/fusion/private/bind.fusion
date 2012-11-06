@@ -4,20 +4,141 @@
 
 
   (require
-    "/fusion/sequence"
     "/fusion/experimental/defines"
     "/fusion/experimental/syntax"
     "/fusion/number"
     "/fusion/private/compare"
     "/fusion/private/sexp"
-    "/fusion/unsafe/sexp")
+    "/fusion/unsafe/list"
+    "/fusion/unsafe/sexp"
+    )
 
-  (provide let let_values letrec values)
+
+  // From builtins
+  (provide let_values letrec values)
 
 
   (define ctx  // PRIVATE!
     "Lexical context for expanded macros."
     (quote_syntax context))
+
+
+  (define (is_seq v)
+    (if (is_sexp v) true (is_list v)))
+
+  (define (is_seq2 v)
+    (if (is_seq v) (= 2 (size v)) false))
+
+  (define (let_loop_name stx)
+    (let_values [((first) (syntax_get stx 1))]
+      (if (is_symbol (syntax_unwrap first))
+        first
+        false)))
+
+
+  (define (split_binding stx binding)
+    "Returns identifier and expr as two values"
+    (if (not (if (is_seq (syntax_unwrap binding))
+               (= 2 (syntax_size binding))
+               false))
+      (wrong_syntax stx "bad binding form: " binding)
+      (let_values [((name) (syntax_get binding 0)),
+                   ((expr) (syntax_get binding 1))]
+        (if (is_identifier name)
+          (values name expr)
+          (wrong_syntax stx "bound name isn't an identifier: " name)))))
+
+  (define (check_bindings_sexp stx bindings)
+    (if (is_pair bindings)
+      (begin
+        (split_binding stx (unsafe_pair_head bindings))
+        (check_bindings_sexp stx (unsafe_pair_tail bindings)))
+      true))
+
+  (define (bindings_as_sexp stx bindings)
+    (if (is_null bindings)
+      (wrong_syntax stx "bad sequence of bindings: " bindings)
+      (if (is_sexp bindings)
+        bindings
+        (if (is_list bindings)
+          (apply sexp bindings)
+          (wrong_syntax stx "bad sequence of bindings: " bindings)))))
+
+  (define (check_bindings stx bindings)
+    (let_values [((bindings_sexp) (bindings_as_sexp stx bindings))]
+      (if (check_bindings_sexp stx bindings_sexp)
+        bindings_sexp
+        (wrong_syntax stx "bad sequence of bindings: " bindings))))
+
+  (define (split_content stx content)
+    (let_values [((bindings) (syntax_unwrap (unsafe_pair_head content))),
+                 ((body)     (unsafe_pair_tail content))]
+      (values (check_bindings stx bindings) body)))
+
+  (define (unzip_bindings stx bindings)
+    " -> (values sexp-of-names sexp-of-exprs)"
+    (if (not (is_pair bindings))
+      (values (quote ()) (quote ()))
+      (let_values [((name expr)
+                    (split_binding stx (head bindings))),
+                   ((tail_names tail_exprs)
+                    (unzip_bindings stx (tail bindings)))]
+        (values (pair name tail_names)
+                (pair expr tail_exprs)))))
+
+
+  //==========================================================================
+
+
+  (defpub_syntax let
+    '''
+    (let ((ident expr) ...) body ...+)
+
+Evaluates the `expr`s left to right, then binds each `ident` to its
+corresponding result, then evaluates `body`.  The scope of the `ident`s only
+covers the `body`, not the `expr`s.
+
+`body` may be one or more forms; the last form is in tail position and its
+result is the result of the entire expression.
+
+    (let loop_id [(ident expr), ...] body ...+)
+
+This variant also creates a procedure, bound to the given name `loop_id`, that
+accepts the same number of arguments as there are `ident`s. When invoked, the
+procedure binds the `ident`s to the arguments and evaluates the body.
+
+For example, this snippet loops through the standard input stream and writes
+the `title` field of each item:
+
+    (let loop [(item (read))]
+      (unless (is_eof item)
+        (let [(title (. item \"title\"))]
+          (writeln title)
+          (loop (read)))))
+    '''
+    (lambda (stx)
+      (if (< (syntax_size stx) 3)
+        (wrong_syntax stx "expected bindings and body")
+        (let_values [((loop) (let_loop_name stx)),
+                     ((content) (unsafe_pair_tail (syntax_unwrap stx)))]
+          (let_values [((bindings body)
+                        (split_content stx (if loop
+                                             (unsafe_pair_tail content)
+                                             content)))]
+            (let_values [((names exprs)
+                          (unzip_bindings stx bindings))]
+              (let_values [((lambda_stx)
+                            (pair (quote_syntax lambda)
+                                  (pair names body)))]
+                (datum_to_syntax
+                  (if loop
+                    (pair (sexp (quote_syntax letrec)
+                                (sexp (sexp loop lambda_stx))
+                                loop)
+                          exprs)
+                    (pair lambda_stx exprs))
+                  ctx
+                  stx))))))))
 
 
   (defpub_syntax lets
@@ -35,26 +156,21 @@ and the `ident`s are bound in the following `expr`s as well as the `body`.
       (if (< (syntax_size stx) 3)
         (wrong_syntax stx "expecting bindings and body")
         (let_values [((content) (unsafe_pair_tail (syntax_unwrap stx)))]
-          (let_values [((bindings) (syntax_unwrap (unsafe_pair_head content))),
-                       ((body)     (unsafe_pair_tail content))]
-            // TODO FUSION-120 check type of bindings, bound identifier
-            (if (= 0 (size bindings))
-
-              //                                       (lets [] BODY...)  -->
-              (datum_to_syntax
-                (pair (quote_syntax begin) body)    // (begin BODY...)
-                ctx
-                stx)
-              (let_values [((binding) (element bindings 0)),
-                           ((others)  (subseq bindings 1 (size bindings)))]
+          (let_values [((bindings body) (split_content stx content))]
+            (datum_to_syntax
+              (if (is_pair bindings)
 
                 //                     (lets [BINDING, OTHERS...] BODY...)  -->
-                (datum_to_syntax
-                  (sexp (quote_syntax let)       // (let
-                    (sexp binding)               //    (BINDING)
-                    (pair (quote_syntax lets)    //    (lets
-                      (pair others               //      OTHERS
-                            body)))              //      BODY...))
-                  ctx
-                  stx))))))))
+                (let_values [((binding) (unsafe_pair_head bindings)),
+                             ((others)  (unsafe_pair_tail bindings))]
+                  (sexp (quote_syntax let)           // (let
+                    (sexp binding)                   //    (BINDING)
+                    (pair (quote_syntax lets)        //    (lets
+                      (pair others                   //      OTHERS
+                            body))))                 //      BODY...))
+
+                //                                      (lets [] BODY...)  -->
+                (pair (quote_syntax begin) body))    // (begin BODY...)
+              ctx
+              stx))))))
 )

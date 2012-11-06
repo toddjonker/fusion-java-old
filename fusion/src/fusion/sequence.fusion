@@ -18,6 +18,7 @@ The built-in sequence types are [list](fusion/list.html) and
     "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/number"
+    "/fusion/private/bind"
     "/fusion/private/builtins"   // Some basic list ops
     "/fusion/private/control"
     "/fusion/private/sexp"

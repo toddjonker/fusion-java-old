@@ -87,6 +87,7 @@ of bound identifiers:
     "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/experimental/syntax"
+    "/fusion/private/bind"
     "/fusion/private/compare"
     "/fusion/private/control"
     "/fusion/private/sexp"
