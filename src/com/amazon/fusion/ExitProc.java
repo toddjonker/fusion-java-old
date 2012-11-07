@@ -13,7 +13,7 @@ final class ExitProc
     ExitProc()
     {
         //    "                                                                               |
-        super("Exits the running program.");
+        super("Exits the running Fusion program.");
     }
 
     @Override

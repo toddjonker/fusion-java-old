@@ -16,8 +16,9 @@ final class ApplyProc
         //    "                                                                               |
         super("Calls the given PROC with arguments that are the (optional) ARGs prepended to\n" +
               "the elements of SEQUENCE. The PROC is called in tail position.\n" +
-              "(apply + [1, 2])         => 3\n" +
-              "(apply + 10 11 [1, 2])   => 24",
+              "\n" +
+              "    (apply + [1, 2])         => 3\n" +
+              "    (apply + 10 11 [1, 2])   => 24",
               "proc", "arg", DOTDOTDOT, "sequence");
     }
 

@@ -3,16 +3,15 @@
 package com.amazon.fusion;
 
 
-/**
- * Concatenates 0 or more strings and returns the result
- */
 final class StringConcatenateProc
     extends Procedure
 {
     StringConcatenateProc()
     {
         //    "                                                                               |
-        super("Concatenates 0 or more strings and returns the result");
+        super("Concatenates the TEXT values (strings or symbols) into a string.  If no \n" +
+              "arguments are supplied, the result is `\"\"`.",
+              "text", DOTDOTDOT);
     }
 
     @Override
