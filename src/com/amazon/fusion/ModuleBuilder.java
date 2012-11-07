@@ -11,10 +11,10 @@ package com.amazon.fusion;
 public interface ModuleBuilder
 {
     /**
-     * Creates or alters a top-level definition.
+     * Creates or alters a top-level definition in the module to be built.
      *
      * @param name must be non-empty.
-     * @param value must be acceptable to the Ion runtime.
+     * @param value must be acceptable to the Fusion runtime.
      */
     void define(String name, Object value);
 
