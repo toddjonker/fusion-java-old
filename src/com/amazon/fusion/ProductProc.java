@@ -15,64 +15,49 @@ final class ProductProc
     ProductProc()
     {
         //    "                                                                               |
-        super("Returns the product of the arguments. With no arguments, returns 1.",
-              "int or dec", DOTDOTDOT);
+        super("Returns the product of the NUMs, which must be int or decimal. With no\n" +
+              "arguments, returns integer 1.",
+              "NUM", DOTDOTDOT);
     }
 
-    Number multiply(Number result, Number operand)
-            throws FusionException
-        {
-            Number newResult = null;
-            if (result instanceof BigInteger && operand instanceof BigInteger)
-            {
-                BigInteger op1 = (BigInteger)result;
-                BigInteger op2 = (BigInteger)operand;
-                newResult = op1.multiply(op2);
-            } else if (result instanceof BigInteger && operand instanceof BigDecimal)
-            {
-                BigDecimal bResult = new BigDecimal((BigInteger)result);
-                newResult = bResult.multiply((BigDecimal)operand);
-            } else if (result instanceof BigDecimal && operand instanceof BigInteger)
-            {
-                BigDecimal bOperand = new BigDecimal((BigInteger)operand);
-                newResult = bOperand.multiply((BigDecimal)result);
-            } else if (result instanceof BigDecimal && operand instanceof BigDecimal)
-            {
-                BigDecimal op1 = (BigDecimal)result;
-                BigDecimal op2 = (BigDecimal)operand;
-                newResult = op1.multiply(op2);
-            }
+    private static BigDecimal toBigDecimal(Number num)
+    {
+        if (num instanceof BigDecimal) return (BigDecimal) num;
+        return new BigDecimal((BigInteger) num);
+    }
 
-            return newResult;
+    private static Number multiply(Number left, Number right)
+        throws FusionException
+    {
+        Number result;
+        if (left instanceof BigInteger && right instanceof BigInteger)
+        {
+            BigInteger leftInt  = (BigInteger)left;
+            BigInteger rightInt = (BigInteger)right;
+            result = leftInt.multiply(rightInt);
+        }
+        else
+        {
+            BigDecimal leftDec  = toBigDecimal(left);
+            BigDecimal rightDec = toBigDecimal(right);
+            result = leftDec.multiply(rightDec);
         }
 
-        @Override
-        Object doApply(Evaluator eval, Object[] args)
-            throws FusionException
+        return result;
+    }
+
+    @Override
+    Object doApply(Evaluator eval, Object[] args)
+        throws FusionException
+    {
+        Number result = BigInteger.ONE;
+
+        for (int i = 0; i < args.length; i++)
         {
-            Number result = BigInteger.ONE;
-
-            for (int i = 0; i < args.length; i++)
-            {
-                Number operandNum = checkBigArg(i, args);
-                if (operandNum == null)
-                {
-                    throw contractFailure("Expected: int or decimal; observed: "+
-                                          FusionValue.writeToString(args[i]));
-                }
-                result = multiply(result,operandNum);
-            }
-
-            Object finalResult = null;
-            if (result instanceof BigInteger)
-            {
-                finalResult = eval.newInt((BigInteger)result);
-            }
-            else if (result instanceof BigDecimal)
-            {
-                finalResult = eval.newDecimal((BigDecimal)result);
-            }
-
-            return finalResult;
+            Number num = checkBigArg(i, args);
+            result = multiply(result, num);
         }
+
+        return eval.injectMaybe(result);
+    }
 }

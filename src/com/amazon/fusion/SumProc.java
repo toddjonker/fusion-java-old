@@ -14,35 +14,35 @@ final class SumProc
     SumProc()
     {
         //    "                                                                               |
-        super("Returns the sum of the arguments. With no arguments, returns 0.",
-              "int or dec", DOTDOTDOT);
+        super("Returns the sum of the NUMs, which must be int or decimal. With no arguments,\n" +
+              "returns integer 0.",
+              "NUM", DOTDOTDOT);
     }
 
-    Number add(Number result, Number operand)
+    private static BigDecimal toBigDecimal(Number num)
+    {
+        if (num instanceof BigDecimal) return (BigDecimal) num;
+        return new BigDecimal((BigInteger) num);
+    }
+
+    private static Number add(Number left, Number right)
         throws FusionException
     {
-        Number newResult = null;
-        if (result instanceof BigInteger && operand instanceof BigInteger)
+        Number result;
+        if (left instanceof BigInteger && right instanceof BigInteger)
         {
-            BigInteger op1 = (BigInteger)result;
-            BigInteger op2 = (BigInteger)operand;
-            newResult = op1.add(op2);
-        } else if (result instanceof BigInteger && operand instanceof BigDecimal)
+            BigInteger leftInt  = (BigInteger)left;
+            BigInteger rightInt = (BigInteger)right;
+            result = leftInt.add(rightInt);
+        }
+        else
         {
-            BigDecimal bResult = new BigDecimal((BigInteger)result);
-            newResult = bResult.add((BigDecimal)operand);
-        } else if (result instanceof BigDecimal && operand instanceof BigInteger)
-        {
-            BigDecimal bOperand = new BigDecimal((BigInteger)operand);
-            newResult = bOperand.add((BigDecimal)result);
-        } else if (result instanceof BigDecimal && operand instanceof BigDecimal)
-        {
-            BigDecimal op1 = (BigDecimal)result;
-            BigDecimal op2 = (BigDecimal)operand;
-            newResult = op1.add(op2);
+            BigDecimal leftDec  = toBigDecimal(left);
+            BigDecimal rightDec = toBigDecimal(right);
+            result = leftDec.add(rightDec);
         }
 
-        return newResult;
+        return result;
     }
 
     @Override
@@ -53,25 +53,10 @@ final class SumProc
 
         for (int i = 0; i < args.length; i++)
         {
-            Number operandNum = checkBigArg(i, args);
-            if (operandNum == null)
-            {
-                throw contractFailure("Expected: int or decimal; observed: "+
-                                      FusionValue.writeToString(args[i]));
-            }
-            result = add(result,operandNum);
+            Number num = checkBigArg(i, args);
+            result = add(result, num);
         }
 
-        Object finalResult = null;
-        if (result instanceof BigInteger)
-        {
-            finalResult = eval.newInt((BigInteger)result);
-        }
-        else if (result instanceof BigDecimal)
-        {
-            finalResult = eval.newDecimal((BigDecimal)result);
-        }
-
-        return finalResult;
+        return eval.injectMaybe(result);
     }
 }

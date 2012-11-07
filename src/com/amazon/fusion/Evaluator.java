@@ -92,6 +92,22 @@ final class Evaluator
         return value;
     }
 
+    Object injectMaybe(Number value)
+    {
+        if (value instanceof Integer)
+        {
+            return newInt(((Integer) value).longValue());
+        }
+        else if (value instanceof BigInteger)
+        {
+            return newInt((BigInteger) value);
+        }
+        else if (value instanceof BigDecimal)
+        {
+            return newDecimal((BigDecimal) value);
+        }
+        return null;
+    }
 
     /**
      * Transforms a Java value to a Fusion value, where possible.
@@ -116,9 +132,9 @@ final class Evaluator
         {
             return newString((String) javaValue);
         }
-        else if (javaValue instanceof Integer)
+        else if (javaValue instanceof Number)
         {
-            return newInt(((Integer) javaValue).longValue());
+            return injectMaybe((Number) javaValue);
         }
         else if (javaValue == null)
         {
