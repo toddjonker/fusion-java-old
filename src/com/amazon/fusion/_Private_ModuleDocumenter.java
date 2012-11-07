@@ -76,11 +76,23 @@ public final class _Private_ModuleDocumenter
     {
         assert modulePath.startsWith("/");
 
-        displayHeader2(out, "Module " + modulePath);
+        displayHeader1(out, "Module " + modulePath);
 
         String[] names = module.providedNames().toArray(EMPTY_STRING_ARRAY);
         Arrays.sort(names);
 
+        displayHeader2(out, "Index");
+
+        for (String name : names)
+        {
+            out.append("[`");
+            out.append(name);
+            out.append("`](#");
+            out.append(name);
+            out.append(") \n");
+        }
+
+        displayHeader2(out, "Exported Bindings");
         for (String name : names)
         {
             ModuleBinding binding = module.resolveProvidedName(name);
@@ -103,6 +115,10 @@ public final class _Private_ModuleDocumenter
         throws IOException
     {
         out.append("\n\n");
+        out.append("<a name='");
+        out.append(name);
+        out.append("'><!-- --></a>\n");
+
         displayHeader3(out, name);
         out.append('\n');
 
@@ -132,6 +148,14 @@ public final class _Private_ModuleDocumenter
                 out.append('\n');
             }
         }
+    }
+
+    private static void displayHeader1(Appendable out, String text)
+        throws IOException
+    {
+        out.append("# ");
+        out.append(text);
+        out.append('\n');
     }
 
     private static void displayHeader2(Appendable out, String text)
