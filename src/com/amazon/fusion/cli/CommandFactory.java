@@ -85,43 +85,43 @@ class CommandFactory
         return exec;
     }
 
+
     /**
-     *
+     * @return an error code, zero meaning success.
      */
-    public static boolean executeCommandLine(String[] commandLine)
+    public static int executeCommandLine(String[] commandLine)
         throws Exception
     {
-        boolean success = true;
+        int errorCode = 0;
 
         int curStartPos = 0;
-        for (int i = 0; i < commandLine.length && success; i++)
+        for (int i = 0; i < commandLine.length && errorCode == 0; i++)
         {
             if (";".equals(commandLine[i])) {
                 int len = i-curStartPos;
                 if (len > 0) {
-                    Executor cmd = doExecutePartial(commandLine,
-                                                    curStartPos,
-                                                    len);
-                    if (cmd == null) {
-                        success = false;
-                    }
+                    errorCode = doExecutePartial(commandLine,
+                                                 curStartPos,
+                                                 len);
                 }
                 curStartPos = i+1;
             }
         }
         int len = commandLine.length-curStartPos;
-        if (success) {
-            Executor cmd = doExecutePartial(commandLine,
-                                            curStartPos,
-                                            len);
-            success = (cmd != null);
+        if (errorCode == 0) {
+            errorCode = doExecutePartial(commandLine, curStartPos, len);
         }
-        return success;
+
+        return errorCode;
     }
 
-    private static Executor doExecutePartial(String[] commandLine,
-                                             int start,
-                                             int len)
+
+    /**
+     * @return an error code, zero meaning success.
+     */
+    private static int doExecutePartial(String[] commandLine,
+                                        int start,
+                                        int len)
         throws Exception
     {
         String[] partial = new String[len];
@@ -129,10 +129,10 @@ class CommandFactory
         Executor cmd = makeCommand(partial);
         if (cmd != null)
         {
-            cmd.execute();
+            return cmd.execute();
         }
 
-        return cmd;
+        return 1;
     }
 
     static class Separator extends Command

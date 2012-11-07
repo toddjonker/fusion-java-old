@@ -85,10 +85,11 @@ class Document
 
 
         @Override
-        public void execute()
+        public int execute()
             throws Exception
         {
             documentDir(myRepoDir, new ModuleDoc(myRuntime, myOutputDir));
+            return 0;
         }
 
 

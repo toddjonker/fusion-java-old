@@ -9,8 +9,11 @@ abstract class Command
         /**
          * Execute this command.  Any exception that's thrown will cause the
          * CLI to display the stack trace to {@link System#err}.
+         *
+         * @return zero to indicate success, any other number to indicate an
+         *  error code.
          */
-        void execute()
+        int execute()
             throws Exception;
     }
 

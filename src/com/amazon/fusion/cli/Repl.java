@@ -67,7 +67,7 @@ class Repl
 
 
         @Override
-        public void execute()
+        public int execute()
             throws FusionException
         {
             welcome();
@@ -78,6 +78,8 @@ class Repl
             {
                 // loop!
             }
+
+            return 0;
         }
 
 

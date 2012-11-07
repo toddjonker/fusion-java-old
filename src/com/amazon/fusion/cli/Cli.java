@@ -9,26 +9,29 @@ import java.io.IOException;
  */
 public final class Cli
 {
+    private Cli() {}
+
+
     public static void main(String[] args) throws IOException
     {
-        boolean success;
+        int errorCode;
 
         try
         {
-            success = CommandFactory.executeCommandLine(args);
+            errorCode = CommandFactory.executeCommandLine(args);
         }
         catch (Throwable e)
         {
-            success = false;
+            errorCode = 1;
             e.printStackTrace(System.err);
         }
 
         System.out.flush();
         System.err.flush();
 
-        if (! success)
+        if (errorCode != 0)
         {
-            System.exit(1);
+            System.exit(errorCode);
         }
     }
 }

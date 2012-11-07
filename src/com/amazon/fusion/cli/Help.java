@@ -59,7 +59,7 @@ class Help
 
 
         @Override
-        public void execute()
+        public int execute()
         {
             PrintWriter out = new PrintWriter(System.out);
 
@@ -112,6 +112,8 @@ class Help
             {
                 out.close();
             }
+
+            return 0;
         }
 
 

@@ -64,7 +64,7 @@ final class Eval
 
 
         @Override
-        public void execute()
+        public int execute()
             throws Exception
         {
             try
@@ -80,6 +80,13 @@ final class Eval
             {
                 // Do nothing, just return successfully.
             }
+            catch (FusionException e)
+            {
+                System.err.println(e.getMessage());
+                return 1;
+            }
+
+            return 0;
         }
 
 
