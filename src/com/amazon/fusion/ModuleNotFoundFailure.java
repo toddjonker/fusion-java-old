@@ -17,13 +17,7 @@ public class ModuleNotFoundFailure
     ModuleNotFoundFailure(String message, Object... locations)
     {
         super(message);
-        assert locations.length != 0;
         myLocations = locations;
-    }
-
-    Object getInitialLocation()
-    {
-        return myLocations[0];
     }
 
     void addContext(Object location)
@@ -31,7 +25,7 @@ public class ModuleNotFoundFailure
         int len = myLocations.length;
 
         // Avoid adding a duplicate entry
-        if (location != myLocations[len - 1])
+        if (len != 0 && location != myLocations[len - 1])
         {
             myLocations = Arrays.copyOf(myLocations, len + 1);
             myLocations[len] = location;

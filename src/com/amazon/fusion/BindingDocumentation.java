@@ -3,16 +3,19 @@
 package com.amazon.fusion;
 
 
-final class FeatureDocumentation
+final class BindingDocumentation
 {
-    enum Kind { PROCEDURE, SYNTAX, MODULE }
+    enum Kind { PROCEDURE, SYNTAX, CONSTANT }
 
     final String myName;
     final Kind   myKind;
+    // TODO one-liner
+    // TODO intro
+    // TODO pairs of usage/body
     final String myUsage;
     final String myBody;
 
-    FeatureDocumentation(String name, Kind kind, String usage, String body)
+    BindingDocumentation(String name, Kind kind, String usage, String body)
     {
         myName = name;
         myKind = kind;

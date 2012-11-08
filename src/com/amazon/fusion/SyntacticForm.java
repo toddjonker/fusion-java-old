@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.FeatureDocumentation.Kind;
+import com.amazon.fusion.BindingDocumentation.Kind;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 
@@ -61,7 +61,7 @@ abstract class SyntacticForm
 
 
     @Override
-    FeatureDocumentation document()
+    BindingDocumentation document()
     {
         String name = getEffectiveName();
 
@@ -77,7 +77,7 @@ abstract class SyntacticForm
         buf.append(')');
         String usage = buf.toString();
 
-        return new FeatureDocumentation(name, Kind.SYNTAX, usage, myDoc);
+        return new BindingDocumentation(name, Kind.SYNTAX, usage, myDoc);
     }
 
 

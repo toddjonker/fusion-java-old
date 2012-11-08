@@ -2,12 +2,14 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
-import com.amazon.fusion.ModuleNamespace.ModuleBinding;
+import static com.amazon.fusion.ModuleDocumentation.buildDocTree;
+import com.petebevin.markdown.MarkdownProcessor;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * NOT FOR APPLICATION USE
@@ -17,69 +19,99 @@ public final class _Private_ModuleDocumenter
     private _Private_ModuleDocumenter() {}
 
 
-    public static void documentModule(File out,
-                                      FusionRuntime runtime,
-                                      String modulePath)
+    public static void writeHtmlTree(FusionRuntime runtime,
+                                     File outputDir,
+                                     File repoDir)
         throws IOException, FusionException
+    {
+        ModuleDocumentation doc = buildDocTree(runtime, repoDir);
+        writeHtmlTree(outputDir, doc);
+    }
+
+
+    private static void writeHtmlTree(File outputDir, ModuleDocumentation doc)
+        throws IOException
+    {
+        if (doc.myName != null)
+        {
+            File outputFile = new File(outputDir, doc.myName + ".html");
+            writeHtmlFile(outputFile, doc);
+            outputDir = new File(outputDir, doc.myName);
+        }
+
+        Collection<ModuleDocumentation> submodules = doc.submodules();
+        for (ModuleDocumentation submodule : submodules)
+        {
+            writeHtmlTree(outputDir, submodule);
+        }
+    }
+
+
+    private static void writeHtmlFile(File out, ModuleDocumentation doc)
+        throws IOException
     {
         out.getParentFile().mkdirs();
 
-        FileWriter outWriter = new FileWriter(out);
-        try
-        {
-            documentModule(outWriter, runtime, modulePath);
-        }
-        finally
-        {
-            outWriter.close();
-        }
+        String text = renderMarkdown(doc);
+
+        // Convert Markdown to HTML
+        text = new MarkdownProcessor().markdown(text);
+
+        writeText(out, text);
     }
 
 
-    public static void documentModule(Appendable out,
-                                      FusionRuntime runtime,
-                                      String module)
-        throws IOException, FusionException
-    {
-        StandardRuntime rt = (StandardRuntime) runtime;
-        ModuleRegistry registry = rt.getDefaultRegistry();
-        StandardTopLevel top = rt.getDefaultTopLevel();
-        Evaluator eval = top.getEvaluator();
-        documentModule(out, eval, registry, module);
-    }
-
-
-    // TODO FUSION-83 shouldn't need registry
-    static void documentModule(Appendable out,
-                               Evaluator eval,
-                               ModuleRegistry registry,
-                               String modulePath)
-        throws IOException, FusionException
-    {
-        assert modulePath.startsWith("/");
-
-        ModuleNameResolver resolver =
-            eval.getGlobalState().myModuleNameResolver;
-        ModuleIdentity id = resolver.resolveLib(eval, modulePath, null);
-        ModuleInstance moduleInstance = registry.lookup(id);
-        documentModule(eval, out, modulePath, moduleInstance, registry);
-    }
-
-
-    // TODO FUSION-83 shouldn't need registry
-    private static void documentModule(Evaluator eval,
-                                       Appendable out,
-                                       String modulePath,
-                                       ModuleInstance module,
-                                       ModuleRegistry registry)
+    private static String renderMarkdown(ModuleDocumentation doc)
         throws IOException
     {
-        assert modulePath.startsWith("/");
+        StringBuilder out = new StringBuilder();
 
-        displayHeader1(out, "Module " + modulePath);
+        displayHeader1(out, "Module " + doc.myPath);
 
-        String[] names = module.providedNames().toArray(EMPTY_STRING_ARRAY);
+        renderSubmoduleLinks(out, doc);
+
+        String[] names = doc.sortedExportedNames();
+
+        renderBindingIndex(out, doc, names);
+        renderBindings(out, doc, names);
+
+        return out.toString();
+    }
+
+
+    private static void renderSubmoduleLinks(Appendable out,
+                                             ModuleDocumentation doc)
+        throws IOException
+    {
+        Map<String, ModuleDocumentation> submodules = doc.submoduleMap();
+        if (submodules == null) return;
+
+        displayHeader2(out, "Submodules");
+
+        String superModuleName = doc.myName;
+
+        String[] names = submodules.keySet().toArray(new String[0]);
         Arrays.sort(names);
+
+        for (String name : names)
+        {
+            out.append("* [");
+            out.append(name);
+            out.append("](");
+            out.append(superModuleName);
+            out.append('/');
+            out.append(name);
+            out.append(".html)\n");
+        }
+    }
+
+
+    private static void renderBindingIndex(Appendable out,
+                                           ModuleDocumentation doc,
+                                           String[] names)
+        throws IOException
+    {
+        if (names.length == 0) return;
 
         displayHeader2(out, "Index");
 
@@ -91,27 +123,29 @@ public final class _Private_ModuleDocumenter
             out.append(name);
             out.append(") \n");
         }
+    }
+
+
+    private static void renderBindings(Appendable out,
+                                       ModuleDocumentation doc,
+                                       String[] names)
+        throws IOException
+    {
+        Map<String, BindingDocumentation> bindings = doc.bindingMap();
+        if (bindings == null) return;
 
         displayHeader2(out, "Exported Bindings");
+
         for (String name : names)
         {
-            ModuleBinding binding = module.resolveProvidedName(name);
-            Object value = binding.lookup(module, registry);
-
-            FeatureDocumentation doc = null;
-            if (value instanceof FusionValue)
-            {
-                FusionValue fv = (FusionValue) value;
-                doc = fv.document();
-                assert doc == null || name.equals(doc.myName);
-            }
-
-            documentFeature(out, name, doc);
+            // May be null:
+            BindingDocumentation feature = bindings.get(name);
+            renderBinding(out, name, feature);
         }
     }
 
-    private static void documentFeature(Appendable out, String name,
-                                        FeatureDocumentation doc)
+    private static void renderBinding(Appendable out, String name,
+                                      BindingDocumentation doc)
         throws IOException
     {
         out.append("\n\n");
@@ -172,5 +206,20 @@ public final class _Private_ModuleDocumenter
         out.append("### ");
         out.append(text);
         out.append('\n');
+    }
+
+
+    private static void writeText(File out, String text)
+        throws IOException
+    {
+        FileWriter fw = new FileWriter(out);
+        try
+        {
+            fw.write(text);
+        }
+        finally
+        {
+            fw.close();
+        }
     }
 }

@@ -29,7 +29,7 @@ final class HelpProc
                 {
                     out.append('\n');
 
-                    FeatureDocumentation doc = ((FusionValue) arg).document();
+                    BindingDocumentation doc = ((FusionValue) arg).document();
 
                     if (doc == null)
                     {
