@@ -15,6 +15,7 @@
   (defpub_j_syntax assert         "com.amazon.fusion.AssertForm")
   (defpub_j_syntax for_list       "com.amazon.fusion.ForListForm")
   (defpub_j_syntax let            "com.amazon.fusion.LetForm")
+  (defpub_j_syntax let_values     "com.amazon.fusion.LetValuesForm")
   (defpub_j_syntax quote          "com.amazon.fusion.QuoteForm")
   (defpub_j_syntax set            "com.amazon.fusion.SetForm")
 
