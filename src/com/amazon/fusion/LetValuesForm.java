@@ -163,6 +163,10 @@ final class LetValuesForm
         {
             case 0:
                 return body;
+            case 1:
+                return new CompiledPlainLet1(valueForms, body);
+            case 2:
+                return new CompiledPlainLet2(valueForms, body);
             default:
                 return new CompiledPlainLet(valueForms, body);
         }
@@ -196,21 +200,66 @@ final class LetValuesForm
             {
                 CompiledForm form = myValueForms[i];
                 Object values = eval.eval(store, form);
-
-                if (values instanceof Object[])
-                {
-                    Object[] valuesArray = (Object[]) values;
-                    assert valuesArray.length > 1;
-                    String expectation =
-                        "1 result but received " + valuesArray.length;
-                    throw new ResultFailure("local-binding form",
-                                            expectation, -1, valuesArray);
-                }
-
+                checkSingleResult(values);
                 boundValues[i] = values;
             }
 
             Store localStore = new LocalStore(store, boundValues);
+            return eval.bounceTailForm(localStore, myBody);
+        }
+    }
+
+
+    private static final class CompiledPlainLet1
+        implements CompiledForm
+    {
+        private final CompiledForm myValueForm0;
+        private final CompiledForm myBody;
+
+        CompiledPlainLet1(CompiledForm[] valueForms, CompiledForm body)
+        {
+            myValueForm0 = valueForms[0];
+            myBody       = body;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Object value = eval.eval(store, myValueForm0);
+            checkSingleResult(value);
+
+            Store localStore = new LocalStore1(store, value);
+            return eval.bounceTailForm(localStore, myBody);
+        }
+    }
+
+
+    private static final class CompiledPlainLet2
+        implements CompiledForm
+    {
+        private final CompiledForm myValueForm0;
+        private final CompiledForm myValueForm1;
+        private final CompiledForm myBody;
+
+        CompiledPlainLet2(CompiledForm[] valueForms, CompiledForm body)
+        {
+            myValueForm0 = valueForms[0];
+            myValueForm1 = valueForms[1];
+            myBody       = body;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Object value0 = eval.eval(store, myValueForm0);
+            checkSingleResult(value0);
+
+            Object value1 = eval.eval(store, myValueForm1);
+            checkSingleResult(value1);
+
+            Store localStore = new LocalStore2(store, value0, value1);
             return eval.bounceTailForm(localStore, myBody);
         }
     }
@@ -255,16 +304,7 @@ final class LetValuesForm
                 int expectedCount = myValueCounts[i];
                 if (expectedCount == 1)
                 {
-                    if (values instanceof Object[])
-                    {
-                        Object[] valuesArray = (Object[]) values;
-                        assert valuesArray.length > 1;
-                        String expectation =
-                            "1 result but received " + valuesArray.length;
-                        throw new ResultFailure("local-binding form",
-                                                expectation, -1, valuesArray);
-                    }
-
+                    checkSingleResult(values);
                     boundValues[bindingPos++] = values;
                 }
                 else if (values instanceof Object[])
@@ -283,6 +323,20 @@ final class LetValuesForm
 
             Store localStore = new LocalStore(store, boundValues);
             return eval.bounceTailForm(localStore, myBody);
+        }
+    }
+
+    private static final void checkSingleResult(Object values)
+        throws FusionException
+    {
+        if (values instanceof Object[])
+        {
+            Object[] valuesArray = (Object[]) values;
+            assert valuesArray.length > 1;
+            String expectation =
+                "1 result but received " + valuesArray.length;
+            throw new ResultFailure("local-binding form",
+                                    expectation, -1, valuesArray);
         }
     }
 }

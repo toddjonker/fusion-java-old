@@ -106,6 +106,8 @@ final class LetrecForm
 
         switch (valueForms.length)
         {
+            case 0:
+                return body;
             case 1:
                 return new CompiledLetrec1(valueForms, body);
             case 2:
