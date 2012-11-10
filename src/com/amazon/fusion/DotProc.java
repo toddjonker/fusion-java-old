@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
 import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVector.unsafeVectorRef;
 import static com.amazon.fusion.FusionVector.unsafeVectorSize;
+import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonStruct;
@@ -51,7 +52,7 @@ final class DotProc
                 int index = checkIntArg(i, args);
                 if (unsafeVectorSize(eval, c) <= index)
                 {
-                    return UNDEF;
+                    return voidValue(eval);
                 }
                 value = unsafeVectorRef(eval, c, index);
             }
@@ -67,7 +68,7 @@ final class DotProc
                         long index = checkLongArg(i, args);
                         if (ic.size() <= index)
                         {
-                            return UNDEF;
+                            return voidValue(eval);
                         }
                         IonSequence s = (IonSequence) ic;
                         value = s.get((int) index);
@@ -87,7 +88,7 @@ final class DotProc
                 }
             }
 
-            if (value == null) return UNDEF;
+            if (value == null) return voidValue(eval);
 
             if (i < lastArg)
             {

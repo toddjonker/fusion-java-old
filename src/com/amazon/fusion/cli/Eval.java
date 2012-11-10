@@ -70,7 +70,7 @@ final class Eval
             try
             {
                 Object result = evalFile(myFileName);
-                if (result != FusionValue.UNDEF)
+                if (result != null)
                 {
                     FusionValue.write(System.out, result);
                     System.out.println();
@@ -91,7 +91,8 @@ final class Eval
 
 
         /**
-         * @return not null.
+         * @return may be null (when void results) or an {@code Object[]} (when
+         * multiple values are returned.
          */
         private Object evalFile(String fileName)
             throws FusionException, IOException

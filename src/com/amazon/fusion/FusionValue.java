@@ -239,6 +239,7 @@ public abstract class FusionValue
      * closures.
      *
      * @param out the output stream; not null.
+     * @param value must not be null.
      *
      * @throws FusionException if there's an exception thrown by the output
      * stream.
