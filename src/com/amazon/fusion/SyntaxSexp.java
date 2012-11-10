@@ -3,6 +3,9 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
+import static com.amazon.fusion.LetValuesForm.compilePlainLet;
+import com.amazon.fusion.LambdaForm.CompiledLambdaBase;
+import com.amazon.fusion.LambdaForm.CompiledLambdaExact;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
@@ -249,6 +252,23 @@ final class SyntaxSexp
 
         CompiledForm procForm = eval.compile(env, first);
         CompiledForm[] argForms = eval.compile(env, this, 1);
+
+        if (procForm instanceof CompiledLambdaExact)
+        {
+            CompiledLambdaBase lambda = (CompiledLambdaBase) procForm;
+            if (lambda.myArgNames.length != argForms.length)
+            {
+                String message =
+                    "lambda form expects " + lambda.myArgNames.length +
+                    " arguments but application has " + argForms.length +
+                    " expressions";
+                 throw new SyntaxFailure("procedure application", message,
+                                         this);
+            }
+
+            return compilePlainLet(argForms, lambda.myBody);
+        }
+
         return new CompiledPlainApp(procForm, argForms);
     }
 

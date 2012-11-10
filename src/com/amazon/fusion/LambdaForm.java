@@ -173,7 +173,7 @@ final class LambdaForm
                 case 2:
                     return new CompiledLambda2(doc, argNames, body);
                 default:
-                    return new CompiledLambda(doc, argNames, body);
+                    return new CompiledLambdaN(doc, argNames, body);
             }
         }
     }
@@ -182,18 +182,33 @@ final class LambdaForm
     //========================================================================
 
 
-    private static class CompiledLambda
+    abstract static class CompiledLambdaBase
         implements CompiledForm
     {
         final String       myDoc;
         final String[]     myArgNames;
         final CompiledForm myBody;
 
-        CompiledLambda(String doc, String[] argNames, CompiledForm body)
+        CompiledLambdaBase(String doc, String[] argNames, CompiledForm body)
         {
             myDoc      = doc;
             myArgNames = argNames;
             myBody     = body;
+        }
+    }
+
+    /** Marker for lambdas that accept a fixed number of arguments. */
+    interface CompiledLambdaExact
+    {
+    }
+
+    private static class CompiledLambdaN
+        extends CompiledLambdaBase
+        implements CompiledLambdaExact
+    {
+        CompiledLambdaN(String doc, String[] argNames, CompiledForm body)
+        {
+            super(doc, argNames, body);
         }
 
         @Override
@@ -245,7 +260,8 @@ final class LambdaForm
 
 
     private static final class CompiledLambda1
-        extends CompiledLambda
+        extends CompiledLambdaBase
+        implements CompiledLambdaExact
     {
         CompiledLambda1(String doc, String[] argNames, CompiledForm body)
         {
@@ -288,7 +304,8 @@ final class LambdaForm
 
 
     private static final class CompiledLambda2
-        extends CompiledLambda
+        extends CompiledLambdaBase
+        implements CompiledLambdaExact
     {
         CompiledLambda2(String doc, String[] argNames, CompiledForm body)
         {
@@ -331,7 +348,7 @@ final class LambdaForm
 
 
     private static final class CompiledLambdaRest
-        extends CompiledLambda
+        extends CompiledLambdaBase
     {
         CompiledLambdaRest(String doc, String restArgName, CompiledForm body)
         {
