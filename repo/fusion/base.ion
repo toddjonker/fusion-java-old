@@ -69,7 +69,7 @@ The last EXPR is in tail position. Given no EXPRs, the result is true.
             (syntax_get stx 1)
             (let [(first (syntax_get    stx 1)),
                   (rest  (syntax_subseq stx 2))]
-              (let [(inner (syntax_cons and rest))]
+              (let [(inner (syntax_cons_q and rest))]
                 (quasisyntax
                   (let ((a (unsyntax first)))
                     (if a (unsyntax inner) a))))))))))
@@ -98,7 +98,7 @@ The last EXPR is in tail position. Given no EXPRs, the result is false.
             (syntax_get stx 1)
             (let [(first (syntax_get    stx 1)),
                   (rest  (syntax_subseq stx 2))]
-              (let [(inner (syntax_cons or rest))]
+              (let [(inner (syntax_cons_q or rest))]
                 (quasisyntax
                   (let ((a (unsyntax first)))
                     (if a a (unsyntax inner)))))))))))
@@ -113,7 +113,7 @@ The last EXPR is in tail position. Given no EXPRs, the result is false.
         (wrong_syntax stx "expected condition")
         (let ((test (syntax_get    stx 1))
               (body (syntax_subseq stx 2)))
-          (let ((begin_body (syntax_cons begin body)))
+          (let ((begin_body (syntax_cons_q begin body)))
             (quasisyntax
               (if (unsyntax test)
                   (unsyntax begin_body)
@@ -128,7 +128,7 @@ The last EXPR is in tail position. Given no EXPRs, the result is false.
         (wrong_syntax stx "expected condition")
         (let ((test (syntax_get    stx 1))
               (body (syntax_subseq stx 2)))
-          (let ((begin_body (syntax_cons begin body)))
+          (let ((begin_body (syntax_cons_q begin body)))
             (quasisyntax
               (if (unsyntax test)
                   (void)
@@ -149,8 +149,8 @@ The last EXPR is in tail position. Given no EXPRs, the result is false.
               (wrong_syntax stx "cond: bad clause " clause))
             (let ((test (syntax_get    clause 0))
                   (body (syntax_subseq clause 1)))
-              (let ((begin_body (syntax_cons begin body))
-                    (cond_tail  (syntax_cons cond  tail)))
+              (let ((begin_body (syntax_cons_q begin body))
+                    (cond_tail  (syntax_cons_q cond  tail)))
                 (quasisyntax
                   (if (unsyntax test)
                       (unsyntax begin_body)

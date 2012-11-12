@@ -10,7 +10,7 @@
 
   (provide datum_to_syntax define_syntax free_identifier_equal
     quasisyntax quote_syntax
-    syntax_append syntax_cons syntax_get syntax_size
+    syntax_append syntax_cons_q syntax_get syntax_size
     syntax_subseq unsyntax wrong_syntax)
 
 
@@ -25,7 +25,9 @@
 
   (define free_identifier_equal (java_new "com.amazon.fusion.FreeIdentifierEqualProc"))
 
-  (define_syntax syntax_cons
+  // '_q' suffix intended to denote that the car is quoted by the syntax form.
+  // Otherwise this would be a procedure.
+  (define_syntax syntax_cons_q
     (lambda (stx)
       (quasisyntax
         (syntax_append (quote_syntax ((unsyntax (syntax_get stx 1))))

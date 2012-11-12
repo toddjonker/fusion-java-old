@@ -16,7 +16,7 @@
             (let ((body (syntax_subseq rest 1)))
               (quasisyntax
                 (lambda (unsyntax parms)
-                  (unsyntax (syntax_cons begin body)))))
+                  (unsyntax (syntax_cons_q begin body)))))
             (loop
               (syntax_append parms (quasisyntax ((unsyntax (syntax_get rest 0)))))
               (syntax_subseq rest 1))))))

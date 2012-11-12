@@ -65,7 +65,7 @@
             (body_sexp (syntax_subseq stx 2)))
         (let ((name (syntax_get bindings 0))
               (params (syntax_subseq bindings 1))
-              (body_begin (syntax_cons begin body_sexp)))
+              (body_begin (syntax_cons_q begin body_sexp)))
 
           (quasisyntax
             (define (unsyntax name)
