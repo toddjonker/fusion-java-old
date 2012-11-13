@@ -27,7 +27,8 @@ final class ModuleBuilderImpl
     ModuleInstance build()
         throws FusionException
     {
-        ModuleStore store = new ModuleStore(myNamespace.extractValues());
+        ModuleStore store = new ModuleStore(myRegistry,
+                                            myNamespace.extractValues());
         Collection<TopBinding> bindings = myNamespace.getBindings();
 
         // TODO should we register the module?

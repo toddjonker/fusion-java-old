@@ -5,9 +5,7 @@ package com.amazon.fusion;
 interface NamespaceStore
     extends Store
 {
-    @Override
-    void set(int address, Object value);
+    ModuleRegistry getRegistry();
 
-    @Override
-    Object lookup(int address);
+    Object lookupImport(int moduleAddress, int bindingAddress);
 }

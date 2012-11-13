@@ -21,7 +21,7 @@ final class ModuleInstance
     extends NamedValue
 {
     private final ModuleIdentity myIdentity;
-    private final NamespaceStore myNamespace;
+    private final ModuleStore    myNamespace;
 
     /**
      * Not all of these bindings are for this module; names that are imported
@@ -30,7 +30,7 @@ final class ModuleInstance
     private final Map<String,ModuleBinding> myProvidedBindings;
 
 
-    private ModuleInstance(ModuleIdentity identity, NamespaceStore namespace,
+    private ModuleInstance(ModuleIdentity identity, ModuleStore namespace,
                            int bindingCount)
         throws FusionException, ContractFailure
     {
@@ -44,7 +44,7 @@ final class ModuleInstance
     /**
      * Creates a module that {@code provide}s the given bindings.
      */
-    ModuleInstance(ModuleIdentity identity, NamespaceStore namespace,
+    ModuleInstance(ModuleIdentity identity, ModuleStore namespace,
                    Collection<TopBinding> bindings)
         throws FusionException, ContractFailure
     {
@@ -61,7 +61,7 @@ final class ModuleInstance
     /**
      * Creates a module that {@code provide}s the given bound identifiers.
      */
-    ModuleInstance(ModuleIdentity identity, NamespaceStore namespace,
+    ModuleInstance(ModuleIdentity identity, ModuleStore namespace,
                    SyntaxSymbol[] providedIdentifiers)
         throws FusionException, ContractFailure
     {
@@ -83,7 +83,7 @@ final class ModuleInstance
     }
 
 
-    NamespaceStore getNamespace()
+    ModuleStore getNamespace()
     {
         return myNamespace;
     }
@@ -103,6 +103,22 @@ final class ModuleInstance
     ModuleBinding resolveProvidedName(String name)
     {
         return myProvidedBindings.get(name);
+    }
+
+
+    BindingDocumentation documentProvidedName(String name)
+    {
+        BindingDocumentation doc = null;
+
+        ModuleBinding binding = resolveProvidedName(name);
+        Object value = binding.lookup(this);
+        if (value instanceof FusionValue)
+        {
+            FusionValue fv = (FusionValue) value;
+            doc = fv.document();
+            assert doc == null || name.equals(doc.myName);
+        }
+        return doc;
     }
 
 

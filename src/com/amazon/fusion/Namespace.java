@@ -7,6 +7,8 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -94,6 +96,16 @@ class Namespace
     }
 
     private final ModuleRegistry myRegistry;
+
+    /**
+     * Assigns required modules to integer addresses, for use in compiled
+     * forms.
+     */
+    private final HashMap<ModuleIdentity,Integer> myRequiredModules =
+        new HashMap<ModuleIdentity,Integer>();
+    private final ArrayList<ModuleStore> myRequiredModuleStores =
+        new ArrayList<ModuleStore>();
+
     private SyntaxWraps myWraps;
     private final ArrayList<TopBinding> myBindings =
         new ArrayList<TopBinding>();
@@ -123,6 +135,7 @@ class Namespace
     }
 
 
+    @Override
     public ModuleRegistry getRegistry()
     {
         return myRegistry;
@@ -368,6 +381,12 @@ class Namespace
         return myValues.get(address);
     }
 
+    @Override
+    public Object lookupImport(int moduleAddress, int bindingAddress)
+    {
+        ModuleStore store = myRequiredModuleStores.get(moduleAddress);
+        return store.lookup(bindingAddress);
+    }
 
     Object[] extractValues()
     {
@@ -375,6 +394,47 @@ class Namespace
         myValues.toArray(values);
         return values;
     }
+
+
+    /**
+     * Translates a required module identity into an integer address for use
+     * by compiled forms.  Note that some required modules may not be
+     * explicitly declared in the source of the module, since they may come in
+     * via macro expansion.
+     * <p>
+     * Building this list is delayed to compile-time to avoid compiling
+     * addresses for modules that are declared but never used.
+     * This may be a useless optimization.
+     * <p>
+     * @return a zero-based address for the module, valid only within this
+     * namespace (or its compiled form).
+     */
+    synchronized int requiredModuleAddress(ModuleIdentity moduleId)
+    {
+        Integer id = myRequiredModules.get(moduleId);
+        if (id == null)
+        {
+            id = myRequiredModules.size();
+            myRequiredModules.put(moduleId, id);
+
+            ModuleInstance module = myRegistry.lookup(moduleId);
+            myRequiredModuleStores.add(module.getNamespace());
+        }
+        return id;
+    }
+
+    synchronized ModuleIdentity[] requiredModuleIds()
+    {
+        ModuleIdentity[] ids = new ModuleIdentity[myRequiredModules.size()];
+        for (Map.Entry<ModuleIdentity, Integer> entry
+                : myRequiredModules.entrySet())
+        {
+            int address = entry.getValue();
+            ids[address] = entry.getKey();
+        }
+        return ids;
+    }
+
 
     //========================================================================
 

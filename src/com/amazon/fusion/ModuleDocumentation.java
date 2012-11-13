@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
-import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -95,7 +94,7 @@ final class ModuleDocumentation
                 ModuleIdentity id = resolveModulePath(runtime, path);
                 ModuleInstance moduleInstance = registry.lookup(id);
 
-                build(moduleInstance, registry);
+                build(moduleInstance);
             }
             catch (ModuleNotFoundFailure e) { }
         }
@@ -139,8 +138,7 @@ final class ModuleDocumentation
     }
 
 
-    // TODO FUSION-83 shouldn't need registry
-    private void build(ModuleInstance module, ModuleRegistry registry)
+    private void build(ModuleInstance module)
     {
         Set<String> names = module.providedNames();
         if (names.size() == 0) return;
@@ -149,18 +147,8 @@ final class ModuleDocumentation
 
         for (String name : names)
         {
-            ModuleBinding binding = module.resolveProvidedName(name);
-            Object value = binding.lookup(module, registry);
-
-            BindingDocumentation doc = null;
-            if (value instanceof FusionValue)
-            {
-                FusionValue fv = (FusionValue) value;
-                doc = fv.document();
-                assert doc == null || name.equals(doc.myName);
-
-                myBindings.put(name, doc);
-            }
+            BindingDocumentation doc = module.documentProvidedName(name);
+            myBindings.put(name, doc);
         }
     }
 

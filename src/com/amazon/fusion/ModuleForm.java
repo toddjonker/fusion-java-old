@@ -366,7 +366,9 @@ final class ModuleForm
         CompiledForm[] otherFormsArray =
             otherForms.toArray(new CompiledForm[otherForms.size()]);
 
-        return new CompiledModule(id, variableCount,
+        return new CompiledModule(id,
+                                  moduleNamespace.requiredModuleIds(),
+                                  variableCount,
                                   providedIdentifiers, otherFormsArray);
     }
 
@@ -482,17 +484,20 @@ final class ModuleForm
     private static final class CompiledModule
         implements CompiledForm
     {
-        private final ModuleIdentity myId;
-        private final int            myVariableCount;
-        private final SyntaxSymbol[] myProvidedIdentifiers;
-        private final CompiledForm[] myBody;
+        private final ModuleIdentity   myId;
+        private final ModuleIdentity[] myRequiredModules;
+        private final int              myVariableCount;
+        private final SyntaxSymbol[]   myProvidedIdentifiers;
+        private final CompiledForm[]   myBody;
 
-        private CompiledModule(ModuleIdentity id,
-                               int            variableCount,
-                               SyntaxSymbol[] providedIdentifiers,
-                               CompiledForm[] body)
+        private CompiledModule(ModuleIdentity   id,
+                               ModuleIdentity[] requiredModules,
+                               int              variableCount,
+                               SyntaxSymbol[]   providedIdentifiers,
+                               CompiledForm[]   body)
         {
             myId                  = id;
+            myRequiredModules     = requiredModules;
             myVariableCount       = variableCount;
             myProvidedIdentifiers = providedIdentifiers;
             myBody                = body;
@@ -502,8 +507,14 @@ final class ModuleForm
         public Object doEval(Evaluator eval, Store ignored)
             throws FusionException
         {
+            ModuleRegistry registry =
+                eval.findCurrentNamespace().getRegistry();
+
+            ModuleStore[] requiredModuleStores = requireModules(registry);
+
             // Allocate just enough space for the top-level bindings.
-            ModuleStore store = new ModuleStore(myVariableCount);
+            ModuleStore store =
+                new ModuleStore(registry, requiredModuleStores, myVariableCount);
 
             ModuleInstance module =
                 new ModuleInstance(myId, store, myProvidedIdentifiers);
@@ -516,6 +527,19 @@ final class ModuleForm
             }
 
             return module;
+        }
+
+        private ModuleStore[] requireModules(ModuleRegistry registry)
+        {
+            int count = myRequiredModules.length;
+            ModuleStore[] stores = new ModuleStore[count];
+            for (int i = 0; i < count; i++)
+            {
+                ModuleInstance module = registry.lookup(myRequiredModules[i]);
+                stores[i] = module.getNamespace();
+            }
+
+            return stores;
         }
     }
 }

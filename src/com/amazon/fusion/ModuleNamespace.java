@@ -35,23 +35,24 @@ class ModuleNamespace
                     localNamespace.getRegistry().lookup(myModuleId);
                 assert module != null : "Module not found: " + myModuleId;
 
-                NamespaceStore ns = module.getNamespace();
+                ModuleStore ns = module.getNamespace();
                 return ns.lookup(myAddress);
             }
 
             return localNamespace.lookup(this);
         }
 
-        // TODO FUSION-83 registry shouldn't be needed
-        Object lookup(ModuleInstance module, ModuleRegistry registry)
+        Object lookup(ModuleInstance module)
         {
+            ModuleStore ns = module.getNamespace();
+
             if (module.getIdentity() != myModuleId)
             {
-                module = registry.lookup(myModuleId);
+                module = ns.getRegistry().lookup(myModuleId);
                 assert module != null : "Module not found: " + myModuleId;
+                ns = module.getNamespace();
             }
 
-            NamespaceStore ns = module.getNamespace();
             return ns.lookup(myAddress);
         }
 
@@ -63,15 +64,14 @@ class ModuleNamespace
             if (localNamespace.getModuleId() != myModuleId)
             {
                 // We have a reference to a binding from another module!
-                // Compiled form must include link to the module since it
+                // Compiled form must include address of the module since it
                 // won't be the top of the runtime environment chain.
 
-                ModuleInstance module =
-                    localNamespace.getRegistry().lookup(myModuleId);
-                assert module != null : "Module not found: " + myModuleId;
+                int moduleAddress =
+                    localNamespace.requiredModuleAddress(myModuleId);
 
-                NamespaceStore ns = module.getNamespace();
-                return new CompiledImportedVariableReference(ns, myAddress);
+                return new CompiledImportedVariableReference(moduleAddress,
+                                                             myAddress);
             }
 
             return super.compileReference(eval, env);
@@ -126,21 +126,24 @@ class ModuleNamespace
     private static final class CompiledImportedVariableReference
         implements CompiledForm
     {
-        private final NamespaceStore myNamespace;
-        private final int            myAddress;
+        private final int myModuleAddress;
+        private final int myBindingAddress;
 
-        CompiledImportedVariableReference(NamespaceStore namespace, int address)
+        CompiledImportedVariableReference(int moduleAddress,
+                                          int bindingAddress)
         {
-            myNamespace = namespace;
-            myAddress   = address;
+            myModuleAddress  = moduleAddress;
+            myBindingAddress = bindingAddress;
         }
 
         @Override
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            Object result = myNamespace.lookup(myAddress);
-            assert result != null : "No value for " + myAddress;
+            NamespaceStore ns = store.namespace();
+            Object result = ns.lookupImport(myModuleAddress, myBindingAddress);
+            assert result != null
+                : "No value for " + myModuleAddress + "@" + myBindingAddress;
             return result;
         }
     }

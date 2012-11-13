@@ -8,15 +8,24 @@ package com.amazon.fusion;
 final class ModuleStore
     implements NamespaceStore
 {
-    private final Object[] myValues;
+    private final ModuleRegistry myRegistry;
+    private final ModuleStore[]  myRequiredModules;
+    private final Object[]       myValues;
 
-    ModuleStore(int topLevelVariableCount)
+
+    ModuleStore(ModuleRegistry registry,
+                ModuleStore[] requiredModules,
+                int topLevelVariableCount)
     {
+        myRegistry = registry;
+        myRequiredModules = requiredModules;
         myValues = new Object[topLevelVariableCount];
     }
 
-    ModuleStore(Object[] values)
+    ModuleStore(ModuleRegistry registry, Object[] values)
     {
+        myRegistry = registry;
+        myRequiredModules = new ModuleStore[0];
         myValues = values;
     }
 
@@ -34,6 +43,12 @@ final class ModuleStore
 
 
     @Override
+    public ModuleRegistry getRegistry()
+    {
+        return myRegistry;
+    }
+
+    @Override
     public NamespaceStore namespace()
     {
         return this;
@@ -49,5 +64,11 @@ final class ModuleStore
     public Object lookup(int address)
     {
         return myValues[address];
+    }
+
+    @Override
+    public Object lookupImport(int moduleAddress, int bindingAddress)
+    {
+        return myRequiredModules[moduleAddress].myValues[bindingAddress];
     }
 }
