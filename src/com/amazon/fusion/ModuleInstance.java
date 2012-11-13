@@ -106,9 +106,9 @@ final class ModuleInstance
     }
 
 
-    BindingDocumentation documentProvidedName(String name)
+    BindingDoc documentProvidedName(String name)
     {
-        BindingDocumentation doc = null;
+        BindingDoc doc = null;
 
         ModuleBinding binding = resolveProvidedName(name);
 
@@ -126,9 +126,9 @@ final class ModuleInstance
         return doc;
     }
 
-    BindingDocumentation documentProvidedName(ModuleBinding binding)
+    BindingDoc documentProvidedName(ModuleBinding binding)
     {
-        BindingDocumentation doc = null;
+        BindingDoc doc = null;
 
         if (binding.myModuleId == myIdentity)
         {

@@ -11,13 +11,13 @@ final class ModuleStore
     private final ModuleRegistry myRegistry;
     private final ModuleStore[]  myRequiredModules;
     private final Object[]       myValues;
-    private final BindingDocumentation[] myBindingDocs;
+    private final BindingDoc[]   myBindingDocs;
 
 
     ModuleStore(ModuleRegistry registry,
                 ModuleStore[] requiredModules,
                 int topLevelVariableCount,
-                BindingDocumentation[] bindingDocs)
+                BindingDoc[] bindingDocs)
     {
         myRegistry = registry;
         myRequiredModules = requiredModules;
@@ -30,7 +30,7 @@ final class ModuleStore
         myRegistry = registry;
         myRequiredModules = new ModuleStore[0];
         myValues = values;
-        myBindingDocs = new BindingDocumentation[0];
+        myBindingDocs = new BindingDoc[0];
     }
 
     @Override
@@ -76,7 +76,7 @@ final class ModuleStore
         return myRequiredModules[moduleAddress].myValues[bindingAddress];
     }
 
-    BindingDocumentation document(int address)
+    BindingDoc document(int address)
     {
         if (address < myBindingDocs.length)
         {

@@ -488,14 +488,14 @@ final class ModuleForm
         private final ModuleIdentity   myId;
         private final ModuleIdentity[] myRequiredModules;
         private final int              myVariableCount;
-        private final BindingDocumentation[] myBindingDocs;
+        private final BindingDoc[]     myBindingDocs;
         private final SyntaxSymbol[]   myProvidedIdentifiers;
         private final CompiledForm[]   myBody;
 
         private CompiledModule(ModuleIdentity   id,
                                ModuleIdentity[] requiredModules,
                                int              variableCount,
-                               BindingDocumentation[] bindingDocs,
+                               BindingDoc[]     bindingDocs,
                                SyntaxSymbol[]   providedIdentifiers,
                                CompiledForm[]   body)
         {

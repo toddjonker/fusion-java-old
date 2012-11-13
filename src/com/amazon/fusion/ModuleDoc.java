@@ -13,14 +13,14 @@ import java.util.Map;
 import java.util.Set;
 
 
-final class ModuleDocumentation
+final class ModuleDoc
 {
     private final FusionRuntime myRuntime;
     final String myName;
     final String myPath;
 
-    private Map<String,ModuleDocumentation> mySubmodules;
-    private Map<String,BindingDocumentation> myBindings;
+    private Map<String,ModuleDoc>  mySubmodules;
+    private Map<String,BindingDoc> myBindings;
 
 
     private static ModuleIdentity resolveModulePath(FusionRuntime runtime,
@@ -38,17 +38,16 @@ final class ModuleDocumentation
     }
 
 
-    public static ModuleDocumentation buildDocTree(FusionRuntime runtime,
-                                                   File repoDir)
+    public static ModuleDoc buildDocTree(FusionRuntime runtime, File repoDir)
         throws IOException, FusionException
     {
-        ModuleDocumentation doc = new ModuleDocumentation(runtime, null, "");
+        ModuleDoc doc = new ModuleDoc(runtime, null, "");
         buildTree(repoDir, doc);
         return doc;
     }
 
 
-    private static void buildTree(File dir, ModuleDocumentation doc)
+    private static void buildTree(File dir, ModuleDoc doc)
         throws IOException, FusionException
     {
         String[] fileNames = dir.list();
@@ -60,7 +59,7 @@ final class ModuleDocumentation
             File testFile = new File(dir, fileName);
             if (testFile.isDirectory())
             {
-                ModuleDocumentation d = doc.addSubmodule(fileName);
+                ModuleDoc d = doc.addSubmodule(fileName);
                 buildTree(testFile, d);
             }
             else if (fileName.endsWith(".ion"))
@@ -68,7 +67,7 @@ final class ModuleDocumentation
                 // We assume that all .ion files are modules.
                 String moduleName =
                     fileName.substring(0, fileName.length() - 4);
-                ModuleDocumentation d = doc.addSubmodule(moduleName);
+                ModuleDoc d = doc.addSubmodule(moduleName);
             }
         }
     }
@@ -77,7 +76,7 @@ final class ModuleDocumentation
      * @param name can be null to represent the repository root (not really a
      *  module).
      */
-    private ModuleDocumentation(FusionRuntime runtime,
+    private ModuleDoc(FusionRuntime runtime,
                                 String name, String path)
         throws FusionException
     {
@@ -100,14 +99,14 @@ final class ModuleDocumentation
         }
     }
 
-    private ModuleDocumentation(ModuleDocumentation parent, String name)
+    private ModuleDoc(ModuleDoc parent, String name)
         throws FusionException
     {
         this(parent.myRuntime, name, parent.myPath + "/" + name);
     }
 
 
-    Map<String, BindingDocumentation> bindingMap()
+    Map<String, BindingDoc> bindingMap()
     {
         return myBindings;
     }
@@ -123,12 +122,12 @@ final class ModuleDocumentation
         return names;
     }
 
-    Map<String, ModuleDocumentation> submoduleMap()
+    Map<String, ModuleDoc> submoduleMap()
     {
         return mySubmodules;
     }
 
-    Collection<ModuleDocumentation> submodules()
+    Collection<ModuleDoc> submodules()
     {
         if (mySubmodules == null)
         {
@@ -143,24 +142,24 @@ final class ModuleDocumentation
         Set<String> names = module.providedNames();
         if (names.size() == 0) return;
 
-        myBindings = new HashMap<String,BindingDocumentation>(names.size());
+        myBindings = new HashMap<String,BindingDoc>(names.size());
 
         for (String name : names)
         {
-            BindingDocumentation doc = module.documentProvidedName(name);
+            BindingDoc doc = module.documentProvidedName(name);
             myBindings.put(name, doc);
         }
     }
 
 
-    private ModuleDocumentation addSubmodule(String name)
+    private ModuleDoc addSubmodule(String name)
         throws FusionException
     {
-        ModuleDocumentation doc = new ModuleDocumentation(this, name);
+        ModuleDoc doc = new ModuleDoc(this, name);
 
         if (mySubmodules == null)
         {
-            mySubmodules = new HashMap<String,ModuleDocumentation>();
+            mySubmodules = new HashMap<String,ModuleDoc>();
         }
 
         assert ! mySubmodules.containsKey(name);

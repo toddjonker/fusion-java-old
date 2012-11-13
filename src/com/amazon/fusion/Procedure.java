@@ -4,7 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVector.isVector;
 import com.amazon.fusion.ArityFailure.Variability;
-import com.amazon.fusion.BindingDocumentation.Kind;
+import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
@@ -75,7 +75,7 @@ abstract class Procedure
 
 
     @Override
-    BindingDocumentation document()
+    BindingDoc document()
     {
         String name = getEffectiveName();
 
@@ -90,7 +90,7 @@ abstract class Procedure
         buf.append(')');
         String usage = buf.toString();
 
-        return new BindingDocumentation(name, Kind.PROCEDURE, usage, myDoc);
+        return new BindingDoc(name, Kind.PROCEDURE, usage, myDoc);
     }
 
 

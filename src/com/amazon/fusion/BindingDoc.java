@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 
-final class BindingDocumentation
+final class BindingDoc
 {
     enum Kind { PROCEDURE, SYNTAX, CONSTANT }
 
@@ -15,7 +15,7 @@ final class BindingDocumentation
     final String myUsage;
     final String myBody;
 
-    BindingDocumentation(String name, Kind kind, String usage, String body)
+    BindingDoc(String name, Kind kind, String usage, String body)
     {
         myName = name;
         myKind = kind;

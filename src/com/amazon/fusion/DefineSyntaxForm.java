@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.BindingDocumentation.Kind;
+import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.fusion.Namespace.TopBinding;
 
 final class DefineSyntaxForm
@@ -87,11 +87,10 @@ final class DefineSyntaxForm
         {
             // We have documentation. Sort of.
             SyntaxString docString = (SyntaxString) source.get(2);
-            BindingDocumentation doc =
-                new BindingDocumentation(identifier.stringValue(),
-                                         Kind.SYNTAX,
-                                         null, // usage
-                                         docString.stringValue());
+            BindingDoc doc = new BindingDoc(identifier.stringValue(),
+                                            Kind.SYNTAX,
+                                            null, // usage
+                                            docString.stringValue());
             env.namespace().setDoc(binding.myAddress, doc);
         }
 

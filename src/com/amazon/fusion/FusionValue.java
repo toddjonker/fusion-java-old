@@ -170,7 +170,7 @@ public abstract class FusionValue
      *
      * @return the documentation model, or null if there's no documentation.
      */
-    BindingDocumentation document()
+    BindingDoc document()
     {
         return null;
     }

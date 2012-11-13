@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.ModuleDocumentation.buildDocTree;
+import static com.amazon.fusion.ModuleDoc.buildDocTree;
 import com.petebevin.markdown.MarkdownProcessor;
 import java.io.File;
 import java.io.FileWriter;
@@ -24,12 +24,12 @@ public final class _Private_ModuleDocumenter
                                      File repoDir)
         throws IOException, FusionException
     {
-        ModuleDocumentation doc = buildDocTree(runtime, repoDir);
+        ModuleDoc doc = buildDocTree(runtime, repoDir);
         writeHtmlTree(outputDir, doc);
     }
 
 
-    private static void writeHtmlTree(File outputDir, ModuleDocumentation doc)
+    private static void writeHtmlTree(File outputDir, ModuleDoc doc)
         throws IOException
     {
         if (doc.myName != null)
@@ -39,15 +39,15 @@ public final class _Private_ModuleDocumenter
             outputDir = new File(outputDir, doc.myName);
         }
 
-        Collection<ModuleDocumentation> submodules = doc.submodules();
-        for (ModuleDocumentation submodule : submodules)
+        Collection<ModuleDoc> submodules = doc.submodules();
+        for (ModuleDoc submodule : submodules)
         {
             writeHtmlTree(outputDir, submodule);
         }
     }
 
 
-    private static void writeHtmlFile(File out, ModuleDocumentation doc)
+    private static void writeHtmlFile(File out, ModuleDoc doc)
         throws IOException
     {
         out.getParentFile().mkdirs();
@@ -64,7 +64,7 @@ public final class _Private_ModuleDocumenter
     }
 
 
-    private static void renderModule(Appendable out, ModuleDocumentation doc)
+    private static void renderModule(Appendable out, ModuleDoc doc)
         throws IOException
     {
         renderHead(out, doc);
@@ -94,7 +94,7 @@ public final class _Private_ModuleDocumenter
         " }" +
         "</style>\n";
 
-    private static void renderHead(Appendable out, ModuleDocumentation doc)
+    private static void renderHead(Appendable out, ModuleDoc doc)
         throws IOException
     {
         out.append("<head>");
@@ -106,11 +106,10 @@ public final class _Private_ModuleDocumenter
     }
 
 
-    private static void renderSubmoduleLinks(Appendable out,
-                                             ModuleDocumentation doc)
+    private static void renderSubmoduleLinks(Appendable out, ModuleDoc doc)
         throws IOException
     {
-        Map<String, ModuleDocumentation> submodules = doc.submoduleMap();
+        Map<String, ModuleDoc> submodules = doc.submoduleMap();
         if (submodules == null) return;
 
         renderHeader2(out, "Submodules");
@@ -137,7 +136,7 @@ public final class _Private_ModuleDocumenter
 
 
     private static void renderBindingIndex(Appendable out,
-                                           ModuleDocumentation doc,
+                                           ModuleDoc doc,
                                            String[] names)
         throws IOException
     {
@@ -158,11 +157,11 @@ public final class _Private_ModuleDocumenter
 
 
     private static void renderBindings(Appendable out,
-                                       ModuleDocumentation doc,
+                                       ModuleDoc doc,
                                        String[] names)
         throws IOException
     {
-        Map<String, BindingDocumentation> bindings = doc.bindingMap();
+        Map<String, BindingDoc> bindings = doc.bindingMap();
         if (bindings == null) return;
 
         renderHeader2(out, "Exported Bindings");
@@ -170,14 +169,14 @@ public final class _Private_ModuleDocumenter
         for (String name : names)
         {
             // May be null:
-            BindingDocumentation feature = bindings.get(name);
-            renderBinding(out, name, feature);
+            BindingDoc binding = bindings.get(name);
+            renderBinding(out, name, binding);
         }
     }
 
 
     private static void renderBinding(Appendable out, String name,
-                                      BindingDocumentation doc)
+                                      BindingDoc doc)
         throws IOException
     {
         name = escape(name);

@@ -97,11 +97,10 @@ final class DefineForm
         {
             // We have documentation. Sort of.
             SyntaxString docString = (SyntaxString) source.get(2);
-            BindingDocumentation doc =
-                new BindingDocumentation(identifier.stringValue(),
-                                         null, // kind
-                                         null, // usage
-                                         docString.stringValue());
+            BindingDoc doc = new BindingDoc(identifier.stringValue(),
+                                            null, // kind
+                                            null, // usage
+                                            docString.stringValue());
             env.namespace().setDoc(binding.myAddress, doc);
         }
 
