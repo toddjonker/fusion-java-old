@@ -10,7 +10,7 @@ final class DefineForm
     DefineForm()
     {
         //    "                                                                               |
-        super("VAR VALUE",
+        super("var value",
               "Defines a top-level variable VAR with the given VALUE.");
     }
 

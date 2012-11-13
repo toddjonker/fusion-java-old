@@ -20,7 +20,9 @@ final class DotProc
         super("Traverses down through an Ion data structure.\n" +
               "CONTAINER must be Ion container (struct, list, or sexp).\n" +
               "Each PART must be a string, symbol, or int, to denote either a struct's\n" +
-              "field-name or a sequence's index.",
+              "field-name or a sequence's index. If any part doesn't have a matching value in\n" +
+              "its container (the list index is out of bounds, or the field doesn't exist),\n" +
+              "then the result is void and any further parts are not evaluated.",
               "container", "part", DOTDOTDOT);
     }
 

@@ -15,9 +15,9 @@ final class EqualProc
     EqualProc()
     {
         //    "                                                                               |
-        super("Returns true if the arguments are equal if the arguments are of type \n" +
-              "integer, decimal, boolean, string, or timestamp.",
-              "value1", "value2");
+        super("Returns true if A and B are equal, ignoring precision. The arguments must be\n" +
+              "the same type: non-null integer, decimal, boolean, string, or timestamp.",
+              "a", "b");
     }
 
     private static final String EXPECTATION =

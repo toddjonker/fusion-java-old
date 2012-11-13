@@ -11,7 +11,7 @@ final class DefineSyntaxForm
     DefineSyntaxForm()
     {
         //    "                                                                               |
-        super("ID XFORM",
+        super("id xform",
               "Binds the identifier ID to a syntax transformer XFORM. The transformer must be\n" +
               "a procedure that accepts an syntax object and returns a syntax object.");
     }

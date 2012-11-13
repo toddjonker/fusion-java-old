@@ -55,7 +55,10 @@ final class FusionVector
         return new ImmutableVector(values);
     }
 
-
+    /**
+     * Creates a mutable vector containing the values.
+     * @param values must be injected.
+     */
     static Object makeVectorFrom(Evaluator eval, List<Object> values)
     {
         Object[] v = new Object[values.size()];

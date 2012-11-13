@@ -16,7 +16,7 @@ final class DifferenceProc
         //    "                                                                               |
         super("With two or more int or decimal NUMs, returns their difference, associating to\n" +
               "the left. With one int or decimal NUM, returns its negation.",
-              "NUM", DOTDOTDOTPLUS);
+              "num", DOTDOTDOTPLUS);
     }
 
 

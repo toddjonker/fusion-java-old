@@ -16,7 +16,7 @@ final class SumProc
         //    "                                                                               |
         super("Returns the sum of the NUMs, which must be int or decimal. With no arguments,\n" +
               "returns integer 0.",
-              "NUM", DOTDOTDOT);
+              "num", DOTDOTDOT);
     }
 
     private static BigDecimal toBigDecimal(Number num)

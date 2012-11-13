@@ -12,7 +12,7 @@ final class IfForm
     IfForm()
     {
         //    "                                                                               |
-        super("TEST THEN ELSE",
+        super("test then else",
               "Evaluates the TEST expression first. If the result is truthy, evaluates the THEN\n" +
               "expression and returns its value. Otherwise, evaluates the ELSE expression and\n" +
               "returns its value.\n" +

@@ -13,10 +13,9 @@ final class LessThanProc
     LessThanProc()
     {
         //    "                                                                               |
-        super("Returns true if the left arg is strictly less than the right arg if the" +
-              " args are both of the same type, with int and timestamps being the only" +
-              " valid ones.",
-              "value1", "value2");
+        super("Returns true if A is strictly less than B.  Both arguments must be of the same\n" +
+              "type, either int, decimal, or timestamp.",
+              "a", "b");
     }
 
     private static final String EXPECTATION =

@@ -12,9 +12,9 @@ final class ForListForm
     ForListForm()
     {
         //    "                                                                               |
-        super("((IDENT SEQ-EXPR)) BODY ...+",
-              "Iterates the SEQ-EXPR, binding IDENT to each element in turn and evaluating\n" +
-              "BODY. Returns a new list of the results.");
+        super("((ident seq_expr) ...) body ...+",
+              "Iterates the SEQ_EXPRs in parallel, binding the corresponding IDENTs to each\n" +
+              "element in turn and evaluating BODY.  Returns a mutable vector of the results.");
     }
 
 

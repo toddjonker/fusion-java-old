@@ -17,7 +17,7 @@ final class ProductProc
         //    "                                                                               |
         super("Returns the product of the NUMs, which must be int or decimal. With no\n" +
               "arguments, returns integer 1.",
-              "NUM", DOTDOTDOT);
+              "num", DOTDOTDOT);
     }
 
     private static BigDecimal toBigDecimal(Number num)

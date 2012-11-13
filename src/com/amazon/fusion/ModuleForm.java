@@ -26,7 +26,7 @@ final class ModuleForm
                DynamicParameter currentModuleDeclareName)
     {
         //    "                                                                               |
-        super("NAME BODY ...+",
+        super("name body ...+",
               "Declares a module containing the given body. The NAME must be a symbol.");
 
         myCurrentModuleDeclareName = currentModuleDeclareName;
