@@ -52,21 +52,24 @@ public final class _Private_ModuleDocumenter
     {
         out.getParentFile().mkdirs();
 
-        String text = renderMarkdown(doc);
-
-        // Convert Markdown to HTML
-        text = new MarkdownProcessor().markdown(text);
-
-        writeText(out, text);
+        FileWriter fw = new FileWriter(out);
+        try
+        {
+            renderModule(fw, doc);
+        }
+        finally
+        {
+            fw.close();
+        }
     }
 
 
-    private static String renderMarkdown(ModuleDocumentation doc)
+    private static void renderModule(Appendable out, ModuleDocumentation doc)
         throws IOException
     {
-        StringBuilder out = new StringBuilder();
+        renderHead(out, doc);
 
-        displayHeader1(out, "Module " + doc.myPath);
+        renderHeader1(out, "Module " + doc.myPath);
 
         renderSubmoduleLinks(out, doc);
 
@@ -74,8 +77,32 @@ public final class _Private_ModuleDocumenter
 
         renderBindingIndex(out, doc, names);
         renderBindings(out, doc, names);
+    }
 
-        return out.toString();
+
+    private static final String STYLE =
+        "<style type='text/css'>" +
+        " .binding {" +
+        "   display: block; width: 100%;" +
+        " }" +
+        " .bound {" +
+        "   font-size: 1.17em;" +
+        "   font-weight: bold;" +
+        " }" +
+        " .kind {" +
+        "   float: right; font-style: italic" +
+        " }" +
+        "</style>\n";
+
+    private static void renderHead(Appendable out, ModuleDocumentation doc)
+        throws IOException
+    {
+        out.append("<head>");
+        out.append("<title>");
+        out.append(escape(doc.myPath));
+        out.append("</title>\n");
+        out.append(STYLE);
+        out.append("</head>\n");
     }
 
 
@@ -86,23 +113,26 @@ public final class _Private_ModuleDocumenter
         Map<String, ModuleDocumentation> submodules = doc.submoduleMap();
         if (submodules == null) return;
 
-        displayHeader2(out, "Submodules");
+        renderHeader2(out, "Submodules");
 
-        String superModuleName = doc.myName;
+        String superModuleName = escape(doc.myName);
 
         String[] names = submodules.keySet().toArray(new String[0]);
         Arrays.sort(names);
 
+        out.append("<ul>");
         for (String name : names)
         {
-            out.append("* [");
-            out.append(name);
-            out.append("](");
+            name = escape(name);
+            out.append("<li><a href='");
             out.append(superModuleName);
             out.append('/');
             out.append(name);
-            out.append(".html)\n");
+            out.append(".html'>");
+            out.append(name);
+            out.append("</a></li>\n");
         }
+        out.append("</ul>\n");
     }
 
 
@@ -113,15 +143,16 @@ public final class _Private_ModuleDocumenter
     {
         if (names.length == 0) return;
 
-        displayHeader2(out, "Index");
+        renderHeader2(out, "Index");
 
         for (String name : names)
         {
-            out.append("[`");
+            name = escape(name);
+            out.append("<a href='#");
             out.append(name);
-            out.append("`](#");
+            out.append("'><code>");
             out.append(name);
-            out.append(") \n");
+            out.append("</code></a>\n");
         }
     }
 
@@ -134,7 +165,7 @@ public final class _Private_ModuleDocumenter
         Map<String, BindingDocumentation> bindings = doc.bindingMap();
         if (bindings == null) return;
 
-        displayHeader2(out, "Exported Bindings");
+        renderHeader2(out, "Exported Bindings");
 
         for (String name : names)
         {
@@ -144,82 +175,84 @@ public final class _Private_ModuleDocumenter
         }
     }
 
+
     private static void renderBinding(Appendable out, String name,
                                       BindingDocumentation doc)
         throws IOException
     {
-        out.append("\n\n");
-        out.append("<a name='");
-        out.append(name);
-        out.append("'><!-- --></a>\n");
+        name = escape(name);
 
-        displayHeader3(out, name);
-        out.append('\n');
+        out.append("<span class='binding'><span class='bound'><a name='");
+        out.append(name);
+        out.append("'>");
+        out.append(name);
+        out.append("</a></span>");   // binding span is still open
 
         if (doc == null)
         {
-            out.append("No documentation available.\n");
+            out.append("</span>\n"); // binding
+            out.append("<p>No documentation available.<p>\n\n");
         }
         else
         {
-            out.append("    ");
-            out.append(doc.myUsage);
-            out.append('\n');
-
-            out.append('*');
-            // Using enum toString() allows display name to be changed
-            out.append(doc.myKind.toString());
-
-            if (doc.myBody == null)
+            if (doc.myKind != null)
             {
-                out.append("*\n");
+                out.append("<span class='kind'>");
+                // Using enum toString() allows display name to be changed
+                out.append(doc.myKind.toString().toLowerCase());
+                out.append("</span>\n");
             }
-            else
+            out.append("</span>\n"); // binding
+
+            StringBuilder buf = new StringBuilder();
+
+            if (doc.myUsage != null)
             {
-                out.append(":* ");
-                out.append('\n');
-                out.append(doc.myBody);
-                out.append('\n');
+                buf.append("    ");
+                buf.append(doc.myUsage);
+                buf.append('\n');
             }
+
+            if (doc.myBody != null)
+            {
+                buf.append('\n');
+                buf.append(doc.myBody);
+                buf.append('\n');
+            }
+
+            out.append(markdown(buf.toString()));
         }
     }
 
-    private static void displayHeader1(Appendable out, String text)
+
+    private static void renderHeader1(Appendable out, String text)
         throws IOException
     {
-        out.append("# ");
-        out.append(text);
-        out.append('\n');
+        out.append("<h1>");
+        out.append(escape(text));
+        out.append("</h1>\n");
     }
 
-    private static void displayHeader2(Appendable out, String text)
+    private static void renderHeader2(Appendable out, String text)
         throws IOException
     {
-        out.append("## ");
-        out.append(text);
-        out.append('\n');
-    }
-
-    private static void displayHeader3(Appendable out, String text)
-        throws IOException
-    {
-        out.append("### ");
-        out.append(text);
-        out.append('\n');
+        out.append("<h2>");
+        out.append(escape(text));
+        out.append("</h2>\n");
     }
 
 
-    private static void writeText(File out, String text)
-        throws IOException
+    private static String escape(String text)
     {
-        FileWriter fw = new FileWriter(out);
-        try
-        {
-            fw.write(text);
-        }
-        finally
-        {
-            fw.close();
-        }
+        text = text.replace("&", "&amp;");
+        text = text.replace("<", "&lt;");
+        text = text.replace(">", "&gt;");
+        return text;
+    }
+
+
+    private static String markdown(String text)
+    {
+        return new MarkdownProcessor().markdown(text);
     }
 }
