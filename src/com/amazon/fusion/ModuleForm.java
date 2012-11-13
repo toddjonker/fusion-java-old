@@ -369,6 +369,7 @@ final class ModuleForm
         return new CompiledModule(id,
                                   moduleNamespace.requiredModuleIds(),
                                   variableCount,
+                                  moduleNamespace.bindingDocs(),
                                   providedIdentifiers, otherFormsArray);
     }
 
@@ -487,18 +488,21 @@ final class ModuleForm
         private final ModuleIdentity   myId;
         private final ModuleIdentity[] myRequiredModules;
         private final int              myVariableCount;
+        private final BindingDocumentation[] myBindingDocs;
         private final SyntaxSymbol[]   myProvidedIdentifiers;
         private final CompiledForm[]   myBody;
 
         private CompiledModule(ModuleIdentity   id,
                                ModuleIdentity[] requiredModules,
                                int              variableCount,
+                               BindingDocumentation[] bindingDocs,
                                SyntaxSymbol[]   providedIdentifiers,
                                CompiledForm[]   body)
         {
             myId                  = id;
             myRequiredModules     = requiredModules;
             myVariableCount       = variableCount;
+            myBindingDocs         = bindingDocs;
             myProvidedIdentifiers = providedIdentifiers;
             myBody                = body;
         }
@@ -514,7 +518,8 @@ final class ModuleForm
 
             // Allocate just enough space for the top-level bindings.
             ModuleStore store =
-                new ModuleStore(registry, requiredModuleStores, myVariableCount);
+                new ModuleStore(registry, requiredModuleStores,
+                                myVariableCount, myBindingDocs);
 
             ModuleInstance module =
                 new ModuleInstance(myId, store, myProvidedIdentifiers);

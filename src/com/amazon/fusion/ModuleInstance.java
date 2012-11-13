@@ -111,16 +111,40 @@ final class ModuleInstance
         BindingDocumentation doc = null;
 
         ModuleBinding binding = resolveProvidedName(name);
-        Object value = binding.lookup(this);
-        if (value instanceof FusionValue)
+
+        doc = documentProvidedName(binding);
+        if (doc == null)
         {
-            FusionValue fv = (FusionValue) value;
-            doc = fv.document();
-            assert doc == null || name.equals(doc.myName);
+            Object value = binding.lookup(this);
+            if (value instanceof FusionValue)
+            {
+                FusionValue fv = (FusionValue) value;
+                doc = fv.document();
+                assert doc == null || name.equals(doc.myName);
+            }
         }
         return doc;
     }
 
+    BindingDocumentation documentProvidedName(ModuleBinding binding)
+    {
+        BindingDocumentation doc = null;
+
+        if (binding.myModuleId == myIdentity)
+        {
+            doc = myNamespace.document(binding.myAddress);
+        }
+        else
+        {
+            ModuleInstance module =
+                myNamespace.getRegistry().lookup(binding.myModuleId);
+            assert module != null
+                : "Module not found: " + binding.myModuleId;
+            doc = module.myNamespace.document(binding.myAddress);
+        }
+
+        return doc;
+    }
 
     //========================================================================
 

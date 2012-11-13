@@ -11,15 +11,18 @@ final class ModuleStore
     private final ModuleRegistry myRegistry;
     private final ModuleStore[]  myRequiredModules;
     private final Object[]       myValues;
+    private final BindingDocumentation[] myBindingDocs;
 
 
     ModuleStore(ModuleRegistry registry,
                 ModuleStore[] requiredModules,
-                int topLevelVariableCount)
+                int topLevelVariableCount,
+                BindingDocumentation[] bindingDocs)
     {
         myRegistry = registry;
         myRequiredModules = requiredModules;
         myValues = new Object[topLevelVariableCount];
+        myBindingDocs = bindingDocs;
     }
 
     ModuleStore(ModuleRegistry registry, Object[] values)
@@ -27,6 +30,7 @@ final class ModuleStore
         myRegistry = registry;
         myRequiredModules = new ModuleStore[0];
         myValues = values;
+        myBindingDocs = new BindingDocumentation[0];
     }
 
     @Override
@@ -70,5 +74,14 @@ final class ModuleStore
     public Object lookupImport(int moduleAddress, int bindingAddress)
     {
         return myRequiredModules[moduleAddress].myValues[bindingAddress];
+    }
+
+    BindingDocumentation document(int address)
+    {
+        if (address < myBindingDocs.length)
+        {
+            return myBindingDocs[address];
+        }
+        return null;
     }
 }

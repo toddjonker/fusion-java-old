@@ -111,6 +111,8 @@ class Namespace
         new ArrayList<TopBinding>();
     private final ArrayList<Object> myValues =
         new ArrayList<Object>();
+    private final ArrayList<BindingDocumentation> myBindingDocs =
+        new ArrayList<BindingDocumentation>();
 
     Namespace(ModuleRegistry registry)
     {
@@ -283,6 +285,25 @@ class Namespace
     }
 
 
+    private <T> void set(ArrayList<T> list, int address, T value)
+    {
+        int size = list.size();
+        if (address < size)
+        {
+            list.set(address, value);
+        }
+        else // We need to grow myValues. Annoying lack of API to do this.
+        {
+            list.ensureCapacity(myBindings.size()); // Grow all at once
+            for (int i = size; i < address; i++)
+            {
+                list.add(null);
+            }
+            list.add(value);
+        }
+    }
+
+
     /**
      * Updates a pre-defined namespace-level variable.
      * Allows rebinding of existing names!
@@ -292,20 +313,7 @@ class Namespace
     @Override
     public void set(int address, Object value)
     {
-        int size = myValues.size();
-        if (address < size)
-        {
-            myValues.set(address, value);
-        }
-        else // We need to grow myValues. Annoying lack of API to do this.
-        {
-            myValues.ensureCapacity(myBindings.size()); // Grow all at once
-            for (int i = size; i < address; i++)
-            {
-                myValues.add(null);
-            }
-            myValues.add(value);
-        }
+        set(myValues, address, value);
     }
 
 
@@ -433,6 +441,27 @@ class Namespace
             ids[address] = entry.getKey();
         }
         return ids;
+    }
+
+
+    //========================================================================
+    // Documentation
+
+
+    public void setDoc(int address, BindingDocumentation doc)
+    {
+        set(myBindingDocs, address, doc);
+    }
+
+
+    /**
+     * @return may be shorter than the number of top-level variables.
+     */
+    BindingDocumentation[] bindingDocs()
+    {
+        BindingDocumentation[] docs =
+            new BindingDocumentation[myBindingDocs.size()];
+        return myBindingDocs.toArray(docs);
     }
 
 

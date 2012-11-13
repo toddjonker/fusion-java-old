@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.BindingDocumentation.Kind;
 import com.amazon.fusion.Namespace.TopBinding;
 
 final class DefineSyntaxForm
@@ -21,7 +22,9 @@ final class DefineSyntaxForm
         throws FusionException
     {
         SyntaxChecker check = check(source);
-        check.arityExact(3);
+        int arity = check.arityAtLeast(3);
+
+        SyntaxValue[] children = source.extract();
 
         SyntaxSymbol identifier = check.requiredIdentifier(1);
 
@@ -38,13 +41,28 @@ final class DefineSyntaxForm
         // Update the identifier with its binding.
         // This is just a way to pass the binding instance through to the
         // runtime stage so invoke() below can reuse it.
-        identifier = (SyntaxSymbol) identifier.expand(eval, env);
+        children[1] = identifier.expand(eval, env);
 
-        SyntaxValue valueStx = source.get(2);
-        valueStx = valueStx.expand(eval, env);
+        int bodyPos;
+        SyntaxValue maybeDoc = children[2];
+        if (maybeDoc.getType() == SyntaxValue.Type.STRING && arity > 3)
+        {
+            bodyPos = 3;
+        }
+        else
+        {
+            bodyPos = 2;
+        }
 
-        source = SyntaxSexp.make(source.getLocation(),
-                                 source.get(0), identifier, valueStx);
+        if (bodyPos != arity-1)
+        {
+            throw check.failure("Too many subforms");
+        }
+
+        SyntaxValue valueStx = source.get(bodyPos);
+        children[bodyPos] = valueStx.expand(eval, env);
+
+        source = SyntaxSexp.make(source.getLocation(), children);
         return source;
     }
 
@@ -56,11 +74,27 @@ final class DefineSyntaxForm
     CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
         throws FusionException
     {
-        SyntaxValue valueSource = source.get(2);
+        int arity = source.size();
+        SyntaxValue valueSource = source.get(arity-1);
         CompiledForm valueForm = eval.compile(env, valueSource);
 
         SyntaxSymbol identifier = (SyntaxSymbol) source.get(1);
         TopBinding binding = (TopBinding) identifier.getBinding();
-        return binding.compileDefineSyntax(eval, env, valueForm);
+        CompiledForm compiled =
+            binding.compileDefineSyntax(eval, env, valueForm);
+
+        if (arity != 3)
+        {
+            // We have documentation. Sort of.
+            SyntaxString docString = (SyntaxString) source.get(2);
+            BindingDocumentation doc =
+                new BindingDocumentation(identifier.stringValue(),
+                                         Kind.SYNTAX,
+                                         null, // usage
+                                         docString.stringValue());
+            env.namespace().setDoc(binding.myAddress, doc);
+        }
+
+        return compiled;
     }
 }

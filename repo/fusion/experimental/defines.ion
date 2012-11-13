@@ -6,32 +6,53 @@
 
   (provide defpub defpub_j defpub_syntax defpub_j_syntax)
 
-  (define_syntax defpub  // (defpub name value)
+  (define_syntax defpub  // WARNING: Doc syntax isn't supported yet.
+    '''
+    (defpub name value)
+
+Defines and provides a transformer binding for ID to the VALUE.
+    '''
     (lambda (stx)
       (quasisyntax
         (begin
-          (define (unsyntax (syntax_get stx 1))
-            (unsyntax (syntax_get stx 2)))
+          (unsyntax (syntax_cons_q define (syntax_subseq stx 1)))
           (provide (unsyntax (syntax_get stx 1)))))))
 
 
-  (define_syntax defpub_j  // (defpub_j name "java.class.Name")
+  (define_syntax defpub_j  // WARNING: Doc syntax isn't supported yet.
+    '''
+    (defpub_j id fqcn)
+
+Defines and provides a binding for ID, using `java_new` and the given
+fully-qualified class name string FQCN.
+    '''
     (lambda (stx)
       (quasisyntax
         (defpub (unsyntax (syntax_get stx 1))
           (java_new (unsyntax (syntax_get stx 2)))))))
 
 
-  (define_syntax defpub_syntax  // (defpub_syntax name value)
+  (define_syntax defpub_syntax  // WARNING: Doc syntax isn't supported yet.
+    '''
+    (defpub_syntax name value)
+
+Defines and provides a transformer binding for ID to the VALUE (which must
+generally be a transform procedure).
+    '''
     (lambda (stx)
       (quasisyntax
         (begin
-          (define_syntax (unsyntax (syntax_get stx 1))
-            (unsyntax (syntax_get stx 2)))
+          (unsyntax (syntax_cons_q define_syntax (syntax_subseq stx 1)))
           (provide (unsyntax (syntax_get stx 1)))))))
 
 
-  (define_syntax defpub_j_syntax  // (defpub_j_syntax name "java.class.Name")
+  (define_syntax defpub_j_syntax  // WARNING: Doc syntax isn't supported yet.
+    '''
+    (defpub_j_syntax_j id fqcn)
+
+Defines and provides a transformer binding for ID, using `java_new` and the
+given fully-qualified class name string FQCN.
+    '''
     (lambda (stx)
       (quasisyntax
         (defpub_syntax (unsyntax (syntax_get stx 1))

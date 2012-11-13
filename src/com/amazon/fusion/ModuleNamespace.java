@@ -13,7 +13,7 @@ class ModuleNamespace
     static final class ModuleBinding
         extends TopBinding
     {
-        private final ModuleIdentity myModuleId;
+        final ModuleIdentity myModuleId;
 
         private ModuleBinding(SyntaxSymbol identifier, int address,
                               ModuleIdentity moduleId)
