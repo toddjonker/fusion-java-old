@@ -4,9 +4,7 @@ package com.amazon.fusion;
 
 import com.amazon.fusion.junit.Injected;
 import com.amazon.fusion.junit.Injected.Inject;
-import com.amazon.ion.IonReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,19 +36,7 @@ public class FUnitTest
         throws Exception
     {
         useTstRepo();
-
-        FileInputStream source = new FileInputStream(myTestFile);
-        try
-        {
-            SourceName name = SourceName.forFile(myTestFile);
-            IonReader reader = system().newReader(source);
-            topLevel().eval(reader, name);
-        }
-        finally
-        {
-            source.close();
-        }
-        // yay
+        topLevel().load(myTestFile);
     }
 
 

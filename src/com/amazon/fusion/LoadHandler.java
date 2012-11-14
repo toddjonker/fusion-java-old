@@ -55,6 +55,9 @@ final class LoadHandler
 
     /**
      * Reads top-level syntax forms from a file, evaluating each in sequence.
+     * The file is resolved relative to {@code current_directory}.
+     * Loading is parameterized to set {@code current_load_relative_directory}
+     * to the parent of the resolved path.
      *
      * @param eval
      * @param namespace may be null, to use
@@ -69,6 +72,11 @@ final class LoadHandler
         throws FusionException
     {
         File file = resolvePath(eval, path);
+        File parent = file.getParentFile();
+
+        eval = eval.markedContinuation(myCurrentLoadRelativeDirectory,
+                                       eval.newString(parent.getAbsolutePath()));
+
         try
         {
             FileInputStream in = new FileInputStream(file);
