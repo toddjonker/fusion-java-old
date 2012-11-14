@@ -6,8 +6,7 @@
 
 
   // #%kernel bindings we pass through
-  (provide begin current_directory define
-    if lambda letrec load module undef use)
+  (provide begin define if lambda letrec load module undef use)
   (provide is_bool is_int is_float is_decimal is_timestamp is_symbol
       is_string is_clob is_blob is_list is_sexp is_struct)
 
@@ -31,7 +30,6 @@
   (defpub_j apply                 "com.amazon.fusion.ApplyProc")
   (defpub_j concatenate           "com.amazon.fusion.StringConcatenateProc")
   (defpub_j contains              "com.amazon.fusion.ContainsProc")
-  (defpub_j display               "com.amazon.fusion.DisplayProc")
   (defpub_j exit                  "com.amazon.fusion.ExitProc")
   (defpub_j for_each_field        "com.amazon.fusion.ForEachFieldProc")
   (defpub_j is_null               "com.amazon.fusion.IsNullProc")
@@ -40,11 +38,9 @@
   (defpub_j not                   "com.amazon.fusion.NotProc")
   (defpub_j raise_argument_error  "com.amazon.fusion.RaiseArgumentErrorProc")
   (defpub_j raise_result_error    "com.amazon.fusion.RaiseResultErrorProc")
-  (defpub_j read                  "com.amazon.fusion.ReadProc")
   (defpub_j remove                "com.amazon.fusion.RemoveProc")
   (defpub_j size                  "com.amazon.fusion.SizeProc")
   (defpub_j to_int                "com.amazon.fusion.ToIntProc")
   (defpub_j to_string             "com.amazon.fusion.ToStringProc")
-  (defpub_j write                 "com.amazon.fusion.WriteProc")
 
 )

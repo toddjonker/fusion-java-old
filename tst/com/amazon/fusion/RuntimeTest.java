@@ -20,6 +20,7 @@ public class RuntimeTest
     public void testDefaultCurrentDirectory()
         throws Exception
     {
+        topLevel().requireModule("/fusion/io");
         assertString(System.getProperty("user.dir"), "(current_directory)");
     }
 

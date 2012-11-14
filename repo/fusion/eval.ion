@@ -1,6 +1,15 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
 (module eval (quote '#%kernel')
 
   (use 'fusion/experimental/defines')
+  
+  // This isn't needed, but it's here to maintain sane dependency graph.
+  (use 'fusion/io')
+
+  // Pass-through bindings from #%kernel
+  (provide load)
+
 
   (defpub_j eval "com.amazon.fusion.FusionEval$EvalProc")
 
