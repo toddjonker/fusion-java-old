@@ -18,6 +18,7 @@ public class ListTest
     public void listTestBegin()
         throws Exception
     {
+        topLevel().requireModule("/fusion/iterator");
         topLevel().requireModule("/fusion/list");
 
         eval("(define smList "+ionListGenerator(1)+")");
@@ -328,5 +329,30 @@ public class ListTest
         expectSyntaxFailure("(for_list ((name 1 2)) 13)");
         expectSyntaxFailure("(for_list ((name 1) ()) 13)");
         expectSyntaxFailure("(for_list ((name 1) (name2)) 13)");
+    }
+
+
+    //========================================================================
+    // List iteration
+
+    @Test
+    public void testInvalidIteration()
+        throws Exception
+    {
+        expectContractFailure("(iterate_list 3)");
+        expectContractFailure("(iterator_to_list 3)");
+        expectContractFailure("(iterator_to_list [2,3])");
+    }
+
+
+    @Test()
+    public void testIterationArityCheck()
+        throws Exception
+    {
+        expectArityFailure("(iterate_list)");
+        expectArityFailure("(iterate_list [] 1)");
+
+        expectArityFailure("(iterator_to_list)");
+        expectArityFailure("(iterator_to_list empty_iterator 1)");
     }
 }

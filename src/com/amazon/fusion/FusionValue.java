@@ -8,7 +8,6 @@ import com.amazon.ion.IonBool;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
-import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonType;
@@ -40,8 +39,6 @@ public abstract class FusionValue
     /** The singular {@code undef} value. */
     public final static FusionValue UNDEF = new Undef();
 
-    /** An empty stream */
-    public final static FusionValue EMPTY_STREAM = new EmptyStream();
 
     //========================================================================
 
@@ -694,60 +691,6 @@ public abstract class FusionValue
             return ((IonBool) iv).booleanValue();
         }
         return null;
-    }
-
-
-
-    /**
-     * Returns all the elements in the list in stream form. Original
-     * order is maintained.
-     */
-    static Object streamFor(IonSequence ionSeq)
-        throws FusionException
-    {
-        return Sequences.streamFor(ionSeq);
-    }
-
-    /**
-     * Returns all the values stored inside the iterator as elements
-     * inside a Fusion stream. Original order is maintained.
-     */
-    public static Object streamFor(Iterator<IonValue> iter)
-    {
-        return Sequences.streamFor(iter);
-    }
-
-    /**
-     * Returns a boolean indicating whether a stream has any more elements to
-     * be fetched
-     *
-     * @throws ContractFailure if input value is not a Fusion stream
-     */
-    static boolean streamHasNext(Object val)
-        throws FusionException
-    {
-        if (val instanceof Stream)
-        {
-            return ((Stream)val).hasNext();
-        }
-        throw new ContractFailure("Argument is not a stream: "
-                                    + writeToString(val));
-    }
-
-    /**
-     * Returns the next element in the stream
-     *
-     * @throws ContractFailure if input value is not a Fusion stream
-     */
-    static Object streamNext(Object val)
-        throws FusionException
-    {
-        if (val instanceof Stream)
-        {
-            return ((Stream)val).next();
-        }
-        throw new ContractFailure("Argument is not a stream: "
-                                    + writeToString(val));
     }
 
 

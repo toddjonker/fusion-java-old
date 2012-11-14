@@ -83,7 +83,6 @@ final class GlobalState
         ns.define("begin", new BeginForm());    // Needed by hard-coded macro
         ns.define("current_directory", currentDirectory);
         ns.define("current_namespace", currentNamespaceParam);
-        ns.define("empty_stream", FusionValue.EMPTY_STREAM);
         ns.define("if", new IfForm());          // Needed by hard-coded macro
         ns.define("java_new", new JavaNewProc());
         ns.define("lambda", new LambdaForm());  // Needed by hard-coded macro

@@ -64,5 +64,8 @@
   (iterator_map_splicing iterate_list empty_iterator)
   [])
 (check_iter
+  (iterator_map_splicing iterate_value (iterate_list [1,2,3,4]))
+  [1,2,3,4])
+(check_iter
   (iterator_map_splicing iterate_list (iterate_list [[1],[2,3],[],[4]]))
   [1,2,3,4])

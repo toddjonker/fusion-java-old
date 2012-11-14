@@ -3,6 +3,10 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
+import static com.amazon.fusion.FusionVector.isVector;
+import static com.amazon.fusion.FusionVector.unsafeVectorIterate;
+import static com.amazon.fusion.Iterators.iterateIonSequence;
+import com.amazon.ion.IonSequence;
 import java.io.IOException;
 
 // TODO Add abstract class so subclasses don't have blank procs?
@@ -17,16 +21,49 @@ class FusionIterator
     }
 
 
+    static FusionIterator iterate(Evaluator eval, Object value)
+        throws FusionException
+    {
+        if (value instanceof FusionIterator)
+        {
+            return (FusionIterator) value;
+        }
+
+        if (isVector(eval, value))
+        {
+            return (FusionIterator) unsafeVectorIterate(eval, value);
+        }
+
+        if (value instanceof IonSequence)
+        {
+            return (FusionIterator) iterateIonSequence((IonSequence) value);
+        }
+
+        throw new ContractFailure("value is not iterable: "
+                                  + FusionValue.writeToString(value));
+    }
+
+    static boolean allHaveNext(Evaluator eval, FusionIterator... streams)
+        throws FusionException
+    {
+        for (FusionIterator s : streams)
+        {
+            if (! s.hasNext(eval)) return false;
+        }
+        return true;
+    }
+
+
     private final Procedure myHasNextProc;
     private final Procedure myNextProc;
 
-
-    public FusionIterator(Procedure hasNextProc, Procedure nextProc)
+    FusionIterator(Procedure hasNextProc, Procedure nextProc)
     {
         myHasNextProc = hasNextProc;
         myNextProc    = nextProc;
     }
 
+    /** Public so it can be called from java_new */
     public FusionIterator(Object hasNextProc, Object nextProc)
     {
         myHasNextProc = (Procedure) hasNextProc;

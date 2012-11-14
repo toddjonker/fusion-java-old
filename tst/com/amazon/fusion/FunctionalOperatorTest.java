@@ -16,7 +16,8 @@ public class FunctionalOperatorTest
         throws Exception
     {
         topLevel().requireModule("/fusion/function");
-        topLevel().requireModule("/fusion/stream");
+        topLevel().requireModule("/fusion/iterator");
+        topLevel().requireModule("/fusion/list");
     }
 
     @Test
@@ -34,8 +35,7 @@ public class FunctionalOperatorTest
         eval("(define add3 (compose add1 add2))");
         assertEval(6, "(add3 3)");
 
-        // streams - inject + stream_to_list
-        eval("(define intToList (compose stream_to_list inject_stream))");
+        eval("(define intToList (compose iterator_to_list iterate_value))");
         assertEval("[2]","(intToList 2)");
     }
 
@@ -80,9 +80,9 @@ public class FunctionalOperatorTest
         assertEval(false, "(is_not_null null)");
 
         // negated user fxn
-        eval("(define is_not_stream (negate is_stream))");
-        assertEval(true, "(is_not_stream 1)");
-        assertEval(false, "(is_not_stream (stream_for [1]))");
-        assertEval(false, "(is_not_stream empty_stream)");
+        eval("(define is_not_iterator (negate is_iterator))");
+        assertEval(true,  "(is_not_iterator 1)");
+        assertEval(false, "(is_not_iterator (iterate_list [1]))");
+        assertEval(false, "(is_not_iterator empty_iterator)");
     }
 }

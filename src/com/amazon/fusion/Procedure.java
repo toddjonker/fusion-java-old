@@ -345,17 +345,6 @@ abstract class Procedure
                            true /* nullable */, argNum, args);
     }
 
-    Stream checkStreamArg(int argNum, Object... args)
-        throws ArgTypeFailure
-    {
-        try
-        {
-            return (Stream) args[argNum];
-        }
-        catch (ClassCastException e) { }
-
-        throw new ArgTypeFailure(this, "stream", argNum, args);
-    }
 
     private <T extends IonValue> T checkDomArg(Class<T> klass, String typeName,
                                                boolean nullable,

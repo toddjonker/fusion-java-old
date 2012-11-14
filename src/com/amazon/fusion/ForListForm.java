@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionIterator.iterate;
 import static com.amazon.fusion.FusionVector.makeVectorFrom;
 import com.amazon.ion.IonValue;
 import java.util.ArrayList;
@@ -134,25 +135,25 @@ final class ForListForm
 
             if (numBindings != 0)
             {
-                Stream[] streams = new Stream[numBindings];
+                FusionIterator[] iters = new FusionIterator[numBindings];
 
                 for (int i = 0; i < numBindings; i++)
                 {
                     CompiledForm form = myValueForms[i];
                     Object boundValue = eval.eval(store, form);
-                    streams[i] = Sequences.streamFor(boundValue);
+                    iters[i] = iterate(eval, boundValue);
                 }
 
                 Object[] boundValues = new Object[numBindings];
                 store = new LocalStore(store, boundValues);
 
-                while (Sequences.allHaveNext(streams))
+                while (FusionIterator.allHaveNext(eval, iters))
                 {
                     // Determine the next round of bound values
                     for (int i = 0; i < numBindings; i++)
                     {
-                        Stream s = streams[i];
-                        boundValues[i] = s.next();
+                        FusionIterator s = iters[i];
+                        boundValues[i] = s.next(eval);
                     }
 
                     Object nextResult = eval.eval(store, myBody);
