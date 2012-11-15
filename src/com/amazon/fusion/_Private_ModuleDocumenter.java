@@ -19,14 +19,18 @@ public final class _Private_ModuleDocumenter
     private _Private_ModuleDocumenter() {}
 
 
+    public static FusionRuntime standardDocumentingRuntime()
+    {
+        FusionRuntimeBuilder rb = FusionRuntimeBuilder.standard();
+        rb.setDocumenting(true);
+        return rb.build();
+    }
+
     public static void writeHtmlTree(File outputDir,
                                      File repoDir)
         throws IOException, FusionException
     {
-        FusionRuntimeBuilder rb = FusionRuntimeBuilder.standard();
-        rb.setDocumenting(true);
-        FusionRuntime runtime = rb.build();
-
+        FusionRuntime runtime = standardDocumentingRuntime();
         ModuleDoc doc = buildDocTree(runtime, repoDir);
         writeHtmlTree(outputDir, doc);
     }

@@ -442,6 +442,12 @@ class Namespace
         return ids;
     }
 
+    @Override
+    public ModuleStore lookupRequiredModule(int moduleAddress)
+    {
+        return myRequiredModuleStores.get(moduleAddress);
+    }
+
 
     //========================================================================
     // Documentation
@@ -456,6 +462,14 @@ class Namespace
         set(myBindingDocs, address, doc);
     }
 
+    BindingDoc document(int address)
+    {
+        if (myBindingDocs != null && address < myBindingDocs.size())
+        {
+            return myBindingDocs.get(address);
+        }
+        return null;
+    }
 
     /**
      * @return may be shorter than the number of provided variables.
@@ -489,10 +503,10 @@ class Namespace
     /**
      * A reference to a top-level variable in the lexically-enclosing namespace.
      */
-    private static final class CompiledTopVariableReference
+    static final class CompiledTopVariableReference
         implements CompiledForm
     {
-        private final int myAddress;
+        final int myAddress;
 
         CompiledTopVariableReference(int address)
         {

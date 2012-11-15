@@ -34,7 +34,6 @@
   (defpub_j display               "com.amazon.fusion.DisplayProc")
   (defpub_j exit                  "com.amazon.fusion.ExitProc")
   (defpub_j for_each_field        "com.amazon.fusion.ForEachFieldProc")
-  (defpub_j help                  "com.amazon.fusion.HelpProc")
   (defpub_j is_null               "com.amazon.fusion.IsNullProc")
   (defpub_j is_undef              "com.amazon.fusion.IsUndefProc")
   (defpub_j make_sexp             "com.amazon.fusion.MakeSexpProc")

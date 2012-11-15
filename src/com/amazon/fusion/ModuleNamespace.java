@@ -123,11 +123,11 @@ class ModuleNamespace
      * A reference to a top-level variable in a namespace that is not the one
      * in our lexical context.
      */
-    private static final class CompiledImportedVariableReference
+    static final class CompiledImportedVariableReference
         implements CompiledForm
     {
-        private final int myModuleAddress;
-        private final int myBindingAddress;
+        final int myModuleAddress;
+        final int myBindingAddress;
 
         CompiledImportedVariableReference(int moduleAddress,
                                           int bindingAddress)

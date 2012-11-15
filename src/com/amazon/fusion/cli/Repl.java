@@ -3,11 +3,12 @@
 package com.amazon.fusion.cli;
 
 import static com.amazon.fusion.FusionVoid.isVoid;
+import static com.amazon.fusion._Private_ModuleDocumenter.standardDocumentingRuntime;
 import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntime;
-import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.fusion.FusionValue;
+import com.amazon.fusion._Private_HelpForm;
 import com.amazon.fusion.TopLevel;
 import com.amazon.ion.IonException;
 import java.io.Console;
@@ -62,7 +63,7 @@ class Repl
         {
             myConsole = console;
             myOut     = console.writer();
-            myRuntime = FusionRuntimeBuilder.standard().build();
+            myRuntime = standardDocumentingRuntime();
         }
 
 
@@ -73,6 +74,8 @@ class Repl
             welcome();
 
             TopLevel top = myRuntime.getDefaultTopLevel();
+
+            top.define("help", new _Private_HelpForm());
 
             while (rep(top))
             {
