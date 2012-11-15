@@ -22,6 +22,7 @@ public class FusionRuntimeBuilder
 
     private File myCurrentDirectory;
     private List<File> myRepositoryDirectories;
+    private boolean myDocumenting;
 
 
     private FusionRuntimeBuilder() { }
@@ -84,6 +85,21 @@ public class FusionRuntimeBuilder
             myRepositoryDirectories = new ArrayList<File>();
         }
         myRepositoryDirectories.add(directory);
+    }
+
+    //=========================================================================
+
+
+    /** NOT FOR APPLICATION USE */
+    boolean isDocumenting()
+    {
+        return myDocumenting;
+    }
+
+    /** NOT FOR APPLICATION USE */
+    void setDocumenting(boolean documenting)
+    {
+        myDocumenting = documenting;
     }
 
 

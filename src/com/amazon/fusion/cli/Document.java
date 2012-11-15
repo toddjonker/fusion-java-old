@@ -3,8 +3,6 @@
 package com.amazon.fusion.cli;
 
 import static com.amazon.fusion._Private_ModuleDocumenter.writeHtmlTree;
-import com.amazon.fusion.FusionRuntime;
-import com.amazon.fusion.FusionRuntimeBuilder;
 import java.io.File;
 
 
@@ -65,13 +63,11 @@ class Document
     private static class Executor
         implements Command.Executor
     {
-        private final FusionRuntime myRuntime;
         private final File myOutputDir;
         private final File myRepoDir;
 
         private Executor(File outputDir, File repoDir)
         {
-            myRuntime   = FusionRuntimeBuilder.standard().build();
             myOutputDir = outputDir;
             myRepoDir   = repoDir;
         }
@@ -81,7 +77,7 @@ class Document
         public int execute()
             throws Exception
         {
-            writeHtmlTree(myRuntime, myOutputDir, myRepoDir);
+            writeHtmlTree(myOutputDir, myRepoDir);
             return 0;
         }
     }

@@ -2,9 +2,11 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionValue.writeToString;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
+import static java.lang.Boolean.TRUE;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
 import java.io.File;
@@ -19,10 +21,17 @@ final class StandardTopLevel
 
     StandardTopLevel(GlobalState globalState,
                      Namespace namespace,
-                     String initialModulePath)
+                     String initialModulePath,
+                     boolean documenting)
         throws FusionException
     {
-        myEvaluator = new Evaluator(globalState);
+        Evaluator eval = new Evaluator(globalState);
+        if (documenting)
+        {
+            eval = eval.markedContinuation(COLLECT_DOCS_MARK, TRUE);
+        }
+
+        myEvaluator = eval;
         myNamespace = namespace;
         namespace.use(myEvaluator, initialModulePath);
     }
@@ -32,7 +41,7 @@ final class StandardTopLevel
                      String initialModulePath)
         throws FusionException
     {
-        this(globalState, new Namespace(registry), initialModulePath);
+        this(globalState, new Namespace(registry), initialModulePath, false);
     }
 
 

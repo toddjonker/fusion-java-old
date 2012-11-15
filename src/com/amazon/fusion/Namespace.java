@@ -111,8 +111,7 @@ class Namespace
         new ArrayList<TopBinding>();
     private final ArrayList<Object> myValues =
         new ArrayList<Object>();
-    private final ArrayList<BindingDoc> myBindingDocs =
-        new ArrayList<BindingDoc>();
+    private ArrayList<BindingDoc> myBindingDocs;
 
     Namespace(ModuleRegistry registry)
     {
@@ -450,17 +449,25 @@ class Namespace
 
     public void setDoc(int address, BindingDoc doc)
     {
+        if (myBindingDocs == null)
+        {
+            myBindingDocs = new ArrayList<BindingDoc>();
+        }
         set(myBindingDocs, address, doc);
     }
 
 
     /**
-     * @return may be shorter than the number of top-level variables.
+     * @return may be shorter than the number of provided variables.
      */
-    BindingDoc[] bindingDocs()
+    BindingDoc[] extractBindingDocs()
     {
+        if (myBindingDocs == null) return BindingDoc.EMPTY_ARRAY;
+
         BindingDoc[] docs = new BindingDoc[myBindingDocs.size()];
-        return myBindingDocs.toArray(docs);
+        myBindingDocs.toArray(docs);
+        myBindingDocs = null;
+        return docs;
     }
 
 

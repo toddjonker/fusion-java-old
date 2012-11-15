@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.fusion.Namespace.TopBinding;
 
@@ -83,7 +84,8 @@ final class DefineSyntaxForm
         CompiledForm compiled =
             binding.compileDefineSyntax(eval, env, valueForm);
 
-        if (arity != 3)
+        if (arity != 3
+            && eval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
         {
             // We have documentation. Sort of.
             SyntaxString docString = (SyntaxString) source.get(2);

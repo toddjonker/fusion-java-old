@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import com.amazon.fusion.Namespace.TopBinding;
 
 final class DefineForm
@@ -93,7 +94,8 @@ final class DefineForm
         TopBinding binding = (TopBinding) identifier.getBinding();
         CompiledForm compiled = binding.compileDefine(eval, env, valueForm);
 
-        if (arity != 3)
+        if (arity != 3
+            && eval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
         {
             // We have documentation. Sort of.
             SyntaxString docString = (SyntaxString) source.get(2);

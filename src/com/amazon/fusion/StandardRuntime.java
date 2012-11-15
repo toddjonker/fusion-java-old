@@ -32,7 +32,8 @@ final class StandardRuntime
                 GlobalState.initialize(ionSystem, builder, myRegistry, topNs);
 
             myTopLevel =
-                new StandardTopLevel(myGlobalState, topNs, "fusion/base");
+                new StandardTopLevel(myGlobalState, topNs, "fusion/base",
+                                     builder.isDocumenting());
         }
         catch (FusionException e)
         {

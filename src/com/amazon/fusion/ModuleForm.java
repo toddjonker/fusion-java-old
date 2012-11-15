@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionEval.evalSyntax;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static java.lang.Boolean.TRUE;
@@ -352,7 +353,10 @@ final class ModuleForm
         {
             // We're gonna call this documentation!
             bodyPos++;
-            docs = ((SyntaxString) source.get(4)).stringValue();
+            if (eval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
+            {
+                docs = ((SyntaxString) source.get(4)).stringValue();
+            }
         }
 
         for (int i = bodyPos; i < source.size(); i++)
@@ -379,7 +383,7 @@ final class ModuleForm
                                   docs,
                                   moduleNamespace.requiredModuleIds(),
                                   variableCount,
-                                  moduleNamespace.bindingDocs(),
+                                  moduleNamespace.extractBindingDocs(),
                                   providedIdentifiers, otherFormsArray);
     }
 
