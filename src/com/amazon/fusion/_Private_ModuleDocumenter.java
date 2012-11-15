@@ -84,7 +84,6 @@ public final class _Private_ModuleDocumenter
 
         String[] names = doc.sortedExportedNames();
 
-        renderBindingIndex(out, doc, names);
         renderBindings(out, doc, names);
     }
 
@@ -174,8 +173,7 @@ public final class _Private_ModuleDocumenter
     {
         if (names.length == 0) return;
 
-        renderHeader2(out, "Index");
-
+        out.append("<blockquote>");
         for (String name : names)
         {
             name = escape(name);
@@ -183,8 +181,9 @@ public final class _Private_ModuleDocumenter
             out.append(name);
             out.append("'><code>");
             out.append(name);
-            out.append("</code></a>\n");
+            out.append("</code></a>&nbsp;&nbsp;\n");
         }
+        out.append("</blockquote>\n");
     }
 
 
@@ -197,6 +196,8 @@ public final class _Private_ModuleDocumenter
         if (bindings == null) return;
 
         renderHeader2(out, "Exported Bindings");
+
+        renderBindingIndex(out, doc, names);
 
         for (String name : names)
         {
