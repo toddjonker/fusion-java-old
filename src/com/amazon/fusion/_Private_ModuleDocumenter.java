@@ -101,6 +101,9 @@ public final class _Private_ModuleDocumenter
         " .kind {" +
         "   float: right; font-style: italic" +
         " }" +
+        " .oneliner p {" +       // Markdown uses <p> but we don't want a break
+        "    display: inline;" +
+        " }" +
         "</style>\n";
 
     private static void renderHead(Appendable out, ModuleDoc doc)
@@ -147,7 +150,18 @@ public final class _Private_ModuleDocumenter
             out.append(name);
             out.append(".html'>");
             out.append(name);
-            out.append("</a></li>\n");
+            out.append("</a>");
+
+            ModuleDoc sub = submodules.get(name);
+            String oneLiner = sub.oneLiner();
+            if (oneLiner != null)
+            {
+                oneLiner = markdown(oneLiner);
+                out.append(" &ndash; <span class='oneliner'>");
+                out.append(oneLiner);
+                out.append("</span>");
+            }
+            out.append("</li>\n");
         }
         out.append("</ul>\n");
     }
@@ -264,6 +278,8 @@ public final class _Private_ModuleDocumenter
         text = text.replace("&", "&amp;");
         text = text.replace("<", "&lt;");
         text = text.replace(">", "&gt;");
+        text = text.replace("\"", "&quot;");
+        text = text.replace("\'", "&apos;");
         return text;
     }
 

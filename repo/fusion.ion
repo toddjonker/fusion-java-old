@@ -1,0 +1,19 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(module fusion 'fusion/base'
+
+  // WARNING: Doc syntax isn't supported yet.
+  '''
+The main Fusion language.  This module will be populated with bindings as the
+library stabilizes.
+
+# Warning!
+
+_Only_ modules with descriptions below may be considered stable, meaning that
+future releases will maintain compatability.
+**Modules that do not have one-liners below must be considered unstable**
+and users should be prepared for changes.
+  '''
+
+  true // Otherwise the doc above won't be treated as such.
+)

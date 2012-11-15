@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import java.io.File;
 import java.io.IOException;
+import java.text.BreakIterator;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -53,6 +54,19 @@ final class ModuleDoc
     {
         String[] fileNames = dir.list();
 
+        // First pass: build all "real" modules
+        for (String fileName : fileNames)
+        {
+            if (fileName.endsWith(".ion"))
+            {
+                // We assume that all .ion files are modules.
+                String moduleName =
+                    fileName.substring(0, fileName.length() - 4);
+                doc.addSubmodule(moduleName);
+            }
+        }
+
+        // Second pass: look for directories, which are implicitly submodules.
         for (String fileName : fileNames)
         {
             if (fileName.equals("private")) continue;
@@ -60,18 +74,12 @@ final class ModuleDoc
             File testFile = new File(dir, fileName);
             if (testFile.isDirectory())
             {
-                ModuleDoc d = doc.addSubmodule(fileName);
+                ModuleDoc d = doc.implicitSubmodule(fileName);
                 buildTree(testFile, d);
-            }
-            else if (fileName.endsWith(".ion"))
-            {
-                // We assume that all .ion files are modules.
-                String moduleName =
-                    fileName.substring(0, fileName.length() - 4);
-                ModuleDoc d = doc.addSubmodule(moduleName);
             }
         }
     }
+
 
     /**
      * @param name can be null to represent the repository root (not really a
@@ -107,6 +115,21 @@ final class ModuleDoc
         throws FusionException
     {
         this(parent.myRuntime, name, parent.myPath + "/" + name);
+    }
+
+
+    String oneLiner()
+    {
+        if (myIntroDocs == null) return null;
+
+        // TODO pick a better locale?
+        BreakIterator breaks = BreakIterator.getSentenceInstance();
+        breaks.setText(myIntroDocs);
+        int start = breaks.first();
+        int end = breaks.next();
+        if (end == BreakIterator.DONE) return null;
+
+        return myIntroDocs.substring(start, end);
     }
 
 
@@ -170,5 +193,19 @@ final class ModuleDoc
         mySubmodules.put(name, doc);
 
         return doc;
+    }
+
+
+    private ModuleDoc implicitSubmodule(String name)
+        throws FusionException
+    {
+        if (mySubmodules != null)
+        {
+            ModuleDoc doc = mySubmodules.get(name);
+
+            if (doc != null) return doc;
+        }
+
+        return addSubmodule(name);
     }
 }
