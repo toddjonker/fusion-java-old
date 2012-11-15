@@ -21,6 +21,7 @@ final class ModuleInstance
     extends NamedValue
 {
     private final ModuleIdentity myIdentity;
+    private final String         myDocs;
     private final ModuleStore    myNamespace;
 
     /**
@@ -30,11 +31,14 @@ final class ModuleInstance
     private final Map<String,ModuleBinding> myProvidedBindings;
 
 
-    private ModuleInstance(ModuleIdentity identity, ModuleStore namespace,
+    private ModuleInstance(ModuleIdentity identity,
+                           String docs,
+                           ModuleStore namespace,
                            int bindingCount)
         throws FusionException, ContractFailure
     {
         myIdentity = identity;
+        myDocs     = docs;
         myNamespace = namespace;
         myProvidedBindings = new HashMap<String,ModuleBinding>(bindingCount);
 
@@ -48,7 +52,7 @@ final class ModuleInstance
                    Collection<TopBinding> bindings)
         throws FusionException, ContractFailure
     {
-        this(identity, namespace, bindings.size());
+        this(identity, /* docs */ null, namespace, bindings.size());
 
         for (TopBinding binding : bindings)
         {
@@ -61,11 +65,13 @@ final class ModuleInstance
     /**
      * Creates a module that {@code provide}s the given bound identifiers.
      */
-    ModuleInstance(ModuleIdentity identity, ModuleStore namespace,
+    ModuleInstance(ModuleIdentity identity,
+                   String docs,
+                   ModuleStore namespace,
                    SyntaxSymbol[] providedIdentifiers)
         throws FusionException, ContractFailure
     {
-        this(identity, namespace, providedIdentifiers.length);
+        this(identity, docs, namespace, providedIdentifiers.length);
 
         for (SyntaxSymbol identifier : providedIdentifiers)
         {
@@ -88,6 +94,10 @@ final class ModuleInstance
         return myNamespace;
     }
 
+    String getDocs()
+    {
+        return myDocs;
+    }
 
     //========================================================================
 

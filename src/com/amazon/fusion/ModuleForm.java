@@ -346,7 +346,16 @@ final class ModuleForm
         ArrayList<SyntaxSexp> provideForms = new ArrayList<SyntaxSexp>();
         ArrayList<CompiledForm> otherForms = new ArrayList<CompiledForm>();
 
-        for (int i = 4; i < source.size(); i++)
+        int bodyPos = 4;
+        String docs = null;
+        if (source.size() > 5 && source.get(4) instanceof SyntaxString)
+        {
+            // We're gonna call this documentation!
+            bodyPos++;
+            docs = ((SyntaxString) source.get(4)).stringValue();
+        }
+
+        for (int i = bodyPos; i < source.size(); i++)
         {
             SyntaxValue form = source.get(i);
             SyntaxSexp provide = formIsProvide(form);
@@ -367,6 +376,7 @@ final class ModuleForm
             otherForms.toArray(new CompiledForm[otherForms.size()]);
 
         return new CompiledModule(id,
+                                  docs,
                                   moduleNamespace.requiredModuleIds(),
                                   variableCount,
                                   moduleNamespace.bindingDocs(),
@@ -486,6 +496,7 @@ final class ModuleForm
         implements CompiledForm
     {
         private final ModuleIdentity   myId;
+        private final String           myDocs;
         private final ModuleIdentity[] myRequiredModules;
         private final int              myVariableCount;
         private final BindingDoc[]     myBindingDocs;
@@ -493,6 +504,7 @@ final class ModuleForm
         private final CompiledForm[]   myBody;
 
         private CompiledModule(ModuleIdentity   id,
+                               String           docs,
                                ModuleIdentity[] requiredModules,
                                int              variableCount,
                                BindingDoc[]     bindingDocs,
@@ -500,6 +512,7 @@ final class ModuleForm
                                CompiledForm[]   body)
         {
             myId                  = id;
+            myDocs                = docs;
             myRequiredModules     = requiredModules;
             myVariableCount       = variableCount;
             myBindingDocs         = bindingDocs;
@@ -522,7 +535,7 @@ final class ModuleForm
                                 myVariableCount, myBindingDocs);
 
             ModuleInstance module =
-                new ModuleInstance(myId, store, myProvidedIdentifiers);
+                new ModuleInstance(myId, myDocs, store, myProvidedIdentifiers);
 
             eval.findCurrentNamespace().getRegistry().register(module);
 

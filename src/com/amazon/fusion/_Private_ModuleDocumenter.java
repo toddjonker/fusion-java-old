@@ -71,6 +71,8 @@ public final class _Private_ModuleDocumenter
 
         renderHeader1(out, "Module " + doc.myPath);
 
+        renderModuleIntro(out, doc);
+
         renderSubmoduleLinks(out, doc);
 
         String[] names = doc.sortedExportedNames();
@@ -105,6 +107,15 @@ public final class _Private_ModuleDocumenter
         out.append("</head>\n");
     }
 
+
+    private static void renderModuleIntro(Appendable out, ModuleDoc doc)
+        throws IOException
+    {
+        if (doc.myIntroDocs == null) return;
+
+        String html = markdown(doc.myIntroDocs);
+        out.append(html);
+    }
 
     private static void renderSubmoduleLinks(Appendable out, ModuleDoc doc)
         throws IOException

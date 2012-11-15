@@ -18,6 +18,7 @@ final class ModuleDoc
     private final FusionRuntime myRuntime;
     final String myName;
     final String myPath;
+    final String myIntroDocs;
 
     private Map<String,ModuleDoc>  mySubmodules;
     private Map<String,BindingDoc> myBindings;
@@ -76,14 +77,14 @@ final class ModuleDoc
      * @param name can be null to represent the repository root (not really a
      *  module).
      */
-    private ModuleDoc(FusionRuntime runtime,
-                                String name, String path)
+    private ModuleDoc(FusionRuntime runtime, String name, String path)
         throws FusionException
     {
         myRuntime = runtime;
         myName = name;
         myPath = path;
 
+        String docs = null;
         if (name != null)
         {
             StandardRuntime rt = (StandardRuntime) runtime;
@@ -93,10 +94,13 @@ final class ModuleDoc
                 ModuleIdentity id = resolveModulePath(runtime, path);
                 ModuleInstance moduleInstance = registry.lookup(id);
 
+                docs = moduleInstance.getDocs();
+
                 build(moduleInstance);
             }
             catch (ModuleNotFoundFailure e) { }
         }
+        myIntroDocs = docs;
     }
 
     private ModuleDoc(ModuleDoc parent, String name)
