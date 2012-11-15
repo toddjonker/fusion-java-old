@@ -1,0 +1,12 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(module experimental 'fusion/base'
+
+  // WARNING: Doc syntax isn't supported yet.
+  '''
+Collects unstable, experimental modules.
+**USE AT YOUR OWN RISK!**
+  '''
+
+  true // Otherwise the doc above won't be treated as such.
+)
