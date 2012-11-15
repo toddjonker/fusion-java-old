@@ -2,52 +2,95 @@
 
 (module function 'fusion/base'
 
+  // WARNING: Doc syntax isn't supported yet.
+  '''
+Higher-order procedure combinators.
+  '''
+
   (use 'fusion/experimental/defines')
+  (use 'fusion/syntax')
+
+
+  (defpub identity
+    (lambda (v)
+      '''
+Returns `v`.
+      '''
+      v))
+
+
+  (defpub always
+    (lambda (v)
+      '''
+Returns a procedure that accepts any number of arguments and always returns
+`v`.  Any arguments are ignored.
+      '''
+      (lambda rest v)))
+
+
+  (defpub_syntax thunk
+    '''
+    (thunk body ...+)
+
+Returns a zero-argument procedure that evaluates the `body` forms.
+    '''
+    (lambda (stx)
+      (when (= 1 (syntax_size stx))
+        (wrong_syntax stx "Expected at least one body form"))
+      (let [(body (syntax_subseq stx 1))]
+        (syntax_append
+          (quote_syntax (lambda ()))
+          body))))
 
 
   (defpub compose
     (lambda (p1 p2)
       '''
-Applies function p1 to the result of (p2 x), returning another function that
-accepts a single input
+Returns a procedure that first applies `p2` to its (single) argument, and then
+applies `p1` to the (single) result.
       '''
-
-     (lambda (x)
-      (p1 (p2 x)))))
+      (lambda (x)
+        (p1 (p2 x)))))
 
   //==========================================================================
 
   (defpub predicate_and
    (lambda (p1 p2)
      '''
-Applies procedures p1 and p2 to an input x and returns the boolean value
-of the result of performing an AND on the return of p1 and p2, assuming
-that p1 and p2 return boolean values.
+Returns a single-argument predicate that is the composition of the
+single-argument predicates `p1` and `p2` as with `and`, applying them left to
+right until one returns an untruthy value.
+
+In other words, the result is similar to using `and` to compose calls to the
+predicates.
       '''
-     (lambda (x)
-      (and (p1 x) (p2 x)))))
+      (lambda (x)
+        (and (p1 x) (p2 x)))))
 
   //==========================================================================
 
   (defpub predicate_or
    (lambda (p1 p2)
       '''
-Applies procedures p1 and p2 to an input x and returns the boolean value
-of the result of performing an OR on the return of p1 and p2, assuming
-that p1 and p2 return boolean values.
+Returns a single-argument predicate that is the composition of the
+single-argument predicates `p1` and `p2` as with `or`, applying them left to
+right until one returns a truthy value.
+
+In other words, the result is similar to using `or` to compose calls to the
+predicates.
       '''
-     (lambda (x)
-      (or (p1 x) (p2 x)))))
+      (lambda (x)
+        (or (p1 x) (p2 x)))))
 
   //==========================================================================
 
   (defpub negate
    (lambda (p)
       '''
-Takes a procedure that returns a boolean value and returns a procedure that
-returns the opposite of the input procedure
+Returns a single-argument procedure that applies `not` to the result of the
+single-argument procedure `p`.
       '''
-     (lambda (x)
-      (not (p x)))))
+      (lambda (x)
+        (not (p x)))))
 
 ) // end module
