@@ -1,0 +1,19 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(module unsafe 'fusion/base'
+
+  // WARNING: Doc syntax isn't supported yet.
+  '''
+Unsafe (but fast) operations on various data types.
+
+# Warning!
+
+In general, operations provided by these modules perform no checks of argument
+types, preconditions, _etc._, and they
+**will crash or exhibit other unspecified behavior**
+if called with invalid arguments.
+**Use with extreme caution!**
+  '''
+
+  true // Otherwise the doc above won't be treated as such.
+)

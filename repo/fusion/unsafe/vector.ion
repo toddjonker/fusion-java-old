@@ -2,6 +2,18 @@
 
 (module unsafe_vector 'fusion/base'
 
+  '''
+Unsafe (but fast) operations on vectors.
+
+These operations perform no type-checking or bounds-checking, and they
+**will crash or exhibit other unspecified behavior**
+if called with invalid arguments.
+**Use with extreme caution!**
+
+See the module [`/fusion/vector`](../vector.html) for more information and
+related operations on vectors.
+  '''
+
   (use 'fusion/experimental/defines')
 
 

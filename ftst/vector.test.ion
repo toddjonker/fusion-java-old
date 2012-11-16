@@ -52,6 +52,7 @@
     (check_equal (apply maker (quote (0 1)))
       [0, 1] "[0, 1]")))
 
+(test_makers immutable_vector false false)
 (test_makers vector true false)
 (test_makers stretchy_vector true true)
 

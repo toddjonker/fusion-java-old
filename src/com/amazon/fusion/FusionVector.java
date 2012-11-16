@@ -447,7 +447,7 @@ final class FusionVector
         IsVectorProc()
         {
             //    "                                                                               |
-            super("Determines whether a VALUE is a vector, returning true or false.",
+            super("Determines whether `value` is a vector, returning true or false.",
                   "value");
         }
 
@@ -467,7 +467,7 @@ final class FusionVector
         IsImmutableVectorProc()
         {
             //    "                                                                               |
-            super("Determines whether a VALUE is an immutable vector, returning true or false.",
+            super("Determines whether `value` is an immutable vector, returning true or false.",
                   "value");
         }
 
@@ -487,7 +487,7 @@ final class FusionVector
         IsMutableVectorProc()
         {
             //    "                                                                               |
-            super("Determines whether a VALUE is an mutable vector, returning true or false.",
+            super("Determines whether `value` is a mutable vector, returning true or false.",
                   "value");
         }
 
@@ -507,7 +507,7 @@ final class FusionVector
         IsStretchyVectorProc()
         {
             //    "                                                                               |
-            super("Determines whether a VALUE is an stretchy vector, returning true or false.",
+            super("Determines whether `value` is a stretchy vector, returning true or false.",
                   "value");
         }
 
@@ -521,13 +521,13 @@ final class FusionVector
     }
 
 
-    static final class VectorProc
+    static final class ImmutableVectorProc
         extends Procedure
     {
-        VectorProc()
+        ImmutableVectorProc()
         {
             //    "                                                                               |
-            super("Makes a fresh, mutable vector containing the given VALUEs.",
+            super("Makes a fresh, immutable vector containing the given `value`s.",
                   "value", DOTDOTDOT);
         }
 
@@ -535,7 +535,26 @@ final class FusionVector
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            return FusionVector.makeVectorFrom(eval, args);
+            return makeImmutableVectorFrom(eval, args);
+        }
+    }
+
+
+    static final class VectorProc
+        extends Procedure
+    {
+        VectorProc()
+        {
+            //    "                                                                               |
+            super("Makes a fresh, mutable vector containing the given `value`s.",
+                  "value", DOTDOTDOT);
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            return makeVectorFrom(eval, args);
         }
     }
 
@@ -546,7 +565,7 @@ final class FusionVector
         StretchyVectorProc()
         {
             //    "                                                                               |
-            super("Makes a fresh, stretchy vector containing the given VALUEs.",
+            super("Makes a fresh, stretchy vector containing the given `value`s.",
                   "value", DOTDOTDOT);
         }
 
@@ -554,7 +573,7 @@ final class FusionVector
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            return FusionVector.stretchyVector(eval, args);
+            return stretchyVector(eval, args);
         }
     }
 
@@ -565,7 +584,7 @@ final class FusionVector
         UnsafeVectorSizeProc()
         {
             //    "                                                                               |
-            super("Returns the size of VECTOR.",
+            super("Returns the size of `vector`.",
                   "vector");
         }
 
@@ -585,7 +604,7 @@ final class FusionVector
         UnsafeVectorRefProc()
         {
             //    "                                                                               |
-            super("Returns the element of VECTOR at slot POS (zero-based).",
+            super("Returns the element of `vector` at (zero-based) position `pos`.",
                   "vector", "pos");
         }
 
@@ -606,8 +625,8 @@ final class FusionVector
         UnsafeVectorSetProc()
         {
             //    "                                                                               |
-            super("Changes the element of VECTOR at slot POS (zero-based). This assumes that the\n" +
-                  "VECTOR is mutable and that the POS is valid.",
+            super("Changes the element of `vector` at (zero-based) position `pos`. This assumes\n" +
+                  "that the `vector` is mutable and that the `pos` is valid.",
                   "vector", "pos", "value");
         }
 
@@ -633,7 +652,7 @@ final class FusionVector
         UnsafeVectorAddProc()
         {
             //    "                                                                               |
-            super("Returns a vector similar to VECTOR with the VALUE added to the end.",
+            super("Returns a vector similar to `vector` with the `value` added to the end.",
                   "vector", "value");
         }
 
@@ -652,8 +671,11 @@ final class FusionVector
         UnsafeVectorAddMProc()
         {
             //    "                                                                               |
-            super("Returns a vector similar to VECTOR with the VALUE added to the end. The result\n" +
-                  "may share structure with the VECTOR, and VECTOR may be mutated.",
+            super("Returns a vector similar to `vector` with the `value` added to the end.  The\n" +
+                  "result may share structure with the vector, which may also be mutated.\n" +
+                  "\n" +
+                  "In particular, when given a stretchy vector, the input is expanded to contain\n" +
+                  "the given value, and the result is the `vector` argument.",
                   "vector", "value");
         }
 
@@ -672,7 +694,7 @@ final class FusionVector
         UnsafeVectorIterateProc()
         {
             //    "                                                                               |
-            super("Returns an iterator over the content of VECTOR.",
+            super("Returns an iterator over the content of `vector`.",
                   "vector");
         }
 
