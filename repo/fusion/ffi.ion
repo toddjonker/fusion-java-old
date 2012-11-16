@@ -8,8 +8,8 @@ Foreign Function Interfaces for integrating Fusion with other languages.
 
 # Warning!
 
-_Only_ modules with descriptions below may be considered stable, meaning that
-future releases will maintain compatability.
+_Only_ modules with descriptions below are stable, meaning that documented
+features are supported and future releases will maintain compatability.
 **Modules that do not have one-liners below must be considered unstable**
 and users should be prepared for changes.
   '''
