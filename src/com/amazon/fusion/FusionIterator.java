@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSexp.isSexp;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVector.unsafeVectorIterate;
@@ -32,6 +33,11 @@ class FusionIterator
         if (isVector(eval, value))
         {
             return (FusionIterator) unsafeVectorIterate(eval, value);
+        }
+
+        if (isSexp(eval, value))
+        {
+            return FusionSexp.unsafeSexpIterate(eval, value);
         }
 
         if (value instanceof IonSequence)

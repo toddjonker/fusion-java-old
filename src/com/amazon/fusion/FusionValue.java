@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSexp.isNullSexp;
+import static com.amazon.fusion.FusionSexp.isSexp;
 import static com.amazon.fusion.FusionVector.isNullVector;
 import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVoid.isVoid;
@@ -14,6 +16,7 @@ import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
+import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Iterator;
@@ -72,6 +75,8 @@ public abstract class FusionValue
 
         if (isNullVector(eval, result)) return false;
 
+        if (isNullSexp(eval, result)) return false;
+
         IonValue iv = FusionValue.castToIonValueMaybe(result);
         if (iv == null) return true;
 
@@ -88,6 +93,18 @@ public abstract class FusionValue
 
 
     //========================================================================
+
+    /** Helper method for subclasses. */
+    void writeAnnotations(Appendable out, String[] annotations)
+        throws IOException
+    {
+        for (String ann : annotations)
+        {
+            IonTextUtils.printSymbol(out, ann);
+            out.append("::");
+        }
+    }
+
 
     /**
      * Writes a representation of this value, following Ion syntax where
@@ -179,7 +196,7 @@ public abstract class FusionValue
     // Static write methods
 
 
-    private static void dispatchWrite(IonWriter out, Object value)
+    static void dispatchWrite(IonWriter out, Object value)
         throws IOException, FusionException
     {
         if (value instanceof Writeable)
@@ -567,8 +584,7 @@ public abstract class FusionValue
      *
      * @see FusionRuntime#ionizeMaybe(Object, ValueFactory)
      */
-    public static IonValue copyToIonValueMaybe(Object value,
-                                               ValueFactory factory)
+    static IonValue copyToIonValueMaybe(Object value, ValueFactory factory)
         throws FusionException
     {
         return copyToIonValue(value, factory, false);
@@ -585,8 +601,9 @@ public abstract class FusionValue
      *
      * @throws FusionException if the value cannot be converted to Ion.
      *
-     * @see FusionRuntime#ionize(Object, ValueFactory)
+     * @deprecated Use {@link FusionRuntime#ionize(Object, ValueFactory)}
      */
+    @Deprecated // for public access
     public static IonValue copyToIonValue(Object value, ValueFactory factory)
         throws FusionException
     {
@@ -618,7 +635,14 @@ public abstract class FusionValue
 
         if (isVector(value))
         {
-            return FusionVector.unsafeCopyToIonList(value, factory);
+            return FusionVector.unsafeCopyToIonList(value, factory,
+                                                    throwOnConversionFailure);
+        }
+
+        if (isSexp(value))
+        {
+            return FusionSexp.unsafeCopyToIonSexp(value, factory,
+                                                  throwOnConversionFailure);
         }
 
         if (throwOnConversionFailure)

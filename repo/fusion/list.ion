@@ -12,9 +12,11 @@
   (provide is_list)
 
   // Pass-through bindings from /fusion/sequence
-  (provide add any choose do find first is_empty last map size subseq)
+  (provide add any choose do find first is_empty last map size)
 
   (defpub_j concatenate_m   "com.amazon.fusion.ConcatenateMProc")
+  (defpub_j subseq          "com.amazon.fusion.IonSubseqProc")
+  // TODO FUSION-86 subseq - Needs to handle sexp
 
 
   (defpub is_immutable_list

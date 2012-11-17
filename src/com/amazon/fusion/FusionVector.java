@@ -6,11 +6,11 @@ import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
+import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
-import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -34,29 +34,24 @@ final class FusionVector
     /**
      * Turns null.list into a {@link NullVector} with the same annotations.
      */
-    static BaseVector vectorFromIonList(Evaluator eval, IonList list)
+    static BaseVector vectorFromIonSequence(Evaluator eval, IonSequence seq)
     {
-        String[] annotations = list.getTypeAnnotations();
+        String[] annotations = seq.getTypeAnnotations();
         // TODO FUSION-47 intern annotation text
 
-        if (list.isNullValue())
+        if (seq.isNullValue())
         {
             return nullVector(eval, annotations);
         }
 
-        int size = list.size();
+        int size = seq.size();
         if (size == 0)
         {
-            if (annotations.length == 0)
-            {
-                return EMPTY_IMMUTABLE_VECTOR;
-            }
-
-            return new ImmutableVector(annotations, EMPTY_OBJECT_ARRAY);
+            return immutableVector(eval, annotations, EMPTY_OBJECT_ARRAY);
         }
         else
         {
-            Object[] elts = list.toArray(new Object[size]);
+            Object[] elts = seq.toArray(new Object[size]);
             return new LazyInjectingVector(annotations, elts);
         }
     }
@@ -453,19 +448,10 @@ final class FusionVector
             return Arrays.asList(myValues).iterator();
         }
 
-        void writeAnnotations(Appendable out) throws IOException
-        {
-            for (String ann : myAnnotations)
-            {
-                IonTextUtils.printSymbol(out, ann);
-                out.append("::");
-            }
-        }
-
         @Override
         void write(Appendable out) throws IOException
         {
-            writeAnnotations(out);
+            writeAnnotations(out, myAnnotations);
 
             out.append('[');
 
@@ -490,7 +476,7 @@ final class FusionVector
                 out.stepIn(IonType.LIST);
                 for (int i = 0; i < size(); i++)
                 {
-                    FusionValue.write(out, myValues[i]);
+                    dispatchWrite(out, myValues[i]);
                 }
                 out.stepOut();
             }
@@ -581,7 +567,7 @@ final class FusionVector
         @Override
         void write(Appendable out) throws IOException
         {
-            writeAnnotations(out);
+            writeAnnotations(out, myAnnotations);
             out.append("null.list");
         }
 

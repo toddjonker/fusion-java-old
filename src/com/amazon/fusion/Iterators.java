@@ -49,7 +49,7 @@ final class Iterators
      * Subclasses just need to implement hasNext and next, and next must
      * return Fusion values.
      */
-    static class AbstractIterator
+    abstract static class AbstractIterator
         extends FusionIterator
     {
         AbstractIterator()

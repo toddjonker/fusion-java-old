@@ -2,6 +2,10 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSexp.isSexp;
+import static com.amazon.fusion.FusionSexp.unsafePairHead;
+import static com.amazon.fusion.FusionSexp.unsafePairTail;
+import static com.amazon.fusion.FusionSexp.unsafeSexpSize;
 import static com.amazon.fusion.FusionValue.castToIonValueMaybe;
 import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVector.unsafeVectorRef;
@@ -200,6 +204,30 @@ final class Syntax
                 children[i] = child;
             }
             return SyntaxList.make(null, children);
+        }
+
+        if (isSexp(eval, datum))
+        {
+            int size = unsafeSexpSize(eval, datum);
+            SyntaxValue[] children = new SyntaxValue[size];
+
+            int i = 0;
+            for (Object pair = datum;
+                 FusionSexp.isPair(eval, pair);
+                 pair = unsafePairTail(eval, pair))
+            {
+                Object rawChild = unsafePairHead(eval, pair);
+                SyntaxValue child =
+                    datumToStrippedSyntaxMaybe(eval, context, rawChild);
+                if (child == null)
+                {
+                    // Hit something that's not syntax-able
+                    return null;
+                }
+                children[i++] = child;
+            }
+            assert i == size;
+            return SyntaxSexp.make(null, children);
         }
 
         return null;

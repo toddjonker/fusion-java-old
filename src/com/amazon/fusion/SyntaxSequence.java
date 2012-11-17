@@ -7,7 +7,6 @@ import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
-import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
@@ -219,36 +218,6 @@ abstract class SyntaxSequence
         return makeSimilar(children, EMPTY_STRING_ARRAY, null);
     }
 
-
-    @Override
-    Object quote(Evaluator eval)
-        throws FusionException
-    {
-        ValueFactory factory = eval.getSystem();
-        IonSequence seq = makeNull(factory);
-        seq.setTypeAnnotations(getAnnotations());
-
-        if (! isNullValue())
-        {
-            int size = size();
-            if (size == 0)
-            {
-                seq.clear();  // Turns null sequence into empty sequence
-            }
-            else
-            {
-                for (int i = 0; i < size; i++)
-                {
-                    SyntaxValue s = get(i);
-                    Object fv = s.quote(eval);
-                    IonValue iv = FusionValue.unsafeCastToIonValue(fv);
-                    assert iv.getSystem() == factory;
-                    seq.add(iv);
-                }
-            }
-        }
-        return eval.inject(seq);
-    }
 
     final void writeContentTo(IonWriter writer, IonType type)
         throws IOException

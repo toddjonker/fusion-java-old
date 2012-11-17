@@ -1,0 +1,112 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(use check)
+(use 'fusion/sexp')
+(use 'fusion/vector')
+
+(define F (lambda (e) false))
+(define T (lambda (e) true))
+
+(define valEmpty (quote ()))
+(define val12    (quote (1 2)))
+
+
+(define test_predicates
+  (lambda (sexp empty)
+    (assert (is_sexp sexp))
+    (check = (is_empty sexp) empty)
+    // TODO ...
+    ))
+
+
+// Construction via literals
+
+(define x "anything")
+
+(test_predicates (quote ())    true)
+(test_predicates (quote (0))   false)
+(test_predicates (quote (0 T)) false)
+
+
+// Construction via procedures
+
+(define test_makers
+  (lambda (maker)
+    (test_predicates (apply maker (quote ())) true)
+    (test_predicates (apply maker (quote (0))) false)
+    (check_equal (apply maker (quote ()))
+      (quote ()) "()")
+    (check_equal (apply maker (quote (0 1)))
+      (quote (0 1)) "(0 1)")))
+
+(test_makers sexp)
+// TODO immutable_sexp
+
+
+//==========================================================================
+// first
+
+(check = (first (quote (1))) 1)
+(check = (first (sexp 1 2)) 1)
+
+
+//==========================================================================
+// last
+
+(check = (last (quote (1))) 1)
+(check = (last (sexp 1 2)) 2)
+
+
+//==========================================================================
+// add
+
+(check_equal (add (sexp 1 2) 3)  (sexp 3 1 2)  "add 3")
+(check_equal (add (sexp 1 2) [3])  (sexp [3] 1 2)  "add [3]")
+
+
+//==========================================================================
+// find
+
+(assert (is_void (find F valEmpty)))
+(assert (is_void (find F val12)))
+(check = (find T val12) 1)
+(check = (find (lambda (e) (= e 2)) val12) 2)
+
+
+//==========================================================================
+// any
+
+(check_false (any T valEmpty))
+(check_false (any F val12))
+(check_true  (any T val12))
+
+(check_true (any (lambda (e) (= e 2)) val12))
+
+
+//==========================================================================
+// TODO map not implemented for sexp
+/*
+(check_equal (map + valEmpty) [] "map1")
+(check_equal (map + [1, 2]) [1, 2] "map2")
+(check_equal (map (lambda (n) (+ 3 n)) [1, 2]) [4, 5] "map3")
+
+(check_equal (choose T []) [] "filter1")
+(check_equal (choose F []) [] "filter2")
+(check_equal (choose T [1, 2]) [1, 2] "filter3")
+(check_equal (choose F [1, 2]) [] "filter4")
+
+(check_equal (choose (lambda (n) (< 10 n)) [1, 11, 10, 12]) [11, 12] "filter5")
+*/
+
+
+//==========================================================================
+// do
+
+(check_equal (do (lambda (x) (+ 1 x)) (quote (2 3)))
+   (void) "do returns void")
+
+(let [(v (stretchy_vector))]
+  (do (lambda (x) (vector_add_m v (+ 1 x))) (quote (2 3)))
+  (check_equal v [3, 4] "do side effects"))
+
+

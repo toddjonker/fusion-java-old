@@ -7,12 +7,33 @@
 (define F (lambda (e) false))
 (define T (lambda (e) true))
 
+
+//==========================================================================
+// first
+
+(check = (first [1])    1)
+(check = (first [1, 2]) 1)
+
+
+//==========================================================================
+// last
+
+(check = (last [1])    1)
+(check = (last [1, 2]) 2)
+
+
+//==========================================================================
+// find
+
 (assert (is_void (find F [])))
 (assert (is_void (find F [1, 2])))
 (check = (find T [1, 2]) 1)
 
 (check = (find (lambda (e) (= e "hi")) ["oh", "hi"]) "hi")
 
+
+//==========================================================================
+// any
 
 (check_false (any T []))
 (check_false (any F [1, 2]))
@@ -23,6 +44,7 @@
 
 
 //==========================================================================
+// map
 
 (check_equal (map + []) [] "map1")
 (check_equal (map + [1, 2]) [1, 2] "map2")
@@ -36,9 +58,12 @@
 (check_equal (choose (lambda (n) (< 10 n)) [1, 11, 10, 12]) [11, 12] "filter5")
 
 
+//==========================================================================
+// do
+
 (check_equal (do (lambda (x) (+ 1 x)) [2, 3])
-   (void) "for_each returns void")
+   (void) "do returns void")
 
 (let [(v (stretchy_vector))]
   (do (lambda (x) (vector_add_m v (+ 1 x))) [2, 3])
-  (check_equal v [3, 4] "for_each side effects"))
+  (check_equal v [3, 4] "do side effects"))

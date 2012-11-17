@@ -11,9 +11,6 @@
 
 
   (defpub_j add    "com.amazon.fusion.AddProc")
-  (defpub_j subseq "com.amazon.fusion.IonSubseqProc")
-  // TODO FUSION-86 subseq - Needs to handle sexp
-
   // TODO FUSION-86 concatenate
 
   (defpub first

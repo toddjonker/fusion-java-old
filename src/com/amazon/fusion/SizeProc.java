@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSexp.isSexp;
+import static com.amazon.fusion.FusionSexp.unsafeSexpSize;
 import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVector.unsafeVectorSize;
 import com.amazon.ion.IonContainer;
@@ -25,6 +27,10 @@ final class SizeProc
         if (isVector(eval, arg))
         {
             size = unsafeVectorSize(eval, arg);
+        }
+        else if (isSexp(eval, arg))
+        {
+            size = unsafeSexpSize(eval, arg);
         }
         else
         {

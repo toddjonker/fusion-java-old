@@ -6,6 +6,7 @@
   (use 'fusion/ffi/java')
   (use 'fusion/ion')
   (use 'fusion/list')
+  (use 'fusion/sexp')
   (use 'fusion/syntax')
   (use 'fusion/vector')
 
@@ -30,6 +31,8 @@
          (check_list_equal actual expected))
         ((is_vector expected)
          (check_vector_equal actual expected))
+        ((is_sexp expected)
+         (check_sexp_equal actual expected))
         ((is_void expected)
          (assert (is_void actual)
            descr " not equal.\nActual: " actual "\nExpected: " expected))
@@ -58,6 +61,21 @@
           (check_equal (vector_ref actual i) (vector_ref expected i)
             "vector element") // TODO bad descr
           (loop (+ 1 i))))))
+
+  (defpub check_sexp_equal
+    (lambda (actual expected)
+      (assert (is_sexp actual) "expected sexp, received: " actual)
+      (assert (= (size actual) (size expected))
+        "sexp sizes don't match. Actual: " actual " Expected: " expected)
+      (let loop
+           [(pos 0), (a actual), (e expected)]
+        (if (is_void e)
+          (assert (is_void a)
+            "sexp tails don't match at pos " pos ". Actual: " actual " Expected: " expected)
+          (begin
+            (check_equal (head a) (head e)
+              (concatenate "sexp element at position " (to_string pos))) // TODO bad descr
+            (loop (+ 1 pos) (tail a) (tail e)))))))
 
 
   (defpub check_annotations

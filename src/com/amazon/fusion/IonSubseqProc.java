@@ -11,13 +11,13 @@ final class IonSubseqProc
     IonSubseqProc()
     {
         //    "                                                                               |
-        super("Returns a sequence holding the elements from `sequence` between positions\n" +
+        super("Returns a list holding the elements from `list` between positions\n" +
               "`from` and `to`.  The following precondition applies:\n" +
               "\n" +
-              "    0 <= from <= to <= (size sequence)\n" +
+              "    0 <= from <= to <= (size list)\n" +
               "\n" +
-              "The result may share structure with `sequence`.",
-              "sequence", "from", "to");
+              "The result may share structure with `list`.",
+              "list", "from", "to");
     }
 
 

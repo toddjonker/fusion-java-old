@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSexp.isSexp;
+import static com.amazon.fusion.FusionSexp.unsafePairDot;
+import static com.amazon.fusion.FusionSexp.unsafeSexpSize;
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
 import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVector.unsafeVectorRef;
@@ -17,8 +20,8 @@ final class DotProc
     DotProc()
     {
         //    "                                                                               |
-        super("Traverses down through an Ion data structure.\n" +
-              "CONTAINER must be Ion container (struct, list, or sexp).\n" +
+        super("Traverses down through a data structure.\n" +
+              "The `container` must be a struct, list, or sexp.\n" +
               "Each PART must be a string, symbol, or int, to denote either a struct's\n" +
               "field-name or a sequence's index. If any part doesn't have a matching value in\n" +
               "its container (the list index is out of bounds, or the field doesn't exist),\n" +
@@ -34,9 +37,10 @@ final class DotProc
         checkArityAtLeast(1, args);
 
         boolean cIsVector = isVector(eval, args[0]);
+        boolean cIsFSexp = isSexp(eval, args[0]);
 
         Object c;
-        if (cIsVector)
+        if (cIsVector || cIsFSexp)
         {
             c = args[0];
         }
@@ -57,6 +61,15 @@ final class DotProc
                     return voidValue(eval);
                 }
                 value = unsafeVectorRef(eval, c, index);
+            }
+            else if (cIsFSexp)
+            {
+                int index = checkIntArg(i, args);
+                if (unsafeSexpSize(eval, c) <= index)
+                {
+                    return voidValue(eval);
+                }
+                value = unsafePairDot(eval, c, index);
             }
             else
             {
@@ -95,7 +108,8 @@ final class DotProc
             if (i < lastArg)
             {
                 cIsVector = isVector(eval, value);
-                if (cIsVector)
+                cIsFSexp  = isSexp(eval, value);
+                if (cIsVector || cIsFSexp)
                 {
                     c = value;
                 }

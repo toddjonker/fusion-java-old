@@ -17,7 +17,7 @@
   // Pass-through bindings from builtins
   (provide assert for_list let let_values quote set)
   (provide * + - . < = apply concatenate exit
-    for_each_field is_null make_sexp not
+    for_each_field is_null not
     raise_argument_error raise_result_error remove
     to_int to_string)
 

@@ -2,6 +2,10 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSexp.EMPTY_SEXP;
+import static com.amazon.fusion.FusionSexp.emptySexp;
+import static com.amazon.fusion.FusionSexp.nullSexp;
+import static com.amazon.fusion.FusionSexp.pair;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.LetValuesForm.compilePlainLet;
 import com.amazon.fusion.LambdaForm.CompiledLambdaBase;
@@ -215,6 +219,43 @@ final class SyntaxSexp
         }
 
         return this;
+    }
+
+
+
+    @Override
+    Object quote(Evaluator eval)
+        throws FusionException
+    {
+        String[] annotations = getAnnotations();
+
+        if (isNullValue())
+        {
+            return nullSexp(eval, annotations);
+        }
+
+        int i = size();
+        if (i == 0)
+        {
+            return emptySexp(eval, annotations);
+        }
+
+        Object sexp = EMPTY_SEXP;
+        while (i-- != 0)
+        {
+            SyntaxValue s = get(i);
+            Object head = s.quote(eval);
+            if (i == 0)
+            {
+                sexp = pair(eval, annotations, head, sexp);
+            }
+            else
+            {
+                sexp = pair(eval, head, sexp);
+            }
+        }
+
+        return sexp;
     }
 
 

@@ -2,8 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSexp.isSexp;
 import static com.amazon.fusion.FusionVector.isVector;
-import static com.amazon.fusion.FusionVector.vectorFromIonList;
+import static com.amazon.fusion.FusionVector.vectorFromIonSequence;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSystem;
@@ -94,7 +95,7 @@ final class Evaluator
         else if (value instanceof IonList)
         {
             IonList list = (IonList) value;
-            return vectorFromIonList(this, list);
+            return vectorFromIonSequence(this, list);
         }
         return value;
     }
@@ -300,9 +301,14 @@ final class Evaluator
             return (IonValue) value;
         }
 
-        if (isVector(value))
+        if (isVector(this, value))
         {
-            return FusionVector.unsafeCopyToIonList(value, mySystem);
+            return FusionVector.unsafeCopyToIonListMaybe(value, mySystem);
+        }
+
+        if (isSexp(this, value))
+        {
+            return FusionSexp.unsafeCopyToIonSexpMaybe(value, mySystem);
         }
 
         return null;
