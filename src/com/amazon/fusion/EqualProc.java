@@ -6,6 +6,7 @@ import com.amazon.ion.IonBool;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonString;
+import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonTimestamp;
 import com.amazon.ion.IonValue;
 
@@ -15,13 +16,14 @@ final class EqualProc
     EqualProc()
     {
         //    "                                                                               |
-        super("Returns true if A and B are equal, ignoring precision. The arguments must be\n" +
-              "the same type: non-null integer, decimal, boolean, string, or timestamp.",
+        super("Returns true if the two arguments have the same content, ignoring precision.\n" +
+              "The arguments must be the same type: non-null bool, int, decimal, string,\n" +
+              "symbol, or timestamp.",
               "a", "b");
     }
 
     private static final String EXPECTATION =
-        "non-null bool, int, decimal, string, or timestamp";
+        "non-null bool, int, decimal, string, symbol, or timestamp";
 
     @Override
     Object doApply(Evaluator eval, Object[] args)
@@ -58,6 +60,12 @@ final class EqualProc
         {
             IonString left  = (IonString) leftVal;
             IonString right = (IonString) rightVal;
+            result = left.stringValue().equals(right.stringValue());
+        }
+        else if (leftVal instanceof IonSymbol && rightVal instanceof IonSymbol)
+        {
+            IonSymbol left  = (IonSymbol) leftVal;
+            IonSymbol right = (IonSymbol) rightVal;
             result = left.stringValue().equals(right.stringValue());
         }
         else if (leftVal instanceof IonTimestamp && rightVal instanceof IonTimestamp)

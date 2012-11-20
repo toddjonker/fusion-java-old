@@ -1,0 +1,8 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(use check)
+(use 'fusion/function')
+
+(check = (quote sym) (quote sym))
+
+(check (lambda (a b) (not (= a b))) (quote separate) (quote equal))
