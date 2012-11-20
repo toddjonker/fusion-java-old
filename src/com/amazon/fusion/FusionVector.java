@@ -269,6 +269,7 @@ final class FusionVector
         }
 
 
+        /** Takes ownership of the array, doesn't make a copy. */
         abstract BaseVector makeSimilar(Object[] values);
 
 

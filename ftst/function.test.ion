@@ -43,7 +43,7 @@
 (define add3 (compose add1 add2))
 (check = (add3 4) 7)
 
-(define vector1 (compose vector_from_iterator iterate_value))
+(define vector1 (compose vector_from_iterator value_iterator))
 (check_equal (vector1 12) [12] "12")
 
 

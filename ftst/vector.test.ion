@@ -214,8 +214,8 @@
 //==========================================================================
 // Iteration
 
-(check_equal (iterator_to_list (vector_iterate str))
+(check_equal (list_from_iterator (vector_iterate str))
   [1,2,3] "iteration round-trip")
 
-(check_equal (iterator_to_list (iterate_list str))
+(check_equal (list_from_iterator (list_iterator str))
   [1,2,3] "iteration round-trip")

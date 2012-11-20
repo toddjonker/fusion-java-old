@@ -1,0 +1,88 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(module sequence 'fusion/private/builtins'
+
+  (use 'fusion/collection')
+  (use 'fusion/experimental/defines')
+  (use 'fusion/vector')
+
+  // Pass-through bindings from builtins
+  (provide add)
+
+  // Pass-through bindings from /fusion/collection
+  (provide any do find is_empty size)
+
+
+  (defpub_j subseq "com.amazon.fusion.IonSubseqProc")
+  // TODO FUSION-86 subseq - Needs to handle sexp
+
+  // TODO FUSION-86 concatenate
+
+  (defpub first
+    (lambda (sequence)
+      '''
+Returns the first element in the `sequence`. Fails if the sequence has no
+elements.
+      '''
+      (if (= 0 (size sequence))
+        (raise_argument_error "first" "non-empty sequence" 0 sequence)
+        (. sequence 0))))
+
+
+  (defpub last
+    (lambda (sequence)
+      '''
+Returns the last element in the `sequence`. Fails if the sequence has no
+elements.
+      '''
+      (let ((s (size sequence)))
+        (if (= 0 s)
+          (raise_argument_error "last" "non-empty sequence" 0 sequence)
+          (. sequence (- s 1))))))
+
+
+  //==========================================================================
+  // Mapping, searching, etc.
+
+  // Name per Dylan.  I prefer `choose` over `filter` because the latter is
+  // ambiguous whether you're filtering "in" or "out".
+  (defpub choose
+    (lambda (pred list)
+      '''
+Applies the one-parameter predicate `pred` to each element of `list`, returning
+a new list of the elements (in order) for which `pred` returns truthy.
+      '''
+      (if (not (is_list list))
+        (raise_argument_error "choose" "list" 1 pred list)
+      (let ((len (size list)))
+        (let loop ((i 0)
+                   (result (stretchy_vector)))
+          (if (= i len)
+            result
+            (let ((elt (. list i)))
+              (loop
+                (+ 1 i)
+                (if (pred elt)
+                  (vector_add_m result elt)
+                  result)))))))))
+
+
+  // Name per Dylan and SRFI-1. Dylan allows mapping over multiple key-value
+  // collections but that's a bit crazy and it's unclear how useful that is.
+  (defpub map
+    (lambda (proc list)
+      '''
+Applies the one-parameter procedure `proc` to each element of `list`, returning
+a new list of the results in order.
+      '''
+      (if (not (is_list list))
+        (raise_argument_error "map" "list" 1 proc list)
+      (let ((len (size list)))
+        (let loop ((i 0)
+                   (result (stretchy_vector)))
+          (if (= i len)
+            result
+            (loop
+              (+ 1 i)
+              (vector_add_m result (proc (. list i))))))))))
+)

@@ -21,8 +21,8 @@ public class IteratorTest
     public void testIterateValueFailures()
         throws Exception
     {
-        expectArityFailure("(iterate_value)");
-        expectArityFailure("(iterate_value 1 2)");
+        expectArityFailure("(value_iterator)");
+        expectArityFailure("(value_iterator 1 2)");
     }
 
 
@@ -74,11 +74,11 @@ public class IteratorTest
     public void testIteratorMapSplicingFailures()
         throws Exception
     {
-        expectArityFailure("(iterator_map_splicing iterate_value)");
-        expectArityFailure("(iterator_map_splicing iterate_value empty_iterator empty_iterator)");
+        expectArityFailure("(iterator_map_splicing value_iterator)");
+        expectArityFailure("(iterator_map_splicing value_iterator empty_iterator empty_iterator)");
 
         // TODO FUSION-85 need to check type of the proc
 //      expectContractFailure("(iterator_map_splicing 1 empty_iterator)");
-        expectContractFailure("(iterator_map_splicing iterate_value [])");
+        expectContractFailure("(iterator_map_splicing value_iterator [])");
     }
 }

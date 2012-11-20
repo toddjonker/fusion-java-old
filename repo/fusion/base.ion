@@ -16,11 +16,15 @@
 
   // Pass-through bindings from builtins
   (provide assert for_list let let_values quote set)
-  (provide * + - . < = add apply concatenate contains exit
+  (provide * + - . < = apply concatenate exit
     for_each_field is_null is_undef make_sexp not
     raise_argument_error raise_result_error remove
-    size to_int to_string)
+    to_int to_string)
 
+  // TODO FUSION-86 these are for DP compatability
+  (provide size)      // Moving to /fusion/collection
+  (provide add)       // Moving to /fusion/sequence
+  (provide contains)  // Broken feature, deprecated
 
   (use 'fusion/params')
   (provide make_parameter parameterize)

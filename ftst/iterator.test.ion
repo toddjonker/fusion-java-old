@@ -23,25 +23,25 @@
 
 (check_iter empty_iterator [])
 
-(check_iter (iterate_list [])      [])
-(check_iter (iterate_list [1])     [1])
-(check_iter (iterate_list [1, 2])  [1, 2])
-(check_iter (iterate_list ["a", true])  ["a", true])
-(check_iter (iterate_list [["a"], [true]])  [["a"], [true]])
+(check_iter (list_iterator [])      [])
+(check_iter (list_iterator [1])     [1])
+(check_iter (list_iterator [1, 2])  [1, 2])
+(check_iter (list_iterator ["a", true])  ["a", true])
+(check_iter (list_iterator [["a"], [true]])  [["a"], [true]])
 
-(check_iter (iterate_value []) [[]])
-(check_iter (iterate_value 509) [509])
+(check_iter (value_iterator []) [[]])
+(check_iter (value_iterator 509) [509])
 
 (define plus1 (lambda (n) (+ 1 n)))
 
 (check_iter (iterator_map plus1 empty_iterator) [])
-(check_iter (iterator_map plus1 (iterate_list [1, 7])) [2, 8])
+(check_iter (iterator_map plus1 (list_iterator [1, 7])) [2, 8])
 
 
 (check_iter (iterator_filter is_int empty_iterator) [])
-(check_iter (iterator_filter is_int (iterate_value true)) [])
-(check_iter (iterator_filter is_int (iterate_value 614)) [614])
-(check_iter (iterator_filter is_int (iterate_list [true, 1, 2, false, 3])) [1,2,3])
+(check_iter (iterator_filter is_int (value_iterator true)) [])
+(check_iter (iterator_filter is_int (value_iterator 614)) [614])
+(check_iter (iterator_filter is_int (list_iterator [true, 1, 2, false, 3])) [1,2,3])
 
 
 (check_true (is_void (iterator_find (lambda (e) true) empty_iterator)))
@@ -50,22 +50,22 @@
 
 
 (check_iter (iterator_append empty_iterator empty_iterator) [])
-(check_iter (iterator_append empty_iterator (iterate_value 601)) [601])
-(check_iter (iterator_append (iterate_value 616) empty_iterator) [616])
-(check_iter (iterator_append (iterate_value 1) (iterate_value 2)) [1,2])
-(check_iter (iterator_append (iterate_list [1,2,3]) (iterate_list [4,5]))
+(check_iter (iterator_append empty_iterator (value_iterator 601)) [601])
+(check_iter (iterator_append (value_iterator 616) empty_iterator) [616])
+(check_iter (iterator_append (value_iterator 1) (value_iterator 2)) [1,2])
+(check_iter (iterator_append (list_iterator [1,2,3]) (list_iterator [4,5]))
   [1,2,3,4,5])
 
-(check_equal (iterator_to_list empty_iterator) [] "635")
-(check_equal (iterator_to_list (iterate_list [1])) [1]  "1")
-(check_equal (iterator_to_list (iterate_list [1,2])) [1,2]  "1,2")
+(check_equal (list_from_iterator empty_iterator) [] "635")
+(check_equal (list_from_iterator (list_iterator [1])) [1]  "1")
+(check_equal (list_from_iterator (list_iterator [1,2])) [1,2]  "1,2")
 
 (check_iter
-  (iterator_map_splicing iterate_list empty_iterator)
+  (iterator_map_splicing list_iterator empty_iterator)
   [])
 (check_iter
-  (iterator_map_splicing iterate_value (iterate_list [1,2,3,4]))
+  (iterator_map_splicing value_iterator (list_iterator [1,2,3,4]))
   [1,2,3,4])
 (check_iter
-  (iterator_map_splicing iterate_list (iterate_list [[1],[2,3],[],[4]]))
+  (iterator_map_splicing list_iterator (list_iterator [[1],[2,3],[],[4]]))
   [1,2,3,4])

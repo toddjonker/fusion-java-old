@@ -4,7 +4,7 @@
 (use 'fusion/list')
 (use check)
 
-(assert (list_empty (ion_annotations true)))
+(assert (is_empty (ion_annotations true)))
 
 (check_annotations null [])
 (check_annotations (quote a::true) ["a"])

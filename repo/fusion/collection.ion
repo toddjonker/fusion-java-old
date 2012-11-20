@@ -1,0 +1,79 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(module collection 'fusion/private/builtins'
+
+  '''
+Generic operations over collection types.
+
+Currently, some of these features may be restricted to a subset of collection
+types.
+  '''
+
+  (use 'fusion/experimental/defines')
+  (use 'fusion/void')
+
+  // Pass-through bindings from builtins
+  (provide size)
+
+  // Name per Dylan and SRFI-1.
+  (defpub any
+    (lambda (pred sequence)   // TODO FUSION-86 optimize these for links vs array
+      '''
+Applies the one-parameter predicate `pred` to each element of `sequence` in
+order; the first time `pred` returns a truthy value that truthy value is
+returned.  If no such call returns a truthy value, then the result is `false`.
+      '''
+      (let ((len (size sequence)))
+        (let loop ((i 0))
+          (if (= i len)
+            false
+            (let ((elt (. sequence i)))
+              (let ((result (pred elt)))
+                (if result result
+                  (loop (+ i 1))))))))))
+
+
+  (defpub is_empty
+    (lambda (collection)
+      '''
+Returns `true` if the size of the `collection` is zero, otherwise returns
+`false`.
+      '''
+      (= 0 (size collection))))
+
+
+  // Name per SRFI-1
+  (defpub find
+    (lambda (pred sequence) // TODO FUSION-86 optimize for links vs array
+      '''
+Applies the one-parameter predicate `pred` to each element of `sequence` in
+order; the first time `pred` returns a truthy value that element is returned.
+If no such element is found, the result is void.
+      '''
+      (let ((len (size sequence)))
+        (let loop ((i 0))
+          (if (= i len)
+            (void)
+            (let ((elt (. sequence i)))
+              (if (pred elt)
+                elt
+                (loop (+ i 1)))))))))
+
+
+  // Name per Dylan.  Equivalent to SRFI-1 `for_each` but I don't want this to
+  // be confused with the `for` syntax from Racket (which I intend to provide).
+  (defpub do
+    (lambda (proc sequence)   // TODO FUSION-86 optimize for links vs array
+      '''
+Applies the one-parameter procedure `proc` to each element of `sequence` in
+order, ignoring any results.  Returns void.
+      '''
+      (let ((len (size sequence)))
+        (let loop ((i 0))
+          (if (= i len)
+            (void)
+            (begin
+              (proc (. sequence i))
+              (loop (+ 1 i))))))))
+
+)

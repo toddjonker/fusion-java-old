@@ -5,37 +5,38 @@
   (use 'fusion/experimental/defines')
   (use 'fusion/ffi/java')
   (use 'fusion/iterator')
+  (use 'fusion/sequence')
+  (use 'fusion/vector')
 
+  // Pass-through bindings from #%kernel
+  (provide is_list)
+
+  // Pass-through bindings from /fusion/sequence
+  (provide any choose do find first is_empty last map size subseq)
 
   (defpub_j concatenate_m   "com.amazon.fusion.ConcatenateMProc")
-  (defpub_j subseq          "com.amazon.fusion.IonSubseqProc")
+
+  // TODO FUSION-86 this is for DP compatability
+  (defpub filter choose)
 
 
-  (defpub first
-    (lambda (sequence)
-      '''
-Returns the first element in the SEQUENCE. Fails if the sequence has no
-elements.
-      '''
-      (if (= 0 (size sequence))
-        (raise_argument_error "first" "non-empty sequence" 0 sequence)
-        (. sequence 0))))
+  (defpub is_immutable_list
+    (lambda (v)
+      (or (is_immutable_vector v)
+          (and (is_list v) (not (is_vector v))))))
 
+  // Renamings to merge vector back into list
+  (defpub is_mutable_list is_mutable_vector)
+  (defpub is_stretchy_list is_stretchy_vector)
 
-  (defpub last
-    (lambda (sequence)
-      '''
-Returns the last element in the SEQUENCE. Fails if the sequence has no
-elements.
-      '''
-      (let ((s (size sequence)))
-        (if (= 0 s)
-          (raise_argument_error "last" "non-empty sequence" 0 sequence)
-          (. sequence (- s 1))))))
+  (defpub immutable_list immutable_vector)
+  (defpub list vector)
+  (defpub stretchy_list stretchy_vector)
 
 
   //==========================================================================
 
+  // TODO FUSION-86 subseq should make 'to' arg optional
   (defpub list_tail
     (lambda (list from)
       '''
@@ -44,49 +45,8 @@ Returns the list after the first FROM elements of LIST.
       // TODO if 'from' is to large, error message has wrong proc name
       (subseq list from (size list))))
 
-  //==========================================================================
-
-  (defpub list_empty
-    (lambda (list)
-      '''
-Returns true if list is empty otherwise returns false
-      '''
-      (= 0 (size list))))
 
   //==========================================================================
-
-  // Per SRFI-1
-  (defpub find
-    (lambda (proc list)
-      '''
-Applies the PROC to each element of LIST in turn; if the PROC returns a truthy
-value that element is returned.
-      '''
-      (let ((len (size list)))
-        (let loop ((i 0))
-          (if (= i len)
-            false
-            (let ((elt (. list i)))
-              (if (proc elt)
-                elt
-                (loop (+ i 1)))))))))
-
-  // Per SRFI-1
-  (defpub any
-    (lambda (proc list)
-      '''
-Applies the PROC to each element of LIST in turn; if the PROC returns a truthy
-value that value is returned.
-      '''
-      (let ((len (size list)))
-        (let loop ((i 0))
-          (if (= i len)
-            false
-            (let ((elt (. list i)))
-              (let ((result (proc elt)))
-                (if result result
-                  (loop (+ i 1))))))))))
-
 
   // TODO not exported since the equality comparison contract is poorly defined.
   (define list_contains
@@ -94,9 +54,9 @@ value that value is returned.
       '''
 Returns true if list contains value otherwise returns false
       '''
-      (if (list_empty list)
+      (if (= 0 (size list))
         false
-        (or (= val (first list))
+        (or (= val (. list 0))
             (list_contains (subseq list 1 (size list)) val)))))
 
 
@@ -105,78 +65,24 @@ Returns true if list contains value otherwise returns false
 
   // TODO I don't like how this is working...
   (define iterate_ion_seq (java_new "com.amazon.fusion.IterateListProc"))
-  (use 'fusion/vector') // TODO ugly coupling
-  (defpub iterate_list
+
+  (defpub list_iterator
     (lambda (list)
-      "Returns an iterator that produces the elements of a LIST (or vector)."
+      "Returns an iterator that produces the elements of a `list` (or vector)."
       (if (is_vector list)
         (vector_iterate list)
         (iterate_ion_seq list))))
 
-  (defpub iterator_to_list
-    (lambda (iter)
+  (defpub list_from_iterator
+    (lambda (iterator)
       '''
-Creates a list with the contents of ITERATOR, in the same order.
+Creates a list with the elements of `iterator`, in the same order.
       '''
-      (unless (is_iterator iter)
-        (raise_argument_error "iterator_to_list" "iterator" 0 iter))
+      (unless (is_iterator iterator)
+        (raise_argument_error "list_from_iterator" "iterator" 0 iterator))
       (let loop ((result (stretchy_vector)))
-        (if (iterator_has_next iter)
-          (loop (vector_add_m result (iterator_next iter)))
+        (if (iterator_has_next iterator)
+          (loop (vector_add_m result (iterator_next iterator)))
           result))))
-
-
-  // Per SRFI-1
-  (defpub map
-    (lambda (proc list)
-      '''
-Applies the one-parameter procedure PROC to each element of LIST, returning a
-new list of the results in order.
-      '''
-      (let ((len (size list)))
-        (let loop ((i 0)
-                   (result (stretchy_vector)))
-          (if (= i len)
-            result
-            (loop
-              (+ 1 i)
-              (vector_add_m result (proc (. list i)))))))))
-
-
-  // Per SRFI-1
-  (defpub filter
-    (lambda (pred list)
-      '''
-Applies the one-parameter predicate PRED to each element of LIST, returning a
-new list of the elements (in order) for which PRED returns true.
-      '''
-      (let ((len (size list)))
-        (let loop ((i 0)
-                   (result (stretchy_vector)))
-          (if (= i len)
-            result
-            (let ((elt (. list i)))
-              (loop
-                (+ 1 i)
-                (if (pred elt)
-                  (vector_add_m result elt)
-                  result))))))))
-
-  (defpub choose filter)
-
-  // Per SRFI-1
-  (defpub for_each
-    (lambda (proc list)
-      '''
-Applies the one-parameter procedure PROC to each element of LIST, ignoring any
-results.
-      '''
-      (let ((len (size list)))
-        (let loop ((i 0))
-          (if (= i len)
-            (void)
-            (begin
-              (proc (. list i))
-              (loop (+ 1 i))))))))
 
 ) // end module

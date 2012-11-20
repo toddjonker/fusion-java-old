@@ -373,9 +373,9 @@ public class ListTest
     public void testInvalidIteration()
         throws Exception
     {
-        expectContractFailure("(iterate_list 3)");
-        expectContractFailure("(iterator_to_list 3)");
-        expectContractFailure("(iterator_to_list [2,3])");
+        expectContractFailure("(list_iterator 3)");
+        expectContractFailure("(list_from_iterator 3)");
+        expectContractFailure("(list_from_iterator [2,3])");
     }
 
 
@@ -383,10 +383,10 @@ public class ListTest
     public void testIterationArityCheck()
         throws Exception
     {
-        expectArityFailure("(iterate_list)");
-        expectArityFailure("(iterate_list [] 1)");
+        expectArityFailure("(list_iterator)");
+        expectArityFailure("(list_iterator [] 1)");
 
-        expectArityFailure("(iterator_to_list)");
-        expectArityFailure("(iterator_to_list empty_iterator 1)");
+        expectArityFailure("(list_from_iterator)");
+        expectArityFailure("(list_from_iterator empty_iterator 1)");
     }
 }

@@ -12,9 +12,9 @@ final class SizeProc
     SizeProc()
     {
         //    "                                                                               |
-        super("Returns the number of child elements contained in the CONTAINER.\n" +
-              "The size of null.list (etc) is zero.",
-              "container");
+        super("Returns the number of elements in the `collection`.\n" +
+              "The size of `null.list` (_etc._) is zero.",
+              "collection");
     }
 
     @Override

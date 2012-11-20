@@ -7,8 +7,8 @@
 (define F (lambda (e) false))
 (define T (lambda (e) true))
 
-(check = (find F [])     false)
-(check = (find F [1, 2]) false)
+(assert (is_void (find F [])))
+(assert (is_void (find F [1, 2])))
 (check = (find T [1, 2]) 1)
 
 (check = (find (lambda (e) (= e "hi")) ["oh", "hi"]) "hi")
@@ -28,17 +28,17 @@
 (check_equal (map + [1, 2]) [1, 2] "map2")
 (check_equal (map (lambda (n) (+ 3 n)) [1, 2]) [4, 5] "map3")
 
-(check_equal (filter T []) [] "filter1")
-(check_equal (filter F []) [] "filter2")
-(check_equal (filter T [1, 2]) [1, 2] "filter3")
-(check_equal (filter F [1, 2]) [] "filter4")
+(check_equal (choose T []) [] "filter1")
+(check_equal (choose F []) [] "filter2")
+(check_equal (choose T [1, 2]) [1, 2] "filter3")
+(check_equal (choose F [1, 2]) [] "filter4")
 
-(check_equal (filter (lambda (n) (< 10 n)) [1, 11, 10, 12]) [11, 12] "filter5")
+(check_equal (choose (lambda (n) (< 10 n)) [1, 11, 10, 12]) [11, 12] "filter5")
 
 
-(check_equal (for_each (lambda (x) (+ 1 x)) [2, 3])
+(check_equal (do (lambda (x) (+ 1 x)) [2, 3])
    (void) "for_each returns void")
 
 (let [(v (stretchy_vector))]
-  (for_each (lambda (x) (vector_add_m v (+ 1 x))) [2, 3])
+  (do (lambda (x) (vector_add_m v (+ 1 x))) [2, 3])
   (check_equal v [3, 4] "for_each side effects"))

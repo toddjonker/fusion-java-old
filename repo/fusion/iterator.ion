@@ -29,10 +29,10 @@ the given procedures, which are usually closures with shared state.
     (make_iterator FALSE BAD_NEXT))
 
 
-  (defpub iterate_value
+  (defpub value_iterator
     (lambda (value)
       '''
-Returns an iterator that produces a single VALUE.
+Returns an iterator that produces `value` as its only element.
       '''
       (letrec ((has_next TRUE)
                (next (lambda ()
