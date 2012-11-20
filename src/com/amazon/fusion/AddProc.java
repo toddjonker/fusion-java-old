@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionUtils.cloneIfContained;
 import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVector.unsafeVectorAdd;
+import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonValue;
 
@@ -31,7 +32,14 @@ final class AddProc
             return unsafeVectorAdd(eval, args[0], args[1]);
         }
 
-        IonValue seq = eval.convertToIonValueMaybe(args[0]);
+        IonValue seq = FusionValue.castToIonValueMaybe(args[0]);
+        if (seq instanceof IonList)
+        {
+            // TODO FUSION-87 this makes extra copies when converting IonList
+            Object vector = coerceListArg(eval, 0, args);
+            return unsafeVectorAdd(eval, vector, args[1]);
+        }
+
         if (! (seq instanceof IonSequence))
         {
             throw argFailure("Ion sequence", 0, args);

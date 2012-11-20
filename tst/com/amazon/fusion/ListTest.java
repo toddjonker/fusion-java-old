@@ -9,6 +9,7 @@ import static org.junit.Assert.assertSame;
 import com.amazon.ion.IonList;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -47,6 +48,36 @@ public class ListTest
 
 
     //========================================================================
+    // Adding and removing elements
+
+
+    /** Tests interaction with IonValues. */
+    @Test
+    public void testAddToIonList()
+        throws Exception
+    {
+        IonList list = (IonList) system().singleValue("[0, sym]");
+        Object result = topLevel().call("add", list, 2);
+        assertEquals(2, list.size());
+        assertEquals(3, unsafeVectorSize(null, result));
+        assertSame(list.get(0), unsafeVectorRef(null, result, 0));
+        assertSame(list.get(1), unsafeVectorRef(null, result, 1));
+    }
+
+
+    /** Tests interaction with IonValues. */
+    @Test
+    public void testAddMToIonList()
+        throws Exception
+    {
+        IonList list = (IonList) system().singleValue("[0, sym]");
+        Object result = topLevel().call("add_m", list, 2);
+        assertEquals(2, list.size());
+        assertEquals(3, unsafeVectorSize(null, result));
+        assertSame(list.get(0), unsafeVectorRef(null, result, 0));
+        assertSame(list.get(1), unsafeVectorRef(null, result, 1));
+    }
+
 
     @Test
     public void testAdd()
@@ -84,18 +115,18 @@ public class ListTest
         }
     }
 
-    @Test
+    @Test @Ignore  // FUSION-86
     public void testDeepAdd()
         throws Exception
     {
         assertEval("{f:[2]}",
                    "(let ((s {f:[]}))" +
-                   "  (add (. s \"f\") 2)" +
+                   "  (add_m (. s \"f\") 2)" +
                    "  s)");
 
         assertEval("{f:(2)}",
                    "(let ((s {f:(quote ())}))" +
-                   "  (add (. s \"f\") 2)" +
+                   "  (add_m (. s \"f\") 2)" +
                    "  s)");
     }
 

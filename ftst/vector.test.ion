@@ -20,12 +20,19 @@
 (define test_predicates
   (lambda (vector mutable stretchy)
     (assert (is_vector vector))
+    (assert (is_list vector))
     (check_equal (is_mutable_vector vector)
        mutable "is mutable")
+    (check_equal (is_mutable_list vector)
+       mutable "is_mutable_list")
     (check_equal (is_immutable_vector vector)
       (not mutable) "is immutable")
+    (check_equal (is_immutable_list vector)
+      (not mutable) "is_immutable_list")
     (check_equal (is_stretchy_vector vector)
-      stretchy "is stretchy")))
+      stretchy "is stretchy")
+    (check_equal (is_stretchy_list vector)
+      stretchy "is_stretchy_list")))
 
 
 // Construction via literals
@@ -126,35 +133,41 @@
 // Add
 
 (define test_add
-  (lambda (v0)
+  (lambda (add_proc v0)
     (let [(mutable (is_mutable_vector v0)),
           (stretchy (is_stretchy_vector v0)),
-          (v1 (vector_add v0 1))]
+          (v1 (add_proc v0 1))]
       (test_predicates v1 mutable stretchy)
       (check_equal v0  [] "v0 not modified")
       (check_equal v1 [1] "v1")
-      (let ((v2 (vector_add v1 2)))
+      (let ((v2 (add_proc v1 2)))
         (test_predicates v2 mutable stretchy)
         (check_equal v0 []      "v0 not modified")
         (check_equal v1 [1]     "v1 not modified")
         (check_equal v2 [1, 2]  "v2")))))
 
-(test_add [])
-(test_add (vector))
-(test_add (stretchy_vector))
+(test_add add [])
+(test_add add (immutable_vector))
+(test_add add (vector))
+(test_add add (stretchy_vector))
+
+(test_add vector_add [])
+(test_add vector_add (immutable_vector))
+(test_add vector_add (vector))
+(test_add vector_add (stretchy_vector))
 
 
 (define test_add_m
-  (lambda (v0)
+  (lambda (add_m_proc add_proc v0)
     (let [(mutable (is_mutable_vector v0)),
           (stretchy (is_stretchy_vector v0)),
-          (v1 (vector_add_m v0 1))]
+          (v1 (add_m_proc v0 1))]
       (test_predicates v1 mutable stretchy)
       (if stretchy
         (check_equal v0 [1] "v0 should be modified")
         (check_equal v0 []  "v0 not modified"))
       (check_equal v1 [1] "v1")
-      (let ((v2 (vector_add_m v1 2)))
+      (let ((v2 (add_m_proc v1 2)))
         (test_predicates v2 mutable stretchy)
         (if stretchy
           (begin
@@ -167,15 +180,21 @@
         (check_equal v2 [1, 2] "v2")
 
         // Test that we use the right size when its less than capacity
-        (let ((v3 (vector_add_m v2 3)))
-          (let ((v4 (vector_add v3 4)))  // NOT vector_add_m!
+        (let ((v3 (add_m_proc v2 3)))
+          (let ((v4 (add_proc v3 4)))  // NOT add_m!
             (check_equal v4 [1,2,3,4] "v4")))))))
 
 
-(test_add_m [])
-(test_add_m (immutable_vector))
-(test_add_m (vector))
-(test_add_m (stretchy_vector))
+(test_add_m add_m add [])
+(test_add_m add_m add (immutable_vector))
+(test_add_m add_m add (vector))
+(test_add_m add_m add (stretchy_vector))
+
+(test_add_m vector_add_m vector_add [])
+(test_add_m vector_add_m vector_add (immutable_vector))
+(test_add_m vector_add_m vector_add (vector))
+(test_add_m vector_add_m vector_add (stretchy_vector))
+
 
 (define str (stretchy_vector 1 2))
 (vector_add_m str 3)

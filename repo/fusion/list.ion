@@ -33,6 +33,15 @@
   (defpub list vector)
   (defpub stretchy_list stretchy_vector)
 
+  // TODO vector_ref, I'm not sure of the name yet, and `.` works for now.
+  (defpub list_set vector_set)
+
+
+  //==========================================================================
+  // Adding and removing elements
+
+  (defpub_j add_m "com.amazon.fusion.AddMProc")
+
 
   //==========================================================================
   // Iteration

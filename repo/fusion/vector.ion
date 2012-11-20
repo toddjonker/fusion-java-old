@@ -136,7 +136,7 @@ Returns the size of `vector`.
       (unsafe_vector_size vector)))
 
 
-  (defpub vector_ref
+  (defpub vector_ref      // TODO transition to list_ref ? some other name?
     (lambda (vector pos)
       '''
 Returns the element of `vector` at (zero-based) position `pos`.
@@ -180,10 +180,10 @@ given vector is not mutated.
     (lambda (vector value)
       '''
 Returns a vector similar to `vector` with the `value` added to the end.  The
-result may share structure with the vector, which may also be mutated.
+result may share structure with the input vector, which may also be mutated.
 
-In particular, when given a stretchy vector, the input is expanded to contain
-the given value, and the result is the `vector` argument.
+In particular, when `vector` is a stretchy vector, is is expanded to contain
+the given value, and is returned as the result.
       '''
       (unless (is_vector vector)
         (raise_argument_error "vector_add_m" "vector" 0 vector value))

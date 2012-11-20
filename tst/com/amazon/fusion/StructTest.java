@@ -16,6 +16,7 @@ public class StructTest
     public void requires()
         throws FusionException
     {
+        topLevel().requireModule("/fusion/list");
         topLevel().requireModule("/fusion/struct");
     }
 
@@ -98,11 +99,11 @@ public class StructTest
     //========================================================================
 
 
-    @Test @Ignore
+    @Test @Ignore  // FUSION-86
     public void testForEachField()
         throws Exception
     {
-        eval("(define add_name (lambda (name value) (add value name)))");
+        eval("(define add_name (lambda (name value) (add_m value name)))");
         assertEval("{f:[\"f\"],g:[\"g\"],f:[true,false,\"f\"]}",
                    "(for_each_field add_name " +
                    "  {f:null.list,g:[],f:[true,false]})");
