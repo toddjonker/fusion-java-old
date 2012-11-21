@@ -199,6 +199,13 @@ final class FusionVector
     }
 
 
+    static Object unsafeVectorConcatenateM(Evaluator eval, Object vector,
+                                           Object[] args)
+    {
+        return ((BaseVector) vector).concatenateM(args);
+    }
+
+
     /**
      * @param vector must be a vector; it is not type-checked!
      */
@@ -271,7 +278,7 @@ final class FusionVector
         }
 
 
-        Object unsafeRef(int i)
+        final Object unsafeRef(int i)
         {
             return myValues[i];
         }
@@ -289,6 +296,31 @@ final class FusionVector
         {
             return add(value);
         }
+
+        BaseVector concatenateM(Object[] args)
+        {
+            int newLen = myValues.length;
+            for (int i = 0; i < args.length; i++)
+            {
+                newLen += ((BaseVector) args[i]).size();
+            }
+
+            Object[] copy = Arrays.copyOf(myValues, newLen);
+
+            int pos = myValues.length;
+            for (Object arg : args)
+            {
+                BaseVector v = (BaseVector) arg;
+                int argLen = v.size();
+
+                System.arraycopy(v.myValues, 0, copy, pos, argLen);
+                pos += argLen;
+            }
+            assert pos == newLen;
+
+            return makeSimilar(copy);
+        }
+
 
         Iterator<?> javaIterate()
         {
@@ -372,12 +404,12 @@ final class FusionVector
     private static class StretchyVector
         extends MutableVector
     {
-        private int size;
+        private int mySize;
 
         StretchyVector(Object[] values)
         {
             super(values);
-            size = values.length;
+            mySize = values.length;
         }
 
         @Override
@@ -389,21 +421,50 @@ final class FusionVector
         @Override
         int size()
         {
-            return size;
+            return mySize;
         }
 
         @Override
         BaseVector addM(Object value)
         {
-            if (size == myValues.length)
+            if (mySize == myValues.length)
             {
                 // This expansion math is what's used by ArrayList, so I'm
                 // assuming that it works well in practice.
-                int newLength = (size * 3) / 2 + 1;
+                int newLength = (mySize * 3) / 2 + 1;
                 myValues = Arrays.copyOf(myValues, newLength);
             }
 
-            myValues[size++] = value;
+            myValues[mySize++] = value;
+            return this;
+        }
+
+        @Override
+        BaseVector concatenateM(Object[] args)
+        {
+            int newLen = mySize;
+            for (Object arg : args)
+            {
+                newLen += ((BaseVector) arg).size();
+            }
+
+            if (myValues.length < newLen)
+            {
+                myValues = Arrays.copyOf(myValues, newLen);
+            }
+
+            int pos = mySize;
+            for (Object arg : args)
+            {
+                BaseVector v = (BaseVector) arg;
+                int argLen = v.size();
+
+                System.arraycopy(v.myValues, 0, myValues, pos, argLen);
+                pos += argLen;
+            }
+            assert pos == newLen;
+            mySize = pos;
+
             return this;
         }
 
@@ -417,13 +478,13 @@ final class FusionVector
                 @Override
                 public boolean hasNext()
                 {
-                    return (i < size);
+                    return (i < mySize);
                 }
 
                 @Override
                 public Object next()
                 {
-                    if (i < size) return myValues[i++];
+                    if (i < mySize) return myValues[i++];
                     throw new NoSuchElementException();
                 }
 
@@ -584,7 +645,7 @@ final class FusionVector
         UnsafeVectorSizeProc()
         {
             //    "                                                                               |
-            super("Returns the size of `vector`.",
+            super("Returns the mySize of `vector`.",
                   "vector");
         }
 

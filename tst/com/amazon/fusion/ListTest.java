@@ -2,7 +2,10 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVector.unsafeVectorRef;
+import static com.amazon.fusion.FusionVector.unsafeVectorSize;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import com.amazon.ion.IonList;
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,6 +23,7 @@ public class ListTest
     {
         topLevel().requireModule("/fusion/iterator");
         topLevel().requireModule("/fusion/list");
+        topLevel().requireModule("/fusion/vector");
 
         eval("(define smList "+ionListGenerator(1)+")");
         eval("(define medList "+ionListGenerator(3)+")");
@@ -329,6 +333,36 @@ public class ListTest
         expectSyntaxFailure("(for_list ((name 1 2)) 13)");
         expectSyntaxFailure("(for_list ((name 1) ()) 13)");
         expectSyntaxFailure("(for_list ((name 1) (name2)) 13)");
+    }
+
+
+    //========================================================================
+    // Concatenation
+
+    /** Tests interaction with IonValues. */
+    @Test
+    public void testConcatenation()
+        throws Exception
+    {
+        Object vector = eval("(stretchy_vector 1)");
+        IonList list = (IonList) system().singleValue("[2, sym, true]");
+        Object result = topLevel().call("concatenate_m", vector, list);
+        assertSame(vector, result);
+        assertEquals(4, unsafeVectorSize(null, result));
+
+        // Elements should be lazily fusion-ized
+        assertSame(list.get(1), topLevel().call("vector_ref", result, 2));
+
+        // Now mutate the IonValue
+        vector = eval("(stretchy_vector 4)");
+        result = topLevel().call("concatenate_m", list, vector);
+        assertEquals(4, unsafeVectorSize(null, result));
+
+        assertSame(list.get(0), unsafeVectorRef(null, result, 0));
+        assertSame(list.get(1), unsafeVectorRef(null, result, 1));
+        assertSame(list.get(2), unsafeVectorRef(null, result, 2));
+        assertSame(unsafeVectorRef(null, vector, 0),
+                   unsafeVectorRef(null, result, 3));
     }
 
 

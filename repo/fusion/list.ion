@@ -7,6 +7,7 @@
   (use 'fusion/iterator')
 
 
+  (defpub_j concatenate_m   "com.amazon.fusion.ConcatenateMProc")
   (defpub_j subseq          "com.amazon.fusion.IonSubseqProc")
 
 
@@ -160,6 +161,8 @@ new list of the elements (in order) for which PRED returns true.
                 (if (pred elt)
                   (vector_add_m result elt)
                   result))))))))
+
+  (defpub choose filter)
 
   // Per SRFI-1
   (defpub for_each

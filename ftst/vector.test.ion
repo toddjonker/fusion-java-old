@@ -130,13 +130,11 @@
     (let [(mutable (is_mutable_vector v0)),
           (stretchy (is_stretchy_vector v0)),
           (v1 (vector_add v0 1))]
-      (check_equal (is_mutable_vector v1) mutable "mutable 1")
-      (check_equal (is_stretchy_vector v1) stretchy"stretchy 1")
+      (test_predicates v1 mutable stretchy)
       (check_equal v0  [] "v0 not modified")
       (check_equal v1 [1] "v1")
       (let ((v2 (vector_add v1 2)))
-        (check_equal (is_mutable_vector v2) mutable "mutable 2")
-        (check_equal (is_stretchy_vector v2) stretchy "stretchy 2")
+        (test_predicates v2 mutable stretchy)
         (check_equal v0 []      "v0 not modified")
         (check_equal v1 [1]     "v1 not modified")
         (check_equal v2 [1, 2]  "v2")))))
@@ -151,15 +149,13 @@
     (let [(mutable (is_mutable_vector v0)),
           (stretchy (is_stretchy_vector v0)),
           (v1 (vector_add_m v0 1))]
-      (check_equal (is_mutable_vector v1) mutable "mutable 1")
-      (check_equal (is_stretchy_vector v1) stretchy "stretchy 1")
+      (test_predicates v1 mutable stretchy)
       (if stretchy
         (check_equal v0 [1] "v0 should be modified")
         (check_equal v0 []  "v0 not modified"))
       (check_equal [1] v1 "v1")
       (let ((v2 (vector_add_m v1 2)))
-        (check_equal (is_mutable_vector v2) mutable "mutable 2")
-        (check_equal (is_stretchy_vector v2) stretchy "stretchy 2")
+        (test_predicates v2 mutable stretchy)
         (if stretchy
           (begin
             (check_equal v0 [1, 2] "v0 should be modified")
@@ -177,6 +173,7 @@
 
 
 (test_add_m [])
+(test_add_m (immutable_vector))
 (test_add_m (vector))
 (test_add_m (stretchy_vector))
 
@@ -184,6 +181,38 @@
 (vector_add_m str 3)
 { a: str }  // Once broken due to the null in the stretchy vector after 3
 
+
+//==========================================================================
+// concatenate
+
+(define test_concatenate_m
+  (lambda (v0)
+    (let [(mutable (is_mutable_vector v0)),
+          (stretchy (is_stretchy_vector v0)),
+          (v1 (concatenate_m v0 [1]))]
+      (test_predicates v1 mutable stretchy)
+      (if stretchy
+        (check_equal v0 [1] "v0 should be modified")
+        (check_equal v0 []  "v0 not modified"))
+      (check_equal [1] v1 "v1")
+      (let ((v2 (concatenate_m v1 (stretchy_vector 2 3) (vector 4))))
+        (test_predicates v2 mutable stretchy)
+        (if stretchy
+          (begin
+            (check_equal v0 [1, 2, 3, 4] "v0 should be modified")
+            (check_equal v1 [1, 2, 3, 4] "v1 should be modified")
+            )
+          (begin
+            (check_equal v0 []  "v0 not modified")
+            (check_equal v1 [1] "v1 not modified")))
+        (check_equal v2 [1, 2, 3, 4] "v2")))))
+
+(check_equal [1] (concatenate_m null.list [1] null.list) "contact w/ null target")
+(check_equal [1] (concatenate_m [1] null.list) "contact w/ null arg")
+
+
+//==========================================================================
+// Iteration
 
 (check_equal (iterator_to_list (vector_iterate str))
   [1,2,3] "iteration round-trip")
