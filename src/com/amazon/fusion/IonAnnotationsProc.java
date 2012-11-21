@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionVector.makeImmutableVectorFrom;
+import static com.amazon.fusion.FusionVector.immutableVector;
 import com.amazon.ion.IonValue;
 
 final class IonAnnotationsProc
@@ -40,6 +40,6 @@ final class IonAnnotationsProc
 
         // Returning immutable vector allows us to return a shared structure
         // when possible, avoiding copies.
-        return makeImmutableVectorFrom(eval, result);
+        return immutableVector(eval, result);
     }
 }

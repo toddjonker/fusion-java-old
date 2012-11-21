@@ -19,7 +19,7 @@ final class FusionVector
 {
     private FusionVector() {}
 
-    static final BaseVector EMPTY_IMMUTABLE_VECTOR =
+    static final ImmutableVector EMPTY_IMMUTABLE_VECTOR =
         new ImmutableVector(FusionUtils.EMPTY_OBJECT_ARRAY);
 
 
@@ -29,51 +29,70 @@ final class FusionVector
 
     /**
      * Caller must have injected children.
+     * @param elements must not be null. This method assumes ownership!
      */
-    static Object makeVectorFrom(Evaluator eval, Object value)
+    static Object vector(Evaluator eval, Object[] elements)
     {
-        return new MutableVector(new Object[] { value });
+        return new MutableVector(elements);
     }
 
-
-    /**
-     * Caller must have injected children.
-     * @param values must not be null. This method assumes ownership!
-     */
-    static Object makeVectorFrom(Evaluator eval, Object[] values)
-    {
-        return new MutableVector(values);
-    }
-
-
-    /**
-     * Caller must have injected children.
-     * @param values must not be null
-     */
-    static Object makeImmutableVectorFrom(Evaluator eval, Object[] values)
-    {
-        return new ImmutableVector(values);
-    }
 
     /**
      * Creates a mutable vector containing the values.
-     * @param values must be injected.
+     * @param elements must be injected.
      */
-    static Object makeVectorFrom(Evaluator eval, List<Object> values)
+    static <T> MutableVector vector(Evaluator eval, List<T> elements)
     {
-        Object[] v = new Object[values.size()];
-        values.toArray(v);
+        Object[] v = new Object[elements.size()];
+        elements.toArray(v);
         return new MutableVector(v);
     }
 
 
     /**
      * Caller must have injected children.
-     * @param values must not be null
+     * @param elements must not be null
      */
-    static Object stretchyVector(Evaluator eval, Object[] values)
+    static ImmutableVector immutableVector(Evaluator eval, Object[] elements)
     {
-        return new StretchyVector(values);
+        if (elements.length == 0)
+        {
+            return EMPTY_IMMUTABLE_VECTOR;
+        }
+        else
+        {
+            return new ImmutableVector(elements);
+        }
+    }
+
+
+    /**
+     * Caller must have injected children.
+     * @param elements must not be null
+     */
+    static <T> ImmutableVector immutableVector(Evaluator eval,
+                                               List<T> elements)
+    {
+        int size = elements.size();
+        if (size == 0)
+        {
+            return EMPTY_IMMUTABLE_VECTOR;
+        }
+        else
+        {
+            Object[] elts = elements.toArray(new Object[size]);
+            return new ImmutableVector(elts);
+        }
+    }
+
+
+    /**
+     * Caller must have injected children.
+     * @param elements must not be null
+     */
+    static Object stretchyVector(Evaluator eval, Object[] elements)
+    {
+        return new StretchyVector(elements);
     }
 
 
@@ -597,7 +616,7 @@ final class FusionVector
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            return makeImmutableVectorFrom(eval, args);
+            return immutableVector(eval, args);
         }
     }
 
@@ -616,7 +635,7 @@ final class FusionVector
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            return makeVectorFrom(eval, args);
+            return vector(eval, args);
         }
     }
 

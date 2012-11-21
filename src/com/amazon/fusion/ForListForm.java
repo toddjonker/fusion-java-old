@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIterator.iterate;
-import static com.amazon.fusion.FusionVector.makeVectorFrom;
+import static com.amazon.fusion.FusionVector.vector;
 import com.amazon.ion.IonValue;
 import java.util.ArrayList;
 
@@ -170,7 +170,7 @@ final class ForListForm
                 }
             }
 
-            return makeVectorFrom(eval, result);
+            return vector(eval, result);
         }
     }
 }

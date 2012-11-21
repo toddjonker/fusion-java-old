@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
+import static com.amazon.fusion.FusionVector.immutableVector;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
@@ -149,7 +150,7 @@ final class SyntaxList
             children[i] = s.quote(eval);
         }
 
-        return FusionVector.makeImmutableVectorFrom(eval, children);
+        return immutableVector(eval, children);
     }
 
 
@@ -204,7 +205,7 @@ final class SyntaxList
                 children[i] = eval.eval(store, myChildForms[i]);
             }
 
-            return FusionVector.makeImmutableVectorFrom(eval, children);
+            return immutableVector(eval, children);
         }
     }
 }

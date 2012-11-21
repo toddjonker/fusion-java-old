@@ -2,8 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVector.immutableVector;
 import static com.amazon.fusion.FusionVector.isVector;
-import static com.amazon.fusion.FusionVector.makeImmutableVectorFrom;
 import static com.amazon.fusion.FusionVector.unsafeVectorConcatenateM;
 import com.amazon.ion.IonList;
 
@@ -38,8 +38,7 @@ final class ConcatenateMProc
             IonList iv = checkIonList(args, 0);
             if (arity == 1) return iv;
 
-            Object[] elements = iv.toArray(new Object[iv.size()]);
-            first = makeImmutableVectorFrom(eval, elements);
+            first = immutableVector(eval, iv);
         }
 
         Object[] vectorArgs = new Object[arity - 1];
@@ -52,8 +51,7 @@ final class ConcatenateMProc
                 IonList iv = checkIonList(args, i);
 
                 // Convert to vector to make appending easier
-                Object[] elements = iv.toArray(new Object[iv.size()]);
-                arg = makeImmutableVectorFrom(eval, elements);
+                arg = immutableVector(eval, iv);
             }
             vectorArgs[i - 1] = arg;
         }

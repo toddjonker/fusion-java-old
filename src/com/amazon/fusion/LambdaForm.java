@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionVector.makeImmutableVectorFrom;
+import static com.amazon.fusion.FusionVector.immutableVector;
 
 /**
  * The {@code lambda} syntactic form, which evaluates to a {@link Closure}.
@@ -377,7 +377,7 @@ final class LambdaForm
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            Object rest = makeImmutableVectorFrom(eval, args);
+            Object rest = immutableVector(eval, args);
 
             Store localStore = new LocalStore1(myEnclosure, rest);
 
