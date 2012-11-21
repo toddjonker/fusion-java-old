@@ -207,6 +207,11 @@
             (check_equal v1 [1] "v1 not modified")))
         (check_equal v2 [1, 2, 3, 4] "v2")))))
 
+(test_concatenate_m [])
+(test_concatenate_m (immutable_vector))
+(test_concatenate_m (vector))
+(test_concatenate_m (stretchy_vector))
+
 (check_equal [1] (concatenate_m null.list [1] null.list) "contact w/ null target")
 (check_equal [1] (concatenate_m [1] null.list) "contact w/ null arg")
 

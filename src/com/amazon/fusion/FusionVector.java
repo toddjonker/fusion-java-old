@@ -646,7 +646,7 @@ final class FusionVector
         UnsafeVectorSizeProc()
         {
             //    "                                                                               |
-            super("Returns the mySize of `vector`.",
+            super("Returns the number of elements in `vector`.",
                   "vector");
         }
 
