@@ -163,31 +163,6 @@ public class ListTest
         return ionListGeneratorWithOffset(length, 0);
     }
 
-    @Test
-    public void testListTail()
-        throws Exception
-    {
-        assertEval("[0]",   "(list_tail smList 0)");
-        assertEval("[1,2]", "(list_tail medList 1)");
-        assertEval(ionListGeneratorWithOffset(8887,1), "(list_tail lgList 1)");
-
-    }
-
-    @Test
-    public void testListTailFailures()
-        throws Exception
-    {
-        expectArityFailure("(list_tail)");
-        expectArityFailure("(list_tail 1 2 3 4)");
-        expectArityFailure("(list_tail [])");
-
-        expectArgTypeFailure("(list_tail \"hello\" 0)", 0);
-
-        expectArgTypeFailure("(list_tail null.list 1)", 1);
-        expectArgTypeFailure("(list_tail [] 1)", 1);
-        expectArgTypeFailure("(list_tail lgList 10000)", 1);
-    }
-
 
     @Test
     public void testSubsequence()

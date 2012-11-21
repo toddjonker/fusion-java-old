@@ -35,32 +35,6 @@
 
 
   //==========================================================================
-
-  // TODO FUSION-86 subseq should make 'to' arg optional
-  (defpub list_tail
-    (lambda (list from)
-      '''
-Returns the list after the first FROM elements of LIST.
-      '''
-      // TODO if 'from' is to large, error message has wrong proc name
-      (subseq list from (size list))))
-
-
-  //==========================================================================
-
-  // TODO not exported since the equality comparison contract is poorly defined.
-  (define list_contains
-    (lambda (list val)
-      '''
-Returns true if list contains value otherwise returns false
-      '''
-      (if (= 0 (size list))
-        false
-        (or (= val (. list 0))
-            (list_contains (subseq list 1 (size list)) val)))))
-
-
-  //==========================================================================
   // Iteration
 
   // TODO I don't like how this is working...
