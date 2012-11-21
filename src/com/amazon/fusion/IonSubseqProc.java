@@ -16,10 +16,12 @@ final class IonSubseqProc
     IonSubseqProc()
     {
         //    "                                                                               |
-        super("Returns a new sequence holding the elements from SEQUENCE starting at index\n" +
-              "FROM (inclusive) and ending before index TO.\n" +
-              "If FROM is beyond the end of the SEQUENCE, or is not less than TO, the result\n" +
-              "is an empty sequence.",
+        super("Returns a sequence holding the elements from `sequence` between positions\n" +
+              "`from` and `to`.  The following precondition applies:\n" +
+              "\n" +
+              "    0 <= from <= to <= (size sequence)\n" +
+              "\n" +
+              "The result may share structure with `sequence`.",
               "sequence", "from", "to");
     }
 
