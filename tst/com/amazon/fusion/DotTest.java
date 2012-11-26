@@ -45,10 +45,10 @@ public class DotTest
     public void testMissingPart()
         throws Exception
     {
-        assertEval(true, "(is_undef (. {f:1} \"g\"))");
-        assertEval(true, "(is_undef (. {f:1,g:[2]} \"g\" 1 1))");
-        assertEval(true, "(is_undef (. [1] 1))");
-        assertEval(true, "(is_undef (. [1, {f:2}] 1 \"g\" 1))");
+        assertEval(true, "(is_void (. {f:1} \"g\"))");
+        assertEval(true, "(is_void (. {f:1,g:[2]} \"g\" 1 1))");
+        assertEval(true, "(is_void (. [1] 1))");
+        assertEval(true, "(is_void (. [1, {f:2}] 1 \"g\" 1))");
     }
 
     @Test

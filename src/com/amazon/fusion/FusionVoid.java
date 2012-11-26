@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import java.io.IOException;
+
 
 /**
  * Utilities for working with Fusion's singular {@code void} value.
@@ -12,8 +14,15 @@ public final class FusionVoid
 
 
     /** The singular {@code void} value. */
-    private final static FusionValue VOID = FusionValue.UNDEF;
-    // TODO FUSION-71 this shouldn't be UNDEF.
+    private final static FusionValue VOID =
+        new FusionValue()
+        {
+            @Override
+            void write(Appendable out) throws IOException
+            {
+                out.append("{{{void}}}");
+            }
+        };
 
 
     //========================================================================
@@ -56,7 +65,7 @@ public final class FusionVoid
         VoidProc()
         {
             //    "                                                                               |
-            super("Returns the Fusion void value, ignoring all ARGs.",
+            super("Returns the singular void value, ignoring all `arg`s.",
                   "arg", DOTDOTDOT);
         }
 
@@ -73,7 +82,7 @@ public final class FusionVoid
         IsVoidProc()
         {
             //    "                                                                               |
-            super("Determines whether a VALUE is the Fusion void value.",
+            super("Determines whether a `value` is the Fusion void value.",
                   "value");
         }
 

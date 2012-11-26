@@ -288,7 +288,7 @@ public class ListTest
         assertEval(true, "(is_list [[[]],[3,3]])");
         assertEval(true, "(is_list [{a:3},{a:3}])");
 
-        assertEval(false, "(is_list undef)");
+        assertEval(false, "(is_list (void))");
         assertEval(false, "(is_list {})");
         assertEval(false, "(is_list \"[1,2,3]\")");
     }

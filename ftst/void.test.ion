@@ -3,14 +3,16 @@
 (use 'check')
 (use 'fusion/void')
 
-(check_equal (is_void (void))     true "0")
-(check_equal (is_void (void 1))   true "1")
-(check_equal (is_void (void 1 2)) true "2")
+(check_true (is_void (void)))
+(check_true (is_void (void 1)))
+(check_true (is_void (void 1 2)))
 
+// TODO FUSION-88 void should be instance-equal
 (check_equal (apply void []) (void) "apply")
 
-(check_equal (is_void null)  false "is_void null")
-(check_equal (is_void true)  false "is_void true")
-(check_equal (is_void false) false "is_void false")
+(check_false (is_void null))
+(check_false (is_void true))
+(check_false (is_void false))
 
-//(check_equal (is_void undef) false "is_void undef") // TODO FUSION-71 FIXME
+(define undef (letrec [(x y), (y 2)] x))
+(check_false (is_void undef))

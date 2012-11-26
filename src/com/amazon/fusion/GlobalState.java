@@ -90,7 +90,6 @@ final class GlobalState
         ns.define("load", loadProc);
         ns.define("module", moduleForm);
         ns.define("quote_syntax", new QuoteSyntaxForm()); // For fusion/syntax
-        ns.define("undef", FusionValue.UNDEF);
 
         for (IonType t : IonType.values())
         {

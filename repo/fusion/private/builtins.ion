@@ -6,7 +6,7 @@
 
 
   // #%kernel bindings we pass through
-  (provide begin define if lambda letrec load module undef use)
+  (provide begin define if lambda letrec load module use)
   (provide is_bool is_int is_float is_decimal is_timestamp is_symbol
       is_string is_clob is_blob is_list is_sexp is_struct)
 
@@ -33,7 +33,6 @@
   (defpub_j exit                  "com.amazon.fusion.ExitProc")
   (defpub_j for_each_field        "com.amazon.fusion.ForEachFieldProc")
   (defpub_j is_null               "com.amazon.fusion.IsNullProc")
-  (defpub_j is_undef              "com.amazon.fusion.IsUndefProc")
   (defpub_j make_sexp             "com.amazon.fusion.MakeSexpProc")
   (defpub_j not                   "com.amazon.fusion.NotProc")
   (defpub_j raise_argument_error  "com.amazon.fusion.RaiseArgumentErrorProc")

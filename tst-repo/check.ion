@@ -16,9 +16,11 @@
   (defpub check_equal
     (lambda (actual expected descr)
       (cond
-        ((is_undef expected)
-         (assert (is_undef actual)
-           descr " not equal.\nActual: " actual "\nExpected: " expected))
+
+// TODO FUSION-88 should support undef
+//        ((is_undef expected)
+//         (assert (is_undef actual)
+//           descr " not equal.\nActual: " actual "\nExpected: " expected))
         ((is_list expected)
          (check_list_equal actual expected))
         ((is_vector expected)

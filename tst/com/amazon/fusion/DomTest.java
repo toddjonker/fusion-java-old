@@ -26,7 +26,7 @@ public class DomTest
     {
         assertEval(true,  "(is_sexp (quote ()))");
         assertEval(false, "(is_string (quote ()))");
-        assertEval(false, "(is_int undef)");
+        assertEval(false, "(is_int (void))");
 
         expectArityFailure("(is_bool)");
     }

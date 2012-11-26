@@ -38,8 +38,7 @@ public class BindingTest
         assertEval(11, "(let ((x 1) (y 2))" +
                        "  (let [(x 10), (y x)]" +
                        "    (+ x y)))");
-        assertEval(1, "(let ((u undef)) (if (is_undef u) 1 2))");
-        assertEval(1, "(let ((u undef)) (if (is_undef u) 1 2))");
+        assertEval(1, "(let ((u (void))) (if (is_void u) 1 2))");
     }
 
 

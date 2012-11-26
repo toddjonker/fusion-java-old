@@ -2,6 +2,26 @@
 
 (module void (quote '#%kernel')
 
+  '''
+The singular no-value value.
+
+The void value is used to denote "no value" and is the canonical value to
+return from a form when it has nothing meaningful to return.
+For example, `(when false "hi")` returns void since the truthy branch isn't
+taken. Definitions via `define`, mutation via `set`, and other core operations
+also return void.  In contrast to C++ or Java, a Fusion procedure that
+"returns void" returns a value called "void", as opposed to no value
+whatsoever.
+
+The void value can be acquired by calling the procedure `void` with any number
+of arguments, and one can check for it via the procedure `is_void`.
+
+Along with all nulls and `false`, the void value is untruthy:
+
+    $ (if (void) "yes" "no")
+    "no"
+  '''
+
   (use 'fusion/experimental/defines')
 
   (defpub_j is_void  "com.amazon.fusion.FusionVoid$IsVoidProc")

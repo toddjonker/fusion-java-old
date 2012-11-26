@@ -51,7 +51,8 @@ public class CoreTestCase
     /** Exprs that evaluate to non-Ion types. */
     private static final String[] NON_ION_EXPRESSIONS =
     {
-        "undef",
+        "(void)",
+        "(letrec [(x y), (y 2)] x)", // undef
         "(lambda () 1)",
     };
 

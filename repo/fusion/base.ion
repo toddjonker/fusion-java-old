@@ -7,7 +7,7 @@
 
 
   // Pass-through bindings from #%kernel
-  (provide begin define if lambda letrec module undef use)
+  (provide begin define if lambda letrec module use)
   (provide is_bool is_int is_float is_decimal is_timestamp is_symbol
       is_string is_clob is_blob is_list is_sexp is_struct)
   // Note that there's no is_null type checker, since that's used to
@@ -17,7 +17,7 @@
   // Pass-through bindings from builtins
   (provide assert for_list let let_values quote set)
   (provide * + - . < = apply concatenate exit
-    for_each_field is_null is_undef make_sexp not
+    for_each_field is_null make_sexp not
     raise_argument_error raise_result_error remove
     to_int to_string)
 

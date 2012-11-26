@@ -28,7 +28,7 @@ public class BooleanTest
         "[]",
         "(quote ())",
         "{}",
-        // "(letrec [(x y), (y 2)] x)",  TODO FUSION-71 undef should be truthy
+        "(letrec [(x y), (y 2)] x)",
     };
 
     public static final String[] UNTRUTHY_EXPRESSIONS =
@@ -288,7 +288,7 @@ public class BooleanTest
             expectContractFailure("("+ops[i]+" 1 \"hello\")");
             expectContractFailure("("+ops[i]+" 1 2008-08-28)");
             expectContractFailure("("+ops[i]+" 1 2007-08-28T16:37:24.0000Z)");
-            expectContractFailure("("+ops[i]+" 1 undef)");
+            expectContractFailure("("+ops[i]+" 1 (void))");
             expectContractFailure("("+ops[i]+" 1 1.667)");
             expectContractFailure("("+ops[i]+" 1 "+reallyBigDec+")");
 
@@ -296,7 +296,7 @@ public class BooleanTest
             expectContractFailure("("+ops[i]+" true \"hello\")");
             expectContractFailure("("+ops[i]+" true 2008-08-28)");
             expectContractFailure("("+ops[i]+" true 2007-08-28T16:37:24.0000Z)");
-            expectContractFailure("("+ops[i]+" true undef)");
+            expectContractFailure("("+ops[i]+" true (void))");
             expectContractFailure("("+ops[i]+" true 1.667)");
             expectContractFailure("("+ops[i]+" true "+reallyBigNumber+")");
             expectContractFailure("("+ops[i]+" true "+reallyBigDec+")");
@@ -305,7 +305,7 @@ public class BooleanTest
             expectContractFailure("("+ops[i]+" \"hello\" true)");
             expectContractFailure("("+ops[i]+" \"hello\" 2008-08-28)");
             expectContractFailure("("+ops[i]+" \"hello\" 2007-08-28T16:37:24.0000Z)");
-            expectContractFailure("("+ops[i]+" \"hello\" undef)");
+            expectContractFailure("("+ops[i]+" \"hello\" (void))");
             expectContractFailure("("+ops[i]+" \"hello\" 1.667)");
             expectContractFailure("("+ops[i]+" \"hello\" "+reallyBigNumber+")");
             expectContractFailure("("+ops[i]+" \"hello\" "+reallyBigDec+")");
@@ -313,7 +313,7 @@ public class BooleanTest
             expectContractFailure("("+ops[i]+" 2008-08-28 1)");
             expectContractFailure("("+ops[i]+" 2008-08-28 \"hello\")");
             expectContractFailure("("+ops[i]+" 2008-08-28 true)");
-            expectContractFailure("("+ops[i]+" 2008-08-28 undef)");
+            expectContractFailure("("+ops[i]+" 2008-08-28 (void))");
             expectContractFailure("("+ops[i]+" 2008-08-28 1.667)");
             expectContractFailure("("+ops[i]+" 2008-08-28 "+reallyBigNumber+")");
             expectContractFailure("("+ops[i]+" 2008-08-28 "+reallyBigDec+")");
@@ -321,7 +321,7 @@ public class BooleanTest
             expectContractFailure("("+ops[i]+" 2007-08-28T16:37:24.0000Z true)");
             expectContractFailure("("+ops[i]+" 2007-08-28T16:37:24.0000Z 1)");
             expectContractFailure("("+ops[i]+" 2007-08-28T16:37:24.0000Z \"hello\")");
-            expectContractFailure("("+ops[i]+" 2008-08-28T16:37:24.0000Z  undef)");
+            expectContractFailure("("+ops[i]+" 2008-08-28T16:37:24.0000Z (void))");
             expectContractFailure("("+ops[i]+" 2008-08-28T16:37:24.0000Z 1.667)");
             expectContractFailure("("+ops[i]+" 2008-08-28T16:37:24.0000Z "+reallyBigNumber+")");
             expectContractFailure("("+ops[i]+" 2008-08-28T16:37:24.0000Z "+reallyBigDec+")");

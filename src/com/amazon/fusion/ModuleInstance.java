@@ -130,7 +130,14 @@ final class ModuleInstance
             {
                 FusionValue fv = (FusionValue) value;
                 doc = fv.document();
-                assert doc == null || name.equals(doc.myName);
+                if (doc != null && ! name.equals(doc.myName))
+                {
+                    String msg =
+                        "WARNING: potential documented-name mismatch in " +
+                        myIdentity + ": " +
+                        name + " vs " + doc.myName;
+                    System.err.println(msg);
+                }
             }
         }
         return doc;

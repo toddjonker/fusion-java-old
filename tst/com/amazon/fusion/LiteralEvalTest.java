@@ -93,7 +93,7 @@ public class LiteralEvalTest
     public void testBadStructLiteral()
         throws Exception
     {
-        expectContractFailure("{f:undef}");
+        expectContractFailure("{f:(void)}");
     }
 
 
@@ -149,21 +149,12 @@ public class LiteralEvalTest
 
 
     @Test
-    public void testIsUndefArity()
-        throws Exception
-    {
-        expectArityFailure("(is_undef)");
-        expectArityFailure("(is_undef undef 2)");
-    }
-
-
-    @Test
     public void testIsNull()
         throws Exception
     {
         assertEval(true,  "(is_null null)");
         assertEval(true,  "(is_null null.int)");
-        assertEval(false, "(is_null undef)");
+        assertEval(false, "(is_null (void))");
         assertEval(false, "(is_null false)");
         assertEval(false, "(is_null 0)");
         assertEval(false, "(is_null \"\")");
