@@ -7,7 +7,6 @@ import static com.amazon.fusion.FusionVoid.isVoid;
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonInt;
-import com.amazon.ion.IonList;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonType;
@@ -550,20 +549,6 @@ public abstract class FusionValue
     }
 
 
-    static IonList copyToIonList(Object[] value, ValueFactory factory)
-        throws FusionException
-    {
-        int len = value.length;
-        IonValue[] ions = new IonValue[len];
-        for (int i = 0; i < len; i++)
-        {
-            ions[i] = copyToIonValue(value[i], factory);
-        }
-
-        return factory.newList(ions);
-    }
-
-
     /**
      * Returns a new {@link IonValue} representation of a Fusion value,
      * if its type falls within the Ion type system.
@@ -583,18 +568,7 @@ public abstract class FusionValue
                                                ValueFactory factory)
         throws FusionException
     {
-        if (value instanceof IonValue)
-        {
-            IonValue iv = (IonValue) value;
-            return factory.clone(iv);
-        }
-
-        if (isVector(value))
-        {
-            return FusionVector.unsafeCopyToIonValueMaybe(value, factory);
-        }
-
-        return null;
+        return copyToIonValue(value, factory, false);
     }
 
 
@@ -613,6 +587,26 @@ public abstract class FusionValue
     public static IonValue copyToIonValue(Object value, ValueFactory factory)
         throws FusionException
     {
+        return copyToIonValue(value, factory, true);
+    }
+
+
+    /**
+     * Returns a new {@link IonValue} representation of a Fusion value,
+     * if its type falls within the Ion type system.
+     * The {@link IonValue} will use the given factory and will not have a
+     * container.
+     *
+     * @param factory must not be null.
+     *
+     * @throws FusionException if the value cannot be converted to Ion.
+     *
+     * @see FusionRuntime#ionize(Object, ValueFactory)
+     */
+    static IonValue copyToIonValue(Object value, ValueFactory factory,
+                                   boolean throwOnConversionFailure)
+        throws FusionException
+    {
         if (value instanceof IonValue)
         {
             IonValue iv = (IonValue) value;
@@ -624,29 +618,30 @@ public abstract class FusionValue
             return FusionVector.unsafeCopyToIonList(value, factory);
         }
 
-        String message =
-            "Value is not convertable to Ion: " + writeToString(value);
-        throw new ContractFailure(message);
+        if (throwOnConversionFailure)
+        {
+            String message =
+                "Value is not convertable to Ion: " + writeToString(value);
+            throw new ContractFailure(message);
+        }
+
+        return null;
     }
 
 
     /**
-     * EXPERIMENTAL - better to use {@link Evaluator#inject(IonValue)}.
+     * FOR INTERNAL USE ONLY!
      *
      * @param dom must not be null.
+     * @deprecated DO NOT USE! Use {@link Evaluator#inject(IonValue)} instead
      */
+    @Deprecated
     static Object forIonValue(IonValue dom)
     {
         dom.getClass();  // Forces a null check
         return dom;
     }
 
-
-    static IonType ionType(Object value)
-    {
-        IonValue iv = castToIonValueMaybe(value);
-        return (iv != null ? iv.getType() : null);
-    }
 
     static boolean isAnyIonNull(Object value)
     {

@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVector.immutableVector;
 import static com.amazon.fusion.FusionVector.isVector;
 import com.amazon.fusion.ArityFailure.Variability;
 import com.amazon.fusion.BindingDoc.Kind;
@@ -138,7 +139,7 @@ abstract class Procedure
     }
 
 
-    FusionException argFailure(String expectation, int badPos, Object... actuals)
+    ArgTypeFailure argFailure(String expectation, int badPos, Object... actuals)
     {
         return new ArgTypeFailure(this, expectation, badPos, actuals);
     }
@@ -314,6 +315,30 @@ abstract class Procedure
     {
         return checkDomArg(IonContainer.class, "list, sexp, or struct",
                            true /* nullable */, argNum, args);
+    }
+
+
+    /**
+     * Expects a list argument, coercing {@link IonList} to an immutable
+     * vector, and {@code null.list} to an empty immutable vector.
+     */
+    Object coerceListArg(Evaluator eval, int argNum, Object... args)
+        throws ArgTypeFailure
+    {
+        Object arg = args[argNum];
+        if (isVector(eval, arg)) return arg;
+
+        IonList list;
+        try
+        {
+            list = (IonList) arg;
+        }
+        catch (ClassCastException e)
+        {
+            throw argFailure("list", argNum, args);
+        }
+
+        return immutableVector(eval, list);
     }
 
 

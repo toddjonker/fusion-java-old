@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionValue.copyToIonValue;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonType;
@@ -231,16 +232,7 @@ final class FusionVector
     static IonList unsafeCopyToIonList(Object vector, ValueFactory factory)
         throws FusionException
     {
-        BaseVector base = (BaseVector) vector;
-        Object[] v = base.myValues;
-        int len = base.size();
-        IonValue[] ions = new IonValue[len];
-        for (int i = 0; i < len; i++)
-        {
-            ions[i] = FusionValue.copyToIonValue(v[i], factory);
-        }
-
-        return factory.newList(ions);
+        return unsafeCopyToIonList(vector, factory, true);
     }
 
 
@@ -249,8 +241,22 @@ final class FusionVector
      *
      * @return null if the vector and its contents cannot be ionized.
      */
-    static IonList unsafeCopyToIonValueMaybe(Object vector,
-                                             ValueFactory factory)
+    static IonList unsafeCopyToIonListMaybe(Object vector,
+                                            ValueFactory factory)
+        throws FusionException
+    {
+        return unsafeCopyToIonList(vector, factory, false);
+    }
+
+
+    /**
+     * @param vector must be a vector; it is not type-checked!
+     *
+     * @return null if the vector and its contents cannot be ionized.
+     */
+    static IonList unsafeCopyToIonList(Object vector,
+                                       ValueFactory factory,
+                                       boolean throwOnConversionFailure)
         throws FusionException
     {
         BaseVector base = (BaseVector) vector;
@@ -259,8 +265,13 @@ final class FusionVector
         IonValue[] ions = new IonValue[len];
         for (int i = 0; i < len; i++)
         {
-            IonValue ion = FusionValue.copyToIonValueMaybe(v[i], factory);
-            if (ion == null) return null;
+            IonValue ion =
+                copyToIonValue(v[i], factory, throwOnConversionFailure);
+            if (ion == null)
+            {
+                assert !throwOnConversionFailure;
+                return null;
+            }
 
             ions[i] = ion;
         }

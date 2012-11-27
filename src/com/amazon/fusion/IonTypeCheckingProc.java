@@ -3,9 +3,10 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonType;
+import com.amazon.ion.IonValue;
 
 /**
- * Implements all the {@code is_TYPE} procedures for the Ion types.
+ * Implements some of the {@code is_TYPE} procedures for the Ion types.
  */
 final class IonTypeCheckingProc
     extends Procedure1
@@ -15,9 +16,9 @@ final class IonTypeCheckingProc
     IonTypeCheckingProc(IonType type)
     {
         //    "                                                                               |
-        super("Determines whether a VALUE is an Ion "
+        super("Determines whether a `value` is of type "
                  + type.name().toLowerCase()
-                 + ", returning true or false.",
+                 + ", returning `true` or `false`.",
               "value");
 
         myType = type;
@@ -27,7 +28,8 @@ final class IonTypeCheckingProc
     Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        boolean result = (FusionValue.ionType(arg) == myType);
+        IonValue iv = castToIonValueMaybe(arg);
+        boolean result = (iv != null && iv.getType() == myType);
         return eval.newBool(result);
     }
 }
