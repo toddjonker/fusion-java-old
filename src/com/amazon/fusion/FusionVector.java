@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
+import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionValue.copyToIonValue;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
@@ -9,6 +11,7 @@ import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
+import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -26,6 +29,32 @@ final class FusionVector
 
     //========================================================================
     // Constructors
+
+
+    /**
+     * Turns null.list into an empty vector with the same annotations.
+     */
+    static BaseVector vectorFromIonList(Evaluator eval, IonList list)
+    {
+        String[] annotations = list.getTypeAnnotations();
+        // TODO FUSION-47 intern annotation text
+
+        int size = list.size();
+        if (size == 0)
+        {
+            if (annotations.length == 0)
+            {
+                return EMPTY_IMMUTABLE_VECTOR;
+            }
+
+            return new ImmutableVector(annotations, EMPTY_OBJECT_ARRAY);
+        }
+        else
+        {
+            Object[] elts = list.toArray(new Object[size]);
+            return new LazyInjectingVector(annotations, elts);
+        }
+    }
 
 
     /**
@@ -51,7 +80,7 @@ final class FusionVector
 
 
     /**
-     * Caller must have injected children.
+     * Caller must have injected elements.
      * @param elements must not be null
      */
     static ImmutableVector immutableVector(Evaluator eval, Object[] elements)
@@ -63,6 +92,25 @@ final class FusionVector
         else
         {
             return new ImmutableVector(elements);
+        }
+    }
+
+
+    /**
+     * Caller must have injected elements.
+     * @param elements must not be null
+     */
+    static ImmutableVector immutableVector(Evaluator eval,
+                                           String[] annotations,
+                                           Object[] elements)
+    {
+        if (elements.length == 0 && annotations.length == 0)
+        {
+            return EMPTY_IMMUTABLE_VECTOR;
+        }
+        else
+        {
+            return new ImmutableVector(annotations, elements);
         }
     }
 
@@ -131,6 +179,14 @@ final class FusionVector
     //========================================================================
     // Accessors
 
+    /**
+     * @return not null.
+     */
+    static String[] unsafeVectorAnnotationStrings(Evaluator eval,
+                                                  Object vector)
+    {
+        return ((BaseVector) vector).myAnnotations;
+    }
 
     static int unsafeVectorSize(Evaluator eval, Object vector)
     {
@@ -140,7 +196,7 @@ final class FusionVector
 
     static Object unsafeVectorRef(Evaluator eval, Object vector, int pos)
     {
-        return ((BaseVector) vector).unsafeRef(pos);
+        return ((BaseVector) vector).unsafeRef(eval, pos);
     }
 
 
@@ -152,24 +208,24 @@ final class FusionVector
 
     static Object unsafeVectorAdd(Evaluator eval, Object vector, Object value)
     {
-        return ((BaseVector) vector).add(value);
+        return ((BaseVector) vector).add(eval, value);
     }
 
     static Object unsafeVectorAddM(Evaluator eval, Object vector, Object value)
     {
-        return ((BaseVector) vector).addM(value);
+        return ((BaseVector) vector).addM(eval, value);
     }
 
 
     @Deprecated
-    static Iterator<?> unsafeJavaIterate(Object vector)
+    static Iterator<?> unsafeJavaIterate(Evaluator eval, Object vector)
     {
-        return ((BaseVector) vector).javaIterate();
+        return ((BaseVector) vector).javaIterate(eval);
     }
 
     static Object unsafeVectorIterate(Evaluator eval, Object vector)
     {
-        return Iterators.iterate(unsafeJavaIterate(vector));
+        return Iterators.iterate(unsafeJavaIterate(eval, vector));
     }
 
 
@@ -180,20 +236,10 @@ final class FusionVector
     /**
      * @param vector must be a vector; it is not type-checked!
      */
-    private static Object[] arrayFor(Object vector)
-    {
-        return ((BaseVector) vector).myValues;
-    }
-
-
-    /**
-     * @param vector must be a vector; it is not type-checked!
-     */
     static void unsafeVectorCopy(Evaluator eval, Object vector, int srcPos,
                                  Object[] dest, int destPos, int length)
     {
-        Object[] v = arrayFor(vector);
-        System.arraycopy(v, srcPos, dest, destPos, length);
+        ((BaseVector) vector).unsafeCopy(eval, srcPos, dest, destPos, length);
     }
 
 
@@ -206,23 +252,22 @@ final class FusionVector
         Object[] copy;
         if (length == 0)
         {
-            copy = FusionUtils.EMPTY_OBJECT_ARRAY;
+            copy = EMPTY_OBJECT_ARRAY;
         }
         else
         {
             copy = new Object[length];
-            Object[] v = arrayFor(vector);
-            System.arraycopy(v, srcPos, copy, 0, length);
+            unsafeVectorCopy(eval, vector, srcPos, copy, 0, length);
         }
 
-        return ((BaseVector) vector).makeSimilar(copy);
+        return ((BaseVector) vector).makeSimilar(EMPTY_STRING_ARRAY, copy);
     }
 
 
     static Object unsafeVectorConcatenateM(Evaluator eval, Object vector,
                                            Object[] args)
     {
-        return ((BaseVector) vector).concatenateM(args);
+        return ((BaseVector) vector).concatenateM(eval, args);
     }
 
 
@@ -260,7 +305,7 @@ final class FusionVector
         throws FusionException
     {
         BaseVector base = (BaseVector) vector;
-        Object[] v = base.myValues;
+        Object[] v = base.myValues;  // Better to not force injection
         int len = base.size();
         IonValue[] ions = new IonValue[len];
         for (int i = 0; i < len; i++)
@@ -276,7 +321,9 @@ final class FusionVector
             ions[i] = ion;
         }
 
-        return factory.newList(ions);
+        IonList list = factory.newList(ions);
+        list.setTypeAnnotations(base.myAnnotations);
+        return list;
     }
 
 
@@ -293,14 +340,25 @@ final class FusionVector
     {
         Object[] myValues;
 
+        /** Not null */
+        private final String[] myAnnotations;
+
         BaseVector(Object[] values)
         {
+            myValues = values;
+            myAnnotations = EMPTY_STRING_ARRAY;
+        }
+
+        BaseVector(String[] annotations, Object[] values)
+        {
+            assert annotations != null;
+            myAnnotations = annotations;
             myValues = values;
         }
 
 
         /** Takes ownership of the array, doesn't make a copy. */
-        abstract BaseVector makeSimilar(Object[] values);
+        abstract BaseVector makeSimilar(String[] annotations, Object[] values);
 
 
         int size()
@@ -309,26 +367,33 @@ final class FusionVector
         }
 
 
-        final Object unsafeRef(int i)
+        Object unsafeRef(Evaluator eval, int i)
         {
             return myValues[i];
         }
 
 
-        BaseVector add(Object value)
+        void unsafeCopy(Evaluator eval, int srcPos, Object[] dest, int destPos,
+                        int length)
+        {
+            System.arraycopy(myValues, srcPos, dest, destPos, length);
+        }
+
+
+        BaseVector add(Evaluator eval, Object value)
         {
             int len = size();
             Object[] copy = Arrays.copyOf(myValues, len + 1);
             copy[len] = value;
-            return makeSimilar(copy);
+            return makeSimilar(myAnnotations, copy);
         }
 
-        BaseVector addM(Object value)
+        BaseVector addM(Evaluator eval, Object value)
         {
-            return add(value);
+            return add(eval, value);
         }
 
-        BaseVector concatenateM(Object[] args)
+        BaseVector concatenateM(Evaluator eval, Object[] args)
         {
             int newLen = myValues.length;
             for (int i = 0; i < args.length; i++)
@@ -349,11 +414,11 @@ final class FusionVector
             }
             assert pos == newLen;
 
-            return makeSimilar(copy);
+            return makeSimilar(myAnnotations, copy);
         }
 
 
-        Iterator<?> javaIterate()
+        Iterator<?> javaIterate(Evaluator eval)
         {
             return Arrays.asList(myValues).iterator();
         }
@@ -361,6 +426,12 @@ final class FusionVector
         @Override
         void write(Appendable out) throws IOException
         {
+            for (String ann : myAnnotations)
+            {
+                IonTextUtils.printSymbol(out, ann);
+                out.append("::");
+            }
+
             out.append('[');
 
             int length = size();
@@ -380,6 +451,7 @@ final class FusionVector
         {
             try
             {
+                out.setTypeAnnotations(myAnnotations);
                 out.stepIn(IonType.LIST);
                 for (int i = 0; i < size(); i++)
                 {
@@ -403,10 +475,15 @@ final class FusionVector
             super(values);
         }
 
-        @Override
-        BaseVector makeSimilar(Object[] values)
+        MutableVector(String[] annotations, Object[] values)
         {
-            return new MutableVector(values);
+            super(annotations, values);
+        }
+
+        @Override
+        BaseVector makeSimilar(String[] annotations, Object[] values)
+        {
+            return new MutableVector(annotations, values);
         }
 
         void unsafeSet(int pos, Object value)
@@ -416,7 +493,7 @@ final class FusionVector
     }
 
 
-    private static final class ImmutableVector
+    private static class ImmutableVector
         extends BaseVector
     {
         ImmutableVector(Object[] values)
@@ -424,10 +501,15 @@ final class FusionVector
             super(values);
         }
 
-        @Override
-        BaseVector makeSimilar(Object[] values)
+        ImmutableVector(String[] annotations, Object[] values)
         {
-            return new ImmutableVector(values);
+            super(annotations, values);
+        }
+
+        @Override
+        BaseVector makeSimilar(String[] annotations, Object[] values)
+        {
+            return new ImmutableVector(annotations, values);
         }
     }
 
@@ -443,10 +525,16 @@ final class FusionVector
             mySize = values.length;
         }
 
-        @Override
-        BaseVector makeSimilar(Object[] values)
+        StretchyVector(String[] annotations, Object[] values)
         {
-            return new StretchyVector(values);
+            super(annotations, values);
+            mySize = values.length;
+        }
+
+        @Override
+        BaseVector makeSimilar(String[] annotations, Object[] values)
+        {
+            return new StretchyVector(annotations, values);
         }
 
         @Override
@@ -456,7 +544,7 @@ final class FusionVector
         }
 
         @Override
-        BaseVector addM(Object value)
+        BaseVector addM(Evaluator eval, Object value)
         {
             if (mySize == myValues.length)
             {
@@ -471,7 +559,7 @@ final class FusionVector
         }
 
         @Override
-        BaseVector concatenateM(Object[] args)
+        BaseVector concatenateM(Evaluator eval, Object[] args)
         {
             int newLen = mySize;
             for (Object arg : args)
@@ -500,7 +588,7 @@ final class FusionVector
         }
 
         @Override
-        Iterator<?> javaIterate()
+        Iterator<?> javaIterate(Evaluator eval)
         {
             Iterator<Object> iterator = new Iterator<Object>()
             {
@@ -529,6 +617,63 @@ final class FusionVector
         }
     }
 
+    private static final class LazyInjectingVector
+        extends ImmutableVector
+    {
+        LazyInjectingVector(String[] annotations, Object[] values)
+        {
+            super(annotations, values);
+            assert values.length != 0;
+        }
+
+        private void injectElements(Evaluator eval)
+        {
+            if (myValues[0] instanceof IonValue)
+            {
+                for (int i = 0; i < myValues.length; i++)
+                {
+                    myValues[i] = eval.inject((IonValue) myValues[i]);
+                }
+            }
+        }
+
+        @Override
+        Object unsafeRef(Evaluator eval, int i)
+        {
+            injectElements(eval);
+            return myValues[i];
+        }
+
+        @Override
+        void unsafeCopy(Evaluator eval, int srcPos, Object[] dest, int destPos,
+                        int length)
+        {
+            injectElements(eval);
+            System.arraycopy(myValues, srcPos, dest, destPos, length);
+        }
+
+
+        @Override
+        BaseVector add(Evaluator eval, Object value)
+        {
+            injectElements(eval);
+            return super.add(eval, value);
+        }
+
+        @Override
+        BaseVector concatenateM(Evaluator eval, Object[] args)
+        {
+            injectElements(eval);
+            return super.concatenateM(eval, args);
+        }
+
+        @Override
+        Iterator<?> javaIterate(Evaluator eval)
+        {
+            injectElements(eval);
+            return super.javaIterate(eval);
+        }
+    }
 
     //========================================================================
 

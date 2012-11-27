@@ -2,13 +2,8 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVector.unsafeVectorSize;
 import static com.amazon.fusion.FusionVector.unsafeVectorSubseq;
-import com.amazon.ion.IonList;
-import com.amazon.ion.IonSequence;
-import com.amazon.ion.IonSystem;
-import com.amazon.ion.IonValue;
 
 final class IonSubseqProc
     extends Procedure
@@ -32,19 +27,12 @@ final class IonSubseqProc
     {
         checkArityExact(args);
 
-        IonList sequence = null;
-        int size;
+        // TODO FUSION-87 this makes an extra copy
+        // I hacked it this way to ensure that we use the same coerced
+        // vector subtype everywhere.
+        Object vector = coerceListArg(eval, 0, args);
 
-        boolean seqIsVector = isVector(eval, args[0]);
-        if (seqIsVector)
-        {
-            size = unsafeVectorSize(eval, args[0]);
-        }
-        else
-        {
-            sequence = checkIonListArg(0, args);
-            size = sequence.size();
-        }
+        int size = unsafeVectorSize(eval, vector);
 
         int from = checkIntArg(1, args);
         int to   = checkIntArg(2, args);
@@ -62,25 +50,9 @@ final class IonSubseqProc
 
         assert from <= to && to <= size;
 
-        if (from == 0 && to == size) return args[0];
+        if (from == 0 && to == size) return vector;
 
-        if (seqIsVector)
-        {
-            int len = to - from;
-            return unsafeVectorSubseq(eval, args[0], from, len);
-        }
-
-        IonSystem system = eval.getSystem();
-        IonSequence result = (IonSequence) system.newNull(sequence.getType());
-        result.clear();
-
-        for (int i = from; i < to; i++)
-        {
-            IonValue e = sequence.get(i);
-            e = system.clone(e);
-            result.add(e);
-        }
-
-        return eval.inject(result);
+        int len = to - from;
+        return unsafeVectorSubseq(eval, vector, from, len);
     }
 }

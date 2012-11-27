@@ -29,8 +29,8 @@ final class StructZipProc
         Object fieldList = checkListArg(0, args);
         Object valueList = checkListArg(1, args);
 
-        Iterator<?> fieldIterator = unsafeJavaIterate(fieldList);
-        Iterator<?> valueIterator = unsafeJavaIterate(valueList);
+        Iterator<?> fieldIterator = unsafeJavaIterate(eval, fieldList);
+        Iterator<?> valueIterator = unsafeJavaIterate(eval, valueList);
 
         while (fieldIterator.hasNext() && valueIterator.hasNext())
         {

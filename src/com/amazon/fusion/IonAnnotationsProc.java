@@ -2,7 +2,11 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
+import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVector.immutableVector;
+import static com.amazon.fusion.FusionVector.isVector;
+import static com.amazon.fusion.FusionVector.unsafeVectorAnnotationStrings;
 import com.amazon.ion.IonValue;
 
 final class IonAnnotationsProc
@@ -20,21 +24,30 @@ final class IonAnnotationsProc
     Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        IonValue value = FusionValue.castToIonValueMaybe(arg);
+        String[] anns = EMPTY_STRING_ARRAY;
 
-        Object[] result = FusionUtils.EMPTY_OBJECT_ARRAY;
-
-        if (value != null)
+        if (isVector(eval, arg))
         {
-            String[] anns = value.getTypeAnnotations();
-            int length = anns.length;
-            if (length != 0)
+            anns = unsafeVectorAnnotationStrings(eval, arg);
+        }
+        else
+        {
+            IonValue value = castToIonValueMaybe(arg);
+
+            if (value != null)
             {
-                result = new Object[length];
-                for (int i = 0; i < length; i++)
-                {
-                    result[i] = eval.newString(anns[i]);
-                }
+                anns = value.getTypeAnnotations();
+            }
+        }
+
+        Object[] result = EMPTY_OBJECT_ARRAY;
+        int length = anns.length;
+        if (length != 0)
+        {
+            result = new Object[length];
+            for (int i = 0; i < length; i++)
+            {
+                result[i] = eval.newString(anns[i]);
             }
         }
 

@@ -692,11 +692,11 @@ public abstract class FusionValue
     /**
      * @param value must be vector or IonContainer
      */
-    static Iterator<?> unsafeJavaIterate(Object value)
+    static Iterator<?> unsafeJavaIterate(Evaluator eval, Object value)
     {
         if (isVector(value))
         {
-            return FusionVector.unsafeJavaIterate(value);
+            return FusionVector.unsafeJavaIterate(eval, value);
         }
         return ((IonContainer)value).iterator();
     }

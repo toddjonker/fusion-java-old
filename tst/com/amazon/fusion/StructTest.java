@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -97,7 +98,7 @@ public class StructTest
     //========================================================================
 
 
-    @Test
+    @Test @Ignore
     public void testForEachField()
         throws Exception
     {

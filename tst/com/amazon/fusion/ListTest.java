@@ -30,6 +30,24 @@ public class ListTest
         eval("(define lgList "+ionListGenerator(8888)+")");
     }
 
+
+    //========================================================================
+    // Annotations
+
+    @Test
+    public void testListInjection()
+        throws Exception
+    {
+        topLevel().requireModule("/fusion/function");
+        IonList list = (IonList) system().singleValue("a::[1]");
+        Object result = topLevel().call("identity", list);
+        result = runtime().ionize(result, system());
+        assertEquals(list, result);
+    }
+
+
+    //========================================================================
+
     @Test
     public void testAdd()
         throws Exception

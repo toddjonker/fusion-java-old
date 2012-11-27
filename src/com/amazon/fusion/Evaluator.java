@@ -3,7 +3,9 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVector.isVector;
+import static com.amazon.fusion.FusionVector.vectorFromIonList;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import com.amazon.ion.IonList;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
@@ -89,6 +91,14 @@ final class Evaluator
         {
             value = mySystem.newNull();
         }
+        else if (value instanceof IonList)
+        {
+            IonList list = (IonList) value;
+            if (! list.isNullValue())
+            {
+                return vectorFromIonList(this, list);
+            }
+        }
         return value;
     }
 
@@ -126,7 +136,7 @@ final class Evaluator
         }
         else if (javaValue instanceof IonValue)
         {
-            return javaValue;
+            return inject((IonValue) javaValue);
         }
         else if (javaValue instanceof String)
         {

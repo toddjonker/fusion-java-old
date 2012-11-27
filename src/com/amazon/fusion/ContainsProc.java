@@ -44,9 +44,9 @@ final class ContainsProc
 
         boolean contained = false;
 
-        Iterator<?> listIterator = unsafeJavaIterate(container);
+        Iterator<?> listIterator = unsafeJavaIterate(eval, container);
 
-        while(listIterator.hasNext())
+        while (listIterator.hasNext())
         {
             Object ionValue = eval.convertToIonValueMaybe(listIterator.next());
             if (ionValue.equals(target))

@@ -13,6 +13,10 @@
   (define raise_check_failure (java_new "com.amazon.fusion.CheckFailureProc"))
 
 
+  (defpub check_equal_annotations
+    (lambda (actual expected)
+      (check_vector_equal (ion_annotations actual) (ion_annotations expected))))
+
   (defpub check_equal
     (lambda (actual expected descr)
       (cond
@@ -30,7 +34,8 @@
            descr " not equal.\nActual: " actual "\nExpected: " expected))
         (true
          (assert (= actual expected)
-           descr " not equal.\nActual: " actual "\nExpected: " expected)))))
+           descr " not equal.\nActual: " actual "\nExpected: " expected)))
+      (check_equal_annotations actual expected)))
 
   (defpub check_list_equal
     (lambda (actual expected)

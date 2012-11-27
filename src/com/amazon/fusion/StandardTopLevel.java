@@ -161,7 +161,7 @@ final class StandardTopLevel
             arg = myEvaluator.injectMaybe(arg);
             if (arg == null)
             {
-                throw new ArgTypeFailure("TopLevel.injectAndCall",
+                throw new ArgTypeFailure("TopLevel.call",
                                          "injectable Java type",
                                          i, arguments[i]);
             }

@@ -2,7 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
+import static com.amazon.fusion.FusionVector.EMPTY_IMMUTABLE_VECTOR;
 import static com.amazon.fusion.FusionVector.immutableVector;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
@@ -124,33 +126,39 @@ final class SyntaxList
     Object quote(Evaluator eval)
         throws FusionException
     {
-        if (getAnnotations().length != 0)
-        {
-            return super.quote(eval);
-        }
+        String[] annotations = getAnnotations();
 
         if (isNullValue())
         {
-
             ValueFactory factory = eval.getSystem();
             IonSequence seq = makeNull(factory);
+            seq.setTypeAnnotations(annotations);
             return eval.inject(seq);
         }
+
+        Object[] children;
 
         int size = size();
         if (size == 0)
         {
-            return FusionVector.EMPTY_IMMUTABLE_VECTOR;
-        }
+            if (annotations.length == 0)
+            {
+                return EMPTY_IMMUTABLE_VECTOR;
+            }
 
-        Object[] children = new Object[size];
-        for (int i = 0; i < size; i++)
+            children = EMPTY_OBJECT_ARRAY;
+        }
+        else
         {
-            SyntaxValue s = get(i);
-            children[i] = s.quote(eval);
+            children = new Object[size];
+            for (int i = 0; i < size; i++)
+            {
+                SyntaxValue s = get(i);
+                children[i] = s.quote(eval);
+            }
         }
 
-        return immutableVector(eval, children);
+        return immutableVector(eval, annotations, children);
     }
 
 

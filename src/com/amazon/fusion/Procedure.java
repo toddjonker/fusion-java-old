@@ -2,8 +2,8 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionVector.immutableVector;
 import static com.amazon.fusion.FusionVector.isVector;
+import static com.amazon.fusion.FusionVector.vectorFromIonList;
 import com.amazon.fusion.ArityFailure.Variability;
 import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.ion.IonContainer;
@@ -338,7 +338,8 @@ abstract class Procedure
             throw argFailure("list", argNum, args);
         }
 
-        return immutableVector(eval, list);
+        assert list.isNullValue() : "Didn't expect IonList: " + list;
+        return vectorFromIonList(eval, list);
     }
 
 
