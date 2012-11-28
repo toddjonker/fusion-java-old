@@ -5,8 +5,8 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVector.EMPTY_IMMUTABLE_VECTOR;
+import static com.amazon.fusion.FusionVector.NULL_VECTOR;
 import static com.amazon.fusion.FusionVector.immutableVector;
-import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
@@ -169,11 +169,11 @@ final class SyntaxList
     CompiledForm doCompile(Evaluator eval, Environment env)
         throws FusionException
     {
-        ValueFactory vf = eval.getSystem();
+        // We don't have to worry about annotations, since that's not valid
+        // syntax.
         if (isNullValue())
         {
-            IonList list = vf.newNullList();
-            return new CompiledIonConstant(list);
+            return new CompiledConstant(NULL_VECTOR);
         }
 
         int len = size();

@@ -338,7 +338,6 @@ abstract class Procedure
             throw argFailure("list", argNum, args);
         }
 
-        assert list.isNullValue() : "Didn't expect IonList: " + list;
         return vectorFromIonList(eval, list);
     }
 

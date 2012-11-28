@@ -94,10 +94,7 @@ final class Evaluator
         else if (value instanceof IonList)
         {
             IonList list = (IonList) value;
-            if (! list.isNullValue())
-            {
-                return vectorFromIonList(this, list);
-            }
+            return vectorFromIonList(this, list);
         }
         return value;
     }

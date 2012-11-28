@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
-import static com.amazon.fusion.FusionValue.copyToIonValue;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonType;
@@ -26,18 +25,24 @@ final class FusionVector
     static final ImmutableVector EMPTY_IMMUTABLE_VECTOR =
         new ImmutableVector(FusionUtils.EMPTY_OBJECT_ARRAY);
 
+    static final NullVector NULL_VECTOR = new NullVector();
 
     //========================================================================
     // Constructors
 
 
     /**
-     * Turns null.list into an empty vector with the same annotations.
+     * Turns null.list into a {@link NullVector} with the same annotations.
      */
     static BaseVector vectorFromIonList(Evaluator eval, IonList list)
     {
         String[] annotations = list.getTypeAnnotations();
         // TODO FUSION-47 intern annotation text
+
+        if (list.isNullValue())
+        {
+            return nullVector(eval, annotations);
+        }
 
         int size = list.size();
         if (size == 0)
@@ -54,6 +59,17 @@ final class FusionVector
             Object[] elts = list.toArray(new Object[size]);
             return new LazyInjectingVector(annotations, elts);
         }
+    }
+
+
+    static NullVector nullVector(Evaluator eval, String[] annotations)
+    {
+        if (annotations.length == 0)
+        {
+            return NULL_VECTOR;
+        }
+
+        return new NullVector(annotations);
     }
 
 
@@ -163,6 +179,11 @@ final class FusionVector
     static boolean isImmutableVector(Evaluator eval, Object v)
     {
         return (v instanceof ImmutableVector);
+    }
+
+    static boolean isNullVector(Evaluator eval, Object v)
+    {
+        return (v instanceof NullVector);
     }
 
     static boolean isMutableVector(Evaluator eval, Object v)
@@ -305,25 +326,7 @@ final class FusionVector
         throws FusionException
     {
         BaseVector base = (BaseVector) vector;
-        Object[] v = base.myValues;  // Better to not force injection
-        int len = base.size();
-        IonValue[] ions = new IonValue[len];
-        for (int i = 0; i < len; i++)
-        {
-            IonValue ion =
-                copyToIonValue(v[i], factory, throwOnConversionFailure);
-            if (ion == null)
-            {
-                assert !throwOnConversionFailure;
-                return null;
-            }
-
-            ions[i] = ion;
-        }
-
-        IonList list = factory.newList(ions);
-        list.setTypeAnnotations(base.myAnnotations);
-        return list;
+        return base.copyToIonList(factory, throwOnConversionFailure);
     }
 
 
@@ -341,7 +344,7 @@ final class FusionVector
         Object[] myValues;
 
         /** Not null */
-        private final String[] myAnnotations;
+        final String[] myAnnotations;
 
         BaseVector(Object[] values)
         {
@@ -379,6 +382,33 @@ final class FusionVector
             System.arraycopy(myValues, srcPos, dest, destPos, length);
         }
 
+        /**
+         * @return null if the vector and its contents cannot be ionized
+         *  UNLESS throwOnConversionFailure
+         */
+        IonList copyToIonList(ValueFactory factory,
+                              boolean throwOnConversionFailure)
+            throws FusionException
+        {
+            int len = size();
+            IonValue[] ions = new IonValue[len];
+            for (int i = 0; i < len; i++)
+            {
+                IonValue ion = copyToIonValue(myValues[i], factory,
+                                              throwOnConversionFailure);
+                if (ion == null)
+                {
+                    assert !throwOnConversionFailure;
+                    return null;
+                }
+
+                ions[i] = ion;
+            }
+
+            IonList list = factory.newList(ions);
+            list.setTypeAnnotations(myAnnotations);
+            return list;
+        }
 
         BaseVector add(Evaluator eval, Object value)
         {
@@ -423,14 +453,19 @@ final class FusionVector
             return Arrays.asList(myValues).iterator();
         }
 
-        @Override
-        void write(Appendable out) throws IOException
+        void writeAnnotations(Appendable out) throws IOException
         {
             for (String ann : myAnnotations)
             {
                 IonTextUtils.printSymbol(out, ann);
                 out.append("::");
             }
+        }
+
+        @Override
+        void write(Appendable out) throws IOException
+        {
+            writeAnnotations(out);
 
             out.append('[');
 
@@ -510,6 +545,60 @@ final class FusionVector
         BaseVector makeSimilar(String[] annotations, Object[] values)
         {
             return new ImmutableVector(annotations, values);
+        }
+    }
+
+
+    private static final class NullVector
+        extends ImmutableVector
+    {
+        NullVector()
+        {
+            super(EMPTY_OBJECT_ARRAY);
+        }
+
+        NullVector(String[] annotations)
+        {
+            super(annotations, EMPTY_OBJECT_ARRAY);
+        }
+
+        @Override
+        int size()
+        {
+            return 0;
+        }
+
+        @Override
+        IonList copyToIonList(ValueFactory factory,
+                              boolean throwOnConversionFailure)
+            throws FusionException
+        {
+            IonList list = factory.newNullList();
+            list.setTypeAnnotations(myAnnotations);
+            return list;
+        }
+
+        @Override
+        void write(Appendable out) throws IOException
+        {
+            writeAnnotations(out);
+            out.append("null.list");
+        }
+
+
+        @Override
+        public void write(IonWriter out)
+            throws FusionException
+        {
+            try
+            {
+                out.setTypeAnnotations(myAnnotations);
+                out.writeNull(IonType.LIST);
+            }
+            catch (IOException e)
+            {
+                throw new FusionException("I/O exception", e);
+            }
         }
     }
 

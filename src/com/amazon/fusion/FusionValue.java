@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVector.isNullVector;
 import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVoid.isVoid;
 import com.amazon.ion.IonBool;
@@ -68,6 +69,8 @@ public abstract class FusionValue
         throws FusionException
     {
         if (isVoid(eval, result)) return false;
+
+        if (isNullVector(eval, result)) return false;
 
         IonValue iv = FusionValue.castToIonValueMaybe(result);
         if (iv == null) return true;

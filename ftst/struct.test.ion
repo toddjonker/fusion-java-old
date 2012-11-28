@@ -5,3 +5,5 @@
 (use check)
 
 (check_equal (. (quote {f:[]}) "f") [] "[] in quoted struct")
+
+(check_equal (concatenate_m (. {f:[]} "f") [1]) [1] "pulling list from struct")
