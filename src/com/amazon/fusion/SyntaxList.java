@@ -7,6 +7,7 @@ import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVector.EMPTY_IMMUTABLE_VECTOR;
 import static com.amazon.fusion.FusionVector.NULL_VECTOR;
 import static com.amazon.fusion.FusionVector.immutableVector;
+import static com.amazon.fusion.FusionVector.nullVector;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
@@ -130,10 +131,7 @@ final class SyntaxList
 
         if (isNullValue())
         {
-            ValueFactory factory = eval.getSystem();
-            IonSequence seq = makeNull(factory);
-            seq.setTypeAnnotations(annotations);
-            return eval.inject(seq);
+            return nullVector(eval, annotations);
         }
 
         Object[] children;
