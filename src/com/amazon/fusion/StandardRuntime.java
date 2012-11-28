@@ -3,12 +3,10 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.ModuleIdentity.intern;
-import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
 import com.amazon.ion.system.IonSystemBuilder;
-import java.io.File;
 
 
 final class StandardRuntime
@@ -98,54 +96,6 @@ final class StandardRuntime
         return new ModuleBuilderImpl(myRegistry, id);
     }
 
-    //========================================================================
-
-
-    @Override
-    public Object eval(String source, SourceName name)
-        throws ExitException, FusionException
-    {
-        return myTopLevel.eval(source, name);
-    }
-
-
-    @Override
-    public Object eval(String source)
-        throws ExitException, FusionException
-    {
-        return myTopLevel.eval(source);
-    }
-
-
-    @Override
-    public Object eval(IonReader source, SourceName name)
-        throws ExitException, FusionException
-    {
-        return myTopLevel.eval(source, name);
-    }
-
-
-    @Override
-    public Object eval(IonReader source)
-        throws ExitException, FusionException
-    {
-        return myTopLevel.eval(source);
-    }
-
-
-    @Override
-    public Object load(File source)
-        throws ExitException, FusionException
-    {
-        return myTopLevel.load(source);
-    }
-
-
-    @Override
-    public void bind(String name, Object value)
-    {
-        myTopLevel.define(name, value);
-    }
 
     //========================================================================
 
