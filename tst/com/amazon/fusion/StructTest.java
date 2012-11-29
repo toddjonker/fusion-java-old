@@ -241,27 +241,4 @@ public class StructTest
         expectContractFailure("(struct_prune [\"a\"] \"a\")");
         expectContractFailure("(struct_prune {} \"a\")");
     }
-
-    public void structContains()
-        throws Exception
-    {
-        String smallStruct = "{a:1,b:2,c:3,d:\"Hello\"}";
-
-        assertEval(true,  "(contains "+smallStruct+" 2)");
-        assertEval(false, "(contains "+smallStruct+" 4)");
-        assertEval(false, "(contains "+smallStruct+" \"hello\")");
-        assertEval(false, "(contains {} null.int)");
-        assertEval(true, "(contains {A:2,A:3} 2)");
-    }
-
-    @Test
-    public void structContainsFail()
-        throws Exception
-    {
-        expectArityFailure("(contains)");
-        expectArityFailure("(contains {} {} {})");
-
-        expectContractFailure("(contains 1 1)");
-        expectContractFailure("(contains \"hello\" \"hello\")");
-    }
 }

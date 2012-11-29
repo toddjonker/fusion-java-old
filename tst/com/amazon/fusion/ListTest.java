@@ -301,34 +301,6 @@ public class ListTest
 
 
     @Test
-    public void listContains()
-        throws Exception
-    {
-        String smallList = "[1,2,3]";
-
-        assertEval(true,  "(contains "+smallList+" 2)");
-        assertEval(false, "(contains "+smallList+" 4)");
-        assertEval(false, "(contains "+smallList+" "+smallList+")");
-        assertEval(true,  "(contains ["+smallList+"] "+smallList+")");
-        assertEval(true,  "(contains ["+smallList+",{A:3}] {A:3})");
-        assertEval(true,  "(contains [{A:3, B:2}, {A:3, B:1}] {A:3, B:1})");
-        assertEval(false, "(contains [{A:3, B:2}, {A:3, B:1}] {A:3, B:4})");
-        assertEval(false, "(contains [] null.int)");
-        assertEval(false, "(contains [] 5)");
-    }
-
-    @Test
-    public void listContainsFail()
-        throws Exception
-    {
-        expectArityFailure("(contains)");
-        expectArityFailure("(contains [] [] [])");
-
-        expectContractFailure("(contains 1 1)");
-        expectContractFailure("(contains \"hello\" \"hello\")");
-    }
-
-    @Test
     public void testIsList()
         throws Exception
     {

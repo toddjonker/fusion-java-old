@@ -24,7 +24,6 @@
   // TODO FUSION-86 these are for DP compatability
   (provide size)      // Moving to /fusion/collection
   (provide add)       // Moving to /fusion/sequence
-  (provide contains)  // Broken feature, deprecated
 
   (use 'fusion/params')
   (provide make_parameter parameterize)

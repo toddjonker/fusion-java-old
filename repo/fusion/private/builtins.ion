@@ -29,7 +29,6 @@
   (defpub_j add                   "com.amazon.fusion.AddProc")
   (defpub_j apply                 "com.amazon.fusion.ApplyProc")
   (defpub_j concatenate           "com.amazon.fusion.StringConcatenateProc")
-  (defpub_j contains              "com.amazon.fusion.ContainsProc")
   (defpub_j exit                  "com.amazon.fusion.ExitProc")
   (defpub_j for_each_field        "com.amazon.fusion.ForEachFieldProc")
   (defpub_j is_null               "com.amazon.fusion.IsNullProc")
