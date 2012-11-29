@@ -12,8 +12,9 @@ types.
   (use 'fusion/experimental/defines')
   (use 'fusion/void')
 
-  // Pass-through bindings from builtins
-  (provide size)
+
+  (defpub_j size "com.amazon.fusion.SizeProc")
+
 
   // Name per Dylan and SRFI-1.
   (defpub any

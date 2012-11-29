@@ -21,9 +21,6 @@
     raise_argument_error raise_result_error remove
     to_int to_string)
 
-  // TODO FUSION-86 these are for DP compatability
-  (provide size)      // Moving to /fusion/collection
-  (provide add)       // Moving to /fusion/sequence
 
   (use 'fusion/params')
   (provide make_parameter parameterize)

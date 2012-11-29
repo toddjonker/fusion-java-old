@@ -26,7 +26,6 @@
   (defpub_j <                     "com.amazon.fusion.LessThanProc")
   (defpub_j =                     "com.amazon.fusion.EqualProc")
 
-  (defpub_j add                   "com.amazon.fusion.AddProc")
   (defpub_j apply                 "com.amazon.fusion.ApplyProc")
   (defpub_j concatenate           "com.amazon.fusion.StringConcatenateProc")
   (defpub_j exit                  "com.amazon.fusion.ExitProc")
@@ -37,7 +36,6 @@
   (defpub_j raise_argument_error  "com.amazon.fusion.RaiseArgumentErrorProc")
   (defpub_j raise_result_error    "com.amazon.fusion.RaiseResultErrorProc")
   (defpub_j remove                "com.amazon.fusion.RemoveProc")
-  (defpub_j size                  "com.amazon.fusion.SizeProc")
   (defpub_j to_int                "com.amazon.fusion.ToIntProc")
   (defpub_j to_string             "com.amazon.fusion.ToStringProc")
 

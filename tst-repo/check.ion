@@ -5,6 +5,7 @@
   (use 'fusion/experimental/defines')
   (use 'fusion/ffi/java')
   (use 'fusion/ion')
+  (use 'fusion/list')
   (use 'fusion/syntax')
   (use 'fusion/vector')
 

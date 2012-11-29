@@ -17,7 +17,6 @@ public class DomTest
         assertEval("()",        "(make_sexp)");
         assertEval("(1)",       "(make_sexp 1)");
         assertEval("(1 [2] 3)", "(make_sexp 1 [2] 3)");
-        assertEval("(1 [2] 3)", "(make_sexp 1 (add [] 2) 3)");
     }
 
     @Test
