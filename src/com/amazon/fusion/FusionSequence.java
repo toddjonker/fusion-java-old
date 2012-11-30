@@ -47,7 +47,12 @@ final class FusionSequence
             super(annotations);
         }
 
-        /** Returns void if the position is out of bounds. */
+        /**
+         * Returns void if the position is out of bounds.
+         *
+         * @param eval is required in case a subclass needs to create values,
+         * for example due to lazy injection.
+         */
         abstract Object dot(Evaluator eval, int pos)
             throws FusionException;
 

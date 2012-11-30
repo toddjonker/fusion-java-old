@@ -2,8 +2,9 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonStruct;
-import com.amazon.ion.IonValue;
+import static com.amazon.fusion.FusionStruct.unsafeStructFieldVisit;
+import static com.amazon.fusion.FusionVoid.voidValue;
+import com.amazon.fusion.FusionStruct.StructFieldVisitor;
 
 final class ForEachFieldProc
     extends Procedure
@@ -11,32 +12,36 @@ final class ForEachFieldProc
     ForEachFieldProc()
     {
         //    "                                                                               |
-        super("Applies PROC to each field within STRUCT, ignoring any results.\n" +
-              "PROC must take two arguments, a field name and an Ion value.\n" +
-              "Returns STRUCT.",
+        super("Applies `proc` to each field within `struct`, ignoring any results.\n" +
+              "The `proc` must take two arguments, a field name symbol and a value.\n" +
+              "Returns void.",
               "proc", "struct");
     }
 
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(final Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityExact(args);
 
-        Procedure proc = checkProcArg(0, args);
-        IonStruct s = checkStructArg(1, args);
+        final Procedure proc = checkProcArg(0, args);
+        Object fs = coerceStructArg(eval, 1, args);
 
-        for (IonValue field : s)
+        StructFieldVisitor visitor = new StructFieldVisitor()
         {
-            String name = field.getFieldName();
+            @Override
+            public Object visit(String name, Object value)
+                throws FusionException
+            {
+                Object nameSym = eval.newSymbol(name);
+                eval.callNonTail(proc, nameSym, value);
+                return null;
+            }
+        };
 
-            Object nameValue  = eval.newString(name);
-            Object fieldValue = eval.inject(field);
+        unsafeStructFieldVisit(eval, fs, visitor);
 
-            eval.callNonTail(proc, nameValue, fieldValue);
-        }
-
-        return args[1]; // Don't need to re-wrap the input struct
+        return voidValue(eval);
     }
 }

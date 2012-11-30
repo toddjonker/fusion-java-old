@@ -4,6 +4,8 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionSequence.isSequence;
 import static com.amazon.fusion.FusionSexp.sexpFromIonSequence;
+import static com.amazon.fusion.FusionStruct.isStruct;
+import static com.amazon.fusion.FusionStruct.structFromIonStruct;
 import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVector.vectorFromIonSequence;
 import com.amazon.fusion.ArityFailure.Variability;
@@ -394,6 +396,16 @@ abstract class Procedure
                            true /* nullable */, argNum, args);
     }
 
+    Object coerceStructArg(Evaluator eval, int argNum, Object... args)
+        throws ArgTypeFailure
+    {
+        Object arg = args[argNum];
+        if (isStruct(eval, arg)) return arg;
+
+        IonStruct is = checkDomArg(IonStruct.class, "struct",
+                                   true /* nullable */, argNum, args);
+        return structFromIonStruct(eval, is);
+    }
 
     /**
      * Allows {@code null.struct}.
@@ -404,7 +416,17 @@ abstract class Procedure
         throws FusionException
     {
         Object arg = args[argNum];
-        IonStruct is = checkStructArg(argNum, args);
+        if (isStruct(eval, arg))
+        {
+            IonValue iv = copyToIonValueMaybe(arg, factory);
+            if (iv != null)
+            {
+                return (IonStruct) iv;
+            }
+        }
+
+        IonStruct is = checkDomArg(IonStruct.class, "struct",
+                                   true /* nullable */, argNum, args);
         // Ensure caller can't mutate the "immutable" value.
         return factory.clone(is);
     }
@@ -417,6 +439,9 @@ abstract class Procedure
     IonStruct checkStructArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
+        // FIXME ugly compatibility hack!
+        if (isStruct(null, args[argNum])) return null;
+
         return checkDomArg(IonStruct.class, "struct",
                            true /* nullable */, argNum, args);
     }

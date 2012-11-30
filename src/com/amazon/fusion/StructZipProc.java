@@ -3,52 +3,50 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionPrint.safeWriteToString;
-import com.amazon.ion.IonStruct;
-import com.amazon.ion.IonValue;
+import static com.amazon.fusion.FusionStruct.immutableStruct;
+import static com.amazon.fusion.FusionStruct.structImplAdd;
+import java.util.HashMap;
 import java.util.Iterator;
 
 final class StructZipProc
-    extends Procedure
+    extends Procedure2
 {
     StructZipProc()
     {
         //    "                                                                               |
-        super("Constructs a struct from a list of field names and a list of values");
+        super("Constructs a struct from a list of field names and a list of values.  The names\n" +
+              "must be non-empty strings or symbols.",
+              "names", "values");
     }
 
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval, Object names, Object values)
         throws FusionException
     {
-        // even # of args = list of structs?
-        // checkArityEven(args);
-        checkArityExact(2, args);
+        names  = coerceListArg(eval, 0, names, values);
+        values = coerceListArg(eval, 1, names, values);
 
-        IonStruct result = eval.getSystem().newEmptyStruct();
+        Iterator<?> fieldIterator = unsafeJavaIterate(eval, names);
+        Iterator<?> valueIterator = unsafeJavaIterate(eval, values);
 
-        Object fieldList = checkListArg(0, args);
-        Object valueList = checkListArg(1, args);
-
-        Iterator<?> fieldIterator = unsafeJavaIterate(eval, fieldList);
-        Iterator<?> valueIterator = unsafeJavaIterate(eval, valueList);
+        HashMap<String, Object> map = new HashMap<String, Object>();
 
         while (fieldIterator.hasNext() && valueIterator.hasNext())
         {
             Object nameObj = fieldIterator.next();
-            String name = FusionValue.asJavaString(nameObj);
-            if (name == null)
+            String name = copyTextToJavaString(nameObj);
+            if (name == null || name.isEmpty())
             {
                 throw new ResultFailure(identify(),
-                                        "string in field-name sequence",
+                                        "non-empty string or symbol in field-name sequence",
                                         safeWriteToString(eval, nameObj));
             }
 
             Object valueObj = valueIterator.next();
-            IonValue value = copyToIonValue(valueObj, eval.getSystem());
-            result.add(name, value);
+            structImplAdd(map, name, valueObj);
         }
 
-        return eval.inject(result);
+        return immutableStruct(map);
     }
 }

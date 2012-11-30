@@ -96,15 +96,17 @@ final class GlobalState
             if (t != IonType.NULL &&
                 t != IonType.DATAGRAM &&
                 t != IonType.LIST &&
-                t != IonType.SEXP)
+                t != IonType.SEXP &&
+                t != IonType.STRUCT)
             {
                 String name = "is_" + t.name().toLowerCase();
                 ns.define(name, new IonTypeCheckingProc(t));
             }
         }
 
-        ns.define("is_list", new IsListProc());
-        ns.define("is_sexp", new IsSexpProc());
+        ns.define("is_list",   new IsListProc());
+        ns.define("is_sexp",   new IsSexpProc());
+        ns.define("is_struct", new IsStructProc());
 
         ModuleInstance kernel = ns.build();
         registry.register(kernel);

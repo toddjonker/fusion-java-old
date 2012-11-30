@@ -34,7 +34,6 @@
   (defpub_j not                   "com.amazon.fusion.NotProc")
   (defpub_j raise_argument_error  "com.amazon.fusion.RaiseArgumentErrorProc")
   (defpub_j raise_result_error    "com.amazon.fusion.RaiseResultErrorProc")
-  (defpub_j remove                "com.amazon.fusion.RemoveProc")
   (defpub_j to_int                "com.amazon.fusion.ToIntProc")
   (defpub_j to_string             "com.amazon.fusion.ToStringProc")
 

@@ -2,14 +2,15 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionUtils.cloneIfContained;
+import static com.amazon.fusion.FusionStruct.EMPTY_STRUCT;
+import static com.amazon.fusion.FusionStruct.NULL_STRUCT;
+import static com.amazon.fusion.FusionStruct.immutableStruct;
+import static com.amazon.fusion.FusionStruct.nullStruct;
+import static com.amazon.fusion.FusionStruct.structImplAdd;
 import static com.amazon.fusion.SourceLocation.currentLocation;
 import com.amazon.ion.IonReader;
-import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonType;
-import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
-import com.amazon.ion.ValueFactory;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,13 +40,20 @@ final class SyntaxStruct
     }
 
 
+    @Deprecated // Due to bug noted within. Note to myself to fix before
+                // adding a use case that may fall prey to it.
     static SyntaxStruct make(String[] names, SyntaxValue[] values,
                              String[] anns)
     {
         Map<String, Object> map = new HashMap<String, Object>(names.length);
         for (int i = 0; i < names.length; i++)
         {
-            map.put(names[i], values[i]);
+            // FIXME wrong for multi-value
+            Object prev = map.put(names[i], values[i]);
+            if (prev != null)
+            {
+                throw new AssertionError("Error handling repeated fields in syntax");
+            }
         }
 
         return new SyntaxStruct(map, anns, null, null);
@@ -162,7 +170,7 @@ final class SyntaxStruct
                     {
                         SyntaxValue[] prevArray = (SyntaxValue[]) prev;
                         int len = prevArray.length;
-                        multi = Arrays.copyOf(prevArray, len);
+                        multi = Arrays.copyOf(prevArray, len+1);
                         multi[len] = child;
                     }
                     map.put(field, multi);
@@ -205,51 +213,47 @@ final class SyntaxStruct
         // This should only be called at runtime, after wraps are pushed.
         assert myWraps == null;
 
-        ValueFactory vf = eval.getSystem();
-        IonStruct resultDom;
+        String[] annotations = getAnnotations();
+
         if (isNullValue())
         {
-            resultDom = vf.newNullStruct();
+            return nullStruct(eval, annotations);
         }
-        else
+
+        String[] names  = new String[myMap.size()];
+        Object[] values = new Object[myMap.size()];
+
+        int pos = 0;
+        for (Map.Entry<String, Object> entry : myMap.entrySet())
         {
-            resultDom = vf.newEmptyStruct();
-            for (Map.Entry<String, Object> entry : myMap.entrySet())
+            String fieldName = entry.getKey();
+            Object value = entry.getValue();
+            if (value instanceof SyntaxValue)
             {
-                String fieldName = entry.getKey();
-                Object value = entry.getValue();
-                if (value instanceof SyntaxValue)
-                {
-                    SyntaxValue child = (SyntaxValue) value;
-                    IonValue childDom = quoteChild(eval, child);
-                    resultDom.add(fieldName, childDom);
-                }
-                else
-                {
-                    SyntaxValue[] children = (SyntaxValue[]) value;
-                    for (SyntaxValue child : children)
-                    {
-                        IonValue childDom = quoteChild(eval, child);
-                        resultDom.add(fieldName, childDom);
-                    }
-                }
+                SyntaxValue child = (SyntaxValue) value;
+                Object childValue = child.quote(eval);
+                names[pos]  = fieldName;
+                values[pos] = childValue;
             }
-        }
-        resultDom.setTypeAnnotations(getAnnotations());
-        return eval.inject(resultDom);
-    }
+            else
+            {
+                SyntaxValue[] children = (SyntaxValue[]) value;
+                Object[] childValues = new Object[children.length];
 
+                int cPos = 0;
+                for (SyntaxValue child : children)
+                {
+                    childValues[cPos++] = child.quote(eval);
+                }
 
-    private IonValue quoteChild(Evaluator eval, SyntaxValue child)
-        throws FusionException
-    {
-        Object childValue = child.quote(eval);
-        IonValue ion = eval.convertToIonValueMaybe(childValue);
-        if (ion == null)
-        {
-            throw new ArgTypeFailure("quote", "Ionizable data", -1, childValue);
+                names[pos]  = fieldName;
+                values[pos] = childValues;
+            }
+
+            pos++;
         }
-        return ion;
+
+        return immutableStruct(names, values, annotations);
     }
 
 
@@ -318,12 +322,12 @@ final class SyntaxStruct
             for (Map.Entry<String, Object> entry : myMap.entrySet())
             {
                 String fieldName = entry.getKey();
-                writer.setFieldName(fieldName);
 
                 Object value = entry.getValue();
                 if (value instanceof SyntaxValue)
                 {
                     SyntaxValue child = (SyntaxValue) value;
+                    writer.setFieldName(fieldName);
                     child.ionize(eval, writer);
                 }
                 else
@@ -331,6 +335,7 @@ final class SyntaxStruct
                     SyntaxValue[] children = (SyntaxValue[]) value;
                     for (SyntaxValue child : children)
                     {
+                        writer.setFieldName(fieldName);
                         child.ionize(eval, writer);
                     }
                 }
@@ -349,17 +354,14 @@ final class SyntaxStruct
     {
         assert myWraps == null;
 
-        ValueFactory vf = eval.getSystem();
         if (isNullValue())
         {
-            IonStruct s = vf.newNullStruct();
-            return new CompiledIonConstant(s);
+            return new CompiledConstant(NULL_STRUCT);
         }
 
         if (myMap.size() == 0)
         {
-            IonStruct s = vf.newEmptyStruct();
-            return new CompiledIonConstant(s);
+            return new CompiledConstant(EMPTY_STRUCT);
         }
 
         // Pre-compute the size so we can allocate arrays all at once.
@@ -433,26 +435,19 @@ final class SyntaxStruct
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            ValueFactory vf = eval.getSystem();
-
-            IonStruct resultDom = vf.newEmptyStruct();
+            HashMap<String, Object> map = new HashMap<String, Object>();
 
             for (int i = 0; i < myFieldNames.length; i++)
             {
                 CompiledForm form = myFieldForms[i];
-                Object childValue = eval.eval(store, form);
-                IonValue childDom = eval.convertToIonValueMaybe(childValue);
-                if (childDom == null)
-                {
-                    throw new ResultFailure("struct literal", "Ion data", i, childValue);
-                }
-                childDom = cloneIfContained(childDom);
+                Object value = eval.eval(store, form);
 
                 String fieldName = myFieldNames[i];
-                resultDom.add(fieldName, childDom);
+
+                structImplAdd(map, fieldName, value);
             }
 
-            return eval.inject(resultDom);
+            return immutableStruct(map);
         }
     }
 }

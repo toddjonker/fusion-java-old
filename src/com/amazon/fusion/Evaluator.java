@@ -3,10 +3,12 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionSexp.sexpFromIonSequence;
+import static com.amazon.fusion.FusionStruct.structFromIonStruct;
 import static com.amazon.fusion.FusionVector.vectorFromIonSequence;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSexp;
+import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
@@ -91,6 +93,10 @@ final class Evaluator
         if (value == null)
         {
             value = mySystem.newNull();
+        }
+        else if (value instanceof IonStruct)
+        {
+            return structFromIonStruct(this, (IonStruct) value);
         }
         else if (value instanceof IonList)
         {

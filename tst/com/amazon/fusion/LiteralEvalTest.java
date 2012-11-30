@@ -89,13 +89,6 @@ public class LiteralEvalTest
         assertEval("{a:{b:33}}", "(z)");
     }
 
-    @Test
-    public void testBadStructLiteral()
-        throws Exception
-    {
-        expectContractFailure("{f:(void)}");
-    }
-
 
     @Test
     public void testQuote()

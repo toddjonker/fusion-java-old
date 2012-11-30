@@ -5,7 +5,10 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionPrint.safeWrite;
 import static com.amazon.fusion.FusionSequence.isSequence;
 import static com.amazon.fusion.FusionSequence.unsafeSequenceDot;
+import static com.amazon.fusion.FusionStruct.isStruct;
+import static com.amazon.fusion.FusionStruct.unsafeStructDot;
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
+import static com.amazon.fusion.FusionVoid.isVoid;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonSequence;
@@ -33,17 +36,15 @@ final class DotProc
     {
         checkArityAtLeast(1, args);
 
-        boolean cIsSequence = isSequence(eval, args[0]);
+        Object c = args[0];
 
-        Object c;
-        if (cIsSequence)
+        boolean cIsSequence = isSequence(eval, c);
+        boolean cIsStruct   = isStruct(eval, c);
+        if (! (cIsSequence || cIsStruct))
         {
-            c = args[0];
+            checkIonContainerArg(0, args);
         }
-        else
-        {
-            c = checkIonContainerArg(0, args);
-        }
+
         Object value = c;
 
         final int lastArg = args.length - 1;
@@ -53,6 +54,11 @@ final class DotProc
             {
                 int pos = checkIntArg(i, args);
                 value = unsafeSequenceDot(eval, c, pos);
+            }
+            else if (cIsStruct)
+            {
+                String field = checkTextArg(i, args);
+                value = unsafeStructDot(eval, c, field);
             }
             else
             {
@@ -86,12 +92,15 @@ final class DotProc
                 }
             }
 
+            if (isVoid(eval, value)) return value;
+
             if (value == null) return voidValue(eval);
 
             if (i < lastArg)
             {
                 cIsSequence = isSequence(eval, value);
-                if (cIsSequence)
+                cIsStruct   = isStruct(eval, value);
+                if (cIsSequence || cIsStruct)
                 {
                     c = value;
                 }

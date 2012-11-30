@@ -3,8 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionPrint.safeWriteToString;
-import static com.amazon.fusion.FusionSexp.isNullSexp;
-import static com.amazon.fusion.FusionVector.isNullVector;
 import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVoid.isVoid;
 import com.amazon.ion.IonBool;
@@ -12,6 +10,7 @@ import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonString;
+import com.amazon.ion.IonText;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
@@ -87,15 +86,9 @@ public abstract class FusionValue
     {
         if (isVoid(eval, result)) return false;
 
-        if (isNullVector(eval, result)) return false;
-
-        if (isNullSexp(eval, result)) return false;
+        if (isAnyNull(eval, result)) return false;
 
         IonValue iv = FusionValue.castToIonValueMaybe(result);
-        if (iv == null) return true;
-
-        if (iv.isNullValue()) return false;
-
         if (iv instanceof IonBool)
         {
             IonBool bv = (IonBool) iv;
@@ -353,6 +346,23 @@ public abstract class FusionValue
         if (iv != null && iv.getType() == IonType.STRING)
         {
             return ((IonString) iv).stringValue();
+        }
+        return null;
+    }
+
+    /**
+     * Given Fusion symbol or string, returns the Java string value.
+     *
+     * @param value
+     * @return null if the value isn't a symbol or string, or if its
+     * null.symbol or null.string.
+     */
+    static String copyTextToJavaString(Object value)
+    {
+        IonValue iv = castToIonValueMaybe(value);
+        if (iv != null && iv instanceof IonText)
+        {
+            return ((IonText) iv).stringValue();
         }
         return null;
     }

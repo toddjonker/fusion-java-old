@@ -2,12 +2,12 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonStruct;
-import com.amazon.ion.IonValue;
+import static com.amazon.fusion.FusionStruct.immutableStruct;
+import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 
 
 /**
- * Constructs a struct from a sequence of alternating strings and Ion Values
+ * Constructs a struct from a sequence of alternating strings and values
  */
 final class StructMakeProc
     extends Procedure
@@ -15,7 +15,7 @@ final class StructMakeProc
     StructMakeProc()
     {
         //    "                                                                               |
-        super("Constructs a struct from a sequence of alternating strings and Ion Values");
+        super("Constructs a struct from pairs of args, alternating strings and values.");
     }
 
     void checkArityEven(Object... args)
@@ -23,9 +23,9 @@ final class StructMakeProc
     {
         if ((args.length % 2) == 1)
         {
-            throw contractFailure("Expected: "+Integer.toString(args.length+1)+
-                                  " or "+ Integer.toString(args.length-1)+
-                                  "; observed: "+Integer.toString(args.length));
+            String message =
+                "Expected even number of args, observed " + args.length;
+            throw contractFailure(message);
         }
     }
 
@@ -35,21 +35,18 @@ final class StructMakeProc
     {
         checkArityEven(args);
 
-        IonStruct result = eval.getSystem().newEmptyStruct();
+        int fieldCount = (args.length / 2);
+        String[] names  = new String[fieldCount];
+        Object[] values = new Object[fieldCount];
 
-        for (int i = 0; i < args.length; i++)
+        int fieldPos = 0;
+        for (int i = 0; i < args.length; i++, fieldPos++)
         {
-            String key = checkTextArg(i, args);
-            i++;
-            IonValue value = eval.convertToIonValueMaybe(args[i]);
-            if (value == null)
-            {
-                throw argFailure("Ion value", i, args);
-            }
-            value = FusionUtils.cloneIfContained(value);
-            result.put(key, value);
+            names [fieldPos] = checkTextArg(i, args);
+            values[fieldPos] = args[++i];
         }
+        assert fieldPos == fieldCount;
 
-        return eval.inject(result);
+        return immutableStruct(names, values, EMPTY_STRING_ARRAY);
     }
 }
