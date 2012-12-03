@@ -2,10 +2,8 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionSexp.isSexp;
-import static com.amazon.fusion.FusionSexp.unsafeSexpSize;
-import static com.amazon.fusion.FusionVector.isVector;
-import static com.amazon.fusion.FusionVector.unsafeVectorSize;
+import static com.amazon.fusion.FusionCollection.isCollection;
+import static com.amazon.fusion.FusionCollection.unsafeCollectionSize;
 import com.amazon.ion.IonContainer;
 
 final class SizeProc
@@ -24,13 +22,9 @@ final class SizeProc
         throws FusionException
     {
         int size;
-        if (isVector(eval, arg))
+        if (isCollection(eval, arg))
         {
-            size = unsafeVectorSize(eval, arg);
-        }
-        else if (isSexp(eval, arg))
-        {
-            size = unsafeSexpSize(eval, arg);
+            size = unsafeCollectionSize(eval, arg);
         }
         else
         {

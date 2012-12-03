@@ -4,6 +4,8 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
+import static com.amazon.fusion.FusionVoid.voidValue;
+import com.amazon.fusion.FusionSequence.BaseSequence;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
@@ -321,7 +323,7 @@ final class FusionVector
         throws FusionException
     {
         BaseVector base = (BaseVector) vector;
-        return base.copyToIonList(factory, throwOnConversionFailure);
+        return base.copyToIonValue(factory, throwOnConversionFailure);
     }
 
 
@@ -333,24 +335,18 @@ final class FusionVector
      * vectors.
      */
     private abstract static class BaseVector
-        extends FusionValue
-        implements Writeable
+        extends BaseSequence
     {
         Object[] myValues;
-
-        /** Not null */
-        final String[] myAnnotations;
 
         BaseVector(Object[] values)
         {
             myValues = values;
-            myAnnotations = EMPTY_STRING_ARRAY;
         }
 
         BaseVector(String[] annotations, Object[] values)
         {
-            assert annotations != null;
-            myAnnotations = annotations;
+            super(annotations);
             myValues = values;
         }
 
@@ -359,15 +355,25 @@ final class FusionVector
         abstract BaseVector makeSimilar(String[] annotations, Object[] values);
 
 
+        @Override
         int size()
         {
             return myValues.length;
         }
 
 
-        Object unsafeRef(Evaluator eval, int i)
+        @Override
+        Object dot(Evaluator eval, int pos)
+            throws FusionException
         {
-            return myValues[i];
+            if (pos < 0 || size() <= pos) return voidValue(eval);
+            return myValues[pos];
+        }
+
+        @Override
+        Object unsafeRef(Evaluator eval, int pos)
+        {
+            return myValues[pos];
         }
 
 
@@ -381,8 +387,9 @@ final class FusionVector
          * @return null if the vector and its contents cannot be ionized
          *  UNLESS throwOnConversionFailure
          */
-        IonList copyToIonList(ValueFactory factory,
-                              boolean throwOnConversionFailure)
+        @Override
+        IonList copyToIonValue(ValueFactory factory,
+                               boolean throwOnConversionFailure)
             throws FusionException
         {
             int len = size();
@@ -555,7 +562,7 @@ final class FusionVector
         }
 
         @Override
-        IonList copyToIonList(ValueFactory factory,
+        IonList copyToIonValue(ValueFactory factory,
                               boolean throwOnConversionFailure)
             throws FusionException
         {
@@ -713,10 +720,18 @@ final class FusionVector
         }
 
         @Override
-        Object unsafeRef(Evaluator eval, int i)
+        Object dot(Evaluator eval, int pos)
+            throws FusionException
         {
             injectElements(eval);
-            return myValues[i];
+            return super.dot(eval, pos);
+        }
+
+        @Override
+        Object unsafeRef(Evaluator eval, int pos)
+        {
+            injectElements(eval);
+            return myValues[pos];
         }
 
         @Override

@@ -2,8 +2,8 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import com.amazon.fusion.FusionSequence.BaseSequence;
 import com.amazon.fusion.Iterators.AbstractIterator;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonSexp;
@@ -213,7 +213,7 @@ final class FusionSexp
         throws FusionException
     {
         BaseSexp base = (BaseSexp) sexp;
-        return base.copyToIonSexp(factory, throwOnConversionFailure);
+        return base.copyToIonValue(factory, throwOnConversionFailure);
     }
 
     /**
@@ -223,7 +223,7 @@ final class FusionSexp
         throws FusionException
     {
         BaseSexp base = (BaseSexp) sexp;
-        return base.copyToIonSexp(factory, true);
+        return base.copyToIonValue(factory, true);
     }
 
     /**
@@ -236,7 +236,7 @@ final class FusionSexp
         throws FusionException
     {
         BaseSexp base = (BaseSexp) sexp;
-        return base.copyToIonSexp(factory, false);
+        return base.copyToIonValue(factory, false);
     }
 
 
@@ -244,28 +244,37 @@ final class FusionSexp
 
 
     static abstract class BaseSexp
-        extends FusionValue
-        implements Writeable
+        extends BaseSequence
     {
-        /** Not null */
-        final String[] myAnnotations;
-
-        BaseSexp()
-        {
-            myAnnotations = EMPTY_STRING_ARRAY;
-        }
+        BaseSexp() {}
 
         BaseSexp(String[] annotations)
         {
-            assert annotations != null;
-            myAnnotations = annotations;
+            super(annotations);
         }
 
-        abstract int size()
-            throws FusionException;
+        @Override
+        int size() throws FusionException { return 0; }
 
-        abstract IonSexp copyToIonSexp(ValueFactory factory,
-                                       boolean throwOnConversionFailure)
+        @Override
+        Object dot(Evaluator eval, int pos)
+            throws FusionException
+        {
+            return voidValue(eval);
+        }
+
+        @Override
+        Object unsafeRef(Evaluator eval, int pos)
+            throws FusionException
+        {
+            String message =
+                "No index " + pos + " in sequence " + this;
+            throw new IndexOutOfBoundsException(message);
+        }
+
+        @Override
+        abstract IonSexp copyToIonValue(ValueFactory factory,
+                                        boolean throwOnConversionFailure)
             throws FusionException;
     }
 
@@ -281,10 +290,7 @@ final class FusionSexp
         }
 
         @Override
-        int size() { return 0; }
-
-        @Override
-        IonSexp copyToIonSexp(ValueFactory factory,
+        IonSexp copyToIonValue(ValueFactory factory,
                               boolean throwOnConversionFailure)
             throws FusionException
         {
@@ -327,10 +333,7 @@ final class FusionSexp
         }
 
         @Override
-        int size() { return 0; }
-
-        @Override
-        IonSexp copyToIonSexp(ValueFactory factory,
+        IonSexp copyToIonValue(ValueFactory factory,
                               boolean throwOnConversionFailure)
             throws FusionException
         {
@@ -404,7 +407,33 @@ final class FusionSexp
         }
 
         @Override
-        IonSexp copyToIonSexp(ValueFactory factory,
+        Object dot(Evaluator eval, int pos)
+            throws FusionException
+        {
+            ImmutablePair p = this;
+            for ( ; pos > 0; pos--)
+            {
+                Object tail = p.myTail;
+                if (! (tail instanceof ImmutablePair))
+                {
+                    return voidValue(eval);
+                }
+                p = (ImmutablePair) tail;
+            }
+            return p.myHead;
+        }
+
+        @Override
+        Object unsafeRef(Evaluator eval, int i)
+            throws FusionException
+        {
+            String message =
+                "No index " + i + " in sequence " + this;
+            throw new IndexOutOfBoundsException(message);
+        }
+
+        @Override
+        IonSexp copyToIonValue(ValueFactory factory,
                               boolean throwOnConversionFailure)
             throws FusionException
         {

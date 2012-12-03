@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSequence.isSequence;
 import static com.amazon.fusion.FusionSexp.sexpFromIonSequence;
 import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVector.vectorFromIonSequence;
@@ -329,7 +330,7 @@ abstract class Procedure
         throws ArgTypeFailure
     {
         Object arg = args[argNum];
-        if (isVector(eval, arg) || FusionSexp.isSexp(eval, arg)) return arg;
+        if (isSequence(eval, arg)) return arg;
 
         IonSequence seq;
         try

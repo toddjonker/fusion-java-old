@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionSexp.isNullSexp;
-import static com.amazon.fusion.FusionSexp.isSexp;
 import static com.amazon.fusion.FusionVector.isNullVector;
 import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVoid.isVoid;
@@ -633,22 +632,31 @@ public abstract class FusionValue
             return factory.clone(iv);
         }
 
-        if (isVector(value))
+        if (value instanceof FusionValue)
         {
-            return FusionVector.unsafeCopyToIonList(value, factory,
-                                                    throwOnConversionFailure);
-        }
-
-        if (isSexp(value))
-        {
-            return FusionSexp.unsafeCopyToIonSexp(value, factory,
-                                                  throwOnConversionFailure);
+            FusionValue fv = (FusionValue)value;
+            return fv.copyToIonValue(factory, throwOnConversionFailure);
         }
 
         if (throwOnConversionFailure)
         {
             String message =
                 "Value is not convertable to Ion: " + writeToString(value);
+            throw new ContractFailure(message);
+        }
+
+        return null;
+    }
+
+
+    IonValue copyToIonValue(ValueFactory factory,
+                            boolean throwOnConversionFailure)
+        throws FusionException
+    {
+        if (throwOnConversionFailure)
+        {
+            String message =
+                "Value is not convertable to Ion: " + this;
             throw new ContractFailure(message);
         }
 

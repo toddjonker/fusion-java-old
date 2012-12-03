@@ -2,13 +2,9 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionSexp.isSexp;
-import static com.amazon.fusion.FusionSexp.unsafePairDot;
-import static com.amazon.fusion.FusionSexp.unsafeSexpSize;
+import static com.amazon.fusion.FusionSequence.isSequence;
+import static com.amazon.fusion.FusionSequence.unsafeSequenceDot;
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
-import static com.amazon.fusion.FusionVector.isVector;
-import static com.amazon.fusion.FusionVector.unsafeVectorRef;
-import static com.amazon.fusion.FusionVector.unsafeVectorSize;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonSequence;
@@ -36,11 +32,10 @@ final class DotProc
     {
         checkArityAtLeast(1, args);
 
-        boolean cIsVector = isVector(eval, args[0]);
-        boolean cIsFSexp = isSexp(eval, args[0]);
+        boolean cIsSequence = isSequence(eval, args[0]);
 
         Object c;
-        if (cIsVector || cIsFSexp)
+        if (cIsSequence)
         {
             c = args[0];
         }
@@ -53,23 +48,10 @@ final class DotProc
         final int lastArg = args.length - 1;
         for (int i = 1; i <= lastArg; i++)
         {
-            if (cIsVector)
+            if (cIsSequence)
             {
-                int index = checkIntArg(i, args);
-                if (unsafeVectorSize(eval, c) <= index)
-                {
-                    return voidValue(eval);
-                }
-                value = unsafeVectorRef(eval, c, index);
-            }
-            else if (cIsFSexp)
-            {
-                int index = checkIntArg(i, args);
-                if (unsafeSexpSize(eval, c) <= index)
-                {
-                    return voidValue(eval);
-                }
-                value = unsafePairDot(eval, c, index);
+                int pos = checkIntArg(i, args);
+                value = unsafeSequenceDot(eval, c, pos);
             }
             else
             {
@@ -107,9 +89,8 @@ final class DotProc
 
             if (i < lastArg)
             {
-                cIsVector = isVector(eval, value);
-                cIsFSexp  = isSexp(eval, value);
-                if (cIsVector || cIsFSexp)
+                cIsSequence = isSequence(eval, value);
+                if (cIsSequence)
                 {
                     c = value;
                 }
@@ -120,7 +101,7 @@ final class DotProc
                 catch (ClassCastException cce)
                 {
                     StringBuilder out = new StringBuilder();
-                    out.append("expected container before traversing ");
+                    out.append("expected collection before traversing ");
                     writeFriendlyIndex(out, i + 1);
                     out.append(" argument, had: ");
                     FusionValue.write(out, value);

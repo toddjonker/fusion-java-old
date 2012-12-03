@@ -2,8 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionSexp.isSexp;
-import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVector.vectorFromIonSequence;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonList;
@@ -287,7 +285,8 @@ final class Evaluator
 
 
     /**
-     * Casts or copies as necessary. Throws if vector contains non-Ion data!
+     * Casts or copies as necessary.
+     * Returns null if value contains non-Ionizable data!
      *
      * @deprecated This is of questionable design, and should probably be
      * removed. Please limit use carefully.
@@ -301,14 +300,10 @@ final class Evaluator
             return (IonValue) value;
         }
 
-        if (isVector(this, value))
+        if (value instanceof FusionValue)
         {
-            return FusionVector.unsafeCopyToIonListMaybe(value, mySystem);
-        }
-
-        if (isSexp(this, value))
-        {
-            return FusionSexp.unsafeCopyToIonSexpMaybe(value, mySystem);
+            FusionValue fv = (FusionValue) value;
+            return fv.copyToIonValue(mySystem, false);
         }
 
         return null;
