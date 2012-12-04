@@ -67,6 +67,12 @@ public abstract class FusionValue
     }
 
 
+    public static boolean isAnyNull(TopLevel top, Object value)
+        throws FusionException
+    {
+        return isAnyNull(((StandardTopLevel) top).getEvaluator(), value);
+    }
+
     static boolean isAnyNull(Evaluator eval, Object value)
         throws FusionException
     {

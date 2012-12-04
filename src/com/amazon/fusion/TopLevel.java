@@ -146,6 +146,7 @@ public interface TopLevel
      * @return the resulting Fusion value.
      * May be null (if no value results) or an {@code Object[]} (if there are
      * multiple values).
+     * Note that "no value" is not the same as "returns void".
      */
     public Object call(String procedureName, Object... arguments)
         throws FusionException;

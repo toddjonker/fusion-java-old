@@ -295,7 +295,7 @@ public class CoreTestCase
         throws FusionException
     {
         Object fv = eval(expressionIon);
-        if (! isVoid(fv))
+        if (! isVoid(topLevel(), fv))
         {
             Assert.fail("Result isn't void: " + fv +
                         "\nSource: " + expressionIon);

@@ -112,6 +112,8 @@ final class Evaluator
         {
             return newDecimal((BigDecimal) value);
         }
+
+        // TODO this API forces us to use a non-null object for VOID!
         return null;
     }
 
@@ -147,6 +149,7 @@ final class Evaluator
             return newNull();
         }
 
+        // TODO this API forces us to use a non-null object for VOID!
         return null;
     }
 

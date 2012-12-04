@@ -34,7 +34,6 @@ public final class FusionVoid
      * null or not!</b>
      */
     static Object voidValue(Evaluator eval)
-        throws FusionException
     {
         return VOID;
     }
@@ -43,16 +42,15 @@ public final class FusionVoid
     //========================================================================
     // Predicates
 
-    @Deprecated
-    public static boolean isVoid(Object v)
-        throws FusionException
+    public static boolean isVoid(TopLevel top, Object v)
     {
+        assert top != null;
         return (v == VOID);
     }
 
     static boolean isVoid(Evaluator eval, Object v)
-        throws FusionException
     {
+        assert eval != null;
         return (v == VOID);
     }
 

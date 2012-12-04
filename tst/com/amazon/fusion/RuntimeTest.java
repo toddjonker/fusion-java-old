@@ -95,10 +95,18 @@ public class RuntimeTest
     }
 
     @Test(expected = FusionException.class)
-    public void testBadIonize()
+    public void testBadIonizeProcedure()
         throws Exception
     {
         Object fv = eval("(lambda () 12)");
+        runtime().ionize(fv, system());
+    }
+
+    @Test(expected = FusionException.class)
+    public void testBadIonizeVoid()
+        throws Exception
+    {
+        Object fv = eval("(void)");
         runtime().ionize(fv, system());
     }
 

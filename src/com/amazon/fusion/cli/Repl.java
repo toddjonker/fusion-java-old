@@ -8,8 +8,8 @@ import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntime;
 import com.amazon.fusion.FusionValue;
-import com.amazon.fusion._Private_HelpForm;
 import com.amazon.fusion.TopLevel;
+import com.amazon.fusion._Private_HelpForm;
 import com.amazon.ion.IonException;
 import java.io.Console;
 import java.io.PrintWriter;
@@ -135,7 +135,7 @@ class Repl
         private void print(Object v)
             throws FusionException
         {
-            if (isVoid(v)) return;
+            if (isVoid(myRuntime.getDefaultTopLevel(), v)) return;
 
             FusionValue.write(myOut, v);
             myOut.println();
