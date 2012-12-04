@@ -60,6 +60,26 @@ public abstract class FusionValue
     }
 
 
+    boolean isAnyNull(Evaluator eval)
+        throws FusionException
+    {
+        return false;
+    }
+
+
+    static boolean isAnyNull(Evaluator eval, Object value)
+        throws FusionException
+    {
+        if (value instanceof FusionValue)
+        {
+            return ((FusionValue) value).isAnyNull(eval);
+        }
+
+        IonValue iv = castToIonValueMaybe(value);
+        return (iv != null ? iv.isNullValue() : false);
+    }
+
+
     static boolean isNullNull(Evaluator eval, Object value)
     {
         IonValue iv = castToIonValueMaybe(value);
@@ -678,6 +698,7 @@ public abstract class FusionValue
     }
 
 
+    @Deprecated
     static boolean isAnyIonNull(Object value)
     {
         IonValue iv = castToIonValueMaybe(value);

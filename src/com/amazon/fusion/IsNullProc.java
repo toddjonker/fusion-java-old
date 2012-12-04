@@ -16,7 +16,7 @@ final class IsNullProc
     Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        boolean isNull = FusionValue.isAnyIonNull(arg);
+        boolean isNull = FusionValue.isAnyNull(eval, arg);
         return eval.newBool(isNull);
     }
 }

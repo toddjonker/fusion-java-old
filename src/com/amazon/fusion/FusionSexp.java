@@ -290,6 +290,13 @@ final class FusionSexp
         }
 
         @Override
+        boolean isAnyNull(Evaluator eval)
+            throws FusionException
+        {
+            return true;
+        }
+
+        @Override
         IonSexp copyToIonValue(ValueFactory factory,
                               boolean throwOnConversionFailure)
             throws FusionException

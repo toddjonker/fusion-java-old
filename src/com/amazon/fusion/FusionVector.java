@@ -556,6 +556,13 @@ final class FusionVector
         }
 
         @Override
+        boolean isAnyNull(Evaluator eval)
+            throws FusionException
+        {
+            return true;
+        }
+
+        @Override
         int size()
         {
             return 0;

@@ -7,6 +7,17 @@
 (define F (lambda (e) false))
 (define T (lambda (e) true))
 
+(check_true (is_null  null.list))
+(check_true (is_empty null.list))
+(check_true (is_null  (quote null.list)))
+(check_true (is_empty (quote null.list)))
+(check_true (is_null  (quote a::null.list)))
+(check_true (is_empty (quote a::null.list)))
+
+(check_false (is_null []))
+(check_false (is_null (quote [])))
+(check_false (is_null (quote a::[])))
+
 
 //==========================================================================
 // first

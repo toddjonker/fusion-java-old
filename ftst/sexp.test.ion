@@ -11,6 +11,17 @@
 (define val12    (quote (1 2)))
 
 
+//(check_true (is_null  null.sexp))  // Not valid syntax
+//(check_true (is_empty null.sexp))
+(check_true (is_null  (quote null.sexp)))
+(check_true (is_empty (quote null.sexp)))
+(check_true (is_null  (quote a::null.sexp)))
+(check_true (is_empty (quote a::null.sexp)))
+
+(check_false (is_null (quote ())))
+(check_false (is_null (quote a::())))
+
+
 (define test_predicates
   (lambda (sexp empty)
     (assert (is_sexp sexp))
