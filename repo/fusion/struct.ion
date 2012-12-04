@@ -6,7 +6,6 @@
   (use 'fusion/experimental/defines')
 
 
-  (defpub_j struct_intersect  "com.amazon.fusion.StructIntersectProc")
   (defpub_j struct_make       "com.amazon.fusion.StructMakeProc")
   (defpub_j struct_prune      "com.amazon.fusion.StructPruneProc")
   (defpub_j struct_union      "com.amazon.fusion.StructUnionAllProc")
