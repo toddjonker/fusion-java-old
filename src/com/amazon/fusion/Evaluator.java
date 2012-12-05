@@ -86,13 +86,13 @@ final class Evaluator
      * It is an error for modifications to be made to the argument instance
      * (or anything it refers to) after it is passed to this method.
      *
-     * @param value may be null, meaning {@code null.null}.
+     * @param value may be null to inject Fusion's void value.
      */
     Object inject(IonValue value)
     {
         if (value == null)
         {
-            value = mySystem.newNull();
+            return voidValue(this);
         }
         else if (value instanceof IonStruct)
         {
@@ -135,7 +135,7 @@ final class Evaluator
      * It is an error for modifications to be made to the argument instance
      * (or anything it refers to) after it is passed to this method.
      *
-     * @param javaValue may be null, meaning {@code null.null}.
+     * @param javaValue may be null to inject Fusion's void value.
      *
      * @return the injected value, or null if the value cannot be injected.
      */
@@ -159,7 +159,7 @@ final class Evaluator
         }
         else if (javaValue == null)
         {
-            return newNull();
+            return voidValue(this);
         }
 
         // TODO this API forces us to use a non-null object for VOID!

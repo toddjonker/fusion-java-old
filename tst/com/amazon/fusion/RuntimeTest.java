@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVoid.isVoid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -77,6 +78,23 @@ public class RuntimeTest
         // Test eval'ing a module
         Object mod = loadFile("tst-repo/grain.ion");
         assertTrue(mod instanceof ModuleInstance);
+    }
+
+    @Test
+    public void testNullInjection()
+        throws Exception
+    {
+        topLevel().requireModule("/fusion/function");
+        Object fv = topLevel().call("identity", (Object) null);
+        assertTrue(isVoid(topLevel(), fv));
+    }
+
+    @Test
+    public void testVoidReturn()
+        throws Exception
+    {
+        Object fv = eval("(void)");
+        assertTrue(isVoid(topLevel(), fv));
     }
 
 
