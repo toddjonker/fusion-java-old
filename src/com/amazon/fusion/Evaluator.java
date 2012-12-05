@@ -2,9 +2,11 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSexp.sexpFromIonSequence;
 import static com.amazon.fusion.FusionVector.vectorFromIonSequence;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonList;
+import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
@@ -94,6 +96,11 @@ final class Evaluator
         {
             IonList list = (IonList) value;
             return vectorFromIonSequence(this, list);
+        }
+        else if (value instanceof IonSexp)
+        {
+            IonSexp sexp = (IonSexp) value;
+            return sexpFromIonSequence(this, sexp);
         }
         return value;
     }
