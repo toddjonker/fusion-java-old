@@ -21,6 +21,7 @@ import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.NullValueException;
 import com.amazon.ion.Timestamp;
+import com.amazon.ion.ValueFactory;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -394,7 +395,25 @@ abstract class Procedure
     }
 
 
-    /** Allows null.struct */
+    /**
+     * Allows {@code null.struct}.
+     * @return not null.
+     */
+    IonStruct copyStructArgToIonStruct(Evaluator eval, ValueFactory factory,
+                                       int argNum, Object... args)
+        throws FusionException
+    {
+        Object arg = args[argNum];
+        IonStruct is = checkStructArg(argNum, args);
+        // Ensure caller can't mutate the "immutable" value.
+        return factory.clone(is);
+    }
+
+    /**
+     * Allows null.struct.
+     * @deprecated Use {@link #copyStructArgToIonStruct}.
+     */
+    @Deprecated
     IonStruct checkStructArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
