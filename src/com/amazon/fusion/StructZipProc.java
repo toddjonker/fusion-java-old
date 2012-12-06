@@ -44,7 +44,7 @@ final class StructZipProc
 
             Object valueObj = valueIterator.next();
             IonValue value = copyToIonValue(valueObj, eval.getSystem());
-            result.put(name, value);
+            result.add(name, value);
         }
 
         return eval.inject(result);

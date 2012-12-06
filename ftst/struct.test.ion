@@ -43,3 +43,23 @@
 (check = (size {f:1}) 1)
 (check = (size {f:2, f:2}) 2)  // repeated field
 (check = (size {f:2, g:2}) 2)
+
+
+//==========================================================================
+// for_each_field
+
+(define rip_and_zip
+  (lambda (struct)
+    (let [(names  (stretchy_list)),
+          (values (stretchy_list))]
+      (for_each_field
+        (lambda (name value)
+          (add_m names name)
+          (add_m values value))
+        struct)
+      (let [(zipped (struct_zip names values))]
+        (check ion_equals zipped struct)))))
+
+(rip_and_zip {})
+(rip_and_zip {a:1,b:[2,3],c:{d:(quote e)}})
+(rip_and_zip {a:1,b:[2,3],a:{d:(quote e)}})  // Repeated field

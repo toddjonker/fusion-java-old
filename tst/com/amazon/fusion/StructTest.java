@@ -168,7 +168,7 @@ public class StructTest
         assertEval("{hello:\"world\"}", "(struct_zip [\"hello\"] [\"world\"])");
         assertEval("{f:3,g:\"hello\"}","(struct_zip [\"f\",\"g\"] [3,\"hello\"])");
         assertEval("{A:3,B:[true,false,[]]}","(struct_zip [\"A\",\"B\"] [3,[true,false,[]]])");
-        assertEval("{A:3}","(struct_zip [\"A\",\"A\"] [[true,false,[]],3])");
+        assertEval("{A:1,A:3}","(struct_zip [\"A\",\"A\"] [1,3])");
         assertEval("{A:3}","(struct_zip [\"A\",\"B\"] [3])");
     }
 
