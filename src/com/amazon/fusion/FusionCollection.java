@@ -24,6 +24,16 @@ final class FusionCollection
     // Accessors
 
 
+    /**
+     * @return not null.
+     */
+    static String[] unsafeCollectionAnnotationStrings(Evaluator eval,
+                                                      Object vector)
+    {
+        return ((BaseCollection) vector).myAnnotations;
+    }
+
+
     static int unsafeCollectionSize(Evaluator eval, Object collection)
         throws FusionException
     {

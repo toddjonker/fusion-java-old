@@ -2,11 +2,11 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionCollection.isCollection;
+import static com.amazon.fusion.FusionCollection.unsafeCollectionAnnotationStrings;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVector.immutableVector;
-import static com.amazon.fusion.FusionVector.isVector;
-import static com.amazon.fusion.FusionVector.unsafeVectorAnnotationStrings;
 import com.amazon.ion.IonValue;
 
 final class IonAnnotationsProc
@@ -26,9 +26,9 @@ final class IonAnnotationsProc
     {
         String[] anns = EMPTY_STRING_ARRAY;
 
-        if (isVector(eval, arg))
+        if (isCollection(eval, arg))
         {
-            anns = unsafeVectorAnnotationStrings(eval, arg);
+            anns = unsafeCollectionAnnotationStrings(eval, arg);
         }
         else
         {

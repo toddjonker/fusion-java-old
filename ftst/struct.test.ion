@@ -1,5 +1,6 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
+(use 'fusion/ion')
 (use 'fusion/list')
 (use 'fusion/struct')
 (use check)
@@ -7,3 +8,38 @@
 (check_equal (. (quote {f:[]}) "f") [] "[] in quoted struct")
 
 (check_equal (concatenate_m (. {f:[]} "f") [1]) [1] "pulling list from struct")
+
+
+(define test_predicates
+  (lambda (struct expect_null expect_empty)
+    (assert (is_struct struct))
+    (check = (is_null  struct) expect_null)
+    (check = (is_empty struct) expect_empty)
+    // TODO ...
+    ))
+
+
+// Construction via literals
+
+(test_predicates           null.struct  true  true)
+(test_predicates (quote    null.struct) true  true)
+(test_predicates (quote a::null.struct) true  true)
+(test_predicates           {}           false true)
+(test_predicates (quote    {})          false true)
+(test_predicates (quote a::{})          false true)
+
+
+(check_equal (ion_annotations (quote {})) (quote []) "annotations")
+(check_equal (ion_annotations (quote a::{})) (quote ["a"]) "annotations")
+(check_equal (ion_annotations (quote a::b::{})) (quote ["a","b"]) "annotations")
+(check_equal (ion_annotations (quote a::b::a::{})) (quote ["a","b","a"]) "annotations")
+
+
+//==========================================================================
+// size
+
+(check = (size null.struct) 0)
+(check = (size {}) 0)
+(check = (size {f:1}) 1)
+(check = (size {f:2, f:2}) 2)  // repeated field
+(check = (size {f:2, g:2}) 2)

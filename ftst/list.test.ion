@@ -1,6 +1,7 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
 (use check)
+(use 'fusion/ion')
 (use 'fusion/list')
 (use 'fusion/vector')
 
@@ -17,6 +18,12 @@
 (check_false (is_null []))
 (check_false (is_null (quote [])))
 (check_false (is_null (quote a::[])))
+
+
+(check_equal (ion_annotations (quote [])) (quote []) "annotations")
+(check_equal (ion_annotations (quote a::[])) (quote ["a"]) "annotations")
+(check_equal (ion_annotations (quote a::b::[])) (quote ["a","b"]) "annotations")
+(check_equal (ion_annotations (quote a::b::a::[])) (quote ["a","b","a"]) "annotations")
 
 
 //==========================================================================
