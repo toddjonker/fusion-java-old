@@ -11,6 +11,8 @@
   (use 'fusion/vector')
 
 
+  (defpub ion_equals          (java_new "com.amazon.fusion.IonEqualsProc"))
+
   // NOT PUBLIC YET
   (define raise_check_failure (java_new "com.amazon.fusion.CheckFailureProc"))
 
