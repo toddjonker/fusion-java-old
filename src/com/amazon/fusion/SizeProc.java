@@ -2,9 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionCollection.isCollection;
 import static com.amazon.fusion.FusionCollection.unsafeCollectionSize;
-import com.amazon.ion.IonContainer;
 
 final class SizeProc
     extends Procedure1
@@ -21,17 +19,8 @@ final class SizeProc
     Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        int size;
-        if (isCollection(eval, arg))
-        {
-            size = unsafeCollectionSize(eval, arg);
-        }
-        else
-        {
-            IonContainer c = checkIonContainerArg(0, arg);
-            size = c.size();
-        }
-
+        checkCollectionArg(eval, 0, arg);
+        int size = unsafeCollectionSize(eval, arg);
         return eval.newInt(size);
     }
 }

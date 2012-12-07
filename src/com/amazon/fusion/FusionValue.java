@@ -3,10 +3,8 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionPrint.safeWriteToString;
-import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVoid.isVoid;
 import com.amazon.ion.IonBool;
-import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonString;
@@ -17,7 +15,6 @@ import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
-import java.util.Iterator;
 
 /**
  * The core features of a Fusion run-time value.  Note that the set of Fusion
@@ -390,18 +387,5 @@ public abstract class FusionValue
             return ((IonBool) iv).booleanValue();
         }
         return null;
-    }
-
-
-    /**
-     * @param value must be vector or IonContainer
-     */
-    static Iterator<?> unsafeJavaIterate(Evaluator eval, Object value)
-    {
-        if (isVector(value))
-        {
-            return FusionVector.unsafeJavaIterate(eval, value);
-        }
-        return ((IonContainer)value).iterator();
     }
 }

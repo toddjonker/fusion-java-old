@@ -19,12 +19,8 @@
   // TODO FUSION-86 subseq - Needs to handle sexp
 
 
-  (defpub is_immutable_list
-    (lambda (v)
-      (or (is_immutable_vector v)
-          (and (is_list v) (not (is_vector v))))))
-
   // Renamings to merge vector back into list
+  (defpub is_immutable_list is_immutable_vector)
   (defpub is_mutable_list is_mutable_vector)
   (defpub is_stretchy_list is_stretchy_vector)
 
@@ -45,15 +41,7 @@
   //==========================================================================
   // Iteration
 
-  // TODO I don't like how this is working...
-  (define iterate_ion_seq (java_new "com.amazon.fusion.IterateListProc"))
-
-  (defpub list_iterator
-    (lambda (list)
-      "Returns an iterator that produces the elements of a `list` (or vector)."
-      (if (is_vector list)
-        (vector_iterate list)
-        (iterate_ion_seq list))))
+  (defpub list_iterator vector_iterate)
 
   (defpub list_from_iterator
     (lambda (iterator)

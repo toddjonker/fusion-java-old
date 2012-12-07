@@ -10,8 +10,6 @@ import static com.amazon.fusion.FusionSexp.unsafeSexpSize;
 import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVector.unsafeVectorCopy;
 import static com.amazon.fusion.FusionVector.unsafeVectorSize;
-import com.amazon.ion.IonSequence;
-import com.amazon.ion.IonValue;
 
 
 final class ApplyProc
@@ -51,10 +49,6 @@ final class ApplyProc
         {
             restLen = unsafeSexpSize(eval, rest);
         }
-        else if (rest instanceof IonSequence)
-        {
-            restLen = ((IonSequence) rest).size();
-        }
         else
         {
             throw argFailure("list or sexp", arity - 1, args);
@@ -73,21 +67,13 @@ final class ApplyProc
         {
             unsafeVectorCopy(eval, rest, 0, procArgs, arg, restLen);
         }
-        else if (restIsChain)
+        else
         {
             while (isPair(eval, rest))
             {
                 procArgs[arg++] = unsafePairHead(eval, rest);
                 rest = unsafePairTail(eval, rest);
             }
-        }
-        else
-        {
-            for (IonValue dom : (IonSequence) rest)
-            {
-                procArgs[arg++] = eval.inject(dom);
-            }
-            assert arg == procArity;
         }
 
         return eval.bounceTailCall(proc, procArgs);

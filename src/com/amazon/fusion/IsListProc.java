@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVector.isVector;
-import com.amazon.ion.IonList;
 
 final class IsListProc
     extends Procedure1
@@ -19,7 +18,7 @@ final class IsListProc
     Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        boolean result = (isVector(eval, arg) || arg instanceof IonList);
+        boolean result = isVector(eval, arg);
         return eval.newBool(result);
     }
 }

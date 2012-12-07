@@ -27,10 +27,7 @@ final class IonSubseqProc
     {
         checkArityExact(args);
 
-        // TODO FUSION-87 this makes an extra copy
-        // I hacked it this way to ensure that we use the same coerced
-        // vector subtype everywhere.
-        Object vector = coerceListArg(eval, 0, args);
+        Object vector = checkListArg(eval, 0, args);
 
         int size = unsafeVectorSize(eval, vector);
 

@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionSexp.isSexp;
-import com.amazon.ion.IonSexp;
 
 final class IsSexpProc
     extends Procedure1
@@ -19,7 +18,7 @@ final class IsSexpProc
     Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        boolean result = (isSexp(eval, arg) || arg instanceof IonSexp);
+        boolean result = isSexp(eval, arg);
         return eval.newBool(result);
     }
 }

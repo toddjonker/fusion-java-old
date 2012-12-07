@@ -23,10 +23,6 @@
   (define unsafe_pair_head (java_new "com.amazon.fusion.FusionSexp$UnsafePairHeadProc"))
   (define unsafe_pair_tail (java_new "com.amazon.fusion.FusionSexp$UnsafePairTailProc"))
 
-  (define coerce_to_fsexp
-    '''Ensure we have a FusionSexp, not an IonSexp''' // TODO FUSION-87 ugly copy
-    (lambda (sexpish)
-      (apply sexp sexpish)))
 
   (defpub head
     (lambda (sexp)
@@ -34,7 +30,7 @@
         (raise_argument_error "head" "sexp" 0 sexp))
       (if (is_empty sexp)
         (void)
-        (unsafe_pair_head (coerce_to_fsexp sexp)))))
+        (unsafe_pair_head sexp))))
 
   (defpub tail
     (lambda (sexp)
@@ -42,6 +38,6 @@
         (raise_argument_error "tail" "sexp" 0 sexp))
       (if (is_empty sexp)
         (void)
-        (unsafe_pair_tail (coerce_to_fsexp sexp)))))
+        (unsafe_pair_tail sexp))))
 
 )

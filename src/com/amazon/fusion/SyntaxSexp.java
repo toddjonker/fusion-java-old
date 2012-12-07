@@ -11,10 +11,8 @@ import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.LetValuesForm.compilePlainLet;
 import com.amazon.fusion.LambdaForm.CompiledLambdaBase;
 import com.amazon.fusion.LambdaForm.CompiledLambdaExact;
-import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
-import com.amazon.ion.ValueFactory;
 import java.io.IOException;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -106,13 +104,6 @@ final class SyntaxSexp
     Type getType()
     {
         return Type.SEXP;
-    }
-
-
-    @Override
-    IonSequence makeNull(ValueFactory factory)
-    {
-        return factory.newNullSexp();
     }
 
 

@@ -26,7 +26,7 @@ final class ForEachFieldProc
         checkArityExact(args);
 
         final Procedure proc = checkProcArg(0, args);
-        Object fs = coerceStructArg(eval, 1, args);
+        Object fs = checkStructArg(eval, 1, args);
 
         StructFieldVisitor visitor = new StructFieldVisitor()
         {

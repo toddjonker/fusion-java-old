@@ -5,10 +5,8 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
-import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
-import com.amazon.ion.ValueFactory;
 import java.io.IOException;
 import java.util.List;
 
@@ -159,14 +157,6 @@ abstract class SyntaxSequence
         pushAnyWraps();
         return myChildren[index];
     }
-
-
-    /**
-     * Construct a null value of the appropriate type.
-     * @param factory must not be null.
-     * @return a new instance.
-     */
-    abstract IonSequence makeNull(ValueFactory factory);
 
 
     /**

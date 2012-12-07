@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionPrint.safeWriteToString;
 import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionStruct.structImplAdd;
+import static com.amazon.fusion.FusionVector.unsafeJavaIterate;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -24,8 +25,8 @@ final class StructZipProc
     Object doApply(Evaluator eval, Object names, Object values)
         throws FusionException
     {
-        names  = coerceListArg(eval, 0, names, values);
-        values = coerceListArg(eval, 1, names, values);
+        checkListArg(eval, 0, names, values);
+        checkListArg(eval, 1, names, values);
 
         Iterator<?> fieldIterator = unsafeJavaIterate(eval, names);
         Iterator<?> valueIterator = unsafeJavaIterate(eval, values);

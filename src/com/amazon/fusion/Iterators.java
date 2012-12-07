@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonValue;
 import java.util.Iterator;
 
@@ -28,17 +27,6 @@ final class Iterators
     {
         return new IonIteratorAdaptor(iterator);
     }
-
-
-    /**
-     * Builds a Fusion iterator over the contents of an Ion sequence.
-     */
-    static Object iterateIonSequence(IonSequence seq)
-    {
-        return new IonIteratorAdaptor(seq.iterator());
-    }
-
-    // TODO iterateIonReader
 
 
     //========================================================================

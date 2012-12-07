@@ -6,8 +6,6 @@ import static com.amazon.fusion.FusionSexp.isSexp;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVector.unsafeVectorIterate;
-import static com.amazon.fusion.Iterators.iterateIonSequence;
-import com.amazon.ion.IonSequence;
 import java.io.IOException;
 
 // TODO Add abstract class so subclasses don't have blank procs?
@@ -38,11 +36,6 @@ class FusionIterator
         if (isSexp(eval, value))
         {
             return FusionSexp.unsafeSexpIterate(eval, value);
-        }
-
-        if (value instanceof IonSequence)
-        {
-            return (FusionIterator) iterateIonSequence((IonSequence) value);
         }
 
         throw new ArgTypeFailure("iterate", "iterable", 0, value);

@@ -8,10 +8,8 @@ import static com.amazon.fusion.FusionVector.EMPTY_IMMUTABLE_VECTOR;
 import static com.amazon.fusion.FusionVector.NULL_VECTOR;
 import static com.amazon.fusion.FusionVector.immutableVector;
 import static com.amazon.fusion.FusionVector.nullVector;
-import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
-import com.amazon.ion.ValueFactory;
 import java.io.IOException;
 
 final class SyntaxList
@@ -77,13 +75,6 @@ final class SyntaxList
     Type getType()
     {
         return Type.LIST;
-    }
-
-
-    @Override
-    IonSequence makeNull(ValueFactory factory)
-    {
-        return factory.newNullList();
     }
 
 

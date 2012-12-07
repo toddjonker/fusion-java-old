@@ -20,8 +20,8 @@ final class StructMergeProc
     Object doApply(Evaluator eval, Object struct1, Object struct2)
         throws FusionException
     {
-        struct1 = coerceStructArg(eval, 0, struct1, struct2);
-        struct2 = coerceStructArg(eval, 1, struct1, struct2);
+        checkStructArg(eval, 0, struct1, struct2);
+        checkStructArg(eval, 1, struct1, struct2);
 
         return unsafeStructMerge(eval, struct1, struct2);
     }

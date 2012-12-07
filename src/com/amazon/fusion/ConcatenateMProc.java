@@ -25,16 +25,15 @@ final class ConcatenateMProc
         checkArityAtLeast(1, args);
         int arity = args.length;
 
-        Object first = coerceListArg(eval, 0, args);
+        Object first = checkListArg(eval, 0, args);
 
-        // TODO FUSION-87 with one arg, conversion above is arguably premature.
         if (arity == 1) return first;
 
         Object[] vectorArgs = new Object[arity - 1];
 
         for (int i = 1; i < arity; i++)
         {
-            vectorArgs[i - 1] = coerceListArg(eval, i, args);
+            vectorArgs[i - 1] = checkListArg(eval, i, args);
         }
 
         return unsafeVectorConcatenateM(eval, first, vectorArgs);

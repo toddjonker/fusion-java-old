@@ -2,24 +2,18 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionCollection.isCollection;
 import static com.amazon.fusion.FusionSequence.isSequence;
-import static com.amazon.fusion.FusionSexp.sexpFromIonSequence;
 import static com.amazon.fusion.FusionStruct.isStruct;
-import static com.amazon.fusion.FusionStruct.structFromIonStruct;
 import static com.amazon.fusion.FusionVector.isVector;
-import static com.amazon.fusion.FusionVector.vectorFromIonSequence;
 import com.amazon.fusion.ArityFailure.Variability;
 import com.amazon.fusion.BindingDoc.Kind;
-import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
-import com.amazon.ion.IonList;
-import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonTimestamp;
-import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.NullValueException;
 import com.amazon.ion.Timestamp;
@@ -317,94 +311,55 @@ abstract class Procedure
         return iv.stringValue();
     }
 
-    IonContainer checkIonContainerArg(int argNum, Object... args)
+
+    /**
+     * Expects a collection argument, including typed nulls.
+     */
+    Object checkCollectionArg(Evaluator eval, int argNum, Object... args)
         throws ArgTypeFailure
     {
-        return checkDomArg(IonContainer.class, "list, sexp, or struct",
-                           true /* nullable */, argNum, args);
+        Object arg = args[argNum];
+        if (isCollection(eval, arg)) return arg;
+
+        throw argFailure("collection", argNum, args);
     }
 
 
     /**
-     * Expects a sequence argument, coercing {@link IonSequence}s to their
-     * equivalent Fusion classes.
+     * Expects a sequence argument, including typed nulls.
      */
-    Object coerceSequenceArg(Evaluator eval, int argNum, Object... args)
+    Object checkSequenceArg(Evaluator eval, int argNum, Object... args)
         throws ArgTypeFailure
     {
         Object arg = args[argNum];
         if (isSequence(eval, arg)) return arg;
 
-        IonSequence seq;
-        try
-        {
-            seq = (IonSequence) arg;
-        }
-        catch (ClassCastException e)
-        {
-            throw argFailure("sequence", argNum, args);
-        }
-
-        if (seq.getType() == IonType.LIST)
-        {
-            return vectorFromIonSequence(eval, seq);
-        }
-
-        return sexpFromIonSequence(eval, seq);
+        throw argFailure("sequence", argNum, args);
     }
 
     /**
-     * Expects a list argument, coercing {@link IonList} to an immutable
-     * vector, and {@code null.list} to an empty immutable vector.
+     * Expects a list argument, including null.list.
      */
-    Object coerceListArg(Evaluator eval, int argNum, Object... args)
+    Object checkListArg(Evaluator eval, int argNum, Object... args)
         throws ArgTypeFailure
     {
         Object arg = args[argNum];
         if (isVector(eval, arg)) return arg;
 
-        IonList list;
-        try
-        {
-            list = (IonList) arg;
-        }
-        catch (ClassCastException e)
-        {
-            throw argFailure("list", argNum, args);
-        }
-
-        return vectorFromIonSequence(eval, list);
+        throw argFailure("list", argNum, args);
     }
 
 
-    /** Allows null.list and vectors. */
-    Object checkListArg(int argNum, Object... args)
-        throws ArgTypeFailure
-    {
-        Object arg = args[argNum];
-        if (isVector(arg)) return arg;
-
-        return checkDomArg(IonList.class, "list",
-                           true /* nullable */, argNum, args);
-    }
-
-    /** Allows null.list */
-    IonList checkIonListArg(int argNum, Object... args)
-        throws ArgTypeFailure
-    {
-        return checkDomArg(IonList.class, "list",
-                           true /* nullable */, argNum, args);
-    }
-
-    Object coerceStructArg(Evaluator eval, int argNum, Object... args)
+    /**
+     * Expects a struct argument, including null.struct.
+     */
+    Object checkStructArg(Evaluator eval, int argNum, Object... args)
         throws ArgTypeFailure
     {
         Object arg = args[argNum];
         if (isStruct(eval, arg)) return arg;
 
-        IonStruct is = checkDomArg(IonStruct.class, "struct",
-                                   true /* nullable */, argNum, args);
-        return structFromIonStruct(eval, is);
+        throw argFailure("struct", argNum, args);
     }
 
     /**
@@ -425,10 +380,7 @@ abstract class Procedure
             }
         }
 
-        IonStruct is = checkDomArg(IonStruct.class, "struct",
-                                   true /* nullable */, argNum, args);
-        // Ensure caller can't mutate the "immutable" value.
-        return factory.clone(is);
+        throw argFailure("ionizable struct", argNum, args);
     }
 
     /**
@@ -442,8 +394,7 @@ abstract class Procedure
         // FIXME ugly compatibility hack!
         if (isStruct(null, args[argNum])) return null;
 
-        return checkDomArg(IonStruct.class, "struct",
-                           true /* nullable */, argNum, args);
+        throw argFailure("struct", argNum, args);
     }
 
 

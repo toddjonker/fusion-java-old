@@ -8,7 +8,7 @@ import static com.amazon.fusion.FusionVector.unsafeVectorAdd;
 
 
 final class AddProc
-    extends Procedure
+    extends Procedure2
 {
     AddProc()
     {
@@ -27,19 +27,16 @@ final class AddProc
 
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval, Object sequence, Object element)
         throws FusionException
     {
-        checkArityExact(args);
+        checkSequenceArg(eval, 0, sequence, element);
 
-        // TODO FUSION-87 this makes extra copies when converting
-        Object s = coerceSequenceArg(eval, 0, args);
-
-        if (isVector(eval, s))
+        if (isVector(eval, sequence))
         {
-            return unsafeVectorAdd(eval, s, args[1]);
+            return unsafeVectorAdd(eval, sequence, element);
         }
 
-        return unsafeSexpAdd(eval, s, args[1]);
+        return unsafeSexpAdd(eval, sequence, element);
     }
 }
