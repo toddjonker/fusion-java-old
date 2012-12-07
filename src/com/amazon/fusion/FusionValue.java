@@ -60,8 +60,7 @@ public abstract class FusionValue
     }
 
 
-    boolean isAnyNull(Evaluator eval)
-        throws FusionException
+    boolean isAnyNull()
     {
         return false;
     }
@@ -78,7 +77,7 @@ public abstract class FusionValue
     {
         if (value instanceof FusionValue)
         {
-            return ((FusionValue) value).isAnyNull(eval);
+            return ((FusionValue) value).isAnyNull();
         }
 
         IonValue iv = castToIonValueMaybe(value);
