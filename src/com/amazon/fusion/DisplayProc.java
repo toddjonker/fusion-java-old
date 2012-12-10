@@ -28,7 +28,7 @@ final class DisplayProc
             {
                 for (Object arg : args)
                 {
-                    FusionValue.display(out, arg);
+                    FusionPrint.display(eval, out, arg);
                 }
             }
             finally

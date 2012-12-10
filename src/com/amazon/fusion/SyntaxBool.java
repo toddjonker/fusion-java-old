@@ -44,8 +44,9 @@ final class SyntaxBool
     }
 
     @Override
-    void writeContentTo(IonWriter writer) throws IOException
+    void ionize(Evaluator eval, IonWriter writer) throws IOException
     {
+        ionizeAnnotations(writer);
         if (myValue == null)
         {
             writer.writeNull(IonType.BOOL);

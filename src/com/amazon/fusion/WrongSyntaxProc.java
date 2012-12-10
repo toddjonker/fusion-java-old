@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.safeDisplayManyToString;
+
 /**
  * Fusion procedure to raise a syntax error.
  */
@@ -24,7 +26,7 @@ final class WrongSyntaxProc
         SyntaxValue stx = checkSyntaxArg(0, args);
 
         String name = null; // TODO infer name
-        String message = FusionValue.displayManyToString(args, 1);
+        String message = safeDisplayManyToString(eval, args, 1);
 
         throw new SyntaxFailure(name, message, stx);
     }

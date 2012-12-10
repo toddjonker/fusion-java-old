@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.safeWrite;
 import static com.amazon.fusion.FusionSequence.isSequence;
 import static com.amazon.fusion.FusionSequence.unsafeSequenceDot;
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
@@ -104,12 +105,12 @@ final class DotProc
                     out.append("expected collection before traversing ");
                     writeFriendlyIndex(out, i + 1);
                     out.append(" argument, had: ");
-                    FusionValue.write(out, value);
+                    safeWrite(eval, out, value);
                     out.append("\nArguments were:");
                     for (Object arg : args)
                     {
                         out.append("\n  ");
-                        FusionValue.write(out, arg);
+                        safeWrite(eval, out, arg);
                     }
                     String message = out.toString();
                     throw contractFailure(message);

@@ -126,29 +126,18 @@ abstract class SyntaxValue
         throws FusionException;
 
     @Override
-    void write(Appendable out)
-        throws IOException
+    void write(Evaluator eval, Appendable out)
+        throws IOException, FusionException
     {
         IonWriter writer = IonTextWriterBuilder.standard().build(out);
-        writeTo(writer);
+        ionize(eval, writer);
         writer.flush();
     }
 
-
-    /**
-     * Writes this syntax in Ion form.
-     * @param writer must not be null.
-     */
-    final void writeTo(IonWriter writer)
-        throws IOException
+    void ionizeAnnotations(IonWriter writer)
     {
         writer.setTypeAnnotations(myAnnotations);
-        writeContentTo(writer);
     }
-
-    /** Write the content (not including annotations) to a writer. */
-    abstract void writeContentTo(IonWriter writer)
-        throws IOException;
 
     abstract boolean isNullValue();
 

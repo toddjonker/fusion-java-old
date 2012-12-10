@@ -18,7 +18,7 @@ public final class FusionVoid
         new FusionValue()
         {
             @Override
-            void write(Appendable out) throws IOException
+            void write(Evaluator eval, Appendable out) throws IOException
             {
                 out.append("{{{void}}}");
             }

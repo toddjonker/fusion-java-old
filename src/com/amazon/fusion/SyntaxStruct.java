@@ -303,8 +303,11 @@ final class SyntaxStruct
 
 
     @Override
-    void writeContentTo(IonWriter writer) throws IOException
+    void ionize(Evaluator eval, IonWriter writer)
+        throws IOException, FusionException
     {
+        ionizeAnnotations(writer);
+
         if (isNullValue())
         {
             writer.writeNull(IonType.STRUCT);
@@ -321,14 +324,14 @@ final class SyntaxStruct
                 if (value instanceof SyntaxValue)
                 {
                     SyntaxValue child = (SyntaxValue) value;
-                    child.writeTo(writer);
+                    child.ionize(eval, writer);
                 }
                 else
                 {
                     SyntaxValue[] children = (SyntaxValue[]) value;
                     for (SyntaxValue child : children)
                     {
-                        child.writeTo(writer);
+                        child.ionize(eval, writer);
                     }
                 }
             }

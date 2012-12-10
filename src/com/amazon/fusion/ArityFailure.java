@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.writeMany;
 import java.io.IOException;
 
 
@@ -34,28 +35,24 @@ final class ArityFailure
     }
 
     @Override
-    public String getMessage()
+    public void displayMessage(Evaluator eval, Appendable out)
+        throws IOException, FusionException
     {
-        StringBuilder b = new StringBuilder();
-        try {
-            myProc.identify(b);
-            b.append(" expects ");
-            if (myVariability == Variability.AT_LEAST)
-            {
-                b.append("at least ");
-            }
-            b.append(myArity);
-            b.append(" argument");
-            if (myArity > 1) b.append("s");
-            b.append(", given ");
-            b.append(myActuals.length);
-            if (myActuals.length != 0)
-            {
-                b.append(":\n  ");
-                FusionValue.writeMany(b, myActuals, "\n  ");
-            }
+        myProc.identify(out);
+        out.append(" expects ");
+        if (myVariability == Variability.AT_LEAST)
+        {
+            out.append("at least ");
         }
-        catch (IOException e) {}
-        return b.toString();
+        out.append(Integer.toString(myArity));
+        out.append(" argument");
+        if (myArity > 1) out.append("s");
+        out.append(", given ");
+        out.append(Integer.toString(myActuals.length));
+        if (myActuals.length != 0)
+        {
+            out.append(":\n  ");
+            writeMany(eval, out, myActuals, "\n  ");
+        }
     }
 }

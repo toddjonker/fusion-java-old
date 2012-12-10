@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
-import static com.amazon.fusion.FusionValue.writeToString;
+import static com.amazon.fusion.FusionPrint.safeWriteToString;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static java.lang.Boolean.TRUE;
@@ -146,7 +146,7 @@ final class StandardTopLevel
 
         throw new FusionException(printQuotedSymbol(procedureName) +
                                   " is not a procedure: " +
-                                  writeToString(proc));
+                                  safeWriteToString(myEvaluator, proc));
     }
 
     @Override

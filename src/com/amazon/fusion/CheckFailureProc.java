@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.safeDisplayManyToString;
 import java.io.IOException;
 
 /**
@@ -25,7 +26,7 @@ final class CheckFailureProc
         checkArityAtLeast(1, args);
         SyntaxValue stx = checkSyntaxArg(0, args);
 
-        String message = FusionValue.displayManyToString(args, 1);
+        String message = safeDisplayManyToString(eval, args, 1);
 
         throw new CheckFailure(stx, message);
     }
@@ -44,26 +45,21 @@ final class CheckFailureProc
         }
 
         @Override
-        public String getMessage()
+        public void displayMessage(Evaluator eval, Appendable out)
+            throws IOException, FusionException
         {
-            StringBuilder out = new StringBuilder();
-            try
+            out.append("Check failure: ");
+            out.append(getBaseMessage());
+
+            SourceLocation loc = mySource.getLocation();
+            if (loc != null)
             {
-                out.append("Check failure: ");
-                out.append(super.getMessage());
-
-                SourceLocation loc = mySource.getLocation();
-                if (loc != null)
-                {
-                    out.append("\nat ");
-                    loc.display(out);
-                }
-
-                out.append("\nSource: ");
-                mySource.write(out);
+                out.append("\nat ");
+                loc.display(out);
             }
-            catch (IOException e) {}
-            return out.toString();
+
+            out.append("\nSource: ");
+            mySource.write(eval, out);
         }
     }
 }

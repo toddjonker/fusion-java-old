@@ -54,8 +54,9 @@ final class SyntaxInt
 
 
     @Override
-    void writeContentTo(IonWriter writer) throws IOException
+    void ionize(Evaluator eval, IonWriter writer) throws IOException
     {
+        ionizeAnnotations(writer);
         writer.writeInt(myValue);
     }
 

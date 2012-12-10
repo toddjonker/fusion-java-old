@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.TextSpan;
 import com.amazon.ion.util.Spans;
+import java.io.IOException;
 
 final class SourceLocation
 {
@@ -46,7 +47,8 @@ final class SourceLocation
     }
 
 
-    void display(StringBuilder out)
+    void display(Appendable out)
+        throws IOException
     {
         FusionUtils.writeFriendlyIndex(out, myLine);
         out.append(" line, ");

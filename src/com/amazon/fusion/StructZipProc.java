@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.safeWriteToString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonValue;
 import java.util.Iterator;
@@ -38,8 +39,9 @@ final class StructZipProc
             String name = FusionValue.asJavaString(nameObj);
             if (name == null)
             {
-                throw contractFailure("Expected: string; received: " +
-                                      writeToString(nameObj));
+                throw new ResultFailure(identify(),
+                                        "string in field-name sequence",
+                                        safeWriteToString(eval, nameObj));
             }
 
             Object valueObj = valueIterator.next();

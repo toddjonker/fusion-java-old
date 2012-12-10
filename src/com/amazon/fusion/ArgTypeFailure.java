@@ -2,8 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.safeWrite;
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
-import static com.amazon.fusion.FusionValue.write;
+import java.io.IOException;
 
 /**
  * Indicates a failure applying a procedure with the wrong type of argument.
@@ -81,11 +82,11 @@ final class ArgTypeFailure
     }
 
     @Override
-    public String getMessage()
+    public void displayMessage(Evaluator eval, Appendable b)
+        throws IOException, FusionException
     {
         int actualsLen = myActuals.length;
 
-        StringBuilder b = new StringBuilder();
         b.append(myName);
         b.append(" expects ");
         b.append(myExpectation);
@@ -95,7 +96,7 @@ final class ArgTypeFailure
             b.append(" as ");
             writeFriendlyIndex(b, myBadPos);
             b.append(" argument, given ");
-            write(b, myActuals[actualsLen == 1 ? 0 : myBadPos]);
+            safeWrite(eval, b, myActuals[actualsLen == 1 ? 0 : myBadPos]);
         }
 
         if (actualsLen != 1 || myBadPos < 0)
@@ -109,11 +110,9 @@ final class ArgTypeFailure
                 if (i != myBadPos)
                 {
                     b.append("\n  ");
-                    write(b, myActuals[i]);
+                    safeWrite(eval, b, myActuals[i]);
                 }
             }
         }
-
-        return b.toString();
     }
 }

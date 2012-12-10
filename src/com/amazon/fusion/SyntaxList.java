@@ -116,10 +116,10 @@ final class SyntaxList
 
 
     @Override
-    void writeContentTo(IonWriter writer)
-        throws IOException
+    void ionize(Evaluator eval, IonWriter out)
+        throws IOException, FusionException
     {
-        writeContentTo(writer, IonType.LIST);
+        ionizeSequence(eval, out, IonType.LIST);
     }
 
 

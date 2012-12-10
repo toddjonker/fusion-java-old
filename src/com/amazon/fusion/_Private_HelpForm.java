@@ -25,7 +25,7 @@ public final class _Private_HelpForm
         }
 
         @Override
-        public void write(Appendable out)
+        public void write(Evaluator eval, Appendable out)
             throws IOException
         {
             for (Object arg : myArgs)

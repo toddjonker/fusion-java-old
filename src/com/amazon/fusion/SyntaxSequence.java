@@ -219,9 +219,10 @@ abstract class SyntaxSequence
     }
 
 
-    final void writeContentTo(IonWriter writer, IonType type)
-        throws IOException
+    final void ionizeSequence(Evaluator eval, IonWriter writer, IonType type)
+        throws IOException, FusionException
     {
+        ionizeAnnotations(writer);
         if (myChildren == null)
         {
             writer.writeNull(type);
@@ -231,7 +232,7 @@ abstract class SyntaxSequence
             writer.stepIn(type);
             for (SyntaxValue child : myChildren)
             {
-                child.writeTo(writer);
+                child.ionize(eval, writer);
             }
             writer.stepOut();
         }

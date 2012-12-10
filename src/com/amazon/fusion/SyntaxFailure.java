@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.safeWrite;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.util.Arrays;
@@ -32,38 +33,33 @@ public class SyntaxFailure
 
 
     @Override
-    public String getMessage()
+    public void displayMessage(Evaluator eval, Appendable out)
+        throws IOException
     {
-        StringBuilder out = new StringBuilder();
-        try
+        out.append("Bad syntax");
+        if (myName != null)
         {
-            out.append("Bad syntax");
-            if (myName != null)
+            out.append(" for ");
+            IonTextUtils.printQuotedSymbol(out, myName);
+        }
+        out.append(": ");
+        out.append(getBaseMessage());
+
+        if (mySources.length != 0)
+        {
+            SourceLocation loc = mySources[0].getLocation();
+            if (loc != null)
             {
-                out.append(" for ");
-                IonTextUtils.printQuotedSymbol(out, myName);
+                out.append("\nat ");
+                loc.display(out);
             }
-            out.append(": ");
-            out.append(super.getMessage());
 
-            if (mySources.length != 0)
+            out.append("\nSources:");
+            for (SyntaxValue expr : mySources)
             {
-                SourceLocation loc = mySources[0].getLocation();
-                if (loc != null)
-                {
-                    out.append("\nat ");
-                    loc.display(out);
-                }
-
-                out.append("\nSources:");
-                for (SyntaxValue expr : mySources)
-                {
-                    out.append("\n  ");
-                    expr.write(out);
-                }
+                out.append("\n  ");
+                safeWrite(eval, out, expr);
             }
         }
-        catch (IOException e) {}
-        return out.toString();
     }
 }

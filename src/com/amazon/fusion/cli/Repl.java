@@ -2,12 +2,12 @@
 
 package com.amazon.fusion.cli;
 
+import static com.amazon.fusion.FusionPrint.write;
 import static com.amazon.fusion.FusionVoid.isVoid;
 import static com.amazon.fusion._Private_ModuleDocumenter.standardDocumentingRuntime;
 import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntime;
-import com.amazon.fusion.FusionValue;
 import com.amazon.fusion.TopLevel;
 import com.amazon.fusion._Private_HelpForm;
 import com.amazon.ion.IonException;
@@ -135,9 +135,10 @@ class Repl
         private void print(Object v)
             throws FusionException
         {
-            if (isVoid(myRuntime.getDefaultTopLevel(), v)) return;
+            TopLevel top = myRuntime.getDefaultTopLevel();
+            if (isVoid(top, v)) return;
 
-            FusionValue.write(myOut, v);
+            write(top, myOut, v);
             myOut.println();
         }
     }

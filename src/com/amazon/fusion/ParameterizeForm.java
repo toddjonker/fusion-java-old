@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.safeWriteToString;
+
+
 final class ParameterizeForm
     extends SyntacticForm
 {
@@ -139,7 +142,7 @@ final class ParameterizeForm
                 {
                     String message =
                         "Parameter expression evaluated to non-parameter: " +
-                        writeToString(paramValue);
+                        safeWriteToString(eval, paramValue);
                     throw contractFailure(message);
                 }
             }

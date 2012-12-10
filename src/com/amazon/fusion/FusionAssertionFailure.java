@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.safeWrite;
+import java.io.IOException;
+
 @SuppressWarnings("serial")
 final class FusionAssertionFailure
     extends FusionException
@@ -18,16 +21,16 @@ final class FusionAssertionFailure
 
     String getUserMessage()
     {
-        return super.getMessage();
+        return getBaseMessage();
     }
 
     @Override
-    public String getMessage()
+    public void displayMessage(Evaluator eval, Appendable out)
+        throws IOException, FusionException
     {
-        StringBuilder out = new StringBuilder();
         out.append("Assertion failure: ");
 
-        String superMessage = super.getMessage();
+        String superMessage = getBaseMessage();
         if (superMessage != null)
         {
             out.append(superMessage);
@@ -41,10 +44,8 @@ final class FusionAssertionFailure
         }
 
         out.append("\nExpression: ");
-        FusionValue.write(out, myExpr);
+        safeWrite(eval, out, myExpr);
         out.append("\nResult: ");
-        FusionValue.write(out, myResult);
-
-        return out.toString();
+        safeWrite(eval, out, myResult);
     }
 }

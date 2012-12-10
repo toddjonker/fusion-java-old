@@ -24,7 +24,7 @@ final class WriteProc
         IonTextWriterBuilder b = IonTextWriterBuilder.pretty();
         IonWriter writer = b.build((OutputStream) System.out);
 
-        FusionValue.write(writer, args[0]);
+        FusionPrint.ionize(eval, writer, args[0]);
 
         try
         {

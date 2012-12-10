@@ -2,11 +2,12 @@
 
 package com.amazon.fusion.cli;
 
+import static com.amazon.fusion.FusionPrint.write;
+import static com.amazon.fusion.FusionVoid.isVoid;
 import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntime;
 import com.amazon.fusion.FusionRuntimeBuilder;
-import com.amazon.fusion.FusionValue;
 import com.amazon.fusion.TopLevel;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.system.IonSystemBuilder;
@@ -65,12 +66,15 @@ final class Eval
         public int execute()
             throws Exception
         {
+            TopLevel top = myRuntime.getDefaultTopLevel();
+
             try
             {
-                Object result = evalFile(myFileName);
-                if (result != null)
+                Object result = evalFile(top, myFileName);
+                if (result != null && ! isVoid(top, result))
                 {
-                    FusionValue.write(System.out, result);
+                    // TODO handle multiple values
+                    write(top, System.out, result);
                     System.out.println();
                 }
             }
@@ -92,11 +96,9 @@ final class Eval
          * @return may be null (when void results) or an {@code Object[]} (when
          * multiple values are returned.
          */
-        private Object evalFile(String fileName)
+        private Object evalFile(TopLevel top, String fileName)
             throws FusionException, IOException
         {
-            TopLevel top = myRuntime.getDefaultTopLevel();
-
             File file = new File(fileName);
             return top.load(file);
         }

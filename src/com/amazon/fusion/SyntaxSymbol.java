@@ -227,9 +227,10 @@ final class SyntaxSymbol
 
 
     @Override
-    void writeContentTo(IonWriter writer)
+    void ionize(Evaluator eval, IonWriter writer)
         throws IOException
     {
+        ionizeAnnotations(writer);
         writer.writeSymbol(myText);
     }
 

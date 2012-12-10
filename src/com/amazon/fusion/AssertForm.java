@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.safeDisplay;
 import static com.amazon.fusion.FusionVoid.voidValue;
 
 final class AssertForm
@@ -74,7 +75,9 @@ final class AssertForm
                 for (CompiledForm messageForm : myMessageForms)
                 {
                     Object messageValue = eval.eval(store, messageForm);
-                    FusionValue.display(buf, messageValue);
+
+                    // Use safe API so we don't throw a different exception
+                    safeDisplay(eval, buf, messageValue);
                 }
                 message = buf.toString();
             }

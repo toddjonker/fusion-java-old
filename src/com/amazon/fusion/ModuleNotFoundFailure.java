@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.safeWrite;
+import java.io.IOException;
 import java.util.Arrays;
 
 
@@ -33,10 +35,10 @@ public class ModuleNotFoundFailure
     }
 
     @Override
-    public String getMessage()
+    public void displayMessage(Evaluator eval, Appendable out)
+        throws IOException, FusionException
     {
-        StringBuilder out = new StringBuilder();
-        out.append(super.getMessage());
+        out.append(getBaseMessage());
 
         if (myLocations.length != 0)
         {
@@ -52,9 +54,8 @@ public class ModuleNotFoundFailure
                         out.append("\n    ");
                     }
                 }
-                FusionValue.write(out, loc);
+                safeWrite(eval, out, loc);
             }
         }
-        return out.toString();
     }
 }

@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionValue.writeToString;
+import static com.amazon.fusion.FusionPrint.safeWriteToString;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -589,7 +589,7 @@ class Namespace
             {
                 String message =
                     "define_syntax value is not a transformer: " +
-                    writeToString(value);
+                    safeWriteToString(eval, value);
                 throw new ContractFailure(message);
             }
 

@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.safeWriteToString;
 import com.amazon.fusion.Namespace.TopBinding;
 import com.amazon.fusion.QuoteSyntaxForm.CompiledQuoteSyntax;
 
@@ -248,9 +249,10 @@ final class QuasiSyntaxForm
             catch (ClassCastException e) {}
 
             String message =
-                "Result of (unsyntax " + writeToString(myUnquotedSyntax) +
+                "Result of (unsyntax " +
+                safeWriteToString(eval, myUnquotedSyntax) +
                 ") isn't a syntax value: " +
-                writeToString(unquoted);
+                safeWriteToString(eval, unquoted);
             throw new ContractFailure(message);
         }
     }

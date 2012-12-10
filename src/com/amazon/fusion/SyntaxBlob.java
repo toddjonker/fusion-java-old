@@ -46,8 +46,9 @@ final class SyntaxBlob
 
 
     @Override
-    void writeContentTo(IonWriter writer) throws IOException
+    void ionize(Evaluator eval, IonWriter writer) throws IOException
     {
+        ionizeAnnotations(writer);
         writer.writeBlob(myValue);
     }
 

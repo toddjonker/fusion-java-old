@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.dispatchWrite;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
@@ -456,7 +457,8 @@ final class FusionVector
         }
 
         @Override
-        void write(Appendable out) throws IOException
+        void write(Evaluator eval, Appendable out)
+            throws IOException, FusionException
         {
             writeAnnotations(out, myAnnotations);
 
@@ -466,7 +468,7 @@ final class FusionVector
             for (int i = 0; i < length; i++)
             {
                 if (i != 0) out.append(", ");
-                dispatchWrite(out, myValues[i]);
+                dispatchWrite(eval, out, myValues[i]);
             }
 
             out.append(']');
@@ -474,23 +476,16 @@ final class FusionVector
 
 
         @Override
-        public void write(IonWriter out)
-            throws FusionException
+        void ionize(Evaluator eval, IonWriter out)
+            throws IOException, FusionException
         {
-            try
+            out.setTypeAnnotations(myAnnotations);
+            out.stepIn(IonType.LIST);
+            for (int i = 0; i < size(); i++)
             {
-                out.setTypeAnnotations(myAnnotations);
-                out.stepIn(IonType.LIST);
-                for (int i = 0; i < size(); i++)
-                {
-                    dispatchWrite(out, myValues[i]);
-                }
-                out.stepOut();
+                FusionPrint.dispatchIonize(eval, out, myValues[i]);
             }
-            catch (IOException e)
-            {
-                throw new FusionException("I/O exception", e);
-            }
+            out.stepOut();
         }
     }
 
@@ -578,7 +573,8 @@ final class FusionVector
         }
 
         @Override
-        void write(Appendable out) throws IOException
+        void write(Evaluator eval, Appendable out)
+            throws IOException
         {
             writeAnnotations(out, myAnnotations);
             out.append("null.list");
@@ -586,18 +582,11 @@ final class FusionVector
 
 
         @Override
-        public void write(IonWriter out)
-            throws FusionException
+        void ionize(Evaluator eval, IonWriter out)
+            throws IOException, FusionException
         {
-            try
-            {
-                out.setTypeAnnotations(myAnnotations);
-                out.writeNull(IonType.LIST);
-            }
-            catch (IOException e)
-            {
-                throw new FusionException("I/O exception", e);
-            }
+            out.setTypeAnnotations(myAnnotations);
+            out.writeNull(IonType.LIST);
         }
     }
 

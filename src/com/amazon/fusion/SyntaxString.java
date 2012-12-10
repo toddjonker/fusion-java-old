@@ -48,9 +48,10 @@ final class SyntaxString
 
 
     @Override
-    void writeContentTo(IonWriter writer)
+    void ionize(Evaluator eval, IonWriter writer)
         throws IOException
     {
+        ionizeAnnotations(writer);
         writer.writeString(myText);
     }
 }

@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.safeWriteToString;
+
+
 final class MacroTransformer
     extends MacroForm
 {
@@ -47,7 +50,7 @@ final class MacroTransformer
         {
             String message =
                 "Transformer returned non-syntax result: " +
-                 writeToString(expanded);
+                safeWriteToString(eval, expanded);
             throw new SyntaxFailure(myTransformer.identify(), message,
                                     source);
         }

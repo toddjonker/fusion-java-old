@@ -45,8 +45,7 @@ class FusionIterator
             return (FusionIterator) iterateIonSequence((IonSequence) value);
         }
 
-        throw new ContractFailure("value is not iterable: "
-                                  + FusionValue.writeToString(value));
+        throw new ArgTypeFailure("iterate", "iterable", 0, value);
     }
 
     static boolean allHaveNext(Evaluator eval, FusionIterator... streams)
@@ -120,9 +119,9 @@ class FusionIterator
 
 
     @Override
-    void write(Appendable out) throws IOException
+    void write(Evaluator eval, Appendable out) throws IOException
     {
-        out.append("/* iterator */");
+        out.append("{{{ iterator }}}");
     }
 
 

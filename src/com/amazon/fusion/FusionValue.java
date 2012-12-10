@@ -2,22 +2,22 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.safeWriteToString;
 import static com.amazon.fusion.FusionSexp.isNullSexp;
 import static com.amazon.fusion.FusionVector.isNullVector;
 import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVoid.isVoid;
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonContainer;
+import com.amazon.ion.IonException;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonString;
-import com.amazon.ion.IonText;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.Iterator;
 
 /**
@@ -31,9 +31,9 @@ public abstract class FusionValue
         extends FusionValue
     {
         @Override
-        void write(Appendable out) throws IOException
+        void write(Evaluator eval, Appendable out) throws IOException
         {
-            out.append("/* undef */");
+            out.append("{{{undefined}}}");
         }
     }
 
@@ -121,45 +121,50 @@ public abstract class FusionValue
 
 
     /**
-     * Writes a representation of this value, following Ion syntax where
-     * possible, including for strings.
-     * The result will be invalid if the value contains any non-Ion data like
-     * closures.
+     * Writes an Ion representation of a value.
+     * An exception is thrown if the value contains any non-Ion data
+     * like closures.
      *
+     * @param eval may be null, in which case output may fall back to default
+     * format of some kind.
      * @param out the output stream; not null.
      *
      * @throws IOException Propagated from the output stream.
+     * @throws IonizeFailure if the data cannot be ionized.
      */
-    abstract void write(Appendable out)
-        throws IOException;
-
-
-    /**
-     * Returns the output of {@link #write(Appendable)} as a {@link String}.
-     *
-     * @return not null.
-     */
-    String write()
+    void ionize(Evaluator eval, IonWriter out)
+        throws IOException, IonException, FusionException, IonizeFailure
     {
-        StringBuilder out = new StringBuilder();
-        try
-        {
-            write(out);
-        }
-        catch (IOException e) {}
-        return out.toString();
+        throw new IonizeFailure(this);
     }
 
 
     /**
+     * Writes a representation of this value, following Ion syntax where
+     * possible.
+     * <p>
+     * Most code shouldn't call this method, and should prefer
+     * {@link FusionPrint#write(Evaluator, Appendable, Object)}.
+     *
+     * @param eval may be null!
+     * @param out the output stream; not null.
+     *
+     * @throws IOException Propagated from the output stream.
+     * @throws FusionException
+     */
+    abstract void write(Evaluator eval, Appendable out)
+        throws IOException, FusionException;
+
+
+    /**
      * Returns a representation of this value for debugging and diagnostics.
-     * Currently, it behaves like {@link #write()} but the behavior may change
+     * Currently, it behaves like {@link FusionPrint#write} but the behavior may change
      * at any time.
      */
     @Override
     public final String toString()
     {
-        return write();
+        return safeWriteToString(null, this);
     }
 
 
@@ -167,31 +172,16 @@ public abstract class FusionValue
      * Prints a representation of this value for human consumption, generally
      * translating character/string data to it's content without using Ion
      * quotes or escapes. Non-character data is output as per
-     * {@link #write(Appendable)}.
+     * {@link #write(Evaluator, Appendable)}.
      *
      * @param out the output stream; not null.
      *
      * @throws IOException Propagated from the output stream.
      */
-    void display(Appendable out)
-        throws IOException
+    void display(Evaluator eval, Appendable out)
+        throws IOException, FusionException
     {
-        write(out);
-    }
-
-
-    /**
-     * Returns the output of {@link #display(Appendable)} as a {@link String}
-     */
-    final String display()
-    {
-        StringWriter out = new StringWriter();
-        try
-        {
-            display(out);
-        }
-        catch (IOException e) {}
-        return out.toString();
+        write(eval, out);
     }
 
 
@@ -203,349 +193,6 @@ public abstract class FusionValue
     BindingDoc document()
     {
         return null;
-    }
-
-
-    //========================================================================
-    // Static write methods
-
-
-    static void dispatchWrite(IonWriter out, Object value)
-        throws IOException, FusionException
-    {
-        if (value instanceof Writeable)
-        {
-            ((Writeable) value).write(out);
-        }
-        else if (value instanceof IonValue)
-        {
-            ((IonValue)value).writeTo(out);
-        }
-        else
-        {
-            throw new ContractFailure("Cannot write non-Ion data " + value);
-        }
-    }
-
-
-    static void write(IonWriter out, Object value)
-        throws FusionException
-    {
-        try
-        {
-            dispatchWrite(out, value);
-        }
-        catch (IOException e)
-        {
-            throw new FusionException("I/O exception", e);
-        }
-    }
-
-
-    static void dispatchWrite(Appendable out, Object value)
-        throws IOException
-    {
-        if (value instanceof FusionValue)
-        {
-            ((FusionValue) value).write(out);
-        }
-        else if (value instanceof IonValue)
-        {
-            FusionUtils.writeIon(out, (IonValue) value);
-        }
-        else
-        {
-            out.append("/* ");
-            out.append(value.toString());
-            out.append(" */");
-        }
-    }
-
-
-    /**
-     * Writes a representation of a value, following Ion syntax where
-     * possible, including for strings.
-     * The result will be invalid if the value contains any non-Ion data like
-     * closures.
-     *
-     * @param out the output stream; not null.
-     * @param value must not be null.
-     *
-     * @throws FusionException if there's an exception thrown by the output
-     * stream.
-     */
-    public static void write(Appendable out, Object value)
-        throws FusionException
-    {
-        try
-        {
-            dispatchWrite(out, value);
-        }
-        catch (IOException e)
-        {
-            throw new FusionException("I/O exception", e);
-        }
-    }
-
-
-    /**
-     * Writes a representation of a value, following Ion syntax where
-     * possible, including for strings.
-     * The result will be invalid if the value contains any non-Ion data like
-     * closures.
-     *
-     * @param out the output buffer; not null.
-     */
-    public static void write(StringBuilder out, Object value)
-    {
-        try
-        {
-            dispatchWrite(out, value);
-        }
-        catch (IOException e)
-        {
-            // This shouldn't happen
-            throw new IllegalStateException("I/O exception", e);
-        }
-    }
-
-
-    // TODO FUSION-52 (write val) that goes to current_output_stream
-
-
-    /**
-     * Returns the output of {@link #write(StringBuilder,Object)} as a
-     * {@link String}.
-     *
-     * @return not null.
-     */
-    public static String writeToString(Object value)
-    {
-        StringBuilder out = new StringBuilder();
-        write(out, value);
-        return out.toString();
-    }
-
-
-    /**
-     * {@linkplain #write(Appendable, Object) Writes} several values,
-     * injecting a string between each pair of values.
-     *
-     * @param out must not be null.
-     * @param values must not be null.
-     * @param join must not be null.
-     */
-    public static void writeMany(Appendable out, Object[] values, String join)
-        throws FusionException
-    {
-        try
-        {
-            for (int i = 0; i < values.length; i++)
-            {
-                if (i != 0)
-                {
-                    out.append(join);
-                }
-
-                write(out, values[i]);
-            }
-        }
-        catch (IOException e)
-        {
-            throw new FusionException("I/O exception", e);
-        }
-    }
-
-
-    /**
-     * {@linkplain #write(StringBuilder, Object) Writes} several values,
-     * injecting a string between each pair of values.
-     *
-     * @param out must not be null.
-     * @param values must not be null.
-     * @param join must not be null.
-     */
-    public static void writeMany(StringBuilder out, Object[] values,
-                                 String join)
-    {
-        for (int i = 0; i < values.length; i++)
-        {
-            if (i != 0)
-            {
-                out.append(join);
-            }
-
-            write(out, values[i]);
-        }
-    }
-
-
-    /**
-     * Returns the output of {@link #writeMany(StringBuilder,Object[],String)}
-     * as a {@link String}.
-     *
-     * @return not null.
-     */
-    public static String writeManyToString(Object[] values, String join)
-    {
-        StringBuilder out = new StringBuilder();
-        writeMany(out, values, join);
-        return out.toString();
-    }
-
-
-    //========================================================================
-    // Static display methods
-
-
-    private static void dispatchDisplay(Appendable out, Object value)
-        throws IOException
-    {
-        if (value instanceof FusionValue)
-        {
-            ((FusionValue) value).display(out);
-        }
-        else if (value instanceof IonValue)
-        {
-            IonValue iv = (IonValue) value;
-            if (iv instanceof IonText)
-            {
-                String text = ((IonText) iv).stringValue();
-                out.append(text);
-            }
-            else
-            {
-                FusionUtils.writeIon(out, iv);
-            }
-        }
-        else if (value instanceof SyntaxValue)
-        {
-            ((SyntaxValue) value).write(out);
-        }
-        else
-        {
-            out.append("/* ");
-            out.append(value.toString());
-            out.append(" */");
-        }
-    }
-
-
-    public static void display(Appendable out, Object value)
-        throws FusionException
-    {
-        try
-        {
-            dispatchDisplay(out, value);
-        }
-        catch (IOException e)
-        {
-            throw new FusionException("I/O exception", e);
-        }
-    }
-
-
-    public static void display(StringBuilder out, Object value)
-    {
-        try
-        {
-            dispatchDisplay(out, value);
-        }
-        catch (IOException e)
-        {
-            // This shouldn't happen
-            throw new IllegalStateException("I/O exception", e);
-        }
-    }
-
-
-    /**
-     * Returns the output of {@link #write(StringBuilder,Object)} as a
-     * {@link String}.
-     *
-     * @return not null.
-     */
-    public static String displayToString(Object value)
-    {
-        StringBuilder out = new StringBuilder();
-        display(out, value);
-        return out.toString();
-    }
-
-
-
-    /**
-     * {@linkplain #display(Appendable, Object) Displays} several values,
-     * injecting a string between each pair of values.
-     *
-     * @param out must not be null.
-     * @param values must not be null.
-     * @param join must not be null.
-     */
-    public static void displayMany(Appendable out, Object[] values, String join)
-        throws FusionException
-    {
-        try
-        {
-            for (int i = 0; i < values.length; i++)
-            {
-                if (i != 0)
-                {
-                    out.append(join);
-                }
-
-                display(out, values[i]);
-            }
-        }
-        catch (IOException e)
-        {
-            throw new FusionException("I/O exception", e);
-        }
-    }
-
-
-    /**
-     * {@linkplain #display(StringBuilder, Object) Displays} several values,
-     * injecting a string between each pair of values.
-     *
-     * @param out must not be null.
-     * @param values must not be null.
-     * @param join must not be null.
-     */
-    public static void displayMany(StringBuilder out, Object[] values, String join)
-    {
-        for (int i = 0; i < values.length; i++)
-        {
-            if (i != 0)
-            {
-                out.append(join);
-            }
-
-            display(out, values[i]);
-        }
-    }
-
-    public static void displayMany(StringBuilder out, Object[] values, int first)
-    {
-        for (int i = first; i < values.length; i++)
-        {
-            display(out, values[i]);
-        }
-    }
-
-
-    public static String displayManyToString(Object[] values, String join)
-    {
-        StringBuilder out = new StringBuilder();
-        displayMany(out, values, join);
-        return out.toString();
-    }
-
-    public static String displayManyToString(Object[] values, int first)
-    {
-        StringBuilder out = new StringBuilder();
-        displayMany(out, values, first);
-        return out.toString();
     }
 
 
@@ -639,7 +286,7 @@ public abstract class FusionValue
      */
     static IonValue copyToIonValue(Object value, ValueFactory factory,
                                    boolean throwOnConversionFailure)
-        throws FusionException
+        throws FusionException, IonizeFailure
     {
         if (value instanceof IonValue)
         {
@@ -655,9 +302,7 @@ public abstract class FusionValue
 
         if (throwOnConversionFailure)
         {
-            String message =
-                "Value is not convertable to Ion: " + writeToString(value);
-            throw new ContractFailure(message);
+            throw new IonizeFailure(value);
         }
 
         return null;
@@ -666,13 +311,11 @@ public abstract class FusionValue
 
     IonValue copyToIonValue(ValueFactory factory,
                             boolean throwOnConversionFailure)
-        throws FusionException
+        throws FusionException, IonizeFailure
     {
         if (throwOnConversionFailure)
         {
-            String message =
-                "Value is not convertable to Ion: " + this;
-            throw new ContractFailure(message);
+            throw new IonizeFailure(this);
         }
 
         return null;

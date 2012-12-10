@@ -72,12 +72,12 @@ abstract class NamedValue
 
 
     @Override
-    public final void write(Appendable out)
+    public final void write(Evaluator eval, Appendable out)
         throws IOException
     {
-        out.append("/* ");
+        out.append("{{{");
         identify(out);
-        out.append(" */");
+        out.append("}}}");
     }
 
     //========================================================================

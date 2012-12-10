@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.dispatchIonize;
+import static com.amazon.fusion.FusionPrint.dispatchWrite;
+import static com.amazon.fusion.FusionPrint.safeWriteToString;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.fusion.FusionSequence.BaseSequence;
 import com.amazon.fusion.Iterators.AbstractIterator;
@@ -306,24 +309,18 @@ final class FusionSexp
         }
 
         @Override
-        void write(Appendable out) throws IOException
+        void write(Evaluator eval, Appendable out) throws IOException
         {
             writeAnnotations(out, myAnnotations);
             out.append("null.sexp");
         }
 
         @Override
-        public void write(IonWriter out) throws FusionException
+        void ionize(Evaluator eval, IonWriter out)
+            throws IOException, FusionException
         {
-            try
-            {
-                out.setTypeAnnotations(myAnnotations);
-                out.writeNull(IonType.SEXP);
-            }
-            catch (IOException e)
-            {
-                throw new FusionException("I/O exception", e);
-            }
+            out.setTypeAnnotations(myAnnotations);
+            out.writeNull(IonType.SEXP);
         }
     }
 
@@ -349,25 +346,19 @@ final class FusionSexp
         }
 
         @Override
-        void write(Appendable out) throws IOException
+        void write(Evaluator eval, Appendable out) throws IOException
         {
             writeAnnotations(out, myAnnotations);
             out.append("()");
         }
 
         @Override
-        public void write(IonWriter out) throws FusionException
+        public void ionize(Evaluator eval, IonWriter out)
+            throws IOException, FusionException
         {
-            try
-            {
-                out.setTypeAnnotations(myAnnotations);
-                out.stepIn(IonType.SEXP);
-                out.stepOut();
-            }
-            catch (IOException e)
-            {
-                throw new FusionException("I/O exception", e);
-            }
+            out.setTypeAnnotations(myAnnotations);
+            out.stepIn(IonType.SEXP);
+            out.stepOut();
         }
     }
 
@@ -468,7 +459,7 @@ final class FusionSexp
                 {
                     String message =
                         "Value is not convertable to Ion: " +
-                        writeToString(this);
+                        safeWriteToString(null, this);
                     throw new ContractFailure(message);
                 }
                 else
@@ -479,7 +470,8 @@ final class FusionSexp
         }
 
         @Override
-        void write(Appendable out) throws IOException
+        void write(Evaluator eval, Appendable out)
+            throws IOException, FusionException
         {
             writeAnnotations(out, myAnnotations);
             out.append('(');
@@ -489,7 +481,7 @@ final class FusionSexp
             {
                 if (pair != this) out.append(' ');
 
-                dispatchWrite(out, pair.myHead);
+                dispatchWrite(eval, out, pair.myHead);
 
                 Object tail = pair.myTail;
                 if (tail instanceof ImmutablePair)
@@ -503,7 +495,7 @@ final class FusionSexp
                 else
                 {
                     out.append("{.} ");
-                    dispatchWrite(out, tail);
+                    dispatchWrite(eval, out, tail);
                     break;
                 }
             }
@@ -512,39 +504,32 @@ final class FusionSexp
         }
 
         @Override
-        public void write(IonWriter out) throws FusionException
+        void ionize(Evaluator eval, IonWriter out)
+            throws IOException, FusionException
         {
-            try
-            {
-                out.setTypeAnnotations(myAnnotations);
-                out.stepIn(IonType.SEXP);
+            out.setTypeAnnotations(myAnnotations);
+            out.stepIn(IonType.SEXP);
 
-                ImmutablePair pair = this;
-                while (true)
+            ImmutablePair pair = this;
+            while (true)
+            {
+                dispatchIonize(eval, out, pair.myHead);
+
+                Object tail = pair.myTail;
+                if (tail instanceof ImmutablePair)
                 {
-                    FusionValue.write(out, pair.myHead);
-
-                    Object tail = pair.myTail;
-                    if (tail instanceof ImmutablePair)
-                    {
-                        pair = (ImmutablePair) tail;
-                    }
-                    else if (tail instanceof EmptySexp)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        String message = "Cannot write non-Ion data " + this;
-                        throw new ContractFailure(message);
-                    }
+                    pair = (ImmutablePair) tail;
                 }
-                out.stepOut();
+                else if (tail instanceof EmptySexp)
+                {
+                    break;
+                }
+                else
+                {
+                    throw new IonizeFailure(this);
+                }
             }
-            catch (IOException e)
-            {
-                throw new FusionException("I/O exception", e);
-            }
+            out.stepOut();
         }
     }
 

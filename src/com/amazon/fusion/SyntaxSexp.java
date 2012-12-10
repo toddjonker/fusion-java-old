@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.safeWrite;
 import static com.amazon.fusion.FusionSexp.EMPTY_SEXP;
 import static com.amazon.fusion.FusionSexp.emptySexp;
 import static com.amazon.fusion.FusionSexp.nullSexp;
@@ -123,10 +124,10 @@ final class SyntaxSexp
     }
 
     @Override
-    void writeContentTo(IonWriter writer)
-        throws IOException
+    void ionize(Evaluator eval, IonWriter out)
+        throws IOException, FusionException
     {
-        writeContentTo(writer, IonType.SEXP);
+        ionizeSequence(eval, out, IonType.SEXP);
     }
 
 
@@ -360,12 +361,12 @@ final class SyntaxSexp
             {
                 StringBuilder b = new StringBuilder();
                 b.append("Application expected procedure, given: ");
-                write(b, proc);
+                safeWrite(eval, b, proc);
                 b.append("\nArguments were: ");
                 for (int i = 0; i < args.length; i++)
                 {
                     b.append("\n  ");
-                    write(b, args[i]);
+                    safeWrite(eval, b, args[i]);
                 }
 
                 throw new FusionException(b.toString());

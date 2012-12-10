@@ -2,9 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.safeWrite;
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
 import static com.amazon.fusion.FusionVoid.voidValue;
-import java.io.IOException;
 
 final class SyntaxGetProc
     extends Procedure
@@ -68,19 +68,16 @@ final class SyntaxGetProc
                 catch (ClassCastException cce)
                 {
                     StringBuilder out = new StringBuilder();
-                    try {
-                        out.append("expected syntax container before traversing ");
-                        writeFriendlyIndex(out, i + 1);
-                        out.append(" argument, had: ");
-                        value.write(out);
-                        out.append("\nArguments were:");
-                        for (Object arg : args)
-                        {
-                            out.append("\n  ");
-                            FusionValue.write(out, arg);
-                        }
+                    out.append("expected syntax container before traversing ");
+                    writeFriendlyIndex(out, i + 1);
+                    out.append(" argument, had: ");
+                    safeWrite(eval, out, value);
+                    out.append("\nArguments were:");
+                    for (Object arg : args)
+                    {
+                        out.append("\n  ");
+                        safeWrite(eval, out, arg);
                     }
-                    catch (IOException ioe) {}
                     String message = out.toString();
                     throw contractFailure(message);
                 }

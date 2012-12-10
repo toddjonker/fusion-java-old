@@ -46,7 +46,6 @@ final class FusionCollection
 
     abstract static class BaseCollection
         extends FusionValue
-        implements Writeable
     {
         /** Not null */
         final String[] myAnnotations;
