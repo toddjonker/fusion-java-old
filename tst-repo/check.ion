@@ -50,7 +50,8 @@
         "list lengths don't match. Actual: " actual " Expected: " expected)
       (let loop ((i 0))
         (when (< i (size actual))
-          (check_equal (. actual i) (. expected i) "list element") // TODO bad descr
+          (check_equal (. actual i) (. expected i)
+            (concatenate "list element #" (to_string i)))
           (loop (+ 1 i))))))
 
   (defpub check_vector_equal

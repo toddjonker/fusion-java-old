@@ -1,6 +1,8 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
 (use check)
+(use 'fusion/list')
+
 
 (check_list_equal
   (for_list () 73)
@@ -54,6 +56,18 @@
 (check_list_equal
   (for_list ((e [1])) (let ((v 73)) (+ e 73)))
   [74])
+
+
+// This tests two things:
+//  1) non-Ion types in the result; here, closures.
+//  2) use of new locations for the bound variables each iteration.
+//     The thunks are applied after iteration completes, each one should have
+//     its own location for variable `e`.
+(check_list_equal
+  (map (lambda (thunk) (thunk))
+    (for_list ((e [1, 2, 3]))
+      (lambda () (* 2 e))))
+  [2, 4, 6])
 
 
 "PASSED" // Helpful output if you run this stand-alone

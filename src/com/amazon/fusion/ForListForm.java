@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIterator.iterate;
 import static com.amazon.fusion.FusionVector.vector;
-import com.amazon.ion.IonValue;
 import java.util.ArrayList;
 
 final class ForListForm
@@ -144,11 +143,11 @@ final class ForListForm
                     iters[i] = iterate(eval, boundValue);
                 }
 
-                Object[] boundValues = new Object[numBindings];
-                store = new LocalStore(store, boundValues);
-
                 while (FusionIterator.allHaveNext(eval, iters))
                 {
+                    Object[] boundValues = new Object[numBindings];
+                    store = new LocalStore(store, boundValues);
+
                     // Determine the next round of bound values
                     for (int i = 0; i < numBindings; i++)
                     {
@@ -157,16 +156,7 @@ final class ForListForm
                     }
 
                     Object nextResult = eval.eval(store, myBody);
-                    IonValue value = castToIonValueMaybe(nextResult);
-                    if (value != null)
-                    {
-                        result.add(value);
-                    }
-                    else
-                    {
-                        throw contractFailure("body returned non-Ion value: "
-                            + writeToString(nextResult));
-                    }
+                    result.add(nextResult);
                 }
             }
 
