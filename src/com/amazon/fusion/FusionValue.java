@@ -50,16 +50,6 @@ public abstract class FusionValue
     }
 
 
-    String getInferredName()
-    {
-        return null;
-    }
-
-    void inferName(String name)
-    {
-    }
-
-
     boolean isAnyNull()
     {
         return false;

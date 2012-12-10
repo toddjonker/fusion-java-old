@@ -63,7 +63,7 @@ abstract class SyntacticForm
     @Override
     BindingDoc document()
     {
-        String name = getEffectiveName();
+        String name = getDocumentedName();
 
         StringBuilder buf = new StringBuilder();
         buf.append('(');
@@ -91,8 +91,8 @@ abstract class SyntacticForm
 
 
     final SyntaxValue requiredForm(String expectation,
-                                  int argNum,
-                                  SyntaxSequence parent)
+                                   int argNum,
+                                   SyntaxSequence parent)
         throws SyntaxFailure
     {
         try
@@ -101,7 +101,7 @@ abstract class SyntacticForm
         }
         catch (IndexOutOfBoundsException e) {}
 
-        throw new SyntaxFailure(getEffectiveName(),
+        throw new SyntaxFailure(identify(),
                                 "expected " + expectation,
                                 parent);
     }
@@ -176,7 +176,7 @@ abstract class SyntacticForm
         }
         catch (ClassCastException e) {}
 
-        throw new SyntaxFailure(this.getEffectiveName(),
+        throw new SyntaxFailure(this.identify(),
                                 "expected " + expectation, form);
     }
 }

@@ -16,13 +16,11 @@ abstract class NamedValue
     private String myName;
 
 
-    @Override
     final String getInferredName()
     {
         return myName;
     }
 
-    @Override
     final void inferName(String name)
     {
         if (myName == null)
@@ -31,13 +29,28 @@ abstract class NamedValue
         }
     }
 
-    final String getEffectiveName()
+
+    /**
+     * Returns a name for this value for rendering in documentation.
+     * This is either the {@linkplain #getInferredName() inferred name} or
+     * some unspecified default value.
+     *
+     * @return not null.
+     */
+    final String getDocumentedName()
     {
         String name = getInferredName();
         return (name == null ? "_" : name);
     }
 
 
+    /**
+     * Identifies this value, usually by name and type.
+     * For example, a procedure with inferred name "foo" would give the result
+     * {@code "procedure foo"}.
+     *
+     * @throws IOException
+     */
     abstract void identify(Appendable out)
         throws IOException;
 

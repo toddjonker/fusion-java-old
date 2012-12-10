@@ -32,7 +32,7 @@ final class QuasiSyntaxForm
     {
         if (stx.size() != 2)
         {
-            throw new SyntaxFailure(getEffectiveName(),
+            throw new SyntaxFailure(identify(),
                                     "a single template required",
                                     stx);
         }

@@ -83,7 +83,7 @@ abstract class Procedure
     @Override
     BindingDoc document()
     {
-        String name = getEffectiveName();
+        String name = getDocumentedName();
 
         StringBuilder buf = new StringBuilder();
         buf.append('(');
