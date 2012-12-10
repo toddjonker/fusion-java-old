@@ -538,7 +538,6 @@ final class Evaluator
      * implementation, but it works.
      */
     private static final class TailForm
-        extends FusionValue
     {
         final Store        myStore;
         final CompiledForm myForm;
@@ -547,12 +546,6 @@ final class Evaluator
         {
             myStore = store;
             myForm  = form;
-        }
-
-        @Override
-        public void write(Appendable out)
-        {
-            throw new IllegalStateException();
         }
     }
 
@@ -578,7 +571,6 @@ final class Evaluator
      * implementation, but it works.
      */
     private static final class TailCall
-        extends FusionValue
     {
         final Procedure myProc;
         final Object[]  myArgs;
@@ -587,12 +579,6 @@ final class Evaluator
         {
             myProc = proc;
             myArgs = args;
-        }
-
-        @Override
-        public void write(Appendable out)
-        {
-            throw new IllegalStateException();
         }
     }
 }
