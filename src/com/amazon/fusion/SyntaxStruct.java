@@ -2,31 +2,38 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionPrint.dispatchIonize;
 import static com.amazon.fusion.FusionStruct.EMPTY_STRUCT;
 import static com.amazon.fusion.FusionStruct.NULL_STRUCT;
 import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionStruct.nullStruct;
 import static com.amazon.fusion.FusionStruct.structImplAdd;
 import static com.amazon.fusion.SourceLocation.currentLocation;
+import com.amazon.fusion.FusionStruct.ImmutableStruct;
+import com.amazon.fusion.FusionStruct.NonNullImmutableStruct;
+import com.amazon.fusion.FusionStruct.StructFieldVisitor;
 import com.amazon.ion.IonReader;
-import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 final class SyntaxStruct
     extends SyntaxContainer
 {
-    /**
-     * For repeated fields, the value is SyntaxValue[] otherwise it's
-     * SyntaxValue.
-     * <p>
-     * <em>DO NOT MUTATE THIS OBJECT AND ITS CONTENTS AFTER CONSTRUCTION!</em>
-     */
-    private final Map<String, Object> myMap;
+    private final ImmutableStruct myStruct;
 
+
+    /**
+     * @param struct must not be null.
+     */
+    private SyntaxStruct(ImmutableStruct struct,
+                         SourceLocation loc, SyntaxWraps wraps)
+    {
+        super(struct.myAnnotations, loc, wraps);
+        assert (wraps == null) || (struct.size() != 0);
+        myStruct = struct;
+    }
 
     /**
      * @param map may be null but may only be non-null when map has children.
@@ -36,41 +43,35 @@ final class SyntaxStruct
     {
         super(anns, loc, wraps);
         assert (wraps == null) || (map != null && ! map.isEmpty());
-        myMap = map;
+        myStruct = immutableStruct(map, anns);
     }
 
 
-    @Deprecated // Due to bug noted within. Note to myself to fix before
-                // adding a use case that may fall prey to it.
+    static SyntaxStruct make(ImmutableStruct struct,
+                             SourceLocation loc, SyntaxWraps wraps)
+    {
+        return new SyntaxStruct(struct, loc, wraps);
+    }
+
     static SyntaxStruct make(String[] names, SyntaxValue[] values,
                              String[] anns)
     {
-        Map<String, Object> map = new HashMap<String, Object>(names.length);
-        for (int i = 0; i < names.length; i++)
-        {
-            // FIXME wrong for multi-value
-            Object prev = map.put(names[i], values[i]);
-            if (prev != null)
-            {
-                throw new AssertionError("Error handling repeated fields in syntax");
-            }
-        }
-
-        return new SyntaxStruct(map, anns, null, null);
+        ImmutableStruct struct = immutableStruct(names, values, anns);
+        return new SyntaxStruct(struct, null, null);
     }
 
 
     @Override
     boolean isNullValue()
     {
-        return myMap == null;
+        return myStruct.isAnyNull();
     }
 
 
     @Override
     boolean hasNoChildren()
     {
-        return myMap == null || myMap.isEmpty();
+        return myStruct.size() == 0;
     }
 
 
@@ -78,7 +79,7 @@ final class SyntaxStruct
     SyntaxStruct copyReplacingWraps(SyntaxWraps wraps)
     {
         // We can share the Map because its never mutated.
-        return new SyntaxStruct(myMap, getAnnotations(), getLocation(), wraps);
+        return new SyntaxStruct(myStruct, getLocation(), wraps);
     }
 
 
@@ -88,16 +89,17 @@ final class SyntaxStruct
         if (hasNoChildren()) return this;  // No children, no marks, all okay!
 
         // Even if we have no marks, some children may have them.
-        boolean mustReplace = (myWraps != null);
+        boolean mustReplace = (myWraps != null);  // TODO optimize further
 
         // Make a copy of the map, then mutate it to replace children
         // as necessary.
-        Map<String, Object> newMap = new HashMap<String, Object>(myMap);
+        Map<String, Object> newMap =
+            ((NonNullImmutableStruct) myStruct).copyMap();
 
         for (Map.Entry<String, Object> entry : newMap.entrySet())
         {
             Object value = entry.getValue();
-            if (value instanceof SyntaxValue)
+            if (! (value instanceof Object[]))
             {
                 SyntaxValue child = (SyntaxValue) value;
                 SyntaxValue stripped = child.stripWraps();
@@ -109,20 +111,20 @@ final class SyntaxStruct
             }
             else
             {
-                SyntaxValue[] children = (SyntaxValue[]) value;
+                Object[] children = (Object[]) value;
                 int childCount = children.length;
 
                 boolean mustReplaceArray = false;
-                SyntaxValue[] newChildren = new SyntaxValue[childCount];
+                Object[] newChildren = new Object[childCount];
                 for (int i = 0; i < childCount; i++)
                 {
-                    SyntaxValue child = children[i];
+                    SyntaxValue child = (SyntaxValue) children[i];
                     SyntaxValue stripped = child.stripWraps();
                     if (stripped != child)
                     {
-                        newChildren[i] = stripped;
                         mustReplaceArray = true;
                     }
+                    newChildren[i] = stripped;
                 }
 
                 if (mustReplaceArray)
@@ -143,43 +145,27 @@ final class SyntaxStruct
     {
         SourceLocation loc = currentLocation(source, name);
 
-        Map<String, Object> map;
-
+        ImmutableStruct struct;
         if (source.isNullValue())
         {
-            map = null;
+            struct = nullStruct(null /* FIXME eval*/, anns);
         }
         else
         {
-            map = new HashMap<String, Object>();
+            Map<String, Object> map = new HashMap<String, Object>();
             source.stepIn();
             while (source.next() != null)
             {
                 String field = source.getFieldName();
                 SyntaxValue child = Syntax.read(source, name);
-                Object prev = map.put(field, child);
-                if (prev != null)
-                {
-                    SyntaxValue[] multi;
-                    if (prev instanceof SyntaxValue)
-                    {
-                        // Shifting from single to repeated field.
-                        multi = new SyntaxValue[] { (SyntaxValue) prev, child };
-                    }
-                    else
-                    {
-                        SyntaxValue[] prevArray = (SyntaxValue[]) prev;
-                        int len = prevArray.length;
-                        multi = Arrays.copyOf(prevArray, len+1);
-                        multi[len] = child;
-                    }
-                    map.put(field, multi);
-                }
+                structImplAdd(map, field, child);
             }
             source.stepOut();
+
+            struct = immutableStruct(map, anns);
         }
 
-        return new SyntaxStruct(map, anns, loc, null);
+        return new SyntaxStruct(struct, loc, null);
     }
 
 
@@ -190,70 +176,58 @@ final class SyntaxStruct
     }
 
 
-    SyntaxValue get(String fieldName)
-    {
-        // This should only be called at runtime, after wraps are pushed.
-        assert myWraps == null;
-
-        Object result = myMap.get(fieldName);
-        if (result == null) return null;
-        if (result instanceof SyntaxValue)
-        {
-            return (SyntaxValue) result;
-        }
-
-        return ((SyntaxValue[]) result)[0];
-    }
-
-
-    @Override
-    Object quote(Evaluator eval)
+    SyntaxValue get(Evaluator eval, String fieldName)
         throws FusionException
     {
         // This should only be called at runtime, after wraps are pushed.
         assert myWraps == null;
 
-        String[] annotations = getAnnotations();
+        return (SyntaxValue) myStruct.dot(eval, fieldName);
+    }
 
-        if (isNullValue())
+
+    @Override
+    Object quote(Evaluator eval)  // TODO optimize
+        throws FusionException
+    {
+        // This should only be called at runtime, after wraps are pushed.
+        assert myWraps == null;
+
+        if (myStruct.size() == 0)
         {
-            return nullStruct(eval, annotations);
+            return myStruct;
         }
 
-        String[] names  = new String[myMap.size()];
-        Object[] values = new Object[myMap.size()];
 
-        int pos = 0;
-        for (Map.Entry<String, Object> entry : myMap.entrySet())
+        // Make a copy of the map, then mutate it to replace children
+        // as necessary.
+        Map<String, Object> newMap =
+            ((NonNullImmutableStruct) myStruct).copyMap();
+
+        for (Map.Entry<String, Object> entry : newMap.entrySet())
         {
-            String fieldName = entry.getKey();
             Object value = entry.getValue();
-            if (value instanceof SyntaxValue)
+            if (! (value instanceof Object[]))
             {
                 SyntaxValue child = (SyntaxValue) value;
                 Object childValue = child.quote(eval);
-                names[pos]  = fieldName;
-                values[pos] = childValue;
+                entry.setValue(childValue);
             }
             else
             {
-                SyntaxValue[] children = (SyntaxValue[]) value;
+                Object[] children = (Object[]) value;
                 Object[] childValues = new Object[children.length];
 
                 int cPos = 0;
-                for (SyntaxValue child : children)
+                for (Object child : children)
                 {
-                    childValues[cPos++] = child.quote(eval);
+                    childValues[cPos++] = ((SyntaxValue)child).quote(eval);
                 }
-
-                names[pos]  = fieldName;
-                values[pos] = childValues;
+                entry.setValue(childValues);
             }
-
-            pos++;
         }
 
-        return immutableStruct(names, values, annotations);
+        return immutableStruct(newMap, getAnnotations());
     }
 
 
@@ -261,45 +235,48 @@ final class SyntaxStruct
     SyntaxValue expand(Evaluator eval, Environment env)
         throws FusionException
     {
-        Map<String, Object> newMap = null;
-        if (myMap != null)
+        if (myStruct.size() == 0)
         {
-            // Make a copy of the map, then mutate it to replace children
-            // as necessary.
-            newMap = new HashMap<String, Object>(myMap);
+            return this;
+        }
 
-            for (Map.Entry<String, Object> entry : newMap.entrySet())
+        // Make a copy of the map, then mutate it to replace children
+        // as necessary.
+        Map<String, Object> newMap =
+            ((NonNullImmutableStruct) myStruct).copyMap();
+
+        for (Map.Entry<String, Object> entry : newMap.entrySet())
+        {
+            Object value = entry.getValue();
+            if (! (value instanceof Object[]))
             {
-                Object value = entry.getValue();
-                if (value instanceof SyntaxValue)
+                SyntaxValue subform = (SyntaxValue) value;
+                if (myWraps != null)
                 {
-                    SyntaxValue subform = (SyntaxValue) value;
+                    subform = subform.addWraps(myWraps);
+                }
+                subform = subform.expand(eval, env);
+                entry.setValue(subform);
+            }
+            else
+            {
+                Object[] children = (Object[]) value;
+                int childCount = children.length;
+
+                Object[] newChildren = new Object[childCount];
+                for (int i = 0; i < childCount; i++)
+                {
+                    SyntaxValue subform = (SyntaxValue) children[i];
                     if (myWraps != null)
                     {
                         subform = subform.addWraps(myWraps);
                     }
-                    subform = subform.expand(eval, env);
-                    entry.setValue(subform);
+                    newChildren[i] = subform.expand(eval, env);
                 }
-                else
-                {
-                    SyntaxValue[] children = (SyntaxValue[]) value;
-                    int childCount = children.length;
-
-                    SyntaxValue[] newChildren = new SyntaxValue[childCount];
-                    for (int i = 0; i < childCount; i++)
-                    {
-                        SyntaxValue subform = children[i];
-                        if (myWraps != null)
-                        {
-                            subform = subform.addWraps(myWraps);
-                        }
-                        newChildren[i] = subform.expand(eval, env);
-                    }
-                    entry.setValue(newChildren);
-                }
+                entry.setValue(newChildren);
             }
         }
+
 
         // Wraps have been pushed down so the copy doesn't need them.
         return new SyntaxStruct(newMap, getAnnotations(), getLocation(), null);
@@ -310,38 +287,7 @@ final class SyntaxStruct
     void ionize(Evaluator eval, IonWriter writer)
         throws IOException, FusionException
     {
-        ionizeAnnotations(writer);
-
-        if (isNullValue())
-        {
-            writer.writeNull(IonType.STRUCT);
-        }
-        else
-        {
-            writer.stepIn(IonType.STRUCT);
-            for (Map.Entry<String, Object> entry : myMap.entrySet())
-            {
-                String fieldName = entry.getKey();
-
-                Object value = entry.getValue();
-                if (value instanceof SyntaxValue)
-                {
-                    SyntaxValue child = (SyntaxValue) value;
-                    writer.setFieldName(fieldName);
-                    child.ionize(eval, writer);
-                }
-                else
-                {
-                    SyntaxValue[] children = (SyntaxValue[]) value;
-                    for (SyntaxValue child : children)
-                    {
-                        writer.setFieldName(fieldName);
-                        child.ionize(eval, writer);
-                    }
-                }
-            }
-            writer.stepOut();
-        }
+        dispatchIonize(null, writer, myStruct);
     }
 
 
@@ -349,7 +295,7 @@ final class SyntaxStruct
 
 
     @Override
-    CompiledForm doCompile(Evaluator eval, Environment env)
+    CompiledForm doCompile(final Evaluator eval, final Environment env)
         throws FusionException
     {
         assert myWraps == null;
@@ -359,58 +305,33 @@ final class SyntaxStruct
             return new CompiledConstant(NULL_STRUCT);
         }
 
-        if (myMap.size() == 0)
+        int size = myStruct.size();
+        if (size == 0)
         {
             return new CompiledConstant(EMPTY_STRUCT);
         }
 
-        // Pre-compute the size so we can allocate arrays all at once.
-        int size = 0;
-        for (Object value : myMap.values())
+        final String[]       fieldNames = new String[size];
+        final CompiledForm[] fieldForms = new CompiledForm[size];
+
+        StructFieldVisitor visitor = new StructFieldVisitor()
         {
-            if (value instanceof SyntaxValue)
-            {
-                size += 1;
-            }
-            else
-            {
-                SyntaxValue[] children = (SyntaxValue[]) value;
-                size += children.length;
-            }
-        }
+            int i = 0;
 
-        String[]       fieldNames = new String[size];
-        CompiledForm[] fieldForms = new CompiledForm[size];
-        int i = 0;
-
-        for (Map.Entry<String, Object> entry : myMap.entrySet())
-        {
-            String fieldName = entry.getKey();
-
-            Object value = entry.getValue();
-            if (value instanceof SyntaxValue)
+            @Override
+            public Object visit(String name, Object value)
+                throws FusionException
             {
                 SyntaxValue child = (SyntaxValue) value;
                 CompiledForm form = eval.compile(env, child);
 
-                fieldNames[i] = fieldName;
+                fieldNames[i] = name;
                 fieldForms[i] = form;
                 i++;
+                return null;
             }
-            else
-            {
-                SyntaxValue[] children = (SyntaxValue[]) value;
-                for (SyntaxValue child : children)
-                {
-                    CompiledForm form = eval.compile(env, child);
-
-                    fieldNames[i] = fieldName;
-                    fieldForms[i] = form;
-                    i++;
-                }
-            }
-        }
-        assert i == size;
+        };
+        myStruct.visitFields(visitor);
 
         return new CompiledStruct(fieldNames, fieldForms);
     }

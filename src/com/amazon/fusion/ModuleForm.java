@@ -320,14 +320,14 @@ final class ModuleForm
 
         ModuleIdentity id;
         {
-            SyntaxText form = (SyntaxText) meta.get("identity");
+            SyntaxText form = (SyntaxText) meta.get(eval, "identity");
             String identity = form.stringValue();
             id = ModuleIdentity.intern(identity);
         }
 
         Namespace moduleNamespace;
         {
-            SyntaxText form = (SyntaxText) meta.get("language_identity");
+            SyntaxText form = (SyntaxText) meta.get(eval, "language_identity");
             String identity = form.stringValue();
             ModuleIdentity languageId = ModuleIdentity.intern(identity);
 
@@ -340,7 +340,7 @@ final class ModuleForm
 
         int variableCount;
         {
-            SyntaxInt form = (SyntaxInt) meta.get("variable_count");
+            SyntaxInt form = (SyntaxInt) meta.get(eval, "variable_count");
             variableCount = form.bigIntegerValue().intValue();
         }
 

@@ -31,3 +31,5 @@
 
 (check_equal (eval (quote [something, something]) ns)
   [1150, 1150] "eval [1150,1150]")
+
+(check = (eval (quote (. {f:2} "f")) ns) 2)

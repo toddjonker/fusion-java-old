@@ -48,7 +48,7 @@ final class SyntaxGetProc
                 {
                     String field = checkTextArg(i, args);
                     SyntaxStruct s = (SyntaxStruct) stx;
-                    value = s.get(field);
+                    value = s.get(eval, field);
                     break;
                 }
                 default:

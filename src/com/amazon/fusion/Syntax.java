@@ -6,11 +6,15 @@ import static com.amazon.fusion.FusionSexp.isSexp;
 import static com.amazon.fusion.FusionSexp.unsafePairHead;
 import static com.amazon.fusion.FusionSexp.unsafePairTail;
 import static com.amazon.fusion.FusionSexp.unsafeSexpSize;
+import static com.amazon.fusion.FusionStruct.isStruct;
 import static com.amazon.fusion.FusionValue.castToIonValueMaybe;
 import static com.amazon.fusion.FusionVector.isVector;
 import static com.amazon.fusion.FusionVector.unsafeVectorRef;
 import static com.amazon.fusion.FusionVector.unsafeVectorSize;
 import static com.amazon.fusion.SourceLocation.currentLocation;
+import com.amazon.fusion.FusionStruct.BaseStruct;
+import com.amazon.fusion.FusionStruct.ImmutableStruct;
+import com.amazon.fusion.FusionStruct.StructFieldVisitor;
 import com.amazon.ion.Decimal;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonType;
@@ -166,10 +170,13 @@ final class Syntax
 
     /**
      * We apply the context only once at the top, so it propagates lazily.
+     *
+     * TODO really? context seems unused
      */
-    private static SyntaxValue datumToStrippedSyntaxMaybe(Evaluator eval,
-                                                          SyntaxSymbol context,
-                                                          Object datum)
+    private static SyntaxValue
+    datumToStrippedSyntaxMaybe(final Evaluator eval,
+                               final SyntaxSymbol context,
+                               Object datum)
         throws FusionException
     {
         if (isSyntax(eval, datum))
@@ -230,7 +237,42 @@ final class Syntax
             return SyntaxSexp.make(null, children);
         }
 
+        if (isStruct(eval, datum))
+        {
+            StructFieldVisitor visitor = new StructFieldVisitor()
+            {
+                @Override
+                public Object visit(String name, Object value)
+                    throws FusionException
+                {
+                    SyntaxValue stripped =
+                        datumToStrippedSyntaxMaybe(eval, context, value);
+                    if (stripped == null)
+                    {
+                        // Hit something that's not syntax-able
+                        throw new StripFailure();
+                    }
+                    return stripped;
+                }
+            };
+
+            try
+            {
+                ImmutableStruct struct =
+                    ((BaseStruct) datum).transformFields(visitor);
+                return SyntaxStruct.make(struct, null, null);
+            }
+            catch (StripFailure e)  // This is crazy.
+            {
+                return null;
+            }
+        }
+
         return null;
+    }
+
+    private static final class StripFailure extends RuntimeException
+    {
     }
 
     static SyntaxValue datumToSyntaxMaybe(Evaluator eval,
