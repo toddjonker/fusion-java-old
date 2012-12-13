@@ -236,7 +236,11 @@ abstract class Procedure
         throw new ArgTypeFailure(this, "int", argNum, args);
     }
 
-    BigDecimal checkBigDecimalArg(int argNum, Object... args)
+    /**
+     * @return not null.
+     */
+    BigDecimal checkRequiredDecimalArg(Evaluator eval, int argNum,
+                                       Object... args)
         throws ArgTypeFailure
     {
         try
@@ -245,7 +249,7 @@ abstract class Procedure
             BigDecimal result = iv.bigDecimalValue();
             if (result != null)
             {
-                return iv.bigDecimalValue();
+                return result;
             }
         }
         catch (ClassCastException e) {}

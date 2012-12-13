@@ -19,9 +19,6 @@
   (defpub_j_syntax set            "com.amazon.fusion.SetForm")
 
 
-  (defpub_j *                     "com.amazon.fusion.ProductProc")
-  (defpub_j +                     "com.amazon.fusion.SumProc")
-  (defpub_j -                     "com.amazon.fusion.DifferenceProc")
   (defpub_j .                     "com.amazon.fusion.DotProc")
   (defpub_j <                     "com.amazon.fusion.LessThanProc")
   (defpub_j =                     "com.amazon.fusion.EqualProc")
