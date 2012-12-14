@@ -1,0 +1,9 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(use check)
+(use 'fusion/number')
+
+(check = (/ 4.0 2.0) 2.0)
+
+// TODO divide by zero
+// TODO inexact result

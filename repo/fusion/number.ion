@@ -1,0 +1,13 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(module number 'fusion/private/builtins'
+
+  (use 'fusion/experimental/defines')
+
+
+  (defpub_j  +  "com.amazon.fusion.SumProc")
+  (defpub_j  -  "com.amazon.fusion.DifferenceProc")
+  (defpub_j  *  "com.amazon.fusion.ProductProc")
+  (defpub_j  /  "com.amazon.fusion.DivideProc")
+
+)
