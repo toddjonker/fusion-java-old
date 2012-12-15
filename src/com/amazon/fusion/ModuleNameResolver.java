@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -103,6 +103,7 @@ final class ModuleNameResolver
     /**
      * Locates and loads a module from the registered repositories.
      *
+     * @param libName is always treated as an absolute module path.
      * @param stx is used for error messaging; may be null.
      *
      * @throws ModuleNotFoundFailure if the module could not be found.
@@ -111,6 +112,7 @@ final class ModuleNameResolver
                               SyntaxValue stx)
         throws FusionException
     {
+        // TODO FUSION-79 Support relative module paths
         if (! libName.startsWith("/")) libName = "/" + libName;
 
         for (ModuleRepository repo : myRepositories)
