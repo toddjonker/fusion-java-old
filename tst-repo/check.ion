@@ -8,7 +8,6 @@
   (use 'fusion/list')
   (use 'fusion/sexp')
   (use 'fusion/syntax')
-  (use 'fusion/vector')
 
 
   (defpub ion_equals          (java_new "com.amazon.fusion.IonEqualsProc"))
@@ -19,7 +18,7 @@
 
   (defpub check_equal_annotations
     (lambda (actual expected)
-      (check_vector_equal (ion_annotations actual) (ion_annotations expected))))
+      (check_list_equal (ion_annotations actual) (ion_annotations expected))))
 
   (defpub check_equal
     (lambda (actual expected descr)
@@ -31,8 +30,6 @@
 //           descr " not equal.\nActual: " actual "\nExpected: " expected))
         ((is_list expected)
          (check_list_equal actual expected))
-        ((is_vector expected)
-         (check_vector_equal actual expected))
         ((is_sexp expected)
          (check_sexp_equal actual expected))
         ((is_void expected)
@@ -52,17 +49,6 @@
         (when (< i (size actual))
           (check_equal (. actual i) (. expected i)
             (concatenate "list element #" (to_string i)))
-          (loop (+ 1 i))))))
-
-  (defpub check_vector_equal
-    (lambda (actual expected)
-      (assert (is_vector actual) "expected vector, received: " actual)
-      (assert (= (vector_size actual) (vector_size expected))
-        "vector sizes don't match. Actual: " actual " Expected: " expected)
-      (let loop ((i 0))
-        (when (< i (vector_size actual))
-          (check_equal (vector_ref actual i) (vector_ref expected i)
-            "vector element") // TODO bad descr
           (loop (+ 1 i))))))
 
   (defpub check_sexp_equal

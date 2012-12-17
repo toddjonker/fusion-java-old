@@ -1,6 +1,6 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module vector 'fusion/base'
+(module namespace 'fusion/base'
 
   (use 'fusion/experimental/defines')
   (use (quote '#%kernel'))

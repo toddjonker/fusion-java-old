@@ -1,12 +1,12 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
 (use check)
-(use 'fusion/vector')
+(use 'fusion/list')
 
 
 (define rester
   (lambda rest
-    (assert (is_immutable_vector rest))
+    (assert (is_immutable_list rest))
     rest))
 
 (check_equal (rester)       []      "rest param 0")

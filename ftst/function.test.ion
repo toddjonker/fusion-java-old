@@ -3,7 +3,7 @@
 (use check)
 (use 'fusion/function')
 (use 'fusion/iterator')
-(use 'fusion/vector')
+(use 'fusion/list')
 
 
 (define boom (lambda rest (assert false "boom")))
@@ -35,16 +35,16 @@
 //==========================================================================
 // compose
 
-(check_equal ((compose vector (always 46)) 22) [46] "46")
-(check_equal ((compose identity vector) 47) [47] "47")
+(check_equal ((compose list (always 46)) 22) [46] "46")
+(check_equal ((compose identity list) 47) [47] "47")
 
 (define add1 (lambda (x) (+ x 1)))
 (define add2 (compose add1 add1))
 (define add3 (compose add1 add2))
 (check = (add3 4) 7)
 
-(define vector1 (compose vector_from_iterator value_iterator))
-(check_equal (vector1 12) [12] "12")
+(define list1 (compose list_from_iterator value_iterator))
+(check_equal (list1 12) [12] "12")
 
 
 //==========================================================================

@@ -2,57 +2,182 @@
 
 (module list 'fusion/base'
 
+  '''
+Core operations for lists (_a.k.a._ arrays).
+
+A _list_ is a sequence of values with zero-based integer keys and
+constant-time lookup of elements.  Lists come in three concrete types:
+immutable, mutable, or stretchy; a stretchy list IS-A mutable list.
+Non-stretchy lists are comparable to Java arrays, while stretchy lists are
+comparable to `ArrayList`s; however, Fusion doesn't guarantee that the
+elements of a list are contiguous in memory.
+
+## Creating Lists
+
+In standard Fusion, Ion list syntax denotes immutable values:
+`[]` denotes an immutable list of size zero, and `[{f:x}]` denotes an
+immutable list of size 1 holding a struct of size 1.  The value of a list
+literal is immutable even when some child values are evaluated at run-time.
+Quoted forms are also immutable; in `(quote [x])` the list's sole element is
+the symbol `'x'`.
+
+The procedure `immutable_list` has the same effect as a list literal.  The
+procedure `list` creates mutable lists, and `stretchy_list` creates
+stretchy lists:
+
+    $ [1, 2]
+    [1, 2]
+    $ (list 1 2)
+    [1, 2]
+    $ (stretchy_list 1 2 3)
+    [1, 2, 3]
+
+Note that the REPL uses a default "ionization strategy" that renders all list
+types the same, so the results _look_ similar even though the values have
+different types.  Eventually the application will be able to
+control this strategy; these defaults are designed to allow a Fusion developer
+to construct data in various combinations of mutability (*etc.*) and output it
+as "normal" Ion data.
+
+## Using Lists
+
+The procedure `list_ref` returns an element from inside the list:
+
+    $ (list_ref ["oompa", "loompa"] 1)
+    "loompa"
+
+The procedure `list_set` replaces an element in a mutable (including
+stretchy) list:
+
+    $ (define immutable [1])
+    $ (list_set immutable 0 "new value")
+    // list_set expects mutable list as 1st argument, given [1]
+    Other arguments were:
+      0
+      "new value"
+    $ (define mutable (list 1))
+    $ mutable
+    [1]
+    $ (list_set mutable 0 "new value")
+    $ mutable
+    ["new value"]
+    $ (list_ref mutable 0)
+    "new value"
+
+The procedure `add`, when given any type of list, returns a list of the
+same type, with a value added to the end.  It does not mutate the input list,
+and the result doesn't share any structure other than the contained elements.
+
+    $ (add mutable "newer")
+    ["new value", "newer"]
+    $ mutable
+    ["new value"]
+    $ (define stretchy (stretchy_list true (quote blue)))
+    $ stretchy
+    [true, blue]
+    $ (add stretchy "magoo")
+    [true, blue, "magoo"]
+    $ stretchy
+    [true, blue]
+
+The procedure `add_m` is a mutating procedure that, like `add`,
+returns a list of the same type with a value added to the end.  However, when
+possible it achieves this through mutation and/or structure sharing. This means
+that when given a stretchy list, it will mutate that list and then return
+it.
+
+    $ (add_m mutable {})
+    ["new value", {}]
+    $ mutable
+    ["new value"]
+    $ (add_m stretchy {})
+    [true, blue, {}]
+    $ stretchy
+    [true, blue, {}]
+
+The semantics of `add` and `add_m` are described a bit oddly here because they
+are polymorphic operations applicable to other Fusion container types.  The
+`'_m'` suffix is Fusion's spelling of the traditional `'!'` suffix in Scheme
+languages, highlighting potential mutation of an argument.
+  '''
+
+
   (use 'fusion/experimental/defines')
   (use 'fusion/ffi/java')
   (use 'fusion/iterator')
+  (use 'fusion/private/builtins')
   (use 'fusion/sequence')
-  (use 'fusion/vector')
+  (use 'fusion/unsafe/list')         // NOT exported!
 
   // Pass-through bindings from #%kernel
   (provide is_list)
 
+  // Pass-through bindings from builtins
+  (provide is_immutable_list is_mutable_list is_stretchy_list)
+  (provide immutable_list list stretchy_list)
+
   // Pass-through bindings from /fusion/sequence
   (provide add any choose do find first is_empty last map size)
 
+  (defpub_j add_m           "com.amazon.fusion.AddMProc")
   (defpub_j concatenate_m   "com.amazon.fusion.ConcatenateMProc")
   (defpub_j subseq          "com.amazon.fusion.IonSubseqProc")
-  // TODO FUSION-86 subseq - Needs to handle sexp
-
-
-  // Renamings to merge vector back into list
-  (defpub is_immutable_list is_immutable_vector)
-  (defpub is_mutable_list is_mutable_vector)
-  (defpub is_stretchy_list is_stretchy_vector)
-
-  (defpub immutable_list immutable_vector)
-  (defpub list vector)
-  (defpub stretchy_list stretchy_vector)
-
-  // TODO vector_ref, I'm not sure of the name yet, and `.` works for now.
-  (defpub list_set vector_set)
+  // TODO FUSION-86 add_m, subseq need to handle sexp
 
 
   //==========================================================================
-  // Adding and removing elements
+  // Basic element access
 
-  (defpub_j add_m "com.amazon.fusion.AddMProc")
+  (defpub list_ref
+    (lambda (list pos)
+      '''
+Returns the element of `list` at (zero-based) position `pos`.
+      '''
+      (unless (is_list list)
+        (raise_argument_error "list_ref" "list" 0 list pos))
+      (unless (is_int pos)
+        (raise_argument_error "list_ref" "int" 1 list pos))
+      (when (or (< pos 0) (<= (unsafe_list_size list) pos))
+        (raise_argument_error "list_ref" "valid position" 1 list pos))
+      (unsafe_list_ref list pos)))
+
+
+  (defpub list_set
+    (lambda (list pos value)
+      '''
+Changes the slot of a mutable `list` at (zero-based) position `pos` so it
+holds `value`.
+      '''
+      (unless (is_mutable_list list)
+        (raise_argument_error "list_set" "mutable list" 0 list pos value))
+      (unless (is_int pos)
+        (raise_argument_error "list_set" "int" 1 list pos value))
+      (when (or (< pos 0) (<= (unsafe_list_size list) pos))
+        (raise_argument_error "list_set" "valid position" 1 list pos value))
+      (unsafe_list_set list pos value)))
 
 
   //==========================================================================
   // Iteration
 
-  (defpub list_iterator vector_iterate)
+  (defpub list_iterator
+    (lambda (list)
+      "Returns an iterator over the content of `list`."
+      (unless (is_list list)
+        (raise_argument_error "list_iterator" "list" 0 list))
+      (unsafe_list_iterator list)))
+
 
   (defpub list_from_iterator
     (lambda (iterator)
       '''
-Creates a list with the elements of `iterator`, in the same order.
+Creates a stretchy list with the elements of `iterator`, in the same order.
       '''
       (unless (is_iterator iterator)
         (raise_argument_error "list_from_iterator" "iterator" 0 iterator))
-      (let loop ((result (stretchy_vector)))
+      (let loop ((result (stretchy_list)))
         (if (iterator_has_next iterator)
-          (loop (vector_add_m result (iterator_next iterator)))
+          (loop (unsafe_list_add_m result (iterator_next iterator)))
           result))))
 
 ) // end module

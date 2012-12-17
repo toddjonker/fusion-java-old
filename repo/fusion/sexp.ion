@@ -6,7 +6,6 @@
   (use 'fusion/ffi/java')
   (use 'fusion/iterator')
   (use 'fusion/sequence')
-  (use 'fusion/vector')
 
   // Pass-through bindings from #%kernel
   (provide is_sexp)

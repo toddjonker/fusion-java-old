@@ -2,8 +2,8 @@
 
 (use check)
 (use 'fusion/ion')
+(use 'fusion/list')
 (use 'fusion/sexp')
-(use 'fusion/vector')
 
 (define F (lambda (e) false))
 (define T (lambda (e) true))
@@ -123,8 +123,8 @@
 (check_equal (do (lambda (x) (+ 1 x)) (quote (2 3)))
    (void) "do returns void")
 
-(let [(v (stretchy_vector))]
-  (do (lambda (x) (vector_add_m v (+ 1 x))) (quote (2 3)))
+(let [(v (stretchy_list))]
+  (do (lambda (x) (add_m v (+ 1 x))) (quote (2 3)))
   (check_equal v [3, 4] "do side effects"))
 
 

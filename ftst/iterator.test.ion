@@ -1,9 +1,8 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
+(use check)
 (use 'fusion/iterator')
 (use 'fusion/list')
-(use 'fusion/vector')
-(use check)
 
 (define check_iter
   (lambda (iter values)
@@ -45,8 +44,8 @@
 
 
 (check_true (is_void (iterator_find (lambda (e) true) empty_iterator)))
-(check = 6 (iterator_find is_int (vector_iterate [true, "", 6])))
-(check = 2 (iterator_find plus1 (vector_iterate [2, 6])))
+(check = 6 (iterator_find is_int (list_iterator [true, "", 6])))
+(check = 2 (iterator_find plus1 (list_iterator [2, 6])))
 
 
 (check_iter (iterator_append empty_iterator empty_iterator) [])

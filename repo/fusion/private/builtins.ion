@@ -34,4 +34,19 @@
   (defpub_j to_int                "com.amazon.fusion.ToIntProc")
   (defpub_j to_string             "com.amazon.fusion.ToStringProc")
 
+
+  (defpub_j is_immutable_list
+    "com.amazon.fusion.FusionVector$IsImmutableVectorProc")
+  (defpub_j is_mutable_list
+    "com.amazon.fusion.FusionVector$IsMutableVectorProc")
+  (defpub_j is_stretchy_list
+    "com.amazon.fusion.FusionVector$IsStretchyVectorProc")
+
+  (defpub_j immutable_list
+    "com.amazon.fusion.FusionVector$ImmutableVectorProc")
+  (defpub_j list // mutable
+    "com.amazon.fusion.FusionVector$VectorProc")
+  (defpub_j stretchy_list
+    "com.amazon.fusion.FusionVector$StretchyVectorProc")
+
 )

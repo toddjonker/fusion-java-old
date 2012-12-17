@@ -80,7 +80,7 @@ class ModuleNamespace
         @Override
         public String toString()
         {
-            return "{{ModuleBinding " + getName() + "}}";
+            return "{{ModuleBinding " + myModuleId + ' ' + getName() + "}}";
         }
     }
 

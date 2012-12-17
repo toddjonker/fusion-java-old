@@ -4,7 +4,8 @@
 
   (use 'fusion/collection')
   (use 'fusion/experimental/defines')
-  (use 'fusion/vector')
+  (use 'fusion/private/builtins')   // Some basic list ops
+  (use 'fusion/unsafe/list')
 
   // Pass-through bindings from /fusion/collection
   (provide any do find is_empty size)
@@ -51,14 +52,14 @@ a new list of the elements (in order) for which `pred` returns truthy.
         (raise_argument_error "choose" "list" 1 pred list)
       (let ((len (size list)))
         (let loop ((i 0)
-                   (result (stretchy_vector)))
+                   (result (stretchy_list)))
           (if (= i len)
             result
             (let ((elt (. list i)))
               (loop
                 (+ 1 i)
                 (if (pred elt)
-                  (vector_add_m result elt)
+                  (unsafe_list_add_m result elt)
                   result)))))))))
 
 
@@ -74,10 +75,10 @@ a new list of the results in order.
         (raise_argument_error "map" "list" 1 proc list)
       (let ((len (size list)))
         (let loop ((i 0)
-                   (result (stretchy_vector)))
+                   (result (stretchy_list)))
           (if (= i len)
             result
             (loop
               (+ 1 i)
-              (vector_add_m result (proc (. list i))))))))))
+              (unsafe_list_add_m result (proc (. list i))))))))))
 )
