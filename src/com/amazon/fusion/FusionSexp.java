@@ -556,6 +556,26 @@ final class FusionSexp
     }
 
 
+    static final class IsSexpProc
+        extends Procedure1
+    {
+        IsSexpProc()
+        {
+            //    "                                                                               |
+            super("Determines whether a `value` is a sexp, returning true or false.",
+                  "value");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object arg)
+            throws FusionException
+        {
+            boolean result = isSexp(eval, arg);
+            return eval.newBool(result);
+        }
+    }
+
+
     static final class IsPairProc
         extends Procedure1
     {

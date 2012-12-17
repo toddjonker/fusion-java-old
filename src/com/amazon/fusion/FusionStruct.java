@@ -698,4 +698,27 @@ final class FusionStruct
             return is;
         }
     }
+
+
+    //========================================================================
+
+
+    static final class IsStructProc
+        extends Procedure1
+    {
+        IsStructProc()
+        {
+            //    "                                                                               |
+            super("Determines whether `value` is a struct, returning true or false.",
+                  "value");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object arg)
+            throws FusionException
+        {
+            boolean result = isStruct(eval, arg);
+            return eval.newBool(result);
+        }
+    }
 }

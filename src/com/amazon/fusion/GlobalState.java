@@ -105,8 +105,8 @@ final class GlobalState
         }
 
         ns.define("is_list",   new FusionList.IsListProc());
-        ns.define("is_sexp",   new IsSexpProc());
-        ns.define("is_struct", new IsStructProc());
+        ns.define("is_sexp",   new FusionSexp.IsSexpProc());
+        ns.define("is_struct", new FusionStruct.IsStructProc());
 
         ModuleInstance kernel = ns.build();
         registry.register(kernel);
