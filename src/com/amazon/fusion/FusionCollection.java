@@ -28,9 +28,9 @@ final class FusionCollection
      * @return not null.
      */
     static String[] unsafeCollectionAnnotationStrings(Evaluator eval,
-                                                      Object vector)
+                                                      Object collection)
     {
-        return ((BaseCollection) vector).myAnnotations;
+        return ((BaseCollection) collection).myAnnotations;
     }
 
 

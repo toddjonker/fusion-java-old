@@ -104,7 +104,7 @@ final class GlobalState
             }
         }
 
-        ns.define("is_list",   new IsListProc());
+        ns.define("is_list",   new FusionList.IsListProc());
         ns.define("is_sexp",   new IsSexpProc());
         ns.define("is_struct", new IsStructProc());
 

@@ -21,75 +21,75 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 
-final class FusionVector
+final class FusionList
 {
-    private FusionVector() {}
+    private FusionList() {}
 
-    static final ImmutableVector EMPTY_IMMUTABLE_VECTOR =
-        new ImmutableVector(FusionUtils.EMPTY_OBJECT_ARRAY);
+    static final ImmutableList EMPTY_IMMUTABLE_LIST =
+        new ImmutableList(FusionUtils.EMPTY_OBJECT_ARRAY);
 
-    static final NullVector NULL_VECTOR = new NullVector();
+    static final NullList NULL_LIST = new NullList();
 
     //========================================================================
     // Constructors
 
 
     /**
-     * Turns null.list into a {@link NullVector} with the same annotations.
+     * Turns null.list into a {@link NullList} with the same annotations.
      */
-    static BaseVector vectorFromIonSequence(Evaluator eval, IonSequence seq)
+    static BaseList listFromIonSequence(Evaluator eval, IonSequence seq)
     {
         String[] annotations = seq.getTypeAnnotations();
         // TODO FUSION-47 intern annotation text
 
         if (seq.isNullValue())
         {
-            return nullVector(eval, annotations);
+            return nullList(eval, annotations);
         }
 
         int size = seq.size();
         if (size == 0)
         {
-            return immutableVector(eval, annotations, EMPTY_OBJECT_ARRAY);
+            return immutableList(eval, annotations, EMPTY_OBJECT_ARRAY);
         }
         else
         {
             Object[] elts = seq.toArray(new Object[size]);
-            return new LazyInjectingVector(annotations, elts);
+            return new LazyInjectingList(annotations, elts);
         }
     }
 
 
-    static NullVector nullVector(Evaluator eval, String[] annotations)
+    static NullList nullList(Evaluator eval, String[] annotations)
     {
         if (annotations.length == 0)
         {
-            return NULL_VECTOR;
+            return NULL_LIST;
         }
 
-        return new NullVector(annotations);
+        return new NullList(annotations);
     }
 
 
     /**
-     * Caller must have injected children.
+     * Caller must have injected elements.
      * @param elements must not be null. This method assumes ownership!
      */
-    static Object vector(Evaluator eval, Object[] elements)
+    static Object list(Evaluator eval, Object[] elements)
     {
-        return new MutableVector(elements);
+        return new MutableList(elements);
     }
 
 
     /**
-     * Creates a mutable vector containing the values.
+     * Creates a mutable list containing the elements.
      * @param elements must be injected.
      */
-    static <T> MutableVector vector(Evaluator eval, List<T> elements)
+    static <T> MutableList list(Evaluator eval, List<T> elements)
     {
         Object[] v = new Object[elements.size()];
         elements.toArray(v);
-        return new MutableVector(v);
+        return new MutableList(v);
     }
 
 
@@ -97,15 +97,15 @@ final class FusionVector
      * Caller must have injected elements.
      * @param elements must not be null
      */
-    static ImmutableVector immutableVector(Evaluator eval, Object[] elements)
+    static ImmutableList immutableList(Evaluator eval, Object[] elements)
     {
         if (elements.length == 0)
         {
-            return EMPTY_IMMUTABLE_VECTOR;
+            return EMPTY_IMMUTABLE_LIST;
         }
         else
         {
-            return new ImmutableVector(elements);
+            return new ImmutableList(elements);
         }
     }
 
@@ -114,48 +114,47 @@ final class FusionVector
      * Caller must have injected elements.
      * @param elements must not be null
      */
-    static ImmutableVector immutableVector(Evaluator eval,
-                                           String[] annotations,
-                                           Object[] elements)
+    static ImmutableList immutableList(Evaluator eval,
+                                       String[] annotations,
+                                       Object[] elements)
     {
         if (elements.length == 0 && annotations.length == 0)
         {
-            return EMPTY_IMMUTABLE_VECTOR;
+            return EMPTY_IMMUTABLE_LIST;
         }
         else
         {
-            return new ImmutableVector(annotations, elements);
+            return new ImmutableList(annotations, elements);
         }
     }
 
 
     /**
-     * Caller must have injected children.
+     * Caller must have injected elements.
      * @param elements must not be null
      */
-    static <T> ImmutableVector immutableVector(Evaluator eval,
-                                               List<T> elements)
+    static <T> ImmutableList immutableList(Evaluator eval, List<T> elements)
     {
         int size = elements.size();
         if (size == 0)
         {
-            return EMPTY_IMMUTABLE_VECTOR;
+            return EMPTY_IMMUTABLE_LIST;
         }
         else
         {
             Object[] elts = elements.toArray(new Object[size]);
-            return new ImmutableVector(elts);
+            return new ImmutableList(elts);
         }
     }
 
 
     /**
-     * Caller must have injected children.
+     * Caller must have injected elements.
      * @param elements must not be null
      */
-    static Object stretchyVector(Evaluator eval, Object[] elements)
+    static Object stretchyList(Evaluator eval, Object[] elements)
     {
-        return new StretchyVector(elements);
+        return new StretchyList(elements);
     }
 
 
@@ -163,35 +162,29 @@ final class FusionVector
     // Predicates
 
 
-    static boolean isVector(Evaluator eval, Object v)
+    static boolean isList(Evaluator eval, Object v)
     {
-        return (v instanceof BaseVector);
+        return (v instanceof BaseList);
     }
 
-    @Deprecated
-    static boolean isVector(Object v)
+    static boolean isImmutableList(Evaluator eval, Object v)
     {
-        return (v instanceof BaseVector);
+        return (v instanceof ImmutableList);
     }
 
-    static boolean isImmutableVector(Evaluator eval, Object v)
+    static boolean isNullList(Evaluator eval, Object v)
     {
-        return (v instanceof ImmutableVector);
+        return (v instanceof NullList);
     }
 
-    static boolean isNullVector(Evaluator eval, Object v)
+    static boolean isMutableList(Evaluator eval, Object v)
     {
-        return (v instanceof NullVector);
+        return (v instanceof MutableList);
     }
 
-    static boolean isMutableVector(Evaluator eval, Object v)
+    static boolean isStretchyList(Evaluator eval, Object v)
     {
-        return (v instanceof MutableVector);
-    }
-
-    static boolean isStretchyVector(Evaluator eval, Object v)
-    {
-        return (v instanceof StretchyVector);
+        return (v instanceof StretchyList);
     }
 
 
@@ -201,50 +194,49 @@ final class FusionVector
     /**
      * @return not null.
      */
-    static String[] unsafeVectorAnnotationStrings(Evaluator eval,
-                                                  Object vector)
+    static String[] unsafeListAnnotationStrings(Evaluator eval, Object list)
     {
-        return ((BaseVector) vector).myAnnotations;
+        return ((BaseList) list).myAnnotations;
     }
 
-    static int unsafeVectorSize(Evaluator eval, Object vector)
+    static int unsafeListSize(Evaluator eval, Object list)
     {
-        return ((BaseVector) vector).size();
-    }
-
-
-    static Object unsafeVectorRef(Evaluator eval, Object vector, int pos)
-    {
-        return ((BaseVector) vector).unsafeRef(eval, pos);
+        return ((BaseList) list).size();
     }
 
 
-    static void unsafeVectorSet(Evaluator eval, Object vector,
+    static Object unsafeListRef(Evaluator eval, Object list, int pos)
+    {
+        return ((BaseList) list).unsafeRef(eval, pos);
+    }
+
+
+    static void unsafeListSet(Evaluator eval, Object list,
                                 int pos, Object value)
     {
-        ((MutableVector) vector).unsafeSet(pos, value);
+        ((MutableList) list).unsafeSet(pos, value);
     }
 
-    static Object unsafeVectorAdd(Evaluator eval, Object vector, Object value)
+    static Object unsafeListAdd(Evaluator eval, Object list, Object value)
     {
-        return ((BaseVector) vector).add(eval, value);
+        return ((BaseList) list).add(eval, value);
     }
 
-    static Object unsafeVectorAddM(Evaluator eval, Object vector, Object value)
+    static Object unsafeListAddM(Evaluator eval, Object list, Object value)
     {
-        return ((BaseVector) vector).addM(eval, value);
+        return ((BaseList) list).addM(eval, value);
     }
 
 
     @Deprecated
-    static Iterator<?> unsafeJavaIterate(Evaluator eval, Object vector)
+    static Iterator<?> unsafeJavaIterate(Evaluator eval, Object list)
     {
-        return ((BaseVector) vector).javaIterate(eval);
+        return ((BaseList) list).javaIterate(eval);
     }
 
-    static Object unsafeVectorIterate(Evaluator eval, Object vector)
+    static FusionIterator unsafeListIterator(Evaluator eval, Object list)
     {
-        return Iterators.iterate(unsafeJavaIterate(eval, vector));
+        return Iterators.iterate(unsafeJavaIterate(eval, list));
     }
 
 
@@ -253,20 +245,20 @@ final class FusionVector
 
 
     /**
-     * @param vector must be a vector; it is not type-checked!
+     * @param list must be a list; it is not type-checked!
      */
-    static void unsafeVectorCopy(Evaluator eval, Object vector, int srcPos,
-                                 Object[] dest, int destPos, int length)
+    static void unsafeListCopy(Evaluator eval, Object list, int srcPos,
+                               Object[] dest, int destPos, int length)
     {
-        ((BaseVector) vector).unsafeCopy(eval, srcPos, dest, destPos, length);
+        ((BaseList) list).unsafeCopy(eval, srcPos, dest, destPos, length);
     }
 
 
     /**
-     * @param vector must be a vector; it is not type-checked!
+     * @param list must be a list; it is not type-checked!
      */
-    static BaseVector unsafeVectorSubseq(Evaluator eval, Object vector,
-                                         int srcPos, int length)
+    static BaseList unsafeListSubseq(Evaluator eval, Object list,
+                                     int srcPos, int length)
     {
         Object[] copy;
         if (length == 0)
@@ -276,54 +268,54 @@ final class FusionVector
         else
         {
             copy = new Object[length];
-            unsafeVectorCopy(eval, vector, srcPos, copy, 0, length);
+            unsafeListCopy(eval, list, srcPos, copy, 0, length);
         }
 
-        return ((BaseVector) vector).makeSimilar(EMPTY_STRING_ARRAY, copy);
+        return ((BaseList) list).makeSimilar(EMPTY_STRING_ARRAY, copy);
     }
 
 
-    static Object unsafeVectorConcatenateM(Evaluator eval, Object vector,
-                                           Object[] args)
+    static Object unsafeListConcatenateM(Evaluator eval, Object list,
+                                         Object[] args)
     {
-        return ((BaseVector) vector).concatenateM(eval, args);
+        return ((BaseList) list).concatenateM(eval, args);
     }
 
 
     /**
-     * @param vector must be a vector; it is not type-checked!
+     * @param list must be a list; it is not type-checked!
      */
-    static IonList unsafeCopyToIonList(Object vector, ValueFactory factory)
+    static IonList unsafeCopyToIonList(Object list, ValueFactory factory)
         throws FusionException
     {
-        return unsafeCopyToIonList(vector, factory, true);
+        return unsafeCopyToIonList(list, factory, true);
     }
 
 
     /**
-     * @param vector must be a vector; it is not type-checked!
+     * @param list must be a list; it is not type-checked!
      *
-     * @return null if the vector and its contents cannot be ionized.
+     * @return null if the list and its elements cannot be ionized.
      */
-    static IonList unsafeCopyToIonListMaybe(Object vector,
+    static IonList unsafeCopyToIonListMaybe(Object list,
                                             ValueFactory factory)
         throws FusionException
     {
-        return unsafeCopyToIonList(vector, factory, false);
+        return unsafeCopyToIonList(list, factory, false);
     }
 
 
     /**
-     * @param vector must be a vector; it is not type-checked!
+     * @param list must be a list; it is not type-checked!
      *
-     * @return null if the vector and its contents cannot be ionized.
+     * @return null if the list and its elements cannot be ionized.
      */
-    static IonList unsafeCopyToIonList(Object vector,
+    static IonList unsafeCopyToIonList(Object list,
                                        ValueFactory factory,
                                        boolean throwOnConversionFailure)
         throws FusionException
     {
-        BaseVector base = (BaseVector) vector;
+        BaseList base = (BaseList) list;
         return base.copyToIonValue(factory, throwOnConversionFailure);
     }
 
@@ -333,19 +325,19 @@ final class FusionVector
 
     /**
      * Prevents mutation from Java code and is distinguishable from mutable
-     * vectors.
+     * lists.
      */
-    private abstract static class BaseVector
+    private abstract static class BaseList
         extends BaseSequence
     {
         Object[] myValues;
 
-        BaseVector(Object[] values)
+        BaseList(Object[] values)
         {
             myValues = values;
         }
 
-        BaseVector(String[] annotations, Object[] values)
+        BaseList(String[] annotations, Object[] values)
         {
             super(annotations);
             myValues = values;
@@ -353,7 +345,7 @@ final class FusionVector
 
 
         /** Takes ownership of the array, doesn't make a copy. */
-        abstract BaseVector makeSimilar(String[] annotations, Object[] values);
+        abstract BaseList makeSimilar(String[] annotations, Object[] values);
 
 
         @Override
@@ -385,7 +377,7 @@ final class FusionVector
         }
 
         /**
-         * @return null if the vector and its contents cannot be ionized
+         * @return null if the list and its elements cannot be ionized
          *  UNLESS throwOnConversionFailure
          */
         @Override
@@ -413,7 +405,7 @@ final class FusionVector
             return list;
         }
 
-        BaseVector add(Evaluator eval, Object value)
+        BaseList add(Evaluator eval, Object value)
         {
             int len = size();
             Object[] copy = Arrays.copyOf(myValues, len + 1);
@@ -421,17 +413,17 @@ final class FusionVector
             return makeSimilar(myAnnotations, copy);
         }
 
-        BaseVector addM(Evaluator eval, Object value)
+        BaseList addM(Evaluator eval, Object value)
         {
             return add(eval, value);
         }
 
-        BaseVector concatenateM(Evaluator eval, Object[] args)
+        BaseList concatenateM(Evaluator eval, Object[] args)
         {
             int newLen = myValues.length;
             for (int i = 0; i < args.length; i++)
             {
-                newLen += ((BaseVector) args[i]).size();
+                newLen += ((BaseList) args[i]).size();
             }
 
             Object[] copy = Arrays.copyOf(myValues, newLen);
@@ -439,7 +431,7 @@ final class FusionVector
             int pos = myValues.length;
             for (Object arg : args)
             {
-                BaseVector v = (BaseVector) arg;
+                BaseList v = (BaseList) arg;
                 int argLen = v.size();
 
                 System.arraycopy(v.myValues, 0, copy, pos, argLen);
@@ -490,23 +482,23 @@ final class FusionVector
     }
 
 
-    private static class MutableVector
-        extends BaseVector
+    private static class MutableList
+        extends BaseList
     {
-        MutableVector(Object[] values)
+        MutableList(Object[] values)
         {
             super(values);
         }
 
-        MutableVector(String[] annotations, Object[] values)
+        MutableList(String[] annotations, Object[] values)
         {
             super(annotations, values);
         }
 
         @Override
-        BaseVector makeSimilar(String[] annotations, Object[] values)
+        BaseList makeSimilar(String[] annotations, Object[] values)
         {
-            return new MutableVector(annotations, values);
+            return new MutableList(annotations, values);
         }
 
         void unsafeSet(int pos, Object value)
@@ -516,36 +508,36 @@ final class FusionVector
     }
 
 
-    private static class ImmutableVector
-        extends BaseVector
+    private static class ImmutableList
+        extends BaseList
     {
-        ImmutableVector(Object[] values)
+        ImmutableList(Object[] values)
         {
             super(values);
         }
 
-        ImmutableVector(String[] annotations, Object[] values)
+        ImmutableList(String[] annotations, Object[] values)
         {
             super(annotations, values);
         }
 
         @Override
-        BaseVector makeSimilar(String[] annotations, Object[] values)
+        BaseList makeSimilar(String[] annotations, Object[] values)
         {
-            return new ImmutableVector(annotations, values);
+            return new ImmutableList(annotations, values);
         }
     }
 
 
-    private static final class NullVector
-        extends ImmutableVector
+    private static final class NullList
+        extends ImmutableList
     {
-        NullVector()
+        NullList()
         {
             super(EMPTY_OBJECT_ARRAY);
         }
 
-        NullVector(String[] annotations)
+        NullList(String[] annotations)
         {
             super(annotations, EMPTY_OBJECT_ARRAY);
         }
@@ -591,27 +583,27 @@ final class FusionVector
     }
 
 
-    private static class StretchyVector
-        extends MutableVector
+    private static class StretchyList
+        extends MutableList
     {
         private int mySize;
 
-        StretchyVector(Object[] values)
+        StretchyList(Object[] values)
         {
             super(values);
             mySize = values.length;
         }
 
-        StretchyVector(String[] annotations, Object[] values)
+        StretchyList(String[] annotations, Object[] values)
         {
             super(annotations, values);
             mySize = values.length;
         }
 
         @Override
-        BaseVector makeSimilar(String[] annotations, Object[] values)
+        BaseList makeSimilar(String[] annotations, Object[] values)
         {
-            return new StretchyVector(annotations, values);
+            return new StretchyList(annotations, values);
         }
 
         @Override
@@ -621,7 +613,7 @@ final class FusionVector
         }
 
         @Override
-        BaseVector addM(Evaluator eval, Object value)
+        BaseList addM(Evaluator eval, Object value)
         {
             if (mySize == myValues.length)
             {
@@ -636,12 +628,12 @@ final class FusionVector
         }
 
         @Override
-        BaseVector concatenateM(Evaluator eval, Object[] args)
+        BaseList concatenateM(Evaluator eval, Object[] args)
         {
             int newLen = mySize;
             for (Object arg : args)
             {
-                newLen += ((BaseVector) arg).size();
+                newLen += ((BaseList) arg).size();
             }
 
             if (myValues.length < newLen)
@@ -652,7 +644,7 @@ final class FusionVector
             int pos = mySize;
             for (Object arg : args)
             {
-                BaseVector v = (BaseVector) arg;
+                BaseList v = (BaseList) arg;
                 int argLen = v.size();
 
                 System.arraycopy(v.myValues, 0, myValues, pos, argLen);
@@ -694,10 +686,10 @@ final class FusionVector
         }
     }
 
-    private static final class LazyInjectingVector
-        extends ImmutableVector
+    private static final class LazyInjectingList
+        extends ImmutableList
     {
-        LazyInjectingVector(String[] annotations, Object[] values)
+        LazyInjectingList(String[] annotations, Object[] values)
         {
             super(annotations, values);
             assert values.length != 0;
@@ -739,14 +731,14 @@ final class FusionVector
 
 
         @Override
-        BaseVector add(Evaluator eval, Object value)
+        BaseList add(Evaluator eval, Object value)
         {
             injectElements(eval);
             return super.add(eval, value);
         }
 
         @Override
-        BaseVector concatenateM(Evaluator eval, Object[] args)
+        BaseList concatenateM(Evaluator eval, Object[] args)
         {
             injectElements(eval);
             return super.concatenateM(eval, args);
@@ -763,93 +755,93 @@ final class FusionVector
     //========================================================================
 
 
-    static final class IsVectorProc
+    static final class IsListProc
         extends Procedure1
     {
-        IsVectorProc()
+        IsListProc()
         {
             //    "                                                                               |
-            super("Determines whether `value` is a vector, returning true or false.",
+            super("Determines whether `value` is a list, returning true or false.",
                   "value");
         }
 
         @Override
-        Object doApply(Evaluator eval, Object vector)
+        Object doApply(Evaluator eval, Object value)
             throws FusionException
         {
-            boolean result = isVector(eval, vector);
+            boolean result = isList(eval, value);
             return eval.newBool(result);
         }
     }
 
 
-    static final class IsImmutableVectorProc
+    static final class IsImmutableListProc
         extends Procedure1
     {
-        IsImmutableVectorProc()
+        IsImmutableListProc()
         {
             //    "                                                                               |
-            super("Determines whether `value` is an immutable vector, returning true or false.",
+            super("Determines whether `value` is an immutable list, returning true or false.",
                   "value");
         }
 
         @Override
-        Object doApply(Evaluator eval, Object vector)
+        Object doApply(Evaluator eval, Object value)
             throws FusionException
         {
-            boolean result = isImmutableVector(eval, vector);
+            boolean result = isImmutableList(eval, value);
             return eval.newBool(result);
         }
     }
 
 
-    static final class IsMutableVectorProc
+    static final class IsMutableListProc
         extends Procedure1
     {
-        IsMutableVectorProc()
+        IsMutableListProc()
         {
             //    "                                                                               |
-            super("Determines whether `value` is a mutable vector, returning true or false.",
+            super("Determines whether `value` is a mutable list, returning true or false.",
                   "value");
         }
 
         @Override
-        Object doApply(Evaluator eval, Object vector)
+        Object doApply(Evaluator eval, Object value)
             throws FusionException
         {
-            boolean result = isMutableVector(eval, vector);
+            boolean result = isMutableList(eval, value);
             return eval.newBool(result);
         }
     }
 
 
-    static final class IsStretchyVectorProc
+    static final class IsStretchyListProc
         extends Procedure1
     {
-        IsStretchyVectorProc()
+        IsStretchyListProc()
         {
             //    "                                                                               |
-            super("Determines whether `value` is a stretchy vector, returning true or false.",
+            super("Determines whether `value` is a stretchy list, returning true or false.",
                   "value");
         }
 
         @Override
-        Object doApply(Evaluator eval, Object vector)
+        Object doApply(Evaluator eval, Object value)
             throws FusionException
         {
-            boolean result = isStretchyVector(eval, vector);
+            boolean result = isStretchyList(eval, value);
             return eval.newBool(result);
         }
     }
 
 
-    static final class ImmutableVectorProc
+    static final class ImmutableListProc
         extends Procedure
     {
-        ImmutableVectorProc()
+        ImmutableListProc()
         {
             //    "                                                                               |
-            super("Makes a fresh, immutable vector containing the given `value`s.",
+            super("Makes a fresh, immutable list containing the given `value`s.",
                   "value", DOTDOTDOT);
         }
 
@@ -857,18 +849,18 @@ final class FusionVector
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            return immutableVector(eval, args);
+            return immutableList(eval, args);
         }
     }
 
 
-    static final class VectorProc
+    static final class ListProc
         extends Procedure
     {
-        VectorProc()
+        ListProc()
         {
             //    "                                                                               |
-            super("Makes a fresh, mutable vector containing the given `value`s.",
+            super("Makes a fresh, mutable list containing the given `value`s.",
                   "value", DOTDOTDOT);
         }
 
@@ -876,18 +868,18 @@ final class FusionVector
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            return vector(eval, args);
+            return list(eval, args);
         }
     }
 
 
-    static final class StretchyVectorProc
+    static final class StretchyListProc
         extends Procedure
     {
-        StretchyVectorProc()
+        StretchyListProc()
         {
             //    "                                                                               |
-            super("Makes a fresh, stretchy vector containing the given `value`s.",
+            super("Makes a fresh, stretchy list containing the given `value`s.",
                   "value", DOTDOTDOT);
         }
 
@@ -895,61 +887,61 @@ final class FusionVector
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            return stretchyVector(eval, args);
+            return stretchyList(eval, args);
         }
     }
 
 
-    static final class UnsafeVectorSizeProc
+    static final class UnsafeListSizeProc
         extends Procedure1
     {
-        UnsafeVectorSizeProc()
+        UnsafeListSizeProc()
         {
             //    "                                                                               |
-            super("Returns the number of elements in `vector`.",
-                  "vector");
+            super("Returns the number of elements in `list`.",
+                  "list");
         }
 
         @Override
-        Object doApply(Evaluator eval, Object vector)
+        Object doApply(Evaluator eval, Object list)
             throws FusionException
         {
-            int result = unsafeVectorSize(eval, vector);
+            int result = unsafeListSize(eval, list);
             return eval.newInt(result);
         }
     }
 
 
-    static final class UnsafeVectorRefProc
+    static final class UnsafeListRefProc
         extends Procedure2
     {
-        UnsafeVectorRefProc()
+        UnsafeListRefProc()
         {
             //    "                                                                               |
-            super("Returns the element of `vector` at (zero-based) position `pos`.",
-                  "vector", "pos");
+            super("Returns the element of `list` at (zero-based) position `pos`.",
+                  "list", "pos");
         }
 
         @Override
-        Object doApply(Evaluator eval, Object vector, Object posArg)
+        Object doApply(Evaluator eval, Object list, Object posArg)
             throws FusionException
         {
             int pos = ((IonInt) posArg).intValue();
 
-            return unsafeVectorRef(eval, vector, pos);
+            return unsafeListRef(eval, list, pos);
         }
     }
 
 
-    static final class UnsafeVectorSetProc
+    static final class UnsafeListSetProc
         extends Procedure
     {
-        UnsafeVectorSetProc()
+        UnsafeListSetProc()
         {
             //    "                                                                               |
-            super("Changes the element of `vector` at (zero-based) position `pos`. This assumes\n" +
-                  "that the `vector` is mutable and that the `pos` is valid.",
-                  "vector", "pos", "value");
+            super("Changes the element of `list` at (zero-based) position `pos`. This assumes\n" +
+                  "that the `list` is mutable and that the `pos` is valid.",
+                  "list", "pos", "value");
         }
 
         @Override
@@ -958,73 +950,73 @@ final class FusionVector
         {
             checkArityExact(args);
 
-            BaseVector vector = (BaseVector) args[0];
+            BaseList list = (BaseList) args[0];
             int pos = ((IonInt) args[1]).intValue();
 
-            unsafeVectorSet(eval, vector, pos, args[2]);
+            unsafeListSet(eval, list, pos, args[2]);
 
             return null;
         }
     }
 
 
-    static final class UnsafeVectorAddProc
+    static final class UnsafeListAddProc
         extends Procedure2
     {
-        UnsafeVectorAddProc()
+        UnsafeListAddProc()
         {
             //    "                                                                               |
-            super("Returns a vector similar to `vector` with the `value` added to the end.",
-                  "vector", "value");
+            super("Returns a list similar to `list` with the `value` added to the end.",
+                  "list", "value");
         }
 
         @Override
-        Object doApply(Evaluator eval, Object vector, Object value)
+        Object doApply(Evaluator eval, Object list, Object value)
             throws FusionException
         {
-            return unsafeVectorAdd(eval, vector, value);
+            return unsafeListAdd(eval, list, value);
         }
     }
 
 
-    static final class UnsafeVectorAddMProc
+    static final class UnsafeListAddMProc
         extends Procedure2
     {
-        UnsafeVectorAddMProc()
+        UnsafeListAddMProc()
         {
             //    "                                                                               |
-            super("Returns a vector similar to `vector` with the `value` added to the end.  The\n" +
-                  "result may share structure with the vector, which may also be mutated.\n" +
+            super("Returns a list similar to `list` with the `value` added to the end.  The\n" +
+                  "result may share structure with the list, which may also be mutated.\n" +
                   "\n" +
-                  "In particular, when given a stretchy vector, the input is expanded to contain\n" +
-                  "the given value, and the result is the `vector` argument.",
-                  "vector", "value");
+                  "In particular, when given a stretchy list, the input is expanded to contain\n" +
+                  "the given value, and the result is the `list` argument.",
+                  "list", "value");
         }
 
         @Override
-        Object doApply(Evaluator eval, Object vector, Object value)
+        Object doApply(Evaluator eval, Object list, Object value)
             throws FusionException
         {
-            return unsafeVectorAddM(eval, vector, value);
+            return unsafeListAddM(eval, list, value);
         }
     }
 
 
-    static final class UnsafeVectorIterateProc
+    static final class UnsafeListIterateProc
         extends Procedure1
     {
-        UnsafeVectorIterateProc()
+        UnsafeListIterateProc()
         {
             //    "                                                                               |
-            super("Returns an iterator over the content of `vector`.",
-                  "vector");
+            super("Returns an iterator over the content of `list`.",
+                  "list");
         }
 
         @Override
-        Object doApply(Evaluator eval, Object vector)
+        Object doApply(Evaluator eval, Object list)
             throws FusionException
         {
-            return unsafeVectorIterate(eval, vector);
+            return unsafeListIterator(eval, list);
         }
     }
 }

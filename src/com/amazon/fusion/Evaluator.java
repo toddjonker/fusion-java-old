@@ -2,9 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionList.listFromIonSequence;
 import static com.amazon.fusion.FusionSexp.sexpFromIonSequence;
 import static com.amazon.fusion.FusionStruct.structFromIonStruct;
-import static com.amazon.fusion.FusionVector.vectorFromIonSequence;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSexp;
@@ -101,7 +101,7 @@ final class Evaluator
         else if (value instanceof IonList)
         {
             IonList list = (IonList) value;
-            return vectorFromIonSequence(this, list);
+            return listFromIonSequence(this, list);
         }
         else if (value instanceof IonSexp)
         {

@@ -18,20 +18,20 @@ related operations on lists.
 
 
   (defpub_j unsafe_list_size
-    "com.amazon.fusion.FusionVector$UnsafeVectorSizeProc")
+    "com.amazon.fusion.FusionList$UnsafeListSizeProc")
 
   (defpub_j unsafe_list_ref
-    "com.amazon.fusion.FusionVector$UnsafeVectorRefProc")
+    "com.amazon.fusion.FusionList$UnsafeListRefProc")
 
   (defpub_j unsafe_list_set
-    "com.amazon.fusion.FusionVector$UnsafeVectorSetProc")
+    "com.amazon.fusion.FusionList$UnsafeListSetProc")
 
   (defpub_j unsafe_list_add
-    "com.amazon.fusion.FusionVector$UnsafeVectorAddProc")
+    "com.amazon.fusion.FusionList$UnsafeListAddProc")
 
   (defpub_j unsafe_list_add_m
-    "com.amazon.fusion.FusionVector$UnsafeVectorAddMProc")
+    "com.amazon.fusion.FusionList$UnsafeListAddMProc")
 
   (defpub_j unsafe_list_iterator
-    "com.amazon.fusion.FusionVector$UnsafeVectorIterateProc")
+    "com.amazon.fusion.FusionList$UnsafeListIterateProc")
 )

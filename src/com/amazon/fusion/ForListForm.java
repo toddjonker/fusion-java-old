@@ -3,8 +3,9 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIterator.iterate;
-import static com.amazon.fusion.FusionVector.vector;
-import java.util.ArrayList;
+import static com.amazon.fusion.FusionList.stretchyList;
+import static com.amazon.fusion.FusionList.unsafeListAddM;
+import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 
 final class ForListForm
     extends SyntacticForm
@@ -13,8 +14,9 @@ final class ForListForm
     {
         //    "                                                                               |
         super("((ident seq_expr) ...) body ...+",
-              "Iterates the SEQ_EXPRs in parallel, binding the corresponding IDENTs to each\n" +
-              "element in turn and evaluating BODY.  Returns a mutable vector of the results.");
+              "Iterates the `seq_expr`s in parallel, binding the corresponding `ident`s to\n" +
+              "each element in turn and evaluating `body`.  Returns a stretchy list of the\n" +
+              "results.");
     }
 
 
@@ -130,7 +132,7 @@ final class ForListForm
         {
             final int numBindings = myValueForms.length;
 
-            ArrayList<Object> result = new ArrayList<Object>();
+            Object resultList = stretchyList(eval, EMPTY_OBJECT_ARRAY);
 
             if (numBindings != 0)
             {
@@ -156,11 +158,11 @@ final class ForListForm
                     }
 
                     Object nextResult = eval.eval(store, myBody);
-                    result.add(nextResult);
+                    unsafeListAddM(eval, resultList, nextResult);
                 }
             }
 
-            return vector(eval, result);
+            return resultList;
         }
     }
 }

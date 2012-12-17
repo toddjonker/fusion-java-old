@@ -2,10 +2,11 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionList.isList;
+import static com.amazon.fusion.FusionList.unsafeListIterator;
 import static com.amazon.fusion.FusionSexp.isSexp;
+import static com.amazon.fusion.FusionSexp.unsafeSexpIterator;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
-import static com.amazon.fusion.FusionVector.isVector;
-import static com.amazon.fusion.FusionVector.unsafeVectorIterate;
 import java.io.IOException;
 
 // TODO Add abstract class so subclasses don't have blank procs?
@@ -28,14 +29,14 @@ class FusionIterator
             return (FusionIterator) value;
         }
 
-        if (isVector(eval, value))
+        if (isList(eval, value))
         {
-            return (FusionIterator) unsafeVectorIterate(eval, value);
+            return unsafeListIterator(eval, value);
         }
 
         if (isSexp(eval, value))
         {
-            return FusionSexp.unsafeSexpIterate(eval, value);
+            return unsafeSexpIterator(eval, value);
         }
 
         throw new ArgTypeFailure("iterate", "iterable", 0, value);

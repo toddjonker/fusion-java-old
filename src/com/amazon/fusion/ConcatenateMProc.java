@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionVector.unsafeVectorConcatenateM;
+import static com.amazon.fusion.FusionList.unsafeListConcatenateM;
 
 
 final class ConcatenateMProc
@@ -29,13 +29,13 @@ final class ConcatenateMProc
 
         if (arity == 1) return first;
 
-        Object[] vectorArgs = new Object[arity - 1];
+        Object[] listArgs = new Object[arity - 1];
 
         for (int i = 1; i < arity; i++)
         {
-            vectorArgs[i - 1] = checkListArg(eval, i, args);
+            listArgs[i - 1] = checkListArg(eval, i, args);
         }
 
-        return unsafeVectorConcatenateM(eval, first, vectorArgs);
+        return unsafeListConcatenateM(eval, first, listArgs);
     }
 }

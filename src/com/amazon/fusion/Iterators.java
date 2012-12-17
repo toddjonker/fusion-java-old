@@ -14,7 +14,7 @@ final class Iterators
 
 
     /** Iterated values must not need injecting. */
-    static Object iterate(Iterator<?> iterator)
+    static FusionIterator iterate(Iterator<?> iterator)
     {
         return new IteratorAdaptor(iterator);
     }

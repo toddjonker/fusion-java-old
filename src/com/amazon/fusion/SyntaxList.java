@@ -2,12 +2,12 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionList.EMPTY_IMMUTABLE_LIST;
+import static com.amazon.fusion.FusionList.NULL_LIST;
+import static com.amazon.fusion.FusionList.immutableList;
+import static com.amazon.fusion.FusionList.nullList;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
-import static com.amazon.fusion.FusionVector.EMPTY_IMMUTABLE_VECTOR;
-import static com.amazon.fusion.FusionVector.NULL_VECTOR;
-import static com.amazon.fusion.FusionVector.immutableVector;
-import static com.amazon.fusion.FusionVector.nullVector;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
@@ -122,7 +122,7 @@ final class SyntaxList
 
         if (isNullValue())
         {
-            return nullVector(eval, annotations);
+            return nullList(eval, annotations);
         }
 
         Object[] children;
@@ -132,7 +132,7 @@ final class SyntaxList
         {
             if (annotations.length == 0)
             {
-                return EMPTY_IMMUTABLE_VECTOR;
+                return EMPTY_IMMUTABLE_LIST;
             }
 
             children = EMPTY_OBJECT_ARRAY;
@@ -147,7 +147,7 @@ final class SyntaxList
             }
         }
 
-        return immutableVector(eval, annotations, children);
+        return immutableList(eval, annotations, children);
     }
 
 
@@ -162,7 +162,7 @@ final class SyntaxList
         // syntax.
         if (isNullValue())
         {
-            return new CompiledConstant(NULL_VECTOR);
+            return new CompiledConstant(NULL_LIST);
         }
 
         int len = size();
@@ -202,7 +202,7 @@ final class SyntaxList
                 children[i] = eval.eval(store, myChildForms[i]);
             }
 
-            return immutableVector(eval, children);
+            return immutableList(eval, children);
         }
     }
 }

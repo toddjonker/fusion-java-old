@@ -3,9 +3,9 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionCollection.isCollection;
+import static com.amazon.fusion.FusionList.isList;
 import static com.amazon.fusion.FusionSequence.isSequence;
 import static com.amazon.fusion.FusionStruct.isStruct;
-import static com.amazon.fusion.FusionVector.isVector;
 import com.amazon.fusion.ArityFailure.Variability;
 import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.ion.IonDecimal;
@@ -348,7 +348,7 @@ abstract class Procedure
         throws ArgTypeFailure
     {
         Object arg = args[argNum];
-        if (isVector(eval, arg)) return arg;
+        if (isList(eval, arg)) return arg;
 
         throw argFailure("list", argNum, args);
     }

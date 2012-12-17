@@ -2,14 +2,14 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionList.isList;
+import static com.amazon.fusion.FusionList.unsafeListCopy;
+import static com.amazon.fusion.FusionList.unsafeListSize;
 import static com.amazon.fusion.FusionSexp.isPair;
 import static com.amazon.fusion.FusionSexp.isSexp;
 import static com.amazon.fusion.FusionSexp.unsafePairHead;
 import static com.amazon.fusion.FusionSexp.unsafePairTail;
 import static com.amazon.fusion.FusionSexp.unsafeSexpSize;
-import static com.amazon.fusion.FusionVector.isVector;
-import static com.amazon.fusion.FusionVector.unsafeVectorCopy;
-import static com.amazon.fusion.FusionVector.unsafeVectorSize;
 
 
 final class ApplyProc
@@ -37,15 +37,15 @@ final class ApplyProc
         Procedure proc = checkProcArg(0, args);
 
         Object rest = args[arity - 1];
-        boolean restIsVector = isVector(eval, rest);
-        boolean restIsChain = isSexp(eval, rest);
+        boolean restIsList = isList(eval, rest);
+        boolean restIsSexp = isSexp(eval, rest);
 
         int restLen;
-        if (restIsVector)
+        if (restIsList)
         {
-            restLen = unsafeVectorSize(eval, rest);
+            restLen = unsafeListSize(eval, rest);
         }
-        else if (restIsChain)
+        else if (restIsSexp)
         {
             restLen = unsafeSexpSize(eval, rest);
         }
@@ -63,9 +63,9 @@ final class ApplyProc
             procArgs[arg++] = args[i];
         }
 
-        if (restIsVector)
+        if (restIsList)
         {
-            unsafeVectorCopy(eval, rest, 0, procArgs, arg, restLen);
+            unsafeListCopy(eval, rest, 0, procArgs, arg, restLen);
         }
         else
         {

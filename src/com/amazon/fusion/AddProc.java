@@ -2,9 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionList.isList;
+import static com.amazon.fusion.FusionList.unsafeListAdd;
 import static com.amazon.fusion.FusionSexp.unsafeSexpAdd;
-import static com.amazon.fusion.FusionVector.isVector;
-import static com.amazon.fusion.FusionVector.unsafeVectorAdd;
 
 
 final class AddProc
@@ -32,9 +32,9 @@ final class AddProc
     {
         checkSequenceArg(eval, 0, sequence, element);
 
-        if (isVector(eval, sequence))
+        if (isList(eval, sequence))
         {
-            return unsafeVectorAdd(eval, sequence, element);
+            return unsafeListAdd(eval, sequence, element);
         }
 
         return unsafeSexpAdd(eval, sequence, element);

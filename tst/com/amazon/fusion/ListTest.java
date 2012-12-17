@@ -2,8 +2,8 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionVector.unsafeVectorRef;
-import static com.amazon.fusion.FusionVector.unsafeVectorSize;
+import static com.amazon.fusion.FusionList.unsafeListRef;
+import static com.amazon.fusion.FusionList.unsafeListSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import com.amazon.ion.IonList;
@@ -58,9 +58,9 @@ public class ListTest
         IonList list = (IonList) system().singleValue("[0, sym]");
         Object result = topLevel().call("add", list, 2);
         assertEquals(2, list.size());
-        assertEquals(3, unsafeVectorSize(null, result));
-        assertSame(list.get(0), unsafeVectorRef(null, result, 0));
-        assertSame(list.get(1), unsafeVectorRef(null, result, 1));
+        assertEquals(3, unsafeListSize(null, result));
+        assertSame(list.get(0), unsafeListRef(null, result, 0));
+        assertSame(list.get(1), unsafeListRef(null, result, 1));
     }
 
 
@@ -72,9 +72,9 @@ public class ListTest
         IonList list = (IonList) system().singleValue("[0, sym]");
         Object result = topLevel().call("add_m", list, 2);
         assertEquals(2, list.size());
-        assertEquals(3, unsafeVectorSize(null, result));
-        assertSame(list.get(0), unsafeVectorRef(null, result, 0));
-        assertSame(list.get(1), unsafeVectorRef(null, result, 1));
+        assertEquals(3, unsafeListSize(null, result));
+        assertSame(list.get(0), unsafeListRef(null, result, 0));
+        assertSame(list.get(1), unsafeListRef(null, result, 1));
     }
 
 
@@ -343,7 +343,7 @@ public class ListTest
         IonList iList = (IonList) system().singleValue("[2, sym, true]");
         Object result = topLevel().call("concatenate_m", fList, iList);
         assertSame(fList, result);
-        assertEquals(4, unsafeVectorSize(null, result));
+        assertEquals(4, unsafeListSize(null, result));
 
         // Elements should be lazily fusion-ized
         assertSame(iList.get(1), topLevel().call("list_ref", result, 2));
@@ -351,13 +351,13 @@ public class ListTest
         // Now mutate the IonValue
         fList = eval("(stretchy_list 4)");
         result = topLevel().call("concatenate_m", iList, fList);
-        assertEquals(4, unsafeVectorSize(null, result));
+        assertEquals(4, unsafeListSize(null, result));
 
-        assertSame(iList.get(0), unsafeVectorRef(null, result, 0));
-        assertSame(iList.get(1), unsafeVectorRef(null, result, 1));
-        assertSame(iList.get(2), unsafeVectorRef(null, result, 2));
-        assertSame(unsafeVectorRef(null, fList, 0),
-                   unsafeVectorRef(null, result, 3));
+        assertSame(iList.get(0), unsafeListRef(null, result, 0));
+        assertSame(iList.get(1), unsafeListRef(null, result, 1));
+        assertSame(iList.get(2), unsafeListRef(null, result, 2));
+        assertSame(unsafeListRef(null, fList, 0),
+                   unsafeListRef(null, result, 3));
     }
 
 

@@ -195,7 +195,7 @@ final class FusionSexp
         return new ImmutablePair(value, sexp);
     }
 
-    static FusionIterator unsafeSexpIterate(Evaluator eval, Object sexp)
+    static FusionIterator unsafeSexpIterator(Evaluator eval, Object sexp)
         throws FusionException
     {
         BaseSexp c = (BaseSexp) sexp;
@@ -567,10 +567,10 @@ final class FusionSexp
         }
 
         @Override
-        Object doApply(Evaluator eval, Object vector)
+        Object doApply(Evaluator eval, Object value)
             throws FusionException
         {
-            boolean result = isPair(eval, vector);
+            boolean result = isPair(eval, value);
             return eval.newBool(result);
         }
     }

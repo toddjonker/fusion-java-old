@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionVector.unsafeVectorAddM;
+import static com.amazon.fusion.FusionList.unsafeListAddM;
 
 final class AddMProc
     extends Procedure2
@@ -28,6 +28,6 @@ final class AddMProc
         throws FusionException
     {
         checkListArg(eval, 0, list, element);
-        return unsafeVectorAddM(eval, list, element);
+        return unsafeListAddM(eval, list, element);
     }
 }

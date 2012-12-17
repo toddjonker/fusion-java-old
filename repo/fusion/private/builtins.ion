@@ -36,17 +36,17 @@
 
 
   (defpub_j is_immutable_list
-    "com.amazon.fusion.FusionVector$IsImmutableVectorProc")
+    "com.amazon.fusion.FusionList$IsImmutableListProc")
   (defpub_j is_mutable_list
-    "com.amazon.fusion.FusionVector$IsMutableVectorProc")
+    "com.amazon.fusion.FusionList$IsMutableListProc")
   (defpub_j is_stretchy_list
-    "com.amazon.fusion.FusionVector$IsStretchyVectorProc")
+    "com.amazon.fusion.FusionList$IsStretchyListProc")
 
   (defpub_j immutable_list
-    "com.amazon.fusion.FusionVector$ImmutableVectorProc")
+    "com.amazon.fusion.FusionList$ImmutableListProc")
   (defpub_j list // mutable
-    "com.amazon.fusion.FusionVector$VectorProc")
+    "com.amazon.fusion.FusionList$ListProc")
   (defpub_j stretchy_list
-    "com.amazon.fusion.FusionVector$StretchyVectorProc")
+    "com.amazon.fusion.FusionList$StretchyListProc")
 
 )

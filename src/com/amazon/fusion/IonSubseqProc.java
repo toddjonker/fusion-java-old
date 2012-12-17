@@ -2,8 +2,8 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionVector.unsafeVectorSize;
-import static com.amazon.fusion.FusionVector.unsafeVectorSubseq;
+import static com.amazon.fusion.FusionList.unsafeListSize;
+import static com.amazon.fusion.FusionList.unsafeListSubseq;
 
 final class IonSubseqProc
     extends Procedure
@@ -27,9 +27,9 @@ final class IonSubseqProc
     {
         checkArityExact(args);
 
-        Object vector = checkListArg(eval, 0, args);
+        Object list = checkListArg(eval, 0, args);
 
-        int size = unsafeVectorSize(eval, vector);
+        int size = unsafeListSize(eval, list);
 
         int from = checkIntArg(1, args);
         int to   = checkIntArg(2, args);
@@ -47,9 +47,9 @@ final class IonSubseqProc
 
         assert from <= to && to <= size;
 
-        if (from == 0 && to == size) return vector;
+        if (from == 0 && to == size) return list;
 
         int len = to - from;
-        return unsafeVectorSubseq(eval, vector, from, len);
+        return unsafeListSubseq(eval, list, from, len);
     }
 }

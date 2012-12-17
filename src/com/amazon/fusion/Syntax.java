@@ -2,15 +2,15 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionList.isList;
+import static com.amazon.fusion.FusionList.unsafeListRef;
+import static com.amazon.fusion.FusionList.unsafeListSize;
 import static com.amazon.fusion.FusionSexp.isSexp;
 import static com.amazon.fusion.FusionSexp.unsafePairHead;
 import static com.amazon.fusion.FusionSexp.unsafePairTail;
 import static com.amazon.fusion.FusionSexp.unsafeSexpSize;
 import static com.amazon.fusion.FusionStruct.isStruct;
 import static com.amazon.fusion.FusionValue.castToIonValueMaybe;
-import static com.amazon.fusion.FusionVector.isVector;
-import static com.amazon.fusion.FusionVector.unsafeVectorRef;
-import static com.amazon.fusion.FusionVector.unsafeVectorSize;
 import static com.amazon.fusion.SourceLocation.currentLocation;
 import com.amazon.fusion.FusionStruct.BaseStruct;
 import com.amazon.fusion.FusionStruct.ImmutableStruct;
@@ -194,13 +194,13 @@ final class Syntax
             // No need to strip wraps here
         }
 
-        if (isVector(eval, datum))
+        if (isList(eval, datum))
         {
-            int size = unsafeVectorSize(eval, datum);
+            int size = unsafeListSize(eval, datum);
             SyntaxValue[] children = new SyntaxValue[size];
             for (int i = 0; i < size; i++)
             {
-                Object rawChild = unsafeVectorRef(eval, datum, i);
+                Object rawChild = unsafeListRef(eval, datum, i);
                 SyntaxValue child =
                     datumToStrippedSyntaxMaybe(eval, context, rawChild);
                 if (child == null)

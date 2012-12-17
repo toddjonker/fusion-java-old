@@ -4,9 +4,9 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionCollection.isCollection;
 import static com.amazon.fusion.FusionCollection.unsafeCollectionAnnotationStrings;
+import static com.amazon.fusion.FusionList.immutableList;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
-import static com.amazon.fusion.FusionVector.immutableVector;
 import com.amazon.ion.IonValue;
 
 final class IonAnnotationsProc
@@ -15,8 +15,8 @@ final class IonAnnotationsProc
     IonAnnotationsProc()
     {
         //    "                                                                               |
-        super("Returns a non-null immutable vector of strings containing the user type\n" +
-              "annotations on the VALUE.",
+        super("Returns a non-null immutable list of strings containing the user type\n" +
+              "annotations on the `value`.",
               "value");
     }
 
@@ -51,8 +51,8 @@ final class IonAnnotationsProc
             }
         }
 
-        // Returning immutable vector allows us to return a shared structure
+        // Returning immutable list allows us to return a shared structure
         // when possible, avoiding copies.
-        return immutableVector(eval, result);
+        return immutableList(eval, result);
     }
 }
