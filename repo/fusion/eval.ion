@@ -2,10 +2,8 @@
 
 (module eval (quote '#%kernel')
 
-  (use 'fusion/experimental/defines')
-  
-  // This isn't needed, but it's here to maintain sane dependency graph.
-  (use 'fusion/io')
+  (use '/fusion/experimental/defines')
+
 
   // Pass-through bindings from #%kernel
   (provide load)

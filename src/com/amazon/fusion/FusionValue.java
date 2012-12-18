@@ -2,8 +2,8 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionPrint.safeWriteToString;
 import static com.amazon.fusion.FusionVoid.isVoid;
+import static com.amazon.fusion.FusionWrite.safeWriteToString;
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonInt;
@@ -134,7 +134,7 @@ public abstract class FusionValue
      * possible.
      * <p>
      * Most code shouldn't call this method, and should prefer
-     * {@link FusionPrint#write(Evaluator, Appendable, Object)}.
+     * {@link FusionWrite#write(Evaluator, Appendable, Object)}.
      *
      * @param eval may be null!
      * @param out the output stream; not null.
@@ -148,7 +148,7 @@ public abstract class FusionValue
 
     /**
      * Returns a representation of this value for debugging and diagnostics.
-     * Currently, it behaves like {@link FusionPrint#write} but the behavior may change
+     * Currently, it behaves like {@link FusionWrite#write} but the behavior may change
      * at any time.
      */
     @Override

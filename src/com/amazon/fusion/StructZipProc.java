@@ -3,9 +3,9 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionList.unsafeJavaIterate;
-import static com.amazon.fusion.FusionPrint.safeWriteToString;
 import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionStruct.structImplAdd;
+import static com.amazon.fusion.FusionWrite.safeWriteToString;
 import java.util.HashMap;
 import java.util.Iterator;
 

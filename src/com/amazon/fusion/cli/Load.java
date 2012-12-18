@@ -2,8 +2,8 @@
 
 package com.amazon.fusion.cli;
 
-import static com.amazon.fusion.FusionPrint.write;
 import static com.amazon.fusion.FusionVoid.isVoid;
+import static com.amazon.fusion.FusionWrite.write;
 import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntime;

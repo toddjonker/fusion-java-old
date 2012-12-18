@@ -2,10 +2,10 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionPrint.dispatchIonize;
-import static com.amazon.fusion.FusionPrint.dispatchWrite;
-import static com.amazon.fusion.FusionPrint.safeWriteToString;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.fusion.FusionWrite.dispatchIonize;
+import static com.amazon.fusion.FusionWrite.dispatchWrite;
+import static com.amazon.fusion.FusionWrite.safeWriteToString;
 import com.amazon.fusion.FusionSequence.BaseSequence;
 import com.amazon.fusion.Iterators.AbstractIterator;
 import com.amazon.ion.IonSequence;

@@ -2,8 +2,8 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionPrint.safeDisplay;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.fusion.FusionWrite.safeDisplay;
 
 final class AssertForm
     extends SyntacticForm

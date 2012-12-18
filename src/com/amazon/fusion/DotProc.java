@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionPrint.safeWrite;
 import static com.amazon.fusion.FusionSequence.isSequence;
 import static com.amazon.fusion.FusionSequence.unsafeSequenceDot;
 import static com.amazon.fusion.FusionStruct.isStruct;
@@ -10,6 +9,7 @@ import static com.amazon.fusion.FusionStruct.unsafeStructDot;
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
 import static com.amazon.fusion.FusionVoid.isVoid;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.fusion.FusionWrite.safeWrite;
 
 final class DotProc
     extends Procedure

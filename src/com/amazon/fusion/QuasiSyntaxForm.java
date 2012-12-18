@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionPrint.safeWriteToString;
+import static com.amazon.fusion.FusionWrite.safeWriteToString;
 import com.amazon.fusion.Namespace.TopBinding;
 import com.amazon.fusion.QuoteSyntaxForm.CompiledQuoteSyntax;
 

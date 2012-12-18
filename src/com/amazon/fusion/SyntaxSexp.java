@@ -2,12 +2,12 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionPrint.safeWrite;
 import static com.amazon.fusion.FusionSexp.EMPTY_SEXP;
 import static com.amazon.fusion.FusionSexp.emptySexp;
 import static com.amazon.fusion.FusionSexp.nullSexp;
 import static com.amazon.fusion.FusionSexp.pair;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
+import static com.amazon.fusion.FusionWrite.safeWrite;
 import static com.amazon.fusion.LetValuesForm.compilePlainLet;
 import com.amazon.fusion.LambdaForm.CompiledLambdaBase;
 import com.amazon.fusion.LambdaForm.CompiledLambdaExact;

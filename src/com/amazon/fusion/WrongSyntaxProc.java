@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionPrint.safeDisplayManyToString;
+import static com.amazon.fusion.FusionWrite.safeDisplayManyToString;
 
 /**
  * Fusion procedure to raise a syntax error.

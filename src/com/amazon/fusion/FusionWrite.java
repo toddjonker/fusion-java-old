@@ -2,18 +2,22 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
+import com.amazon.ion.system.IonTextWriterBuilder;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 /**
  *
  */
-public final class FusionPrint
+public final class FusionWrite
 {
-    private FusionPrint() {}
+    private FusionWrite() {}
 
 
 
@@ -129,13 +133,12 @@ public final class FusionPrint
 
 
     /**
-     * Writes a representation of a value, following Ion text syntax where
+     * Writes a text representation of a value, following Ion syntax where
      * possible, including for strings.
-     * The result will be unreadable if the value contains any non-Ion data
-     * like closures.
+     * The result will be unreadable (by the Fusion and Ion readers) if the
+     * value contains any non-Ionizable data like closures.
      *
-     * @param top may be null, in which case output may fall back to default
-     * format of some kind.
+     * @param top must not be null.
      * @param out the output stream; not null.
      * @param value must not be null.
      *
@@ -150,10 +153,10 @@ public final class FusionPrint
 
 
     /**
-     * Writes a representation of a value, following Ion text syntax where
+     * Writes a text representation of a value, following Ion syntax where
      * possible, including for strings.
-     * The result will be unreadable if the value contains any non-Ion data
-     * like closures.
+     * The result will be unreadable (by the Fusion and Ion readers) if the
+     * value contains any non-Ionizable data like closures.
      *
      * @param eval may be null, in which case output may fall back to default
      * format of some kind.
@@ -379,7 +382,7 @@ public final class FusionPrint
 
     /**
      * Returns the output of
-     * {@link FusionPrint#write(Evaluator,Appendable,Object)} as a
+     * {@link FusionWrite#write(Evaluator,Appendable,Object)} as a
      * {@link String}, handling any exceptions by writing their message into
      * the output.
      *
@@ -407,4 +410,105 @@ public final class FusionPrint
         }
         return out.toString();
     }
+
+    //========================================================================
+
+
+    final static class IonizeProc
+        extends Procedure
+    {
+        IonizeProc()
+        {
+            //    "                                                                               |
+            super("Writes an Ion text representation of `value`, throwing an exception if the\n" +
+                  "value contains any non-Ionizable data like closures.",
+                  "value");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            IonTextWriterBuilder b = IonTextWriterBuilder.pretty();
+            IonWriter writer = b.build((OutputStream) System.out);
+
+            FusionWrite.ionize(eval, writer, args[0]);
+
+            try
+            {
+                writer.flush();
+            }
+            catch (IOException e)
+            {
+                throw new FusionException("I/O Exception", e);
+            }
+
+            return voidValue(eval);
+        }
+    }
+
+
+    final static class WriteProc
+        extends Procedure
+    {
+        WriteProc()
+        {
+            //    "                                                                               |
+            super("Writes a text representation of `value`, following Ion syntax where possible.\n" +
+                  "The result will be unreadable (by the Fusion and Ion readers) if the value\n" +
+                  "contains any non-Ionizable data like closures.",
+                  "value");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            FusionWrite.write(eval, System.out, args[0]);
+
+            return voidValue(eval);
+        }
+    }
+
+
+    final static class DisplayProc
+        extends Procedure
+    {
+        DisplayProc()
+        {
+            //    "                                                                               |
+            super("Writes a text representation of the `value`s, writing character data as-is but\n" +
+                  "otherwise following Ion syntax where possible.  In general, the result will be\n" +
+                  "unreadable by the Fusion and Ion readers.",
+                  "value", DOTDOTDOT);
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            try
+            {
+                OutputStreamWriter out = new OutputStreamWriter(System.out);
+                try
+                {
+                    for (Object arg : args)
+                    {
+                        FusionWrite.display(eval, out, arg);
+                    }
+                }
+                finally
+                {
+                    out.flush();
+                }
+            }
+            catch (IOException e)
+            {
+                throw new FusionException(e);
+            }
+
+            return voidValue(eval);
+        }
+    }
 }
+

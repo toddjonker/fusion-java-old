@@ -2,12 +2,12 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionPrint.dispatchIonize;
 import static com.amazon.fusion.FusionStruct.EMPTY_STRUCT;
 import static com.amazon.fusion.FusionStruct.NULL_STRUCT;
 import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionStruct.nullStruct;
 import static com.amazon.fusion.FusionStruct.structImplAdd;
+import static com.amazon.fusion.FusionWrite.dispatchIonize;
 import static com.amazon.fusion.SourceLocation.currentLocation;
 import com.amazon.fusion.FusionStruct.ImmutableStruct;
 import com.amazon.fusion.FusionStruct.NonNullImmutableStruct;

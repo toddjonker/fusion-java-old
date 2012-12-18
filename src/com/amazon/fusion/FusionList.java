@@ -2,10 +2,11 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionPrint.dispatchWrite;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.fusion.FusionWrite.dispatchIonize;
+import static com.amazon.fusion.FusionWrite.dispatchWrite;
 import com.amazon.fusion.FusionSequence.BaseSequence;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
@@ -475,7 +476,7 @@ final class FusionList
             out.stepIn(IonType.LIST);
             for (int i = 0; i < size(); i++)
             {
-                FusionPrint.dispatchIonize(eval, out, myValues[i]);
+                dispatchIonize(eval, out, myValues[i]);
             }
             out.stepOut();
         }

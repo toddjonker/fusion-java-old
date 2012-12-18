@@ -2,14 +2,10 @@
 
 (module io (quote '#%kernel')
 
-  (use 'fusion/experimental/defines')
+  (use '/fusion/experimental/defines')
 
   // Pass-through bindings from #%kernel
   (provide current_directory)
 
-
-  (defpub_j display "com.amazon.fusion.DisplayProc")
   (defpub_j read    "com.amazon.fusion.ReadProc")
-  (defpub_j write   "com.amazon.fusion.WriteProc")
-
 )

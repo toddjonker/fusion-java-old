@@ -2,10 +2,10 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionPrint.dispatchIonize;
-import static com.amazon.fusion.FusionPrint.dispatchWrite;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.fusion.FusionWrite.dispatchIonize;
+import static com.amazon.fusion.FusionWrite.dispatchWrite;
 import static com.amazon.ion.util.IonTextUtils.printSymbol;
 import static java.util.Collections.EMPTY_MAP;
 import com.amazon.fusion.FusionCollection.BaseCollection;

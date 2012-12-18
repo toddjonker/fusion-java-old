@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionPrint.writeMany;
+import static com.amazon.fusion.FusionWrite.writeMany;
 import java.io.IOException;
 
 

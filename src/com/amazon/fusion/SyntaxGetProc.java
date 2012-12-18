@@ -2,9 +2,9 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionPrint.safeWrite;
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.fusion.FusionWrite.safeWrite;
 
 final class SyntaxGetProc
     extends Procedure
