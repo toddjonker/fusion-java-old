@@ -1,0 +1,15 @@
+// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+
+(module read (quote '#%kernel')
+
+  '''
+Reading data from an input stream.
+
+See `/fusion/write` for related output procedures.
+  '''
+  (use '/fusion/experimental/defines')
+
+
+  (defpub_j read    "com.amazon.fusion.ReadProc")
+
+)

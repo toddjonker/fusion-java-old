@@ -7,5 +7,4 @@
   // Pass-through bindings from #%kernel
   (provide current_directory)
 
-  (defpub_j read    "com.amazon.fusion.ReadProc")
 )

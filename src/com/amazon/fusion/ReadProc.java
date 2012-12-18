@@ -6,9 +6,7 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonValue;
 import java.util.Iterator;
 
-/**
- *
- */
+
 final class ReadProc
     extends Procedure
 {
@@ -17,8 +15,8 @@ final class ReadProc
     ReadProc()
     {
         //    "                                                                               |
-        super("Reads an Ion value from the standard input stream. Returns void when there's\n" +
-              "no more data; use (is_void) to check for it.");
+        super("Reads an Ion value from the standard input stream.  Returns void when there's\n" +
+              "no more data.");
     }
 
     @Override
