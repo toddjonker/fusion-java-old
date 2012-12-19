@@ -17,7 +17,7 @@ class CommandFactory
             new Command[]
             {
                 new Repl(),
-                new Eval(),
+                new Load(),
                 new Separator(),
                 new Help(),
                 new Document(),

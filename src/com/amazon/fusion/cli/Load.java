@@ -14,23 +14,22 @@ import com.amazon.ion.system.IonSystemBuilder;
 import java.io.File;
 import java.io.IOException;
 
-/**
- *
- */
-final class Eval
+
+final class Load
     extends Command
 {
     //=+===============================================================================
     private static final String HELP_ONE_LINER =
-        "Evaluate a file.";
+        "Load and evaluate a script.";
     private static final String HELP_USAGE =
-        "eval FILE";
+        "load FILE";
     private static final String HELP_BODY =
-        "Evaluates the Fusion script in the given FILE.";
+        "Loads and evaluates the Fusion script in the given FILE.  The result of the\n" +
+        "last expression is sent to standard output via the `write` procedure.";
 
-    Eval()
+    Load()
     {
-        super("eval");
+        super("load");
         putHelpText(HELP_ONE_LINER, HELP_USAGE, HELP_BODY);
     }
 
@@ -70,7 +69,7 @@ final class Eval
 
             try
             {
-                Object result = evalFile(top, myFileName);
+                Object result = loadFile(top, myFileName);
                 if (result != null && ! isVoid(top, result))
                 {
                     // TODO handle multiple values
@@ -96,7 +95,7 @@ final class Eval
          * @return may be null (when void results) or an {@code Object[]} (when
          * multiple values are returned.
          */
-        private Object evalFile(TopLevel top, String fileName)
+        private Object loadFile(TopLevel top, String fileName)
             throws FusionException, IOException
         {
             File file = new File(fileName);
