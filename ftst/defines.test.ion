@@ -5,3 +5,29 @@
 (use check)
 
 (check_equal jonny 39 "defpub exported var")
+
+
+(define (thunk) 513)
+(check = (thunk) 513)
+
+(define (thunk) 514 515)
+(check = (thunk) 515)
+
+(define (thunk) "doc" "body")
+(check = (thunk) "body")
+
+(define (thunk) "doc" 516 517)
+(check = (thunk) 517)
+
+
+(define (proc arg) arg)
+(check = (proc 518) 518)
+
+(define (proc arg) 532 arg)
+(check = (proc 533) 533)
+
+(define (proc arg) "doc" arg)
+(check = (proc 545) 545)
+
+(define (proc arg) "doc" 546 arg)
+(check = (proc 547) 547)

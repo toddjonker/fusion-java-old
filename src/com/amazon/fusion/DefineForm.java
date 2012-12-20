@@ -11,8 +11,13 @@ final class DefineForm
     DefineForm()
     {
         //    "                                                                               |
-        super("var value",
-              "Defines a top-level variable VAR with the given VALUE.");
+        super("id value",
+              "Binds a top-level variable `id` to the result of `value`.\n" +
+              "\n" +
+              "    (define (id arg ...) body ...+)\n" +
+              "\n" +
+              "Defines a procedure `id`, with formal arguments `arg ...` and the `body`.\n" +
+              "This form is equivalent to `(define id (lambda (arg ...) body ...))`.");
     }
 
 
@@ -27,16 +32,81 @@ final class DefineForm
         return identifier;
     }
 
+    // (define (p f ...) d? b ...+) => (define p d? (lambda (f ...) b ...))
+    SyntaxSexp expandImplicitLambda(Evaluator eval, SyntaxSexp source)
+        throws SyntaxFailure
+    {
+        SyntaxChecker defineChecker = check(source);
+        int defineArity = defineChecker.arityAtLeast(3);
+
+        if (source.get(1).getType() != SyntaxValue.Type.SEXP)
+        {
+            // No implicit lambda
+            return source;
+        }
+
+        SyntaxChecker check =
+            defineChecker.subformSeq("procedure signature", 1);
+        int sigArity = check.arityAtLeast(1);
+
+        SyntaxSymbol procName = check.requiredIdentifier("procedure name", 0);
+
+        SyntaxValue[] procFormals = new SyntaxValue[sigArity - 1];
+        for (int i = 1; i < sigArity; i++)
+        {
+            procFormals[i-1] =
+                check.requiredIdentifier("procedure formal argument", i);
+        }
+
+        SyntaxValue[] origDefineElts = source.extract();
+        boolean hasDoc =
+            (defineArity > 3 &&
+             origDefineElts[2].getType() == SyntaxValue.Type.STRING);
+        int docOffset = (hasDoc ? 1 : 0);
+
+        int bodyStart = 2 + docOffset;
+        int bodyLen = defineArity - bodyStart;
+        assert bodyLen > 0;
+
+        SyntaxValue[] lambda = new SyntaxValue[2 + bodyLen];
+        lambda[0] = eval.makeKernelIdentifier("lambda");
+        lambda[1] = SyntaxSexp.make(procFormals);
+        for (int p = 2, i = bodyStart; i < defineArity; p++, i++)
+        {
+            lambda[p] = origDefineElts[i];
+        }
+
+        SyntaxValue[] newDefineElts = new SyntaxValue[3 + docOffset];
+        newDefineElts[0] = origDefineElts[0];   // define
+        newDefineElts[1] = procName;
+        if (hasDoc)
+        {
+            newDefineElts[2] = origDefineElts[2];
+        }
+        newDefineElts[2 + docOffset] = SyntaxSexp.make(lambda);
+
+        return SyntaxSexp.make(source.getLocation(), newDefineElts);
+    }
+
 
     @Override
     SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
         throws FusionException
     {
+        // Two phase expansion.
+        // TODO rewrite this as a macro, replace this entire built-in form
+        // with define_values.
+        source = expandImplicitLambda(eval, source);
+
         SyntaxChecker check = check(source);
         int arity = check.arityAtLeast(3);
 
         SyntaxValue[] children = source.extract();
 
+        // If check2 != check, this will always succeed since we've already
+        // checked the identifier.  So this will only cause an error when
+        // check2 == check so we know the error trace will correctly refer to
+        // the original syntax.
         SyntaxSymbol identifier = check.requiredIdentifier(1);
 
         // We need to strip off the module-level wrap that's already been
@@ -68,6 +138,7 @@ final class DefineForm
 
         if (bodyPos != arity-1)
         {
+            // Use the original checker so error trace has original syntax.
             throw check.failure("Too many subforms");
         }
 
