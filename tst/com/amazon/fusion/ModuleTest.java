@@ -103,21 +103,21 @@ public class ModuleTest
     public void testLoadFusionBase()
         throws Exception
     {
-        eval("(use 'fusion/base')");
+        eval("(use '/fusion/base')");
     }
 
     @Test
     public void testLoadFusionBaseAsLib()
         throws Exception
     {
-        eval("(use (lib \"fusion/base\"))");
+        eval("(use (lib \"/fusion/base\"))");
     }
 
     @Test
     public void testRepositoryLoad()
         throws Exception
     {
-        eval("(use (lib \"fusion/list\"))");
+        eval("(use (lib \"/fusion/list\"))");
         assertEval("[]", "(map + [])");
     }
 
@@ -128,16 +128,16 @@ public class ModuleTest
         expectSyntaxFailure("(use {})");
         expectSyntaxFailure("(use ())");
         expectSyntaxFailure("(use (lib))");
-        expectSyntaxFailure("(use (lib \"fusion/list\" \"list\"))");
-        expectSyntaxFailure("(use (lib 'fusion/list'))");
-        expectSyntaxFailure("(use (lib fusion/list))");
+        expectSyntaxFailure("(use (lib \"/fusion/list\" \"list\"))");
+        expectSyntaxFailure("(use (lib '/fusion/list'))");
+        expectSyntaxFailure("(use (lib /fusion/list))");
     }
 
     @Test
     public void testModuleAtTopLevel()
         throws Exception
     {
-        eval("(module mod 'fusion/base'" +
+        eval("(module mod '/fusion/base'" +
              "  (define M 1054)" +
             "   (define N (lambda () (+ 1 M)))" +
              "  (provide M N))");

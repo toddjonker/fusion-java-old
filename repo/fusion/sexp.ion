@@ -1,11 +1,11 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module sexp 'fusion/base'
+(module sexp '/fusion/base'
 
-  (use 'fusion/experimental/defines')
-  (use 'fusion/ffi/java')
-  (use 'fusion/iterator')
-  (use 'fusion/sequence')
+  (use '/fusion/experimental/defines')
+  (use '/fusion/ffi/java')
+  (use '/fusion/iterator')
+  (use '/fusion/sequence')
 
   // Pass-through bindings from #%kernel
   (provide is_sexp)

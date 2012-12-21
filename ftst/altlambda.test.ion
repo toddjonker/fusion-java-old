@@ -1,8 +1,8 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(use 'fusion/experimental/altlambda')
-(use 'fusion/syntax')
 (use check)
+(use '/fusion/experimental/altlambda')
+(use '/fusion/syntax')
 
 (define sub1
   (|x| (- x 1)))

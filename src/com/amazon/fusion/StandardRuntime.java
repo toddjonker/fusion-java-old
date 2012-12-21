@@ -30,7 +30,7 @@ final class StandardRuntime
                 GlobalState.initialize(ionSystem, builder, myRegistry, topNs);
 
             myTopLevel =
-                new StandardTopLevel(myGlobalState, topNs, "fusion/base",
+                new StandardTopLevel(myGlobalState, topNs, "/fusion/base",
                                      builder.isDocumenting());
         }
         catch (FusionException e)
@@ -77,7 +77,7 @@ final class StandardRuntime
     public TopLevel makeTopLevel()
         throws FusionException
     {
-        return makeTopLevel("fusion/base");
+        return makeTopLevel("/fusion/base");
     }
 
 

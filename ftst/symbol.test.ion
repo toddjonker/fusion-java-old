@@ -1,7 +1,7 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
 (use check)
-(use 'fusion/function')
+(use '/fusion/function')
 
 (check = (quote sym) (quote sym))
 

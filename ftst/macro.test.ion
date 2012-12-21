@@ -1,7 +1,7 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(use 'fusion/syntax')
 (use check)
+(use '/fusion/syntax')
 
 
 // Very basic macro

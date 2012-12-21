@@ -2,7 +2,7 @@
 
 (module builtins (quote '#%kernel')
 
-  (use 'fusion/experimental/defines')
+  (use '/fusion/experimental/defines')
 
 
   // #%kernel bindings we pass through

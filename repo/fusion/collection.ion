@@ -1,6 +1,6 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module collection 'fusion/base'
+(module collection '/fusion/base'
 
   '''
 Generic operations over collection types.
@@ -9,8 +9,8 @@ Currently, some of these features may be restricted to a subset of collection
 types.
   '''
 
-  (use 'fusion/experimental/defines')
-  (use 'fusion/void')
+  (use '/fusion/experimental/defines')
+  (use '/fusion/void')
 
 
   (defpub_j size "com.amazon.fusion.SizeProc")

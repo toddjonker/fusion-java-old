@@ -1,6 +1,6 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module rel1 'fusion/base'
+(module rel1 '/fusion/base'
 
   // Testing of 'use' via relative file path.
   (use "sub/rel2")

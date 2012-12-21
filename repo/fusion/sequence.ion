@@ -1,11 +1,11 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module sequence 'fusion/base'
+(module sequence '/fusion/base'
 
-  (use 'fusion/collection')
-  (use 'fusion/experimental/defines')
-  (use 'fusion/private/builtins')   // Some basic list ops
-  (use 'fusion/unsafe/list')
+  (use '/fusion/collection')
+  (use '/fusion/experimental/defines')
+  (use '/fusion/private/builtins')   // Some basic list ops
+  (use '/fusion/unsafe/list')
 
   // Pass-through bindings from /fusion/collection
   (provide any do find is_empty size)

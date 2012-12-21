@@ -1,5 +1,5 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module let 'fusion/base'
+(module let '/fusion/base'
   (provide define let)
 )

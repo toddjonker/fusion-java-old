@@ -1,9 +1,9 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
 (use check)
-(use 'fusion/function')
-(use 'fusion/iterator')
-(use 'fusion/list')
+(use '/fusion/function')
+(use '/fusion/iterator')
+(use '/fusion/list')
 
 
 (define boom (lambda rest (assert false "boom")))

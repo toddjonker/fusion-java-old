@@ -6,7 +6,7 @@
   // syntactic forms must be imported from another module.
   // That's true everywhere except for these low-level modules.
 
-  (use 'fusion/private/metasyntax')
+  (use '/fusion/private/metasyntax')
 
   (provide datum_to_syntax define_syntax free_identifier_equal
     quasisyntax quote_syntax

@@ -1,9 +1,9 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
 (use check)
-(use 'fusion/ion')
-(use 'fusion/list')
-(use 'fusion/sexp')
+(use '/fusion/ion')
+(use '/fusion/list')
+(use '/fusion/sexp')
 
 (define F (lambda (e) false))
 (define T (lambda (e) true))

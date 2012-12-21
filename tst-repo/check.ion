@@ -1,13 +1,13 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module check 'fusion/base'
+(module check '/fusion/base'
 
-  (use 'fusion/experimental/defines')
-  (use 'fusion/ffi/java')
-  (use 'fusion/ion')
-  (use 'fusion/list')
-  (use 'fusion/sexp')
-  (use 'fusion/syntax')
+  (use '/fusion/experimental/defines')
+  (use '/fusion/ffi/java')
+  (use '/fusion/ion')
+  (use '/fusion/list')
+  (use '/fusion/sexp')
+  (use '/fusion/syntax')
 
 
   (defpub ion_equals          (java_new "com.amazon.fusion.IonEqualsProc"))

@@ -2,7 +2,7 @@
 
 (module ion (quote '#%kernel')
 
-  (use 'fusion/experimental/defines')
+  (use '/fusion/experimental/defines')
 
   (defpub_j ion_annotations  "com.amazon.fusion.IonAnnotationsProc")
 )

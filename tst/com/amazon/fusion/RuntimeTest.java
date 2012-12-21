@@ -184,7 +184,7 @@ public class RuntimeTest
         throws Exception
     {
         useTstRepo();
-        runtime().makeTopLevel("leaf_module");
+        runtime().makeTopLevel("/leaf_module");
 
     }
 }

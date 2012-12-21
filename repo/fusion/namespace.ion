@@ -1,8 +1,8 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module namespace 'fusion/base'
+(module namespace '/fusion/base'
 
-  (use 'fusion/experimental/defines')
+  (use '/fusion/experimental/defines')
   (use (quote '#%kernel'))
 
   (provide current_namespace)  // From kernel

@@ -1,6 +1,6 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module list 'fusion/base'
+(module list '/fusion/base'
 
   '''
 Core operations for lists (_a.k.a._ arrays).
@@ -102,12 +102,12 @@ languages, highlighting potential mutation of an argument.
   '''
 
 
-  (use 'fusion/experimental/defines')
-  (use 'fusion/ffi/java')
-  (use 'fusion/iterator')
-  (use 'fusion/private/builtins')
-  (use 'fusion/sequence')
-  (use 'fusion/unsafe/list')         // NOT exported!
+  (use '/fusion/experimental/defines')
+  (use '/fusion/ffi/java')
+  (use '/fusion/iterator')
+  (use '/fusion/private/builtins')
+  (use '/fusion/sequence')
+  (use '/fusion/unsafe/list')         // NOT exported!
 
   // Pass-through bindings from #%kernel
   (provide is_list)

@@ -1,9 +1,9 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
 (use check)
-(use 'fusion/ion')
-(use 'fusion/list')
-(use 'fusion/unsafe/list')
+(use '/fusion/ion')
+(use '/fusion/list')
+(use '/fusion/unsafe/list')
 
 (define F (lambda rest false))
 (define T (lambda rest true))

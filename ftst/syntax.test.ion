@@ -1,7 +1,7 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
 (use 'check')
-(use 'fusion/syntax')
+(use '/fusion/syntax')
 
 (define id (quote_syntax identifier))
 (define some_syntax (quote_syntax (op arg)))

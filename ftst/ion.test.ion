@@ -1,8 +1,8 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(use 'fusion/ion')
-(use 'fusion/list')
 (use check)
+(use '/fusion/ion')
+(use '/fusion/list')
 
 (assert (is_empty (ion_annotations true)))
 

@@ -1,8 +1,9 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module iterator 'fusion/base'
-  (use 'fusion/ffi/java')
-  (use 'fusion/experimental/defines')
+(module iterator '/fusion/base'
+
+  (use '/fusion/experimental/defines')
+  (use '/fusion/ffi/java')
 
   (define TRUE  (lambda () true))
   (define FALSE (lambda () false))

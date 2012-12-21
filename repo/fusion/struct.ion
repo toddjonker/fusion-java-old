@@ -1,9 +1,9 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module struct 'fusion/base'
+(module struct '/fusion/base'
 
-  (use 'fusion/ffi/java')
-  (use 'fusion/experimental/defines')
+  (use '/fusion/experimental/defines')
+  (use '/fusion/ffi/java')
 
 
   (defpub_j remove_keys       "com.amazon.fusion.RemoveKeysProc")

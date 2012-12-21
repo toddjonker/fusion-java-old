@@ -2,7 +2,7 @@
 
 (module params (quote '#%kernel')
 
-  (use 'fusion/experimental/defines')
+  (use '/fusion/experimental/defines')
 
   (defpub_j_syntax parameterize "com.amazon.fusion.ParameterizeForm")
 

@@ -1,7 +1,7 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
 (use check)
-(use 'fusion/list')
+(use '/fusion/list')
 
 
 (check_list_equal

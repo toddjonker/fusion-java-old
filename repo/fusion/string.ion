@@ -1,9 +1,9 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module string 'fusion/base'
+(module string '/fusion/base'
 
-  (use 'fusion/ffi/java')
-  (use 'fusion/experimental/defines')
+  (use '/fusion/experimental/defines')
+  (use '/fusion/ffi/java')
 
 
   (defpub_j string_to_lower    "com.amazon.fusion.StringToLowerProc")

@@ -1,7 +1,7 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
 (use 'check')
-(use 'fusion/void')
+(use '/fusion/void')
 
 (check_true (is_void (void)))
 (check_true (is_void (void 1)))

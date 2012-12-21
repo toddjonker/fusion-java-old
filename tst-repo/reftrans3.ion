@@ -2,8 +2,8 @@
 
 // Tests referential transparency through macro expansion.
 
-(module reftrans3 'fusion/base'
-  (use 'fusion/syntax')
+(module reftrans3 '/fusion/base'
+  (use '/fusion/syntax')
 
   // This tests that we can use 'my3' when it's not exported.
   (define my3 3)

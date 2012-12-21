@@ -2,7 +2,7 @@
 
 (module math (quote '#%kernel')
 
-  (use 'fusion/experimental/defines')
+  (use '/fusion/experimental/defines')
 
 
   (defpub_j ceil            "com.amazon.fusion.CeilingProc")

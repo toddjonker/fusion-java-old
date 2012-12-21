@@ -1,6 +1,6 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module experimental 'fusion/base'
+(module experimental '/fusion/base'
 
   // WARNING: Doc syntax isn't supported yet.
   '''

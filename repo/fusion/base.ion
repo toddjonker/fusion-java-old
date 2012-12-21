@@ -1,9 +1,9 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module base 'fusion/private/builtins'
+(module base '/fusion/private/builtins'
 
-  (use 'fusion/syntax')
-  (use 'fusion/experimental/defines')
+  (use '/fusion/syntax')
+  (use '/fusion/experimental/defines')
 
 
   // Pass-through bindings from #%kernel
@@ -22,13 +22,13 @@
     to_int to_string)
 
 
-  (use 'fusion/number')
+  (use '/fusion/number')
   (provide + - * /)
 
-  (use 'fusion/params')
+  (use '/fusion/params')
   (provide make_parameter parameterize)
 
-  (use 'fusion/void')
+  (use '/fusion/void')
   (provide is_void void)
 
 

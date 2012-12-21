@@ -1,7 +1,7 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module defpub_use 'fusion/base'
-  (use 'fusion/experimental/defines')
+(module defpub_use '/fusion/base'
+  (use '/fusion/experimental/defines')
 
   (defpub jonny 39)
 )

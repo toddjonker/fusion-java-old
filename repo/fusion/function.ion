@@ -1,14 +1,14 @@
 // Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
 
-(module function 'fusion/base'
+(module function '/fusion/base'
 
   // WARNING: Doc syntax isn't supported yet.
   '''
 Higher-order procedure combinators.
   '''
 
-  (use 'fusion/experimental/defines')
-  (use 'fusion/syntax')
+  (use '/fusion/experimental/defines')
+  (use '/fusion/syntax')
 
 
   (defpub identity

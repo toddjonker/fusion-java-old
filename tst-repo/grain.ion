@@ -1,4 +1,4 @@
-(module grain 'fusion/base'
+(module grain '/fusion/base'
   (define barley "soup")
   (provide barley)
 )
