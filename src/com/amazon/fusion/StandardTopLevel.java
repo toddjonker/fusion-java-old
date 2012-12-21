@@ -19,12 +19,17 @@ final class StandardTopLevel
     private final Namespace myNamespace;
 
 
+    /**
+     * @param initialModulePath must be absolute.
+     */
     StandardTopLevel(GlobalState globalState,
                      Namespace namespace,
                      String initialModulePath,
                      boolean documenting)
         throws FusionException
     {
+        assert initialModulePath.startsWith("/");
+
         Evaluator eval = new Evaluator(globalState);
         if (documenting)
         {
@@ -36,6 +41,9 @@ final class StandardTopLevel
         namespace.use(myEvaluator, initialModulePath);
     }
 
+    /**
+     * @param initialModulePath must be absolute.
+     */
     StandardTopLevel(GlobalState globalState,
                      ModuleRegistry registry,
                      String initialModulePath)

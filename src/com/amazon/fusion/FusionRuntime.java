@@ -45,6 +45,9 @@ public interface FusionRuntime
      * Returns a fresh {@link TopLevel} instance, populated with bindings from
      * a given module.
      *
+     * @param initialModulePath must be an absolute module path, starting with
+     * {@code '/'}.
+     *
      * @return not null.
      */
     public TopLevel makeTopLevel(String initialModulePath)
