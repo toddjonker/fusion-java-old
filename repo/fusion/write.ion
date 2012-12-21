@@ -35,4 +35,13 @@ Displays the values, then a newline.
       (apply display rest)
       (display "\n")))
 
+
+  (provide writeln)  // defpub doesn't work for this form
+  (define (writeln value)
+    '''
+Writes the value, then a newline.
+    '''
+    (write value)
+    (display "\n"))
+
 )
