@@ -22,7 +22,7 @@ final class DotProc
               "Each PART must be a string, symbol, or int, to denote either a struct's\n" +
               "field-name or a sequence's index. If any part doesn't have a matching value in\n" +
               "its container (the list index is out of bounds, or the field doesn't exist),\n" +
-              "then the result is void and any further parts are not evaluated.",
+              "then the result is void and any further parts are not traversed.",
               "collection", "part", DOTDOTDOT);
     }
 

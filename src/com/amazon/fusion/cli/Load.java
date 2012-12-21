@@ -24,8 +24,8 @@ final class Load
     private static final String HELP_USAGE =
         "load FILE";
     private static final String HELP_BODY =
-        "Loads and evaluates the Fusion script in the given FILE.  The result of the\n" +
-        "last expression is sent to standard output via the `write` procedure.";
+        "Loads and evaluates the Fusion script in the given FILE.  If the result of the\n" +
+        "last expression is not void, it is sent to standard output via `write`.";
 
     Load()
     {
@@ -76,6 +76,8 @@ final class Load
                     write(top, System.out, result);
                     System.out.println();
                 }
+
+                System.out.flush();
             }
             catch (ExitException e)
             {
@@ -83,6 +85,7 @@ final class Load
             }
             catch (FusionException e)
             {
+                // TODO optionally display the stack trace
                 System.err.println(e.getMessage());
                 return 1;
             }
