@@ -28,6 +28,14 @@ final class DefineForm
         SyntaxChecker check = new SyntaxChecker("define", source);
         check.arityAtLeast(3);
 
+        if (source.get(1).getType() == SyntaxValue.Type.SEXP)
+        {
+            SyntaxChecker sigCheck =
+                check.subformSeq("procedure signature", 1);
+
+            return sigCheck.requiredIdentifier("procedure name", 0);
+        }
+
         SyntaxSymbol identifier = check.requiredIdentifier(1);
         return identifier;
     }
