@@ -20,6 +20,7 @@ class CommandFactory
                 new Load(),
                 new Separator(),
                 new Help(),
+                new Version(),
                 new Document(),
             };
 
