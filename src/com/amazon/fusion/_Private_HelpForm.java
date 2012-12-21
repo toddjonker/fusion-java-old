@@ -6,6 +6,7 @@ import com.amazon.fusion.ModuleNamespace.CompiledImportedVariableReference;
 import com.amazon.fusion.Namespace.CompiledTopVariableReference;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 /**
@@ -83,8 +84,16 @@ public final class _Private_HelpForm
         SyntaxChecker check = check(source);
         int arity = source.size();
 
-        // Just make sure we've got a list of identifiers
         SyntaxValue[] children = source.extract();
+
+        // Expand (help) into (help help)
+        if (arity == 1)
+        {
+            children = Arrays.copyOf(children, 2);
+            children[1] = children[0];
+        }
+
+        // Just make sure we've got a list of identifiers
         for (int i = 1; i < arity; i++)
         {
             SyntaxSymbol identifier = check.requiredIdentifier(i);
