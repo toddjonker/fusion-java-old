@@ -122,10 +122,19 @@ final class ModuleNameResolver
             }
         }
 
-        String message =
-            "A module named " + printQuotedSymbol(libName) +
-            " could not be found in the registered repositories.";
-        // TODO explain where we looked
+        StringBuilder buf = new StringBuilder();
+        buf.append("A module named ");
+        buf.append(printQuotedSymbol(libName));
+        buf.append(" could not be found in the registered repositories.");
+        buf.append(" The repositories are:\n");
+        for (ModuleRepository repo : myRepositories)
+        {
+            buf.append("  * ");
+            buf.append(repo.identify());
+            buf.append('\n');
+        }
+        String message = buf.toString();
+
         if (stx == null)
         {
             throw new ModuleNotFoundFailure(message);

@@ -6,6 +6,13 @@ final class JarModuleRepository
     extends ModuleRepository
 {
     @Override
+    String identify()
+    {
+        return "ClassLoader repository";
+    }
+
+
+    @Override
     ModuleIdentity resolveLib(Evaluator eval, String libName)
         throws FusionException
     {

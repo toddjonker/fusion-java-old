@@ -25,6 +25,13 @@ final class FileSystemModuleRepository
 
 
     @Override
+    String identify()
+    {
+        return myRepoDir.getPath();
+    }
+
+
+    @Override
     ModuleIdentity resolveLib(Evaluator eval, String libName)
         throws FusionException
     {
