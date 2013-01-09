@@ -114,6 +114,10 @@
 (check ion_equals (remove_keys {g:2,f:1} "f" "h") {g:2})
 (check ion_equals (remove_keys {f:1,g:2} "f" (quote g)) {})
 
+(check ion_equals (remove_keys (quote a::null.struct)) (quote a::null.struct))
+(check ion_equals (remove_keys (quote a::{f:1}) "f") (quote a::{}))
+(check ion_equals (remove_keys (quote a::{f:1}) "g") (quote a::{f:1}))
+
 
 //==========================================================================
 // retain_keys
@@ -135,6 +139,10 @@
 (check ion_equals (retain_keys {a:3} "a") {a:3})
 (check ion_equals (retain_keys {a:3,a:4} "a") {a:3,a:4})
 (check ion_equals (retain_keys {a:1,b:3,c:2} "a" "c") {a:1,c:2})
+
+(check ion_equals (retain_keys (quote a::null.struct)) (quote a::null.struct))
+(check ion_equals (retain_keys (quote a::{f:1}) "f") (quote a::{f:1}))
+(check ion_equals (retain_keys (quote a::{f:1}) "g") (quote a::{}))
 
 
 //==========================================================================

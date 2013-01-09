@@ -892,7 +892,9 @@ final class FusionStruct
         RemoveKeysProc()
         {
             //    "                                                                               |
-            super("Returns a struct derived from `struct` without fields with the given `name`s.",
+            super("Returns a struct derived from `struct` without fields with the given `name`s.\n" +
+                  "If the input is `null.struct` then the result is `null.struct`.  The result\n" +
+                  "will have the same annotations as `struct`.",
                   "struct", "name", DOTDOTDOT);
         }
 
@@ -924,7 +926,8 @@ final class FusionStruct
         {
             //    "                                                                               |
             super("Returns a struct derived from `struct` with _only_ fields with the given\n" +
-                  "`name`s.",
+                  "`name`s.  If the input is `null.struct` then the result is `null.struct`.  The\n" +
+                  "result will have the same annotations as `struct`.",
                   "struct", "name", DOTDOTDOT);
         }
 
