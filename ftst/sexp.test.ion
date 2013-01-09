@@ -6,6 +6,7 @@
 (use '/fusion/sexp')
 
 
+(define valNull  (quote null.sexp))
 (define valEmpty (quote ()))
 (define val12    (quote (1 2)))
 
@@ -83,6 +84,7 @@
 //==========================================================================
 // find
 
+(assert (is_void (find F valNull)))
 (assert (is_void (find F valEmpty)))
 (assert (is_void (find F val12)))
 (check = (find T val12) 1)
@@ -92,6 +94,7 @@
 //==========================================================================
 // any
 
+(check_false (any T valNull))
 (check_false (any T valEmpty))
 (check_false (any F val12))
 (check_true  (any T val12))
@@ -102,6 +105,7 @@
 //==========================================================================
 // TODO map not implemented for sexp
 /*
+(check_equal (map + valNull) valNull "map1")
 (check_equal (map + valEmpty) [] "map1")
 (check_equal (map + [1, 2]) [1, 2] "map2")
 (check_equal (map (lambda (n) (+ 3 n)) [1, 2]) [4, 5] "map3")
