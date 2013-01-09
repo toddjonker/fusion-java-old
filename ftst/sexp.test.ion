@@ -5,8 +5,6 @@
 (use '/fusion/list')
 (use '/fusion/sexp')
 
-(define F (lambda (e) false))
-(define T (lambda (e) true))
 
 (define valEmpty (quote ()))
 (define val12    (quote (1 2)))

@@ -10,6 +10,10 @@
   (use '/fusion/syntax')
 
 
+  (defpub F (lambda rest false))
+  (defpub T (lambda rest true))
+
+
   (defpub ion_equals          (java_new "com.amazon.fusion.IonEqualsProc"))
 
   // NOT PUBLIC YET

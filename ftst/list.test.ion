@@ -5,9 +5,6 @@
 (use '/fusion/list')
 (use '/fusion/unsafe/list')
 
-(define F (lambda rest false))
-(define T (lambda rest true))
-
 
 //==========================================================================
 // Literals
