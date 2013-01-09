@@ -24,7 +24,7 @@ public class StructTest
     //========================================================================
 
 
-    @Test @Ignore
+    @Test @Ignore // TODO FUSION-93 struct mutability
     public void testDeepRemoveKeysM()
         throws Exception
     {
@@ -82,7 +82,7 @@ public class StructTest
     //========================================================================
 
 
-    @Test @Ignore  // FUSION-86
+    @Test @Ignore  // TODO FUSION-86
     public void testForEachField()
         throws Exception
     {
@@ -90,6 +90,7 @@ public class StructTest
         assertEval("{f:[\"f\"],g:[\"g\"],f:[true,false,\"f\"]}",
                    "(for_each_field add_name " +
                    "  {f:null.list,g:[],f:[true,false]})");
+        // TODO as written the struct and its field values are immutable.
     }
 
     @Test

@@ -77,13 +77,14 @@
   (lambda (struct)
     (let [(names  (stretchy_list)),
           (values (stretchy_list))]
-      (for_each_field
+      (let [(result (for_each_field
         (lambda (name value)
           (add_m names name)
           (add_m values value))
-        struct)
+                      struct))]
+        // TODO FUSION-88 (check eq result struct)
       (let [(zipped (struct_zip names values))]
-        (check ion_equals zipped struct)))))
+          (check ion_equals zipped struct))))))
 
 (rip_and_zip {})
 (rip_and_zip {a:1,b:[2,3],c:{d:(quote e)}})

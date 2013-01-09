@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionStruct.unsafeStructFieldVisit;
-import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.fusion.FusionStruct.StructFieldVisitor;
 
 final class ForEachFieldProc
@@ -14,7 +13,7 @@ final class ForEachFieldProc
         //    "                                                                               |
         super("Applies `proc` to each field within `struct`, ignoring any results.\n" +
               "The `proc` must take two arguments, a field name symbol and a value.\n" +
-              "Returns void.",
+              "Returns the given `struct`.",
               "proc", "struct");
     }
 
@@ -42,6 +41,6 @@ final class ForEachFieldProc
 
         unsafeStructFieldVisit(eval, fs, visitor);
 
-        return voidValue(eval);
+        return fs;
     }
 }
