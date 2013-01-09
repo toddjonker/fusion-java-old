@@ -7,9 +7,6 @@ Generic operations over collection types.
 
 The built-in collection types are [list](list.html), [sexp](sexp.html), and
 [struct](struct.html).
-
-Currently, some of these features may be restricted to a subset of collection
-types.
   '''
 
   (use '/fusion/experimental/defines')
@@ -63,20 +60,33 @@ Returns `true` if the size of the `collection` is zero, otherwise returns
 
   // Name per SRFI-1
   (defpub find
-    (lambda (pred sequence) // TODO FUSION-86 optimize for links vs array
+    (lambda (pred collection)
       '''
-Applies the one-parameter predicate `pred` to each element of `sequence` in
-order; the first time `pred` returns a truthy value that element is returned.
+Applies the one-parameter predicate `pred` to each element of `collection`;
+the first time `pred` returns a truthy value that element is returned.
 If no such element is found, the result is void.
+
+When `collection` is a sequence, the elements are visited in order.
       '''
-      (let ((len (size sequence)))
-        (let loop ((i 0))
-          (if (= i len)
-            (void)
-            (let ((elt (. sequence i)))
-              (if (pred elt)
-                elt
-                (loop (+ i 1)))))))))
+      (cond
+        ((is_struct collection)
+         (let [(result (void))]
+           // WARNING!  This unsafe procedure is UNSUPPORTED!
+           (unsafe_struct_visit (lambda (key elt)
+                                  (let [(elt_result (pred elt))]
+                                    (when elt_result (set result elt))
+                                    elt_result))
+             collection)
+           result))
+        (true    // TODO FUSION-86 optimize for list vs sexp
+         (let ((len (size collection)))
+           (let loop ((i 0))
+             (if (= i len)
+               (void)
+               (let ((elt (. collection i)))
+                 (if (pred elt)
+                   elt
+                   (loop (+ i 1)))))))))))
 
 
   // Name per Dylan.  Equivalent to SRFI-1 `for_each` but I don't want this to

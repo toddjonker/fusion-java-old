@@ -158,3 +158,14 @@
 (let [(sum 0)]
   (do (lambda (x) (set sum (+ sum x))) {f:2, g:3})
   (check = sum 5))
+
+
+//==========================================================================
+// find
+
+(assert (is_void (find F null.struct)))
+(assert (is_void (find F {})))
+(assert (is_void (find F {f:1, g:2})))
+(check = (find T {f:1}) 1)
+
+(check = (find (lambda (e) (= e "hi")) {f:"oh", g:"hi"}) "hi")

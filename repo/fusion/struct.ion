@@ -12,8 +12,7 @@
   (provide is_struct)
 
   // Pass-through bindings from /fusion/collection
-  (provide any is_empty size)
-  // TODO FUSION-86 do, find
+  (provide any do find is_empty size)
 
 
   // TODO FUSION-86 rename struct_make to struct?  (Parallel to `list`, `sexp`, etc.)
