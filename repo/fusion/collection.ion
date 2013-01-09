@@ -41,7 +41,7 @@ When `collection` is a sequence, the elements are visited in order.
                                     elt_result))
              collection)
            result))
-        (true    // TODO FUSION-86 optimize these for list vs sexp
+        (true    // TODO FUSION-86 optimize for list vs sexp
          (let ((len (size collection)))
            (let loop ((i 0))
              (if (= i len)
@@ -82,17 +82,30 @@ If no such element is found, the result is void.
   // Name per Dylan.  Equivalent to SRFI-1 `for_each` but I don't want this to
   // be confused with the `for` syntax from Racket (which I intend to provide).
   (defpub do
-    (lambda (proc sequence)   // TODO FUSION-86 optimize for links vs array
+    (lambda (proc collection)
       '''
-Applies the one-parameter procedure `proc` to each element of `sequence` in
-order, ignoring any results.  Returns void.
+Applies the one-parameter procedure `proc` to the elements of `collection`,
+ignoring any results.  Returns void.
+
+When `collection` is a sequence, the elements are visited in order.
       '''
-      (let ((len (size sequence)))
-        (let loop ((i 0))
-          (if (= i len)
-            (void)
-            (begin
-              (proc (. sequence i))
-              (loop (+ 1 i))))))))
+      // We return void (rather than the collection) because this should
+      // eventually accept multiple collections to walk in parallel, and then
+      // it doesn't make sense to return the first one.
+      (cond
+        ((is_struct collection)
+         // WARNING!  This unsafe procedure is UNSUPPORTED!
+         (unsafe_struct_visit
+           (lambda (key elt) (proc elt) false)
+           collection)
+         (void))
+        (true    // TODO FUSION-86 optimize for list vs sexp
+         (let ((len (size collection)))
+           (let loop ((i 0))
+             (if (= i len)
+               (void)
+               (begin
+                 (proc (. collection i))
+                 (loop (+ 1 i))))))))))
 
 )

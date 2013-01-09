@@ -146,3 +146,14 @@
 
 (check_true (any (lambda (e) (= e "hi")) {f:"oh", g:"hi"}))
 (check = (any (lambda (e) (when (= e "hi") e)) {f:"oh", g:"hi"}) "hi")
+
+
+//==========================================================================
+// do
+
+(check_equal (do (lambda (x) (+ 1 x)) {f:2, g:3})
+   (void) "do returns void")
+
+(let [(sum 0)]
+  (do (lambda (x) (set sum (+ sum x))) {f:2, g:3})
+  (check = sum 5))
