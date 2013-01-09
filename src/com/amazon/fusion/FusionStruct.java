@@ -7,6 +7,7 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.FusionWrite.dispatchIonize;
 import static com.amazon.fusion.FusionWrite.dispatchWrite;
 import static com.amazon.ion.util.IonTextUtils.printSymbol;
+import static java.lang.Boolean.TRUE;
 import static java.util.Collections.EMPTY_MAP;
 import com.amazon.fusion.FusionCollection.BaseCollection;
 import com.amazon.ion.IonStruct;
@@ -257,6 +258,10 @@ final class FusionStruct
         @Override
         abstract int size(); // Doesn't throw
 
+        /**
+         * Visits each field in the struct, stopping as soon as the visitation
+         * returns non-null.
+         */
         abstract void visitFields(StructFieldVisitor visitor)
             throws FusionException;
 
@@ -447,12 +452,12 @@ final class FusionStruct
                 {
                     for (Object element : (Object[]) value)
                     {
-                        visitor.visit(fieldName, element);
+                        if (visitor.visit(fieldName, element) != null) return;
                     }
                 }
                 else
                 {
-                    visitor.visit(fieldName, value);
+                    if (visitor.visit(fieldName, value) != null) return;
                 }
             }
         }
@@ -719,6 +724,45 @@ final class FusionStruct
         {
             boolean result = isStruct(eval, arg);
             return eval.newBool(result);
+        }
+    }
+
+
+
+    static final class UnsafeStructVisitProc
+        extends Procedure2
+    {
+        UnsafeStructVisitProc()
+        {
+            //    "                                                                               |
+            super("UNSUPPORTED!\n" +
+                  "\n" +
+                  "Applies `proc` to the elements of the `struct`, stopping when the result of the\n" +
+                  "call is truthy.",
+                  "proc", "struct");
+        }
+
+        @Override
+        Object doApply(final Evaluator eval, Object proc, Object struct)
+            throws FusionException
+        {
+            final Procedure p = (Procedure) proc;
+
+            StructFieldVisitor visitor = new StructFieldVisitor()
+            {
+                @Override
+                public Object visit(String name, Object value)
+                    throws FusionException
+                {
+                    Object nameSym = eval.newSymbol(name);
+                    Object result = eval.callNonTail(p, nameSym, value);
+                    return (isTruthy(eval, result) ? TRUE : null);
+                }
+            };
+
+            unsafeStructFieldVisit(eval, struct, visitor);
+
+            return struct;
         }
     }
 }
