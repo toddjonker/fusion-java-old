@@ -16,12 +16,13 @@
 
 
   // TODO FUSION-86 for_each_field - move from builtins
+  // TODO FUSION-86 rename struct_make to struct?  (Parallel to `list`, `sexp`, etc.)
 
-  (defpub_j remove_keys       "com.amazon.fusion.RemoveKeysProc")
-  (defpub_j retain_keys       "com.amazon.fusion.RetainKeysProc")
-  (defpub_j struct_make       "com.amazon.fusion.StructMakeProc")
-  (defpub_j struct_merge      "com.amazon.fusion.StructMergeProc")
-  (defpub_j struct_zip        "com.amazon.fusion.StructZipProc")
+  (defpub_j remove_keys       "com.amazon.fusion.FusionStruct$RemoveKeysProc")
+  (defpub_j retain_keys       "com.amazon.fusion.FusionStruct$RetainKeysProc")
+  (defpub_j struct_make       "com.amazon.fusion.FusionStruct$StructMakeProc")
+  (defpub_j struct_merge      "com.amazon.fusion.FusionStruct$StructMergeProc")
+  (defpub_j struct_zip        "com.amazon.fusion.FusionStruct$StructZipProc")
 
   // TODO FUSION-86 temporary, for DP compatability
   (defpub struct_union struct_merge)

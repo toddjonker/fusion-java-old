@@ -2,10 +2,12 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionList.unsafeJavaIterate;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.FusionWrite.dispatchIonize;
 import static com.amazon.fusion.FusionWrite.dispatchWrite;
+import static com.amazon.fusion.FusionWrite.safeWriteToString;
 import static com.amazon.ion.util.IonTextUtils.printSymbol;
 import static java.lang.Boolean.TRUE;
 import static java.util.Collections.EMPTY_MAP;
@@ -19,6 +21,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -765,4 +768,182 @@ final class FusionStruct
             return struct;
         }
     }
+
+
+
+    static final class StructMakeProc
+        extends Procedure
+    {
+        StructMakeProc()
+        {
+            //    "                                                                               |
+            super("Constructs a struct from pairs of args, alternating strings and values.");
+        }
+
+        void checkArityEven(Object... args)
+            throws FusionException
+        {
+            if ((args.length % 2) == 1)
+            {
+                String message =
+                    "Expected even number of args, observed " + args.length;
+                throw contractFailure(message);
+            }
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityEven(args);
+
+            int fieldCount = (args.length / 2);
+            String[] names  = new String[fieldCount];
+            Object[] values = new Object[fieldCount];
+
+            int fieldPos = 0;
+            for (int i = 0; i < args.length; i++, fieldPos++)
+            {
+                names [fieldPos] = checkTextArg(i, args);
+                values[fieldPos] = args[++i];
+            }
+            assert fieldPos == fieldCount;
+
+            return immutableStruct(names, values, EMPTY_STRING_ARRAY);
+        }
+    }
+
+
+
+    static final class StructMergeProc
+        extends Procedure2
+    {
+        StructMergeProc()
+        {
+            //    "                                                                               |
+            super("Returns a struct that has all the name-value elements of both arguments.  This\n" +
+                  "will result in repeated fields if the names overlap or if one of the arguments\n" +
+                  "has repeats.",
+                  "struct1", "struct2");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object struct1, Object struct2)
+            throws FusionException
+        {
+            checkStructArg(eval, 0, struct1, struct2);
+            checkStructArg(eval, 1, struct1, struct2);
+
+            return unsafeStructMerge(eval, struct1, struct2);
+        }
+    }
+
+
+
+    static final class StructZipProc
+        extends Procedure2
+    {
+        StructZipProc()
+        {
+            //    "                                                                               |
+            super("Constructs a struct from a list of field names and a list of values.  The names\n" +
+                  "must be non-empty strings or symbols.",
+                  "names", "values");
+        }
+
+
+        @Override
+        Object doApply(Evaluator eval, Object names, Object values)
+            throws FusionException
+        {
+            checkListArg(eval, 0, names, values);
+            checkListArg(eval, 1, names, values);
+
+            Iterator<?> fieldIterator = unsafeJavaIterate(eval, names);
+            Iterator<?> valueIterator = unsafeJavaIterate(eval, values);
+
+            HashMap<String, Object> map = new HashMap<String, Object>();
+
+            while (fieldIterator.hasNext() && valueIterator.hasNext())
+            {
+                Object nameObj = fieldIterator.next();
+                String name = copyTextToJavaString(nameObj);
+                if (name == null || name.isEmpty())
+                {
+                    String expectation =
+                        "non-empty string or symbol in field-name sequence";
+                    throw new ResultFailure(identify(), expectation,
+                                            safeWriteToString(eval, nameObj));
+                }
+
+                Object valueObj = valueIterator.next();
+                structImplAdd(map, name, valueObj);
+            }
+
+            return immutableStruct(map);
+        }
+    }
+
+
+
+    static final class RemoveKeysProc
+        extends Procedure
+    {
+        RemoveKeysProc()
+        {
+            //    "                                                                               |
+            super("Returns a struct derived from `struct` without fields with the given `name`s.",
+                  "struct", "name", DOTDOTDOT);
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityAtLeast(1, args);
+
+            Object struct = checkStructArg(eval, 0, args);
+
+            if (args.length == 1) return struct;
+
+            String[] keys = new String[args.length - 1];
+            for (int i = 1; i < args.length; i++)
+            {
+                keys[i-1] = checkTextArg(i, args);
+            }
+
+            return unsafeStructRemoveKey(eval, struct, keys);
+        }
+    }
+
+
+    static final class RetainKeysProc
+        extends Procedure
+    {
+        RetainKeysProc()
+        {
+            //    "                                                                               |
+            super("Returns a struct derived from `struct` with _only_ fields with the given\n" +
+                  "`name`s.",
+                  "struct", "name", DOTDOTDOT);
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityAtLeast(1, args);
+
+            Object struct = checkStructArg(eval, 0, args);
+
+            String[] keys = new String[args.length - 1];
+            for (int i = 1; i < args.length; i++)
+            {
+                keys[i-1] = checkTextArg(i, args);
+            }
+
+            return unsafeStructRetainKey(eval, struct, keys);
+        }
+    }
+
 }
