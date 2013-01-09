@@ -2,9 +2,20 @@
 
 (module struct '/fusion/base'
 
+  (use '/fusion/collection')
   (use '/fusion/experimental/defines')
   (use '/fusion/ffi/java')
 
+
+  // Pass-through bindings from #%kernel
+  (provide is_struct)
+
+  // Pass-through bindings from /fusion/collection
+  (provide any is_empty size)
+  // TODO FUSION-86 do, find
+
+
+  // TODO FUSION-86 for_each_field - move from builtins
 
   (defpub_j remove_keys       "com.amazon.fusion.RemoveKeysProc")
   (defpub_j retain_keys       "com.amazon.fusion.RetainKeysProc")
@@ -12,6 +23,9 @@
   (defpub_j struct_merge      "com.amazon.fusion.StructMergeProc")
   (defpub_j struct_zip        "com.amazon.fusion.StructZipProc")
 
-  // TODO temporary, for DP compatability
+  // TODO FUSION-86 temporary, for DP compatability
   (defpub struct_union struct_merge)
+
+  // TODO FUSION-93 struct mutability
+  //   * remove_keys_m
 )

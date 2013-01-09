@@ -5,11 +5,15 @@
   '''
 Generic operations over collection types.
 
+The built-in collection types are [list](list.html), [sexp](sexp.html), and
+[struct](struct.html).
+
 Currently, some of these features may be restricted to a subset of collection
 types.
   '''
 
   (use '/fusion/experimental/defines')
+  (use '/fusion/unsafe/struct')
   (use '/fusion/void')
 
 
@@ -18,20 +22,34 @@ types.
 
   // Name per Dylan and SRFI-1.
   (defpub any
-    (lambda (pred sequence)   // TODO FUSION-86 optimize these for links vs array
+    (lambda (pred collection)
       '''
-Applies the one-parameter predicate `pred` to each element of `sequence` in
-order; the first time `pred` returns a truthy value that truthy value is
-returned.  If no such call returns a truthy value, then the result is `false`.
+Applies the one-parameter predicate `pred` to the elements of `collection`;
+the first time `pred` returns a truthy value that truthy value is returned and
+no more elements are visited.  If no call returns a truthy value, then the
+result is `false`.
+
+When `collection` is a sequence, the elements are visited in order.
       '''
-      (let ((len (size sequence)))
-        (let loop ((i 0))
-          (if (= i len)
-            false
-            (let ((elt (. sequence i)))
-              (let ((result (pred elt)))
-                (if result result
-                  (loop (+ i 1))))))))))
+      (cond
+        ((is_struct collection)
+         (let [(result false)]
+           // WARNING!  This unsafe procedure is UNSUPPORTED!
+           (unsafe_struct_visit (lambda (key elt)
+                                  (let [(elt_result (pred elt))]
+                                    (when elt_result (set result elt_result))
+                                    elt_result))
+             collection)
+           result))
+        (true    // TODO FUSION-86 optimize these for list vs sexp
+         (let ((len (size collection)))
+           (let loop ((i 0))
+             (if (= i len)
+               false
+               (let ((elt (. collection i)))
+                 (let ((result (pred elt)))
+                   (if result result
+                     (loop (+ i 1))))))))))))
 
 
   (defpub is_empty

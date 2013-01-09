@@ -78,12 +78,12 @@
     (let [(names  (stretchy_list)),
           (values (stretchy_list))]
       (let [(result (for_each_field
-        (lambda (name value)
-          (add_m names name)
-          (add_m values value))
+                      (lambda (name value)
+                        (add_m names name)
+                        (add_m values value))
                       struct))]
         // TODO FUSION-88 (check eq result struct)
-      (let [(zipped (struct_zip names values))]
+        (let [(zipped (struct_zip names values))]
           (check ion_equals zipped struct))))))
 
 (rip_and_zip {})
@@ -129,3 +129,15 @@
 (check ion_equals (retain_keys {a:3} "a") {a:3})
 (check ion_equals (retain_keys {a:3,a:4} "a") {a:3,a:4})
 (check ion_equals (retain_keys {a:1,b:3,c:2} "a" "c") {a:1,c:2})
+
+
+//==========================================================================
+// any
+
+(check_false (any T null.struct))
+(check_false (any T {}))
+(check_false (any F {f:1, g:2}))
+(check_true  (any T {f:1, g:2}))
+
+(check_true (any (lambda (e) (= e "hi")) {f:"oh", g:"hi"}))
+(check = (any (lambda (e) (when (= e "hi") e)) {f:"oh", g:"hi"}) "hi")
