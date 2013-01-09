@@ -9,7 +9,6 @@ import static org.junit.Assert.assertSame;
 import com.amazon.ion.IonList;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -114,19 +113,15 @@ public class ListTest
         }
     }
 
-    @Test @Ignore  // FUSION-86
+    @Test
     public void testDeepAdd()
         throws Exception
     {
         assertEval("{f:[2]}",
-                   "(let ((s {f:[]}))" +
+                   "(let ((s {f:(stretchy_list)}))" +
                    "  (add_m (. s \"f\") 2)" +
                    "  s)");
-
-        assertEval("{f:(2)}",
-                   "(let ((s {f:(quote ())}))" +
-                   "  (add_m (. s \"f\") 2)" +
-                   "  s)");
+        // Can't do the same thing with sexp since add_m returns a new pair.
     }
 
     @Test
