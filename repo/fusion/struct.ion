@@ -5,6 +5,7 @@
   (use '/fusion/collection')
   (use '/fusion/experimental/defines')
   (use '/fusion/ffi/java')
+  (use '/fusion/unsafe/struct')
 
 
   // Pass-through bindings from #%kernel
@@ -15,7 +16,6 @@
   // TODO FUSION-86 do, find
 
 
-  // TODO FUSION-86 for_each_field - move from builtins
   // TODO FUSION-86 rename struct_make to struct?  (Parallel to `list`, `sexp`, etc.)
 
   (defpub_j remove_keys       "com.amazon.fusion.FusionStruct$RemoveKeysProc")
@@ -29,4 +29,21 @@
 
   // TODO FUSION-93 struct mutability
   //   * remove_keys_m
+
+  (defpub for_each_field
+    (lambda (proc struct)
+      '''
+Applies `proc` to each field within `struct`, returning `struct`.  The `proc`
+must accept two arguments, a field name symbol and a value; any results from
+applying the proc are ignored.
+      '''
+      // This is pretty much the same as struct_visit except we never return early.
+      (unless (is_procedure proc)
+        (raise_argument_error "for_each_field" "procedure" 0 proc struct))
+      (unless (is_struct struct)
+        (raise_argument_error "for_each_field" "struct" 1 proc struct))
+      (unsafe_struct_visit
+        (lambda (name elt) (proc name elt) false)
+        struct)))
+
 )

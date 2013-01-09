@@ -16,11 +16,12 @@
 
   // Pass-through bindings from builtins
   (provide assert for_list let let_values quote set)
-  (provide . < = apply concatenate exit
-    for_each_field is_null is_procedure not
+  (provide . < = apply concatenate exit is_null is_procedure not
     raise_argument_error raise_result_error
     to_int to_string)
 
+  // TODO FUSION-95 these bindings seem out of place:
+  //  assert for_list concatenate to_int to_string raise_*
 
   (use '/fusion/number')
   (provide + - * /)

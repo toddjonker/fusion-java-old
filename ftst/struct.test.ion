@@ -92,6 +92,11 @@
 
 // TODO test struct_zip with null/empty string/symbol
 
+// for_each_field returns its input struct.
+(check =
+  (. (for_each_field (lambda (k v) 3) {f:1}) "f")
+  1)
+
 
 //==========================================================================
 // remove_keys
