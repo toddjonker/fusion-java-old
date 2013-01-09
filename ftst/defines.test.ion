@@ -8,6 +8,7 @@
 
 
 (define (thunk) 513)
+(check_true (is_procedure thunk))
 (check = (thunk) 513)
 
 (define (thunk) 514 515)
@@ -21,6 +22,7 @@
 
 
 (define (proc arg) arg)
+(check_true (is_procedure proc))
 (check = (proc 518) 518)
 
 (define (proc arg) 532 arg)

@@ -28,6 +28,7 @@
   (defpub_j exit                  "com.amazon.fusion.ExitProc")
   (defpub_j for_each_field        "com.amazon.fusion.ForEachFieldProc")
   (defpub_j is_null               "com.amazon.fusion.IsNullProc")
+  (defpub_j is_procedure          "com.amazon.fusion.IsProcedureProc")
   (defpub_j not                   "com.amazon.fusion.NotProc")
   (defpub_j raise_argument_error  "com.amazon.fusion.RaiseArgumentErrorProc")
   (defpub_j raise_result_error    "com.amazon.fusion.RaiseResultErrorProc")
