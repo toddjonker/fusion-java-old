@@ -11,7 +11,8 @@ final class RetainKeysProc
     RetainKeysProc()
     {
         //    "                                                                               |
-        super("Returns a struct derived from `struct` with _no_ fields with the given `name`s.",
+        super("Returns a struct derived from `struct` with _only_ fields with the given\n" +
+              "`name`s.",
               "struct", "name", DOTDOTDOT);
     }
 
