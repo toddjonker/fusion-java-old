@@ -806,10 +806,8 @@ final class FusionStruct
         UnsafeStructVisitProc()
         {
             //    "                                                                               |
-            super("UNSUPPORTED!\n" +
-                  "\n" +
-                  "Applies `proc` to the elements of the `struct`, stopping when the result of the\n" +
-                  "call is truthy.",
+            super("*UNSUPPORTED!*  Applies `proc` to the fields of the `struct`, stopping when\n" +
+                  "the result of the call is truthy.",
                   "proc", "struct");
         }
 

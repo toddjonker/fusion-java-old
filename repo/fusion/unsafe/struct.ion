@@ -2,8 +2,6 @@
 
 (module unsafe_struct '/fusion/base'
 
-  null // Prevent the text below from being treated as documentation
-
   '''
 Unsafe (but fast) operations on structs.
 

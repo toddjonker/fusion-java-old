@@ -2,6 +2,18 @@
 
 (module sequence '/fusion/base'
 
+  '''
+Ordered collections of values.
+
+A _sequence_ is an ordered [collection](collection.html) of values, keyed by
+non-negative integers.
+
+The built-in sequence types are [list](list.html) and [sexp](sexp.html).
+
+Currently, some of these features may be restricted to a subset of sequence
+types.
+  '''
+
   (use '/fusion/collection')
   (use '/fusion/experimental/defines')
   (use '/fusion/private/builtins')   // Some basic list ops

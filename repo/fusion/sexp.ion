@@ -3,7 +3,7 @@
 (module sexp '/fusion/base'
 
   '''
-Operations for sexps (_a.k.a._ S-expressions).
+Operations for sexps (_a.k.a._ S-expressions) and pairs.
 
 An _sexp_ is a [sequence](sequence.html) of values with zero-based integer
 keys and O(_n_) lookup of elements.  Generally, sexps are linked lists of
