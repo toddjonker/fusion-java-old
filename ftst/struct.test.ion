@@ -2,6 +2,7 @@
 
 (use check)
 (use '/fusion/ion')
+(use '/fusion/function')
 (use '/fusion/list')
 (use '/fusion/struct')
 
@@ -53,6 +54,21 @@
 (check ion_equals (struct_merge {f:3} {f:4}) {f:3,f:4})
 (check ion_equals (struct_merge {f:3} {g:4}) {f:3,g:4})
 (check ion_equals (struct_merge {f:3} {g:4,h:5}) {f:3,g:4,h:5})
+
+
+//==========================================================================
+// struct_ref
+
+(check_void (struct_ref null.struct "x" void))
+(check_void (struct_ref null.struct "x" (void)))
+(check = (struct_ref null.struct "x" 1157) 1157)
+
+(check = (struct_ref {} "x" 1158) 1158)
+(check = (struct_ref {f:1} "x" 1159) 1159)
+
+(check = (struct_ref {f:1} "f" 1159) 1)
+(check = (struct_ref {f:1, g:2} "g" 1159) 2)
+(check = (struct_ref {f:1, g:"h"} "h" (always 1201)) 1201)
 
 
 //==========================================================================

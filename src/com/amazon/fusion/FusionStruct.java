@@ -184,6 +184,16 @@ final class FusionStruct
         return array;
     }
 
+    private static Object bounceDefaultResult(Evaluator eval, Object def)
+        throws FusionException
+    {
+        if (def instanceof Procedure)
+        {
+            def = eval.bounceTailCall((Procedure) def);
+        }
+        return def;
+    }
+
 
     //========================================================================
     // Predicates
@@ -276,6 +286,15 @@ final class FusionStruct
         abstract Object dot(Evaluator eval, String field)
             throws FusionException;
 
+        /**
+         * Finds the value for a given name.
+         *
+         * @param def the default result. If its a procedure, it's called with
+         * no arguments to determine the result. Otherwise it's returned as-is.
+         */
+        abstract Object ref(Evaluator eval, String name, Object def)
+            throws FusionException;
+
         abstract Object removeKeys(String[] keys)
             throws FusionException;
 
@@ -337,6 +356,13 @@ final class FusionStruct
             throws FusionException
         {
             return voidValue(eval);
+        }
+
+        @Override
+        Object ref(Evaluator eval, String name, Object def)
+            throws FusionException
+        {
+            return bounceDefaultResult(eval, def);
         }
 
         @Override
@@ -553,6 +579,23 @@ final class FusionStruct
         }
 
         @Override
+        Object ref(Evaluator eval, String name, Object def)
+            throws FusionException
+        {
+            Object result = myMap.get(name);
+            if (result == null)
+            {
+                return bounceDefaultResult(eval, def);
+            }
+            if (result instanceof Object[])
+            {
+                return ((Object[]) result)[0];
+            }
+
+            return result;
+        }
+
+        @Override
         Object removeKeys(String[] keys)
             throws FusionException
         {
@@ -727,6 +770,31 @@ final class FusionStruct
         {
             boolean result = isStruct(eval, arg);
             return eval.newBool(result);
+        }
+    }
+
+
+
+    static final class UnsafeStructRefProc
+        extends Procedure
+    {
+        UnsafeStructRefProc()
+        {
+            //    "                                                                               |
+            super("Returns the value associated with `name` in `struct`. The `name` must be a\n" +
+                  "string or symbol.  If no field exists with the name, the `default` is used: if\n" +
+                  "it is a procedure, it's applied to no arguments and the result is returned,\n" +
+                  "otherwise the `default` is returned as-is.",
+                  "struct", "name", "default");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            BaseStruct s = (BaseStruct) args[0];
+            String name = checkTextArg(1, args);
+            return s.ref(eval, name, args[2]);
         }
     }
 
