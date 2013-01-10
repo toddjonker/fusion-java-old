@@ -1,12 +1,12 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (module list '/fusion/base'
 
   '''
-Core operations for lists (_a.k.a._ arrays).
+Operations for lists (_a.k.a._ arrays).
 
-A _list_ is a sequence of values with zero-based integer keys and
-constant-time lookup of elements.  Lists come in three concrete types:
+A _list_ is a [sequence](sequence.html) of values with zero-based integer keys
+and constant-time lookup of elements.  Lists come in three concrete types:
 immutable, mutable, or stretchy; a stretchy list IS-A mutable list.
 Non-stretchy lists are comparable to Java arrays, while stretchy lists are
 comparable to `ArrayList`s; however, Fusion doesn't guarantee that the

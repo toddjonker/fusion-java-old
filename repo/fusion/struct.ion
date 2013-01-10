@@ -1,6 +1,25 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (module struct '/fusion/base'
+
+  '''
+Operations for structs.
+
+A _struct_ is an unordered [collection](collection.html) of values, keyed by
+strings.  Since Fusion structs are based on Ion structs, these collections are
+multi-maps: the same key can map to multiple values, or even multiple mappings
+to the same value.
+
+## Creating Structs
+
+In standard Fusion, Ion struct syntax denotes immutable values:
+`{}` denotes an immutable struct of size zero, and `{f:[x]}` denotes an
+immutable struct of size 1 holding a list of size 1.  The value of a struct
+literal is immutable even when some child values are evaluated at run-time.
+Quoted forms are also immutable; in `(quote {f:x})` the struct's sole element
+is the symbol `'x'`.
+
+  '''
 
   (use '/fusion/collection')
   (use '/fusion/experimental/defines')
