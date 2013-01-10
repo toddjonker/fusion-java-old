@@ -155,4 +155,16 @@ Ensures that (OP VAL1 VAL2) is truthy.
           (quasisyntax
             (do_check (unsyntax stx) = (unsyntax val1_stx) false))
           msg_sexp))))
+
+
+  // The failure message isn't the greatest, its in terms of the inner check
+  (defpub_syntax check_void
+    (lambda (stx)
+      (let ((val1_stx (syntax_get stx 1))
+            (msg_sexp (syntax_subseq stx 2)))
+        (syntax_append
+          (quasisyntax
+            (do_check (unsyntax stx) (lambda (actual expected) (is_void actual))
+              (unsyntax val1_stx) false))
+          msg_sexp))))
 )
