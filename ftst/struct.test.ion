@@ -72,13 +72,13 @@
 
 
 //==========================================================================
-// for_each_field
+// struct_for_each
 
 (define rip_and_zip
   (lambda (struct)
     (let [(names  (stretchy_list)),
           (values (stretchy_list))]
-      (let [(result (for_each_field
+      (let [(result (struct_for_each
                       (lambda (name value)
                         (add_m names name)
                         (add_m values value))
@@ -93,9 +93,9 @@
 
 // TODO test struct_zip with null/empty string/symbol
 
-// for_each_field returns its input struct.
+// struct_for_each returns its input struct.
 (check =
-  (. (for_each_field (lambda (k v) 3) {f:1}) "f")
+  (. (struct_for_each (lambda (k v) 3) {f:1}) "f")
   1)
 
 

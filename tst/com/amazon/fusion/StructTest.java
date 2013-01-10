@@ -83,41 +83,41 @@ public class StructTest
 
 
     @Test @Ignore  // TODO FUSION-86
-    public void testForEachField()
+    public void testStructForEach()
         throws Exception
     {
         eval("(define add_name (lambda (name value) (add_m value name)))");
         assertEval("{f:[\"f\"],g:[\"g\"],f:[true,false,\"f\"]}",
-                   "(for_each_field add_name " +
+                   "(struct_for_each add_name " +
                    "  {f:null.list,g:[],f:[true,false]})");
         // TODO as written the struct and its field values are immutable.
     }
 
     @Test
-    public void testForEachFieldArity()
+    public void testStructForEachArity()
         throws Exception
     {
         eval("(define add_name (lambda (name value) (add value name)))");
-        expectArityFailure("(for_each_field)");
-        expectArityFailure("(for_each_field add_name)");
-        expectArityFailure("(for_each_field add_name {} 3)");
+        expectArityFailure("(struct_for_each)");
+        expectArityFailure("(struct_for_each add_name)");
+        expectArityFailure("(struct_for_each add_name {} 3)");
     }
 
     @Test
-    public void testForEachFieldArgTypes()
+    public void testStructForEachArgTypes()
         throws Exception
     {
         eval("(define add_name (lambda (name value) (add value name)))");
 
         for (String form : allIonExpressions())
         {
-            String expr = "(for_each_field " + form + " {})";
+            String expr = "(struct_for_each " + form + " {})";
             expectArgTypeFailure(expr, 0);
         }
 
         for (String form : nonStructExpressions())
         {
-            String expr = "(for_each_field add_name " + form + ")";
+            String expr = "(struct_for_each add_name " + form + ")";
             expectArgTypeFailure(expr, 1);
         }
     }
