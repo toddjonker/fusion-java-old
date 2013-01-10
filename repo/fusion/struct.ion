@@ -42,8 +42,6 @@ is the symbol `'x'`.
   (defpub_j struct_merge      "com.amazon.fusion.FusionStruct$StructMergeProc")
   (defpub_j struct_zip        "com.amazon.fusion.FusionStruct$StructZipProc")
 
-  // TODO FUSION-86 temporary, for DP compatability
-  (defpub struct_union struct_merge)
 
   // TODO FUSION-93 struct mutability
   //   * remove_keys_m
