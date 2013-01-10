@@ -1,0 +1,23 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(module unsafe_struct '/fusion/base'
+
+  '''
+Unsafe (but fast) operations on sexps.
+
+These operations perform no type-checking or bounds-checking, and they
+**will crash or exhibit other unspecified behavior**
+if called with invalid arguments.
+**Use with extreme caution!**
+
+See the module [`/fusion/sexp`](../sexp.html) for more information and
+related operations on sexps.
+  '''
+
+  (use '/fusion/experimental/defines')
+
+
+  (defpub_j unsafe_pair_head "com.amazon.fusion.FusionSexp$UnsafePairHeadProc")
+  (defpub_j unsafe_pair_tail "com.amazon.fusion.FusionSexp$UnsafePairTailProc")
+
+)

@@ -12,13 +12,17 @@ pairs, there are zero-length sexps --- for example, the result of `(quote ())`
 --- and of course `null.sexp`.
 
 A _proper sexp_ is one in which the tail of the final pair is a zero-length
-sexp.
+sexp (_not_ `null.sexp`).
+
+At present, pairs and sexps are immutable.  Issue FUSION-102 covers mutable
+sexps.
   '''
 
   (use '/fusion/experimental/defines')
   (use '/fusion/ffi/java')
   (use '/fusion/iterator')
   (use '/fusion/sequence')
+  (use '/fusion/unsafe/sexp')
 
   // Pass-through bindings from #%kernel
   (provide is_sexp)
@@ -27,18 +31,15 @@ sexp.
   (provide add any do find first is_empty last size)
 
 
-  // TODO mutable_sexp
+  // TODO FUSION-102 mutable_sexp
   // TODO FUSION-86 FUSION-102 There's an inconsistency here vs list:
   // `list` creates mutable mutable values and literals create immutables.
   // Thus one can create both kinds with brief notation.
-  // However, there's no s
+  // However, there's no such literal notation for sexps.
 
 
   (defpub_j sexp    "com.amazon.fusion.FusionSexp$SexpProc")
   (defpub_j is_pair "com.amazon.fusion.FusionSexp$IsPairProc")
-
-  (define unsafe_pair_head (java_new "com.amazon.fusion.FusionSexp$UnsafePairHeadProc"))
-  (define unsafe_pair_tail (java_new "com.amazon.fusion.FusionSexp$UnsafePairTailProc"))
 
 
   (defpub head
