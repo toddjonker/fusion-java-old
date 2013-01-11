@@ -1,8 +1,14 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (module number '/fusion/private/builtins'
 
+  '''
+Operations on numbers (int, decimal, and float).
+  '''
   (use '/fusion/experimental/defines')
+
+  (use '/fusion/private/compare')
+  (provide < <= = >= >)
 
 
   (defpub_j  +  "com.amazon.fusion.SumProc")

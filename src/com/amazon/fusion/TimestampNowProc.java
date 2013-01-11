@@ -1,3 +1,5 @@
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+
 package com.amazon.fusion;
 
 import com.amazon.ion.Timestamp;
@@ -11,7 +13,8 @@ final class TimestampNowProc
     TimestampNowProc()
     {
         //    "                                                                               |
-        super("Returns a timestamp representing \"now\".");
+        super("Returns a timestamp representing \"now\".  At present the local offset is\n" +
+              "unspecified, but that may change in the future.");
     }
 
     @Override
