@@ -21,7 +21,8 @@
 
   (defpub_j .                     "com.amazon.fusion.DotProc")
   (defpub_j apply                 "com.amazon.fusion.ApplyProc")
-  (defpub_j concatenate           "com.amazon.fusion.StringConcatenateProc")
+  // TODO FUSION-107 remove this
+  (defpub_j concatenate           "com.amazon.fusion.FusionString$ConcatProc")
   (defpub_j exit                  "com.amazon.fusion.ExitProc")
   (defpub_j is_null               "com.amazon.fusion.IsNullProc")
   (defpub_j is_procedure          "com.amazon.fusion.IsProcedureProc")

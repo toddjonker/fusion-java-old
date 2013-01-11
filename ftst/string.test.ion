@@ -1,0 +1,22 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(use check)
+(use '/fusion/string')
+
+
+(check = (string_concat ""   "")  "")
+(check = (string_concat "aB" "")  "aB")
+(check = (string_concat "aB" "c") "aBc")
+
+(check = (string_concat "aB" (quote c) "d") "aBcd")
+(check = (string_concat (quote aB) "") "aB")
+(check = (string_concat (quote aB) "c") "aBc")
+(check = (string_concat (quote aB) "c" (quote d)) "aBcd")
+
+
+(check = (string_to_lower "")    "")
+(check = (string_to_lower "AbC") "abc")
+
+
+(check = (string_to_upper "")    "")
+(check = (string_to_upper "AbC") "ABC")

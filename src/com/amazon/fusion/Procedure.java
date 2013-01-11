@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -307,6 +307,9 @@ abstract class Procedure
         return iv.stringValue();
     }
 
+    /**
+     * @return not null
+     */
     String checkStringArg(int argNum, Object... args)
         throws ArgTypeFailure
     {

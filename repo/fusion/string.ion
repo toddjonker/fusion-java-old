@@ -1,11 +1,14 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
-(module string '/fusion/base'
+(module string '/fusion/private/builtins'
 
+  '''
+Operations for strings.
+  '''
   (use '/fusion/experimental/defines')
-  (use '/fusion/ffi/java')
 
 
-  (defpub_j string_to_lower    "com.amazon.fusion.StringToLowerProc")
-  (defpub_j string_to_upper    "com.amazon.fusion.StringToUpperProc")
+  (defpub_j string_concat      "com.amazon.fusion.FusionString$ConcatProc")
+  (defpub_j string_to_lower    "com.amazon.fusion.FusionString$ToLowerProc")
+  (defpub_j string_to_upper    "com.amazon.fusion.FusionString$ToUpperProc")
 )

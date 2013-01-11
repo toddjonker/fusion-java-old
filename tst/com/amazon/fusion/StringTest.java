@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -16,15 +16,6 @@ public class StringTest
         topLevel().requireModule("/fusion/string");
     }
 
-    @Test
-    public void testStringConcat()
-        throws Exception
-    {
-        assertString("", "(concatenate)");
-        assertString("hello","(concatenate \"hello\")");
-        assertString("hello world", "(concatenate \"hello \" \"world\")");
-        assertString("I like pie", "(concatenate \"I \" \"like \" \"pie\")");
-    }
 
     @Test
     public void testStringConcatInvalid()
@@ -34,20 +25,6 @@ public class StringTest
         expectArgTypeFailure("(concatenate true)",0);
     }
 
-    @Test
-    public void testStringCaseTransform()
-        throws Exception
-    {
-        String [] ans = { "a", "A" };
-        String [] ops = { "string_to_lower", "string_to_upper" };
-
-        for (int i = 0; i < ops.length; i++)
-        {
-            assertString(ans[i],"("+ops[i]+" \"A\")");
-            assertString(ans[i],"("+ops[i]+"\"a\")");
-            assertString("", "("+ops[i]+ "\"\")");
-        }
-    }
 
     @Test
     public void testStringCaseTransformFail()
