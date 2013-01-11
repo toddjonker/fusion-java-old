@@ -224,7 +224,7 @@
 
 
 //==========================================================================
-// concatenate
+// concatenate_m
 
 (define test_concatenate_m
   (lambda (v0)

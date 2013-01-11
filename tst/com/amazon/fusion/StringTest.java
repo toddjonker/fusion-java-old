@@ -21,8 +21,8 @@ public class StringTest
     public void testStringConcatInvalid()
         throws Exception
     {
-        expectArgTypeFailure("(concatenate 1)",0);
-        expectArgTypeFailure("(concatenate true)",0);
+        expectArgTypeFailure("(string_concat 1)",0);
+        expectArgTypeFailure("(string_concat true)",0);
     }
 
 

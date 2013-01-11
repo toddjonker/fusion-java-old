@@ -7,6 +7,7 @@
   (use '/fusion/ion')
   (use '/fusion/list')
   (use '/fusion/sexp')
+  (use '/fusion/string')
   (use '/fusion/syntax')
 
 
@@ -52,7 +53,7 @@
       (let loop ((i 0))
         (when (< i (size actual))
           (check_equal (. actual i) (. expected i)
-            (concatenate "list element #" (to_string i)))
+            (string_concat "list element #" (to_string i)))
           (loop (+ 1 i))))))
 
   (defpub check_sexp_equal
@@ -67,7 +68,7 @@
             "sexp tails don't match at pos " pos ". Actual: " actual " Expected: " expected)
           (begin
             (check_equal (head a) (head e)
-              (concatenate "sexp element at position " (to_string pos))) // TODO bad descr
+              (string_concat "sexp element at position " (to_string pos))) // TODO bad descr
             (loop (+ 1 pos) (tail a) (tail e)))))))
 
 
