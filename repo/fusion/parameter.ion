@@ -1,0 +1,65 @@
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+
+(module parameter (quote '#%kernel')
+
+  '''
+Dynamically-scoped values.
+
+A _parameter_ is a single-value procedure whose result is dynamically scoped.
+A parameter's value is set via `parameterize` and the parameter retains the
+value for the dynamic extent of the parameterized body, and then reverts to
+its prior value.
+
+Parameters are created via `make_parameter`, which also gives it an initial
+default value. The parameter's value is retrieved by applying it (remember,
+parameters are procedures):
+
+    (define p (make_parameter 19))
+
+    p    =>  {{{procedure 'p'}}}
+    (p)  =>  19
+
+To change the parameter's value for the extent of some evaluation, the
+`parameterize` syntax form takes pairs of parameters and values (similar to
+`let`) and body.  The parameters will have the given values while the body is
+evaluated, and will revert to their earlier values when the body exits:
+
+    (define (use_p)
+      (+ (p)
+         (parameterize [(p 7)]
+           (p))))               // 7
+
+    (use_p)                     => 26
+
+    (parameterize [(p 13)]
+      (use_p))                  => 20
+
+    (use_p)                     => 26
+    (p)                         => 19
+
+
+It's important to understand that the parameter itself is statically bound and
+lexically scoped just like any other binding, while the parameter's _value_ has
+dynamic extent.
+
+Another way to look at it: `parameterize` associates the parameter and the value
+_on the call stack_, and the association is visible until either the stack frame
+is abandoned (by exiting the `parameterize` body) or a dynamically-nested
+`parameterize` "shadows" it with another value.
+Java developers will recognize that this is very similar to how a Java `catch`
+clause sets an exception handler with dynamic extent.
+  '''
+
+  (use '/fusion/experimental/defines')
+
+
+  (defpub_j_syntax parameterize "com.amazon.fusion.ParameterizeForm")
+
+  (defpub make_parameter
+    (lambda (value)
+      '''
+Makes a new dynamic parameter procedure. The initial value of the parameter is
+`value`.
+      '''
+      (java_new "com.amazon.fusion.DynamicParameter" value)))
+)

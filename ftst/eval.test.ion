@@ -1,8 +1,9 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (use 'check')
 (use '/fusion/eval')
 (use '/fusion/namespace')
+(use '/fusion/parameter')
 (use '/fusion/syntax')
 
 

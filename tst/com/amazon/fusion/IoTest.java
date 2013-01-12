@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -18,6 +18,7 @@ public class IoTest
     {
         topLevel().requireModule("/fusion/eval");
         topLevel().requireModule("/fusion/io");
+        topLevel().requireModule("/fusion/parameter");
         topLevel().requireModule("/fusion/read");
     }
 

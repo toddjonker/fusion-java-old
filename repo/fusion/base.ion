@@ -31,9 +31,6 @@
   (use '/fusion/number')
   (provide + - * /)
 
-  (use '/fusion/params')
-  (provide make_parameter parameterize)
-
   (use '/fusion/void')
   (provide is_void void)
 
