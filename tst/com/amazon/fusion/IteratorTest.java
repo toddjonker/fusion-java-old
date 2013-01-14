@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -45,13 +45,13 @@ public class IteratorTest
     public void testIteratorFilterFailures()
         throws Exception
     {
-        expectArityFailure("(iterator_filter)");
-        expectArityFailure("(iterator_filter is_null)");
-        expectArityFailure("(iterator_filter is_null empty_iterator 1)");
+        expectArityFailure("(iterator_choose)");
+        expectArityFailure("(iterator_choose is_null)");
+        expectArityFailure("(iterator_choose is_null empty_iterator 1)");
 
         // TODO FUSION-85 need to check type of the proc
-//      expectContractFailure("(iterator_filter 1 empty_iterator)");
-        expectContractFailure("(iterator_filter is_null [])");
+//      expectContractFailure("(iterator_choose 1 empty_iterator)");
+        expectContractFailure("(iterator_choose is_null [])");
     }
 
 

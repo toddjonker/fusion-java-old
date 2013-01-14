@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -128,8 +128,7 @@ class FusionIterator
         IsIteratorProc()
         {
             //    "                                                                               |
-            super("Checks if the input argument is an iterator. Returns true if it is, and false\n" +
-                  "otherwise.",
+            super("Checks if the `value` is an iterator.  Returns `true` or `false`.",
                   "value");
         }
 
@@ -148,7 +147,14 @@ class FusionIterator
     {
         HasNextProc()
         {
-            super("Returns whether there are values left to fetch in the ITERATOR.",
+            //    "                                                                               |
+            super("Checks if the `iterator` will provide another value when `iterator_next` is\n" +
+                  "called.  Returns `true` or `false`.\n" +
+                  "\n" +
+                  "After this procedure returns `false` for some iterator instance, all\n" +
+                  "subsequent calls of `iterator_has_next` on the same instance are expected to\n" +
+                  "return `false`, and all subsequent calls of `iterator_next` are expected to\n" +
+                  "throw an exception.",
                   "iterator");
         }
 
@@ -167,7 +173,9 @@ class FusionIterator
     {
         NextProc()
         {
-            super("Returns the next element of the ITERATOR.",
+            //    "                                                                               |
+            super("Returns the next element of the `iterator`.  When the iterator has no more\n" +
+                  "elements, an exception is thrown.",
                   "iterator");
         }
 

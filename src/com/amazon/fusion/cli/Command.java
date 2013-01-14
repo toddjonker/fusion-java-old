@@ -1,4 +1,4 @@
-// Copyright (c) 2005-2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2005-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -100,7 +100,7 @@ abstract class Command
     // Option parsing
 
     /**
-     * Parse and filter command-line options.
+     * Parse and remove command-line options.
      * Options are defined to start with <code>'--'</code>, and come in three
      * forms:
      * <pre>

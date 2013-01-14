@@ -1,6 +1,18 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (module iterator '/fusion/base'
+
+  '''
+Stateful traversal of value sequences.
+
+Fusion iterators are essentially identical to Java iterators, and their use is
+based on two procedures:
+
+  * `(iterator_has_next i)` returns true or false to indicate whether iterator
+    `i` has another value to retrieve.
+  * `(iterator_next i)` returns the next value from the iterator, throwing an
+    exception if there's no next value.
+  '''
 
   (use '/fusion/experimental/defines')
   (use '/fusion/ffi/java')
@@ -26,7 +38,13 @@ the given procedures, which are usually closures with shared state.
       '''
        (java_new "com.amazon.fusion.FusionIterator" has_next_proc next_proc)))
 
+
   (defpub empty_iterator
+    '''
+An iterator with no elements.  `(iterator_has_next empty_iterator)` always
+returns `false`, and `(iterator_next empty_iterator)` always throws an
+exception.
+    '''
     (make_iterator FALSE BAD_NEXT))
 
 
@@ -48,7 +66,8 @@ Returns an iterator that produces `value` as its only element.
   (defpub iterator_map
     (lambda (proc iter)
       '''
-Returns a lazy iterator that contains PROC applied to each element of ITER.
+Returns an iterator whose elements are the results of applying `proc` to the
+corresponding elements of `iter`.
       '''
       // TODO type-check proc
       (unless (is_iterator iter)
@@ -57,12 +76,13 @@ Returns a lazy iterator that contains PROC applied to each element of ITER.
         (lambda () (iterator_has_next iter))
         (lambda () (proc (iterator_next iter))))))
 
+
   // AKA cross-apply
   (defpub iterator_map_splicing
     (lambda (proc iter)
       '''
-Returns an iterator that applies an iterator-making PROC to each element of
-ITER, splicing the inner sequences into a single outer sequence.
+Returns an iterator that applies an iterator-making `proc` to each element of
+`iter`, splicing the inner sequences into a single outer sequence.
       '''
       // TODO type-check proc
       (unless (is_iterator iter)
@@ -102,15 +122,15 @@ ITER, splicing the inner sequences into a single outer sequence.
 
 
 
-  (defpub iterator_filter
+  (defpub iterator_choose
     (lambda (pred iter)
       '''
-Returns a lazy iterator that returns the elements of ITER for which PRED
-returns a truthy value when applied to the element.
+Returns an iterator whose elements are those provided by `iter` that satisfy
+predicate `pred`.
       '''
       // TODO type-check pred
       (unless (is_iterator iter)
-        (raise_argument_error "iterator_filter" "iterator" 1 pred iter))
+        (raise_argument_error "iterator_choose" "iterator" 1 pred iter))
       (letrec [(find_next
                  (lambda ()
                    (if (iterator_has_next iter)
@@ -139,19 +159,21 @@ returns a truthy value when applied to the element.
 (defpub iterator_find
   (lambda (pred iter)
       '''
-Returns the first element of ITER that satisfies predicate PRED; void if no
-element satisfies it.
+Returns the first element of `iter` that satisfies predicate `pred`.  If no
+element satisfies the predicate, the result is void.
       '''
-    (let [(filtered (iterator_filter pred iter))]
+    (let [(filtered (iterator_choose pred iter))]
       (if (iterator_has_next filtered)
         (iterator_next filtered)
         (void)))))
 
 
+  // TODO FUSION-112 should this be named iterator_concat?  (Or vice versa?)
   (defpub iterator_append
     (lambda (iter1 iter2)
       '''
-Returns an iterator that returns elements of ITER1 and then ITER2.
+Returns an iterator that provides all the elements of `iter1` and then all the
+elements of `iter2`.
       '''
       (unless (is_iterator iter1)
         (raise_argument_error "iterator_append" "iterator" 0 iter1 iter2))
@@ -177,23 +199,5 @@ Returns an iterator that returns elements of ITER1 and then ITER2.
         (make_iterator
           (lambda () (has_next))
           (lambda () (next))))))
-
-  // Another way to append. This iterator takes less space but makes lots of
-  // has_next calls. The above only calls it once per element.
-  (define iterator_append_alternate
-    (lambda (iter1 iter2)
-      '''
-Returns an iterator that returns elements of ITER1 and then ITER2.
-      '''
-      (unless (is_iterator iter1)
-        (raise_argument_error "iterator_append" "iterator" 0 iter1 iter2))
-      (unless (is_iterator iter2)
-        (raise_argument_error "iterator_append" "iterator" 1 iter1 iter2))
-      (make_iterator
-        (lambda () (or (iterator_has_next iter1) (iterator_has_next iter2)))
-        (lambda () (if (iterator_has_next iter1)
-                     (iterator_next iter1)
-                     (iterator_next iter2))))))
-
 
 )
