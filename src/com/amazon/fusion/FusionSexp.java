@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,8 +6,8 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.FusionWrite.dispatchIonize;
 import static com.amazon.fusion.FusionWrite.dispatchWrite;
 import static com.amazon.fusion.FusionWrite.safeWriteToString;
+import com.amazon.fusion.FusionIterator.AbstractIterator;
 import com.amazon.fusion.FusionSequence.BaseSequence;
-import com.amazon.fusion.Iterators.AbstractIterator;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonType;

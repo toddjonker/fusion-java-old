@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -237,7 +237,7 @@ final class FusionList
 
     static FusionIterator unsafeListIterator(Evaluator eval, Object list)
     {
-        return Iterators.iterate(unsafeJavaIterate(eval, list));
+        return FusionIterator.iterate(eval, unsafeJavaIterate(eval, list));
     }
 
 
