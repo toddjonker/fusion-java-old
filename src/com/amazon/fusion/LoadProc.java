@@ -12,8 +12,9 @@ final class LoadProc
     {
         //    "                                                                               |
         super("Opens the Fusion source file named by the given string and evaluates each\n" +
-              "expression in sequence. Returns the last result.\n" +
-              "FILENAME is resolved relative to the value of current_directory.",
+              "expression in sequence, returning the last result.  The `filename` is resolved\n" +
+              "relative to the value of the [`current_directory`](io.html#current_directory)\n" +
+              "parameter.  The evaluation is performed within the [current namespace](namespace.html#current_namespace).",
               "filename");
 
         myLoadHandler = loadHandler;

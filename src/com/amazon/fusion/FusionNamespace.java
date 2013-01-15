@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -45,7 +45,7 @@ final class FusionNamespace
         MakeNamespaceWithLanguageProc()
         {
             //    "                                                                               |
-            super("Makes a fresh namespace with the bindings of LANGUAGE, which must be a string\n" +
+            super("Makes a fresh namespace with the bindings of `language`, which must be a string\n" +
                   "holding an absolute module path.",
                   "language");
         }

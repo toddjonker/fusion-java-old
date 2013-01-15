@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -81,8 +81,14 @@ final class GlobalState
         LoadProc loadProc = new LoadProc(loadHandler);
 
         ns.define("begin", new BeginForm());    // Needed by hard-coded macro
-        ns.define("current_directory", currentDirectory);
-        ns.define("current_namespace", currentNamespaceParam);
+
+        ns.define("current_directory", currentDirectory,
+                  "A [parameter](parameter.html) holding the thread-local working directory.");
+
+        ns.define("current_namespace", currentNamespaceParam,
+                  "A [parameter](parameter.html) holding the thread-local namespace.  This value has no direct\n" +
+                  "relationship to the namespace lexically enclosing the parameter call.");
+
         ns.define("if", new IfForm());          // Needed by hard-coded macro
         ns.define("java_new", new JavaNewProc());
         ns.define("lambda", new LambdaForm());  // Needed by hard-coded macro

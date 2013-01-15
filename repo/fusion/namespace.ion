@@ -1,6 +1,17 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (module namespace '/fusion/base'
+
+  '''
+Collections of top-level variables.
+
+A _namespace_ is a set of top-level variables, both name-to-variable bindings
+and variable-to-value storage.  Every module has its own namespace holding its
+top-level definitions and imported bindings.  Likewise, every script is
+evaluated within the context of some namespace.
+
+Namespaces are typically used for [dynamic evaluation](../eval.html).
+  '''
 
   (use '/fusion/experimental/defines')
   (use (quote '#%kernel'))

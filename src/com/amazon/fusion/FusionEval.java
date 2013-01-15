@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -82,8 +82,13 @@ final class FusionEval
         EvalProc()
         {
             //    "                                                                               |
-            super("Evaluates a TOP_FORM within a NAMESPACE. If NAMESPACE is null then the\n" +
-                  "current_namespace is used.",
+            super("Evaluates a `top_form` within a `namespace`.  If `namespace` is null then the\n" +
+                  "[`current_namespace`](namespace.html#current_namespace) parameter is used.\n" +
+                  "\n" +
+                  "The `top_form` must be a valid top-level syntactic form with respect to the\n" +
+                  "bindings visible in the namespace.  The form is expanded, compiled, and\n" +
+                  "evaluated, and its result is returned.  Any side effects made to the namespace\n" +
+                  "will be visible to later evaluations.",
                   "top_form", "namespace");
         }
 
