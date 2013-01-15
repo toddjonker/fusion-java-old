@@ -1,7 +1,8 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.fusion.Namespace.TopBinding;
 import java.util.Collection;
 
@@ -24,11 +25,21 @@ final class ModuleBuilderImpl
         myNamespace.bind(name, value);
     }
 
+    void define(String name, Object value, String documentation)
+    {
+        myNamespace.bind(name, value);
+
+        Kind kind =
+            (value instanceof Procedure ? Kind.PROCEDURE : Kind.CONSTANT);
+        myNamespace.setDoc(name, kind, documentation);
+    }
+
     ModuleInstance build()
         throws FusionException
     {
         ModuleStore store = new ModuleStore(myRegistry,
-                                            myNamespace.extractValues());
+                                            myNamespace.extractValues(),
+                                            myNamespace.extractBindingDocs());
         Collection<TopBinding> bindings = myNamespace.getBindings();
 
         // TODO should we register the module?

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -452,6 +452,15 @@ class Namespace
     //========================================================================
     // Documentation
 
+
+    void setDoc(String name, BindingDoc.Kind kind, String doc)
+    {
+        TopBinding binding = (TopBinding) resolve(name);
+        BindingDoc bDoc = new BindingDoc(name, kind,
+                                         null, // usage
+                                         doc);
+        setDoc(binding.myAddress, bDoc);
+    }
 
     public void setDoc(int address, BindingDoc doc)
     {

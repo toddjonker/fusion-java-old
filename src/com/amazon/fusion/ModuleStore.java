@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -25,12 +25,14 @@ final class ModuleStore
         myBindingDocs = bindingDocs;
     }
 
-    ModuleStore(ModuleRegistry registry, Object[] values)
+    ModuleStore(ModuleRegistry registry,
+                Object[] values,
+                BindingDoc[] bindingDocs)
     {
         myRegistry = registry;
         myRequiredModules = new ModuleStore[0];
         myValues = values;
-        myBindingDocs = new BindingDoc[0];
+        myBindingDocs = bindingDocs;
     }
 
     @Override
