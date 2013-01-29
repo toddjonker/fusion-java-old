@@ -51,7 +51,14 @@ final class Expander
     SyntaxValue expand(Environment env, SyntaxValue stx)
         throws FusionException
     {
-        // TODO FUSION-43 Fail if there are annotations on stx
+        if (stx.getAnnotations().length != 0)
+        {
+            String message =
+                "Annotations not supported in raw syntax. You probably " +
+                "want to quote this value";
+            throw new SyntaxFailure(null, message, stx);
+        }
+
         return stx.doExpand(this, env);
     }
 
