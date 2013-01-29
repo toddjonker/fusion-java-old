@@ -392,17 +392,6 @@ final class Evaluator
     }
 
 
-    /**
-     * Similar to Racket expand-syntax.
-     * Doesn't enrich the syntax's lexical context.
-     */
-    SyntaxValue expandSyntax(Environment env, SyntaxValue topLevelStx)
-        throws FusionException
-    {
-        Expander expander = new Expander(this);
-        return expander.expand(env, topLevelStx);
-    }
-
 
     CompiledForm compile(Environment env, SyntaxValue source)
         throws FusionException
@@ -449,16 +438,6 @@ final class Evaluator
     {
         evaluating: while (true)
         {
-            /*
-            if (expr.getAnnotations().length != 0)
-            {
-                String message =
-                    "Annotations not supported in raw syntax. You probably " +
-                    "want to quote this value";
-                throw new SyntaxFailure(null, message, expr);
-            }
-*/
-
             Object result = form.doEval(this, store);
 
             checkingResult: while (true)

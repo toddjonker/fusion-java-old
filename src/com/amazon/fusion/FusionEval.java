@@ -14,28 +14,33 @@ final class FusionEval
      * The default evaluation handler, evaluating the given source
      * within the current namespace.
      *
+     * @param topLevelForm is not enriched with lexical information.
+     *
      * @see <a href="http://docs.racket-lang.org/reference/eval.html#%28def._%28%28quote._~23~25kernel%29._current-eval%29%29">
          Racket's <code>eval</code></a>
      */
-    static Object defaultEval(Evaluator eval, SyntaxValue source)
+    static Object defaultEval(Evaluator eval, SyntaxValue topLevelForm)
         throws FusionException
     {
         Namespace ns = eval.findCurrentNamespace();
 
-        // TODO this should partial-expand and splice begins
+        {
+            // TODO this should partial-expand and splice begins
+            Expander expander = new Expander(eval);
+            topLevelForm = expander.expand(ns, topLevelForm);
+        }
 
-        source = eval.expandSyntax(ns, source);
-        CompiledForm compiled = eval.compile(ns, source);
-        source = null; // Don't hold garbage
+        CompiledForm compiled = eval.compile(ns, topLevelForm);
+        topLevelForm = null; // Don't hold garbage
 
         return eval.eval(ns, compiled); // TODO TAIL
     }
 
 
-    static Object callCurrentEval(Evaluator eval, SyntaxValue source)
+    static Object callCurrentEval(Evaluator eval, SyntaxValue topLevelForm)
         throws FusionException
     {
-        return defaultEval(eval, source);
+        return defaultEval(eval, topLevelForm);
     }
 
 
@@ -46,15 +51,15 @@ final class FusionEval
      *
      * @param ns may be null to use {@link Evaluator#findCurrentNamespace()}.
      */
-    static Object eval(Evaluator eval, SyntaxValue source, Namespace ns)
+    static Object eval(Evaluator eval, SyntaxValue topLevelForm, Namespace ns)
         throws FusionException
     {
         eval = eval.parameterizeCurrentNamespace(ns);
 
         // TODO FUSION-44 handle (module ...) properly
-        source = eval.findCurrentNamespace().syntaxIntroduce(source);
+        topLevelForm = eval.findCurrentNamespace().syntaxIntroduce(topLevelForm);
 
-        return callCurrentEval(eval, source); // TODO TAIL
+        return callCurrentEval(eval, topLevelForm); // TODO TAIL
     }
 
 
