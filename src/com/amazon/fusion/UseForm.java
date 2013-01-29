@@ -17,20 +17,20 @@ final class UseForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws SyntaxFailure
     {
-        requiredForm("module spec", 1, source);
-        return source;
+        requiredForm("module spec", 1, stx);
+        return stx;
     }
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp expr)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
         // TODO Should we resolve the name at compile-time?
-        SyntaxValue moduleSpec = expr.get(1);
+        SyntaxValue moduleSpec = stx.get(1);
         ModuleIdentity id = myModuleNameResolver.resolve(eval, moduleSpec);
         return new CompiledUse(id);
     }

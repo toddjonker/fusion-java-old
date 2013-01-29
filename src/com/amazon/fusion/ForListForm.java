@@ -21,11 +21,10 @@ final class ForListForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env,
-                       SyntaxSexp source)
+    SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = check(source);
+        SyntaxChecker check = check(stx);
         check.arityAtLeast(2);
 
         SyntaxChecker checkBindings =
@@ -47,7 +46,7 @@ final class ForListForm
             SyntaxValue subform = checkPair.requiredForm("bound value", 1);
 
             // Bound values use the outer lexical environment
-            boundValues[i] = ctx.expand(env, subform);
+            boundValues[i] = expander.expand(env, subform);
         }
 
         LocalEnvironment bodyEnv = new LocalEnvironment(env, boundNames);
@@ -67,19 +66,19 @@ final class ForListForm
                                        expandedForms);
 
         // Prepare the body.
-        expandedForms = new SyntaxValue[source.size()];
-        expandedForms[0] = source.get(0);
+        expandedForms = new SyntaxValue[stx.size()];
+        expandedForms[0] = stx.get(0);
         expandedForms[1] = bindingForms;
 
-        for (int i = 2; i < source.size(); i++)
+        for (int i = 2; i < stx.size(); i++)
         {
-            SyntaxValue bodyStx = source.get(i);
+            SyntaxValue bodyStx = stx.get(i);
             bodyStx = bodyStx.addWrap(localWrap);
-            expandedForms[i] = ctx.expand(bodyEnv, bodyStx);
+            expandedForms[i] = expander.expand(bodyEnv, bodyStx);
         }
 
-        source = SyntaxSexp.make(source.getLocation(), expandedForms);
-        return source;
+        stx = SyntaxSexp.make(stx.getLocation(), expandedForms);
+        return stx;
     }
 
 

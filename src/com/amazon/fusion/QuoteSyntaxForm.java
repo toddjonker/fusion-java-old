@@ -13,20 +13,20 @@ final class QuoteSyntaxForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws SyntaxFailure
     {
-        check(source).arityExact(2);
+        check(stx).arityExact(2);
 
-        return source;
+        return stx;
     }
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxValue quoted = source.get(1);
+        SyntaxValue quoted = stx.get(1);
         return new CompiledQuoteSyntax(quoted);
     }
 

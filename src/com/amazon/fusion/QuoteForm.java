@@ -17,18 +17,18 @@ final class QuoteForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws SyntaxFailure
     {
-        SyntaxChecker check = check(source);
+        SyntaxChecker check = check(stx);
         check.arityExact(2);
 
-        SyntaxValue[] children = source.extract();
+        SyntaxValue[] children = stx.extract();
         SyntaxValue quoted = children[1];
         children[1] = quoted.stripWraps();
 
-        source = SyntaxSexp.make(source.getLocation(), children);
-        return source;
+        stx = SyntaxSexp.make(stx.getLocation(), children);
+        return stx;
     }
 
 
@@ -36,10 +36,10 @@ final class QuoteForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxValue quotedSource = source.get(1);
+        SyntaxValue quotedSource = stx.get(1);
         return new CompiledQuote(quotedSource);
     }
 

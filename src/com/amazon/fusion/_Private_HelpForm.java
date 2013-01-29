@@ -78,14 +78,13 @@ public final class _Private_HelpForm
     }
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env,
-                       SyntaxSexp source)
+    SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = check(source);
-        int arity = source.size();
+        SyntaxChecker check = check(stx);
+        int arity = stx.size();
 
-        SyntaxValue[] children = source.extract();
+        SyntaxValue[] children = stx.extract();
 
         // Expand (help) into (help help)
         if (arity == 1)
@@ -98,24 +97,24 @@ public final class _Private_HelpForm
         for (int i = 1; i < arity; i++)
         {
             SyntaxSymbol identifier = check.requiredIdentifier(i);
-            children[i] = ctx.expand(env, identifier);
+            children[i] = expander.expand(env, identifier);
         }
 
-        source = SyntaxSexp.make(source.getLocation(), children);
-        return source;
+        stx = SyntaxSexp.make(stx.getLocation(), children);
+        return stx;
     }
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        int arity = source.size();
+        int arity = stx.size();
 
         CompiledForm[] children = new CompiledForm[arity - 1];
         for (int i = 1; i < arity; i++)
         {
-            children[i-1] = source.get(i).doCompile(eval, env);
+            children[i-1] = stx.get(i).doCompile(eval, env);
         }
         return new CompiledHelp(children);
     }

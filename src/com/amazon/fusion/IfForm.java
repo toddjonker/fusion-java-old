@@ -24,11 +24,11 @@ final class IfForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env, SyntaxSexp stx)
+    SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
         check(stx).arityExact(4);
-        return expandArgs(ctx, env, stx);
+        return expandArgs(expander, env, stx);
     }
 
 

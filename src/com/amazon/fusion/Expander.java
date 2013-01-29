@@ -59,6 +59,6 @@ final class Expander
     SyntaxValue expand(Environment env, SyntacticForm form, SyntaxSexp stx)
         throws FusionException
     {
-        return form.expand(myEval, this, env, stx);
+        return form.expand(this, env, stx);
     }
 }

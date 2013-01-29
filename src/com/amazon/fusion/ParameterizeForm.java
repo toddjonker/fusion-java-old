@@ -22,11 +22,10 @@ final class ParameterizeForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env,
-                       SyntaxSexp source)
+    SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = check(source);
+        SyntaxChecker check = check(stx);
         final int exprSize = check.arityAtLeast(3);
 
         SyntaxChecker checkBindings =
@@ -44,10 +43,10 @@ final class ParameterizeForm
             SyntaxSexp binding = (SyntaxSexp) checkPair.form();
 
             SyntaxValue paramExpr = binding.get(0);
-            paramExpr = ctx.expand(env, paramExpr);
+            paramExpr = expander.expand(env, paramExpr);
 
             SyntaxValue boundExpr = binding.get(1);
-            boundExpr = ctx.expand(env, boundExpr);
+            boundExpr = expander.expand(env, boundExpr);
 
             binding = SyntaxSexp.make(binding.getLocation(),
                                       paramExpr, boundExpr);
@@ -59,17 +58,17 @@ final class ParameterizeForm
 
         // Expand the body expressions
         expandedForms = new SyntaxValue[exprSize];
-        expandedForms[0] = source.get(0);
+        expandedForms[0] = stx.get(0);
         expandedForms[1] = bindingForms;
 
         for (int i = 2; i < exprSize; i++)
         {
-            SyntaxValue bodyExpr = source.get(i);
-            expandedForms[i] = ctx.expand(env, bodyExpr);
+            SyntaxValue bodyExpr = stx.get(i);
+            expandedForms[i] = expander.expand(env, bodyExpr);
         }
 
-        source = SyntaxSexp.make(source.getLocation(), expandedForms);
-        return source;
+        stx = SyntaxSexp.make(stx.getLocation(), expandedForms);
+        return stx;
     }
 
 
@@ -77,10 +76,10 @@ final class ParameterizeForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxSexp bindingForms = (SyntaxSexp) source.get(1);
+        SyntaxSexp bindingForms = (SyntaxSexp) stx.get(1);
 
         final int numBindings = bindingForms.size();
 
@@ -98,7 +97,7 @@ final class ParameterizeForm
             valueForms[i] = eval.compile(env, valueExpr);
         }
 
-        CompiledForm body = BeginForm.compile(eval, env, source, 2);
+        CompiledForm body = BeginForm.compile(eval, env, stx, 2);
 
         return new CompiledParameterize(parameterForms, valueForms, body);
     }

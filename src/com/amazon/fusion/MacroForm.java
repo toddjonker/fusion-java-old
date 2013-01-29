@@ -19,8 +19,8 @@ abstract class MacroForm
 
 
     @Override
-    final SyntaxValue expand(Evaluator eval, Expander expander,
-                             Environment env, SyntaxSexp stx)
+    final SyntaxValue expand(Expander expander, Environment env,
+                             SyntaxSexp stx)
         throws FusionException
     {
         // TODO FUSION-39 we create two MarkWrap instances here
@@ -46,7 +46,7 @@ abstract class MacroForm
 
     @Override
     final CompiledForm compile(Evaluator eval, Environment env,
-                               SyntaxSexp source)
+                               SyntaxSexp stx)
         throws FusionException
     {
         throw new IllegalStateException("Macros should be expanded already!");

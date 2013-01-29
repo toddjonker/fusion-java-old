@@ -22,13 +22,14 @@ abstract class SyntacticForm
     }
 
 
-    abstract SyntaxValue expand(Evaluator eval, Expander ctx, Environment env,
-                                SyntaxSexp source)
+    abstract SyntaxValue expand(Expander expander, Environment env,
+                                SyntaxSexp stx)
         throws FusionException;
 
 
     /** Expand elements [1...] from a sexp. */
-    final SyntaxValue expandArgs(Expander ctx, Environment env, SyntaxSexp stx)
+    final SyntaxValue expandArgs(Expander expander, Environment env,
+                                 SyntaxSexp stx)
         throws FusionException
     {
         int size = stx.size();
@@ -39,13 +40,14 @@ abstract class SyntacticForm
         for (int i = 1; i < size; i++)
         {
             SyntaxValue subform = stx.get(i);
-            expandedChildren[i] = ctx.expand(env, subform);
+            expandedChildren[i] = expander.expand(env, subform);
         }
         return SyntaxSexp.make(stx.getLocation(), expandedChildren);
     }
 
 
-    abstract CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
+    abstract CompiledForm compile(Evaluator eval, Environment env,
+                                  SyntaxSexp stx)
         throws FusionException;
 
 

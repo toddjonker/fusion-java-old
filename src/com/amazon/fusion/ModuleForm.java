@@ -47,8 +47,8 @@ final class ModuleForm
 
 
     @Override
-    SyntaxValue expand(Evaluator ev, Expander expander,
-                       Environment envOutsideModule, SyntaxSexp source)
+    SyntaxValue expand(Expander expander, Environment envOutsideModule,
+                       SyntaxSexp source)
         throws FusionException
     {
         SyntaxChecker check = check(source);
@@ -316,7 +316,7 @@ final class ModuleForm
 
     @Override
     CompiledForm compile(Evaluator eval, Environment envOutsideModule,
-                         SyntaxSexp source)
+                         SyntaxSexp stx)
         throws FusionException
     {
         // TODO We repeat work here that was done during expansion.
@@ -324,7 +324,7 @@ final class ModuleForm
         // See Racket reference 11.9.1
         // http://docs.racket-lang.org/reference/Expanding_Top-Level_Forms.html#%28part._modinfo%29
 
-        SyntaxStruct meta = (SyntaxStruct) source.get(3);
+        SyntaxStruct meta = (SyntaxStruct) stx.get(3);
 
         ModuleIdentity id;
         {
@@ -357,19 +357,19 @@ final class ModuleForm
 
         int bodyPos = 4;
         String docs = null;
-        if (source.size() > 5 && source.get(4) instanceof SyntaxString)
+        if (stx.size() > 5 && stx.get(4) instanceof SyntaxString)
         {
             // We're gonna call this documentation!
             bodyPos++;
             if (eval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
             {
-                docs = ((SyntaxString) source.get(4)).stringValue();
+                docs = ((SyntaxString) stx.get(4)).stringValue();
             }
         }
 
-        for (int i = bodyPos; i < source.size(); i++)
+        for (int i = bodyPos; i < stx.size(); i++)
         {
-            SyntaxValue form = source.get(i);
+            SyntaxValue form = stx.get(i);
             SyntaxSexp provide = formIsProvide(form);
             if (provide != null)
             {

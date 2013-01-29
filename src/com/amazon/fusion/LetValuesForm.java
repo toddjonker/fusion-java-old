@@ -21,10 +21,10 @@ final class LetValuesForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = check(source);
+        SyntaxChecker check = check(stx);
         final int letExprSize = check.arityAtLeast(3);
 
         SyntaxChecker checkBindings =
@@ -82,7 +82,7 @@ final class LetValuesForm
             names = SyntaxSexp.make(names.getLocation(), wrappedNames);
 
             SyntaxValue boundExpr = binding.get(1);
-            boundExpr = ctx.expand(env, boundExpr);
+            boundExpr = expander.expand(env, boundExpr);
             binding = SyntaxSexp.make(binding.getLocation(),
                                       names,
                                       boundExpr);
@@ -94,18 +94,18 @@ final class LetValuesForm
                                        expandedForms);
 
         expandedForms = new SyntaxValue[letExprSize];
-        expandedForms[0] = source.get(0);
+        expandedForms[0] = stx.get(0);
         expandedForms[1] = bindingForms;
 
         for (int i = 2; i < letExprSize; i++)
         {
-            SyntaxValue subform = source.get(i);
+            SyntaxValue subform = stx.get(i);
             subform = subform.addWrap(localWrap);
-            expandedForms[i] = ctx.expand(bodyEnv, subform);
+            expandedForms[i] = expander.expand(bodyEnv, subform);
         }
 
-        source = SyntaxSexp.make(source.getLocation(), expandedForms);
-        return source;
+        stx = SyntaxSexp.make(stx.getLocation(), expandedForms);
+        return stx;
     }
 
 

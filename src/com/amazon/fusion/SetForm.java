@@ -13,11 +13,10 @@ final class SetForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env,
-                       SyntaxSexp source)
+    SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = check(source);
+        SyntaxChecker check = check(stx);
         check.arityExact(3);
 
         SyntaxSymbol id = check.requiredIdentifier("variable identifier", 1);
@@ -27,22 +26,22 @@ final class SetForm
             throw check.failure("variable has no binding", id);
         }
 
-        SyntaxValue[] children = source.extract();
-        SyntaxValue valueExpr = source.get(2);
-        children[2] = ctx.expand(env, valueExpr);
+        SyntaxValue[] children = stx.extract();
+        SyntaxValue valueExpr = stx.get(2);
+        children[2] = expander.expand(env, valueExpr);
 
-        source = SyntaxSexp.make(source.getLocation(), children);
-        return source;
+        stx = SyntaxSexp.make(stx.getLocation(), children);
+        return stx;
     }
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        CompiledForm valueForm = eval.compile(env, source.get(2));
+        CompiledForm valueForm = eval.compile(env, stx.get(2));
 
-        SyntaxSymbol id = (SyntaxSymbol) source.get(1);
+        SyntaxSymbol id = (SyntaxSymbol) stx.get(1);
         Binding binding = id.resolve();
 
         return binding.compileSet(eval, env, valueForm);

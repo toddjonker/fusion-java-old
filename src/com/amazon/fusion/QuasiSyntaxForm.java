@@ -28,8 +28,7 @@ final class QuasiSyntaxForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander expander, Environment env,
-                       SyntaxSexp stx)
+    SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
         if (stx.size() != 2)
@@ -113,39 +112,39 @@ final class QuasiSyntaxForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxValue node = source.get(1);
+        SyntaxValue node = stx.get(1);
         return compile(eval, env, node, 0);
     }
 
 
     private CompiledForm compile(Evaluator eval, Environment env,
-                                 SyntaxValue source, int depth)
+                                 SyntaxValue stx, int depth)
         throws FusionException
     {
-        if (source instanceof SyntaxSexp)
+        if (stx instanceof SyntaxSexp)
         {
-            return compile(eval, env, (SyntaxSexp) source, depth);
+            return compile(eval, env, (SyntaxSexp) stx, depth);
         }
         else
         {
-            return new CompiledQuoteSyntax(source);
+            return new CompiledQuoteSyntax(stx);
         }
     }
 
 
     private CompiledForm compile(Evaluator eval, Environment env,
-                                 SyntaxSexp source, int depth)
+                                 SyntaxSexp stx, int depth)
         throws FusionException
     {
-        int size = source.size();
-        if (size == 0) return new CompiledQuoteSyntax(source);
+        int size = stx.size();
+        if (size == 0) return new CompiledQuoteSyntax(stx);
 
         if (size == 2)
         {
-            SyntaxValue first = source.get(0);
+            SyntaxValue first = stx.get(0);
             if (first instanceof SyntaxSymbol)
             {
                 Binding binding = ((SyntaxSymbol)first).uncachedResolve();
@@ -155,7 +154,7 @@ final class QuasiSyntaxForm
                 {
                     if (depth == 0)
                     {
-                        SyntaxValue unquotedSyntax = source.get(1);
+                        SyntaxValue unquotedSyntax = stx.get(1);
                         CompiledForm unquotedForm =
                             eval.compile(env, unquotedSyntax);
                         return new CompiledUnsyntax(unquotedSyntax,
@@ -174,7 +173,7 @@ final class QuasiSyntaxForm
         CompiledForm[] children = new CompiledForm[size];
         for (int i = 0; i < size; i++)
         {
-            SyntaxValue orig = source.get(i);
+            SyntaxValue orig = stx.get(i);
             children[i] = compile(eval, env, orig, depth);
             same &= (children[i] instanceof CompiledQuoteSyntax);
         }
@@ -182,10 +181,10 @@ final class QuasiSyntaxForm
         if (same)
         {
             // There's no unsyntax within the children, so use the original.
-            return new CompiledQuoteSyntax(source);
+            return new CompiledQuoteSyntax(stx);
         }
 
-        return new CompiledQuasiSyntaxSexp(source.getLocation(), children);
+        return new CompiledQuasiSyntaxSexp(stx.getLocation(), children);
     }
 
 

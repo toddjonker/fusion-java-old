@@ -98,7 +98,7 @@ final class DefineForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander expander, Environment env, SyntaxSexp stx)
+    SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
         // Two phase expansion.

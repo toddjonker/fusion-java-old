@@ -28,14 +28,13 @@ final class LambdaForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env,
-                       SyntaxSexp source)
+    SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = check(source);
+        SyntaxChecker check = check(stx);
         int arity = check.arityAtLeast(3);
 
-        SyntaxValue[] children = source.extract();
+        SyntaxValue[] children = stx.extract();
 
         int bodyStart;
         SyntaxValue maybeDoc = children[2];
@@ -86,12 +85,12 @@ final class LambdaForm
         {
             SyntaxValue bodyForm = children[i];
             bodyForm = bodyForm.addWrap(localWrap);
-            bodyForm = ctx.expand(bodyEnv, bodyForm);
+            bodyForm = expander.expand(bodyEnv, bodyForm);
             children[i] = bodyForm;
         }
 
-        source = SyntaxSexp.make(source.getLocation(), children);
-        return source;
+        stx = SyntaxSexp.make(stx.getLocation(), children);
+        return stx;
     }
 
 
@@ -130,16 +129,16 @@ final class LambdaForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
         String doc;
         int bodyStart;
 
         {
-            SyntaxValue maybeDoc = source.get(2);
+            SyntaxValue maybeDoc = stx.get(2);
             if (maybeDoc.getType() == SyntaxValue.Type.STRING
-                && source.size() > 3)
+                && stx.size() > 3)
             {
                 doc = ((SyntaxString) maybeDoc).stringValue();
                 if (doc != null) doc = doc.trim();
@@ -155,18 +154,18 @@ final class LambdaForm
         // Dummy environment to keep track of depth
         env = new LocalEnvironment(env, SyntaxSymbol.EMPTY_ARRAY);
 
-        CompiledForm body = BeginForm.compile(eval, env, source, bodyStart);
+        CompiledForm body = BeginForm.compile(eval, env, stx, bodyStart);
 
-        boolean isRest = (source.get(1) instanceof SyntaxSymbol);
+        boolean isRest = (stx.get(1) instanceof SyntaxSymbol);
         if (isRest)
         {
-            SyntaxSymbol identifier = (SyntaxSymbol) source.get(1);
+            SyntaxSymbol identifier = (SyntaxSymbol) stx.get(1);
             Binding binding = identifier.resolve();
             return new CompiledLambdaRest(doc, binding.getName(), body);
         }
         else
         {
-            String[] argNames = determineArgNames((SyntaxSexp) source.get(1));
+            String[] argNames = determineArgNames((SyntaxSexp) stx.get(1));
             switch (argNames.length)
             {
                 case 1:

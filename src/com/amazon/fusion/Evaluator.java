@@ -396,11 +396,11 @@ final class Evaluator
      * Similar to Racket expand-syntax.
      * Doesn't enrich the syntax's lexical context.
      */
-    SyntaxValue expandSyntax(Environment env, SyntaxValue source)
+    SyntaxValue expandSyntax(Environment env, SyntaxValue topLevelStx)
         throws FusionException
     {
-        Expander ctx = new Expander(this);
-        return ctx.expand(env, source);
+        Expander expander = new Expander(this);
+        return expander.expand(env, topLevelStx);
     }
 
 

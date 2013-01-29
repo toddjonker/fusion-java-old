@@ -41,20 +41,20 @@ final class BeginForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        int size = source.size();
+        int size = stx.size();
 
         SyntaxValue[] expandedChildren = new SyntaxValue[size];
-        expandedChildren[0] = source.get(0);
+        expandedChildren[0] = stx.get(0);
 
         for (int i = 1; i < size; i++)
         {
-            SyntaxValue subform = source.get(i);
-            expandedChildren[i] = ctx.expand(env, subform);
+            SyntaxValue subform = stx.get(i);
+            expandedChildren[i] = expander.expand(env, subform);
         }
-        return SyntaxSexp.make(source.getLocation(), expandedChildren);
+        return SyntaxSexp.make(stx.getLocation(), expandedChildren);
     }
 
 
@@ -62,33 +62,33 @@ final class BeginForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        return compile(eval, env, source, 1, source.size());
+        return compile(eval, env, stx, 1, stx.size());
     }
 
 
     static CompiledForm compile(Evaluator eval, Environment env,
-                                SyntaxSexp source, int from, int to)
+                                SyntaxSexp stx, int from, int to)
         throws FusionException
     {
         int size = to - from;
 
         if (size == 0) return CompiledVoid.SINGLETON;
 
-        if (size == 1) return eval.compile(env, source.get(from));
+        if (size == 1) return eval.compile(env, stx.get(from));
 
-        CompiledForm[] subforms = eval.compile(env, source, from, to);
+        CompiledForm[] subforms = eval.compile(env, stx, from, to);
         return new CompiledBegin(subforms);
     }
 
 
     static CompiledForm compile(Evaluator eval, Environment env,
-                                SyntaxSexp source, int from)
+                                SyntaxSexp stx, int from)
         throws FusionException
     {
-        return compile(eval, env, source, from, source.size());
+        return compile(eval, env, stx, from, stx.size());
     }
 
 
