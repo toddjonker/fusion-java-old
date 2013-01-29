@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -26,13 +26,13 @@ final class LetForm
      * {@code ((letrec ((f (lambda (v ...) b ...))) f) e ...)}
      */
     @Override
-    SyntaxValue expandOnce(Evaluator eval, SyntaxSexp source)
+    SyntaxValue expandOnce(Expander expander, SyntaxSexp stx)
         throws SyntaxFailure
     {
-        SyntaxChecker check = check(source);
+        SyntaxChecker check = check(stx);
         final int letExprSize = check.arityAtLeast(3);
 
-        SyntaxSymbol loopName = checkForName(source);
+        SyntaxSymbol loopName = checkForName(stx);
         int bindingPos = (loopName == null ? 1 : 2);
         if (letExprSize < bindingPos + 2)
         {
@@ -61,11 +61,11 @@ final class LetForm
 
         // Build the lambda
         subforms = new SyntaxValue[letExprSize - bindingPos + 1];
-        subforms[0] = eval.makeKernelIdentifier("lambda");
+        subforms[0] = expander.getEvaluator().makeKernelIdentifier("lambda");
         subforms[1] = formals;
         for (int i = bindingPos + 1; i < letExprSize; i++)
         {
-            SyntaxValue bodyForm = source.get(i);
+            SyntaxValue bodyForm = stx.get(i);
             subforms[i - bindingPos + 1] = bodyForm;
         }
         SyntaxSexp lambdaForm = SyntaxSexp.make(null, subforms);
@@ -79,7 +79,7 @@ final class LetForm
             SyntaxSexp binding  = SyntaxSexp.make(loopName, lambdaForm);
             SyntaxSexp bindings = SyntaxSexp.make(binding);
             SyntaxSexp letrec   =
-                SyntaxSexp.make(eval.makeKernelIdentifier("letrec"),
+                SyntaxSexp.make(expander.getEvaluator().makeKernelIdentifier("letrec"),
                                 bindings,
                                 loopName);
             subforms[0] = letrec;
@@ -96,7 +96,7 @@ final class LetForm
             subforms[i + 1] = binding.get(1);
         }
 
-        SyntaxSexp result = SyntaxSexp.make(source.getLocation(), subforms);
+        SyntaxSexp result = SyntaxSexp.make(stx.getLocation(), subforms);
         return result;
     }
 

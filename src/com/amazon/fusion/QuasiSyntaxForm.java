@@ -28,7 +28,7 @@ final class QuasiSyntaxForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env,
+    SyntaxValue expand(Evaluator eval, Expander expander, Environment env,
                        SyntaxSexp stx)
         throws FusionException
     {
@@ -40,37 +40,35 @@ final class QuasiSyntaxForm
         }
 
         SyntaxValue subform = stx.get(1);
-        subform = expand(eval, ctx, env, subform, 0);
+        subform = expand(expander, env, subform, 0);
 
         stx = SyntaxSexp.make(stx.getLocation(), stx.get(0), subform);
         return stx;
     }
 
-    private SyntaxValue expand(Evaluator eval, Expander ctx,
-                               Environment env,
-                               SyntaxValue source, int depth)
+    private SyntaxValue expand(Expander expander, Environment env,
+                               SyntaxValue stx, int depth)
         throws FusionException
     {
         // TODO FUSION-46 handle unsyntax inside lists and structs
-        if (source instanceof SyntaxSexp)
+        if (stx instanceof SyntaxSexp)
         {
-            return expand(eval, ctx, env, (SyntaxSexp) source, depth);
+            return expand(expander, env, (SyntaxSexp) stx, depth);
         }
         else
         {
-            return source;
+            return stx;
         }
     }
 
-    private SyntaxValue expand(Evaluator eval, Expander ctx,
-                               Environment env,
-                               SyntaxSexp source, int depth)
+    private SyntaxValue expand(Expander expander, Environment env,
+                               SyntaxSexp stx, int depth)
         throws FusionException
     {
-        int size = source.size();
-        if (size == 0) return source;
+        int size = stx.size();
+        if (size == 0) return stx;
 
-        SyntaxValue[] children = source.extract();
+        SyntaxValue[] children = stx.extract();
         SyntaxValue first = children[0];
         if (first instanceof SyntaxSymbol)
         {
@@ -80,21 +78,21 @@ final class QuasiSyntaxForm
 
             if (myUsBinding == binding)
             {
-                check(source).arityExact(2);
+                check(stx).arityExact(2);
 
                 if (depth < 1)
                 {
                     SyntaxValue subform = children[1];
-                    children[1] = ctx.expand(env, subform);
-                    source = SyntaxSexp.make(source.getLocation(), children);
-                    return source;
+                    children[1] = expander.expand(env, subform);
+                    stx = SyntaxSexp.make(stx.getLocation(), children);
+                    return stx;
                 }
 
                 depth--;
             }
             else if (myQsBinding == binding)
             {
-                check(source).arityExact(2);
+                check(stx).arityExact(2);
 
                 depth++;
             }
@@ -102,12 +100,12 @@ final class QuasiSyntaxForm
 
         for (int i = 0; i < size; i++)
         {
-            SyntaxValue subform = source.get(i);
-            children[i] = expand(eval, ctx, env, subform, depth);
+            SyntaxValue subform = stx.get(i);
+            children[i] = expand(expander, env, subform, depth);
         }
 
-        source = SyntaxSexp.make(source.getLocation(), children);
-        return source;
+        stx = SyntaxSexp.make(stx.getLocation(), children);
+        return stx;
     }
 
 

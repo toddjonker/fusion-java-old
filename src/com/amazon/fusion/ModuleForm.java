@@ -47,20 +47,21 @@ final class ModuleForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander ctx,
+    SyntaxValue expand(Evaluator ev, Expander expander,
                        Environment envOutsideModule, SyntaxSexp source)
         throws FusionException
     {
         SyntaxChecker check = check(source);
-        if (! ctx.isTopLevel())
+        if (! expander.isTopLevel())
         {
             throw check.failure("`module` declaration not at top-level");
         }
 
         // TODO module-begin
-        ctx = ctx.nestModule();
+        Evaluator eval = expander.getEvaluator();
+        expander = expander.nestModule();
 
-        ModuleInstance kernel = eval.findKernel();
+        ModuleInstance kernel = expander.getKernel();
 
         // TODO precompute this?
         IdentityHashMap<Binding, Object> stops =
@@ -167,7 +168,7 @@ final class ModuleForm
                 if (form instanceof SyntaxSexp)
                 {
                     expanded =
-                        ((SyntaxSexp)form).partialExpand(eval, ctx,
+                        ((SyntaxSexp)form).partialExpand(expander,
                                                          moduleNamespace,
                                                          stops);
                     if (expanded instanceof SyntaxSexp)
@@ -178,7 +179,7 @@ final class ModuleForm
                         if (binding == defineBinding)
                         {
                             SyntaxSymbol identifier =
-                                DefineForm.boundIdentifier(eval,
+                                DefineForm.boundIdentifier(expander.getEvaluator(),
                                                            moduleNamespace,
                                                            sexp);
                             identifier = identifier.stripImmediateEnvWrap(moduleNamespace);
@@ -189,7 +190,7 @@ final class ModuleForm
                             try
                             {
                                 expanded =
-                                    eval.expandSyntax(moduleNamespace, expanded);
+                                    expander.expand(moduleNamespace, expanded);
                                 // TODO this is getting compiled twice
                                 CompiledForm compiled =
                                     eval.compile(moduleNamespace, expanded);
@@ -282,7 +283,7 @@ final class ModuleForm
         {
             if (! prepared.next())
             {
-                stx = ctx.expand(moduleNamespace, stx);
+                stx = expander.expand(moduleNamespace, stx);
             }
             subforms[i++] = stx;
         }

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -19,17 +19,17 @@ final class MacroTransformer
 
 
     @Override
-    SyntaxValue expandOnce(Evaluator eval, SyntaxSexp source)
+    SyntaxValue expandOnce(Expander expander, SyntaxSexp stx)
         throws SyntaxFailure
     {
         Object expanded;
         try
         {
-            expanded = eval.callNonTail(myTransformer, source);
+            expanded = expander.getEvaluator().callNonTail(myTransformer, stx);
         }
         catch (SyntaxFailure e)
         {
-            e.addContext(source);
+            e.addContext(stx);
             throw e;
         }
         catch (FusionException e)
@@ -37,7 +37,7 @@ final class MacroTransformer
             String message =
                 "Error expanding macro: " + e.getMessage();
             SyntaxFailure fail =
-                new SyntaxFailure(getInferredName(), message, source);
+                new SyntaxFailure(getInferredName(), message, stx);
             fail.initCause(e);
             throw fail;
         }
@@ -50,9 +50,9 @@ final class MacroTransformer
         {
             String message =
                 "Transformer returned non-syntax result: " +
-                safeWriteToString(eval, expanded);
+                safeWriteToString(expander.getEvaluator(), expanded);
             throw new SyntaxFailure(myTransformer.identify(), message,
-                                    source);
+                                    stx);
         }
     }
 }

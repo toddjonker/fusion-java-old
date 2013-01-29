@@ -22,13 +22,13 @@ final class DefineForm
 
 
     static SyntaxSymbol boundIdentifier(Evaluator eval, Environment env,
-                                        SyntaxSexp source)
+                                        SyntaxSexp defineStx)
         throws SyntaxFailure
     {
-        SyntaxChecker check = new SyntaxChecker("define", source);
+        SyntaxChecker check = new SyntaxChecker("define", defineStx);
         check.arityAtLeast(3);
 
-        if (source.get(1).getType() == SyntaxValue.Type.SEXP)
+        if (defineStx.get(1).getType() == SyntaxValue.Type.SEXP)
         {
             SyntaxChecker sigCheck =
                 check.subformSeq("procedure signature", 1);
@@ -41,16 +41,16 @@ final class DefineForm
     }
 
     // (define (p f ...) d? b ...+) => (define p d? (lambda (f ...) b ...))
-    SyntaxSexp expandImplicitLambda(Evaluator eval, SyntaxSexp source)
+    SyntaxSexp expandImplicitLambda(Expander expander, SyntaxSexp stx)
         throws SyntaxFailure
     {
-        SyntaxChecker defineChecker = check(source);
+        SyntaxChecker defineChecker = check(stx);
         int defineArity = defineChecker.arityAtLeast(3);
 
-        if (source.get(1).getType() != SyntaxValue.Type.SEXP)
+        if (stx.get(1).getType() != SyntaxValue.Type.SEXP)
         {
             // No implicit lambda
-            return source;
+            return stx;
         }
 
         SyntaxChecker check =
@@ -66,7 +66,7 @@ final class DefineForm
                 check.requiredIdentifier("procedure formal argument", i);
         }
 
-        SyntaxValue[] origDefineElts = source.extract();
+        SyntaxValue[] origDefineElts = stx.extract();
         boolean hasDoc =
             (defineArity > 3 &&
              origDefineElts[2].getType() == SyntaxValue.Type.STRING);
@@ -77,7 +77,7 @@ final class DefineForm
         assert bodyLen > 0;
 
         SyntaxValue[] lambda = new SyntaxValue[2 + bodyLen];
-        lambda[0] = eval.makeKernelIdentifier("lambda");
+        lambda[0] = expander.getEvaluator().makeKernelIdentifier("lambda");
         lambda[1] = SyntaxSexp.make(procFormals);
         for (int p = 2, i = bodyStart; i < defineArity; p++, i++)
         {
@@ -93,23 +93,23 @@ final class DefineForm
         }
         newDefineElts[2 + docOffset] = SyntaxSexp.make(lambda);
 
-        return SyntaxSexp.make(source.getLocation(), newDefineElts);
+        return SyntaxSexp.make(stx.getLocation(), newDefineElts);
     }
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
         // Two phase expansion.
         // TODO rewrite this as a macro, replace this entire built-in form
         // with define_values.
-        source = expandImplicitLambda(eval, source);
+        stx = expandImplicitLambda(expander, stx);
 
-        SyntaxChecker check = check(source);
+        SyntaxChecker check = check(stx);
         int arity = check.arityAtLeast(3);
 
-        SyntaxValue[] children = source.extract();
+        SyntaxValue[] children = stx.extract();
 
         // If check2 != check, this will always succeed since we've already
         // checked the identifier.  So this will only cause an error when
@@ -131,7 +131,7 @@ final class DefineForm
         // Update the identifier with its binding.
         // This is just a way to pass the binding instance through to the
         // runtime stage so compile() below can reuse it.
-        children[1] = ctx.expand(env, identifier);
+        children[1] = expander.expand(env, identifier);
 
         int bodyPos;
         SyntaxValue maybeDoc = children[2];
@@ -150,11 +150,11 @@ final class DefineForm
             throw check.failure("Too many subforms");
         }
 
-        SyntaxValue valueStx = source.get(bodyPos);
-        children[bodyPos] = ctx.expand(env, valueStx);
+        SyntaxValue valueStx = stx.get(bodyPos);
+        children[bodyPos] = expander.expand(env, valueStx);
 
-        source = SyntaxSexp.make(source.getLocation(), children);
-        return source;
+        stx = SyntaxSexp.make(stx.getLocation(), children);
+        return stx;
     }
 
 
@@ -162,14 +162,14 @@ final class DefineForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        int arity = source.size();
-        SyntaxValue valueSource = source.get(arity-1);
+        int arity = stx.size();
+        SyntaxValue valueSource = stx.get(arity-1);
         CompiledForm valueForm = eval.compile(env, valueSource);
 
-        SyntaxSymbol identifier = (SyntaxSymbol) source.get(1);
+        SyntaxSymbol identifier = (SyntaxSymbol) stx.get(1);
         TopBinding binding = (TopBinding) identifier.getBinding();
         CompiledForm compiled = binding.compileDefine(eval, env, valueForm);
 
@@ -177,7 +177,7 @@ final class DefineForm
             && eval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
         {
             // We have documentation. Sort of.
-            SyntaxString docString = (SyntaxString) source.get(2);
+            SyntaxString docString = (SyntaxString) stx.get(2);
             BindingDoc doc = new BindingDoc(identifier.stringValue(),
                                             null, // kind
                                             null, // usage

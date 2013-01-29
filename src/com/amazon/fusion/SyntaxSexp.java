@@ -170,9 +170,8 @@ final class SyntaxSexp
     }
 
 
-    SyntaxValue partialExpand(Evaluator eval, Expander ctx,
-                              Environment env,
-                              IdentityHashMap<Binding, Object> stops)
+    final SyntaxValue partialExpand(Expander expander, Environment env,
+                                    IdentityHashMap<Binding, Object> stops)
         throws FusionException
     {
         int len = size();
@@ -185,7 +184,7 @@ final class SyntaxSexp
         if (first instanceof SyntaxSymbol)
         {
             SyntaxSymbol maybeMacro = (SyntaxSymbol) first;
-            SyntaxValue prepared = ctx.expand(env, maybeMacro);
+            SyntaxValue prepared = expander.expand(env, maybeMacro);
             // Make sure we don't have to structurally change this sexp
             assert prepared == maybeMacro;
 
@@ -200,11 +199,11 @@ final class SyntaxSexp
             {
                 // We found a static top-level macro binding!
                 SyntaxValue expanded =
-                    ((MacroTransformer)resolved).expandOnce(eval, this);
+                    ((MacroTransformer)resolved).expandOnce(expander, this);
                 if (expanded instanceof SyntaxSexp)
                 {
                     // TODO replace recursion with iteration
-                    return ((SyntaxSexp)expanded).partialExpand(eval, ctx, env,
+                    return ((SyntaxSexp)expanded).partialExpand(expander, env,
                                                                 stops);
                 }
                 return expanded;

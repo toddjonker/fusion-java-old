@@ -24,6 +24,17 @@ final class Expander
         myContext = ctx;
     }
 
+
+    Evaluator getEvaluator()
+    {
+        return myEval;
+    }
+
+    ModuleInstance getKernel()
+    {
+        return myEval.findKernel();
+    }
+
     boolean isTopLevel()
     {
         return myContext == Context.TOP;
