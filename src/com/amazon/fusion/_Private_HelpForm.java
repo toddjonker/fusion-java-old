@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -78,7 +78,8 @@ public final class _Private_HelpForm
     }
 
     @Override
-    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env,
+                       SyntaxSexp source)
         throws FusionException
     {
         SyntaxChecker check = check(source);
@@ -97,7 +98,7 @@ public final class _Private_HelpForm
         for (int i = 1; i < arity; i++)
         {
             SyntaxSymbol identifier = check.requiredIdentifier(i);
-            children[i] = identifier.expand(eval, env);
+            children[i] = eval.expand(ctx, env, identifier);
         }
 
         source = SyntaxSexp.make(source.getLocation(), children);

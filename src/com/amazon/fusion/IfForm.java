@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -24,11 +24,11 @@ final class IfForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env, SyntaxSexp source)
         throws FusionException
     {
         check(source).arityExact(4);
-        return super.expand(eval, env, source);
+        return super.expand(eval, ctx, env, source);
     }
 
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -21,7 +21,8 @@ final class ForListForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env,
+                       SyntaxSexp source)
         throws FusionException
     {
         SyntaxChecker check = check(source);
@@ -46,7 +47,7 @@ final class ForListForm
             SyntaxValue subform = checkPair.requiredForm("bound value", 1);
 
             // Bound values use the outer lexical environment
-            boundValues[i] = subform.expand(eval, env);
+            boundValues[i] = eval.expand(ctx, env, subform);
         }
 
         LocalEnvironment bodyEnv = new LocalEnvironment(env, boundNames);
@@ -74,7 +75,7 @@ final class ForListForm
         {
             SyntaxValue bodyStx = source.get(i);
             bodyStx = bodyStx.addWrap(localWrap);
-            expandedForms[i] = bodyStx.expand(eval, bodyEnv);
+            expandedForms[i] = eval.expand(ctx, bodyEnv, bodyStx);
         }
 
         source = SyntaxSexp.make(source.getLocation(), expandedForms);

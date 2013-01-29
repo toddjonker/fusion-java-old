@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -232,7 +232,7 @@ final class SyntaxStruct
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Environment env)
+    SyntaxValue doExpand(Evaluator eval, ExpandContext ctx, Environment env)
         throws FusionException
     {
         if (myStruct.size() == 0)
@@ -255,7 +255,7 @@ final class SyntaxStruct
                 {
                     subform = subform.addWraps(myWraps);
                 }
-                subform = subform.expand(eval, env);
+                subform = eval.expand(ctx, env, subform);
                 entry.setValue(subform);
             }
             else
@@ -271,7 +271,7 @@ final class SyntaxStruct
                     {
                         subform = subform.addWraps(myWraps);
                     }
-                    newChildren[i] = subform.expand(eval, env);
+                    newChildren[i] = eval.expand(ctx, env, subform);
                 }
                 entry.setValue(newChildren);
             }

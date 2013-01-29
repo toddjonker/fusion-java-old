@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -19,8 +19,8 @@ abstract class MacroForm
 
 
     @Override
-    final SyntaxValue expand(Evaluator eval, Environment env,
-                             SyntaxSexp source)
+    final SyntaxValue expand(Evaluator eval, ExpandContext ctx,
+                             Environment env, SyntaxSexp source)
         throws FusionException
     {
         // TODO FUSION-39 we create two MarkWrap instances here
@@ -31,7 +31,8 @@ abstract class MacroForm
         SyntaxValue expanded = expandOnce(eval, source);
         expanded = expanded.addOrRemoveMark(mark);
 
-        return expanded.expand(eval, env);
+        // TODO tail
+        return eval.expand(ctx, env, expanded);
     }
 
     /**

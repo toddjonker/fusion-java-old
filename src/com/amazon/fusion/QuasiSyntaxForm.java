@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -28,7 +28,8 @@ final class QuasiSyntaxForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp stx)
+    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env,
+                       SyntaxSexp stx)
         throws FusionException
     {
         if (stx.size() != 2)
@@ -39,20 +40,21 @@ final class QuasiSyntaxForm
         }
 
         SyntaxValue subform = stx.get(1);
-        subform = expand(eval, env, subform, 0);
+        subform = expand(eval, ctx, env, subform, 0);
 
         stx = SyntaxSexp.make(stx.getLocation(), stx.get(0), subform);
         return stx;
     }
 
-    private SyntaxValue expand(Evaluator eval, Environment env,
+    private SyntaxValue expand(Evaluator eval, ExpandContext ctx,
+                               Environment env,
                                SyntaxValue source, int depth)
         throws FusionException
     {
         // TODO FUSION-46 handle unsyntax inside lists and structs
         if (source instanceof SyntaxSexp)
         {
-            return expand(eval, env, (SyntaxSexp) source, depth);
+            return expand(eval, ctx, env, (SyntaxSexp) source, depth);
         }
         else
         {
@@ -60,7 +62,8 @@ final class QuasiSyntaxForm
         }
     }
 
-    private SyntaxValue expand(Evaluator eval, Environment env,
+    private SyntaxValue expand(Evaluator eval, ExpandContext ctx,
+                               Environment env,
                                SyntaxSexp source, int depth)
         throws FusionException
     {
@@ -82,7 +85,7 @@ final class QuasiSyntaxForm
                 if (depth < 1)
                 {
                     SyntaxValue subform = children[1];
-                    children[1] = subform.expand(eval, env);
+                    children[1] = eval.expand(ctx, env, subform);
                     source = SyntaxSexp.make(source.getLocation(), children);
                     return source;
                 }
@@ -100,7 +103,7 @@ final class QuasiSyntaxForm
         for (int i = 0; i < size; i++)
         {
             SyntaxValue subform = source.get(i);
-            children[i] = expand(eval, env, subform, depth);
+            children[i] = expand(eval, ctx, env, subform, depth);
         }
 
         source = SyntaxSexp.make(source.getLocation(), children);

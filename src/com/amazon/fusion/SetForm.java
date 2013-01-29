@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -13,7 +13,8 @@ final class SetForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env,
+                       SyntaxSexp source)
         throws FusionException
     {
         SyntaxChecker check = check(source);
@@ -28,7 +29,7 @@ final class SetForm
 
         SyntaxValue[] children = source.extract();
         SyntaxValue valueExpr = source.get(2);
-        children[2] = valueExpr.expand(eval, env);
+        children[2] = eval.expand(ctx, env, valueExpr);
 
         source = SyntaxSexp.make(source.getLocation(), children);
         return source;

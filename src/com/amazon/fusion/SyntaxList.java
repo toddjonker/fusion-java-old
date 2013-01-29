@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -87,7 +87,7 @@ final class SyntaxList
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Environment env)
+    SyntaxValue doExpand(Evaluator eval, ExpandContext ctx, Environment env)
         throws FusionException
     {
         int len = size();
@@ -98,7 +98,7 @@ final class SyntaxList
         for (int i = 0; i < len; i++)
         {
             SyntaxValue subform = children[i];
-            children[i] = subform.expand(eval, env);
+            children[i] = eval.expand(ctx, env, subform);
         }
 
         SyntaxList expanded = SyntaxList.make(this.getLocation(), children);

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -47,12 +47,18 @@ final class ModuleForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval,
-                        Environment envOutsideModule,
-                        SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, ExpandContext ctx,
+                       Environment envOutsideModule, SyntaxSexp source)
         throws FusionException
     {
         SyntaxChecker check = check(source);
+        if (! ctx.isTopLevel())
+        {
+            throw check.failure("`module` declaration not at top-level");
+        }
+
+        // TODO module-begin
+        ctx = ctx.nestModule();
 
         ModuleInstance kernel = eval.findKernel();
 
@@ -161,7 +167,8 @@ final class ModuleForm
                 if (form instanceof SyntaxSexp)
                 {
                     expanded =
-                        ((SyntaxSexp)form).partialExpand(eval, moduleNamespace,
+                        ((SyntaxSexp)form).partialExpand(eval, ctx,
+                                                         moduleNamespace,
                                                          stops);
                     if (expanded instanceof SyntaxSexp)
                     {
@@ -182,7 +189,7 @@ final class ModuleForm
                             try
                             {
                                 expanded =
-                                    eval.expand(moduleNamespace, expanded);
+                                    eval.expandSyntax(moduleNamespace, expanded);
                                 // TODO this is getting compiled twice
                                 CompiledForm compiled =
                                     eval.compile(moduleNamespace, expanded);
@@ -275,7 +282,7 @@ final class ModuleForm
         {
             if (! prepared.next())
             {
-                stx = stx.expand(eval, moduleNamespace);
+                stx = eval.expand(ctx, moduleNamespace, stx);
             }
             subforms[i++] = stx;
         }

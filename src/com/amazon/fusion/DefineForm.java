@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -98,7 +98,7 @@ final class DefineForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env, SyntaxSexp source)
         throws FusionException
     {
         // Two phase expansion.
@@ -131,7 +131,7 @@ final class DefineForm
         // Update the identifier with its binding.
         // This is just a way to pass the binding instance through to the
         // runtime stage so compile() below can reuse it.
-        children[1] = identifier.expand(eval, env);
+        children[1] = eval.expand(ctx, env, identifier);
 
         int bodyPos;
         SyntaxValue maybeDoc = children[2];
@@ -151,7 +151,7 @@ final class DefineForm
         }
 
         SyntaxValue valueStx = source.get(bodyPos);
-        children[bodyPos] = valueStx.expand(eval, env);
+        children[bodyPos] = eval.expand(ctx, env, valueStx);
 
         source = SyntaxSexp.make(source.getLocation(), children);
         return source;

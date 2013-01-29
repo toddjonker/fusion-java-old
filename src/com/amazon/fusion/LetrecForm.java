@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -19,7 +19,8 @@ final class LetrecForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env,
+                       SyntaxSexp source)
         throws FusionException
     {
         SyntaxChecker check = check(source);
@@ -54,7 +55,7 @@ final class LetrecForm
             SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
             SyntaxValue boundExpr = binding.get(1);
             boundExpr = boundExpr.addWrap(localWrap);
-            boundExpr = boundExpr.expand(eval, bodyEnv);
+            boundExpr = eval.expand(ctx, bodyEnv, boundExpr);
             binding = SyntaxSexp.make(binding.getLocation(),
                                       name,
                                       boundExpr);
@@ -72,7 +73,7 @@ final class LetrecForm
         {
             SyntaxValue subform = source.get(i);
             subform = subform.addWrap(localWrap);
-            expandedForms[i] = subform.expand(eval, bodyEnv);
+            expandedForms[i] = eval.expand(ctx, bodyEnv, subform);
         }
 
         source = SyntaxSexp.make(source.getLocation(), expandedForms);

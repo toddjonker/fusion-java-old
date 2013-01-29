@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -95,7 +95,8 @@ abstract class SyntaxValue
     }
 
 
-    SyntaxValue expand(Evaluator eval, Environment env)
+    /** Don't call directly! Go through the evaluator. */
+    SyntaxValue doExpand(Evaluator eval, ExpandContext ctx, Environment env)
         throws FusionException
     {
         return this;

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -126,7 +126,7 @@ final class SyntaxSexp
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Environment env)
+    SyntaxValue doExpand(Evaluator eval, ExpandContext ctx, Environment env)
         throws FusionException
     {
         int len = size();
@@ -138,7 +138,7 @@ final class SyntaxSexp
         SyntaxValue[] children = extract();
 
         SyntaxValue first = children[0];
-        first = first.expand(eval, env);
+        first = eval.expand(ctx, env, first);
         children[0] = first;
         if (first instanceof SyntaxSymbol)
         {
@@ -152,7 +152,7 @@ final class SyntaxSexp
                 SyntaxSexp form =
                     SyntaxSexp.make(getLocation(), children);
                 SyntaxValue expandedExpr =
-                    ((SyntacticForm)resolved).expand(eval, env, form);
+                    ((SyntacticForm)resolved).expand(eval, ctx, env, form);
                 return expandedExpr;
             }
         }
@@ -161,7 +161,7 @@ final class SyntaxSexp
         for (int i = 1; i < len; i++)
         {
             SyntaxValue subform = children[i];
-            children[i] = subform.expand(eval, env);
+            children[i] = eval.expand(ctx, env, subform);
         }
 
         SyntaxSexp result = SyntaxSexp.make(getLocation(), children);
@@ -169,9 +169,10 @@ final class SyntaxSexp
     }
 
 
-    SyntaxValue partialExpand(Evaluator eval, Environment env,
+    SyntaxValue partialExpand(Evaluator eval, ExpandContext ctx,
+                              Environment env,
                               IdentityHashMap<Binding, Object> stops)
-        throws SyntaxFailure
+        throws FusionException
     {
         int len = size();
         if (len == 0)
@@ -183,7 +184,7 @@ final class SyntaxSexp
         if (first instanceof SyntaxSymbol)
         {
             SyntaxSymbol maybeMacro = (SyntaxSymbol) first;
-            SyntaxValue prepared = maybeMacro.expand(eval, env);
+            SyntaxValue prepared = eval.expand(ctx, env, maybeMacro);
             // Make sure we don't have to structurally change this sexp
             assert prepared == maybeMacro;
 
@@ -202,7 +203,7 @@ final class SyntaxSexp
                 if (expanded instanceof SyntaxSexp)
                 {
                     // TODO replace recursion with iteration
-                    return ((SyntaxSexp)expanded).partialExpand(eval, env,
+                    return ((SyntaxSexp)expanded).partialExpand(eval, ctx, env,
                                                                 stops);
                 }
                 return expanded;

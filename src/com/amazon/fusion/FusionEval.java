@@ -24,7 +24,7 @@ final class FusionEval
 
         // TODO this should partial-expand and splice begins
 
-        source = eval.expand(ns, source);
+        source = eval.expandSyntax(ns, source);
         CompiledForm compiled = eval.compile(ns, source);
         source = null; // Don't hold garbage
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -41,7 +41,7 @@ final class BeginForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env, SyntaxSexp source)
         throws FusionException
     {
         int size = source.size();
@@ -52,7 +52,7 @@ final class BeginForm
         for (int i = 1; i < size; i++)
         {
             SyntaxValue subform = source.get(i);
-            expandedChildren[i] = subform.expand(eval, env);
+            expandedChildren[i] = eval.expand(ctx, env, subform);
         }
         return SyntaxSexp.make(source.getLocation(), expandedChildren);
     }

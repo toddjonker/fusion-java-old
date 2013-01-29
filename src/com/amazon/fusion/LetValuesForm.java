@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -21,7 +21,7 @@ final class LetValuesForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env, SyntaxSexp source)
         throws FusionException
     {
         SyntaxChecker check = check(source);
@@ -82,7 +82,7 @@ final class LetValuesForm
             names = SyntaxSexp.make(names.getLocation(), wrappedNames);
 
             SyntaxValue boundExpr = binding.get(1);
-            boundExpr = boundExpr.expand(eval, env);
+            boundExpr = eval.expand(ctx, env, boundExpr);
             binding = SyntaxSexp.make(binding.getLocation(),
                                       names,
                                       boundExpr);
@@ -101,7 +101,7 @@ final class LetValuesForm
         {
             SyntaxValue subform = source.get(i);
             subform = subform.addWrap(localWrap);
-            expandedForms[i] = subform.expand(eval, bodyEnv);
+            expandedForms[i] = eval.expand(ctx, bodyEnv, subform);
         }
 
         source = SyntaxSexp.make(source.getLocation(), expandedForms);

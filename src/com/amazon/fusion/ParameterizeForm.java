@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -22,7 +22,8 @@ final class ParameterizeForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env,
+                       SyntaxSexp source)
         throws FusionException
     {
         SyntaxChecker check = check(source);
@@ -43,10 +44,10 @@ final class ParameterizeForm
             SyntaxSexp binding = (SyntaxSexp) checkPair.form();
 
             SyntaxValue paramExpr = binding.get(0);
-            paramExpr = paramExpr.expand(eval, env);
+            paramExpr = eval.expand(ctx, env, paramExpr);
 
             SyntaxValue boundExpr = binding.get(1);
-            boundExpr = boundExpr.expand(eval, env);
+            boundExpr = eval.expand(ctx, env, boundExpr);
 
             binding = SyntaxSexp.make(binding.getLocation(),
                                       paramExpr, boundExpr);
@@ -64,7 +65,7 @@ final class ParameterizeForm
         for (int i = 2; i < exprSize; i++)
         {
             SyntaxValue bodyExpr = source.get(i);
-            expandedForms[i] = bodyExpr.expand(eval, env);
+            expandedForms[i] = eval.expand(ctx, env, bodyExpr);
         }
 
         source = SyntaxSexp.make(source.getLocation(), expandedForms);

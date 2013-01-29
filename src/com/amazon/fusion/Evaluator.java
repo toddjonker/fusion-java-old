@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -392,13 +392,24 @@ final class Evaluator
     }
 
 
+    /**
+     * Similar to Racket expand-syntax.
+     * Doesn't enrich the syntax's lexical context.
+     */
+    SyntaxValue expandSyntax(Environment env, SyntaxValue source)
+        throws FusionException
+    {
+        ExpandContext ctx = new ExpandContext(this);
+        return source.doExpand(this, ctx, env);
+    }
 
-    // TODO FUSION-43 expansion should recur through here
-    SyntaxValue expand(Environment env, SyntaxValue source)
+
+    SyntaxValue expand(ExpandContext ctx, Environment env, SyntaxValue source)
         throws FusionException
     {
         // TODO FUSION-43 Fail if there are annotations
-        return source.expand(this, env);
+        assert ctx != null;
+        return source.doExpand(this, ctx, env);
     }
 
 

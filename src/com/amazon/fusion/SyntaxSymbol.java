@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -183,7 +183,7 @@ final class SyntaxSymbol
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Environment env)
+    SyntaxValue doExpand(Evaluator eval, ExpandContext ctx, Environment env)
         throws SyntaxFailure
     {
         if (myBinding == null)        // Otherwise we've already been prepared

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -28,7 +28,8 @@ final class LambdaForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env,
+                       SyntaxSexp source)
         throws FusionException
     {
         SyntaxChecker check = check(source);
@@ -85,7 +86,7 @@ final class LambdaForm
         {
             SyntaxValue bodyForm = children[i];
             bodyForm = bodyForm.addWrap(localWrap);
-            bodyForm = bodyForm.expand(eval, bodyEnv);
+            bodyForm = eval.expand(ctx, bodyEnv, bodyForm);
             children[i] = bodyForm;
         }
 
