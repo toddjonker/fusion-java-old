@@ -86,7 +86,7 @@ final class LambdaForm
         {
             SyntaxValue bodyForm = children[i];
             bodyForm = bodyForm.addWrap(localWrap);
-            bodyForm = eval.expand(ctx, bodyEnv, bodyForm);
+            bodyForm = ctx.expand(eval, bodyEnv, bodyForm);
             children[i] = bodyForm;
         }
 

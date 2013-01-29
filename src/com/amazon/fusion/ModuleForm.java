@@ -282,7 +282,7 @@ final class ModuleForm
         {
             if (! prepared.next())
             {
-                stx = eval.expand(ctx, moduleNamespace, stx);
+                stx = ctx.expand(eval, moduleNamespace, stx);
             }
             subforms[i++] = stx;
         }

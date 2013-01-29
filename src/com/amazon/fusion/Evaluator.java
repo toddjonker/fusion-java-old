@@ -400,16 +400,7 @@ final class Evaluator
         throws FusionException
     {
         Expander ctx = new Expander(this);
-        return source.doExpand(this, ctx, env);
-    }
-
-
-    SyntaxValue expand(Expander ctx, Environment env, SyntaxValue source)
-        throws FusionException
-    {
-        // TODO FUSION-43 Fail if there are annotations
-        assert ctx != null;
-        return source.doExpand(this, ctx, env);
+        return ctx.expand(this, env, source);
     }
 
 

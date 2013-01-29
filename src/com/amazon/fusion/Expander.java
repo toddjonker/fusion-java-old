@@ -35,4 +35,22 @@ final class Expander
 
         return new Expander(myEval, Context.MODULE);
     }
+
+
+    SyntaxValue expand(Evaluator eval, Environment env, SyntaxValue stx)
+        throws FusionException
+    {
+        assert myEval == eval;
+        // TODO FUSION-43 Fail if there are annotations on stx
+        return stx.doExpand(myEval, this, env);
+    }
+
+
+    SyntaxValue expand(Evaluator eval, Environment env, SyntacticForm form,
+                       SyntaxSexp stx)
+        throws FusionException
+    {
+        assert myEval == eval;
+        return form.expand(myEval, this, env, stx);
+    }
 }

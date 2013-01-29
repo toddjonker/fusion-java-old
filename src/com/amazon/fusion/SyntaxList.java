@@ -98,7 +98,7 @@ final class SyntaxList
         for (int i = 0; i < len; i++)
         {
             SyntaxValue subform = children[i];
-            children[i] = eval.expand(ctx, env, subform);
+            children[i] = ctx.expand(eval, env, subform);
         }
 
         SyntaxList expanded = SyntaxList.make(this.getLocation(), children);

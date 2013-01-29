@@ -138,7 +138,7 @@ final class SyntaxSexp
         SyntaxValue[] children = extract();
 
         SyntaxValue first = children[0];
-        first = eval.expand(ctx, env, first);
+        first = ctx.expand(eval, env, first);
         children[0] = first;
         if (first instanceof SyntaxSymbol)
         {
@@ -149,10 +149,11 @@ final class SyntaxSexp
                 // We found a static top-level binding to a built-in form or
                 // to a macro. Continue the expansion process.
 
-                SyntaxSexp form =
+                SyntaxSexp form = /// TODO rename
                     SyntaxSexp.make(getLocation(), children);
                 SyntaxValue expandedExpr =
-                    ((SyntacticForm)resolved).expand(eval, ctx, env, form);
+                    ctx.expand(eval, env, (SyntacticForm)resolved, form);
+//                    ((SyntacticForm)resolved).expand(eval, ctx, env, form);
                 return expandedExpr;
             }
         }
@@ -161,7 +162,7 @@ final class SyntaxSexp
         for (int i = 1; i < len; i++)
         {
             SyntaxValue subform = children[i];
-            children[i] = eval.expand(ctx, env, subform);
+            children[i] = ctx.expand(eval, env, subform);
         }
 
         SyntaxSexp result = SyntaxSexp.make(getLocation(), children);
@@ -184,7 +185,7 @@ final class SyntaxSexp
         if (first instanceof SyntaxSymbol)
         {
             SyntaxSymbol maybeMacro = (SyntaxSymbol) first;
-            SyntaxValue prepared = eval.expand(ctx, env, maybeMacro);
+            SyntaxValue prepared = ctx.expand(eval, env, maybeMacro);
             // Make sure we don't have to structurally change this sexp
             assert prepared == maybeMacro;
 

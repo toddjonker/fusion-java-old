@@ -43,7 +43,7 @@ final class DefineSyntaxForm
         // Update the identifier with its binding.
         // This is just a way to pass the binding instance through to the
         // runtime stage so invoke() below can reuse it.
-        children[1] = eval.expand(ctx, env, identifier);
+        children[1] = ctx.expand(eval, env, identifier);
 
         int bodyPos;
         SyntaxValue maybeDoc = children[2];
@@ -62,7 +62,7 @@ final class DefineSyntaxForm
         }
 
         SyntaxValue valueStx = source.get(bodyPos);
-        children[bodyPos] = eval.expand(ctx, env, valueStx);
+        children[bodyPos] = ctx.expand(eval, env, valueStx);
 
         source = SyntaxSexp.make(source.getLocation(), children);
         return source;
