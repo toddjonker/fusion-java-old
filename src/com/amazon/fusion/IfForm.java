@@ -24,21 +24,21 @@ final class IfForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        check(source).arityExact(4);
-        return super.expand(eval, ctx, env, source);
+        check(stx).arityExact(4);
+        return expandArgs(ctx, env, stx);
     }
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp expr)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        CompiledForm testForm = eval.compile(env, expr.get(1));
-        CompiledForm thenForm = eval.compile(env, expr.get(2));
-        CompiledForm elseForm = eval.compile(env, expr.get(3));
+        CompiledForm testForm = eval.compile(env, stx.get(1));
+        CompiledForm thenForm = eval.compile(env, stx.get(2));
+        CompiledForm elseForm = eval.compile(env, stx.get(3));
 
         return new CompiledIf(testForm, thenForm, elseForm);
     }

@@ -19,22 +19,22 @@ final class AssertForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        check(source).arityAtLeast(2);
-        return super.expand(eval, ctx, env, source);
+        check(stx).arityAtLeast(2);
+        return expandArgs(ctx, env, stx);
     }
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp source)
+    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxValue testFormSyntax = source.get(1);
+        SyntaxValue testFormSyntax = stx.get(1);
         CompiledForm testForm = eval.compile(env, testFormSyntax);
 
-        CompiledForm[] messageForms = eval.compile(env, source, 2);
+        CompiledForm[] messageForms = eval.compile(env, stx, 2);
         return new CompiledAssert(testFormSyntax, testForm, messageForms);
     }
 
