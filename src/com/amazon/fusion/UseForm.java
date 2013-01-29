@@ -17,7 +17,7 @@ final class UseForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         requiredForm("module spec", 1, source);

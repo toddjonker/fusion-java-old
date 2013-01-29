@@ -19,7 +19,7 @@ abstract class MacroForm
 
 
     @Override
-    final SyntaxValue expand(Evaluator eval, ExpandContext ctx,
+    final SyntaxValue expand(Evaluator eval, Expander ctx,
                              Environment env, SyntaxSexp source)
         throws FusionException
     {

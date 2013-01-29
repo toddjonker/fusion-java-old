@@ -28,7 +28,7 @@ final class QuasiSyntaxForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env,
+    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env,
                        SyntaxSexp stx)
         throws FusionException
     {
@@ -46,7 +46,7 @@ final class QuasiSyntaxForm
         return stx;
     }
 
-    private SyntaxValue expand(Evaluator eval, ExpandContext ctx,
+    private SyntaxValue expand(Evaluator eval, Expander ctx,
                                Environment env,
                                SyntaxValue source, int depth)
         throws FusionException
@@ -62,7 +62,7 @@ final class QuasiSyntaxForm
         }
     }
 
-    private SyntaxValue expand(Evaluator eval, ExpandContext ctx,
+    private SyntaxValue expand(Evaluator eval, Expander ctx,
                                Environment env,
                                SyntaxSexp source, int depth)
         throws FusionException

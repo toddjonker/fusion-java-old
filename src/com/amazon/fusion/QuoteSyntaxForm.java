@@ -13,7 +13,7 @@ final class QuoteSyntaxForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         check(source).arityExact(2);

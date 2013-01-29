@@ -17,7 +17,7 @@ final class QuoteForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env, SyntaxSexp source)
         throws SyntaxFailure
     {
         SyntaxChecker check = check(source);

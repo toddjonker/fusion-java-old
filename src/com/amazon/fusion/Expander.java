@@ -5,20 +5,20 @@ package com.amazon.fusion;
 /**
  * "Registers" used during macro expansion
  */
-final class ExpandContext
+final class Expander
 {
     enum Context { TOP, MODULE, EXPRESSION }
 
-    final Evaluator myEval;
-    final Context   myContext;
+    private final Evaluator myEval;
+    private final Context   myContext;
 
-    ExpandContext(Evaluator eval)
+    Expander(Evaluator eval)
     {
         myEval = eval;
         myContext = Context.TOP;
     }
 
-    private ExpandContext(Evaluator eval, Context ctx)
+    private Expander(Evaluator eval, Context ctx)
     {
         myEval = eval;
         myContext = ctx;
@@ -29,10 +29,10 @@ final class ExpandContext
         return myContext == Context.TOP;
     }
 
-    ExpandContext nestModule()
+    Expander nestModule()
     {
         assert isTopLevel();
 
-        return new ExpandContext(myEval, Context.MODULE);
+        return new Expander(myEval, Context.MODULE);
     }
 }

@@ -19,7 +19,7 @@ final class AssertForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env, SyntaxSexp source)
         throws FusionException
     {
         check(source).arityAtLeast(2);

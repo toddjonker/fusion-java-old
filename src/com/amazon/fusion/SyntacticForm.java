@@ -22,7 +22,7 @@ abstract class SyntacticForm
     }
 
 
-    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env,
+    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env,
                        SyntaxSexp source)
         throws FusionException
     {

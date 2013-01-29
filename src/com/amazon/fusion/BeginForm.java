@@ -41,7 +41,7 @@ final class BeginForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, ExpandContext ctx, Environment env, SyntaxSexp source)
+    SyntaxValue expand(Evaluator eval, Expander ctx, Environment env, SyntaxSexp source)
         throws FusionException
     {
         int size = source.size();

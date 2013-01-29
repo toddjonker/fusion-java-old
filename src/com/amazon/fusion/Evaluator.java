@@ -399,12 +399,12 @@ final class Evaluator
     SyntaxValue expandSyntax(Environment env, SyntaxValue source)
         throws FusionException
     {
-        ExpandContext ctx = new ExpandContext(this);
+        Expander ctx = new Expander(this);
         return source.doExpand(this, ctx, env);
     }
 
 
-    SyntaxValue expand(ExpandContext ctx, Environment env, SyntaxValue source)
+    SyntaxValue expand(Expander ctx, Environment env, SyntaxValue source)
         throws FusionException
     {
         // TODO FUSION-43 Fail if there are annotations

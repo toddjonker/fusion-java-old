@@ -232,7 +232,7 @@ final class SyntaxStruct
 
 
     @Override
-    SyntaxValue doExpand(Evaluator eval, ExpandContext ctx, Environment env)
+    SyntaxValue doExpand(Evaluator eval, Expander ctx, Environment env)
         throws FusionException
     {
         if (myStruct.size() == 0)

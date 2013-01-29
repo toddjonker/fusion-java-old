@@ -47,7 +47,7 @@ final class ModuleForm
 
 
     @Override
-    SyntaxValue expand(Evaluator eval, ExpandContext ctx,
+    SyntaxValue expand(Evaluator eval, Expander ctx,
                        Environment envOutsideModule, SyntaxSexp source)
         throws FusionException
     {

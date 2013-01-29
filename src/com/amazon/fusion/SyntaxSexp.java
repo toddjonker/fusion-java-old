@@ -126,7 +126,7 @@ final class SyntaxSexp
 
 
     @Override
-    SyntaxValue doExpand(Evaluator eval, ExpandContext ctx, Environment env)
+    SyntaxValue doExpand(Evaluator eval, Expander ctx, Environment env)
         throws FusionException
     {
         int len = size();
@@ -169,7 +169,7 @@ final class SyntaxSexp
     }
 
 
-    SyntaxValue partialExpand(Evaluator eval, ExpandContext ctx,
+    SyntaxValue partialExpand(Evaluator eval, Expander ctx,
                               Environment env,
                               IdentityHashMap<Binding, Object> stops)
         throws FusionException

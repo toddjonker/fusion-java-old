@@ -87,7 +87,7 @@ final class SyntaxList
 
 
     @Override
-    SyntaxValue doExpand(Evaluator eval, ExpandContext ctx, Environment env)
+    SyntaxValue doExpand(Evaluator eval, Expander ctx, Environment env)
         throws FusionException
     {
         int len = size();
