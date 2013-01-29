@@ -82,8 +82,7 @@ final class LetValuesForm
             names = SyntaxSexp.make(names.getLocation(), wrappedNames);
 
             SyntaxValue boundExpr = binding.get(1);
-            boundExpr = boundExpr.addWrap(localWrap);
-            boundExpr = boundExpr.expand(eval, bodyEnv);
+            boundExpr = boundExpr.expand(eval, env);
             binding = SyntaxSexp.make(binding.getLocation(),
                                       names,
                                       boundExpr);
@@ -117,9 +116,6 @@ final class LetValuesForm
     CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
-        // Dummy environment to keep track of depth
-        env = new LocalEnvironment(env, SyntaxSymbol.EMPTY_ARRAY);
-
         SyntaxSexp bindingForms = (SyntaxSexp) expr.get(1);
 
         final int numBindingForms = bindingForms.size();
@@ -144,6 +140,8 @@ final class LetValuesForm
             valueForms[i] = eval.compile(env, boundExpr);
         }
 
+        // Dummy environment to keep track of depth
+        env = new LocalEnvironment(env, SyntaxSymbol.EMPTY_ARRAY);
         CompiledForm body = BeginForm.compile(eval, env, expr, 2);
 
         if (allSingles)

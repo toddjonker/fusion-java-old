@@ -57,6 +57,14 @@
     (+ x y z))
   6)
 
+(check =
+  // The dummy var ensures that the x vars have different offsets
+  (let [(dummy -1), (x 1)]
+    (let_values
+      [((x) (+ x 2)),
+       ((y) (+ x 10))]
+      y))
+  11)
 
 //==========================================================================
 // letrec
