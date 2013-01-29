@@ -126,7 +126,7 @@ final class SyntaxSexp
 
 
     @Override
-    SyntaxValue doExpand(Evaluator eval, Expander ctx, Environment env)
+    SyntaxValue doExpand(Expander expander, Environment env)
         throws FusionException
     {
         int len = size();
@@ -138,7 +138,7 @@ final class SyntaxSexp
         SyntaxValue[] children = extract();
 
         SyntaxValue first = children[0];
-        first = ctx.expand(eval, env, first);
+        first = expander.expand(env, first);
         children[0] = first;
         if (first instanceof SyntaxSymbol)
         {
@@ -149,11 +149,11 @@ final class SyntaxSexp
                 // We found a static top-level binding to a built-in form or
                 // to a macro. Continue the expansion process.
 
-                SyntaxSexp form = /// TODO rename
+                SyntaxSexp stx =
                     SyntaxSexp.make(getLocation(), children);
+                // TODO tail expand
                 SyntaxValue expandedExpr =
-                    ctx.expand(eval, env, (SyntacticForm)resolved, form);
-//                    ((SyntacticForm)resolved).expand(eval, ctx, env, form);
+                    expander.expand(env, (SyntacticForm) resolved, stx);
                 return expandedExpr;
             }
         }
@@ -162,7 +162,7 @@ final class SyntaxSexp
         for (int i = 1; i < len; i++)
         {
             SyntaxValue subform = children[i];
-            children[i] = ctx.expand(eval, env, subform);
+            children[i] = expander.expand(env, subform);
         }
 
         SyntaxSexp result = SyntaxSexp.make(getLocation(), children);
@@ -185,7 +185,7 @@ final class SyntaxSexp
         if (first instanceof SyntaxSymbol)
         {
             SyntaxSymbol maybeMacro = (SyntaxSymbol) first;
-            SyntaxValue prepared = ctx.expand(eval, env, maybeMacro);
+            SyntaxValue prepared = ctx.expand(env, maybeMacro);
             // Make sure we don't have to structurally change this sexp
             assert prepared == maybeMacro;
 

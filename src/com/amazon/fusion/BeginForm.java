@@ -52,7 +52,7 @@ final class BeginForm
         for (int i = 1; i < size; i++)
         {
             SyntaxValue subform = source.get(i);
-            expandedChildren[i] = ctx.expand(eval, env, subform);
+            expandedChildren[i] = ctx.expand(env, subform);
         }
         return SyntaxSexp.make(source.getLocation(), expandedChildren);
     }

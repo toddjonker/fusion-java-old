@@ -87,7 +87,7 @@ final class SyntaxList
 
 
     @Override
-    SyntaxValue doExpand(Evaluator eval, Expander ctx, Environment env)
+    SyntaxValue doExpand(Expander expander, Environment env)
         throws FusionException
     {
         int len = size();
@@ -98,7 +98,7 @@ final class SyntaxList
         for (int i = 0; i < len; i++)
         {
             SyntaxValue subform = children[i];
-            children[i] = ctx.expand(eval, env, subform);
+            children[i] = expander.expand(env, subform);
         }
 
         SyntaxList expanded = SyntaxList.make(this.getLocation(), children);

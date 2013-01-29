@@ -55,7 +55,7 @@ final class LetrecForm
             SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
             SyntaxValue boundExpr = binding.get(1);
             boundExpr = boundExpr.addWrap(localWrap);
-            boundExpr = ctx.expand(eval, bodyEnv, boundExpr);
+            boundExpr = ctx.expand(bodyEnv, boundExpr);
             binding = SyntaxSexp.make(binding.getLocation(),
                                       name,
                                       boundExpr);
@@ -73,7 +73,7 @@ final class LetrecForm
         {
             SyntaxValue subform = source.get(i);
             subform = subform.addWrap(localWrap);
-            expandedForms[i] = ctx.expand(eval, bodyEnv, subform);
+            expandedForms[i] = ctx.expand(bodyEnv, subform);
         }
 
         source = SyntaxSexp.make(source.getLocation(), expandedForms);

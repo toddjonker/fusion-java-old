@@ -400,7 +400,7 @@ final class Evaluator
         throws FusionException
     {
         Expander ctx = new Expander(this);
-        return ctx.expand(this, env, source);
+        return ctx.expand(env, source);
     }
 
 

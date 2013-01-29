@@ -232,7 +232,7 @@ final class SyntaxStruct
 
 
     @Override
-    SyntaxValue doExpand(Evaluator eval, Expander ctx, Environment env)
+    SyntaxValue doExpand(Expander expander, Environment env)
         throws FusionException
     {
         if (myStruct.size() == 0)
@@ -255,7 +255,7 @@ final class SyntaxStruct
                 {
                     subform = subform.addWraps(myWraps);
                 }
-                subform = ctx.expand(eval, env, subform);
+                subform = expander.expand(env, subform);
                 entry.setValue(subform);
             }
             else
@@ -271,7 +271,7 @@ final class SyntaxStruct
                     {
                         subform = subform.addWraps(myWraps);
                     }
-                    newChildren[i] = ctx.expand(eval, env, subform);
+                    newChildren[i] = expander.expand(env, subform);
                 }
                 entry.setValue(newChildren);
             }

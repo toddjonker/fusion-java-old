@@ -32,7 +32,7 @@ abstract class MacroForm
         expanded = expanded.addOrRemoveMark(mark);
 
         // TODO tail
-        return ctx.expand(eval, env, expanded);
+        return ctx.expand(env, expanded);
     }
 
     /**

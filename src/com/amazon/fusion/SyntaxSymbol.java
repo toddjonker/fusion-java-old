@@ -183,7 +183,7 @@ final class SyntaxSymbol
 
 
     @Override
-    SyntaxValue doExpand(Evaluator eval, Expander ctx, Environment env)
+    SyntaxValue doExpand(Expander expander, Environment env)
         throws SyntaxFailure
     {
         if (myBinding == null)        // Otherwise we've already been prepared

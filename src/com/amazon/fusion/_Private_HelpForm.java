@@ -98,7 +98,7 @@ public final class _Private_HelpForm
         for (int i = 1; i < arity; i++)
         {
             SyntaxSymbol identifier = check.requiredIdentifier(i);
-            children[i] = ctx.expand(eval, env, identifier);
+            children[i] = ctx.expand(env, identifier);
         }
 
         source = SyntaxSexp.make(source.getLocation(), children);

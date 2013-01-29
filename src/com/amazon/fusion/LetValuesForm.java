@@ -82,7 +82,7 @@ final class LetValuesForm
             names = SyntaxSexp.make(names.getLocation(), wrappedNames);
 
             SyntaxValue boundExpr = binding.get(1);
-            boundExpr = ctx.expand(eval, env, boundExpr);
+            boundExpr = ctx.expand(env, boundExpr);
             binding = SyntaxSexp.make(binding.getLocation(),
                                       names,
                                       boundExpr);
@@ -101,7 +101,7 @@ final class LetValuesForm
         {
             SyntaxValue subform = source.get(i);
             subform = subform.addWrap(localWrap);
-            expandedForms[i] = ctx.expand(eval, bodyEnv, subform);
+            expandedForms[i] = ctx.expand(bodyEnv, subform);
         }
 
         source = SyntaxSexp.make(source.getLocation(), expandedForms);

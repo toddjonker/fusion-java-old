@@ -96,7 +96,7 @@ abstract class SyntaxValue
 
 
     /** Don't call directly! Go through the evaluator. */
-    SyntaxValue doExpand(Evaluator eval, Expander ctx, Environment env)
+    SyntaxValue doExpand(Expander expander, Environment env)
         throws FusionException
     {
         return this;

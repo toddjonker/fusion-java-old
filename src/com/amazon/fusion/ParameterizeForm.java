@@ -44,10 +44,10 @@ final class ParameterizeForm
             SyntaxSexp binding = (SyntaxSexp) checkPair.form();
 
             SyntaxValue paramExpr = binding.get(0);
-            paramExpr = ctx.expand(eval, env, paramExpr);
+            paramExpr = ctx.expand(env, paramExpr);
 
             SyntaxValue boundExpr = binding.get(1);
-            boundExpr = ctx.expand(eval, env, boundExpr);
+            boundExpr = ctx.expand(env, boundExpr);
 
             binding = SyntaxSexp.make(binding.getLocation(),
                                       paramExpr, boundExpr);
@@ -65,7 +65,7 @@ final class ParameterizeForm
         for (int i = 2; i < exprSize; i++)
         {
             SyntaxValue bodyExpr = source.get(i);
-            expandedForms[i] = ctx.expand(eval, env, bodyExpr);
+            expandedForms[i] = ctx.expand(env, bodyExpr);
         }
 
         source = SyntaxSexp.make(source.getLocation(), expandedForms);

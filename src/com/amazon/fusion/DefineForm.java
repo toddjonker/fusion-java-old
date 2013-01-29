@@ -131,7 +131,7 @@ final class DefineForm
         // Update the identifier with its binding.
         // This is just a way to pass the binding instance through to the
         // runtime stage so compile() below can reuse it.
-        children[1] = ctx.expand(eval, env, identifier);
+        children[1] = ctx.expand(env, identifier);
 
         int bodyPos;
         SyntaxValue maybeDoc = children[2];
@@ -151,7 +151,7 @@ final class DefineForm
         }
 
         SyntaxValue valueStx = source.get(bodyPos);
-        children[bodyPos] = ctx.expand(eval, env, valueStx);
+        children[bodyPos] = ctx.expand(env, valueStx);
 
         source = SyntaxSexp.make(source.getLocation(), children);
         return source;
