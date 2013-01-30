@@ -81,11 +81,12 @@ final class LambdaForm
                           ? args[0]
                           : SyntaxSexp.make(children[1].getLocation(), args));
 
+        // TODO FUSION-36 Should allow internal definitions
         for (int i = bodyStart; i < children.length; i++)
         {
             SyntaxValue bodyForm = children[i];
             bodyForm = bodyForm.addWrap(localWrap);
-            bodyForm = expander.expand(bodyEnv, bodyForm);
+            bodyForm = expander.expandExpression(bodyEnv, bodyForm);
             children[i] = bodyForm;
         }
 

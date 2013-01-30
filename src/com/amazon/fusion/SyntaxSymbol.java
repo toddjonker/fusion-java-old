@@ -157,6 +157,7 @@ final class SyntaxSymbol
     {
         if (myBinding == null)
         {
+            // TODO FUSION-114 check that our text has at least one character!
             if (myWraps == null)
             {
                 myBinding = new FreeBinding(stringValue());
@@ -188,6 +189,7 @@ final class SyntaxSymbol
     {
         if (myBinding == null)        // Otherwise we've already been prepared
         {
+            // TODO FUSION-114 this should happen in resolve()
             if (myText == null)
             {
                 throw new SyntaxFailure(null,

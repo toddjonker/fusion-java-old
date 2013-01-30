@@ -138,31 +138,33 @@ final class SyntaxSexp
         SyntaxValue[] children = extract();
 
         SyntaxValue first = children[0];
-        first = expander.expand(env, first);
-        children[0] = first;
         if (first instanceof SyntaxSymbol)
         {
-            Binding binding = ((SyntaxSymbol) first).getBinding();
+            // TODO FUSION-114 what if this is null or empty symbol?
+            // We probably shouldn't fail in that case but let #%app handle it.
+            Binding binding = ((SyntaxSymbol) first).resolve();
             Object resolved = binding.lookup(env);
             if (resolved instanceof SyntacticForm)
             {
                 // We found a static top-level binding to a built-in form or
                 // to a macro. Continue the expansion process.
 
-                SyntaxSexp stx =
-                    SyntaxSexp.make(getLocation(), children);
                 // TODO tail expand
+
+                // We use the same expansion context as we already have.
+                // Don't need to replace the sexp since we haven't changed it.
                 SyntaxValue expandedExpr =
-                    expander.expand(env, (SyntacticForm) resolved, stx);
+                    expander.expand(env, (SyntacticForm) resolved, this);
                 return expandedExpr;
             }
         }
 
-        // else we have a procedure application, expand each subform
-        for (int i = 1; i < len; i++)
+        // else we have a procedure application, expand each subform as an
+        // expression
+        for (int i = 0; i < len; i++)
         {
             SyntaxValue subform = children[i];
-            children[i] = expander.expand(env, subform);
+            children[i] = expander.expandExpression(env, subform);
         }
 
         SyntaxSexp result = SyntaxSexp.make(getLocation(), children);

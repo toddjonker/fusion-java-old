@@ -82,7 +82,7 @@ final class LetValuesForm
             names = SyntaxSexp.make(names.getLocation(), wrappedNames);
 
             SyntaxValue boundExpr = binding.get(1);
-            boundExpr = expander.expand(env, boundExpr);
+            boundExpr = expander.expandExpression(env, boundExpr);
             binding = SyntaxSexp.make(binding.getLocation(),
                                       names,
                                       boundExpr);
@@ -97,11 +97,12 @@ final class LetValuesForm
         expandedForms[0] = stx.get(0);
         expandedForms[1] = bindingForms;
 
+        // TODO FUSION-36 Should allow internal definitions
         for (int i = 2; i < letExprSize; i++)
         {
             SyntaxValue subform = stx.get(i);
             subform = subform.addWrap(localWrap);
-            expandedForms[i] = expander.expand(bodyEnv, subform);
+            expandedForms[i] = expander.expandExpression(bodyEnv, subform);
         }
 
         stx = SyntaxSexp.make(stx.getLocation(), expandedForms);

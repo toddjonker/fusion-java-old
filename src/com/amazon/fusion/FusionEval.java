@@ -25,7 +25,7 @@ final class FusionEval
         Namespace ns = eval.findCurrentNamespace();
 
         {
-            // TODO this should partial-expand and splice begins
+            // TODO FUSION-33 this should partial-expand and splice begins
             Expander expander = new Expander(eval);
             topLevelForm = expander.expand(ns, topLevelForm);
         }

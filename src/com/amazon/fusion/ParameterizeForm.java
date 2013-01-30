@@ -43,10 +43,10 @@ final class ParameterizeForm
             SyntaxSexp binding = (SyntaxSexp) checkPair.form();
 
             SyntaxValue paramExpr = binding.get(0);
-            paramExpr = expander.expand(env, paramExpr);
+            paramExpr = expander.expandExpression(env, paramExpr);
 
             SyntaxValue boundExpr = binding.get(1);
-            boundExpr = expander.expand(env, boundExpr);
+            boundExpr = expander.expandExpression(env, boundExpr);
 
             binding = SyntaxSexp.make(binding.getLocation(),
                                       paramExpr, boundExpr);
@@ -61,10 +61,11 @@ final class ParameterizeForm
         expandedForms[0] = stx.get(0);
         expandedForms[1] = bindingForms;
 
+        // TODO FUSION-36 Should allow internal definitions
         for (int i = 2; i < exprSize; i++)
         {
             SyntaxValue bodyExpr = stx.get(i);
-            expandedForms[i] = expander.expand(env, bodyExpr);
+            expandedForms[i] = expander.expandExpression(env, bodyExpr);
         }
 
         stx = SyntaxSexp.make(stx.getLocation(), expandedForms);

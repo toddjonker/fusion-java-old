@@ -54,7 +54,7 @@ final class LetrecForm
             SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
             SyntaxValue boundExpr = binding.get(1);
             boundExpr = boundExpr.addWrap(localWrap);
-            boundExpr = expander.expand(bodyEnv, boundExpr);
+            boundExpr = expander.expandExpression(bodyEnv, boundExpr);
             binding = SyntaxSexp.make(binding.getLocation(),
                                       name,
                                       boundExpr);
@@ -68,11 +68,12 @@ final class LetrecForm
         expandedForms[0] = stx.get(0);
         expandedForms[1] = bindingForms;
 
+        // TODO FUSION-36 Should allow internal definitions
         for (int i = 2; i < letrecExprSize; i++)
         {
             SyntaxValue subform = stx.get(i);
             subform = subform.addWrap(localWrap);
-            expandedForms[i] = expander.expand(bodyEnv, subform);
+            expandedForms[i] = expander.expandExpression(bodyEnv, subform);
         }
 
         stx = SyntaxSexp.make(stx.getLocation(), expandedForms);

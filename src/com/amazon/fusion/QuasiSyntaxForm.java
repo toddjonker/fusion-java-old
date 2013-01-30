@@ -82,7 +82,7 @@ final class QuasiSyntaxForm
                 if (depth < 1)
                 {
                     SyntaxValue subform = children[1];
-                    children[1] = expander.expand(env, subform);
+                    children[1] = expander.expandExpression(env, subform);
                     stx = SyntaxSexp.make(stx.getLocation(), children);
                     return stx;
                 }

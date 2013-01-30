@@ -52,15 +52,12 @@ final class ModuleForm
         throws FusionException
     {
         SyntaxChecker check = check(source);
-        if (! expander.isTopLevel())
+        if (! expander.isTopLevelContext())
         {
             throw check.failure("`module` declaration not at top-level");
         }
 
-        // TODO module-begin
         Evaluator eval = expander.getEvaluator();
-        expander = expander.nestModule();
-
         ModuleInstance kernel = expander.getKernel();
 
         // TODO precompute this?
@@ -126,6 +123,8 @@ final class ModuleForm
             new ModuleNamespace(registry, language, id);
 
         // TODO handle #%module-begin and #%plain-module-begin
+        expander = expander.enterModuleContext();
+
 
         // Pass 1: locate definitions and install dummy bindings
 
@@ -283,7 +282,15 @@ final class ModuleForm
         {
             if (! prepared.next())
             {
-                stx = expander.expand(moduleNamespace, stx);
+                if (firstBinding(stx) == defineBinding)
+                {
+                    assert expander.isModuleContext();
+                    stx = expander.expand(moduleNamespace, stx);
+                }
+                else
+                {
+                    stx = expander.expandExpression(moduleNamespace, stx);
+                }
             }
             subforms[i++] = stx;
         }
@@ -309,6 +316,15 @@ final class ModuleForm
                 Binding binding = ((SyntaxSymbol)first).getBinding();
                 return binding;
             }
+        }
+        return null;
+    }
+
+    Binding firstBinding(SyntaxValue stx)
+    {
+        if (stx instanceof SyntaxSexp)
+        {
+            return firstBinding((SyntaxSexp) stx);
         }
         return null;
     }

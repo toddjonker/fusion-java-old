@@ -40,7 +40,7 @@ abstract class SyntacticForm
         for (int i = 1; i < size; i++)
         {
             SyntaxValue subform = stx.get(i);
-            expandedChildren[i] = expander.expand(env, subform);
+            expandedChildren[i] = expander.expandExpression(env, subform);
         }
         return SyntaxSexp.make(stx.getLocation(), expandedChildren);
     }

@@ -107,26 +107,31 @@ final class DefineForm
         stx = expandImplicitLambda(expander, stx);
 
         SyntaxChecker check = check(stx);
+        if (! (expander.isTopLevelContext() || expander.isModuleContext()))
+        {
+            throw check.failure("Definition must be at top-level or module level");
+        }
+
         int arity = check.arityAtLeast(3);
 
         SyntaxValue[] children = stx.extract();
 
-        // If check2 != check, this will always succeed since we've already
-        // checked the identifier.  So this will only cause an error when
-        // check2 == check so we know the error trace will correctly refer to
-        // the original syntax.
+        // If we had an implicit lambda, this will always succeed since we've
+        // already checked the identifier.  Thus this will only cause an error
+        // when using the original stx, so we know the error trace will
+        // correctly refer to the original syntax.
         SyntaxSymbol identifier = check.requiredIdentifier(1);
 
-        // We need to strip off the module-level wrap that's already been
-        // applied to the identifier. Otherwise we'll loop forever trying to
-        // resolve it! This is a bit of a hack, really.
-        //identifier = identifier.stripImmediateEnvWrap(env);
-        SyntaxSymbol stripped = identifier.stripImmediateEnvWrap(env);
-
-        // If at module top-level, this has already been done.
-        // TODO FUSION-51 should know the context where this is happening...
-        Namespace ns = env.namespace();
-        ns.predefine(stripped);
+        // If at module context, this has already been done.
+        if (! expander.isModuleContext())
+        {
+            // We need to strip off the module-level wrap that's already been
+            // applied to the identifier. Otherwise we'll loop forever trying
+            // to resolve it! This is a bit of a hack, really.
+            SyntaxSymbol stripped = identifier.stripImmediateEnvWrap(env);
+            Namespace ns = env.namespace();
+            ns.predefine(stripped);
+        }
 
         // Update the identifier with its binding.
         // This is just a way to pass the binding instance through to the
@@ -151,7 +156,7 @@ final class DefineForm
         }
 
         SyntaxValue valueStx = stx.get(bodyPos);
-        children[bodyPos] = expander.expand(env, valueStx);
+        children[bodyPos] = expander.expandExpression(env, valueStx);
 
         stx = SyntaxSexp.make(stx.getLocation(), children);
         return stx;

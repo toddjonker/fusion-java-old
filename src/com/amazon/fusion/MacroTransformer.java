@@ -25,6 +25,9 @@ final class MacroTransformer
         Object expanded;
         try
         {
+            // TODO FUSION-32 This should set current-namespace
+            // See Racket Reference 1.2.3.2
+            // http://docs.racket-lang.org/reference/syntax-model.html#(part._expand-steps)
             expanded = expander.getEvaluator().callNonTail(myTransformer, stx);
         }
         catch (SyntaxFailure e)

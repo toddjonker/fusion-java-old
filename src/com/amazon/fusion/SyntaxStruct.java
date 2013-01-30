@@ -255,7 +255,7 @@ final class SyntaxStruct
                 {
                     subform = subform.addWraps(myWraps);
                 }
-                subform = expander.expand(env, subform);
+                subform = expander.expandExpression(env, subform);
                 entry.setValue(subform);
             }
             else
@@ -271,7 +271,7 @@ final class SyntaxStruct
                     {
                         subform = subform.addWraps(myWraps);
                     }
-                    newChildren[i] = expander.expand(env, subform);
+                    newChildren[i] = expander.expandExpression(env, subform);
                 }
                 entry.setValue(newChildren);
             }

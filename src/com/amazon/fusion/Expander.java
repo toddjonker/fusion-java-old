@@ -35,19 +35,27 @@ final class Expander
         return myEval.findKernel();
     }
 
-    boolean isTopLevel()
+    boolean isTopLevelContext()
     {
         return myContext == Context.TOP;
     }
 
-    Expander nestModule()
+    boolean isModuleContext()
     {
-        assert isTopLevel();
+        return myContext == Context.MODULE;
+    }
+
+    Expander enterModuleContext()
+    {
+        assert isTopLevelContext();
 
         return new Expander(myEval, Context.MODULE);
     }
 
 
+    /**
+     * Expands syntax in the current context.
+     */
     SyntaxValue expand(Environment env, SyntaxValue stx)
         throws FusionException
     {
@@ -60,6 +68,23 @@ final class Expander
         }
 
         return stx.doExpand(this, env);
+    }
+
+
+    /**
+     * Expands syntax in an expression context.
+     * Equivalent to Racket syntax-local-expand-expression.
+     */
+    SyntaxValue expandExpression(Environment env, SyntaxValue stx)
+        throws FusionException
+    {
+        Expander expander = this;
+        if (myContext != Context.EXPRESSION)
+        {
+            expander = new Expander(myEval, Context.EXPRESSION);
+        }
+
+        return expander.expand(env, stx);
     }
 
 

@@ -23,21 +23,27 @@ final class DefineSyntaxForm
         throws FusionException
     {
         SyntaxChecker check = check(stx);
+        if (! (expander.isTopLevelContext() || expander.isModuleContext()))
+        {
+            throw check.failure("Definition must be at top-level or module level");
+        }
+
         int arity = check.arityAtLeast(3);
 
         SyntaxValue[] children = stx.extract();
 
         SyntaxSymbol identifier = check.requiredIdentifier(1);
 
-        // We need to strip off the module-level wrap that's already been
-        // applied to the identifier. Otherwise we'll loop forever trying to
-        // resolve it! This is a bit of a hack, really.
-        SyntaxSymbol stripped = identifier.stripImmediateEnvWrap(env);
-
-        // If at module top-level, this has already been done.
-        // TODO FUSION-51 should know the context where this is happening...
-        Namespace ns = env.namespace();
-        ns.predefine(stripped);
+        // WARNING!  This isn't conditional as with 'define' since
+        // 'define_syntax' doesn't get predefined by the 'module' expander.
+        {
+            // We need to strip off the module-level wrap that's already been
+            // applied to the identifier. Otherwise we'll loop forever trying
+            // to resolve it! This is a bit of a hack, really.
+            SyntaxSymbol stripped = identifier.stripImmediateEnvWrap(env);
+            Namespace ns = env.namespace();
+            ns.predefine(stripped);
+        }
 
         // Update the identifier with its binding.
         // This is just a way to pass the binding instance through to the
@@ -61,7 +67,7 @@ final class DefineSyntaxForm
         }
 
         SyntaxValue valueStx = stx.get(bodyPos);
-        children[bodyPos] = expander.expand(env, valueStx);
+        children[bodyPos] = expander.expandExpression(env, valueStx);
 
         stx = SyntaxSexp.make(stx.getLocation(), children);
         return stx;

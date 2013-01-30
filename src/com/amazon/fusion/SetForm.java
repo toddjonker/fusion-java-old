@@ -28,7 +28,7 @@ final class SetForm
 
         SyntaxValue[] children = stx.extract();
         SyntaxValue valueExpr = stx.get(2);
-        children[2] = expander.expand(env, valueExpr);
+        children[2] = expander.expandExpression(env, valueExpr);
 
         stx = SyntaxSexp.make(stx.getLocation(), children);
         return stx;

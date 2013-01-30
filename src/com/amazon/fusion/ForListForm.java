@@ -46,7 +46,7 @@ final class ForListForm
             SyntaxValue subform = checkPair.requiredForm("bound value", 1);
 
             // Bound values use the outer lexical environment
-            boundValues[i] = expander.expand(env, subform);
+            boundValues[i] = expander.expandExpression(env, subform);
         }
 
         LocalEnvironment bodyEnv = new LocalEnvironment(env, boundNames);
@@ -70,11 +70,12 @@ final class ForListForm
         expandedForms[0] = stx.get(0);
         expandedForms[1] = bindingForms;
 
+        // TODO FUSION-36 Should allow internal definitions
         for (int i = 2; i < stx.size(); i++)
         {
             SyntaxValue bodyStx = stx.get(i);
             bodyStx = bodyStx.addWrap(localWrap);
-            expandedForms[i] = expander.expand(bodyEnv, bodyStx);
+            expandedForms[i] = expander.expandExpression(bodyEnv, bodyStx);
         }
 
         stx = SyntaxSexp.make(stx.getLocation(), expandedForms);

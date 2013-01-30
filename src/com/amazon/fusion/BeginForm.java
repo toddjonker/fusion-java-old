@@ -44,6 +44,11 @@ final class BeginForm
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
+        // At module context, we should've spliced this into the module body.
+        assert ! (expander.isModuleContext());
+        // TODO FUSION-33 handle splicing in top-level context
+        // TODO FUSION-36 handle splicing in internal-defn context
+
         int size = stx.size();
 
         SyntaxValue[] expandedChildren = new SyntaxValue[size];
@@ -52,7 +57,7 @@ final class BeginForm
         for (int i = 1; i < size; i++)
         {
             SyntaxValue subform = stx.get(i);
-            expandedChildren[i] = expander.expand(env, subform);
+            expandedChildren[i] = expander.expandExpression(env, subform);
         }
         return SyntaxSexp.make(stx.getLocation(), expandedChildren);
     }
