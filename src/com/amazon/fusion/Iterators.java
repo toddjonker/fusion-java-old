@@ -19,11 +19,11 @@ final class Iterators  // TODO FUSION-107 remove this class
     /**
      * Builds a Fusion iterator from an IonValue iterator.
      *
-     * @deprecated Use {@link FusionIterator#injectIterator(Evaluator,Iterator)}.
+     * @deprecated Use {@link FusionIterator#injectIonIterator(Evaluator,Iterator)}.
      */
     @Deprecated
     static Object iterateIon(Iterator<IonValue> iterator)
     {
-        return FusionIterator.injectIterator(null, iterator);
+        return FusionIterator.injectIonIterator(null, iterator);
     }
 }

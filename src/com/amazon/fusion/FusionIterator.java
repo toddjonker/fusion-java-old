@@ -45,17 +45,40 @@ class FusionIterator
     }
 
 
-    /** Iterated values must not need injecting. */
+    /**
+     * Builds a Fusion iterator from a Java iterator, without injecting its
+     * elements.
+     *
+     * @see #injectIterator(Evaluator, Iterator)
+     * @see #injectIonIterator(Evaluator, Iterator)
+     */
     static FusionIterator iterate(Evaluator eval, Iterator<?> iterator)
     {
         return new IteratorAdaptor(iterator);
     }
 
 
+
     /**
-     * Builds a Fusion iterator from an IonValue iterator.
+     * Builds a Fusion iterator from a Java iterator, lazily injecting each
+     * value.
+     *
+     * @see #iterate(Evaluator, Iterator)
+     * @see #injectIonIterator(Evaluator, Iterator)
      */
-    static Object injectIterator(Evaluator eval, Iterator<IonValue> iterator)
+    static Object injectIterator(Evaluator eval, Iterator<?> iterator)
+    {
+        return new InjectingIteratorAdaptor(iterator);
+    }
+
+
+    /**
+     * Builds a Fusion iterator from an IonValue iterator, lazily injecting
+     * each {@code IonValue}.  This is slightly more efficient than
+     * {@link FusionIterator#injectIterator(Evaluator, Iterator)}.
+     */
+    static Object injectIonIterator(Evaluator eval,
+                                    Iterator<IonValue> iterator)
     {
         return new IonIteratorAdaptor(iterator);
     }
@@ -173,10 +196,10 @@ class FusionIterator
     }
 
 
-    private static final class IteratorAdaptor
+    private static class IteratorAdaptor
         extends AbstractIterator
     {
-        private final Iterator<?> myIterator;
+        final Iterator<?> myIterator;
 
         /** Iterated values must not need injecting. */
         IteratorAdaptor(Iterator<?> iter)
@@ -192,8 +215,35 @@ class FusionIterator
 
         @Override
         public Object next(Evaluator eval)
+            throws FusionException
         {
             return myIterator.next();
+        }
+    }
+
+
+    /** Custom class avoid some dynamic dispatch. */
+    private static final class InjectingIteratorAdaptor
+        extends IteratorAdaptor
+    {
+        InjectingIteratorAdaptor(Iterator<?> iter)
+        {
+            super(iter);
+        }
+
+        @Override
+        public Object next(Evaluator eval)
+            throws FusionException
+        {
+            Object orig = myIterator.next();
+            Object injected = eval.injectMaybe(orig);
+            if (injected == null)
+            {
+                throw new ResultFailure("iterator_next",
+                                        "injectable Java type",
+                                        0, orig);
+            }
+            return injected;
         }
     }
 
