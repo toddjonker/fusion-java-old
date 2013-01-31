@@ -1,14 +1,14 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionList.unsafeListConcatenateM;
+import static com.amazon.fusion.FusionList.unsafeListAppendM;
 
 
-final class ConcatenateMProc
+final class AppendMProc
     extends Procedure
 {
-    ConcatenateMProc()
+    AppendMProc()
     {
         //    "                                                                               |
         super("Concatenates the `list`s, mutating the first argument when possible.  If the\n" +
@@ -36,6 +36,6 @@ final class ConcatenateMProc
             listArgs[i - 1] = checkListArg(eval, i, args);
         }
 
-        return unsafeListConcatenateM(eval, first, listArgs);
+        return unsafeListAppendM(eval, first, listArgs);
     }
 }

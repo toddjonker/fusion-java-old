@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -327,16 +327,16 @@ public class ListTest
 
 
     //========================================================================
-    // Concatenation
+    // Append
 
     /** Tests interaction with IonValues. */
     @Test
-    public void testConcatenation()
+    public void testAppendM()
         throws Exception
     {
         Object fList = eval("(stretchy_list 1)");
         IonList iList = (IonList) system().singleValue("[2, sym, true]");
-        Object result = topLevel().call("concatenate_m", fList, iList);
+        Object result = topLevel().call("append_m", fList, iList);
         assertSame(fList, result);
         assertEquals(4, unsafeListSize(null, result));
 
@@ -345,7 +345,7 @@ public class ListTest
 
         // Now mutate the IonValue
         fList = eval("(stretchy_list 4)");
-        result = topLevel().call("concatenate_m", iList, fList);
+        result = topLevel().call("append_m", iList, fList);
         assertEquals(4, unsafeListSize(null, result));
 
         assertSame(iList.get(0), unsafeListRef(null, result, 0));

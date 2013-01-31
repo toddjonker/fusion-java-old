@@ -120,7 +120,9 @@ languages, highlighting potential mutation of an argument.
   (provide add any choose do find first is_empty last map size)
 
   (defpub_j add_m           "com.amazon.fusion.AddMProc")
-  (defpub_j concatenate_m   "com.amazon.fusion.ConcatenateMProc")
+  (defpub_j append_m        "com.amazon.fusion.AppendMProc")
+  // TODO FUSION-107 remove `concatenate_m`; renamed to `append_m`
+  (defpub_j concatenate_m   "com.amazon.fusion.AppendMProc")
   (defpub_j subseq          "com.amazon.fusion.IonSubseqProc")
   // TODO FUSION-86 add_m, subseq need to handle sexp
 

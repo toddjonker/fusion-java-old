@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (use check)
 (use '/fusion/function')
@@ -224,19 +224,19 @@
 
 
 //==========================================================================
-// concatenate_m
+// append_m
 
-(define test_concatenate_m
+(define test_append_m
   (lambda (v0)
     (let [(mutable (is_mutable_list v0)),
           (stretchy (is_stretchy_list v0)),
-          (v1 (concatenate_m v0 [1]))]
+          (v1 (append_m v0 [1]))]
       (test_predicates v1 mutable stretchy)
       (if stretchy
         (check_equal v0 [1] "v0 should be modified")
         (check_equal v0 []  "v0 not modified"))
       (check_equal v1 [1] "v1")
-      (let ((v2 (concatenate_m v1 (stretchy_list 2 3) (list 4))))
+      (let ((v2 (append_m v1 (stretchy_list 2 3) (list 4))))
         (test_predicates v2 mutable stretchy)
         (if stretchy
           (begin
@@ -248,26 +248,26 @@
             (check_equal v1 [1] "v1 not modified")))
         (check_equal v2 [1, 2, 3, 4] "v2")))))
 
-(test_concatenate_m [])
-(test_concatenate_m (immutable_list))
-(test_concatenate_m (list))
-(test_concatenate_m (stretchy_list))
+(test_append_m [])
+(test_append_m (immutable_list))
+(test_append_m (list))
+(test_append_m (stretchy_list))
 
-(check_equal (concatenate_m null.list [1] null.list)
-  [1] "concat w/ null target")
-(check_equal (concatenate_m [1] null.list)
-  [1] "contcat w/ null arg")
+(check_equal (append_m null.list [1] null.list)
+  [1] "append w/ null target")
+(check_equal (append_m [1] null.list)
+  [1] "append w/ null arg")
 
 
-(check_equal (concatenate_m (quote a::null.list))
-  (quote a::null.list) "annotated concat 1")
-(check_equal (concatenate_m (quote a::null.list) (quote b::[c::2]))
-  (quote a::[c::2]) "annotated concat 2")
+(check_equal (append_m (quote a::null.list))
+  (quote a::null.list) "annotated append 1")
+(check_equal (append_m (quote a::null.list) (quote b::[c::2]))
+  (quote a::[c::2]) "annotated append 2")
 
-(check_equal (concatenate_m (quote a::[1]))
-  (quote a::[1]) "annotated concat 1")
-(check_equal (concatenate_m (quote a::[1]) (quote b::[c::2]))
-  (quote a::[1,c::2]) "annotated concat 2")
+(check_equal (append_m (quote a::[1]))
+  (quote a::[1]) "annotated append 1")
+(check_equal (append_m (quote a::[1]) (quote b::[c::2]))
+  (quote a::[1,c::2]) "annotated append 2")
 
 // TODO test annotations on mutable/stretchy lists
 

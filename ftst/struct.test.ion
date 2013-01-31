@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (use check)
 (use '/fusion/ion')
@@ -8,7 +8,7 @@
 
 (check_equal (. (quote {f:[]}) "f") [] "[] in quoted struct")
 
-(check_equal (concatenate_m (. {f:[]} "f") [1]) [1] "pulling list from struct")
+(check_equal (append_m (. {f:[]} "f") [1]) [1] "pulling list from struct")
 
 
 (define test_predicates

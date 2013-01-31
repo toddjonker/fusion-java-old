@@ -276,10 +276,9 @@ final class FusionList
     }
 
 
-    static Object unsafeListConcatenateM(Evaluator eval, Object list,
-                                         Object[] args)
+    static Object unsafeListAppendM(Evaluator eval, Object list, Object[] args)
     {
-        return ((BaseList) list).concatenateM(eval, args);
+        return ((BaseList) list).appendM(eval, args);
     }
 
 
@@ -419,7 +418,7 @@ final class FusionList
             return add(eval, value);
         }
 
-        BaseList concatenateM(Evaluator eval, Object[] args)
+        BaseList appendM(Evaluator eval, Object[] args)
         {
             int newLen = myValues.length;
             for (int i = 0; i < args.length; i++)
@@ -629,7 +628,7 @@ final class FusionList
         }
 
         @Override
-        BaseList concatenateM(Evaluator eval, Object[] args)
+        BaseList appendM(Evaluator eval, Object[] args)
         {
             int newLen = mySize;
             for (Object arg : args)
@@ -739,10 +738,10 @@ final class FusionList
         }
 
         @Override
-        BaseList concatenateM(Evaluator eval, Object[] args)
+        BaseList appendM(Evaluator eval, Object[] args)
         {
             injectElements(eval);
-            return super.concatenateM(eval, args);
+            return super.appendM(eval, args);
         }
 
         @Override
