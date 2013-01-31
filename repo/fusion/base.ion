@@ -36,6 +36,50 @@
 
 
   //==========================================================================
+  // Binding forms
+
+/*
+(lets [] body ...+)
+=>
+(begin body ...)
+
+(lets [binding, others ...] body ...+)
+=>
+(let [binding]
+  (lets [others ...]
+    body ...))
+*/
+
+  (defpub_syntax lets
+    '''
+    (lets [(ident expr), ...] body ...+)
+
+Like `let`, but each binding is created (and its `expr` evaluated) one by one,
+and the `ident`s are bound in the following `expr`s as well as the `body`.
+
+    (lets [(a 1),
+           (b (+ a 1))]
+      [a, b])            => [1, 2]
+    '''
+    (lambda (stx)
+      (if (< (syntax_size stx) 3)
+        (wrong_syntax stx "expecting bindings and body")
+        (let [(bindings (syntax_get    stx 1)),
+              (body     (syntax_subseq stx 2))]
+          // TODO FUSION-120 check type of bindings, bound identifier
+          (if (= 0 (syntax_size bindings))
+              (syntax_cons_q begin body)
+              (let [(binding (syntax_get    bindings 0)),
+                    (others  (syntax_subseq bindings 1))]
+                (quasisyntax
+                  (let ((unsyntax binding))   // TODO FUSION-46 can't use [] here
+                    (unsyntax
+                      (syntax_append
+                        (quasisyntax (lets (unsyntax others)))
+                        body))))))))))
+
+
+  //==========================================================================
   // Control forms
 
   (defpub_syntax and  // WARNING: Doc syntax isn't supported yet.
@@ -157,6 +201,7 @@ If no TEST is truthy, the result is void.
           (quote_syntax (void))
           (let ((clause (syntax_get    stx 1))
                 (tail   (syntax_subseq stx 2)))
+            // TODO FUSION-120 check type of clause
             (when (> 1 (syntax_size clause))
               (wrong_syntax stx "cond: bad clause " clause))
             (let ((test (syntax_get    clause 0))
