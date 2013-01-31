@@ -8,7 +8,7 @@ Operations for strings.
   (use '/fusion/experimental/defines')
 
 
-  (defpub_j string_concat      "com.amazon.fusion.FusionString$ConcatProc")
+  (defpub_j string_append      "com.amazon.fusion.FusionString$AppendProc")
   (defpub_j string_to_lower    "com.amazon.fusion.FusionString$ToLowerProc")
   (defpub_j string_to_upper    "com.amazon.fusion.FusionString$ToUpperProc")
 )

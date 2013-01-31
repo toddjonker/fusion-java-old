@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (module check '/fusion/base'
 
@@ -53,7 +53,7 @@
       (let loop ((i 0))
         (when (< i (size actual))
           (check_equal (. actual i) (. expected i)
-            (string_concat "list element #" (to_string i)))
+            (string_append "list element #" (to_string i)))
           (loop (+ 1 i))))))
 
   (defpub check_sexp_equal
@@ -68,7 +68,7 @@
             "sexp tails don't match at pos " pos ". Actual: " actual " Expected: " expected)
           (begin
             (check_equal (head a) (head e)
-              (string_concat "sexp element at position " (to_string pos))) // TODO bad descr
+              (string_append "sexp element at position " (to_string pos))) // TODO bad descr
             (loop (+ 1 pos) (tail a) (tail e)))))))
 
 

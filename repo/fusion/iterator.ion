@@ -168,7 +168,6 @@ element satisfies the predicate, the result is void.
         (void)))))
 
 
-  // TODO FUSION-112 should this be named iterator_concat?  (Or vice versa?)
   (defpub iterator_append
     (lambda (iter1 iter2)
       '''

@@ -18,11 +18,11 @@ public class StringTest
 
 
     @Test
-    public void testStringConcatInvalid()
+    public void testStringAppendInvalid()
         throws Exception
     {
-        expectArgTypeFailure("(string_concat 1)",0);
-        expectArgTypeFailure("(string_concat true)",0);
+        expectArgTypeFailure("(string_append 1)",0);
+        expectArgTypeFailure("(string_append true)",0);
     }
 
 

@@ -8,10 +8,10 @@ final class FusionString
     private FusionString() {}
 
 
-    static final class ConcatProc
+    static final class AppendProc
         extends Procedure
     {
-        ConcatProc()
+        AppendProc()
         {
             //    "                                                                               |
             super("Concatenates the `text` values (strings or symbols), returning a string.  If no\n" +

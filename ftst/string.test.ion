@@ -4,14 +4,14 @@
 (use '/fusion/string')
 
 
-(check = (string_concat ""   "")  "")
-(check = (string_concat "aB" "")  "aB")
-(check = (string_concat "aB" "c") "aBc")
+(check = (string_append ""   "")  "")
+(check = (string_append "aB" "")  "aB")
+(check = (string_append "aB" "c") "aBc")
 
-(check = (string_concat "aB" (quote c) "d") "aBcd")
-(check = (string_concat (quote aB) "") "aB")
-(check = (string_concat (quote aB) "c") "aBc")
-(check = (string_concat (quote aB) "c" (quote d)) "aBcd")
+(check = (string_append "aB" (quote c) "d") "aBcd")
+(check = (string_append (quote aB) "") "aB")
+(check = (string_append (quote aB) "c") "aBc")
+(check = (string_append (quote aB) "c" (quote d)) "aBcd")
 
 
 (check = (string_to_lower "")    "")
