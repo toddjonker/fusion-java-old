@@ -183,6 +183,43 @@ final class SyntaxSymbol
     }
 
 
+    /**
+     * Checks if this symbol is bound to a {@link SyntacticForm} in the given
+     * enviroment.  If so, cache the binding and return the form.  Otherwise
+     * do nothing.
+     *
+     * @return may be null.
+     */
+    SyntacticForm resolveSyntaxMaybe(Environment env)
+    {
+        // TODO FUSION-114 what if this is null or empty symbol?
+        //      We shouldn't fail in that case, at least not yet.
+
+        Binding b;
+        if (myBinding != null)
+        {
+            b = myBinding;
+        }
+        else if (myWraps == null)
+        {
+            return null;
+        }
+        else
+        {
+            b = myWraps.resolve(this);
+        }
+
+        Object resolved = b.lookup(env);
+        if (resolved instanceof SyntacticForm)
+        {
+            myBinding = b;
+            return (SyntacticForm) resolved;
+        }
+
+        return null;
+    }
+
+
     @Override
     SyntaxValue doExpand(Expander expander, Environment env)
         throws SyntaxFailure

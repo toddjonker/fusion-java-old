@@ -140,21 +140,27 @@ final class SyntaxSexp
         SyntaxValue first = children[0];
         if (first instanceof SyntaxSymbol)
         {
-            // TODO FUSION-114 what if this is null or empty symbol?
-            // We probably shouldn't fail in that case but let #%app handle it.
-            Binding binding = ((SyntaxSymbol) first).resolve();
-            Object resolved = binding.lookup(env);
-            if (resolved instanceof SyntacticForm)
+            // Do not assume that the symbol will be treated as a variable,
+            // since this scope may override #%app or #%variable-reference.
+            // Thus we cannot call expand on the symbol and must not cache the
+            // results of the binding resolution unless it resolves to syntax.
+            SyntacticForm xform =
+                ((SyntaxSymbol) first).resolveSyntaxMaybe(env);
+            if (xform != null)
             {
                 // We found a static top-level binding to a built-in form or
                 // to a macro. Continue the expansion process.
+
+                // TODO FUSION-31 identifier macros entail extra work here.
+                assert expander.expand(env, first) == first;
+                // else the next stmt must change
 
                 // TODO tail expand
 
                 // We use the same expansion context as we already have.
                 // Don't need to replace the sexp since we haven't changed it.
                 SyntaxValue expandedExpr =
-                    expander.expand(env, (SyntacticForm) resolved, this);
+                    expander.expand(env, xform, this);
                 return expandedExpr;
             }
         }

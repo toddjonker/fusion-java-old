@@ -17,6 +17,21 @@ public class BindingTest
         eval("g");
     }
 
+
+    @Test(expected = UnboundIdentifierFailure.class)
+    public void testNoProcBindingAtTop()
+        throws Exception
+    {
+        eval("(g)");
+    }
+
+    @Test(expected = UnboundIdentifierFailure.class)
+    public void testNoArgBindingAtTop()
+        throws Exception
+    {
+        eval("(is_int g)");
+    }
+
     @Test(expected = UnboundIdentifierFailure.class)
     public void testNoBindingInProcedureBody()
         throws Exception
