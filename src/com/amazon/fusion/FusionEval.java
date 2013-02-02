@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.Syntax.datumToSyntaxMaybe;
+import static com.amazon.fusion.Syntax.isSyntax;
 
 
 final class FusionEval
@@ -19,25 +20,46 @@ final class FusionEval
      * @see <a href="http://docs.racket-lang.org/reference/eval.html#%28def._%28%28quote._~23~25kernel%29._current-eval%29%29">
          Racket's <code>eval</code></a>
      */
-    static Object defaultEval(Evaluator eval, SyntaxValue topLevelForm)
+    @SuppressWarnings("javadoc")
+    private static Object defaultEval(Evaluator eval, Object topLevelForm)
         throws FusionException
     {
         Namespace ns = eval.findCurrentNamespace();
 
+        SyntaxValue stx;
+        if (Syntax.isSyntax(eval, topLevelForm))
+        {
+            stx = (SyntaxValue) topLevelForm;
+        }
+        else
+        {
+            stx = datumToSyntaxMaybe(eval, null, topLevelForm);
+            if (stx == null)
+            {
+                throw new ArgTypeFailure("default_eval_handler",
+                                         "Syntax object or Ionizable data",
+                                         0, topLevelForm);
+            }
+            stx = enrich(eval, stx);
+        }
+
         {
             // TODO FUSION-33 this should partial-expand and splice begins
             Expander expander = new Expander(eval);
-            topLevelForm = expander.expand(ns, topLevelForm);
+            stx = expander.expand(ns, stx);
         }
 
-        CompiledForm compiled = eval.compile(ns, topLevelForm);
-        topLevelForm = null; // Don't hold garbage
+        CompiledForm compiled = eval.compile(ns, stx);
+        stx = null; // Don't hold garbage
 
         return eval.eval(ns, compiled); // TODO TAIL
     }
 
 
-    static Object callCurrentEval(Evaluator eval, SyntaxValue topLevelForm)
+    /**
+     * Placeholder so we can later add current-eval parameter.
+     */
+    static Object callCurrentEval(Evaluator eval, Object topLevelForm)
         throws FusionException
     {
         return defaultEval(eval, topLevelForm);
@@ -50,21 +72,24 @@ final class FusionEval
      * Equivalent to Racket's {@code eval} (but incomplete at the moment.)
      *
      * @param ns may be null to use {@link Evaluator#findCurrentNamespace()}.
+     * @param topLevelForm will be enriched.
      */
-    static Object eval(Evaluator eval, SyntaxValue topLevelForm, Namespace ns)
+    static Object eval(Evaluator eval, Object topLevelForm, Namespace ns)
         throws FusionException
     {
         eval = eval.parameterizeCurrentNamespace(ns);
 
-        // TODO FUSION-44 handle (module ...) properly
-        topLevelForm = eval.findCurrentNamespace().syntaxIntroduce(topLevelForm);
+        if (isSyntax(eval, topLevelForm))
+        {
+            topLevelForm = enrich(eval, (SyntaxValue) topLevelForm);
+        }
 
         return callCurrentEval(eval, topLevelForm); // TODO TAIL
     }
 
 
     /**
-     * Like {@link #eval(Evaluator, SyntaxValue, Namespace)},
+     * Like {@link #eval(Evaluator, Object, Namespace)},
      * but does not enrich the source's lexical context.
      *
      * @param ns may be null to use {@link Evaluator#findCurrentNamespace()}.
@@ -75,6 +100,20 @@ final class FusionEval
         eval = eval.parameterizeCurrentNamespace(ns);
 
         return callCurrentEval(eval, source); // TODO TAIL
+    }
+
+
+    /**
+     * Enriches a syntax object "in the same way as eval", using the current
+     * namespace.
+     */
+    private static SyntaxValue enrich(Evaluator eval, SyntaxValue topLevelForm)
+    {
+        Namespace ns = eval.findCurrentNamespace();
+
+        // TODO FUSION-44 handle (module ...) properly
+        topLevelForm = ns.syntaxIntroduce(topLevelForm);
+        return topLevelForm;
     }
 
 
@@ -103,12 +142,6 @@ final class FusionEval
         {
             checkArityRange(1, 2, args);
 
-            SyntaxValue stx = datumToSyntaxMaybe(eval, null, args[0]);
-            if (stx == null)
-            {
-                throw argFailure("Syntax object or Ionizable data", 0, args);
-            }
-
             Namespace ns = null;
             if (args.length == 2)
             {
@@ -122,7 +155,7 @@ final class FusionEval
                 }
             }
 
-            return FusionEval.eval(eval, stx, ns);  // TODO TAIL
+            return FusionEval.eval(eval, args[0], ns);  // TODO TAIL
         }
     }
 }
