@@ -6,11 +6,21 @@
 (define id (quote_syntax identifier))
 (define some_syntax (quote_syntax (op arg)))
 
-(datum_to_syntax id some_syntax)
-
 // This should strip lexical data (and per Racket, location and properties)
-(datum_to_syntax null some_syntax)
+(datum_to_syntax some_syntax)
 
+(datum_to_syntax some_syntax id)
+(datum_to_syntax null id)
+(datum_to_syntax "hello" id)
+(datum_to_syntax (quote s) id)
+
+(datum_to_syntax null.list id)
+(datum_to_syntax [] id)
+(datum_to_syntax [id] id)
+
+
+// FIXME FUSION-107 DP2 backwards compatibility
+(datum_to_syntax id some_syntax)
 (datum_to_syntax id null)
 (datum_to_syntax id "hello")
 (datum_to_syntax id (quote s))

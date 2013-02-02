@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -7,34 +7,47 @@ import static com.amazon.fusion.Syntax.isIdentifier;
 
 
 class DatumToSyntaxProc
-    extends Procedure2
+    extends Procedure
 {
     DatumToSyntaxProc()
     {
         //    "                                                                               |
-        super("Converts the DATUM to a syntax object with the binding information copied from\n" +
-              "the CONTEXT syntax identifier.",
-              "context", "datum");
+        super("Converts the `datum` to a syntax object with the binding information copied\n" +
+              "from the `context` syntax identifier.\n" +
+              "\n" +
+              "When `context` isn't provided, the resulting syntax object has no lexical\n" +
+              "context.",
+              "datum", "[context]");
     }
 
     @Override
-    Object doApply(Evaluator eval, Object arg0, Object arg1)
+    Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
-        SyntaxSymbol context;
-        if (isIdentifier(eval, arg0))
+        checkArityRange(1, 2, args);
+
+        SyntaxSymbol context = null;
+        Object datum;
+        if (args.length == 2 && isIdentifier(eval, args[0]))
         {
-            context = (SyntaxSymbol) arg0;
-        }
-        else if (isNullNull(eval, arg0))
-        {
-            context = null;
+            // FIXME FUSION-107 DP2 backwards compatibility this whole clause
+            context = (SyntaxSymbol) args[0];
+            datum = args[1];
         }
         else
         {
-            throw argFailure("syntax identifier, or null", 0, arg0, arg1);
+            datum = args[0];
+
+            if (args.length == 2)
+            {
+                if (! isIdentifier(eval, args[1]))
+                {
+                    throw argFailure("syntax identifier", 1, args);
+                }
+                context = (SyntaxSymbol) args[1];
+            }
         }
 
-        return datumToSyntax(eval, context, arg1);
+        return datumToSyntax(eval, context, datum);
     }
 }
