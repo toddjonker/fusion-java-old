@@ -14,7 +14,7 @@
 
 (check_equal
   (parameterize ((current_namespace ns))
-    (eval (quote_syntax barley) null))
+    (eval (quote_syntax barley)))
   "soup" "eval 2")
 
 

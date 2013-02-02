@@ -383,6 +383,10 @@ final class Evaluator
     }
 
 
+    /**
+     * @param ns may be null, having no effect.
+     * @return a parameterized evaluator.
+     */
     Evaluator parameterizeCurrentNamespace(Namespace ns)
     {
         if (ns == null) return this;

@@ -82,43 +82,44 @@ final class FusionEval
 
 
     static final class EvalProc
-        extends Procedure2
+        extends Procedure
     {
         EvalProc()
         {
             //    "                                                                               |
-            super("Evaluates a `top_form` within a `namespace`.  If `namespace` is null then the\n" +
+            super("Evaluates a `top_form` within a `namespace`.  If `namespace` is absent then the\n" +
                   "[`current_namespace`](namespace.html#current_namespace) parameter is used.\n" +
                   "\n" +
                   "The `top_form` must be a valid top-level syntactic form with respect to the\n" +
                   "bindings visible in the namespace.  The form is expanded, compiled, and\n" +
                   "evaluated, and its result is returned.  Any side effects made to the namespace\n" +
                   "will be visible to later evaluations.",
-                  "top_form", "namespace");
+                  "top_form", "[namespace]");
         }
 
         @Override
-        Object doApply(Evaluator eval, Object arg0, Object arg1)
+        Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            SyntaxValue stx = datumToSyntaxMaybe(eval, null, arg0);
+            checkArityRange(1, 2, args);
+
+            SyntaxValue stx = datumToSyntaxMaybe(eval, null, args[0]);
             if (stx == null)
             {
-                throw argFailure("Syntax object or Ionizable data", 0, arg0, arg1);
+                throw argFailure("Syntax object or Ionizable data", 0, args);
             }
 
-            Namespace ns;
-            if (arg1 instanceof Namespace)
+            Namespace ns = null;
+            if (args.length == 2)
             {
-                ns = (Namespace) arg1;
-            }
-            else if (isNullNull(eval, arg1))
-            {
-                ns = null;
-            }
-            else
-            {
-                throw argFailure("namespace or null", 1, arg0, arg1);
+                if (args[1] instanceof Namespace)
+                {
+                    ns = (Namespace) args[1];
+                }
+                else
+                {
+                    throw argFailure("namespace", 1, args);
+                }
             }
 
             return FusionEval.eval(eval, stx, ns);  // TODO TAIL
