@@ -301,7 +301,7 @@ final class SyntaxSexp
             if (lambda.myArgNames.length != argForms.length)
             {
                 String message =
-                    "lambda form expects " + lambda.myArgNames.length +
+                    "procedure expects " + lambda.myArgNames.length +
                     " arguments but application has " + argForms.length +
                     " expressions";
                  throw new SyntaxFailure("procedure application", message,

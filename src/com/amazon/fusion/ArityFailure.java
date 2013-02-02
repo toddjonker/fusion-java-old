@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,29 +10,55 @@ import java.io.IOException;
  * Indicates a failure applying a procedure with the wrong number of arguments.
  */
 @SuppressWarnings("serial")
-final class ArityFailure
+class ArityFailure
     extends ContractFailure
 {
-    enum Variability { EXACT, AT_LEAST }
-
     private final Procedure myProc;
-    private final int myArity;
-    private final Variability myVariability;
+    private final int myMinArity;
+    private final int myMaxArity;
     private final Object[] myActuals;
+
 
     /**
      * @param proc must not be null
      */
-    ArityFailure(Procedure proc, int arity, Variability variability,
+    ArityFailure(Procedure proc, int minArity, int maxArity,
                  Object... actuals)
     {
         super("arity failure");
         assert proc != null && actuals != null;
+        assert minArity <= maxArity;
         myProc = proc;
-        myArity = arity;
-        myVariability = variability;
+        myMinArity = minArity;
+        myMaxArity = maxArity;
         myActuals = actuals;
     }
+
+
+    protected void displayArityExpectation(Evaluator eval, Appendable out)
+        throws IOException, FusionException
+    {
+        int base = myMinArity;
+        if (myMaxArity == Integer.MAX_VALUE)
+        {
+            out.append("at least ");
+            out.append(Integer.toString(myMinArity));
+        }
+        else
+        {
+            out.append(Integer.toString(myMinArity));
+
+            if (myMinArity != myMaxArity)
+            {
+                out.append(" to ");
+                out.append(Integer.toString(myMaxArity));
+                base = myMaxArity;
+            }
+        }
+        out.append(" argument");
+        if (base != 1) out.append("s");
+    }
+
 
     @Override
     public void displayMessage(Evaluator eval, Appendable out)
@@ -40,13 +66,7 @@ final class ArityFailure
     {
         myProc.identify(out);
         out.append(" expects ");
-        if (myVariability == Variability.AT_LEAST)
-        {
-            out.append("at least ");
-        }
-        out.append(Integer.toString(myArity));
-        out.append(" argument");
-        if (myArity > 1) out.append("s");
+        displayArityExpectation(eval, out);
         out.append(", given ");
         out.append(Integer.toString(myActuals.length));
         if (myActuals.length != 0)

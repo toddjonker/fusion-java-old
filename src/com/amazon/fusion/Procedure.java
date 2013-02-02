@@ -6,7 +6,6 @@ import static com.amazon.fusion.FusionCollection.isCollection;
 import static com.amazon.fusion.FusionList.isList;
 import static com.amazon.fusion.FusionSequence.isSequence;
 import static com.amazon.fusion.FusionStruct.isStruct;
-import com.amazon.fusion.ArityFailure.Variability;
 import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
@@ -115,7 +114,7 @@ abstract class Procedure
     {
         if (args.length != argCount)
         {
-            throw new ArityFailure(this, argCount, Variability.EXACT, args);
+            throw new ArityFailure(this, argCount, argCount, args);
         }
     }
 
@@ -135,7 +134,17 @@ abstract class Procedure
     {
         if (args.length < atLeast)
         {
-            throw new ArityFailure(this, atLeast, Variability.AT_LEAST, args);
+            throw new ArityFailure(this, atLeast, Integer.MAX_VALUE, args);
+        }
+    }
+
+
+    void checkArityRange(int atLeast, int atMost, Object[] args)
+        throws ArityFailure
+    {
+        if (args.length < atLeast || args.length > atMost)
+        {
+            throw new ArityFailure(this, atLeast, atMost, args);
         }
     }
 
