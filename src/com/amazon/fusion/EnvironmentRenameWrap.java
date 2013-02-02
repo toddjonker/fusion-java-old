@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * Syntax wrap that adds all bindings from a specific namespace.
+ * Syntax wrap that adds all bindings from a specific environment.
  */
 class EnvironmentRenameWrap
     extends SyntaxWrap

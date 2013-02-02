@@ -142,7 +142,7 @@ final class SyntaxSymbol
     }
 
 
-    /** Not set until {@link #resolve} or {@link #expand}. */
+    /** Not set until {@link #resolve} or {@link #doExpand}. */
     Binding getBinding()
     {
         return myBinding;
@@ -150,6 +150,7 @@ final class SyntaxSymbol
 
     /**
      * Expand-time binding resolution.
+     * As a postcondition, {@link #myBinding} is not null.
      *
      * @return not null.
      */
@@ -224,7 +225,7 @@ final class SyntaxSymbol
     SyntaxValue doExpand(Expander expander, Environment env)
         throws SyntaxFailure
     {
-        if (myBinding == null)        // Otherwise we've already been prepared
+        if (myBinding == null)        // Otherwise we've already been expanded
         {
             // TODO FUSION-114 this should happen in resolve()
             if (myText == null)
@@ -235,11 +236,6 @@ final class SyntaxSymbol
             }
 
             resolve();
-            assert myBinding != null;
-            if (myBinding instanceof FreeBinding)
-            {
-                throw new UnboundIdentifierFailure(myText, this);
-            }
         }
 
         return this;
@@ -282,6 +278,11 @@ final class SyntaxSymbol
         throws FusionException
     {
         assert myBinding != null : "No binding for " + myText;
+
+        if (myBinding instanceof FreeBinding)
+        {
+            throw new UnboundIdentifierFailure(myText, this);
+        }
 
         return myBinding.compileReference(eval, env);
     }

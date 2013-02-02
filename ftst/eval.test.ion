@@ -34,3 +34,27 @@
   [1150, 1150] "eval [1150,1150]")
 
 (check = (eval (quote (. {f:2} "f")) ns) 2)
+
+
+//==========================================================================
+// expand
+
+(check_equal
+  (syntax_to_datum (expand (quote_syntax (and))))
+  (quote true)
+  "(and)")
+
+(check_equal
+  (syntax_to_datum (expand (quote (and))))
+  (quote true)
+  "(and)")
+
+(check_equal
+  (syntax_to_datum (expand (quote (let [(a 3)] a))))
+  (quote ((lambda (a) a) 3))
+  "let")
+
+(check_equal
+  (syntax_to_datum (expand (quote (let [(a b)] a))))
+  (quote ((lambda (a) a) b))
+  "let w/ unbound var")

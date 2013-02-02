@@ -15,6 +15,7 @@ See [dynamic evaluation](../eval.html) for more information.
   (provide load)
 
 
-  (defpub_j eval "com.amazon.fusion.FusionEval$EvalProc")
+  (defpub_j eval   "com.amazon.fusion.FusionEval$EvalProc")
+  (defpub_j expand "com.amazon.fusion.FusionEval$ExpandProc")
 
 )

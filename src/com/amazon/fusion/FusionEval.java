@@ -11,11 +11,42 @@ final class FusionEval
     private FusionEval() {}
 
 
+    private static SyntaxValue topLevelStx(Evaluator eval,
+                                           Object topLevelForm,
+                                           boolean enrichSyntaxObject,
+                                           String whosCalling)
+        throws FusionException
+    {
+        SyntaxValue stx;
+        if (Syntax.isSyntax(eval, topLevelForm))
+        {
+            stx = (SyntaxValue) topLevelForm;
+            if (enrichSyntaxObject)
+            {
+                stx = enrich(eval, stx);
+            }
+        }
+        else
+        {
+            stx = datumToSyntaxMaybe(eval, null, topLevelForm);
+            if (topLevelForm == null)
+            {
+                throw new ArgTypeFailure(whosCalling,
+                                         "Syntax object or Ionizable data",
+                                         0, topLevelForm);
+            }
+            stx = enrich(eval, stx);
+        }
+
+        return stx;
+    }
+
     /**
      * The default evaluation handler, evaluating the given source
      * within the current namespace.
      *
-     * @param topLevelForm is not enriched with lexical information.
+     * @param topLevelForm is not enriched with lexical information if it is
+     *  a syntax object.
      *
      * @see <a href="http://docs.racket-lang.org/reference/eval.html#%28def._%28%28quote._~23~25kernel%29._current-eval%29%29">
          Racket's <code>eval</code></a>
@@ -24,24 +55,10 @@ final class FusionEval
     private static Object defaultEval(Evaluator eval, Object topLevelForm)
         throws FusionException
     {
-        Namespace ns = eval.findCurrentNamespace();
+        SyntaxValue stx =
+            topLevelStx(eval, topLevelForm, false, "default_eval_handler");
 
-        SyntaxValue stx;
-        if (Syntax.isSyntax(eval, topLevelForm))
-        {
-            stx = (SyntaxValue) topLevelForm;
-        }
-        else
-        {
-            stx = datumToSyntaxMaybe(eval, null, topLevelForm);
-            if (stx == null)
-            {
-                throw new ArgTypeFailure("default_eval_handler",
-                                         "Syntax object or Ionizable data",
-                                         0, topLevelForm);
-            }
-            stx = enrich(eval, stx);
-        }
+        Namespace ns = eval.findCurrentNamespace();
 
         {
             // TODO FUSION-33 this should partial-expand and splice begins
@@ -120,20 +137,53 @@ final class FusionEval
     //========================================================================
 
 
+    static final class ExpandProc
+        extends Procedure1
+    {
+        ExpandProc()
+        {
+            //    "                                                                               |
+            super("Expands a top-level form to core syntax, using the bindings of the current\n" +
+                  "namespace.\n" +
+                  "\n" +
+                  "The `top_level_form` may be a syntax object or another datum.",
+                  "top_level_form");
+        }
+
+        /**
+         * @see FusionEval#eval(Evaluator, Object, Namespace)
+         */
+        @Override
+        Object doApply(Evaluator eval, Object arg0)
+            throws FusionException
+        {
+            SyntaxValue topLevelForm =
+                topLevelStx(eval, arg0, true, identify());
+
+            Namespace ns = eval.findCurrentNamespace();
+            Expander expander = new Expander(eval);
+            topLevelForm = expander.expand(ns, topLevelForm);
+
+            return topLevelForm;
+        }
+    }
+
+
     static final class EvalProc
         extends Procedure
     {
         EvalProc()
         {
             //    "                                                                               |
-            super("Evaluates a `top_form` within a `namespace`.  If `namespace` is absent then the\n" +
-                  "[`current_namespace`](namespace.html#current_namespace) parameter is used.\n" +
+            super("Evaluates a `top_level_form` within a `namespace`.  If `namespace` is absent\n" +
+                  "then the [`current_namespace`](namespace.html#current_namespace) parameter is\n" +
+                  "used.\n" +
                   "\n" +
-                  "The `top_form` must be a valid top-level syntactic form with respect to the\n" +
-                  "bindings visible in the namespace.  The form is expanded, compiled, and\n" +
+                  "The `top_level_form` must be a valid top-level syntactic form with respect to\n" +
+                  "the bindings visible in the namespace.  The form is expanded, compiled, and\n" +
                   "evaluated, and its result is returned.  Any side effects made to the namespace\n" +
                   "will be visible to later evaluations.",
-                  "top_form", "[namespace]");
+                  "top_level_form", "[namespace]");
         }
 
         @Override
