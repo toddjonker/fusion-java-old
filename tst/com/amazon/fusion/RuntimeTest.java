@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -17,6 +17,18 @@ import org.junit.Test;
 public class RuntimeTest
     extends CoreTestCase
 {
+    private static final File TEST_REPO = new File("tst-repo");
+
+
+    @Test
+    public void testDefaultBuilder()
+        throws Exception
+    {
+        FusionRuntimeBuilder b = FusionRuntimeBuilder.standard();
+        assertSame(b, b.mutable());
+        b.build();
+    }
+
     @Test
     public void testDefaultCurrentDirectory()
         throws Exception
@@ -43,17 +55,29 @@ public class RuntimeTest
         runtimeBuilder().setInitialCurrentDirectory(file);
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void testInitialCurrentDirectoryImmutability()
+        throws Exception
+    {
+        runtimeBuilder().immutable().setInitialCurrentDirectory(TEST_REPO);
+    }
 
     @Test
     public void testUseFromCurrentDirectory()
         throws Exception
     {
-        File tstRepo = new File("tst-repo");
-        runtimeBuilder().setInitialCurrentDirectory(tstRepo);
+        runtimeBuilder().setInitialCurrentDirectory(TEST_REPO);
         eval("(use \"grain\")");
         assertString("soup", "barley");
     }
 
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testDocumentingImmutability()
+        throws Exception
+    {
+        runtimeBuilder().immutable().setDocumenting(true);
+    }
 
     @Test
     public void testModuleInUserRepository()
