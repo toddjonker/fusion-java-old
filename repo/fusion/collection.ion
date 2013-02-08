@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (module collection '/fusion/base'
 
@@ -39,14 +39,14 @@ When `collection` is a sequence, the elements are visited in order.
              collection)
            result))
         (true    // TODO FUSION-86 optimize for list vs sexp
-         (let ((len (size collection)))
-           (let loop ((i 0))
+         (let [(len (size collection))]
+           (let loop [(i 0)]
              (if (= i len)
                false
-               (let ((elt (. collection i)))
-                 (let ((result (pred elt)))
-                   (if result result
-                     (loop (+ i 1))))))))))))
+               (lets [(elt (. collection i)),
+                      (result (pred elt))]
+                 (if result result
+                   (loop (+ i 1)))))))))))
 
 
   (defpub is_empty
@@ -79,11 +79,11 @@ When `collection` is a sequence, the elements are visited in order.
              collection)
            result))
         (true    // TODO FUSION-86 optimize for list vs sexp
-         (let ((len (size collection)))
-           (let loop ((i 0))
+         (let [(len (size collection))]
+           (let loop [(i 0)]
              (if (= i len)
                (void)
-               (let ((elt (. collection i)))
+               (let [(elt (. collection i))]
                  (if (pred elt)
                    elt
                    (loop (+ i 1)))))))))))
@@ -110,8 +110,8 @@ When `collection` is a sequence, the elements are visited in order.
            collection)
          (void))
         (true    // TODO FUSION-86 optimize for list vs sexp
-         (let ((len (size collection)))
-           (let loop ((i 0))
+         (let [(len (size collection))]
+           (let loop [(i 0)]
              (if (= i len)
                (void)
                (begin

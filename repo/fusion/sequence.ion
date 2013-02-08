@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (module sequence '/fusion/base'
 
@@ -43,7 +43,7 @@ elements.
 Returns the last element in the `sequence`. Fails if the sequence has no
 elements.
       '''
-      (let ((s (size sequence)))
+      (let [(s (size sequence))]
         (if (= 0 s)
           (raise_argument_error "last" "non-empty sequence" 0 sequence)
           (. sequence (- s 1))))))
@@ -62,17 +62,17 @@ a new list of the elements (in order) for which `pred` returns truthy.
       '''
       (if (not (is_list list))
         (raise_argument_error "choose" "list" 1 pred list)
-      (let ((len (size list)))
-        (let loop ((i 0)
-                   (result (stretchy_list)))
-          (if (= i len)
-            result
-            (let ((elt (. list i)))
-              (loop
-                (+ 1 i)
-                (if (pred elt)
-                  (unsafe_list_add_m result elt)
-                  result)))))))))
+        (let [(len (size list))]
+          (let loop [(i 0),
+                     (result (stretchy_list))]
+            (if (= i len)
+              result
+              (let [(elt (. list i))]
+                (loop
+                  (+ 1 i)
+                  (if (pred elt)
+                    (unsafe_list_add_m result elt)
+                    result)))))))))
 
 
   // Name per Dylan and SRFI-1. Dylan allows mapping over multiple key-value
@@ -85,12 +85,12 @@ a new list of the results in order.
       '''
       (if (not (is_list list))
         (raise_argument_error "map" "list" 1 proc list)
-      (let ((len (size list)))
-        (let loop ((i 0)
-                   (result (stretchy_list)))
-          (if (= i len)
-            result
-            (loop
-              (+ 1 i)
-              (unsafe_list_add_m result (proc (. list i))))))))))
+        (let [(len (size list))]
+          (let loop [(i 0),
+                     (result (stretchy_list))]
+            (if (= i len)
+              result
+              (loop
+                (+ 1 i)
+                (unsafe_list_add_m result (proc (. list i))))))))))
 )
