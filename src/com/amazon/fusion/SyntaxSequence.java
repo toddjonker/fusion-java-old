@@ -75,6 +75,15 @@ abstract class SyntaxSequence
         }
     }
 
+
+    /**
+     * Does not push wraps!
+     */
+    SyntaxValue[] children()
+    {
+        return myChildren;
+    }
+
     Object[] unwrapChildren()
     {
         pushAnyWraps();

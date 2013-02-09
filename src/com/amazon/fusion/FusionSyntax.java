@@ -66,7 +66,7 @@ final class FusionSyntax
         {
             checkArityExact(1, args);
             SyntaxValue stx = checkSyntaxArg(0, args);
-            return stx.unwrap(eval);
+            return stx.unwrap(eval, false);
         }
     }
 }

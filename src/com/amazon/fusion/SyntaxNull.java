@@ -33,7 +33,7 @@ final class SyntaxNull
     }
 
     @Override
-    Object unwrap(Evaluator eval)
+    Object unwrap(Evaluator eval, boolean recurse)
     {
         return eval.newNull(getAnnotations());
     }

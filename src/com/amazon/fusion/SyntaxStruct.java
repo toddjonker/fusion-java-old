@@ -187,64 +187,22 @@ final class SyntaxStruct
 
 
     @Override
-    Object unwrap(Evaluator eval)
+    Object unwrap(Evaluator eval, boolean recurse)
         throws FusionException
     {
-        if (myWraps == null) return myStruct;
-
-        // We have children, and wraps to propagate.
-
-        // Make a copy of the map, then mutate it to replace children
-        // as necessary.
-        Map<String, Object> newMap =
-            ((NonNullImmutableStruct) myStruct).copyMap();
-
-        for (Map.Entry<String, Object> entry : newMap.entrySet())
-        {
-            Object value = entry.getValue();
-            if (! (value instanceof Object[]))
-            {
-                SyntaxValue child = (SyntaxValue) value;
-                child = child.addWraps(myWraps);
-                entry.setValue(child);
-            }
-            else
-            {
-                Object[] children = (Object[]) value;
-                Object[] childValues = new Object[children.length];
-
-                int cPos = 0;
-                for (Object child : children)
-                {
-                    childValues[cPos++] = ((SyntaxValue)child).addWraps(myWraps);
-                }
-                entry.setValue(childValues);
-            }
-        }
-
-        myStruct = immutableStruct(newMap, getAnnotations());
-        myWraps = null;
-        return myStruct;
-    }
-
-
-    @Override
-    Object quote(Evaluator eval)  // TODO optimize
-        throws FusionException
-    {
-        // This should only be called at runtime, after wraps are pushed.
-        assert myWraps == null;
-
-        if (myStruct.size() == 0)
+        if (recurse ? myStruct.size() == 0 : myWraps == null)
         {
             return myStruct;
         }
 
+        // We have children, and wraps to propagate (when not recursing)
 
         // Make a copy of the map, then mutate it to replace children
         // as necessary.
         Map<String, Object> newMap =
             ((NonNullImmutableStruct) myStruct).copyMap();
+
+        // TODO optimize this to not allocate new objects when nothing changes.
 
         for (Map.Entry<String, Object> entry : newMap.entrySet())
         {
@@ -252,7 +210,9 @@ final class SyntaxStruct
             if (! (value instanceof Object[]))
             {
                 SyntaxValue child = (SyntaxValue) value;
-                Object childValue = child.quote(eval);
+                Object childValue =
+                    (recurse ? child.unwrap(eval, true)
+                             : child.addWraps(myWraps));
                 entry.setValue(childValue);
             }
             else
@@ -261,15 +221,27 @@ final class SyntaxStruct
                 Object[] childValues = new Object[children.length];
 
                 int cPos = 0;
-                for (Object child : children)
+                for (Object c : children)
                 {
-                    childValues[cPos++] = ((SyntaxValue)child).quote(eval);
+                    SyntaxValue child = (SyntaxValue) c;
+                    Object childValue =
+                        (recurse ? child.unwrap(eval, true)
+                                 : child.addWraps(myWraps));
+                    childValues[cPos++] = childValue;
                 }
                 entry.setValue(childValues);
             }
         }
 
-        return immutableStruct(newMap, getAnnotations());
+        NonNullImmutableStruct result =
+            immutableStruct(newMap, getAnnotations());
+        if (!recurse) // We've push wraps to children, retain them!
+        {
+            myStruct = result;
+            myWraps = null;
+        }
+
+        return result;
     }
 
 

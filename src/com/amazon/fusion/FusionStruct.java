@@ -735,6 +735,7 @@ final class FusionStruct
                     {
                         IonValue ion = copyToIonValue(child, factory,
                                                       throwOnConversionFailure);
+                        if (ion == null) return null;
                         is.add(fieldName, ion);
                     }
                 }
@@ -742,6 +743,7 @@ final class FusionStruct
                 {
                     IonValue ion = copyToIonValue(value, factory,
                                                   throwOnConversionFailure);
+                    if (ion == null) return null;
                     is.add(fieldName, ion);
                 }
             }

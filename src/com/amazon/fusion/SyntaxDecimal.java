@@ -41,7 +41,7 @@ final class SyntaxDecimal
 
 
     @Override
-    Object unwrap(Evaluator eval)
+    Object unwrap(Evaluator eval, boolean recurse)
     {
         return eval.newDecimal(myValue, getAnnotations());
     }

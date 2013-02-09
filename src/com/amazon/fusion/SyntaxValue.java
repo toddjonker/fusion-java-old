@@ -122,20 +122,12 @@ abstract class SyntaxValue
 
 
     /**
-     * Unwraps one layer of syntax, returning plain values.
+     * Unwraps syntax, returning plain values.
+     * @param recurse if true, unwrapping is recursive (as per `quote` or
+     *  `synatax_to_datum`); otherwise only one layer is unwrapped.
      */
-    abstract Object unwrap(Evaluator eval)
+    abstract Object unwrap(Evaluator eval, boolean recurse)
         throws FusionException;
-
-
-    /**
-     * Transform this syntax into plain values, recursively.
-     */
-    Object quote(Evaluator eval)
-        throws FusionException
-    {
-        return unwrap(eval);
-    }
 
 
     @Override

@@ -41,7 +41,7 @@ final class SyntaxTimestamp
 
 
     @Override
-    Object unwrap(Evaluator eval)
+    Object unwrap(Evaluator eval, boolean recurse)
     {
         return eval.newTimestamp(myValue, getAnnotations());
     }

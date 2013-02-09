@@ -39,7 +39,7 @@ final class SyntaxBlob
 
 
     @Override
-    Object unwrap(Evaluator eval)
+    Object unwrap(Evaluator eval, boolean recurse)
     {
         return eval.newBlob(myValue, getAnnotations());
     }

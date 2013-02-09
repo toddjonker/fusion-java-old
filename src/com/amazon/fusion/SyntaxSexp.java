@@ -225,7 +225,7 @@ final class SyntaxSexp
 
 
     @Override
-    Object unwrap(Evaluator eval)
+    Object unwrap(Evaluator eval, boolean recurse)
         throws FusionException
     {
         String[] annotations = getAnnotations();
@@ -241,45 +241,28 @@ final class SyntaxSexp
             return emptySexp(eval, annotations);
         }
 
+        if (recurse)
+        {
+            Object sexp = EMPTY_SEXP;
+            for (int i = size; i-- != 0;)
+            {
+                SyntaxValue s = get(i);
+                Object head = s.unwrap(eval, true);
+                if (i == 0)
+                {
+                    sexp = pair(eval, annotations, head, sexp);
+                }
+                else
+                {
+                    sexp = pair(eval, head, sexp);
+                }
+            }
+
+            return sexp;
+        }
         Object head = get(0);
         Object tail = (size == 1 ? EMPTY_SEXP : makeSubseq(1, size));
         return pair(eval, annotations, head, tail);
-    }
-
-
-    @Override
-    Object quote(Evaluator eval)
-        throws FusionException
-    {
-        String[] annotations = getAnnotations();
-
-        if (isNullValue())
-        {
-            return nullSexp(eval, annotations);
-        }
-
-        int i = size();
-        if (i == 0)
-        {
-            return emptySexp(eval, annotations);
-        }
-
-        Object sexp = EMPTY_SEXP;
-        while (i-- != 0)
-        {
-            SyntaxValue s = get(i);
-            Object head = s.quote(eval);
-            if (i == 0)
-            {
-                sexp = pair(eval, annotations, head, sexp);
-            }
-            else
-            {
-                sexp = pair(eval, head, sexp);
-            }
-        }
-
-        return sexp;
     }
 
 

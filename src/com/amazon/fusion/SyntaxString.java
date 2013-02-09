@@ -33,7 +33,7 @@ final class SyntaxString
 
 
     @Override
-    Object unwrap(Evaluator eval)
+    Object unwrap(Evaluator eval, boolean recurse)
     {
         return eval.newString(myText, getAnnotations());
     }
