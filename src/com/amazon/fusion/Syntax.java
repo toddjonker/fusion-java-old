@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -154,29 +154,12 @@ final class Syntax
         return datum;
     }
 
-    /**
-     * @param context may be null
-     */
-    static SyntaxValue datumToSyntax(Evaluator eval,
-                                     SyntaxSymbol context,
-                                     SyntaxValue datum)
-        throws FusionException
-    {
-        // TODO Should strip location and properties
-        datum = datum.stripWraps();
-        return applyContext(eval, context, datum);
-    }
-
 
     /**
-     * We apply the context only once at the top, so it propagates lazily.
-     *
-     * TODO really? context seems unused
+     * @return null if something in the datum can't be converted into synatx.
      */
     private static SyntaxValue
-    datumToStrippedSyntaxMaybe(final Evaluator eval,
-                               final SyntaxSymbol context,
-                               Object datum)
+    datumToStrippedSyntaxMaybe(final Evaluator eval, Object datum)
         throws FusionException
     {
         if (isSyntax(eval, datum))
@@ -201,8 +184,7 @@ final class Syntax
             for (int i = 0; i < size; i++)
             {
                 Object rawChild = unsafeListRef(eval, datum, i);
-                SyntaxValue child =
-                    datumToStrippedSyntaxMaybe(eval, context, rawChild);
+                SyntaxValue child = datumToStrippedSyntaxMaybe(eval, rawChild);
                 if (child == null)
                 {
                     // Hit something that's not syntax-able
@@ -224,8 +206,7 @@ final class Syntax
                  pair = unsafePairTail(eval, pair))
             {
                 Object rawChild = unsafePairHead(eval, pair);
-                SyntaxValue child =
-                    datumToStrippedSyntaxMaybe(eval, context, rawChild);
+                SyntaxValue child = datumToStrippedSyntaxMaybe(eval, rawChild);
                 if (child == null)
                 {
                     // Hit something that's not syntax-able
@@ -246,7 +227,7 @@ final class Syntax
                     throws FusionException
                 {
                     SyntaxValue stripped =
-                        datumToStrippedSyntaxMaybe(eval, context, value);
+                        datumToStrippedSyntaxMaybe(eval, value);
                     if (stripped == null)
                     {
                         // Hit something that's not syntax-able
@@ -271,10 +252,16 @@ final class Syntax
         return null;
     }
 
+    @SuppressWarnings("serial")
     private static final class StripFailure extends RuntimeException
     {
     }
 
+
+    /**
+     * @param context may be null, in which case no lexical information is
+     * applied (and any existing is stripped).
+     */
     static SyntaxValue datumToSyntaxMaybe(Evaluator eval,
                                           SyntaxSymbol context,
                                           Object datum)
@@ -285,12 +272,17 @@ final class Syntax
             return datumToSyntax(eval, context, (SyntaxValue) datum);
         }
 
-        SyntaxValue stx = datumToStrippedSyntaxMaybe(eval, context, datum);
+        SyntaxValue stx = datumToStrippedSyntaxMaybe(eval, datum);
         if (stx == null) return null;
 
         return applyContext(eval, context, stx);
     }
 
+
+    /**
+     * @param context may be null, in which case no lexical information is
+     * applied (and any existing is stripped).
+     */
     static SyntaxValue datumToSyntax(Evaluator eval,
                                      SyntaxSymbol context,
                                      Object datum)
@@ -305,5 +297,19 @@ final class Syntax
         }
 
         return stx;
+    }
+
+    /**
+     * @param context may be null, in which case no lexical information is
+     * applied (and any existing is stripped).
+     */
+    static SyntaxValue datumToSyntax(Evaluator eval,
+                                     SyntaxSymbol context,
+                                     SyntaxValue datum)
+        throws FusionException
+    {
+        // TODO Should strip location and properties
+        datum = datum.stripWraps();
+        return applyContext(eval, context, datum);
     }
 }
