@@ -49,6 +49,28 @@ final class FusionSyntax
     }
 
 
+    static final class ToDatumProc
+        extends Procedure
+    {
+        ToDatumProc()
+        {
+            //    "                                                                               |
+            super("Given a `syntax` object, removes the lexical information and returns a plain\n" +
+                  "value, unwraps all layers recursively.",
+                  "syntax");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(1, args);
+            SyntaxValue stx = checkSyntaxArg(0, args);
+            return stx.unwrap(eval, true);
+        }
+    }
+
+
     static final class UnwrapProc
         extends Procedure
     {

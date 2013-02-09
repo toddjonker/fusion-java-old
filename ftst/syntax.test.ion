@@ -50,6 +50,30 @@
 
 
 //==========================================================================
+// syntax_to_datum
+
+
+(check = true        (syntax_to_datum (quote_syntax true)))
+(check = 159         (syntax_to_datum (quote_syntax 159)))
+//(check = 2.57e0      (syntax_to_datum (quote_syntax 2.57e0)))   // TODO
+(check = 2.57        (syntax_to_datum (quote_syntax 2.57)))
+(check = 2013-02-08T (syntax_to_datum (quote_syntax 2013-02-08T)))
+(check = (quote u)   (syntax_to_datum (quote_syntax u)))
+(check = "unwrap"    (syntax_to_datum (quote_syntax "unwrap")))
+// TODO test blob, clob
+
+(lets [(stx (quote_syntax [a, 2])),
+       (unwrapped (syntax_to_datum stx))]
+  (check_equal (quote [a, 2]) unwrapped ""))
+
+(lets [(stx (quote_syntax (a {f:2, g:["hi"]}))),
+       (unwrapped (syntax_to_datum stx))]
+  (check = (quote a) (head unwrapped))
+  (check = 2 (. unwrapped 1 "f") "f")
+  (check_equal ["hi"] (. unwrapped 1 "g") "g"))
+
+
+//==========================================================================
 // syntax_unwrap   aka syntax-e
 
 
