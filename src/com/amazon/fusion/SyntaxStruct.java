@@ -21,7 +21,7 @@ import java.util.Map;
 final class SyntaxStruct
     extends SyntaxContainer
 {
-    private final ImmutableStruct myStruct;
+    private ImmutableStruct myStruct;
 
 
     /**
@@ -183,6 +183,48 @@ final class SyntaxStruct
         assert myWraps == null;
 
         return (SyntaxValue) myStruct.dot(eval, fieldName);
+    }
+
+
+    @Override
+    Object unwrap(Evaluator eval)
+        throws FusionException
+    {
+        if (myWraps == null) return myStruct;
+
+        // We have children, and wraps to propagate.
+
+        // Make a copy of the map, then mutate it to replace children
+        // as necessary.
+        Map<String, Object> newMap =
+            ((NonNullImmutableStruct) myStruct).copyMap();
+
+        for (Map.Entry<String, Object> entry : newMap.entrySet())
+        {
+            Object value = entry.getValue();
+            if (! (value instanceof Object[]))
+            {
+                SyntaxValue child = (SyntaxValue) value;
+                child = child.addWraps(myWraps);
+                entry.setValue(child);
+            }
+            else
+            {
+                Object[] children = (Object[]) value;
+                Object[] childValues = new Object[children.length];
+
+                int cPos = 0;
+                for (Object child : children)
+                {
+                    childValues[cPos++] = ((SyntaxValue)child).addWraps(myWraps);
+                }
+                entry.setValue(childValues);
+            }
+        }
+
+        myStruct = immutableStruct(newMap, getAnnotations());
+        myWraps = null;
+        return myStruct;
     }
 
 

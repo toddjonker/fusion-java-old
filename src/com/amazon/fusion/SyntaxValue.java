@@ -120,11 +120,23 @@ abstract class SyntaxValue
         throw new IllegalStateException();
     }
 
+
     /**
-     * Transform this syntax into plain values.
+     * Unwraps one layer of syntax, returning plain values.
      */
-    abstract Object quote(Evaluator eval)
+    abstract Object unwrap(Evaluator eval)
         throws FusionException;
+
+
+    /**
+     * Transform this syntax into plain values, recursively.
+     */
+    Object quote(Evaluator eval)
+        throws FusionException
+    {
+        return unwrap(eval);
+    }
+
 
     @Override
     void write(Evaluator eval, Appendable out)

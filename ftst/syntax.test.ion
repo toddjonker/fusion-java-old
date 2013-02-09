@@ -1,6 +1,8 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (use 'check')
+(use '/fusion/list')
+(use '/fusion/sexp')
 (use '/fusion/syntax')
 
 (define id (quote_syntax identifier))
@@ -28,3 +30,52 @@
 (datum_to_syntax id null.list)
 (datum_to_syntax id [])
 (datum_to_syntax id [id])
+
+
+//==========================================================================
+// is_identifier
+
+(check_false (is_identifier (quote_syntax "a")))
+(check_false (is_identifier (quote a)))
+(check_false (is_identifier (quote "a")))
+
+(define (check_identifier expected_sym v)
+  (check_true (is_syntax v))
+  (check_true (is_identifier v))
+  (let [(sym (syntax_unwrap v))]
+    (check_true (is_symbol sym))
+    (check = expected_sym sym)))
+
+(check_identifier (quote a) (quote_syntax a))
+
+
+//==========================================================================
+// syntax_unwrap   aka syntax-e
+
+
+(check = true        (syntax_unwrap (quote_syntax true)))
+(check = 159         (syntax_unwrap (quote_syntax 159)))
+//(check = 2.57e0      (syntax_unwrap (quote_syntax 2.57e0)))   // TODO
+(check = 2.57        (syntax_unwrap (quote_syntax 2.57)))
+(check = 2013-02-08T (syntax_unwrap (quote_syntax 2013-02-08T)))
+(check = (quote u)   (syntax_unwrap (quote_syntax u)))
+(check = "unwrap"    (syntax_unwrap (quote_syntax "unwrap")))
+// TODO test blob, clob
+
+(lets [(stx (quote_syntax [a, 2])),
+       (unwrapped (syntax_unwrap stx))]
+  (check_true (is_list unwrapped))
+  (let [(u1 (syntax_unwrap (list_ref unwrapped 1)))]
+    (check_identifier (quote a) (list_ref unwrapped 0))
+    (check = 2 u1)))
+
+(lets [(stx (quote_syntax (a 2))),
+       (unwrapped (syntax_unwrap stx))]
+  (check_true (is_pair unwrapped))
+  (check_true (is_identifier (head unwrapped)))
+  (let [(u0 (syntax_unwrap (head unwrapped))),
+        (u1 (syntax_unwrap (tail unwrapped)))]
+    (check = (quote a) u0)
+    (check_true (is_sexp u1))
+    (check = 1 (size u1))
+    (check = 2 (syntax_unwrap (head u1)))))

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -41,7 +41,7 @@ final class SyntaxTimestamp
 
 
     @Override
-    Object quote(Evaluator eval)
+    Object unwrap(Evaluator eval)
     {
         return eval.newTimestamp(myValue, getAnnotations());
     }

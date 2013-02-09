@@ -225,6 +225,29 @@ final class SyntaxSexp
 
 
     @Override
+    Object unwrap(Evaluator eval)
+        throws FusionException
+    {
+        String[] annotations = getAnnotations();
+
+        if (isNullValue())
+        {
+            return nullSexp(eval, annotations);
+        }
+
+        int size = size();
+        if (size == 0)
+        {
+            return emptySexp(eval, annotations);
+        }
+
+        Object head = get(0);
+        Object tail = (size == 1 ? EMPTY_SEXP : makeSubseq(1, size));
+        return pair(eval, annotations, head, tail);
+    }
+
+
+    @Override
     Object quote(Evaluator eval)
         throws FusionException
     {

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -33,7 +33,7 @@ final class SyntaxNull
     }
 
     @Override
-    Object quote(Evaluator eval)
+    Object unwrap(Evaluator eval)
     {
         return eval.newNull(getAnnotations());
     }

@@ -115,6 +115,22 @@ final class SyntaxList
 
 
     @Override
+    Object unwrap(Evaluator eval)
+        throws FusionException
+    {
+        String[] annotations = getAnnotations();
+
+        if (isNullValue())
+        {
+            return nullList(eval, annotations);
+        }
+
+        Object[] children = unwrapChildren();
+        return immutableList(eval, annotations, children);
+    }
+
+
+    @Override
     Object quote(Evaluator eval)
         throws FusionException
     {

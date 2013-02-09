@@ -259,7 +259,7 @@ final class SyntaxSymbol
 
 
     @Override
-    Object quote(Evaluator eval)
+    Object unwrap(Evaluator eval)
     {
         return eval.newSymbol(myText, getAnnotations());
     }
