@@ -234,9 +234,8 @@ class Namespace
 
     Binding resolve(String name)
     {
-        SyntaxSymbol identifier = SyntaxSymbol.make(name);
-        identifier = (SyntaxSymbol) syntaxIntroduce(identifier);
-        return identifier.resolve();
+        // TODO FUSION-114 check that the name has at least one character!
+        return myWraps.resolve(name);
     }
 
 

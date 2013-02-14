@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -17,7 +17,7 @@ abstract class SyntaxWrap
      *
      * @return not null
      */
-    abstract Binding resolve(SyntaxSymbol ident,
+    abstract Binding resolve(String identifier,
                              Iterator<SyntaxWrap> moreWraps,
                              Set<Integer> returnMarks);
 }

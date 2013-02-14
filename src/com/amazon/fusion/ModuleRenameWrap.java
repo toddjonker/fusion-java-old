@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -21,7 +21,7 @@ class ModuleRenameWrap
 
 
     @Override
-    Binding resolve(SyntaxSymbol identifier,
+    Binding resolve(String identifier,
                     Iterator<SyntaxWrap> moreWraps,
                     Set<Integer> returnMarks)
     {
@@ -38,7 +38,7 @@ class ModuleRenameWrap
 
         if (b == null || b instanceof FreeBinding)
         {
-            String name = identifier.stringValue();
+            String name = identifier;
             b = myModule.resolveProvidedName(name);
             if (b == null)
             {

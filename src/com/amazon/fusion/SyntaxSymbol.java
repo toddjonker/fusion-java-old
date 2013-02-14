@@ -158,14 +158,15 @@ final class SyntaxSymbol
     {
         if (myBinding == null)
         {
+            String name = stringValue();
             // TODO FUSION-114 check that our text has at least one character!
             if (myWraps == null)
             {
-                myBinding = new FreeBinding(stringValue());
+                myBinding = new FreeBinding(name);
             }
             else
             {
-                myBinding = myWraps.resolve(this);
+                myBinding = myWraps.resolve(name);
             }
         }
         return myBinding;
@@ -179,8 +180,9 @@ final class SyntaxSymbol
     Binding uncachedResolve()
     {
         if (myBinding != null) return myBinding;
-        if (myWraps   == null) return new FreeBinding(stringValue());
-        return myWraps.resolve(this);
+        String name = stringValue();
+        if (myWraps   == null) return new FreeBinding(name);
+        return myWraps.resolve(name);
     }
 
 
@@ -207,7 +209,7 @@ final class SyntaxSymbol
         }
         else
         {
-            b = myWraps.resolve(this);
+            b = myWraps.resolve(stringValue());
         }
 
         Object resolved = b.lookup(env);

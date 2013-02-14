@@ -25,7 +25,7 @@ class MarkWrap
 
 
     @Override
-    Binding resolve(SyntaxSymbol identifier,
+    Binding resolve(String identifier,
                     Iterator<SyntaxWrap> moreWraps,
                     Set<Integer> returnMarks)
     {
@@ -37,7 +37,7 @@ class MarkWrap
         }
         else
         {
-            b = new FreeBinding(identifier.stringValue());
+            b = new FreeBinding(identifier);
         }
 
         if (! returnMarks.add(myMark))

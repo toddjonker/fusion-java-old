@@ -24,7 +24,7 @@ class EnvironmentRenameWrap
     }
 
     @Override
-    Binding resolve(SyntaxSymbol identifier,
+    Binding resolve(String identifier,
                     Iterator<SyntaxWrap> moreWraps,
                     Set<Integer> returnMarks)
     {
@@ -36,7 +36,7 @@ class EnvironmentRenameWrap
         }
         else
         {
-            b = new FreeBinding(identifier.stringValue());
+            b = new FreeBinding(identifier);
         }
 
         Binding subst = myEnvironment.substitute(b, returnMarks);

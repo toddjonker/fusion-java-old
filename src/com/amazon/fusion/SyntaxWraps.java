@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -129,13 +129,13 @@ class SyntaxWraps
     /**
      * @return not null
      */
-    Binding resolve(SyntaxSymbol ident)
+    Binding resolve(String identifier)
     {
         Iterator<SyntaxWrap> i = Arrays.asList(myWraps).iterator();
         Set<Integer> marks = new HashSet<Integer>();
 
         // We always have at least one wrap
         SyntaxWrap wrap = i.next();
-        return wrap.resolve(ident, i, marks);
+        return wrap.resolve(identifier, i, marks);
     }
 }
