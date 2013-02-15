@@ -494,7 +494,7 @@ final class FusionSexp
                 }
                 else
                 {
-                    out.append("{.} ");
+                    out.append(" {.} ");
                     dispatchWrite(eval, out, tail);
                     break;
                 }
@@ -572,6 +572,25 @@ final class FusionSexp
         {
             boolean result = isSexp(eval, arg);
             return eval.newBool(result);
+        }
+    }
+
+
+    static final class PairProc
+        extends Procedure2
+    {
+        PairProc()
+        {
+            //    "                                                                               |
+            super("Makes a fresh, immutable pair containing the given `head` and `tail`.",
+                  "head", "tail");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object head, Object tail)
+            throws FusionException
+        {
+            return pair(eval, head, tail);
         }
     }
 

@@ -61,6 +61,18 @@
 
 
 //==========================================================================
+// pair
+
+(check_true (is_sexp (pair 1 2)))
+(check = (head (pair 1 2)) 1)
+(check = (tail (pair 1 2)) 2)
+(check = (size (pair 1 2)) 1)
+
+(check = (size (pair 1 (pair 2 3))) 2)
+(check = (size (pair 1 (pair 2 (quote ())))) 2)
+
+
+//==========================================================================
 // first
 
 (check = (first (quote (1))) 1)

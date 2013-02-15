@@ -39,6 +39,7 @@ sexps.
 
 
   (defpub_j sexp    "com.amazon.fusion.FusionSexp$SexpProc")
+  (defpub_j pair    "com.amazon.fusion.FusionSexp$PairProc")
   (defpub_j is_pair "com.amazon.fusion.FusionSexp$IsPairProc")
 
 
