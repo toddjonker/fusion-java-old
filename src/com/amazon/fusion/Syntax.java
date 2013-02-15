@@ -165,6 +165,8 @@ final class Syntax
         if (isSyntax(eval, datum))
         {
             // TODO Should strip location and properties
+            //      Well, probably not, that throws away existing
+            //      context when called from datum_to_syntax
             return ((SyntaxValue) datum).stripWraps();
         }
 
@@ -197,6 +199,8 @@ final class Syntax
 
         if (isSexp(eval, datum))
         {
+            // FIXME this is broken when some pair is a syntax sexp
+            //  Must rework SyntaxSexp to use pairs...
             int size = unsafeSexpSize(eval, datum);
             SyntaxValue[] children = new SyntaxValue[size];
 
@@ -263,13 +267,13 @@ final class Syntax
      * applied (and any existing is stripped).
      */
     static SyntaxValue datumToSyntaxMaybe(Evaluator eval,
-                                          SyntaxSymbol context,
-                                          Object datum)
+                                          Object datum,
+                                          SyntaxSymbol context)
         throws FusionException
     {
         if (isSyntax(eval, datum))
         {
-            return datumToSyntax(eval, context, (SyntaxValue) datum);
+            return datumToSyntax(eval, (SyntaxValue) datum, context);
         }
 
         SyntaxValue stx = datumToStrippedSyntaxMaybe(eval, datum);
@@ -284,16 +288,16 @@ final class Syntax
      * applied (and any existing is stripped).
      */
     static SyntaxValue datumToSyntax(Evaluator eval,
-                                     SyntaxSymbol context,
-                                     Object datum)
+                                     Object datum,
+                                     SyntaxSymbol context)
         throws FusionException
     {
-        SyntaxValue stx = datumToSyntaxMaybe(eval, context, datum);
+        SyntaxValue stx = datumToSyntaxMaybe(eval, datum, context);
         if (stx == null)
         {
             throw new ArgTypeFailure("datum_to_syntax",
                                      "Syntax object or Ionizable data",
-                                     1, context, datum);
+                                     0, datum, context);
         }
 
         return stx;
@@ -304,8 +308,8 @@ final class Syntax
      * applied (and any existing is stripped).
      */
     static SyntaxValue datumToSyntax(Evaluator eval,
-                                     SyntaxSymbol context,
-                                     SyntaxValue datum)
+                                     SyntaxValue datum,
+                                     SyntaxSymbol context)
         throws FusionException
     {
         // TODO Should strip location and properties

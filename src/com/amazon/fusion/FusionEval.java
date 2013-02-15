@@ -28,7 +28,7 @@ final class FusionEval
         }
         else
         {
-            stx = datumToSyntaxMaybe(eval, null, topLevelForm);
+            stx = datumToSyntaxMaybe(eval, topLevelForm, null);
             if (topLevelForm == null)
             {
                 throw new ArgTypeFailure(whosCalling,

@@ -48,6 +48,6 @@ class DatumToSyntaxProc
             }
         }
 
-        return datumToSyntax(eval, context, datum);
+        return datumToSyntax(eval, datum, context);
     }
 }
