@@ -141,14 +141,15 @@ final class SyntaxStruct
     }
 
 
-    static SyntaxStruct read(IonReader source, SourceName name, String[] anns)
+    static SyntaxStruct read(Evaluator eval, IonReader source, SourceName name,
+                             String[] anns)
     {
         SourceLocation loc = currentLocation(source, name);
 
         ImmutableStruct struct;
         if (source.isNullValue())
         {
-            struct = nullStruct(null /* FIXME eval*/, anns);
+            struct = nullStruct(eval, anns);
         }
         else
         {
@@ -157,7 +158,7 @@ final class SyntaxStruct
             while (source.next() != null)
             {
                 String field = source.getFieldName();
-                SyntaxValue child = Syntax.read(source, name);
+                SyntaxValue child = Syntax.read(eval, source, name);
                 structImplAdd(map, field, child);
             }
             source.stepOut();

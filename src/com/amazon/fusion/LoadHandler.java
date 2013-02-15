@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -89,7 +89,7 @@ final class LoadHandler
                 while (reader.next() != null)
                 {
                     result = null;  // Don't hold onto garbage
-                    SyntaxValue fileExpr = Syntax.read(reader, name);
+                    SyntaxValue fileExpr = Syntax.read(eval, reader, name);
                     result = FusionEval.eval(eval, fileExpr, namespace);
                     // TODO TAIL
                 }
@@ -125,7 +125,7 @@ final class LoadHandler
                 }
 
                 SourceName name = SourceName.forModule(id);
-                SyntaxValue firstTopLevel = Syntax.read(reader, name);
+                SyntaxValue firstTopLevel = Syntax.read(eval, reader, name);
                 if (reader.next() != null)
                 {
                     String message =

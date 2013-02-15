@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -90,7 +90,7 @@ final class StandardTopLevel
 
         while (source.next() != null)
         {
-            SyntaxValue sourceExpr = Syntax.read(source, name);
+            SyntaxValue sourceExpr = Syntax.read(myEvaluator, source, name);
             result = FusionEval.eval(myEvaluator, sourceExpr, myNamespace);
         }
 

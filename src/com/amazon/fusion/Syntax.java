@@ -39,7 +39,7 @@ final class Syntax
         return (value instanceof SyntaxSymbol);
     }
 
-    static SyntaxValue read(IonReader source, SourceName name)
+    static SyntaxValue read(Evaluator eval, IonReader source, SourceName name)
     {
         IonType type = source.getType();
         assert type != null;
@@ -105,17 +105,17 @@ final class Syntax
             }
             case LIST:
             {
-                SyntaxValue[] value = readSequence(source, name);
+                SyntaxValue[] value = readSequence(eval, source, name);
                 return SyntaxList.make(value, anns, loc);
             }
             case SEXP:
             {
-                SyntaxValue[] value = readSequence(source, name);
+                SyntaxValue[] value = readSequence(eval, source, name);
                 return SyntaxSexp.make(value, anns, loc);
             }
             case STRUCT:
             {
-                return SyntaxStruct.read(source, name, anns);
+                return SyntaxStruct.read(eval, source, name, anns);
             }
         }
 
@@ -123,7 +123,9 @@ final class Syntax
     }
 
 
-    static SyntaxValue[] readSequence(IonReader source, SourceName name)
+    static SyntaxValue[] readSequence(Evaluator eval,
+                                      IonReader source,
+                                      SourceName name)
     {
         if (source.isNullValue()) return null;
 
@@ -132,7 +134,7 @@ final class Syntax
         source.stepIn();
         while (source.next() != null)
         {
-            SyntaxValue child = Syntax.read(source, name);
+            SyntaxValue child = Syntax.read(eval, source, name);
             children.add(child);
         }
         source.stepOut();
@@ -175,7 +177,7 @@ final class Syntax
         {
             IonReader r = eval.getSystem().newReader(iv);
             r.next();
-            return read(r, null);
+            return read(eval, r, null);
             // No need to strip wraps here
         }
 
