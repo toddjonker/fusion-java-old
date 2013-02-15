@@ -55,13 +55,13 @@ final class LetrecForm
             SyntaxValue boundExpr = binding.get(1);
             boundExpr = boundExpr.addWrap(localWrap);
             boundExpr = expander.expandExpression(bodyEnv, boundExpr);
-            binding = SyntaxSexp.make(binding.getLocation(),
+            binding = SyntaxSexp.make(expander, binding.getLocation(),
                                       name,
                                       boundExpr);
             expandedForms[i] = binding;
         }
 
-        bindingForms = SyntaxSexp.make(bindingForms.getLocation(),
+        bindingForms = SyntaxSexp.make(expander, bindingForms.getLocation(),
                                        expandedForms);
 
         expandedForms = new SyntaxValue[letrecExprSize];
@@ -76,7 +76,7 @@ final class LetrecForm
             expandedForms[i] = expander.expandExpression(bodyEnv, subform);
         }
 
-        stx = SyntaxSexp.make(stx.getLocation(), expandedForms);
+        stx = SyntaxSexp.make(expander, stx.getLocation(), expandedForms);
         return stx;
     }
 

@@ -57,12 +57,14 @@ final class ForListForm
         {
             SyntaxSymbol name = boundNames[i].addWrap(localWrap);
             name.resolve();
-            expandedForms[i] = SyntaxSexp.make(bindingForms.get(i).getLocation(),
+            expandedForms[i] = SyntaxSexp.make(expander,
+                                               bindingForms.get(i).getLocation(),
                                                name,
                                                boundValues[i]);
         }
 
-        bindingForms = SyntaxSexp.make(bindingForms.getLocation(),
+        bindingForms = SyntaxSexp.make(expander,
+                                       bindingForms.getLocation(),
                                        expandedForms);
 
         // Prepare the body.
@@ -78,7 +80,7 @@ final class ForListForm
             expandedForms[i] = expander.expandExpression(bodyEnv, bodyStx);
         }
 
-        stx = SyntaxSexp.make(stx.getLocation(), expandedForms);
+        stx = SyntaxSexp.make(expander, stx.getLocation(), expandedForms);
         return stx;
     }
 

@@ -100,7 +100,7 @@ public final class _Private_HelpForm
             children[i] = expander.expandExpression(env, identifier);
         }
 
-        stx = SyntaxSexp.make(stx.getLocation(), children);
+        stx = SyntaxSexp.make(expander, stx.getLocation(), children);
         return stx;
     }
 

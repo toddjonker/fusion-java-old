@@ -41,7 +41,8 @@ final class QuasiSyntaxForm
         SyntaxValue subform = stx.get(1);
         subform = expand(expander, env, subform, 0);
 
-        stx = SyntaxSexp.make(stx.getLocation(), stx.get(0), subform);
+        stx = SyntaxSexp.make(expander, stx.getLocation(),
+                              stx.get(0), subform);
         return stx;
     }
 
@@ -83,7 +84,8 @@ final class QuasiSyntaxForm
                 {
                     SyntaxValue subform = children[1];
                     children[1] = expander.expandExpression(env, subform);
-                    stx = SyntaxSexp.make(stx.getLocation(), children);
+                    stx = SyntaxSexp.make(expander, stx.getLocation(),
+                                          children);
                     return stx;
                 }
 
@@ -103,7 +105,7 @@ final class QuasiSyntaxForm
             children[i] = expand(expander, env, subform, depth);
         }
 
-        stx = SyntaxSexp.make(stx.getLocation(), children);
+        stx = SyntaxSexp.make(expander, stx.getLocation(), children);
         return stx;
     }
 
@@ -218,7 +220,7 @@ final class QuasiSyntaxForm
                 // or unquote, which always return syntax.
                 children[i] = (SyntaxValue) child;
             }
-            return SyntaxSexp.make(myLocation, children);
+            return SyntaxSexp.make(eval, myLocation, children);
         }
     }
 

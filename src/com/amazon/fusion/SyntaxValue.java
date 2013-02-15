@@ -89,7 +89,7 @@ abstract class SyntaxValue
      * @return an equivalent syntax value with no wraps.
      * May return this instance when that's already the case.
      */
-    SyntaxValue stripWraps()
+    SyntaxValue stripWraps(Evaluator eval)
     {
         return this;
     }

@@ -56,8 +56,9 @@ final class LetForm
 
             subforms[i] = boundName;
         }
-        SyntaxSexp formals = SyntaxSexp.make(null, subforms);
 
+        Evaluator eval = expander.getEvaluator();
+        SyntaxSexp formals = SyntaxSexp.make(eval, subforms);
 
         // Build the lambda
         subforms = new SyntaxValue[letExprSize - bindingPos + 1];
@@ -68,7 +69,7 @@ final class LetForm
             SyntaxValue bodyForm = stx.get(i);
             subforms[i - bindingPos + 1] = bodyForm;
         }
-        SyntaxSexp lambdaForm = SyntaxSexp.make(null, subforms);
+        SyntaxSexp lambdaForm = SyntaxSexp.make(eval, subforms);
 
 
         // Build the outer result expression
@@ -76,10 +77,11 @@ final class LetForm
 
         if (loopName != null)
         {
-            SyntaxSexp binding  = SyntaxSexp.make(loopName, lambdaForm);
-            SyntaxSexp bindings = SyntaxSexp.make(binding);
+            SyntaxSexp binding  = SyntaxSexp.make(eval, loopName, lambdaForm);
+            SyntaxSexp bindings = SyntaxSexp.make(eval, binding);
             SyntaxSexp letrec   =
-                SyntaxSexp.make(expander.getEvaluator().makeKernelIdentifier("letrec"),
+                SyntaxSexp.make(eval,
+                                eval.makeKernelIdentifier("letrec"),
                                 bindings,
                                 loopName);
             subforms[0] = letrec;
@@ -96,8 +98,7 @@ final class LetForm
             subforms[i + 1] = binding.get(1);
         }
 
-        SyntaxSexp result = SyntaxSexp.make(stx.getLocation(), subforms);
-        return result;
+        return SyntaxSexp.make(expander, stx.getLocation(), subforms);
     }
 
     SyntaxSymbol checkForName(SyntaxSexp letExpr)

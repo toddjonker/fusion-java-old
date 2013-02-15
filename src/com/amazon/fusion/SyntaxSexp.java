@@ -15,7 +15,6 @@ import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 import java.util.IdentityHashMap;
-import java.util.List;
 
 final class SyntaxSexp
     extends SyntaxSequence
@@ -28,10 +27,11 @@ final class SyntaxSexp
      * must not be changed by calling code afterwards!
      * @param anns must not be null.
      */
-    private SyntaxSexp(SyntaxValue[] children, String[] anns,
+    private SyntaxSexp(Evaluator eval, SyntaxValue[] children, String[] anns,
                        SourceLocation loc)
     {
         super(children, anns, loc);
+        assert eval != null;
     }
 
     /** Copy constructor shares children and replaces unpushed wraps. */
@@ -49,10 +49,12 @@ final class SyntaxSexp
      * must not be changed by calling code afterwards!
      * @param anns must not be null.
      */
-    static SyntaxSexp make(SyntaxValue[] children, String[] anns,
+    static SyntaxSexp make(Evaluator eval,
+                           SyntaxValue[] children,
+                           String[] anns,
                            SourceLocation loc)
     {
-        return new SyntaxSexp(children, anns, loc);
+        return new SyntaxSexp(eval, children, anns, loc);
     }
 
     /**
@@ -62,9 +64,9 @@ final class SyntaxSexp
      * This method takes ownership of the array; the array and its elements
      * must not be changed by calling code afterwards!
      */
-    static SyntaxSexp make(SyntaxValue... children)
+    static SyntaxSexp make(Evaluator eval, SyntaxValue... children)
     {
-        return make(null, children);
+        return new SyntaxSexp(eval, children, EMPTY_STRING_ARRAY, null);
     }
 
     /**
@@ -74,22 +76,37 @@ final class SyntaxSexp
      * This method takes ownership of the array; the array and its elements
      * must not be changed by calling code afterwards!
      */
-    static SyntaxSexp make(SourceLocation loc, SyntaxValue... children)
+    static SyntaxSexp make(Evaluator eval, SourceLocation loc,
+                           SyntaxValue... children)
     {
-        return new SyntaxSexp(children, EMPTY_STRING_ARRAY, loc);
+        return new SyntaxSexp(eval, children, EMPTY_STRING_ARRAY, loc);
     }
 
     /**
      * Instance will be {@link #isNullValue()} if children is null.
-     *
-     * @param children this instance takes ownership of the child elements
-     * and they must not be changed by calling code afterwards!
+
+     * @param children the children of the new sexp.
+     * This method takes ownership of the array; the array and its elements
+     * must not be changed by calling code afterwards!
      */
-    static SyntaxSexp make(SourceLocation loc, List<SyntaxValue> children)
+    static SyntaxSexp make(Expander expander, SyntaxValue... children)
     {
-        SyntaxValue[] childs = new SyntaxValue[children.size()];
-        children.toArray(childs);
-        return new SyntaxSexp(childs, EMPTY_STRING_ARRAY, loc);
+        return new SyntaxSexp(expander.getEvaluator(), children,
+                              EMPTY_STRING_ARRAY, null);
+    }
+
+    /**
+     * Instance will be {@link #isNullValue()} if children is null.
+
+     * @param children the children of the new sexp.
+     * This method takes ownership of the array; the array and its elements
+     * must not be changed by calling code afterwards!
+     */
+    static SyntaxSexp make(Expander expander, SourceLocation loc,
+                           SyntaxValue... children)
+    {
+        return new SyntaxSexp(expander.getEvaluator(), children,
+                              EMPTY_STRING_ARRAY, loc);
     }
 
 
@@ -108,10 +125,11 @@ final class SyntaxSexp
 
 
     @Override
-    SyntaxSexp makeSimilar(SyntaxValue[] children, String[] anns,
+    SyntaxSexp makeSimilar(Evaluator eval, SyntaxValue[] children,
+                           String[] anns,
                            SourceLocation loc)
     {
-        return new SyntaxSexp(children, anns, loc);
+        return new SyntaxSexp(eval, children, anns, loc);
     }
 
     @Override
@@ -173,7 +191,7 @@ final class SyntaxSexp
             children[i] = expander.expandExpression(env, subform);
         }
 
-        SyntaxSexp result = SyntaxSexp.make(getLocation(), children);
+        SyntaxSexp result = SyntaxSexp.make(expander, getLocation(), children);
         return result;
     }
 
@@ -261,7 +279,7 @@ final class SyntaxSexp
             return sexp;
         }
         Object head = get(0);
-        Object tail = (size == 1 ? EMPTY_SEXP : makeSubseq(1, size));
+        Object tail = (size == 1 ? EMPTY_SEXP : makeSubseq(eval, 1, size));
         return pair(eval, annotations, head, tail);
     }
 

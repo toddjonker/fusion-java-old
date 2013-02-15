@@ -14,7 +14,7 @@ final class BeginForm
         int size = seq.size();
         if (size <= from)
         {
-            return SyntaxSexp.make(begin);
+            return SyntaxSexp.make(eval, begin);
         }
 
         SyntaxValue[] subforms = new SyntaxValue[size - from + 1];
@@ -26,8 +26,7 @@ final class BeginForm
             subforms[i - from + 1] = bodyForm;
         }
 
-        SyntaxSexp beginForm = SyntaxSexp.make(/* location */ null, subforms);
-        return beginForm;
+        return SyntaxSexp.make(eval, subforms);
     }
 
 
@@ -59,7 +58,7 @@ final class BeginForm
             SyntaxValue subform = stx.get(i);
             expandedChildren[i] = expander.expandExpression(env, subform);
         }
-        return SyntaxSexp.make(stx.getLocation(), expandedChildren);
+        return SyntaxSexp.make(expander, stx.getLocation(), expandedChildren);
     }
 
 

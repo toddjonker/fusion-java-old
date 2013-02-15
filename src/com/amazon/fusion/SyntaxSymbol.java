@@ -115,7 +115,7 @@ final class SyntaxSymbol
 
 
     @Override
-    SyntaxSymbol stripWraps()
+    SyntaxSymbol stripWraps(Evaluator eval)
     {
         if (myWraps == null) return this;
         return copyReplacingWraps(null);

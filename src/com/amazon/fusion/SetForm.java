@@ -30,7 +30,7 @@ final class SetForm
         SyntaxValue valueExpr = stx.get(2);
         children[2] = expander.expandExpression(env, valueExpr);
 
-        stx = SyntaxSexp.make(stx.getLocation(), children);
+        stx = SyntaxSexp.make(expander, stx.getLocation(), children);
         return stx;
     }
 

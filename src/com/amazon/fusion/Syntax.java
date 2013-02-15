@@ -111,7 +111,7 @@ final class Syntax
             case SEXP:
             {
                 SyntaxValue[] value = readSequence(eval, source, name);
-                return SyntaxSexp.make(value, anns, loc);
+                return SyntaxSexp.make(eval, value, anns, loc);
             }
             case STRUCT:
             {
@@ -169,7 +169,7 @@ final class Syntax
             // TODO Should strip location and properties
             //      Well, probably not, that throws away existing
             //      context when called from datum_to_syntax
-            return ((SyntaxValue) datum).stripWraps();
+            return ((SyntaxValue) datum).stripWraps(eval);
         }
 
         IonValue iv = castToIonValueMaybe(datum);
@@ -221,7 +221,7 @@ final class Syntax
                 children[i++] = child;
             }
             assert i == size;
-            return SyntaxSexp.make(null, children);
+            return SyntaxSexp.make(eval, children);
         }
 
         if (isStruct(eval, datum))
@@ -314,8 +314,8 @@ final class Syntax
                                      SyntaxSymbol context)
         throws FusionException
     {
-        // TODO Should strip location and properties
-        datum = datum.stripWraps();
+        // TODO Should strip location and properties  XXX really?
+        datum = datum.stripWraps(eval);
         return applyContext(eval, context, datum);
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -25,7 +25,7 @@ final class SyntaxSubseqProc
 
         if (size < from) from = size;
 
-        SyntaxSequence result = sequence.makeSubseq(from, size);
+        SyntaxSequence result = sequence.makeSubseq(eval, from, size);
         return result;
     }
 }

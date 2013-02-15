@@ -301,7 +301,8 @@ final class ModuleForm
             subforms[i++] = stx;
         }
 
-        SyntaxSexp result = SyntaxSexp.make(source.getLocation(), subforms);
+        SyntaxSexp result = SyntaxSexp.make(expander, source.getLocation(),
+                                            subforms);
         return result;
     }
 

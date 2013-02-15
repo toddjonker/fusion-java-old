@@ -78,7 +78,9 @@ final class SyntaxList
 
 
     @Override
-    SyntaxList makeSimilar(SyntaxValue[] children, String[] anns,
+    SyntaxList makeSimilar(Evaluator eval,
+                           SyntaxValue[] children,
+                           String[] anns,
                            SourceLocation loc)
     {
         return new SyntaxList(children, anns, loc);

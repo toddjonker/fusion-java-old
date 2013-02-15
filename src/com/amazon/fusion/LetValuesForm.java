@@ -79,18 +79,19 @@ final class LetValuesForm
                 wrappedNames[j] = name;
                 bindingPos++;
             }
-            names = SyntaxSexp.make(names.getLocation(), wrappedNames);
+            names = SyntaxSexp.make(expander, names.getLocation(),
+                                    wrappedNames);
 
             SyntaxValue boundExpr = binding.get(1);
             boundExpr = expander.expandExpression(env, boundExpr);
-            binding = SyntaxSexp.make(binding.getLocation(),
+            binding = SyntaxSexp.make(expander, binding.getLocation(),
                                       names,
                                       boundExpr);
             expandedForms[i] = binding;
         }
         assert bindingPos == boundNames.length;
 
-        bindingForms = SyntaxSexp.make(bindingForms.getLocation(),
+        bindingForms = SyntaxSexp.make(expander, bindingForms.getLocation(),
                                        expandedForms);
 
         expandedForms = new SyntaxValue[letExprSize];
@@ -105,7 +106,7 @@ final class LetValuesForm
             expandedForms[i] = expander.expandExpression(bodyEnv, subform);
         }
 
-        stx = SyntaxSexp.make(stx.getLocation(), expandedForms);
+        stx = SyntaxSexp.make(expander, stx.getLocation(), expandedForms);
         return stx;
     }
 

@@ -181,7 +181,7 @@ final class LoadHandler
 
         children[0] = eval.makeKernelIdentifier("module");
 
-        moduleStx = SyntaxSexp.make(moduleStx.getLocation(), children);
+        moduleStx = SyntaxSexp.make(eval, moduleStx.getLocation(), children);
         return moduleStx;
     }
 

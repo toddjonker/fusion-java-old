@@ -69,7 +69,7 @@ final class DefineSyntaxForm
         SyntaxValue valueStx = stx.get(bodyPos);
         children[bodyPos] = expander.expandExpression(env, valueStx);
 
-        stx = SyntaxSexp.make(stx.getLocation(), children);
+        stx = SyntaxSexp.make(expander, stx.getLocation(), children);
         return stx;
     }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -23,7 +23,7 @@ final class SyntaxAppendProc
         for (int i = 1; i < args.length; i++)
         {
             SyntaxSequence next = checkSyntaxSequenceArg(i, args);
-            seq = seq.makeAppended(next);
+            seq = seq.makeAppended(eval, next);
         }
         return seq;
     }

@@ -78,7 +78,7 @@ final class DefineForm
 
         SyntaxValue[] lambda = new SyntaxValue[2 + bodyLen];
         lambda[0] = expander.getEvaluator().makeKernelIdentifier("lambda");
-        lambda[1] = SyntaxSexp.make(procFormals);
+        lambda[1] = SyntaxSexp.make(expander, procFormals);
         for (int p = 2, i = bodyStart; i < defineArity; p++, i++)
         {
             lambda[p] = origDefineElts[i];
@@ -91,9 +91,10 @@ final class DefineForm
         {
             newDefineElts[2] = origDefineElts[2];
         }
-        newDefineElts[2 + docOffset] = SyntaxSexp.make(lambda);
+        newDefineElts[2 + docOffset] =
+            SyntaxSexp.make(expander, lambda);
 
-        return SyntaxSexp.make(stx.getLocation(), newDefineElts);
+        return SyntaxSexp.make(expander, stx.getLocation(), newDefineElts);
     }
 
 
@@ -158,7 +159,7 @@ final class DefineForm
         SyntaxValue valueStx = stx.get(bodyPos);
         children[bodyPos] = expander.expandExpression(env, valueStx);
 
-        stx = SyntaxSexp.make(stx.getLocation(), children);
+        stx = SyntaxSexp.make(expander, stx.getLocation(), children);
         return stx;
     }
 

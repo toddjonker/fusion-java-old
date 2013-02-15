@@ -84,7 +84,7 @@ final class SyntaxStruct
 
 
     @Override
-    SyntaxStruct stripWraps()
+    SyntaxStruct stripWraps(Evaluator eval)
     {
         if (hasNoChildren()) return this;  // No children, no marks, all okay!
 
@@ -102,7 +102,7 @@ final class SyntaxStruct
             if (! (value instanceof Object[]))
             {
                 SyntaxValue child = (SyntaxValue) value;
-                SyntaxValue stripped = child.stripWraps();
+                SyntaxValue stripped = child.stripWraps(eval);
                 if (stripped != child)
                 {
                     entry.setValue(stripped);
@@ -119,7 +119,7 @@ final class SyntaxStruct
                 for (int i = 0; i < childCount; i++)
                 {
                     SyntaxValue child = (SyntaxValue) children[i];
-                    SyntaxValue stripped = child.stripWraps();
+                    SyntaxValue stripped = child.stripWraps(eval);
                     if (stripped != child)
                     {
                         mustReplaceArray = true;

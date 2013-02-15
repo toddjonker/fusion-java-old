@@ -48,12 +48,12 @@ final class ParameterizeForm
             SyntaxValue boundExpr = binding.get(1);
             boundExpr = expander.expandExpression(env, boundExpr);
 
-            binding = SyntaxSexp.make(binding.getLocation(),
+            binding = SyntaxSexp.make(expander, binding.getLocation(),
                                       paramExpr, boundExpr);
             expandedForms[i] = binding;
         }
 
-        bindingForms = SyntaxSexp.make(bindingForms.getLocation(),
+        bindingForms = SyntaxSexp.make(expander, bindingForms.getLocation(),
                                        expandedForms);
 
         // Expand the body expressions
@@ -68,7 +68,7 @@ final class ParameterizeForm
             expandedForms[i] = expander.expandExpression(env, bodyExpr);
         }
 
-        stx = SyntaxSexp.make(stx.getLocation(), expandedForms);
+        stx = SyntaxSexp.make(expander, stx.getLocation(), expandedForms);
         return stx;
     }
 
