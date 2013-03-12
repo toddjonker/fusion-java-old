@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionValue.UNDEF;
-import static com.amazon.fusion.ModuleIdentity.intern;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonType;
 
@@ -15,7 +14,7 @@ final class GlobalState
 {
     static final String KERNEL_MODULE_NAME = "#%kernel";
     static final ModuleIdentity KERNEL_MODULE_IDENTITY =
-        intern(KERNEL_MODULE_NAME);
+        ModuleIdentity.internBuiltinName(KERNEL_MODULE_NAME);
 
     final IonSystem          myIonSystem;
     final ModuleInstance     myKernelModule;

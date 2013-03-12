@@ -69,9 +69,7 @@ final class ModuleForm
         Binding beginBinding        = stopBinding(kernel, stops, "begin");
 
         SyntaxSymbol moduleNameSymbol = check.requiredSymbol("module name", 1);
-        String declaredName = moduleNameSymbol.stringValue();
-        // TODO check null/empty
-
+        ModuleIdentity.validateLocalName(moduleNameSymbol);
 
         ModuleRegistry registry = envOutsideModule.namespace().getRegistry();
 
@@ -108,7 +106,7 @@ final class ModuleForm
         ModuleIdentity id;
         try
         {
-            id = determineIdentity(eval, declaredName);
+            id = determineIdentity(eval, moduleNameSymbol);
         }
         catch (FusionException e)
         {
@@ -347,14 +345,14 @@ final class ModuleForm
         {
             SyntaxText form = (SyntaxText) meta.get(eval, "identity");
             String identity = form.stringValue();
-            id = ModuleIdentity.intern(identity);
+            id = ModuleIdentity.reIntern(identity);
         }
 
         Namespace moduleNamespace;
         {
             SyntaxText form = (SyntaxText) meta.get(eval, "language_identity");
             String identity = form.stringValue();
-            ModuleIdentity languageId = ModuleIdentity.intern(identity);
+            ModuleIdentity languageId = ModuleIdentity.reIntern(identity);
 
             ModuleRegistry registry =
                 envOutsideModule.namespace().getRegistry();
@@ -413,18 +411,19 @@ final class ModuleForm
     }
 
     private ModuleIdentity determineIdentity(Evaluator eval,
-                                             String declaredName)
+                                             SyntaxSymbol moduleNameSymbol)
         throws FusionException
     {
         ModuleIdentity id;
         String current = myCurrentModuleDeclareName.asString(eval);
         if (current != null)
         {
-            id = ModuleIdentity.intern(current);
+            id = ModuleIdentity.reIntern(current);
         }
         else
         {
-            id = ModuleIdentity.intern(declaredName);
+            String declaredName = moduleNameSymbol.stringValue();
+            id = ModuleIdentity.internLocalName(declaredName);
         }
         return id;
     }

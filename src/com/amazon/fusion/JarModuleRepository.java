@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -18,12 +18,13 @@ final class JarModuleRepository
     {
         assert libName.startsWith("/");
 
-        // TODO absolute vs relative paths
-        String fileName = libName.substring(1) + ".ion"; // TODO ugly hard-coding
+        // TODO FUSION-79 absolute vs relative paths
+        String fileName = "/FUSION-REPO" + libName + ".ion"; // TODO ugly hard-coding
 
-        if (getClass().getResource("/FUSION-REPO/" + fileName) != null)
+        if (getClass().getResource(fileName) != null)
         {
-            ModuleIdentity id = ModuleIdentity.internFromJar(fileName);
+            ModuleIdentity id = ModuleIdentity.internFromClasspath(libName,
+                                                                   fileName);
             return id;
         }
         return null;

@@ -157,8 +157,8 @@ public class RuntimeTest
     public void testModuleRegistration()
         throws Exception
     {
-        final ModuleIdentity id = ModuleIdentity.intern("#%dummy");
-        assertSame(id, ModuleIdentity.intern("#%dummy"));
+        final ModuleIdentity id = ModuleIdentity.internBuiltinName("#%dummy");
+        assertSame(id, ModuleIdentity.internBuiltinName("#%dummy"));
 
         ModuleBuilder builder = runtime().makeModuleBuilder("#%dummy");
         builder.instantiate();
@@ -209,6 +209,5 @@ public class RuntimeTest
     {
         useTstRepo();
         runtime().makeTopLevel("/leaf_module");
-
     }
 }

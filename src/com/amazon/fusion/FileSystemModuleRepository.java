@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -43,8 +43,7 @@ final class FileSystemModuleRepository
         File libFile = new File(myRepoDir, fileName);
         if (libFile.exists())
         {
-            ModuleIdentity id = ModuleIdentity.intern(libFile);
-            return id;
+            return ModuleIdentity.internFromFile(libName, libFile);
         }
 
         return null;

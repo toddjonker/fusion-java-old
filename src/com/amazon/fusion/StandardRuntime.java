@@ -1,8 +1,8 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.ModuleIdentity.intern;
+import static com.amazon.fusion.ModuleIdentity.BUILTIN_NAME_EXPECTATION;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
@@ -84,15 +84,14 @@ final class StandardRuntime
     @Override
     public ModuleBuilder makeModuleBuilder(String moduleName)
     {
-        if (! moduleName.startsWith("#%") || moduleName.contains("/"))
+        if (! ModuleIdentity.isValidBuiltinName(moduleName))
         {
             String message =
-                "Built-in module names must start with '#%' and must not " +
-                "contain '/'.";
+                "Invalid built-in module name. " + BUILTIN_NAME_EXPECTATION;
             throw new IllegalArgumentException(message);
         }
 
-        ModuleIdentity id = intern(moduleName);
+        ModuleIdentity id = ModuleIdentity.internBuiltinName(moduleName);
         return new ModuleBuilderImpl(myRegistry, id);
     }
 

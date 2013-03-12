@@ -218,7 +218,7 @@ final class LoadHandler
         catch (FusionException e)
         {
             String message =
-                "Failure loading module from " + id.identify() +
+                "Failure loading module " + id.identify() +
                 ": " + e.getMessage();
             throw new FusionException(message, e);
         }
