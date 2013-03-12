@@ -53,9 +53,26 @@
 
 (check ion_equals (syntax_to_datum (quote_syntax a::null.sexp))
   (quote a::null.sexp))
+(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::null.sexp)))
+  (quote a::null.sexp))
+
 (check ion_equals (syntax_to_datum (quote_syntax a::()))
   (quote a::()))
+(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::())))
+  (quote a::()))
+(check ion_equals (syntax_to_datum (datum_to_syntax (quote_syntax a::())))
+  (quote a::()))
+(check ion_equals (syntax_to_datum (datum_to_syntax (quasisyntax a::())))
+  (quote a::()))
 (check ion_equals (syntax_to_datum (quote_syntax a::(b)))
+  (quote a::(b)))
+(check ion_equals (syntax_to_datum (quasisyntax a::(b)))
+  (quote a::(b)))
+(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::(b))))
+  (quote a::(b)))
+(check ion_equals (syntax_to_datum (datum_to_syntax (quote_syntax a::(b))))
+  (quote a::(b)))
+(check ion_equals (syntax_to_datum (datum_to_syntax (quasisyntax a::(b))))
   (quote a::(b)))
 (check ion_equals (syntax_to_datum (quote_syntax a::(b c)))
   (quote a::(b c)))
@@ -67,7 +84,6 @@
 (check ion_equals
   (syntax_to_datum (quasisyntax a::(b (unsyntax (quote_syntax c)))))
   (quote a::(b c)) "")
-
 
 
 (lets [(stx (quote_syntax [a, 2])),
@@ -110,10 +126,14 @@
        (unwrapped (syntax_unwrap stx))]
   (check_annotations unwrapped ["a"])
   (check_true (is_pair unwrapped))
-  (check_true (is_identifier (head unwrapped)))
-  (let [(u0 (syntax_unwrap (head unwrapped))),
-        (u1 (syntax_unwrap (tail unwrapped)))]
-    (check = (quote b) u0)
-    (check_true (is_sexp u1))
-    (check = 1 (size u1))
-    (check = 2 (syntax_unwrap (head u1)))))
+  (let [(h (head unwrapped)),
+        (t (tail unwrapped))]
+    (check_true (is_identifier h))
+    (check = (quote b) (syntax_unwrap h))
+    (check_true (is_pair t))
+    (check = 1 (size t))
+    (check = 2 (syntax_unwrap (head t)))))
+
+(define s (quote_syntax (1 2 3)))
+(define se (syntax_unwrap s))
+(check_true (is_pair (tail se)))

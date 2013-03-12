@@ -8,6 +8,7 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.FusionWrite.dispatchIonize;
 import static com.amazon.fusion.FusionWrite.dispatchWrite;
 import com.amazon.fusion.FusionSequence.BaseSequence;
+import com.amazon.fusion.FusionSexp.BaseSexp;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
@@ -281,6 +282,26 @@ final class FusionList
         return ((BaseList) list).appendM(eval, args);
     }
 
+
+    static BaseSexp unsafeListToSexp(Evaluator eval, Object list)
+        throws FusionException
+    {
+        if (list instanceof NullList)
+        {
+            return FusionSexp.nullSexp(eval, null); // TODO annotations
+        }
+
+        BaseSexp s = FusionSexp.EMPTY_SEXP;
+
+        BaseList l = (BaseList) list;
+        for (int i = l.size(); i-- != 0; )
+        {
+            Object head = l.dot(eval, i);
+            s = FusionSexp.pair(eval, head, s);
+        }
+
+        return s;
+    }
 
     /**
      * @param list must be a list; it is not type-checked!

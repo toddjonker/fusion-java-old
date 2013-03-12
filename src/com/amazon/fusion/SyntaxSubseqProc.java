@@ -25,6 +25,11 @@ final class SyntaxSubseqProc
 
         if (size < from) from = size;
 
-        return sequence.makeSubseq(eval, (int) from, size);
+        sequence = sequence.makeSubseq(eval, (int) from);
+        if (sequence == null)
+        {
+            throw new ArgTypeFailure(this, "proper sequence", 0, args);
+        }
+        return sequence;
     }
 }

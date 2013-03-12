@@ -49,9 +49,9 @@ final class FusionSexp
 
     /**
      * Caller must have injected children.
-     * @param values must not be null. This method assumes ownership!
+     * @param values must not be null.
      */
-    static Object immutableSexp(Evaluator eval, Object[] values)
+    static BaseSexp immutableSexp(Evaluator eval, Object[] values)
     {
         BaseSexp c = EMPTY_SEXP;
 
@@ -64,15 +64,43 @@ final class FusionSexp
         return c;
     }
 
+    /**
+     * Caller must have injected children.
+     *
+     * @param annotations must not be null.
+     * @param values must not be null.
+     */
+    static BaseSexp immutableSexp(Evaluator eval,
+                                  String[] annotations,
+                                  Object[] values)
+    {
+        if (values.length == 0)
+        {
+            return emptySexp(eval, annotations);
+        }
 
-    static Object pair(Evaluator eval, Object head, Object tail)
+        BaseSexp c = EMPTY_SEXP;
+
+        int i = values.length;
+        while (--i != 0)
+        {
+            c = new ImmutablePair(values[i], c);
+        }
+
+        c = new ImmutablePair(annotations, values[0], c);
+
+        return c;
+    }
+
+
+    static ImmutablePair pair(Evaluator eval, Object head, Object tail)
     {
         return new ImmutablePair(head, tail);
     }
 
 
-    static Object pair(Evaluator eval, String[] annotations,
-                       Object head, Object tail)
+    static ImmutablePair pair(Evaluator eval, String[] annotations,
+                              Object head, Object tail)
     {
         return new ImmutablePair(annotations, head, tail);
     }
@@ -116,17 +144,15 @@ final class FusionSexp
     //========================================================================
     // Predicates
 
-    @Deprecated
-    static boolean isSexp(Object v)
-    {
-        return (v instanceof BaseSexp);
-    }
-
     static boolean isSexp(Evaluator eval, Object v)
     {
         return (v instanceof BaseSexp);
     }
 
+    static boolean isEmptySexp(Evaluator eval, Object v)
+    {
+        return (v instanceof EmptySexp);
+    }
 
     static boolean isNullSexp(Evaluator eval, Object v)
     {
@@ -381,6 +407,11 @@ final class FusionSexp
             myHead = head;
             myTail = tail;
         }
+
+
+        Object head() { return myHead; }
+        Object tail() { return myTail; }
+
 
         @Override
         int size()

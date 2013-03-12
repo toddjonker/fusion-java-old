@@ -24,6 +24,10 @@ final class SyntaxAppendProc
         {
             SyntaxSequence next = checkSyntaxSequenceArg(i, args);
             seq = seq.makeAppended(eval, next);
+            if (seq == null)
+            {
+                throw new ArgTypeFailure(this, "proper sequence", i-1, args);
+            }
         }
         return seq;
     }

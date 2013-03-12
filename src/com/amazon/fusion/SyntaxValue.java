@@ -20,7 +20,7 @@ abstract class SyntaxValue
         STRING, SYMBOL, LIST, SEXP, STRUCT, KEYWORD
     }
 
-    /** A zero-lengeth array. */
+    /** A zero-length array. */
     final static SyntaxValue[] EMPTY_ARRAY = new SyntaxValue[0];
 
     private final String[] myAnnotations;

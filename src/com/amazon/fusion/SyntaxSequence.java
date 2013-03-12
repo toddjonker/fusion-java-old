@@ -2,142 +2,31 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
-import static java.lang.System.arraycopy;
-import static java.util.Arrays.copyOfRange;
-import com.amazon.ion.IonType;
-import com.amazon.ion.IonWriter;
-import java.io.IOException;
-import java.util.List;
 
 abstract class SyntaxSequence
     extends SyntaxContainer
 {
     /**
-     * Both the array and its content may be shared with other instances.
-     * When we push down wraps, we copy the array and the children.
-     * We push lazily to aggregate as many wraps here and only push once.
-     * That avoids repeated cloning of the children.
-     */
-    private SyntaxValue[] myChildren;
-
-
-    /**
-     * Instance will be {@link #isNullValue()} if children is null.
-     *
      * @param anns must not be null.
      * This method takes ownership of the array; the array and its elements
      * must not be changed by calling code afterwards!
-     * @param children the children of the new list.
-     * This method takes ownership of the array; the array and its elements
-     * must not be changed by calling code afterwards!
      */
-    SyntaxSequence(SourceLocation loc, String[] anns, SyntaxValue[] children)
+    SyntaxSequence(SourceLocation loc, String[] anns)
     {
         super(anns, loc, null);
-        myChildren = children;
     }
 
-    /**
-     * Copy constructor, shares the myChildren array and replaces wraps.
-     * The array will be copied when wraps are pushed but not before.
-     */
-    SyntaxSequence(SyntaxSequence that, SyntaxWraps wraps)
+    SyntaxSequence(String[] anns, SourceLocation loc, SyntaxWraps wraps)
     {
-        super(that.getAnnotations(), that.getLocation(), wraps);
-        assert that.myChildren.length != 0 && wraps != null;
-        myChildren = that.myChildren;
+        super(anns, loc, wraps);
     }
 
-
-    /**
-     * If we have wraps cached here, push them down into fresh copies of all
-     * children. This must be called before exposing any children outside of
-     * this instance, so that it appears as if the wraps were pushed when they
-     * were created.
-     */
-    private void pushAnyWraps(Evaluator eval)
-        throws FusionException
-    {
-        if (myWraps != null)  // We only have wraps when we have children.
-        {
-            boolean changed = false;
-            int len = myChildren.length;
-            SyntaxValue[] newChildren = new SyntaxValue[len];
-            for (int i = 0; i < len; i++)
-            {
-                SyntaxValue child = myChildren[i];
-                SyntaxValue wrapped = child.addWraps(myWraps);
-                newChildren[i] = wrapped;
-                changed |= wrapped != child;
-            }
-
-            if (changed) myChildren = newChildren; // Keep sharing when we can
-
-            myWraps = null;
-        }
-    }
+    abstract int size()
+        throws FusionException;
 
 
-    /**
-     * Does not push wraps!
-     */
-    SyntaxValue[] children()
-    {
-        return myChildren;
-    }
-
-    Object[] unwrapChildren(Evaluator eval)
-        throws FusionException
-    {
-        pushAnyWraps(eval);
-        return myChildren;
-    }
-
-
-    @Override
-    SyntaxSequence stripWraps(Evaluator eval)
-        throws FusionException
-    {
-        if (hasNoChildren()) return this;  // No children, no marks, all okay!
-
-        // Even if we have no marks, some children may have them.
-        boolean mustCopy = (myWraps != null);
-
-        int len = myChildren.length;
-        SyntaxValue[] newChildren = new SyntaxValue[len];
-        for (int i = 0; i < len; i++)
-        {
-            SyntaxValue child = myChildren[i];
-            SyntaxValue stripped = child.stripWraps(eval);
-            newChildren[i] = stripped;
-            mustCopy |= stripped != child;
-        }
-
-        if (! mustCopy) return this;
-
-        return makeSimilar(eval, getLocation(), getAnnotations(), newChildren);
-    }
-
-
-    @Override
-    final boolean isNullValue()
-    {
-        return myChildren == null;
-    }
-
-
-    @Override
-    final boolean hasNoChildren()
-    {
-        return myChildren == null || myChildren.length == 0;
-    }
-
-
-    final int size()
-    {
-        return (myChildren == null ? 0 : myChildren.length);
-    }
+    abstract SyntaxValue get(Evaluator eval, int index)
+        throws FusionException;
 
 
     /**
@@ -146,113 +35,18 @@ abstract class SyntaxSequence
      *
      * @return a new array.
      */
-    SyntaxValue[] extract(Evaluator eval)
-        throws FusionException
-    {
-        if (myChildren == null) return null;
-
-        pushAnyWraps(eval);
-
-        int len = myChildren.length;
-        SyntaxValue[] extracted = new SyntaxValue[len];
-        arraycopy(myChildren, 0, extracted, 0, len);
-        return extracted;
-    }
-
-
-    void extract(Evaluator eval, List<SyntaxValue> list, int from)
-        throws FusionException
-    {
-        if (myChildren != null)
-        {
-            pushAnyWraps(eval);
-            for (int i = from; i < myChildren.length; i++)
-            {
-                list.add(myChildren[i]);
-            }
-        }
-    }
-
-
-    final SyntaxValue get(Evaluator eval, int index)
-        throws FusionException
-    {
-        pushAnyWraps(eval);
-        return myChildren[index];
-    }
-
-
-    /**
-     * Creates a new sequence of the same type, with the children.
-     *
-     * @param anns must not be null.
-     * This method takes ownership of the array; the array and its elements
-     * must not be changed by calling code afterwards!
-     */
-    abstract SyntaxSequence makeSimilar(Evaluator eval,
-                                        SourceLocation loc,
-                                        String[] anns,
-                                        SyntaxValue[] children);
+    abstract SyntaxValue[] extract(Evaluator eval)
+        throws FusionException;
 
 
     /** Creates a new sequence with this + that. */
-    SyntaxSequence makeAppended(Evaluator eval, SyntaxSequence that)
-        throws FusionException
-    {
-        int thisLength = this.size();
-        int thatLength = that.size();
-        int newLength  = thisLength + thatLength;
-
-        SyntaxValue[] children;
-        if (newLength == 0)
-        {
-            children = SyntaxValue.EMPTY_ARRAY;
-        }
-        else
-        {
-            children = new SyntaxValue[thisLength + thatLength];
-            if (thisLength != 0)
-            {
-                this.pushAnyWraps(eval);
-                arraycopy(this.myChildren, 0, children, 0, thisLength);
-            }
-            if (thatLength != 0)
-            {
-                that.pushAnyWraps(eval);
-                arraycopy(that.myChildren, 0, children, thisLength, thatLength);
-            }
-        }
-
-        return makeSimilar(eval, null, EMPTY_STRING_ARRAY, children);
-    }
+    abstract SyntaxSequence makeAppended(Evaluator eval, SyntaxSequence that)
+        throws FusionException;
 
 
-    SyntaxSequence makeSubseq(Evaluator eval, int from, int to)
-        throws FusionException
-    {
-        pushAnyWraps(eval);
-        SyntaxValue[] children =
-            (myChildren == null ? null : copyOfRange(myChildren, from, to));
-        return makeSimilar(eval, null, EMPTY_STRING_ARRAY, children);
-    }
-
-
-    final void ionizeSequence(Evaluator eval, IonWriter writer, IonType type)
-        throws IOException, FusionException
-    {
-        ionizeAnnotations(writer);
-        if (myChildren == null)
-        {
-            writer.writeNull(type);
-        }
-        else
-        {
-            writer.stepIn(type);
-            for (SyntaxValue child : myChildren)
-            {
-                child.ionize(eval, writer);
-            }
-            writer.stepOut();
-        }
-    }
+    /**
+     * @return null if this sequence isn't proper and from goes beyond the end.
+     */
+    abstract SyntaxSequence makeSubseq(Evaluator eval, int from)
+        throws FusionException;
 }
