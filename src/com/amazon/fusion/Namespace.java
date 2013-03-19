@@ -454,11 +454,16 @@ class Namespace
 
     void setDoc(String name, BindingDoc.Kind kind, String doc)
     {
-        TopBinding binding = (TopBinding) resolve(name);
         BindingDoc bDoc = new BindingDoc(name, kind,
                                          null, // usage
                                          doc);
-        setDoc(binding.myAddress, bDoc);
+        setDoc(name, bDoc);
+    }
+
+    void setDoc(String name, BindingDoc doc)
+    {
+        TopBinding binding = (TopBinding) resolve(name);
+        setDoc(binding.myAddress, doc);
     }
 
     public void setDoc(int address, BindingDoc doc)

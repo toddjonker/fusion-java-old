@@ -23,6 +23,15 @@ final class ModuleBuilderImpl
     public void define(String name, Object value)
     {
         myNamespace.bind(name, value);
+
+        if (value instanceof FusionValue)
+        {
+            BindingDoc doc = ((FusionValue) value).document();
+            if (doc != null)
+            {
+                myNamespace.setDoc(name, doc);
+            }
+        }
     }
 
     void define(String name, Object value, String documentation)
