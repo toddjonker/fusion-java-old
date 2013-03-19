@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (module defines (quote '#%kernel')
 
@@ -27,9 +27,17 @@ Defines and provides a binding for ID, using `java_new` and the given
 fully-qualified class name string FQCN.
     '''
     (lambda (stx)
-      (quasisyntax
-        (defpub (unsyntax (syntax_get stx 1))
-          (java_new (unsyntax (syntax_get stx 2)))))))
+      (if (= 4 (syntax_size stx))
+        (if (is_string (syntax_to_datum (syntax_get stx 2)))
+          // We have docs
+          (quasisyntax
+            (defpub (unsyntax (syntax_get stx 1))
+              (unsyntax (syntax_get stx 2))
+              (java_new (unsyntax (syntax_get stx 3)))))
+          (wrong_syntax (syntax_get stx 2) "Expected documentation string"))
+        (quasisyntax
+          (defpub (unsyntax (syntax_get stx 1))
+            (java_new (unsyntax (syntax_get stx 2))))))))
 
 
   (define_syntax defpub_syntax  // WARNING: Doc syntax isn't supported yet.
@@ -58,4 +66,3 @@ given fully-qualified class name string FQCN.
         (defpub_syntax (unsyntax (syntax_get stx 1))
           (java_new (unsyntax (syntax_get stx 2)))))))
 )
-

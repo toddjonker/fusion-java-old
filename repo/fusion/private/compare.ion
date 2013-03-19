@@ -2,34 +2,44 @@
 
 (module compare '/fusion/private/builtins'
 
+  (use (quote '#%kernel'))
+  (provide =)
+
   (use '/fusion/experimental/defines')
 
-  (defpub_j < "com.amazon.fusion.LessThanProc")
-  (defpub_j = "com.amazon.fusion.EqualProc")
-
+  (defpub_j <
+    '''
+    (< a b)
+Returns true if `a` is strictly less than `b`.  Both arguments must have the
+same type, either int, decimal, or timestamp.
+    '''
+    "com.amazon.fusion.LessThanProc")
 
   (defpub >
+    '''
+    (> a b)
+Returns true if `a` is strictly greater than `b`.  Both arguments must have
+the same type, either int, decimal, or timestamp.
+    '''
     (lambda (a b)
-      '''
-Returns true if A is strictly greater than B.  Both arguments must be of the
-same type, either int, decimal, or timestamp.
-      '''
       (< b a)))
 
   (defpub <=
+    '''
+    (<= a b)
+Returns true if `a` is less than or equal to `b`.  Both arguments must have
+the same type, either int, decimal, or timestamp.
+    '''
     (lambda (a b)
-      '''
-Returns true if A is less than or equal to B.  Both arguments must be of the
-same type, either int, decimal, or timestamp.
-      '''
       (not (< b a))))
 
   (defpub >=
-    (lambda (a b)
-      '''
-Returns true if A is greater than or equal to B.  Both arguments must be of
+    '''
+    (>= a b)
+Returns true if `a` is greater than or equal to `b`.  Both arguments must have
 the same type, either int, decimal, or timestamp.
-      '''
+    '''
+    (lambda (a b)
       (not (< a b))))
 
 )
