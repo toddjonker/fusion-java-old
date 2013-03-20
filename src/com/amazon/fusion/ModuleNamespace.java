@@ -1,6 +1,7 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
+
 
 /**
  * Extended prepare-time {@link Namespace} that knows it's a module.
@@ -115,6 +116,13 @@ class ModuleNamespace
         return new ModuleBinding(identifier, address, myModuleId);
     }
 
+    @Override
+    public void setDoc(int address, BindingDoc doc)
+    {
+        doc.addProvidingModule(myModuleId);
+
+        super.setDoc(address, doc);
+    }
 
     //========================================================================
 

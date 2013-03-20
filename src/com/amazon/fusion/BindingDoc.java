@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import java.util.HashSet;
+import java.util.Set;
+
 
 final class BindingDoc
 {
@@ -19,6 +22,8 @@ final class BindingDoc
     // TODO pairs of usage/body
     private String myUsage;
     private final String myBody;
+    private final HashSet<ModuleIdentity> myProvidingModules = new HashSet<>();
+
 
     BindingDoc(String name, Kind kind, String usage, String body)
     {
@@ -80,5 +85,16 @@ final class BindingDoc
     String getBody()
     {
         return myBody;
+    }
+
+
+    Set<ModuleIdentity> getProvidingModules()
+    {
+        return myProvidingModules;
+    }
+
+    void addProvidingModule(ModuleIdentity id)
+    {
+        myProvidingModules.add(id);
     }
 }

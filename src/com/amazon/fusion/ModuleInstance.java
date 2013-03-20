@@ -130,13 +130,26 @@ final class ModuleInstance
             {
                 FusionValue fv = (FusionValue) value;
                 doc = fv.document();
-                if (doc != null && ! name.equals(doc.getName()))
+                if (doc != null)
                 {
-                    String msg =
-                        "WARNING: potential documented-name mismatch in " +
-                        myIdentity + ": " +
-                        name + " vs " + doc.getName();
-                    System.err.println(msg);
+                    {
+                        String msg =
+                            "WARNING: using doc-on-value for " +
+                                myIdentity.internString() + ' ' + name;
+                        System.err.println(msg);
+                    }
+
+                    if (! name.equals(doc.getName()))
+                    {
+                        String msg =
+                            "WARNING: potential documented-name mismatch in " +
+                            myIdentity.internString() + ": " +
+                            name + " vs " + doc.getName();
+                        System.err.println(msg);
+                    }
+
+                    doc.addProvidingModule(binding.myModuleId);
+                    doc.addProvidingModule(myIdentity);
                 }
             }
         }
@@ -145,7 +158,7 @@ final class ModuleInstance
 
     BindingDoc documentProvidedName(ModuleBinding binding)
     {
-        BindingDoc doc = null;
+        BindingDoc doc;
 
         if (binding.myModuleId == myIdentity)
         {
@@ -158,6 +171,11 @@ final class ModuleInstance
             assert module != null
                 : "Module not found: " + binding.myModuleId;
             doc = module.myNamespace.document(binding.myAddress);
+        }
+
+        if (doc != null)
+        {
+            doc.addProvidingModule(myIdentity);
         }
 
         return doc;
