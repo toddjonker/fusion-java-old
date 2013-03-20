@@ -89,16 +89,12 @@ final class ModuleStore
         if (address < myBindingDocs.length)
         {
             BindingDoc doc = myBindingDocs[address];
-            if (doc != null && doc.myKind == null)
+            if (doc != null && doc.getKind() == null)
             {
                 Object value = lookup(address);
                 if (value instanceof Procedure)
                 {
-                    doc = new BindingDoc(doc.myName,
-                                         BindingDoc.Kind.PROCEDURE,
-                                         doc.myUsage,
-                                         doc.myBody);
-                    myBindingDocs[address] = doc;
+                    doc.setKind(BindingDoc.Kind.PROCEDURE);
                 }
             }
             return doc;

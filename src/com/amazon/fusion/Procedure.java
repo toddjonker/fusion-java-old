@@ -33,8 +33,9 @@ abstract class Procedure
     final static String DOTDOTDOT = "...";
     final static String DOTDOTDOTPLUS = "...+";
 
-    private final String[] myArgNames;
-    private final String myDoc;
+    private final BindingDoc myDocs;
+    private final int myArity;
+
 
     /**
      * @param argNames are used purely for documentation
@@ -42,9 +43,24 @@ abstract class Procedure
     Procedure(String doc, String... argNames)
     {
         assert doc == null || ! doc.endsWith("\n");
-        assert argNames != null;
-        myArgNames = argNames;
-        myDoc = doc;
+        myArity = argNames.length;
+
+        StringBuilder buf = new StringBuilder();
+        for (String formal : argNames)
+        {
+            buf.append(' ');
+            buf.append(formal);
+        }
+        String usage = buf.toString();
+
+        myDocs = new BindingDoc(null, Kind.PROCEDURE, usage, doc);
+    }
+
+
+    @Override
+    final void nameInferred(String name)
+    {
+        myDocs.setName(name);
     }
 
 
@@ -65,33 +81,10 @@ abstract class Procedure
     }
 
 
-    /**
-     * Allows subclass to override and compute param names on-demand.
-     * @return not null.
-     */
-    String[] getArgNames()
-    {
-        return myArgNames;
-    }
-
-
     @Override
     BindingDoc document()
     {
-        String name = getDocumentedName();
-
-        StringBuilder buf = new StringBuilder();
-        buf.append('(');
-        buf.append(name);
-        for (String formal : getArgNames())
-        {
-            buf.append(' ');
-            buf.append(formal);
-        }
-        buf.append(')');
-        String usage = buf.toString();
-
-        return new BindingDoc(name, Kind.PROCEDURE, usage, myDoc);
+        return myDocs;
     }
 
 
@@ -109,12 +102,12 @@ abstract class Procedure
     // Type-checking helpers
 
 
-    void checkArityExact(int argCount, Object[] args)
+    void checkArityExact(int arity, Object[] args)
         throws ArityFailure
     {
-        if (args.length != argCount)
+        if (args.length != arity)
         {
-            throw new ArityFailure(this, argCount, argCount, args);
+            throw new ArityFailure(this, arity, arity, args);
         }
     }
 
@@ -125,7 +118,7 @@ abstract class Procedure
     void checkArityExact(Object[] args)
         throws ArityFailure
     {
-        checkArityExact(myArgNames.length, args);
+        checkArityExact(myArity, args);
     }
 
 

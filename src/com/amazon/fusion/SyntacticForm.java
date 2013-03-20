@@ -14,11 +14,21 @@ abstract class SyntacticForm
 {
     protected final String myBodyPattern;
     protected final String myDoc;
+    private final BindingDoc myDocs;
 
     SyntacticForm(String bodyPattern, String doc)
     {
         myBodyPattern = bodyPattern;
         myDoc = doc;
+
+        myDocs = new BindingDoc(null, Kind.SYNTAX, myBodyPattern, myDoc);
+    }
+
+
+    @Override
+    final void nameInferred(String name)
+    {
+        myDocs.setName(name);
     }
 
 
@@ -71,21 +81,7 @@ abstract class SyntacticForm
     @Override
     BindingDoc document()
     {
-        String name = getDocumentedName();
-
-        StringBuilder buf = new StringBuilder();
-        buf.append('(');
-        buf.append(name);
-
-        if (myBodyPattern != null)
-        {
-            buf.append(' ');
-            buf.append(myBodyPattern);
-        }
-        buf.append(')');
-        String usage = buf.toString();
-
-        return new BindingDoc(name, Kind.SYNTAX, usage, myDoc);
+        return myDocs;
     }
 
 

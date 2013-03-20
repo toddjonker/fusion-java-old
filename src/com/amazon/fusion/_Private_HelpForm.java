@@ -48,20 +48,23 @@ public final class _Private_HelpForm
                 }
                 else
                 {
-                    out.append("\n[");
-                    // Using enum toString() allows display name to be changed
-                    out.append(doc.myKind.toString());
-                    out.append("]  ");
-                    if (doc.myUsage != null)
+                    if (doc.getKind() != null)
                     {
-                        out.append(doc.myUsage);
+                        out.append("\n[");
+                        // Using enum toString() allows display name to be changed
+                        out.append(doc.getKind().toString());
+                        out.append("]  ");
+                    }
+                    if (doc.getUsage() != null)
+                    {
+                        out.append(doc.getUsage());
                     }
                     out.append('\n');
 
-                    if (doc.myBody != null)
+                    if (doc.getBody() != null)
                     {
                         out.append('\n');
-                        out.append(doc.myBody);
+                        out.append(doc.getBody());
                         out.append('\n');
                     }
                 }

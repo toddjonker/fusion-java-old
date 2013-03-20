@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -7,9 +7,6 @@ import com.amazon.ion.NullValueException;
 import java.io.IOException;
 
 
-/**
- *
- */
 abstract class NamedValue
     extends FusionValue
 {
@@ -26,21 +23,16 @@ abstract class NamedValue
         if (myName == null)
         {
             myName = name;
+            nameInferred(name);
         }
     }
 
-
     /**
-     * Returns a name for this value for rendering in documentation.
-     * This is either the {@linkplain #getInferredName() inferred name} or
-     * some unspecified default value.
-     *
-     * @return not null.
+     * Hook for subclass to be notified when a name has been inferred for this
+     * value.
      */
-    final String getDocumentedName()
+    void nameInferred(String name)
     {
-        String name = getInferredName();
-        return (name == null ? "_" : name);
     }
 
 

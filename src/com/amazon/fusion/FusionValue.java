@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -177,6 +177,9 @@ public abstract class FusionValue
 
     /**
      * Returns the documentation of this value.
+     * <p>
+     * <b>Implementations are expected to return the same object instance on
+     * every call, in order to preserve proper documentation indexing.</b>
      *
      * @return the documentation model, or null if there's no documentation.
      */

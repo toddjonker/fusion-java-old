@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -130,12 +130,12 @@ final class ModuleInstance
             {
                 FusionValue fv = (FusionValue) value;
                 doc = fv.document();
-                if (doc != null && ! name.equals(doc.myName))
+                if (doc != null && ! name.equals(doc.getName()))
                 {
                     String msg =
                         "WARNING: potential documented-name mismatch in " +
                         myIdentity + ": " +
-                        name + " vs " + doc.myName;
+                        name + " vs " + doc.getName();
                     System.err.println(msg);
                 }
             }

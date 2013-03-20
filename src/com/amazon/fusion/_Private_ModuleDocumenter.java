@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -227,28 +227,28 @@ public final class _Private_ModuleDocumenter
         }
         else
         {
-            if (doc.myKind != null)
+            if (doc.getKind() != null)
             {
                 out.append("<span class='kind'>");
                 // Using enum toString() allows display name to be changed
-                out.append(doc.myKind.toString().toLowerCase());
+                out.append(doc.getKind().toString().toLowerCase());
                 out.append("</span>\n");
             }
             out.append("</span>\n"); // binding
 
             StringBuilder buf = new StringBuilder();
 
-            if (doc.myUsage != null)
+            if (doc.getUsage() != null)
             {
                 buf.append("    ");
-                buf.append(doc.myUsage);
+                buf.append(doc.getUsage());
                 buf.append('\n');
             }
 
-            if (doc.myBody != null)
+            if (doc.getBody() != null)
             {
                 buf.append('\n');
-                buf.append(doc.myBody);
+                buf.append(doc.getBody());
                 buf.append('\n');
             }
 
