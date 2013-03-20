@@ -16,6 +16,7 @@ import java.util.Map;
  * This plays the same role as Racket's "resolved module path".
  */
 class ModuleIdentity
+    implements Comparable<ModuleIdentity>
 {
     static final String LOCAL_NAME_EXPECTATION =
         "Expected an Ion identifier";
@@ -198,6 +199,7 @@ class ModuleIdentity
         return myName;
     }
 
+
     @Override
     public int hashCode()
     {
@@ -221,5 +223,12 @@ class ModuleIdentity
         }
         else if ( !myName.equals(other.myName)) return false;
         return true;
+    }
+
+
+    @Override
+    public int compareTo(ModuleIdentity that)
+    {
+        return this.myName.compareTo(that.myName);
     }
 }
