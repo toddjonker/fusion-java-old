@@ -43,11 +43,12 @@ public final class _Private_ModuleDocumenter
     private static void writeHtmlTree(File outputDir, ModuleDoc doc)
         throws IOException
     {
-        if (doc.myName != null)
+        String name = doc.baseName();
+        if (name != null)
         {
-            File outputFile = new File(outputDir, doc.myName + ".html");
+            File outputFile = new File(outputDir, name + ".html");
             writeHtmlFile(outputFile, doc);
-            outputDir = new File(outputDir, doc.myName);
+            outputDir = new File(outputDir, name);
         }
 
         Collection<ModuleDoc> submodules = doc.submodules();
@@ -138,7 +139,7 @@ public final class _Private_ModuleDocumenter
 
         renderHeader2(out, "Submodules");
 
-        String superModuleName = escape(doc.myName);
+        String superModuleName = escape(doc.baseName());
 
         String[] names = submodules.keySet().toArray(new String[0]);
         Arrays.sort(names);

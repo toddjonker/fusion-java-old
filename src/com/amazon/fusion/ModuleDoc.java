@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -17,7 +17,7 @@ import java.util.Set;
 final class ModuleDoc
 {
     private final FusionRuntime myRuntime;
-    final String myName;
+    private final String myName;
     final String myPath;
     final String myIntroDocs;
 
@@ -117,6 +117,11 @@ final class ModuleDoc
         this(parent.myRuntime, name, parent.myPath + "/" + name);
     }
 
+
+    String baseName()
+    {
+        return myName;
+    }
 
     String oneLiner()
     {
