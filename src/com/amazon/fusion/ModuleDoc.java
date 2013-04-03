@@ -17,8 +17,8 @@ import java.util.Set;
 final class ModuleDoc
 {
     private final FusionRuntime myRuntime;
-    private final String myName;
     final String myPath;
+    final ModuleIdentity myModuleId;
     final String myIntroDocs;
 
     private Map<String,ModuleDoc>  mySubmodules;
@@ -89,26 +89,35 @@ final class ModuleDoc
         throws FusionException
     {
         myRuntime = runtime;
-        myName = name;
         myPath = path;
 
         String docs = null;
+        ModuleIdentity id = null;
         if (name != null)
         {
             StandardRuntime rt = (StandardRuntime) runtime;
             ModuleRegistry registry = rt.getDefaultRegistry();
             try
             {
-                ModuleIdentity id = resolveModulePath(runtime, path);
+                id = resolveModulePath(runtime, path);
+                assert id.baseName().equals(name);
+
                 ModuleInstance moduleInstance = registry.lookup(id);
 
                 docs = moduleInstance.getDocs();
 
                 build(moduleInstance);
             }
-            catch (ModuleNotFoundFailure e) { }
+            catch (ModuleNotFoundFailure e) {
+                // TODO what now? We have a name, but no module.
+                throw e;
+            }
         }
+
+        myModuleId = id;
         myIntroDocs = docs;
+
+        assert (myModuleId == null) == (name == null);
     }
 
     private ModuleDoc(ModuleDoc parent, String name)
@@ -120,7 +129,7 @@ final class ModuleDoc
 
     String baseName()
     {
-        return myName;
+        return (myModuleId == null ? null : myModuleId.baseName());
     }
 
     String oneLiner()

@@ -199,6 +199,13 @@ class ModuleIdentity
         return myName;
     }
 
+    public String baseName()
+    {
+        int slashIndex = myName.lastIndexOf('/');
+        if (slashIndex == -1) return myName;
+        return myName.substring(slashIndex + 1);
+    }
+
 
     @Override
     public int hashCode()
