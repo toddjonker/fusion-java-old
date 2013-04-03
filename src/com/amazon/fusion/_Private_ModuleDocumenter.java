@@ -129,11 +129,12 @@ public final class _Private_ModuleDocumenter
         void renderModule(ModuleDoc doc)
             throws IOException
         {
-            renderHead(doc.myPath, myBaseUrl, STYLE);
+            String modulePath = doc.myModuleId.internString();
+            renderHead(modulePath, myBaseUrl, STYLE);
 
             append("<a class='indexlink' href='binding-index.html'>Binding Index</a>\n");
 
-            renderHeader1("Module " + doc.myPath);
+            renderHeader1("Module " + modulePath);
 
             renderModuleIntro(doc);
 

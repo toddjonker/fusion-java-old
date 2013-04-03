@@ -17,7 +17,6 @@ import java.util.Set;
 final class ModuleDoc
 {
     private final FusionRuntime myRuntime;
-    final String myPath;
     final ModuleIdentity myModuleId;
     final String myIntroDocs;
 
@@ -43,7 +42,7 @@ final class ModuleDoc
     public static ModuleDoc buildDocTree(FusionRuntime runtime, File repoDir)
         throws IOException, FusionException
     {
-        ModuleDoc doc = new ModuleDoc(runtime, null, "");
+        ModuleDoc doc = new ModuleDoc(runtime);
         buildTree(repoDir, doc);
         return doc;
     }
@@ -74,56 +73,43 @@ final class ModuleDoc
             File testFile = new File(dir, fileName);
             if (testFile.isDirectory())
             {
-                ModuleDoc d = doc.implicitSubmodule(fileName);
+                ModuleDoc d = doc.addImplicitSubmodule(fileName);
                 buildTree(testFile, d);
             }
         }
     }
 
 
+    //========================================================================
+
+
     /**
-     * @param name can be null to represent the repository root (not really a
-     *  module).
+     * Constructs the documentation root as a pseudo-module.
      */
-    private ModuleDoc(FusionRuntime runtime, String name, String path)
+    private ModuleDoc(FusionRuntime runtime)
         throws FusionException
     {
         myRuntime = runtime;
-        myPath = path;
-
-        String docs = null;
-        ModuleIdentity id = null;
-        if (name != null)
-        {
-            StandardRuntime rt = (StandardRuntime) runtime;
-            ModuleRegistry registry = rt.getDefaultRegistry();
-            try
-            {
-                id = resolveModulePath(runtime, path);
-                assert id.baseName().equals(name);
-
-                ModuleInstance moduleInstance = registry.lookup(id);
-
-                docs = moduleInstance.getDocs();
-
-                build(moduleInstance);
-            }
-            catch (ModuleNotFoundFailure e) {
-                // TODO what now? We have a name, but no module.
-                throw e;
-            }
-        }
-
-        myModuleId = id;
-        myIntroDocs = docs;
-
-        assert (myModuleId == null) == (name == null);
+        myModuleId = null;
+        myIntroDocs = null;
     }
 
-    private ModuleDoc(ModuleDoc parent, String name)
+
+    /**
+     * Constructs docs for a real or implicit top-level module or submodule.
+     */
+    private ModuleDoc(FusionRuntime runtime, ModuleIdentity id)
         throws FusionException
     {
-        this(parent.myRuntime, name, parent.myPath + "/" + name);
+        myRuntime = runtime;
+        myModuleId = id;
+
+        StandardRuntime rt = (StandardRuntime) runtime;
+        ModuleInstance moduleInstance = rt.getDefaultRegistry().lookup(id);
+
+        myIntroDocs = moduleInstance.getDocs();
+
+        build(moduleInstance);
     }
 
 
@@ -131,6 +117,21 @@ final class ModuleDoc
     {
         return (myModuleId == null ? null : myModuleId.baseName());
     }
+
+
+    String submodulePath(String name)
+    {
+        if (myModuleId == null)
+        {
+            return "/" + name;
+        }
+
+        String parentPath = myModuleId.internString();
+        assert parentPath.startsWith("/");
+
+        return parentPath + "/" + name;
+    }
+
 
     String oneLiner()
     {
@@ -193,10 +194,16 @@ final class ModuleDoc
     }
 
 
+    /**
+     * @return null if the submodule is to be excluded from documentation.
+     */
     private ModuleDoc addSubmodule(String name)
         throws FusionException
     {
-        ModuleDoc doc = new ModuleDoc(this, name);
+        ModuleIdentity id = resolveModulePath(myRuntime, submodulePath(name));
+        assert id.baseName().equals(name);
+
+        ModuleDoc doc = new ModuleDoc(myRuntime, id);
 
         if (mySubmodules == null)
         {
@@ -210,7 +217,11 @@ final class ModuleDoc
     }
 
 
-    private ModuleDoc implicitSubmodule(String name)
+    /**
+     * Adds a submodule doc if and only if it doesn't already exist.
+     * @return null if the submodule is to be excluded from documentation.
+     */
+    private ModuleDoc addImplicitSubmodule(String name)
         throws FusionException
     {
         if (mySubmodules != null)
