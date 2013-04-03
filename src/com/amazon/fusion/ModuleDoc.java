@@ -39,16 +39,17 @@ final class ModuleDoc
     }
 
 
-    public static ModuleDoc buildDocTree(FusionRuntime runtime, File repoDir)
+    public static ModuleDoc buildDocTree(FusionRuntime runtime, Filter filter,
+                                         File repoDir)
         throws IOException, FusionException
     {
         ModuleDoc doc = new ModuleDoc(runtime);
-        buildTree(repoDir, doc);
+        buildTree(filter, repoDir, doc);
         return doc;
     }
 
 
-    private static void buildTree(File dir, ModuleDoc doc)
+    private static void buildTree(Filter filter, File dir, ModuleDoc doc)
         throws IOException, FusionException
     {
         String[] fileNames = dir.list();
@@ -61,20 +62,21 @@ final class ModuleDoc
                 // We assume that all .ion files are modules.
                 String moduleName =
                     fileName.substring(0, fileName.length() - 4);
-                doc.addSubmodule(moduleName);
+                doc.addSubmodule(filter, moduleName);
             }
         }
 
         // Second pass: look for directories, which are implicitly submodules.
         for (String fileName : fileNames)
         {
-            if (fileName.equals("private")) continue;
-
             File testFile = new File(dir, fileName);
             if (testFile.isDirectory())
             {
-                ModuleDoc d = doc.addImplicitSubmodule(fileName);
-                buildTree(testFile, d);
+                ModuleDoc d = doc.addImplicitSubmodule(filter, fileName);
+                if (d != null)
+                {
+                    buildTree(filter, testFile, d);
+                }
             }
         }
     }
@@ -197,11 +199,25 @@ final class ModuleDoc
     /**
      * @return null if the submodule is to be excluded from documentation.
      */
-    private ModuleDoc addSubmodule(String name)
+    private ModuleDoc addSubmodule(Filter filter, String name)
         throws FusionException
     {
-        ModuleIdentity id = resolveModulePath(myRuntime, submodulePath(name));
-        assert id.baseName().equals(name);
+        ModuleIdentity id;
+        try
+        {
+            id = resolveModulePath(myRuntime, submodulePath(name));
+            assert id.baseName().equals(name);
+        }
+        catch (ModuleNotFoundFailure e)
+        {
+            // This can happen for implicit modules with no stub .ion file.
+            // For now we just stop here and don't handle further submodules.
+            // TODO Recurse into implicit modules that don't have stub source.
+            return null;
+        }
+
+        if (! filter.accept(id)) return null;
+
 
         ModuleDoc doc = new ModuleDoc(myRuntime, id);
 
@@ -221,7 +237,7 @@ final class ModuleDoc
      * Adds a submodule doc if and only if it doesn't already exist.
      * @return null if the submodule is to be excluded from documentation.
      */
-    private ModuleDoc addImplicitSubmodule(String name)
+    private ModuleDoc addImplicitSubmodule(Filter filter, String name)
         throws FusionException
     {
         if (mySubmodules != null)
@@ -231,6 +247,22 @@ final class ModuleDoc
             if (doc != null) return doc;
         }
 
-        return addSubmodule(name);
+        return addSubmodule(filter, name);
+    }
+
+
+    //========================================================================
+
+
+    static final class Filter
+    {
+        boolean accept(ModuleIdentity id)
+        {
+            String name = id.internString();
+            if (name.startsWith("#%")) return false;
+            if (name.endsWith("/private")) return false;
+            if (name.contains("/private/")) return false;
+            return true;
+        }
     }
 }

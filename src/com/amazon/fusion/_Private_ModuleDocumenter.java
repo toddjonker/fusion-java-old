@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.DocIndex.buildDocIndex;
 import static com.amazon.fusion.ModuleDoc.buildDocTree;
+import com.amazon.fusion.ModuleDoc.Filter;
 import com.amazon.ion.Timestamp;
 import com.petebevin.markdown.MarkdownProcessor;
 import java.io.File;
@@ -34,25 +35,29 @@ public final class _Private_ModuleDocumenter
         throws IOException, FusionException
     {
         FusionRuntime runtime = standardDocumentingRuntime();
-        ModuleDoc doc = buildDocTree(runtime, repoDir);
-        writeModuleTree(outputDir, ".", doc);
+        Filter filter = new Filter();
+
+        ModuleDoc doc = buildDocTree(runtime, filter, repoDir);
+        writeModuleTree(filter, outputDir, ".", doc);
 
         DocIndex index = buildDocIndex(doc);
-        writeIndexFile(outputDir, index);
+        writeIndexFile(filter, outputDir, index);
 
         System.out.println("DONE rendering docs to " + outputDir + " at "
             + Timestamp.now());
     }
 
 
-    private static void writeModuleTree(File outputDir, String baseUrl,
+    private static void writeModuleTree(Filter filter,
+                                        File outputDir,
+                                        String baseUrl,
                                         ModuleDoc doc)
         throws IOException
     {
         String name = doc.baseName();
         if (name != null)
         {
-            writeModuleFile(outputDir, baseUrl, doc);
+            writeModuleFile(filter, outputDir, baseUrl, doc);
             outputDir = new File(outputDir, name);
             baseUrl = baseUrl + "/..";
         }
@@ -60,30 +65,35 @@ public final class _Private_ModuleDocumenter
         Collection<ModuleDoc> submodules = doc.submodules();
         for (ModuleDoc submodule : submodules)
         {
-            writeModuleTree(outputDir, baseUrl, submodule);
+            writeModuleTree(filter, outputDir, baseUrl, submodule);
         }
     }
 
 
-    private static void writeModuleFile(File outputDir, String baseUrl,
+    private static void writeModuleFile(Filter filter,
+                                        File outputDir,
+                                        String baseUrl,
                                         ModuleDoc doc)
         throws IOException
     {
         File outputFile = new File(outputDir, doc.baseName() + ".html");
 
-        try (ModuleWriter writer = new ModuleWriter(outputFile, baseUrl))
+        try (ModuleWriter writer =
+                 new ModuleWriter(filter, outputFile, baseUrl))
         {
             writer.renderModule(doc);
         }
     }
 
 
-    private static void writeIndexFile(File outputDir, DocIndex index)
+    private static void writeIndexFile(Filter filter,
+                                       File outputDir,
+                                       DocIndex index)
         throws IOException
     {
         File outputFile = new File(outputDir, "binding-index.html");
 
-        try (IndexWriter writer = new IndexWriter(outputFile))
+        try (IndexWriter writer = new IndexWriter(filter, outputFile))
         {
             writer.renderIndex(index);
         }
@@ -96,13 +106,15 @@ public final class _Private_ModuleDocumenter
     private static final class ModuleWriter
         extends HtmlWriter
     {
+        private final Filter myFilter;
         private final String myBaseUrl;
         private final MarkdownProcessor myMarkdown = new MarkdownProcessor();
 
-        public ModuleWriter(File outputFile, String baseUrl)
+        public ModuleWriter(Filter filter, File outputFile, String baseUrl)
             throws IOException
         {
             super(outputFile);
+            myFilter  = filter;
             myBaseUrl = baseUrl;
         }
 
@@ -278,11 +290,8 @@ public final class _Private_ModuleDocumenter
                 boolean printedOne = false;
                 for (ModuleIdentity id : ids)
                 {
-                    if (id != moduleDoc.myModuleId)
+                    if (id != moduleDoc.myModuleId && myFilter.accept(id))
                     {
-                        // TODO filter out private modules
-                        // TODO filter out file-system module identifiers
-
                         if (printedOne)
                         {
                             append(", ");
@@ -319,10 +328,14 @@ public final class _Private_ModuleDocumenter
     private static final class IndexWriter
         extends HtmlWriter
     {
-        public IndexWriter(File outputFile)
+        private final Filter myFilter;
+
+
+        public IndexWriter(Filter filter, File outputFile)
             throws IOException
         {
             super(outputFile);
+            myFilter = filter;
         }
 
 
@@ -349,12 +362,15 @@ public final class _Private_ModuleDocumenter
                 boolean printedOne = false;
                 for (ModuleIdentity id : entry.getValue())
                 {
-                    if (printedOne)
+                    if (myFilter.accept(id))
                     {
-                        append(", ");
+                        if (printedOne)
+                        {
+                            append(", ");
+                        }
+                        linkToBindingAsModulePath(id, escapedName);
+                        printedOne = true;
                     }
-                    linkToBindingAsModulePath(id, escapedName);
-                    printedOne = true;
                 }
 
                 append("</td>\n");
