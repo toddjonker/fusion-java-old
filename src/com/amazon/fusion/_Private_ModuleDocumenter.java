@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.ModuleDoc.buildDocTree;
+import com.amazon.ion.Timestamp;
 import com.petebevin.markdown.MarkdownProcessor;
 import java.io.File;
 import java.io.FileWriter;
@@ -33,6 +34,9 @@ public final class _Private_ModuleDocumenter
         FusionRuntime runtime = standardDocumentingRuntime();
         ModuleDoc doc = buildDocTree(runtime, repoDir);
         writeHtmlTree(outputDir, doc);
+
+        System.out.println("DONE rendering docs to " + outputDir + " at "
+                           + Timestamp.now());
     }
 
 
