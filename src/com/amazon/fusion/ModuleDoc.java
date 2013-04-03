@@ -16,7 +16,7 @@ import java.util.Set;
 
 final class ModuleDoc
 {
-    private final FusionRuntime myRuntime;
+    private final StandardRuntime myRuntime;
     final ModuleIdentity myModuleId;
     final String myIntroDocs;
 
@@ -43,42 +43,9 @@ final class ModuleDoc
                                          File repoDir)
         throws IOException, FusionException
     {
-        ModuleDoc doc = new ModuleDoc(runtime);
-        buildTree(filter, repoDir, doc);
+        ModuleDoc doc = new ModuleDoc((StandardRuntime) runtime);
+        doc.addModules(filter, repoDir);
         return doc;
-    }
-
-
-    private static void buildTree(Filter filter, File dir, ModuleDoc doc)
-        throws IOException, FusionException
-    {
-        String[] fileNames = dir.list();
-
-        // First pass: build all "real" modules
-        for (String fileName : fileNames)
-        {
-            if (fileName.endsWith(".ion"))
-            {
-                // We assume that all .ion files are modules.
-                String moduleName =
-                    fileName.substring(0, fileName.length() - 4);
-                doc.addSubmodule(filter, moduleName);
-            }
-        }
-
-        // Second pass: look for directories, which are implicitly submodules.
-        for (String fileName : fileNames)
-        {
-            File testFile = new File(dir, fileName);
-            if (testFile.isDirectory())
-            {
-                ModuleDoc d = doc.addImplicitSubmodule(filter, fileName);
-                if (d != null)
-                {
-                    buildTree(filter, testFile, d);
-                }
-            }
-        }
     }
 
 
@@ -88,7 +55,7 @@ final class ModuleDoc
     /**
      * Constructs the documentation root as a pseudo-module.
      */
-    private ModuleDoc(FusionRuntime runtime)
+    private ModuleDoc(StandardRuntime runtime)
         throws FusionException
     {
         myRuntime = runtime;
@@ -100,18 +67,16 @@ final class ModuleDoc
     /**
      * Constructs docs for a real or implicit top-level module or submodule.
      */
-    private ModuleDoc(FusionRuntime runtime, ModuleIdentity id)
+    private ModuleDoc(StandardRuntime runtime,
+                      ModuleIdentity id,
+                      String introDocs)
         throws FusionException
     {
+        assert id != null;
+
         myRuntime = runtime;
         myModuleId = id;
-
-        StandardRuntime rt = (StandardRuntime) runtime;
-        ModuleInstance moduleInstance = rt.getDefaultRegistry().lookup(id);
-
-        myIntroDocs = moduleInstance.getDocs();
-
-        build(moduleInstance);
+        myIntroDocs = introDocs;
     }
 
 
@@ -181,7 +146,7 @@ final class ModuleDoc
     }
 
 
-    private void build(ModuleInstance module)
+    private void addBindings(ModuleInstance module)
     {
         Set<String> names = module.providedNames();
         if (names.size() == 0) return;
@@ -218,8 +183,11 @@ final class ModuleDoc
 
         if (! filter.accept(id)) return null;
 
+        ModuleInstance moduleInstance =
+            myRuntime.getDefaultRegistry().lookup(id);
 
-        ModuleDoc doc = new ModuleDoc(myRuntime, id);
+        ModuleDoc doc = new ModuleDoc(myRuntime, id, moduleInstance.getDocs());
+        doc.addBindings(moduleInstance);
 
         if (mySubmodules == null)
         {
@@ -248,6 +216,42 @@ final class ModuleDoc
         }
 
         return addSubmodule(filter, name);
+    }
+
+
+    /**
+     * Adds all modules that we can discover within a directory.
+     */
+    private void addModules(Filter filter, File dir)
+        throws IOException, FusionException
+    {
+        String[] fileNames = dir.list();
+
+        // First pass: build all "real" modules
+        for (String fileName : fileNames)
+        {
+            if (fileName.endsWith(".ion"))
+            {
+                // We assume that all .ion files are modules.
+                String moduleName =
+                    fileName.substring(0, fileName.length() - 4);
+                addSubmodule(filter, moduleName);
+            }
+        }
+
+        // Second pass: look for directories, which are implicitly submodules.
+        for (String fileName : fileNames)
+        {
+            File testFile = new File(dir, fileName);
+            if (testFile.isDirectory())
+            {
+                ModuleDoc d = addImplicitSubmodule(filter, fileName);
+                if (d != null)
+                {
+                    d.addModules(filter, testFile);
+                }
+            }
+        }
     }
 
 
