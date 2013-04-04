@@ -123,18 +123,36 @@ public final class _Private_ModuleDocumenter
             " .indexlink {" +
             "   float: right;" +
             " }" +
-            " .binding {" +
-            "   display: block; width: 100%;" +
+            " .submodules .oneliner p {" +
+            "   display: inline;" +
             " }" +
-            " .bound {" +
+            " .exports {" +
+            "   display: block; width: 100%;" +
+            "   margin-left: 1em; margin-bottom: 1em" +
+            " }" +
+            " .binding {" +
+            "   display: block;" +
+            "   margin-left: 1em;" +
+            " }" +
+            " .binding .name {" +
             "   font-size: 1.17em;" +
             "   font-weight: bold;" +
+            "   margin-left: -1em;" +
             " }" +
-            " .kind {" +
-            "   float: right; font-style: italic" +
+            " .binding .kind {" +
+            "   float: right; font-style: italic;" +
             " }" +
-            " .oneliner p {" +   // Markdown uses <p> but we don't want a break
-            "    display: inline;" +
+            " .binding .oneliner {" +
+//            "   margin-left: 1em;" +
+            " }" +
+            " .binding .nodoc {" +
+            "   font-style: italic;" +
+            " }" +
+            " .binding .body {" +
+//            "   margin-left: 1em;" +
+            " }" +
+            " .binding .also {" +
+//            "   margin-left: 1em;" +
             " }" +
             "</style>\n";
 
@@ -178,7 +196,7 @@ public final class _Private_ModuleDocumenter
             String[] names = submodules.keySet().toArray(new String[0]);
             Arrays.sort(names);
 
-            append("<ul>");
+            append("<ul class='submodules'>");
             for (String name : names)
             {
                 ModuleDoc sub = submodules.get(name);
@@ -205,14 +223,14 @@ public final class _Private_ModuleDocumenter
         {
             if (names.length == 0) return;
 
-            append("<blockquote>\n");
+            append("<div class='exports'>\n");
             for (String name : names)
             {
                 String escapedName = escapeString(name);
                 linkToBindingAsName(doc.myModuleId, escapedName);
                 append("&nbsp;&nbsp;\n");
             }
-            append("</blockquote>\n");
+            append("</div>\n");
         }
 
 
@@ -235,22 +253,30 @@ public final class _Private_ModuleDocumenter
         }
 
 
+        /* CSS hierarchy:
+         *
+         *  binding
+         *    name
+         *    kind
+         *    oneliner
+         *    body
+         *    also
+         */
         private void renderBinding(ModuleDoc moduleDoc,
                                    String name, BindingDoc doc)
             throws IOException
         {
             String escapedName = escapeString(name);
 
-            append("\n<span class='binding'><span class='bound'><a name='");
+            append("\n<div class='binding'><span class='name'><a name='");
             append(escapedName);
             append("'>");
             append(escapedName);
-            append("</a></span>");   // binding span is still open
+            append("</a></span>");   // binding div is still open
 
             if (doc == null)
             {
-                append("</span>\n"); // binding
-                append("<p>No documentation available.<p>\n\n");
+                append("<p class='nodoc'>No documentation available.<p>\n\n");
             }
             else
             {
@@ -261,7 +287,6 @@ public final class _Private_ModuleDocumenter
                     append(doc.getKind().toString().toLowerCase());
                     append("</span>\n");
                 }
-                append("</span>\n"); // binding
 
                 StringBuilder buf = new StringBuilder();
 
@@ -270,6 +295,12 @@ public final class _Private_ModuleDocumenter
                     buf.append("    ");
                     buf.append(doc.getUsage());
                     buf.append('\n');
+
+                    append("<div class='oneliner'>");
+                    markdown(buf.toString());
+                    append("</div>\n");
+
+                    buf.setLength(0);
                 }
 
                 if (doc.getBody() != null)
@@ -277,9 +308,14 @@ public final class _Private_ModuleDocumenter
                     buf.append('\n');
                     buf.append(doc.getBody());
                     buf.append('\n');
+
+                    append("<div class='body'>");
+                    markdown(buf.toString());
+                    append("</div>\n");
+
+                    buf.setLength(0);
                 }
 
-                markdown(buf.toString());
                 append('\n');
 
 
@@ -298,7 +334,7 @@ public final class _Private_ModuleDocumenter
                         }
                         else
                         {
-                            append("<p><em>Also provided by ");
+                            append("<p class='also'><em>Also provided by ");
                         }
 
                         linkToBindingAsModulePath(id, escapedName);
@@ -310,6 +346,8 @@ public final class _Private_ModuleDocumenter
                     append("</em></p>\n");
                 }
             }
+
+            append("</div>\n"); // binding
         }
 
 
