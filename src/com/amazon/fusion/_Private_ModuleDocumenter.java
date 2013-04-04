@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * NOT FOR APPLICATION USE
@@ -42,6 +43,7 @@ public final class _Private_ModuleDocumenter
 
         DocIndex index = buildDocIndex(doc);
         writeIndexFile(filter, outputDir, index);
+        writePermutedIndexFile(filter, outputDir, index);
 
         System.out.println("DONE rendering docs to " + outputDir + " at "
             + Timestamp.now());
@@ -96,6 +98,21 @@ public final class _Private_ModuleDocumenter
         try (IndexWriter writer = new IndexWriter(filter, outputFile))
         {
             writer.renderIndex(index);
+        }
+    }
+
+
+    private static void writePermutedIndexFile(Filter filter,
+                                               File outputDir,
+                                               DocIndex index)
+        throws IOException
+    {
+        File outputFile = new File(outputDir, "permuted-index.html");
+
+        try (PermutedIndexWriter writer =
+                 new PermutedIndexWriter(filter, index, outputFile))
+        {
+            writer.renderIndex();
         }
     }
 
@@ -162,7 +179,10 @@ public final class _Private_ModuleDocumenter
             String modulePath = doc.myModuleId.internString();
             renderHead(modulePath, myBaseUrl, STYLE);
 
-            append("<a class='indexlink' href='binding-index.html'>Binding Index</a>\n");
+            append("<div class='indexlink'>" +
+                   "<a href='binding-index.html'>Binding Index</a> " +
+                   "(<a href='permuted-index.html'>Permuted</a>)" +
+                   "</div>\n");
 
             renderHeader1("Module " + modulePath);
 
@@ -379,6 +399,9 @@ public final class _Private_ModuleDocumenter
 
         private static final String STYLE =
             "<style type='text/css'>" +
+            " .indexlink {" +
+            "   float: right;" +
+            " }" +
             " td.bound {" +
             "   font-family: monospace;" +
             " }" +
@@ -389,8 +412,15 @@ public final class _Private_ModuleDocumenter
         {
             renderHead("Fusion Binding Index", null, STYLE);
 
+            append("<div class='indexlink'>" +
+                   "<a href='permuted-index.html'>Permuted Index</a>" +
+                   "</div>\n");
+
+            renderHeader1("Binding Index");
+
             append("<table>");
-            for (Entry<String, Set<ModuleIdentity>> entry : index.getNameMap().entrySet())
+            for (Entry<String, Set<ModuleIdentity>> entry
+                    : index.getNameMap().entrySet())
             {
                 String escapedName = escapeString(entry.getKey());
                 append("<tr><td class='bound'>");
@@ -399,6 +429,187 @@ public final class _Private_ModuleDocumenter
 
                 boolean printedOne = false;
                 for (ModuleIdentity id : entry.getValue())
+                {
+                    if (myFilter.accept(id))
+                    {
+                        if (printedOne)
+                        {
+                            append(", ");
+                        }
+                        linkToBindingAsModulePath(id, escapedName);
+                        printedOne = true;
+                    }
+                }
+
+                append("</td>\n");
+            }
+            append("</table>\n");
+        }
+    }
+
+
+    //========================================================================
+
+
+    private static final class PermutedIndexWriter
+        extends HtmlWriter
+    {
+        private final Filter   myFilter;
+        private final DocIndex myIndex;
+
+        /** Maps keywords to the lines in which they exist. */
+        private final TreeSet<Line> myLines;
+
+
+        /** An index line. */
+        private static final class Line
+            implements Comparable<Line>
+        {
+            private final String myPrefix;
+            private final String myKeyword;
+            private final Entry<String, Set<ModuleIdentity>> myEntry;
+
+
+            Line(Entry<String, Set<ModuleIdentity>> entry,
+                 int keywordStartPos,
+                 int keywordLimitPos)
+            {
+                String name = entry.getKey();
+                myPrefix  = name.substring(0, keywordStartPos);
+                myKeyword = name.substring(keywordStartPos, keywordLimitPos);
+                myEntry   = entry;
+            }
+
+            String bindingName()
+            {
+                return myEntry.getKey();
+            }
+
+            String prefix()
+            {
+                return myPrefix;
+            }
+
+            String keyword()
+            {
+                return myKeyword;
+            }
+
+            String suffix()
+            {
+                int pos = myPrefix.length() + myKeyword.length();
+                return bindingName().substring(pos);
+            }
+
+            Set<ModuleIdentity> modules()
+            {
+                return myEntry.getValue();
+            }
+
+            @Override
+            public int compareTo(Line that)
+            {
+                int result = myKeyword.compareTo(that.myKeyword);
+                if (result == 0)
+                {
+                    result = myPrefix.compareTo(that.myPrefix);
+                    if (result == 0)
+                    {
+                        // We shouldn't get this far often, so we spend time to
+                        // get the suffix rather that memory to cache it.
+                        result = suffix().compareTo(that.suffix());
+                    }
+                }
+                return result;
+            }
+        }
+
+
+        public PermutedIndexWriter(Filter filter, DocIndex index,
+                                   File outputFile)
+            throws IOException
+        {
+            super(outputFile);
+
+            myFilter = filter;
+            myIndex  = index;
+            myLines  = new TreeSet<>();
+        }
+
+
+        private void permute()
+        {
+            for (Entry<String, Set<ModuleIdentity>> entry
+                     : myIndex.getNameMap().entrySet())
+            {
+                String name = entry.getKey();
+
+                int pos = 0;
+                while (true)
+                {
+                    int underscorePos = name.indexOf('_', pos);
+                    if (underscorePos == -1)
+                    {
+                        myLines.add(new Line(entry, pos, name.length()));
+                        break;
+                    }
+                    else if (pos < underscorePos)
+                    {
+                        myLines.add(new Line(entry, pos, underscorePos));
+                    }
+                    pos = underscorePos + 1;
+                }
+            }
+        }
+
+
+        private static final String STYLE =
+            "<style type='text/css'>" +
+            " .indexlink {" +
+            "   float: right;" +
+            " }" +
+            " td.prefix {" +
+            "   font-family: monospace;" +
+            "   text-align: right;" +
+            "   padding-right: 0;" +
+            " }" +
+            " td.tail {" +
+            "   font-family: monospace;" +
+            "   padding-left: 0;" +
+            " }" +
+            " td .keyword {" +
+            "   font-weight: bold;" +
+            " }" +
+            "</style>\n";
+
+        void renderIndex()
+            throws IOException
+        {
+            permute();
+
+            renderHead("Fusion Binding Index (Permuted)", null, STYLE);
+
+            append("<div class='indexlink'>" +
+                   "<a href='binding-index.html'>Alphabetical Index</a>" +
+                   "</div>\n");
+
+            renderHeader1("Permuted Binding Index");
+
+            append("<table>");
+            for (Line line : myLines)
+            {
+                String escapedName = escapeString(line.bindingName());
+
+                append("<tr><td class='prefix'>");
+                escape(line.prefix());
+                append("</td><td class='tail'><span class='keyword'>");
+                escape(line.keyword());
+                append("</span>");
+                escape(line.suffix());
+                append("</td><td>");
+
+                boolean printedOne = false;
+                for (ModuleIdentity id : line.modules())
                 {
                     if (myFilter.accept(id))
                     {
