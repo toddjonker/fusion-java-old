@@ -338,12 +338,14 @@ class Namespace
     }
 
     void use(ModuleIdentity id)
+        throws FusionException
     {
         ModuleInstance module = myRegistry.lookup(id);
         use(module);
     }
 
-    void use(final ModuleInstance module)
+    void use(ModuleInstance module)
+        throws FusionException
     {
         SyntaxWrap wrap = new ModuleRenameWrap(module);
         myWraps = myWraps.addWrap(wrap);

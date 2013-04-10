@@ -130,6 +130,7 @@ final class StandardTopLevel
 
     @Override
     public void define(String name, Object value)
+        throws FusionException
     {
         myNamespace.bind(name, value);
     }

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -129,7 +129,8 @@ public interface TopLevel
      * @param value must be of a type supported by the Fusion runtime.
      * Must not be null.
      */
-    public void define(String name, Object value);
+    public void define(String name, Object value)
+        throws FusionException;
 
 
     /**

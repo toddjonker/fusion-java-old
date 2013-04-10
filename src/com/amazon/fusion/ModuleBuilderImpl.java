@@ -21,6 +21,7 @@ final class ModuleBuilderImpl
 
     @Override
     public void define(String name, Object value)
+        throws FusionException
     {
         myNamespace.bind(name, value);
 
@@ -35,6 +36,7 @@ final class ModuleBuilderImpl
     }
 
     void define(String name, Object value, String documentation)
+        throws FusionException
     {
         myNamespace.bind(name, value);
 

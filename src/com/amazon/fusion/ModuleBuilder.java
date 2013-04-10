@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -16,7 +16,8 @@ public interface ModuleBuilder
      * @param name must be non-empty.
      * @param value must be acceptable to the Fusion runtime.
      */
-    void define(String name, Object value);
+    void define(String name, Object value)
+        throws FusionException;
 
 
     /**
