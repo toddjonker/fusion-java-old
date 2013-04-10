@@ -174,6 +174,8 @@ final class SyntaxSymbol
 
 
     /**
+     * Resolves this identifier, but doesn't cache the result if it has not
+     * been previously resolved.
      *
      * @return not null, but maybe a {@link FreeBinding}.
      */

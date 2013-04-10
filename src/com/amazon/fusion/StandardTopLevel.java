@@ -49,7 +49,8 @@ final class StandardTopLevel
                      String initialModulePath)
         throws FusionException
     {
-        this(globalState, new Namespace(registry), initialModulePath, false);
+        this(globalState, new TopLevelNamespace(registry), initialModulePath,
+             false);
     }
 
 

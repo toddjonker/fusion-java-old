@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -17,10 +17,10 @@ public class SyntaxFailure
     private final String myName;
     private SyntaxValue[] mySources;
 
-    SyntaxFailure(String name, String message, SyntaxValue... sources)
+    SyntaxFailure(String whatForm, String message, SyntaxValue... sources)
     {
         super(message);
-        myName = name;
+        myName = whatForm;
         mySources = sources;
     }
 

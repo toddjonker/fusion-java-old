@@ -33,7 +33,7 @@ final class FusionNamespace
             registry = eval.findCurrentNamespace().getRegistry();
         }
 
-        Namespace ns = new Namespace(registry);
+        Namespace ns = new TopLevelNamespace(registry);
         ns.use(eval, language);
         return ns;
     }

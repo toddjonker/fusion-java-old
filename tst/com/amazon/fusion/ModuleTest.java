@@ -64,6 +64,35 @@ public class ModuleTest
     }
 
 
+    @Test(expected = FusionException.class)
+    public void testDuplicateDefinedName()
+        throws Exception
+    {
+        eval("(use '/module/duplicate_defined_name')");
+    }
+
+    @Test(expected = FusionException.class)
+    public void testDuplicateImportedName()
+        throws Exception
+    {
+        eval("(use '/module/duplicate_imported_name')");
+    }
+
+    @Test(expected = FusionException.class)
+    public void testDefineImportedName()
+        throws Exception
+    {
+        eval("(use '/module/define_imported_name')");
+    }
+
+    @Test(expected = FusionException.class)
+    public void testImportDefinedName()
+        throws Exception
+    {
+        eval("(use '/module/import_defined_name')");
+    }
+
+
     @Test(expected = UnboundIdentifierFailure.class)
     public void testIntialModuleImportsWithNoProvides()
         throws Exception

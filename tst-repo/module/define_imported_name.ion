@@ -1,0 +1,7 @@
+(module define_imported '/fusion/base'
+
+  (use '/module/require/dupe1')
+
+  // ERROR: 'dupe' is already bound via import.
+  (define dupe 3)
+)

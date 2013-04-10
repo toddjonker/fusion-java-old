@@ -99,13 +99,13 @@ final class DefineForm
 
 
     @Override
-    SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
+    SyntaxValue expand(Expander expander, Environment env, SyntaxSexp origStx)
         throws FusionException
     {
         // Two phase expansion.
         // TODO rewrite this as a macro, replace this entire built-in form
         // with define_values.
-        stx = expandImplicitLambda(expander, stx);
+        SyntaxSexp stx = expandImplicitLambda(expander, origStx);
 
         SyntaxChecker check = check(stx);
         if (! (expander.isTopLevelContext() || expander.isModuleContext()))
@@ -124,15 +124,16 @@ final class DefineForm
         SyntaxSymbol identifier = check.requiredIdentifier(1);
 
         // If at module context, this has already been done.
-        if (! expander.isModuleContext())
+        if (expander.isTopLevelContext())
         {
             // We need to strip off the module-level wrap that's already been
             // applied to the identifier. Otherwise we'll loop forever trying
             // to resolve it! This is a bit of a hack, really.
             SyntaxSymbol stripped = identifier.stripImmediateEnvWrap(env);
             Namespace ns = env.namespace();
-            ns.predefine(stripped);
+            ns.predefine(stripped, origStx);
         }
+
 
         // Update the identifier with its binding.
         // This is just a way to pass the binding instance through to the

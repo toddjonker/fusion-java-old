@@ -24,7 +24,7 @@ class EnvironmentRenameWrap
     }
 
     @Override
-    Binding resolve(String identifier,
+    Binding resolve(String name,
                     Iterator<SyntaxWrap> moreWraps,
                     Set<Integer> returnMarks)
     {
@@ -32,11 +32,11 @@ class EnvironmentRenameWrap
         if (moreWraps.hasNext())
         {
             SyntaxWrap nextWrap = moreWraps.next();
-            b = nextWrap.resolve(identifier, moreWraps, returnMarks);
+            b = nextWrap.resolve(name, moreWraps, returnMarks);
         }
         else
         {
-            b = new FreeBinding(identifier);
+            b = new FreeBinding(name);
         }
 
         Binding subst = myEnvironment.substitute(b, returnMarks);
@@ -47,6 +47,6 @@ class EnvironmentRenameWrap
     @Override
     public String toString()
     {
-        return "/* Environment renames */";
+        return "{{{Environment renames}}}";
     }
 }

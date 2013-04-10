@@ -19,40 +19,33 @@ class ModuleRenameWrap
         myModule = module;
     }
 
+    Binding localResolveMaybe(String name)
+    {
+        return myModule.resolveProvidedName(name);
+    }
 
     @Override
-    Binding resolve(String identifier,
+    Binding resolve(String name,
                     Iterator<SyntaxWrap> moreWraps,
                     Set<Integer> returnMarks)
     {
-        Binding b;
+        Binding local = myModule.resolveProvidedName(name);
+        if (local != null) return local;
+
         if (moreWraps.hasNext())
         {
             SyntaxWrap nextWrap = moreWraps.next();
-            b = nextWrap.resolve(identifier, moreWraps, returnMarks);
-        }
-        else
-        {
-            b = null;
+            return nextWrap.resolve(name, moreWraps, returnMarks);
         }
 
-        if (b == null || b instanceof FreeBinding)
-        {
-            String name = identifier;
-            b = myModule.resolveProvidedName(name);
-            if (b == null)
-            {
-                b = new FreeBinding(name);
-            }
-        }
-
-        return b;
+        return new FreeBinding(name);
     }
 
 
     @Override
     public String toString()
     {
-        return "/* Module renames for " + myModule.identify() + " */";
+        String id = myModule.getIdentity().internString();
+        return "{{{Module renames for " + id + "}}}";
     }
 }

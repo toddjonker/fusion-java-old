@@ -180,7 +180,7 @@ final class ModuleForm
                                                            moduleNamespace,
                                                            sexp);
                             identifier = identifier.stripImmediateEnvWrap(moduleNamespace);
-                            moduleNamespace.predefine(identifier);
+                            moduleNamespace.predefine(identifier, form);
                         }
                         else if (binding == defineSyntaxBinding)
                         {
@@ -304,7 +304,10 @@ final class ModuleForm
         return result;
     }
 
-
+    /**
+     * Finds the binding for the leading symbol in the form, or null if the
+     * form doesn't start with a symbol.
+     */
     Binding firstBinding(SyntaxSexp form)
     {
         if (form.size() != 0)

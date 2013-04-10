@@ -24,13 +24,17 @@ final class StandardRuntime
 
         try
         {
-            Namespace topNs = new Namespace(myRegistry);
+            // This is the bootstrap top-level namespace, which starts out
+            // empty.  It becomes the initial value of current_namespace
+            // during global initialization.
+            Namespace topNs = new TopLevelNamespace(myRegistry);
 
             myGlobalState =
                 GlobalState.initialize(ionSystem, builder, myRegistry, topNs);
 
             myTopLevel =
-                new StandardTopLevel(myGlobalState, topNs, "/fusion/base",
+                new StandardTopLevel(myGlobalState, topNs,
+                                     getDefaultLanguage(),
                                      builder.isDocumenting());
         }
         catch (FusionException e)
@@ -50,6 +54,11 @@ final class StandardRuntime
     ModuleRegistry getDefaultRegistry()
     {
         return myRegistry;
+    }
+
+    String getDefaultLanguage()
+    {
+        return "/fusion/base";
     }
 
 
@@ -77,7 +86,7 @@ final class StandardRuntime
     public TopLevel makeTopLevel()
         throws FusionException
     {
-        return makeTopLevel("/fusion/base");
+        return makeTopLevel(getDefaultLanguage());
     }
 
 

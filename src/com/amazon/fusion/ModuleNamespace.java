@@ -81,13 +81,19 @@ class ModuleNamespace
         @Override
         public String toString()
         {
-            return "{{ModuleBinding " + myModuleId + ' ' + getName() + "}}";
+            return "{{{ModuleBinding " + myModuleId + ' ' + getName() + "}}}";
         }
     }
 
 
     private final ModuleIdentity myModuleId;
 
+    /**
+     * Constructs a module with no language. Any bindings will need to be
+     * {@code require}d or {@code define}d.
+     *
+     * @param moduleId identifies this module.
+     */
     ModuleNamespace(ModuleRegistry registry, ModuleIdentity moduleId)
     {
         super(registry);
@@ -123,6 +129,41 @@ class ModuleNamespace
 
         super.setDoc(address, doc);
     }
+
+
+    @Override
+    TopBinding predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
+        throws FusionException
+    {
+        String name = identifier.stringValue();
+        Binding oldBinding = resolve(name);
+        if (! (oldBinding instanceof FreeBinding))
+        {
+            throw new AmbiguousBindingFailure(null, name, formForErrors);
+        }
+
+        return addBinding(identifier);
+    }
+
+
+    @Override
+    void use(ModuleInstance module)
+        throws FusionException
+    {
+        // Validate that we aren't importing a duplicate name.
+        for (String name : module.providedNames())
+        {
+            Binding oldBinding = resolve(name);
+            if (! (oldBinding instanceof FreeBinding)
+                && oldBinding != module.resolveProvidedName(name))
+            {
+                throw new AmbiguousBindingFailure("use", name);
+            }
+        }
+
+        addWrap(new ModuleRenameWrap(module));
+    }
+
 
     //========================================================================
 

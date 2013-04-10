@@ -79,7 +79,7 @@ final class LocalEnvironment
         @Override
         public String toString()
         {
-            return "{{LocalBinding " + myIdentifier + "}}";
+            return "{{{LocalBinding " + myIdentifier + "}}}";
         }
 
 

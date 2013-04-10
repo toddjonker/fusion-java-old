@@ -14,8 +14,11 @@ import java.util.Set;
 /**
  * Expand- and compile-time environment for all top-level sequences, and
  * eval-time store for non-module top levels.
+ * <p>
+ * Since top-levels and modules have different behavior around imports and
+ * defines, that responsibility is delegated to subclasses.
  */
-class Namespace
+abstract class Namespace
     implements Environment, NamespaceStore
 {
     static class TopBinding implements Binding
@@ -34,6 +37,11 @@ class Namespace
         public final String getName()
         {
             return myIdentifier.stringValue();
+        }
+
+        final SyntaxSymbol getIdentifier()
+        {
+            return myIdentifier;
         }
 
         @Override
@@ -166,10 +174,13 @@ class Namespace
         throw new IllegalStateException("Rib not found");
     }
 
-    ModuleIdentity getModuleId()
-    {
-        return null;
-    }
+    /**
+     * Gets the identity of the module associated with this namespace.
+     *
+     * @return null if this namespace isn't that of a module.
+     */
+    abstract ModuleIdentity getModuleId();
+
 
     Collection<TopBinding> getBindings()
     {
@@ -239,27 +250,26 @@ class Namespace
     }
 
 
-    TopBinding newBinding(SyntaxSymbol identifier, int address)
+    abstract TopBinding newBinding(SyntaxSymbol identifier, int address);
+
+
+    TopBinding addBinding(SyntaxSymbol identifier)
+        throws FusionException
     {
-        return new TopBinding(identifier, address);
+        int address = myBindings.size();
+        TopBinding binding = newBinding(identifier, address);
+        myBindings.add(binding);
+        return binding;
     }
 
 
     /**
      * Creates a binding, but no value, for a name.
-     * Used during preparation phase, before evaluating the right-hand side.
+     * Used during expansion phase, before evaluating the right-hand side.
      */
-    public TopBinding predefine(SyntaxSymbol identifier)
-    {
-        TopBinding binding = localResolve(identifier);
-        if (binding == null)
-        {
-            int address = myBindings.size();
-            binding = newBinding(identifier, address);
-            myBindings.add(binding);
-        }
-        return binding;
-    }
+    abstract TopBinding predefine(SyntaxSymbol identifier,
+                                  SyntaxValue formForErrors)
+        throws FusionException;
 
 
     /**
@@ -322,9 +332,10 @@ class Namespace
      * @param value must not be null
      */
     public void bind(String name, Object value)
+        throws FusionException
     {
         SyntaxSymbol identifier = SyntaxSymbol.make(name);
-        TopBinding binding = predefine(identifier);
+        TopBinding binding = predefine(identifier, null);
         bind(binding, value);
     }
 
@@ -344,10 +355,11 @@ class Namespace
         use(module);
     }
 
-    void use(ModuleInstance module)
-        throws FusionException
+    abstract void use(ModuleInstance module)
+        throws FusionException;
+
+    void addWrap(SyntaxWrap wrap)
     {
-        SyntaxWrap wrap = new ModuleRenameWrap(module);
         myWraps = myWraps.addWrap(wrap);
     }
 
@@ -497,18 +509,6 @@ class Namespace
         myBindingDocs.toArray(docs);
         myBindingDocs = null;
         return docs;
-    }
-
-
-    //========================================================================
-
-
-    /**
-     * Creates a new namespace sharing the same {@link ModuleRegistry}.
-     */
-    Namespace emptyNamespace()
-    {
-        return new Namespace(myRegistry);
     }
 
 

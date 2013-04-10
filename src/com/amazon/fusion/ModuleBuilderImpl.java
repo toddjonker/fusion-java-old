@@ -13,6 +13,9 @@ final class ModuleBuilderImpl
     private final ModuleRegistry  myRegistry;
     private final ModuleNamespace myNamespace;
 
+    /**
+     * Prepares to build a module with no language.
+     */
     ModuleBuilderImpl(ModuleRegistry registry, ModuleIdentity moduleId)
     {
         myRegistry = registry;

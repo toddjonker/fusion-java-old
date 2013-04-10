@@ -42,7 +42,7 @@ final class DefineSyntaxForm
             // to resolve it! This is a bit of a hack, really.
             SyntaxSymbol stripped = identifier.stripImmediateEnvWrap(env);
             Namespace ns = env.namespace();
-            ns.predefine(stripped);
+            ns.predefine(stripped, stx);
         }
 
         // Update the identifier with its binding.

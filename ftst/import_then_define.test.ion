@@ -1,0 +1,39 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(use '/fusion/base')
+(use check)
+
+// Test that we can define a name that's already imported.
+//  That's legal at top-level, but not at module-level
+
+(use '/module/dupe1')
+(define (d1) dupe)
+
+(check = dupe 1)
+(check = (d1) 1)
+
+(use '/module/dupe2')
+(define (d2) dupe)
+
+(check = dupe 2)
+(check = (d1) 1)
+(check = (d2) 2)
+
+(define dupe 4)
+(check = dupe 4)
+(check = (d1) 1)
+(check = (d2) 2)
+
+// TODO should be able to move this above the first use,
+//   even though dupe isn't defined yet
+(define (d_local) dupe)
+
+(define dupe 5)
+(check = dupe 5)
+(check = (d_local) 5)
+
+(use '/module/dupe2')
+(check = dupe 2)
+(check = (d1) 1)
+(check = (d2) 2)
+(check = (d_local) 5)
