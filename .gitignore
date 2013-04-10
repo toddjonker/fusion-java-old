@@ -1,5 +1,6 @@
 /build
 /compiled
+/demo/compiled
 /eclipse-bin
 junit*.properties
 tmp*
