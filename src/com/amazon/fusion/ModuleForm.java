@@ -6,7 +6,6 @@ import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionEval.evalSyntax;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static java.lang.Boolean.TRUE;
-import com.amazon.fusion.Namespace.NsBinding;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -478,8 +477,6 @@ final class ModuleForm
                     " since it has no definition.";
                 throw check.failure(message);
             }
-
-            assert b instanceof NsBinding;
 
             String freeName = b.getName();
             if (! publicName.equals(freeName))

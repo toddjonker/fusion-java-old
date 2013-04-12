@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
-import com.amazon.fusion.Namespace.NsBinding;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -17,16 +16,20 @@ final class LanguageWrap
     extends SyntaxWrap
 {
     static final class LanguageBinding
-        extends NsBinding
         implements Binding
     {
         private final ModuleBinding myBinding;
 
         private LanguageBinding(ModuleBinding original)
         {
-            super(original.getIdentifier(), original.myAddress);
+            assert original.originalBinding() == original;
             myBinding = original;
-            assert myBinding == myBinding.originalBinding();
+        }
+
+        @Override
+        public final String getName()
+        {
+            return myBinding.getName();
         }
 
         @Override
