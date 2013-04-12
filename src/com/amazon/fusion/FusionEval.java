@@ -128,7 +128,26 @@ final class FusionEval
     {
         Namespace ns = eval.findCurrentNamespace();
 
-        // TODO FUSION-44 handle (module ...) properly
+        // Handle (module ...) such that we don't push bindings into the body.
+        if (topLevelForm instanceof SyntaxSexp)
+        {
+            SyntaxSexp maybeModule = (SyntaxSexp) topLevelForm;
+            if (maybeModule.size() > 1 &&
+                maybeModule.get(0) instanceof SyntaxSymbol)
+            {
+                SyntaxSymbol maybeKeyword = (SyntaxSymbol) maybeModule.get(0);
+                maybeKeyword = (SyntaxSymbol) ns.syntaxIntroduce(maybeKeyword);
+                SyntaxSymbol moduleKeyword =
+                    eval.makeKernelIdentifier("module");
+                if (maybeKeyword.freeIdentifierEqual(moduleKeyword))
+                {
+                    SyntaxValue[] children = maybeModule.extract();
+                    children[0] = maybeKeyword;
+                    return SyntaxSexp.make(eval, children);
+                }
+            }
+        }
+
         topLevelForm = ns.syntaxIntroduce(topLevelForm);
         return topLevelForm;
     }

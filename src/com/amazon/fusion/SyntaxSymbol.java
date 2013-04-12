@@ -246,12 +246,16 @@ final class SyntaxSymbol
     }
 
 
-    Object freeIdentifierEqual(Evaluator eval, SyntaxSymbol that)
+    boolean freeIdentifierEqual(SyntaxSymbol that)
     {
         Binding thisBinding = this.uncachedResolve();
         Binding thatBinding = that.uncachedResolve();
-        boolean result = thisBinding.sameTarget(thatBinding);
-        return eval.newBool(result);
+        return thisBinding.sameTarget(thatBinding);
+    }
+
+    Object freeIdentifierEqual(Evaluator eval, SyntaxSymbol that)
+    {
+        return eval.newBool(freeIdentifierEqual(that));
     }
 
 

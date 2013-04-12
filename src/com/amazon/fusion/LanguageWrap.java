@@ -91,7 +91,9 @@ final class LanguageWrap
                     Iterator<SyntaxWrap> moreWraps,
                     Set<Integer> returnMarks)
     {
-//        assert ! moreWraps.hasNext();
+        assert ! moreWraps.hasNext();
+        // If that's not always true we must collect marks from moreWraps.
+        // and perhaps look up name there too?
 
         ModuleBinding local = myModule.resolveProvidedName(name);
         if (local != null)
