@@ -14,7 +14,7 @@ class ModuleNamespace
     extends Namespace
 {
     static final class ModuleBinding
-        extends TopBinding
+        extends NsBinding
     {
         final ModuleIdentity myModuleId;
 
@@ -124,7 +124,7 @@ class ModuleNamespace
 
 
     @Override
-    TopBinding newBinding(SyntaxSymbol identifier, int address)
+    NsBinding newBinding(SyntaxSymbol identifier, int address)
     {
         return new ModuleBinding(identifier, address, myModuleId);
     }
@@ -139,7 +139,7 @@ class ModuleNamespace
 
 
     @Override
-    TopBinding predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
+    NsBinding predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
         throws FusionException
     {
         Binding oldBinding = identifier.uncachedResolve();

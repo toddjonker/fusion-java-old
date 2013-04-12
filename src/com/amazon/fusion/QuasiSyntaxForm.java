@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionWrite.safeWriteToString;
-import com.amazon.fusion.Namespace.TopBinding;
 import com.amazon.fusion.QuoteSyntaxForm.CompiledQuoteSyntax;
 
 final class QuasiSyntaxForm
@@ -19,11 +18,9 @@ final class QuasiSyntaxForm
 
         SyntaxSymbol id = (SyntaxSymbol) qsIdentifier;
         myQsBinding = id.resolve();
-        assert myQsBinding instanceof TopBinding;
 
         id = (SyntaxSymbol) usIdentifier;
         myUsBinding = id.resolve();
-        assert myUsBinding instanceof TopBinding;
     }
 
 

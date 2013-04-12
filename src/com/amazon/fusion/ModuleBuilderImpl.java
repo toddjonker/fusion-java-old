@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.BindingDoc.Kind;
-import com.amazon.fusion.Namespace.TopBinding;
+import com.amazon.fusion.Namespace.NsBinding;
 import java.util.Collection;
 
 
@@ -54,7 +54,7 @@ final class ModuleBuilderImpl
         ModuleStore store = new ModuleStore(myRegistry,
                                             myNamespace.extractValues(),
                                             myNamespace.extractBindingDocs());
-        Collection<TopBinding> bindings = myNamespace.getBindings();
+        Collection<NsBinding> bindings = myNamespace.getBindings();
 
         // TODO should we register the module?
         return new ModuleInstance(myNamespace.getModuleId(), store, bindings);

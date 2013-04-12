@@ -22,7 +22,7 @@ class TopLevelNamespace
     extends Namespace
 {
     private static final class TopLevelNsBinding
-        extends TopBinding
+        extends NsBinding
     {
         private int myPrecedence;
 
@@ -66,7 +66,7 @@ class TopLevelNamespace
                 Binding earlier =
                     nextWrap.resolve(name, moreWraps, returnMarks);
                 assert earlier instanceof FreeBinding
-                    || earlier instanceof TopBinding;
+                    || earlier instanceof NsBinding;
 
                 if (local == null) return earlier;
 
@@ -110,14 +110,14 @@ class TopLevelNamespace
 
 
     @Override
-    TopBinding newBinding(SyntaxSymbol identifier, int address)
+    NsBinding newBinding(SyntaxSymbol identifier, int address)
     {
         return new TopLevelNsBinding(identifier, address, myCurrentPrecedence);
     }
 
 
     @Override
-    TopBinding predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
+    NsBinding predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
         throws FusionException
     {
         // We need to strip off the namespace-level wrap that's already been
@@ -125,7 +125,7 @@ class TopLevelNamespace
         // to resolve it! This is a bit of a hack, really.
         identifier = identifier.stripImmediateEnvWrap(this);
 
-        TopBinding binding = localResolve(identifier);
+        NsBinding binding = localResolve(identifier);
         if (binding == null)
         {
             binding = addBinding(identifier);

@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
-import com.amazon.fusion.Namespace.TopBinding;
+import com.amazon.fusion.Namespace.NsBinding;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.util.Collection;
@@ -49,12 +49,12 @@ final class ModuleInstance
      * Creates a module that {@code provide}s the given bindings.
      */
     ModuleInstance(ModuleIdentity identity, ModuleStore namespace,
-                   Collection<TopBinding> bindings)
+                   Collection<NsBinding> bindings)
         throws FusionException, ContractFailure
     {
         this(identity, /* docs */ null, namespace, bindings.size());
 
-        for (TopBinding binding : bindings)
+        for (NsBinding binding : bindings)
         {
             String name = binding.getName();
 

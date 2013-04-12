@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
-import com.amazon.fusion.Namespace.TopBinding;
+import com.amazon.fusion.Namespace.NsBinding;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -17,7 +17,7 @@ final class LanguageWrap
     extends SyntaxWrap
 {
     static final class LanguageBinding
-        extends TopBinding
+        extends NsBinding
         implements Binding
     {
         private final ModuleBinding myBinding;

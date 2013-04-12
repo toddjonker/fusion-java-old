@@ -22,12 +22,13 @@ import java.util.Set;
 abstract class Namespace
     implements Environment, NamespaceStore
 {
-    abstract static class TopBinding implements Binding
+    abstract static class NsBinding
+        implements Binding
     {
         private final SyntaxSymbol myIdentifier;
         final int myAddress;
 
-        TopBinding(SyntaxSymbol identifier, int address)
+        NsBinding(SyntaxSymbol identifier, int address)
         {
             assert (identifier.resolve() instanceof FreeBinding ||
                     identifier.resolve() instanceof LanguageBinding);
@@ -115,15 +116,13 @@ abstract class Namespace
      * forms.
      */
     private final HashMap<ModuleIdentity,Integer> myRequiredModules =
-        new HashMap<ModuleIdentity,Integer>();
+        new HashMap<>();
     private final ArrayList<ModuleStore> myRequiredModuleStores =
-        new ArrayList<ModuleStore>();
+        new ArrayList<>();
 
     private SyntaxWraps myWraps;
-    private final ArrayList<TopBinding> myBindings =
-        new ArrayList<TopBinding>();
-    private final ArrayList<Object> myValues =
-        new ArrayList<Object>();
+    private final ArrayList<NsBinding> myBindings = new ArrayList<>();
+    private final ArrayList<Object>    myValues   = new ArrayList<>();
     private ArrayList<BindingDoc> myBindingDocs;
 
     Namespace(ModuleRegistry registry)
@@ -187,7 +186,7 @@ abstract class Namespace
     abstract ModuleIdentity getModuleId();
 
 
-    Collection<TopBinding> getBindings()
+    Collection<NsBinding> getBindings()
     {
         return Collections.unmodifiableCollection(myBindings);
     }
@@ -210,9 +209,9 @@ abstract class Namespace
      *
      * @return null if identifier isn't bound here.
      */
-    TopBinding localSubstitute(Binding binding, Set<Integer> marks)
+    NsBinding localSubstitute(Binding binding, Set<Integer> marks)
     {
-        for (TopBinding b : myBindings)
+        for (NsBinding b : myBindings)
         {
             Binding resolvedBoundId = b.myIdentifier.resolve();
             if (resolvedBoundId.sameTarget(binding))
@@ -240,7 +239,7 @@ abstract class Namespace
     /**
      * @return null if identifier isn't bound here.
      */
-    TopBinding localResolve(SyntaxSymbol identifier)
+    NsBinding localResolve(SyntaxSymbol identifier)
     {
         Binding resolvedRequestedId = identifier.resolve();
         Set<Integer> marks = identifier.computeMarks();
@@ -255,14 +254,14 @@ abstract class Namespace
     }
 
 
-    abstract TopBinding newBinding(SyntaxSymbol identifier, int address);
+    abstract NsBinding newBinding(SyntaxSymbol identifier, int address);
 
 
-    TopBinding addBinding(SyntaxSymbol identifier)
+    NsBinding addBinding(SyntaxSymbol identifier)
         throws FusionException
     {
         int address = myBindings.size();
-        TopBinding binding = newBinding(identifier, address);
+        NsBinding binding = newBinding(identifier, address);
         myBindings.add(binding);
         return binding;
     }
@@ -272,7 +271,7 @@ abstract class Namespace
      * Creates a binding, but no value, for a name.
      * Used during expansion phase, before evaluating the right-hand side.
      */
-    abstract TopBinding predefine(SyntaxSymbol identifier,
+    abstract NsBinding predefine(SyntaxSymbol identifier,
                                   SyntaxValue formForErrors)
         throws FusionException;
 
@@ -283,7 +282,7 @@ abstract class Namespace
      *
      * @param value must not be null
      */
-    void bind(TopBinding binding, Object value)
+    void bind(NsBinding binding, Object value)
     {
         set(binding.myAddress, value);
 
@@ -340,7 +339,7 @@ abstract class Namespace
         throws FusionException
     {
         SyntaxSymbol identifier = SyntaxSymbol.make(name);
-        TopBinding binding = predefine(identifier, null);
+        NsBinding binding = predefine(identifier, null);
         bind(binding, value);
     }
 
@@ -372,19 +371,19 @@ abstract class Namespace
     @Override
     public Object lookup(Binding binding)
     {
-        if (binding instanceof TopBinding)    // else it can't possibly be ours
+        if (binding instanceof NsBinding)    // else it can't possibly be ours
         {
-            return lookup((TopBinding) binding);
+            return lookup((NsBinding) binding);
         }
         return null;
     }
 
-    public Object lookup(TopBinding binding)
+    public Object lookup(NsBinding binding)
     {
         int address = binding.myAddress;
         if (address < myValues.size())              // for prepare-time lookup
         {
-            TopBinding localBinding = myBindings.get(address);
+            NsBinding localBinding = myBindings.get(address);
             if (binding == localBinding)
             {
                 return myValues.get(address);
@@ -481,7 +480,7 @@ abstract class Namespace
 
     void setDoc(String name, BindingDoc doc)
     {
-        TopBinding binding = (TopBinding) resolve(name);
+        NsBinding binding = (NsBinding) resolve(name);
         setDoc(binding.myAddress, doc);
     }
 

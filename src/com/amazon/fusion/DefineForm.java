@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
-import com.amazon.fusion.Namespace.TopBinding;
+import com.amazon.fusion.Namespace.NsBinding;
 
 final class DefineForm
     extends SyntacticForm
@@ -174,7 +174,7 @@ final class DefineForm
         CompiledForm valueForm = eval.compile(env, valueSource);
 
         SyntaxSymbol identifier = (SyntaxSymbol) stx.get(1);
-        TopBinding binding = (TopBinding) identifier.getBinding();
+        NsBinding binding = (NsBinding) identifier.getBinding();
         CompiledForm compiled = binding.compileDefine(eval, env, valueForm);
 
         if (arity != 3
