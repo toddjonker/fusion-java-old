@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 
-
 /**
  * Extended prepare-time {@link Namespace} that knows it's a top-level.
  * <p>
@@ -21,13 +20,13 @@ import java.util.Set;
 class TopLevelNamespace
     extends Namespace
 {
-    private static final class TopLevelNsBinding
+    private static final class TopLevelBinding
         extends NsBinding
     {
         private int myPrecedence;
 
-        private TopLevelNsBinding(SyntaxSymbol identifier, int address,
-                                  int precedence)
+        private TopLevelBinding(SyntaxSymbol identifier, int address,
+                                int precedence)
         {
             super(identifier, address);
             myPrecedence = precedence;
@@ -36,7 +35,7 @@ class TopLevelNamespace
         @Override
         public String toString()
         {
-            return "{{{TopLevelNsBinding " + getIdentifier() + "}}}";
+            return "{{{TopLevelBinding " + getIdentifier() + "}}}";
         }
     }
 
@@ -72,10 +71,10 @@ class TopLevelNamespace
 
                 // The top-level "define" bindings are always earlier than
                 // imported bindings, since the namespace wrap is added first.
-                if (earlier instanceof TopLevelNsBinding)
+                if (earlier instanceof TopLevelBinding)
                 {
                     int definePrecedence =
-                        ((TopLevelNsBinding) earlier).myPrecedence;
+                        ((TopLevelBinding) earlier).myPrecedence;
                     return (myPrecedence < definePrecedence ? earlier : local);
                 }
 
@@ -112,7 +111,7 @@ class TopLevelNamespace
     @Override
     NsBinding newBinding(SyntaxSymbol identifier, int address)
     {
-        return new TopLevelNsBinding(identifier, address, myCurrentPrecedence);
+        return new TopLevelBinding(identifier, address, myCurrentPrecedence);
     }
 
 
@@ -132,8 +131,7 @@ class TopLevelNamespace
         }
         else
         {
-            assert binding instanceof TopLevelNsBinding;
-            ((TopLevelNsBinding) binding).myPrecedence = myCurrentPrecedence;
+            ((TopLevelBinding) binding).myPrecedence = myCurrentPrecedence;
         }
         return binding;
     }
