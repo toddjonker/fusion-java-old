@@ -1,0 +1,19 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+// Test that a module can define a name that's been imported from the
+// language.  Unlike imports via `use`, language bindings can be
+// shadowed within a module body.
+
+(module local '/fusion/base'
+
+  (define apply 99)
+
+  (define result (+ apply 1))
+
+  (provide result)
+)
+
+(use check)
+(use (quote local))
+
+(check = result 100)

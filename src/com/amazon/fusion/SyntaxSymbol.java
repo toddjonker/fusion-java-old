@@ -248,12 +248,9 @@ final class SyntaxSymbol
 
     Object freeIdentifierEqual(Evaluator eval, SyntaxSymbol that)
     {
-        // Use originalBinding() so that a reference to an exported binding
-        // from outside the module is equivalent to its internal binding.
-        Binding thisBinding = this.uncachedResolve().originalBinding();
-        Binding thatBinding = that.uncachedResolve().originalBinding();
-
-        boolean result = thisBinding.equals(thatBinding);
+        Binding thisBinding = this.uncachedResolve();
+        Binding thatBinding = that.uncachedResolve();
+        boolean result = thisBinding.sameTarget(thatBinding);
         return eval.newBool(result);
     }
 

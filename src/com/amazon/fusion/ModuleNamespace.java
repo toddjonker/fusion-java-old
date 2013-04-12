@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.LanguageWrap.LanguageBinding;
+
 
 /**
  * Extended prepare-time {@link Namespace} that knows it's a module.
@@ -100,6 +102,12 @@ class ModuleNamespace
         myModuleId = moduleId;
     }
 
+    /**
+     * Constructs a module with a given language.  Bindings provided by the
+     * language can be shadowed by {@code require} or {@code define}.
+     *
+     * @param moduleId identifies this module.
+     */
     ModuleNamespace(ModuleRegistry registry, ModuleInstance language,
                     ModuleIdentity moduleId)
     {
@@ -118,7 +126,6 @@ class ModuleNamespace
     @Override
     TopBinding newBinding(SyntaxSymbol identifier, int address)
     {
-        assert identifier.uncachedResolve() instanceof FreeBinding;
         return new ModuleBinding(identifier, address, myModuleId);
     }
 
@@ -137,12 +144,13 @@ class ModuleNamespace
     {
         String name = identifier.stringValue();
         Binding oldBinding = resolve(name);
-        if (! (oldBinding instanceof FreeBinding))
+        if (oldBinding instanceof FreeBinding ||
+            oldBinding instanceof LanguageBinding)
         {
-            throw new AmbiguousBindingFailure(null, name, formForErrors);
+            return addBinding(identifier);
         }
 
-        return addBinding(identifier);
+        throw new AmbiguousBindingFailure(null, name, formForErrors);
     }
 
 
@@ -155,7 +163,7 @@ class ModuleNamespace
         {
             Binding oldBinding = resolve(name);
             if (! (oldBinding instanceof FreeBinding)
-                && oldBinding != module.resolveProvidedName(name))
+                && ! oldBinding.sameTarget(module.resolveProvidedName(name)))
             {
                 throw new AmbiguousBindingFailure("use", name);
             }

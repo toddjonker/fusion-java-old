@@ -39,7 +39,7 @@ final class ModuleForm
                                 Map<Binding, Object> stops,
                                 String name)
     {
-        Binding b = kernel.resolveProvidedName(name);
+        Binding b = kernel.resolveProvidedName(name).originalBinding();
         assert b != null;
         stops.put(b, TRUE);
         return b;
@@ -316,7 +316,7 @@ final class ModuleForm
             if (first instanceof SyntaxSymbol)
             {
                 Binding binding = ((SyntaxSymbol)first).getBinding();
-                return binding;
+                return binding.originalBinding();
             }
         }
         return null;

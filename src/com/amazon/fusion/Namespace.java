@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.FusionWrite.safeWriteToString;
+import com.amazon.fusion.LanguageWrap.LanguageBinding;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,14 +22,15 @@ import java.util.Set;
 abstract class Namespace
     implements Environment, NamespaceStore
 {
-    static class TopBinding implements Binding
+    abstract static class TopBinding implements Binding
     {
         private final SyntaxSymbol myIdentifier;
         final int myAddress;
 
         TopBinding(SyntaxSymbol identifier, int address)
         {
-            assert identifier.resolve() instanceof FreeBinding;
+            assert (identifier.resolve() instanceof FreeBinding ||
+                    identifier.resolve() instanceof LanguageBinding);
             myIdentifier = identifier;
             myAddress = address;
         }
@@ -48,6 +50,12 @@ abstract class Namespace
         public Binding originalBinding()
         {
             return this;
+        }
+
+        @Override
+        public boolean sameTarget(Binding other)
+        {
+            return this == other.originalBinding();
         }
 
         @Override
@@ -93,14 +101,11 @@ abstract class Namespace
         @Override
         public boolean equals(Object other)
         {
-            return this == other;
+            throw new UnsupportedOperationException();
         }
 
         @Override
-        public String toString()
-        {
-            return "{{TopBinding " + myIdentifier + "}}";
-        }
+        public abstract String toString(); // Force subclasses to implement
     }
 
     private final ModuleRegistry myRegistry;
@@ -135,7 +140,7 @@ abstract class Namespace
     {
         myRegistry = registry;
 
-        SyntaxWrap wrap = new ModuleRenameWrap(language);
+        SyntaxWrap wrap = new LanguageWrap(language);
         SyntaxWraps wraps = SyntaxWraps.make(wrap);
         wrap = new EnvironmentRenameWrap(this);
         wraps = wraps.addWrap(wrap);
@@ -210,7 +215,7 @@ abstract class Namespace
         for (TopBinding b : myBindings)
         {
             Binding resolvedBoundId = b.myIdentifier.resolve();
-            if (resolvedBoundId.equals(binding))
+            if (resolvedBoundId.sameTarget(binding))
             {
                 Set<Integer> boundMarks = b.myIdentifier.computeMarks();
                 if (marks.equals(boundMarks))
@@ -380,7 +385,7 @@ abstract class Namespace
         if (address < myValues.size())              // for prepare-time lookup
         {
             TopBinding localBinding = myBindings.get(address);
-            if (binding.equals(localBinding))
+            if (binding == localBinding)
             {
                 return myValues.get(address);
             }

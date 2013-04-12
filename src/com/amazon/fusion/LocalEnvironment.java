@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -34,6 +34,14 @@ final class LocalEnvironment
         public Binding originalBinding()
         {
             return this;
+        }
+
+        @Override
+        public boolean sameTarget(Binding other)
+        {
+            // Don't need to call other.originalBinding() since locals are
+            // never renamed or wrapped.
+            return this == other;
         }
 
 
@@ -73,7 +81,7 @@ final class LocalEnvironment
         @Override
         public boolean equals(Object other)
         {
-            return this == other;
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -153,7 +161,7 @@ final class LocalEnvironment
         for (LocalBinding b : myBindings)
         {
             Binding resolvedBoundId = b.myIdentifier.resolve();
-            if (resolvedBoundId.equals(binding))
+            if (resolvedBoundId.sameTarget(binding))
             {
                 Set<Integer> boundMarks = b.myIdentifier.computeMarks();
                 if (marks.equals(boundMarks))

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -20,6 +20,14 @@ interface Binding
      * @return not null.
      */
     Binding originalBinding();
+
+    /**
+     * Determines whether two bindings refer to the same
+     * {@link #originalBinding()}, despite any renames on import or export.
+     *
+     * @param other must not be null.
+     */
+    boolean sameTarget(Binding other);
 
     /**
      * @return null if there's no value associated with the binding.
