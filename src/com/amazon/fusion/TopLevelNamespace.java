@@ -120,6 +120,11 @@ class TopLevelNamespace
     TopBinding predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
         throws FusionException
     {
+        // We need to strip off the namespace-level wrap that's already been
+        // applied to the identifier. Otherwise we'll loop forever trying
+        // to resolve it! This is a bit of a hack, really.
+        identifier = identifier.stripImmediateEnvWrap(this);
+
         TopBinding binding = localResolve(identifier);
         if (binding == null)
         {

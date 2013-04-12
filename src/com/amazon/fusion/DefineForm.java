@@ -126,12 +126,9 @@ final class DefineForm
         // If at module context, this has already been done.
         if (expander.isTopLevelContext())
         {
-            // We need to strip off the module-level wrap that's already been
-            // applied to the identifier. Otherwise we'll loop forever trying
-            // to resolve it! This is a bit of a hack, really.
-            SyntaxSymbol stripped = identifier.stripImmediateEnvWrap(env);
             Namespace ns = env.namespace();
-            ns.predefine(stripped, origStx);
+            assert ns == env;
+            ns.predefine(identifier, origStx);
         }
 
 

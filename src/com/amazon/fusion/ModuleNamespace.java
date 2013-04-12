@@ -142,14 +142,19 @@ class ModuleNamespace
     TopBinding predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
         throws FusionException
     {
-        String name = identifier.stringValue();
-        Binding oldBinding = resolve(name);
+        Binding oldBinding = identifier.uncachedResolve();
         if (oldBinding instanceof FreeBinding ||
             oldBinding instanceof LanguageBinding)
         {
+            // We need to strip off the namespace-level wrap that's already been
+            // applied to the identifier. Otherwise we'll loop forever trying
+            // to resolve it! This is a bit of a hack, really.
+            identifier = identifier.stripImmediateEnvWrap(this);
+
             return addBinding(identifier);
         }
 
+        String name = identifier.stringValue();
         throw new AmbiguousBindingFailure(null, name, formForErrors);
     }
 

@@ -37,12 +37,9 @@ final class DefineSyntaxForm
         // WARNING!  This isn't conditional as with 'define' since
         // 'define_syntax' doesn't get predefined by the 'module' expander.
         {
-            // We need to strip off the module-level wrap that's already been
-            // applied to the identifier. Otherwise we'll loop forever trying
-            // to resolve it! This is a bit of a hack, really.
-            SyntaxSymbol stripped = identifier.stripImmediateEnvWrap(env);
             Namespace ns = env.namespace();
-            ns.predefine(stripped, stx);
+            assert ns == env;
+            ns.predefine(identifier, stx);
         }
 
         // Update the identifier with its binding.

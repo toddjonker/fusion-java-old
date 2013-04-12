@@ -179,7 +179,6 @@ final class ModuleForm
                                 DefineForm.boundIdentifier(expander.getEvaluator(),
                                                            moduleNamespace,
                                                            sexp);
-                            identifier = identifier.stripImmediateEnvWrap(moduleNamespace);
                             moduleNamespace.predefine(identifier, form);
                         }
                         else if (binding == defineSyntaxBinding)
