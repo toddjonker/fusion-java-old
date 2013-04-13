@@ -173,6 +173,26 @@ final class LocalEnvironment
         return binding;
     }
 
+    @Override
+    public Binding substituteFree(String name, Set<Integer> marks)
+    {
+        for (LocalBinding b : myBindings)
+        {
+            Binding resolvedBoundId = b.myIdentifier.resolve();
+            if (resolvedBoundId instanceof FreeBinding
+                // TODO FUSION-47 intern symbol names and use ==
+                && resolvedBoundId.getName().equals(name))
+            {
+                Set<Integer> boundMarks = b.myIdentifier.computeMarks();
+                if (marks.equals(boundMarks))
+                {
+                    return b;
+                }
+            }
+        }
+        return null;
+    }
+
 
     @Override
     public Object lookup(Binding binding)

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -26,6 +26,16 @@ interface Environment
      * @return given binding if not substituted here; not null.
      */
     Binding substitute(Binding binding, Set<Integer> marks);
+
+
+    /**
+     * Finds the effective binding for a free variable.
+     *
+     * @param marks not null.
+     *
+     * @return null if the name is not substituted here.
+     */
+    Binding substituteFree(String name, Set<Integer> marks);
 
 
     /**

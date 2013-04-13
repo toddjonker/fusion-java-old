@@ -38,7 +38,7 @@ class ModuleRenameWrap
             return nextWrap.resolve(name, moreWraps, returnMarks);
         }
 
-        return new FreeBinding(name);
+        return null;
     }
 
 

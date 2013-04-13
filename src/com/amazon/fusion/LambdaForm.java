@@ -162,7 +162,7 @@ final class LambdaForm
         if (isRest)
         {
             SyntaxSymbol identifier = (SyntaxSymbol) stx.get(1);
-            Binding binding = identifier.resolve();
+            Binding binding = identifier.getBinding();
             return new CompiledLambdaRest(doc, binding.getName(), body);
         }
         else

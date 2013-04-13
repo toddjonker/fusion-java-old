@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.FusionWrite.safeWriteToString;
-import com.amazon.fusion.LanguageWrap.LanguageBinding;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,8 +29,6 @@ abstract class Namespace
 
         NsBinding(SyntaxSymbol identifier, int address)
         {
-            assert (identifier.resolve() instanceof FreeBinding ||
-                    identifier.resolve() instanceof LanguageBinding);
             myIdentifier = identifier;
             myAddress = address;
         }
@@ -235,6 +232,27 @@ abstract class Namespace
         return subst;
     }
 
+    @Override
+    public Binding substituteFree(String name, Set<Integer> marks)
+    {
+        for (NsBinding b : myBindings)
+        {
+            Binding resolvedBoundId = b.myIdentifier.resolve();
+            if (resolvedBoundId instanceof FreeBinding
+                // TODO FUSION-47 intern symbol names and use ==
+                && resolvedBoundId.getName().equals(name))
+            {
+                Set<Integer> boundMarks = b.myIdentifier.computeMarks();
+                if (marks.equals(boundMarks))
+                {
+                    return b;
+                }
+            }
+        }
+
+        return null;
+    }
+
 
     /**
      * @return null if identifier isn't bound here.
@@ -247,6 +265,9 @@ abstract class Namespace
     }
 
 
+    /**
+     * @return null is equivalent to a {@link FreeBinding}.
+     */
     Binding resolve(String name)
     {
         // TODO FUSION-114 check that the name has at least one character!

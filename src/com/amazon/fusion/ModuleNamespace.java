@@ -142,8 +142,9 @@ class ModuleNamespace
     NsBinding predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
         throws FusionException
     {
-        Binding oldBinding = identifier.uncachedResolve();
-        if (oldBinding instanceof FreeBinding ||
+        Binding oldBinding = identifier.uncachedResolveMaybe();
+        if (oldBinding == null ||
+            oldBinding instanceof FreeBinding ||
             oldBinding instanceof LanguageBinding)
         {
             // We need to strip off the namespace-level wrap that's already been
@@ -167,7 +168,8 @@ class ModuleNamespace
         for (String name : module.providedNames())
         {
             Binding oldBinding = resolve(name);
-            if (! (oldBinding instanceof FreeBinding)
+            if (oldBinding != null
+                && ! (oldBinding instanceof FreeBinding)
                 && ! oldBinding.sameTarget(module.resolveProvidedName(name)))
             {
                 throw new AmbiguousBindingFailure("use", name);

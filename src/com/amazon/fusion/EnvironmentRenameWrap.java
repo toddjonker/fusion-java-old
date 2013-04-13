@@ -33,13 +33,13 @@ class EnvironmentRenameWrap
         {
             SyntaxWrap nextWrap = moreWraps.next();
             b = nextWrap.resolve(name, moreWraps, returnMarks);
-        }
-        else
-        {
-            b = new FreeBinding(name);
+            if (b != null)
+            {
+                return myEnvironment.substitute(b, returnMarks);
+            }
         }
 
-        Binding subst = myEnvironment.substitute(b, returnMarks);
+        Binding subst = myEnvironment.substituteFree(name, returnMarks);
         return subst;
     }
 

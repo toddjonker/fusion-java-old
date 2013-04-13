@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-class SyntaxWraps
+final class SyntaxWraps
 {
     private final SyntaxWrap[] myWraps;
 
@@ -127,15 +127,15 @@ class SyntaxWraps
 
 
     /**
-     * @return not null
+     * @return null is equivalent to a {@link FreeBinding}.
      */
-    Binding resolve(String identifier)
+    Binding resolve(String name)
     {
         Iterator<SyntaxWrap> i = Arrays.asList(myWraps).iterator();
         Set<Integer> marks = new HashSet<Integer>();
 
         // We always have at least one wrap
         SyntaxWrap wrap = i.next();
-        return wrap.resolve(identifier, i, marks);
+        return wrap.resolve(name, i, marks);
     }
 }

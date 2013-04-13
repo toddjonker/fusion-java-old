@@ -29,15 +29,11 @@ class MarkWrap
                     Iterator<SyntaxWrap> moreWraps,
                     Set<Integer> returnMarks)
     {
-        Binding b;
+        Binding b = null;
         if (moreWraps.hasNext())
         {
             SyntaxWrap nextWrap = moreWraps.next();
             b = nextWrap.resolve(name, moreWraps, returnMarks);
-        }
-        else
-        {
-            b = new FreeBinding(name);
         }
 
         if (! returnMarks.add(myMark))

@@ -76,7 +76,7 @@ final class ModuleInstance
         for (SyntaxSymbol identifier : providedIdentifiers)
         {
             String  name    = identifier.stringValue();
-            Binding binding = identifier.resolve().originalBinding();
+            Binding binding = identifier.getBinding().originalBinding();
 
             myProvidedBindings.put(name, (ModuleBinding) binding);
         }

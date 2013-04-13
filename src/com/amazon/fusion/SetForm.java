@@ -42,7 +42,7 @@ final class SetForm
         CompiledForm valueForm = eval.compile(env, stx.get(2));
 
         SyntaxSymbol id = (SyntaxSymbol) stx.get(1);
-        Binding binding = id.resolve();
+        Binding binding = id.getBinding();
 
         return binding.compileSet(eval, env, valueForm);
     }

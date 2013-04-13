@@ -167,6 +167,7 @@ final class SyntaxSymbol
             else
             {
                 myBinding = myWraps.resolve(name);
+                if (myBinding == null) myBinding = new FreeBinding(name);
             }
         }
         return myBinding;
@@ -183,7 +184,26 @@ final class SyntaxSymbol
     {
         if (myBinding != null) return myBinding;
         String name = stringValue();
-        if (myWraps   == null) return new FreeBinding(name);
+        if (myWraps != null)
+        {
+            Binding b = myWraps.resolve(name);
+            if (b != null) return b;
+        }
+        return new FreeBinding(name);
+    }
+
+
+    /**
+     * Resolves this identifier, but doesn't cache the result if it has not
+     * been previously resolved.
+     *
+     * @return null is equivalent to a {@link FreeBinding}.
+     */
+    Binding uncachedResolveMaybe()
+    {
+        if (myBinding != null) return myBinding;
+        if (myWraps   == null) return null;
+        String name = stringValue();
         return myWraps.resolve(name);
     }
 
@@ -200,27 +220,25 @@ final class SyntaxSymbol
         // TODO FUSION-114 what if this is null or empty symbol?
         //      We shouldn't fail in that case, at least not yet.
 
-        Binding b;
+        Binding b = null;
         if (myBinding != null)
         {
             b = myBinding;
         }
-        else if (myWraps == null)
-        {
-            return null;
-        }
-        else
+        else if (myWraps != null)
         {
             b = myWraps.resolve(stringValue());
         }
 
-        Object resolved = b.lookup(env);
-        if (resolved instanceof SyntacticForm)
+        if (b != null)
         {
-            myBinding = b;
-            return (SyntacticForm) resolved;
+            Object resolved = b.lookup(env);
+            if (resolved instanceof SyntacticForm)
+            {
+                myBinding = b;
+                return (SyntacticForm) resolved;
+            }
         }
-
         return null;
     }
 

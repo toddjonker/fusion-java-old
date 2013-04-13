@@ -70,29 +70,32 @@ final class QuasiSyntaxForm
         if (first instanceof SyntaxSymbol)
         {
             // Be careful that we don't force a binding too early.
-            Binding binding = ((SyntaxSymbol)first).uncachedResolve();
-            binding = binding.originalBinding();
-
-            if (myUsBinding == binding)
+            Binding binding = ((SyntaxSymbol)first).uncachedResolveMaybe();
+            if (binding != null)
             {
-                check(stx).arityExact(2);
+                binding = binding.originalBinding();
 
-                if (depth < 1)
+                if (myUsBinding == binding)
                 {
-                    SyntaxValue subform = children[1];
-                    children[1] = expander.expandExpression(env, subform);
-                    stx = SyntaxSexp.make(expander, stx.getLocation(),
-                                          children);
-                    return stx;
+                    check(stx).arityExact(2);
+
+                    if (depth < 1)
+                    {
+                        SyntaxValue subform = children[1];
+                        children[1] = expander.expandExpression(env, subform);
+                        stx = SyntaxSexp.make(expander, stx.getLocation(),
+                                              children);
+                        return stx;
+                    }
+
+                    depth--;
                 }
+                else if (myQsBinding == binding)
+                {
+                    check(stx).arityExact(2);
 
-                depth--;
-            }
-            else if (myQsBinding == binding)
-            {
-                check(stx).arityExact(2);
-
-                depth++;
+                    depth++;
+                }
             }
         }
 
@@ -146,24 +149,27 @@ final class QuasiSyntaxForm
             SyntaxValue first = stx.get(0);
             if (first instanceof SyntaxSymbol)
             {
-                Binding binding = ((SyntaxSymbol)first).uncachedResolve();
-                binding = binding.originalBinding();
+                Binding binding = ((SyntaxSymbol)first).uncachedResolveMaybe();
+                if (binding != null)
+                {
+                    binding = binding.originalBinding();
 
-                if (myUsBinding == binding)
-                {
-                    if (depth == 0)
+                    if (myUsBinding == binding)
                     {
-                        SyntaxValue unquotedSyntax = stx.get(1);
-                        CompiledForm unquotedForm =
-                            eval.compile(env, unquotedSyntax);
-                        return new CompiledUnsyntax(unquotedSyntax,
-                                                    unquotedForm);
+                        if (depth == 0)
+                        {
+                            SyntaxValue unquotedSyntax = stx.get(1);
+                            CompiledForm unquotedForm =
+                                eval.compile(env, unquotedSyntax);
+                            return new CompiledUnsyntax(unquotedSyntax,
+                                                        unquotedForm);
+                        }
+                        depth--;
                     }
-                    depth--;
-                }
-                else if (myQsBinding == binding)
-                {
-                    depth++;
+                    else if (myQsBinding == binding)
+                    {
+                        depth++;
+                    }
                 }
             }
         }

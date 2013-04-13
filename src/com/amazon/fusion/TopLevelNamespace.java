@@ -64,7 +64,8 @@ class TopLevelNamespace
                 SyntaxWrap nextWrap = moreWraps.next();
                 Binding earlier =
                     nextWrap.resolve(name, moreWraps, returnMarks);
-                assert earlier instanceof FreeBinding
+                assert earlier == null
+                    || earlier instanceof FreeBinding
                     || earlier instanceof NsBinding;
 
                 if (local == null) return earlier;
@@ -77,13 +78,9 @@ class TopLevelNamespace
                         ((TopLevelBinding) earlier).myPrecedence;
                     return (myPrecedence < definePrecedence ? earlier : local);
                 }
-
-                return local;
             }
 
-
-            if (local != null) return local;
-            return new FreeBinding(name);
+            return local;
         }
     }
 

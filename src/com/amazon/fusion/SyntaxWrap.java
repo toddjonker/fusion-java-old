@@ -15,9 +15,9 @@ abstract class SyntaxWrap
      * @param returnMarks <em>returns</em> the marks from this wrap and those
      * deeper. Must be mutable and not null.
      *
-     * @return not null
+     * @return null indicates a free variable.
      */
-    abstract Binding resolve(String identifier,
+    abstract Binding resolve(String name,
                              Iterator<SyntaxWrap> moreWraps,
                              Set<Integer> returnMarks);
 }
