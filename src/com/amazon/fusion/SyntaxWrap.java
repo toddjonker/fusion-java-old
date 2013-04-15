@@ -20,4 +20,13 @@ abstract class SyntaxWrap
     abstract Binding resolve(String name,
                              Iterator<SyntaxWrap> moreWraps,
                              Set<Integer> returnMarks);
+
+
+    /**
+     * Returns an iterator over sub-wraps, if this is a composite, or null
+     * otherwise.
+     *
+     * @return a non-empty iterator, or null.
+     */
+    abstract Iterator<SyntaxWrap> iterator();
 }

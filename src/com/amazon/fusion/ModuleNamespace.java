@@ -91,6 +91,27 @@ class ModuleNamespace
     private final ModuleIdentity myModuleId;
 
     /**
+     * The wraps for our used modules, then our language.  This allows us to
+     * add imported bindings (via mutation of this sequence) after the wraps
+     * have been propagated to existing symbols.  Which in turn means that
+     * imports cover the entire module body, not just code after the import.
+     */
+    private final SequenceWrap myUsedModuleWraps;
+
+
+    /**
+     * Obnoxious helper constructor lets us allocate the sequence and retain a
+     * reference to it.
+     */
+    private ModuleNamespace(ModuleRegistry registry, ModuleIdentity moduleId,
+                            SequenceWrap wrap)
+    {
+        super(registry, wrap);
+        myModuleId = moduleId;
+        myUsedModuleWraps = wrap;
+    }
+
+    /**
      * Constructs a module with no language. Any bindings will need to be
      * {@code require}d or {@code define}d.
      *
@@ -100,6 +121,7 @@ class ModuleNamespace
     {
         super(registry);
         myModuleId = moduleId;
+        myUsedModuleWraps = null;
     }
 
     /**
@@ -111,8 +133,14 @@ class ModuleNamespace
     ModuleNamespace(ModuleRegistry registry, ModuleInstance language,
                     ModuleIdentity moduleId)
     {
-        super(registry, language);
-        myModuleId = moduleId;
+        this(registry, moduleId,
+             new SequenceWrap(new LanguageWrap(language)));
+
+        // Note that we don't add this module to the base sequence.
+        // That's because it breaks {@link SyntaxWraps#stripImmediateEnvWrap}.
+        // Also, this structure lets up lookup bindings in the module first
+        // before proceeding on to imports and the language.
+        addWrap(new EnvironmentRenameWrap(this));
     }
 
 
@@ -176,7 +204,7 @@ class ModuleNamespace
             }
         }
 
-        addWrap(new ModuleRenameWrap(module));
+        myUsedModuleWraps.addWrap(new ModuleRenameWrap(module));
     }
 
 

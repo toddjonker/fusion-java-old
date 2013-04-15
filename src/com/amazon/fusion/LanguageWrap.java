@@ -115,6 +115,13 @@ final class LanguageWrap
 
 
     @Override
+    Iterator<SyntaxWrap> iterator()
+    {
+        return null;
+    }
+
+
+    @Override
     public String toString()
     {
         String id = myModule.getIdentity().internString();

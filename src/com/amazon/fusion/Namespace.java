@@ -133,21 +133,13 @@ abstract class Namespace
         myRegistry = registry;
 
         SyntaxWrap wrap = new EnvironmentRenameWrap(this);
-        SyntaxWraps wraps = SyntaxWraps.make(wrap);
-
-        myWraps = wraps;
+        myWraps = SyntaxWraps.make(wrap);
     }
 
-    Namespace(ModuleRegistry registry, ModuleInstance language)
+    Namespace(ModuleRegistry registry, SyntaxWrap... wraps)
     {
         myRegistry = registry;
-
-        SyntaxWrap wrap = new LanguageWrap(language);
-        SyntaxWraps wraps = SyntaxWraps.make(wrap);
-        wrap = new EnvironmentRenameWrap(this);
-        wraps = wraps.addWrap(wrap);
-
-        myWraps = wraps;
+        myWraps = SyntaxWraps.make(wraps);
     }
 
 

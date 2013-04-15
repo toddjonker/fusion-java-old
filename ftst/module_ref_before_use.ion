@@ -1,0 +1,23 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+// Test that imports into a module are scoped across the entire module body.
+
+(module local1 '/fusion/base'
+  (define value 143)
+  (provide value)
+)
+
+(module local2 '/fusion/base'
+
+  // Reference to `value` before it has been imported.
+  (define result (+ value 1))
+
+  (use (quote local1))
+
+  (provide result)
+)
+
+(use check)
+(use (quote local2))
+
+(check = result 144)

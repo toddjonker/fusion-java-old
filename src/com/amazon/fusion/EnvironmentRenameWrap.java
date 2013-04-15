@@ -45,6 +45,13 @@ class EnvironmentRenameWrap
 
 
     @Override
+    Iterator<SyntaxWrap> iterator()
+    {
+        return null;
+    }
+
+
+    @Override
     public String toString()
     {
         return "{{{Environment renames}}}";
