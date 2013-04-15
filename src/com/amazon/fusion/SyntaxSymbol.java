@@ -38,21 +38,27 @@ final class SyntaxSymbol
 
     final SyntaxWraps myWraps;
 
-    private SyntaxSymbol(String value, String[] anns, SourceLocation loc,
+    private SyntaxSymbol(String name, String[] anns, SourceLocation loc,
                          SyntaxWraps wraps)
     {
-        super(value, anns, loc);
+        super(name, anns, loc);
         myWraps = wraps;
     }
 
-    static SyntaxSymbol make(String value)
+    static SyntaxSymbol make(String name)
     {
-        return new SyntaxSymbol(value, EMPTY_STRING_ARRAY, null, null);
+        return new SyntaxSymbol(name, EMPTY_STRING_ARRAY, null, null);
     }
 
-    static SyntaxSymbol make(String value, String[] anns, SourceLocation loc)
+    static SyntaxSymbol make(String name, SyntaxWrap wrap)
     {
-        return new SyntaxSymbol(value, anns, loc, null);
+        return new SyntaxSymbol(name, EMPTY_STRING_ARRAY, null,
+                                SyntaxWraps.make(wrap));
+    }
+
+    static SyntaxSymbol make(String name, String[] anns, SourceLocation loc)
+    {
+        return new SyntaxSymbol(name, anns, loc, null);
     }
 
     /**

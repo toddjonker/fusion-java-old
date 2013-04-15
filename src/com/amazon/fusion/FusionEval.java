@@ -138,7 +138,7 @@ final class FusionEval
                 SyntaxSymbol maybeKeyword = (SyntaxSymbol) maybeModule.get(0);
                 maybeKeyword = (SyntaxSymbol) ns.syntaxIntroduce(maybeKeyword);
                 SyntaxSymbol moduleKeyword =
-                    eval.makeKernelIdentifier("module");
+                    eval.getGlobalState().myKernelModuleIdentifier;
                 if (maybeKeyword.freeIdentifierEqual(moduleKeyword))
                 {
                     SyntaxValue[] children = maybeModule.extract();

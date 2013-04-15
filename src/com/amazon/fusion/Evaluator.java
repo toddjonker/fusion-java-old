@@ -64,20 +64,6 @@ final class Evaluator
         return myGlobalState.myKernelModule;
     }
 
-    /**
-     * Returns an identifier (a wrapped syntax symbol) that has the bindings
-     * of the {@code #%kernel} module.
-     * <p>
-     * This shouldn't be exposed as a public API since the contents of the
-     * kernel are not specified.
-     */
-    SyntaxSymbol makeKernelIdentifier(String symbol)
-    {
-        SyntaxSymbol sym = SyntaxSymbol.make(symbol);
-        sym = sym.addWrap(new ModuleRenameWrap(findKernel()));
-        return sym;
-    }
-
 
     //========================================================================
 

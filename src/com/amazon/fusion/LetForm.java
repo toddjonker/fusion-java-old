@@ -62,7 +62,7 @@ final class LetForm
 
         // Build the lambda
         subforms = new SyntaxValue[letExprSize - bindingPos + 1];
-        subforms[0] = expander.getEvaluator().makeKernelIdentifier("lambda");
+        subforms[0] = expander.getGlobalState().myKernelLambdaIdentifier;
         subforms[1] = formals;
         for (int i = bindingPos + 1; i < letExprSize; i++)
         {
@@ -81,7 +81,7 @@ final class LetForm
             SyntaxSexp bindings = SyntaxSexp.make(eval, binding);
             SyntaxSexp letrec   =
                 SyntaxSexp.make(eval,
-                                eval.makeKernelIdentifier("letrec"),
+                                eval.getGlobalState().myKernelLetrecIdentifier,
                                 bindings,
                                 loopName);
             subforms[0] = letrec;

@@ -23,6 +23,11 @@ final class GlobalState
     final UseForm            myUseForm;
     final DynamicParameter   myCurrentNamespaceParam;
 
+    final SyntaxSymbol       myKernelBeginIdentifier;
+    final SyntaxSymbol       myKernelLambdaIdentifier;
+    final SyntaxSymbol       myKernelLetrecIdentifier;
+    final SyntaxSymbol       myKernelModuleIdentifier;
+
 
     private GlobalState(IonSystem          ionSystem,
                         ModuleInstance     kernel,
@@ -37,6 +42,12 @@ final class GlobalState
         myLoadHandler           = loadHandler;
         myUseForm               = useForm;
         myCurrentNamespaceParam = currentNamespaceParam;
+
+        SyntaxWrap wrap = new ModuleRenameWrap(kernel);
+        myKernelBeginIdentifier  = SyntaxSymbol.make("begin", wrap);
+        myKernelLambdaIdentifier = SyntaxSymbol.make("lambda", wrap);
+        myKernelLetrecIdentifier = SyntaxSymbol.make("letrec", wrap);
+        myKernelModuleIdentifier = SyntaxSymbol.make("module", wrap);
     }
 
 

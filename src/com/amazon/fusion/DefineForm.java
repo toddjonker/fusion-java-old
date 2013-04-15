@@ -77,7 +77,7 @@ final class DefineForm
         assert bodyLen > 0;
 
         SyntaxValue[] lambda = new SyntaxValue[2 + bodyLen];
-        lambda[0] = expander.getEvaluator().makeKernelIdentifier("lambda");
+        lambda[0] = expander.getGlobalState().myKernelLambdaIdentifier;
         lambda[1] = SyntaxSexp.make(expander, procFormals);
         for (int p = 2, i = bodyStart; i < defineArity; p++, i++)
         {

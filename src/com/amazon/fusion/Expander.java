@@ -30,6 +30,11 @@ final class Expander
         return myEval;
     }
 
+    GlobalState getGlobalState()
+    {
+        return myEval.getGlobalState();
+    }
+
     ModuleInstance getKernel()
     {
         return myEval.findKernel();

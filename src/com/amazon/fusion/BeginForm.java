@@ -10,7 +10,7 @@ final class BeginForm
 {
     static SyntaxSexp makeSyntax(Evaluator eval, SyntaxSequence seq, int from)
     {
-        SyntaxValue begin = eval.makeKernelIdentifier("begin");
+        SyntaxValue begin = eval.getGlobalState().myKernelBeginIdentifier;
         int size = seq.size();
         if (size <= from)
         {

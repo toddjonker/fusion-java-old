@@ -179,7 +179,7 @@ final class LoadHandler
         // We already verified this type-safety
         assert ((SyntaxSymbol) children[0]).stringValue().equals("module");
 
-        children[0] = eval.makeKernelIdentifier("module");
+        children[0] = eval.getGlobalState().myKernelModuleIdentifier;
 
         moduleStx = SyntaxSexp.make(eval, moduleStx.getLocation(), children);
         return moduleStx;
