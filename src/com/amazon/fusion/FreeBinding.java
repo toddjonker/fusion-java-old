@@ -20,6 +20,14 @@ final class FreeBinding implements Binding
 
 
     @Override
+    public boolean isFree(String name)
+    {
+        // TODO FUSION-47 intern symbol names and use ==
+        return myName.equals(name);
+    }
+
+
+    @Override
     public Binding originalBinding()
     {
         return this;

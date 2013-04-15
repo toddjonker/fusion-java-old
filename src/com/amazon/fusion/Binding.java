@@ -12,6 +12,11 @@ interface Binding
     String getName();
 
     /**
+     * Determines whether this is a {@link FreeBinding} with the given name.
+     */
+    boolean isFree(String name);
+
+    /**
      * Gets the original binding this represents.
      * If this is a free, lexical, or namespace-level binding, return this.
      * If this is an exported module binding, return the internal

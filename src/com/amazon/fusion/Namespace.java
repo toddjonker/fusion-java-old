@@ -45,6 +45,12 @@ abstract class Namespace
         }
 
         @Override
+        public boolean isFree(String name)
+        {
+            return false;
+        }
+
+        @Override
         public Binding originalBinding()
         {
             return this;
@@ -210,17 +216,11 @@ abstract class Namespace
     {
         for (NsBinding b : myBindings)
         {
-            Binding resolvedBoundId = b.myIdentifier.resolve();
-            if (resolvedBoundId.sameTarget(binding))
+            if (b.myIdentifier.resolvesBound(binding, marks))
             {
-                Set<Integer> boundMarks = b.myIdentifier.computeMarks();
-                if (marks.equals(boundMarks))
-                {
-                    return b;
-                }
+                return b;
             }
         }
-
         return null;
     }
 
@@ -237,19 +237,11 @@ abstract class Namespace
     {
         for (NsBinding b : myBindings)
         {
-            Binding resolvedBoundId = b.myIdentifier.resolve();
-            if (resolvedBoundId instanceof FreeBinding
-                // TODO FUSION-47 intern symbol names and use ==
-                && resolvedBoundId.getName().equals(name))
+            if (b.myIdentifier.resolvesFree(name, marks))
             {
-                Set<Integer> boundMarks = b.myIdentifier.computeMarks();
-                if (marks.equals(boundMarks))
-                {
-                    return b;
-                }
+                return b;
             }
         }
-
         return null;
     }
 

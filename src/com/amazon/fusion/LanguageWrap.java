@@ -33,6 +33,12 @@ final class LanguageWrap
         }
 
         @Override
+        public boolean isFree(String name)
+        {
+            return false;
+        }
+
+        @Override
         public Binding originalBinding()
         {
             return myBinding;

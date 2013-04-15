@@ -209,6 +209,44 @@ final class SyntaxSymbol
 
 
     /**
+     * Determines whether this identifier resolves to a {@link FreeBinding}
+     * with the given name and marks.
+     */
+    boolean resolvesFree(String name, Set<Integer> marks)
+    {
+        Binding resolvedBoundId = resolve();
+        if (resolvedBoundId.isFree(name))
+        {
+            Set<Integer> boundMarks = computeMarks();
+            if (marks.equals(boundMarks))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * Determines whether this identifier resolves to a given binding and has
+     * the given marks.
+     */
+    boolean resolvesBound(Binding binding, Set<Integer> marks)
+    {
+        Binding resolvedBoundId = resolve();
+        if (resolvedBoundId.sameTarget(binding))
+        {
+            Set<Integer> boundMarks = computeMarks();
+            if (marks.equals(boundMarks))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
      * Checks if this symbol is bound to a {@link SyntacticForm} in the given
      * enviroment.  If so, cache the binding and return the form.  Otherwise
      * do nothing.
