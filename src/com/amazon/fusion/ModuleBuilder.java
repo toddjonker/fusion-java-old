@@ -7,6 +7,9 @@ package com.amazon.fusion;
  * <p>
  * Applications should use this with great discretion and hesitation, since
  * it leads to non-portable Fusion code.
+ * <p>
+ * To create a {@link ModuleBuilder}, use
+ * {@link FusionRuntime#makeModuleBuilder(String)}.
  */
 public interface ModuleBuilder
 {
