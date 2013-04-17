@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -88,7 +88,7 @@ class Repl
 
         private void welcome()
         {
-            myOut.println("\n\033[1;31mWelcome to Fusion!\033[m\n");
+            red("\nWelcome to Fusion!\n\n");
             myOut.println("Type...");
             myOut.println("  (exit)            to exit");
             myOut.println("  (help SOMETHING)  to see documentation; try '(help help)'!\n");
@@ -97,7 +97,8 @@ class Repl
 
         private boolean rep(TopLevel top)
         {
-            String line = myConsole.readLine("$ ");
+            blue("$");
+            String line = myConsole.readLine(" ");
 
             if (line == null)
             {
@@ -114,18 +115,14 @@ class Repl
             }
             catch (ExitException e)
             {
-                myOut.println("// Goodbye!");
+                blue("Goodbye!\n");
+                myOut.flush();
                 return false;
             }
-            catch (FusionException e)
+            catch (FusionException | IonException e)
             {
-                myOut.print("// ");
-                myOut.println(e.getMessage());
-            }
-            catch (IonException e)
-            {
-                myOut.print("// ");
-                myOut.println(e.getMessage());
+                red(e.getMessage());
+                myOut.println();
             }
 
             return true;
@@ -140,6 +137,22 @@ class Repl
 
             write(top, myOut, v);
             myOut.println();
+        }
+
+
+
+        private void blue(String text)
+        {
+            myOut.print("\033[1;34m");
+            myOut.print(text);
+            myOut.print("\033[m");
+        }
+
+        private void red(String text)
+        {
+            myOut.print("\033[1;31m");
+            myOut.print(text);
+            myOut.print("\033[m");
         }
     }
 }
