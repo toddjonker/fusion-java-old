@@ -35,7 +35,7 @@ public abstract class FusionValue
 
 
     /** The singular {@code undef} value. */
-    public final static FusionValue UNDEF = new Undef();
+    final static FusionValue UNDEF = new Undef();
 
 
     //========================================================================
