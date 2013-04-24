@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionEval.callCurrentEval;
+import com.amazon.ion.IonException;
 import com.amazon.ion.IonReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -101,9 +102,11 @@ final class LoadHandler
                 in.close();
             }
         }
-        catch (IOException e)
+        catch (IOException | IonException e)
         {
-            throw new FusionException(e);
+            String message =
+                "Error loading file " + file + ": " + e.getMessage();
+            throw new FusionException(message, e);
         }
     }
 

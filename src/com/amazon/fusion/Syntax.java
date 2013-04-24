@@ -16,6 +16,7 @@ import com.amazon.fusion.FusionStruct.BaseStruct;
 import com.amazon.fusion.FusionStruct.ImmutableStruct;
 import com.amazon.fusion.FusionStruct.StructFieldVisitor;
 import com.amazon.ion.Decimal;
+import com.amazon.ion.IonException;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
@@ -39,7 +40,11 @@ final class Syntax
         return (value instanceof SyntaxSymbol);
     }
 
+    /**
+     * @throws IonException if there's a problem reading the source data.
+     */
     static SyntaxValue read(Evaluator eval, IonReader source, SourceName name)
+        throws IonException
     {
         IonType type = source.getType();
         assert type != null;
