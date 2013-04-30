@@ -92,21 +92,4 @@ abstract class SyntacticForm
     {
         return new SyntaxChecker(getInferredName(), form);
     }
-
-
-    final SyntaxValue requiredForm(String expectation,
-                                   int argNum,
-                                   SyntaxSequence parent)
-        throws SyntaxFailure
-    {
-        try
-        {
-            return parent.get(argNum);
-        }
-        catch (IndexOutOfBoundsException e) {}
-
-        throw new SyntaxFailure(identify(),
-                                "expected " + expectation,
-                                parent);
-    }
 }

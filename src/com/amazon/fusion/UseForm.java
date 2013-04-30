@@ -20,7 +20,7 @@ final class UseForm
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws SyntaxFailure
     {
-        requiredForm("module spec", 1, stx);
+        check(stx).requiredForm("module spec", 1);
         return stx;
     }
 
