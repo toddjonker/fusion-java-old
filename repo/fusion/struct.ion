@@ -74,7 +74,7 @@ iterated.
     "/fusion/unsafe/struct")
 
 
-  // Pass-through bindings from #%kernel
+  // Pass-through bindings from /fusion/private/kernel
   (provide is_struct)
 
   // Pass-through bindings from /fusion/collection

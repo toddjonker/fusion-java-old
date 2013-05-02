@@ -1,13 +1,13 @@
 // Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
-(module io (quote '#%kernel')
+(module io '/fusion/private/kernel'
 
   '''
 Basic input/output features.
   '''
 
 
-  // Pass-through bindings from #%kernel
+  // Pass-through bindings from /fusion/private/kernel
   (provide current_directory)
 
 )

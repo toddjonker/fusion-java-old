@@ -25,7 +25,7 @@ sexps.
     "/fusion/sequence"
     "/fusion/unsafe/sexp")
 
-  // Pass-through bindings from #%kernel
+  // Pass-through bindings from /fusion/private/kernel
   (provide is_sexp)
 
   // Pass-through bindings from /fusion/sequence

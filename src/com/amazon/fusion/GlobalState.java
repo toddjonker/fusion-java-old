@@ -12,7 +12,7 @@ import com.amazon.ion.IonType;
  */
 final class GlobalState
 {
-    static final String KERNEL_MODULE_NAME = "#%kernel";
+    static final String KERNEL_MODULE_NAME = "/fusion/private/kernel";
     static final ModuleIdentity KERNEL_MODULE_IDENTITY =
         ModuleIdentity.internBuiltinName(KERNEL_MODULE_NAME);
 

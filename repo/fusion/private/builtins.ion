@@ -1,11 +1,11 @@
 // Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
-(module builtins (quote '#%kernel')
+(module builtins '/fusion/private/kernel'
 
   (require "/fusion/experimental/defines")
 
 
-  // #%kernel bindings we pass through
+  // Pass-through bindings from kernel
   // TODO FUSION-133 remove `use`
   (provide begin define if lambda letrec load module require use)
   (provide is_bool is_int is_float is_decimal is_timestamp is_symbol

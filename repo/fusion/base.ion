@@ -7,7 +7,7 @@
     "/fusion/syntax")
 
 
-  // Pass-through bindings from #%kernel
+  // Pass-through bindings from kernel
   // TODO FUSION-133 remove `use`
   (provide begin define if lambda letrec module require use)
   (provide is_bool is_int is_float is_decimal is_timestamp is_symbol

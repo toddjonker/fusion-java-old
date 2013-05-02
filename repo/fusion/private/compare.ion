@@ -2,7 +2,7 @@
 
 (module compare '/fusion/private/builtins'
 
-  (use (quote '#%kernel'))
+  (require "/fusion/private/kernel")
   (provide =)
 
   (require "/fusion/experimental/defines")

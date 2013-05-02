@@ -1,6 +1,6 @@
 // Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
-(module ion (quote '#%kernel')
+(module ion '/fusion/private/kernel'
 
   (require "/fusion/experimental/defines")
 

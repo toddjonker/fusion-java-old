@@ -110,7 +110,7 @@ languages, highlighting potential mutation of an argument.
     "/fusion/sequence"
     "/fusion/unsafe/list")         // NOT exported!
 
-  // Pass-through bindings from #%kernel
+  // Pass-through bindings from kernel
   (provide is_list)
 
   // Pass-through bindings from builtins
