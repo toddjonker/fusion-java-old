@@ -113,6 +113,21 @@ final class ModuleNameResolver
         throw check.failure("unrecognized form");
     }
 
+    ModuleIdentity locate(Evaluator eval, String absoluteModulePath)
+        throws FusionException
+    {
+        ModuleIdentity id = ModuleIdentity.locate(absoluteModulePath);
+        if (id == null)
+        {
+            for (ModuleRepository repo : myRepositories)
+            {
+                id = repo.resolveLib(eval, absoluteModulePath);
+                if (id != null) break;
+            }
+        }
+        return id;
+    }
+
     /**
      * Locates and loads a module from the registered repositories.
      *
@@ -128,13 +143,10 @@ final class ModuleNameResolver
         // TODO FUSION-79 Support relative module paths
         if (! libName.startsWith("/")) libName = "/" + libName;
 
-        for (ModuleRepository repo : myRepositories)
+        ModuleIdentity id = locate(eval, libName);
+        if (id != null)
         {
-            ModuleIdentity id = repo.resolveLib(eval, libName);
-            if (id != null)
-            {
-                return loadModule(eval, id);
-            }
+            return loadModule(eval, id);
         }
 
         StringBuilder buf = new StringBuilder();

@@ -86,6 +86,12 @@ class ModuleIdentity
         return doIntern(name);
     }
 
+
+    static ModuleIdentity locate(String absoluteModulePath)
+    {
+        return ourInternedIdentities.get(absoluteModulePath);
+    }
+
     /**
      *
      * @param name must be the result of {@link #internString()}.
