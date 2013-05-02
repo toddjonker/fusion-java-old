@@ -65,13 +65,13 @@ but since the input isn't modified one must use side effects.
 More general collection operations like `any` and `find` can be applied to
 structs, in which case the field names are ignored while the field values are
 iterated.
-
   '''
 
-  (use '/fusion/collection')
-  (use '/fusion/experimental/defines')
-  (use '/fusion/ffi/java')
-  (use '/fusion/unsafe/struct')
+  (require
+    "/fusion/collection"
+    "/fusion/experimental/defines"
+    "/fusion/ffi/java"
+    "/fusion/unsafe/struct")
 
 
   // Pass-through bindings from #%kernel

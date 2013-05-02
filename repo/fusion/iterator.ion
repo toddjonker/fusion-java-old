@@ -14,8 +14,9 @@ based on two procedures:
     exception if there's no next value.
   '''
 
-  (use '/fusion/experimental/defines')
-  (use '/fusion/ffi/java')
+  (require
+    "/fusion/experimental/defines"
+    "/fusion/ffi/java")
 
   (define TRUE  (lambda () true))
   (define FALSE (lambda () false))

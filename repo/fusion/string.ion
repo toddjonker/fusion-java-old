@@ -5,7 +5,9 @@
   '''
 Operations for strings.
   '''
-  (use '/fusion/experimental/defines')
+
+
+  (require "/fusion/experimental/defines")
 
 
   (defpub_j string_append      "com.amazon.fusion.FusionString$AppendProc")

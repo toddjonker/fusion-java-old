@@ -2,7 +2,7 @@
 
 (module defines (quote '#%kernel')
 
-  (use '/fusion/syntax')
+  (require "/fusion/syntax")
 
   (provide defpub defpub_j defpub_syntax defpub_j_syntax)
 

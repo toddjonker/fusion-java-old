@@ -14,10 +14,11 @@ Currently, some of these features may be restricted to a subset of sequence
 types.
   '''
 
-  (use '/fusion/collection')
-  (use '/fusion/experimental/defines')
-  (use '/fusion/private/builtins')   // Some basic list ops
-  (use '/fusion/unsafe/list')
+  (require
+    "/fusion/collection"
+    "/fusion/experimental/defines"
+    "/fusion/private/builtins"   // Some basic list ops
+    "/fusion/unsafe/list")
 
   // Pass-through bindings from /fusion/collection
   (provide any do find is_empty size)

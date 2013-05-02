@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * A unique identitier for modules available to the Fusion runtime system.
@@ -26,6 +27,17 @@ class ModuleIdentity
 
     private static final Map<String,ModuleIdentity> ourInternedIdentities =
         new HashMap<String,ModuleIdentity>();
+
+
+
+    private static Pattern PATH_PATTERN =
+        Pattern.compile("(/[a-zA-Z_]+)+");
+
+    static boolean isValidAbsoluteModulePath(String path)
+    {
+        return PATH_PATTERN.matcher(path).matches();
+    }
+
 
     static boolean isValidLocalName(String name)
     {

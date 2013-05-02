@@ -62,10 +62,11 @@ final class ModuleForm
         // TODO precompute this?
         IdentityHashMap<Binding, Object> stops =
             new IdentityHashMap<Binding, Object>();
+        Binding beginBinding        = stopBinding(kernel, stops, "begin");
         Binding defineBinding       = stopBinding(kernel, stops, "define");
         Binding defineSyntaxBinding = stopBinding(kernel, stops, "define_syntax");
-        Binding useSyntaxBinding    = stopBinding(kernel, stops, "use");
-        Binding beginBinding        = stopBinding(kernel, stops, "begin");
+        Binding requireBinding      = stopBinding(kernel, stops, "require");
+        Binding useBinding          = stopBinding(kernel, stops, "use");
 
         SyntaxSymbol moduleNameSymbol = check.requiredSymbol("module name", 1);
         ModuleIdentity.validateLocalName(moduleNameSymbol);
@@ -199,7 +200,8 @@ final class ModuleForm
                             }
                             formIsPrepared = true;
                         }
-                        else if (binding == useSyntaxBinding)
+                        else if (binding == useBinding ||
+                                 binding == requireBinding)
                         {
                             try
                             {
@@ -208,7 +210,7 @@ final class ModuleForm
                             catch (FusionException e)
                             {
                                 String message = e.getMessage();
-                                throw new SyntaxFailure("use",
+                                throw new SyntaxFailure(binding.getName(),
                                                         message, form);
                             }
                             expanded = null;

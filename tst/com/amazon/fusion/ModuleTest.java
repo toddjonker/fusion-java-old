@@ -47,6 +47,13 @@ public class ModuleTest
     }
 
     @Test(expected = FusionException.class) // ModuleNotFoundFailure gets wrapped
+    public void testBadLanguageSymbolInRepoModule2()
+        throws Exception
+    {
+        eval("(require \"/module/bad_lang_symbol\")");
+    }
+
+    @Test(expected = FusionException.class) // ModuleNotFoundFailure gets wrapped
     public void testBadQuotedLanguageSymbolInRepoModule()
         throws Exception
     {

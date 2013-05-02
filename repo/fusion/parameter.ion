@@ -50,7 +50,7 @@ Java developers will recognize that this is very similar to how a Java `catch`
 clause sets an exception handler with dynamic extent.
   '''
 
-  (use '/fusion/experimental/defines')
+  (require "/fusion/experimental/defines")
 
 
   (defpub_j_syntax parameterize "com.amazon.fusion.ParameterizeForm")

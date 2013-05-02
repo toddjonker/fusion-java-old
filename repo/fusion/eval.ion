@@ -8,7 +8,7 @@ Loading and evaluating Fusion code.
 See [dynamic evaluation](../eval.html) for more information.
   '''
 
-  (use '/fusion/experimental/defines')
+  (require "/fusion/experimental/defines")
 
 
   // Pass-through bindings from #%kernel

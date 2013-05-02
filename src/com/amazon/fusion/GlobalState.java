@@ -85,6 +85,7 @@ final class GlobalState
         ns.define("define", new DefineForm());
         ns.define("define_syntax", new DefineSyntaxForm());
         ns.define("use", useForm);
+        ns.define("require", new RequireForm(resolver));
 
         SyntacticForm moduleForm =
             new ModuleForm(resolver, currentModuleDeclareName);

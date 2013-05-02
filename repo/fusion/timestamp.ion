@@ -8,9 +8,9 @@ Point-in-time values with local offset.
 Fusion timestamp values are identical to Ion timestamps.
   '''
 
-  (use '/fusion/experimental/defines')
+  (require "/fusion/experimental/defines")
 
-  (use '/fusion/private/compare')
+  (require "/fusion/private/compare")
   (provide < <= = >= >)
 
 

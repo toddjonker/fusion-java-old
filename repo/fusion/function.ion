@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (module function '/fusion/base'
 
@@ -7,8 +7,9 @@
 Higher-order procedure combinators.
   '''
 
-  (use '/fusion/experimental/defines')
-  (use '/fusion/syntax')
+  (require
+    "/fusion/experimental/defines"
+    "/fusion/syntax")
 
 
   (defpub identity

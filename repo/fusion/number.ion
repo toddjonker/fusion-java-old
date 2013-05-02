@@ -5,9 +5,10 @@
   '''
 Operations on numbers (int, decimal, and float).
   '''
-  (use '/fusion/experimental/defines')
 
-  (use '/fusion/private/compare')
+  (require "/fusion/experimental/defines")
+
+  (require "/fusion/private/compare")
   (provide < <= = >= >)
 
 

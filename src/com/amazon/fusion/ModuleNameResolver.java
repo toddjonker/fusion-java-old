@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static com.amazon.ion.util.IonTextUtils.printString;
 import java.io.File;
@@ -39,6 +40,7 @@ final class ModuleNameResolver
      *
      * @throws ModuleNotFoundFailure if the module could not be found.
      */
+    @Deprecated
     ModuleIdentity resolve(Evaluator eval, SyntaxValue pathStx)
         throws FusionException
     {
@@ -65,6 +67,30 @@ final class ModuleNameResolver
         throw new SyntaxFailure("module path", "unrecognized form", pathStx);
     }
 
+    /**
+     * Locates and loads a module, dispatching on the concrete syntax of the
+     * request.
+     *
+     * @throws ModuleNotFoundFailure if the module could not be found.
+     */
+    ModuleIdentity resolve(Evaluator eval,
+                           SyntaxValue pathStx,
+                           ModuleIdentity baseModule,
+                           boolean load)
+        throws FusionException
+    {
+        switch (pathStx.getType())
+        {
+            case STRING:
+            {
+                String path = ((SyntaxString) pathStx).stringValue();
+                // TODO check null/empty
+                return resolveModulePath(eval, path, pathStx, baseModule, load);
+            }
+        }
+
+        throw new SyntaxFailure("module path", "unrecognized form", pathStx);
+    }
 
     /**
      * Locates and loads a module, dispatching on the concrete syntax of the
@@ -72,6 +98,7 @@ final class ModuleNameResolver
      *
      * @throws ModuleNotFoundFailure if the module could not be found.
      */
+    @Deprecated
     ModuleIdentity resolve(Evaluator eval, SyntaxSexp pathStx)
         throws FusionException
     {
@@ -136,6 +163,7 @@ final class ModuleNameResolver
      *
      * @throws ModuleNotFoundFailure if the module could not be found.
      */
+    @Deprecated
     ModuleIdentity resolveLib(Evaluator eval, String libName,
                               SyntaxValue stx)
         throws FusionException
@@ -172,6 +200,56 @@ final class ModuleNameResolver
         }
     }
 
+    /**
+     * Locates and loads a module from the registered repositories.
+     *
+     * @param modulePath must be an absolute module path.
+     * @param stx is used for error messaging; may be null.
+     *
+     * @throws ModuleNotFoundFailure if the module could not be found.
+     */
+    private ModuleIdentity resolveModulePath(Evaluator eval,
+                                             String modulePath,
+                                             SyntaxValue stx,
+                                             ModuleIdentity baseModule,
+                                             boolean load)
+        throws FusionException
+    {
+        // TODO FUSION-79 Support relative module paths
+        if (! isValidAbsoluteModulePath(modulePath))
+        {
+            throw new SyntaxFailure(null, "Invalid module path", stx);
+        }
+
+        ModuleIdentity id = locate(eval, modulePath);
+        if (id != null)
+        {
+            return loadModule(eval, id);
+        }
+
+        StringBuilder buf = new StringBuilder();
+        buf.append("A module named ");
+        buf.append(printQuotedSymbol(modulePath));
+        buf.append(" could not be found in the registered repositories.");
+        buf.append(" The repositories are:\n");
+        for (ModuleRepository repo : myRepositories)
+        {
+            buf.append("  * ");
+            buf.append(repo.identify());
+            buf.append('\n');
+        }
+        String message = buf.toString();
+
+        if (stx == null)
+        {
+            throw new ModuleNotFoundFailure(message);
+        }
+        else
+        {
+            throw new ModuleNotFoundFailure(message, stx);
+        }
+    }
+
 
     /**
      * Resolve a file path to a module identity and load the module into the
@@ -187,6 +265,7 @@ final class ModuleNameResolver
      *
      * @throws ModuleNotFoundFailure if the module could not be found.
      */
+    @Deprecated
     ModuleIdentity resolve(Evaluator eval, String path, SyntaxValue stx)
         throws FusionException
     {

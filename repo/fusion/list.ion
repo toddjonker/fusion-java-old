@@ -102,12 +102,13 @@ languages, highlighting potential mutation of an argument.
   '''
 
 
-  (use '/fusion/experimental/defines')
-  (use '/fusion/ffi/java')
-  (use '/fusion/iterator')
-  (use '/fusion/private/builtins')
-  (use '/fusion/sequence')
-  (use '/fusion/unsafe/list')         // NOT exported!
+  (require
+    "/fusion/experimental/defines"
+    "/fusion/ffi/java"
+    "/fusion/iterator"
+    "/fusion/private/builtins"
+    "/fusion/sequence"
+    "/fusion/unsafe/list")         // NOT exported!
 
   // Pass-through bindings from #%kernel
   (provide is_list)

@@ -5,7 +5,7 @@
   (use (quote '#%kernel'))
   (provide =)
 
-  (use '/fusion/experimental/defines')
+  (require "/fusion/experimental/defines")
 
   (defpub_j <
     '''

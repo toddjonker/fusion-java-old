@@ -1,5 +1,5 @@
 (module root '/fusion/base'
-  (use "leaf_module")
+  (require "/leaf_module")
   (define root_fn leaf_fn)
-  (use "mid_module")
+  (require "/mid_module")
   (provide leaf_var leaf_fn mid_fn root_fn))

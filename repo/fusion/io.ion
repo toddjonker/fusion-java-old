@@ -6,7 +6,6 @@
 Basic input/output features.
   '''
 
-  (use '/fusion/experimental/defines')
 
   // Pass-through bindings from #%kernel
   (provide current_directory)

@@ -9,9 +9,10 @@ The built-in collection types are [list](list.html), [sexp](sexp.html), and
 [struct](struct.html).
   '''
 
-  (use '/fusion/experimental/defines')
-  (use '/fusion/unsafe/struct')
-  (use '/fusion/void')
+  (require
+    "/fusion/experimental/defines"
+    "/fusion/unsafe/struct"
+    "/fusion/void")
 
 
   (defpub_j size "com.amazon.fusion.SizeProc")

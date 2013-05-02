@@ -18,11 +18,12 @@ At present, pairs and sexps are immutable.  Issue FUSION-102 covers mutable
 sexps.
   '''
 
-  (use '/fusion/experimental/defines')
-  (use '/fusion/ffi/java')
-  (use '/fusion/iterator')
-  (use '/fusion/sequence')
-  (use '/fusion/unsafe/sexp')
+  (require
+    "/fusion/experimental/defines"
+    "/fusion/ffi/java"
+    "/fusion/iterator"
+    "/fusion/sequence"
+    "/fusion/unsafe/sexp")
 
   // Pass-through bindings from #%kernel
   (provide is_sexp)
