@@ -3,6 +3,8 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.ModuleIdentity.BUILTIN_NAME_EXPECTATION;
+import static com.amazon.fusion.ModuleIdentity.internBuiltinName;
+import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
@@ -77,6 +79,13 @@ final class StandardRuntime
     public TopLevel makeTopLevel(String initialModulePath)
         throws FusionException
     {
+        if (! isValidAbsoluteModulePath(initialModulePath))
+        {
+            String message =
+                "Not a valid absolute module path: " + initialModulePath;
+            throw new IllegalArgumentException(message);
+        }
+
         return new StandardTopLevel(myGlobalState, myRegistry,
                                     initialModulePath);
     }
@@ -91,16 +100,16 @@ final class StandardRuntime
 
 
     @Override
-    public ModuleBuilder makeModuleBuilder(String moduleName)
+    public ModuleBuilder makeModuleBuilder(String absoluteModulePath)
     {
-        if (! ModuleIdentity.isValidBuiltinName(moduleName))
+        if (! ModuleIdentity.isValidBuiltinName(absoluteModulePath))
         {
             String message =
                 "Invalid built-in module name. " + BUILTIN_NAME_EXPECTATION;
             throw new IllegalArgumentException(message);
         }
 
-        ModuleIdentity id = ModuleIdentity.internBuiltinName(moduleName);
+        ModuleIdentity id = internBuiltinName(absoluteModulePath);
         return new ModuleBuilderImpl(myRegistry, id);
     }
 

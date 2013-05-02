@@ -57,11 +57,11 @@ public interface FusionRuntime
     /**
      * Returns a builder for constructing modules via Java.
      *
-     * @param moduleName must start with {@code "#%"} and must not contain
-     * {@code "/"}.
+     * @param absoluteModulePath must be an absolute module path, starting
+     * with {@code '/'}.
      * @return a new module builder.
      */
-    public ModuleBuilder makeModuleBuilder(String moduleName)
+    public ModuleBuilder makeModuleBuilder(String absoluteModulePath)
         throws FusionException;
 
 

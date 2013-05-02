@@ -210,8 +210,10 @@ final class ModuleForm
                             catch (FusionException e)
                             {
                                 String message = e.getMessage();
-                                throw new SyntaxFailure(binding.getName(),
+                                SyntaxFailure ex = new SyntaxFailure(binding.getName(),
                                                         message, form);
+                                ex.initCause(e);
+                                throw ex;
                             }
                             expanded = null;
                         }

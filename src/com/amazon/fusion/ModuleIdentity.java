@@ -23,7 +23,7 @@ class ModuleIdentity
         "Expected an Ion identifier";
 
     static final String BUILTIN_NAME_EXPECTATION =
-        "Expected `#%` followed by an Ion identifier";
+        "Expected an absolute module path";
 
     private static final Map<String,ModuleIdentity> ourInternedIdentities =
         new HashMap<String,ModuleIdentity>();
@@ -59,8 +59,9 @@ class ModuleIdentity
     static boolean isValidBuiltinName(String name)
     {
         return name != null
-            && name.startsWith("#%")
-            && symbolVariant(name.substring(2)) == IDENTIFIER;
+            && ((name.startsWith("#%")
+                     && symbolVariant(name.substring(2)) == IDENTIFIER)
+                || isValidAbsoluteModulePath(name));
     }
 
     private static ModuleIdentity doIntern(String name)
