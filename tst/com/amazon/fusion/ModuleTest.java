@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static org.junit.Assert.assertSame;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -122,19 +121,6 @@ public class ModuleTest
         throws Exception
     {
         eval("(use \"tst-data/trivialDefine.ion\")");
-    }
-
-    @Test  // TODO FUSION-133 remove 'use'
-    public void testTransitiveLoad()
-        throws Exception
-    {
-        eval("(use root_module)");
-        assertEval(437, "leaf_var");
-        Object rootFn = eval("root_fn");
-        Object midFn  = eval("mid_fn");
-        Object leafFn = eval("leaf_fn");
-        assertSame(leafFn, rootFn);
-        assertSame(leafFn, midFn);
     }
 
     @Test @Deprecated  // TODO FUSION-133 remove 'use'

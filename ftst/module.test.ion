@@ -1,8 +1,22 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
-(use begin_splice)
-(use check)
+(module begin_splice '/fusion/base'
 
-(check_equal top "top" "top")
-(check_equal middle "middle" "middle")
-(check_equal bottom "bottom" "bottom")
+  // Top-level 'begin' should have contents lifted out.
+  // That allows macros to produce multiple top-level forms.
+  (begin
+    (define top "top")
+    (begin
+      (define middle "middle"))
+    (define bottom "bottom"))
+
+  (provide top middle bottom)
+)
+
+(require
+  begin_splice
+  "/check")
+
+(check = top "top")
+(check = middle "middle")
+(check = bottom "bottom")

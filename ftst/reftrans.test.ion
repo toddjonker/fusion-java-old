@@ -1,10 +1,37 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 // Tests referential transparency through macro expansion.
 
-(use reftrans1)
-(use reftrans2)
-(use check)
+// Note that we're using the very limited 'let' language, which doesn't
+// export 'lambda'.  Yet we can still use 'let' which expands to use it.
+
+
+// This module tests that we can use 'let' where 'lambda' is not visible.
+(module reftrans1 '/let'
+  (define one
+    (let ((x 1))
+      x))
+  (provide one)
+)
+
+
+// This module tests that we can use 'let' where 'lambda' is rebound.
+(module reftrans2 '/let'
+
+  (define lambda 99)
+
+  (define two
+    (let ((x 2))
+      x))
+
+  (provide two)
+)
+
+
+(require
+  reftrans1
+  reftrans2
+  "/check")
 
 (check_equal one 1 "")
 (check_equal two 2 "")
@@ -16,7 +43,19 @@
 (check_equal two 2 "")
 
 
-(use reftrans3)
+(module reftrans3 '/fusion/base'
+  (require "/fusion/syntax")
+
+  // This tests that we can use 'my3' when it's not exported.
+  (define my3 3)
+
+  (define_syntax three
+    (lambda (stx) (quasisyntax my3)))
+
+  (provide three)
+)
+
+(require reftrans3)
 (check_equal (three) 3 "3")
 
 // TODO test "export" of a lexical binding

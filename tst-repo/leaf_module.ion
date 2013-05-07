@@ -1,4 +1,0 @@
-(module leaf '/fusion/base'
-  (provide leaf_fn leaf_var)
-  (define leaf_var 437)
-  (define leaf_fn (lambda () leaf_var)))

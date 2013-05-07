@@ -1,4 +1,0 @@
-(module mid '/fusion/base'
-  (require "/leaf_module")
-  (provide mid_fn)
-  (define mid_fn leaf_fn))
