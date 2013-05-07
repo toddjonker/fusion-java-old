@@ -13,7 +13,8 @@
   (provide result)
 )
 
-(use check)
-(use (quote local))
+(require
+  local
+  "/check")
 
 (check = result 100)

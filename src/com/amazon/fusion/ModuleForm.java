@@ -427,8 +427,9 @@ final class ModuleForm
         }
         else
         {
+            ModuleRegistry reg = eval.findCurrentNamespace().getRegistry();
             String declaredName = moduleNameSymbol.stringValue();
-            id = ModuleIdentity.internLocalName(declaredName);
+            id = ModuleIdentity.internLocalName(reg, declaredName);
         }
         return id;
     }

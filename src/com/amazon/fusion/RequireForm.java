@@ -29,12 +29,10 @@ final class RequireForm
 
         for (int i = 1; i < arity; i++)
         {
-            String path =
-                check.requiredString("absolute module path string", i);
-            if (! ModuleIdentity.isValidAbsoluteModulePath(path))
+            String path = check.requiredText("module path", i);
+            if (! ModuleIdentity.isValidModulePath(path))
             {
-                String message =
-                    "not a valid absolute module path: " + stx.get(i);
+                String message = "not a valid module path: " + stx.get(i);
                 throw check.failure(message);
             }
         }
@@ -49,7 +47,7 @@ final class RequireForm
     {
         // TODO Should we resolve the name at compile-time or run-time?
 
-        ModuleIdentity baseModule = null;
+        ModuleIdentity baseModule = env.namespace().getModuleId();
         int arity = stx.size();
         ModuleIdentity[] ids = new ModuleIdentity[arity - 1];
 

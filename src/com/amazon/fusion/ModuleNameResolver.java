@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
+import static com.amazon.fusion.ModuleIdentity.isValidModulePath;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static com.amazon.ion.util.IonTextUtils.printString;
 import java.io.File;
@@ -71,6 +71,9 @@ final class ModuleNameResolver
      * Locates and loads a module, dispatching on the concrete syntax of the
      * request.
      *
+     * @param baseModule the starting point for relative references.
+     * If null, it indicates a reference from top-level.
+     *
      * @throws ModuleNotFoundFailure if the module could not be found.
      */
     ModuleIdentity resolve(Evaluator eval,
@@ -82,8 +85,9 @@ final class ModuleNameResolver
         switch (pathStx.getType())
         {
             case STRING:
+            case SYMBOL:
             {
-                String path = ((SyntaxString) pathStx).stringValue();
+                String path = ((SyntaxText) pathStx).stringValue();
                 // TODO check null/empty
                 return resolveModulePath(eval, path, pathStx, baseModule, load);
             }
@@ -116,6 +120,8 @@ final class ModuleNameResolver
         {
             SyntaxSymbol name = check.requiredSymbol("module name", 1);
 
+            ModuleRegistry reg = eval.findCurrentNamespace().getRegistry();
+
             // TODO FUSION-79 Should there be separate syntax forms for
             //   builtins versus local modules?
             ModuleIdentity id;
@@ -125,12 +131,12 @@ final class ModuleNameResolver
             }
             else
             {
+                // These names are scoped by registry!
                 ModuleIdentity.validateLocalName(name);
-                id = ModuleIdentity.internLocalName(name.stringValue());
+                id = ModuleIdentity.locateLocal(reg, name.stringValue());
             }
 
-            ModuleRegistry reg = eval.findCurrentNamespace().getRegistry();
-            if (reg.lookup(id) == null)
+            if (id == null || reg.lookup(id) == null)
             {
                 throw new ModuleNotFoundFailure("Module not found", pathStx);
             }
@@ -140,15 +146,26 @@ final class ModuleNameResolver
         throw check.failure("unrecognized form");
     }
 
-    ModuleIdentity locate(Evaluator eval, String absoluteModulePath)
+    ModuleIdentity locate(Evaluator eval, String modulePath)
         throws FusionException
     {
-        ModuleIdentity id = ModuleIdentity.locate(absoluteModulePath);
+        ModuleIdentity id;
+        if (modulePath.startsWith("/"))
+        {
+            id = ModuleIdentity.locate(modulePath);
+        }
+        else
+        {
+            // TODO FUSION-79 Support relative module paths other than locals
+            ModuleRegistry reg = eval.findCurrentNamespace().getRegistry();
+            id = ModuleIdentity.locateLocal(reg, modulePath);
+        }
+
         if (id == null)
         {
             for (ModuleRepository repo : myRepositories)
             {
-                id = repo.resolveLib(eval, absoluteModulePath);
+                id = repo.resolveLib(eval, modulePath);
                 if (id != null) break;
             }
         }
@@ -203,8 +220,10 @@ final class ModuleNameResolver
     /**
      * Locates and loads a module from the registered repositories.
      *
-     * @param modulePath must be an absolute module path.
+     * @param modulePath must be a module path.
      * @param stx is used for error messaging; may be null.
+     * @param baseModule the starting point for relative references.
+     * If null, it indicates a reference from top-level.
      *
      * @throws ModuleNotFoundFailure if the module could not be found.
      */
@@ -216,7 +235,7 @@ final class ModuleNameResolver
         throws FusionException
     {
         // TODO FUSION-79 Support relative module paths
-        if (! isValidAbsoluteModulePath(modulePath))
+        if (! isValidModulePath(modulePath))
         {
             throw new SyntaxFailure(null, "Invalid module path", stx);
         }

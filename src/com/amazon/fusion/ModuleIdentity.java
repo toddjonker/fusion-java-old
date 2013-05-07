@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.ion.util.IonTextUtils.symbolVariant;
 import static com.amazon.ion.util.IonTextUtils.SymbolVariant.IDENTIFIER;
+import static java.lang.System.identityHashCode;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -19,6 +20,9 @@ import java.util.regex.Pattern;
 class ModuleIdentity
     implements Comparable<ModuleIdentity>
 {
+    static final String TOP_LEVEL_MODULE_PREFIX =
+        "/fusion/private/toplevel/";
+
     static final String LOCAL_NAME_EXPECTATION =
         "Expected an Ion identifier";
 
@@ -30,19 +34,30 @@ class ModuleIdentity
 
 
 
+    private static Pattern NAME_PATTERN =
+        Pattern.compile("[a-zA-Z][a-zA-Z0-9_]*");
+
     private static Pattern PATH_PATTERN =
-        Pattern.compile("(/[a-zA-Z_]+)+");
+        Pattern.compile("(/(" + NAME_PATTERN + "))+");
+
+    static boolean isValidModuleName(String name)
+    {
+        return name != null && NAME_PATTERN.matcher(name).matches();
+    }
 
     static boolean isValidAbsoluteModulePath(String path)
     {
-        return PATH_PATTERN.matcher(path).matches();
+        return path != null && PATH_PATTERN.matcher(path).matches();
     }
 
+    static boolean isValidModulePath(String path)
+    {
+        return isValidModuleName(path) || isValidAbsoluteModulePath(path);
+    }
 
     static boolean isValidLocalName(String name)
     {
-        return name != null
-            && symbolVariant(name) == IDENTIFIER;
+        return isValidModuleName(name);
     }
 
     static void validateLocalName(SyntaxSymbol name)
@@ -75,16 +90,23 @@ class ModuleIdentity
     }
 
 
+    private static String localPath(ModuleRegistry reg, String name)
+    {
+        assert isValidLocalName(name) : name;
+        return TOP_LEVEL_MODULE_PREFIX + identityHashCode(reg) + '/' + name;
+    }
+
+
     /**
      * @param name must be a valid local module name.
      * @return not null.
      *
      * @see #isValidLocalName(String)
      */
-    static ModuleIdentity internLocalName(String name)
+    static ModuleIdentity internLocalName(ModuleRegistry reg, String name)
     {
-        assert isValidLocalName(name);
-        return doIntern(name);
+        String path = localPath(reg, name);
+        return doIntern(path);
     }
 
     /**
@@ -103,6 +125,11 @@ class ModuleIdentity
     static ModuleIdentity locate(String absoluteModulePath)
     {
         return ourInternedIdentities.get(absoluteModulePath);
+    }
+
+    static ModuleIdentity locateLocal(ModuleRegistry reg, String name)
+    {
+        return ourInternedIdentities.get(localPath(reg, name));
     }
 
     /**

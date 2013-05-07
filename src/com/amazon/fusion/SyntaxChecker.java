@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -121,6 +121,15 @@ class SyntaxChecker
         SyntaxValue form = requiredForm(expectation, argNum);
         return checkSyntax(SyntaxSymbol.class, expectation,
                            false /* nullable */, form);
+    }
+
+
+    final String requiredText(String expectation, int argNum)
+        throws SyntaxFailure
+    {
+        SyntaxValue form = requiredForm(expectation, argNum);
+        return checkSyntax(SyntaxText.class, expectation,
+                           false /* nullable */, form).stringValue();
     }
 
 

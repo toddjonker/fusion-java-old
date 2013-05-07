@@ -12,12 +12,12 @@
   // Reference to `value` before it has been imported.
   (define result (+ value 1))
 
-  (use (quote local1))
+  (require local1)
 
   (provide result)
 )
 
 (use check)
-(use (quote local2))
+(require local2)
 
 (check = result 144)
