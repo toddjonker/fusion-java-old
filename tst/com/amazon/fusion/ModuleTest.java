@@ -161,10 +161,21 @@ public class ModuleTest
     public void testBadRequireSyntax()
         throws Exception
     {
+        expectSyntaxFailure("(require)");
         expectSyntaxFailure("(require {})");
         expectSyntaxFailure("(require ())");
         expectSyntaxFailure("(require (lib))");
         expectSyntaxFailure("(require (lib \"/fusion/list\"))");
+    }
+
+    @Test
+    public void testRequireUnderTop()
+        throws Exception
+    {
+        String code =
+            "(module m '/fusion/base'" +
+            "  (if true (require '/fusion/list') false))";
+        expectSyntaxFailure(code);
     }
 
     @Test

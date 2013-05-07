@@ -22,10 +22,13 @@ final class RequireForm
     {
         SyntaxChecker check = check(stx);
 
-        // TODO check expansion context is top-level or module-level
+        if (!expander.isModuleContext() && !expander.isTopLevelContext())
+        {
+            throw check.failure("May only appear in a top-level context " +
+                                "or a module context");
+        }
 
-        // TODO what about zero args?
-        int arity = check.arityAtLeast(1);
+        int arity = check.arityAtLeast(2);
 
         for (int i = 1; i < arity; i++)
         {
