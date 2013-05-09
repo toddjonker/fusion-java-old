@@ -5,7 +5,9 @@ package com.amazon.fusion;
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionEval.evalSyntax;
 import static com.amazon.fusion.GlobalState.DEFINE_SYNTAX;
+import static com.amazon.fusion.Syntax.datumToSyntax;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
+import com.amazon.fusion.Namespace.NsBinding;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -271,7 +273,7 @@ final class ModuleForm
 
         for (SyntaxSexp stx : provideForms)
         {
-            stx = prepareProvide(stx, moduleNamespace);
+            stx = expandProvide(eval, stx, moduleNamespace);
             subforms[i++] = stx;
         }
 
@@ -358,7 +360,8 @@ final class ModuleForm
             }
         }
 
-        SyntaxSymbol[] providedIdentifiers = providedSymbols(provideForms);
+        SyntaxSymbol[] providedIdentifiers =
+            providedSymbols(eval, moduleNamespace, provideForms);
 
         CompiledForm[] otherFormsArray =
             otherForms.toArray(new CompiledForm[otherForms.size()]);
@@ -396,6 +399,7 @@ final class ModuleForm
 
     private SyntaxSexp formIsProvide(SyntaxValue form)
     {
+        // TODO FUSION-135 this needs to use binding comparison, not strcmp
         if (form.getType() == SyntaxValue.Type.SEXP)
         {
             SyntaxSexp sexp = (SyntaxSexp) form;
@@ -413,30 +417,147 @@ final class ModuleForm
     }
 
     /**
-     * @param provideForms
-     * @param myNamespace
-     * @return
+     * Performs expand-time syntax checking of {@code provide} forms.
+     * Note that we expand these after expanding the rest of the module.
      */
-    private SyntaxSexp prepareProvide(SyntaxSexp form,
-                                      Namespace moduleNamespace)
-        throws SyntaxFailure
+    private SyntaxSexp expandProvide(Evaluator eval,
+                                     SyntaxSexp form,
+                                     Namespace moduleNamespace)
+        throws FusionException
     {
-        int size = form.size();
+        ArrayList<SyntaxValue> expanded = new ArrayList<>(form.size());
+        expanded.add(form.get(0));
+
         SyntaxChecker check = new SyntaxChecker("provide", form);
-        for (int i = 1; i < size; i++)
+        for (int i = 1; i < form.size(); i++)
         {
-            check.requiredIdentifier("bound identifier", i);
+            SyntaxValue spec = form.get(i);
+            switch (spec.getType())
+            {
+                case SYMBOL:
+                {
+                    check.requiredIdentifier("bound identifier", i);
+
+                    expandProvideId(moduleNamespace, (SyntaxSymbol) spec,
+                                    check, expanded);
+                    break;
+                }
+                case SEXP:
+                {
+                    expandProvideSexp(eval, moduleNamespace,
+                                      (SyntaxSexp) spec,
+                                      check.subformSexp("provide-spec", i),
+                                      expanded);
+                    break;
+                }
+                default:
+                {
+                    throw check.failure("expected provide-spec", form.get(i));
+                }
+            }
         }
 
-        return form;
+        SyntaxValue[] children =
+            expanded.toArray(new SyntaxValue[expanded.size()]);
+        return SyntaxSexp.make(eval, children, form.getAnnotations(), form.getLocation());
+    }
+
+
+    private void expandProvideId(Namespace moduleNamespace,
+                                 SyntaxSymbol identifier,
+                                 SyntaxChecker check,
+                                 ArrayList<SyntaxValue> expanded)
+        throws FusionException
+    {
+        String publicName = identifier.stringValue();
+
+        // TODO FUSION-139 id.resolve works when the id has the ns in context
+        // It doesn't work when the ns isn't in context because the
+        // provided binding was macro-introduced.
+
+        Binding b = identifier.resolve();
+        // Binding local = moduleNamespace.localResolve(identifier);
+        // localResolve isn't right either since it doesn't find imports
+
+        if (b instanceof FreeBinding)
+        {
+            String message =
+                "cannot export " + printQuotedSymbol(publicName) +
+                " since it has no definition.";
+            throw check.failure(message);
+        }
+
+        String freeName = b.getName();
+        if (! publicName.equals(freeName))
+        {
+            String message =
+                "cannot export binding since symbolic name " +
+                printQuotedSymbol(publicName) +
+                " differs from resolved name " +
+                printQuotedSymbol(freeName);
+            throw check.failure(message);
+        }
+
+        expanded.add(identifier);
+    }
+
+    private void expandProvideSexp(Evaluator eval,
+                                   Namespace moduleNamespace,
+                                   SyntaxSexp specForm,
+                                   SyntaxChecker check,
+                                   ArrayList<SyntaxValue> expanded)
+        throws FusionException
+    {
+        SyntaxSymbol tag = check.requiredIdentifier(0);
+        switch (tag.stringValue())
+        {
+            case "all_defined_out":
+            {
+                check.arityExact(1);
+
+                // Filter by lexical context: we shouldn't export identifiers
+                // introduced by macros unless this form was also introduced
+                // at the same time.
+                for (NsBinding binding : moduleNamespace.getBindings())
+                {
+                    // TODO the datum->syntax context should be the whole sexp
+                    // form `(all_defined_out)` not just `all_defined_out` but
+                    // we don't currently retain context on SyntaxSexp after
+                    // it has been pushed down to children.
+                    SyntaxSymbol localized = (SyntaxSymbol)
+                        datumToSyntax(eval,
+                                      SyntaxSymbol.make(binding.getName()),
+                                      tag);
+                    localized = localized.copyAndResolveTop();
+                    Binding localBinding =
+                        moduleNamespace.localResolve(localized);
+                    if (localBinding != null
+                        && binding.sameTarget(localBinding))
+                    {
+                        localized = localized.copyReplacingBinding(binding);
+                        expanded.add(localized);
+                    }
+
+                    // TODO FUSION-136 handle rename-transformers per Racket
+                }
+
+                break;
+            }
+            default:
+            {
+                throw check.failure("invalid provide-spec");
+            }
+        }
     }
 
 
     /**
      * @return not null.
      */
-    private SyntaxSymbol[] providedSymbols(ArrayList<SyntaxSexp> provideForms)
-        throws SyntaxFailure
+    private SyntaxSymbol[] providedSymbols(Evaluator eval,
+                                           Namespace ns,
+                                           ArrayList<SyntaxSexp> provideForms)
+        throws FusionException
     {
         ArrayList<SyntaxSymbol> identifiers = new ArrayList<SyntaxSymbol>();
 
@@ -447,29 +568,20 @@ final class ModuleForm
             int size = form.size();
             for (int i = 1; i < size; i++)
             {
-                SyntaxSymbol identifier = (SyntaxSymbol) form.get(i);
-                String publicName = identifier.stringValue();
-
-                Binding b = identifier.resolve();
-                if (b instanceof FreeBinding)
+                SyntaxValue spec = form.get(i);
+                switch (spec.getType())
                 {
-                    String message =
-                        "cannot export " + printQuotedSymbol(publicName) +
-                        " since it has no definition.";
-                    throw check.failure(message);
+                    case SYMBOL:
+                    {
+                        SyntaxSymbol id = (SyntaxSymbol) spec;
+                        identifiers.add(id);
+                        break;
+                    }
+                    default:
+                    {
+                        throw check.failure("invalid provide-spec");
+                    }
                 }
-
-                String freeName = b.getName();
-                if (! publicName.equals(freeName))
-                {
-                    String message =
-                        "cannot export binding since symbolic name " +
-                        printQuotedSymbol(publicName) +
-                        " differs from resolved name " +
-                        printQuotedSymbol(freeName);
-                    throw check.failure(message);
-                }
-                identifiers.add(identifier);
             }
         }
 

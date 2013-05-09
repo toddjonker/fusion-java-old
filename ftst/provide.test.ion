@@ -1,0 +1,60 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(require "/check")
+
+
+//============================================================================
+// Check simple all_defined_out
+
+(module M1 '/fusion/base'
+  (define m1 1)
+  (define m2 2)
+  (provide (all_defined_out)))
+
+(require M1)
+(check = m1 1)
+(check = m2 2)
+
+
+//============================================================================
+// Check that all_defined_out filters identifiers based on lexical context.
+
+(define top "at-top")
+
+(module M2 '/fusion/base'
+  (require "/fusion/syntax")
+  (define_syntax deftop
+    (lambda (stx)
+      (quasisyntax
+        (define top (unsyntax (syntax_get stx 1))))))
+  (define_syntax defpubtop
+    (lambda (stx)
+      (quasisyntax
+        (begin (define top (unsyntax (syntax_get stx 1)))
+               (provide (all_defined_out))))))
+  (provide (all_defined_out)))
+
+(require M2)
+(deftop "macro")         // Defines a different top, with marks from the macro
+(check = top "at-top")
+
+(module M3 '/fusion/base'
+  (require M2)
+  (deftop "inside M3")
+  // This should not export top since it was introduced via macro
+  (provide (all_defined_out)))
+
+(require M3)
+(check = top "at-top")
+
+
+(module M4 '/fusion/base'
+  (require M2)
+  // This DOES export top
+  (defpubtop "inside M4"))
+(require M4)
+(check = top "inside M4")
+
+
+
+// TODO test exporting two differently-marked vars w/same name

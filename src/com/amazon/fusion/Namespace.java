@@ -181,6 +181,12 @@ abstract class Namespace
     abstract ModuleIdentity getModuleId();
 
 
+    /**
+     * Collects the bindings defined in this module; does not include imported
+     * bindings.
+     *
+     * @return not null.
+     */
     Collection<NsBinding> getBindings()
     {
         return Collections.unmodifiableCollection(myBindings);
@@ -228,7 +234,7 @@ abstract class Namespace
     }
 
     @Override
-    public Binding substituteFree(String name, Set<Integer> marks)
+    public NsBinding substituteFree(String name, Set<Integer> marks)
     {
         for (NsBinding b : myBindings)
         {
@@ -244,10 +250,14 @@ abstract class Namespace
     /**
      * @return null if identifier isn't bound here.
      */
-    NsBinding localResolve(SyntaxSymbol identifier)
+    final NsBinding localResolve(SyntaxSymbol identifier)
     {
         Binding resolvedRequestedId = identifier.resolve();
         Set<Integer> marks = identifier.computeMarks();
+        if (resolvedRequestedId instanceof FreeBinding)
+        {
+            return substituteFree(identifier.stringValue(), marks);
+        }
         return localSubstitute(resolvedRequestedId, marks);
     }
 
