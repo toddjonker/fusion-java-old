@@ -171,22 +171,28 @@ class ModuleNamespace
     SyntaxSymbol predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
         throws FusionException
     {
+        // Don't cache the binding! The symbol instance may also be in use as
+        // a reference to this binding (due to a macro expansion), in which
+        // case this result is not correct for that reference.
         Binding oldBinding = identifier.uncachedResolveMaybe();
         if (oldBinding == null ||
-            oldBinding instanceof FreeBinding ||
-            oldBinding instanceof LanguageBinding)
+            oldBinding instanceof FreeBinding)
         {
-            // We need to strip off the namespace-level wrap that's already been
-            // applied to the identifier. Otherwise we'll loop forever trying
-            // to resolve it! This is a bit of a hack, really.
-            identifier = identifier.stripImmediateEnvWrap(this);
-
-            NsBinding b = addBinding(identifier);
-            return identifier.copyReplacingBinding(b);
+            identifier = identifier.makeFree();
+        }
+        else if (oldBinding instanceof LanguageBinding)
+        {
+            // Again, being careful not to cache a binding in the original id.
+            identifier = identifier.copyReplacingBinding(oldBinding);
+        }
+        else
+        {
+            String name = identifier.stringValue();
+            throw new AmbiguousBindingFailure(null, name, formForErrors);
         }
 
-        String name = identifier.stringValue();
-        throw new AmbiguousBindingFailure(null, name, formForErrors);
+        NsBinding b = addBinding(identifier);
+        return identifier.copyReplacingBinding(b);
     }
 
 

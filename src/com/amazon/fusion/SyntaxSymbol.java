@@ -86,13 +86,19 @@ final class SyntaxSymbol
         return copy;
     }
 
-    SyntaxSymbol stripImmediateEnvWrap(Environment env)
+    /**
+     * Returns a free identifier similar to this one, by striping lexical
+     * information and retaining marks.
+     */
+    SyntaxSymbol makeFree()
     {
-        if (myWraps == null) return this;
-        SyntaxWraps wraps = myWraps.stripImmediateEnvWrap(env);
-        if (wraps == myWraps) return this;
-        return copyReplacingWraps(wraps);
+        if (myWraps == null)
+        {
+            return this;
+        }
+        return copyReplacingWraps(myWraps.retainMarks());
     }
+
 
     @Override
     Type getType()

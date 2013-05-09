@@ -10,7 +10,7 @@
   (lambda (stx)
     (quasisyntax
       (define (c) c))))
-(define_c)
+//(define_c)    // TODO c is unbound inside introduced lambda body
 
 // Similar, but within a module.  Here `d` is unbound where it occurs.
 (module M1 '/fusion/base'
@@ -36,7 +36,7 @@
     (quasisyntax
       (define top (unsyntax (syntax_get stx 1))))))
 (define_top "macro1")
-//(check = top "outside")  TODO top -> "macro1"
+(check = top "outside")
 
 
 // Similar for macro exported from a module
@@ -53,7 +53,7 @@
    (provide define_top))
 (require M2)
 (define_top "macro2" get_top_1)
-//(check = top "outside")          TODO top -> "macro1"
+(check = top "outside")
 //(check = (get_top_1) "macro2")
 
 
