@@ -74,6 +74,14 @@ final class SyntaxSymbol
         return copy;
     }
 
+    SyntaxSymbol copyReplacingBinding(Binding binding)
+    {
+        SyntaxSymbol copy =
+            new SyntaxSymbol(myText, getAnnotations(), getLocation(), myWraps);
+        copy.myBinding = binding;
+        return copy;
+    }
+
     SyntaxSymbol stripImmediateEnvWrap(Environment env)
     {
         if (myWraps == null) return this;

@@ -113,7 +113,7 @@ class TopLevelNamespace
 
 
     @Override
-    NsBinding predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
+    SyntaxSymbol predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
         throws FusionException
     {
         // We need to strip off the namespace-level wrap that's already been
@@ -128,9 +128,12 @@ class TopLevelNamespace
         }
         else
         {
+            // Give this pre-existing binding precedence over any imports that
+            // may have happened since the last time it was defined.
             ((TopLevelBinding) binding).myPrecedence = myCurrentPrecedence;
         }
-        return binding;
+
+        return identifier.copyReplacingBinding(binding);
     }
 
 

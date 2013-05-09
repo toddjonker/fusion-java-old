@@ -21,23 +21,50 @@ final class DefineForm
     }
 
 
-    static SyntaxSymbol boundIdentifier(Evaluator eval, Environment env,
-                                        SyntaxSexp defineStx)
-        throws SyntaxFailure
+    /**
+     * Predefines the identifiers at module level. As with all binding forms,
+     * we modify the original identifier so that its
+     * {@link SyntaxSymbol#getBinding()} returns the new binding.
+     * This is a hack to communicate that information between the "expand" and
+     * "compile" phases, since the complire doesn't have the same environment
+     * and cannot resolve bindings.
+     *
+     * @return the {@code define} form, with the bound identifier updated to
+     * have the new {@link Binding}.
+     */
+    static SyntaxSexp predefine(Evaluator eval,
+                                ModuleNamespace ns,
+                                SyntaxSexp defineStx,
+                                SyntaxValue formForErrors)
+        throws FusionException
     {
         SyntaxChecker check = new SyntaxChecker("define", defineStx);
         check.arityAtLeast(3);
 
-        if (defineStx.get(1).getType() == SyntaxValue.Type.SEXP)
+        SyntaxValue[] children = defineStx.extract();
+
+        SyntaxValue first = children[1];
+        if (first.getType() == SyntaxValue.Type.SEXP)
         {
             SyntaxChecker sigCheck =
                 check.subformSeq("procedure signature", 1);
 
-            return sigCheck.requiredIdentifier("procedure name", 0);
+            SyntaxSymbol identifier =
+                sigCheck.requiredIdentifier("procedure name", 0);
+
+            SyntaxValue[] sig = ((SyntaxSexp) first).extract();
+            sig[0] = ns.predefine(identifier, formForErrors);
+            children[1] = SyntaxSexp.make(eval, sig, first.getAnnotations(),
+                                          first.getLocation());
+        }
+        else
+        {
+            SyntaxSymbol identifier = check.requiredIdentifier(1);
+            children[1] = ns.predefine(identifier, formForErrors);
         }
 
-        SyntaxSymbol identifier = check.requiredIdentifier(1);
-        return identifier;
+        return SyntaxSexp.make(eval, children, defineStx.getAnnotations(),
+                               defineStx.getLocation());
     }
 
     // (define (p f ...) d? b ...+) => (define p d? (lambda (f ...) b ...))
@@ -128,14 +155,9 @@ final class DefineForm
         {
             Namespace ns = env.namespace();
             assert ns == env;
-            ns.predefine(identifier, origStx);
+            identifier = ns.predefine(identifier, origStx);
+            children[1] = identifier;
         }
-
-
-        // Update the identifier with its binding.
-        // This is just a way to pass the binding instance through to the
-        // runtime stage so compile() below can reuse it.
-        children[1] = expander.expand(env, identifier);
 
         int bodyPos;
         SyntaxValue maybeDoc = children[2];

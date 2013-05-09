@@ -167,7 +167,7 @@ class ModuleNamespace
 
 
     @Override
-    NsBinding predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
+    SyntaxSymbol predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
         throws FusionException
     {
         Binding oldBinding = identifier.uncachedResolveMaybe();
@@ -180,7 +180,8 @@ class ModuleNamespace
             // to resolve it! This is a bit of a hack, really.
             identifier = identifier.stripImmediateEnvWrap(this);
 
-            return addBinding(identifier);
+            NsBinding b = addBinding(identifier);
+            return identifier.copyReplacingBinding(b);
         }
 
         String name = identifier.stringValue();

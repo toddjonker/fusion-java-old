@@ -39,13 +39,8 @@ final class DefineSyntaxForm
         {
             Namespace ns = env.namespace();
             assert ns == env;
-            ns.predefine(identifier, stx);
+            children[1] = ns.predefine(identifier, stx);
         }
-
-        // Update the identifier with its binding.
-        // This is just a way to pass the binding instance through to the
-        // runtime stage so invoke() below can reuse it.
-        children[1] = expander.expand(env, identifier);
 
         int bodyPos;
         SyntaxValue maybeDoc = children[2];

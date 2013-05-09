@@ -275,9 +275,11 @@ abstract class Namespace
     /**
      * Creates a binding, but no value, for a name.
      * Used during expansion phase, before evaluating the right-hand side.
+     *
+     * @return a copy of the identifier that has the new binding attached.
      */
-    abstract NsBinding predefine(SyntaxSymbol identifier,
-                                  SyntaxValue formForErrors)
+    abstract SyntaxSymbol predefine(SyntaxSymbol identifier,
+                                    SyntaxValue formForErrors)
         throws FusionException;
 
 
@@ -344,7 +346,8 @@ abstract class Namespace
         throws FusionException
     {
         SyntaxSymbol identifier = SyntaxSymbol.make(name);
-        NsBinding binding = predefine(identifier, null);
+        identifier = predefine(identifier, null);
+        NsBinding binding = (NsBinding) identifier.getBinding();
         bind(binding, value);
     }
 

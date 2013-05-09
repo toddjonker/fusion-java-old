@@ -11,6 +11,12 @@ final class FusionEval
     private FusionEval() {}
 
 
+    /**
+     * Turns a given form (datum or syntax) into a top-level syntax object,
+     * and optionally enriching it.
+     *
+     * @param whosCalling The form to name for error messages.
+     */
     private static SyntaxValue topLevelStx(Evaluator eval,
                                            Object topLevelForm,
                                            boolean enrichSyntaxObject,

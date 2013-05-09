@@ -117,7 +117,7 @@ final class ModuleForm
             throw ex;
         }
 
-        Namespace moduleNamespace =
+        ModuleNamespace moduleNamespace =
             new ModuleNamespace(registry, language, id);
 
         // TODO handle #%module-begin and #%plain-module-begin
@@ -175,11 +175,9 @@ final class ModuleForm
 
                         if (binding == defineBinding)
                         {
-                            SyntaxSymbol identifier =
-                                DefineForm.boundIdentifier(expander.getEvaluator(),
-                                                           moduleNamespace,
-                                                           sexp);
-                            moduleNamespace.predefine(identifier, form);
+                            expanded = DefineForm.predefine(expander.getEvaluator(),
+                                                            moduleNamespace,
+                                                            sexp, form);
                         }
                         else if (binding == defineSyntaxBinding)
                         {
