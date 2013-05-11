@@ -470,29 +470,6 @@ final class ModuleForm
         for (int i = 1; i < size; i++)
         {
             check.requiredIdentifier("bound identifier", i);
-
-            SyntaxSymbol identifier = (SyntaxSymbol) form.get(i);
-            String publicName = identifier.stringValue();
-
-            Binding b = identifier.resolve();
-            if (b instanceof FreeBinding)
-            {
-                String message =
-                    "cannot export " + printQuotedSymbol(publicName) +
-                    " since it has no definition.";
-                throw check.failure(message);
-            }
-
-            String freeName = b.getName();
-            if (! publicName.equals(freeName))
-            {
-                String message =
-                    "cannot export binding since symbolic name " +
-                    printQuotedSymbol(publicName) +
-                    " differs from resolved name " +
-                    printQuotedSymbol(freeName);
-                throw check.failure(message);
-            }
         }
 
         return form;
@@ -509,10 +486,33 @@ final class ModuleForm
 
         for (SyntaxSexp form : provideForms)
         {
+            SyntaxChecker check = new SyntaxChecker("provide", form);
+
             int size = form.size();
             for (int i = 1; i < size; i++)
             {
                 SyntaxSymbol identifier = (SyntaxSymbol) form.get(i);
+                String publicName = identifier.stringValue();
+
+                Binding b = identifier.resolve();
+                if (b instanceof FreeBinding)
+                {
+                    String message =
+                        "cannot export " + printQuotedSymbol(publicName) +
+                        " since it has no definition.";
+                    throw check.failure(message);
+                }
+
+                String freeName = b.getName();
+                if (! publicName.equals(freeName))
+                {
+                    String message =
+                        "cannot export binding since symbolic name " +
+                        printQuotedSymbol(publicName) +
+                        " differs from resolved name " +
+                        printQuotedSymbol(freeName);
+                    throw check.failure(message);
+                }
                 identifiers.add(identifier);
             }
         }

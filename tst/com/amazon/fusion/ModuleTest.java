@@ -193,4 +193,17 @@ public class ModuleTest
         eval("(require mod)");
         assertEval(1054, "M");
     }
+
+    /**
+     * We shouldn't fail `provide` at expand-time, since that may hide the
+     * compile-time errors that caused provide to fail.
+     */
+    @Test(expected=UnboundIdentifierFailure.class)
+    public void testProvideFailsLate()
+        throws Exception
+    {
+        eval("(module x '/fusion/base'" +
+             "  (define_syntax broken (lambda (s) s))" +
+             "  (provide broken))");
+    }
 }
