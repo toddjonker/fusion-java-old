@@ -18,9 +18,7 @@ abstract class MacroForm
     }
 
 
-    @Override
-    final SyntaxValue expand(Expander expander, Environment env,
-                             SyntaxSexp stx)
+    final SyntaxValue expandOnce(Expander expander, SyntaxSexp stx)
         throws FusionException
     {
         // TODO FUSION-39 we create two MarkWrap instances here
@@ -28,19 +26,29 @@ abstract class MacroForm
 
         stx = (SyntaxSexp) stx.addOrRemoveMark(mark);
 
+        SyntaxValue expanded = doExpandOnce(expander, stx);
+
+        return expanded.addOrRemoveMark(mark);
+    }
+
+    @Override
+    final SyntaxValue expand(Expander expander, Environment env,
+                             SyntaxSexp stx)
+        throws FusionException
+    {
         SyntaxValue expanded = expandOnce(expander, stx);
-        expanded = expanded.addOrRemoveMark(mark);
 
         // TODO tail
         return expander.expand(env, expanded);
     }
 
     /**
-     * Performs a single "level" of macro expansion.
+     * PRIVATE! Performs a single "level" of macro expansion.
+     * Not for use outside this hierarchy.
      *
      * @param stx the input syntax, including the macro identifier.
      */
-    abstract SyntaxValue expandOnce(Expander expander, SyntaxSexp stx)
+    abstract SyntaxValue doExpandOnce(Expander expander, SyntaxSexp stx)
         throws SyntaxFailure;
 
 

@@ -26,7 +26,7 @@ final class LetForm
      * {@code ((letrec ((f (lambda (v ...) b ...))) f) e ...)}
      */
     @Override
-    SyntaxValue expandOnce(Expander expander, SyntaxSexp stx)
+    SyntaxValue doExpandOnce(Expander expander, SyntaxSexp stx)
         throws SyntaxFailure
     {
         SyntaxChecker check = check(stx);

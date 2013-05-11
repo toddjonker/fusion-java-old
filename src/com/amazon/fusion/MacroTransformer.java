@@ -19,7 +19,7 @@ final class MacroTransformer
 
 
     @Override
-    SyntaxValue expandOnce(Expander expander, SyntaxSexp stx)
+    SyntaxValue doExpandOnce(Expander expander, SyntaxSexp stx)
         throws SyntaxFailure
     {
         Object expanded;
