@@ -63,6 +63,25 @@ final class FreeBinding implements Binding
     }
 
     @Override
+    public CompiledForm compileTopReference(Evaluator eval, Environment env,
+                                            SyntaxSymbol id)
+        throws FusionException
+    {
+        Namespace ns = env.namespace();
+
+        if (ns instanceof TopLevelNamespace)
+        {
+            Binding b = ns.localResolve(id);
+            if (b != null)
+            {
+                return b.compileReference(eval, env);
+            }
+        }
+
+        throw new UnboundIdentifierFailure(id.stringValue(), id);
+    }
+
+    @Override
     public CompiledForm compileSet(Evaluator eval, Environment env,
                                    CompiledForm valueForm)
         throws FusionException

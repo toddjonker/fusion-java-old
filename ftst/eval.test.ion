@@ -56,5 +56,6 @@
 
 (check_equal
   (syntax_to_datum (expand (quote (let [(a b)] a))))
-  (quote ((lambda (a) a) b))
+  (quote ((lambda (a) a) ('#%top' b)))
   "let w/ unbound var")
+

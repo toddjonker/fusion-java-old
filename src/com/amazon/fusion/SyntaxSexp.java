@@ -239,8 +239,9 @@ final class SyntaxSexp
         {
             SyntaxSymbol maybeMacro = (SyntaxSymbol) first;
             SyntaxValue prepared = expander.expand(env, maybeMacro);
-            // Make sure we don't have to structurally change this sexp
-            assert prepared == maybeMacro;
+
+            // Identifier has been expanded to #%top, we can stop.
+            if (prepared != maybeMacro) return this;
 
             Binding binding = maybeMacro.getBinding();
             if (stops.get(binding) != null)

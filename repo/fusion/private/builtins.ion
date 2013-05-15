@@ -18,6 +18,7 @@
   (defpub_j_syntax let_values     "com.amazon.fusion.LetValuesForm")
   (defpub_j_syntax quote          "com.amazon.fusion.QuoteForm")
   (defpub_j_syntax set            "com.amazon.fusion.SetForm")
+  (defpub_j_syntax '#%top'        "com.amazon.fusion.TopForm")
 
 
   (defpub_j .                     "com.amazon.fusion.DotProc")

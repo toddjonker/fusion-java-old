@@ -43,6 +43,11 @@ interface Binding
     CompiledForm compileReference(Evaluator eval, Environment env)
         throws FusionException;
 
+    /** Compile a #%top reference. */
+    CompiledForm compileTopReference(Evaluator eval, Environment env,
+                                     SyntaxSymbol id)
+        throws FusionException;
+
     /** Compile a mutation of the variable denoted by this binding. */
     CompiledForm compileSet(Evaluator eval, Environment env,
                             CompiledForm valueForm)

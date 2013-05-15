@@ -64,6 +64,17 @@ final class LanguageWrap
         }
 
         @Override
+        public CompiledForm compileTopReference(Evaluator eval,
+                                                Environment env,
+                                                SyntaxSymbol id)
+            throws FusionException
+        {
+            String message =
+                "#%top not implemented for language binding: " + this;
+            throw new SyntaxFailure("#%top", message, id);
+        }
+
+        @Override
         public CompiledForm compileSet(Evaluator eval, Environment env,
                                        CompiledForm valueForm)
             throws FusionException

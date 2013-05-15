@@ -60,6 +60,17 @@ class ModuleNamespace
         }
 
         @Override
+        public CompiledForm compileTopReference(Evaluator eval,
+                                                Environment env,
+                                                SyntaxSymbol id)
+            throws FusionException
+        {
+            String message =
+                "#%top not implemented for module binding: " + this;
+            throw new SyntaxFailure("#%top", message, id);
+        }
+
+        @Override
         public CompiledForm compileReference(Evaluator eval, Environment env)
             throws FusionException
         {

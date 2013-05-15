@@ -33,6 +33,15 @@ class TopLevelNamespace
         }
 
         @Override
+        public CompiledForm compileTopReference(Evaluator eval,
+                                                Environment env,
+                                                SyntaxSymbol id)
+            throws FusionException
+        {
+            return new CompiledTopVariableReference(myAddress);
+        }
+
+        @Override
         public String toString()
         {
             return "{{{TopLevelBinding " + getIdentifier() + "}}}";

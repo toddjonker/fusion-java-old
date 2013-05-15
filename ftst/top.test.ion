@@ -1,0 +1,50 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(require "/check")
+
+
+(define my_top "at-top")
+(check = ('#%top' my_top) "at-top")
+
+// TODO this fails since my_top has a local binding
+//(let [(my_top "shadow")]
+//  (check = ('#%top' my_top) "at-top"))
+
+
+(module M '/fusion/base'
+  (require "/check" "/fusion/syntax")
+  (define my_top "in-M")
+
+  // TODO #%top for module-level definitions
+  //(check = ('#%top' my_top) "in-M")
+
+  // TODO this fails as it should, but the error message is bad.
+  //(let [(my_top "shadow")]
+  //  ('#%top' my_top))
+
+  (define_syntax define_accessor
+    (lambda (stx)
+      (quasisyntax
+        (define ((unsyntax (syntax_get stx 1)))
+          // TODO fails because my_top is a module-level binding
+          ('#%top' my_top)))))
+
+  (define_syntax define_accessor2
+    (lambda (stx)
+      (quasisyntax
+        (begin
+          (define my_top "another one")
+          (define ((unsyntax (syntax_get stx 1)))
+            // TODO fails because my_top is a module-level binding
+            ('#%top' my_top))))))
+  (provide define_accessor define_accessor2))
+(require M)
+//(define_accessor a)                  // TODO fails
+//(check = (a) "at-top")
+(check = my_top "at-top")
+(check = ('#%top' my_top) "at-top")
+
+//(define_accessor2 a2)                // TODO fails
+//(check = (a2) "another one")
+(check = my_top "at-top")
+(check = ('#%top' my_top) "at-top")

@@ -71,6 +71,17 @@ final class LocalEnvironment
         }
 
         @Override
+        public CompiledForm compileTopReference(Evaluator eval,
+                                                Environment env,
+                                                SyntaxSymbol id)
+            throws FusionException
+        {
+            String message =
+                "#%top not implemented for local binding: " + this;
+            throw new SyntaxFailure("#%top", message, id);
+        }
+
+        @Override
         public CompiledForm compileSet(Evaluator eval, Environment env,
                                        CompiledForm valueForm)
             throws FusionException

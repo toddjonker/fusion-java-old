@@ -307,11 +307,10 @@ final class SyntaxSymbol
 
     @Override
     SyntaxValue doExpand(Expander expander, Environment env)
-        throws SyntaxFailure
+        throws FusionException
     {
         if (myBinding == null)        // Otherwise we've already been expanded
         {
-            // TODO FUSION-114 this should happen in resolve()
             if (myText == null)
             {
                 throw new SyntaxFailure(null,
@@ -320,6 +319,23 @@ final class SyntaxSymbol
             }
 
             resolve();
+
+            if (myBinding instanceof FreeBinding)
+            {
+                SyntaxSymbol top =
+                    new SyntaxSymbol("#%top", EMPTY_STRING_ARRAY,
+                                     null, myWraps);
+                if (top.resolve() instanceof FreeBinding)
+                {
+                    throw new UnboundIdentifierFailure(myText, this);
+                }
+
+                assert getAnnotations().length == 0;
+                SyntaxSexp topExpr = SyntaxSexp.make(expander, top, this);
+
+                // TODO TAIL
+                return expander.expandExpression(env, topExpr);
+            }
         }
 
         return this;
