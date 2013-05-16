@@ -80,8 +80,8 @@ final class LanguageWrap
         @Override
         public String toString()
         {
-            return "{{{LanguageBinding " + myBinding.myModuleId +
-                   ' ' + getName() + "}}}";
+            return "{{{LanguageBinding " + myBinding.myModuleId.internString()
+                 + ' ' + getName() + "}}}";
         }
     }
 

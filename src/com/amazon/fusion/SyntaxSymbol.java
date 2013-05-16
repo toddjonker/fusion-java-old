@@ -38,6 +38,10 @@ final class SyntaxSymbol
 
     final SyntaxWraps myWraps;
 
+    /**
+     * @param anns the new instance assumes ownership of the array and
+     * it must not be modified later. Must not be null.
+     */
     private SyntaxSymbol(String name, String[] anns, SourceLocation loc,
                          SyntaxWraps wraps)
     {
@@ -344,6 +348,17 @@ final class SyntaxSymbol
         writer.writeSymbol(myText);
     }
 
+    String debugString()
+    {
+        String base = toString();
+        Set<Integer> marks = this.computeMarks();
+        if (marks.isEmpty()) return base;
+        for (Integer mark : marks)
+        {
+            base += "#" + mark;
+        }
+        return base;
+    }
 
     //========================================================================
 

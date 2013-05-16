@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -73,6 +73,12 @@ public class SourceName
 
     /** Returns the human-readable source name, for display in messages. */
     String display()
+    {
+        return myDisplay;
+    }
+
+    @Override
+    public String toString()
     {
         return myDisplay;
     }

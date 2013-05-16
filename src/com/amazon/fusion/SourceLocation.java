@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -60,5 +60,22 @@ final class SourceLocation
             out.append(" of ");
             out.append(myName.display());
         }
+    }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder out = new StringBuilder();
+        FusionUtils.writeFriendlyIndex(out, myLine);
+        out.append(" line, ");
+        FusionUtils.writeFriendlyIndex(out, myColumn);
+        out.append(" column");
+
+        if (myName != null)
+        {
+            out.append(" of ");
+            out.append(myName.display());
+        }
+        return out.toString();
     }
 }

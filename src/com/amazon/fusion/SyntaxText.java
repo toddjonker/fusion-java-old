@@ -8,6 +8,8 @@ abstract class SyntaxText
     protected final String myText;
 
     /**
+     * @param anns the new instance assumes ownership of the array and
+     * it must not be modified later. Must not be null.
      * @param text may be null.
      */
     SyntaxText(String text, String[] anns, SourceLocation loc)

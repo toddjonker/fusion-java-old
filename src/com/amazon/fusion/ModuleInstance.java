@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import com.amazon.fusion.Namespace.NsBinding;
-import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -188,15 +187,7 @@ final class ModuleInstance
     final void identify(Appendable out)
         throws IOException
     {
-        String name = getInferredName();
-        if (name == null)
-        {
-            out.append("anonymous module");
-        }
-        else
-        {
-            out.append("module ");
-            IonTextUtils.printQuotedSymbol(out, name);
-        }
+        out.append("module ");
+        out.append(myIdentity.toString());
     }
 }
