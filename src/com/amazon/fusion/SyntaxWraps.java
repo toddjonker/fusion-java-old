@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -20,7 +19,6 @@ final class SyntaxWraps
 
     static SyntaxWraps make(SyntaxWrap... initialWraps)
     {
-        assert initialWraps.length != 0;
         return new SyntaxWraps(initialWraps);
     }
 
@@ -68,27 +66,6 @@ final class SyntaxWraps
     }
 
 
-    SyntaxWraps retainMarks()
-    {
-        // TODO optimize
-        ArrayList<SyntaxWrap> wraps = new ArrayList<>();
-
-        for (SyntaxWrap wrap : myWraps)
-        {
-            if (wrap instanceof MarkWrap)
-            {
-                wraps.add(wrap);
-            }
-        }
-
-        int size = wraps.size();
-        if (size == 0) return null;
-
-        SyntaxWrap[] s = wraps.toArray(new SyntaxWrap[size]);
-        return new SyntaxWraps(s);
-    }
-
-
     /**
      * @return not null.
      */
@@ -132,6 +109,24 @@ final class SyntaxWraps
         {
             SyntaxWrap wrap = i.next();
             return wrap.resolve(name, i, marks);
+        }
+
+        return null;
+    }
+
+    /**
+     * @return null is equivalent to a {@link FreeBinding}.
+     */
+    Binding resolveTop(String name)
+    {
+        Iterator<SyntaxWrap> i =
+            new SplicingIterator(Arrays.asList(myWraps).iterator());
+        Set<Integer> marks = new HashSet<Integer>();
+
+        if (i.hasNext())
+        {
+            SyntaxWrap wrap = i.next();
+            return wrap.resolveTop(name, i, marks);
         }
 
         return null;

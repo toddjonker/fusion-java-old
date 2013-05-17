@@ -22,6 +22,18 @@ abstract class SyntaxWrap
                              Set<Integer> returnMarks);
 
 
+    Binding resolveTop(String name,
+                       Iterator<SyntaxWrap> moreWraps,
+                       Set<Integer> returnMarks)
+    {
+        if (moreWraps.hasNext())
+        {
+            SyntaxWrap nextWrap = moreWraps.next();
+            return nextWrap.resolveTop(name, moreWraps, returnMarks);
+        }
+        return resolve(name, moreWraps, returnMarks);
+    }
+
     /**
      * Returns an iterator over sub-wraps, if this is a composite, or null
      * otherwise.

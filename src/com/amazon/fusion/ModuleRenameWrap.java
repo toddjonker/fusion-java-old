@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -19,7 +20,7 @@ class ModuleRenameWrap
         myModule = module;
     }
 
-    Binding localResolveMaybe(String name)
+    ModuleBinding localResolveMaybe(String name)
     {
         return myModule.resolveProvidedName(name);
     }

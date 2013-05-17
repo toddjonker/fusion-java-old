@@ -194,6 +194,9 @@ abstract class Namespace
      */
     SyntaxValue syntaxIntroduce(SyntaxValue source)
     {
+        // TODO there's a case where we are applying the same wraps that are
+        // already on the source.  This happens when expand-ing (and maybe when
+        // eval-ing at top-level source that's from that same context.
         source = source.addWraps(myWraps);
         return source;
     }
@@ -375,6 +378,12 @@ abstract class Namespace
         myWraps = myWraps.addWrap(wrap);
     }
 
+    boolean ownsBinding(NsBinding binding)
+    {
+        int address = binding.myAddress;
+        return (address < myBindings.size()
+                && binding == myBindings.get(address));
+    }
 
     @Override
     public Object lookup(Binding binding)

@@ -189,14 +189,15 @@ class ModuleNamespace
         if (oldBinding == null ||
             oldBinding instanceof FreeBinding)
         {
-            identifier = identifier.makeFree();
+            identifier = identifier.copyAndResolveTop();
         }
         else if (oldBinding instanceof LanguageBinding)
         {
-            // Again, being careful not to cache a binding in the original id.
+            // Visible binding is from our language, we can shadow it.
+            // Again, be careful not to cache a binding in the original id.
             identifier = identifier.copyReplacingBinding(oldBinding);
         }
-        else
+        else // there's an imported binding
         {
             String name = identifier.stringValue();
             throw new AmbiguousBindingFailure(null, name, formForErrors);

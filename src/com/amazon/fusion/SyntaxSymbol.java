@@ -86,19 +86,6 @@ final class SyntaxSymbol
         return copy;
     }
 
-    /**
-     * Returns a free identifier similar to this one, by striping lexical
-     * information and retaining marks.
-     */
-    SyntaxSymbol makeFree()
-    {
-        if (myWraps == null)
-        {
-            return this;
-        }
-        return copyReplacingWraps(myWraps.retainMarks());
-    }
-
 
     @Override
     Type getType()
@@ -229,6 +216,29 @@ final class SyntaxSymbol
         if (myWraps   == null) return null;
         String name = stringValue();
         return myWraps.resolve(name);
+    }
+
+
+    /**
+     * Copies this identifier, caching a top-resolved binding.
+     * @return not null.
+     */
+    SyntaxSymbol copyAndResolveTop()
+    {
+        assert myBinding == null;  // Ensure we aren't throwing away work
+
+        Binding b = null;
+        if (myWraps != null)
+        {
+            String name = stringValue();
+            b = myWraps.resolveTop(name);
+        }
+        if (b == null)
+        {
+            b = new FreeBinding(stringValue());
+        }
+
+        return copyReplacingBinding(b);
     }
 
 

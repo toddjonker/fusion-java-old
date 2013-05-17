@@ -10,7 +10,7 @@
   (lambda (stx)
     (quasisyntax
       (define (c) c))))
-//(define_c)    // TODO c is unbound inside introduced lambda body
+(define_c)
 
 // Similar, but within a module.  Here `d` is unbound where it occurs.
 (module M1 '/fusion/base'
@@ -18,10 +18,10 @@
   (define_syntax define_d
     (lambda (stx)
       (quasisyntax
-        (define (d) d))))     // TODO fails when macro is used, d unbound
+        (define (d) d))))
   (provide define_d))
 (require M1)
-//(define_d)  // TODO fails
+(define_d)
 
 
 //============================================================================
