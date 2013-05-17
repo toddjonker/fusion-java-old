@@ -378,12 +378,23 @@ abstract class Namespace
         myWraps = myWraps.addWrap(wrap);
     }
 
+
     boolean ownsBinding(NsBinding binding)
     {
         int address = binding.myAddress;
         return (address < myBindings.size()
                 && binding == myBindings.get(address));
     }
+
+    boolean ownsBinding(Binding binding)
+    {
+        if (binding instanceof NsBinding)
+        {
+            return ownsBinding((NsBinding) binding);
+        }
+        return false;
+    }
+
 
     @Override
     public Object lookup(Binding binding)

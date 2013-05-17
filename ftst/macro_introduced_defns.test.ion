@@ -47,14 +47,13 @@
       (quasisyntax
         (begin
           (define top (unsyntax (syntax_get stx 1)))
-          // TODO top is not being resolved in lambda
-          //(define (unsyntax (syntax_get stx 2)) (lambda () top))
+          (define (unsyntax (syntax_get stx 2)) (lambda () top))
           ))))
    (provide define_top))
 (require M2)
 (define_top "macro2" get_top_1)
 (check = top "outside")
-//(check = (get_top_1) "macro2")
+(check = (get_top_1) "macro2")
 
 
 // Now try using the macro at module level
@@ -63,9 +62,9 @@
   (define top "in_M3")
   (define_top "macro_in1" get_top_in1)
   (check = top "in_M3")
-//  (check = (get_top_in1) "macro_in1")
+  (check = (get_top_in1) "macro_in1")
   (define_top "macro_in2" get_top_in2)
   (check = top "in_M3")
-//  (check = (get_top_in2) "macro_in2")
+  (check = (get_top_in2) "macro_in2")
   )
 (require M3)

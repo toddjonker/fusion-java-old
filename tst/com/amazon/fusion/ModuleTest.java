@@ -211,7 +211,7 @@ public class ModuleTest
         throws Exception
     {
         eval("(module x '/fusion/base'" +
-             "  (define_syntax broken (lambda (s) s))" +
+             "  (define_syntax broken (lambda (s) x))" +
              "  (provide broken))");
     }
 }

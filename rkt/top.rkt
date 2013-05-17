@@ -10,6 +10,17 @@
   (check-eq? (#%top . my_top) "at-top"))
 
 
+(module T racket
+  (define my_top "in-T")
+  (provide my_top))
+(require 'T)
+(check-eq? (#%top . my_top) "at-top")
+(let [(my_top "shadow")]
+  (check-eq? (#%top . my_top) "at-top"))
+
+;; Hide the binding from T
+(define my_top "at-top")
+
 (check-exn exn:fail?
   (lambda ()
     (eval
@@ -42,19 +53,35 @@
          (define my_top "another one")
          (define (name)
            (#%top . my_top)))]))
-  (provide define_accessor define_accessor2))
+  
+    (define-syntax define_accessor3
+    (syntax-rules ()
+      [(_ name)
+       (begin
+         (define my_top "yet another")
+         (define_accessor name))]))
+  
+  (provide define_accessor define_accessor2 define_accessor3))
 
 (require 'M)
 
 ; Macro-introduced #%top causes access to top-level, not module-level.
-(define_accessor a)
-(check-eq? (a) "at-top")
+(define_accessor a1)
 (check-eq? my_top "at-top")
 (check-eq? (#%top . my_top) "at-top")
+(check-eq? (a1) "at-top")
 
 (define_accessor2 a2)
-(check-eq? (a2) "another one")
 (check-eq? my_top "at-top")
 (check-eq? (#%top . my_top) "at-top")
+(check-eq? (a1) "at-top")
+(check-eq? (a2) "another one")
+
+(define_accessor3 a3)
+(check-eq? my_top "at-top")
+(check-eq? (#%top . my_top) "at-top")
+(check-eq? (a1) "at-top")
+(check-eq? (a2) "another one")
+(check-eq? (a3) "at-top")
 
 (printf "success~n")

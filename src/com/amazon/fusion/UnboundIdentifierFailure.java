@@ -9,8 +9,8 @@ package com.amazon.fusion;
 final class UnboundIdentifierFailure
     extends SyntaxFailure
 {
-    UnboundIdentifierFailure(String name, SyntaxValue... exprs)
+    UnboundIdentifierFailure(String whatForm, SyntaxValue... exprs)
     {
-        super(name, "unbound identifier", exprs);
+        super(whatForm, "unbound identifier", exprs);
     }
 }

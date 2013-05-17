@@ -93,11 +93,7 @@ class TopLevelNamespace
                                                 SyntaxSymbol id)
             throws FusionException
         {
-            if (myTarget == this)
-            {
-                return new CompiledTopVariableReference(myAddress);
-            }
-            return myTarget.compileTopReference(eval, env, id);
+            return new CompiledTopVariableReference(myAddress);
         }
 
         @Override

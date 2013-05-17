@@ -225,8 +225,6 @@ final class SyntaxSymbol
      */
     SyntaxSymbol copyAndResolveTop()
     {
-        assert myBinding == null;  // Ensure we aren't throwing away work
-
         Binding b = null;
         if (myWraps != null)
         {

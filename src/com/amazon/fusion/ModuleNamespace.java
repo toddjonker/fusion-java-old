@@ -3,6 +3,8 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.LanguageWrap.LanguageBinding;
+import java.util.Iterator;
+import java.util.Set;
 
 
 /**
@@ -65,6 +67,7 @@ class ModuleNamespace
                                                 SyntaxSymbol id)
             throws FusionException
         {
+            // We should never get here.
             String message =
                 "#%top not implemented for module binding: " + this;
             throw new SyntaxFailure("#%top", message, id);
@@ -95,10 +98,40 @@ class ModuleNamespace
         public String toString()
         {
             return "{{{ModuleBinding " + myModuleId.internString()
-                + ' ' + getName() + "}}}";
+                + ' ' + getIdentifier().debugString() + "}}}";
         }
     }
 
+
+    private static final class ModuleWrap
+        extends EnvironmentRenameWrap
+    {
+        ModuleWrap(ModuleNamespace ns)
+        {
+            super(ns);
+        }
+
+        @Override
+        Binding resolveTop(String name,
+                           Iterator<SyntaxWrap> moreWraps,
+                           Set<Integer> returnMarks)
+        {
+            if (moreWraps.hasNext())
+            {
+                SyntaxWrap nextWrap = moreWraps.next();
+                return nextWrap.resolve(name, moreWraps, returnMarks);
+            }
+            return null;
+        }
+
+        @Override
+        public String toString()
+        {
+            String name =
+                ((ModuleNamespace)getEnvironment()).myModuleId.internString();
+            return "{{{ModuleWrap " + name + "}}}";
+        }
+    }
 
     private final ModuleIdentity myModuleId;
 
@@ -152,7 +185,7 @@ class ModuleNamespace
         // That's because it breaks {@link SyntaxWraps#stripImmediateEnvWrap}.
         // Also, this structure lets up lookup bindings in the module first
         // before proceeding on to imports and the language.
-        addWrap(new EnvironmentRenameWrap(this));
+        addWrap(new ModuleWrap(this));
     }
 
 
