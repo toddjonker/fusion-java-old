@@ -5,12 +5,9 @@ package com.amazon.fusion;
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionEval.evalSyntax;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
-import static java.lang.Boolean.TRUE;
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
 
 /**
  * @see <a href="http://docs.racket-lang.org/reference/module.html">Racket
@@ -34,13 +31,10 @@ final class ModuleForm
     }
 
 
-    private Binding stopBinding(ModuleInstance kernel,
-                                Map<Binding, Object> stops,
-                                String name)
+    private Binding binding(ModuleInstance module, String name)
     {
-        Binding b = kernel.resolveProvidedName(name).originalBinding();
+        Binding b = module.resolveProvidedName(name).originalBinding();
         assert b != null;
-        stops.put(b, TRUE);
         return b;
     }
 
@@ -59,14 +53,12 @@ final class ModuleForm
         Evaluator eval = expander.getEvaluator();
         ModuleInstance kernel = expander.getKernel();
 
-        // TODO precompute this?
-        IdentityHashMap<Binding, Object> stops =
-            new IdentityHashMap<Binding, Object>();
-        Binding beginBinding        = stopBinding(kernel, stops, "begin");
-        Binding defineBinding       = stopBinding(kernel, stops, "define");
-        Binding defineSyntaxBinding = stopBinding(kernel, stops, "define_syntax");
-        Binding requireBinding      = stopBinding(kernel, stops, "require");
-        Binding useBinding          = stopBinding(kernel, stops, "use");
+        // TODO Stash these in GlobalState
+        Binding beginBinding        = binding(kernel, "begin");
+        Binding defineBinding       = binding(kernel, "define");
+        Binding defineSyntaxBinding = binding(kernel, "define_syntax");
+        Binding requireBinding      = binding(kernel, "require");
+        Binding useBinding          = binding(kernel, "use");
 
         SyntaxSymbol moduleNameSymbol = check.requiredSymbol("module name", 1);
         ModuleIdentity.validateLocalName(moduleNameSymbol);
@@ -161,76 +153,68 @@ final class ModuleForm
             else
             {
                 boolean formIsPrepared = false;
-                SyntaxValue expanded;
-                if (form instanceof SyntaxSexp)
-                {
-                    expanded =
-                        ((SyntaxSexp)form).partialExpand(expander,
-                                                         moduleNamespace,
-                                                         stops);
-                    if (expanded instanceof SyntaxSexp)
-                    {
-                        SyntaxSexp sexp = (SyntaxSexp)expanded;
-                        Binding binding = firstBinding(sexp);
 
-                        if (binding == defineBinding)
-                        {
-                            expanded = DefineForm.predefine(expander.getEvaluator(),
-                                                            moduleNamespace,
-                                                            sexp, form);
-                        }
-                        else if (binding == defineSyntaxBinding)
-                        {
-                            try
-                            {
-                                expanded =
-                                    expander.expand(moduleNamespace, expanded);
-                                // TODO this is getting compiled twice
-                                CompiledForm compiled =
-                                    eval.compile(moduleNamespace, expanded);
-                                eval.eval(moduleNamespace, compiled);
-                            }
-                            catch (FusionException e)
-                            {
-                                String message = e.getMessage();
-                                throw new SyntaxFailure("define_syntax",
-                                                        message, form);
-                            }
-                            formIsPrepared = true;
-                        }
-                        else if (binding == useBinding ||
-                                 binding == requireBinding)
-                        {
-                            try
-                            {
-                                evalSyntax(eval, expanded, moduleNamespace);
-                            }
-                            catch (FusionException e)
-                            {
-                                String message = e.getMessage();
-                                SyntaxFailure ex = new SyntaxFailure(binding.getName(),
-                                                        message, form);
-                                ex.initCause(e);
-                                throw ex;
-                            }
-                            expanded = null;
-                        }
-                        else if (binding == beginBinding)
-                        {
-                            // Top-level 'begin' is spliced into the module
-                            int last = sexp.size() - 1;
-                            for (int i = last; i != 0;  i--)
-                            {
-                                forms.push(sexp.get(i));
-                            }
-                            formsAlreadyWrapped += last;
-                            expanded = null;
-                        }
-                    }
-                }
-                else
+                SyntaxValue expanded =
+                    expander.partialExpand(moduleNamespace, form);
+
+                if (expanded instanceof SyntaxSexp)
                 {
-                    expanded = form;
+                    SyntaxSexp sexp = (SyntaxSexp)expanded;
+                    Binding binding = firstBinding(sexp);
+
+                    if (binding == defineBinding)
+                    {
+                        expanded = DefineForm.predefine(eval, moduleNamespace,
+                                                        sexp, form);
+                    }
+                    else if (binding == defineSyntaxBinding)
+                    {
+                        try
+                        {
+                            expanded =
+                                expander.expand(moduleNamespace, expanded);
+                            // TODO this is getting compiled twice
+                            CompiledForm compiled =
+                                eval.compile(moduleNamespace, expanded);
+                            eval.eval(moduleNamespace, compiled);
+                        }
+                        catch (FusionException e)
+                        {
+                            String message = e.getMessage();
+                            throw new SyntaxFailure("define_syntax",
+                                                    message, form);
+                        }
+                        formIsPrepared = true;
+                    }
+                    else if (binding == useBinding ||
+                             binding == requireBinding)
+                    {
+                        try
+                        {
+                            evalSyntax(eval, expanded, moduleNamespace);
+                        }
+                        catch (FusionException e)
+                        {
+                            String message = e.getMessage();
+                            SyntaxFailure ex =
+                                new SyntaxFailure(binding.getName(),
+                                                  message, form);
+                            ex.initCause(e);
+                            throw ex;
+                        }
+                        expanded = null;
+                    }
+                    else if (binding == beginBinding)
+                    {
+                        // Top-level 'begin' is spliced into the module
+                        int last = sexp.size() - 1;
+                        for (int i = last; i != 0;  i--)
+                        {
+                            forms.push(sexp.get(i));
+                        }
+                        formsAlreadyWrapped += last;
+                        expanded = null;
+                    }
                 }
 
                 if (expanded != null)
@@ -315,7 +299,7 @@ final class ModuleForm
             SyntaxValue first = form.get(0);
             if (first instanceof SyntaxSymbol)
             {
-                Binding binding = ((SyntaxSymbol)first).getBinding();
+                Binding binding = ((SyntaxSymbol)first).uncachedResolve();
                 return binding.originalBinding();
             }
         }

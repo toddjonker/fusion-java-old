@@ -178,6 +178,14 @@ public class ModuleTest
         expectSyntaxFailure(code);
     }
 
+    /** Traps an infinite-loop bug in partial expansion. */
+    @Test(expected = FusionException.class)
+    public void testBadSexpAtModuleLevel()
+        throws Exception
+    {
+        eval("(module m '/fusion/base' (1))");
+    }
+
     @Test
     public void testModuleAtTopLevel()
         throws Exception

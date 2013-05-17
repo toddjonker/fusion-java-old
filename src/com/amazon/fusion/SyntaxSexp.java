@@ -196,6 +196,16 @@ final class SyntaxSexp
     }
 
 
+    /**
+     * This is actually an incomplete implementation of something like Racket's
+     * {@code local-expand}. Partial expansion is defined based on core syntax
+     * forms, not on a given stop-list.
+     *
+     * @see Expander#partialExpand(Environment, SyntaxValue)
+     *
+     * @deprecated No longer in use but I'm not ready to delete it.
+     */
+    @Deprecated
     final SyntaxValue partialExpand(Expander expander, Environment env,
                                     IdentityHashMap<Binding, Object> stops)
         throws FusionException
