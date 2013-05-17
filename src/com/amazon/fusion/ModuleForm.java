@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionEval.evalSyntax;
+import static com.amazon.fusion.GlobalState.DEFINE_SYNTAX;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,14 +32,6 @@ final class ModuleForm
     }
 
 
-    private Binding binding(ModuleInstance module, String name)
-    {
-        Binding b = module.resolveProvidedName(name).originalBinding();
-        assert b != null;
-        return b;
-    }
-
-
     @Override
     SyntaxValue expand(Expander expander, Environment envOutsideModule,
                        SyntaxSexp source)
@@ -50,15 +43,9 @@ final class ModuleForm
             throw check.failure("`module` declaration not at top-level");
         }
 
-        Evaluator eval = expander.getEvaluator();
-        ModuleInstance kernel = expander.getKernel();
 
-        // TODO Stash these in GlobalState
-        Binding beginBinding        = binding(kernel, "begin");
-        Binding defineBinding       = binding(kernel, "define");
-        Binding defineSyntaxBinding = binding(kernel, "define_syntax");
-        Binding requireBinding      = binding(kernel, "require");
-        Binding useBinding          = binding(kernel, "use");
+        final GlobalState globals = expander.getGlobalState();
+        final Evaluator   eval    = expander.getEvaluator();
 
         SyntaxSymbol moduleNameSymbol = check.requiredSymbol("module name", 1);
         ModuleIdentity.validateLocalName(moduleNameSymbol);
@@ -162,12 +149,12 @@ final class ModuleForm
                     SyntaxSexp sexp = (SyntaxSexp)expanded;
                     Binding binding = firstBinding(sexp);
 
-                    if (binding == defineBinding)
+                    if (binding == globals.myKernelDefineBinding)
                     {
                         expanded = DefineForm.predefine(eval, moduleNamespace,
                                                         sexp, form);
                     }
-                    else if (binding == defineSyntaxBinding)
+                    else if (binding == globals.myKernelDefineSyntaxBinding)
                     {
                         try
                         {
@@ -181,13 +168,13 @@ final class ModuleForm
                         catch (FusionException e)
                         {
                             String message = e.getMessage();
-                            throw new SyntaxFailure("define_syntax",
+                            throw new SyntaxFailure(DEFINE_SYNTAX,
                                                     message, form);
                         }
                         formIsPrepared = true;
                     }
-                    else if (binding == useBinding ||
-                             binding == requireBinding)
+                    else if (binding == globals.myKernelUseBinding ||
+                             binding == globals.myKernelRequireBinding)
                     {
                         try
                         {
@@ -204,7 +191,7 @@ final class ModuleForm
                         }
                         expanded = null;
                     }
-                    else if (binding == beginBinding)
+                    else if (binding == globals.myKernelBeginBinding)
                     {
                         // Top-level 'begin' is spliced into the module
                         int last = sexp.size() - 1;
@@ -264,7 +251,7 @@ final class ModuleForm
         {
             if (! prepared.next())
             {
-                if (firstBinding(stx) == defineBinding)
+                if (firstBinding(stx) == globals.myKernelDefineBinding)
                 {
                     assert expander.isModuleContext();
                     stx = expander.expand(moduleNamespace, stx);

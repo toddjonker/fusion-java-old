@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionEval.callCurrentEval;
+import static com.amazon.fusion.GlobalState.MODULE;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonReader;
 import java.io.File;
@@ -155,13 +156,14 @@ final class LoadHandler
         throws FusionException
     {
         SyntaxValue topLevel = readModuleSyntax(eval, id);
-        try {
+        try
+        {
             SyntaxSexp moduleDeclaration = (SyntaxSexp) topLevel;
             if (moduleDeclaration.size() > 1)
             {
                 SyntaxSymbol moduleSym = (SyntaxSymbol)
                     moduleDeclaration.get(0);
-                if ("module".equals(moduleSym.stringValue()))
+                if (MODULE.equals(moduleSym.stringValue()))
                 {
                     return moduleDeclaration;
                 }
@@ -180,7 +182,7 @@ final class LoadHandler
         SyntaxValue[] children = moduleStx.extract();
 
         // We already verified this type-safety
-        assert ((SyntaxSymbol) children[0]).stringValue().equals("module");
+        assert ((SyntaxSymbol) children[0]).stringValue().equals(MODULE);
 
         children[0] = eval.getGlobalState().myKernelModuleIdentifier;
 

@@ -38,7 +38,7 @@ final class DefineForm
                                 SyntaxValue formForErrors)
         throws FusionException
     {
-        SyntaxChecker check = new SyntaxChecker("define", defineStx);
+        SyntaxChecker check = new SyntaxChecker(GlobalState.DEFINE, defineStx);
         check.arityAtLeast(3);
 
         SyntaxValue[] children = defineStx.extract();

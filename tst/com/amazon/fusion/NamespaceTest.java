@@ -31,7 +31,7 @@ public class NamespaceTest
                 throws FusionException
             {
                 Namespace ns = (Namespace) arg;
-                Binding b = ns.resolve("module");
+                Binding b = ns.resolve(GlobalState.MODULE);
                 assertTrue(b.lookup(ns) instanceof ModuleForm);
 
                 ModuleRegistry reg = ns.getRegistry();

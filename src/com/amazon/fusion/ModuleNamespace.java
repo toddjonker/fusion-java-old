@@ -202,7 +202,7 @@ class ModuleNamespace
                 && ! (oldBinding instanceof FreeBinding)
                 && ! oldBinding.sameTarget(module.resolveProvidedName(name)))
             {
-                throw new AmbiguousBindingFailure("use", name);
+                throw new AmbiguousBindingFailure(GlobalState.USE, name);
             }
         }
 
