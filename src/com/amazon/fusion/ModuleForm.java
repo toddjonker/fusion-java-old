@@ -110,11 +110,11 @@ final class ModuleForm
         // imports, so we don't have to backtrack and add more wraps to
         // earlier forms.  Or maybe scan for the imports first?
 
-        ArrayList<SyntaxSexp> provideForms = new ArrayList<SyntaxSexp>();
-        ArrayList<SyntaxValue> otherForms = new ArrayList<SyntaxValue>();
-        ArrayList<Boolean> preparedFormFlags = new ArrayList<Boolean>();
+        ArrayList<SyntaxSexp>  provideForms      = new ArrayList<>();
+        ArrayList<SyntaxValue> otherForms        = new ArrayList<>();
+        ArrayList<Boolean>     preparedFormFlags = new ArrayList<>();
 
-        LinkedList<SyntaxValue> forms = new LinkedList<SyntaxValue>();
+        LinkedList<SyntaxValue> forms = new LinkedList<>();
         source.extract(forms, 3);
 
         int formsAlreadyWrapped = 0;
@@ -147,7 +147,7 @@ final class ModuleForm
                 if (expanded instanceof SyntaxSexp)
                 {
                     SyntaxSexp sexp = (SyntaxSexp)expanded;
-                    Binding binding = firstBinding(sexp);
+                    Binding binding = sexp.firstBinding();
 
                     if (binding == globals.myKernelDefineBinding)
                     {
@@ -275,29 +275,11 @@ final class ModuleForm
         return result;
     }
 
-    /**
-     * Finds the binding for the leading symbol in the form, or null if the
-     * form doesn't start with a symbol.
-     */
-    Binding firstBinding(SyntaxSexp form)
-    {
-        if (form.size() != 0)
-        {
-            SyntaxValue first = form.get(0);
-            if (first instanceof SyntaxSymbol)
-            {
-                Binding binding = ((SyntaxSymbol)first).uncachedResolve();
-                return binding.originalBinding();
-            }
-        }
-        return null;
-    }
-
     Binding firstBinding(SyntaxValue stx)
     {
         if (stx instanceof SyntaxSexp)
         {
-            return firstBinding((SyntaxSexp) stx);
+            return ((SyntaxSexp) stx).firstBinding();
         }
         return null;
     }

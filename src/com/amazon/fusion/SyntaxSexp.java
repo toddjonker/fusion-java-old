@@ -142,6 +142,24 @@ final class SyntaxSexp
 
     //========================================================================
 
+    /**
+     * Finds the binding for the leading symbol in the sexp, or null if the
+     * sexp doesn't start with a symbol.
+     */
+    Binding firstBinding()
+    {
+        if (size() != 0)
+        {
+            SyntaxValue first = get(0);
+            if (first instanceof SyntaxSymbol)
+            {
+                Binding binding = ((SyntaxSymbol)first).uncachedResolve();
+                return binding.originalBinding();
+            }
+        }
+        return null;
+    }
+
 
     @Override
     SyntaxValue doExpand(Expander expander, Environment env)
