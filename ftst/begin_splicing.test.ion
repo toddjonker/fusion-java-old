@@ -1,0 +1,33 @@
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+
+(require "/check")
+
+
+// Check that top-level `begin` is spliced.
+(begin
+  (define a "a")
+  (begin
+    (begin
+      (define b "b")
+      (define c "c")))
+  (check = a "a"))
+(check = a "a")
+(check = b "b")
+(check = c "c")
+
+
+// Check that module-level `begin` is spliced.
+(module begin_splice '/fusion/base'
+  (begin
+    (define top "top")
+    (begin
+      (define middle "middle"))
+    (define bottom "bottom"))
+
+  (provide top middle bottom)
+)
+(require begin_splice)
+
+(check = top "top")
+(check = middle "middle")
+(check = bottom "bottom")

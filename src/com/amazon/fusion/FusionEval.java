@@ -2,8 +2,10 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.Syntax.datumToSyntaxMaybe;
 import static com.amazon.fusion.Syntax.isSyntax;
+import java.util.LinkedList;
 
 
 final class FusionEval
@@ -66,16 +68,51 @@ final class FusionEval
 
         Namespace ns = eval.findCurrentNamespace();
 
+        Expander expander = new Expander(eval);
+
+        LinkedList<SyntaxValue> forms = new LinkedList<>();
+        forms.push(stx);
+
+        Object result = voidValue(eval);
+        while (! forms.isEmpty())
         {
-            // TODO FUSION-33 this should partial-expand and splice begins
-            Expander expander = new Expander(eval);
-            stx = expander.expand(ns, stx);
+            stx = expander.partialExpand(ns, forms.pop());
+
+            if (stx instanceof SyntaxSexp)
+            {
+                SyntaxSexp sexp = (SyntaxSexp) stx;
+                Binding binding = sexp.firstBinding();
+                if (binding == eval.getGlobalState().myKernelBeginBinding)
+                {
+                    // Splice 'begin' into the top-level sequence
+                    int last = sexp.size() - 1;
+                    for (int i = last; i != 0;  i--)
+                    {
+                        forms.push(sexp.get(i));
+                    }
+                    stx = null;
+                }
+            }
+
+            if (stx != null)
+            {
+                // We've partial-expanded, now full-expand.
+                stx = expander.expand(ns, stx);
+
+                CompiledForm compiled = eval.compile(ns, stx);
+                stx = null; // Don't hold garbage
+
+                Object r = eval.eval(ns, compiled); // TODO TAIL
+
+                // Take care not to retain the result value longer than needed
+                if (forms.isEmpty())
+                {
+                    result = r;
+                }
+            }
         }
 
-        CompiledForm compiled = eval.compile(ns, stx);
-        stx = null; // Don't hold garbage
-
-        return eval.eval(ns, compiled); // TODO TAIL
+        return result;
     }
 
 

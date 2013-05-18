@@ -193,7 +193,7 @@ final class ModuleForm
                     }
                     else if (binding == globals.myKernelBeginBinding)
                     {
-                        // Top-level 'begin' is spliced into the module
+                        // Splice 'begin' into the module-begin sequence
                         int last = sexp.size() - 1;
                         for (int i = last; i != 0;  i--)
                         {
