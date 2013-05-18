@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (use check)
 (use '/fusion/syntax')
@@ -45,31 +45,6 @@
 (define_syntax S3
   (lambda (stx) (apply s3 [])))
 (check_equal (S3) 99 "S3 macro expansion")
-
-
-// Macro that introducing a binding with "private" identifier.
-// Use of this macro crashed the compiler at one point.
-(define_syntax make_m3
-  (lambda (stx)
-    (quasisyntax
-      (define m3 (unsyntax (syntax_get stx 1))))))
-(make_m3 99)
-
-// Similar for macro exported from a module
-(module mac '/fusion/base'
-  (require "/fusion/syntax")
-  (define_syntax make_m3
-    (lambda (stx)
-      (quasisyntax
-        (define m3 (unsyntax (syntax_get stx 1))))))
-   (provide make_m3))
-(require mac)
-(make_m3 1057)
-
-// Now try using the macro at module level
-(module usemac '/fusion/base'
-  (require mac)
-  (make_m3 623))
 
 
 //============================================================================
