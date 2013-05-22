@@ -67,7 +67,7 @@ final class FreeBinding implements Binding
                                             SyntaxSymbol id)
         throws FusionException
     {
-        throw new UnboundIdentifierFailure(id.stringValue(), id);
+        throw new UnboundIdentifierFailure(null, id);
     }
 
     @Override

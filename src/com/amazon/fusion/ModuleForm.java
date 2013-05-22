@@ -165,6 +165,11 @@ final class ModuleForm
                                 eval.compile(moduleNamespace, expanded);
                             eval.eval(moduleNamespace, compiled);
                         }
+                        catch (SyntaxFailure e)
+                        {
+                            e.addContext(form);
+                            throw e;
+                        }
                         catch (FusionException e)
                         {
                             String message = e.getMessage();
