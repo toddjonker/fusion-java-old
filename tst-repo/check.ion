@@ -19,6 +19,7 @@
 
   // NOT PUBLIC YET
   (define raise_check_failure (java_new "com.amazon.fusion.CheckFailureProc"))
+  (define thunk_throws_syntax_failure (java_new "com.amazon.fusion.ThunkThrowsProc"))
 
 
   (defpub check_equal_annotations
@@ -168,4 +169,16 @@ Ensures that (OP VAL1 VAL2) is truthy.
             (do_check (unsyntax stx) (lambda (actual expected) (is_void actual))
               (unsyntax val1_stx) false))
           msg_sexp))))
+
+
+  // TODO this should accept a predicate to check exn type
+  (defpub_syntax check_exn
+    (lambda (stx)
+      // TODO check arity
+      (let [(thunk_stx (syntax_get stx 1))]
+        (quasisyntax
+          // TODO type-check thunk
+          (unless (thunk_throws_syntax_failure (unsyntax thunk_stx))
+            (raise_check_failure (quote_syntax (unsyntax stx))
+              "expected exception"))))))
 )

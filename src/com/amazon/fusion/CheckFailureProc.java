@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,7 +6,7 @@ import static com.amazon.fusion.FusionWrite.safeDisplayManyToString;
 import java.io.IOException;
 
 /**
- * Fusion procedure to raise a syntax error.
+ * Fusion procedure to raise a unit test failure.
  */
 final class CheckFailureProc
     extends Procedure
@@ -14,7 +14,7 @@ final class CheckFailureProc
     CheckFailureProc()
     {
         //    "                                                                               |
-        super("Raises a syntax error located at the given STX syntax. The MESSAGEs are\n" +
+        super("Raises an exception located at the given STX syntax. The MESSAGEs are\n" +
               "displayed as part of the error.",
               "stx", "message", DOTDOTDOT);
     }
