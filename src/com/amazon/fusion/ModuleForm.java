@@ -9,8 +9,10 @@ import static com.amazon.fusion.Syntax.datumToSyntax;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import com.amazon.fusion.Namespace.NsBinding;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * @see <a href="http://docs.racket-lang.org/reference/module.html">Racket
@@ -330,8 +332,8 @@ final class ModuleForm
             variableCount = form.bigIntegerValue().intValue();
         }
 
-        ArrayList<SyntaxSexp> provideForms = new ArrayList<SyntaxSexp>();
-        ArrayList<CompiledForm> otherForms = new ArrayList<CompiledForm>();
+        ArrayList<SyntaxSexp> provideForms = new ArrayList<>();
+        ArrayList<CompiledForm> otherForms = new ArrayList<>();
 
         int bodyPos = 4;
         String docs = null;
@@ -559,7 +561,8 @@ final class ModuleForm
                                            ArrayList<SyntaxSexp> provideForms)
         throws FusionException
     {
-        ArrayList<SyntaxSymbol> identifiers = new ArrayList<SyntaxSymbol>();
+        Set<String> names = new HashSet<>();
+        ArrayList<SyntaxSymbol> identifiers = new ArrayList<>();
 
         for (SyntaxSexp form : provideForms)
         {
@@ -574,6 +577,13 @@ final class ModuleForm
                     case SYMBOL:
                     {
                         SyntaxSymbol id = (SyntaxSymbol) spec;
+                        if (! names.add(id.stringValue()))
+                        {
+                            String message =
+                                "identifier already provided with a different" +
+                                " binding";
+                            throw check.failure(message, id);
+                        }
                         identifiers.add(id);
                         break;
                     }

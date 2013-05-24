@@ -56,6 +56,17 @@
 (check-eq? top "inside M4")
 
 
+;; Check failure exporting two bindings w/same name
+(check-exn exn:fail?
+  (lambda ()
+    (eval
+      '(module M5 racket
+         (require 'M2)
+         (define top "M5")
+         (provide top)
+         (defpubtop "macro M5")))))
+
+
 ;;============================================================================
 ;; Check requires using macro-introduced identifiers
 
