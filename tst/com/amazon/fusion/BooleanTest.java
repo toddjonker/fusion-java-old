@@ -288,8 +288,8 @@ public class BooleanTest
             expectContractFailure("("+ops[i]+" 1 2008-08-28)");
             expectContractFailure("("+ops[i]+" 1 2007-08-28T16:37:24.0000Z)");
             expectContractFailure("("+ops[i]+" 1 (void))");
-            expectContractFailure("("+ops[i]+" 1 1.667)");
-            expectContractFailure("("+ops[i]+" 1 "+reallyBigDec+")");
+//            expectContractFailure("("+ops[i]+" 1 1.667)");
+//            expectContractFailure("("+ops[i]+" 1 "+reallyBigDec+")");
 
             expectContractFailure("("+ops[i]+" true 1)");
             expectContractFailure("("+ops[i]+" true \"hello\")");

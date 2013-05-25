@@ -1,9 +1,25 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
-(use check)
-(use '/fusion/number')
+(require
+  "/check"
+  "/fusion/number")
 
 (check = (/ 4.0 2.0) 2.0)
 
 // TODO divide by zero
 // TODO inexact result
+
+(check_true (< 1   2  ))
+(check_true (< 1   2.0))
+(check_true (< 1.0 2  ))
+(check_true (< 1.0 2.0))
+
+(check_false (< 2   1  ))
+(check_false (< 2   1.0))
+(check_false (< 2.0 1  ))
+(check_false (< 2.0 1.0))
+
+(check_false (< 1   1  ))
+(check_false (< 1   1.0))
+(check_false (< 1.0 1  ))
+(check_false (< 1.0 1.0))
