@@ -145,7 +145,7 @@ final class GlobalState
         ns.define("is_sexp",   new FusionSexp.IsSexpProc());
         ns.define("is_struct", new FusionStruct.IsStructProc());
 
-        ns.define("=", new EqualProc());
+        ns.define("=", new FusionCompare.EqualProc());
 
         ModuleInstance kernel = ns.build();
         registry.register(kernel);

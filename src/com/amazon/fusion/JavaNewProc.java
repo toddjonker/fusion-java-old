@@ -83,8 +83,9 @@ final class JavaNewProc
         catch (InstantiationException e)
         {
             String message =
-                "Unable to instantiate Java class: " + klass +
-                "; does it have a no-argument constructor?";
+                "Unable to instantiate Java " + klass +
+                "; does it have a no-argument constructor? " +
+                "If an inner class, is it static?";
             throw contractFailure(message);
         }
         catch (IllegalAccessException e)

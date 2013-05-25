@@ -14,36 +14,36 @@ Returns true if `a` is less than `b`.  Int and decimal values may be mixed and
 are compared without regard to precision.  Timestamps are compared to each
 other without regard to precision.  Annotations are ignored.
     '''
-    "com.amazon.fusion.LessThanProc")
+    "com.amazon.fusion.FusionCompare$LessThanProc")
 
-  (defpub >
+
+  (defpub_j >
     '''
     (> a b)
 Returns true if `a` is greater than `b`.  Int and decimal values may be mixed
 and are compared without regard to precision.  Timestamps are compared to each
 other without regard to precision.  Annotations are ignored.
     '''
-    (lambda (a b)
-      (< b a)))
+    "com.amazon.fusion.FusionCompare$GreaterThanProc")
 
-  (defpub <=
+
+  (defpub_j <=
     '''
     (<= a b)
 Returns true if `a` is less than or equal to `b`.  Int and decimal values may
 be mixed and are compared without regard to precision.  Timestamps are compared
 to each other without regard to precision.  Annotations are ignored.
     '''
-    (lambda (a b)
-      (not (< b a))))
+    "com.amazon.fusion.FusionCompare$LessThanOrEqualToProc")
 
-  (defpub >=
+
+  (defpub_j >=
     '''
     (>= a b)
 Returns true if `a` is greater than or equal to `b`.  Int and decimal values
 may be mixed and are compared without regard to precision.  Timestamps are
 compared to each other without regard to precision.  Annotations are ignored.
     '''
-    (lambda (a b)
-      (not (< a b))))
+    "com.amazon.fusion.FusionCompare$GreaterThanOrEqualToProc")
 
 )
