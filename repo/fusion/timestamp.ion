@@ -14,7 +14,8 @@ Fusion timestamp values are identical to Ion timestamps.
   (provide < <= = >= >)
 
 
-  (defpub_j timestamp_now   "com.amazon.fusion.TimestampNowProc")
+  (defpub_j timestamp_now
+    "com.amazon.fusion.FusionTimestamp$TimestampNowProc")
 
   (defpub_j timestamp_to_epoch_millis
     "com.amazon.fusion.FusionTimestamp$TimestampToEpochMillisProc")

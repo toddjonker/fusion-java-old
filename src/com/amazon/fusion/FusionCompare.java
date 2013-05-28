@@ -18,6 +18,9 @@ import java.math.BigInteger;
  */
 final class FusionCompare
 {
+    private FusionCompare() {}
+
+
     private static abstract class BaseCompareProc
         extends Procedure
     {

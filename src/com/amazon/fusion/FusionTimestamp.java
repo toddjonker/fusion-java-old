@@ -13,6 +13,26 @@ final class FusionTimestamp
     private FusionTimestamp() {}
 
 
+    static final class TimestampNowProc
+        extends Procedure0
+    {
+        TimestampNowProc()
+        {
+            //    "                                                                               |
+            super("Returns a timestamp representing \"now\".  At present the local offset is\n" +
+                  "unspecified, but that may change in the future.");
+        }
+
+        @Override
+        Object doApply(Evaluator eval)
+            throws FusionException
+        {
+            Timestamp now = Timestamp.now();
+            return eval.newTimestamp(now);
+        }
+    }
+
+
     static final class TimestampToEpochMillisProc
         extends Procedure1
     {

@@ -293,7 +293,7 @@ abstract class Procedure
         throws ArgTypeFailure
     {
         IonTimestamp iv = checkDomArg(IonTimestamp.class, "timestamp",
-                                  true /* nullable */, argNum, args);
+                                      true /* nullable */, argNum, args);
         return iv.timestampValue();
     }
 
