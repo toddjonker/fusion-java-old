@@ -1,0 +1,12 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(require "/check" "/fusion/timestamp")
+
+(check = (timestamp_to_epoch_millis 1970-01-01                )   0)
+(check = (timestamp_to_epoch_millis 1970-01-01T00:00:00.001Z  )   1)
+(check = (timestamp_to_epoch_millis 1970-01-01T00:00:00.00123Z)  1.23)
+(check = (timestamp_to_epoch_millis 1970-01-01T00:00:01Z      )  1000)
+(check = (timestamp_to_epoch_millis 1969-12-31T23:59:59Z      ) -1000)
+
+(check = (timestamp_to_epoch_millis 1970-01-01T00:00:00.00123+01:00)
+         (- 1.23 (* 60 /*minutes*/ 60 /*seconds*/ 1000 /*millis*/)))
