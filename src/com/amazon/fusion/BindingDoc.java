@@ -65,8 +65,11 @@ final class BindingDoc
             StringBuilder buf = new StringBuilder();
             buf.append('(');
             buf.append(myName == null ? "_" : myName);
-            if (! myUsage.startsWith(" ")) buf.append(' ');
-            buf.append(myUsage);
+            if (myUsage.length() != 0)
+            {
+                if (! myUsage.startsWith(" ")) buf.append(' ');
+                buf.append(myUsage);
+            }
             buf.append(')');
 
             myUsage = buf.toString();
