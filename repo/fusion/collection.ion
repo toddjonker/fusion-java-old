@@ -41,7 +41,7 @@ When `collection` is a sequence, the elements are visited in order.
                                     elt_result))
              collection)
            result))
-        (true    // TODO FUSION-86 optimize for list vs sexp
+        (true    // TODO FUSION-141 optimize for list vs sexp
          (let [(len (size collection))]
            (let loop [(i 0)]
              (if (= i len)
@@ -81,7 +81,7 @@ When `collection` is a sequence, the elements are visited in order.
                                     elt_result))
              collection)
            result))
-        (true    // TODO FUSION-86 optimize for list vs sexp
+        (true    // TODO FUSION-141 optimize for list vs sexp
          (let [(len (size collection))]
            (let loop [(i 0)]
              (if (= i len)
@@ -112,7 +112,7 @@ When `collection` is a sequence, the elements are visited in order.
            (lambda (key elt) (proc elt) false)
            collection)
          (void))
-        (true    // TODO FUSION-86 optimize for list vs sexp
+        (true    // TODO FUSION-141 optimize for list vs sexp
          (let [(len (size collection))]
            (let loop [(i 0)]
              (if (= i len)

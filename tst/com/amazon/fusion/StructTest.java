@@ -82,7 +82,7 @@ public class StructTest
     //========================================================================
 
 
-    @Test @Ignore  // TODO FUSION-86
+    @Test @Ignore  // TODO FUSION-93
     public void testStructForEach()
         throws Exception
     {

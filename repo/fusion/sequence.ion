@@ -26,7 +26,6 @@ types.
 
 
   (defpub_j add    "com.amazon.fusion.AddProc")
-  // TODO FUSION-86 append, append_m
 
   (defpub first
     (lambda (sequence)

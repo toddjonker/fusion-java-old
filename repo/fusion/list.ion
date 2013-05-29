@@ -125,7 +125,6 @@ languages, highlighting potential mutation of an argument.
   // TODO FUSION-107 remove `concatenate_m`; renamed to `append_m`
   (defpub_j concatenate_m   "com.amazon.fusion.AppendMProc")
   (defpub_j subseq          "com.amazon.fusion.IonSubseqProc")
-  // TODO FUSION-86 add_m, subseq need to handle sexp
 
 
   //==========================================================================
