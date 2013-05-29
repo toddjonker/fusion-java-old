@@ -21,13 +21,13 @@ literal is immutable even when some child values are evaluated at run-time.
 Quoted forms are also immutable; in `(quote [x])` the list's sole element is
 the symbol `'x'`.
 
-The procedure `immutable_list` has the same effect as a list literal.  The
-procedure `list` creates mutable lists, and `stretchy_list` creates
+The procedure `list` has the same effect as a list literal.  The
+procedure `mutable_list` creates mutable lists, and `stretchy_list` creates
 stretchy lists:
 
     $ [1, 2]
     [1, 2]
-    $ (list 1 2)
+    $ (mutable_list 1 2)
     [1, 2]
     $ (stretchy_list 1 2 3)
     [1, 2, 3]
@@ -55,7 +55,7 @@ stretchy) list:
     Other arguments were:
       0
       "new value"
-    $ (define mutable (list 1))
+    $ (define mutable (mutable_list 1))
     $ mutable
     [1]
     $ (list_set mutable 0 "new value")
@@ -115,7 +115,7 @@ languages, highlighting potential mutation of an argument.
 
   // Pass-through bindings from builtins
   (provide is_immutable_list is_mutable_list is_stretchy_list)
-  (provide immutable_list list stretchy_list)
+  (provide list mutable_list stretchy_list)
 
   // Pass-through bindings from /fusion/sequence
   (provide add any choose do find first is_empty last map size)

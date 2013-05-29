@@ -33,11 +33,6 @@ sexps.
 
 
   // TODO FUSION-102 mutable_sexp
-  // TODO FUSION-86 FUSION-102 There's an inconsistency here vs list:
-  // `list` creates mutable mutable values and literals create immutables.
-  // Thus one can create both kinds with brief notation.
-  // However, there's no such literal notation for sexps.
-
 
   (defpub_j sexp    "com.amazon.fusion.FusionSexp$SexpProc")
   (defpub_j pair    "com.amazon.fusion.FusionSexp$PairProc")

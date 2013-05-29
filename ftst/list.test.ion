@@ -1,10 +1,11 @@
 // Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
-(use check)
-(use '/fusion/function')
-(use '/fusion/ion')
-(use '/fusion/list')
-(use '/fusion/unsafe/list')
+(require
+  "/check"
+  "/fusion/function"
+  "/fusion/ion"
+  "/fusion/list"
+  "/fusion/unsafe/list")
 
 
 //==========================================================================
@@ -71,8 +72,8 @@
     (check_equal (apply maker (quote (0 1)))
       [0, 1] "[0, 1]")))
 
-(test_makers immutable_list false false)
-(test_makers list true false)
+(test_makers list false false)
+(test_makers mutable_list true false)
 (test_makers stretchy_list true true)
 
 
@@ -83,9 +84,9 @@
 (define imm1 [0])
 (define imm2 [0, [1]])
 
-(define mut0 (list))
-(define mut1 (list 0))
-(define mut2 (list 0 [1]))
+(define mut0 (mutable_list))
+(define mut1 (mutable_list 0))
+(define mut2 (mutable_list 0 [1]))
 
 (define str0 (stretchy_list))
 (define str1 (stretchy_list 0))
@@ -126,14 +127,14 @@
 // Lists can hold any type!
 
 (assert ((list_ref [F, T] 1)))
-(assert ((list_ref (list F T) 1)))
+(assert ((list_ref (mutable_list F T) 1)))
 (assert ((list_ref (stretchy_list F T) 1)))
 
 
 //==========================================================================
 // list_set
 
-(check_equal (let ((v (list 0)))
+(check_equal (let ((v (mutable_list 0)))
                (list_set v 0 1)
                v)
   [1] "list_set 1")
@@ -162,13 +163,13 @@
         (check_equal v2 [1, 2]  "v2")))))
 
 (test_add add [])
-(test_add add (immutable_list))
 (test_add add (list))
+(test_add add (mutable_list))
 (test_add add (stretchy_list))
 
 (test_add unsafe_list_add [])
-(test_add unsafe_list_add (immutable_list))
 (test_add unsafe_list_add (list))
+(test_add unsafe_list_add (mutable_list))
 (test_add unsafe_list_add (stretchy_list))
 
 
@@ -201,13 +202,13 @@
 
 
 (test_add_m add_m add [])
-(test_add_m add_m add (immutable_list))
 (test_add_m add_m add (list))
+(test_add_m add_m add (mutable_list))
 (test_add_m add_m add (stretchy_list))
 
 (test_add_m unsafe_list_add_m unsafe_list_add [])
-(test_add_m unsafe_list_add_m unsafe_list_add (immutable_list))
 (test_add_m unsafe_list_add_m unsafe_list_add (list))
+(test_add_m unsafe_list_add_m unsafe_list_add (mutable_list))
 (test_add_m unsafe_list_add_m unsafe_list_add (stretchy_list))
 
 
@@ -236,7 +237,7 @@
         (check_equal v0 [1] "v0 should be modified")
         (check_equal v0 []  "v0 not modified"))
       (check_equal v1 [1] "v1")
-      (let ((v2 (append_m v1 (stretchy_list 2 3) (list 4))))
+      (let ((v2 (append_m v1 (stretchy_list 2 3) (mutable_list 4))))
         (test_predicates v2 mutable stretchy)
         (if stretchy
           (begin
@@ -249,8 +250,8 @@
         (check_equal v2 [1, 2, 3, 4] "v2")))))
 
 (test_append_m [])
-(test_append_m (immutable_list))
 (test_append_m (list))
+(test_append_m (mutable_list))
 (test_append_m (stretchy_list))
 
 (check_equal (append_m null.list [1] null.list)

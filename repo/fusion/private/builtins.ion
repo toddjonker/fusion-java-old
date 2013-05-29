@@ -42,10 +42,10 @@
   (defpub_j is_stretchy_list
     "com.amazon.fusion.FusionList$IsStretchyListProc")
 
-  (defpub_j immutable_list
+  (defpub_j list
     "com.amazon.fusion.FusionList$ImmutableListProc")
-  (defpub_j list // mutable
-    "com.amazon.fusion.FusionList$ListProc")
+  (defpub_j mutable_list
+    "com.amazon.fusion.FusionList$MutableListProc")
   (defpub_j stretchy_list
     "com.amazon.fusion.FusionList$StretchyListProc")
 

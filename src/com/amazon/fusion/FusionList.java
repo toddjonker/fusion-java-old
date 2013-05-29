@@ -76,7 +76,7 @@ final class FusionList
      * Caller must have injected elements.
      * @param elements must not be null. This method assumes ownership!
      */
-    static Object list(Evaluator eval, Object[] elements)
+    static Object mutableList(Evaluator eval, Object[] elements)
     {
         return new MutableList(elements);
     }
@@ -86,7 +86,7 @@ final class FusionList
      * Creates a mutable list containing the elements.
      * @param elements must be injected.
      */
-    static <T> MutableList list(Evaluator eval, List<T> elements)
+    static <T> MutableList mutableList(Evaluator eval, List<T> elements)
     {
         Object[] v = new Object[elements.size()];
         elements.toArray(v);
@@ -854,10 +854,10 @@ final class FusionList
     }
 
 
-    static final class ListProc
+    static final class MutableListProc
         extends Procedure
     {
-        ListProc()
+        MutableListProc()
         {
             //    "                                                                               |
             super("Makes a fresh, mutable list containing the given `value`s.",
@@ -868,7 +868,7 @@ final class FusionList
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            return list(eval, args);
+            return mutableList(eval, args);
         }
     }
 
