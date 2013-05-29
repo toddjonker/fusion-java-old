@@ -129,27 +129,27 @@ public class StructTest
          assertEval("{}",
                     "(struct_make)");
          assertEval("{f:3}",
-                    "(struct_make \"f\" 3)");
+                    "(struct \"f\" 3)");
          assertEval("{hello:\"world\"}",
-                    "(struct_make \"hello\" \"world\")");
+                    "(struct (quote hello) \"world\")");
          assertEval("{f:3,g:\"hello\"}",
-                    "(struct_make \"f\" 3 \"g\" \"hello\")");
+                    "(struct \"f\" 3 (quote g) \"hello\")");
          assertEval("{A:3,B:[true,false,[]]}",
-                    "(struct_make \"A\" 3 \"B\" [true,false,[]])");
+                    "(struct \"A\" 3 \"B\" [true,false,[]])");
          assertEval("{hello:\"world\", hello:\"hello\"}",
-                    "(struct_make \"hello\" \"hello\" \"hello\" \"world\")");
+                    "(struct \"hello\" \"hello\" \"hello\" \"world\")");
          assertEval("{a:1,a:2,b:3}",
-                    "(struct_make \"a\" 1 \"b\" 3 \"a\" 2)");
+                    "(struct \"a\" 1 \"b\" 3 \"a\" 2)");
     }
 
     @Test
     public void makeStructFail()
         throws Exception
     {
-        expectContractFailure("(struct_make \"hello\")");
-        expectContractFailure("(struct_make \"hello\" 13 \"world\")");
+        expectContractFailure("(struct \"hello\")");
+        expectContractFailure("(struct \"hello\" 13 \"world\")");
 
-        expectArgTypeFailure("(struct_make 15 14)",0);
+        expectArgTypeFailure("(struct 15 14)",0);
     }
 
 

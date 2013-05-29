@@ -839,13 +839,17 @@ final class FusionStruct
 
 
 
-    static final class StructMakeProc
+    static final class StructProc
         extends Procedure
     {
-        StructMakeProc()
+        StructProc()
         {
             //    "                                                                               |
-            super("Constructs a struct from pairs of args, alternating strings and values.");
+            super("Constructs an immutable struct from alternating strings and values.  Each\n" +
+                  "`name` is a non-empty string or symbol denoting a field name, and the\n" +
+                  "following `value` is the field's value.  Names may be repeated to produce\n" +
+                  "repeated (multi-mapped) fields.",
+                  "name", "value", DOTDOTDOT, DOTDOTDOT);
         }
 
         void checkArityEven(Object... args)

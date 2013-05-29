@@ -17,21 +17,25 @@ At present, all structs are immutable.  Issue FUSION-93 covers mutable structs.
 
 ## Creating Structs
 
-In standard Fusion, Ion struct syntax denotes immutable values:
+In standard Fusion, Ion struct syntax denotes immutable values, treating field
+names as literals and field values as expressions.  Thus
 `{}` denotes an immutable struct of size zero, and `{f:[x]}` denotes an
-immutable struct of size 1 holding a list of size 1.  The value of a struct
-literal is immutable even when some child values are evaluated at run-time.
+immutable struct of size 1 holding a list whose only element is the value of
+the variable `x`.  The value of a struct
+literal is immutable even when some child values are evaluated at run-time,
+but elements of such a struct may be mutable.
 Quoted forms are also immutable; in `(quote {f:x})` the struct's sole element
 is the symbol `'x'`.
 
-The procedure `struct_make` creates a struct from names and elements:
+The procedure `struct` works like a struct literal, creating an immutable
+struct from names and elements:
 
-    (struct_make "name" "Steve" "age" 29)  =>  {name:"Steve", age:29}
+    (struct "name" "Steve" "age" 29)  =>  {name:"Steve", age:29}
 
 `struct_zip` is similar, but accepts lists containing the names and
 elements:
 
-    (struct_zip ["name", "age"] ["Doug", 38])  =>  {age:38, name:"Doug"}
+    (struct ["name", "age"] ["Doug", 38])  =>  {age:38, name:"Doug"}
 
 The procedures `remove_keys` and `retain_keys` functionally eliminate fields
 from a struct without modifying the input.  `struct_merge` combines the fields
@@ -62,9 +66,9 @@ void value:
 The procedure `struct_for_each` iterates the name/value pairs within a struct,
 but since the input isn't modified one must use side effects.
 
-More general collection operations like `any` and `find` can be applied to
-structs, in which case the field names are ignored while the field values are
-iterated.
+More general [collection](fusion/collection.html) operations like `any` and
+`find` can be applied to structs, in which case the field names are ignored
+while the field values are iterated.
   '''
 
   (require
@@ -81,11 +85,12 @@ iterated.
   (provide any do find is_empty size)
 
 
-  // TODO FUSION-86 rename struct_make to struct?  (Parallel to `list`, `sexp`, etc.)
+  // TODO FUSION-140 remove struct_make
 
   (defpub_j remove_keys       "com.amazon.fusion.FusionStruct$RemoveKeysProc")
   (defpub_j retain_keys       "com.amazon.fusion.FusionStruct$RetainKeysProc")
-  (defpub_j struct_make       "com.amazon.fusion.FusionStruct$StructMakeProc")
+  (defpub_j struct            "com.amazon.fusion.FusionStruct$StructProc")
+  (defpub   struct_make       struct)
   (defpub_j struct_merge      "com.amazon.fusion.FusionStruct$StructMergeProc")
   (defpub_j struct_zip        "com.amazon.fusion.FusionStruct$StructZipProc")
 
@@ -123,6 +128,7 @@ Most often, you'll want to use `void` so as to default to the void value:
   // TODO FUSION-93 struct mutability
   //   * remove_keys_m
 
+  // Name per Racket, where for-each is for side effects.
   (defpub struct_for_each
     (lambda (proc struct)
       '''
