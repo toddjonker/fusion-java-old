@@ -5,10 +5,11 @@
   '''
 Ordered collections of values.
 
-A _sequence_ is an ordered [collection](collection.html) of values, keyed by
-non-negative integers.
+A _sequence_ is an ordered [collection](fusion/collection.html) of values,
+keyed by non-negative integers.
 
-The built-in sequence types are [list](list.html) and [sexp](sexp.html).
+The built-in sequence types are [list](fusion/list.html) and
+[sexp](fusion/sexp.html).
 
 Currently, some of these features may be restricted to a subset of sequence
 types.

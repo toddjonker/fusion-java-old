@@ -5,8 +5,10 @@
   '''
 Generic operations over collection types.
 
-The built-in collection types are [list](list.html), [sexp](sexp.html), and
-[struct](struct.html).
+The built-in collection types are [list](fusion/list.html),
+[sexp](fusion/sexp.html), and [struct](fusion/struct.html).
+
+See also [sequence](fusion/sequence.html).
   '''
 
   (require

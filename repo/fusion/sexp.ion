@@ -5,9 +5,9 @@
   '''
 Operations for sexps (_a.k.a._ S-expressions) and pairs.
 
-An _sexp_ is a [sequence](sequence.html) of values with zero-based integer
-keys and O(_n_) lookup of elements.  Generally, sexps are linked lists of
-_pairs_, each of which has a _head_ slot and a _tail_ slot.  In addition to
+An _sexp_ is a [sequence](fusion/sequence.html) of values with zero-based
+integer keys and O(_n_) lookup of elements.  Generally, sexps are linked lists
+of _pairs_, each of which has a _head_ slot and a _tail_ slot.  In addition to
 pairs, there are zero-length sexps --- for example, the result of `(quote ())`
 --- and of course `null.sexp`.
 

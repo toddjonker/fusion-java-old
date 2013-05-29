@@ -5,10 +5,10 @@
   '''
 Operations for structs.
 
-A _struct_ is an unordered [collection](collection.html) of values, keyed by
-strings.  Since Fusion structs are based on Ion structs, these collections are
-multi-maps: the same key can map to multiple values, or even multiple mappings
-to the same value.
+A _struct_ is an unordered [collection](fusion/collection.html) of values,
+keyed by strings.  Since Fusion structs are based on Ion structs, these
+collections are multi-maps: the same key can map to multiple values, or even
+multiple mappings to the same value.
 
 The _elements_ of a struct are its values, but not the associated field names.
 
