@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,6 +6,7 @@ import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.system.IonTextWriterBuilder;
 import java.io.IOException;
+import java.io.Reader;
 
 /**
  *
@@ -92,5 +93,22 @@ final class FusionUtils
         IonWriter writer = IonTextWriterBuilder.standard().build(out);
         v.writeTo(writer);
         writer.flush();
+    }
+
+
+    public static String loadReader(Reader in)
+        throws IOException
+    {
+        StringBuilder buf = new StringBuilder(2048);
+
+        char[] chars = new char[2048];
+
+        int len;
+        while ((len = in.read(chars)) != -1)
+        {
+            buf.append(chars, 0, len);
+        }
+
+        return buf.toString();
     }
 }

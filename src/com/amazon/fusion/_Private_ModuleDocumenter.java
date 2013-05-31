@@ -4,11 +4,18 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.DocIndex.buildDocIndex;
 import static com.amazon.fusion.ModuleDoc.buildDocTree;
+import static com.amazon.ion.system.IonTextWriterBuilder.UTF8;
 import com.amazon.fusion.ModuleDoc.Filter;
 import com.amazon.ion.Timestamp;
 import com.petebevin.markdown.MarkdownProcessor;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -38,15 +45,23 @@ public final class _Private_ModuleDocumenter
         FusionRuntime runtime = standardDocumentingRuntime();
         Filter filter = new Filter();
 
+        log("Building module docs");
         ModuleDoc doc = buildDocTree(runtime, filter, repoDir);
+
+        log("Writing module docs");
         writeModuleTree(filter, outputDir, ".", doc);
 
+        log("Building indices");
         DocIndex index = buildDocIndex(doc);
+
+        log("Writing indices");
         writeIndexFile(filter, outputDir, index);
         writePermutedIndexFile(filter, outputDir, index);
 
-        System.out.println("DONE rendering docs to " + outputDir + " at "
-            + Timestamp.now());
+        log("Writing Markdown pages");
+        writeMarkdownPages(outputDir, repoDir);
+
+        log("DONE writing HTML docs to " + outputDir);
     }
 
 
@@ -113,6 +128,61 @@ public final class _Private_ModuleDocumenter
                  new PermutedIndexWriter(filter, index, outputFile))
         {
             writer.renderIndex();
+        }
+    }
+
+
+    //========================================================================
+
+
+    private static void writeMarkdownPage(File outputFile, File inputFile)
+        throws IOException
+    {
+        String markdownContent;
+        try (FileInputStream inStream = new FileInputStream(inputFile))
+        {
+            try (Reader inReader = new InputStreamReader(inStream, UTF8))
+            {
+                markdownContent = FusionUtils.loadReader(inReader);
+            }
+        }
+
+        final MarkdownProcessor markdowner = new MarkdownProcessor();
+        String html = markdowner.markdown(markdownContent);
+
+        try (FileOutputStream outStream = new FileOutputStream(outputFile))
+        {
+            try (Writer writer = new OutputStreamWriter(outStream, UTF8))
+            {
+                writer.write(html);
+            }
+        }
+    }
+
+
+    /**
+     * Recursively discover {@code .md} files and transform to {@code .html}.
+     */
+    private static void writeMarkdownPages(File outputDir, File repoDir)
+        throws IOException
+    {
+        String[] fileNames = repoDir.list();
+
+        for (String fileName : fileNames)
+        {
+            File repoFile = new File(repoDir, fileName);
+
+            if (fileName.endsWith(".md"))
+            {
+                String docName = fileName.substring(0, fileName.length() - 2);
+                File outputFile = new File(outputDir, docName + "html");
+                writeMarkdownPage(outputFile, repoFile);
+            }
+            else if (repoFile.isDirectory())
+            {
+                File subOutputDir = new File(outputDir, fileName);
+                writeMarkdownPages(subOutputDir, repoFile);
+            }
         }
     }
 
@@ -626,5 +696,13 @@ public final class _Private_ModuleDocumenter
             }
             append("</table>\n");
         }
+    }
+
+
+    private static void log(String message)
+    {
+        System.out.print(Timestamp.now());
+        System.out.print(" ");
+        System.out.println(message);
     }
 }
