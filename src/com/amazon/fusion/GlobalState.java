@@ -114,10 +114,10 @@ final class GlobalState
         ns.define(BEGIN, new BeginForm());    // Needed by hard-coded macro
 
         ns.define("current_directory", currentDirectory,
-                  "A [parameter](parameter.html) holding the thread-local working directory.");
+                  "A [parameter](fusion/parameter.html) holding the thread-local working directory.");
 
         ns.define("current_namespace", currentNamespaceParam,
-                  "A [parameter](parameter.html) holding the thread-local namespace.  This value has no direct\n" +
+                  "A [parameter](fusion/parameter.html) holding the thread-local namespace.  This value has no direct\n" +
                   "relationship to the namespace lexically enclosing the parameter call.");
 
         ns.define("if", new IfForm());          // Needed by hard-coded macro

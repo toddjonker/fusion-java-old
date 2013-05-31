@@ -238,7 +238,7 @@ final class FusionEval
         {
             //    "                                                                               |
             super("Evaluates a `top_level_form` within a `namespace`.  If `namespace` is absent\n" +
-                  "then the [`current_namespace`](namespace.html#current_namespace) parameter is\n" +
+                  "then the [`current_namespace`](fusion/namespace.html#current_namespace) parameter is\n" +
                   "used.\n" +
                   "\n" +
                   "The `top_level_form` must be a valid top-level syntactic form with respect to\n" +

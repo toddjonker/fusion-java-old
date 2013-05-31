@@ -1,4 +1,4 @@
-// Copyright (c) 2005-2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -18,7 +18,7 @@ class Document
 
     private static final String HELP_BODY =
         "Given a REPO_DIR directory containing Fusion source code, generate reference\n" +
-        "documentation (in MarkDown format) into the OUTPUT_DIR.";
+        "documentation (in HTML format) into the OUTPUT_DIR.";
 
 
     //=========================================================================

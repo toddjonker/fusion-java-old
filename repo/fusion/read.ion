@@ -5,7 +5,7 @@
   '''
 Reading data from an input stream.
 
-See `/fusion/write` for related output procedures.
+See [`/fusion/write`](fusion/write.html) for related output procedures.
   '''
 
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -16,10 +16,10 @@ final class JavaNewProc
     JavaNewProc()
     {
         //    "                                                                               |
-        super("Instantiates a new Fusion value that's implemented by a Java class. CLASSNAME\n" +
+        super("Instantiates a new Fusion value that's implemented by a Java class. `classname`\n" +
               "is the fully-qualified Java class name. A constructor with the appropriate\n" +
-              "number of Object parameters will be invoked and the result returned.",
-              "CLASSNAME", "ARG", DOTDOTDOT);
+              "number of `Object` arguments will be invoked and the result returned.",
+              "classname", "arg", DOTDOTDOT);
     }
 
 

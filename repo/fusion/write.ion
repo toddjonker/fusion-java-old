@@ -16,7 +16,7 @@ There are three "styles" of output:
   character data types (strings and symbols), which are output as-is without
   escapes.
 
-See `/fusion/read` for related input procedures.
+See [`/fusion/read`](fusion/read.html) for related input procedures.
   '''
 
   (require "/fusion/experimental/defines")
