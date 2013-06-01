@@ -58,18 +58,23 @@ final class RequireForm
         {
             SyntaxValue moduleSpec = stx.get(i);
 
-            ids[i-1] = myModuleNameResolver.resolve(eval, moduleSpec,
-                                                    baseModule, true);
+            ids[i-1] = myModuleNameResolver.resolve(eval, baseModule,
+                                                    moduleSpec, true);
         }
 
         return new CompiledRequire(ids);
     }
 
 
-    void use(Evaluator eval, Namespace ns, SyntaxValue moduleSpec)
+    void require(Evaluator eval, Namespace ns, String modulePath)
         throws FusionException
     {
-        ModuleIdentity id = myModuleNameResolver.resolve(eval, moduleSpec);
+        ModuleIdentity baseModule = ns.getModuleId();
+        ModuleIdentity id =
+            myModuleNameResolver.resolveModulePath(eval, baseModule,
+                                                   modulePath,
+                                                   true /* load */,
+                                                   null /* stxForErrors */);
         ns.use(id);
     }
 

@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionEval.evalSyntax;
 import static com.amazon.fusion.GlobalState.DEFINE_SYNTAX;
+import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import static com.amazon.fusion.Syntax.datumToSyntax;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import com.amazon.fusion.Namespace.NsBinding;
@@ -56,15 +57,37 @@ final class ModuleForm
 
         ModuleRegistry registry = envOutsideModule.namespace().getRegistry();
 
+        ModuleIdentity id;
+        try
+        {
+            id = determineIdentity(eval, moduleNameSymbol);
+        }
+        catch (FusionException e)
+        {
+            String message =
+                "Error determining module identity: " + e.getMessage();
+            SyntaxFailure ex = check.failure(message);
+            ex.initCause(e);
+            throw ex;
+        }
+
         ModuleIdentity initialBindingsId;
         ModuleInstance language;
         {
-            SyntaxValue initialBindingsStx =
-                check.requiredForm("initial module path", 2);
+            String path = check.requiredText("initial module path", 2);
+            SyntaxValue initialBindingsStx = source.get(2);
+
+            if (! isValidAbsoluteModulePath(path))
+            {
+                String message = "Module path for language must be absolute";
+                throw new ModuleNotFoundFailure(message, initialBindingsStx);
+            }
+
             try
             {
                 initialBindingsId =
-                    myModuleNameResolver.resolve(eval, initialBindingsStx);
+                    myModuleNameResolver.resolve(eval, id, initialBindingsStx,
+                                                 true /*load it*/);
                 language = registry.lookup(initialBindingsId);
                 assert language != null;  // Otherwise resolve should fail
             }
@@ -86,20 +109,6 @@ final class ModuleForm
         }
 
         // The new namespace shares the registry of current-namespace
-        ModuleIdentity id;
-        try
-        {
-            id = determineIdentity(eval, moduleNameSymbol);
-        }
-        catch (FusionException e)
-        {
-            String message =
-                "Error determining module identity: " + e.getMessage();
-            SyntaxFailure ex = check.failure(message);
-            ex.initCause(e);
-            throw ex;
-        }
-
         ModuleNamespace moduleNamespace =
             new ModuleNamespace(registry, language, id);
 

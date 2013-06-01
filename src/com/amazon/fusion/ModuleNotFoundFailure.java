@@ -18,7 +18,7 @@ public class ModuleNotFoundFailure
 
     ModuleNotFoundFailure(String message, Object... locations)
     {
-        super(message);
+        super(message != null ? message : "Module not found");
         myLocations = locations;
     }
 

@@ -24,7 +24,7 @@ public class ModuleTest
         eval("(module m '/no_such_module' (define x 1))");
     }
 
-    @Test(expected = ModuleNotFoundFailure.class)
+    @Test(expected = SyntaxFailure.class)
     public void testBadQuotedLanguageSymbolInTopLevelModule()
         throws Exception
     {
@@ -36,6 +36,24 @@ public class ModuleTest
         throws Exception
     {
         eval("(module m \"no_such_module\" (define x 1))");
+    }
+
+    @Test(expected = ModuleNotFoundFailure.class)
+    public void testRelativeLanguageStringInTopLevelModule()
+        throws Exception
+    {
+        // TODO FUSION-151 this isn't well-defined yet and should be rejected.
+        eval("(module m \"fusion\" (define x 1))");
+    }
+
+    @Test(expected = ModuleNotFoundFailure.class)
+    public void testTopLevelLanguageInTopLevelModule()
+        throws Exception
+    {
+        eval("(module lang '/fusion/base')");
+
+        // TODO FUSION-151 this isn't well-defined yet and should be rejected.
+        eval("(module m \"lang\" (define x 1))");
     }
 
     // TODO similar tests for 'use' to the language tests above
@@ -105,7 +123,7 @@ public class ModuleTest
     public void testIntialModuleImportsWithNoProvides()
         throws Exception
     {
-        eval("(module M 'NoProvides' X)");
+        eval("(module M '/NoProvides' X)");
     }
 
 

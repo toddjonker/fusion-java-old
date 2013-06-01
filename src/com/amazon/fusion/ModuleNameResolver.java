@@ -77,8 +77,8 @@ final class ModuleNameResolver
      * @throws ModuleNotFoundFailure if the module could not be found.
      */
     ModuleIdentity resolve(Evaluator eval,
-                           SyntaxValue pathStx,
                            ModuleIdentity baseModule,
+                           SyntaxValue pathStx,
                            boolean load)
         throws FusionException
     {
@@ -89,7 +89,7 @@ final class ModuleNameResolver
             {
                 String path = ((SyntaxText) pathStx).stringValue();
                 // TODO check null/empty
-                return resolveModulePath(eval, path, pathStx, baseModule, load);
+                return resolveModulePath(eval, baseModule, path, load, pathStx);
             }
         }
 
@@ -146,7 +146,13 @@ final class ModuleNameResolver
         throw check.failure("unrecognized form");
     }
 
-    ModuleIdentity locate(Evaluator eval, String modulePath)
+
+    /**
+     * @return null if the referenced module couldn't be located in the current
+     * registry or any repository.
+     */
+    ModuleIdentity locate(Evaluator eval, ModuleIdentity baseModule,
+                          String modulePath, SyntaxValue stxForErrors)
         throws FusionException
     {
         ModuleIdentity id;
@@ -159,6 +165,9 @@ final class ModuleNameResolver
             // TODO FUSION-79 Support relative module paths other than locals
             ModuleRegistry reg = eval.findCurrentNamespace().getRegistry();
             id = ModuleIdentity.locateLocal(reg, modulePath);
+
+            // We can't fall through: repositories wants an absolute path.
+            return id;
         }
 
         if (id == null)
@@ -171,6 +180,7 @@ final class ModuleNameResolver
         }
         return id;
     }
+
 
     /**
      * Locates and loads a module from the registered repositories.
@@ -188,7 +198,7 @@ final class ModuleNameResolver
         // TODO FUSION-79 Support relative module paths
         if (! libName.startsWith("/")) libName = "/" + libName;
 
-        ModuleIdentity id = locate(eval, libName);
+        ModuleIdentity id = locate(eval, null, libName, stx);
         if (id != null)
         {
             return loadModule(eval, id);
@@ -220,30 +230,33 @@ final class ModuleNameResolver
     /**
      * Locates and loads a module from the registered repositories.
      *
-     * @param modulePath must be a module path.
-     * @param stx is used for error messaging; may be null.
+     * @param eval the evaluation context.
      * @param baseModule the starting point for relative references.
      * If null, it indicates a reference from top-level.
+     * @param modulePath must be a module path.
+     * @param load should we load the module, or just determine its identity?
+     * @param stxForErrors is used for error messaging; may be null.
      *
      * @throws ModuleNotFoundFailure if the module could not be found.
      */
-    private ModuleIdentity resolveModulePath(Evaluator eval,
-                                             String modulePath,
-                                             SyntaxValue stx,
-                                             ModuleIdentity baseModule,
-                                             boolean load)
+    ModuleIdentity resolveModulePath(Evaluator eval,
+                                     ModuleIdentity baseModule,
+                                     String modulePath,
+                                     boolean load,
+                                     SyntaxValue stxForErrors)
         throws FusionException
     {
         // TODO FUSION-79 Support relative module paths
         if (! isValidModulePath(modulePath))
         {
-            throw new SyntaxFailure(null, "Invalid module path", stx);
+            throw new SyntaxFailure(null, "Invalid module path", stxForErrors);
         }
 
-        ModuleIdentity id = locate(eval, modulePath);
+        ModuleIdentity id = locate(eval, baseModule, modulePath, stxForErrors);
         if (id != null)
         {
-            return loadModule(eval, id);
+            if (load) loadModule(eval, id);
+            return id;
         }
 
         StringBuilder buf = new StringBuilder();
@@ -259,13 +272,13 @@ final class ModuleNameResolver
         }
         String message = buf.toString();
 
-        if (stx == null)
+        if (stxForErrors == null)
         {
             throw new ModuleNotFoundFailure(message);
         }
         else
         {
-            throw new ModuleNotFoundFailure(message, stx);
+            throw new ModuleNotFoundFailure(message, stxForErrors);
         }
     }
 
@@ -278,14 +291,15 @@ final class ModuleNameResolver
      * @param path the file to resolve and load. If relative, its resolved
      * relative to the {@code current_load_relative_directory} parameter if
      * its set, or else the {@code current_directory} parameter.
-     * @param stx is used for error messaging
+     * @param stxForErrors is used for error messaging
      *
      * @return the identity of the loaded module.
      *
      * @throws ModuleNotFoundFailure if the module could not be found.
      */
     @Deprecated
-    ModuleIdentity resolve(Evaluator eval, String path, SyntaxValue stx)
+    ModuleIdentity resolve(Evaluator eval, String path,
+                           SyntaxValue stxForErrors)
         throws FusionException
     {
         String pathFileName = path.endsWith(".ion") ? path : path + ".ion";
@@ -333,7 +347,7 @@ final class ModuleNameResolver
             "The syntax in use looks for a relative file, and does not " +
             "search any registered repositories.";
         // TODO explain where we looked
-        throw new ModuleNotFoundFailure(message, stx);
+        throw new ModuleNotFoundFailure(message, stxForErrors);
     }
 
 
