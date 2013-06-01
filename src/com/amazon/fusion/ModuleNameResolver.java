@@ -122,8 +122,6 @@ final class ModuleNameResolver
 
             ModuleRegistry reg = eval.findCurrentNamespace().getRegistry();
 
-            // TODO FUSION-79 Should there be separate syntax forms for
-            //   builtins versus local modules?
             ModuleIdentity id;
             if (ModuleIdentity.isValidBuiltinName(name.stringValue()))
             {
@@ -162,7 +160,7 @@ final class ModuleNameResolver
         }
         else
         {
-            // TODO FUSION-79 Support relative module paths other than locals
+            // TODO FUSION-152 Support relative module paths other than locals
             ModuleRegistry reg = eval.findCurrentNamespace().getRegistry();
             id = ModuleIdentity.locateLocal(reg, modulePath);
 
@@ -195,7 +193,7 @@ final class ModuleNameResolver
                               SyntaxValue stx)
         throws FusionException
     {
-        // TODO FUSION-79 Support relative module paths
+        // TODO FUSION-74 Support relative module paths
         if (! libName.startsWith("/")) libName = "/" + libName;
 
         ModuleIdentity id = locate(eval, null, libName, stx);
@@ -246,7 +244,6 @@ final class ModuleNameResolver
                                      SyntaxValue stxForErrors)
         throws FusionException
     {
-        // TODO FUSION-79 Support relative module paths
         if (! isValidModulePath(modulePath))
         {
             throw new SyntaxFailure(null, "Invalid module path", stxForErrors);
@@ -325,7 +322,7 @@ final class ModuleNameResolver
 
         if (pathFile.exists())
         {
-            // TODO FUSION-74 FUSION-79 Is this correct in all cases?
+            // TODO FUSION-74 Is this correct in all cases?
             String modulePath;
             try
             {

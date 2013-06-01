@@ -71,8 +71,10 @@ class ModuleIdentity
         }
     }
 
+    /** Allows a #% name (for now) or an absolute path */
     static boolean isValidBuiltinName(String name)
     {
+        // TODO FUSION-107 remove #% support
         return name != null
             && ((name.startsWith("#%")
                      && symbolVariant(name.substring(2)) == IDENTIFIER)

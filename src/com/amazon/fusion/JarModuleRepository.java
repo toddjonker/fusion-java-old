@@ -18,7 +18,7 @@ final class JarModuleRepository
     {
         assert libName.startsWith("/");
 
-        // TODO FUSION-79 absolute vs relative paths
+        // TODO FUSION-74 absolute vs relative paths
         String fileName = "/FUSION-REPO" + libName + ".ion"; // TODO ugly hard-coding
 
         if (getClass().getResource(fileName) != null)
