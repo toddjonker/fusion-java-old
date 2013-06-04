@@ -21,11 +21,28 @@ public class SyntaxFailure
     {
         super(message);
         myName = whatForm;
+
+        for (SyntaxValue s : sources)
+        {
+            if (s == null)
+            {
+                // Long way around to filter nulls
+                mySources = SyntaxValue.EMPTY_ARRAY;
+                for (SyntaxValue s2 : sources)
+                {
+                    if (s2 != null) addContext(s2);
+                }
+                return;
+            }
+        }
+
         mySources = sources;
+        assert mySources[0] != null;
     }
 
     void addContext(SyntaxValue syntax)
     {
+        assert syntax != null;
         int len = mySources.length;
         mySources = Arrays.copyOf(mySources, len + 1);
         mySources[len] = syntax;

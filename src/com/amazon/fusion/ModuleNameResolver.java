@@ -246,7 +246,8 @@ final class ModuleNameResolver
     {
         if (! isValidModulePath(modulePath))
         {
-            throw new SyntaxFailure(null, "Invalid module path", stxForErrors);
+            String message = "Invalid module path: " + printString(modulePath);
+            throw new SyntaxFailure(null, message, stxForErrors);
         }
 
         ModuleIdentity id = locate(eval, baseModule, modulePath, stxForErrors);
