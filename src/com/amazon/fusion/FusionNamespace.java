@@ -23,10 +23,7 @@ final class FusionNamespace
                                             ModuleRegistry registry)
         throws FusionException
     {
-        assert language.startsWith("/");
-
-        // TODO FUSION-74 Resolver should handle absolute paths
-        language = language.substring(1);
+        assert ModuleIdentity.isValidAbsoluteModulePath(language);
 
         if (registry == null)
         {
@@ -34,7 +31,7 @@ final class FusionNamespace
         }
 
         Namespace ns = new TopLevelNamespace(registry);
-        ns.use(eval, language);
+        ns.require(eval, language);
         return ns;
     }
 

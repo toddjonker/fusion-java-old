@@ -66,6 +66,9 @@ final class RequireForm
     }
 
 
+    /**
+     * @param modulePath is an absolute or relative module path.
+     */
     void require(Evaluator eval, Namespace ns, String modulePath)
         throws FusionException
     {
@@ -75,7 +78,7 @@ final class RequireForm
                                                    modulePath,
                                                    true /* load */,
                                                    null /* stxForErrors */);
-        ns.use(id);
+        ns.require(id);
     }
 
 
@@ -101,7 +104,7 @@ final class RequireForm
             Namespace namespace = (Namespace) store.namespace();
             for (ModuleIdentity id : myUsedModuleIds)
             {
-                namespace.use(id);
+                namespace.require(id);
             }
             return voidValue(eval);
         }

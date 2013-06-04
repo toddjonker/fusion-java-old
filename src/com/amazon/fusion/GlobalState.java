@@ -29,7 +29,7 @@ final class GlobalState
     final ModuleInstance     myKernelModule;
     final ModuleNameResolver myModuleNameResolver;
     final LoadHandler        myLoadHandler;
-    final UseForm            myUseForm;
+    final RequireForm        myRequireForm;
     final DynamicParameter   myCurrentNamespaceParam;
 
     final SyntaxSymbol       myKernelBeginIdentifier;
@@ -47,14 +47,14 @@ final class GlobalState
                         ModuleInstance     kernel,
                         ModuleNameResolver resolver,
                         LoadHandler        loadHandler,
-                        UseForm            useForm,
+                        RequireForm        requireForm,
                         DynamicParameter   currentNamespaceParam)
     {
         myIonSystem             = ionSystem;
         myKernelModule          = kernel;
         myModuleNameResolver    = resolver;
         myLoadHandler           = loadHandler;
-        myUseForm               = useForm;
+        myRequireForm           = requireForm;
         myCurrentNamespaceParam = currentNamespaceParam;
 
         SyntaxWrap wrap = new ModuleRenameWrap(kernel);
@@ -98,13 +98,16 @@ final class GlobalState
                                    currentDirectory,
                                    currentModuleDeclareName,
                                    builder.buildModuleRepositories());
+
+        // TODO FUSION-133 remove UseForm
         UseForm useForm = new UseForm(resolver);
+        RequireForm requireForm = new RequireForm(resolver);
 
         // These must be bound before 'module' since we need the bindings
         // for the partial-expansion stop-list.
         ns.define(DEFINE, new DefineForm());
         ns.define(DEFINE_SYNTAX, new DefineSyntaxForm());
-        ns.define(REQUIRE, new RequireForm(resolver));
+        ns.define(REQUIRE, requireForm);
         ns.define(USE, useForm);
 
         SyntacticForm moduleForm =
@@ -151,7 +154,7 @@ final class GlobalState
         registry.register(kernel);
 
         GlobalState globals =
-            new GlobalState(system, kernel, resolver, loadHandler, useForm,
+            new GlobalState(system, kernel, resolver, loadHandler, requireForm,
                             currentNamespaceParam);
         return globals;
     }

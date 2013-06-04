@@ -365,22 +365,21 @@ abstract class Namespace
     }
 
 
-    void use(Evaluator eval, String modulePath)
+    void require(Evaluator eval, String modulePath)
         throws FusionException
     {
-        UseForm useForm = eval.getGlobalState().myUseForm;
-        SyntaxValue baseRef = SyntaxSymbol.make(modulePath);
-        useForm.use(eval, this, baseRef);
+        RequireForm requireForm = eval.getGlobalState().myRequireForm;
+        requireForm.require(eval, this, modulePath);
     }
 
-    void use(ModuleIdentity id)
+    void require(ModuleIdentity id)
         throws FusionException
     {
         ModuleInstance module = myRegistry.lookup(id);
-        use(module);
+        require(module);
     }
 
-    abstract void use(ModuleInstance module)
+    abstract void require(ModuleInstance module)
         throws FusionException;
 
     void addWrap(SyntaxWrap wrap)

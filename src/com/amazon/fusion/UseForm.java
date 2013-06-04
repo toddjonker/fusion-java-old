@@ -40,7 +40,7 @@ final class UseForm
         throws FusionException
     {
         ModuleIdentity id = myModuleNameResolver.resolve(eval, moduleSpec);
-        ns.use(id);
+        ns.require(id);
     }
 
 
@@ -64,7 +64,7 @@ final class UseForm
             // These forms are evaluated during expansion of a module.
             // So it's never entered with a "real" Store.
             Namespace namespace = (Namespace) store.namespace();
-            namespace.use(myUsedModuleId);
+            namespace.require(myUsedModuleId);
             return voidValue(eval);
         }
     }

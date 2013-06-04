@@ -242,7 +242,7 @@ class ModuleNamespace
 
 
     @Override
-    void use(ModuleInstance module)
+    void require(ModuleInstance module)
         throws FusionException
     {
         // Validate that we aren't importing a duplicate name.

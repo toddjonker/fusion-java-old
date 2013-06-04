@@ -13,7 +13,7 @@ import java.util.Set;
  * The tricky part here is getting the precedence correct between imports and
  * top-level definitions.  The rule is that the last occurrence wins.  To
  * implement this we keep a counter of the number of times that
- * {@link #use(ModuleInstance)} has been called, record that on bindings when
+ * {@link #require(ModuleInstance)} has been called, record that on bindings when
  * they are defined or redefined, and compare those numbers to determine which
  * binding has precedence.
  */
@@ -416,7 +416,7 @@ class TopLevelNamespace
 
 
     @Override
-    void use(ModuleInstance module)
+    void require(ModuleInstance module)
         throws FusionException
     {
         SyntaxWrap wrap = new TopLevelRequireWrap(module, myCurrentPrecedence);

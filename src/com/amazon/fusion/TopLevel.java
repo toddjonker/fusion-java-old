@@ -114,17 +114,26 @@ public interface TopLevel
 
 
     /**
-     * Imports the bindings from a named module into this namespace.
+     * Imports all exported bindings from a module into this namespace.
+     * <p>
+     * If any imported names have top-level definitions, those definitions will
+     * be shadowed by the imported binding.
      *
-     * @param moduleIdentifier names the required module. It may be either an
+     * @param modulePath locates the required module. It may be either an
      * absolute or relative path.
      */
-    public void requireModule(String moduleIdentifier)
+    public void requireModule(String modulePath)
         throws FusionException;
 
 
     /**
      * Binds an identifier with a value in this namespace.
+     * <p>
+     * If the name has already been defined in this namespace then the existing
+     * variable is mutated to have the given value.
+     * If the name has been previously imported into this namespace, then a
+     * top-level definition is created or modified and will shadow the imported
+     * binding in future expressions.
      *
      * @param value must be of a type supported by the Fusion runtime.
      * Must not be null.

@@ -38,7 +38,7 @@ final class StandardTopLevel
 
         myEvaluator = eval;
         myNamespace = namespace;
-        namespace.use(myEvaluator, initialModulePath);
+        namespace.require(myEvaluator, initialModulePath);
     }
 
     /**
@@ -117,15 +117,10 @@ final class StandardTopLevel
 
 
     @Override
-    public void requireModule(String moduleIdentifier)
+    public void requireModule(String modulePath)
         throws FusionException
     {
-        // TODO FUSION-74 don't do this conversion!
-        if (moduleIdentifier.startsWith("/"))
-        {
-            moduleIdentifier = moduleIdentifier.substring(1);
-        }
-        myNamespace.use(myEvaluator, moduleIdentifier);
+        myNamespace.require(myEvaluator, modulePath);
     }
 
 
