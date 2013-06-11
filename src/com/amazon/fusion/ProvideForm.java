@@ -116,45 +116,40 @@ final class ProvideForm
                                    ArrayList<SyntaxValue> expanded)
         throws FusionException
     {
-        SyntaxSymbol tag = check.requiredIdentifier(0);
-        switch (tag.stringValue())
+        Binding b = specForm.firstBinding();
+        if (b == eval.getGlobalState().myKernelAllDefinedOutBinding)
         {
-            case "all_defined_out":
+            check.arityExact(1);
+
+            SyntaxSymbol tag = (SyntaxSymbol) specForm.get(0);
+
+            // Filter by lexical context: we shouldn't export identifiers
+            // introduced by macros unless this form was also introduced
+            // at the same time.
+            for (NsBinding binding : moduleNamespace.getBindings())
             {
-                check.arityExact(1);
-
-                // Filter by lexical context: we shouldn't export identifiers
-                // introduced by macros unless this form was also introduced
-                // at the same time.
-                for (NsBinding binding : moduleNamespace.getBindings())
+                // TODO the datum->syntax context should be the whole sexp
+                // form `(all_defined_out)` not just `all_defined_out` but
+                // we don't currently retain context on SyntaxSexp after
+                // it has been pushed down to children.
+                SyntaxSymbol localized = (SyntaxSymbol)
+                    datumToSyntax(eval,
+                                  SyntaxSymbol.make(binding.getName()),
+                                  tag);
+                localized = localized.copyAndResolveTop();
+                Binding localBinding = moduleNamespace.localResolve(localized);
+                if (localBinding != null && binding.sameTarget(localBinding))
                 {
-                    // TODO the datum->syntax context should be the whole sexp
-                    // form `(all_defined_out)` not just `all_defined_out` but
-                    // we don't currently retain context on SyntaxSexp after
-                    // it has been pushed down to children.
-                    SyntaxSymbol localized = (SyntaxSymbol)
-                        datumToSyntax(eval,
-                                      SyntaxSymbol.make(binding.getName()),
-                                      tag);
-                    localized = localized.copyAndResolveTop();
-                    Binding localBinding =
-                        moduleNamespace.localResolve(localized);
-                    if (localBinding != null
-                        && binding.sameTarget(localBinding))
-                    {
-                        localized = localized.copyReplacingBinding(binding);
-                        expanded.add(localized);
-                    }
-
-                    // TODO FUSION-136 handle rename-transformers per Racket
+                    localized = localized.copyReplacingBinding(binding);
+                    expanded.add(localized);
                 }
 
-                break;
+                // TODO FUSION-136 handle rename-transformers per Racket
             }
-            default:
-            {
-                throw check.failure("invalid provide-spec");
-            }
+        }
+        else
+        {
+            throw check.failure("invalid provide-spec");
         }
     }
 
@@ -167,5 +162,37 @@ final class ProvideForm
         throws FusionException
     {
         throw new IllegalStateException("Provide shouldn't be compiled");
+    }
+
+
+    //========================================================================
+
+
+    /**
+     * This class primarily provides syntax to bind to all_defined_out so that
+     * {@link ProvideForm} can compare bindings, not symbolic names.  This is
+     * as specified by Racket.
+     */
+    static final class AllDefinedOutForm
+        extends SyntacticForm
+    {
+        AllDefinedOutForm()
+        {
+            super("", "doc");
+        }
+
+        @Override
+        SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
+            throws FusionException
+        {
+            throw check(stx).failure("must be used inside `provide`");
+        }
+
+        @Override
+        CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+            throws FusionException
+        {
+            throw new IllegalStateException("Shouldn't be compiled");
+        }
     }
 }

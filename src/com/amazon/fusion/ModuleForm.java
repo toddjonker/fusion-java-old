@@ -161,8 +161,7 @@ final class ModuleForm
                 {
                     try
                     {
-                        expanded =
-                            expander.expand(moduleNamespace, expanded);
+                        expanded = expander.expand(moduleNamespace, expanded);
                         // TODO this is getting compiled twice
                         CompiledForm compiled =
                             eval.compile(moduleNamespace, expanded);
@@ -176,8 +175,7 @@ final class ModuleForm
                     catch (FusionException e)
                     {
                         String message = e.getMessage();
-                        throw new SyntaxFailure(DEFINE_SYNTAX,
-                                                message, form);
+                        throw new SyntaxFailure(DEFINE_SYNTAX, message, form);
                     }
                     formIsPrepared = true;
                 }

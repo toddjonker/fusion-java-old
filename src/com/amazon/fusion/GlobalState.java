@@ -16,15 +16,16 @@ final class GlobalState
     static final ModuleIdentity KERNEL_MODULE_IDENTITY =
         ModuleIdentity.internBuiltinName(KERNEL_MODULE_NAME);
 
-    static final String BEGIN         = "begin";
-    static final String DEFINE        = "define";
-    static final String DEFINE_SYNTAX = "define_syntax";
-    static final String LAMBDA        = "lambda";
-    static final String LETREC        = "letrec";
-    static final String MODULE        = "module";
-    static final String PROVIDE       = "provide";
-    static final String REQUIRE       = "require";
-    static final String USE           = "use";
+    static final String ALL_DEFINED_OUT = "all_defined_out";
+    static final String BEGIN           = "begin";
+    static final String DEFINE          = "define";
+    static final String DEFINE_SYNTAX   = "define_syntax";
+    static final String LAMBDA          = "lambda";
+    static final String LETREC          = "letrec";
+    static final String MODULE          = "module";
+    static final String PROVIDE         = "provide";
+    static final String REQUIRE         = "require";
+    static final String USE             = "use";
 
     final IonSystem          myIonSystem;
     final ModuleInstance     myKernelModule;
@@ -38,6 +39,7 @@ final class GlobalState
     final SyntaxSymbol       myKernelLetrecIdentifier;
     final SyntaxSymbol       myKernelModuleIdentifier;
 
+    final Binding myKernelAllDefinedOutBinding;
     final Binding myKernelBeginBinding;
     final Binding myKernelDefineBinding;
     final Binding myKernelDefineSyntaxBinding;
@@ -65,12 +67,13 @@ final class GlobalState
         myKernelLetrecIdentifier = SyntaxSymbol.make(LETREC, wrap);
         myKernelModuleIdentifier = SyntaxSymbol.make(MODULE, wrap);
 
-        myKernelBeginBinding        = kernelBinding(BEGIN);
-        myKernelDefineBinding       = kernelBinding(DEFINE);
-        myKernelDefineSyntaxBinding = kernelBinding(DEFINE_SYNTAX);
-        myKernelProvideBinding      = kernelBinding(PROVIDE);
-        myKernelRequireBinding      = kernelBinding(REQUIRE);
-        myKernelUseBinding          = kernelBinding(USE);
+        myKernelAllDefinedOutBinding = kernelBinding(ALL_DEFINED_OUT);
+        myKernelBeginBinding         = kernelBinding(BEGIN);
+        myKernelDefineBinding        = kernelBinding(DEFINE);
+        myKernelDefineSyntaxBinding  = kernelBinding(DEFINE_SYNTAX);
+        myKernelProvideBinding       = kernelBinding(PROVIDE);
+        myKernelRequireBinding       = kernelBinding(REQUIRE);
+        myKernelUseBinding           = kernelBinding(USE);
     }
 
 
@@ -117,6 +120,7 @@ final class GlobalState
             new ModuleForm(resolver, currentModuleDeclareName);
         LoadProc loadProc = new LoadProc(loadHandler);
 
+        ns.define(ALL_DEFINED_OUT, new ProvideForm.AllDefinedOutForm());
         ns.define(BEGIN, new BeginForm());    // Needed by hard-coded macro
 
         ns.define("current_directory", currentDirectory,
