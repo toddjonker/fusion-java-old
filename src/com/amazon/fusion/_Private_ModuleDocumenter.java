@@ -250,6 +250,7 @@ public final class _Private_ModuleDocumenter
             renderHead(modulePath, myBaseUrl, STYLE);
 
             append("<div class='indexlink'>" +
+                   "<a href='index.html'>Top</a> " +
                    "<a href='binding-index.html'>Binding Index</a> " +
                    "(<a href='permuted-index.html'>Permuted</a>)" +
                    "</div>\n");
@@ -483,6 +484,7 @@ public final class _Private_ModuleDocumenter
             renderHead("Fusion Binding Index", null, STYLE);
 
             append("<div class='indexlink'>" +
+                   "<a href='index.html'>Top</a> " +
                    "<a href='permuted-index.html'>Permuted Index</a>" +
                    "</div>\n");
 
@@ -660,6 +662,7 @@ public final class _Private_ModuleDocumenter
             renderHead("Fusion Binding Index (Permuted)", null, STYLE);
 
             append("<div class='indexlink'>" +
+                   "<a href='index.html'>Top</a> " +
                    "<a href='binding-index.html'>Alphabetical Index</a>" +
                    "</div>\n");
 
