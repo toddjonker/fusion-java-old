@@ -22,6 +22,7 @@ final class GlobalState
     static final String LAMBDA        = "lambda";
     static final String LETREC        = "letrec";
     static final String MODULE        = "module";
+    static final String PROVIDE       = "provide";
     static final String REQUIRE       = "require";
     static final String USE           = "use";
 
@@ -40,6 +41,7 @@ final class GlobalState
     final Binding myKernelBeginBinding;
     final Binding myKernelDefineBinding;
     final Binding myKernelDefineSyntaxBinding;
+    final Binding myKernelProvideBinding;
     final Binding myKernelRequireBinding;
     final Binding myKernelUseBinding;
 
@@ -66,6 +68,7 @@ final class GlobalState
         myKernelBeginBinding        = kernelBinding(BEGIN);
         myKernelDefineBinding       = kernelBinding(DEFINE);
         myKernelDefineSyntaxBinding = kernelBinding(DEFINE_SYNTAX);
+        myKernelProvideBinding      = kernelBinding(PROVIDE);
         myKernelRequireBinding      = kernelBinding(REQUIRE);
         myKernelUseBinding          = kernelBinding(USE);
     }
@@ -129,6 +132,7 @@ final class GlobalState
         ns.define(LETREC, new LetrecForm());    // Needed by hard-coded macro
         ns.define("load", loadProc);
         ns.define(MODULE, moduleForm);
+        ns.define(PROVIDE, new ProvideForm());
         ns.define("quote_syntax", new QuoteSyntaxForm()); // For fusion/syntax
 
         for (IonType t : IonType.values())

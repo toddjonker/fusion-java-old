@@ -6,9 +6,6 @@ import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionEval.evalSyntax;
 import static com.amazon.fusion.GlobalState.DEFINE_SYNTAX;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
-import static com.amazon.fusion.Syntax.datumToSyntax;
-import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
-import com.amazon.fusion.Namespace.NsBinding;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -145,88 +142,85 @@ final class ModuleForm
                 formsAlreadyWrapped--;
             }
 
-            SyntaxSexp provide = formIsProvide(form);
-            if (provide != null)
+            boolean formIsPrepared = false;
+
+            SyntaxValue expanded =
+                expander.partialExpand(moduleNamespace, form);
+
+            if (expanded instanceof SyntaxSexp)
             {
-                provideForms.add(provide);
+                SyntaxSexp sexp = (SyntaxSexp)expanded;
+                Binding binding = sexp.firstBinding();
+
+                if (binding == globals.myKernelDefineBinding)
+                {
+                    expanded = DefineForm.predefine(eval, moduleNamespace,
+                                                    sexp, form);
+                }
+                else if (binding == globals.myKernelDefineSyntaxBinding)
+                {
+                    try
+                    {
+                        expanded =
+                            expander.expand(moduleNamespace, expanded);
+                        // TODO this is getting compiled twice
+                        CompiledForm compiled =
+                            eval.compile(moduleNamespace, expanded);
+                        eval.eval(moduleNamespace, compiled);
+                    }
+                    catch (SyntaxFailure e)
+                    {
+                        e.addContext(form);
+                        throw e;
+                    }
+                    catch (FusionException e)
+                    {
+                        String message = e.getMessage();
+                        throw new SyntaxFailure(DEFINE_SYNTAX,
+                                                message, form);
+                    }
+                    formIsPrepared = true;
+                }
+                else if (binding == globals.myKernelUseBinding ||
+                         binding == globals.myKernelRequireBinding)
+                {
+                    try
+                    {
+                        evalSyntax(eval, expanded, moduleNamespace);
+                    }
+                    catch (FusionException e)
+                    {
+                        String message = e.getMessage();
+                        SyntaxFailure ex =
+                            new SyntaxFailure(binding.getName(),
+                                              message, form);
+                        ex.initCause(e);
+                        throw ex;
+                    }
+                    expanded = null;
+                }
+                else if (binding == globals.myKernelProvideBinding)
+                {
+                    provideForms.add(sexp);
+                    expanded = null;
+                }
+                else if (binding == globals.myKernelBeginBinding)
+                {
+                    // Splice 'begin' into the module-begin sequence
+                    int last = sexp.size() - 1;
+                    for (int i = last; i != 0;  i--)
+                    {
+                        forms.push(sexp.get(i));
+                    }
+                    formsAlreadyWrapped += last;
+                    expanded = null;
+                }
             }
-            else
+
+            if (expanded != null)
             {
-                boolean formIsPrepared = false;
-
-                SyntaxValue expanded =
-                    expander.partialExpand(moduleNamespace, form);
-
-                if (expanded instanceof SyntaxSexp)
-                {
-                    SyntaxSexp sexp = (SyntaxSexp)expanded;
-                    Binding binding = sexp.firstBinding();
-
-                    if (binding == globals.myKernelDefineBinding)
-                    {
-                        expanded = DefineForm.predefine(eval, moduleNamespace,
-                                                        sexp, form);
-                    }
-                    else if (binding == globals.myKernelDefineSyntaxBinding)
-                    {
-                        try
-                        {
-                            expanded =
-                                expander.expand(moduleNamespace, expanded);
-                            // TODO this is getting compiled twice
-                            CompiledForm compiled =
-                                eval.compile(moduleNamespace, expanded);
-                            eval.eval(moduleNamespace, compiled);
-                        }
-                        catch (SyntaxFailure e)
-                        {
-                            e.addContext(form);
-                            throw e;
-                        }
-                        catch (FusionException e)
-                        {
-                            String message = e.getMessage();
-                            throw new SyntaxFailure(DEFINE_SYNTAX,
-                                                    message, form);
-                        }
-                        formIsPrepared = true;
-                    }
-                    else if (binding == globals.myKernelUseBinding ||
-                             binding == globals.myKernelRequireBinding)
-                    {
-                        try
-                        {
-                            evalSyntax(eval, expanded, moduleNamespace);
-                        }
-                        catch (FusionException e)
-                        {
-                            String message = e.getMessage();
-                            SyntaxFailure ex =
-                                new SyntaxFailure(binding.getName(),
-                                                  message, form);
-                            ex.initCause(e);
-                            throw ex;
-                        }
-                        expanded = null;
-                    }
-                    else if (binding == globals.myKernelBeginBinding)
-                    {
-                        // Splice 'begin' into the module-begin sequence
-                        int last = sexp.size() - 1;
-                        for (int i = last; i != 0;  i--)
-                        {
-                            forms.push(sexp.get(i));
-                        }
-                        formsAlreadyWrapped += last;
-                        expanded = null;
-                    }
-                }
-
-                if (expanded != null)
-                {
-                    otherForms.add(expanded);
-                    preparedFormFlags.add(formIsPrepared);
-                }
+                otherForms.add(expanded);
+                preparedFormFlags.add(formIsPrepared);
             }
         }
 
@@ -282,9 +276,9 @@ final class ModuleForm
             subforms[i++] = stx;
         }
 
-        for (SyntaxSexp stx : provideForms)
+        for (SyntaxValue stx : provideForms)
         {
-            stx = expandProvide(eval, stx, moduleNamespace);
+            stx = expander.expand(moduleNamespace, stx);
             subforms[i++] = stx;
         }
 
@@ -341,7 +335,6 @@ final class ModuleForm
             variableCount = form.bigIntegerValue().intValue();
         }
 
-        ArrayList<SyntaxSexp> provideForms = new ArrayList<>();
         ArrayList<CompiledForm> otherForms = new ArrayList<>();
 
         int bodyPos = 4;
@@ -356,23 +349,25 @@ final class ModuleForm
             }
         }
 
-        for (int i = bodyPos; i < stx.size(); i++)
+
+        final Binding kernelProvideBinding =
+            eval.getGlobalState().myKernelProvideBinding;
+
+        int i;
+        for (i = bodyPos; i < stx.size(); i++)
         {
             SyntaxValue form = stx.get(i);
-            SyntaxSexp provide = formIsProvide(form);
-            if (provide != null)
+            if (firstBinding(form) == kernelProvideBinding)
             {
-                provideForms.add(provide);
+                break;
             }
-            else
-            {
-                CompiledForm compiled = eval.compile(moduleNamespace, form);
-                otherForms.add(compiled);
-            }
+
+            CompiledForm compiled = eval.compile(moduleNamespace, form);
+            otherForms.add(compiled);
         }
 
         SyntaxSymbol[] providedIdentifiers =
-            providedSymbols(eval, moduleNamespace, provideForms);
+            providedSymbols(eval, moduleNamespace, stx, i);
 
         CompiledForm[] otherFormsArray =
             otherForms.toArray(new CompiledForm[otherForms.size()]);
@@ -408,173 +403,21 @@ final class ModuleForm
     //========================================================================
 
 
-    private SyntaxSexp formIsProvide(SyntaxValue form)
-    {
-        // TODO FUSION-135 this needs to use binding comparison, not strcmp
-        if (form.getType() == SyntaxValue.Type.SEXP)
-        {
-            SyntaxSexp sexp = (SyntaxSexp) form;
-            if (sexp.size() != 0)
-            {
-                SyntaxValue first = sexp.get(0);
-                if (first.getType() == SyntaxValue.Type.SYMBOL
-                    && "provide".equals(((SyntaxSymbol) first).stringValue()))
-                {
-                    return sexp;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Performs expand-time syntax checking of {@code provide} forms.
-     * Note that we expand these after expanding the rest of the module.
-     */
-    private SyntaxSexp expandProvide(Evaluator eval,
-                                     SyntaxSexp form,
-                                     Namespace moduleNamespace)
-        throws FusionException
-    {
-        ArrayList<SyntaxValue> expanded = new ArrayList<>(form.size());
-        expanded.add(form.get(0));
-
-        SyntaxChecker check = new SyntaxChecker("provide", form);
-        for (int i = 1; i < form.size(); i++)
-        {
-            SyntaxValue spec = form.get(i);
-            switch (spec.getType())
-            {
-                case SYMBOL:
-                {
-                    check.requiredIdentifier("bound identifier", i);
-
-                    expandProvideId(moduleNamespace, (SyntaxSymbol) spec,
-                                    check, expanded);
-                    break;
-                }
-                case SEXP:
-                {
-                    expandProvideSexp(eval, moduleNamespace,
-                                      (SyntaxSexp) spec,
-                                      check.subformSexp("provide-spec", i),
-                                      expanded);
-                    break;
-                }
-                default:
-                {
-                    throw check.failure("expected provide-spec", form.get(i));
-                }
-            }
-        }
-
-        SyntaxValue[] children =
-            expanded.toArray(new SyntaxValue[expanded.size()]);
-        return SyntaxSexp.make(eval, children, form.getAnnotations(), form.getLocation());
-    }
-
-
-    private void expandProvideId(Namespace moduleNamespace,
-                                 SyntaxSymbol identifier,
-                                 SyntaxChecker check,
-                                 ArrayList<SyntaxValue> expanded)
-        throws FusionException
-    {
-        String publicName = identifier.stringValue();
-
-        // TODO FUSION-139 id.resolve works when the id has the ns in context
-        // It doesn't work when the ns isn't in context because the
-        // provided binding was macro-introduced.
-
-        Binding b = identifier.resolve();
-        // Binding local = moduleNamespace.localResolve(identifier);
-        // localResolve isn't right either since it doesn't find imports
-
-        if (b instanceof FreeBinding)
-        {
-            String message =
-                "cannot export " + printQuotedSymbol(publicName) +
-                " since it has no definition.";
-            throw check.failure(message);
-        }
-
-        String freeName = b.getName();
-        if (! publicName.equals(freeName))
-        {
-            String message =
-                "cannot export binding since symbolic name " +
-                printQuotedSymbol(publicName) +
-                " differs from resolved name " +
-                printQuotedSymbol(freeName);
-            throw check.failure(message);
-        }
-
-        expanded.add(identifier);
-    }
-
-    private void expandProvideSexp(Evaluator eval,
-                                   Namespace moduleNamespace,
-                                   SyntaxSexp specForm,
-                                   SyntaxChecker check,
-                                   ArrayList<SyntaxValue> expanded)
-        throws FusionException
-    {
-        SyntaxSymbol tag = check.requiredIdentifier(0);
-        switch (tag.stringValue())
-        {
-            case "all_defined_out":
-            {
-                check.arityExact(1);
-
-                // Filter by lexical context: we shouldn't export identifiers
-                // introduced by macros unless this form was also introduced
-                // at the same time.
-                for (NsBinding binding : moduleNamespace.getBindings())
-                {
-                    // TODO the datum->syntax context should be the whole sexp
-                    // form `(all_defined_out)` not just `all_defined_out` but
-                    // we don't currently retain context on SyntaxSexp after
-                    // it has been pushed down to children.
-                    SyntaxSymbol localized = (SyntaxSymbol)
-                        datumToSyntax(eval,
-                                      SyntaxSymbol.make(binding.getName()),
-                                      tag);
-                    localized = localized.copyAndResolveTop();
-                    Binding localBinding =
-                        moduleNamespace.localResolve(localized);
-                    if (localBinding != null
-                        && binding.sameTarget(localBinding))
-                    {
-                        localized = localized.copyReplacingBinding(binding);
-                        expanded.add(localized);
-                    }
-
-                    // TODO FUSION-136 handle rename-transformers per Racket
-                }
-
-                break;
-            }
-            default:
-            {
-                throw check.failure("invalid provide-spec");
-            }
-        }
-    }
-
-
     /**
      * @return not null.
      */
     private SyntaxSymbol[] providedSymbols(Evaluator eval,
                                            Namespace ns,
-                                           ArrayList<SyntaxSexp> provideForms)
+                                           SyntaxSexp moduleStx,
+                                           int firstProvidePos)
         throws FusionException
     {
         Set<String> names = new HashSet<>();
         ArrayList<SyntaxSymbol> identifiers = new ArrayList<>();
 
-        for (SyntaxSexp form : provideForms)
+        for (int p = firstProvidePos; p < moduleStx.size(); p++)
         {
+            SyntaxSexp form = (SyntaxSexp) moduleStx.get(p);
             SyntaxChecker check = new SyntaxChecker("provide", form);
 
             int size = form.size();

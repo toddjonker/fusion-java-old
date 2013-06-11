@@ -4,6 +4,22 @@
 
 
 ;;============================================================================
+;; Check use at module context
+
+(check-exn exn:fail?
+  (lambda ()
+    (eval (quote
+      (provide eval)))))   ; ERROR: not at module level
+
+
+(check-exn exn:fail?
+  (lambda ()
+    (eval (quote
+      (module M racket
+         (if true (provide if) true))))))   ; ERROR: not at module level
+
+
+;;============================================================================
 ;; Check simple all_defined_out
 
 (module M1 racket

@@ -4,6 +4,22 @@
 
 
 //============================================================================
+// Check use at module context
+
+(check_exn // exn:fail?
+  (lambda ()
+    (eval (quote
+      (provide eval)))))   // ERROR: not at module level
+
+
+(check_exn // exn:fail?
+  (lambda ()
+    (eval (quote
+      (module M '/fusion/base'
+         (if true (provide if) true))))))   // ERROR: not at module level
+
+
+//============================================================================
 // Check simple all_defined_out
 
 (module M1 '/fusion/base'
