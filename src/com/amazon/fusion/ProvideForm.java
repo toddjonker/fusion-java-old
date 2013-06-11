@@ -13,7 +13,14 @@ final class ProvideForm
 {
     ProvideForm()
     {
-        super("provide-clause", "doc");
+        //    "                                                                               |
+        super("provide_clause ...",
+              "Declares bindings to be exported from the enclosing module.  This form may only\n" +
+              "appear at module level.\n" +
+              "\n" +
+              "The clauses denote the bindings to be exported.  The basic clause is an\n" +
+              "identifier bound at module-level, either via definition or import.  At present\n" +
+              "the only other `provide_clause` form is `all_defined_out`.");
     }
 
 
@@ -24,7 +31,7 @@ final class ProvideForm
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp form)
         throws FusionException
     {
-        SyntaxChecker check = new SyntaxChecker("provide", form);
+        SyntaxChecker check = check(form);
 
         if (!expander.isModuleContext())
         {
@@ -178,7 +185,12 @@ final class ProvideForm
     {
         AllDefinedOutForm()
         {
-            super("", "doc");
+            //    "                                                                               |
+            super("",
+                  "A `provide` clause that exports all bindings `define`d by the enclosing module.\n" +
+                  "Imported bindings are not exported.\n" +
+                  "\n" +
+                  "This form can only appear within `provide`.");
         }
 
         @Override

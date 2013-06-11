@@ -1,0 +1,14 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(module module "/fusion/private/kernel"
+
+  '''
+The basic organizational component of Fusion code.
+
+See [Modules and Scripts](/module.html) for an overview.
+  '''
+
+  (require "/fusion/experimental/defines")
+
+  (provide all_defined_out module provide require)
+)

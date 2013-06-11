@@ -11,7 +11,15 @@ final class RequireForm
 
     RequireForm(ModuleNameResolver moduleNameResolver)
     {
-        super("MODULE", "doc");
+        //    "                                                                               |
+        super("require_clause ...+",
+              "Declares bindings to be imported into the enclosing module.  This form may only\n" +
+              "appear at module level.\n" +
+              "The clauses denote the bindings to be imported.  At present the only clause\n" +
+              "form is a string or symbol containing a [module path][]; all bindings\n" +
+              "`provide`d by the referenced module are imported." +
+              "\n" +
+              "[module path]: module.html#ref");
         myModuleNameResolver = moduleNameResolver;
     }
 
