@@ -420,7 +420,7 @@ public final class FusionWrite
         IonizeProc()
         {
             //    "                                                                               |
-            super("Writes an Ion text representation of `value`, throwing an exception if the\n" +
+            super("Outputs an Ion text representation of `value`, throwing an exception if the\n" +
                   "value contains any non-Ionizable data like closures.",
                   "value");
         }
@@ -454,7 +454,7 @@ public final class FusionWrite
         WriteProc()
         {
             //    "                                                                               |
-            super("Writes a text representation of `value`, following Ion syntax where possible.\n" +
+            super("Outputs a text representation of `value`, following Ion syntax where possible.\n" +
                   "The result will be unreadable (by the Fusion and Ion readers) if the value\n" +
                   "contains any non-Ionizable data like closures.",
                   "value");
@@ -477,7 +477,7 @@ public final class FusionWrite
         DisplayProc()
         {
             //    "                                                                               |
-            super("Writes a text representation of the `value`s, writing character data as-is but\n" +
+            super("Outputs a text representation of the `value`s, writing character data as-is but\n" +
                   "otherwise following Ion syntax where possible.  In general, the result will be\n" +
                   "unreadable by the Fusion and Ion readers.",
                   "value", DOTDOTDOT);
