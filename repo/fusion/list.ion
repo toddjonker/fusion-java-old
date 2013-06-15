@@ -122,8 +122,6 @@ languages, highlighting potential mutation of an argument.
 
   (defpub_j add_m           "com.amazon.fusion.AddMProc")
   (defpub_j append_m        "com.amazon.fusion.AppendMProc")
-  // TODO FUSION-107 remove `concatenate_m`; renamed to `append_m`
-  (defpub_j concatenate_m   "com.amazon.fusion.AppendMProc")
   (defpub_j subseq          "com.amazon.fusion.IonSubseqProc")
 
 
