@@ -21,17 +21,6 @@
 (datum_to_syntax [id] id)
 
 
-// FIXME FUSION-107 DP2 backwards compatibility
-(datum_to_syntax id some_syntax)
-(datum_to_syntax id null)
-(datum_to_syntax id "hello")
-(datum_to_syntax id (quote s))
-
-(datum_to_syntax id null.list)
-(datum_to_syntax id [])
-(datum_to_syntax id [id])
-
-
 //==========================================================================
 // is_identifier
 

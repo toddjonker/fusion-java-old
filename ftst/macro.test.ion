@@ -158,7 +158,7 @@
     (let ((arg (syntax_get stx 1)))
       (quasisyntax
         (let ((c 2))
-          (unsyntax (datum_to_syntax (quote_syntax here) arg)))))))
+          (unsyntax (datum_to_syntax arg (quote_syntax here))))))))
 (check_equal
   (let ((c 5))
     (capture (* 10 c)))

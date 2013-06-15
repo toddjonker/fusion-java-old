@@ -27,25 +27,15 @@ class DatumToSyntaxProc
         checkArityRange(1, 2, args);
 
         SyntaxSymbol context = null;
-        Object datum;
-        if (args.length == 2 && isIdentifier(eval, args[0]))
-        {
-            // FIXME FUSION-107 DP2 backwards compatibility this whole clause
-            context = (SyntaxSymbol) args[0];
-            datum = args[1];
-        }
-        else
-        {
-            datum = args[0];
+        Object datum = args[0];
 
-            if (args.length == 2)
+        if (args.length == 2)
+        {
+            if (! isIdentifier(eval, args[1]))
             {
-                if (! isIdentifier(eval, args[1]))
-                {
-                    throw argFailure("syntax identifier", 1, args);
-                }
-                context = (SyntaxSymbol) args[1];
+                throw argFailure("syntax identifier", 1, args);
             }
+            context = (SyntaxSymbol) args[1];
         }
 
         return datumToSyntax(eval, datum, context);
