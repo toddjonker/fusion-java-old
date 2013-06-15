@@ -105,20 +105,7 @@ final class GlobalState
                                    currentModuleDeclareName,
                                    builder.buildModuleRepositories());
 
-        // TODO FUSION-133 remove UseForm
-        UseForm useForm = new UseForm(resolver);
         RequireForm requireForm = new RequireForm(resolver);
-
-        // These must be bound before 'module' since we need the bindings
-        // for the partial-expansion stop-list.
-        ns.define(DEFINE, new DefineForm());
-        ns.define(DEFINE_SYNTAX, new DefineSyntaxForm());
-        ns.define(REQUIRE, requireForm);
-        ns.define(USE, useForm);
-
-        SyntacticForm moduleForm =
-            new ModuleForm(resolver, currentModuleDeclareName);
-        LoadProc loadProc = new LoadProc(loadHandler);
 
         ns.define(ALL_DEFINED_OUT, new ProvideForm.AllDefinedOutForm());
         ns.define(BEGIN, new BeginForm());    // Needed by hard-coded macro
@@ -130,14 +117,20 @@ final class GlobalState
                   "A [parameter](fusion/parameter.html) holding the thread-local namespace.  This value has no direct\n" +
                   "relationship to the namespace lexically enclosing the parameter call.");
 
+        ns.define(DEFINE, new DefineForm());
+        ns.define(DEFINE_SYNTAX, new DefineSyntaxForm());
         ns.define("if", new IfForm());          // Needed by hard-coded macro
         ns.define("java_new", new JavaNewProc());
         ns.define(LAMBDA, new LambdaForm());    // Needed by hard-coded macro
         ns.define(LETREC, new LetrecForm());    // Needed by hard-coded macro
-        ns.define("load", loadProc);
-        ns.define(MODULE, moduleForm);
+        ns.define("load", new LoadProc(loadHandler));
+        ns.define(MODULE, new ModuleForm(resolver, currentModuleDeclareName));
         ns.define(PROVIDE, new ProvideForm());
         ns.define("quote_syntax", new QuoteSyntaxForm()); // For fusion/syntax
+        ns.define(REQUIRE, requireForm);
+
+        // TODO FUSION-133 remove UseForm
+        ns.define(USE, new UseForm(resolver));
 
         for (IonType t : IonType.values())
         {
