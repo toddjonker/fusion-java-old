@@ -845,8 +845,8 @@ final class FusionStruct
         StructProc()
         {
             //    "                                                                               |
-            super("Constructs an immutable struct from alternating strings and values.  Each\n" +
-                  "`name` is a non-empty string or symbol denoting a field name, and the\n" +
+            super("Constructs an immutable, non-null struct from alternating strings and values.\n" +
+                  "Each `name` is a non-empty string or symbol denoting a field name, and the\n" +
                   "following `value` is the field's value.  Names may be repeated to produce\n" +
                   "repeated (multi-mapped) fields.",
                   "name", "value", DOTDOTDOT, DOTDOTDOT);

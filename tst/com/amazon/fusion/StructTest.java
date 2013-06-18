@@ -127,7 +127,7 @@ public class StructTest
         throws Exception
     {
          assertEval("{}",
-                    "(struct_make)");
+                    "(struct)");
          assertEval("{f:3}",
                     "(struct \"f\" 3)");
          assertEval("{hello:\"world\"}",
