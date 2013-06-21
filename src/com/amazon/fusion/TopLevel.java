@@ -143,8 +143,9 @@ public interface TopLevel
 
 
     /**
-     * Calls a Fusion procedure by name, converting Java types to Fusion types
-     * where possible.
+     * Calls a Fusion procedure by name,
+     * <a href="{@docRoot}/overview-summary.html#inject">injecting</a> Java
+     * values to Fusion values where possible.
      *
      * @param procedureName must name a visible procedure, either defined in
      * this namespace or imported from a module.

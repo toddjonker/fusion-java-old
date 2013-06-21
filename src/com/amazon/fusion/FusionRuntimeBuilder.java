@@ -88,7 +88,7 @@ public class FusionRuntimeBuilder
      * Gets the initial value of the {@code current_directory} parameter,
      * which is the working directory for Fusion code.
      *
-     * @result an absolute path. May be null, which means the builder will use
+     * @return an absolute path. May be null, which means the builder will use
      * the {@code "user.dir"} JVM system property when {@link #build()} is
      * called.
      *
