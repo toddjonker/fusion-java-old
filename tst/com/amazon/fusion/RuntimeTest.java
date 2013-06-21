@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.isTrue;
 import static com.amazon.fusion.FusionVoid.isVoid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -12,6 +13,8 @@ import static org.junit.Assert.fail;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonValue;
 import java.io.File;
+import java.math.BigInteger;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class RuntimeTest
@@ -111,6 +114,24 @@ public class RuntimeTest
         topLevel().requireModule("/fusion/function");
         Object fv = topLevel().call("identity", (Object) null);
         assertTrue(isVoid(topLevel(), fv));
+
+        // Check that define() injects the given value.
+        topLevel().define("v", null);
+        fv = topLevel().eval("(identity v)");
+        assertTrue(isVoid(topLevel(), fv));
+    }
+
+    @Test
+    public void testIntInjection()
+        throws Exception
+    {
+        Object fv = topLevel().call("<", 22, BigInteger.valueOf(23));
+        assertTrue(isTrue(topLevel(), fv));
+
+        // Check that define() injects the given value.
+        topLevel().define("v", 22);
+        fv = topLevel().eval("(= v 22)");
+        assertTrue(isTrue(topLevel(), fv));
     }
 
     @Test

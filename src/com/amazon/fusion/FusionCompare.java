@@ -32,8 +32,7 @@ final class FusionCompare
 
         FusionException failure(Object[] args)
         {
-            return new ArgTypeFailure(this, "values are not comparable", -1,
-                                      args);
+            return new ArgTypeFailure(this, "comparable types", -1, args);
         }
 
 

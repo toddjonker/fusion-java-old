@@ -127,7 +127,9 @@ public interface TopLevel
 
 
     /**
-     * Binds an identifier with a value in this namespace.
+     * Binds an identifier with a value in this namespace,
+     * <a href="{@docRoot}/overview-summary.html#inject">injecting</a> Java
+     * values.
      * <p>
      * If the name has already been defined in this namespace then the existing
      * variable is mutated to have the given value.
@@ -135,8 +137,9 @@ public interface TopLevel
      * top-level definition is created or modified and will shadow the imported
      * binding in future expressions.
      *
-     * @param value must be of a type supported by the Fusion runtime.
-     * Must not be null.
+     * @param value the value to bind, must be
+     * <a href="{@docRoot}/overview-summary.html#inject">injectable</a>.
+     * It is unspecified whether the value will be copied in whole or in part.
      */
     public void define(String name, Object value)
         throws FusionException;
@@ -145,7 +148,7 @@ public interface TopLevel
     /**
      * Calls a Fusion procedure by name,
      * <a href="{@docRoot}/overview-summary.html#inject">injecting</a> Java
-     * values to Fusion values where possible.
+     * values.
      *
      * @param procedureName must name a visible procedure, either defined in
      * this namespace or imported from a module.

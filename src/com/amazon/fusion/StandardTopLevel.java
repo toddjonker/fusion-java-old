@@ -128,7 +128,15 @@ final class StandardTopLevel
     public void define(String name, Object value)
         throws FusionException
     {
-        myNamespace.bind(name, value);
+        Object fv = myEvaluator.injectMaybe(value);
+        if (fv == null)
+        {
+            throw new ArgTypeFailure("TopLevel.define",
+                                     "injectable Java type",
+                                     1, name, value);
+        }
+
+        myNamespace.bind(name, fv);
     }
 
 
