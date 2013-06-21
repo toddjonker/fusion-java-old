@@ -1,13 +1,45 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.isBool;
+import static com.amazon.fusion.FusionBool.isFalse;
+import static com.amazon.fusion.FusionBool.isTrue;
 import static com.amazon.fusion.TailCallTest.STACK_OVERFLOW_DEPTH;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 public class BooleanTest
     extends CoreTestCase
 {
+    @Test
+    public void testBoolBasics()
+        throws Exception
+    {
+        Object fv = topLevel().eval("true");
+        assertTrue(isBool(topLevel(), fv));
+        assertTrue(isTrue(topLevel(), fv));
+        assertFalse(isFalse(topLevel(), fv));
+
+        fv = topLevel().eval("false");
+        assertTrue(isBool(topLevel(), fv));
+        assertFalse(isTrue(topLevel(), fv));
+        assertTrue(isFalse(topLevel(), fv));
+
+        fv = topLevel().eval("null.bool");
+        assertTrue(isBool(topLevel(), fv));
+        assertFalse(isTrue(topLevel(), fv));
+        assertFalse(isFalse(topLevel(), fv));
+
+        fv = topLevel().eval("null");
+        assertFalse(isBool(topLevel(), fv));
+        assertFalse(isTrue(topLevel(), fv));
+        assertFalse(isFalse(topLevel(), fv));
+    }
+
+
+
     public static final String[] TRUTHY_EXPRESSIONS =
     {
         "true",

@@ -45,6 +45,11 @@ public abstract class FusionValue
     {
     }
 
+    static Evaluator evaluator(TopLevel top)
+    {
+        return ((StandardTopLevel) top).getEvaluator();
+    }
+
 
     boolean isAnyNull()
     {
@@ -55,7 +60,7 @@ public abstract class FusionValue
     public static boolean isAnyNull(TopLevel top, Object value)
         throws FusionException
     {
-        return isAnyNull(((StandardTopLevel) top).getEvaluator(), value);
+        return isAnyNull(evaluator(top), value);
     }
 
     static boolean isAnyNull(Evaluator eval, Object value)
@@ -78,14 +83,36 @@ public abstract class FusionValue
     }
 
 
-    static boolean isTruthy(Evaluator eval, Object result)
+    /**
+     * Determines whether a given Fusion value is "truthy".
+     * Fusion defines truthiness as follows:
+     * <ul>
+     *   <li>
+     *     Every value is truthy except for {@code false}, void, and any
+     *     variant of {@code null}.
+     *   </li>
+     * </ul>
+     * This definition is more lax (and hopefully more convenient) than Java,
+     * but less lenient (and hopefully less error-prone) than C or C++.
+     * See <a Null and Void for more explanation.
+     *
+     * @see <a href="{@docRoot}/../nullvoid.html">Null and Void</a>
+     * @see FusionBool#isTrue(TopLevel, Object)
+     */
+    public static boolean isTruthy(TopLevel top, Object value)
         throws FusionException
     {
-        if (isVoid(eval, result)) return false;
+        return isTruthy(evaluator(top), value);
+    }
 
-        if (isAnyNull(eval, result)) return false;
+    static boolean isTruthy(Evaluator eval, Object value)
+        throws FusionException
+    {
+        if (isVoid(eval, value)) return false;
 
-        IonValue iv = FusionValue.castToIonValueMaybe(result);
+        if (isAnyNull(eval, value)) return false;
+
+        IonValue iv = FusionValue.castToIonValueMaybe(value);
         if (iv instanceof IonBool)
         {
             IonBool bv = (IonBool) iv;
