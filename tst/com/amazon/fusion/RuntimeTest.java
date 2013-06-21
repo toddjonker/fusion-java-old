@@ -14,7 +14,6 @@ import com.amazon.ion.IonInt;
 import com.amazon.ion.IonValue;
 import java.io.File;
 import java.math.BigInteger;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class RuntimeTest
@@ -131,6 +130,18 @@ public class RuntimeTest
         // Check that define() injects the given value.
         topLevel().define("v", 22);
         fv = topLevel().eval("(= v 22)");
+        assertTrue(isTrue(topLevel(), fv));
+    }
+
+    @Test
+    public void testBoolInjection()
+        throws Exception
+    {
+        Object fv = topLevel().call("=", true, Boolean.FALSE);
+        assertFalse(isTrue(topLevel(), fv));
+
+        topLevel().define("v", true);
+        fv = topLevel().eval("v");
         assertTrue(isTrue(topLevel(), fv));
     }
 

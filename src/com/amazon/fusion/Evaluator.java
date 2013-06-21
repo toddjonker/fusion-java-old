@@ -127,7 +127,13 @@ final class Evaluator
      */
     Object injectMaybe(Object javaValue)
     {
-        if (javaValue instanceof FusionValue)
+        // Check for null first, on the off chance this will help the compiler
+        // optimize the later instanceof tests.
+        if (javaValue == null)
+        {
+            return voidValue(this);
+        }
+        else if (javaValue instanceof FusionValue)
         {
             return javaValue;
         }
@@ -143,10 +149,15 @@ final class Evaluator
         {
             return injectMaybe((Number) javaValue);
         }
-        else if (javaValue == null)
+        else if (javaValue instanceof Boolean)
         {
-            return voidValue(this);
+            return newBool((Boolean) javaValue);
         }
+
+        // ******** Be sure to document types as they are added! ********
+
+
+        // TODO should handle Double, Timestamp, Object[], ArrayList
 
         // TODO this API forces us to use a non-null object for VOID!
         return null;
