@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.GlobalState.FUSION_SOURCE_EXTENSION;
+import static com.amazon.fusion.ModuleIdentity.internFromFile;
 import java.io.File;
 
 final class FileSystemModuleRepository
@@ -32,18 +34,26 @@ final class FileSystemModuleRepository
 
 
     @Override
-    ModuleIdentity resolveLib(Evaluator eval, String libName)
+    ModuleIdentity resolveLib(Evaluator eval, String absoluteModulePath)
         throws FusionException
     {
-        assert libName.startsWith("/");
+        assert absoluteModulePath.startsWith("/");
 
-        // TODO absolute vs relative paths
-        String fileName = libName.substring(1) + ".ion"; // TODO ugly hard-coding
-
+        // TODO ugly hard-coding
+        String fileName =
+            absoluteModulePath.substring(1) + FUSION_SOURCE_EXTENSION;
         File libFile = new File(myRepoDir, fileName);
         if (libFile.exists())
         {
-            return ModuleIdentity.internFromFile(libName, libFile);
+            return internFromFile(absoluteModulePath, libFile);
+        }
+
+        // TODO FUSION-159 remove support for .ion extension
+        fileName = absoluteModulePath.substring(1) + ".ion";
+        libFile = new File(myRepoDir, fileName);
+        if (libFile.exists())
+        {
+            return internFromFile(absoluteModulePath, libFile);
         }
 
         return null;

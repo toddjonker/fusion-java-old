@@ -98,7 +98,7 @@ public class RuntimeTest
         checkString("hello", loadFile("tst-data/hello.ion"));
 
         // Test that eval'd define affects the visible namespace
-        loadFile("tst-data/trivialDefine.ion");
+        loadFile("tst-data/trivialDefine.fusion");
         assertEval(3328, "x");
 
         // Test eval'ing a module

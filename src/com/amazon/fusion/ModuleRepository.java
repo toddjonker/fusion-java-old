@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -14,6 +14,7 @@ abstract class ModuleRepository
      */
     abstract String identify();
 
-    abstract ModuleIdentity resolveLib(Evaluator eval, String libName)
+    abstract ModuleIdentity resolveLib(Evaluator eval,
+                                       String absoluteModulePath)
         throws FusionException;
 }

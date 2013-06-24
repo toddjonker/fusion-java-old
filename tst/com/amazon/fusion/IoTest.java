@@ -49,7 +49,7 @@ public class IoTest
     public void testLoadCurrentNamespace()
         throws Exception
     {
-        eval("(load \"tst-data/trivialDefine.ion\")");
+        eval("(load \"tst-data/trivialDefine.fusion\")");
         assertEval(3328, "x");
     }
 

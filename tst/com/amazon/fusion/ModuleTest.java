@@ -138,7 +138,7 @@ public class ModuleTest
     public void testUseNonModule()
         throws Exception
     {
-        eval("(use \"tst-data/trivialDefine.ion\")");
+        eval("(use \"tst-data/trivialDefine.fusion\")");
     }
 
     @Test @Deprecated  // TODO FUSION-133 remove 'use'

@@ -300,6 +300,7 @@ final class ModuleNameResolver
                            SyntaxValue stxForErrors)
         throws FusionException
     {
+        // TODO FUSION-159 Remove support for .ion extension
         String pathFileName = path.endsWith(".ion") ? path : path + ".ion";
 
         File pathFile = new File(pathFileName);

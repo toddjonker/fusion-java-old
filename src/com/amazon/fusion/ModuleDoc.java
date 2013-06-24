@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
+import static com.amazon.fusion.GlobalState.FUSION_SOURCE_EXTENSION;
 import java.io.File;
 import java.io.IOException;
 import java.text.BreakIterator;
@@ -175,7 +176,7 @@ final class ModuleDoc
         }
         catch (ModuleNotFoundFailure e)
         {
-            // This can happen for implicit modules with no stub .ion file.
+            // This can happen for implicit modules with no stub .fusion file.
             // For now we just stop here and don't handle further submodules.
             // TODO Recurse into implicit modules that don't have stub source.
             return null;
@@ -230,6 +231,16 @@ final class ModuleDoc
         // First pass: build all "real" modules
         for (String fileName : fileNames)
         {
+            if (fileName.endsWith(FUSION_SOURCE_EXTENSION))
+            {
+                // We assume that all .fusion files are modules.
+                int endIndex =
+                    fileName.length() - FUSION_SOURCE_EXTENSION.length();
+                String moduleName = fileName.substring(0, endIndex);
+                addSubmodule(filter, moduleName);
+            }
+
+            // TODO FUSION-159 remove support for .ion extension
             if (fileName.endsWith(".ion"))
             {
                 // We assume that all .ion files are modules.

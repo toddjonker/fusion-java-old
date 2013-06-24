@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.GlobalState.FUSION_SOURCE_EXTENSION;
+import static com.amazon.fusion.ModuleIdentity.internFromClasspath;
+
 final class JarModuleRepository
     extends ModuleRepository
 {
@@ -13,20 +16,26 @@ final class JarModuleRepository
 
 
     @Override
-    ModuleIdentity resolveLib(Evaluator eval, String libName)
+    ModuleIdentity resolveLib(Evaluator eval, String absoluteModulePath)
         throws FusionException
     {
-        assert libName.startsWith("/");
+        assert absoluteModulePath.startsWith("/");
 
-        // TODO FUSION-74 absolute vs relative paths
-        String fileName = "/FUSION-REPO" + libName + ".ion"; // TODO ugly hard-coding
-
+        // TODO ugly hard-coding
+        String fileName =
+            "/FUSION-REPO" + absoluteModulePath + FUSION_SOURCE_EXTENSION;
         if (getClass().getResource(fileName) != null)
         {
-            ModuleIdentity id = ModuleIdentity.internFromClasspath(libName,
-                                                                   fileName);
-            return id;
+            return internFromClasspath(absoluteModulePath, fileName);
         }
+
+        // TODO FUSION-159 remove support for .ion extension
+        fileName = "/FUSION-REPO" + absoluteModulePath + ".ion";
+        if (getClass().getResource(fileName) != null)
+        {
+            return internFromClasspath(absoluteModulePath, fileName);
+        }
+
         return null;
     }
 }
