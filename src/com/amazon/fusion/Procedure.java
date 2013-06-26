@@ -315,7 +315,7 @@ abstract class Procedure
     String checkStringArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
-        IonString iv = checkDomArg(IonString.class, "text",
+        IonString iv = checkDomArg(IonString.class, "string",
                                    false /* nullable */, argNum, args);
         return iv.stringValue();
     }

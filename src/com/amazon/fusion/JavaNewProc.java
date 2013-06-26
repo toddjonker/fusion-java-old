@@ -116,8 +116,8 @@ final class JavaNewProc
         catch (NoSuchMethodException e)
         {
             String message =
-                "Java class doesn't have a public constructor accepting " +
-                args.length + " Objects: " + klass;
+                klass + " doesn't have a public constructor accepting " +
+                args.length + " Object args";
             throw contractFailure(message);
         }
     }
