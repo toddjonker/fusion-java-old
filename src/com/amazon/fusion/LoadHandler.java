@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionEval.callCurrentEval;
+import static com.amazon.fusion.FusionUtils.resolvePath;
 import static com.amazon.fusion.GlobalState.MODULE;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonReader;
@@ -28,34 +29,6 @@ final class LoadHandler
 
 
     /**
-     * Resolve a relative path against the {@code current_directory} param.
-     * If file is absolute it is returned as-is.
-     */
-    private File resolvePath(Evaluator eval, File file)
-        throws FusionException
-    {
-        if (! file.isAbsolute())
-        {
-            String cdPath = myCurrentDirectory.asString(eval);
-            File cdFile = new File(cdPath);
-            file = new File(cdFile, file.getPath());
-        }
-        return file;
-    }
-
-    /**
-     * Resolve a relative path against the {@code current_directory} param.
-     * If the path is absolute it is returned as-is.
-     */
-    private File resolvePath(Evaluator eval, String path)
-        throws FusionException
-    {
-        File file = new File(path);
-        return resolvePath(eval, file);
-    }
-
-
-    /**
      * Reads top-level syntax forms from a file, evaluating each in sequence.
      * The file is resolved relative to {@code current_directory}.
      * Loading is parameterized to set {@code current_load_relative_directory}
@@ -73,7 +46,7 @@ final class LoadHandler
     Object loadTopLevel(Evaluator eval, Namespace namespace, String path)
         throws FusionException
     {
-        File file = resolvePath(eval, path);
+        File file = resolvePath(eval, myCurrentDirectory, path);
         File parent = file.getParentFile();
 
         eval = eval.markedContinuation(myCurrentLoadRelativeDirectory,

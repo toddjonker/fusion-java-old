@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.system.IonTextWriterBuilder;
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 
@@ -93,6 +94,38 @@ final class FusionUtils
         IonWriter writer = IonTextWriterBuilder.standard().build(out);
         v.writeTo(writer);
         writer.flush();
+    }
+
+
+    /**
+     * Resolve a relative path against the {@code currentDirectory} param.
+     * If file is absolute it is returned as-is.
+     */
+    static File resolvePath(Evaluator eval,
+                            DynamicParameter currentDirectory,
+                            File file)
+        throws FusionException
+    {
+        if (! file.isAbsolute())
+        {
+            String cdPath = currentDirectory.asString(eval);
+            File cdFile = new File(cdPath);
+            file = new File(cdFile, file.getPath());
+        }
+        return file;
+    }
+
+    /**
+     * Resolve a relative path against the {@code current_directory} param.
+     * If the path is absolute it is returned as-is.
+     */
+    static File resolvePath(Evaluator eval,
+                            DynamicParameter currentDirectory,
+                            String path)
+        throws FusionException
+    {
+        File file = new File(path);
+        return resolvePath(eval, currentDirectory, file);
     }
 
 
