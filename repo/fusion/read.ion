@@ -12,6 +12,7 @@ See [`/fusion/write`](fusion/write.html) for related output procedures.
   (require "/fusion/experimental/defines")
 
 
-  (defpub_j read    "com.amazon.fusion.ReadProc")
+  (defpub read
+    (java_new "com.amazon.fusion.ReadProc" current_ion_reader))
 
 )

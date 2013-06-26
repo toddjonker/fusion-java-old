@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,7 +6,7 @@ package com.amazon.fusion;
 /**
  *
  */
-final class DynamicParameter
+class DynamicParameter
     extends Procedure
 {
     private final Object myInitialValue;
@@ -25,10 +25,10 @@ final class DynamicParameter
     }
 
 
-    Object currentValue(Evaluator eval)
+    <T> T currentValue(Evaluator eval)
     {
         Object result = eval.firstContinuationMark(this);
-        return (result == null ? myInitialValue : result);
+        return (T) (result == null ? myInitialValue : result);
     }
 
 

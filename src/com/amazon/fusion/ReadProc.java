@@ -1,22 +1,24 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.voidValue;
+import com.amazon.ion.IonReader;
 import com.amazon.ion.IonValue;
-import java.util.Iterator;
 
 
 final class ReadProc
     extends Procedure
 {
-    private Iterator<IonValue> myInputValues;
+    private final DynamicParameter myCurrentIonReaderParam;
 
-    ReadProc()
+    public ReadProc(Object currentIonReaderParam)
     {
         //    "                                                                               |
-        super("Reads an Ion value from the standard input stream.  Returns void when there's\n" +
-              "no more data.");
+        super("Reads an Ion value from the current Ion input stream.  Returns void when\n" +
+              "there's no more data.");
+
+        myCurrentIonReaderParam = (DynamicParameter) currentIonReaderParam;
     }
 
     @Override
@@ -25,15 +27,12 @@ final class ReadProc
     {
         checkArityExact(args);
 
-        if (myInputValues == null)
-        {
-            myInputValues = eval.getSystem().iterate(System.in);
-        }
+        IonReader r = myCurrentIonReaderParam.currentValue(eval);
 
         Object result;
-        if (myInputValues.hasNext())
+        if (r.next() != null)
         {
-            IonValue v = myInputValues.next();
+            IonValue v = eval.getSystem().newValue(r);
             result = eval.inject(v);
         }
         else
