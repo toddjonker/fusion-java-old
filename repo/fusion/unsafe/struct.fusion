@@ -20,7 +20,4 @@ related operations on structs.
   (defpub_j unsafe_struct_ref
     "com.amazon.fusion.FusionStruct$UnsafeStructRefProc")
 
-  // TODO FUSION-94 replace this with struct_iterator
-  (defpub_j unsafe_struct_visit
-    "com.amazon.fusion.FusionStruct$UnsafeStructVisitProc")
 )

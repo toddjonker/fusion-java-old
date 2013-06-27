@@ -75,6 +75,7 @@ while the field values are iterated.
     "/fusion/collection"
     "/fusion/experimental/defines"
     "/fusion/ffi/java"
+    "/fusion/private/builtins"   // unsafe_struct_visit
     "/fusion/unsafe/struct")
 
 

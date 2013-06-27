@@ -13,7 +13,7 @@ See also [sequence](fusion/sequence.html).
 
   (require
     "/fusion/experimental/defines"
-    "/fusion/unsafe/struct"
+    "/fusion/private/builtins"     // unsafe_struct_visit
     "/fusion/void")
 
 
