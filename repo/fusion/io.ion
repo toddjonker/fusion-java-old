@@ -3,11 +3,74 @@
 (module io '/fusion/private/kernel'
 
   '''
-Basic input/output features.
+Basic input/output features.  At present these are generally Ion-oriented.
+
+
+## Input
+
+The `read` procedure reads data from an Ion input stream.
+
+The _current Ion input stream_ is an internal [parameter][] that is the default
+source for reading Ion data.  If the current Ion stream is not parameterized
+(via `with_ion_from_file`), it is initialized from `stdin` when it's first
+needed.
+
+
+## Output
+
+There are three "styles" of output:
+
+  * `ionize` is for strict generation of Ion data.  If ionization encounters a
+  value that is not within the Ion type system, an exception is thrown.
+  * `write` is lax generation of Ion text.  It works like `ionize` except that
+  it outputs non-Ion values in a manner that is generally unreadable by an Ion
+  parser.
+  * `display` is for human-readable content.  It works like `write` except for
+  character data types (strings and symbols), which are output as-is without
+  escapes.
+
+
+[parameter]: fusion/parameter.html
   '''
+
+
+  (require "/fusion/base" "/fusion/experimental/defines")
 
 
   // Pass-through bindings from /fusion/private/kernel
   (provide current_directory)
+  // Note that we don't currently provide current_ion_reader since the name and
+  // semantics are still a bit shady.
 
+  (defpub with_ion_from_file
+    (java_new "com.amazon.fusion.WithIonFromFileProc"
+      current_directory current_ion_reader))
+
+  (defpub read
+    (java_new "com.amazon.fusion.ReadProc" current_ion_reader))
+
+  (defpub_j display "com.amazon.fusion.FusionWrite$DisplayProc")
+  (defpub_j ionize  "com.amazon.fusion.FusionWrite$IonizeProc")
+  (defpub_j write   "com.amazon.fusion.FusionWrite$WriteProc")
+
+  (defpub displayln
+    '''
+    (displayln value ...)
+
+Displays the values, then a newline.
+    '''
+    (lambda rest
+      (apply display rest)
+      (display "\n")))
+
+
+  (provide writeln)  // defpub doesn't work for this form
+  (define (writeln value)
+    '''
+    (writeln value)
+
+Writes the value, then a newline.
+    '''
+    (write value)
+    (display "\n"))
 )

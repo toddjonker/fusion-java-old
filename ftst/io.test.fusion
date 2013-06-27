@@ -2,8 +2,7 @@
 
 (require
   "/check"
-  "/fusion/io"
-  "/fusion/read")
+  "/fusion/io")
 
 
 // This assumes that current_directory is at the project root.

@@ -19,7 +19,6 @@ public class IoTest
         topLevel().requireModule("/fusion/eval");
         topLevel().requireModule("/fusion/io");
         topLevel().requireModule("/fusion/parameter");
-        topLevel().requireModule("/fusion/read");
     }
 
 
