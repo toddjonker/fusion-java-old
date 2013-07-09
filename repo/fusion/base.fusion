@@ -144,9 +144,11 @@ The last EXPR is in tail position. Given no EXPRs, the result is false.
     '''
     (when test body ...)
 
-Evaluates the TEST, and if it is truthy, evaluates the BODY expressions left
-to right. The last BODY is in tail position, and its result is the result of
+Evaluates the `test`, and if it is truthy, evaluates the `body` forms left
+to right. The last `body` is in tail position, and its result is the result of
 the entire form.  If the body isn't evaluated, the result is void.
+
+A companion form is `unless`.
     '''
     (lambda (stx)
 
@@ -166,9 +168,11 @@ the entire form.  If the body isn't evaluated, the result is void.
     '''
     (unless test body ...)
 
-Evaluates the TEST, and if it is _not_ truthy, evaluates the BODY expressions
-left to right. The last BODY is in tail position, and its result is the result
-of the entire form.  If the body isn't evaluated, the result is void.
+Evaluates the `test`, and if it is _not_ truthy, evaluates the `body` forms
+left to right. The last `body` is in tail position, and its result is the
+result of the entire form.  If the body isn't evaluated, the result is void.
+
+A companion form is `when`.
     '''
     (lambda (stx)
 
