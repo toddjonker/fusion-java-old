@@ -1,0 +1,23 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/check"
+  "/fusion/experimental/decimal")
+
+(check = (decimal_divide 1. 3.)
+  0.3333333333333333333333333333333333)
+
+(check = (decimal_divide 2. 3.)
+  0.6666666666666666666666666666666667)
+
+
+(check = (decimal_rescale 1.2345 2) 1.23)
+(check = (decimal_rescale 1.2345 3) 1.234)
+(check = (decimal_rescale 1.2335 3) 1.234)
+(check = (decimal_rescale 1.2346 3) 1.235)
+
+
+// Try converting to "dollars and cents"
+(check = (decimal_rescale (decimal_divide 2. 3.) 2) 0.67)
+
+

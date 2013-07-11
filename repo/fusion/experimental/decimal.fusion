@@ -1,0 +1,43 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(module decimal "/fusion/base"
+
+  (require
+    "/fusion/experimental/defines"
+    "/fusion/ffi/java")
+
+
+/* These procedures should use a "math context" parameter (or equivalent)
+ * holding precision and rounding mode.
+ * The best default context is not clear to me.
+ * Racket and Dylan don't have decimal arithmetic so there's no help there.
+ * Should check the 754 recommendation, Ruby, Python, etc.
+ */
+
+
+  (defpub decimal_divide
+    '''
+    (decimal_divide dividend divisor)
+
+Like `/`, but rounds to 34 significant digits, using the "half-even" method.
+
+This is equivalent to the "decimal128" default context of IEEE 754.
+
+In the future this procedure will be replaced with a programmatic math context.
+    '''
+    (java_new "com.amazon.fusion.DecimalDivideProc"))
+
+
+  (defpub decimal_rescale
+    '''
+    (decimal_rescale d scale)
+
+Returns a decimal whose value is `d` but rounded to (or extended to) `scale`
+fractional digits.  If the scale is reduced (that is, fractional digits are
+removed), the value is rounded using the "half-even" method.
+
+`d` must be a decimal, and `scale` must be an int.
+    '''
+    (java_new "com.amazon.fusion.DecimalRescaleProc"))
+
+)

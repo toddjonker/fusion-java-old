@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,7 +6,7 @@ import static com.amazon.fusion.FusionWrite.safeWriteToString;
 import java.math.BigDecimal;
 
 
-final class DivideProc
+class DivideProc
     extends Procedure
 {
     DivideProc()
@@ -18,19 +18,17 @@ final class DivideProc
               "dividend", "divisor");
     }
 
-    @Override
-    Object doApply(Evaluator eval, Object[] args)
+
+    /**
+     * Helper to allow subclass to tweak the divison context.
+     */
+    BigDecimal divide(Evaluator eval, Object[] args,
+                      BigDecimal dividend, BigDecimal divisor)
         throws FusionException
     {
-        checkArityExact(args);
-
-        BigDecimal dividend = checkRequiredDecimalArg(eval, 0, args);
-        BigDecimal divisor  = checkRequiredDecimalArg(eval, 1, args);
-
         try
         {
-            BigDecimal result = dividend.divide(divisor);
-            return eval.newDecimal(result);
+            return dividend.divide(divisor);
         }
         catch (ArithmeticException e)
         {
@@ -40,5 +38,19 @@ final class DivideProc
                 "\n  " + safeWriteToString(eval, args[1]);
             throw new ContractFailure(message);
         }
+    }
+
+
+    @Override
+    Object doApply(Evaluator eval, Object[] args)
+        throws FusionException
+    {
+        checkArityExact(args);
+
+        BigDecimal dividend = checkRequiredDecimalArg(eval, 0, args);
+        BigDecimal divisor  = checkRequiredDecimalArg(eval, 1, args);
+
+        BigDecimal result = divide(eval, args, dividend, divisor);
+        return eval.newDecimal(result);
     }
 }
