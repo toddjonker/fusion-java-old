@@ -4,6 +4,20 @@
   "/check"
   "/fusion/experimental/decimal")
 
+
+(check = (decimal_scale    0.)  0)
+(check = (decimal_scale    0.0) 1)
+(check = (decimal_scale    1.)  0)
+(check = (decimal_scale    1.0) 1)
+(check = (decimal_scale 1234.0) 1)
+
+(check = (decimal_scale 1234.56789   ) 5)
+(check = (decimal_scale 1234.56789d-1) 6)
+(check = (decimal_scale 1234.56789d5)  0)
+(check = (decimal_scale 1234.56789d8)  -3)
+
+
+
 (check = (decimal_divide 1. 3.)
   0.3333333333333333333333333333333333)
 
@@ -16,8 +30,18 @@
 (check = (decimal_rescale 1.2335 3) 1.234)
 (check = (decimal_rescale 1.2346 3) 1.235)
 
-
-// Try converting to "dollars and cents"
 (check = (decimal_rescale (decimal_divide 2. 3.) 2) 0.67)
 
+// Highlight difference caused by rounding only once.
+(define long 19.9499999999999999999999999999999999)
+(check = (decimal_divide long 10.)
+  1.995)
+(check = (decimal_rescale (decimal_divide long 10.) 2)
+  2.00)
+(check = (decimal_divide_rescale long 10. 2)
+  1.99)
 
+(check = (decimal_scale (decimal_divide_rescale 1. 2. 2)) 2)
+
+(check = (decimal_divide_rescale 1. 2. 2) 0.50)
+(check = (decimal_divide_rescale 2. 3. 2) 0.67)

@@ -14,6 +14,15 @@
  * Should check the 754 recommendation, Ruby, Python, etc.
  */
 
+  (defpub decimal_scale
+    '''
+    (decimal_scale d)
+
+Returns the number of fractional digits of the decimal `d`; that is, the
+negation of the value's exponent.
+    '''
+    (java_new "com.amazon.fusion.DecimalScaleProc"))
+
 
   (defpub decimal_divide
     '''
@@ -40,4 +49,19 @@ removed), the value is rounded using the "half-even" method.
     '''
     (java_new "com.amazon.fusion.DecimalRescaleProc"))
 
+
+  (defpub decimal_divide_rescale
+    '''
+    (decimal_divide_rescale dividend divisor scale)
+
+Like `/`, but rounds to `scale` fractional digits, using the "half-even"
+method.  `dividend` and `divisor` must be decimals, and `scale` must be an int.
+
+This function is similar to:
+
+    (decimal_rescale (decimal_divide dividend divisor) scale)
+
+except only a single rounding operation occurs.
+    '''
+    (java_new "com.amazon.fusion.DecimalDivideRescaleProc"))
 )
