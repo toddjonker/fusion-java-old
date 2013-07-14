@@ -43,12 +43,12 @@ final class LetValuesForm
             checkPair.arityExact(2);
 
             SyntaxChecker checkBoundNames =
-                checkPair.subformSexp("bound names sequence", 0);
+                checkPair.subformSexp("binding name sequence", 0);
 
             for (int j = 0; j < checkBoundNames.form().size(); j++)
             {
                 SyntaxSymbol name =
-                    checkBoundNames.requiredIdentifier("bound name", j);
+                    checkBoundNames.requiredIdentifier("binding name", j);
                 boundNameList.add(name);
             }
         }
