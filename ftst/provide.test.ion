@@ -6,10 +6,8 @@
 //============================================================================
 // Check use at module context
 
-(check_exn // exn:fail?
-  (lambda ()
-    (eval (quote
-      (provide eval)))))   // ERROR: not at module level
+(check_compile_exn // TODO check that it raises exn:fail?
+  (provide eval))   // ERROR: not at module level
 
 
 (check_exn // exn:fail?
@@ -73,6 +71,7 @@
 
 
 // Check failure exporting two bindings w/same name
+// TODO should use check_compile_exn but that gets AssertionError
 (check_exn // exn:fail?
   (lambda ()
     (eval (quote

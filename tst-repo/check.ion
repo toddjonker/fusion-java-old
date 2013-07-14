@@ -2,13 +2,15 @@
 
 (module check '/fusion/base'
 
-  (use '/fusion/experimental/defines')
-  (use '/fusion/ffi/java')
-  (use '/fusion/ion')
-  (use '/fusion/list')
-  (use '/fusion/sexp')
-  (use '/fusion/string')
-  (use '/fusion/syntax')
+  (require
+    "/fusion/experimental/defines"
+    "/fusion/eval"
+    "/fusion/ffi/java"
+    "/fusion/ion"
+    "/fusion/list"
+    "/fusion/sexp"
+    "/fusion/string"
+    "/fusion/syntax")
 
 
   (defpub F (lambda rest false))
@@ -181,4 +183,18 @@ Ensures that (OP VAL1 VAL2) is truthy.
           (unless (thunk_throws_syntax_failure (unsyntax thunk_stx))
             (raise_check_failure (quote_syntax (unsyntax stx))
               "expected exception"))))))
+
+
+  (defpub_syntax check_compile_exn
+    '''
+    (check_compile_exn top_form)
+     ->
+    (check_exn (lambda () (eval (quote top_form))))
+    '''
+    (lambda (stx)
+      // TODO check arity
+      (let [(top_form (syntax_get stx 1))]
+        (quasisyntax
+          (check_exn
+            (lambda () (eval (quote_syntax (unsyntax top_form)))))))))
 )
