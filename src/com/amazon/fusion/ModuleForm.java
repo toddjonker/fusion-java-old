@@ -28,7 +28,7 @@ final class ModuleForm
         //    "                                                                               |
         super("name language body ...+",
               "Declares a module containing the given body. The `name` must be a symbol; it is\n" +
-              "ignored when loading a top-level module.\n" +
+              "ignored when loading a module from a file.\n" +
               "\n" +
               "The `language` must be an absolute [module path][]. The denoted module is\n" +
               "instantiated and all of its `provide`d bindings are immediately imported.  This\n" +
