@@ -1,0 +1,91 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/check"
+  "/fusion/collection"
+  "/fusion/experimental/altlambda"
+  "/fusion/experimental/ref"
+  "/fusion/function"
+  "/fusion/list")
+
+(define I identity)
+
+(check = (@? [4] 0) 4)
+
+(check = (@? [{f:4}] 0 f) 4)
+
+// Mapping
+(check_equal (@? [{f:4}] * f) [4] "map")
+(check_equal (@? [{f:4},{g:5},{f:6}] * f) [4,(void),6] "map")
+
+
+(check_void (@? 1999 1))
+(check_void (@? 1999 g))
+
+(check_void (@? [{f:4}] 1 g))
+(check_void (@? [{f:4}] 0 g))
+(check_void (@? [{f:4}] 0 f g))
+
+// TODO (check_void (@? [{f:4}] f))  // Key-type mismatch
+// TODO (check_void (@? [{f:4}] 0 1))  // Key-type mismatch
+
+(check = (@? [1,2,3] (I size)) 3)
+
+
+(define value
+  {h:{os:[{oid:1,ss:[{sid:301,is:[{iid:501},
+                                  {iid:502}]},
+                     {sid:311,is:[{iid:503}]}]},
+          {oid:2,ss:[{sid:321,is:[{iid:504}]}]}]}}
+)
+
+(check_equal
+  (@? value h os * ss * is * iid)
+  [[[501, 502], [503]], [[504]]]  "")
+
+(check_equal
+  (@? value h os + * ss * is * iid)
+  [[501, 502], [503], [504]]   "")
+
+(check_equal
+  (@? value h os + * ss + * is * iid)
+  [501, 502, 503, 504]   "")
+
+(check_equal
+  (@? value h os ? + * ss + * is * iid)
+  [501, 502, 503, 504]   "")
+
+(check_equal
+  (@? value h os ** ss ** is * iid)
+  [501, 502, 503, 504]   "")
+
+(check =
+  (@? value h os 0 ss 0 is 1 iid)
+  502)
+
+(check_equal
+  (@? [value] * h os 0 ss 0 is 1 iid)
+  [502]   "")
+
+
+(check_equal
+  (# {k1: [ [{k2: 4},{k2: 5}], [], [{k2: 6}] ] } k1 + + k2)
+  [4,5,6]  "")
+
+(check_equal
+  (# value h os + ss + is + iid)
+  [501, 502, 503, 504]   "")
+
+(check_equal
+  (# [(void), [4,5,6]] + (lambda (a) (list_ref a 1)))
+  [5]  "")
+
+(check_equal
+  (# [4,5,6] + / (|x| (> x 4)))
+  [5,6] "")
+(check_equal
+  (# [4,5,6] + / (|x| (> x 4)) / is_int)
+  [5,6] "")
+(check_equal
+  (# [4,5,6] + / (|x| (> x 4)) / (|x| (< x 6)))
+  [5] "")

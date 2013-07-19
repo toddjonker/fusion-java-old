@@ -1,0 +1,253 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(module ref "/fusion/base"
+
+  '''
+*EXTREMELY EXPERIMENTAL AND UNSTABLE* "path" operators.
+
+Experimentation and feedback is encouraged, but don't use this for any stable
+code.
+  '''
+
+  (require
+    "/fusion/experimental/defines"
+    "/fusion/function"
+    "/fusion/list"
+    "/fusion/sequence"
+    "/fusion/syntax")
+
+  (define_syntax rem
+    (lambda (stx) (quote_syntax (begin))))
+
+
+  // Should we reserve . for Scheme-like pair notation (x . y)  ??
+
+  (rem  // trying things out
+
+    (ref {f:{g:true}} "f" "g")
+    // Dylan would fold this through binary-ref
+
+    (. {f:{g:true}} f g)
+
+    (@  {f:{g:true}} f x)  --> error
+    (@? {f:{g:true}} f x)  --> void
+
+    (|>>| @? f x)  --> (lambda (_) (@? _ "f" "x"))
+    (@_ f x)       --> (lambda (_) (@? _ "f" "x"))
+
+
+
+
+    (let [(name f)]
+      (. {f:{g:true}} (ref name) g))   // treat symbol as var
+
+
+    // Handling procs in the path: proc must accept 1 arg and return 1 value
+    //   It is applied to the prior result, regardless of type.
+
+    (ref [0, 1, 2] first)        => 0
+    (.   [0, 1, 2] (ref first))  => 0
+
+
+    (@ E '*' B C ...) ->  (map    (|elt| (@ elt B C ...)) E)
+    (@ E '/' B C ...) ->  (choose (negate is_void)
+                            (map (|elt| (@? elt B C ...)) E))
+    (@ E A B C ...)   ->  (@ (@ E A) B C ...)
+    (@ E id)          ->  (ref E "id")
+
+    (@ E ())
+
+
+    (@? E id)          ->  (let [(e E)]
+                             (if (is_void e) e (ref e "id")))
+
+
+
+/* `ref` is the generic binary method wrapping array-ref, list-ref,
+ * struct-ref, etc.   [Dylan spells it `element`.]  Should have default-value?
+ *
+ * `.` references through slot accessor methods:
+ *     (. _ first)  ->  (first _)
+ *     (. _ first size) ->  (size (first _))
+ * This approximates C syntax for field access.
+ *
+ * Non-procedure arguments lead to use of ref.  Absent elements should throw
+ * errors because the procs will throw errors when they are not applicable.
+ *     (. [{f:[x,y]}] first "f" 1)  => y
+ *
+ *
+ * Two classes of errors:
+ *   1) type mismatch: eg passing an ordinal when given a struct
+ *   2) no-such-element: key is out of range for the collection
+ *
+ *
+ * `@` is a syntax extension that folds over ref and treats symbols as strings.
+ * It throws if an element is absent.
+ *     (@ _ f g)  ->  (ref (ref _ "f") "g")
+ *
+ * `@?` is similar, but returns void if an element is absent.
+ *
+ *
+ * Within either path:
+ *   `*` causes the rest of the path to be MAPPED across the current value
+ *   `/` causes the next segment to be a FILTER across the current value
+ *
+ * (# [{f:1},{f:2}] f)  ==> [1,2]
+ *
+ * OPEN ISSUE with * : does it flatten?
+ * eg:
+ * VAL = {h:{os:[{ss:[{is:[{id:I
+ * (@ VAL h  os * ss * is * id)
+ *   ==>        [    [    [ I ...
+ *   OR?                  [ I ...
+ *
+ * ANother idea: # for operating over sets, not singletons
+ *   But I think we've unified them as above
+ *
+ *
+ * "Set" operations   (FLWR?)
+ *
+ * map
+ * splicing map
+ * filter
+ * append/flatten
+ *   ? What about when we "flatten" a scalar?  throw?  lift it?
+ * void filtering
+ */
+
+    // @ as lens composition
+    (define_lens (focus f)
+      (@ (filter [f]) (hoist f)))
+
+
+  )
+
+  (define (sweep l)
+    (choose (negate is_void) l))
+
+  (defpub_syntax @?
+    (lambda (stx)
+      (when (< (syntax_size stx) 3)
+        (wrong_syntax stx "insufficient number of arguments"))
+      (lets [(segment_stx   (syntax_get stx 2)),
+             (segment_datum (syntax_to_datum segment_stx)),
+             (segment_sym   (is_symbol segment_datum))]
+        (if (= 3 (syntax_size stx))
+          // Single-segment path: treat symbol as field name, other forms as-is
+          (let [(segment_out (if segment_sym
+                               (quasisyntax (quote (unsyntax segment_stx)))
+                               segment_stx))]
+            // TODO check for trailing *
+            (quasisyntax
+              (let ((v (unsyntax (syntax_get stx 1))))
+                (if (or (is_struct v) (is_list v) (is_sexp v))
+                  (. v (unsyntax segment_out))
+                  (void)))))
+          // Multi-segment path
+          (cond
+            ((and segment_sym (= (quote *) segment_datum))
+              // We have a map segment
+              (quasisyntax
+                (let ((v (unsyntax (syntax_get stx 1))))
+                  (if (or (is_list v) (is_sexp v))
+                    (map (lambda (e)
+                           (unsyntax
+                             (syntax_append
+                               (quote_syntax (@? e))
+                               (syntax_subseq stx 3))))
+                      v)
+                    (void)))))
+            ((and segment_sym (= (quote **) segment_datum))
+             // We have a map segment
+             (quasisyntax
+               (let ((v (unsyntax (syntax_get stx 1))))
+                 (if (or (is_list v) (is_sexp v))
+                   (apply append_m
+                     (sweep
+                       (map (lambda (e)
+                              (unsyntax
+                                (syntax_append
+                                  (quote_syntax (@? e))
+                                  (syntax_subseq stx 3))))
+                       v)))
+                   (void)))))
+            ((and segment_sym (= (quote +) segment_datum))
+             (quasisyntax
+               (let ((v (unsyntax (syntax_get stx 1))))
+                 (if (or (is_list v) (is_sexp v))// sexp wont work
+                   (apply append_m
+                     (unsyntax
+                       (syntax_append
+                         (quote_syntax (@? v))
+                         (syntax_subseq stx 3))))
+                   (void)))))
+            ((and segment_sym (= (quote ?) segment_datum))
+             (quasisyntax
+               (let ((v (unsyntax (syntax_get stx 1))))
+                 (if (or (is_list v) (is_sexp v))// sexp wont work
+                   (choose (negate is_void)
+                     (unsyntax
+                       (syntax_append
+                         (quote_syntax (@? v))
+                         (syntax_subseq stx 3))))
+                   (void)))))
+
+            // Multi-segment path: unwind one segment
+            (true (syntax_append
+              (quasisyntax
+                (@? (@? (unsyntax (syntax_get stx 1))
+                        (unsyntax segment_stx))))
+              (syntax_subseq stx 3))))))))
+
+
+  (define_syntax ##
+    (lambda (stx)
+      // Minimum length is checked by # before we get here.
+      (lets [(segment_stx   (syntax_get stx 2)),
+             (segment_datum (syntax_to_datum segment_stx)),
+             (segment_sym   (is_symbol segment_datum))]
+        (if (= 3 (syntax_size stx))
+          // Single-segment path: treat symbol as field name, other forms as-is
+          (if (and segment_sym (= (quote +) segment_datum))
+            (quasisyntax
+              (let ((v (unsyntax (syntax_get stx 1))))
+                (if (is_empty v) v (apply append_m v))))
+            (let [(segment_out (if segment_sym
+                                 (quasisyntax (quote (unsyntax segment_stx)))
+                                 segment_stx))]
+              (quasisyntax
+                (let ((v (unsyntax (syntax_get stx 1))))
+                  (sweep
+                    (map (lambda (e)
+                           (if (or (is_struct e) (is_list e) (is_sexp e))
+                             (. e (unsyntax segment_out))
+                             (void)))
+                    v))))))
+          // Multi-segment path
+          (if (and segment_sym (= (quote /) segment_datum))
+            (let [(c (quasisyntax
+                       (let ((v (unsyntax (syntax_get stx 1))))
+                         (choose (unsyntax (syntax_get stx 3)) v))))]
+              (if (= 4 (syntax_size stx))
+                c
+                (syntax_append
+                  //  CRASH HERE(quasisyntax (# c))
+                  (quasisyntax (## (unsyntax c)))
+                  (syntax_subseq stx 4))))
+            (syntax_append
+              (quasisyntax
+                (## (## (unsyntax (syntax_get stx 1))
+                        (unsyntax segment_stx))))
+              (syntax_subseq stx 3)))))))
+
+
+  (defpub_syntax #
+    (lambda (stx)
+      // This simply wraps the arg into a list, so we start with a 'set'.
+      (when (< (syntax_size stx) 3)
+        (wrong_syntax stx "insufficient number of arguments"))
+      (syntax_append
+        (quasisyntax (## (list (unsyntax (syntax_get stx 1)))))
+        (syntax_subseq stx 2))))
+
+)
