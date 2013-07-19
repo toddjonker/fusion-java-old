@@ -22,7 +22,6 @@
   (defpub_j_syntax '#%top'        "com.amazon.fusion.TopForm")
 
 
-  (defpub_j .                     "com.amazon.fusion.DotProc")
   (defpub_j apply                 "com.amazon.fusion.ApplyProc")
   (defpub_j exit                  "com.amazon.fusion.ExitProc")
   (defpub_j is_null               "com.amazon.fusion.IsNullProc")

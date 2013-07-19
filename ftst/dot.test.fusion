@@ -1,0 +1,155 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/check"
+  "/fusion/collection"
+  "/fusion/function"
+  "/fusion/sexp")
+
+(define I identity)
+
+
+//==========================================================================
+// element
+
+// Check good cases
+
+(check = (element [0,1] 0) 0)
+(check = (element [0,1] 1) 1)
+
+(check = (element (sexp 0 1) 0) 0)
+(check = (element (sexp 0 1) 1) 1)
+
+(check = (element {f:0,g:1} "f") 0)
+
+
+// Check key out-of-bounds
+
+(check_arg_exn (element null.list 0))
+(check_arg_exn (element [0,1] null.int))
+(check_arg_exn (element [0,1] -1))
+(check_arg_exn (element [0,1] 2))
+
+(check_arg_exn (element (quote null.sexp) 0))
+(check_arg_exn (element (sexp 0 1) null.int))
+(check_arg_exn (element (sexp 0 1) -1))
+(check_arg_exn (element (sexp 0 1) 2))
+
+(check_arg_exn (element null.struct ""))
+(check_arg_exn (element {f:0,g:1} null.string))
+(check_arg_exn (element {f:0,g:1} "h"))
+
+
+// Check key has bad type
+
+(check_arg_exn (element [0,1] "f"))
+(check_arg_exn (element [0,1] first))
+
+(check_arg_exn (element (sexp 0 1) "f"))
+(check_arg_exn (element (sexp 0 1) first))
+
+(check_arg_exn (element {f:0,g:1} 0))
+(check_arg_exn (element {f:0,g:1} (lambda (struct) (void))))
+
+
+// Check collection has bad type
+
+(check_arg_exn (element false 0))
+(check_arg_exn (element (void) (void)))
+
+
+//==========================================================================
+// elt
+
+// Check good cases
+
+(check = (elt [0,1] 0) 0)
+(check = (elt [0,1] 1) 1)
+
+(check = (elt (sexp 0 1) 0) 0)
+(check = (elt (sexp 0 1) 1) 1)
+
+(check = (elt {f:0,g:1} "f") 0)
+
+// elt accepts a void "collection"
+(check_void (elt (void) 1))
+
+
+// Check key out-of-bounds
+
+(check_void (elt null.list 0))
+(check_void (elt [0,1] null.int))
+(check_void (elt [0,1] -1))
+(check_void (elt [0,1] 2))
+
+(check_void (elt (quote null.sexp) 0))
+(check_void (elt (sexp 0 1) null.int))
+(check_void (elt (sexp 0 1) -1))
+(check_void (elt (sexp 0 1) 2))
+
+(check_void (elt null.struct ""))
+(check_void (elt {f:0,g:1} null.string))
+(check_void (elt {f:0,g:1} "h"))
+
+
+// Check key has bad type
+
+(check_void (elt [0,1] "f"))
+(check_void (elt [0,1] first))
+
+(check_void (elt (sexp 0 1) "f"))
+(check_void (elt (sexp 0 1) first))
+
+(check_void (elt {f:0,g:1} 0))
+(check_void (elt {f:0,g:1} (lambda (struct) (void))))
+
+
+// Check collection has bad type
+
+(check_arg_exn (elt false 0))
+
+
+//==========================================================================
+// dot
+
+// No path
+
+(check_equal (. (void)) (void) "")
+(check_equal (. 7287) 7287 "")
+(check_equal (. []  ) []   "")
+
+
+// Check key parts
+
+(check = (. [0,1,2,3] 0) 0)
+(check = (. [0,1,2,3] 1) 1)
+
+(check = (. (sexp 0 1 2 3) 0) 0)
+(check = (. (sexp 0 1 2 3) 1) 1)
+
+(check_equal (. {f:1,g:[2]} "f") 1   "")
+(check_equal (. {f:1,g:[2]} "g") [2] "")
+
+(check = (. {f:{g:"oy"}, h:true} "f" (quote g)) "oy")
+(check = (. {f:1,g:[2]} (quote f)) 1)
+
+
+// Check procedure parts
+
+(check = (. [0,1,2,3] size) 4)
+(check = (. [0,1,2,3] I size) 4)
+
+(check =     (. (sexp 0 1 2 3) head) 0)
+(check_equal (. (sexp 0 1 2 3) tail) (sexp 1 2 3) "")
+(check_equal (. (sexp 0 1 2 3) tail I tail) (sexp 2 3) "")
+(check_equal (. (sexp 0 1 2 3) tail tail head) 2 "")
+
+(check = (. [1,2,3] I size I) 3)
+
+
+// Check key out-of-bounds
+
+(check_void (. {f:1} "g"))
+(check_void (. {f:1,g:[2]} "g" 1 1))
+(check_void (. [1] 1))
+(check_void (. [1, {f:2}] 1 "g" 1))

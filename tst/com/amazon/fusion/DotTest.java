@@ -19,51 +19,10 @@ public class DotTest
     public void testNoParts()
         throws Exception
     {
-        assertEval("[]", "(. [])");
-        assertEval("{}", "(.{})");
+        // FUnit still can't compare structs
         assertEval("{f:true}", "(. {f:true})");
     }
 
-    @Test
-    public void testStructParts()
-        throws Exception
-    {
-        assertEval(true, "(. {f:true} \"f\")");
-        assertEval(true, "(. {f:true} (quote f))");
-        assertEval("\"oy\"", "(. {f:{g:'''oy'''}, h:true} \"f\" (quote g))");
-    }
-
-    @Test
-    public void testSequenceParts()
-        throws Exception
-    {
-        assertEval(99, "(. [99, \"hello\"] 0)");
-        assertEval("{{}}", "(. [99, [true, {{}}]] 1 1)");
-    }
-
-    @Test
-    public void testMissingPart()
-        throws Exception
-    {
-        assertEval(true, "(is_void (. {f:1} \"g\"))");
-        assertEval(true, "(is_void (. {f:1,g:[2]} \"g\" 1 1))");
-        assertEval(true, "(is_void (. [1] 1))");
-        assertEval(true, "(is_void (. [1, {f:2}] 1 \"g\" 1))");
-    }
-
-    @Test
-    public void testDotArgType()
-        throws Exception
-    {
-        for (String form : nonContainerExpressions())
-        {
-            String expr = "(. " + form + ")";
-            expectArgTypeFailure(expr, 0);
-
-            expr = "(. " + form + " 12)";
-            expectArgTypeFailure(expr, 0);
-        }
-    }
 
     @Test
     public void testNonContainerMidway()
