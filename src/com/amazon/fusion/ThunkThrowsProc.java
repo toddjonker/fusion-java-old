@@ -18,19 +18,21 @@ final class ThunkThrowsProc
         throws FusionException
     {
         // TODO type-check the thunk
-        boolean threw;
         try
         {
             Procedure proc = (Procedure) thunk;
             eval.callNonTail(proc);
-            threw = false;
         }
         catch (SyntaxFailure e)
         {
             // Good!  We are expecting this.
-            threw = true;
+            return eval.newString("syntax");
+        }
+        catch (ArgTypeFailure e)
+        {
+            return eval.newString("arg");
         }
 
-        return eval.newBool(threw);
+        return eval.newBool(false);
     }
 }
