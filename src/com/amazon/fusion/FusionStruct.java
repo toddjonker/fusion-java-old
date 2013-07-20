@@ -784,9 +784,9 @@ final class FusionStruct
         {
             //    "                                                                               |
             super("Returns the value associated with `name` in `struct`. The `name` must be a\n" +
-                  "string or symbol.  If no field exists with the name, the `default` is used: if\n" +
-                  "it is a procedure, it's applied to no arguments and the result is returned,\n" +
-                  "otherwise the `default` is returned as-is.",
+                  "non-null string or symbol.  If no field exists with the name, the `default` is\n" +
+                  "used: if it is a procedure, it's applied to no arguments and the result is\n" +
+                  "returned, otherwise the `default` is returned as-is.",
                   "struct", "name", "default");
         }
 

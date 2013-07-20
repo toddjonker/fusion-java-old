@@ -131,7 +131,8 @@ languages, highlighting potential mutation of an argument.
   (defpub list_ref
     (lambda (list pos)
       '''
-Returns the element of `list` at (zero-based) position `pos`.
+Returns the element of `list` at (zero-based) position `pos`.  An exception is
+thrown if the position is out of bounds.
       '''
       (unless (is_list list)
         (raise_argument_error "list_ref" "list" 0 list pos))
@@ -146,7 +147,7 @@ Returns the element of `list` at (zero-based) position `pos`.
     (lambda (list pos value)
       '''
 Changes the slot of a mutable `list` at (zero-based) position `pos` so it
-holds `value`.
+holds `value`.  An exception is thrown if the position is out of bounds.
       '''
       (unless (is_mutable_list list)
         (raise_argument_error "list_set" "mutable list" 0 list pos value))
