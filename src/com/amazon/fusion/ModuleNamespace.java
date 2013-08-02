@@ -91,7 +91,7 @@ class ModuleNamespace
                                                              myAddress);
             }
 
-            return super.compileReference(eval, env);
+            return compileLocalTopReference(eval);
         }
 
         @Override

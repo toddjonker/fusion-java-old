@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.TopLevelNamespace.TopLevelBinding.REQUIRED_FROM_ELSEWHERE;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import java.util.Iterator;
 import java.util.Set;
@@ -26,6 +27,9 @@ class TopLevelNamespace
     static final class TopLevelBinding
         extends NsBinding
     {
+        // Value is arbitrary and (hopefully) unique to aid in debugging.
+        static final int REQUIRED_FROM_ELSEWHERE = -20130802;
+
         /**
          * Reference to the active binding for my identifier, either this
          * instance (when the top-level definition is active) or a binding
@@ -48,9 +52,9 @@ class TopLevelNamespace
 
         private TopLevelBinding(TopLevelRequireBinding required)
         {
-            super(required.myBinding.getIdentifier(), -1);
+            super(required.myBinding.getIdentifier(), REQUIRED_FROM_ELSEWHERE);
             myTarget = required.myBinding;
-            myPrecedence = -1;
+            myPrecedence = REQUIRED_FROM_ELSEWHERE;
         }
 
         @Override
@@ -82,7 +86,7 @@ class TopLevelNamespace
         {
             if (myTarget == this)
             {
-                return super.compileReference(eval, env);
+                return compileLocalTopReference(eval);
             }
             return myTarget.compileReference(eval, env);
         }
@@ -166,7 +170,7 @@ class TopLevelNamespace
                 super.resolve(name, moreWraps, returnMarks);
 
             assert (definedBinding == null
-                    || definedBinding.myAddress == -1
+                    || definedBinding.myAddress == REQUIRED_FROM_ELSEWHERE
                     || myTopNs.ownsBinding(definedBinding));
 
             // Look for an imported binding, then decide which one wins.

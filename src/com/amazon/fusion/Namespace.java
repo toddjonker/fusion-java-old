@@ -69,8 +69,7 @@ abstract class Namespace
             return env.namespace().lookup(this);
         }
 
-        @Override
-        public CompiledForm compileReference(Evaluator eval, Environment env)
+        CompiledForm compileLocalTopReference(Evaluator eval)
             throws FusionException
         {
             return new CompiledTopVariableReference(myAddress);
@@ -475,10 +474,10 @@ abstract class Namespace
         Integer id = myRequiredModules.get(moduleId);
         if (id == null)
         {
+            ModuleInstance module = myRegistry.lookup(moduleId);
+
             id = myRequiredModules.size();
             myRequiredModules.put(moduleId, id);
-
-            ModuleInstance module = myRegistry.lookup(moduleId);
             myRequiredModuleStores.add(module.getNamespace());
         }
         return id;
