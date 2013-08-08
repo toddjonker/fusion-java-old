@@ -1,0 +1,10 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(require "/check")
+
+
+//==========================================================================
+// check_arity_exn
+
+(check_arity_exn
+  (raise_arity_error "foo" 1))

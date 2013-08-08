@@ -1,0 +1,18 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(require "/check")
+
+//==========================================================================
+// raise_arity_error
+
+(check_arity_exn
+  (raise_arity_error /* missing name */ /* missing arity */))
+
+(check_arity_exn
+  (raise_arity_error "proc" /* missing arity */))
+
+(check_arg_exn
+  (raise_arity_error /* wrong: */ 0 0))
+
+(check_arg_exn
+  (raise_arity_error "proc" /* wrong: */ "0"))
