@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.TopLevelNamespace.TopLevelBinding.REQUIRED_FROM_ELSEWHERE;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import java.util.Iterator;
 import java.util.Set;
@@ -169,8 +168,10 @@ class TopLevelNamespace
             TopLevelBinding definedBinding = (TopLevelBinding)
                 super.resolve(name, moreWraps, returnMarks);
 
+            // NOTE: Adding static import for REQUIRED_FROM_ELSEWHERE caused
+            //       bogus compiler errors in JDK 1.7u25
             assert (definedBinding == null
-                    || definedBinding.myAddress == REQUIRED_FROM_ELSEWHERE
+                    || definedBinding.myAddress == TopLevelBinding.REQUIRED_FROM_ELSEWHERE
                     || myTopNs.ownsBinding(definedBinding));
 
             // Look for an imported binding, then decide which one wins.
