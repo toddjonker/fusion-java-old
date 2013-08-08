@@ -183,7 +183,8 @@ Ensures that (OP VAL1 VAL2) is truthy.
           // TODO type-check thunk
           (let ((e (thunk_throws (unsyntax thunk_stx))))
             (cond
-              ((= e "syntax") (void))
+              ((and (is_string e) (= e "syntax"))
+               (void))
               (e  (raise_check_failure (quote_syntax (unsyntax stx))
                     "expected syntax failure, got " e " exception"))
               (true (raise_check_failure (quote_syntax (unsyntax stx))
@@ -197,11 +198,27 @@ Ensures that (OP VAL1 VAL2) is truthy.
           // TODO type-check thunk
           (let ((e (thunk_throws (lambda () (unsyntax thunk_stx)))))
             (cond
-              ((= e "arg") (void))
+              ((and (is_string e) (= e "arg"))
+               (void))
               (e  (raise_check_failure (quote_syntax (unsyntax stx))
                     "expected arg type failure, got " e " exception"))
               (true (raise_check_failure (quote_syntax (unsyntax stx))
                       "expected arg type failure"))))))))
+
+  (defpub_syntax check_arity_exn
+    (lambda (stx)
+      // TODO check arity
+      (let [(thunk_stx (syntax_get stx 1))]
+        (quasisyntax
+          // TODO type-check thunk
+          (let ((e (thunk_throws (lambda () (unsyntax thunk_stx)))))
+            (cond
+              ((and (is_string e) (= e "arity"))
+               (void))
+              (e  (raise_check_failure (quote_syntax (unsyntax stx))
+                    "expected arity failure, got " e " exception"))
+              (true (raise_check_failure (quote_syntax (unsyntax stx))
+                      "expected arity failure"))))))))
 
   (defpub_syntax check_compile_exn
     '''

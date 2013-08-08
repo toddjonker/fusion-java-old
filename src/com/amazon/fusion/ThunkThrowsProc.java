@@ -9,7 +9,7 @@ final class ThunkThrowsProc
     ThunkThrowsProc()
     {
         //    "                                                                               |
-        super("XXX",
+        super("NOT FOR APPLICATION USE",
               "thunk");
     }
 
@@ -31,6 +31,14 @@ final class ThunkThrowsProc
         catch (ArgTypeFailure e)
         {
             return eval.newString("arg");
+        }
+        catch (ArityFailure e)
+        {
+            return eval.newString("arity");
+        }
+        catch (FusionException e)
+        {
+            return e;
         }
 
         return eval.newBool(false);

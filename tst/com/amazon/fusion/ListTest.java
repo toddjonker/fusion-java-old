@@ -125,14 +125,6 @@ public class ListTest
     }
 
     @Test
-    public void testAddArity()
-        throws Exception
-    {
-        expectArityFailure("(add)");
-    }
-
-
-    @Test
     public void testAddArgType()
         throws Exception
     {
@@ -249,48 +241,6 @@ public class ListTest
         big = -9223372036854775806L;
         assertEquals(2, (int)big);
         expectArgTypeFailure("(subseq smList " + big + " " + (big + 1) + ")", 1);
-    }
-
-
-    @Test
-    public void testLast()
-        throws Exception
-    {
-        assertEval(0,"(last smList)");
-        assertEval(2,"(last medList)");
-        assertEval(8887,"(last lgList)");
-    }
-
-    @Test
-    public void testLastFail()
-        throws Exception
-    {
-        expectArityFailure("(last)");
-        expectArityFailure("(last [] 2)");
-
-        expectArgTypeFailure("(last [])", 0);
-        expectArgTypeFailure("(last \"pikachu\")", 0);
-    }
-
-
-    @Test
-    public void testFirst()
-        throws Exception
-    {
-        assertEval(0,"(first smList)");
-        assertEval(0,"(first medList)");
-        assertEval(4000,"(first "+ionListGeneratorWithOffset(1000,4000)+")");
-    }
-
-    @Test
-    public void testFirstFail()
-        throws Exception
-    {
-        expectArityFailure("(first)");
-        expectArityFailure("(first [] 2)");
-
-        expectArgTypeFailure("(first [])", 0);
-        expectArgTypeFailure("(first \"boeing\")", 0);
     }
 
 

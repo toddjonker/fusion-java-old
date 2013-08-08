@@ -78,12 +78,18 @@
 (check = (first (quote (1))) 1)
 (check = (first (sexp 1 2)) 1)
 
+(check_arg_exn (first (quote null.sexp)))
+(check_arg_exn (first (sexp)))
+
 
 //==========================================================================
 // last
 
 (check = (last (quote (1))) 1)
 (check = (last (sexp 1 2)) 2)
+
+(check_arg_exn (last (quote null.sexp)))
+(check_arg_exn (last (sexp)))
 
 
 //==========================================================================

@@ -13,11 +13,23 @@ import java.io.IOException;
 class ArityFailure
     extends ContractFailure
 {
-    private final Procedure myProc;
+    private final String myProcIdentity;
     private final int myMinArity;
     private final int myMaxArity;
     private final Object[] myActuals;
 
+
+    ArityFailure(String procIdentity, int minArity, int maxArity,
+                 Object... actuals)
+    {
+        super("arity failure");
+        assert procIdentity != null && actuals != null;
+        assert minArity <= maxArity;
+        myProcIdentity = procIdentity;
+        myMinArity = minArity;
+        myMaxArity = maxArity;
+        myActuals = actuals;
+    }
 
     /**
      * @param proc must not be null
@@ -25,13 +37,7 @@ class ArityFailure
     ArityFailure(Procedure proc, int minArity, int maxArity,
                  Object... actuals)
     {
-        super("arity failure");
-        assert proc != null && actuals != null;
-        assert minArity <= maxArity;
-        myProc = proc;
-        myMinArity = minArity;
-        myMaxArity = maxArity;
-        myActuals = actuals;
+        this(proc.identify(), minArity, maxArity, actuals);
     }
 
 
@@ -64,7 +70,7 @@ class ArityFailure
     public void displayMessage(Evaluator eval, Appendable out)
         throws IOException, FusionException
     {
-        myProc.identify(out);
+        out.append(myProcIdentity);
         out.append(" expects ");
         displayArityExpectation(eval, out);
         out.append(", given ");
