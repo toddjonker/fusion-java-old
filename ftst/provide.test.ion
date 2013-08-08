@@ -18,6 +18,15 @@
 
 
 //============================================================================
+// Should be able to provide something twice
+
+(module Twice '/fusion/base'
+  (define twice 2)
+//  (provide twice)  // FIXME FUSION-167
+  (provide twice))
+
+
+//============================================================================
 // Check simple all_defined_out
 
 (module M1 '/fusion/base'
