@@ -1,6 +1,6 @@
 // Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
-(module collection '/fusion/base'
+(module collection '/fusion/private/builtins'
 
   '''
 Generic operations over collection types.
@@ -13,7 +13,12 @@ See also [sequence](fusion/sequence.html).
 
   (require
     "/fusion/experimental/defines"
-    "/fusion/private/builtins"     // unsafe_struct_visit
+    "/fusion/number"
+    "/fusion/private/bind"
+    "/fusion/private/compare"
+    "/fusion/private/control"
+    "/fusion/unsafe/list"
+    "/fusion/unsafe/struct"
     "/fusion/void")
 
 
