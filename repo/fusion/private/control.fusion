@@ -1,0 +1,147 @@
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+
+(module control "/fusion/private/builtins"
+
+  (require
+    "/fusion/experimental/defines"
+    "/fusion/private/compare"
+    "/fusion/syntax"
+    "/fusion/void")
+
+
+  (defpub_syntax and  // WARNING: Doc syntax isn't supported yet.
+    '''
+    (and expr ...)
+
+Evaluates the EXPRs from left to right, returning the first untruthy value
+that results (and ignoring further expressions). If they all return truthy
+values, the last one is returned.
+
+The last EXPR is in tail position. Given no EXPRs, the result is true.
+    '''
+    (lambda (stx)
+      // (and)          -->  true
+      // (and A)        -->  A
+      // (and A B ...)  -->  (let [(a A)] (if a (and B ...) a))
+
+      (let [(size (syntax_size stx))]
+        (if (= 1 size)
+          (quote_syntax true)
+          (if (= 2 size)
+            (syntax_get stx 1)
+            (let [(first (syntax_get    stx 1)),
+                  (rest  (syntax_subseq stx 2))]
+              (let [(inner (syntax_cons_q and rest))]
+                (quasisyntax
+                  (let ((a (unsyntax first)))
+                    (if a (unsyntax inner) a))))))))))
+
+
+  (defpub_syntax or  // WARNING: Doc syntax isn't supported yet.
+    '''
+    (or expr ...)
+
+Evaluates the EXPRs from left to right, returning the first truthy value
+that results (and ignoring further expressions). If they all return untruthy
+values, the last one is returned.
+
+The last EXPR is in tail position. Given no EXPRs, the result is false.
+    '''
+    (lambda (stx)
+
+      // (or)          -->  false
+      // (or A)        -->  A
+      // (or A B ...)  -->  (let [(a A)] (if a a (and B ...)))
+
+      (let [(size (syntax_size stx))]
+        (if (= 1 size)
+          (quote_syntax false)
+          (if (= 2 size)
+            (syntax_get stx 1)
+            (let [(first (syntax_get    stx 1)),
+                  (rest  (syntax_subseq stx 2))]
+              (let [(inner (syntax_cons_q or rest))]
+                (quasisyntax
+                  (let ((a (unsyntax first)))
+                    (if a a (unsyntax inner)))))))))))
+
+
+  (defpub_syntax when  // WARNING: Doc syntax isn't supported yet.
+    '''
+    (when test body ...)
+
+Evaluates the `test`, and if it is truthy, evaluates the `body` forms left
+to right. The last `body` is in tail position, and its result is the result of
+the entire form.  If the body isn't evaluated, the result is void.
+
+A companion form is `unless`.
+    '''
+    (lambda (stx)
+
+      // (when TEST BODY ...)  -->  (if TEST (begin BODY ...) (void))
+
+      (if (= 1 (syntax_size stx))
+        (wrong_syntax stx "expected condition")
+        (let ((test (syntax_get    stx 1))
+              (body (syntax_subseq stx 2)))
+          (let ((begin_body (syntax_cons_q begin body)))
+            (quasisyntax
+              (if (unsyntax test)
+                  (unsyntax begin_body)
+                  (void))))))))
+
+  (defpub_syntax unless  // WARNING: Doc syntax isn't supported yet.
+    '''
+    (unless test body ...)
+
+Evaluates the `test`, and if it is _not_ truthy, evaluates the `body` forms
+left to right. The last `body` is in tail position, and its result is the
+result of the entire form.  If the body isn't evaluated, the result is void.
+
+A companion form is `when`.
+    '''
+    (lambda (stx)
+
+      // (unless TEST BODY ...)  -->  (if TEST (void) (begin BODY ...))
+
+      (if (= 1 (syntax_size stx))
+        (wrong_syntax stx "expected condition")
+        (let ((test (syntax_get    stx 1))
+              (body (syntax_subseq stx 2)))
+          (let ((begin_body (syntax_cons_q begin body)))
+            (quasisyntax
+              (if (unsyntax test)
+                  (void)
+                  (unsyntax begin_body))))))))
+
+
+// TODO FUSION-36  Support internal definitions in body sequences.
+// Shouldn't use begin since that doesn't delimit the new scope that's needed.
+
+  (defpub_syntax cond  // WARNING: Doc syntax isn't supported yet.
+    '''
+    (cond (test body ...) ...)
+
+Evaluates the TEST expressions left to right until one returns a truthy value,
+then evaluates the corresponding BODY in tail position.
+If no TEST is truthy, the result is void.
+    '''
+    (lambda (stx)
+      (let ((size (syntax_size stx)))
+        (if (= 1 size)               // (cond) with no clauses
+          (quote_syntax (void))
+          (let ((clause (syntax_get    stx 1))
+                (tail   (syntax_subseq stx 2)))
+            // TODO FUSION-120 check type of clause
+            (when (> 1 (syntax_size clause))
+              (wrong_syntax stx "cond: bad clause " clause))
+            (let ((test (syntax_get    clause 0))
+                  (body (syntax_subseq clause 1)))
+              (let ((begin_body (syntax_cons_q begin body))
+                    (cond_tail  (syntax_cons_q cond  tail)))
+                (quasisyntax
+                  (if (unsyntax test)
+                      (unsyntax begin_body)
+                      (unsyntax cond_tail))))))))))
+
+)
