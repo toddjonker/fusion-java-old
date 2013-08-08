@@ -1,0 +1,50 @@
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+
+(module sexp '/fusion/private/builtins'
+
+  (require
+    "/fusion/experimental/defines"
+    "/fusion/number"
+    "/fusion/private/control"
+    "/fusion/unsafe/sexp"
+    "/fusion/void")
+
+  // Pass-through bindings from /fusion/private/kernel
+  (provide is_sexp)
+
+
+  // TODO FUSION-102 mutable_sexp
+
+  (defpub_j sexp    "com.amazon.fusion.FusionSexp$SexpProc")
+  (defpub_j pair    "com.amazon.fusion.FusionSexp$PairProc")
+  (defpub_j is_pair "com.amazon.fusion.FusionSexp$IsPairProc")
+
+
+  (defpub head
+    (lambda (sexp)
+      '''
+Returns the first element of `sexp`.  If `sexp` is a pair, the result is its
+head slot.  If `sexp` isn't a pair (that is, it's zero-length or `null.sexp`),
+the result is void.
+      '''
+      (unless (is_sexp sexp)
+        (raise_argument_error "head" "sexp" 0 sexp))
+      (if (= 0 (size sexp))
+        (void)
+        (unsafe_pair_head sexp))))
+
+
+  (defpub tail
+    (lambda (sexp)
+      '''
+Returns the elements _after_ the first element of `sexp`.  If `sexp` is a
+pair, the result is its tail slot.  If `sexp` isn't a pair (that is, it's
+zero-length or `null.sexp`), the result is void.
+      '''
+      (unless (is_sexp sexp)
+        (raise_argument_error "tail" "sexp" 0 sexp))
+      (if (= 0 (size sexp))
+        (void)
+        (unsafe_pair_tail sexp))))
+
+)

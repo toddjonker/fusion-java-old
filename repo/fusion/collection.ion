@@ -22,7 +22,7 @@ See also [sequence](fusion/sequence.html).
     "/fusion/void")
 
 
-  (defpub_j size "com.amazon.fusion.SizeProc")
+  (provide size)
 
 
   // Name per Dylan and SRFI-1.

@@ -34,6 +34,8 @@
   (defpub_j to_string             "com.amazon.fusion.ToStringProc")
 
 
+  (defpub_j size "com.amazon.fusion.SizeProc")
+
   (defpub_j is_immutable_list
     "com.amazon.fusion.FusionList$IsImmutableListProc")
   (defpub_j is_mutable_list
