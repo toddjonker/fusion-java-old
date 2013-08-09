@@ -22,7 +22,7 @@
   //  assert for_list to_int to_string raise_*
 
   (require "/fusion/collection")
-  (provide .)
+  (provide . any do element elt find is_empty size)
 
   (require "/fusion/private/bind")
   (provide lets)
