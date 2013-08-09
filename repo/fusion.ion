@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (module fusion '/fusion/base'
 
@@ -8,6 +8,14 @@ The main Fusion language.  This module will be populated with bindings as the
 library stabilizes.
 
 # Warning!
+
+<!-- Note similar content in the site index! -->
+
+This documentation is your contract.  Use of non-public and/or
+undocumented features, APIs, procedures, modules, _etc._ is NOT SUPPORTED.
+Behavior that is not documented here is non-contractual and is subject to
+change at any time.  If you have any questions about supported behavior,
+contact us for clarification.
 
 _Only_ modules with descriptions below are stable, meaning that documented
 features are supported and future releases will maintain compatability.
