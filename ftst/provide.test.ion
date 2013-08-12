@@ -22,8 +22,11 @@
 
 (module Twice '/fusion/base'
   (define twice 2)
-//  (provide twice)  // FIXME FUSION-167
+  (provide twice)
   (provide twice))
+
+(require Twice)
+(check = twice 2)
 
 
 //============================================================================

@@ -7,10 +7,10 @@ import static com.amazon.fusion.FusionEval.evalSyntax;
 import static com.amazon.fusion.GlobalState.DEFINE_SYNTAX;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * @see <a href="http://docs.racket-lang.org/reference/module.html">Racket
@@ -427,7 +427,7 @@ final class ModuleForm
                                            int firstProvidePos)
         throws FusionException
     {
-        Set<String> names = new HashSet<>();
+        Map<String,Binding> names = new HashMap<>();
         ArrayList<SyntaxSymbol> identifiers = new ArrayList<>();
 
         for (int p = firstProvidePos; p < moduleStx.size(); p++)
@@ -444,7 +444,9 @@ final class ModuleForm
                     case SYMBOL:
                     {
                         SyntaxSymbol id = (SyntaxSymbol) spec;
-                        if (! names.add(id.stringValue()))
+                        Binding binding = id.getBinding();
+                        Binding prior = names.put(id.stringValue(), binding);
+                        if (prior != null && ! binding.sameTarget(prior))
                         {
                             String message =
                                 "identifier already provided with a different" +

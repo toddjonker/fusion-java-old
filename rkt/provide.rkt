@@ -20,6 +20,18 @@
 
 
 ;;============================================================================
+;; Should be able to provide something twice
+
+(module Twice racket
+  (define twice 2)
+  (provide twice)
+  (provide twice))
+
+(require 'Twice)
+(check-eq? twice 2)
+
+
+;;============================================================================
 ;; Check simple all_defined_out
 
 (module M1 racket
