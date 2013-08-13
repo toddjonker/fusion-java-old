@@ -77,7 +77,10 @@
 
   (defpub check_annotations
     (lambda (value expected)
-      (let ((anns (ion_annotations value)))
+      (let [(anns (ion_annotations value))]
+        (check_list_equal anns expected))
+      (let [(expected (map string_to_symbol expected)),
+            (anns (type_annotations value))]
         (check_list_equal anns expected))))
 
 

@@ -38,4 +38,9 @@
 
   (require "/fusion/void")
   (provide is_void void)
+
+
+  (require "/fusion/experimental/defines")
+
+  (defpub_j type_annotations  "com.amazon.fusion.TypeAnnotationsProc")
 )
