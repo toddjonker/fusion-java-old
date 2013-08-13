@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -14,7 +14,6 @@ public class NumericsTest
     public void requires()
         throws FusionException
     {
-        topLevel().requireModule("/fusion/math");
         topLevel().requireModule("/fusion/timestamp");
     }
 
