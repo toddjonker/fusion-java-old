@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -19,7 +19,9 @@ final class CeilingProc
     CeilingProc()
     {
         //    "                                                                               |
-        super("Returns the smallest number larger than or equal to the input number",
+        super("Returns the smallest int greater than or equal to `number` (that is, truncate\n"
+            + "toward positive infinity).  The input must be an int or decimal, and the result\n"
+            + "is an int.",
               "number");
     }
 
@@ -42,7 +44,6 @@ final class CeilingProc
             return eval.newInt(iVal);
         }
 
-        throw new ContractFailure("Incorrect type input to perform ceiling operation");
+        throw new ArgTypeFailure(this, "int or decimal", 0, arg0);
     }
-
 }

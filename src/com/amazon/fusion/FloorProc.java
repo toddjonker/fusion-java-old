@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -19,7 +19,9 @@ final class FloorProc
     FloorProc()
     {
         //    "                                                                               |
-        super("Returns the largest number smaller than or equal to the input number",
+        super("Returns the largest int less than or equal to `number` (that is, truncate\n"
+            + "toward negative infinity).  The input must be an int or decimal, and the result\n"
+            + "is an int.",
               "number");
     }
 
@@ -42,6 +44,6 @@ final class FloorProc
             return eval.newInt(iVal);
         }
 
-        throw new ContractFailure("Incorrect type input to perform ceiling operation");
+        throw new ArgTypeFailure(this, "int or decimal", 0, arg0);
     }
 }

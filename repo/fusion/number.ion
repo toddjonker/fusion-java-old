@@ -17,4 +17,7 @@ Operations on numbers (int, decimal, and float).
   (defpub_j  *  "com.amazon.fusion.ProductProc")
   (defpub_j  /  "com.amazon.fusion.DivideProc")
 
+
+  (defpub_j ceiling  "com.amazon.fusion.CeilingProc")
+  (defpub_j floor    "com.amazon.fusion.FloorProc")
 )

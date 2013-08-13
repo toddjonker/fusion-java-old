@@ -3,9 +3,10 @@
 (module math '/fusion/private/kernel'
 
   (require "/fusion/experimental/defines")
+  (require "/fusion/number")
 
+  (define ceil ceiling)
+  (provide ceil floor)
 
-  (defpub_j ceil            "com.amazon.fusion.CeilingProc")
-  (defpub_j floor           "com.amazon.fusion.FloorProc")
   (defpub_j rand            "com.amazon.fusion.RandomProc")
 )
