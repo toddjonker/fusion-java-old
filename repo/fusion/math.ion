@@ -7,6 +7,4 @@
 
   (define ceil ceiling)
   (provide ceil floor)
-
-  (defpub_j rand            "com.amazon.fusion.RandomProc")
 )
