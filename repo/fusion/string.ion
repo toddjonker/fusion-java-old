@@ -13,4 +13,6 @@ Operations for strings.
   (defpub_j string_append      "com.amazon.fusion.FusionString$AppendProc")
   (defpub_j string_to_lower    "com.amazon.fusion.FusionString$ToLowerProc")
   (defpub_j string_to_upper    "com.amazon.fusion.FusionString$ToUpperProc")
+
+  (defpub_j string_to_symbol   "com.amazon.fusion.FusionString$ToSymbolProc")
 )

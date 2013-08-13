@@ -20,3 +20,12 @@
 
 (check = (string_to_upper "")    "")
 (check = (string_to_upper "AbC") "ABC")
+
+
+//============================================================================
+// string_to_symbol
+
+(check ion_equals (string_to_symbol null.string) (quote null.symbol))
+(check = (string_to_symbol "text") (quote text))
+
+(check_arg_exn (string_to_symbol ""))

@@ -320,6 +320,17 @@ abstract class Procedure
         return iv.stringValue();
     }
 
+    /**
+     * @return may be null
+     */
+    String checkNullableStringArg(int argNum, Object... args)
+        throws ArgTypeFailure
+    {
+        IonString iv = checkDomArg(IonString.class, "string",
+                                   true /* nullable */, argNum, args);
+        return iv.stringValue();
+    }
+
 
     /**
      * Expects a collection argument, including typed nulls.
@@ -414,7 +425,7 @@ abstract class Procedure
     {
         try
         {
-            IonValue iv = castToIonValueMaybe(args[argNum]);  // TODO copy?!?
+            IonValue iv = castToIonValueMaybe(args[argNum]);
             if (iv != null && (nullable || ! iv.isNullValue()))
             {
                 return klass.cast(iv);
@@ -422,7 +433,10 @@ abstract class Procedure
         }
         catch (ClassCastException e) {}
 
-        throw new ArgTypeFailure(this, typeName, argNum, args);
+        String expectation =
+            (nullable ? typeName : "non-null " + typeName);
+
+        throw new ArgTypeFailure(this, expectation, argNum, args);
     }
 
 
