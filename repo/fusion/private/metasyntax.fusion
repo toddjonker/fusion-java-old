@@ -8,7 +8,9 @@
 
   (define_syntax unsyntax
     (lambda (stx)
-      (wrong_syntax stx "must be used inside quasisyntax")))
+      (wrong_syntax stx "must be used inside quasisyntax.  Sorry, but it "
+        "currently doesn't work inside a list or struct; see FUSION-34."
+      )))
 
   (define_syntax quasisyntax (java_new "com.amazon.fusion.QuasiSyntaxForm"
                                        (quote_syntax quasisyntax)

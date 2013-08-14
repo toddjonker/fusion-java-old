@@ -193,35 +193,37 @@ Ensures that (OP VAL1 VAL2) is truthy.
               (true (raise_check_failure (quote_syntax (unsyntax stx))
                       "expected syntax failure"))))))))
 
-  (defpub_syntax check_arg_exn
+  // This should really be a procedure, but it doesn't work.
+  (define_syntax make_exn_checker
     (lambda (stx)
-      // TODO check arity
-      (let [(thunk_stx (syntax_get stx 1))]
+      (let [(tag (syntax_get stx 1))]
         (quasisyntax
-          // TODO type-check thunk
-          (let ((e (thunk_throws (lambda () (unsyntax thunk_stx)))))
-            (cond
-              ((and (is_string e) (= e "arg"))
-               (void))
-              (e  (raise_check_failure (quote_syntax (unsyntax stx))
-                    "expected arg type failure, got " e " exception"))
-              (true (raise_check_failure (quote_syntax (unsyntax stx))
-                      "expected arg type failure"))))))))
+          (lambda (stx)
+            // TODO check arity
+            (let ((thunk_stx (syntax_get stx 1))
+                  (exn_tag (quote_syntax (unsyntax tag))))
+              (quasisyntax
+                // TODO type-check thunk
+                (let ((e (thunk_throws (lambda () (unsyntax thunk_stx)))))
+                  (cond
+                    ((and (is_string e) (= e (unsyntax exn_tag)))
+                     (void))
+                    (e  (raise_check_failure (quote_syntax (unsyntax stx))
+                          "expected " (unsyntax exn_tag) " failure, got "
+                          e " exception"))
+                    (true (raise_check_failure (quote_syntax (unsyntax stx))
+                            "expected " (unsyntax exn_tag) " failure, got "
+                            e " exception")))))))))))
+
+  (defpub_syntax check_arg_exn
+    (make_exn_checker "arg"))
 
   (defpub_syntax check_arity_exn
-    (lambda (stx)
-      // TODO check arity
-      (let [(thunk_stx (syntax_get stx 1))]
-        (quasisyntax
-          // TODO type-check thunk
-          (let ((e (thunk_throws (lambda () (unsyntax thunk_stx)))))
-            (cond
-              ((and (is_string e) (= e "arity"))
-               (void))
-              (e  (raise_check_failure (quote_syntax (unsyntax stx))
-                    "expected arity failure, got " e " exception"))
-              (true (raise_check_failure (quote_syntax (unsyntax stx))
-                      "expected arity failure"))))))))
+    (make_exn_checker "arity"))
+
+  (defpub_syntax check_syntax_exn
+    (make_exn_checker "syntax"))
+
 
   (defpub_syntax check_compile_exn
     '''
