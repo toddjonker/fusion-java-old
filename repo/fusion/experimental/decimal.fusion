@@ -1,6 +1,24 @@
 // Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
 
+/*                       *** WARNING ***
+ *
+ * There are customer dependencies on this module!  See FUSION-174
+ */
+
+
 (module decimal "/fusion/base"
+
+  '''
+Experimental operators for decimal arithmetic.
+
+## WARNING
+
+This module contains unstable, experimental features.
+There is **NO SUPPORT** for this module.
+
+[FUSION-174]: issue:FUSION-174
+  '''
+
 
   (require
     "/fusion/experimental/defines"
