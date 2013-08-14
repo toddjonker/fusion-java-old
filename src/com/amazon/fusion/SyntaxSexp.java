@@ -168,7 +168,9 @@ final class SyntaxSexp
         int len = size();
         if (len == 0)
         {
-            throw new SyntaxFailure(null, "not a valid syntactic form", this);
+            String message =
+                "not a valid syntactic form. You probably want to quote this.";
+            throw new SyntaxFailure(null, message, this);
         }
 
         SyntaxValue[] children = extract();

@@ -321,9 +321,10 @@ final class SyntaxSymbol
         {
             if (myText == null)
             {
-                throw new SyntaxFailure(null,
-                                        "null.symbol is not an expression",
-                                        this);
+                String message =
+                    "null.symbol is not an expression. " +
+                    "You probably want to quote this.";
+                throw new SyntaxFailure(null, message, this);
             }
 
             resolve();

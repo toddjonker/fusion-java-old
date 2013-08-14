@@ -70,7 +70,7 @@ final class Expander
         {
             String message =
                 "Annotations not supported in raw syntax. You probably " +
-                "want to quote this value";
+                "want to quote this.";
             throw new SyntaxFailure(null, message, stx);
         }
 
