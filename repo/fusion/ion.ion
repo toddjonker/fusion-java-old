@@ -2,7 +2,13 @@
 
 (module ion '/fusion/private/kernel'
 
+
+  "DEPRECATED! Do not use."
+
+
   (require "/fusion/experimental/defines")
 
-  (defpub_j ion_annotations  "com.amazon.fusion.IonAnnotationsProc")
+  (defpub ion_annotations
+    "DEPRECATED! Use `type_annotations` instead."
+    (java_new "com.amazon.fusion.IonAnnotationsProc"))
 )
