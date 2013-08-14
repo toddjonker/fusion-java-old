@@ -4,10 +4,21 @@
   "/check"
   "/fusion/number")
 
+
+//============================================================================
+// division
+
 (check = (/ 4.0 2.0) 2.0)
 
-// TODO divide by zero
-// TODO inexact result
+// divide by zero
+(check_contract_exn (/ 12. 0.))
+
+// inexact result
+(check_contract_exn (/ 12. 7.))
+
+
+//============================================================================
+// comparisons
 
 (check_true (< 1   2  ))
 (check_true (< 1   2.0))
