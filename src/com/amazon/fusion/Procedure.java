@@ -162,21 +162,6 @@ abstract class Procedure
     }
 
 
-    double checkDecimalArg(int argNum, Object... args)
-        throws ArgTypeFailure
-    {
-        try
-        {
-            IonDecimal iv = (IonDecimal) castToIonValueMaybe(args[argNum]);
-            return iv.doubleValue();
-        }
-        catch (ClassCastException e) {}
-        catch (NullValueException e) {}
-        catch (NullPointerException e) {} // in case toIonValue() ==> null
-
-        throw new ArgTypeFailure(this, "double", argNum, args);
-    }
-
 
     /**
      * Checks that an argument fits safely into Java's {@code int} type.
@@ -188,17 +173,16 @@ abstract class Procedure
         {
             IonInt iv = (IonInt) castToIonValueMaybe(args[argNum]);
             long v = iv.longValue();
-            if (Integer.MAX_VALUE < v || v < Integer.MIN_VALUE)
+            if (Integer.MIN_VALUE <= v && v <= Integer.MAX_VALUE)
             {
-                throw new ArgTypeFailure(this, "32-bit int", argNum, args);
+                return (int) v;
             }
-            return (int) v;
         }
-        catch (ClassCastException e) {}
-        catch (NullValueException e) {}
-        catch (NullPointerException e) {} // in case toIonValue() ==> null
+        catch (ClassCastException e)   {}
+        catch (NullValueException e)   {}    // iv == null
+        catch (NullPointerException e) {}    // iv.isNullValue()
 
-        throw new ArgTypeFailure(this, "int", argNum, args);
+        throw new ArgTypeFailure(this, "32-bit int", argNum, args);
     }
 
 
@@ -211,21 +195,23 @@ abstract class Procedure
             // TODO range check
             return iv.longValue();
         }
-        catch (ClassCastException e) {}
-        catch (NullValueException e) {}
-        catch (NullPointerException e) {} // in case toIonValue() ==> null
+        catch (ClassCastException e)   {}
+        catch (NullValueException e)   {}    // iv == null
+        catch (NullPointerException e) {}    // iv.isNullValue()
 
         throw new ArgTypeFailure(this, "int", argNum, args);
     }
 
+
+    /**
+     * @return not null.
+     */
     BigInteger checkBigIntArg(int argNum, Object... args)
         throws ArgTypeFailure
     {
-        IonValue dom = FusionValue.castToIonValueMaybe(args[argNum]);
-
         try
         {
-            IonInt iv = (IonInt)dom;
+            IonInt iv = (IonInt) castToIonValueMaybe(args[argNum]);
             BigInteger result = iv.bigIntegerValue();
             if (result != null)
             {
@@ -233,15 +219,35 @@ abstract class Procedure
             }
         }
         catch (ClassCastException e)   {}
-        catch (NullPointerException e) {} // in case toIonValue() ==> null
+        catch (NullPointerException e) {}    // iv == null
+
+        throw new ArgTypeFailure(this, "non-null int", argNum, args);
+    }
+
+    /**
+     * @return may be null.
+     */
+    BigInteger checkBigIntArg(Evaluator eval, int argNum, Object... args)
+        throws ArgTypeFailure
+    {
+        try
+        {
+            IonInt iv = (IonInt) castToIonValueMaybe(args[argNum]);
+            BigInteger result = iv.bigIntegerValue();
+            return result;
+        }
+        catch (ClassCastException e)   {}
+        catch (NullPointerException e) {}    // iv == null
 
         throw new ArgTypeFailure(this, "int", argNum, args);
     }
 
+
     /**
      * @return not null.
      */
-    BigDecimal checkRequiredDecimalArg(Evaluator eval, int argNum,
+    BigDecimal checkRequiredDecimalArg(Evaluator eval, // Newer name+signature
+                                       int argNum,
                                        Object... args)
         throws ArgTypeFailure
     {
@@ -254,10 +260,10 @@ abstract class Procedure
                 return result;
             }
         }
-        catch (ClassCastException e) {}
-        catch (NullPointerException e) {} // in case toIonValue() ==> null
+        catch (ClassCastException e)   {}
+        catch (NullPointerException e) {}    // iv == null
 
-        throw new ArgTypeFailure(this, "decimal", argNum, args);
+        throw new ArgTypeFailure(this, "non-null decimal", argNum, args);
     }
 
     Number checkBigArg(int argNum, Object... args)
@@ -265,7 +271,7 @@ abstract class Procedure
     {
         try
         {
-            IonValue ionValue = FusionValue.castToIonValueMaybe(args[argNum]);
+            IonValue ionValue = castToIonValueMaybe(args[argNum]);
             Number result = null;
             if (ionValue instanceof IonInt)
             {
@@ -283,8 +289,8 @@ abstract class Procedure
                 return result;
             }
         }
-        catch (ClassCastException e) {}
-        catch (NullPointerException e) {} // in case toIonValue() ==> null
+        catch (ClassCastException e)   {}
+        catch (NullPointerException e) {}    // iv == null
 
         throw new ArgTypeFailure(this, "int or decimal", argNum, args);
     }
@@ -401,20 +407,6 @@ abstract class Procedure
         }
 
         throw argFailure("ionizable struct", argNum, args);
-    }
-
-    /**
-     * Allows null.struct.
-     * @deprecated Use {@link #copyStructArgToIonStruct}.
-     */
-    @Deprecated
-    IonStruct checkStructArg(int argNum, Object... args)
-        throws ArgTypeFailure
-    {
-        // FIXME ugly compatibility hack!
-        if (isStruct(null, args[argNum])) return null;
-
-        throw argFailure("struct", argNum, args);
     }
 
 
