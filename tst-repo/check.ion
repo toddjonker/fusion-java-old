@@ -221,6 +221,9 @@ Ensures that (OP VAL1 VAL2) is truthy.
   (defpub_syntax check_arity_exn
     (make_exn_checker "arity"))
 
+  (defpub_syntax check_contract_exn
+    (make_exn_checker "contract"))
+
   (defpub_syntax check_syntax_exn
     (make_exn_checker "syntax"))
 
