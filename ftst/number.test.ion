@@ -75,3 +75,16 @@
 
 (check_arg_exn (floor 1e0))
 (check_arg_exn (floor "1"))
+
+
+//============================================================================
+// int_to_string
+
+(check ion_equals (int_to_string null.int) null.string)
+
+(check = (int_to_string 0) "0")
+(check = (int_to_string 1234) "1234")
+(check = (int_to_string -99) "-99")
+
+(check = (int_to_string -123456789012345678901234567890)
+                       "-123456789012345678901234567890")
