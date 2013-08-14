@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,7 +10,9 @@ final class ToStringProc
     ToStringProc()
     {
         //    "                                                                               |
-        super("Converts an integer to string format. Input of string types will be "+
+        super("DEPRECATED!  Use `int_to_string` instead.\n" +
+              "\n" +
+              "Converts an integer to string format. Input of string types will be "+
               "returned in the same way");
     }
 
