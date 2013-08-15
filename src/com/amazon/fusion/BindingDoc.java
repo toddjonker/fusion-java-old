@@ -60,7 +60,8 @@ final class BindingDoc
 
     String getUsage()
     {
-        if (myUsage != null && ! myUsage.startsWith("("))
+        if (myUsage != null
+            && ! (myUsage.startsWith("(") && myUsage.endsWith(")")))
         {
             StringBuilder buf = new StringBuilder();
             buf.append('(');
