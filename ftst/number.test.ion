@@ -88,3 +88,31 @@
 
 (check = (int_to_string -123456789012345678901234567890)
                        "-123456789012345678901234567890")
+
+(check_arg_exn (int_to_string 1.))
+(check_arg_exn (int_to_string "1"))
+
+
+//============================================================================
+// string_to_int
+
+(check ion_equals (string_to_int null.string) null.int)
+
+(check = (string_to_int "0") 0)
+(check = (string_to_int "1234") 1234)
+(check = (string_to_int "-99") -99)
+
+(check = (string_to_int "-123456789012345678901234567890")
+                         -123456789012345678901234567890)
+
+(check_arg_exn (string_to_int ""))
+(check_arg_exn (string_to_int " 0"))
+(check_arg_exn (string_to_int "0 "))
+(check_arg_exn (string_to_int " 0 "))
+(check_arg_exn (string_to_int "0-"))
+(check_arg_exn (string_to_int "0,"))
+(check_arg_exn (string_to_int "+1"))
+(check_arg_exn (string_to_int "--1"))
+
+(check_arg_exn (string_to_int "1."))
+(check_arg_exn (string_to_int "1.0"))

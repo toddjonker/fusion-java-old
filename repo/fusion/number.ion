@@ -22,4 +22,5 @@ Operations on numbers (int, decimal, and float).
   (defpub_j floor    "com.amazon.fusion.FloorProc")
 
   (defpub_j int_to_string "com.amazon.fusion.IntToStringProc")
+  (defpub_j string_to_int "com.amazon.fusion.StringToIntProc")
 )
