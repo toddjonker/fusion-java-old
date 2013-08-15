@@ -762,7 +762,7 @@ final class FusionStruct
         IsStructProc()
         {
             //    "                                                                               |
-            super("Determines whether `value` is a struct, returning true or false.",
+            super("Determines whether `value` is a struct, returning `true` or `false`.",
                   "value");
         }
 

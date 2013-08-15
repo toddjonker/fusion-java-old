@@ -197,7 +197,7 @@ be evaluated as a variable reference:
   (defpub any
     (lambda (pred collection)
       '''
-Applies the one-parameter predicate `pred` to the elements of `collection`;
+Applies the one-argument predicate `pred` to the elements of `collection`;
 the first time `pred` returns a truthy value that truthy value is returned and
 no more elements are visited.  If no call returns a truthy value, then the
 result is `false`.
@@ -238,7 +238,7 @@ Returns `true` if the size of the `collection` is zero, otherwise returns
   (defpub find
     (lambda (pred collection)
       '''
-Applies the one-parameter predicate `pred` to each element of `collection`;
+Applies the one-argument predicate `pred` to each element of `collection`;
 the first time `pred` returns a truthy value that element is returned.
 If no such element is found, the result is void.
 
@@ -270,7 +270,7 @@ When `collection` is a sequence, the elements are visited in order.
   (defpub do
     (lambda (proc collection)
       '''
-Applies the one-parameter procedure `proc` to the elements of `collection`,
+Applies the one-argument procedure `proc` to the elements of `collection`,
 ignoring any results.  Returns void.
 
 When `collection` is a sequence, the elements are visited in order.

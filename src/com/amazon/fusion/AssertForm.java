@@ -11,10 +11,9 @@ final class AssertForm
     AssertForm()
     {
         //    "                                                                               |
-        super("EXPR MESSAGE ...",
-              "Evaluates the EXPR, throwing an exception if the result isn't truthy (as\n" +
-              "defined by `if`.\n" +
-              "The exception displays the MESSAGEs, which are only evaluated on failure.");
+        super("expr message ...",
+              "Evaluates the `expr`, throwing an exception if the result isn't truthy.\n" +
+              "The exception `display`s the `message`s, which are only evaluated on failure.");
     }
 
 

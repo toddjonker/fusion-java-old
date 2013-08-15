@@ -33,9 +33,9 @@ final class BeginForm
     BeginForm()
     {
         //    "                                                                               |
-        super("EXPR ...",
-              "Evaluates the EXPRs in order, returning the final result.\n" +
-              "The last EXPR is in tail position. If there are no EXPRs the result is void.");
+        super("expr ...",
+              "Evaluates the `expr`s in order, returning the final result.  The last `expr` is\n"
+            + "in tail position.  If there are no `expr`s the result is void.");
     }
 
 

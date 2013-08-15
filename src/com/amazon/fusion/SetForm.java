@@ -7,8 +7,8 @@ final class SetForm
 {
     SetForm()
     {
-        super("VAR VALUE",
-              "Mutates the given variable, assigning it the VALUE.");
+        super("var value",
+              "Mutates the given `var`iable, assigning it the `value`.");
     }
 
 

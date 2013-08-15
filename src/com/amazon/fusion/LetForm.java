@@ -8,10 +8,13 @@ final class LetForm
     LetForm()
     {
         //    "                                                                               |
-        super("((IDENT EXPR) ...) BODY ...+",
-              "Binds each IDENT to its EXPR, then evaluates BODY.\n" +
-              "BODY may be one or more forms; the result of the last form is the result of the\n" +
-              "entire expression.");
+        super("((ident expr) ...) body ...+",
+              "Evaluates the `expr`s left to right, then binds each `ident` to its\n" +
+              "corresponding result, then evaluates `body`.  The scope of the `ident`s only\n" +
+              "covers the `body`, not the `expr`s.\n" +
+              "\n" +
+              "`body` may be one or more forms; the last form is in tail position and its\n" +
+              "result is the result of the entire expression.");
     }
 
     /**

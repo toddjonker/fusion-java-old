@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -9,8 +9,8 @@ final class NotProc
     NotProc()
     {
         //    "                                                                               |
-        super("Returns true if VALUE is untruthy, false if VALUE is truthy. Truthiness is as\n" +
-              "defined by `if`.",
+        super("Returns `true` if `value` is untruthy, `false` if `value` is truthy. Truthiness"
+            + "is as defined by `if`.",
               "value");
     }
 

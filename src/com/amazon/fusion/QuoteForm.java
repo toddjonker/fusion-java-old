@@ -11,8 +11,8 @@ final class QuoteForm
     QuoteForm()
     {
         //    "                                                                               |
-        super("DATUM",
-              "Returns the Ion DATUM as-is, without evaluation.");
+        super("datum",
+              "Returns the Ion `datum` as-is, without evaluation.");
     }
 
 

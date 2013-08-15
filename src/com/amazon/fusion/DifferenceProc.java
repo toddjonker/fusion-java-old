@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -14,8 +14,9 @@ final class DifferenceProc
     DifferenceProc()
     {
         //    "                                                                               |
-        super("With two or more int or decimal NUMs, returns their difference, associating to\n" +
-              "the left. With one int or decimal NUM, returns its negation.",
+        super("With two or more int or decimal `num`bers, returns their difference,\n"
+            + "associating to the left.  With one int or decimal argument, returns its\n"
+            + "negation.",
               "num", DOTDOTDOTPLUS);
     }
 

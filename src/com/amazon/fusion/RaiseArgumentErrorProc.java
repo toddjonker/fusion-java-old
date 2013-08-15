@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -12,10 +12,11 @@ final class RaiseArgumentErrorProc
     {
         //    "                                                                               |
         super("Raises a contract failure due to a procedure being called with unacceptable\n" +
-              "argument values. The NAME text (string or symbol) identifies the procedure.\n" +
-              "The EXPECTED string describes the relevant contract. BAD_POS is the zero-based\n" +
-              "position of the bad argument; a negative value means that a specific argument\n" +
-              "is not implicated.  The VALUEs are the arguments passed to the procedure.",
+              "argument values.  The `name` text (string or symbol) identifies the procedure.\n" +
+              "The `expected` string describes the relevant contract.  `bad_pos` is the\n" +
+              "zero-based position of the bad argument; a negative value means that a specific\n" +
+              "argument is not implicated.  The `value`s are the arguments passed to the\n" +
+              "procedure.",
               "name", "expected", "bad_pos", "value", DOTDOTDOTPLUS);
     }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -8,7 +8,7 @@ final class IsNullProc
     IsNullProc()
     {
         //    "                                                                               |
-        super("Returns true when VALUE is any Ion null, false otherwise.",
+        super("Returns `true` when `value` is _any_ Ion null, `false` otherwise.",
               "value");
     }
 

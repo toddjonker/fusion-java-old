@@ -5,7 +5,6 @@ package com.amazon.fusion;
 import com.amazon.fusion.Namespace.NsBinding;
 
 
-
 /**
  * Implementation of {@code #%top}.
  */
@@ -15,10 +14,10 @@ final class TopForm
     TopForm()
     {
         //    "                                                                               |
-        super("('#%top' ID)",
-              "References a top-level definition for ID, skipping over any surrounding local\n" +
-              "bindings.  Within a module, ID must be defined within the module and not\n" +
-              "locally.\n" +
+        super("('#%top' id)",
+              "References a top-level definition for symbol `id`, skipping over any\n" +
+              "surrounding local bindings.  Within a module, `id` must be defined within the\n" +
+              "module and not locally.\n" +
               "\n" +
               "As suggested by the awkward name, this form is rarely needed by application\n" +
               "code and is primarily an artifact of the macro-expansion process.");

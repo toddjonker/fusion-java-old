@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -15,7 +15,7 @@ final class ProductProc
     ProductProc()
     {
         //    "                                                                               |
-        super("Returns the product of the NUMs, which must be int or decimal. With no\n" +
+        super("Returns the product of the `num`bers, which must be int or decimal.  With no\n" +
               "arguments, returns integer 1.",
               "num", DOTDOTDOT);
     }

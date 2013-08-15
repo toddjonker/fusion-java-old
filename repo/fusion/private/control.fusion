@@ -13,11 +13,11 @@
     '''
     (and expr ...)
 
-Evaluates the EXPRs from left to right, returning the first untruthy value
+Evaluates the `expr`s from left to right, returning the first untruthy value
 that results (and ignoring further expressions). If they all return truthy
 values, the last one is returned.
 
-The last EXPR is in tail position. Given no EXPRs, the result is true.
+The last `expr` is in tail position. Given no `expr`s, the result is true.
     '''
     (lambda (stx)
       // (and)          -->  true
@@ -41,11 +41,11 @@ The last EXPR is in tail position. Given no EXPRs, the result is true.
     '''
     (or expr ...)
 
-Evaluates the EXPRs from left to right, returning the first truthy value
+Evaluates the `expr`s from left to right, returning the first truthy value
 that results (and ignoring further expressions). If they all return untruthy
 values, the last one is returned.
 
-The last EXPR is in tail position. Given no EXPRs, the result is false.
+The last `expr` is in tail position. Given no `expr`s, the result is false.
     '''
     (lambda (stx)
 
@@ -122,9 +122,9 @@ A companion form is `when`.
     '''
     (cond (test body ...) ...)
 
-Evaluates the TEST expressions left to right until one returns a truthy value,
-then evaluates the corresponding BODY in tail position.
-If no TEST is truthy, the result is void.
+Evaluates the `test` expressions left to right until one returns a truthy value,
+then evaluates the corresponding `body` expressions in tail position.
+If no `test` is truthy, the result is void.
     '''
     (lambda (stx)
       (let ((size (syntax_size stx)))

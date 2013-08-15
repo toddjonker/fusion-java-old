@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -14,8 +14,8 @@ final class SumProc
     SumProc()
     {
         //    "                                                                               |
-        super("Returns the sum of the NUMs, which must be int or decimal. With no arguments,\n" +
-              "returns integer 0.",
+        super("Returns the sum of the `num`bers, which must be int or decimal.  With no\n"
+            + "arguments, returns integer 0.",
               "num", DOTDOTDOT);
     }
 

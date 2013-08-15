@@ -23,6 +23,9 @@ class FusionIterator
     }
 
 
+    /**
+     * @param value may be an iterator, list, or sexp.
+     */
     static FusionIterator iterate(Evaluator eval, Object value)
         throws FusionException
     {

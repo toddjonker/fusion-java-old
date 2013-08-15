@@ -761,7 +761,7 @@ final class FusionList
         IsListProc()
         {
             //    "                                                                               |
-            super("Determines whether `value` is a list, returning true or false.",
+            super("Determines whether `value` is a list, returning `true` or `false`.",
                   "value");
         }
 
@@ -781,7 +781,7 @@ final class FusionList
         IsImmutableListProc()
         {
             //    "                                                                               |
-            super("Determines whether `value` is an immutable list, returning true or false.",
+            super("Determines whether `value` is an immutable list, returning `true` or `false`.",
                   "value");
         }
 
@@ -801,7 +801,7 @@ final class FusionList
         IsMutableListProc()
         {
             //    "                                                                               |
-            super("Determines whether `value` is a mutable list, returning true or false.",
+            super("Determines whether `value` is a mutable list, returning `true` or `false`.",
                   "value");
         }
 
@@ -821,7 +821,7 @@ final class FusionList
         IsStretchyListProc()
         {
             //    "                                                                               |
-            super("Determines whether `value` is a stretchy list, returning true or false.",
+            super("Determines whether `value` is a stretchy list, returning `true` or `false`.",
                   "value");
         }
 

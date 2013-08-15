@@ -13,14 +13,14 @@ final class LambdaForm
     LambdaForm()
     {
         //    "                                                                               |
-        super("(ARG ...) DOC? BODY ...+",
-              "Returns a new procedure. When invoked, the caller's arguments are bound to the\n" +
-              "ARG identifiers and the BODY is evaluated and returned.\n" +
-              "DOC is an optional documentation string.\n" +
-              "BODY may be one or more forms; the result of the last form is the result of the\n" +
-              "procedure invocation.\n" +
+        super("(arg ...) doc? body ...+",
+              "Returns a procedure.  When invoked, the caller's arguments are bound to the\n" +
+              "`arg` identifiers (the formal arguments) and the `body` is evaluated and\n" +
+              "returned.  The `doc` is an optional documentation string.\n" +
+              "`body` may be one or more forms; the last form is in tail position and its\n" +
+              "result is the result of the procedure invocation.\n" +
               "\n" +
-              "    (lambda REST_ID DOC? BODY ...+)\n" +
+              "    (lambda rest_id doc? body ...+)\n" +
               "\n" +
               "This variant returns a procedure that accepts any number of arguments, which\n" +
               "are collected into an immutable sexp and bound to `rest_id`.");

@@ -562,7 +562,7 @@ final class FusionSexp
         IsSexpProc()
         {
             //    "                                                                               |
-            super("Determines whether a `value` is a sexp, returning true or false.",
+            super("Determines whether a `value` is a sexp, returning `true` or `false`.",
                   "value");
         }
 
@@ -601,7 +601,7 @@ final class FusionSexp
         IsPairProc()
         {
             //    "                                                                               |
-            super("Determines whether `value` is a pair, returning true or false.",
+            super("Determines whether `value` is a pair, returning `true` or `false`.",
                   "value");
         }
 

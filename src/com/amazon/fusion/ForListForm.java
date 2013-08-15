@@ -13,9 +13,10 @@ final class ForListForm
     ForListForm()
     {
         //    "                                                                               |
-        super("((ident seq_expr) ...) body ...+",
-              "Iterates the `seq_expr`s in parallel, binding the corresponding `ident`s to\n" +
-              "each element in turn and evaluating `body`.  Returns a stretchy list of the\n" +
+        super("((ident series) ...) body ...+",
+              "Iterates the `series` in parallel, binding the corresponding `ident`s to\n" +
+              "each element in turn and evaluating `body`.  Each `series` expression must\n" +
+              "evaluate to a list, sexp, or iterator.  Returns a stretchy list of the\n" +
               "results.");
     }
 

@@ -10,11 +10,11 @@ final class LetrecForm
     LetrecForm()
     {
         //    "                                                                               |
-        super("((IDENT EXPR) ...) BODY ...+",
-              "Creates new binding locations for each IDENT, binds them to their EXPRs, then\n" +
-              "evaluates BODY. The EXPRs are evaluated left-to-right, and the IDENTs are bound\n" +
-              "in all EXPRs and BODYs. BODY may be one or more forms; the result of the last\n" +
-              "form is the result of the entire expression.");
+        super("((ident expr) ...) body ...+",
+              "Creates new binding locations for each `ident`, binds them to their `expr`s,\n"
+            + "then evaluates `body`. The `expr`s are evaluated left-to-right, and the\n"
+            + "`ident`s are bound in all `expr`s and `body`s. `body` may be one or more forms;\n"
+            + "the result of the last form is the result of the entire expression.");
     }
 
 

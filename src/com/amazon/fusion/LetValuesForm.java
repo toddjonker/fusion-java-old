@@ -10,11 +10,11 @@ final class LetValuesForm
     LetValuesForm()
     {
         //    "                                                                               |
-        super("(((IDENT ...) EXPR) ...) BODY ...+",
-              "Creates local bindings for the IDENTs, with the BODY in scope.  The EXPRs are\n" +
-              "evaluated left-to-right, and must return as many values as there are\n" +
-              "corresponding IDENTs, which are then bound to those results.  After the\n" +
-              "bindings are installed the BODY is evaluated.  BODY may be one or more forms;\n" +
+        super("(((ident ...) expr) ...) body ...+",
+              "Creates local bindings for the `ident`s, with the `body` in scope.  The `expr`s\n" +
+              "are evaluated left-to-right, and must return as many values as there are\n" +
+              "corresponding `ident`s, which are then bound to those results.  After the\n" +
+              "bindings are installed the `body` is evaluated.  `body` may be one or more forms;\n" +
               "the last form is in tail position and its result is the result of the entire\n" +
               "expression.");
     }
