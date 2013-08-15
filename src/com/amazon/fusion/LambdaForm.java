@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionList.immutableList;
+import static com.amazon.fusion.FusionSexp.immutableSexp;
 
 /**
  * The {@code lambda} syntactic form, which evaluates to a {@link Closure}.
@@ -23,7 +23,7 @@ final class LambdaForm
               "    (lambda REST_ID DOC? BODY ...+)\n" +
               "\n" +
               "This variant returns a procedure that accepts any number of arguments, which\n" +
-              "are collected into an immutable sequence and bound to `rest_id`.");
+              "are collected into an immutable sexp and bound to `rest_id`.");
     }
 
 
@@ -379,7 +379,7 @@ final class LambdaForm
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            Object rest = immutableList(eval, args);
+            Object rest = immutableSexp(eval, args);
 
             Store localStore = new LocalStore1(myEnclosure, rest);
 

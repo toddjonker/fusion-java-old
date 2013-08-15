@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -21,8 +21,8 @@ final class ApplyProc
         super("Calls the given `proc` with arguments that are the (optional) `arg`s prepended\n" +
               "to the elements of `sequence`.  The `proc` is called in tail position.\n" +
               "\n" +
-              "    (apply + [1, 2])                => 3\n" +
-              "    (apply + 10 11 (quote (1 2)))   => 24",
+              "    (apply + [1, 2])             =>  3\n" +
+              "    (apply + 10 11 (sexp 1 2))   =>  24",
               "proc", "arg", DOTDOTDOT, "sequence");
     }
 
@@ -53,6 +53,9 @@ final class ApplyProc
         {
             throw argFailure("list or sexp", arity - 1, args);
         }
+
+        // TODO if proc accepts a rest argument, optimize this copying.
+        //   As it stands we'll copy to an array, then to a sexp.
 
         int procArity = restLen + arity - 2;
         Object[] procArgs = new Object[procArity];

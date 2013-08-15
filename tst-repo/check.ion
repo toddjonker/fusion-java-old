@@ -68,7 +68,8 @@
            [(pos 0), (a actual), (e expected)]
         (if (is_void e)
           (assert (is_void a)
-            "sexp tails don't match at pos " pos ". Actual: " actual " Expected: " expected)
+            "sexp tails don't match at pos " pos ". Actual: " actual
+            " Expected: " expected)
           (begin
             (check_equal (head a) (head e)
               (string_append "sexp element at position " (to_string pos))) // TODO bad descr
