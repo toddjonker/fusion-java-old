@@ -12,16 +12,11 @@ import java.io.IOException;
 abstract class SyntacticForm
     extends NamedValue
 {
-    protected final String myBodyPattern;
-    protected final String myDoc;
     private final BindingDoc myDocs;
 
     SyntacticForm(String bodyPattern, String doc)
     {
-        myBodyPattern = bodyPattern;
-        myDoc = doc;
-
-        myDocs = new BindingDoc(null, Kind.SYNTAX, myBodyPattern, myDoc);
+        myDocs = new BindingDoc(null, Kind.SYNTAX, bodyPattern, doc);
     }
 
 
