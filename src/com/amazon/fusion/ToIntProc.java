@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,7 +10,9 @@ final class ToIntProc
     ToIntProc()
     {
         //    "                                                                               |
-        super("Converts a string to int format - can also accept an int on input and return" +
+        super("DEPRECATED!  Use `string_to_int` instead.\n" +
+              "\n" +
+              "Converts a string to int format - can also accept an int on input and return" +
             " the same int back upon exit.");
     }
 
