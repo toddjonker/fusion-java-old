@@ -73,6 +73,7 @@ while the field values are iterated.
 
   (require
     "/fusion/collection"
+    "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/ffi/java"
     "/fusion/private/builtins"   // unsafe_struct_visit

@@ -1,0 +1,22 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(module exception '/fusion/private/builtins'
+
+  '''
+Operations for working with exceptions.
+
+At present, Fusion has no support for catching exceptions or for creating
+custom exception types.
+  '''
+
+
+  (require "/fusion/experimental/defines")
+
+  (defpub_j_syntax assert         "com.amazon.fusion.AssertForm")
+
+  (defpub_j raise_argument_error  "com.amazon.fusion.RaiseArgumentErrorProc")
+  (defpub_j raise_arity_error     "com.amazon.fusion.RaiseArityErrorProc")
+  (defpub_j raise_result_error    "com.amazon.fusion.RaiseResultErrorProc")
+
+  (provide assert raise_argument_error raise_arity_error raise_result_error)
+)

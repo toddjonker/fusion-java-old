@@ -3,14 +3,17 @@
 (module check '/fusion/base'
 
   (require
-    "/fusion/experimental/defines"
     "/fusion/eval"
+    "/fusion/exception"
+    "/fusion/experimental/defines"
     "/fusion/ffi/java"
     "/fusion/ion"
     "/fusion/list"
     "/fusion/sexp"
     "/fusion/string"
     "/fusion/syntax")
+
+  (provide assert)
 
 
   (defpub F (lambda rest false))

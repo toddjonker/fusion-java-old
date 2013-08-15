@@ -17,6 +17,7 @@ types.
 
   (require
     "/fusion/collection"
+    "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/private/builtins"   // Some basic list ops
     "/fusion/unsafe/list")

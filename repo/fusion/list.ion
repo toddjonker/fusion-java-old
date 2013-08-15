@@ -103,6 +103,7 @@ languages, highlighting potential mutation of an argument.
 
 
   (require
+    "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/ffi/java"
     "/fusion/iterator"

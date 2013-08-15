@@ -1,13 +1,22 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 public class AssertTest
     extends CoreTestCase
 {
+    @Before
+    public void requires()
+        throws Exception
+    {
+        topLevel().requireModule("/fusion/exception");
+    }
+
+
     private void expectAssertFailure(String expr)
         throws Exception
     {

@@ -15,6 +15,7 @@ based on two procedures:
   '''
 
   (require
+    "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/ffi/java")
 

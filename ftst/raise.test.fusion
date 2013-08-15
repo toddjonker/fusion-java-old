@@ -1,6 +1,9 @@
 // Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
 
-(require "/check")
+(require
+  "/check"
+  "/fusion/exception")
+
 
 //==========================================================================
 // raise_arity_error

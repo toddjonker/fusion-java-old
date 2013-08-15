@@ -12,6 +12,7 @@ See also [sequence](fusion/sequence.html).
   '''
 
   (require
+    "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/number"
     "/fusion/private/bind"
