@@ -215,15 +215,24 @@ When `collection` is a sequence, the elements are visited in order.
                                     elt_result))
              collection)
            result))
-        (true    // TODO FUSION-141 optimize for list vs sexp
+        ((is_list collection)
          (let [(len (size collection))]
            (let loop [(i 0)]
              (if (= i len)
                false
-               (lets [(elt (element collection i)),
+               (lets [(elt (unsafe_list_ref collection i)),
                       (result (pred elt))]
                  (if result result
-                   (loop (+ i 1)))))))))))
+                   (loop (+ i 1))))))))
+        ((is_sexp collection)
+         (let loop [(s collection)]
+           (if (is_empty s)
+             false
+             (let [(result (pred (head s)))]
+               (if result result
+                 (loop (tail s)))))))
+        (true
+         (raise_argument_error "any" "collection" 0 collection)))))
 
 
   (defpub is_empty
@@ -255,15 +264,25 @@ When `collection` is a sequence, the elements are visited in order.
                                     elt_result))
              collection)
            result))
-        (true    // TODO FUSION-141 optimize for list vs sexp
+        ((is_list collection)
          (let [(len (size collection))]
            (let loop [(i 0)]
              (if (= i len)
                (void)
-               (let [(elt (element collection i))]
+               (let [(elt (unsafe_list_ref collection i))]
                  (if (pred elt)
                    elt
-                   (loop (+ i 1)))))))))))
+                   (loop (+ i 1))))))))
+        ((is_sexp collection)
+         (let loop [(s collection)]
+           (if (is_empty s)
+             (void)
+             (let [(elt (head s))]
+               (if (pred elt)
+                 elt
+                 (loop (tail s)))))))
+        (true
+         (raise_argument_error "any" "collection" 0 collection)))))
 
 
   // Name per Dylan.  Equivalent to SRFI-1 `for_each` but I don't want this to
@@ -286,13 +305,22 @@ When `collection` is a sequence, the elements are visited in order.
            (lambda (key elt) (proc elt) false)
            collection)
          (void))
-        (true    // TODO FUSION-141 optimize for list vs sexp
+        ((is_list collection)
          (let [(len (size collection))]
            (let loop [(i 0)]
              (if (= i len)
                (void)
                (begin
-                 (proc (element collection i))
-                 (loop (+ 1 i))))))))))
+                 (proc (unsafe_list_ref collection i))
+                 (loop (+ 1 i)))))))
+        ((is_sexp collection)
+         (let loop [(s collection)]
+           (if (is_empty s)
+             (void)
+             (begin
+               (proc (head s))
+               (loop (tail s))))))
+        (true
+         (raise_argument_error "any" "collection" 0 collection)))))
 
 )
