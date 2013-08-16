@@ -14,7 +14,7 @@
 
   // Pass-through bindings from builtins
   (provide let let_values quote set '#%top')
-  (provide apply exit is_null is_procedure not
+  (provide apply exit is_null is_null_null is_procedure not
     to_int to_string)
 
   // TODO FUSION-95 these bindings seem out of place:
