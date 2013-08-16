@@ -1,7 +1,9 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
-(use check)
-(use '/fusion/list')
+(require
+  "/check"
+  "/fusion/for"
+  "/fusion/list")
 
 
 (check_list_equal
@@ -68,6 +70,20 @@
     (for_list ((e [1, 2, 3]))
       (lambda () (* 2 e))))
   [2, 4, 6])
+
+
+
+(check_compile_exn (for_list))
+(check_compile_exn (for_list 1 2))
+(check_compile_exn (for_list null.sexp 13))
+(check_compile_exn (for_list (12) 13))
+(check_compile_exn (for_list (1 2) 13))
+(check_compile_exn (for_list (()) 13))
+(check_compile_exn (for_list ((12)) 13))
+(check_compile_exn (for_list ((name)) 13))
+(check_compile_exn (for_list ((name 1 2)) 13))
+(check_compile_exn (for_list ((name 1) ()) 13))
+(check_compile_exn (for_list ((name 1) (name2)) 13))
 
 
 "PASSED" // Helpful output if you run this stand-alone

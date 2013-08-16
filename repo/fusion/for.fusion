@@ -1,0 +1,13 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(module for '/fusion/base'
+
+  '''
+Generic collection "comprehension" forms.
+  '''
+
+
+  (require "/fusion/experimental/defines")
+
+  (defpub_j_syntax for_list "com.amazon.fusion.ForListForm")
+)

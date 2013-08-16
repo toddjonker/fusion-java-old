@@ -258,23 +258,6 @@ public class ListTest
         assertEval(false, "(is_list \"[1,2,3]\")");
     }
 
-    @Test
-    public void testForListSyntax()
-        throws Exception
-    {
-        expectSyntaxFailure("(for_list)");
-        expectSyntaxFailure("(for_list 1 2)");
-        expectSyntaxFailure("(for_list null.sexp 13)");
-        expectSyntaxFailure("(for_list (12) 13)");
-        expectSyntaxFailure("(for_list (1 2) 13)");
-        expectSyntaxFailure("(for_list (()) 13)");
-        expectSyntaxFailure("(for_list ((12)) 13)");
-        expectSyntaxFailure("(for_list ((name)) 13)");
-        expectSyntaxFailure("(for_list ((name 1 2)) 13)");
-        expectSyntaxFailure("(for_list ((name 1) ()) 13)");
-        expectSyntaxFailure("(for_list ((name 1) (name2)) 13)");
-    }
-
 
     //========================================================================
     // Append

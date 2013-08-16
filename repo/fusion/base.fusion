@@ -13,12 +13,12 @@
 
 
   // Pass-through bindings from builtins
-  (provide for_list let let_values quote set '#%top')
+  (provide let let_values quote set '#%top')
   (provide apply exit is_null is_procedure not
     to_int to_string)
 
   // TODO FUSION-95 these bindings seem out of place:
-  //  for_list to_int to_string
+  //  to_int to_string
 
   (require "/fusion/collection")
   (provide . any do element elt find is_empty size)
