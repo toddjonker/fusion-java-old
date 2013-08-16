@@ -1,8 +1,9 @@
-// Copyright (c) 2011 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2011-2013 Amazon.com, Inc.  All rights reserved.
 
-package com.amazon.fusion.cli;
+package com.amazon.fusion.util;
 
-import com.amazon.ion.IonException;
+import com.amazon.fusion.FusionException;
+import com.amazon.fusion._Private_Trampoline;
 import com.amazon.ion.Timestamp;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +12,7 @@ import java.util.Properties;
 /**
  * Provides information about this release of the FusionJava library.
  */
-final class FusionJarInfo
+public final class FusionJarInfo
 {
     private String ourReleaseLabel;
     private String ourMajorVersion;
@@ -23,10 +24,10 @@ final class FusionJarInfo
      * Constructs a new instance that can provide build information about this
      * library.
      *
-     * @throws IonException if there's a problem loading the build info.
+     * @throws FusionException if there's a problem loading the build info.
      */
     public FusionJarInfo()
-        throws IonException
+        throws FusionException
     {
         loadBuildProperties();
     }
@@ -56,7 +57,7 @@ final class FusionJarInfo
 
     /**
      * Gets the Brazil package version of this build,
-     * in the form {@code "IonJava-1.0.x.x"}.
+     * in the form {@code "FusionJava-1.0.x.x"}.
      *
      * @return null if the package version is unknown.
      */
@@ -91,7 +92,7 @@ final class FusionJarInfo
     }
 
     private void loadBuildProperties()
-        throws IonException
+        throws FusionException
     {
         String file = getClass().getSimpleName() + ".properties";
         try
@@ -129,7 +130,8 @@ final class FusionJarInfo
         }
         catch (IOException e)
         {
-            throw new IonException("Unable to load " + file, e);
+            String message = "Unable to load " + file;
+            throw _Private_Trampoline.newFusionException(message, e);
         }
     }
 }
