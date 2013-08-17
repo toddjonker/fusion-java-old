@@ -330,6 +330,14 @@ final class FusionList
     private abstract static class BaseList
         extends BaseSequence
     {
+        /**
+         * The elements within this list.
+         *
+         * <b>WARNING!</b> The {@link LazyInjectingList} subclass may mutate
+         * elements of this list while still appearing immutable. Every method
+         * that reads from this array MUST be overridden there and properly
+         * synchronized.
+         */
         Object[] myValues;
 
         BaseList(Object[] values)
@@ -698,7 +706,10 @@ final class FusionList
             assert values.length != 0;
         }
 
-        private void injectElements(Evaluator eval)
+        /**
+         * Synchronized so this immutable class is thread-safe for reads.
+         */
+        private synchronized void injectElements(Evaluator eval)
         {
             if (myValues[0] instanceof IonValue)
             {
@@ -732,6 +743,15 @@ final class FusionList
             System.arraycopy(myValues, srcPos, dest, destPos, length);
         }
 
+        @Override
+        synchronized // So another thread doesn't inject while we copy.
+        IonList copyToIonValue(ValueFactory factory,
+                               boolean throwOnConversionFailure)
+            throws FusionException
+        {
+            // No need to inject our elements, they will still be copied.
+            return super.copyToIonValue(factory, throwOnConversionFailure);
+        }
 
         @Override
         BaseList add(Evaluator eval, Object value)
@@ -752,6 +772,24 @@ final class FusionList
         {
             injectElements(eval);
             return super.javaIterate(eval);
+        }
+
+        @Override
+        synchronized // So another thread doesn't inject while we write.
+        void write(Evaluator eval, Appendable out)
+            throws IOException, FusionException
+        {
+            // No need to inject our elements, they'll be output identically.
+            super.write(eval, out);
+        }
+
+        @Override
+        synchronized // So another thread doesn't inject while we ionize.
+        void ionize(Evaluator eval, IonWriter out)
+            throws IOException, FusionException
+        {
+            // No need to inject our elements, they'll be output identically.
+            super.ionize(eval, out);
         }
     }
 

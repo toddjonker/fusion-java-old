@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -46,6 +46,7 @@ public final class FusionWrite
     /**
      *
      * @param eval may be null!
+     * @param value may be an {@link IonValue}.
      */
     static void dispatchWrite(Evaluator eval, Appendable out, Object value)
         throws IOException, FusionException

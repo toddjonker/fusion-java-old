@@ -298,6 +298,7 @@ public abstract class FusionValue
      * The {@link IonValue} will use the given factory and will not have a
      * container.
      *
+     * @param value may be an {@link IonValue}, in which case it is cloned.
      * @param factory must not be null.
      *
      * @throws FusionException if the value cannot be converted to Ion.
