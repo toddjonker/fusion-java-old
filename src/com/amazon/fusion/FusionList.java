@@ -420,21 +420,24 @@ final class FusionList
 
         BaseList appendM(Evaluator eval, Object[] args)
         {
-            int newLen = myValues.length;
+            int myLen = myValues.length;
+            int newLen = myLen;
             for (int i = 0; i < args.length; i++)
             {
                 newLen += ((BaseList) args[i]).size();
             }
 
+            if (newLen == myLen) return this; // Nothing to append
+
             Object[] copy = Arrays.copyOf(myValues, newLen);
 
-            int pos = myValues.length;
+            int pos = myLen;
             for (Object arg : args)
             {
                 BaseList v = (BaseList) arg;
                 int argLen = v.size();
 
-                System.arraycopy(v.myValues, 0, copy, pos, argLen);
+                v.unsafeCopy(eval, 0, copy, pos, argLen);
                 pos += argLen;
             }
             assert pos == newLen;
