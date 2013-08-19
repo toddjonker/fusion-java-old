@@ -17,11 +17,15 @@
   (provide apply exit is_null is_null_null is_procedure not
     to_int to_string)
 
-  // TODO FUSION-95 these bindings seem out of place:
+  // TODO FUSION-95 FUSION-173 FUSION-177 remove these from this module:
   //  to_int to_string
 
   (require "/fusion/collection")
   (provide . any do element elt find is_empty size)
+
+  // TODO FUSION-180 Remove from this module
+  (require "/fusion/for")
+  (provide for_list)
 
   (require "/fusion/private/bind")
   (provide lets)

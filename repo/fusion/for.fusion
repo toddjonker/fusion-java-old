@@ -1,6 +1,6 @@
 // Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
 
-(module for '/fusion/base'
+(module for '/fusion/private/kernel'
 
   '''
 Generic collection "comprehension" forms.
