@@ -20,12 +20,11 @@ final class SyntaxSubseqProc
     {
         checkArityExact(args);
         SyntaxSequence sequence = checkSyntaxSequenceArg(0, args);
-        int from = (int) checkLongArg(1, args); // TODO type-safety
+        long from = checkLongArg(1, args);
         int size = sequence.size();
 
         if (size < from) from = size;
 
-        SyntaxSequence result = sequence.makeSubseq(eval, from, size);
-        return result;
+        return sequence.makeSubseq(eval, (int) from, size);
     }
 }
