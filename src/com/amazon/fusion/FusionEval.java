@@ -81,14 +81,14 @@ final class FusionEval
             if (stx instanceof SyntaxSexp)
             {
                 SyntaxSexp sexp = (SyntaxSexp) stx;
-                Binding binding = sexp.firstBinding();
+                Binding binding = sexp.firstBinding(eval);
                 if (binding == eval.getGlobalState().myKernelBeginBinding)
                 {
                     // Splice 'begin' into the top-level sequence
                     int last = sexp.size() - 1;
                     for (int i = last; i != 0;  i--)
                     {
-                        forms.push(sexp.get(i));
+                        forms.push(sexp.get(eval, i));
                     }
                     stx = null;
                 }
@@ -177,15 +177,16 @@ final class FusionEval
         {
             SyntaxSexp maybeModule = (SyntaxSexp) topLevelForm;
             if (maybeModule.size() > 1 &&
-                maybeModule.get(0) instanceof SyntaxSymbol)
+                maybeModule.get(eval, 0) instanceof SyntaxSymbol)
             {
-                SyntaxSymbol maybeKeyword = (SyntaxSymbol) maybeModule.get(0);
+                SyntaxSymbol maybeKeyword = (SyntaxSymbol)
+                    maybeModule.get(eval, 0);
                 maybeKeyword = (SyntaxSymbol) ns.syntaxIntroduce(maybeKeyword);
                 SyntaxSymbol moduleKeyword =
                     eval.getGlobalState().myKernelModuleIdentifier;
                 if (maybeKeyword.freeIdentifierEqual(moduleKeyword))
                 {
-                    SyntaxValue[] children = maybeModule.extract();
+                    SyntaxValue[] children = maybeModule.extract(eval);
                     children[0] = maybeKeyword;
                     return SyntaxSexp.make(eval, children);
                 }

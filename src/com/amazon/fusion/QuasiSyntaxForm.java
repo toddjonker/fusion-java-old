@@ -28,6 +28,8 @@ final class QuasiSyntaxForm
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
+        final Evaluator eval = expander.getEvaluator();
+
         if (stx.size() != 2)
         {
             throw new SyntaxFailure(identify(),
@@ -35,11 +37,11 @@ final class QuasiSyntaxForm
                                     stx);
         }
 
-        SyntaxValue subform = stx.get(1);
+        SyntaxValue subform = stx.get(eval, 1);
         subform = expand(expander, env, subform, 0);
 
         stx = SyntaxSexp.make(expander, stx.getLocation(),
-                              stx.get(0), subform);
+                              stx.get(eval, 0), subform);
         return stx;
     }
 
@@ -62,10 +64,12 @@ final class QuasiSyntaxForm
                                SyntaxSexp stx, int depth)
         throws FusionException
     {
+        final Evaluator eval = expander.getEvaluator();
+
         int size = stx.size();
         if (size == 0) return stx;
 
-        SyntaxValue[] children = stx.extract();
+        SyntaxValue[] children = stx.extract(eval);
         SyntaxValue first = children[0];
         if (first instanceof SyntaxSymbol)
         {
@@ -77,7 +81,7 @@ final class QuasiSyntaxForm
 
                 if (myUsBinding == binding)
                 {
-                    check(stx).arityExact(2);
+                    check(eval, stx).arityExact(2);
 
                     if (depth < 1)
                     {
@@ -92,7 +96,7 @@ final class QuasiSyntaxForm
                 }
                 else if (myQsBinding == binding)
                 {
-                    check(stx).arityExact(2);
+                    check(eval, stx).arityExact(2);
 
                     depth++;
                 }
@@ -101,7 +105,7 @@ final class QuasiSyntaxForm
 
         for (int i = 0; i < size; i++)
         {
-            SyntaxValue subform = stx.get(i);
+            SyntaxValue subform = stx.get(eval, i);
             children[i] = expand(expander, env, subform, depth);
         }
 
@@ -117,7 +121,7 @@ final class QuasiSyntaxForm
     CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxValue node = stx.get(1);
+        SyntaxValue node = stx.get(eval, 1);
         return compile(eval, env, node, 0);
     }
 
@@ -146,7 +150,7 @@ final class QuasiSyntaxForm
 
         if (size == 2)
         {
-            SyntaxValue first = stx.get(0);
+            SyntaxValue first = stx.get(eval, 0);
             if (first instanceof SyntaxSymbol)
             {
                 Binding binding = ((SyntaxSymbol)first).uncachedResolveMaybe();
@@ -158,7 +162,7 @@ final class QuasiSyntaxForm
                     {
                         if (depth == 0)
                         {
-                            SyntaxValue unquotedSyntax = stx.get(1);
+                            SyntaxValue unquotedSyntax = stx.get(eval, 1);
                             CompiledForm unquotedForm =
                                 eval.compile(env, unquotedSyntax);
                             return new CompiledUnsyntax(unquotedSyntax,
@@ -178,7 +182,7 @@ final class QuasiSyntaxForm
         CompiledForm[] children = new CompiledForm[size];
         for (int i = 0; i < size; i++)
         {
-            SyntaxValue orig = stx.get(i);
+            SyntaxValue orig = stx.get(eval, i);
             children[i] = compile(eval, env, orig, depth);
             same &= (children[i] instanceof CompiledQuoteSyntax);
         }

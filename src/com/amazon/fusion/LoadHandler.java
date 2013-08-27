@@ -135,7 +135,7 @@ final class LoadHandler
             if (moduleDeclaration.size() > 1)
             {
                 SyntaxSymbol moduleSym = (SyntaxSymbol)
-                    moduleDeclaration.get(0);
+                    moduleDeclaration.get(eval, 0);
                 if (MODULE.equals(moduleSym.stringValue()))
                 {
                     return moduleDeclaration;
@@ -153,7 +153,7 @@ final class LoadHandler
                                            SyntaxSexp moduleStx)
         throws FusionException
     {
-        SyntaxValue[] children = moduleStx.extract();
+        SyntaxValue[] children = moduleStx.extract(eval);
 
         // We already verified this type-safety
         assert ((SyntaxSymbol) children[0]).stringValue().equals(MODULE);

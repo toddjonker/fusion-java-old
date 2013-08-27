@@ -84,10 +84,12 @@ public final class _Private_HelpForm
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = check(stx);
+        final Evaluator eval = expander.getEvaluator();
+
+        SyntaxChecker check = check(eval, stx);
         int arity = stx.size();
 
-        SyntaxValue[] children = stx.extract();
+        SyntaxValue[] children = stx.extract(eval);
 
         // Expand (help) into (help help)
         if (arity == 1)
@@ -103,7 +105,7 @@ public final class _Private_HelpForm
             children[i] = expander.expandExpression(env, identifier);
         }
 
-        stx = SyntaxSexp.make(expander, stx.getLocation(), children);
+        stx = SyntaxSexp.make(eval, stx.getLocation(), children);
         return stx;
     }
 
@@ -117,7 +119,7 @@ public final class _Private_HelpForm
         CompiledForm[] children = new CompiledForm[arity - 1];
         for (int i = 1; i < arity; i++)
         {
-            children[i-1] = stx.get(i).doCompile(eval, env);
+            children[i-1] = stx.get(eval, i).doCompile(eval, env);
         }
         return new CompiledHelp(children);
     }

@@ -22,7 +22,9 @@ final class LetrecForm
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = check(stx);
+        final Evaluator eval = expander.getEvaluator();
+
+        SyntaxChecker check = check(eval, stx);
         final int letrecExprSize = check.arityAtLeast(3);
 
         SyntaxChecker checkBindings =
@@ -51,11 +53,11 @@ final class LetrecForm
             name.resolve();
 
             // Already type- and arity-checked this above
-            SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
-            SyntaxValue boundExpr = binding.get(1);
+            SyntaxSexp binding = (SyntaxSexp) bindingForms.get(eval, i);
+            SyntaxValue boundExpr = binding.get(eval, 1);
             boundExpr = boundExpr.addWrap(localWrap);
             boundExpr = expander.expandExpression(bodyEnv, boundExpr);
-            binding = SyntaxSexp.make(expander, binding.getLocation(),
+            binding = SyntaxSexp.make(eval, binding.getLocation(),
                                       name,
                                       boundExpr);
             expandedForms[i] = binding;
@@ -65,18 +67,18 @@ final class LetrecForm
                                        expandedForms);
 
         expandedForms = new SyntaxValue[letrecExprSize];
-        expandedForms[0] = stx.get(0);
+        expandedForms[0] = stx.get(eval, 0);
         expandedForms[1] = bindingForms;
 
         // TODO FUSION-36 Should allow internal definitions
         for (int i = 2; i < letrecExprSize; i++)
         {
-            SyntaxValue subform = stx.get(i);
+            SyntaxValue subform = stx.get(eval, i);
             subform = subform.addWrap(localWrap);
             expandedForms[i] = expander.expandExpression(bodyEnv, subform);
         }
 
-        stx = SyntaxSexp.make(expander, stx.getLocation(), expandedForms);
+        stx = SyntaxSexp.make(eval, stx.getLocation(), expandedForms);
         return stx;
     }
 
@@ -91,15 +93,15 @@ final class LetrecForm
         // Dummy environment to keep track of depth
         env = new LocalEnvironment(env, SyntaxSymbol.EMPTY_ARRAY);
 
-        SyntaxSexp bindingForms = (SyntaxSexp) stx.get(1);
+        SyntaxSexp bindingForms = (SyntaxSexp) stx.get(eval, 1);
 
         final int numBindings = bindingForms.size();
 
         CompiledForm[] valueForms = new CompiledForm[numBindings];
         for (int i = 0; i < numBindings; i++)
         {
-            SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
-            SyntaxValue boundExpr = binding.get(1);
+            SyntaxSexp binding = (SyntaxSexp) bindingForms.get(eval, i);
+            SyntaxValue boundExpr = binding.get(eval, 1);
             valueForms[i] = eval.compile(env, boundExpr);
         }
 

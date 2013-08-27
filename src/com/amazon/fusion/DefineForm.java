@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
+import static com.amazon.fusion.GlobalState.DEFINE;
 import com.amazon.fusion.Namespace.NsBinding;
 
 final class DefineForm
@@ -38,10 +39,10 @@ final class DefineForm
                                 SyntaxValue formForErrors)
         throws FusionException
     {
-        SyntaxChecker check = new SyntaxChecker(GlobalState.DEFINE, defineStx);
+        SyntaxChecker check = new SyntaxChecker(eval, DEFINE, defineStx);
         check.arityAtLeast(3);
 
-        SyntaxValue[] children = defineStx.extract();
+        SyntaxValue[] children = defineStx.extract(eval);
 
         SyntaxValue first = children[1];
         if (first.getType() == SyntaxValue.Type.SEXP)
@@ -52,7 +53,7 @@ final class DefineForm
             SyntaxSymbol identifier =
                 sigCheck.requiredIdentifier("procedure name", 0);
 
-            SyntaxValue[] sig = ((SyntaxSexp) first).extract();
+            SyntaxValue[] sig = ((SyntaxSexp) first).extract(eval);
             sig[0] = ns.predefine(identifier, formForErrors);
             children[1] = SyntaxSexp.make(eval, sig, first.getAnnotations(),
                                           first.getLocation());
@@ -71,10 +72,11 @@ final class DefineForm
     SyntaxSexp expandImplicitLambda(Expander expander, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker defineChecker = check(stx);
+        SyntaxChecker defineChecker = check(expander, stx);
         int defineArity = defineChecker.arityAtLeast(3);
 
-        if (stx.get(1).getType() != SyntaxValue.Type.SEXP)
+        Evaluator eval = expander.getEvaluator();
+        if (stx.get(eval, 1).getType() != SyntaxValue.Type.SEXP)
         {
             // No implicit lambda
             return stx;
@@ -93,7 +95,7 @@ final class DefineForm
                 check.requiredIdentifier("procedure formal argument", i);
         }
 
-        SyntaxValue[] origDefineElts = stx.extract();
+        SyntaxValue[] origDefineElts = stx.extract(eval);
         boolean hasDoc =
             (defineArity > 3 &&
              origDefineElts[2].getType() == SyntaxValue.Type.STRING);
@@ -134,7 +136,7 @@ final class DefineForm
         // with define_values.
         SyntaxSexp stx = expandImplicitLambda(expander, origStx);
 
-        SyntaxChecker check = check(stx);
+        SyntaxChecker check = check(expander, stx);
         if (! (expander.isTopLevelContext() || expander.isModuleContext()))
         {
             throw check.failure("Definition must be at top-level or module level");
@@ -142,7 +144,8 @@ final class DefineForm
 
         int arity = check.arityAtLeast(3);
 
-        SyntaxValue[] children = stx.extract();
+        Evaluator eval = expander.getEvaluator();
+        SyntaxValue[] children = stx.extract(eval);
 
         // If we had an implicit lambda, this will always succeed since we've
         // already checked the identifier.  Thus this will only cause an error
@@ -176,7 +179,7 @@ final class DefineForm
             throw check.failure("Too many subforms");
         }
 
-        SyntaxValue valueStx = stx.get(bodyPos);
+        SyntaxValue valueStx = stx.get(eval, bodyPos);
         children[bodyPos] = expander.expandExpression(env, valueStx);
 
         stx = SyntaxSexp.make(expander, stx.getLocation(), children);
@@ -192,10 +195,10 @@ final class DefineForm
         throws FusionException
     {
         int arity = stx.size();
-        SyntaxValue valueSource = stx.get(arity-1);
+        SyntaxValue valueSource = stx.get(eval, arity-1);
         CompiledForm valueForm = eval.compile(env, valueSource);
 
-        SyntaxSymbol identifier = (SyntaxSymbol) stx.get(1);
+        SyntaxSymbol identifier = (SyntaxSymbol) stx.get(eval, 1);
         NsBinding binding = (NsBinding) identifier.getBinding();
         CompiledForm compiled = binding.compileDefine(eval, env, valueForm);
 
@@ -203,7 +206,7 @@ final class DefineForm
             && eval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
         {
             // We have documentation. Sort of.
-            SyntaxString docString = (SyntaxString) stx.get(2);
+            SyntaxString docString = (SyntaxString) stx.get(eval, 2);
             BindingDoc doc = new BindingDoc(identifier.stringValue(),
                                             null, // kind
                                             null, // usage

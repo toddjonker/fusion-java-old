@@ -54,7 +54,7 @@ abstract class SyntaxSequence
      * this instance, so that it appears as if the wraps were pushed when they
      * were created.
      */
-    private void pushAnyWraps()
+    private void pushAnyWraps(Evaluator eval)
         throws FusionException
     {
         if (myWraps != null)  // We only have wraps when we have children.
@@ -85,10 +85,10 @@ abstract class SyntaxSequence
         return myChildren;
     }
 
-    Object[] unwrapChildren()
+    Object[] unwrapChildren(Evaluator eval)
         throws FusionException
     {
-        pushAnyWraps();
+        pushAnyWraps(eval);
         return myChildren;
     }
 
@@ -144,12 +144,12 @@ abstract class SyntaxSequence
      *
      * @return a new array.
      */
-    SyntaxValue[] extract()
+    SyntaxValue[] extract(Evaluator eval)
         throws FusionException
     {
         if (myChildren == null) return null;
 
-        pushAnyWraps();
+        pushAnyWraps(eval);
 
         int len = myChildren.length;
         SyntaxValue[] extracted = new SyntaxValue[len];
@@ -158,12 +158,12 @@ abstract class SyntaxSequence
     }
 
 
-    void extract(List<SyntaxValue> list, int from)
+    void extract(Evaluator eval, List<SyntaxValue> list, int from)
         throws FusionException
     {
         if (myChildren != null)
         {
-            pushAnyWraps();
+            pushAnyWraps(eval);
             for (int i = from; i < myChildren.length; i++)
             {
                 list.add(myChildren[i]);
@@ -172,10 +172,10 @@ abstract class SyntaxSequence
     }
 
 
-    final SyntaxValue get(int index)
+    final SyntaxValue get(Evaluator eval, int index)
         throws FusionException
     {
-        pushAnyWraps();
+        pushAnyWraps(eval);
         return myChildren[index];
     }
 
@@ -209,12 +209,12 @@ abstract class SyntaxSequence
             children = new SyntaxValue[thisLength + thatLength];
             if (thisLength != 0)
             {
-                this.pushAnyWraps();
+                this.pushAnyWraps(eval);
                 arraycopy(this.myChildren, 0, children, 0, thisLength);
             }
             if (thatLength != 0)
             {
-                that.pushAnyWraps();
+                that.pushAnyWraps(eval);
                 arraycopy(that.myChildren, 0, children, thisLength, thatLength);
             }
         }
@@ -226,7 +226,7 @@ abstract class SyntaxSequence
     SyntaxSequence makeSubseq(Evaluator eval, int from, int to)
         throws FusionException
     {
-        pushAnyWraps();
+        pushAnyWraps(eval);
         SyntaxValue[] children =
             (myChildren == null ? null : copyOfRange(myChildren, from, to));
         return makeSimilar(eval, children, EMPTY_STRING_ARRAY, null);

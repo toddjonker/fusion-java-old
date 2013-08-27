@@ -20,7 +20,7 @@ final class QuoteForm
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = check(stx);
+        SyntaxChecker check = check(expander, stx);
         check.arityExact(2);
         return stx;
     }
@@ -33,7 +33,7 @@ final class QuoteForm
     CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxValue quotedSource = stx.get(1);
+        SyntaxValue quotedSource = stx.get(eval, 1);
         Object result = quotedSource.unwrap(eval, true);
         return new CompiledConstant(result);
     }

@@ -20,7 +20,7 @@ final class UseForm
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        check(stx).requiredForm("module spec", 1);
+        check(expander, stx).requiredForm("module spec", 1);
         return stx;
     }
 
@@ -30,7 +30,7 @@ final class UseForm
         throws FusionException
     {
         // TODO Should we resolve the name at compile-time?
-        SyntaxValue moduleSpec = stx.get(1);
+        SyntaxValue moduleSpec = stx.get(eval, 1);
         ModuleIdentity id = myModuleNameResolver.resolve(eval, moduleSpec);
         return new CompiledUse(id);
     }

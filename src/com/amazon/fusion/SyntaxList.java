@@ -94,7 +94,7 @@ final class SyntaxList
         int len = size();
         if (len == 0) return this;
 
-        SyntaxValue[] children = extract();
+        SyntaxValue[] children = extract(expander.getEvaluator());
 
         for (int i = 0; i < len; i++)
         {
@@ -149,7 +149,7 @@ final class SyntaxList
         }
         else
         {
-            children = unwrapChildren();
+            children = unwrapChildren(eval);
         }
 
         return immutableList(eval, annotations, children);
@@ -174,7 +174,7 @@ final class SyntaxList
         CompiledForm[] children = new CompiledForm[len];
         for (int i = 0; i < len; i++)
         {
-            SyntaxValue elementExpr = get(i);
+            SyntaxValue elementExpr = get(eval, i);
             CompiledForm child = eval.compile(env, elementExpr);
             children[i] = child;
         }

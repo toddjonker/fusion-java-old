@@ -37,14 +37,16 @@ abstract class SyntacticForm
                                  SyntaxSexp stx)
         throws FusionException
     {
+        final Evaluator eval = expander.getEvaluator();
+
         int size = stx.size();
 
         SyntaxValue[] expandedChildren = new SyntaxValue[size];
-        expandedChildren[0] = stx.get(0);
+        expandedChildren[0] = stx.get(eval, 0);
 
         for (int i = 1; i < size; i++)
         {
-            SyntaxValue subform = stx.get(i);
+            SyntaxValue subform = stx.get(eval, i);
             expandedChildren[i] = expander.expandExpression(env, subform);
         }
         return SyntaxSexp.make(expander, stx.getLocation(), expandedChildren);
@@ -83,8 +85,13 @@ abstract class SyntacticForm
     //========================================================================
     // Type-checking helpers
 
-    final SyntaxChecker check(SyntaxSexp form)
+    final SyntaxChecker check(Evaluator eval, SyntaxSexp form)
     {
-        return new SyntaxChecker(getInferredName(), form);
+        return new SyntaxChecker(eval, getInferredName(), form);
+    }
+
+    final SyntaxChecker check(Expander expander, SyntaxSexp form)
+    {
+        return check(expander.getEvaluator(), form);
     }
 }

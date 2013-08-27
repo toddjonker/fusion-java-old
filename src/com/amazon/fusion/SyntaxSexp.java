@@ -146,12 +146,12 @@ final class SyntaxSexp
      * Finds the binding for the leading symbol in the sexp, or null if the
      * sexp doesn't start with a symbol.
      */
-    Binding firstBinding()
+    Binding firstBinding(Evaluator eval)
         throws FusionException
     {
         if (size() != 0)
         {
-            SyntaxValue first = get(0);
+            SyntaxValue first = get(eval, 0);
             if (first instanceof SyntaxSymbol)
             {
                 Binding binding = ((SyntaxSymbol)first).uncachedResolve();
@@ -174,7 +174,7 @@ final class SyntaxSexp
             throw new SyntaxFailure(null, message, this);
         }
 
-        SyntaxValue[] children = extract();
+        SyntaxValue[] children = extract(expander.getEvaluator());
 
         SyntaxValue first = children[0];
         if (first instanceof SyntaxSymbol)
@@ -237,7 +237,8 @@ final class SyntaxSexp
             throw new SyntaxFailure(null, "not a valid syntactic form", this);
         }
 
-        SyntaxValue first = get(0); // calls pushAnyWraps()
+        Evaluator eval = expander.getEvaluator();
+        SyntaxValue first = get(eval, 0); // calls pushAnyWraps()
         if (first instanceof SyntaxSymbol)
         {
             SyntaxSymbol maybeMacro = (SyntaxSymbol) first;
@@ -296,7 +297,7 @@ final class SyntaxSexp
             Object sexp = EMPTY_SEXP;
             for (int i = size; i-- != 0;)
             {
-                SyntaxValue s = get(i);
+                SyntaxValue s = get(eval, i);
                 Object head = s.unwrap(eval, true);
                 if (i == 0)
                 {
@@ -310,7 +311,7 @@ final class SyntaxSexp
 
             return sexp;
         }
-        Object head = get(0);
+        Object head = get(eval, 0);
         Object tail = (size == 1 ? EMPTY_SEXP : makeSubseq(eval, 1, size));
         return pair(eval, annotations, head, tail);
     }
@@ -323,7 +324,7 @@ final class SyntaxSexp
     CompiledForm doCompile(Evaluator eval, Environment env)
         throws FusionException
     {
-        SyntaxValue first = get(0);
+        SyntaxValue first = get(eval, 0);
         if (first instanceof SyntaxSymbol)
         {
             Binding binding = ((SyntaxSymbol) first).getBinding();

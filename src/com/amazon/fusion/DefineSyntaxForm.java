@@ -22,7 +22,9 @@ final class DefineSyntaxForm
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = check(stx);
+        final Evaluator eval = expander.getEvaluator();
+
+        SyntaxChecker check = check(eval, stx);
         if (! (expander.isTopLevelContext() || expander.isModuleContext()))
         {
             throw check.failure("Definition must be at top-level or module level");
@@ -30,7 +32,7 @@ final class DefineSyntaxForm
 
         int arity = check.arityAtLeast(3);
 
-        SyntaxValue[] children = stx.extract();
+        SyntaxValue[] children = stx.extract(eval);
 
         SyntaxSymbol identifier = check.requiredIdentifier(1);
 
@@ -58,7 +60,7 @@ final class DefineSyntaxForm
             throw check.failure("Too many subforms");
         }
 
-        SyntaxValue valueStx = stx.get(bodyPos);
+        SyntaxValue valueStx = stx.get(eval, bodyPos);
         children[bodyPos] = expander.expandExpression(env, valueStx);
 
         stx = SyntaxSexp.make(expander, stx.getLocation(), children);
@@ -74,10 +76,10 @@ final class DefineSyntaxForm
         throws FusionException
     {
         int arity = stx.size();
-        SyntaxValue valueSource = stx.get(arity-1);
+        SyntaxValue valueSource = stx.get(eval, arity-1);
         CompiledForm valueForm = eval.compile(env, valueSource);
 
-        SyntaxSymbol identifier = (SyntaxSymbol) stx.get(1);
+        SyntaxSymbol identifier = (SyntaxSymbol) stx.get(eval, 1);
         NsBinding binding = (NsBinding) identifier.getBinding();
         CompiledForm compiled =
             binding.compileDefineSyntax(eval, env, valueForm);
@@ -86,7 +88,7 @@ final class DefineSyntaxForm
             && eval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
         {
             // We have documentation. Sort of.
-            SyntaxString docString = (SyntaxString) stx.get(2);
+            SyntaxString docString = (SyntaxString) stx.get(eval, 2);
             BindingDoc doc = new BindingDoc(identifier.stringValue(),
                                             Kind.SYNTAX,
                                             null, // usage

@@ -99,7 +99,7 @@ final class Expander
             SyntaxSexp sexp = (SyntaxSexp) stx;
             if (sexp.size() == 0) break;
 
-            SyntaxValue first = sexp.get(0);
+            SyntaxValue first = sexp.get(myEval, 0);
             if (! (first instanceof SyntaxSymbol)) break;
 
             SyntaxSymbol maybeMacro = (SyntaxSymbol) first;

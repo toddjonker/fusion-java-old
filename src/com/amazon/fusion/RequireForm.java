@@ -28,7 +28,9 @@ final class RequireForm
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = check(stx);
+        final Evaluator eval = expander.getEvaluator();
+
+        SyntaxChecker check = check(eval, stx);
 
         if (!expander.isModuleContext() && !expander.isTopLevelContext())
         {
@@ -43,7 +45,8 @@ final class RequireForm
             String path = check.requiredText("module path", i);
             if (! ModuleIdentity.isValidModulePath(path))
             {
-                String message = "not a valid module path: " + stx.get(i);
+                String message =
+                    "not a valid module path: " + stx.get(eval, i);
                 throw check.failure(message);
             }
         }
@@ -64,7 +67,7 @@ final class RequireForm
 
         for (int i = 1; i < arity; i++)
         {
-            SyntaxValue moduleSpec = stx.get(i);
+            SyntaxValue moduleSpec = stx.get(eval, i);
 
             ids[i-1] = myModuleNameResolver.resolve(eval, baseModule,
                                                     moduleSpec, true);

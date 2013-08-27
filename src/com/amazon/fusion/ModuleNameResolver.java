@@ -106,7 +106,7 @@ final class ModuleNameResolver
     ModuleIdentity resolve(Evaluator eval, SyntaxSexp pathStx)
         throws FusionException
     {
-        SyntaxChecker check = new SyntaxChecker("module path", pathStx);
+        SyntaxChecker check = new SyntaxChecker(eval, "module path", pathStx);
         check.arityExact(2);
 
         String form = check.requiredIdentifier("symbol", 0).stringValue();

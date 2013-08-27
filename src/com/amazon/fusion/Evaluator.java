@@ -414,7 +414,7 @@ final class Evaluator
         CompiledForm[] forms = new CompiledForm[size];
         for (int i = from; i < to; i++)
         {
-            SyntaxValue form = source.get(i);
+            SyntaxValue form = source.get(this, i);
             forms[i - from] = compile(env, form);
         }
 

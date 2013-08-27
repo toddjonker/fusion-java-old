@@ -23,7 +23,7 @@ final class BeginForm
 
         for (int i = from; i < size; i++)
         {
-            SyntaxValue bodyForm = seq.get(i);
+            SyntaxValue bodyForm = seq.get(eval, i);
             subforms[i - from + 1] = bodyForm;
         }
 
@@ -44,6 +44,8 @@ final class BeginForm
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
+        final Evaluator eval = expander.getEvaluator();
+
         // At module context, we should've spliced this into the module body.
         assert ! (expander.isModuleContext());
         // TODO FUSION-33 handle splicing in top-level context
@@ -52,11 +54,11 @@ final class BeginForm
         int size = stx.size();
 
         SyntaxValue[] expandedChildren = new SyntaxValue[size];
-        expandedChildren[0] = stx.get(0);
+        expandedChildren[0] = stx.get(eval, 0);
 
         for (int i = 1; i < size; i++)
         {
-            SyntaxValue subform = stx.get(i);
+            SyntaxValue subform = stx.get(eval, i);
             expandedChildren[i] = expander.expandExpression(env, subform);
         }
         return SyntaxSexp.make(expander, stx.getLocation(), expandedChildren);
@@ -82,7 +84,7 @@ final class BeginForm
 
         if (size == 0) return CompiledVoid.SINGLETON;
 
-        if (size == 1) return eval.compile(env, stx.get(from));
+        if (size == 1) return eval.compile(env, stx.get(eval, from));
 
         CompiledForm[] subforms = eval.compile(env, stx, from, to);
         return new CompiledBegin(subforms);

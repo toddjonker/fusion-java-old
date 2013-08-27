@@ -41,7 +41,7 @@ final class SyntaxGetProc
                     {
                         return voidValue(eval);
                     }
-                    value = s.get((int) index);
+                    value = s.get(eval, (int) index);
                     break;
                 }
                 case STRUCT:

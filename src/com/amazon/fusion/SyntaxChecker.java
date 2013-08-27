@@ -8,11 +8,13 @@ package com.amazon.fusion;
  */
 class SyntaxChecker
 {
+    final Evaluator myEvaluator;
     final String myFormName;
     final SyntaxSequence myForm;
 
-    SyntaxChecker(String formName, SyntaxSequence form)
+    SyntaxChecker(Evaluator eval, String formName, SyntaxSequence form)
     {
+        myEvaluator = eval;
         myFormName = formName;
         myForm = form;
     }
@@ -70,7 +72,7 @@ class SyntaxChecker
     {
         try
         {
-            return myForm.get(argNum);
+            return myForm.get(myEvaluator, argNum);
         }
         catch (IndexOutOfBoundsException e) {}
 
@@ -208,7 +210,7 @@ class SyntaxChecker
         SubformChecker(SyntaxChecker base, String description,
                        SyntaxSequence form)
         {
-            super(description, form);
+            super(base.myEvaluator, description, form);
             myBaseForm = base;
         }
 

@@ -31,10 +31,12 @@ final class LambdaForm
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = check(stx);
+        final Evaluator eval = expander.getEvaluator();
+
+        SyntaxChecker check = check(eval, stx);
         int arity = check.arityAtLeast(3);
 
-        SyntaxValue[] children = stx.extract();
+        SyntaxValue[] children = stx.extract(eval);
 
         int bodyStart;
         SyntaxValue maybeDoc = children[2];
@@ -114,7 +116,8 @@ final class LambdaForm
     //========================================================================
 
 
-    private static String[] determineArgNames(SyntaxSexp argSexp)
+    private static String[] determineArgNames(Evaluator eval,
+                                              SyntaxSexp argSexp)
         throws FusionException
     {
         int size = argSexp.size();
@@ -123,7 +126,7 @@ final class LambdaForm
         String[] args = new String[size];
         for (int i = 0; i < size; i++)
         {
-            SyntaxSymbol identifier = (SyntaxSymbol) argSexp.get(i);
+            SyntaxSymbol identifier = (SyntaxSymbol) argSexp.get(eval, i);
             Binding binding = identifier.resolve();
             args[i] = binding.getName();
         }
@@ -139,7 +142,7 @@ final class LambdaForm
         int bodyStart;
 
         {
-            SyntaxValue maybeDoc = stx.get(2);
+            SyntaxValue maybeDoc = stx.get(eval, 2);
             if (maybeDoc.getType() == SyntaxValue.Type.STRING
                 && stx.size() > 3)
             {
@@ -159,16 +162,17 @@ final class LambdaForm
 
         CompiledForm body = BeginForm.compile(eval, env, stx, bodyStart);
 
-        boolean isRest = (stx.get(1) instanceof SyntaxSymbol);
+        boolean isRest = (stx.get(eval, 1) instanceof SyntaxSymbol);
         if (isRest)
         {
-            SyntaxSymbol identifier = (SyntaxSymbol) stx.get(1);
+            SyntaxSymbol identifier = (SyntaxSymbol) stx.get(eval, 1);
             Binding binding = identifier.getBinding();
             return new CompiledLambdaRest(doc, binding.getName(), body);
         }
         else
         {
-            String[] argNames = determineArgNames((SyntaxSexp) stx.get(1));
+            String[] argNames =
+                determineArgNames(eval, (SyntaxSexp) stx.get(eval, 1));
             switch (argNames.length)
             {
                 case 1:

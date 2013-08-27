@@ -32,7 +32,9 @@ final class LetForm
     SyntaxValue doExpandOnce(Expander expander, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = check(stx);
+        final Evaluator eval = expander.getEvaluator();
+
+        SyntaxChecker check = check(eval, stx);
         final int letExprSize = check.arityAtLeast(3);
 
         SyntaxSymbol loopName = determineLoopName(check);
@@ -60,16 +62,15 @@ final class LetForm
             subforms[i] = boundName;
         }
 
-        Evaluator eval = expander.getEvaluator();
         SyntaxSexp formals = SyntaxSexp.make(eval, subforms);
 
         // Build the lambda
         subforms = new SyntaxValue[letExprSize - bindingPos + 1];
-        subforms[0] = expander.getGlobalState().myKernelLambdaIdentifier;
+        subforms[0] = eval.getGlobalState().myKernelLambdaIdentifier;
         subforms[1] = formals;
         for (int i = bindingPos + 1; i < letExprSize; i++)
         {
-            SyntaxValue bodyForm = stx.get(i);
+            SyntaxValue bodyForm = stx.get(eval, i);
             subforms[i - bindingPos + 1] = bodyForm;
         }
         SyntaxSexp lambdaForm = SyntaxSexp.make(eval, subforms);
@@ -97,11 +98,11 @@ final class LetForm
         for (int i = 0; i < bindingForms.size(); i++)
         {
             // Already type- and arity-checked this above
-            SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
-            subforms[i + 1] = binding.get(1);
+            SyntaxSexp binding = (SyntaxSexp) bindingForms.get(eval, i);
+            subforms[i + 1] = binding.get(eval, 1);
         }
 
-        return SyntaxSexp.make(expander, stx.getLocation(), subforms);
+        return SyntaxSexp.make(eval, stx.getLocation(), subforms);
     }
 
     SyntaxSymbol determineLoopName(SyntaxChecker check)

@@ -21,7 +21,7 @@ final class AssertForm
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        check(stx).arityAtLeast(2);
+        check(expander, stx).arityAtLeast(2);
         return expandArgs(expander, env, stx);
     }
 
@@ -30,7 +30,7 @@ final class AssertForm
     CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxValue testFormSyntax = stx.get(1);
+        SyntaxValue testFormSyntax = stx.get(eval, 1);
         CompiledForm testForm = eval.compile(env, testFormSyntax);
 
         CompiledForm[] messageForms = eval.compile(env, stx, 2);

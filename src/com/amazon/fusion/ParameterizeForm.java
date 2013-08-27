@@ -25,7 +25,9 @@ final class ParameterizeForm
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = check(stx);
+        final Evaluator eval = expander.getEvaluator();
+
+        SyntaxChecker check = check(eval, stx);
         final int exprSize = check.arityAtLeast(3);
 
         SyntaxChecker checkBindings =
@@ -42,10 +44,10 @@ final class ParameterizeForm
 
             SyntaxSexp binding = (SyntaxSexp) checkPair.form();
 
-            SyntaxValue paramExpr = binding.get(0);
+            SyntaxValue paramExpr = binding.get(eval, 0);
             paramExpr = expander.expandExpression(env, paramExpr);
 
-            SyntaxValue boundExpr = binding.get(1);
+            SyntaxValue boundExpr = binding.get(eval, 1);
             boundExpr = expander.expandExpression(env, boundExpr);
 
             binding = SyntaxSexp.make(expander, binding.getLocation(),
@@ -58,13 +60,13 @@ final class ParameterizeForm
 
         // Expand the body expressions
         expandedForms = new SyntaxValue[exprSize];
-        expandedForms[0] = stx.get(0);
+        expandedForms[0] = stx.get(eval, 0);
         expandedForms[1] = bindingForms;
 
         // TODO FUSION-36 Should allow internal definitions
         for (int i = 2; i < exprSize; i++)
         {
-            SyntaxValue bodyExpr = stx.get(i);
+            SyntaxValue bodyExpr = stx.get(eval, i);
             expandedForms[i] = expander.expandExpression(env, bodyExpr);
         }
 
@@ -80,7 +82,7 @@ final class ParameterizeForm
     CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxSexp bindingForms = (SyntaxSexp) stx.get(1);
+        SyntaxSexp bindingForms = (SyntaxSexp) stx.get(eval, 1);
 
         final int numBindings = bindingForms.size();
 
@@ -89,12 +91,12 @@ final class ParameterizeForm
 
         for (int i = 0; i < numBindings; i++)
         {
-            SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
+            SyntaxSexp binding = (SyntaxSexp) bindingForms.get(eval, i);
 
-            SyntaxValue paramExpr = binding.get(0);
+            SyntaxValue paramExpr = binding.get(eval, 0);
             parameterForms[i] = eval.compile(env, paramExpr);
 
-            SyntaxValue valueExpr = binding.get(1);
+            SyntaxValue valueExpr = binding.get(eval, 1);
             valueForms[i] = eval.compile(env, valueExpr);
         }
 

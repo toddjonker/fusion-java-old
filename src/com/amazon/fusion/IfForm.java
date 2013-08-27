@@ -28,7 +28,7 @@ final class IfForm
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        check(stx).arityExact(4);
+        check(expander, stx).arityExact(4);
         return expandArgs(expander, env, stx);
     }
 
@@ -37,9 +37,9 @@ final class IfForm
     CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        CompiledForm testForm = eval.compile(env, stx.get(1));
-        CompiledForm thenForm = eval.compile(env, stx.get(2));
-        CompiledForm elseForm = eval.compile(env, stx.get(3));
+        CompiledForm testForm = eval.compile(env, stx.get(eval, 1));
+        CompiledForm thenForm = eval.compile(env, stx.get(eval, 2));
+        CompiledForm elseForm = eval.compile(env, stx.get(eval, 3));
 
         return new CompiledIf(testForm, thenForm, elseForm);
     }

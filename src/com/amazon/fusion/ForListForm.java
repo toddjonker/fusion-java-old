@@ -30,7 +30,9 @@ final class ForListForm
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxChecker check = check(stx);
+        final Evaluator eval = expander.getEvaluator();
+
+        SyntaxChecker check = check(eval, stx);
         check.arityAtLeast(2);
 
         SyntaxChecker checkBindings =
@@ -63,8 +65,9 @@ final class ForListForm
         {
             SyntaxSymbol name = boundNames[i].addWrap(localWrap);
             name.resolve();
+            SourceLocation location = bindingForms.get(eval, i).getLocation();
             expandedForms[i] = SyntaxSexp.make(expander,
-                                               bindingForms.get(i).getLocation(),
+                                               location,
                                                name,
                                                boundValues[i]);
         }
@@ -75,13 +78,13 @@ final class ForListForm
 
         // Prepare the body.
         expandedForms = new SyntaxValue[stx.size()];
-        expandedForms[0] = stx.get(0);
+        expandedForms[0] = stx.get(eval, 0);
         expandedForms[1] = bindingForms;
 
         // TODO FUSION-36 Should allow internal definitions
         for (int i = 2; i < stx.size(); i++)
         {
-            SyntaxValue bodyStx = stx.get(i);
+            SyntaxValue bodyStx = stx.get(eval, i);
             bodyStx = bodyStx.addWrap(localWrap);
             expandedForms[i] = expander.expandExpression(bodyEnv, bodyStx);
         }
@@ -98,7 +101,7 @@ final class ForListForm
     CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp forStx)
         throws FusionException
     {
-        SyntaxSequence bindingForms = (SyntaxSequence) forStx.get(1);
+        SyntaxSequence bindingForms = (SyntaxSequence) forStx.get(eval, 1);
 
         final int numBindings = bindingForms.size();
 
@@ -106,8 +109,8 @@ final class ForListForm
 
         for (int i = 0; i < numBindings; i++)
         {
-            SyntaxSexp binding = (SyntaxSexp) bindingForms.get(i);
-            SyntaxValue boundExpr = binding.get(1);
+            SyntaxSexp binding = (SyntaxSexp) bindingForms.get(eval, i);
+            SyntaxValue boundExpr = binding.get(eval, 1);
             valueForms[i] = eval.compile(env, boundExpr);
         }
 
