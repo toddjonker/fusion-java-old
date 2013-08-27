@@ -55,6 +55,7 @@ abstract class SyntaxSequence
      * were created.
      */
     private void pushAnyWraps()
+        throws FusionException
     {
         if (myWraps != null)  // We only have wraps when we have children.
         {
@@ -85,6 +86,7 @@ abstract class SyntaxSequence
     }
 
     Object[] unwrapChildren()
+        throws FusionException
     {
         pushAnyWraps();
         return myChildren;
@@ -93,6 +95,7 @@ abstract class SyntaxSequence
 
     @Override
     SyntaxSequence stripWraps(Evaluator eval)
+        throws FusionException
     {
         if (hasNoChildren()) return this;  // No children, no marks, all okay!
 
@@ -142,6 +145,7 @@ abstract class SyntaxSequence
      * @return a new array.
      */
     SyntaxValue[] extract()
+        throws FusionException
     {
         if (myChildren == null) return null;
 
@@ -155,6 +159,7 @@ abstract class SyntaxSequence
 
 
     void extract(List<SyntaxValue> list, int from)
+        throws FusionException
     {
         if (myChildren != null)
         {
@@ -168,6 +173,7 @@ abstract class SyntaxSequence
 
 
     final SyntaxValue get(int index)
+        throws FusionException
     {
         pushAnyWraps();
         return myChildren[index];
@@ -187,6 +193,7 @@ abstract class SyntaxSequence
 
     /** Creates a new sequence with this + that. */
     SyntaxSequence makeAppended(Evaluator eval, SyntaxSequence that)
+        throws FusionException
     {
         int thisLength = this.size();
         int thatLength = that.size();
@@ -217,6 +224,7 @@ abstract class SyntaxSequence
 
 
     SyntaxSequence makeSubseq(Evaluator eval, int from, int to)
+        throws FusionException
     {
         pushAnyWraps();
         SyntaxValue[] children =

@@ -303,6 +303,7 @@ final class ModuleForm
     }
 
     Binding firstBinding(SyntaxValue stx)
+        throws FusionException
     {
         if (stx instanceof SyntaxSexp)
         {

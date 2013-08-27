@@ -47,9 +47,10 @@ abstract class MacroForm
      * Not for use outside this hierarchy.
      *
      * @param stx the input syntax, including the macro identifier.
+     * @throws FusionException
      */
     abstract SyntaxValue doExpandOnce(Expander expander, SyntaxSexp stx)
-        throws SyntaxFailure;
+        throws SyntaxFailure, FusionException;
 
 
     @Override

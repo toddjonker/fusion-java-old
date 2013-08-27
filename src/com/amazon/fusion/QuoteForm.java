@@ -18,7 +18,7 @@ final class QuoteForm
 
     @Override
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
-        throws SyntaxFailure
+        throws FusionException
     {
         SyntaxChecker check = check(stx);
         check.arityExact(2);

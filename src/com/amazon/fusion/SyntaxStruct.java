@@ -85,6 +85,7 @@ final class SyntaxStruct
 
     @Override
     SyntaxStruct stripWraps(Evaluator eval)
+        throws FusionException
     {
         if (hasNoChildren()) return this;  // No children, no marks, all okay!
 

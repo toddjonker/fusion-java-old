@@ -69,7 +69,7 @@ final class DefineForm
 
     // (define (p f ...) d? b ...+) => (define p d? (lambda (f ...) b ...))
     SyntaxSexp expandImplicitLambda(Expander expander, SyntaxSexp stx)
-        throws SyntaxFailure
+        throws FusionException
     {
         SyntaxChecker defineChecker = check(stx);
         int defineArity = defineChecker.arityAtLeast(3);

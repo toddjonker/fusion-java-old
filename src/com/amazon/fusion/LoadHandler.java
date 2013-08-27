@@ -151,6 +151,7 @@ final class LoadHandler
     private SyntaxSexp
     wrapModuleIdentifierWithKernelBindings(Evaluator eval,
                                            SyntaxSexp moduleStx)
+        throws FusionException
     {
         SyntaxValue[] children = moduleStx.extract();
 

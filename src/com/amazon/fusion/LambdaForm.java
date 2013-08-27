@@ -97,7 +97,7 @@ final class LambdaForm
 
 
     private static SyntaxSymbol[] determineArgs(SyntaxChecker checkArgs)
-        throws SyntaxFailure
+        throws FusionException
     {
         SyntaxSexp argSexp = (SyntaxSexp) checkArgs.form();
         int size = argSexp.size();
@@ -115,6 +115,7 @@ final class LambdaForm
 
 
     private static String[] determineArgNames(SyntaxSexp argSexp)
+        throws FusionException
     {
         int size = argSexp.size();
         if (size == 0) return FusionUtils.EMPTY_STRING_ARRAY;

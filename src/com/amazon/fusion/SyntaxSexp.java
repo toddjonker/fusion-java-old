@@ -147,6 +147,7 @@ final class SyntaxSexp
      * sexp doesn't start with a symbol.
      */
     Binding firstBinding()
+        throws FusionException
     {
         if (size() != 0)
         {

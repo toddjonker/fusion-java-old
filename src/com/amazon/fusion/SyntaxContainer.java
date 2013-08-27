@@ -25,17 +25,20 @@ abstract class SyntaxContainer
      * Equivalent to size() == 0.  Computing size of {@link SyntaxStruct} is
      * expensive so we do this instead.
      */
-    abstract boolean hasNoChildren();
+    abstract boolean hasNoChildren()
+        throws FusionException;
 
     /**
      * Only called when this container has children.
      * @param wraps is not null.
      */
-    abstract SyntaxValue copyReplacingWraps(SyntaxWraps wraps);
+    abstract SyntaxValue copyReplacingWraps(SyntaxWraps wraps)
+        throws FusionException;
 
 
     @Override
     final SyntaxValue addWrap(SyntaxWrap wrap)
+        throws FusionException
     {
         // Don't bother if this is an empty container.
         if (hasNoChildren()) return this;
@@ -56,7 +59,8 @@ abstract class SyntaxContainer
      * Prepends a sequence of wraps onto our existing wraps.
      */
     @Override
-    SyntaxValue addWraps(SyntaxWraps wraps)
+    final SyntaxValue addWraps(SyntaxWraps wraps)
+        throws FusionException
     {
         // Don't bother if this is an empty container.
         if (hasNoChildren()) return this;

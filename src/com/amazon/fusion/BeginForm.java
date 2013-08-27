@@ -9,6 +9,7 @@ final class BeginForm
     extends SyntacticForm
 {
     static SyntaxSexp makeSyntax(Evaluator eval, SyntaxSequence seq, int from)
+        throws FusionException
     {
         SyntaxValue begin = eval.getGlobalState().myKernelBeginIdentifier;
         int size = seq.size();

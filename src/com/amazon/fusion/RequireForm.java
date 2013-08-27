@@ -26,7 +26,7 @@ final class RequireForm
 
     @Override
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
-        throws SyntaxFailure
+        throws FusionException
     {
         SyntaxChecker check = check(stx);
 

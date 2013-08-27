@@ -198,6 +198,7 @@ abstract class Namespace
      * namespace and of required modules.
      */
     SyntaxValue syntaxIntroduce(SyntaxValue source)
+        throws FusionException
     {
         // TODO there's a case where we are applying the same wraps that are
         // already on the source.  This happens when expand-ing (and maybe when

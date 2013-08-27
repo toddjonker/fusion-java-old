@@ -138,6 +138,7 @@ final class SyntaxSymbol
      * symbol.
      */
     SyntaxValue copyWrapsTo(SyntaxValue source)
+        throws FusionException
     {
         if (myWraps == null) return source;
         return source.addWraps(myWraps);

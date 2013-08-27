@@ -159,6 +159,7 @@ final class Syntax
     private static SyntaxValue applyContext(Evaluator eval,
                                             SyntaxSymbol context,
                                             SyntaxValue datum)
+        throws FusionException
     {
         if (context != null)
         {

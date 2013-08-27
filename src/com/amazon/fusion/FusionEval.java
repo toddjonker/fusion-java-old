@@ -168,6 +168,7 @@ final class FusionEval
      * namespace.
      */
     private static SyntaxValue enrich(Evaluator eval, SyntaxValue topLevelForm)
+        throws FusionException
     {
         Namespace ns = eval.findCurrentNamespace();
 

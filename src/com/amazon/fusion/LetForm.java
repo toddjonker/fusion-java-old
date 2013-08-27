@@ -30,7 +30,7 @@ final class LetForm
      */
     @Override
     SyntaxValue doExpandOnce(Expander expander, SyntaxSexp stx)
-        throws SyntaxFailure
+        throws FusionException
     {
         SyntaxChecker check = check(stx);
         final int letExprSize = check.arityAtLeast(3);
@@ -105,7 +105,7 @@ final class LetForm
     }
 
     SyntaxSymbol determineLoopName(SyntaxChecker check)
-        throws SyntaxFailure
+        throws FusionException
     {
         SyntaxValue maybeName =
             check.requiredForm("loop name or binding pairs", 1);

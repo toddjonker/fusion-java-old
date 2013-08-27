@@ -18,7 +18,7 @@ final class UseForm
 
     @Override
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
-        throws SyntaxFailure
+        throws FusionException
     {
         check(stx).requiredForm("module spec", 1);
         return stx;
