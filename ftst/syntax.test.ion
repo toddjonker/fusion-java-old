@@ -51,6 +51,16 @@
 (check = "unwrap"    (syntax_to_datum (quote_syntax "unwrap")))
 // TODO test blob, clob
 
+(check ion_equals (syntax_to_datum (quote_syntax a::null.sexp))
+  (quote a::null.sexp))
+(check ion_equals (syntax_to_datum (quote_syntax a::()))
+  (quote a::()))
+(check ion_equals (syntax_to_datum (quote_syntax a::(b)))
+  (quote a::(b)))
+(check ion_equals (syntax_to_datum (quote_syntax a::(b c)))
+  (quote a::(b c)))
+
+
 (lets [(stx (quote_syntax [a, 2])),
        (unwrapped (syntax_to_datum stx))]
   (check_equal (quote [a, 2]) unwrapped ""))
@@ -82,13 +92,19 @@
     (check_identifier (quote a) (list_ref unwrapped 0))
     (check = 2 u1)))
 
-(lets [(stx (quote_syntax (a 2))),
+(check ion_equals (syntax_unwrap (quote_syntax a::null.sexp))
+  (quote a::null.sexp))
+(check ion_equals (syntax_unwrap (quote_syntax a::()))
+  (quote a::()))
+
+(lets [(stx (quote_syntax a::(b 2))),
        (unwrapped (syntax_unwrap stx))]
+  (check_annotations unwrapped ["a"])
   (check_true (is_pair unwrapped))
   (check_true (is_identifier (head unwrapped)))
   (let [(u0 (syntax_unwrap (head unwrapped))),
         (u1 (syntax_unwrap (tail unwrapped)))]
-    (check = (quote a) u0)
+    (check = (quote b) u0)
     (check_true (is_sexp u1))
     (check = 1 (size u1))
     (check = 2 (syntax_unwrap (head u1)))))

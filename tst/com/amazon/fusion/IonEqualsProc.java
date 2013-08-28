@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -16,6 +16,7 @@ final class IonEqualsProc
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     Object doApply(Evaluator eval, Object arg0, Object arg1)
         throws FusionException
     {

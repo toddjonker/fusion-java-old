@@ -14,6 +14,10 @@
 (check_annotations (quote a::b::true) ["a", "b"])
 (check_annotations (quote [a::true]) [])
 
+(check_annotations (quote a::null.sexp) ["a"])
+(check_annotations (quote a::()) ["a"])
+(check_annotations (quote a::(b)) ["a"])
+
 
 //==========================================================================
 // is_null_null
