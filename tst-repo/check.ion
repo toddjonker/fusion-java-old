@@ -216,8 +216,7 @@ Ensures that (OP VAL1 VAL2) is truthy.
                           "expected " (unsyntax exn_tag) " failure, got "
                           e " exception"))
                     (true (raise_check_failure (quote_syntax (unsyntax stx))
-                            "expected " (unsyntax exn_tag) " failure, got "
-                            e " exception")))))))))))
+                            "expected " (unsyntax exn_tag) " failure")))))))))))
 
   (defpub_syntax check_arg_exn
     (make_exn_checker "arg"))
