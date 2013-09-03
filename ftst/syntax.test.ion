@@ -61,6 +61,15 @@
   (quote a::(b c)))
 
 
+(check ion_equals
+  (syntax_to_datum (quasisyntax a::(b)))
+  (quote a::(b)) "")
+(check ion_equals
+  (syntax_to_datum (quasisyntax a::(b (unsyntax (quote_syntax c)))))
+  (quote a::(b c)) "")
+
+
+
 (lets [(stx (quote_syntax [a, 2])),
        (unwrapped (syntax_to_datum stx))]
   (check_equal (quote [a, 2]) unwrapped ""))

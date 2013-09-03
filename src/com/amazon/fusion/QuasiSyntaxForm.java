@@ -87,7 +87,16 @@ final class QuasiSyntaxForm
                     {
                         SyntaxValue subform = children[1];
                         children[1] = expander.expandExpression(env, subform);
-                        stx = SyntaxSexp.make(expander, stx.getLocation(),
+
+                        // TODO accept annotations on unsyntax form?
+                        if (stx.getAnnotations().length != 0)
+                        {
+                            String message =
+                                "Annotations not accepted on unsyntax form";
+                            throw check(eval, stx).failure(message);
+                        }
+
+                        stx = SyntaxSexp.make(eval, stx.getLocation(),
                                               children);
                         return stx;
                     }
@@ -109,7 +118,8 @@ final class QuasiSyntaxForm
             children[i] = expand(expander, env, subform, depth);
         }
 
-        stx = SyntaxSexp.make(expander, stx.getLocation(), children);
+        stx = SyntaxSexp.make(eval, children,
+                              stx.getAnnotations(), stx.getLocation());
         return stx;
     }
 
@@ -148,6 +158,7 @@ final class QuasiSyntaxForm
         int size = stx.size();
         if (size == 0) return new CompiledQuoteSyntax(stx);
 
+        // Look for an (unsyntax ...) form
         if (size == 2)
         {
             SyntaxValue first = stx.get(eval, 0);
@@ -162,6 +173,7 @@ final class QuasiSyntaxForm
                     {
                         if (depth == 0)
                         {
+                            assert stx.getAnnotations().length == 0;
                             SyntaxValue unquotedSyntax = stx.get(eval, 1);
                             CompiledForm unquotedForm =
                                 eval.compile(env, unquotedSyntax);
@@ -193,7 +205,9 @@ final class QuasiSyntaxForm
             return new CompiledQuoteSyntax(stx);
         }
 
-        return new CompiledQuasiSyntaxSexp(stx.getLocation(), children);
+        return new CompiledQuasiSyntaxSexp(stx.getLocation(),
+                                           stx.getAnnotations(),
+                                           children);
     }
 
 
@@ -204,13 +218,16 @@ final class QuasiSyntaxForm
         implements CompiledForm
     {
         private final SourceLocation myLocation;
+        private final String[]       myAnnotations;
         private final CompiledForm[] myChildForms;
 
         CompiledQuasiSyntaxSexp(SourceLocation location,
+                                String[]       annotations,
                                 CompiledForm[] childForms)
         {
-            myLocation   = location;
-            myChildForms = childForms;
+            myLocation    = location;
+            myAnnotations = annotations;
+            myChildForms  = childForms;
         }
 
         @Override
@@ -224,10 +241,10 @@ final class QuasiSyntaxForm
                 Object child = eval.eval(store, myChildForms[i]);
 
                 // This cast is safe because children are either quote-syntax
-                // or unquote, which always return syntax.
+                // or unsyntax, which always return syntax.
                 children[i] = (SyntaxValue) child;
             }
-            return SyntaxSexp.make(eval, myLocation, children);
+            return SyntaxSexp.make(eval, children, myAnnotations, myLocation);
         }
     }
 
