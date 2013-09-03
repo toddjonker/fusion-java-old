@@ -388,19 +388,17 @@ final class FusionSexp
         {
             int size = 1;
             ImmutablePair p = this;
-            try
+            while (p.myTail instanceof ImmutablePair)
             {
-                while (p.myTail instanceof ImmutablePair)
-                {
-                    p = (ImmutablePair) p.myTail;
-                    size++;
-                }
+                p = (ImmutablePair) p.myTail;
+                size++;
+            }
+            if (p.myTail instanceof EmptySexp)
+            {
                 return size;
             }
-            catch (ClassCastException e)
-            {
-                throw new ArgTypeFailure("size", "proper sexp", 0, this);
-            }
+
+            throw new ArgTypeFailure("size", "proper sexp", 0, this);
         }
 
         @Override

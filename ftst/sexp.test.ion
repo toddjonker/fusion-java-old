@@ -1,9 +1,10 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
-(use check)
-(use '/fusion/ion')
-(use '/fusion/list')
-(use '/fusion/sexp')
+(require
+  "/check"
+  "/fusion/ion"
+  "/fusion/list"
+  "/fusion/sexp")
 
 
 (define valNull  (quote null.sexp))
@@ -66,10 +67,6 @@
 (check_true (is_sexp (pair 1 2)))
 (check = (head (pair 1 2)) 1)
 (check = (tail (pair 1 2)) 2)
-(check = (size (pair 1 2)) 1)
-
-(check = (size (pair 1 (pair 2 3))) 2)
-(check = (size (pair 1 (pair 2 (quote ())))) 2)
 
 
 //==========================================================================
@@ -148,3 +145,12 @@
   (check_equal v [3, 4] "do side effects"))
 
 
+//==========================================================================
+// size
+
+(check = (size (quote ())) 0)
+(check = (size (sexp 1)) 1)
+(check = (size (sexp 1 51)) 2)
+(check = (size (pair 1 (pair 2 (quote ())))) 2)
+
+(check_arg_exn (size (pair 1 215)))

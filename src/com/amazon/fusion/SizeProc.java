@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -11,7 +11,8 @@ final class SizeProc
     {
         //    "                                                                               |
         super("Returns the number of elements in the `collection`.\n" +
-              "The size of `null.list` (_etc._) is zero.",
+              "The size of `null.list` (_etc._) is zero.  If `collection` is an improper sexp,\n" +
+              "an exception is thrown.",
               "collection");
     }
 
