@@ -17,15 +17,17 @@ final class SyntaxList
     /**
      * Instance will be {@link #isNullValue()} if children is null.
      *
+     * @param anns must not be null.
+     * This method takes ownership of the array; the array and its elements
+     * must not be changed by calling code afterwards!
      * @param children the children of the new list.
      * This method takes ownership of the array; the array and its elements
      * must not be changed by calling code afterwards!
-     * @param anns must not be null.
      */
-    private SyntaxList(SyntaxValue[] children, String[] anns,
-                       SourceLocation loc)
+    private SyntaxList(SourceLocation loc, String[] anns,
+                       SyntaxValue[] children)
     {
-        super(children, anns, loc);
+        super(loc, anns, children);
     }
 
     /** Copy constructor shares children and replaces unpushed wraps. */
@@ -37,16 +39,18 @@ final class SyntaxList
 
     /**
      * Instance will be {@link #isNullValue()} if children is null.
-
+     *
+     * @param anns must not be null.
+     * This method takes ownership of the array; the array and its elements
+     * must not be changed by calling code afterwards!
      * @param children the children of the new list.
      * This method takes ownership of the array; the array and its elements
      * must not be changed by calling code afterwards!
-     * @param anns must not be null.
      */
-    static SyntaxList make(SyntaxValue[] children, String[] anns,
-                           SourceLocation loc)
+    static SyntaxList make(SourceLocation loc, String[] anns,
+                           SyntaxValue[] children)
     {
-        return new SyntaxList(children, anns, loc);
+        return new SyntaxList(loc, anns, children);
     }
 
 
@@ -59,7 +63,7 @@ final class SyntaxList
      */
     static SyntaxList make(SourceLocation loc, SyntaxValue... children)
     {
-        return new SyntaxList(children, EMPTY_STRING_ARRAY, loc);
+        return new SyntaxList(loc, EMPTY_STRING_ARRAY, children);
     }
 
 
@@ -79,11 +83,11 @@ final class SyntaxList
 
     @Override
     SyntaxList makeSimilar(Evaluator eval,
-                           SyntaxValue[] children,
+                           SourceLocation loc,
                            String[] anns,
-                           SourceLocation loc)
+                           SyntaxValue[] children)
     {
-        return new SyntaxList(children, anns, loc);
+        return new SyntaxList(loc, anns, children);
     }
 
 

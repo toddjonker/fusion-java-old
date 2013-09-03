@@ -25,12 +25,14 @@ abstract class SyntaxSequence
     /**
      * Instance will be {@link #isNullValue()} if children is null.
      *
+     * @param anns must not be null.
+     * This method takes ownership of the array; the array and its elements
+     * must not be changed by calling code afterwards!
      * @param children the children of the new list.
      * This method takes ownership of the array; the array and its elements
      * must not be changed by calling code afterwards!
-     * @param anns must not be null.
      */
-    SyntaxSequence(SyntaxValue[] children, String[] anns, SourceLocation loc)
+    SyntaxSequence(SourceLocation loc, String[] anns, SyntaxValue[] children)
     {
         super(anns, loc, null);
         myChildren = children;
@@ -114,7 +116,7 @@ abstract class SyntaxSequence
 
         if (! mustCopy) return this;
 
-        return makeSimilar(eval, newChildren, getAnnotations(), getLocation());
+        return makeSimilar(eval, getLocation(), getAnnotations(), newChildren);
     }
 
 
@@ -184,11 +186,13 @@ abstract class SyntaxSequence
      * Creates a new sequence of the same type, with the children.
      *
      * @param anns must not be null.
+     * This method takes ownership of the array; the array and its elements
+     * must not be changed by calling code afterwards!
      */
     abstract SyntaxSequence makeSimilar(Evaluator eval,
-                                        SyntaxValue[] children,
+                                        SourceLocation loc,
                                         String[] anns,
-                                        SourceLocation loc);
+                                        SyntaxValue[] children);
 
 
     /** Creates a new sequence with this + that. */
@@ -219,7 +223,7 @@ abstract class SyntaxSequence
             }
         }
 
-        return makeSimilar(eval, children, EMPTY_STRING_ARRAY, null);
+        return makeSimilar(eval, null, EMPTY_STRING_ARRAY, children);
     }
 
 
@@ -229,7 +233,7 @@ abstract class SyntaxSequence
         pushAnyWraps(eval);
         SyntaxValue[] children =
             (myChildren == null ? null : copyOfRange(myChildren, from, to));
-        return makeSimilar(eval, children, EMPTY_STRING_ARRAY, null);
+        return makeSimilar(eval, null, EMPTY_STRING_ARRAY, children);
     }
 
 

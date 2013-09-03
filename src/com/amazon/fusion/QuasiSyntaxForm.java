@@ -118,8 +118,8 @@ final class QuasiSyntaxForm
             children[i] = expand(expander, env, subform, depth);
         }
 
-        stx = SyntaxSexp.make(eval, children,
-                              stx.getAnnotations(), stx.getLocation());
+        stx = SyntaxSexp.make(eval, stx.getLocation(), stx.getAnnotations(),
+                              children);
         return stx;
     }
 
@@ -244,7 +244,7 @@ final class QuasiSyntaxForm
                 // or unsyntax, which always return syntax.
                 children[i] = (SyntaxValue) child;
             }
-            return SyntaxSexp.make(eval, children, myAnnotations, myLocation);
+            return SyntaxSexp.make(eval, myLocation, myAnnotations, children);
         }
     }
 

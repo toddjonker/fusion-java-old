@@ -117,12 +117,12 @@ final class Syntax
             case LIST:
             {
                 SyntaxValue[] value = readSequence(eval, source, name);
-                return SyntaxList.make(value, anns, loc);
+                return SyntaxList.make(loc, anns, value);
             }
             case SEXP:
             {
                 SyntaxValue[] value = readSequence(eval, source, name);
-                return SyntaxSexp.make(eval, value, anns, loc);
+                return SyntaxSexp.make(eval, loc, anns, value);
             }
             case STRUCT:
             {

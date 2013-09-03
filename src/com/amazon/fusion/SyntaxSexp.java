@@ -22,15 +22,17 @@ final class SyntaxSexp
     /**
      * Instance will be {@link #isNullValue()} if children is null.
      *
+     * @param anns must not be null.
+     * This method takes ownership of the array; the array and its elements
+     * must not be changed by calling code afterwards!
      * @param children the children of the new sexp.
      * This method takes ownership of the array; the array and its elements
      * must not be changed by calling code afterwards!
-     * @param anns must not be null.
      */
-    private SyntaxSexp(Evaluator eval, SyntaxValue[] children, String[] anns,
-                       SourceLocation loc)
+    private SyntaxSexp(Evaluator eval, SourceLocation loc, String[] anns,
+                       SyntaxValue[] children)
     {
-        super(children, anns, loc);
+        super(loc, anns, children);
         assert eval != null;
     }
 
@@ -43,18 +45,20 @@ final class SyntaxSexp
 
     /**
      * Instance will be {@link #isNullValue()} if children is null.
-
+     *
+     * @param anns must not be null.
+     * This method takes ownership of the array; the array and its elements
+     * must not be changed by calling code afterwards!
      * @param children the children of the new sexp.
      * This method takes ownership of the array; the array and its elements
      * must not be changed by calling code afterwards!
-     * @param anns must not be null.
      */
     static SyntaxSexp make(Evaluator eval,
-                           SyntaxValue[] children,
+                           SourceLocation loc,
                            String[] anns,
-                           SourceLocation loc)
+                           SyntaxValue[] children)
     {
-        return new SyntaxSexp(eval, children, anns, loc);
+        return new SyntaxSexp(eval, loc, anns, children);
     }
 
     /**
@@ -66,7 +70,7 @@ final class SyntaxSexp
      */
     static SyntaxSexp make(Evaluator eval, SyntaxValue... children)
     {
-        return new SyntaxSexp(eval, children, EMPTY_STRING_ARRAY, null);
+        return new SyntaxSexp(eval, null, EMPTY_STRING_ARRAY, children);
     }
 
     /**
@@ -79,7 +83,7 @@ final class SyntaxSexp
     static SyntaxSexp make(Evaluator eval, SourceLocation loc,
                            SyntaxValue... children)
     {
-        return new SyntaxSexp(eval, children, EMPTY_STRING_ARRAY, loc);
+        return new SyntaxSexp(eval, loc, EMPTY_STRING_ARRAY, children);
     }
 
     /**
@@ -91,8 +95,8 @@ final class SyntaxSexp
      */
     static SyntaxSexp make(Expander expander, SyntaxValue... children)
     {
-        return new SyntaxSexp(expander.getEvaluator(), children,
-                              EMPTY_STRING_ARRAY, null);
+        return new SyntaxSexp(expander.getEvaluator(), null,
+                              EMPTY_STRING_ARRAY, children);
     }
 
     /**
@@ -105,8 +109,8 @@ final class SyntaxSexp
     static SyntaxSexp make(Expander expander, SourceLocation loc,
                            SyntaxValue... children)
     {
-        return new SyntaxSexp(expander.getEvaluator(), children,
-                              EMPTY_STRING_ARRAY, loc);
+        return new SyntaxSexp(expander.getEvaluator(), loc,
+                              EMPTY_STRING_ARRAY, children);
     }
 
 
@@ -125,11 +129,11 @@ final class SyntaxSexp
 
 
     @Override
-    SyntaxSexp makeSimilar(Evaluator eval, SyntaxValue[] children,
+    SyntaxSexp makeSimilar(Evaluator eval, SourceLocation loc,
                            String[] anns,
-                           SourceLocation loc)
+                           SyntaxValue[] children)
     {
-        return new SyntaxSexp(eval, children, anns, loc);
+        return new SyntaxSexp(eval, loc, anns, children);
     }
 
     @Override

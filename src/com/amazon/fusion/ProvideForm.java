@@ -77,7 +77,8 @@ final class ProvideForm
 
         SyntaxValue[] children =
             expanded.toArray(new SyntaxValue[expanded.size()]);
-        return SyntaxSexp.make(eval, children, form.getAnnotations(), form.getLocation());
+        return SyntaxSexp.make(eval, form.getLocation(), form.getAnnotations(),
+                               children);
     }
 
     private void expandProvideId(Namespace moduleNamespace,

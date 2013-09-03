@@ -87,8 +87,8 @@ final class TopForm
         }
 
         children[1] = id;
-        return SyntaxSexp.make(eval, children,
-                               stx.getAnnotations(), stx.getLocation());
+        return SyntaxSexp.make(eval, stx.getLocation(), stx.getAnnotations(),
+                               children);
     }
 
     @Override

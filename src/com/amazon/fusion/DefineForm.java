@@ -55,8 +55,10 @@ final class DefineForm
 
             SyntaxValue[] sig = ((SyntaxSexp) first).extract(eval);
             sig[0] = ns.predefine(identifier, formForErrors);
-            children[1] = SyntaxSexp.make(eval, sig, first.getAnnotations(),
-                                          first.getLocation());
+            children[1] = SyntaxSexp.make(eval,
+                                          first.getLocation(),
+                                          first.getAnnotations(),
+                                          sig);
         }
         else
         {
@@ -64,8 +66,8 @@ final class DefineForm
             children[1] = ns.predefine(identifier, formForErrors);
         }
 
-        return SyntaxSexp.make(eval, children, defineStx.getAnnotations(),
-                               defineStx.getLocation());
+        return SyntaxSexp.make(eval, defineStx.getLocation(), defineStx.getAnnotations(),
+                               children);
     }
 
     // (define (p f ...) d? b ...+) => (define p d? (lambda (f ...) b ...))
