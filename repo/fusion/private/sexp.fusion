@@ -28,11 +28,11 @@ Returns the first element of `sexp`.  If `sexp` is a pair, the result is its
 head slot.  If `sexp` isn't a pair (that is, it's zero-length or `null.sexp`),
 the result is void.
       '''
-      (unless (is_sexp sexp)
-        (raise_argument_error "head" "sexp" 0 sexp))
-      (if (= 0 (size sexp))
-        (void)
-        (unsafe_pair_head sexp))))
+      (if (is_pair sexp)
+        (unsafe_pair_head sexp)
+        (if (is_sexp sexp)
+          (void)
+          (raise_argument_error "head" "sexp" 0 sexp)))))
 
 
   (defpub tail
@@ -42,10 +42,10 @@ Returns the elements _after_ the first element of `sexp`.  If `sexp` is a
 pair, the result is its tail slot.  If `sexp` isn't a pair (that is, it's
 zero-length or `null.sexp`), the result is void.
       '''
-      (unless (is_sexp sexp)
-        (raise_argument_error "tail" "sexp" 0 sexp))
-      (if (= 0 (size sexp))
-        (void)
-        (unsafe_pair_tail sexp))))
+      (if (is_pair sexp)
+        (unsafe_pair_tail sexp)
+        (if (is_sexp sexp)
+          (void)
+          (raise_argument_error "tail" "sexp" 0 sexp)))))
 
 )
