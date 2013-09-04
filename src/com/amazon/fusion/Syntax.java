@@ -178,7 +178,7 @@ final class Syntax
     {
         if (isSyntax(eval, datum))
         {
-            // TODO Should strip location and properties
+            // TODO FUSION-183 Should strip location and properties?
             //      Well, probably not, that throws away existing
             //      context when called from datum_to_syntax
             return ((SyntaxValue) datum).stripWraps(eval);
@@ -326,7 +326,7 @@ final class Syntax
                                      SyntaxSymbol context)
         throws FusionException
     {
-        // TODO Should strip location and properties  XXX really?
+        // TODO FUSION-183 Strip location and properties?
         datum = datum.stripWraps(eval);
         return applyContext(eval, context, datum);
     }
