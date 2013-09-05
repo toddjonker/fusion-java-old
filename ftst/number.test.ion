@@ -5,6 +5,16 @@
   "/fusion/number")
 
 
+// Here's the bindings we expect to be available:
+(module check_bindings '/fusion/number'
+  [ '*', '+', '-', '/',
+    '<', '<=', '=', '>=', '>',
+    is_decimal, is_float, is_int,
+    ceiling, floor,
+    int_to_string, string_to_int,
+  ])
+
+
 //============================================================================
 // division
 

@@ -10,6 +10,9 @@ Fusion timestamp values are identical to Ion timestamps.
 
   (require "/fusion/experimental/defines")
 
+  // Pass-through bindings from kernel
+  (provide is_timestamp)
+
   (require "/fusion/private/compare")
   (provide < <= = >= >)
 

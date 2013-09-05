@@ -1,7 +1,15 @@
 // Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
 
-(use check)
-(use '/fusion/string')
+(require
+  "/check"
+  "/fusion/string")
+
+
+// Here's the bindings we expect to be available:
+(module check_bindings '/fusion/string'
+  [ is_string,
+    string_append, string_to_lower, string_to_symbol, string_to_upper,
+  ])
 
 
 (check = (string_append ""   "")  "")

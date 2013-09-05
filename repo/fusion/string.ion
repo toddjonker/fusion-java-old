@@ -6,6 +6,8 @@
 Operations for strings.
   '''
 
+  // Pass-through bindings from kernel
+  (provide is_string)
 
   (require "/fusion/experimental/defines")
 
