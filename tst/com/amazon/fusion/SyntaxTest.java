@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -12,7 +12,7 @@ public class SyntaxTest
     public void requires()
         throws Exception
     {
-        topLevel().requireModule("/fusion/syntax");
+        topLevel().requireModule("/fusion/experimental/syntax");
     }
 
 

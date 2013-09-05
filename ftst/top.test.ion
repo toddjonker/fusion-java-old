@@ -1,6 +1,8 @@
 // Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
 
-(require "/check" "/fusion/eval")
+(require
+  "/check"
+  "/fusion/eval")
 
 
 (define my_top "at-top")
@@ -32,7 +34,7 @@
 
 
 (module M '/fusion/base'
-  (require "/check" "/fusion/syntax")
+  (require "/check" "/fusion/experimental/syntax")
   (define dummy "Force my_top here to have different address from top-level")
   (define my_top "in-M")
 

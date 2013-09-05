@@ -44,7 +44,7 @@
 
 
 (module reftrans3 '/fusion/base'
-  (require "/fusion/syntax")
+  (require "/fusion/experimental/syntax")
 
   // This tests that we can use 'my3' when it's not exported.
   (define my3 3)

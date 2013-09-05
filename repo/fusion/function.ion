@@ -9,7 +9,7 @@ Higher-order procedure combinators.
 
   (require
     "/fusion/experimental/defines"
-    "/fusion/syntax")
+    "/fusion/experimental/syntax")
 
 
   (defpub identity

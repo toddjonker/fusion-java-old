@@ -11,10 +11,10 @@ code.
 
   (require
     "/fusion/experimental/defines"
+    "/fusion/experimental/syntax"
     "/fusion/function"
     "/fusion/list"
-    "/fusion/sequence"
-    "/fusion/syntax")
+    "/fusion/sequence")
 
   (define_syntax rem
     (lambda (stx) (quote_syntax (begin))))

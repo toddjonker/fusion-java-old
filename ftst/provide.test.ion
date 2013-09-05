@@ -1,6 +1,8 @@
 // Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
 
-(require "/check" "/fusion/eval")
+(require
+  "/check"
+  "/fusion/eval")
 
 
 //============================================================================
@@ -48,7 +50,7 @@
 (define top "at-top")
 
 (module M2 '/fusion/base'
-  (require "/fusion/syntax")
+  (require "/fusion/experimental/syntax")
   (define_syntax deftop
     (lambda (stx)
       (quasisyntax

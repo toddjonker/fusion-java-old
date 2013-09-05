@@ -50,7 +50,7 @@
 (define top "at-top")
 
 (module M2 racket
-;  (require "/fusion/syntax")
+;  (require "/fusion/experimental/syntax")
   (define-syntax deftop
     (lambda (stx)
       (quasisyntax

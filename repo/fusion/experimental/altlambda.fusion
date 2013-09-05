@@ -3,7 +3,8 @@
 // Alternative syntaxes for lambda
 
 (module altlambda '/fusion/base'
-  (require "/fusion/syntax")
+
+  (require "/fusion/experimental/syntax")
 
   //  (| x ... | body ...)  ->  (lambda (x ...) body ...)
 

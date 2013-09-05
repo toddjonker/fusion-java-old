@@ -2,7 +2,7 @@
 
 (module defines '/fusion/private/kernel'
 
-  (require "/fusion/syntax")
+  (require "/fusion/experimental/syntax")
 
   (provide defpub defpub_j defpub_syntax defpub_j_syntax)
 

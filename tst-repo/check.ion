@@ -6,12 +6,12 @@
     "/fusion/eval"
     "/fusion/exception"
     "/fusion/experimental/defines"
+    "/fusion/experimental/syntax"
     "/fusion/ffi/java"
     "/fusion/ion"
     "/fusion/list"
     "/fusion/sexp"
-    "/fusion/string"
-    "/fusion/syntax")
+    "/fusion/string")
 
   (provide assert)
 

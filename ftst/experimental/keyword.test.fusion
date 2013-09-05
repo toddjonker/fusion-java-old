@@ -7,8 +7,8 @@
 (require
   "/check"
   "/fusion/eval"
-  "/fusion/string"
-  "/fusion/syntax")
+  "/fusion/experimental/syntax"
+  "/fusion/string")
 
 // Keywords can't be used as argument names
 (check_compile_exn

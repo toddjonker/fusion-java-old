@@ -5,9 +5,9 @@
 
   (require
     "/fusion/experimental/defines"
+    "/fusion/experimental/syntax"
     "/fusion/number"
-    "/fusion/private/compare"
-    "/fusion/syntax")
+    "/fusion/private/compare")
 
 
 /*

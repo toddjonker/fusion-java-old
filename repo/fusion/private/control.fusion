@@ -4,8 +4,8 @@
 
   (require
     "/fusion/experimental/defines"
+    "/fusion/experimental/syntax"
     "/fusion/private/compare"
-    "/fusion/syntax"
     "/fusion/void")
 
 

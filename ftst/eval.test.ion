@@ -1,10 +1,11 @@
 // Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
-(use 'check')
-(use '/fusion/eval')
-(use '/fusion/namespace')
-(use '/fusion/parameter')
-(use '/fusion/syntax')
+(require
+  "/check"
+  "/fusion/eval"
+  "/fusion/experimental/syntax"
+  "/fusion/namespace"
+  "/fusion/parameter")
 
 
 (define ns (make_namespace_with_language "/grain")) // In test repo
