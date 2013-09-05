@@ -1,6 +1,24 @@
 // Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
+/*                       *** WARNING ***
+ *
+ * There may be customer dependencies on this module!  See FUSION-184
+ */
+
+
 (module syntax '/fusion/private/kernel'
+
+  '''
+Experimental operators for macros and syntax manipulation.
+
+<!-- FUSION-185 This comment forces FusionDoc to stop the one-liner here. -->
+
+## WARNING
+
+This module contains unstable, experimental features.
+There is **NO SUPPORT** for this module.
+  '''
+
 
   // This is split into two files because the compiler requires that built-in
   // syntactic forms must be imported from another module.

@@ -11,12 +11,12 @@
   '''
 Experimental operators for decimal arithmetic.
 
+<!-- FUSION-185 This comment forces FusionDoc to stop the one-liner here. -->
+
 ## WARNING
 
 This module contains unstable, experimental features.
 There is **NO SUPPORT** for this module.
-
-[FUSION-174]: issue:FUSION-174
   '''
 
 
