@@ -13,11 +13,13 @@
     (with_ion_from_file "tst-data/hello.ion"
       (lambda ()
         (check = "hello" (read))
-        (check_void (read))))
+        (check_true (is_eof (read)))))
     (check = 2 (read))
     (check = 3 (read))
-    (check_void (read))))
+    (check_true (is_eof (read)))))
 
 // A nice shortcut for reading a single value.
 (check = "hello"
   (with_ion_from_file "tst-data/hello.ion" read))
+
+(check_true (is_eof eof))

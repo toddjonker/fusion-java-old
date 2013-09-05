@@ -34,11 +34,13 @@ There are three "styles" of output:
   '''
 
 
-  (require "/fusion/base" "/fusion/experimental/defines")
+  (require
+    "/fusion/base"
+    "/fusion/experimental/defines")
 
 
   // Pass-through bindings from /fusion/private/kernel
-  (provide current_directory)
+  (provide current_directory eof)
   // Note that we don't currently provide current_ion_reader since the name and
   // semantics are still a bit shady.
 
@@ -48,6 +50,8 @@ There are three "styles" of output:
 
   (defpub read
     (java_new "com.amazon.fusion.ReadProc" current_ion_reader))
+
+  (defpub_j is_eof  "com.amazon.fusion.FusionIo$IsEofProc")
 
   (defpub_j display "com.amazon.fusion.FusionWrite$DisplayProc")
   (defpub_j ionize  "com.amazon.fusion.FusionWrite$IonizeProc")

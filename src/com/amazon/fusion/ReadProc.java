@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.fusion.FusionIo.eof;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonValue;
 
@@ -15,7 +15,7 @@ final class ReadProc
     public ReadProc(Object currentIonReaderParam)
     {
         //    "                                                                               |
-        super("Reads an Ion value from the current Ion input stream.  Returns void when\n" +
+        super("Reads an Ion value from the current Ion input stream.  Returns `eof` when\n" +
               "there's no more data.");
 
         myCurrentIonReaderParam = (DynamicParameter) currentIonReaderParam;
@@ -37,7 +37,7 @@ final class ReadProc
         }
         else
         {
-            result = voidValue(eval);
+            result = eof(eval);
         }
 
         return result;

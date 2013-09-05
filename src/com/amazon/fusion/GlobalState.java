@@ -22,6 +22,7 @@ final class GlobalState
     static final String BEGIN           = "begin";
     static final String DEFINE          = "define";
     static final String DEFINE_SYNTAX   = "define_syntax";
+    static final String EOF             = "eof";
     static final String LAMBDA          = "lambda";
     static final String LETREC          = "letrec";
     static final String MODULE          = "module";
@@ -121,6 +122,8 @@ final class GlobalState
 
         ns.define(DEFINE, new DefineForm());
         ns.define(DEFINE_SYNTAX, new DefineSyntaxForm());
+        ns.define(EOF, FusionIo.eof(null),
+                  "A unique value that denotes an end-of-file condition.");
         ns.define("if", new IfForm());          // Needed by hard-coded macro
         ns.define("java_new", new JavaNewProc());
         ns.define(LAMBDA, new LambdaForm());    // Needed by hard-coded macro
