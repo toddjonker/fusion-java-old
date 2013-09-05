@@ -22,7 +22,7 @@ final class ForListForm
               "    (for_list\n" +
               "      [ (even [0, 2, 4]),\n" +
               "        (odd  [1, 3, 5]) ]\n" +
-              "      [even, odd])             =>  [1, 5, 9]");
+              "      (+ even odd))             =>  [1, 5, 9]");
     }
 
 
