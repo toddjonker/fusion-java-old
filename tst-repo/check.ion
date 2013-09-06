@@ -146,6 +146,26 @@ Ensures that (OP VAL1 VAL2) is truthy.
         (syntax_subseq stx 1))))
 
 
+  (defpub_syntax check_pred
+    (lambda (stx)
+      '''
+(check_pred PRED VAL MSG ...)
+
+Ensures that (PRED VAL) is truthy.
+      '''
+      (when (< (syntax_size stx) 3)
+        (wrong_syntax stx
+          "check_pred requires at least two args: (check_pred PRED VAL MSG ...)"))
+      (syntax_append
+        (quasisyntax
+          (do_check (unsyntax stx)
+            (lambda (result dummy)
+              ((unsyntax (syntax_get stx 1)) result))
+            (unsyntax (syntax_get stx 2))
+            "(ignore this dummy argument)"))
+        (syntax_subseq stx 3))))
+
+
   // The failure message isn't the greatest, its in terms of the inner check
   (defpub_syntax check_true
     (lambda (stx)
