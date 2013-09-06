@@ -20,6 +20,9 @@ import java.io.IOException;
  * The core features of a Fusion run-time value.  Note that the set of Fusion
  * values is a superset of the Ion values, so not all {@link FusionValue}s are
  * Ion data values.
+ * <p>
+ * <b>WARNING:</b> This class should not be extended by
+ * code outside of this library.
  */
 public abstract class FusionValue
 {

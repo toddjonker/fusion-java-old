@@ -11,6 +11,9 @@ import java.io.File;
  * specific Fusion module or language.
  * <p>
  * To create a {@link TopLevel}, use a {@link FusionRuntime}.
+ * <p>
+ * <b>WARNING:</b> This interface should not be implemented or extended by
+ * code outside of this library.
  */
 public interface TopLevel
 {

@@ -18,6 +18,9 @@ import com.amazon.ion.ValueFactory;
  * top levels by calling one of the {@link #makeTopLevel} methods.
  * <p>
  * To create a {@link FusionRuntime}, use a {@link FusionRuntimeBuilder}.
+ * <p>
+ * <b>WARNING:</b> This interface should not be implemented or extended by
+ * code outside of this library.
  */
 public interface FusionRuntime
 {

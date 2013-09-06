@@ -4,6 +4,9 @@
 FusionJava is the reference implementation of the
 <a href="https://ion-fusion.dev/">Fusion programming language</a>, for
 Java<sup><font size="-4">TM</font></sup> 7 and above.
+
+<h2>Warnings and Caveats</h2>
+
 <p>
 This document describes all classes intended for public consumption, limited to
 the packages listed here.  The distribution includes other implementation
@@ -14,6 +17,12 @@ your use of those packages is not supported, so do us both a favor and
 More generally:
 <b>Any behavior or features not present in this API documentation is
 unsupported, probably untested, and subject to change without notice.</b>
+<p>
+Further, do not assume that interfaces and classes documented here may be
+implemented extended by clients of this library; in fact, unless something is
+documented as an extension point, you must assume that is <em>not</em> the
+case! We may add new methods to interfaces and classes at any time, and your
+extensions will probably break when that happens.
 
 
 <h2>Representation of Values</h2>
