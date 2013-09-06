@@ -116,7 +116,7 @@ public class RuntimeTest
 
         // Check that define() injects the given value.
         topLevel().define("v", null);
-        fv = topLevel().eval("(identity v)");
+        fv = topLevel().load("(identity v)");
         assertTrue(isVoid(topLevel(), fv));
     }
 
@@ -129,7 +129,7 @@ public class RuntimeTest
 
         // Check that define() injects the given value.
         topLevel().define("v", 22);
-        fv = topLevel().eval("(= v 22)");
+        fv = topLevel().load("(= v 22)");
         assertTrue(isTrue(topLevel(), fv));
     }
 
@@ -141,7 +141,7 @@ public class RuntimeTest
         assertFalse(isTrue(topLevel(), fv));
 
         topLevel().define("v", true);
-        fv = topLevel().eval("v");
+        fv = topLevel().load("v");
         assertTrue(isTrue(topLevel(), fv));
     }
 

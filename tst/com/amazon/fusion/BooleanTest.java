@@ -17,22 +17,22 @@ public class BooleanTest
     public void testBoolBasics()
         throws Exception
     {
-        Object fv = topLevel().eval("true");
+        Object fv = topLevel().load("true");
         assertTrue(isBool(topLevel(), fv));
         assertTrue(isTrue(topLevel(), fv));
         assertFalse(isFalse(topLevel(), fv));
 
-        fv = topLevel().eval("false");
+        fv = topLevel().load("false");
         assertTrue(isBool(topLevel(), fv));
         assertFalse(isTrue(topLevel(), fv));
         assertTrue(isFalse(topLevel(), fv));
 
-        fv = topLevel().eval("null.bool");
+        fv = topLevel().load("null.bool");
         assertTrue(isBool(topLevel(), fv));
         assertFalse(isTrue(topLevel(), fv));
         assertFalse(isFalse(topLevel(), fv));
 
-        fv = topLevel().eval("null");
+        fv = topLevel().load("null");
         assertFalse(isBool(topLevel(), fv));
         assertFalse(isTrue(topLevel(), fv));
         assertFalse(isFalse(topLevel(), fv));

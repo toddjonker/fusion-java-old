@@ -132,7 +132,7 @@ public class CoreTestCase
         throws FusionException
     {
         TopLevel top = topLevel();
-        return top.eval(expressionIon);
+        return top.load(expressionIon);
     }
 
 

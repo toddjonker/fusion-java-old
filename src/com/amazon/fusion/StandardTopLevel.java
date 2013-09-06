@@ -63,26 +63,47 @@ final class StandardTopLevel
     }
 
 
-    @Override
+    @Deprecated @Override
     public Object eval(String source, SourceName name)
+        throws ExitException, FusionException
+    {
+        return load(source, name);
+    }
+
+    @Override
+    public Object load(String source, SourceName name)
         throws ExitException, FusionException
     {
         IonSystem system = myEvaluator.getGlobalState().myIonSystem;
         IonReader i = system.newReader(source);
-        return eval(i, name);
+        return load(i, name);
     }
 
 
-    @Override
+    @Deprecated @Override
     public Object eval(String source)
         throws ExitException, FusionException
     {
-        return eval(source, null);
+        return load(source, null);
+    }
+
+    @Override
+    public Object load(String source)
+        throws ExitException, FusionException
+    {
+        return load(source, null);
     }
 
 
-    @Override
+    @Deprecated @Override
     public Object eval(IonReader source, SourceName name)
+        throws ExitException, FusionException
+    {
+        return load(source, name);
+    }
+
+    @Override
+    public Object load(IonReader source, SourceName name)
         throws ExitException, FusionException
     {
         Object result = voidValue(myEvaluator);
@@ -99,11 +120,18 @@ final class StandardTopLevel
     }
 
 
-    @Override
+    @Deprecated @Override
     public Object eval(IonReader source)
         throws ExitException, FusionException
     {
-        return eval(source, null);
+        return load(source, null);
+    }
+
+    @Override
+    public Object load(IonReader source)
+        throws ExitException, FusionException
+    {
+        return load(source, null);
     }
 
 

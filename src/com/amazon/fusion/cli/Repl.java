@@ -110,7 +110,7 @@ class Repl
 
             try
             {
-                Object result = top.eval(line);
+                Object result = top.load(line);
                 print(result);
             }
             catch (ExitException e)
