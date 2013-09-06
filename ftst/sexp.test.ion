@@ -2,6 +2,7 @@
 
 (require
   "/check"
+  "/fusion/function"
   "/fusion/ion"
   "/fusion/list"
   "/fusion/sexp")
@@ -114,7 +115,27 @@
 (check_false (any F val12))
 (check_true  (any T val12))
 
-(check_true (any (lambda (e) (= e 2)) val12))
+(check_true  (any (lambda (e) (= e "hi")) (sexp "oh" "hi")))
+(check_false (any (lambda (e) (= e "ho")) (sexp "oh" "hi")))
+
+// Check that it returns the truthy predicate result, not the selected element
+(check = 408
+  (any (lambda (e) (when (= e 204) (* e 2)))
+    (sexp 123 204 567)))
+(check = 1134
+  (any (lambda (e) (when (= e 567) (* e 2)))
+    (sexp 123 204 567)))
+
+// Check than it returns the last predicate result if none are truthy
+(check_pred (predicate_and is_null is_int)
+  (any (lambda (s) (if (is_void s) null.int null))
+    (sexp false (void))))
+(check_pred (predicate_and is_null is_int)
+  (any (lambda (s) (if (is_null s) null.int null))
+    (sexp false null.int)))
+(check_void
+  (any (lambda (s) (if (is_null s) (void) null))
+    (sexp false null.int null.list)))
 
 
 //==========================================================================

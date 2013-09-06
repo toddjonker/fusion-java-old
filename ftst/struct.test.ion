@@ -169,8 +169,29 @@
 (check_false (any F {f:1, g:2}))
 (check_true  (any T {f:1, g:2}))
 
-(check_true (any (lambda (e) (= e "hi")) {f:"oh", g:"hi"}))
-(check = (any (lambda (e) (when (= e "hi") e)) {f:"oh", g:"hi"}) "hi")
+(check_true  (any (lambda (e) (= e "hi")) {f:"oh", g:"hi"}))
+(check_false (any (lambda (e) (= e "ho")) {f:"oh", g:"hi"}))
+
+(check =    (any (lambda (e) (when (= e "hi") e)) {f:"oh", g:"hi"}) "hi")
+
+// Check that it returns the truthy predicate result, not the selected element
+(check = 408
+  (any (lambda (e) (when (= e 204) (* e 2)))
+    {f:123, f:204, f:567}))
+(check = 1134
+  (any (lambda (e) (when (= e 567) (* e 2)))
+    {f:123, f:204, f:567}))
+
+// Check than it returns the last predicate result if none are truthy
+(check_pred (predicate_and is_null is_int)
+  (any (lambda (s) null.int)
+    {a:false, b:(void)}))
+(check_pred is_null_null
+  (any (lambda (s) null)
+    {a:false, b:true}))
+(check_void
+  (any (lambda (s) (void))
+    {a:false, b:null.int, c:null.list}))
 
 
 //==========================================================================

@@ -201,36 +201,44 @@ be evaluated as a variable reference:
 Applies the one-argument predicate `pred` to the elements of `collection`;
 the first time `pred` returns a truthy value that truthy value is returned and
 no more elements are visited.  If no call returns a truthy value, then the
-result is `false`.
+result is that of the final predicate call, or `false` if the collection is
+empty.
 
-When `collection` is a sequence, the elements are visited in order.
+When `collection` is a sequence, the elements are visited in order, and the
+application of `pred` to the final element of the sequence is in tail position.
       '''
       (cond
         ((is_struct collection)
          (let [(result false)]
            // WARNING!  This unsafe procedure is UNSUPPORTED!
            (unsafe_struct_visit (lambda (key elt)
-                                  (let [(elt_result (pred elt))]
-                                    (when elt_result (set result elt_result))
-                                    elt_result))
+                                  (set result (pred elt))
+                                  result)  // Stop visits if result is truthy
              collection)
            result))
         ((is_list collection)
          (let [(len (size collection))]
-           (let loop [(i 0)]
-             (if (= i len)
-               false
-               (lets [(elt (unsafe_list_ref collection i)),
-                      (result (pred elt))]
-                 (if result result
-                   (loop (+ i 1))))))))
-        ((is_sexp collection)
-         (let loop [(s collection)]
-           (if (is_empty s)
+           (if (= 0 len)
              false
-             (let [(result (pred (head s)))]
-               (if result result
-                 (loop (tail s)))))))
+             (let loop [(i 0)]
+               (assert (< i len))
+               (let [(elt (unsafe_list_ref collection i)),
+                     (i   (+ 1 i))]
+                 (if (= i len)
+                   (pred elt)    // The last predicate call is in tail position
+                   (or (pred elt)
+                       (loop i))))))))
+        ((is_sexp collection)
+         (if (is_empty collection)
+           false
+           (let loop [(s collection)]
+             (assert (not (is_empty s)))
+             (let [(h (head s)),
+                   (t (tail s))]
+               (if (is_pair t)
+                 (or (pred h)
+                     (loop t))
+                 (pred h))))))   // The last predicate call is in tail position
         (true
          (raise_argument_error "any" "collection" 0 collection)))))
 
