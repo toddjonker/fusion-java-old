@@ -1,10 +1,22 @@
 (require "/check")
 
+
+(check_compile_exn
+  free)
+
 (define (free_ref)
   free)
 
 (check_compile_exn
-  (free_ref))   // ERROR
+  (free_ref))
+
+(check_compile_exn
+  (define free free))
+
+// Still not defined
+(check_compile_exn
+  free)
+
 
 (define free "bird")
 (check = "bird" (free_ref))
@@ -24,6 +36,15 @@
 (define free "beer")
 (check = "beer" free)
 (check = "beer" (free_ref))
+
+
+// Body of the definition uses the existing binding
+(define (+ a b)
+  (+ 100 a b))
+
+(define num 1)
+(define num (+ 3 num))
+(check = 104 num)
 
 
 "SUCCESS"

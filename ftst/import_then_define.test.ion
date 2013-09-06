@@ -24,8 +24,6 @@
 (check = (d1) 1)
 (check = (d2) 2)
 
-// TODO should be able to move this above the first use,
-//   even though dupe isn't defined yet
 (define (d_local) dupe)
 
 (define dupe 5)

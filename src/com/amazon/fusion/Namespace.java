@@ -4,6 +4,8 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.FusionWrite.safeWriteToString;
+import com.amazon.fusion.ModuleNamespace.ModuleBinding;
+import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -71,14 +73,6 @@ abstract class Namespace
             String message =
                 "Mutation of top-level variables is not supported";
             throw new ContractException(message);
-        }
-
-        CompiledForm compileDefine(Evaluator eval,
-                                   Environment env,
-                                   CompiledForm valueForm)
-        {
-            String name = getName();
-            return new CompiledTopDefine(name, myAddress, valueForm);
         }
 
         CompiledForm compileDefineSyntax(Evaluator eval,
@@ -401,6 +395,26 @@ abstract class Namespace
     }
 
 
+
+    abstract CompiledForm compileDefine(Evaluator eval,
+                                        FreeBinding binding,
+                                        SyntaxSymbol id,
+                                        CompiledForm valueForm)
+        throws FusionException;
+
+    abstract CompiledForm compileDefine(Evaluator eval,
+                                        TopLevelBinding binding,
+                                        SyntaxSymbol id,
+                                        CompiledForm valueForm)
+        throws FusionException;
+
+    abstract CompiledForm compileDefine(Evaluator eval,
+                                        ModuleBinding binding,
+                                        SyntaxSymbol id,
+                                        CompiledForm valueForm)
+        throws FusionException;
+
+
     /**
      * Compile a free variable reference.  These are allowed at top-level but
      * not within a module.
@@ -585,7 +599,7 @@ abstract class Namespace
     }
 
 
-    private static class CompiledTopDefine
+    protected static class CompiledTopDefine
         implements CompiledForm
     {
         private final String       myName;

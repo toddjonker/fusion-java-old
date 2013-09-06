@@ -27,7 +27,7 @@ final class DefineForm
      * we modify the original identifier so that its
      * {@link SyntaxSymbol#getBinding()} returns the new binding.
      * This is a hack to communicate that information between the "expand" and
-     * "compile" phases, since the complire doesn't have the same environment
+     * "compile" phases, since the compiler doesn't have the same environment
      * and cannot resolve bindings.
      *
      * @return the {@code define} form, with the bound identifier updated to
@@ -153,16 +153,7 @@ final class DefineForm
         // already checked the identifier.  Thus this will only cause an error
         // when using the original stx, so we know the error trace will
         // correctly refer to the original syntax.
-        SyntaxSymbol identifier = check.requiredIdentifier(1);
-
-        // If at module context, this has already been done.
-        if (expander.isTopLevelContext())
-        {
-            Namespace ns = env.namespace();
-            assert ns == env;
-            identifier = ns.predefine(identifier, origStx);
-            children[1] = identifier;
-        }
+        check.requiredIdentifier(1);
 
         int bodyPos;
         SyntaxValue maybeDoc = children[2];
@@ -201,10 +192,12 @@ final class DefineForm
         CompiledForm valueForm = eval.compile(env, valueSource);
 
         SyntaxSymbol identifier = (SyntaxSymbol) stx.get(eval, 1);
-        NsBinding binding = (NsBinding) identifier.getBinding();
-        CompiledForm compiled = binding.compileDefine(eval, env, valueForm);
+        Binding binding = identifier.resolve();
+        CompiledForm compiled =
+            binding.compileDefine(eval, env, identifier, valueForm);
 
         if (arity != 3
+            && binding instanceof NsBinding
             && eval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
         {
             // We have documentation. Sort of.
@@ -213,7 +206,8 @@ final class DefineForm
                                             null, // kind
                                             null, // usage
                                             docString.stringValue());
-            env.namespace().setDoc(binding.myAddress, doc);
+            int address = ((NsBinding) binding).myAddress;
+            env.namespace().setDoc(address, doc);
         }
 
         return compiled;

@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import java.util.Iterator;
 import java.util.Set;
@@ -102,10 +103,18 @@ class TopLevelNamespace
         @Override
         CompiledForm compileDefine(Evaluator eval,
                                    Environment env,
+                                   SyntaxSymbol id,
                                    CompiledForm valueForm)
+            throws FusionException
         {
-            assert myTarget == this;
-            return super.compileDefine(eval, env, valueForm);
+            if (myTarget == this)
+            {
+                return env.namespace().compileDefine(eval, this,
+                                                     id, valueForm);
+            }
+
+            // Override of visible module binding.
+            return myTarget.compileDefine(eval, env, id, valueForm);
         }
 
         @Override
@@ -113,6 +122,7 @@ class TopLevelNamespace
                                          Environment env,
                                          CompiledForm valueForm)
         {
+            // TODO FUSION-192 This should bind after evaluation, as 'define'.
             assert myTarget == this;
             return super.compileDefineSyntax(eval, env, valueForm);
         }
@@ -425,9 +435,91 @@ class TopLevelNamespace
 
 
     @Override
+    CompiledForm compileDefine(Evaluator eval,
+                               FreeBinding binding,
+                               SyntaxSymbol id,
+                               CompiledForm valueForm)
+        throws FusionException
+    {
+        return new CompiledFreeDefine(id, valueForm);
+    }
+
+
+    @Override
+    CompiledForm compileDefine(Evaluator eval,
+                               TopLevelBinding binding,
+                               SyntaxSymbol id,
+                               CompiledForm valueForm)
+        throws FusionException
+    {
+        // We can't trust the identifier in the binding, since it may have
+        // resolved to an id with a different set of marks.
+        return new CompiledFreeDefine(id, valueForm);
+    }
+
+
+    @Override
+    CompiledForm compileDefine(Evaluator eval,
+                               ModuleBinding binding,
+                               SyntaxSymbol id,
+                               CompiledForm valueForm)
+        throws FusionException
+    {
+        // The lexical context of the bound identifier resolves to some module.
+        // We'll use a top-level binding instead.
+        return new CompiledFreeDefine(id, valueForm);
+    }
+
+
+    @Override
     CompiledForm compileFreeTopReference(SyntaxSymbol identifier)
     {
         return new CompiledFreeVariableReference(identifier);
+    }
+
+
+    //========================================================================
+    // Compiled Forms
+
+    private static final class CompiledFreeDefine
+        implements CompiledForm
+    {
+        private final SyntaxSymbol myId;
+        private final CompiledForm myValueForm;
+
+        CompiledFreeDefine(SyntaxSymbol id, CompiledForm valueForm)
+        {
+            myId = id;
+            myValueForm = valueForm;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Object value = eval.eval(store, myValueForm);
+
+            value = processValue(eval, store, value);
+
+            TopLevelNamespace ns = (TopLevelNamespace) store.namespace();
+            SyntaxSymbol boundId = ns.predefine(myId, myId);
+            TopLevelBinding binding = (TopLevelBinding) boundId.getBinding();
+
+            ns.set(binding.myAddress, value);
+
+            if (value instanceof NamedValue)
+            {
+                ((NamedValue)value).inferName(myId.stringValue());
+            }
+
+            return voidValue(eval);
+        }
+
+        Object processValue(Evaluator eval, Store store, Object value)
+            throws FusionException
+        {
+            return value;
+        }
     }
 
 

@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.LanguageWrap.LanguageBinding;
+import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -59,6 +60,16 @@ class ModuleNamespace
             }
 
             return ns.lookup(myAddress);
+        }
+
+        @Override
+        CompiledForm compileDefine(Evaluator eval,
+                                   Environment env,
+                                   SyntaxSymbol id,
+                                   CompiledForm valueForm)
+            throws FusionException
+        {
+            return env.namespace().compileDefine(eval, this, id, valueForm);
         }
 
         @Override
@@ -258,6 +269,43 @@ class ModuleNamespace
         }
 
         myUsedModuleWraps.addWrap(new ModuleRenameWrap(module));
+    }
+
+
+    @Override
+    CompiledForm compileDefine(Evaluator eval,
+                               FreeBinding binding,
+                               SyntaxSymbol id,
+                               CompiledForm valueForm)
+        throws FusionException
+    {
+        throw new IllegalStateException("Unexpected define in module: "
+                                        + binding);
+    }
+
+
+    @Override
+    CompiledForm compileDefine(Evaluator eval,
+                               TopLevelBinding binding,
+                               SyntaxSymbol id,
+                               CompiledForm valueForm)
+        throws FusionException
+    {
+        throw new IllegalStateException("Unexpected define in module: "
+                                        + binding);
+    }
+
+
+    @Override
+    CompiledForm compileDefine(Evaluator eval,
+                               ModuleBinding binding,
+                               SyntaxSymbol id,
+                               CompiledForm valueForm)
+        throws FusionException
+    {
+        String name = binding.getName();
+        return new CompiledTopDefine(name, binding.myAddress, valueForm);
+
     }
 
 
