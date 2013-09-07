@@ -174,7 +174,7 @@ final class ModuleDoc
             id = resolveModulePath(myRuntime, submodulePath(name));
             assert id.baseName().equals(name);
         }
-        catch (ModuleNotFoundFailure e)
+        catch (ModuleNotFoundException e)
         {
             // This can happen for implicit modules with no stub .fusion file.
             // For now we just stop here and don't handle further submodules.

@@ -17,7 +17,7 @@ public class ModuleTest
         useTstRepo();
     }
 
-    @Test(expected = ModuleNotFoundFailure.class)
+    @Test(expected = ModuleNotFoundException.class)
     public void testBadLanguageSymbolInTopLevelModule()
         throws Exception
     {
@@ -31,14 +31,14 @@ public class ModuleTest
         eval("(module m (quote 'no_such_module') (define x 1))");
     }
 
-    @Test(expected = ModuleNotFoundFailure.class)
+    @Test(expected = ModuleNotFoundException.class)
     public void testBadLanguageStringInTopLevelModule()
         throws Exception
     {
         eval("(module m \"no_such_module\" (define x 1))");
     }
 
-    @Test(expected = ModuleNotFoundFailure.class)
+    @Test(expected = ModuleNotFoundException.class)
     public void testRelativeLanguageStringInTopLevelModule()
         throws Exception
     {
@@ -46,7 +46,7 @@ public class ModuleTest
         eval("(module m \"fusion\" (define x 1))");
     }
 
-    @Test(expected = ModuleNotFoundFailure.class)
+    @Test(expected = ModuleNotFoundException.class)
     public void testTopLevelLanguageInTopLevelModule()
         throws Exception
     {
@@ -59,21 +59,21 @@ public class ModuleTest
     // TODO similar tests for 'use' to the language tests above
 
 
-    @Test(expected = FusionException.class) // ModuleNotFoundFailure gets wrapped
+    @Test(expected = FusionException.class) // ModuleNotFoundException gets wrapped
     public void testBadLanguageSymbolInRepoModule()
         throws Exception
     {
         eval("(require '/module/bad_lang_symbol')");
     }
 
-    @Test(expected = FusionException.class) // ModuleNotFoundFailure gets wrapped
+    @Test(expected = FusionException.class) // ModuleNotFoundException gets wrapped
     public void testBadLanguageSymbolInRepoModule2()
         throws Exception
     {
         eval("(require \"/module/bad_lang_symbol\")");
     }
 
-    @Test(expected = FusionException.class) // ModuleNotFoundFailure gets wrapped
+    @Test(expected = FusionException.class) // ModuleNotFoundException gets wrapped
     public void testBadQuotedLanguageSymbolInRepoModule()
         throws Exception
     {

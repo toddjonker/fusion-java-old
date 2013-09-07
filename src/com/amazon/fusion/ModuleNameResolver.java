@@ -38,11 +38,11 @@ final class ModuleNameResolver
      * Locates and loads a module, dispatching on the concrete syntax of the
      * request.
      *
-     * @throws ModuleNotFoundFailure if the module could not be found.
+     * @throws ModuleNotFoundException if the module could not be found.
      */
     @Deprecated
     ModuleIdentity resolve(Evaluator eval, SyntaxValue pathStx)
-        throws FusionException
+        throws FusionException, ModuleNotFoundException
     {
         switch (pathStx.getType())
         {
@@ -74,13 +74,13 @@ final class ModuleNameResolver
      * @param baseModule the starting point for relative references.
      * If null, it indicates a reference from top-level.
      *
-     * @throws ModuleNotFoundFailure if the module could not be found.
+     * @throws ModuleNotFoundException if the module could not be found.
      */
     ModuleIdentity resolve(Evaluator eval,
                            ModuleIdentity baseModule,
                            SyntaxValue pathStx,
                            boolean load)
-        throws FusionException
+        throws FusionException, ModuleNotFoundException
     {
         switch (pathStx.getType())
         {
@@ -100,11 +100,11 @@ final class ModuleNameResolver
      * Locates and loads a module, dispatching on the concrete syntax of the
      * request.
      *
-     * @throws ModuleNotFoundFailure if the module could not be found.
+     * @throws ModuleNotFoundException if the module could not be found.
      */
     @Deprecated
     ModuleIdentity resolve(Evaluator eval, SyntaxSexp pathStx)
-        throws FusionException
+        throws FusionException, ModuleNotFoundException
     {
         SyntaxChecker check = new SyntaxChecker(eval, "module path", pathStx);
         check.arityExact(2);
@@ -136,7 +136,7 @@ final class ModuleNameResolver
 
             if (id == null || reg.lookup(id) == null)
             {
-                throw new ModuleNotFoundFailure("Module not found", pathStx);
+                throw new ModuleNotFoundException("Module not found", pathStx);
             }
             return id;
         }
@@ -186,12 +186,12 @@ final class ModuleNameResolver
      * @param libName is always treated as an absolute module path.
      * @param stx is used for error messaging; may be null.
      *
-     * @throws ModuleNotFoundFailure if the module could not be found.
+     * @throws ModuleNotFoundException if the module could not be found.
      */
     @Deprecated
     ModuleIdentity resolveLib(Evaluator eval, String libName,
                               SyntaxValue stx)
-        throws FusionException
+        throws FusionException, ModuleNotFoundException
     {
         // TODO FUSION-74 Support relative module paths
         if (! libName.startsWith("/")) libName = "/" + libName;
@@ -217,11 +217,11 @@ final class ModuleNameResolver
 
         if (stx == null)
         {
-            throw new ModuleNotFoundFailure(message);
+            throw new ModuleNotFoundException(message);
         }
         else
         {
-            throw new ModuleNotFoundFailure(message, stx);
+            throw new ModuleNotFoundException(message, stx);
         }
     }
 
@@ -235,14 +235,14 @@ final class ModuleNameResolver
      * @param load should we load the module, or just determine its identity?
      * @param stxForErrors is used for error messaging; may be null.
      *
-     * @throws ModuleNotFoundFailure if the module could not be found.
+     * @throws ModuleNotFoundException if the module could not be found.
      */
     ModuleIdentity resolveModulePath(Evaluator eval,
                                      ModuleIdentity baseModule,
                                      String modulePath,
                                      boolean load,
                                      SyntaxValue stxForErrors)
-        throws FusionException
+        throws FusionException, ModuleNotFoundException
     {
         if (! isValidModulePath(modulePath))
         {
@@ -272,11 +272,11 @@ final class ModuleNameResolver
 
         if (stxForErrors == null)
         {
-            throw new ModuleNotFoundFailure(message);
+            throw new ModuleNotFoundException(message);
         }
         else
         {
-            throw new ModuleNotFoundFailure(message, stxForErrors);
+            throw new ModuleNotFoundException(message, stxForErrors);
         }
     }
 
@@ -293,12 +293,12 @@ final class ModuleNameResolver
      *
      * @return the identity of the loaded module.
      *
-     * @throws ModuleNotFoundFailure if the module could not be found.
+     * @throws ModuleNotFoundException if the module could not be found.
      */
     @Deprecated
     ModuleIdentity resolve(Evaluator eval, String path,
                            SyntaxValue stxForErrors)
-        throws FusionException
+        throws FusionException, ModuleNotFoundException
     {
         // TODO FUSION-159 Remove support for .ion extension
         String pathFileName = path.endsWith(".ion") ? path : path + ".ion";
@@ -346,7 +346,7 @@ final class ModuleNameResolver
             "The syntax in use looks for a relative file, and does not " +
             "search any registered repositories.";
         // TODO explain where we looked
-        throw new ModuleNotFoundFailure(message, stxForErrors);
+        throw new ModuleNotFoundException(message, stxForErrors);
     }
 
 

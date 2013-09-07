@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -11,12 +11,12 @@ import java.util.Arrays;
  * Indicates failure to locate a required module.
  */
 @SuppressWarnings("serial")
-public class ModuleNotFoundFailure
+public class ModuleNotFoundException
     extends FusionException
 {
     private Object[] myLocations;
 
-    ModuleNotFoundFailure(String message, Object... locations)
+    ModuleNotFoundException(String message, Object... locations)
     {
         super(message != null ? message : "Module not found");
         myLocations = locations;

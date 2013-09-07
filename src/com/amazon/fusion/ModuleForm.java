@@ -96,7 +96,7 @@ final class ModuleForm
             if (! isValidAbsoluteModulePath(path))
             {
                 String message = "Module path for language must be absolute";
-                throw new ModuleNotFoundFailure(message, initialBindingsStx);
+                throw new ModuleNotFoundException(message, initialBindingsStx);
             }
 
             try
@@ -107,7 +107,7 @@ final class ModuleForm
                 language = registry.lookup(initialBindingsId);
                 assert language != null;  // Otherwise resolve should fail
             }
-            catch (ModuleNotFoundFailure e)
+            catch (ModuleNotFoundException e)
             {
                 e.addContext(initialBindingsStx);
                 throw e;
