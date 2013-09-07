@@ -9,7 +9,7 @@ import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
  */
 @SuppressWarnings("serial")
 final class AmbiguousBindingFailure
-    extends SyntaxFailure
+    extends SyntaxException
 {
     public AmbiguousBindingFailure(String whatForm, String identifier,
                                    SyntaxValue... exprs)

@@ -70,7 +70,7 @@ class ModuleNamespace
             // We should never get here.
             String message =
                 "#%top not implemented for module binding: " + this;
-            throw new SyntaxFailure("#%top", message, id);
+            throw new SyntaxException("#%top", message, id);
         }
 
         @Override

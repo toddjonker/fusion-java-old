@@ -71,7 +71,7 @@ final class Expander
             String message =
                 "Annotations not supported in raw syntax. You probably " +
                 "want to quote this.";
-            throw new SyntaxFailure(null, message, stx);
+            throw new SyntaxException(null, message, stx);
         }
 
         return stx.doExpand(this, env);

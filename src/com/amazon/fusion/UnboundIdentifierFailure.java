@@ -7,7 +7,7 @@ package com.amazon.fusion;
  */
 @SuppressWarnings("serial")
 final class UnboundIdentifierFailure
-    extends SyntaxFailure
+    extends SyntaxException
 {
     UnboundIdentifierFailure(String whatForm, SyntaxValue... exprs)
     {

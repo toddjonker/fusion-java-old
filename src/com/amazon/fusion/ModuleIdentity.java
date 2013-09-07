@@ -66,8 +66,8 @@ class ModuleIdentity
         String text = name.stringValue();
         if (! isValidLocalName(text))
         {
-            throw new SyntaxFailure("local module name",
-                                    LOCAL_NAME_EXPECTATION, name);
+            throw new SyntaxException("local module name",
+                                      LOCAL_NAME_EXPECTATION, name);
         }
     }
 

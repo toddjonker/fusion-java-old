@@ -28,6 +28,6 @@ final class WrongSyntaxProc
         String name = null; // TODO infer name
         String message = safeDisplayManyToString(eval, args, 1);
 
-        throw new SyntaxFailure(name, message, stx);
+        throw new SyntaxException(name, message, stx);
     }
 }

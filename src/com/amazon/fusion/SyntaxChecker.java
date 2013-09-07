@@ -28,14 +28,14 @@ class SyntaxChecker
 
     //========================================================================
 
-    SyntaxFailure failure(String message)
+    SyntaxException failure(String message)
     {
-        return new SyntaxFailure(myFormName, message, myForm);
+        return new SyntaxException(myFormName, message, myForm);
     }
 
-    SyntaxFailure failure(String message, SyntaxValue subform)
+    SyntaxException failure(String message, SyntaxValue subform)
     {
-        return new SyntaxFailure(myFormName, message, subform, myForm);
+        return new SyntaxException(myFormName, message, subform, myForm);
     }
 
     /**
@@ -173,7 +173,7 @@ class SyntaxChecker
                                                String expectation,
                                                boolean nullable,
                                                SyntaxValue form)
-        throws SyntaxFailure
+        throws SyntaxException
     {
         try
         {
@@ -215,17 +215,17 @@ class SyntaxChecker
         }
 
         @Override
-        SyntaxFailure failure(String message)
+        SyntaxException failure(String message)
         {
-            return new SyntaxFailure(myBaseForm.myFormName, message,
-                                     myForm, myBaseForm.myForm);
+            return new SyntaxException(myBaseForm.myFormName, message,
+                                       myForm, myBaseForm.myForm);
         }
 
         @Override
-        SyntaxFailure failure(String message, SyntaxValue subform)
+        SyntaxException failure(String message, SyntaxValue subform)
         {
-            return new SyntaxFailure(myBaseForm.myFormName, message,
-                                     subform, myBaseForm.myForm);
+            return new SyntaxException(myBaseForm.myFormName, message,
+                                       subform, myBaseForm.myForm);
         }
 
         @Override

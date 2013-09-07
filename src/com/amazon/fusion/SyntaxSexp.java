@@ -505,7 +505,7 @@ final class SyntaxSexp
         {
             String message =
                 "not a valid syntactic form. You probably want to quote this.";
-            throw new SyntaxFailure(null, message, this);
+            throw new SyntaxException(null, message, this);
         }
 
         SyntaxValue[] children = extract(expander.getEvaluator());
@@ -568,7 +568,9 @@ final class SyntaxSexp
         int len = size();
         if (len == 0)
         {
-            throw new SyntaxFailure(null, "not a valid syntactic form", this);
+            String message =
+                "not a valid syntactic form. You probably want to quote this.";
+            throw new SyntaxException(null, message, this);
         }
 
         Evaluator eval = expander.getEvaluator();
@@ -652,8 +654,8 @@ final class SyntaxSexp
                     "procedure expects " + lambda.myArgNames.length +
                     " arguments but application has " + argForms.length +
                     " expressions";
-                 throw new SyntaxFailure("procedure application", message,
-                                         this);
+                 throw new SyntaxException("procedure application", message,
+                                           this);
             }
 
             return compilePlainLet(argForms, lambda.myBody);

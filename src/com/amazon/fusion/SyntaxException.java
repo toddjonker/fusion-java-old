@@ -11,13 +11,13 @@ import java.util.Arrays;
  * Indicates a compile-time syntax error.
  */
 @SuppressWarnings("serial")
-public class SyntaxFailure
+public class SyntaxException
     extends FusionException
 {
     private final String myName;
     private SyntaxValue[] mySources;
 
-    SyntaxFailure(String whatForm, String message, SyntaxValue... sources)
+    SyntaxException(String whatForm, String message, SyntaxValue... sources)
     {
         super(message);
         myName = whatForm;

@@ -20,7 +20,7 @@ final class MacroTransformer
 
     @Override
     SyntaxValue doExpandOnce(Expander expander, SyntaxSexp stx)
-        throws SyntaxFailure
+        throws SyntaxException
     {
         Object expanded;
         try
@@ -30,7 +30,7 @@ final class MacroTransformer
             // http://docs.racket-lang.org/reference/syntax-model.html#(part._expand-steps)
             expanded = expander.getEvaluator().callNonTail(myTransformer, stx);
         }
-        catch (SyntaxFailure e)
+        catch (SyntaxException e)
         {
             e.addContext(stx);
             throw e;
@@ -39,8 +39,8 @@ final class MacroTransformer
         {
             String message =
                 "Error expanding macro: " + e.getMessage();
-            SyntaxFailure fail =
-                new SyntaxFailure(getInferredName(), message, stx);
+            SyntaxException fail =
+                new SyntaxException(getInferredName(), message, stx);
             fail.initCause(e);
             throw fail;
         }
@@ -54,8 +54,8 @@ final class MacroTransformer
             String message =
                 "Transformer returned non-syntax result: " +
                 safeWriteToString(expander.getEvaluator(), expanded);
-            throw new SyntaxFailure(myTransformer.identify(), message,
-                                    stx);
+            throw new SyntaxException(myTransformer.identify(), message,
+                                      stx);
         }
     }
 }

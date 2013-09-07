@@ -411,7 +411,7 @@ public class CoreTestCase
     void expectSyntaxFailure(String expr)
         throws Exception
     {
-        expectFailure(SyntaxFailure.class, expr);
+        expectFailure(SyntaxException.class, expr);
     }
 
 

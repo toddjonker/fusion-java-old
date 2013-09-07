@@ -64,7 +64,7 @@ final class ModuleNameResolver
             }
         }
 
-        throw new SyntaxFailure("module path", "unrecognized form", pathStx);
+        throw new SyntaxException("module path", "unrecognized form", pathStx);
     }
 
     /**
@@ -93,7 +93,7 @@ final class ModuleNameResolver
             }
         }
 
-        throw new SyntaxFailure("module path", "unrecognized form", pathStx);
+        throw new SyntaxException("module path", "unrecognized form", pathStx);
     }
 
     /**
@@ -247,7 +247,7 @@ final class ModuleNameResolver
         if (! isValidModulePath(modulePath))
         {
             String message = "Invalid module path: " + printString(modulePath);
-            throw new SyntaxFailure(null, message, stxForErrors);
+            throw new SyntaxException(null, message, stxForErrors);
         }
 
         ModuleIdentity id = locate(eval, baseModule, modulePath, stxForErrors);

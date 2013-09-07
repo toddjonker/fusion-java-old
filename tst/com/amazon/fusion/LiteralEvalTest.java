@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -26,7 +26,7 @@ public class LiteralEvalTest
     }
 
 
-    @Test(expected = SyntaxFailure.class)
+    @Test(expected = SyntaxException.class)
     public void testNullSymbol()
         throws Exception
     {
@@ -34,7 +34,7 @@ public class LiteralEvalTest
     }
 
 
-    @Test(expected = SyntaxFailure.class)
+    @Test(expected = SyntaxException.class)
     public void testNullSexp()
         throws Exception
     {
@@ -42,7 +42,7 @@ public class LiteralEvalTest
     }
 
 
-    @Test(expected = SyntaxFailure.class)
+    @Test(expected = SyntaxException.class)
     public void testEmptySexp()
         throws Exception
     {

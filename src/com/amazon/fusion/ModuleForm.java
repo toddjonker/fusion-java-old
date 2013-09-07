@@ -82,7 +82,7 @@ final class ModuleForm
         {
             String message =
                 "Error determining module identity: " + e.getMessage();
-            SyntaxFailure ex = check.failure(message);
+            SyntaxException ex = check.failure(message);
             ex.initCause(e);
             throw ex;
         }
@@ -116,9 +116,9 @@ final class ModuleForm
             {
                 String message =
                     "Error installing initial bindings: " + e.getMessage();
-                SyntaxFailure ex =
-                    new SyntaxFailure(getInferredName(), message,
-                                      initialBindingsStx);
+                SyntaxException ex =
+                    new SyntaxException(getInferredName(), message,
+                                        initialBindingsStx);
                 ex.initCause(e);
                 throw ex;
             }
@@ -186,7 +186,7 @@ final class ModuleForm
                             eval.compile(moduleNamespace, expanded);
                         eval.eval(moduleNamespace, compiled);
                     }
-                    catch (SyntaxFailure e)
+                    catch (SyntaxException e)
                     {
                         e.addContext(form);
                         throw e;
@@ -194,7 +194,8 @@ final class ModuleForm
                     catch (FusionException e)
                     {
                         String message = e.getMessage();
-                        throw new SyntaxFailure(DEFINE_SYNTAX, message, form);
+                        throw new SyntaxException(DEFINE_SYNTAX, message,
+                                                  form);
                     }
                     formIsPrepared = true;
                 }
@@ -208,9 +209,9 @@ final class ModuleForm
                     catch (FusionException e)
                     {
                         String message = e.getMessage();
-                        SyntaxFailure ex =
-                            new SyntaxFailure(binding.getName(),
-                                              message, form);
+                        SyntaxException ex =
+                            new SyntaxException(binding.getName(),
+                                                message, form);
                         ex.initCause(e);
                         throw ex;
                     }

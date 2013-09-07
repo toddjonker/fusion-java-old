@@ -24,7 +24,7 @@ public class ModuleTest
         eval("(module m '/no_such_module' (define x 1))");
     }
 
-    @Test(expected = SyntaxFailure.class)
+    @Test(expected = SyntaxException.class)
     public void testBadQuotedLanguageSymbolInTopLevelModule()
         throws Exception
     {

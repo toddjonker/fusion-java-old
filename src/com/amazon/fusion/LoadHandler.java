@@ -145,7 +145,7 @@ final class LoadHandler
         catch (ClassCastException e) { /* fall through */ }
 
         String message = "Top-level form isn't (module ...)";
-        throw new SyntaxFailure("load handler", message, topLevel);
+        throw new SyntaxException("load handler", message, topLevel);
     }
 
     private SyntaxSexp

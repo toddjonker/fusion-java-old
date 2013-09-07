@@ -32,9 +32,9 @@ final class QuasiSyntaxForm
 
         if (stx.size() != 2)
         {
-            throw new SyntaxFailure(identify(),
-                                    "a single template required",
-                                    stx);
+            throw new SyntaxException(identify(),
+                                      "a single template required",
+                                      stx);
         }
 
         SyntaxValue subform = stx.get(eval, 1);

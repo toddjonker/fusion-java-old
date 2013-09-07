@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -34,9 +34,9 @@ final class SyntaxKeyword
 
     @Override
     SyntaxValue doExpand(Expander eval, Environment env)
-        throws SyntaxFailure
+        throws SyntaxException
     {
-        throw new SyntaxFailure(null, "Keywords are not expressions", this);
+        throw new SyntaxException(null, "Keywords are not expressions", this);
     }
 
 

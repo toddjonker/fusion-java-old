@@ -78,7 +78,7 @@ final class LocalEnvironment
         {
             String message =
                 "#%top not implemented for local binding: " + this;
-            throw new SyntaxFailure("#%top", message, id);
+            throw new SyntaxException("#%top", message, id);
         }
 
         @Override

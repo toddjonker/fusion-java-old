@@ -50,7 +50,7 @@ abstract class MacroForm
      * @throws FusionException
      */
     abstract SyntaxValue doExpandOnce(Expander expander, SyntaxSexp stx)
-        throws SyntaxFailure, FusionException;
+        throws FusionException;
 
 
     @Override
