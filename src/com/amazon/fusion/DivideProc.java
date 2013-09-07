@@ -36,7 +36,7 @@ class DivideProc
                 getInferredName() + ": result of division isn't exact.\n" +
                 "Arguments were:\n  " + safeWriteToString(eval, args[0]) +
                 "\n  " + safeWriteToString(eval, args[1]);
-            throw new ContractFailure(message);
+            throw new ContractException(message);
         }
     }
 

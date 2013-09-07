@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -11,7 +11,7 @@ import java.io.IOException;
  */
 @SuppressWarnings("serial")
 final class ArgTypeFailure
-    extends ContractFailure
+    extends ContractException
 {
     private final String   myName;
     private final String   myExpectation;

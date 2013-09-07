@@ -219,7 +219,7 @@ public class RuntimeTest
             builder.instantiate();
             fail("expected exception");
         }
-        catch (ContractFailure e) { }
+        catch (ContractException e) { }
 
 
         try {

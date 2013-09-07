@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -27,11 +27,11 @@ final class ModuleRegistry
     }
 
     /**
-     * @throws ContractFailure if a module is already registered with the same
-     * {@link ModuleIdentity}.
+     * @throws ContractException if a module is already registered with the
+     * same {@link ModuleIdentity}.
      */
     synchronized void register(ModuleInstance instance)
-        throws FusionException, ContractFailure
+        throws FusionException, ContractException
     {
         ModuleIdentity id = instance.getIdentity();
 
@@ -41,7 +41,7 @@ final class ModuleRegistry
             myModules.put(id, old);
             String message =
                 "Registry already has a module with identity " + id;
-            throw new ContractFailure(message);
+            throw new ContractException(message);
         }
     }
 }

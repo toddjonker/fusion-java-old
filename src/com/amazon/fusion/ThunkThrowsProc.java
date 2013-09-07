@@ -36,7 +36,7 @@ final class ThunkThrowsProc
         {
             return eval.newString("arity");
         }
-        catch (ContractFailure e)
+        catch (ContractException e)
         {
             return eval.newString("contract");
         }

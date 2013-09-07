@@ -11,7 +11,7 @@ import java.io.IOException;
  */
 @SuppressWarnings("serial")
 class ArityFailure
-    extends ContractFailure
+    extends ContractException
 {
     private final String myProcIdentity;
     private final int myMinArity;

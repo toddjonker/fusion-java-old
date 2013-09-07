@@ -10,7 +10,7 @@ import java.io.IOException;
  */
 @SuppressWarnings("serial")
 class IonizeFailure
-    extends ContractFailure
+    extends ContractException
 {
     private final Object myUnIonizableValue;
 

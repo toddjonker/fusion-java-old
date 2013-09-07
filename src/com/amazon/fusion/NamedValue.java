@@ -76,7 +76,7 @@ abstract class NamedValue
     // Type-checking helpers
 
     final boolean checkBoolArg(Object arg)
-        throws ContractFailure
+        throws ContractException
     {
         try
         {
@@ -95,7 +95,7 @@ abstract class NamedValue
     // Error helpers
 
     /**
-     * Returns a new {@link ContractFailure} with the given message and
+     * Returns a new {@link ContractException} with the given message and
      * the identification of this value. This is preferable to creating
      * the exception directly, since this method can annotate it with location
      * information.
@@ -111,8 +111,8 @@ abstract class NamedValue
      * @param message the message to render in the exception.
      * @return a new exception
      */
-    ContractFailure contractFailure(String message)
+    ContractException contractFailure(String message)
     {
-        return new ContractFailure(identify() + ": " + message);
+        return new ContractException(identify() + ": " + message);
     }
 }

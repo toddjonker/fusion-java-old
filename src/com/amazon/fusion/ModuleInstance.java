@@ -34,7 +34,7 @@ final class ModuleInstance
                            String docs,
                            ModuleStore namespace,
                            int bindingCount)
-        throws FusionException, ContractFailure
+        throws FusionException
     {
         myIdentity = identity;
         myDocs     = docs;
@@ -49,7 +49,7 @@ final class ModuleInstance
      */
     ModuleInstance(ModuleIdentity identity, ModuleStore namespace,
                    Collection<NsBinding> bindings)
-        throws FusionException, ContractFailure
+        throws FusionException
     {
         this(identity, /* docs */ null, namespace, bindings.size());
 
@@ -68,7 +68,7 @@ final class ModuleInstance
                    String docs,
                    ModuleStore namespace,
                    SyntaxSymbol[] providedIdentifiers)
-        throws FusionException, ContractFailure
+        throws FusionException
     {
         this(identity, docs, namespace, providedIdentifiers.length);
 

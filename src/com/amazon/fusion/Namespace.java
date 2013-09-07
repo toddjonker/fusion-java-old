@@ -82,7 +82,7 @@ abstract class Namespace
         {
             String message =
                 "Mutation of top-level variables is not supported";
-            throw new ContractFailure(message);
+            throw new ContractException(message);
         }
 
         CompiledForm compileDefine(Evaluator eval,
@@ -646,7 +646,7 @@ abstract class Namespace
                 String message =
                     "define_syntax value is not a transformer: " +
                     safeWriteToString(eval, value);
-                throw new ContractFailure(message);
+                throw new ContractException(message);
             }
 
             return value;

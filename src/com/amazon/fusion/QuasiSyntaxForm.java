@@ -279,7 +279,7 @@ final class QuasiSyntaxForm
                 safeWriteToString(eval, myUnquotedSyntax) +
                 ") isn't a syntax value: " +
                 safeWriteToString(eval, unquoted);
-            throw new ContractFailure(message);
+            throw new ContractException(message);
         }
     }
 }

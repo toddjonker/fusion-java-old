@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -418,7 +418,7 @@ public class CoreTestCase
     void expectContractFailure(String expr)
         throws Exception
     {
-        expectFailure(ContractFailure.class, expr);
+        expectFailure(ContractException.class, expr);
     }
 
 
