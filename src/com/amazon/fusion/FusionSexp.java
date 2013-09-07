@@ -5,7 +5,6 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.FusionWrite.dispatchIonize;
 import static com.amazon.fusion.FusionWrite.dispatchWrite;
-import static com.amazon.fusion.FusionWrite.safeWriteToString;
 import com.amazon.fusion.FusionIterator.AbstractIterator;
 import com.amazon.fusion.FusionSequence.BaseSequence;
 import com.amazon.ion.IonSequence;
@@ -486,10 +485,7 @@ final class FusionSexp
                 }
                 else if (throwOnConversionFailure)
                 {
-                    String message =
-                        "Value is not convertable to Ion: " +
-                        safeWriteToString(null, this);
-                    throw new ContractFailure(message);
+                    throw new IonizeFailure(this);
                 }
                 else
                 {

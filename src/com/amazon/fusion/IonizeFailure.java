@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,7 +6,7 @@ import static com.amazon.fusion.FusionWrite.safeWrite;
 import java.io.IOException;
 
 /**
- *
+ * Indicates a failure to convert a Fusion value into Ion.
  */
 @SuppressWarnings("serial")
 class IonizeFailure

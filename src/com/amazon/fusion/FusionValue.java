@@ -333,6 +333,10 @@ public abstract class FusionValue
     }
 
 
+    /**
+     * @throws IonizeFailure (when {@code throwOnConversionFailure})
+     * if this value cannot be ionized.
+     */
     IonValue copyToIonValue(ValueFactory factory,
                             boolean throwOnConversionFailure)
         throws FusionException, IonizeFailure
