@@ -162,6 +162,7 @@ final class SyntaxSymbol
 
     /**
      * Expand-time binding resolution.
+     * As a precondition, this symbol's text must be non-empty.
      * As a postcondition, {@link #myBinding} is not null.
      *
      * @return not null.
@@ -171,7 +172,8 @@ final class SyntaxSymbol
         if (myBinding == null)
         {
             String name = stringValue();
-            // TODO FUSION-114 check that our text has at least one character!
+            assert (name != null && name.length() != 0);
+
             if (myWraps == null)
             {
                 myBinding = new FreeBinding(name);
@@ -288,9 +290,6 @@ final class SyntaxSymbol
      */
     SyntacticForm resolveSyntaxMaybe(Environment env)
     {
-        // TODO FUSION-114 what if this is null or empty symbol?
-        //      We shouldn't fail in that case, at least not yet.
-
         Binding b = null;
         if (myBinding != null)
         {
@@ -298,7 +297,11 @@ final class SyntaxSymbol
         }
         else if (myWraps != null)
         {
-            b = myWraps.resolve(stringValue());
+            String name = stringValue();
+            if (name != null && name.length() != 0)
+            {
+                b = myWraps.resolve(name);
+            }
         }
 
         if (b != null)
@@ -324,6 +327,14 @@ final class SyntaxSymbol
             {
                 String message =
                     "null.symbol is not an expression. " +
+                    "You probably want to quote this.";
+                throw new SyntaxException(null, message, this);
+            }
+
+            if (myText.length() == 0)
+            {
+                String message =
+                    "Not an expression. " +
                     "You probably want to quote this.";
                 throw new SyntaxException(null, message, this);
             }

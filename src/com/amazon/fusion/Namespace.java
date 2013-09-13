@@ -263,11 +263,11 @@ abstract class Namespace
 
 
     /**
+     * @param name must be non-empty.
      * @return null is equivalent to a {@link FreeBinding}.
      */
     Binding resolve(String name)
     {
-        // TODO FUSION-114 check that the name has at least one character!
         return myWraps.resolve(name);
     }
 
@@ -354,10 +354,18 @@ abstract class Namespace
      * Allows rebinding of existing names!
      *
      * @param value must not be null
+     *
+     * @throws IllegalArgumentException if the name is null or empty.
      */
     public void bind(String name, Object value)
         throws FusionException
     {
+        if (name == null || name.length() == 0)
+        {
+            String message = "bound name must be non-null and non-empty";
+            throw new IllegalArgumentException(message);
+        }
+
         SyntaxSymbol identifier = SyntaxSymbol.make(name);
         identifier = predefine(identifier, null);
         NsBinding binding = (NsBinding) identifier.getBinding();
