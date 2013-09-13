@@ -160,7 +160,7 @@ final class ForListForm
                 while (FusionIterator.allHaveNext(eval, iters))
                 {
                     Object[] boundValues = new Object[numBindings];
-                    store = new LocalStore(store, boundValues);
+                    Store localStore = new LocalStore(store, boundValues);
 
                     // Determine the next round of bound values
                     for (int i = 0; i < numBindings; i++)
@@ -169,7 +169,7 @@ final class ForListForm
                         boundValues[i] = s.next(eval);
                     }
 
-                    Object nextResult = eval.eval(store, myBody);
+                    Object nextResult = eval.eval(localStore, myBody);
                     unsafeListAddM(eval, resultList, nextResult);
                 }
             }

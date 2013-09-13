@@ -29,23 +29,23 @@
 
 (check_list_equal
   (for_list ((e [1, 2, 3])
-             (f [1, 2, 3]))
+             (f [10, 20, 30]))
     (+ e f))
-  [2, 4, 6])
+  [11, 22, 33])
 
 (check_list_equal
   (for_list ((e [1, 2, 3])
-             (f [1, 2]))
+             (f [10, 20]))
     (+ e f))
-  [2, 4])
+  [11, 22])
 
 
 // Sexp works too
 (check_list_equal
   (for_list ((e (quote (1 2)))
-             (f [1, 2, 3]))
+             (f [10, 20, 30]))
     (+ e f))
-  [2, 4])
+  [11, 22])
 
 
 // Macro in bound-value position
@@ -59,7 +59,6 @@
   (for_list ((e [1])) (let ((v 73)) (+ e 73)))
   [74])
 
-
 // This tests two things:
 //  1) non-Ion types in the result; here, closures.
 //  2) use of new locations for the bound variables each iteration.
@@ -70,6 +69,17 @@
     (for_list ((e [1, 2, 3]))
       (lambda () (* 2 e))))
   [2, 4, 6])
+
+
+// Check access to variables in surrounding scopes.
+(lets [(data         [{ amountPosted:{ amount:-39.99 }},
+                      { amountPosted:{ amount:-49.99 }} ]),
+       (amountPosted "amountPosted"),
+       (amount       "amount")]
+  (check_list_equal
+    (for_list [(x data)]
+      (. x  amountPosted   amount))
+     [-39.99, -49.99]))
 
 
 
