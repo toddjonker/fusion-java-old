@@ -80,6 +80,9 @@ abstract class Command
         return myAliases;
     }
 
+    /**
+     * If null, the command will not be listed by `help`.
+     */
     String getHelpOneLiner()
     {
         return myHelpOneLiner;

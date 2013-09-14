@@ -77,10 +77,13 @@ class Help
                     {
                         Command command = allCommands[i];
 
-                        String[] row =
-                        { command.getCommand(), command.getHelpOneLiner() };
+                        String oneLiner = command.getHelpOneLiner();
+                        if (oneLiner != null)
+                        {
+                            String[] row = { command.getCommand(), oneLiner };
 
-                        table.addRow(row);
+                            table.addRow(row);
+                        }
                     }
 
                     table.render(out);

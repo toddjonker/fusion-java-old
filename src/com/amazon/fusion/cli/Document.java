@@ -10,12 +10,15 @@ class Document
     extends Command
 {
     //=+===============================================================================
+    @SuppressWarnings("unused")
     private static final String HELP_ONE_LINER =
         "Generate reference documentation for a repository.";
 
+    @SuppressWarnings("unused")
     private static final String HELP_USAGE =
         "document OUTPUT_DIR REPO_DIR";
 
+    @SuppressWarnings("unused")
     private static final String HELP_BODY =
         "Given a REPO_DIR directory containing Fusion source code, generate reference\n" +
         "documentation (in HTML format) into the OUTPUT_DIR.";
@@ -27,7 +30,9 @@ class Document
     Document()
     {
         super("document");
-        putHelpText(HELP_ONE_LINER, HELP_USAGE, HELP_BODY);
+
+        // We don't want this documented yet since its not stable.
+//        putHelpText(HELP_ONE_LINER, HELP_USAGE, HELP_BODY);
     }
 
 
