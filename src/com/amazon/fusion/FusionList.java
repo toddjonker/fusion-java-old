@@ -974,13 +974,14 @@ final class FusionList
     }
 
 
-    static final class UnsafeListRefProc
+    static final class UnsafeListElementProc
         extends Procedure2
     {
-        UnsafeListRefProc()
+        UnsafeListElementProc()
         {
             //    "                                                                               |
-            super("Returns the element of `list` at (zero-based) position `pos`.",
+            super("Returns the element of `list` at (zero-based) position `pos`. The `pos` must\n"
+                + "be a non-null int with a valid value.",
                   "list", "pos");
         }
 

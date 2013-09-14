@@ -106,18 +106,19 @@
 (check_equal (unsafe_list_size str2) 2 "str unsafe size 2")
 
 //==========================================================================
-// list_ref
+// list_element
 
 (define test_ref
   (lambda (vec2)
-    (check_equal (list_ref vec2 0)
-      0 "ref 0")
-    (check_equal (unsafe_list_ref vec2 0)
-      0 "unsafe ref 0")
-    (check_equal (list_ref vec2 1)
-      [1] "ref 1")
-    (check_equal (unsafe_list_ref vec2 1)
-      [1] "unsafe ref 1")))
+    (check = (list_ref vec2 0) 0)
+    (check = (list_element vec2 0) 0)
+    (check = (unsafe_list_element vec2 0) 0)
+    (check_list_equal (list_ref vec2 1)
+      [1])
+    (check_list_equal (list_ref vec2 1)
+      [1])
+    (check_list_equal (unsafe_list_element vec2 1)
+      [1])))
 
 (test_ref imm2)
 (test_ref mut2)
@@ -126,9 +127,12 @@
 
 // Lists can hold any type!
 
-(assert ((list_ref [F, T] 1)))
-(assert ((list_ref (mutable_list F T) 1)))
-(assert ((list_ref (stretchy_list F T) 1)))
+(assert ((list_element [F, T] 1)))
+(assert ((list_element (mutable_list F T) 1)))
+(assert ((list_element (stretchy_list F T) 1)))
+
+// Bad arguments
+(check_arg_exn (list_element [1,2] null.int))
 
 
 //==========================================================================

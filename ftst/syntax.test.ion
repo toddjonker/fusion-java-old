@@ -114,8 +114,8 @@
 (lets [(stx (quote_syntax [a, 2])),
        (unwrapped (syntax_unwrap stx))]
   (check_true (is_list unwrapped))
-  (let [(u1 (syntax_unwrap (list_ref unwrapped 1)))]
-    (check_identifier (quote a) (list_ref unwrapped 0))
+  (let [(u1 (syntax_unwrap (list_element unwrapped 1)))]
+    (check_identifier (quote a) (list_element unwrapped 0))
     (check = 2 u1)))
 
 (check ion_equals (syntax_unwrap (quote_syntax a::null.sexp))

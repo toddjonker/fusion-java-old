@@ -275,7 +275,7 @@ public class ListTest
         assertEquals(4, unsafeListSize(null, result));
 
         // Elements should be lazily fusion-ized
-        assertSame(iList.get(1), topLevel().call("list_ref", result, 2));
+        assertSame(iList.get(1), topLevel().call("list_element", result, 2));
 
         // Now mutate the IonValue
         fList = eval("(stretchy_list 4)");

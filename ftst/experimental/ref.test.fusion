@@ -77,7 +77,7 @@
   [501, 502, 503, 504]   "")
 
 (check_equal
-  (# [(void), [4,5,6]] + (lambda (a) (list_ref a 1)))
+  (# [(void), [4,5,6]] + (lambda (a) (list_element a 1)))
   [5]  "")
 
 (check_equal

@@ -41,9 +41,11 @@ as "normal" Ion data.
 
 ## Using Lists
 
-The procedure `list_ref` returns an element from inside the list:
+The procedure `list_element` returns an element from inside the list. It is a
+type-specific (and thus slightly faster) version of the more-generic `element`
+procedure.
 
-    $ (list_ref ["oompa", "loompa"] 1)
+    $ (list_element ["oompa", "loompa"] 1)
     "loompa"
 
 The procedure `list_set` replaces an element in a mutable (including
@@ -61,7 +63,7 @@ stretchy) list:
     $ (list_set mutable 0 "new value")
     $ mutable
     ["new value"]
-    $ (list_ref mutable 0)
+    $ (list_element mutable 0)
     "new value"
 
 The procedure `add`, when given any type of list, returns a list of the
@@ -129,19 +131,25 @@ languages, highlighting potential mutation of an argument.
   //==========================================================================
   // Basic element access
 
-  (defpub list_ref
+  (defpub list_element
     (lambda (list pos)
       '''
 Returns the element of `list` at (zero-based) position `pos`.  An exception is
 thrown if the position is out of bounds.
       '''
       (unless (is_list list)
-        (raise_argument_error "list_ref" "list" 0 list pos))
-      (unless (is_int pos)
-        (raise_argument_error "list_ref" "int" 1 list pos))
+        (raise_argument_error "list_element" "list" 0 list pos))
+      (unless (and (is_int pos) (not (is_null pos)))
+        (raise_argument_error "list_element" "non-null int" 1 list pos))
       (when (or (< pos 0) (<= (unsafe_list_size list) pos))
-        (raise_argument_error "list_ref" "valid position" 1 list pos))
-      (unsafe_list_ref list pos)))
+        (raise_argument_error "list_element" "valid position" 1 list pos))
+      (unsafe_list_element list pos)))
+
+  (defpub list_ref
+      '''
+DEPRECATED. Renamed to `list_element`.
+      '''
+      list_element)
 
 
   (defpub list_set
@@ -152,8 +160,8 @@ holds `value`.  An exception is thrown if the position is out of bounds.
       '''
       (unless (is_mutable_list list)
         (raise_argument_error "list_set" "mutable list" 0 list pos value))
-      (unless (is_int pos)
-        (raise_argument_error "list_set" "int" 1 list pos value))
+      (unless (and (is_int pos) (not (is_null pos)))
+        (raise_argument_error "list_set" "non-null int" 1 list pos value))
       (when (or (< pos 0) (<= (unsafe_list_size list) pos))
         (raise_argument_error "list_set" "valid position" 1 list pos value))
       (unsafe_list_set list pos value)))

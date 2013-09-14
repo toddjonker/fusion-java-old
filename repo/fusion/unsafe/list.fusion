@@ -20,8 +20,8 @@ related operations on lists.
   (defpub_j unsafe_list_size
     "com.amazon.fusion.FusionList$UnsafeListSizeProc")
 
-  (defpub_j unsafe_list_ref
-    "com.amazon.fusion.FusionList$UnsafeListRefProc")
+  (defpub_j unsafe_list_element
+    "com.amazon.fusion.FusionList$UnsafeListElementProc")
 
   (defpub_j unsafe_list_set
     "com.amazon.fusion.FusionList$UnsafeListSetProc")

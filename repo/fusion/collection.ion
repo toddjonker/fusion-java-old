@@ -60,7 +60,7 @@ an element within the collection.
            (if (and key  // null check
                     (<= 0 key)
                     (< key (unsafe_list_size collection)))
-             (unsafe_list_ref collection key)
+             (unsafe_list_element collection key)
              (raise_argument_error "element" "valid position" 1 collection key))
            (raise_argument_error "element" "int" 1 collection key)))
         //-
@@ -125,7 +125,7 @@ An exception is raised if the `collection` has an unsupported type.
                     key  // null check
                     (<= 0 key)
                     (< key (unsafe_list_size collection)))
-           (unsafe_list_ref collection key)))
+           (unsafe_list_element collection key)))
         //-
         ((is_struct collection)
          (when (and (or (is_string key) (is_symbol key))
@@ -222,7 +222,7 @@ application of `pred` to the final element of the sequence is in tail position.
              false
              (let loop [(i 0)]
                (assert (< i len))
-               (let [(elt (unsafe_list_ref collection i)),
+               (let [(elt (unsafe_list_element collection i)),
                      (i   (+ 1 i))]
                  (if (= i len)
                    (pred elt)    // The last predicate call is in tail position
@@ -277,7 +277,7 @@ When `collection` is a sequence, the elements are visited in order.
            (let loop [(i 0)]
              (if (= i len)
                (void)
-               (let [(elt (unsafe_list_ref collection i))]
+               (let [(elt (unsafe_list_element collection i))]
                  (if (pred elt)
                    elt
                    (loop (+ i 1))))))))
@@ -319,7 +319,7 @@ When `collection` is a sequence, the elements are visited in order.
              (if (= i len)
                (void)
                (begin
-                 (proc (unsafe_list_ref collection i))
+                 (proc (unsafe_list_element collection i))
                  (loop (+ 1 i)))))))
         ((is_sexp collection)
          (let loop [(s collection)]
