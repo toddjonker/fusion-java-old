@@ -413,6 +413,14 @@ abstract class Namespace
     }
 
 
+    /**
+     * Compile a free variable reference.  These are allowed at top-level but
+     * not within a module.
+     */
+    abstract CompiledForm compileFreeBinding(SyntaxSymbol identifier)
+        throws FusionException;
+
+
     @Override
     public Object lookup(Binding binding)
     {

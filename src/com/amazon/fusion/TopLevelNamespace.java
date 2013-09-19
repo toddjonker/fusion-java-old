@@ -428,4 +428,62 @@ class TopLevelNamespace
         myRequiredModuleWraps = myRequiredModuleWraps.addWrap(wrap);
         myCurrentPrecedence++;
     }
+
+
+    @Override
+    CompiledForm compileFreeBinding(SyntaxSymbol identifier)
+    {
+        return new CompiledFreeVariableReference(identifier);
+    }
+
+
+    /**
+     * A reference to a top-level variable in the lexically-enclosing namespace.
+     */
+    static final class CompiledFreeVariableReference
+        implements CompiledForm
+    {
+        private final SyntaxSymbol myId;
+        private int myAddress = -1;
+
+        CompiledFreeVariableReference(SyntaxSymbol id)
+        {
+            myId = id;
+        }
+
+        @Override
+        public synchronized Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            int address;
+
+            synchronized (this)
+            {
+                address = myAddress;
+                if (address < 0)
+                {
+                    SyntaxSymbol topId = myId.copyAndResolveTop();
+
+                    Namespace ns = (Namespace) store.namespace();
+                    NsBinding binding = ns.localResolve(topId);
+                    if (binding == null)
+                    {
+                        throw new UnboundIdentifierFailure(null, myId);
+                    }
+
+                    address = binding.myAddress;
+                    myAddress = address;
+                }
+            }
+
+            NamespaceStore ns = store.namespace();
+            Object result = ns.lookup(address);
+            if (result == null)
+            {
+                throw new UnboundIdentifierFailure(null, myId);
+            }
+
+            return result;
+        }
+    }
 }

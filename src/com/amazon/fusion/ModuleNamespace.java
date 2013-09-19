@@ -261,6 +261,14 @@ class ModuleNamespace
     }
 
 
+    @Override
+    CompiledForm compileFreeBinding(SyntaxSymbol identifier)
+        throws FusionException
+    {
+        throw new UnboundIdentifierFailure(null, identifier);
+    }
+
+
     //========================================================================
 
 

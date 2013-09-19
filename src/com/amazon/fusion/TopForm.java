@@ -52,7 +52,7 @@ final class TopForm
                 assert stripped.resolve() instanceof FreeBinding;
 
                 binding = ns.localResolve(stripped);
-                // This may still be free, but don't fail until compile-time.
+                // This may still be free, but don't fail until eval-time.
                 // We'd like things like (expand (#%top foo)) to succeed.
             }
 
