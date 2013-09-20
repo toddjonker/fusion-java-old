@@ -712,11 +712,18 @@ final class SyntaxSexp
                 StringBuilder b = new StringBuilder();
                 b.append("Application expected procedure, given: ");
                 safeWrite(eval, b, proc);
-                b.append("\nArguments were: ");
-                for (int i = 0; i < args.length; i++)
+                if (args.length == 0)
                 {
-                    b.append("\n  ");
-                    safeWrite(eval, b, args[i]);
+                    b.append("\nNo arguments were provided.");
+                }
+                else
+                {
+                    b.append("\nArguments were: ");
+                    for (int i = 0; i < args.length; i++)
+                    {
+                        b.append("\n  ");
+                        safeWrite(eval, b, args[i]);
+                    }
                 }
 
                 throw new FusionException(b.toString());
