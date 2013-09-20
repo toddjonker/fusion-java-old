@@ -16,7 +16,7 @@ final class LanguageWrap
     extends SyntaxWrap
 {
     static final class LanguageBinding
-        implements Binding
+        extends Binding
     {
         private final ModuleBinding myBinding;
 
@@ -30,12 +30,6 @@ final class LanguageWrap
         public final String getName()
         {
             return myBinding.getName();
-        }
-
-        @Override
-        public boolean isFree(String name)
-        {
-            return false;
         }
 
         @Override

@@ -8,7 +8,8 @@ import java.util.Set;
 final class LocalEnvironment
     implements Environment
 {
-    static final class LocalBinding implements Binding
+    static final class LocalBinding
+        extends Binding
     {
         static final LocalBinding[] EMPTY_ARRAY = new LocalBinding[0];
 
@@ -28,18 +29,6 @@ final class LocalEnvironment
         public String getName()
         {
             return myIdentifier.stringValue();
-        }
-
-        @Override
-        public boolean isFree(String name)
-        {
-            return false;
-        }
-
-        @Override
-        public Binding originalBinding()
-        {
-            return this;
         }
 
         @Override

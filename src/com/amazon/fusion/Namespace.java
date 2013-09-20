@@ -22,7 +22,7 @@ abstract class Namespace
     implements Environment, NamespaceStore
 {
     abstract static class NsBinding
-        implements Binding
+        extends Binding
     {
         private final SyntaxSymbol myIdentifier;
         final int myAddress;
@@ -42,18 +42,6 @@ abstract class Namespace
         final SyntaxSymbol getIdentifier()
         {
             return myIdentifier;
-        }
-
-        @Override
-        public boolean isFree(String name)
-        {
-            return false;
-        }
-
-        @Override
-        public Binding originalBinding()
-        {
-            return this;
         }
 
         @Override

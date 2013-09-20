@@ -229,7 +229,7 @@ class TopLevelNamespace
 
 
     static final class TopLevelRequireBinding
-        implements Binding
+        extends Binding
     {
         private final int myPrecedence;
         private final ModuleBinding myBinding;
@@ -246,12 +246,6 @@ class TopLevelNamespace
         public final String getName()
         {
             return myBinding.getName();
-        }
-
-        @Override
-        public boolean isFree(String name)
-        {
-            return false;
         }
 
         @Override

@@ -3,7 +3,8 @@
 package com.amazon.fusion;
 
 
-final class FreeBinding implements Binding
+final class FreeBinding
+    extends Binding
 {
     private final String myName;
 
@@ -24,13 +25,6 @@ final class FreeBinding implements Binding
     {
         // TODO FUSION-47 intern symbol names and use ==
         return myName.equals(name);
-    }
-
-
-    @Override
-    public Binding originalBinding()
-    {
-        return this;
     }
 
 

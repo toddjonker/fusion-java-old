@@ -7,14 +7,18 @@ package com.amazon.fusion;
  * binding site.
  * They are compiled away and are not used at eval-time.
  */
-interface Binding
+abstract class Binding
 {
-    String getName();
+    abstract String getName();
 
     /**
      * Determines whether this is a {@link FreeBinding} with the given name.
+     * This implementation returns false.
      */
-    boolean isFree(String name);
+    boolean isFree(String name)
+    {
+        return false;
+    }
 
     /**
      * Gets the original binding this represents.
@@ -24,7 +28,10 @@ interface Binding
      *
      * @return not null.
      */
-    Binding originalBinding();
+    Binding originalBinding()
+    {
+        return this;
+    }
 
     /**
      * Determines whether two bindings refer to the same
@@ -32,24 +39,27 @@ interface Binding
      *
      * @param other must not be null.
      */
-    boolean sameTarget(Binding other);
+    abstract boolean sameTarget(Binding other);
 
     /**
      * @return null if there's no value associated with the binding.
      */
-    Object lookup(Environment store);
+    abstract Object lookup(Environment store);
 
     /** Compile a reference to the variable denoted by this binding. */
-    CompiledForm compileReference(Evaluator eval, Environment env)
+    abstract CompiledForm compileReference(Evaluator eval,
+                                           Environment env)
         throws FusionException;
 
     /** Compile a #%top reference. */
-    CompiledForm compileTopReference(Evaluator eval, Environment env,
-                                     SyntaxSymbol id)
+    abstract CompiledForm compileTopReference(Evaluator eval,
+                                              Environment env,
+                                              SyntaxSymbol id)
         throws FusionException;
 
     /** Compile a mutation of the variable denoted by this binding. */
-    CompiledForm compileSet(Evaluator eval, Environment env,
-                            CompiledForm valueForm)
+    abstract CompiledForm compileSet(Evaluator eval,
+                                     Environment env,
+                                     CompiledForm valueForm)
         throws FusionException;
 }
