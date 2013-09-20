@@ -1,10 +1,12 @@
 // Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
-(use check)
-(use '/fusion/ion')
-(use '/fusion/function')
-(use '/fusion/list')
-(use '/fusion/struct')
+(require
+  "/check"
+  "/fusion/ion"
+  "/fusion/function"
+  "/fusion/list"
+  "/fusion/struct")
+
 
 (check_equal (. (quote {f:[]}) "f") [] "[] in quoted struct")
 

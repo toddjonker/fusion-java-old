@@ -17,7 +17,7 @@
   (provide result)
 )
 
-(use check)
-(require local2)
+(require "/check")
 
+(require local2)
 (check = result 144)

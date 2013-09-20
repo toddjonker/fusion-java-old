@@ -1,7 +1,9 @@
 // Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
 
-(use '/fusion/base')
-(use check)
+(require
+  "/check"
+  "/fusion/base")
+
 
 // Test that we can import a name that's already defined.
 //  That's legal at top-level, but not at module-level
@@ -9,14 +11,14 @@
 
 (define (d_local) dupe)
 
-(use '/module/dupe1')
+(require "/module/dupe1")
 (define (d1) dupe)
 
 (check = dupe 1)
 (check = (d1) 1)
 (check = (d_local) 3)
 
-(use '/module/dupe2')
+(require "/module/dupe2")
 (define (d2) dupe)
 
 (check = dupe 2)
@@ -34,7 +36,7 @@
 (check = dupe 5)
 (check = (d_local) 5)
 
-(use '/module/dupe2')
+(require "/module/dupe2")
 (check = dupe 2)
 (check = (d1) 1)
 (check = (d2) 2)
