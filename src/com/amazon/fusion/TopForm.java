@@ -80,10 +80,8 @@ final class TopForm
                     return id.copyReplacingBinding(binding);
                 }
             }
-            else
-            {
-                throw new UnboundIdentifierFailure(null, id);
-            }
+
+            throw new UnboundIdentifierFailure(null, id);
         }
 
         children[1] = id;

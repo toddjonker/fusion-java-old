@@ -262,10 +262,11 @@ class ModuleNamespace
 
 
     @Override
-    CompiledForm compileFreeBinding(SyntaxSymbol identifier)
+    CompiledForm compileFreeTopReference(SyntaxSymbol identifier)
         throws FusionException
     {
-        throw new UnboundIdentifierFailure(null, identifier);
+        throw new IllegalStateException("Unexpected #%top in module: "
+                                        + identifier);
     }
 
 

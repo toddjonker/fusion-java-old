@@ -425,16 +425,17 @@ class TopLevelNamespace
 
 
     @Override
-    CompiledForm compileFreeBinding(SyntaxSymbol identifier)
+    CompiledForm compileFreeTopReference(SyntaxSymbol identifier)
     {
         return new CompiledFreeVariableReference(identifier);
     }
 
 
     /**
-     * A reference to a top-level variable in the lexically-enclosing namespace.
+     * A reference to a top-level variable in the lexically-enclosing
+     * namespace, when the binding isn't known at compile-time.
      */
-    static final class CompiledFreeVariableReference
+    private static final class CompiledFreeVariableReference
         implements CompiledForm
     {
         private final SyntaxSymbol myId;

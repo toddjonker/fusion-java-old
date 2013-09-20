@@ -61,7 +61,7 @@ final class FreeBinding
                                             SyntaxSymbol id)
         throws FusionException
     {
-        return env.namespace().compileFreeBinding(id);
+        return env.namespace().compileFreeTopReference(id);
     }
 
     @Override
