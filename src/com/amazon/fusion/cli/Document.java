@@ -66,13 +66,15 @@ class Document
 
 
     private static class Executor
-        implements Command.Executor
+        extends FusionExecutor
     {
         private final File myOutputDir;
         private final File myRepoDir;
 
         private Executor(File outputDir, File repoDir)
         {
+            super(/* documenting */ true);
+
             myOutputDir = outputDir;
             myRepoDir   = repoDir;
         }
@@ -82,7 +84,7 @@ class Document
         public int execute()
             throws Exception
         {
-            writeHtmlTree(myOutputDir, myRepoDir);
+            writeHtmlTree(myRuntime, myOutputDir, myRepoDir);
             return 0;
         }
     }

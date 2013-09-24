@@ -31,18 +31,11 @@ public final class _Private_ModuleDocumenter
     private _Private_ModuleDocumenter() {}
 
 
-    public static FusionRuntime standardDocumentingRuntime()
-    {
-        FusionRuntimeBuilder rb = FusionRuntimeBuilder.standard();
-        rb.setDocumenting(true);
-        return rb.build();
-    }
-
-    public static void writeHtmlTree(File outputDir,
+    public static void writeHtmlTree(FusionRuntime runtime,
+                                     File outputDir,
                                      File repoDir)
         throws IOException, FusionException
     {
-        FusionRuntime runtime = standardDocumentingRuntime();
         Filter filter = new Filter();
 
         log("Building module docs");

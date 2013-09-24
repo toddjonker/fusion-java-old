@@ -4,10 +4,8 @@ package com.amazon.fusion.cli;
 
 import static com.amazon.fusion.FusionVoid.isVoid;
 import static com.amazon.fusion.FusionWrite.write;
-import static com.amazon.fusion._Private_ModuleDocumenter.standardDocumentingRuntime;
 import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
-import com.amazon.fusion.FusionRuntime;
 import com.amazon.fusion.TopLevel;
 import com.amazon.fusion._Private_HelpForm;
 import com.amazon.ion.IonException;
@@ -52,18 +50,18 @@ class Repl
 
 
     private static class Executor
-        implements Command.Executor
+        extends FusionExecutor
     {
         private final Console       myConsole;
         private final PrintWriter   myOut;
-        private final FusionRuntime myRuntime;
 
 
         Executor(Console console)
         {
+            super(/* documenting */ true);
+
             myConsole = console;
             myOut     = console.writer();
-            myRuntime = standardDocumentingRuntime();
         }
 
 

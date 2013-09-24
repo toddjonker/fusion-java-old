@@ -9,6 +9,14 @@ public class _Private_Trampoline
 {
     private _Private_Trampoline() {}
 
+
+    public static void setDocumenting(FusionRuntimeBuilder rb,
+                                      boolean documenting)
+    {
+        rb.setDocumenting(documenting);
+    }
+
+
     public static FusionException newFusionException(String message,
                                                      Throwable cause)
     {
