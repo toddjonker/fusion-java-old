@@ -42,6 +42,7 @@ public class RuntimeTest
 
     @Test(expected = IllegalArgumentException.class)
     public void testCurrentDirectoryDoesNotExist()
+        throws Exception
     {
         File file = new File("no-such-file");
         assertFalse(file.exists());
@@ -51,6 +52,7 @@ public class RuntimeTest
 
     @Test(expected = IllegalArgumentException.class)
     public void testCurrentDirectoryIsNormalFile()
+        throws Exception
     {
         File file = new File("build.xml");
         assertTrue(file.isFile());

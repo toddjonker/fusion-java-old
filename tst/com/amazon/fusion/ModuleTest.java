@@ -13,6 +13,7 @@ public class ModuleTest
 {
     @Before
     public void requires()
+        throws FusionException
     {
         useTstRepo();
     }

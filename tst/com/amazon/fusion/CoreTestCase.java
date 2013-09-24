@@ -88,24 +88,28 @@ public class CoreTestCase
     }
 
     protected FusionRuntimeBuilder runtimeBuilder()
+        throws FusionException
     {
         if (myRuntimeBuilder == null)
         {
-            myRuntimeBuilder = FusionRuntimeBuilder.standard();
-            File userDir = new File(System.getProperty("user.dir"));
-            File repoDir = new File(userDir, "repo");
-            myRuntimeBuilder.addRepositoryDirectory(repoDir);
+            FusionRuntimeBuilder b = FusionRuntimeBuilder.standard();
+
+            b = b.withConfigProperties(getClass(), "/fusion.properties");
+
+            myRuntimeBuilder = b;
         }
         return myRuntimeBuilder;
     }
 
     protected void useTstRepo()
+        throws FusionException
     {
         File tstRepo = new File("tst-repo");
         runtimeBuilder().addRepositoryDirectory(tstRepo);
     }
 
     protected FusionRuntime runtime()
+        throws FusionException
     {
         if (myRuntime == null)
         {
