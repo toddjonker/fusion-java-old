@@ -559,21 +559,12 @@ public class FusionRuntimeBuilder
 
     private void addBootstrapRepository(List<ModuleRepository> repos)
     {
-        ModuleRepository repo = null;
-
         if (myBootstrapRepository != null)
         {
-            // TODO FUSION-172 this shouldn't happen here
+            // TODO FUSION-200 this shouldn't happen here
             File src = new File(myBootstrapRepository, "src");
-            repo = new FileSystemModuleRepository(src);
+            repos.add(new FileSystemModuleRepository(src));
         }
-        else
-        {
-            // TODO FUSION-172 remove this
-            repo = new JarModuleRepository();
-        }
-
-        if (repo != null) repos.add(repo);
     }
 
 
@@ -604,7 +595,7 @@ public class FusionRuntimeBuilder
                     needBootstrap = false;
                 }
 
-                // TODO Fusion-172 remove this
+                // TODO Fusion-200 remove this
                 File src = new File(f, "src");
                 if (src.isDirectory())
                 {

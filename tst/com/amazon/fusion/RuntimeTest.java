@@ -28,7 +28,8 @@ public class RuntimeTest
     {
         FusionRuntimeBuilder b = FusionRuntimeBuilder.standard();
         assertSame(b, b.mutable());
-        b.build();
+//        b.build();
+
     }
 
     @Test
