@@ -8,6 +8,32 @@ import java.util.Arrays;
 
 /**
  * Builder for acquiring a {@link FusionRuntime}.
+ * <p>
+ * <b>Instances of this class are not safe for use by multiple threads unless
+ * they are {@linkplain #immutable() immutable}.</b>
+ * <p>
+ *
+ * <h2>Configuration Properties</h2>
+ *
+ * This builder provides several configuration points that determine the
+ * capabilities of the resulting runtime system.
+ * <p>
+ * Configuration properties follow the standard JavaBeans idiom in order to be
+ * friendly to dependency injection systems. They also provide alternative
+ * mutation methods that enable a more fluid style:
+ *<pre>
+ *    FusionRuntime runtime =
+ *        FusionRuntimeBuilder.standard()
+ *                            .withRepositoryDirectory(repo)
+ *                            .build();
+ *</pre>
+ *
+ * <h3>Initial Current Directory</h3>
+ *
+ * Fusion's {@code current_directory} parameter holds the current working
+ * directory used by many IO operations. The runtime can be configured with a
+ * specific default value. If not configured when {@link #build()} is called,
+ * the builder uses the value of the {@code "user.dir"} system property.
  */
 public class FusionRuntimeBuilder
 {
@@ -156,14 +182,18 @@ public class FusionRuntimeBuilder
 
 
     /**
-     * Declares another repository from which Fusion modules are loaded.
+     * Declares a repository from which Fusion modules are loaded.
      * Repositories are searched in the order they are declared.
      *
      * @param directory must be a path to a readable directory.
      * If a relative path is given, it is immediately resolved as per
      * {@link File#getAbsolutePath()}.
+     *
+     * @throws UnsupportedOperationException if this is immutable.
+     *
+     * @see #withRepositoryDirectory(File)
      */
-    public void addRepositoryDirectory(File directory)
+    public final void addRepositoryDirectory(File directory)
     {
         mutationCheck();
 
@@ -184,6 +214,26 @@ public class FusionRuntimeBuilder
             myRepositoryDirectories[len] = directory;
         }
     }
+
+
+    /**
+     * Declares a repository from which Fusion modules are loaded,
+     * returning a new mutable builder if this is immutable.
+     * Repositories are searched in the order they are declared.
+     *
+     * @param directory must be a path to a readable directory.
+     * If a relative path is given, it is immediately resolved as per
+     * {@link File#getAbsolutePath()}.
+     *
+     * @see #addRepositoryDirectory(File)
+     */
+    public final FusionRuntimeBuilder withRepositoryDirectory(File directory)
+    {
+        FusionRuntimeBuilder b = mutable();
+        b.addRepositoryDirectory(directory);
+        return b;
+    }
+
 
     //=========================================================================
 
