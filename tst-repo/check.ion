@@ -29,7 +29,8 @@
 
   (defpub check_equal_annotations
     (lambda (actual expected)
-      (check_list_equal (ion_annotations actual) (ion_annotations expected))))
+      (check_list_equal (ion_annotations actual) (ion_annotations expected))
+      (check_list_equal (type_annotations actual) (type_annotations expected))))
 
   (defpub check_equal
     (lambda (actual expected descr)

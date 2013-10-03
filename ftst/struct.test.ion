@@ -2,7 +2,6 @@
 
 (require
   "/check"
-  "/fusion/ion"
   "/fusion/function"
   "/fusion/list"
   "/fusion/struct")
@@ -32,11 +31,11 @@
 (test_predicates (quote a::{})          false true)
 
 
-(check_equal (ion_annotations (quote null.struct)) (quote []) "annotations")
-(check_equal (ion_annotations (quote {})) (quote []) "annotations")
-(check_equal (ion_annotations (quote a::{})) (quote ["a"]) "annotations")
-(check_equal (ion_annotations (quote a::b::{})) (quote ["a","b"]) "annotations")
-(check_equal (ion_annotations (quote a::b::a::{})) (quote ["a","b","a"]) "annotations")
+(check_annotations (quote null.struct) (quote []))
+(check_annotations (quote {}) (quote []))
+(check_annotations (quote a::{}) (quote ["a"]))
+(check_annotations (quote a::b::{}) (quote ["a","b"]))
+(check_annotations (quote a::b::a::{}) (quote ["a","b","a"]))
 
 
 //==========================================================================

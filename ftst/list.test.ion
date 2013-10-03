@@ -3,7 +3,6 @@
 (require
   "/check"
   "/fusion/function"
-  "/fusion/ion"
   "/fusion/list"
   "/fusion/unsafe/list")
 
@@ -23,10 +22,10 @@
 (check_false (is_null (quote a::[])))
 
 
-(check_equal (ion_annotations (quote [])) (quote []) "annotations")
-(check_equal (ion_annotations (quote a::[])) (quote ["a"]) "annotations")
-(check_equal (ion_annotations (quote a::b::[])) (quote ["a","b"]) "annotations")
-(check_equal (ion_annotations (quote a::b::a::[])) (quote ["a","b","a"]) "annotations")
+(check_annotations (quote []) (quote []))
+(check_annotations (quote a::[]) (quote ["a"]))
+(check_annotations (quote a::b::[]) (quote ["a","b"]))
+(check_annotations (quote a::b::a::[]) (quote ["a","b","a"]))
 
 (assert (not (is_list           (quote ()))))
 (assert (not (is_mutable_list   (quote ()))))

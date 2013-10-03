@@ -3,7 +3,6 @@
 (require
   "/check"
   "/fusion/function"
-  "/fusion/ion"
   "/fusion/list"
   "/fusion/sexp")
 
@@ -56,10 +55,10 @@
 // TODO immutable_sexp
 
 
-(check_equal (ion_annotations (quote ())) (quote []) "annotations")
-(check_equal (ion_annotations (quote a::(c))) (quote ["a"]) "annotations")
-(check_equal (ion_annotations (quote a::b::(c d))) (quote ["a","b"]) "annotations")
-(check_equal (ion_annotations (quote a::b::a::(a))) (quote ["a","b","a"]) "annotations")
+(check_annotations (quote ()) (quote []))
+(check_annotations (quote a::(c)) (quote ["a"]))
+(check_annotations (quote a::b::(c d)) (quote ["a","b"]))
+(check_annotations (quote a::b::a::(a)) (quote ["a","b","a"]))
 
 
 //==========================================================================
