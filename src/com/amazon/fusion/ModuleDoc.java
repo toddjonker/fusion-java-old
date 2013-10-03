@@ -278,7 +278,6 @@ final class ModuleDoc
         boolean accept(ModuleIdentity id)
         {
             String name = id.internString();
-            if (name.startsWith("#%")) return false;
             if (name.endsWith("/private")) return false;
             if (name.contains("/private/")) return false;
             return true;

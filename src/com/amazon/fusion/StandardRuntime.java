@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.ModuleIdentity.BUILTIN_NAME_EXPECTATION;
 import static com.amazon.fusion.ModuleIdentity.internBuiltinName;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import com.amazon.ion.IonSystem;
@@ -102,10 +101,10 @@ final class StandardRuntime
     @Override
     public ModuleBuilder makeModuleBuilder(String absoluteModulePath)
     {
-        if (! ModuleIdentity.isValidBuiltinName(absoluteModulePath))
+        if (! isValidAbsoluteModulePath(absoluteModulePath))
         {
             String message =
-                "Invalid built-in module name. " + BUILTIN_NAME_EXPECTATION;
+                "Invalid absolute module path: " + absoluteModulePath;
             throw new IllegalArgumentException(message);
         }
 

@@ -181,10 +181,10 @@ public class RuntimeTest
     public void testModuleRegistration()
         throws Exception
     {
-        final ModuleIdentity id = ModuleIdentity.internBuiltinName("#%dummy");
-        assertSame(id, ModuleIdentity.internBuiltinName("#%dummy"));
+        final ModuleIdentity id = ModuleIdentity.internBuiltinName("/tst/dummy");
+        assertSame(id, ModuleIdentity.internBuiltinName("/tst/dummy"));
 
-        ModuleBuilder builder = runtime().makeModuleBuilder("#%dummy");
+        ModuleBuilder builder = runtime().makeModuleBuilder("/tst/dummy");
         builder.instantiate();
 
         topLevel().define("callback", new Procedure0("callback")
@@ -206,7 +206,7 @@ public class RuntimeTest
 
 
         // Test registering two instances w/ same identity
-        builder = runtime().makeModuleBuilder("#%dummy");
+        builder = runtime().makeModuleBuilder("/tst/dummy");
         try {
             builder.instantiate();
             fail("expected exception");
