@@ -10,7 +10,7 @@ These operations perform no type-checking or bounds-checking, and they
 if called with invalid arguments.
 **Use with extreme caution!**
 
-See the module [`/fusion/sexp`](../sexp.html) for more information and
+See the module [`/fusion/sexp`](fusion/sexp.html) for more information and
 related operations on sexps.
   '''
 

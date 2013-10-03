@@ -10,7 +10,7 @@ These operations perform no type-checking or bounds-checking, and they
 if called with invalid arguments.
 **Use with extreme caution!**
 
-See the module [`/fusion/list`](../list.html) for more information and
+See the module [`/fusion/list`](fusion/list.html) for more information and
 related operations on lists.
   '''
 
