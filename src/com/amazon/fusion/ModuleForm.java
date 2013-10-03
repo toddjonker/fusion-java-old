@@ -6,6 +6,7 @@ import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionEval.evalSyntax;
 import static com.amazon.fusion.GlobalState.DEFINE_SYNTAX;
 import static com.amazon.fusion.GlobalState.PROVIDE;
+import static com.amazon.fusion.GlobalState.REQUIRE;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -200,8 +201,7 @@ final class ModuleForm
                     }
                     formIsPrepared = true;
                 }
-                else if (binding == globals.myKernelUseBinding ||
-                         binding == globals.myKernelRequireBinding)
+                else if (binding == globals.myKernelRequireBinding)
                 {
                     try
                     {
@@ -211,8 +211,7 @@ final class ModuleForm
                     {
                         String message = e.getMessage();
                         SyntaxException ex =
-                            new SyntaxException(binding.getName(),
-                                                message, form);
+                            new SyntaxException(REQUIRE, message, form);
                         ex.initCause(e);
                         throw ex;
                     }

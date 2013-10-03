@@ -1,8 +1,0 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
-
-(module rel3 '/fusion/base'
-
-  (define three 3)
-
-  (provide three)
-)

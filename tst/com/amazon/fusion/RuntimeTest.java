@@ -66,15 +66,6 @@ public class RuntimeTest
         runtimeBuilder().immutable().setInitialCurrentDirectory(TEST_REPO);
     }
 
-    @Test
-    public void testUseFromCurrentDirectory()
-        throws Exception
-    {
-        runtimeBuilder().setInitialCurrentDirectory(TEST_REPO);
-        eval("(use \"grain\")");
-        assertString("soup", "barley");
-    }
-
 
     @Test(expected = UnsupportedOperationException.class)
     public void testDocumentingImmutability()

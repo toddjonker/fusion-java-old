@@ -36,7 +36,11 @@ final class ModuleDoc
         ModuleNameResolver resolver =
             eval.getGlobalState().myModuleNameResolver;
 
-        return resolver.resolveLib(eval, modulePath, null);
+        return resolver.resolveModulePath(eval,
+                                          null,       // baseModule
+                                          modulePath,
+                                          true,       // load the module
+                                          null);      // syntax form for errors
     }
 
 

@@ -18,9 +18,8 @@ To use this dialect for your module, declare it as follows:
 
 
   // Pass-through bindings from kernel
-  // TODO FUSION-133 remove `use`
   (provide all_defined_out begin define if lambda letrec module provide
-    require use)
+    require)
   (provide is_bool is_int is_float is_decimal is_timestamp is_symbol
       is_string is_clob is_blob is_list is_sexp is_struct)
   // Note that there's no is_null type checker, since that's used to

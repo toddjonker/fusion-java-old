@@ -28,9 +28,6 @@ contact us for clarification.
   // Misc core forms
   (provide quote set type_annotations '#%top')
 
-  // TODO FUSION-202 Backwards compat
-  (provide use)                           // TODO FUSION-133 remove from here
-
 
   //=========================================================================
   // Scalar Types
