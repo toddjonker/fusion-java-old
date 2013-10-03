@@ -14,7 +14,7 @@ See the module [`/fusion/struct`](../struct.html) for more information and
 related operations on structs.
   '''
 
-  (use '/fusion/experimental/defines')
+  (require "/fusion/experimental/defines")
 
 
   (defpub_j unsafe_struct_ref

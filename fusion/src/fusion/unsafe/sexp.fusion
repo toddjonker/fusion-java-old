@@ -14,7 +14,7 @@ See the module [`/fusion/sexp`](../sexp.html) for more information and
 related operations on sexps.
   '''
 
-  (use '/fusion/experimental/defines')
+  (require "/fusion/experimental/defines")
 
 
   (defpub_j unsafe_pair_head "com.amazon.fusion.FusionSexp$UnsafePairHeadProc")
