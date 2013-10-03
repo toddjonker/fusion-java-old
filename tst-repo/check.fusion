@@ -7,8 +7,7 @@
     "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/experimental/syntax"
-    "/fusion/ffi/java"
-    "/fusion/ion")
+    "/fusion/ffi/java")
 
   (provide assert)
 
@@ -26,7 +25,6 @@
 
   (defpub check_equal_annotations
     (lambda (actual expected)
-      (check_list_equal (ion_annotations actual) (ion_annotations expected))
       (check_list_equal (type_annotations actual) (type_annotations expected))))
 
   (defpub check_equal
@@ -80,8 +78,6 @@
 
   (defpub check_annotations
     (lambda (value expected)
-      (let [(anns (ion_annotations value))]
-        (check_list_equal anns expected))
       (let [(expected (map string_to_symbol expected)),
             (anns (type_annotations value))]
         (check_list_equal anns expected))))
