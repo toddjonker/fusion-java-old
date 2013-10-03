@@ -59,8 +59,8 @@
         "list lengths don't match. Actual: " actual " Expected: " expected)
       (let loop ((i 0))
         (when (< i (size actual))
-          (check_equal (. actual i) (. expected i)
-            (string_append "list element #" (to_string i)))
+          (check_equal (element actual i) (element expected i)
+            (string_append "list element #" (int_to_string i)))
           (loop (+ 1 i))))))
 
   (defpub check_sexp_equal
@@ -76,7 +76,8 @@
             " Expected: " expected)
           (begin
             (check_equal (head a) (head e)
-              (string_append "sexp element at position " (to_string pos))) // TODO bad descr
+              // TODO bad message
+              (string_append "sexp element at position " (int_to_string pos)))
             (loop (+ 1 pos) (tail a) (tail e)))))))
 
 
