@@ -11,11 +11,6 @@ final class FileSystemModuleRepository
 {
     private final File myRepoDir;
 
-    FileSystemModuleRepository()
-    {
-        myRepoDir = findRepository();
-    }
-
     /**
      * @param repoDir must be absolute.
      */
@@ -57,37 +52,5 @@ final class FileSystemModuleRepository
         }
 
         return null;
-    }
-
-
-    private static File findRepository()
-    {
-        // TODO this is really the wrong place to have this logic
-        String fusionRepoDir = System.getProperty("com.amazon.fusion.repoDir");
-        if (fusionRepoDir != null)
-        {
-            File repo = new File(fusionRepoDir);
-            assert repo.isAbsolute()
-                : "com.amazon.fusion.repoDir is not absolute: " + repo;
-
-            return repo;
-        }
-
-        File home = findFusionHomeDir();
-        File repo = new File(home, "repo");
-        return repo;
-    }
-
-    private static File findFusionHomeDir()
-    {
-        // TODO this is really the wrong place to have this logic
-        // TODO error handling
-        String fusionHomeDir = System.getProperty("com.amazon.fusion.home");
-        if (fusionHomeDir == null)
-        {
-            fusionHomeDir = System.getProperty("user.dir");
-        }
-
-        return new File(fusionHomeDir);
     }
 }
