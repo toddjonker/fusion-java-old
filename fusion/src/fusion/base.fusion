@@ -35,10 +35,6 @@ To use this dialect for your module, declare it as follows:
   (require "/fusion/collection")
   (provide . any do element elt find is_empty size)
 
-  // TODO FUSION-181 Remove from this module
-  (require "/fusion/exception")
-  (provide assert raise_argument_error raise_arity_error raise_result_error)
-
   // TODO FUSION-180 Remove from this module
   (require "/fusion/for")
   (provide for_list)
