@@ -88,7 +88,7 @@ public class RuntimeTest
         throws Exception
     {
         useTstRepo();
-        eval("(use grain)");
+        eval("(require '''/grain''')");
         assertString("soup", "barley");
     }
 

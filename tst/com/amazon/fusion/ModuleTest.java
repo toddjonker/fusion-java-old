@@ -57,7 +57,7 @@ public class ModuleTest
         eval("(module m \"lang\" (define x 1))");
     }
 
-    // TODO similar tests for 'use' to the language tests above
+    // TODO similar tests for 'require' to the language tests above
 
 
     @Test(expected = FusionException.class) // ModuleNotFoundException gets wrapped
@@ -185,6 +185,13 @@ public class ModuleTest
         expectSyntaxFailure("(require ())");
         expectSyntaxFailure("(require (lib))");
         expectSyntaxFailure("(require (lib \"/fusion/list\"))");
+    }
+
+    @Test(expected = FusionException.class)
+    public void testRequireNonModule()
+        throws Exception
+    {
+        eval("(require \"/nonmodule/trivialDefine\")");
     }
 
     @Test
