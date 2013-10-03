@@ -29,11 +29,8 @@ To use this dialect for your module, declare it as follows:
 
   // Pass-through bindings from builtins
   (provide let let_values quote set '#%top')
-  (provide apply exit is_null is_null_null is_procedure not
-    to_string)
+  (provide apply exit is_null is_null_null is_procedure not)
 
-  // TODO FUSION-95 FUSION-173 remove these from this module:
-  //  to_string
 
   (require "/fusion/collection")
   (provide . any do element elt find is_empty size)

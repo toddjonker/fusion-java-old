@@ -166,28 +166,4 @@ public class NumericsTest
     {
         expectArgTypeFailure("(- 10 10e-2)",1);
     }
-
-
-    @Test
-    public void testItoa()
-       throws Exception
-    {
-        assertString("5","(to_string 5)");
-        assertString("-2","(to_string -2)");
-        assertString("hello","(to_string \"hello\")");
-
-        String reallyBigNumber = "8888888888888888888888888888888888888888888888888888888888";
-        assertEval("\""+reallyBigNumber+"\"", "(to_string "+reallyBigNumber+")");
-    }
-
-    @Test
-    public void testItoaFail()
-       throws Exception
-    {
-        expectArgTypeFailure("(to_string 2.33332)", 0);
-        expectArgTypeFailure("(to_string null.int)", 0);
-
-        expectArityFailure("(to_string)");
-        expectArityFailure("(to_string 2 2)");
-    }
 }

@@ -30,7 +30,6 @@ contact us for clarification.
 
   // TODO FUSION-202 Backwards compat
   (provide assert)                        // TODO FUSION-181 remove from here
-  (provide to_string)                     // TODO FUSION-173 remove from here
   (provide use)                           // TODO FUSION-133 remove from here
 
 
