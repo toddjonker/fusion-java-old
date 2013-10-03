@@ -41,7 +41,7 @@
   (provide and or when unless cond)
 
   (require "/fusion/number")
-  (provide + - * /)
+  (provide + - * / int_to_string string_to_int)
 
   (require "/fusion/void")
   (provide is_void void)
