@@ -167,29 +167,6 @@ public class NumericsTest
         expectArgTypeFailure("(- 10 10e-2)",1);
     }
 
-    @Test
-    public void testAtoi()
-        throws Exception
-    {
-        assertBigInt(5, "(to_int \"5\")");
-        assertBigInt(-2, "(to_int \"-2\")");
-
-        String bigIntStr = "8888888888888888888888888888888888888888888888888888888888";
-        BigInteger expected = new BigInteger(bigIntStr);
-        assertEval(expected,"(to_int \""+bigIntStr+"\")");
-    }
-
-    @Test
-    public void testAtoiFail()
-        throws Exception
-    {
-        expectFusionException("(to_int \"hello\")");
-        expectArityFailure("(to_int)");
-
-        expectArgTypeFailure("(to_int 2)",0);
-        expectArgTypeFailure("(to_int null.string)", 0);
-        expectArgTypeFailure("(to_int \"2.33332\")", 0);
-    }
 
     @Test
     public void testItoa()
