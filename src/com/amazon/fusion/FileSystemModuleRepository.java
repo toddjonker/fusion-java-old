@@ -43,14 +43,6 @@ final class FileSystemModuleRepository
             return internFromFile(absoluteModulePath, libFile);
         }
 
-        // TODO FUSION-159 remove support for .ion extension
-        fileName = absoluteModulePath.substring(1) + ".ion";
-        libFile = new File(myRepoDir, fileName);
-        if (libFile.exists())
-        {
-            return internFromFile(absoluteModulePath, libFile);
-        }
-
         return null;
     }
 }

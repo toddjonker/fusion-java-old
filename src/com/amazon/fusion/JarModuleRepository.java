@@ -29,13 +29,6 @@ final class JarModuleRepository
             return internFromClasspath(absoluteModulePath, fileName);
         }
 
-        // TODO FUSION-159 remove support for .ion extension
-        fileName = "/FUSION-REPO" + absoluteModulePath + ".ion";
-        if (getClass().getResource(fileName) != null)
-        {
-            return internFromClasspath(absoluteModulePath, fileName);
-        }
-
         return null;
     }
 }
