@@ -71,7 +71,7 @@ class Repl
         {
             welcome();
 
-            TopLevel top = myRuntime.getDefaultTopLevel();
+            TopLevel top = runtime().getDefaultTopLevel();
 
             top.define("help", new _Private_HelpForm());
 
@@ -130,7 +130,7 @@ class Repl
         private void print(Object v)
             throws FusionException
         {
-            TopLevel top = myRuntime.getDefaultTopLevel();
+            TopLevel top = runtime().getDefaultTopLevel();
             if (isVoid(top, v)) return;
 
             write(top, myOut, v);

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -59,7 +59,7 @@ final class Load
         public int execute()
             throws Exception
         {
-            TopLevel top = myRuntime.getDefaultTopLevel();
+            TopLevel top = runtime().getDefaultTopLevel();
 
             try
             {

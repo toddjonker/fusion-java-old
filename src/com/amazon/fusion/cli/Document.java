@@ -84,7 +84,7 @@ class Document
         public int execute()
             throws Exception
         {
-            writeHtmlTree(myRuntime, myOutputDir, myRepoDir);
+            writeHtmlTree(runtime(), myOutputDir, myRepoDir);
             return 0;
         }
     }
