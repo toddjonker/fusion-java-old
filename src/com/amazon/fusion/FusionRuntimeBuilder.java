@@ -550,7 +550,8 @@ public class FusionRuntimeBuilder
      *
      * @return a new builder instance.
      */
-    public FusionRuntime build() // TODO throws FusionException
+    public FusionRuntime build()
+        throws FusionException
     {
         FusionRuntimeBuilder b = fillDefaults();
         return new StandardRuntime(b);
