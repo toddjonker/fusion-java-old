@@ -60,7 +60,7 @@ final class StandardRuntime
 
     String getDefaultLanguage()
     {
-        return "/fusion/base";
+        return "/fusion";
     }
 
 

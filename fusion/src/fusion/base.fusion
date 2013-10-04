@@ -2,6 +2,21 @@
 
 (module base '/fusion/private/builtins'
 
+  // WARNING: Doc syntax isn't supported yet.
+  '''
+A reduced language that may be preferable to using the full
+[`/fusion`](fusion.html) language in some situations. In particular, this
+dialect may exhibit faster startup time since it requires fewer parts of the
+full library.
+
+To use this dialect for your module, declare it as follows:
+
+    (module my_module "/fusion/base"
+      // ...
+    )
+  '''
+
+
   // Pass-through bindings from kernel
   // TODO FUSION-133 remove `use`
   (provide all_defined_out begin define if lambda letrec module provide
