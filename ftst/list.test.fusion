@@ -2,7 +2,6 @@
 
 (require
   "/check"
-  "/fusion/function"
   "/fusion/list"
   "/fusion/unsafe/list")
 
@@ -338,10 +337,10 @@
     [123, 204, 567]))
 
 // Check than `any` returns the last predicate result if none are truthy
-(check_pred (predicate_and is_null is_int)
+(check_pred (conjoin is_null is_int)
   (any (lambda (s) (if (is_void s) null.int null))
     [false, (void)] ))
-(check_pred (predicate_and is_null is_int)
+(check_pred (conjoin is_null is_int)
   (any (lambda (s) (if (is_null s) null.int null))
     [false, null.bool]))
 (check_void

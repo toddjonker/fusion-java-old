@@ -2,7 +2,6 @@
 
 (require
   "/check"
-  "/fusion/function"
   "/fusion/list"
   "/fusion/struct")
 
@@ -184,7 +183,7 @@
     {f:123, f:204, f:567}))
 
 // Check than it returns the last predicate result if none are truthy
-(check_pred (predicate_and is_null is_int)
+(check_pred (conjoin is_null is_int)
   (any (lambda (s) null.int)
     {a:false, b:(void)}))
 (check_pred is_null_null

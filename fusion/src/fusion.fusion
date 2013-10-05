@@ -92,8 +92,9 @@ contact us for clarification.
   //=========================================================================
   // Procedures
 
-  (require "/fusion/function")
-  (provide always apply compose identity is_procedure lambda negate thunk)
+  (require "/fusion/procedure")
+  (provide always apply compose conjoin disjoin identity is_procedure lambda
+    negate thunk)
 
 
   //=========================================================================

@@ -1,0 +1,85 @@
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/check"
+  "/fusion/procedure"
+  "/fusion/iterator"
+  "/fusion/list")
+
+
+(define boom (lambda rest (assert false "boom")))
+
+
+//==========================================================================
+// always
+
+(define ten (always 10))
+
+(check = (ten) 10)
+(check = (ten 1) 10)
+(check = (ten 1 2 3) 10)
+(check = (apply ten [{}, true, "hi"]) 10)
+
+
+//==========================================================================
+// thunk
+
+(check = ((thunk 1 2 3)) 3)
+
+(let [(x 0)]
+  (let [(t (thunk (set x (+ 1 x)) x))]
+    (check = x 0)
+    (check = (t) 1)
+    (check = x 1)))
+
+
+//==========================================================================
+// compose
+
+(check_equal ((compose list (always 46)) 22) [46] "46")
+(check_equal ((compose identity list) 47) [47] "47")
+
+(define add1 (lambda (x) (+ x 1)))
+(define add2 (compose add1 add1))
+(define add3 (compose add1 add2))
+(check = (add3 4) 7)
+
+(define list1 (compose list_from_iterator value_iterator))
+(check_equal (list1 12) [12] "12")
+
+
+//==========================================================================
+// conjoin
+
+(define is_zero (conjoin is_int (lambda (i) (= i 0))))
+(check_true  (is_zero 0))
+(check_false (is_zero 1))
+(check_false (is_zero 0.))
+
+// Ensure extra predicates aren't called
+(check_false ((conjoin (always false) boom) true))
+
+
+//==========================================================================
+// disjoin
+
+(define is_num (disjoin is_int is_decimal))
+(check_true  (is_num 0))
+(check_true  (is_num 1))
+(check_true  (is_num 1.23))
+(check_true  (is_num 0.))
+(check_false (is_num "1"))
+(check_false (is_num 2012-11-15))
+
+// Ensure extra predicates aren't called
+(check_true ((disjoin is_int boom) 1))
+
+
+//==========================================================================
+// negate
+
+(define is_not_null (negate is_null))
+(check_true  (is_not_null 1))
+(check_false (is_not_null null))
+
+(check_true ((negate is_not_null) null))

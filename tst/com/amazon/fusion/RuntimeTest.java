@@ -112,7 +112,6 @@ public class RuntimeTest
     public void testNullInjection()
         throws Exception
     {
-        topLevel().requireModule("/fusion/function");
         Object fv = topLevel().call("identity", (Object) null);
         assertTrue(isVoid(topLevel(), fv));
 

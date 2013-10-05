@@ -1,0 +1,103 @@
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+
+(module procedure "/fusion/base"
+
+  // WARNING: Doc syntax isn't supported yet.
+  '''
+Operators for creating and manipulating procedures.
+  '''
+
+  (require
+    "/fusion/experimental/defines"
+    "/fusion/experimental/syntax")
+
+
+  (provide apply is_procedure lambda)
+
+
+  (defpub identity
+    (lambda (v)
+      '''
+Returns `v`.
+      '''
+      v))
+
+
+  (defpub always
+    (lambda (v)
+      '''
+Returns a procedure that accepts (and ignores) any number of arguments and
+always returns `v`.
+      '''
+      (lambda rest v)))
+
+
+  (defpub_syntax thunk
+    '''
+    (thunk body ...+)
+
+Returns a zero-argument procedure that evaluates the `body` forms.
+    '''
+    (lambda (stx)
+      (when (= 1 (syntax_size stx))
+        (wrong_syntax stx "Expected at least one body form"))
+      (let [(body (syntax_subseq stx 1))]
+        (syntax_append
+          (quote_syntax (lambda ()))
+          body))))
+
+
+  (defpub compose
+    (lambda (p1 p2)
+      '''
+Returns a procedure that first applies `p2` to its (single) argument, and then
+applies `p1` to the (single) result.
+      '''
+      (lambda (x)
+        (p1 (p2 x)))))
+
+  //==========================================================================
+
+  // Name comes from Dylan.
+  (defpub conjoin
+   (lambda (p1 p2)
+     '''
+Returns a single-argument predicate that is the conjunction of the
+single-argument predicates `p1` and `p2` as with `and`, applying them left to
+right until one returns an untruthy value.
+
+In other words, the result is similar to using `and` to compose calls to the
+predicates.
+      '''
+      (lambda (x)
+        (and (p1 x) (p2 x)))))
+
+  //==========================================================================
+
+  // Name comes from Dylan.
+  (defpub disjoin
+   (lambda (p1 p2)
+      '''
+Returns a single-argument predicate that is the disjunction of the
+single-argument predicates `p1` and `p2` as with `or`, applying them left to
+right until one returns a truthy value.
+
+In other words, the result is similar to using `or` to compose calls to the
+predicates.
+      '''
+      (lambda (x)
+        (or (p1 x) (p2 x)))))
+
+  //==========================================================================
+
+  // Name comes from Racket; Dylan calls this `complement`.
+  (defpub negate
+   (lambda (p)
+      '''
+Returns a single-argument procedure that applies `not` to the result of the
+single-argument procedure `p`.
+      '''
+      (lambda (x)
+        (not (p x)))))
+
+) // end module

@@ -4,60 +4,23 @@
 
   // WARNING: Doc syntax isn't supported yet.
   '''
-Higher-order procedure combinators.
+DEPRECATED: Use /fusion/procedure instead.
   '''
 
   (require
     "/fusion/experimental/defines"
-    "/fusion/experimental/syntax")
+    "/fusion/procedure")
 
+  (provide always compose identity negate thunk)
 
-  (defpub identity
-    (lambda (v)
-      '''
-Returns `v`.
-      '''
-      v))
-
-
-  (defpub always
-    (lambda (v)
-      '''
-Returns a procedure that accepts any number of arguments and always returns
-`v`.  Any arguments are ignored.
-      '''
-      (lambda rest v)))
-
-
-  (defpub_syntax thunk
-    '''
-    (thunk body ...+)
-
-Returns a zero-argument procedure that evaluates the `body` forms.
-    '''
-    (lambda (stx)
-      (when (= 1 (syntax_size stx))
-        (wrong_syntax stx "Expected at least one body form"))
-      (let [(body (syntax_subseq stx 1))]
-        (syntax_append
-          (quote_syntax (lambda ()))
-          body))))
-
-
-  (defpub compose
-    (lambda (p1 p2)
-      '''
-Returns a procedure that first applies `p2` to its (single) argument, and then
-applies `p1` to the (single) result.
-      '''
-      (lambda (x)
-        (p1 (p2 x)))))
 
   //==========================================================================
 
   (defpub predicate_and
    (lambda (p1 p2)
      '''
+DEPRECATED: Use `conjoin` instead.
+
 Returns a single-argument predicate that is the composition of the
 single-argument predicates `p1` and `p2` as with `and`, applying them left to
 right until one returns an untruthy value.
@@ -65,14 +28,15 @@ right until one returns an untruthy value.
 In other words, the result is similar to using `and` to compose calls to the
 predicates.
       '''
-      (lambda (x)
-        (and (p1 x) (p2 x)))))
+      (conjoin p1 p2)))
 
   //==========================================================================
 
   (defpub predicate_or
    (lambda (p1 p2)
       '''
+DEPRECATED: Use `disjoin` instead.
+
 Returns a single-argument predicate that is the composition of the
 single-argument predicates `p1` and `p2` as with `or`, applying them left to
 right until one returns a truthy value.
@@ -80,18 +44,6 @@ right until one returns a truthy value.
 In other words, the result is similar to using `or` to compose calls to the
 predicates.
       '''
-      (lambda (x)
-        (or (p1 x) (p2 x)))))
-
-  //==========================================================================
-
-  (defpub negate
-   (lambda (p)
-      '''
-Returns a single-argument procedure that applies `not` to the result of the
-single-argument procedure `p`.
-      '''
-      (lambda (x)
-        (not (p x)))))
+      (disjoin p1 p2)))
 
 ) // end module

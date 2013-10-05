@@ -1,6 +1,6 @@
 // Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
 
-(module ref "/fusion/base"
+(module ref "/fusion"
 
   '''
 *EXTREMELY EXPERIMENTAL AND UNSTABLE* "path" operators.
@@ -12,7 +12,6 @@ code.
   (require
     "/fusion/experimental/defines"
     "/fusion/experimental/syntax"
-    "/fusion/function"
     "/fusion/list"
     "/fusion/sequence")
 

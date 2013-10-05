@@ -2,7 +2,6 @@
 
 (require
   "/check"
-  "/fusion/function"
   "/fusion/list")
 
 
@@ -125,10 +124,10 @@
     (sexp 123 204 567)))
 
 // Check than it returns the last predicate result if none are truthy
-(check_pred (predicate_and is_null is_int)
+(check_pred (conjoin is_null is_int)
   (any (lambda (s) (if (is_void s) null.int null))
     (sexp false (void))))
-(check_pred (predicate_and is_null is_int)
+(check_pred (conjoin is_null is_int)
   (any (lambda (s) (if (is_null s) null.int null))
     (sexp false null.int)))
 (check_void

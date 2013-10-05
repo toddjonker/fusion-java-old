@@ -38,7 +38,6 @@ public class ListTest
     public void testListInjection()
         throws Exception
     {
-        topLevel().requireModule("/fusion/function");
         IonList list = (IonList) system().singleValue("a::[1]");
         Object result = topLevel().call("identity", list);
         result = runtime().ionize(result, system());
@@ -298,7 +297,6 @@ public class ListTest
         IonValue boom =
             system().singleValue("[ [ { value:1 } ], [ { value:2 } ] ]");
 
-        topLevel().requireModule("/fusion/function");
         topLevel().define("$t", boom);
 
         assertEval(2, "(. (apply append_m $t) 1 \"value\")");
