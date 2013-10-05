@@ -4,7 +4,7 @@
 // language.  Unlike imports via `use`, language bindings can be
 // shadowed within a module body.
 
-(module local '/fusion/base'
+(module local "/fusion"
 
   (define apply 99)
 

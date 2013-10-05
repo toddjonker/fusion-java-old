@@ -26,7 +26,7 @@
   [] "eval 4")
 
 
-(define ns (make_namespace_with_language "/fusion/base"))
+(define ns (make_namespace_with_language "/fusion"))
 
 (eval (quote (define something 1150)) ns)
 (check_equal (eval (quote something) ns) 1150 "eval 1150")

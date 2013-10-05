@@ -17,7 +17,7 @@
 
 
 // Check that module-level `begin` is spliced.
-(module begin_splice '/fusion/base'
+(module begin_splice "/fusion"
   (begin
     (define top "top")
     (begin

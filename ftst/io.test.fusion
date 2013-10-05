@@ -1,8 +1,6 @@
 // Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
 
-(require
-  "/check"
-  "/fusion/io")
+(require "/check")
 
 
 // This assumes that current_directory is at the project root.

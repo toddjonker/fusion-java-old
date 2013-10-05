@@ -15,14 +15,14 @@
 (check_exn // exn:fail?
   (lambda ()
     (eval (quote
-      (module M '/fusion/base'
+      (module M "/fusion"
          (if true (provide if) true))))))   // ERROR: not at module level
 
 
 //============================================================================
 // Should be able to provide something twice
 
-(module Twice '/fusion/base'
+(module Twice "/fusion"
   (define twice 2)
   (provide twice)
   (provide twice))
@@ -34,7 +34,7 @@
 //============================================================================
 // Check simple all_defined_out
 
-(module M1 '/fusion/base'
+(module M1 "/fusion"
   (define m1 1)
   (define m2 2)
   (provide (all_defined_out)))
@@ -49,7 +49,7 @@
 
 (define top "at-top")
 
-(module M2 '/fusion/base'
+(module M2 "/fusion"
   (require "/fusion/experimental/syntax")
   (define_syntax deftop
     (lambda (stx)
@@ -66,7 +66,7 @@
 (deftop "macro")         // Defines a different top, with marks from the macro
 (check = top "at-top")
 
-(module M3 '/fusion/base'
+(module M3 "/fusion"
   (require M2)
   (deftop "inside M3")
   // This should not export top since it was introduced via macro
@@ -76,7 +76,7 @@
 (check = top "at-top")
 
 
-(module M4 '/fusion/base'
+(module M4 "/fusion"
   (require M2)
   // This DOES export top
   (defpubtop "inside M4"))
@@ -89,7 +89,7 @@
 (check_exn // exn:fail?
   (lambda ()
     (eval (quote
-      (module M5 '/fusion/base'
+      (module M5 "/fusion"
         (require M2)
         (define top "M5")
         (provide top)

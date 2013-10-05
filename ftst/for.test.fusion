@@ -2,8 +2,7 @@
 
 (require
   "/check"
-  "/fusion/for"
-  "/fusion/list")
+  "/fusion/for")
 
 
 (check_list_equal

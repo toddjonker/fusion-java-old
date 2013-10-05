@@ -2,9 +2,7 @@
 
 (require
   "/check"
-  "/fusion/experimental/syntax"
-  "/fusion/list"
-  "/fusion/sexp")
+  "/fusion/experimental/syntax")
 
 (define id (quote_syntax identifier))
 (define some_syntax (quote_syntax (op arg)))

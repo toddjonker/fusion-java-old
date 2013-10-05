@@ -42,7 +42,7 @@ public class NamespaceTest
             }
         });
 
-        eval("(callback (make_namespace_with_language \"/fusion/base\"))");
+        eval("(callback (make_namespace_with_language \"/fusion\"))");
     }
 
 

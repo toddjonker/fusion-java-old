@@ -2,11 +2,8 @@
 
 (require
   "/check"
-  "/fusion/collection"
   "/fusion/experimental/altlambda"
-  "/fusion/experimental/ref"
-  "/fusion/function"
-  "/fusion/list")
+  "/fusion/experimental/ref")
 
 (define I identity)
 

@@ -3,8 +3,7 @@
 (require
   "/check"
   "/fusion/function"
-  "/fusion/list"
-  "/fusion/sexp")
+  "/fusion/list")
 
 
 (define valNull  (quote null.sexp))

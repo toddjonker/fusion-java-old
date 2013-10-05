@@ -5,17 +5,17 @@
 
 (require "/check")
 
-(module leaf '/fusion/base'
+(module leaf "/fusion"
   (provide leaf_fn leaf_var)
   (define leaf_var 437)
   (define leaf_fn (lambda () leaf_var)))
 
-(module mid '/fusion/base'
+(module mid "/fusion"
   (require leaf)
   (provide mid_fn)
   (define mid_fn leaf_fn))
 
-(module root '/fusion/base'
+(module root "/fusion"
   (require leaf)
   (define root_fn leaf_fn)
   (require mid)

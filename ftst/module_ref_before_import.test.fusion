@@ -2,12 +2,12 @@
 
 // Test that imports into a module are scoped across the entire module body.
 
-(module local1 '/fusion/base'
+(module local1 "/fusion"
   (define value 143)
   (provide value)
 )
 
-(module local2 '/fusion/base'
+(module local2 "/fusion"
 
   // Reference to `value` before it has been imported.
   (define result (+ value 1))

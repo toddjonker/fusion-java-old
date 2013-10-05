@@ -7,7 +7,7 @@
 
 
 // This module tests that we can use 'let' where 'lambda' is not visible.
-(module reftrans1 '/let'
+(module reftrans1 "/let"
   (define one
     (let ((x 1))
       x))
@@ -16,7 +16,7 @@
 
 
 // This module tests that we can use 'let' where 'lambda' is rebound.
-(module reftrans2 '/let'
+(module reftrans2 "/let"
 
   (define lambda 99)
 
@@ -43,7 +43,7 @@
 (check_equal two 2 "")
 
 
-(module reftrans3 '/fusion/base'
+(module reftrans3 "/fusion"
   (require "/fusion/experimental/syntax")
 
   // This tests that we can use 'my3' when it's not exported.

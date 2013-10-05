@@ -7,8 +7,7 @@
 (require
   "/check"
   "/fusion/eval"
-  "/fusion/experimental/syntax"
-  "/fusion/string")
+  "/fusion/experimental/syntax")
 
 // Keywords can't be used as argument names
 (check_compile_exn
@@ -47,7 +46,7 @@
 (check_exn // exn:fail?
   (lambda ()
     (eval (quote
-      (module M "/fusion/base"
+      (module M "/fusion"
         (define _top_ 1))))))
 
 

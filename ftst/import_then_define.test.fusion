@@ -1,9 +1,8 @@
 // Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
 
+(require "/check")
 
-(require
-  "/check"
-  "/fusion/base")
+
 // Test that we can define a name that's already imported.
 //  That's legal at top-level, but not at module-level
 

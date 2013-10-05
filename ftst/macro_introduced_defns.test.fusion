@@ -14,7 +14,7 @@
 (define_c)
 
 // Similar, but within a module.  Here `d` is unbound where it occurs.
-(module M1 '/fusion/base'
+(module M1 "/fusion"
   (require "/fusion/experimental/syntax")
   (define_syntax define_d
     (lambda (stx)
@@ -41,7 +41,7 @@
 
 
 // Similar for macro exported from a module
-(module M2 '/fusion/base'
+(module M2 "/fusion"
   (require "/fusion/experimental/syntax")
   (define_syntax define_top
     (lambda (stx)
@@ -58,7 +58,7 @@
 
 
 // Now try using the macro at module level
-(module M3 '/fusion/base'
+(module M3 "/fusion"
   (require M2 "/check")
   (define top "in_M3")
   (define_top "macro_in1" get_top_in1)

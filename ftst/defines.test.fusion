@@ -2,8 +2,7 @@
 
 (require
   "/check"
-  "/defpub_use"
-  "/fusion/base")
+  "/defpub_use")
 
 (check_equal jonny 39 "defpub exported var")
 

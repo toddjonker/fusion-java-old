@@ -1,4 +1,6 @@
-(module import_defined '/fusion/base'
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(module import_defined "/fusion"
 
   (define dupe 3)
 

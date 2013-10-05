@@ -1,8 +1,6 @@
 // Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
 
-(require
-  "/check"
-  "/fusion/base")
+(require "/check")
 
 
 // Test that we can import a name that's already defined.

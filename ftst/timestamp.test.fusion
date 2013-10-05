@@ -1,8 +1,6 @@
 // Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
 
-(require
-  "/check"
-  "/fusion/timestamp")
+(require "/check")
 
 
 // Here's the bindings we expect to be available:

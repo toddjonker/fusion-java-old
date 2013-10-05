@@ -1,4 +1,6 @@
-(module dupe_define '/fusion/base'
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(module dupe_define "/fusion"
 
   (define dupe 1)
 

@@ -12,7 +12,7 @@
   (check = ('#%top' my_top) "at-top"))
 
 
-(module T '/fusion/base'
+(module T "/fusion"
   (define my_top "in-T")
   (provide my_top))
 (require T)
@@ -27,13 +27,13 @@
 (check_exn // exn:fail?
   (lambda ()
     (eval (quote
-      (module M '/fusion/base'
+      (module M "/fusion"
         (define my_top "in-M")
         (let [(my_top "shadow")]
           ('#%top' my_top)))))))   // ERROR
 
 
-(module M '/fusion/base'
+(module M "/fusion"
   (require "/check" "/fusion/experimental/syntax")
   (define dummy "Force my_top here to have different address from top-level")
   (define my_top "in-M")

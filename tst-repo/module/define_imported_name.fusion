@@ -1,4 +1,6 @@
-(module define_imported '/fusion/base'
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(module define_imported "/fusion"
 
   (requre "/module/require/dupe1")
 
