@@ -8,6 +8,13 @@
 
   //  (| x ... | body ...)  ->  (lambda (x ...) body ...)
 
+  //  (|| body ...) -> (lambda () body ...)
+
+
+  //  (|<| proc arg0 arg1)   -> (curryl proc arg0 arg1 /*...*/)
+  //  (|>| proc argm argn)   -> (curryr proc /*...*/ argm argn)
+
+
   (provide |)
   (define_syntax |
     (lambda (stx)
