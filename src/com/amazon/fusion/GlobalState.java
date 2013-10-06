@@ -156,8 +156,7 @@ final class GlobalState
 
         ns.define("=", new FusionCompare.EqualProc());
 
-        ModuleInstance kernel = ns.build();
-        registry.register(kernel);
+        ModuleInstance kernel = ns.buildAndRegister();
 
         GlobalState globals =
             new GlobalState(system, kernel, resolver, loadHandler, requireForm,
