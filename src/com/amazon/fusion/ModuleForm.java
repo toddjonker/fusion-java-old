@@ -68,7 +68,8 @@ final class ModuleForm
 
 
 
-        SyntaxSymbol moduleNameSymbol = check.requiredSymbol("module name", 1);
+        SyntaxSymbol moduleNameSymbol =
+            check.requiredIdentifier("module name", 1);
         ModuleIdentity.validateLocalName(moduleNameSymbol);
 
         ModuleRegistry registry = envOutsideModule.namespace().getRegistry();

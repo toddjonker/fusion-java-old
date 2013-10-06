@@ -35,13 +35,13 @@ final class SyntaxGetProc
                 case LIST:
                 case SEXP:
                 {
-                    long index = checkLongArg(i, args);
+                    int index = checkIntArg(i, args);
                     SyntaxSequence s = (SyntaxSequence) stx;
                     if (s.size() <= index)
                     {
                         return voidValue(eval);
                     }
-                    value = s.get(eval, (int) index);
+                    value = s.get(eval, index);
                     break;
                 }
                 case STRUCT:

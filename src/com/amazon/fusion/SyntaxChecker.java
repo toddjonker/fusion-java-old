@@ -159,16 +159,6 @@ class SyntaxChecker
     }
 
 
-    @Deprecated
-    final String requiredNonEmptySymbol(String expectation, int argNum)
-        throws FusionException
-    {
-        SyntaxSymbol sym = requiredSymbol(expectation, argNum);
-        // TODO check emptyness
-        return sym.stringValue();
-    }
-
-
     final <T extends SyntaxValue> T checkSyntax(Class<T> klass,
                                                String expectation,
                                                boolean nullable,
