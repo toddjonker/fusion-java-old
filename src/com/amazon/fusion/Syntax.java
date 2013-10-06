@@ -73,9 +73,7 @@ final class Syntax
             }
             case DECIMAL:
             {
-                // TODO WORKAROUND ION-290 this check shouldn't be needed
-                Decimal value =
-                    (source.isNullValue() ? null : source.decimalValue());
+                Decimal value = source.decimalValue();
                 return SyntaxDecimal.make(value, anns, loc);
             }
             case FLOAT:
