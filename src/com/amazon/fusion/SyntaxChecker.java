@@ -147,7 +147,7 @@ class SyntaxChecker
                 "expected " + expectation + ", not a keyword";
             throw failure(message, form);
         }
-        // TODO check emptyness
+        // TODO FUSION-204 check emptyness
         return checkSyntax(SyntaxSymbol.class, expectation,
                            false /* nullable */, form);
     }

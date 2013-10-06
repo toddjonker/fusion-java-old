@@ -354,7 +354,7 @@ final class SyntaxSymbol
                 assert getAnnotations().length == 0;
                 SyntaxSexp topExpr = SyntaxSexp.make(expander, top, this);
 
-                // TODO TAIL
+                // TODO FUSION-207 tail expand
                 return expander.expandExpression(env, topExpr);
             }
         }

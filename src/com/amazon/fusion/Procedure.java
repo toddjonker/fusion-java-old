@@ -192,7 +192,7 @@ abstract class Procedure
         try
         {
             IonInt iv = (IonInt) castToIonValueMaybe(args[argNum]);
-            // TODO range check
+            // TODO FUSION-205 range check
             return iv.longValue();
         }
         catch (ClassCastException e)   {}

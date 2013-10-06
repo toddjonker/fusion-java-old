@@ -528,7 +528,7 @@ final class SyntaxSexp
                 assert expander.expand(env, first) == first;
                 // else the next stmt must change
 
-                // TODO tail expand
+                // TODO FUSION-207 tail expand
 
                 // We use the same expansion context as we already have.
                 // Don't need to replace the sexp since we haven't changed it.

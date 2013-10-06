@@ -38,7 +38,7 @@ abstract class MacroForm
     {
         SyntaxValue expanded = expandOnce(expander, stx);
 
-        // TODO tail
+        // TODO FUSION-207 tail expand
         return expander.expand(env, expanded);
     }
 
