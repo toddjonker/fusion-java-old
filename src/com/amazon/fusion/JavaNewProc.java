@@ -45,16 +45,6 @@ final class JavaNewProc
             result = callConstructor(constructor, constructorArgs);
         }
 
-        result = eval.injectMaybe(result);
-
-        if (result == null)
-        {
-            String message =
-                "Java class cannot be injected into the Fusion runtime: " +
-                className;
-            throw contractFailure(message);
-        }
-
         return result;
     }
 
