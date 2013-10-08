@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -240,5 +242,24 @@ public class ModuleTest
              "  (require '/fusion/experimental/syntax')" +
              "  (define_syntax broken (lambda (s) x))" +
              "  (provide broken))");
+    }
+
+
+    @Test
+    public void testModuleCircularity()
+        throws Exception
+    {
+        try
+        {
+            topLevel().requireModule("/cycle0");
+            fail("Expected exception");
+        }
+        catch (FusionException e)
+        {
+            String message = e.getMessage();
+            assertTrue(message.contains("/cycle1"));
+            assertTrue(message.contains("/cycle2"));
+            assertTrue(message.contains("/cycle3"));
+        }
     }
 }

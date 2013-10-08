@@ -7,12 +7,17 @@ import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static com.amazon.ion.util.IonTextUtils.printString;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  *
  */
 final class ModuleNameResolver
 {
+    /** Private continuation mark to detect module cycles. */
+    private static final Object MODULE_LOADING_MARK =
+        new DynamicParameter(null);
+
     private final LoadHandler myLoadHandler;
     private final DynamicParameter myCurrentLoadRelativeDirectory;
     private final DynamicParameter myCurrentDirectory;
@@ -350,6 +355,32 @@ final class ModuleNameResolver
     }
 
 
+    private void checkForCycles(Evaluator eval, Object moduleId)
+        throws FusionException
+    {
+        ArrayList<Object> marks =
+            eval.continuationMarks(MODULE_LOADING_MARK);
+
+        for (int i = 0; i < marks.size(); i++)
+        {
+            if (marks.get(i).equals(moduleId))
+            {
+                // Found a cycle!
+                StringBuilder message = new StringBuilder();
+                message.append("Module dependency cycle detected: ");
+                for ( ; i >= 0; i--)
+                {
+                    message.append(marks.get(i));
+                    message.append(" -> ");
+                }
+                message.append(moduleId);
+
+                throw new FusionException(message.toString());
+            }
+        }
+    }
+
+
     private ModuleIdentity loadModule(Evaluator eval, ModuleIdentity id)
         throws FusionException
     {
@@ -364,8 +395,13 @@ final class ModuleNameResolver
             if (reg.lookup(id) == null)
             {
                 Object idString = eval.newString(id.internString());
+
+                checkForCycles(eval, idString);
+
                 Evaluator loadEval =
-                    eval.markedContinuation(myCurrentModuleDeclareName, idString);
+                    eval.markedContinuation(new Object[]{ myCurrentModuleDeclareName,
+                                                          MODULE_LOADING_MARK },
+                                            new Object[]{ idString, idString });
                 myLoadHandler.loadModule(loadEval, id);
                 // Evaluation of 'module' registers the ModuleInstance
             }
