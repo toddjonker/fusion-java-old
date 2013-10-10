@@ -83,21 +83,6 @@
 
 
 //==========================================================================
-// struct_ref
-
-(check_void (struct_ref null.struct "x" void))
-(check_void (struct_ref null.struct "x" (void)))
-(check = (struct_ref null.struct "x" 1157) 1157)
-
-(check = (struct_ref {} "x" 1158) 1158)
-(check = (struct_ref {f:1} "x" 1159) 1159)
-
-(check = (struct_ref {f:1} "f" 1159) 1)
-(check = (struct_ref {f:1, g:2} "g" 1159) 2)
-(check = (struct_ref {f:1, g:"h"} "h" (always 1201)) 1201)
-
-
-//==========================================================================
 // struct_zip
 
 (check ion_equals (struct_zip ["f"] [3]) {f:3})
@@ -218,8 +203,8 @@
 (check_void
   (any (lambda (s) (void))
     {a:false, b:null.int, c:null.list}))
-    
-    
+
+
 //==========================================================================
 // every
 
@@ -245,7 +230,7 @@
 (check = 1134
   (every (lambda (e) (when (or (= e 123) (= e 567)) (* e 2)))
     {f:123, g:123, h:567}))
-    
+
 
 //==========================================================================
 // do

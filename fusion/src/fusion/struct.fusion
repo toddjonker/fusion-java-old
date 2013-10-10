@@ -41,25 +41,6 @@ The procedures `remove_keys` and `retain_keys` functionally eliminate fields
 from a struct without modifying the input.  `struct_merge` combines the fields
 from two structs.
 
-## Accessing Structs
-
-The basic operation for retrieving values from a struct is `struct_ref` which
-accepts a (string or symbol) field name and a default result for use when the
-field doesn't exist in the struct:
-
-    (struct_ref {city:"Seattle", zip:98102} "zip" 0)  =>  98102
-    (struct_ref {city:"Seattle", zip:98102} "zap" 0)  =>  0
-
-If the default result is a procedure, it's called with no arguments for the
-default value:
-
-    (struct_ref {city:"Seattle", zip:98102} "zap" (lambda () 0))  => 0
-
-Most often, you'll want to use `void` which is a procedure that returns the
-void value:
-
-    (struct_ref {city:"Seattle", zip:98102} "zap" void)  =>  {{{void}}}
-
 
 ## Iterating Struct Fields
 
@@ -77,7 +58,7 @@ while the field values are iterated.
     "/fusion/experimental/defines"
     "/fusion/ffi/java"
     "/fusion/private/builtins"   // unsafe_struct_visit
-    "/fusion/unsafe/struct")
+    "/fusion/private/struct")
 
 
   // Pass-through bindings from /fusion/private/kernel
@@ -93,39 +74,6 @@ while the field values are iterated.
   (defpub_j struct_merge      "com.amazon.fusion.FusionStruct$StructMergeProc")
   (defpub_j struct_zip        "com.amazon.fusion.FusionStruct$StructZipProc")
 
-
-  (provide struct_ref)
-  (define (struct_ref struct name default)
-    '''
-    (struct_ref struct name default)
-
-Returns the value associated with `name` in `struct`.  The `name` must be a
-string or symbol.  If no field exists with the name, the `default` is used; if
-it is _not_ a procedure, it's returned as-is:
-
-    (struct_ref {city:"Seattle", zip:98102} "zip" 0)  =>  98102
-    (struct_ref {city:"Seattle", zip:98102} "zap" 0)  =>  0
-
-If `default` _is_ a procedure, it's called (in tail position) with no
-arguments:
-
-    (struct_ref {city:"Seattle", zip:98102} "zap" (lambda () 0))  => 0
-
-Most often, you'll want to use `void` so as to default to the void value:
-
-    (struct_ref {city:"Seattle", zip:98102} "zap" void)  =>  {{{void}}}
-    '''
-    (unless (is_struct struct)
-      (raise_argument_error "struct_ref" "struct" 0 struct name default))
-    (unless (and (or (is_string name) (is_symbol name))
-                 name)  // null check
-      (raise_argument_error "struct_ref" "non-null string or symbol"
-        1 struct name default))
-    (unsafe_struct_ref struct name default))
-
-
-  // TODO FUSION-93 struct mutability
-  //   * remove_keys_m
 
   // Name per Racket, where for-each is for side effects.
   (defpub struct_for_each
