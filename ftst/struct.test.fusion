@@ -48,6 +48,32 @@
 
 
 //==========================================================================
+// has_key
+
+(check_false (has_key null.struct ""))
+(check_false (has_key null.struct null.string))
+(check_false (has_key null.struct 2))
+
+(check_false (has_key {} ""))
+(check_false (has_key {} null.string))
+(check_false (has_key {} 2))
+
+(check_false (has_key {a:1, b:2, c:3} ""))
+(check_false (has_key {a:1, b:2, c:3} null.string))
+(check_false (has_key {a:1, b:2, c:3} 2))
+
+
+(check_true (has_key {a:1, b:2, c:3} "a"))
+(check_true (has_key {a:1, b:2, c:3} (quote a)))
+(check_true (has_key {a:null  } "a"))
+(check_true (has_key {a:false } "a"))
+(check_true (has_key {a:(void)} "a"))
+
+(check_arity_exn (has_key))
+(check_arity_exn (has_key {}))
+
+
+//==========================================================================
 // struct_merge
 
 (check ion_equals (struct_merge {} {}) {})

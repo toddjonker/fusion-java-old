@@ -19,6 +19,7 @@ See also [sequence](fusion/sequence.html).
     "/fusion/private/compare"
     "/fusion/private/control"
     "/fusion/private/sexp"
+    "/fusion/private/struct"
     "/fusion/unsafe/list"
     "/fusion/unsafe/sexp"
     "/fusion/unsafe/struct"
@@ -26,6 +27,38 @@ See also [sequence](fusion/sequence.html).
 
 
   (provide size)
+
+
+  (defpub has_key
+    (lambda (collection key)
+      (cond
+        ((is_struct collection)
+         (if (and (or (is_string key) (is_symbol key))
+                  key)  // null check
+           (unsafe_struct_has_key collection key)
+           false))
+        //-
+        ((is_list collection)
+         (if (and (is_int key)
+                  key          // null check
+                  (< key (unsafe_list_size collection))
+                  (<= 0 key))
+           true
+           false))
+        //-
+        ((is_sexp collection)
+         (if (and (is_int key)
+                  key  // null check
+                  (<= 0 key))
+           (let loop [(key key), (s collection)]
+             (if (is_pair s)
+               (or (= 0 key)
+                 (loop (- key 1) (unsafe_pair_tail s)))
+               false))
+           false))
+        //-
+        (true
+         (raise_argument_error "element" "collection" 0 collection key)))))
 
 
   (defpub element

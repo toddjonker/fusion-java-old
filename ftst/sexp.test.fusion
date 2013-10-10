@@ -68,6 +68,36 @@
 
 
 //==========================================================================
+// has_key
+
+(check_false (has_key valNull ""))
+(check_false (has_key valNull null.int))
+(check_false (has_key valNull -1))
+(check_false (has_key valNull 0))
+(check_false (has_key valNull 1))
+
+(check_false (has_key valEmpty ""))
+(check_false (has_key valEmpty null.int))
+(check_false (has_key valEmpty -1))
+(check_false (has_key valEmpty 0))
+(check_false (has_key valEmpty 1))
+
+(check_false (has_key val12 null.string))
+(check_false (has_key val12 -1))
+(check_false (has_key val12 3))
+
+(check_true (has_key val12 0))
+(check_true (has_key val12 1))
+
+(check_true (has_key (sexp null)   0))
+(check_true (has_key (sexp false)  0))
+(check_true (has_key (sexp (void)) 0))
+
+(check_arity_exn (has_key))
+(check_arity_exn (has_key []))
+
+
+//==========================================================================
 // first
 
 (check = (first (quote (1))) 1)
