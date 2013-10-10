@@ -336,7 +336,7 @@
   (any (lambda (e) (when (= e 567) (* e 2)))
     [123, 204, 567]))
 
-// Check than `any` returns the last predicate result if none are truthy
+// Check that `any` returns the last predicate result if none are truthy
 (check_pred (conjoin is_null is_int)
   (any (lambda (s) (if (is_void s) null.int null))
     [false, (void)] ))
@@ -346,6 +346,31 @@
 (check_void
   (any (lambda (s) (if (is_null s) (void) null))
     [false, null.int, null.list]))
+    
+    
+//==========================================================================
+// every
+
+(check_true (every T null.list))
+(check_true (every T []))
+(check_false (every F [1, 2]))
+(check_true  (every T [1, 2]))
+
+(check_false (every (lambda (e) (= e "hi")) ["oh", "hi"]))
+(check_true  (every (lambda (e) (= e "hi")) ["hi", "hi"]))
+
+// Check that it returns the untruthy predicate result
+(check_void
+  (every (lambda (e) (when (= e 204) e))
+    [123, 204, 567]))
+(check_pred is_null
+  (every (lambda (e) (if (= e 123) e null))
+    [123, 456, 678]))
+
+// Check that `every` returns the last predicate result if all are truthy
+(check = 1134
+  (every (lambda (e) (when (or (= e 123) (= e 567)) (* e 2)))
+    [123, 123, 567]))
 
 
 //==========================================================================

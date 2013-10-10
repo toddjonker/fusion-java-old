@@ -23,7 +23,7 @@ types.
     "/fusion/unsafe/list")
 
   // Pass-through bindings from /fusion/collection
-  (provide any do find is_empty size)
+  (provide any do every find is_empty size)
 
 
   (defpub_j add    "com.amazon.fusion.AddProc")

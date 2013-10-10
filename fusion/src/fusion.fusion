@@ -64,7 +64,7 @@ contact us for clarification.
   // Collection Types
 
   (require "/fusion/collection")
-  (provide . any do element elt find is_empty size)
+  (provide . any do element elt every find is_empty size)
 
   (require "/fusion/sequence")
   (provide add choose first last map)
