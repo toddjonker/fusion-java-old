@@ -1,6 +1,6 @@
 // Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
-(module base '/fusion/private/builtins'
+(module base "/fusion/private/builtins"
 
   // WARNING: Doc syntax isn't supported yet.
   '''
@@ -27,12 +27,12 @@ To use this dialect for your module, declare it as follows:
 
 
   // Pass-through bindings from builtins
-  (provide let let_values quote set '#%top')
+  (provide let let_values quote '#%top')
   (provide apply exit is_null is_null_null is_procedure not)
 
 
   (require "/fusion/collection")
-  (provide . any do element elt find is_empty size)
+  (provide element elt is_empty size)
 
   (require "/fusion/private/bind")
   (provide lets)
@@ -44,7 +44,7 @@ To use this dialect for your module, declare it as follows:
   (provide and or when unless cond)
 
   (require "/fusion/number")
-  (provide + - * / int_to_string string_to_int)
+  (provide + - * /)
 
   (require "/fusion/void")
   (provide is_void void)

@@ -18,6 +18,8 @@ change at any time.  If you have any questions about supported behavior,
 contact us for clarification.
   '''
 
+  (require "/fusion/private/builtins")  // For `set`
+
 
   // Top-Level Forms
   (provide begin define)
