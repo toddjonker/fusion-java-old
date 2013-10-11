@@ -118,6 +118,9 @@ public class CoreTestCase
         return myRuntime;
     }
 
+    /**
+     * Gets the default TopLevel from the {@link #runtime()}.
+     */
     protected TopLevel topLevel()
         throws FusionException
     {
@@ -132,11 +135,18 @@ public class CoreTestCase
     //========================================================================
     // Basic evaluation
 
+
+    protected Object eval(TopLevel top, String expressionIon)
+        throws FusionException
+    {
+        return top.load(expressionIon);
+    }
+
     protected Object eval(String expressionIon)
         throws FusionException
     {
         TopLevel top = topLevel();
-        return top.load(expressionIon);
+        return eval(top, expressionIon);
     }
 
 
@@ -148,10 +158,10 @@ public class CoreTestCase
         return top.load(file);
     }
 
-    protected IonValue evalToIon(String source)
+    protected IonValue evalToIon(TopLevel top, String source)
         throws FusionException
     {
-        Object fv = eval(source);
+        Object fv = eval(top, source);
         IonValue iv = runtime().ionizeMaybe(fv, system());
         if (iv == null)
         {
@@ -159,6 +169,14 @@ public class CoreTestCase
         }
         return iv;
     }
+
+    protected IonValue evalToIon(String source)
+        throws FusionException
+    {
+        TopLevel top = topLevel();
+        return evalToIon(top, source);
+    }
+
 
     protected Procedure evalToProcedure(String expressionIon)
         throws FusionException
@@ -274,11 +292,18 @@ public class CoreTestCase
     //========================================================================
 
 
+    protected void assertEval(TopLevel top, IonValue expected, String source)
+        throws FusionException
+    {
+        IonValue iv = evalToIon(top, source);
+        assertEquals(source, expected, iv);
+    }
+
     protected void assertEval(IonValue expected, String source)
         throws FusionException
     {
-        IonValue iv = evalToIon(source);
-        assertEquals(source, expected, iv);
+        TopLevel top = topLevel();
+        assertEval(top, expected, source);
     }
 
     protected void assertEval(IonValue expected, IonValue source)
@@ -313,12 +338,22 @@ public class CoreTestCase
         assertEval(expected, expressionIon);
     }
 
-    protected void assertEval(int expectedInt, String expressionIon)
+
+    protected void assertEval(TopLevel top,
+                              int expectedInt, String expressionIon)
         throws FusionException
     {
         IonValue expected = mySystem.newInt(expectedInt);
-        assertEval(expected, expressionIon);
+        assertEval(top, expected, expressionIon);
     }
+
+    protected void assertEval(int expectedInt, String expressionIon)
+        throws FusionException
+    {
+        TopLevel top = topLevel();
+        assertEval(top, expectedInt, expressionIon);
+    }
+
 
     protected void assertEval(BigInteger expectedInt, String expressionIon)
         throws FusionException
