@@ -29,8 +29,11 @@ class ModuleIdentity
     static final String BUILTIN_NAME_EXPECTATION =
         "Expected an absolute module path";
 
+    /**
+     * Access to this map must be synchronized on it!
+     */
     private static final Map<String,ModuleIdentity> ourInternedIdentities =
-        new HashMap<String,ModuleIdentity>();
+        new HashMap<>();
 
 
 
@@ -83,12 +86,15 @@ class ModuleIdentity
 
     private static ModuleIdentity doIntern(String name)
     {
-        ModuleIdentity interned = ourInternedIdentities.get(name);
-        if (interned != null) return interned;
+        synchronized (ourInternedIdentities)
+        {
+            ModuleIdentity interned = ourInternedIdentities.get(name);
+            if (interned != null) return interned;
 
-        ModuleIdentity id = new ModuleIdentity(name);
-        ourInternedIdentities.put(name, id);
-        return id;
+            ModuleIdentity id = new ModuleIdentity(name);
+            ourInternedIdentities.put(name, id);
+            return id;
+        }
     }
 
 
@@ -126,12 +132,15 @@ class ModuleIdentity
 
     static ModuleIdentity locate(String absoluteModulePath)
     {
-        return ourInternedIdentities.get(absoluteModulePath);
+        synchronized (ourInternedIdentities)
+        {
+            return ourInternedIdentities.get(absoluteModulePath);
+        }
     }
 
     static ModuleIdentity locateLocal(ModuleRegistry reg, String name)
     {
-        return ourInternedIdentities.get(localPath(reg, name));
+        return locate(localPath(reg, name));
     }
 
     /**
@@ -141,7 +150,7 @@ class ModuleIdentity
      */
     static ModuleIdentity reIntern(String name)
     {
-        ModuleIdentity interned = ourInternedIdentities.get(name);
+        ModuleIdentity interned = locate(name);
         assert interned != null;
         return interned;
     }
@@ -153,27 +162,30 @@ class ModuleIdentity
         assert modulePath.startsWith("/");
         assert resource.startsWith("/");
 
-        ModuleIdentity interned = ourInternedIdentities.get(modulePath);
-        if (interned != null) return interned;
-
-        ModuleIdentity id = new ModuleIdentity(modulePath)
+        synchronized (ourInternedIdentities)
         {
-            @Override
-            public String identify()
-            {
-                return internString() + " (at classpath:" + resource + ")";
-            }
+            ModuleIdentity interned = ourInternedIdentities.get(modulePath);
+            if (interned != null) return interned;
 
-            @Override
-            InputStream open()
-                throws IOException
+            ModuleIdentity id = new ModuleIdentity(modulePath)
             {
-                return getClass().getResourceAsStream(resource);
-            }
-        };
+                @Override
+                public String identify()
+                {
+                    return internString() + " (at classpath:" + resource + ")";
+                }
 
-        ourInternedIdentities.put(modulePath, id);
-        return id;
+                @Override
+                InputStream open()
+                    throws IOException
+                {
+                    return getClass().getResourceAsStream(resource);
+                }
+            };
+
+            ourInternedIdentities.put(modulePath, id);
+            return id;
+        }
     }
 
 
@@ -182,33 +194,36 @@ class ModuleIdentity
         assert modulePath.startsWith("/");
         assert file.isAbsolute();
 
-        ModuleIdentity interned = ourInternedIdentities.get(modulePath);
-        if (interned != null) return interned;
-
-        ModuleIdentity id = new ModuleIdentity(modulePath)
+        synchronized (ourInternedIdentities)
         {
-            @Override
-            public String identify()
-            {
-                return internString() + " (at file:" + file + ")";
-            }
+            ModuleIdentity interned = ourInternedIdentities.get(modulePath);
+            if (interned != null) return interned;
 
-            @Override
-            InputStream open()
-                throws IOException
+            ModuleIdentity id = new ModuleIdentity(modulePath)
             {
-                return new FileInputStream(file);
-            }
+                @Override
+                public String identify()
+                {
+                    return internString() + " (at file:" + file + ")";
+                }
 
-            @Override
-            String parentDirectory()
-            {
-                return file.getParentFile().getAbsolutePath();
-            }
-        };
+                @Override
+                InputStream open()
+                    throws IOException
+                {
+                    return new FileInputStream(file);
+                }
 
-        ourInternedIdentities.put(modulePath, id);
-        return id;
+                @Override
+                String parentDirectory()
+                {
+                    return file.getParentFile().getAbsolutePath();
+                }
+            };
+
+            ourInternedIdentities.put(modulePath, id);
+            return id;
+        }
     }
 
     private final String myName;
