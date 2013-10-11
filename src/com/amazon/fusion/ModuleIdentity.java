@@ -4,13 +4,13 @@ package com.amazon.fusion;
 
 import static com.amazon.ion.util.IonTextUtils.symbolVariant;
 import static com.amazon.ion.util.IonTextUtils.SymbolVariant.IDENTIFIER;
-import static java.lang.System.identityHashCode;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 /**
@@ -35,6 +35,13 @@ class ModuleIdentity
     private static final Map<String,ModuleIdentity> ourInternedIdentities =
         new HashMap<>();
 
+    /**
+     * Counts the number of synthetic top-level module identities that have
+     * been created.
+     *
+     * @see #forTopLevel()
+     */
+    private static final AtomicLong ourTopLevelCounter = new AtomicLong();
 
 
     private static Pattern NAME_PATTERN =
@@ -98,10 +105,10 @@ class ModuleIdentity
     }
 
 
-    private static String localPath(ModuleRegistry reg, String name)
+    private static String localPath(Namespace ns, String name)
     {
         assert isValidLocalName(name) : name;
-        return TOP_LEVEL_MODULE_PREFIX + identityHashCode(reg) + '/' + name;
+        return ns.getModuleId().internString() + '/' + name;
     }
 
 
@@ -111,9 +118,9 @@ class ModuleIdentity
      *
      * @see #isValidLocalName(String)
      */
-    static ModuleIdentity internLocalName(ModuleRegistry reg, String name)
+    static ModuleIdentity internLocalName(Namespace ns, String name)
     {
-        String path = localPath(reg, name);
+        String path = localPath(ns, name);
         return doIntern(path);
     }
 
@@ -138,9 +145,29 @@ class ModuleIdentity
         }
     }
 
-    static ModuleIdentity locateLocal(ModuleRegistry reg, String name)
+    // TODO merge with above?
+    /**
+     * @param baseModule must not be null.
+     * @param relativePath must not be null.
+     * @return null if the referenced module hasn't been interned.
+     */
+    static ModuleIdentity locateRelative(ModuleIdentity baseModule,
+                                         String relativePath)
     {
-        return locate(localPath(reg, name));
+        assert ! relativePath.startsWith("/");
+        String basePath = baseModule.relativeBasePath();
+        return locate(basePath + relativePath);
+    }
+
+
+    /**
+     * Looks for an interned local module ID, but doesn't intern a new one.
+     *
+     * @return null if the local module hasn't been interned.
+     */
+    static ModuleIdentity locateLocal(Namespace ns, String name)
+    {
+        return locate(localPath(ns, name));
     }
 
     /**
@@ -155,6 +182,29 @@ class ModuleIdentity
         return interned;
     }
 
+
+    /**
+     * Creates a <em>non-interned</em> identity for a top-level namespace.
+     *
+     * @return a fresh, non-interned identity.
+     */
+    static ModuleIdentity forTopLevel()
+    {
+        // TODO In a long-running service this could overflow.
+        String path =
+            TOP_LEVEL_MODULE_PREFIX + ourTopLevelCounter.incrementAndGet();
+
+        ModuleIdentity id = new ModuleIdentity(path)
+        {
+            @Override
+            String relativeBasePath()
+            {
+                return internString() + "/";
+            }
+        };
+
+        return id;
+    }
 
     static ModuleIdentity internFromClasspath(String modulePath,
                                               final String resource)
@@ -268,6 +318,23 @@ class ModuleIdentity
         int slashIndex = myName.lastIndexOf('/');
         if (slashIndex == -1) return myName;
         return myName.substring(slashIndex + 1);
+    }
+
+    String relativeBasePath()
+    {
+        String path = myName;
+        int slashIndex = path.lastIndexOf('/');
+        assert slashIndex >= 0;
+        if (slashIndex == 0)
+        {
+            path = "/";
+        }
+        else
+        {
+            path = path.substring(0, slashIndex + 1);
+        }
+
+        return path;
     }
 
 

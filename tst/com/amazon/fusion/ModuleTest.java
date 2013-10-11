@@ -262,4 +262,22 @@ public class ModuleTest
             assertTrue(message.contains("/cycle3"));
         }
     }
+
+
+    @Test
+    public void testTopLevelLocalModuleIsolation()
+        throws Exception
+    {
+        TopLevel top1 = topLevel();
+        TopLevel top2 = runtime().makeTopLevel();
+
+        top1.load("(module M '/fusion' (define v 1) (provide v))");
+        top2.load("(module M '/fusion' (define v 2) (provide v))");
+
+        top1.load("(require M)");
+        top2.load("(require M)");
+
+        assertEval(top1, 1, "v");
+        assertEval(top2, 2, "v");
+    }
 }

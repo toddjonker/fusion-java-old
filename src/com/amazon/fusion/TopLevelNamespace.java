@@ -377,16 +377,9 @@ class TopLevelNamespace
      */
     TopLevelNamespace(ModuleRegistry registry)
     {
-        super(registry, new SyntaxWrap[0]);
+        super(registry, ModuleIdentity.forTopLevel(), new SyntaxWrap[0]);
         myRequiredModuleWraps = SyntaxWraps.make();
         addWrap(new TopLevelWrap(this));
-    }
-
-
-    @Override
-    ModuleIdentity getModuleId()
-    {
-        return null;
     }
 
 

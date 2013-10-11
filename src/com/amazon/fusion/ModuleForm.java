@@ -77,7 +77,7 @@ final class ModuleForm
         ModuleIdentity id;
         try
         {
-            id = determineIdentity(eval, moduleNameSymbol);
+            id = determineIdentity(eval, envOutsideModule, moduleNameSymbol);
         }
         catch (FusionException e)
         {
@@ -401,6 +401,7 @@ final class ModuleForm
     }
 
     private ModuleIdentity determineIdentity(Evaluator eval,
+                                             Environment envOutsideModule,
                                              SyntaxSymbol moduleNameSymbol)
         throws FusionException
     {
@@ -412,9 +413,13 @@ final class ModuleForm
         }
         else
         {
-            ModuleRegistry reg = eval.findCurrentNamespace().getRegistry();
+            Namespace outsideNs = envOutsideModule.namespace();
+
+            // current_namespace should be the top-level we're evaluating in.
+            assert outsideNs == eval.findCurrentNamespace();
+
             String declaredName = moduleNameSymbol.stringValue();
-            id = ModuleIdentity.internLocalName(reg, declaredName);
+            id = ModuleIdentity.internLocalName(outsideNs, declaredName);
         }
         return id;
     }

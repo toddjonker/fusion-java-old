@@ -76,8 +76,7 @@ final class ModuleNameResolver
      * Locates and loads a module, dispatching on the concrete syntax of the
      * request.
      *
-     * @param baseModule the starting point for relative references.
-     * If null, it indicates a reference from top-level.
+     * @param baseModule the starting point for relative references; not null.
      *
      * @throws ModuleNotFoundException if the module could not be found.
      */
@@ -125,7 +124,8 @@ final class ModuleNameResolver
         {
             SyntaxSymbol name = check.requiredSymbol("module name", 1);
 
-            ModuleRegistry reg = eval.findCurrentNamespace().getRegistry();
+            Namespace ns = eval.findCurrentNamespace();
+            ModuleRegistry reg = ns.getRegistry();
 
             ModuleIdentity id;
             if (ModuleIdentity.isValidBuiltinName(name.stringValue()))
@@ -134,9 +134,9 @@ final class ModuleNameResolver
             }
             else
             {
-                // These names are scoped by registry!
+                // These names are scoped by namespace!
                 ModuleIdentity.validateLocalName(name);
-                id = ModuleIdentity.locateLocal(reg, name.stringValue());
+                id = ModuleIdentity.locateLocal(ns, name.stringValue());
             }
 
             if (id == null || reg.lookup(id) == null)
@@ -151,6 +151,8 @@ final class ModuleNameResolver
 
 
     /**
+     * @param baseModule the starting point for relative references; not null.
+     *
      * @return null if the referenced module couldn't be located in the current
      * registry or any repository.
      */
@@ -165,12 +167,8 @@ final class ModuleNameResolver
         }
         else
         {
-            // TODO FUSION-152 Support relative module paths other than locals
-            ModuleRegistry reg = eval.findCurrentNamespace().getRegistry();
-            id = ModuleIdentity.locateLocal(reg, modulePath);
-
-            // We can't fall through: repositories wants an absolute path.
-            return id;
+            // Relative path
+            id = ModuleIdentity.locateRelative(baseModule, modulePath);
         }
 
         if (id == null)
@@ -234,8 +232,7 @@ final class ModuleNameResolver
      * Locates and loads a module from the registered repositories.
      *
      * @param eval the evaluation context.
-     * @param baseModule the starting point for relative references.
-     * If null, it indicates a reference from top-level.
+     * @param baseModule the starting point for relative references; not null.
      * @param modulePath must be a module path.
      * @param load should we load the module, or just determine its identity?
      * @param stxForErrors is used for error messaging; may be null.
@@ -264,7 +261,7 @@ final class ModuleNameResolver
 
         StringBuilder buf = new StringBuilder();
         buf.append("A module named ");
-        buf.append(printQuotedSymbol(modulePath));
+        buf.append(printString(modulePath));
         buf.append(" could not be found in the registered repositories.");
         buf.append(" The repositories are:\n");
         for (ModuleRepository repo : myRepositories)
