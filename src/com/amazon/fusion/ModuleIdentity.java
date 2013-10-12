@@ -226,6 +226,7 @@ class ModuleIdentity
         }
     }
 
+    /** Not null or empty */
     private final String myName;
 
     private ModuleIdentity(String name)
@@ -237,7 +238,7 @@ class ModuleIdentity
     InputStream open()
         throws IOException
     {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Cannot open " + myName);
     }
 
     String parentDirectory()
@@ -274,9 +275,7 @@ class ModuleIdentity
     public int hashCode()
     {
         final int prime = 31;
-        int result = 1;
-        result = prime * result + ((myName == null) ? 0 : myName.hashCode());
-        return result;
+        return prime + myName.hashCode();
     }
 
 
@@ -287,12 +286,7 @@ class ModuleIdentity
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         ModuleIdentity other = (ModuleIdentity) obj;
-        if (myName == null)
-        {
-            if (other.myName != null) return false;
-        }
-        else if ( !myName.equals(other.myName)) return false;
-        return true;
+        return myName.equals(other.myName);
     }
 
 
