@@ -121,7 +121,7 @@ languages, highlighting potential mutation of an argument.
   (provide list mutable_list stretchy_list)
 
   // Pass-through bindings from /fusion/sequence
-  (provide add any choose do find first is_empty last map size)
+  (provide . add any choose do element elt every find first has_key is_empty last map size)
 
   (defpub_j add_m           "com.amazon.fusion.AddMProc")
   (defpub_j append_m        "com.amazon.fusion.AppendMProc")

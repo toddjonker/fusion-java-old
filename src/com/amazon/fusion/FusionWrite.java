@@ -61,9 +61,10 @@ public final class FusionWrite
         }
         else
         {
-            out.append("{{{ ");
+            out.append(value.getClass().getName());
+            out.append("::{{{");
             out.append(value.toString());
-            out.append(" }}}");
+            out.append("}}}");
         }
     }
 
@@ -90,9 +91,10 @@ public final class FusionWrite
         }
         else
         {
-            out.append("{{{ ");
+            out.append(value.getClass().getName());
+            out.append("::{{{");
             out.append(value.toString());
-            out.append(" }}}");
+            out.append("}}}");
         }
     }
 

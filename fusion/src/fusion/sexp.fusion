@@ -22,6 +22,6 @@ sexps.
   (provide head is_pair is_sexp pair sexp tail)
 
   (require "/fusion/sequence")
-  (provide add any do find first is_empty last size)
+  (provide . add any do element elt every find first has_key is_empty last size)
 
 )

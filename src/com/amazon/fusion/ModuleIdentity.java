@@ -2,13 +2,13 @@
 
 package com.amazon.fusion;
 
-import static java.lang.System.identityHashCode;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 /**
@@ -27,9 +27,19 @@ class ModuleIdentity
     static final String BUILTIN_NAME_EXPECTATION =
         "Expected an absolute module path";
 
+    /**
+     * Access to this map must be synchronized on it!
+     */
     private static final Map<String,ModuleIdentity> ourInternedIdentities =
-        new HashMap<String,ModuleIdentity>();
+        new HashMap<>();
 
+    /**
+     * Counts the number of synthetic top-level module identities that have
+     * been created.
+     *
+     * @see #forTopLevel()
+     */
+    private static final AtomicLong ourTopLevelCounter = new AtomicLong();
 
 
     private static Pattern NAME_PATTERN =
@@ -72,19 +82,22 @@ class ModuleIdentity
 
     private static ModuleIdentity doIntern(String name)
     {
-        ModuleIdentity interned = ourInternedIdentities.get(name);
-        if (interned != null) return interned;
+        synchronized (ourInternedIdentities)
+        {
+            ModuleIdentity interned = ourInternedIdentities.get(name);
+            if (interned != null) return interned;
 
-        ModuleIdentity id = new ModuleIdentity(name);
-        ourInternedIdentities.put(name, id);
-        return id;
+            ModuleIdentity id = new ModuleIdentity(name);
+            ourInternedIdentities.put(name, id);
+            return id;
+        }
     }
 
 
-    private static String localPath(ModuleRegistry reg, String name)
+    private static String localPath(Namespace ns, String name)
     {
         assert isValidLocalName(name) : name;
-        return TOP_LEVEL_MODULE_PREFIX + identityHashCode(reg) + '/' + name;
+        return ns.getModuleId().internString() + '/' + name;
     }
 
 
@@ -94,9 +107,9 @@ class ModuleIdentity
      *
      * @see #isValidLocalName(String)
      */
-    static ModuleIdentity internLocalName(ModuleRegistry reg, String name)
+    static ModuleIdentity internLocalName(Namespace ns, String name)
     {
-        String path = localPath(reg, name);
+        String path = localPath(ns, name);
         return doIntern(path);
     }
 
@@ -115,12 +128,35 @@ class ModuleIdentity
 
     static ModuleIdentity locate(String absoluteModulePath)
     {
-        return ourInternedIdentities.get(absoluteModulePath);
+        synchronized (ourInternedIdentities)
+        {
+            return ourInternedIdentities.get(absoluteModulePath);
+        }
     }
 
-    static ModuleIdentity locateLocal(ModuleRegistry reg, String name)
+    // TODO merge with above?
+    /**
+     * @param baseModule must not be null.
+     * @param relativePath must not be null.
+     * @return null if the referenced module hasn't been interned.
+     */
+    static ModuleIdentity locateRelative(ModuleIdentity baseModule,
+                                         String relativePath)
     {
-        return ourInternedIdentities.get(localPath(reg, name));
+        assert ! relativePath.startsWith("/");
+        String basePath = baseModule.relativeBasePath();
+        return locate(basePath + relativePath);
+    }
+
+
+    /**
+     * Looks for an interned local module ID, but doesn't intern a new one.
+     *
+     * @return null if the local module hasn't been interned.
+     */
+    static ModuleIdentity locateLocal(Namespace ns, String name)
+    {
+        return locate(localPath(ns, name));
     }
 
     /**
@@ -130,11 +166,34 @@ class ModuleIdentity
      */
     static ModuleIdentity reIntern(String name)
     {
-        ModuleIdentity interned = ourInternedIdentities.get(name);
+        ModuleIdentity interned = locate(name);
         assert interned != null;
         return interned;
     }
 
+
+    /**
+     * Creates a <em>non-interned</em> identity for a top-level namespace.
+     *
+     * @return a fresh, non-interned identity.
+     */
+    static ModuleIdentity forTopLevel()
+    {
+        // TODO In a long-running service this could overflow.
+        String path =
+            TOP_LEVEL_MODULE_PREFIX + ourTopLevelCounter.incrementAndGet();
+
+        ModuleIdentity id = new ModuleIdentity(path)
+        {
+            @Override
+            String relativeBasePath()
+            {
+                return internString() + "/";
+            }
+        };
+
+        return id;
+    }
 
     static ModuleIdentity internFromClasspath(String modulePath,
                                               final String resource)
@@ -142,27 +201,30 @@ class ModuleIdentity
         assert modulePath.startsWith("/");
         assert resource.startsWith("/");
 
-        ModuleIdentity interned = ourInternedIdentities.get(modulePath);
-        if (interned != null) return interned;
-
-        ModuleIdentity id = new ModuleIdentity(modulePath)
+        synchronized (ourInternedIdentities)
         {
-            @Override
-            public String identify()
-            {
-                return internString() + " (at classpath:" + resource + ")";
-            }
+            ModuleIdentity interned = ourInternedIdentities.get(modulePath);
+            if (interned != null) return interned;
 
-            @Override
-            InputStream open()
-                throws IOException
+            ModuleIdentity id = new ModuleIdentity(modulePath)
             {
-                return getClass().getResourceAsStream(resource);
-            }
-        };
+                @Override
+                public String identify()
+                {
+                    return internString() + " (at classpath:" + resource + ")";
+                }
 
-        ourInternedIdentities.put(modulePath, id);
-        return id;
+                @Override
+                InputStream open()
+                    throws IOException
+                {
+                    return getClass().getResourceAsStream(resource);
+                }
+            };
+
+            ourInternedIdentities.put(modulePath, id);
+            return id;
+        }
     }
 
 
@@ -171,35 +233,39 @@ class ModuleIdentity
         assert modulePath.startsWith("/");
         assert file.isAbsolute();
 
-        ModuleIdentity interned = ourInternedIdentities.get(modulePath);
-        if (interned != null) return interned;
-
-        ModuleIdentity id = new ModuleIdentity(modulePath)
+        synchronized (ourInternedIdentities)
         {
-            @Override
-            public String identify()
-            {
-                return internString() + " (at file:" + file + ")";
-            }
+            ModuleIdentity interned = ourInternedIdentities.get(modulePath);
+            if (interned != null) return interned;
 
-            @Override
-            InputStream open()
-                throws IOException
+            ModuleIdentity id = new ModuleIdentity(modulePath)
             {
-                return new FileInputStream(file);
-            }
+                @Override
+                public String identify()
+                {
+                    return internString() + " (at file:" + file + ")";
+                }
 
-            @Override
-            String parentDirectory()
-            {
-                return file.getParentFile().getAbsolutePath();
-            }
-        };
+                @Override
+                InputStream open()
+                    throws IOException
+                {
+                    return new FileInputStream(file);
+                }
 
-        ourInternedIdentities.put(modulePath, id);
-        return id;
+                @Override
+                String parentDirectory()
+                {
+                    return file.getParentFile().getAbsolutePath();
+                }
+            };
+
+            ourInternedIdentities.put(modulePath, id);
+            return id;
+        }
     }
 
+    /** Not null or empty */
     private final String myName;
 
     private ModuleIdentity(String name)
@@ -211,7 +277,7 @@ class ModuleIdentity
     InputStream open()
         throws IOException
     {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Cannot open " + myName);
     }
 
     String parentDirectory()
@@ -243,14 +309,29 @@ class ModuleIdentity
         return myName.substring(slashIndex + 1);
     }
 
+    String relativeBasePath()
+    {
+        String path = myName;
+        int slashIndex = path.lastIndexOf('/');
+        assert slashIndex >= 0;
+        if (slashIndex == 0)
+        {
+            path = "/";
+        }
+        else
+        {
+            path = path.substring(0, slashIndex + 1);
+        }
+
+        return path;
+    }
+
 
     @Override
     public int hashCode()
     {
         final int prime = 31;
-        int result = 1;
-        result = prime * result + ((myName == null) ? 0 : myName.hashCode());
-        return result;
+        return prime + myName.hashCode();
     }
 
 
@@ -261,12 +342,7 @@ class ModuleIdentity
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         ModuleIdentity other = (ModuleIdentity) obj;
-        if (myName == null)
-        {
-            if (other.myName != null) return false;
-        }
-        else if ( !myName.equals(other.myName)) return false;
-        return true;
+        return myName.equals(other.myName);
     }
 
 

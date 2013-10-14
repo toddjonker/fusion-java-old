@@ -68,6 +68,36 @@
 
 
 //==========================================================================
+// has_key
+
+(check_false (has_key valNull ""))
+(check_false (has_key valNull null.int))
+(check_false (has_key valNull -1))
+(check_false (has_key valNull 0))
+(check_false (has_key valNull 1))
+
+(check_false (has_key valEmpty ""))
+(check_false (has_key valEmpty null.int))
+(check_false (has_key valEmpty -1))
+(check_false (has_key valEmpty 0))
+(check_false (has_key valEmpty 1))
+
+(check_false (has_key val12 null.string))
+(check_false (has_key val12 -1))
+(check_false (has_key val12 3))
+
+(check_true (has_key val12 0))
+(check_true (has_key val12 1))
+
+(check_true (has_key (sexp null)   0))
+(check_true (has_key (sexp false)  0))
+(check_true (has_key (sexp (void)) 0))
+
+(check_arity_exn (has_key))
+(check_arity_exn (has_key []))
+
+
+//==========================================================================
 // first
 
 (check = (first (quote (1))) 1)
@@ -133,7 +163,32 @@
 (check_void
   (any (lambda (s) (if (is_null s) (void) null))
     (sexp false null.int null.list)))
+    
 
+//==========================================================================
+// every
+
+(check_true (every T valNull))
+(check_true (every T valEmpty))
+(check_false (every F val12))
+(check_true  (every T val12))
+
+(check_false (every (lambda (e) (= e "hi")) (sexp "oh" "hi")))
+(check_true  (every (lambda (e) (= e "hi")) (sexp "hi" "hi")))
+    
+// Check that it returns the untruthy predicate result
+(check_void
+  (every (lambda (e) (when (= e 204) e))
+    (sexp 123 204 567)))
+(check_pred is_null
+  (every (lambda (e) (if (= e 123) e null))
+    (sexp 123 456 678)))
+    
+// Check that `every` returns the last predicate result if all are truthy
+(check = 1134
+  (every (lambda (e) (when (or (= e 123) (= e 567)) (* e 2)))
+    (sexp 123 123 567)))
+    
 
 //==========================================================================
 // TODO map not implemented for sexp

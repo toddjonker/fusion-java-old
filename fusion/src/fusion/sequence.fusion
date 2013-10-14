@@ -23,7 +23,7 @@ types.
     "/fusion/unsafe/list")
 
   // Pass-through bindings from /fusion/collection
-  (provide any do find is_empty size)
+  (provide . any do element elt every find has_key is_empty size)
 
 
   (defpub_j add    "com.amazon.fusion.AddProc")
@@ -56,6 +56,7 @@ elements.
 
   // Name per Dylan.  I prefer `choose` over `filter` because the latter is
   // ambiguous whether you're filtering "in" or "out".
+  // TODO FUSION-143 implement for sexp
   (defpub choose
     (lambda (pred list)
       '''
@@ -79,6 +80,7 @@ a new list of the elements (in order) for which `pred` returns truthy.
 
   // Name per Dylan and SRFI-1. Dylan allows mapping over multiple key-value
   // collections but that's a bit crazy and it's unclear how useful that is.
+  // TODO FUSION-143 implement for sexp
   (defpub map
     (lambda (proc list)
       '''

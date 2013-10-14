@@ -144,7 +144,7 @@ class ModuleNamespace
         }
     }
 
-    private final ModuleIdentity myModuleId;
+
 
     /**
      * The wraps for our used modules, then our language.  This allows us to
@@ -162,8 +162,7 @@ class ModuleNamespace
     private ModuleNamespace(ModuleRegistry registry, ModuleIdentity moduleId,
                             SequenceWrap wrap)
     {
-        super(registry, wrap);
-        myModuleId = moduleId;
+        super(registry, moduleId, wrap);
         myUsedModuleWraps = wrap;
     }
 
@@ -175,8 +174,7 @@ class ModuleNamespace
      */
     ModuleNamespace(ModuleRegistry registry, ModuleIdentity moduleId)
     {
-        super(registry);
-        myModuleId = moduleId;
+        super(registry, moduleId);
         myUsedModuleWraps = null;
     }
 
@@ -197,13 +195,6 @@ class ModuleNamespace
         // Also, this structure lets up lookup bindings in the module first
         // before proceeding on to imports and the language.
         addWrap(new ModuleWrap(this));
-    }
-
-
-    @Override
-    ModuleIdentity getModuleId()
-    {
-        return myModuleId;
     }
 
 

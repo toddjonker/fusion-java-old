@@ -282,6 +282,9 @@ final class FusionStruct
         abstract ImmutableStruct transformFields(StructFieldVisitor visitor)
             throws FusionException;
 
+        abstract boolean hasKey(Evaluator eval, String key)
+            throws FusionException;
+
         /** Returns void if the field doesn't exist. */
         abstract Object dot(Evaluator eval, String field)
             throws FusionException;
@@ -349,6 +352,13 @@ final class FusionStruct
         NullStruct transformFields(StructFieldVisitor visitor)
         {
             return this;
+        }
+
+        @Override
+        boolean hasKey(Evaluator eval, String key)
+            throws FusionException
+        {
+            return false;
         }
 
         @Override
@@ -547,6 +557,13 @@ final class FusionStruct
             if (! mustReplaceThis) return this;
 
             return new NonNullImmutableStruct(newMap, myAnnotations);
+        }
+
+        @Override
+        boolean hasKey(Evaluator eval, String key)
+            throws FusionException
+        {
+            return myMap.get(key) != null;
         }
 
         Object get(String fieldName)
@@ -777,6 +794,28 @@ final class FusionStruct
 
 
 
+    static final class UnsafeStructHasKeyProc
+        extends Procedure
+    {
+        UnsafeStructHasKeyProc()
+        {
+            //    "                                                                               |
+            super("UNSUPPORTED.  `name` must be text.",
+                  "struct", "name");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            BaseStruct s = (BaseStruct) args[0];
+            String key = checkTextArg(1, args);    // TODO reduce safety checks
+            return eval.newBool(s.hasKey(eval, key));
+        }
+    }
+
+
+
     static final class UnsafeStructRefProc
         extends Procedure
     {
@@ -795,7 +834,7 @@ final class FusionStruct
             throws FusionException
         {
             BaseStruct s = (BaseStruct) args[0];
-            String name = checkTextArg(1, args);
+            String name = checkTextArg(1, args);   // TODO reduce safety checks
             return s.ref(eval, name, args[2]);
         }
     }

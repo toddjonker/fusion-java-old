@@ -1,0 +1,11 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(module struct '/fusion/private/builtins'
+
+  (require
+    "/fusion/experimental/defines")
+
+  (defpub_j unsafe_struct_has_key
+    "com.amazon.fusion.FusionStruct$UnsafeStructHasKeyProc")
+
+)

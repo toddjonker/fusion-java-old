@@ -103,6 +103,38 @@
 (check_equal (unsafe_list_size mut2) 2 "mut unsafe size 2")
 (check_equal (unsafe_list_size str2) 2 "str unsafe size 2")
 
+
+//==========================================================================
+// has_key
+
+(check_false (has_key null.list ""))
+(check_false (has_key null.list null.int))
+(check_false (has_key null.list -1))
+(check_false (has_key null.list 0))
+(check_false (has_key null.list 1))
+
+(check_false (has_key [] ""))
+(check_false (has_key [] null.int))
+(check_false (has_key [] -1))
+(check_false (has_key [] 0))
+(check_false (has_key [] 1))
+
+(check_false (has_key [1,2,3] null.string))
+(check_false (has_key [1,2,3] -1))
+(check_false (has_key [1,2,3] 3))
+
+(check_true (has_key [1,2,3] 0))
+(check_true (has_key [1,2,3] 1))
+(check_true (has_key [1,2,3] 2))
+
+(check_true (has_key [null]   0))
+(check_true (has_key [false]  0))
+(check_true (has_key [(void)] 0))
+
+(check_arity_exn (has_key))
+(check_arity_exn (has_key []))
+
+
 //==========================================================================
 // list_element
 
@@ -336,7 +368,7 @@
   (any (lambda (e) (when (= e 567) (* e 2)))
     [123, 204, 567]))
 
-// Check than `any` returns the last predicate result if none are truthy
+// Check that `any` returns the last predicate result if none are truthy
 (check_pred (conjoin is_null is_int)
   (any (lambda (s) (if (is_void s) null.int null))
     [false, (void)] ))
@@ -346,6 +378,31 @@
 (check_void
   (any (lambda (s) (if (is_null s) (void) null))
     [false, null.int, null.list]))
+    
+    
+//==========================================================================
+// every
+
+(check_true (every T null.list))
+(check_true (every T []))
+(check_false (every F [1, 2]))
+(check_true  (every T [1, 2]))
+
+(check_false (every (lambda (e) (= e "hi")) ["oh", "hi"]))
+(check_true  (every (lambda (e) (= e "hi")) ["hi", "hi"]))
+
+// Check that it returns the untruthy predicate result
+(check_void
+  (every (lambda (e) (when (= e 204) e))
+    [123, 204, 567]))
+(check_pred is_null
+  (every (lambda (e) (if (= e 123) e null))
+    [123, 456, 678]))
+
+// Check that `every` returns the last predicate result if all are truthy
+(check = 1134
+  (every (lambda (e) (when (or (= e 123) (= e 567)) (* e 2)))
+    [123, 123, 567]))
 
 
 //==========================================================================

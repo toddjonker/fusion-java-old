@@ -35,8 +35,8 @@ There are three "styles" of output:
 
 
   (require
-    "/fusion/base"
-    "/fusion/experimental/defines")
+    "/fusion/experimental/defines"
+    "/fusion/private/builtins")
 
 
   // Pass-through bindings from /fusion/private/kernel

@@ -5,8 +5,6 @@
   (require
     "/fusion/exception"
     "/fusion/experimental/defines"
-    "/fusion/number"
-    "/fusion/private/control"
     "/fusion/unsafe/sexp"
     "/fusion/void")
 

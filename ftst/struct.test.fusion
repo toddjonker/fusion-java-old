@@ -48,6 +48,32 @@
 
 
 //==========================================================================
+// has_key
+
+(check_false (has_key null.struct ""))
+(check_false (has_key null.struct null.string))
+(check_false (has_key null.struct 2))
+
+(check_false (has_key {} ""))
+(check_false (has_key {} null.string))
+(check_false (has_key {} 2))
+
+(check_false (has_key {a:1, b:2, c:3} ""))
+(check_false (has_key {a:1, b:2, c:3} null.string))
+(check_false (has_key {a:1, b:2, c:3} 2))
+
+
+(check_true (has_key {a:1, b:2, c:3} "a"))
+(check_true (has_key {a:1, b:2, c:3} (quote a)))
+(check_true (has_key {a:null  } "a"))
+(check_true (has_key {a:false } "a"))
+(check_true (has_key {a:(void)} "a"))
+
+(check_arity_exn (has_key))
+(check_arity_exn (has_key {}))
+
+
+//==========================================================================
 // struct_merge
 
 (check ion_equals (struct_merge {} {}) {})
@@ -192,7 +218,34 @@
 (check_void
   (any (lambda (s) (void))
     {a:false, b:null.int, c:null.list}))
+    
+    
+//==========================================================================
+// every
 
+(check_true (every T null.struct))
+(check_true (every T {}))
+(check_false (every F {f:1, g:2}))
+(check_true  (every T {f:1, g:2}))
+
+(check_false (every (lambda (e) (= e "hi")) {f:"oh", g:"hi"}))
+(check_true  (every (lambda (e) (= e "hi")) {f:"hi", g:"hi"}))
+
+(check =    (every (lambda (e) (when (= e "hi") e)) {f:"hi", g:"hi"}) "hi")
+
+// Check that it returns the untruthy predicate result
+(check_void
+  (every (lambda (e) (when (= e 204) e))
+    {f:123, f:204, f:567}))
+(check_pred is_null
+  (every (lambda (e) (if (= e 123) e null))
+    {f:123, f:456, f:678}))
+
+// Check that `every` returns the last predicate result if all are truthy
+(check = 1134
+  (every (lambda (e) (when (or (= e 123) (= e 567)) (* e 2)))
+    {f:123, g:123, h:567}))
+    
 
 //==========================================================================
 // do

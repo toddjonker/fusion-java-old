@@ -14,6 +14,7 @@ import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -342,6 +343,34 @@ final class Evaluator
             e = e.myOuterFrame;
         }
         return null;
+    }
+
+
+    /**
+     * Collects all marks for {@code key} in the current continuation,
+     * with the most recent mark first.
+     *
+     * @return a non-null list.
+     */
+    ArrayList<Object> continuationMarks(Object key)
+    {
+        // The keys must be hashable and equals-able!
+        assert key instanceof DynamicParameter;
+
+        ArrayList<Object> results = new ArrayList<>();
+
+        Evaluator e = this;
+        while (e.myOuterFrame != null)
+        {
+            Object value = e.myContinuationMarks.get(key);
+            if (value != null)
+            {
+                results.add(value);
+            }
+            e = e.myOuterFrame;
+        }
+
+        return results;
     }
 
 

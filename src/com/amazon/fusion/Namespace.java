@@ -94,6 +94,7 @@ abstract class Namespace
     }
 
     private final ModuleRegistry myRegistry;
+            final ModuleIdentity myModuleId;
 
     /**
      * Assigns required modules to integer addresses, for use in compiled
@@ -109,17 +110,20 @@ abstract class Namespace
     private final ArrayList<Object>    myValues   = new ArrayList<>();
     private ArrayList<BindingDoc> myBindingDocs;
 
-    Namespace(ModuleRegistry registry)
+
+    Namespace(ModuleRegistry registry, ModuleIdentity id)
     {
         myRegistry = registry;
+        myModuleId = id;
 
         SyntaxWrap wrap = new EnvironmentRenameWrap(this);
         myWraps = SyntaxWraps.make(wrap);
     }
 
-    Namespace(ModuleRegistry registry, SyntaxWrap... wraps)
+    Namespace(ModuleRegistry registry, ModuleIdentity id, SyntaxWrap... wraps)
     {
         myRegistry = registry;
+        myModuleId = id;
         myWraps = SyntaxWraps.make(wraps);
     }
 
@@ -156,10 +160,15 @@ abstract class Namespace
 
     /**
      * Gets the identity of the module associated with this namespace.
+     * For non-module namespaces, this returns a synthetic identity that's
+     * unique amongst all namespaces.
      *
-     * @return null if this namespace isn't that of a module.
+     * @return not null.
      */
-    abstract ModuleIdentity getModuleId();
+    final ModuleIdentity getModuleId()
+    {
+        return myModuleId;
+    }
 
 
     /**

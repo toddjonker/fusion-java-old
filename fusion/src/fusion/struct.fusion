@@ -84,7 +84,7 @@ while the field values are iterated.
   (provide is_struct)
 
   // Pass-through bindings from /fusion/collection
-  (provide any do find is_empty size)
+  (provide . any do element elt every find has_key is_empty size)
 
 
   (defpub_j remove_keys       "com.amazon.fusion.FusionStruct$RemoveKeysProc")

@@ -3,14 +3,18 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.ModuleIdentity.isValidModulePath;
-import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static com.amazon.ion.util.IonTextUtils.printString;
+import java.util.ArrayList;
 
 /**
  *
  */
 final class ModuleNameResolver
 {
+    /** Private continuation mark to detect module cycles. */
+    private static final Object MODULE_LOADING_MARK =
+        new DynamicParameter(null);
+
     private final LoadHandler myLoadHandler;
     private final DynamicParameter myCurrentLoadRelativeDirectory;
     private final DynamicParameter myCurrentDirectory;
@@ -36,8 +40,7 @@ final class ModuleNameResolver
      * Locates and loads a module, dispatching on the concrete syntax of the
      * request.
      *
-     * @param baseModule the starting point for relative references.
-     * If null, it indicates a reference from top-level.
+     * @param baseModule the starting point for relative references; not null.
      *
      * @throws ModuleNotFoundException if the module could not be found.
      */
@@ -63,6 +66,8 @@ final class ModuleNameResolver
 
 
     /**
+     * @param baseModule the starting point for relative references; not null.
+     *
      * @return null if the referenced module couldn't be located in the current
      * registry or any repository.
      */
@@ -77,12 +82,8 @@ final class ModuleNameResolver
         }
         else
         {
-            // TODO FUSION-152 Support relative module paths other than locals
-            ModuleRegistry reg = eval.findCurrentNamespace().getRegistry();
-            id = ModuleIdentity.locateLocal(reg, modulePath);
-
-            // We can't fall through: repositories wants an absolute path.
-            return id;
+            // Relative path
+            id = ModuleIdentity.locateRelative(baseModule, modulePath);
         }
 
         if (id == null)
@@ -101,8 +102,7 @@ final class ModuleNameResolver
      * Locates and loads a module from the registered repositories.
      *
      * @param eval the evaluation context.
-     * @param baseModule the starting point for relative references.
-     * If null, it indicates a reference from top-level.
+     * @param baseModule the starting point for relative references; not null.
      * @param modulePath must be a module path.
      * @param load should we load the module, or just determine its identity?
      * @param stxForErrors is used for error messaging; may be null.
@@ -131,7 +131,7 @@ final class ModuleNameResolver
 
         StringBuilder buf = new StringBuilder();
         buf.append("A module named ");
-        buf.append(printQuotedSymbol(modulePath));
+        buf.append(printString(modulePath));
         buf.append(" could not be found in the registered repositories.");
         buf.append(" The repositories are:\n");
         for (ModuleRepository repo : myRepositories)
@@ -153,6 +153,32 @@ final class ModuleNameResolver
     }
 
 
+    private void checkForCycles(Evaluator eval, Object moduleId)
+        throws FusionException
+    {
+        ArrayList<Object> marks =
+            eval.continuationMarks(MODULE_LOADING_MARK);
+
+        for (int i = 0; i < marks.size(); i++)
+        {
+            if (marks.get(i).equals(moduleId))
+            {
+                // Found a cycle!
+                StringBuilder message = new StringBuilder();
+                message.append("Module dependency cycle detected: ");
+                for ( ; i >= 0; i--)
+                {
+                    message.append(marks.get(i));
+                    message.append(" -> ");
+                }
+                message.append(moduleId);
+
+                throw new FusionException(message.toString());
+            }
+        }
+    }
+
+
     private ModuleIdentity loadModule(Evaluator eval, ModuleIdentity id)
         throws FusionException
     {
@@ -167,8 +193,13 @@ final class ModuleNameResolver
             if (reg.lookup(id) == null)
             {
                 Object idString = eval.newString(id.internString());
+
+                checkForCycles(eval, idString);
+
                 Evaluator loadEval =
-                    eval.markedContinuation(myCurrentModuleDeclareName, idString);
+                    eval.markedContinuation(new Object[]{ myCurrentModuleDeclareName,
+                                                          MODULE_LOADING_MARK },
+                                            new Object[]{ idString, idString });
                 myLoadHandler.loadModule(loadEval, id);
                 // Evaluation of 'module' registers the ModuleInstance
             }
