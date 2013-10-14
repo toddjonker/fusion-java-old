@@ -30,10 +30,7 @@ public interface TopLevel
      * {@code Object[]} (if there are multiple values).
      *
      * @throws ExitException if the Fusion {@code exit} procedure is invoked.
-     *
-     * @deprecated Use {@link #load(IonReader,SourceName)} instead.
      */
-    @Deprecated  // TODO FUSION-187 remove eval()
     Object eval(IonReader source, SourceName name)
         throws ExitException, FusionException;
 
@@ -51,7 +48,10 @@ public interface TopLevel
      * {@code Object[]} (if there are multiple values).
      *
      * @throws ExitException if the Fusion {@code exit} procedure is invoked.
+     *
+     * @deprecated Use {@link #eval(IonReader,SourceName)} instead.
      */
+    @Deprecated
     Object load(IonReader source, SourceName name)
         throws ExitException, FusionException;
 
@@ -61,7 +61,7 @@ public interface TopLevel
      * Top-level {@code define} forms will alter the environment and will be
      * visible to later calls.
      * <p>
-     * {@link #load(IonReader,SourceName)} should be preferred to this method,
+     * {@link #eval(IonReader,SourceName)} should be preferred to this method,
      * since it can provide better error reporting.
      *
      * @param source Fusion source code, in Ion data format. Must not be null.
@@ -72,11 +72,8 @@ public interface TopLevel
      *
      * @throws ExitException if the Fusion {@code exit} procedure is invoked.
      *
-     * @see #load(IonReader,SourceName)
-     *
-     * @deprecated Use {@link #load(IonReader)} instead.
+     * @see #eval(IonReader,SourceName)
      */
-    @Deprecated  // TODO FUSION-187 remove eval()
     public Object eval(IonReader source)
         throws ExitException, FusionException;
 
@@ -86,7 +83,7 @@ public interface TopLevel
      * Top-level {@code define} forms will alter the environment and will be
      * visible to later calls.
      * <p>
-     * {@link #load(IonReader,SourceName)} should be preferred to this method,
+     * {@link #eval(IonReader,SourceName)} should be preferred to this method,
      * since it can provide better error reporting.
      *
      * @param source Fusion source code, in Ion data format. Must not be null.
@@ -97,8 +94,11 @@ public interface TopLevel
      *
      * @throws ExitException if the Fusion {@code exit} procedure is invoked.
      *
-     * @see #load(IonReader,SourceName)
+     * @see #eval(IonReader,SourceName)
+     *
+     * @deprecated Use {@link #eval(IonReader)} instead.
      */
+    @Deprecated
     public Object load(IonReader source)
         throws ExitException, FusionException;
 
@@ -116,9 +116,7 @@ public interface TopLevel
      * {@code Object[]} (if there are multiple values).
      *
      * @throws ExitException if the Fusion {@code exit} procedure is invoked.
-     * @deprecated Use {@link #load(String,SourceName)} instead
      */
-    @Deprecated  // TODO FUSION-187 remove eval()
     public Object eval(String source, SourceName name)
         throws ExitException, FusionException;
 
@@ -136,7 +134,10 @@ public interface TopLevel
      * {@code Object[]} (if there are multiple values).
      *
      * @throws ExitException if the Fusion {@code exit} procedure is invoked.
+     *
+     * @deprecated Use {@link #eval(String,SourceName)} instead
      */
+    @Deprecated
     public Object load(String source, SourceName name)
         throws ExitException, FusionException;
 
@@ -146,7 +147,7 @@ public interface TopLevel
      * Top-level {@code define} forms will alter the environment and will be
      * visible to later calls.
      * <p>
-     * {@link #load(String,SourceName)} should be preferred to this method,
+     * {@link #eval(String,SourceName)} should be preferred to this method,
      * since it can provide better error reporting.
      *
      * @param source Fusion source code, in Ion data format. Must not be null.
@@ -157,11 +158,8 @@ public interface TopLevel
      *
      * @throws ExitException if the Fusion {@code exit} procedure is invoked.
      *
-     * @see #load(String,SourceName)
-     *
-     * @deprecated Use {@link #load(String)} instead.
+     * @see #eval(String,SourceName)
      */
-    @Deprecated  // TODO FUSION-187 remove eval()
     public Object eval(String source)
         throws ExitException, FusionException;
 
@@ -171,7 +169,7 @@ public interface TopLevel
      * Top-level {@code define} forms will alter the environment and will be
      * visible to later calls.
      * <p>
-     * {@link #load(String,SourceName)} should be preferred to this method,
+     * {@link #eval(String,SourceName)} should be preferred to this method,
      * since it can provide better error reporting.
      *
      * @param source Fusion source code, in Ion data format. Must not be null.
@@ -182,8 +180,11 @@ public interface TopLevel
      *
      * @throws ExitException if the Fusion {@code exit} procedure is invoked.
      *
-     * @see #load(String,SourceName)
+     * @see #eval(String,SourceName)
+     *
+     * @deprecated Use {@link #eval(String)} instead.
      */
+    @Deprecated
     public Object load(String source)
         throws ExitException, FusionException;
 

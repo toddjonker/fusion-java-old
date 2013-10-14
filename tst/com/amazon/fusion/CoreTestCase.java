@@ -139,7 +139,7 @@ public class CoreTestCase
     protected Object eval(TopLevel top, String expressionIon)
         throws FusionException
     {
-        return top.load(expressionIon);
+        return top.eval(expressionIon);
     }
 
     protected Object eval(String expressionIon)
