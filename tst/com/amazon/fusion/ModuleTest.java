@@ -221,11 +221,11 @@ public class ModuleTest
         TopLevel top1 = topLevel();
         TopLevel top2 = runtime().makeTopLevel();
 
-        top1.load("(module M '/fusion' (define v 1) (provide v))");
-        top2.load("(module M '/fusion' (define v 2) (provide v))");
+        top1.eval("(module M '/fusion' (define v 1) (provide v))");
+        top2.eval("(module M '/fusion' (define v 2) (provide v))");
 
-        top1.load("(require M)");
-        top2.load("(require M)");
+        top1.eval("(require M)");
+        top2.eval("(require M)");
 
         assertEval(top1, 1, "v");
         assertEval(top2, 2, "v");
