@@ -59,7 +59,9 @@ final class RequireForm
     CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        // TODO Should we resolve the name at compile-time or run-time?
+        // We resolve the name at compile-time, noting that for `require`
+        // the form is immediately evaluated. I don't want to think about what
+        // would happen if resolving at runtime gave a different result.
 
         ModuleIdentity baseModule = env.namespace().getModuleId();
         int arity = stx.size();

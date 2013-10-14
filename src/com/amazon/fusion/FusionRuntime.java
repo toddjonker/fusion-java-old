@@ -36,7 +36,8 @@ public interface FusionRuntime
         throws FusionException;
 
     /**
-     * Returns a fresh {@link TopLevel} instance.
+     * Returns a fresh {@link TopLevel} instance, bootstrapped with the
+     * {@code /fusion} language.
      *
      * @return not null.
      */
