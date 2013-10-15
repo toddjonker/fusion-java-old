@@ -11,6 +11,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import com.amazon.ion.IonInt;
+import com.amazon.ion.IonReader;
 import com.amazon.ion.IonValue;
 import java.io.File;
 import java.math.BigInteger;
@@ -242,5 +243,15 @@ public class RuntimeTest
     {
         useTstRepo();
         runtime().makeTopLevel("/let");
+    }
+
+
+    @Test
+    public void testEvalUsesCurrentIonReaderValue()
+        throws Exception
+    {
+        IonReader r = system().newReader("(define a 338) a");
+        Object result = topLevel().eval(r);
+        checkLong(338, result);
     }
 }

@@ -21,6 +21,11 @@ public interface TopLevel
      * Evaluates top-level forms within this namespace.
      * Top-level {@code define} forms will alter the environment and will be
      * visible to later calls.
+     * <p>
+     * If the reader is already positioned on a value (that is, if
+     * {@code source.getType() != null}), then that value is the first form
+     * evaluated. Otherwise, the reader is advanced to the next value
+     * automatically.
      *
      * @param source Fusion source code, in Ion data format. Must not be null.
      * @param name identifies the source for error reporting. May be null.
@@ -39,6 +44,11 @@ public interface TopLevel
      * Evaluates top-level forms within this namespace.
      * Top-level {@code define} forms will alter the environment and will be
      * visible to later calls.
+     * <p>
+     * If the reader is already positioned on a value (that is, if
+     * {@code source.getType() != null}), then that value is the first form
+     * evaluated. Otherwise, the reader is advanced to the next value
+     * automatically.
      *
      * @param source Fusion source code, in Ion data format. Must not be null.
      * @param name identifies the source for error reporting. May be null.
