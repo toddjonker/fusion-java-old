@@ -30,6 +30,7 @@ class ModuleRenameWrap
                     Iterator<SyntaxWrap> moreWraps,
                     Set<Integer> returnMarks)
     {
+        // TODO FUSION-117 Resolve the whole identifier, including marks.
         Binding local = myModule.resolveProvidedName(name);
         if (local != null) return local;
 

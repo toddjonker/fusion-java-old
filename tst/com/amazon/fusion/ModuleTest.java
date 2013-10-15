@@ -59,7 +59,6 @@ public class ModuleTest
         eval("(module m \"lang\" (define x 1))");
     }
 
-    // TODO similar tests for 'require' to the language tests above
 
 
     @Test(expected = FusionException.class) // ModuleNotFoundException gets wrapped
