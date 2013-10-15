@@ -284,11 +284,8 @@ public abstract class FusionValue
      * @param factory must not be null.
      *
      * @throws FusionException if the value cannot be converted to Ion.
-     *
-     * @deprecated Use {@link FusionRuntime#ionize(Object, ValueFactory)}
      */
-    @Deprecated // for public access
-    public static IonValue copyToIonValue(Object value, ValueFactory factory)
+    static IonValue copyToIonValue(Object value, ValueFactory factory)
         throws FusionException
     {
         return copyToIonValue(value, factory, true);
