@@ -105,8 +105,7 @@ public class RuntimeTest
         assertEval(3328, "x");
 
         // Test eval'ing a module
-        Object mod = loadFile("tst-repo/grain.fusion");
-        assertTrue(mod instanceof ModuleInstance);
+        loadFile("tst-repo/grain.fusion");
     }
 
     @Test

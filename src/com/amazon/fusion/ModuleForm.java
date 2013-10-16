@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionEval.evalSyntax;
+import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.GlobalState.DEFINE_SYNTAX;
 import static com.amazon.fusion.GlobalState.PROVIDE;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
@@ -105,7 +106,7 @@ final class ModuleForm
                 initialBindingsId =
                     myModuleNameResolver.resolve(eval, id, initialBindingsStx,
                                                  true /*load it*/);
-                language = registry.lookup(initialBindingsId);
+                language = registry.instantiate(eval, initialBindingsId);
                 assert language != null;  // Otherwise resolve should fail
             }
             catch (ModuleNotFoundException e)
@@ -344,7 +345,7 @@ final class ModuleForm
 
             ModuleRegistry registry =
                 envOutsideModule.namespace().getRegistry();
-            ModuleInstance language = registry.lookup(languageId);
+            ModuleInstance language = registry.instantiate(eval, languageId);
 
             moduleNamespace = new ModuleNamespace(registry, language, id);
         }
@@ -481,7 +482,7 @@ final class ModuleForm
     //========================================================================
 
 
-    private static final class CompiledModule
+    static final class CompiledModule
         implements CompiledForm
     {
         private final ModuleIdentity   myId;
@@ -515,8 +516,19 @@ final class ModuleForm
         {
             ModuleRegistry registry =
                 eval.findCurrentNamespace().getRegistry();
+            registry.declare(myId, this);
 
-            ModuleStore[] requiredModuleStores = requireModules(registry);
+            return voidValue(eval);
+        }
+
+
+        ModuleInstance instantiate(Evaluator eval)
+            throws FusionException
+        {
+            ModuleRegistry registry =
+                eval.findCurrentNamespace().getRegistry();
+
+            ModuleStore[] requiredModuleStores = requireModules(eval, registry);
 
             // Allocate just enough space for the top-level bindings.
             ModuleStore store =
@@ -526,23 +538,26 @@ final class ModuleForm
             ModuleInstance module =
                 new ModuleInstance(myId, myDocs, store, myProvidedIdentifiers);
 
-            eval.findCurrentNamespace().getRegistry().register(module);
-
             for (CompiledForm form : myBody)
             {
+                // TODO FUSION-213 each eval should be wrapped with a prompt.
+                // See Racket reference for `module`.
                 eval.eval(store, form);
             }
 
             return module;
         }
 
-        private ModuleStore[] requireModules(ModuleRegistry registry)
+        private ModuleStore[] requireModules(Evaluator eval,
+                                             ModuleRegistry registry)
+            throws FusionException
         {
             int count = myRequiredModules.length;
             ModuleStore[] stores = new ModuleStore[count];
             for (int i = 0; i < count; i++)
             {
-                ModuleInstance module = registry.lookup(myRequiredModules[i]);
+                ModuleInstance module =
+                    registry.instantiate(eval, myRequiredModules[i]);
                 stores[i] = module.getNamespace();
             }
 

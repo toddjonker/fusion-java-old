@@ -165,7 +165,8 @@ final class LoadHandler
     }
 
     /**
-     *
+     * Reads module source and declares it in the current namespace's registry.
+     * The module is not instantiated.
      */
     void loadModule(Evaluator eval, ModuleIdentity id)
         throws FusionException
@@ -185,9 +186,6 @@ final class LoadHandler
                     eval.markedContinuation(myCurrentLoadRelativeDirectory,
                                             eval.newString(dirPath));
             }
-
-            // TODO FUSION-40 separate module declaration from instantiation
-            // This should result in a declaration, no instantiation or visit.
 
             // TODO Do we need an Evaluator with no continuation marks?
 

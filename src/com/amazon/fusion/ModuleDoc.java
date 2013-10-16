@@ -25,20 +25,6 @@ final class ModuleDoc
     private Map<String,BindingDoc> myBindings;
 
 
-    private static ModuleIdentity resolveModulePath(FusionRuntime runtime,
-                                                    String modulePath)
-        throws FusionException
-    {
-        assert modulePath.startsWith("/");
-
-        StandardTopLevel top = (StandardTopLevel) runtime.getDefaultTopLevel();
-        Evaluator eval = top.getEvaluator();
-        ModuleNameResolver resolver =
-            eval.getGlobalState().myModuleNameResolver;
-
-        return resolver.resolveLib(eval, modulePath, null);
-    }
-
 
     public static ModuleDoc buildDocTree(FusionRuntime runtime, Filter filter,
                                          File repoDir)
@@ -171,7 +157,7 @@ final class ModuleDoc
         ModuleIdentity id;
         try
         {
-            id = resolveModulePath(myRuntime, submodulePath(name));
+            id = resolveModulePath(submodulePath(name));
             assert id.baseName().equals(name);
         }
         catch (ModuleNotFoundException e)
@@ -185,7 +171,7 @@ final class ModuleDoc
         if (! filter.accept(id)) return null;
 
         ModuleInstance moduleInstance =
-            myRuntime.getDefaultRegistry().lookup(id);
+            myRuntime.getDefaultRegistry().instantiate(evaluator(), id);
 
         ModuleDoc doc = new ModuleDoc(myRuntime, id, moduleInstance.getDocs());
         doc.addBindings(moduleInstance);
@@ -265,6 +251,25 @@ final class ModuleDoc
         }
     }
 
+
+    private ModuleIdentity resolveModulePath(String modulePath)
+        throws FusionException
+    {
+        assert modulePath.startsWith("/");
+
+        Evaluator eval = evaluator();
+        ModuleNameResolver resolver =
+            eval.getGlobalState().myModuleNameResolver;
+
+        return resolver.resolveLib(eval, modulePath, null);
+    }
+
+
+    private Evaluator evaluator()
+        throws FusionException
+    {
+        return myRuntime.getDefaultTopLevel().getEvaluator();
+    }
 
     //========================================================================
 

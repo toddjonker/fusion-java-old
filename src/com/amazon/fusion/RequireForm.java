@@ -91,7 +91,7 @@ final class RequireForm
                                                    modulePath,
                                                    true /* load */,
                                                    null /* stxForErrors */);
-        ns.require(id);
+        ns.require(eval, id);
     }
 
 
@@ -117,7 +117,7 @@ final class RequireForm
             Namespace namespace = (Namespace) store.namespace();
             for (ModuleIdentity id : myUsedModuleIds)
             {
-                namespace.require(id);
+                namespace.require(eval, id);
             }
             return voidValue(eval);
         }

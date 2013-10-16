@@ -389,7 +389,7 @@ final class ModuleNameResolver
         // TODO FUSION-73 This is probably far too coarse-grained in general.
         synchronized (reg)
         {
-            if (reg.lookup(id) == null)
+            if (! reg.isLoaded(id))
             {
                 Object idString = eval.newString(id.internString());
 
@@ -400,7 +400,7 @@ final class ModuleNameResolver
                                                           MODULE_LOADING_MARK },
                                             new Object[]{ idString, idString });
                 myLoadHandler.loadModule(loadEval, id);
-                // Evaluation of 'module' registers the ModuleInstance
+                // Evaluation of 'module' declares it, but doesn't instantiate.
             }
         }
 
