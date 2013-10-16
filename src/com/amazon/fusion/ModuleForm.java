@@ -8,6 +8,7 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.GlobalState.DEFINE_SYNTAX;
 import static com.amazon.fusion.GlobalState.PROVIDE;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
+import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -387,7 +388,7 @@ final class ModuleForm
             otherForms.add(compiled);
         }
 
-        SyntaxSymbol[] providedIdentifiers =
+        Object[] providedIdentifiers =
             providedSymbols(eval, moduleNamespace, stx, i);
 
         CompiledForm[] otherFormsArray =
@@ -398,7 +399,9 @@ final class ModuleForm
                                   moduleNamespace.requiredModuleIds(),
                                   variableCount,
                                   moduleNamespace.extractBindingDocs(),
-                                  providedIdentifiers, otherFormsArray);
+                                  (String[]) providedIdentifiers[0],
+                                  (ModuleBinding[]) providedIdentifiers[1],
+                                  otherFormsArray);
     }
 
     private ModuleIdentity determineIdentity(Evaluator eval,
@@ -430,16 +433,17 @@ final class ModuleForm
 
 
     /**
-     * @return not null.
+     * @return [String[] names, ModuleBinding[] bindings]
      */
-    private SyntaxSymbol[] providedSymbols(Evaluator eval,
+    private Object[] providedSymbols(Evaluator eval,
                                            Namespace ns,
                                            SyntaxSexp moduleStx,
                                            int firstProvidePos)
         throws FusionException
     {
-        Map<String,Binding> names = new HashMap<>();
-        ArrayList<SyntaxSymbol> identifiers = new ArrayList<>();
+        Map<String,Binding>      bound    = new HashMap<>();
+        ArrayList<String>        names    = new ArrayList<>();
+        ArrayList<ModuleBinding> bindings = new ArrayList<>();
 
         for (int p = firstProvidePos; p < moduleStx.size(); p++)
         {
@@ -456,7 +460,7 @@ final class ModuleForm
                     {
                         SyntaxSymbol id = (SyntaxSymbol) spec;
                         Binding binding = id.getBinding();
-                        Binding prior = names.put(id.stringValue(), binding);
+                        Binding prior = bound.put(id.stringValue(), binding);
                         if (prior != null && ! binding.sameTarget(prior))
                         {
                             String message =
@@ -464,7 +468,8 @@ final class ModuleForm
                                 " binding";
                             throw check.failure(message, id);
                         }
-                        identifiers.add(id);
+                        names.add(id.stringValue());
+                        bindings.add((ModuleBinding) binding.originalBinding());
                         break;
                     }
                     default:
@@ -475,7 +480,10 @@ final class ModuleForm
             }
         }
 
-        return identifiers.toArray(new SyntaxSymbol[identifiers.size()]);
+        int count = names.size();
+        Object[] result = { names.toArray(new String[count]),
+                            bindings.toArray(new ModuleBinding[count]) };
+        return result;
     }
 
 
@@ -490,7 +498,8 @@ final class ModuleForm
         private final ModuleIdentity[] myRequiredModules;
         private final int              myVariableCount;
         private final BindingDoc[]     myBindingDocs;
-        private final SyntaxSymbol[]   myProvidedIdentifiers;
+        private final String[]         myProvidedNames;
+        private final ModuleBinding[]  myProvidedBindings;
         private final CompiledForm[]   myBody;
 
         private CompiledModule(ModuleIdentity   id,
@@ -498,7 +507,8 @@ final class ModuleForm
                                ModuleIdentity[] requiredModules,
                                int              variableCount,
                                BindingDoc[]     bindingDocs,
-                               SyntaxSymbol[]   providedIdentifiers,
+                               String[]         providedNames,
+                               ModuleBinding[]  providedBindings,
                                CompiledForm[]   body)
         {
             myId                  = id;
@@ -506,7 +516,8 @@ final class ModuleForm
             myRequiredModules     = requiredModules;
             myVariableCount       = variableCount;
             myBindingDocs         = bindingDocs;
-            myProvidedIdentifiers = providedIdentifiers;
+            myProvidedNames       = providedNames;
+            myProvidedBindings    = providedBindings;
             myBody                = body;
         }
 
@@ -536,7 +547,8 @@ final class ModuleForm
                                 myVariableCount, myBindingDocs);
 
             ModuleInstance module =
-                new ModuleInstance(myId, myDocs, store, myProvidedIdentifiers);
+                new ModuleInstance(myId, myDocs, store, myProvidedNames,
+                                   myProvidedBindings);
 
             for (CompiledForm form : myBody)
             {
