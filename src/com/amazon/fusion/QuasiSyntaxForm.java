@@ -177,8 +177,15 @@ final class QuasiSyntaxForm
                             SyntaxValue unquotedSyntax = stx.get(eval, 1);
                             CompiledForm unquotedForm =
                                 eval.compile(env, unquotedSyntax);
-                            return new CompiledUnsyntax(unquotedSyntax,
-                                                        unquotedForm);
+
+                            SourceLocation location =
+                                unquotedSyntax.getLocation();
+                            String expression =
+                                safeWriteToString(eval, unquotedSyntax);
+
+                            return new CompiledUnsyntax(unquotedForm,
+                                                        location,
+                                                        expression);
                         }
                         depth--;
                     }
@@ -252,15 +259,17 @@ final class QuasiSyntaxForm
     private static final class CompiledUnsyntax
         implements CompiledForm
     {
-        // TODO FUSION-35 we shouldn't retain the whole source
-        private final SyntaxValue  myUnquotedSyntax;
         private final CompiledForm myUnquotedForm;
+        private final SourceLocation myLocation;
+        private final String         myExpression;
 
-        CompiledUnsyntax(SyntaxValue  unquotedSyntax,
-                         CompiledForm unquotedForm)
+        CompiledUnsyntax(CompiledForm unquotedForm,
+                         SourceLocation location,
+                         String expression)
         {
-            myUnquotedSyntax = unquotedSyntax;
             myUnquotedForm   = unquotedForm;
+            myLocation       = location;
+            myExpression     = expression;
         }
 
         @Override
@@ -275,11 +284,10 @@ final class QuasiSyntaxForm
             catch (ClassCastException e) {}
 
             String message =
-                "Result of (unsyntax " +
-                safeWriteToString(eval, myUnquotedSyntax) +
+                "Result of (unsyntax " + myExpression +
                 ") isn't a syntax value: " +
                 safeWriteToString(eval, unquoted);
-            throw new ContractException(message);
+            throw new ContractException(message, myLocation);
         }
     }
 }
