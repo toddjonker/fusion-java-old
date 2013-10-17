@@ -446,6 +446,14 @@ public class FusionRuntimeBuilder
             directory = directory.getAbsoluteFile();
         }
 
+
+        File src = new File(directory, "src");
+        if (! src.isDirectory())
+        {
+           String message = "Repository has no src directory: " + directory;
+           throw new IllegalArgumentException(message);
+        }
+
         if (myRepositoryDirectories == null)
         {
             myRepositoryDirectories = new File[] { directory };
@@ -562,7 +570,7 @@ public class FusionRuntimeBuilder
     {
         if (myBootstrapRepository != null)
         {
-            // TODO FUSION-200 this shouldn't happen here
+            // TODO FUSION-214 Push this into the repo impl
             File src = new File(myBootstrapRepository, "src");
             repos.add(new FileSystemModuleRepository(src));
         }
@@ -591,19 +599,17 @@ public class FusionRuntimeBuilder
                         String message =
                             "The first repository is not a Fusion bootstrap " +
                             "repository: " + f;
-                        throw new IllegalArgumentException(message);
+                        throw new IllegalStateException(message);
                     }
                     needBootstrap = false;
                 }
 
-                // TODO Fusion-200 remove this
+                // TODO FUSION-214 Push this into the repo impl
                 File src = new File(f, "src");
                 if (src.isDirectory())
                 {
-                    f = src;
+                    repos.add(new FileSystemModuleRepository(src));
                 }
-
-                repos.add(new FileSystemModuleRepository(f));
             }
         }
 

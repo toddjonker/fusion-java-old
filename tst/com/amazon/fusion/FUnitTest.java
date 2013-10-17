@@ -70,7 +70,7 @@ public class FUnitTest
                     gatherFiles(results, recurse, testFile);
                 }
             }
-            else
+            else if (fileName.endsWith(".test.fusion"))
             {
                 results.add(testFile);
             }
