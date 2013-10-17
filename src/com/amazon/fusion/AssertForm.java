@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.FusionWrite.safeDisplay;
+import static com.amazon.fusion.FusionWrite.safeWriteToString;
 
 final class AssertForm
     extends SyntacticForm
@@ -34,7 +35,12 @@ final class AssertForm
         CompiledForm testForm = eval.compile(env, testFormSyntax);
 
         CompiledForm[] messageForms = eval.compile(env, stx, 2);
-        return new CompiledAssert(testFormSyntax, testForm, messageForms);
+
+        SourceLocation location = testFormSyntax.getLocation();
+        String expression = safeWriteToString(eval, testFormSyntax);
+
+        return new CompiledAssert(testForm, messageForms,
+                                  location, expression);
     }
 
 
@@ -44,16 +50,20 @@ final class AssertForm
     private final class CompiledAssert
         implements CompiledForm
     {
-        private final SyntaxValue    myTestFormSyntax; // For error reporting
         private final CompiledForm   myTestForm;
         private final CompiledForm[] myMessageForms;
+        private final SourceLocation myLocation;
+        private final String         myExpression;
 
-        CompiledAssert(SyntaxValue testFormSyntax, CompiledForm testForm,
-                       CompiledForm[] messageForms)
+        CompiledAssert(CompiledForm testForm,
+                       CompiledForm[] messageForms,
+                       SourceLocation location,
+                       String expression)
         {
-            myTestFormSyntax = testFormSyntax;
             myTestForm       = testForm;
             myMessageForms   = messageForms;
+            myLocation       = location;
+            myExpression     = expression;
         }
 
         @Override
@@ -70,7 +80,7 @@ final class AssertForm
             int size = myMessageForms.length;
             if (size != 0)
             {
-                StringBuilder buf = new StringBuilder();
+                StringBuilder buf = new StringBuilder(256);
                 for (CompiledForm messageForm : myMessageForms)
                 {
                     Object messageValue = eval.eval(store, messageForm);
@@ -85,7 +95,8 @@ final class AssertForm
                 message = null;
             }
 
-            throw new FusionAssertionFailure(message, myTestFormSyntax, result);
+            throw new FusionAssertionFailure(message, myLocation, myExpression,
+                                             result);
         }
     }
 }
