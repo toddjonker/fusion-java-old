@@ -25,6 +25,60 @@ case! We may add new methods to interfaces and classes at any time, and your
 extensions will probably break when that happens.
 
 
+<h2>Embedding Fusion</h2>
+
+The primary purpose of these APIs is to enable embedding of the Fusion
+evaluator into Java applications. The central component for doing so is the
+{@link com.amazon.fusion.FusionRuntime}. The runtime is a heavyweight object,
+and the vast majority of applications should create exactly one runtime at
+launch or on demand. To acquire a runtime, you'll use a
+{@link com.amazon.fusion.FusionRuntimeBuilder}.
+
+From the runtime, you can then acquire one or more
+{@link com.amazon.fusion.TopLevel}s. Each {@code TopLevel} instace contains
+its own namespace in which bindings (that is, variables) can be {@code define}d
+and code can be evaluated.
+
+Here's a typical processing sequence:
+<pre>
+    IonSystem ionSystem = IonSystemBuilder.standard().build();
+
+    FusionRuntime runtime =
+        FusionRuntimeBuilder.standard()
+            .withBootstrapRepository(fusionJavaRepository)
+            .withRepositoryDirectory(projectRepository)
+            .build();
+
+    TopLevel topLevel = runtime.getDefaultTopLevel();
+    // The topLevel has the /fusion language already imported.
+
+    // Import our own helper procedures.
+    topLevel.requireModule("/amazon/project/helpers");
+
+    // Evaluate an expression.
+    Object result = topLevel.eval("(compute_something)");
+
+    // Convert the result to an IonValue.
+    IonValue ionResult = runtime.ionize(result, ionSystem);
+
+    // We can also invoke a procedure without making source code.
+    result = topLevel.call("our_procedure", 1, "hello");
+
+    // Let's write it as Ion-ish text. Depending on the data, the result
+    // may not be readable by an Ion parser.
+    FusionIo.write(topLevel, result, System.out);
+</pre>
+
+
+<h2>Thread Safety</h2>
+
+Unless document otherwise, these Java APIs do not provide thread-safety
+guarantees, nor does the Fusion language itself. If you need to evaluate
+Fusion code from multiple threads, you will need to provide your own
+synchronization. In most cases this will involve preventing threads from
+simultaneous use of the same {@link com.amazon.fusion.TopLevel}.
+
+
 <h2>Representation of Values</h2>
 
 The data manipulated by the Fusion evaluator are generically referred to as
@@ -59,6 +113,18 @@ the values.
     time.
   </li>
 </ul>
+
+What this really means is that there's not much you can do directly with an
+{@code Object} returned by the Fusion APIs. You must instead use static
+utility methods that mirror procedures provided by the Fusion library.
+Examples include {@link com.amazon.fusion.FusionValue},
+{@link com.amazon.fusion.FusionBool}, and
+{@link com.amazon.fusion.FusionIo}.
+<p>
+Most often you'll want to convert the Fusion value to an
+{@link com.amazon.ion.IonValue}, for which you can use
+{@link com.amazon.fusion.FusionRuntime#ionize FusionRuntime.ionize()}.
+
 
 
 <!-- Note, using <a/> causes Firefox rendering problems -->

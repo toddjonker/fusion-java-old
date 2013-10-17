@@ -14,7 +14,7 @@ import java.util.Properties;
 /**
  * Builder for acquiring a {@link FusionRuntime}.
  * <p>
- * <b>Instances of this class are not safe for use by multiple threads unless
+ * <b>Instances of this class are not thread-safe unless
  * they are {@linkplain #immutable() immutable}.</b>
  * <p>
  *
