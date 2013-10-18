@@ -677,6 +677,8 @@ final class FusionStruct
         {
             writeAnnotations(out, myAnnotations);
             out.append('{');
+
+            boolean comma = false;
             for (Map.Entry<String, Object> entry : myMap.entrySet())
             {
                 String fieldName = entry.getKey();
@@ -686,18 +688,22 @@ final class FusionStruct
                 {
                     for (Object element : (Object[]) value)
                     {
+                        if (comma) out.append(',');
+
                         printSymbol(out, fieldName);
                         out.append(':');
                         dispatchWrite(eval, out, element);
-                        out.append(',');
+                        comma = true;
                     }
                 }
                 else
                 {
+                    if (comma) out.append(',');
+
                     printSymbol(out, fieldName);
                     out.append(':');
                     dispatchWrite(eval, out, value);
-                    out.append(',');
+                    comma = true;
                 }
             }
             out.append('}');
