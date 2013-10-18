@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
@@ -49,7 +50,14 @@ final class SyntaxFloat
     void ionize(Evaluator eval, IonWriter writer) throws IOException
     {
         ionizeAnnotations(writer);
-        writer.writeFloat(myValue);
+        if (myValue != null)
+        {
+            writer.writeFloat(myValue);
+        }
+        else
+        {
+            writer.writeNull(IonType.FLOAT);
+        }
     }
 
 

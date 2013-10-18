@@ -371,10 +371,10 @@ abstract class Namespace
         requireForm.require(eval, this, modulePath);
     }
 
-    void require(ModuleIdentity id)
+    void require(Evaluator eval, ModuleIdentity id)
         throws FusionException
     {
-        ModuleInstance module = myRegistry.lookup(id);
+        ModuleInstance module = myRegistry.instantiate(eval, id);
         require(module);
     }
 

@@ -10,10 +10,17 @@ import java.io.File;
  * Each instance has a separate namespace, bootstrapped with bindings from a
  * specific Fusion module or language.
  * <p>
- * To create a {@link TopLevel}, use a {@link FusionRuntime}.
- * <p>
- * <b>WARNING:</b> This interface should not be implemented or extended by
+ * <b>WARNING:</b> This interface must not be implemented or extended by
  * code outside of this library.
+ * <p>
+ * {@link TopLevel}s are <em>not</em> inherently thread-safe! It is not safe
+ * to use the same instance from multiple threads, unless all such use is
+ * functional (that is, no mutations are made) with respect to any common data.
+ * Put another way, this library does not perform any synchronization on
+ * namespaces or user-visibile data structures, so your application must take
+ * steps to handle such synchronization when and if it is needed.
+ * <p>
+ * To create a {@link TopLevel}, use a {@link FusionRuntime}.
  */
 public interface TopLevel
 {
@@ -21,6 +28,11 @@ public interface TopLevel
      * Evaluates top-level forms within this namespace.
      * Top-level {@code define} forms will alter the environment and will be
      * visible to later calls.
+     * <p>
+     * If the reader is already positioned on a value (that is, if
+     * {@code source.getType() != null}), then that value is the first form
+     * evaluated. Otherwise, the reader is advanced to the next value
+     * automatically.
      *
      * @param source Fusion source code, in Ion data format. Must not be null.
      * @param name identifies the source for error reporting. May be null.

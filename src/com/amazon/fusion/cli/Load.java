@@ -2,8 +2,8 @@
 
 package com.amazon.fusion.cli;
 
+import static com.amazon.fusion.FusionIo.write;
 import static com.amazon.fusion.FusionVoid.isVoid;
-import static com.amazon.fusion.FusionWrite.write;
 import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.TopLevel;
@@ -67,7 +67,7 @@ final class Load
                 if (result != null && ! isVoid(top, result))
                 {
                     // TODO handle multiple values
-                    write(top, System.out, result);
+                    write(top, result, System.out);
                     System.out.println();
                 }
 

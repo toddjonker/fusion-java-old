@@ -87,12 +87,13 @@ final class StandardTopLevel
     {
         Object result = voidValue(myEvaluator);
 
-        // TODO should work even if already positioned on first value
+        if (source.getType() == null) source.next();
 
-        while (source.next() != null)
+        while (source.getType() != null)
         {
             SyntaxValue sourceExpr = Syntax.read(myEvaluator, source, name);
             result = FusionEval.eval(myEvaluator, sourceExpr, myNamespace);
+            source.next();
         }
 
         return result;

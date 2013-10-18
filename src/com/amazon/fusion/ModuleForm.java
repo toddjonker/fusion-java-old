@@ -4,10 +4,12 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionEval.evalSyntax;
+import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.GlobalState.DEFINE_SYNTAX;
 import static com.amazon.fusion.GlobalState.PROVIDE;
 import static com.amazon.fusion.GlobalState.REQUIRE;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
+import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -106,7 +108,7 @@ final class ModuleForm
                 initialBindingsId =
                     myModuleNameResolver.resolve(eval, id, initialBindingsStx,
                                                  true /*load it*/);
-                language = registry.lookup(initialBindingsId);
+                language = registry.instantiate(eval, initialBindingsId);
                 assert language != null;  // Otherwise resolve should fail
             }
             catch (ModuleNotFoundException e)
@@ -343,7 +345,7 @@ final class ModuleForm
 
             ModuleRegistry registry =
                 envOutsideModule.namespace().getRegistry();
-            ModuleInstance language = registry.lookup(languageId);
+            ModuleInstance language = registry.instantiate(eval, languageId);
 
             moduleNamespace = new ModuleNamespace(registry, language, id);
         }
@@ -385,7 +387,7 @@ final class ModuleForm
             otherForms.add(compiled);
         }
 
-        SyntaxSymbol[] providedIdentifiers =
+        Object[] providedIdentifiers =
             providedSymbols(eval, moduleNamespace, stx, i);
 
         CompiledForm[] otherFormsArray =
@@ -396,7 +398,9 @@ final class ModuleForm
                                   moduleNamespace.requiredModuleIds(),
                                   variableCount,
                                   moduleNamespace.extractBindingDocs(),
-                                  providedIdentifiers, otherFormsArray);
+                                  (String[]) providedIdentifiers[0],
+                                  (ModuleBinding[]) providedIdentifiers[1],
+                                  otherFormsArray);
     }
 
     private ModuleIdentity determineIdentity(Evaluator eval,
@@ -428,16 +432,17 @@ final class ModuleForm
 
 
     /**
-     * @return not null.
+     * @return [String[] names, ModuleBinding[] bindings]
      */
-    private SyntaxSymbol[] providedSymbols(Evaluator eval,
+    private Object[] providedSymbols(Evaluator eval,
                                            Namespace ns,
                                            SyntaxSexp moduleStx,
                                            int firstProvidePos)
         throws FusionException
     {
-        Map<String,Binding> names = new HashMap<>();
-        ArrayList<SyntaxSymbol> identifiers = new ArrayList<>();
+        Map<String,Binding>      bound    = new HashMap<>();
+        ArrayList<String>        names    = new ArrayList<>();
+        ArrayList<ModuleBinding> bindings = new ArrayList<>();
 
         for (int p = firstProvidePos; p < moduleStx.size(); p++)
         {
@@ -454,7 +459,7 @@ final class ModuleForm
                     {
                         SyntaxSymbol id = (SyntaxSymbol) spec;
                         Binding binding = id.getBinding();
-                        Binding prior = names.put(id.stringValue(), binding);
+                        Binding prior = bound.put(id.stringValue(), binding);
                         if (prior != null && ! binding.sameTarget(prior))
                         {
                             String message =
@@ -462,7 +467,8 @@ final class ModuleForm
                                 " binding";
                             throw check.failure(message, id);
                         }
-                        identifiers.add(id);
+                        names.add(id.stringValue());
+                        bindings.add((ModuleBinding) binding.originalBinding());
                         break;
                     }
                     default:
@@ -473,14 +479,17 @@ final class ModuleForm
             }
         }
 
-        return identifiers.toArray(new SyntaxSymbol[identifiers.size()]);
+        int count = names.size();
+        Object[] result = { names.toArray(new String[count]),
+                            bindings.toArray(new ModuleBinding[count]) };
+        return result;
     }
 
 
     //========================================================================
 
 
-    private static final class CompiledModule
+    static final class CompiledModule
         implements CompiledForm
     {
         private final ModuleIdentity   myId;
@@ -488,7 +497,8 @@ final class ModuleForm
         private final ModuleIdentity[] myRequiredModules;
         private final int              myVariableCount;
         private final BindingDoc[]     myBindingDocs;
-        private final SyntaxSymbol[]   myProvidedIdentifiers;
+        private final String[]         myProvidedNames;
+        private final ModuleBinding[]  myProvidedBindings;
         private final CompiledForm[]   myBody;
 
         private CompiledModule(ModuleIdentity   id,
@@ -496,7 +506,8 @@ final class ModuleForm
                                ModuleIdentity[] requiredModules,
                                int              variableCount,
                                BindingDoc[]     bindingDocs,
-                               SyntaxSymbol[]   providedIdentifiers,
+                               String[]         providedNames,
+                               ModuleBinding[]  providedBindings,
                                CompiledForm[]   body)
         {
             myId                  = id;
@@ -504,7 +515,8 @@ final class ModuleForm
             myRequiredModules     = requiredModules;
             myVariableCount       = variableCount;
             myBindingDocs         = bindingDocs;
-            myProvidedIdentifiers = providedIdentifiers;
+            myProvidedNames       = providedNames;
+            myProvidedBindings    = providedBindings;
             myBody                = body;
         }
 
@@ -514,8 +526,19 @@ final class ModuleForm
         {
             ModuleRegistry registry =
                 eval.findCurrentNamespace().getRegistry();
+            registry.declare(myId, this);
 
-            ModuleStore[] requiredModuleStores = requireModules(registry);
+            return voidValue(eval);
+        }
+
+
+        ModuleInstance instantiate(Evaluator eval)
+            throws FusionException
+        {
+            ModuleRegistry registry =
+                eval.findCurrentNamespace().getRegistry();
+
+            ModuleStore[] requiredModuleStores = requireModules(eval, registry);
 
             // Allocate just enough space for the top-level bindings.
             ModuleStore store =
@@ -523,25 +546,29 @@ final class ModuleForm
                                 myVariableCount, myBindingDocs);
 
             ModuleInstance module =
-                new ModuleInstance(myId, myDocs, store, myProvidedIdentifiers);
-
-            eval.findCurrentNamespace().getRegistry().register(module);
+                new ModuleInstance(myId, myDocs, store, myProvidedNames,
+                                   myProvidedBindings);
 
             for (CompiledForm form : myBody)
             {
+                // TODO FUSION-213 each eval should be wrapped with a prompt.
+                // See Racket reference for `module`.
                 eval.eval(store, form);
             }
 
             return module;
         }
 
-        private ModuleStore[] requireModules(ModuleRegistry registry)
+        private ModuleStore[] requireModules(Evaluator eval,
+                                             ModuleRegistry registry)
+            throws FusionException
         {
             int count = myRequiredModules.length;
             ModuleStore[] stores = new ModuleStore[count];
             for (int i = 0; i < count; i++)
             {
-                ModuleInstance module = registry.lookup(myRequiredModules[i]);
+                ModuleInstance module =
+                    registry.instantiate(eval, myRequiredModules[i]);
                 stores[i] = module.getNamespace();
             }
 

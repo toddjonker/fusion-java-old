@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.isVoid;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
@@ -285,6 +286,10 @@ public class CoreTestCase
     void checkLong(Integer expected, Object actual)
     {
         Long actualLong = FusionValue.asJavaLong(actual);
+        if (actualLong == null)
+        {
+            fail("Expected " + expected + " but got " + actual);
+        }
         assertEquals(expected.longValue(), actualLong.longValue());
     }
 

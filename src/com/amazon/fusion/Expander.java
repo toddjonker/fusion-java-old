@@ -91,7 +91,6 @@ final class Expander
         // Handle other cases as per Racket spec. In particular:
         // TODO FUSION-31  identifier macros
         // TODO FUSION-136 rename transformers
-        // TODO FUSION-137 #%top
         // TODO FUSION-138 #%app
 
         while (stx instanceof SyntaxSexp)

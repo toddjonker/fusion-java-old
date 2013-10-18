@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -7,10 +7,15 @@ import com.amazon.ion.ValueFactory;
 
 /**
  * Primary entry point for embedding Fusion within a Java program.
- * The runtime contains resource common to many evaluations, in particular the
- * registry of built-in modules. Most applications are expected to construct
- * exactly one runtime, and probably multiple {@link TopLevel}s to isolate
- * state between different code fragments.
+ * The runtime contains resources common to many evaluations, in particular a
+ * registry of all loaded modules. Instances are immutable and thread-safe.
+ * <p>
+ * <b>WARNING:</b> This interface must not be implemented or extended by
+ * code outside of this library.
+ * <p>
+ * The runtime should be considered a very heavyweight component, and it should
+ * not be used in a transient or localized fashion. Most applications should
+ * construct exactly one runtime.
  * <p>
  * The runtime maintains a {@link TopLevel} namespace within which expressions
  * can be evaluated. The namespace bindings and state are maintained between
@@ -18,9 +23,6 @@ import com.amazon.ion.ValueFactory;
  * top levels by calling one of the {@link #makeTopLevel} methods.
  * <p>
  * To create a {@link FusionRuntime}, use a {@link FusionRuntimeBuilder}.
- * <p>
- * <b>WARNING:</b> This interface should not be implemented or extended by
- * code outside of this library.
  */
 public interface FusionRuntime
 {
@@ -36,7 +38,8 @@ public interface FusionRuntime
         throws FusionException;
 
     /**
-     * Returns a fresh {@link TopLevel} instance.
+     * Returns a fresh {@link TopLevel} instance, bootstrapped with the
+     * {@code /fusion} language.
      *
      * @return not null.
      */

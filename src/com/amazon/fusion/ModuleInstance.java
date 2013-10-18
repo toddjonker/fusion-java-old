@@ -62,22 +62,20 @@ final class ModuleInstance
     }
 
     /**
-     * Creates a module that {@code provide}s the given bound identifiers.
+     * Creates a module that {@code provide}s the given bindings.
      */
-    ModuleInstance(ModuleIdentity identity,
-                   String docs,
-                   ModuleStore namespace,
-                   SyntaxSymbol[] providedIdentifiers)
+    ModuleInstance(ModuleIdentity  identity,
+                   String          docs,
+                   ModuleStore     namespace,
+                   String[]        providedNames,
+                   ModuleBinding[] providedBindings)
         throws FusionException
     {
-        this(identity, docs, namespace, providedIdentifiers.length);
+        this(identity, docs, namespace, providedNames.length);
 
-        for (SyntaxSymbol identifier : providedIdentifiers)
+        for (int i = 0; i < providedNames.length; i++)
         {
-            String  name    = identifier.stringValue();
-            Binding binding = identifier.getBinding().originalBinding();
-
-            myProvidedBindings.put(name, (ModuleBinding) binding);
+            myProvidedBindings.put(providedNames[i], providedBindings[i]);
         }
     }
 

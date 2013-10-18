@@ -363,10 +363,9 @@ class TopLevelNamespace
     private SyntaxWraps myRequiredModuleWraps;
 
     /**
-     * Every `require` gets its own precedence level. Definitions win over
-     * imports at the same precedence.
-     * TODO not true, but it should be!
-     * Currently broken for defns that precede any `require`
+     * Every `require` gets its own precedence level, starting at zero (which
+     * is usually the language). Imports win over definitions at the same
+     * precedence.
      */
     private int myCurrentPrecedence = 0;
 

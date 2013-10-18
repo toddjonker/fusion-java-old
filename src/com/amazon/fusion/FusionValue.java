@@ -399,6 +399,9 @@ public abstract class FusionValue
         return null;
     }
 
+    /**
+     * @return null if the value isn't a Fusion int
+     */
     static Long asJavaLong(Object value)
     {
         IonValue iv = castToIonValueMaybe(value);

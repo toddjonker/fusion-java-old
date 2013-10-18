@@ -5,9 +5,9 @@ package com.amazon.fusion;
 import java.io.IOException;
 
 /**
- *
+ * Utilities for input and output of Fusion data.
  */
-final class FusionIo
+public final class FusionIo
 {
     private FusionIo() {}
 
@@ -54,5 +54,26 @@ final class FusionIo
             return eval.newBool(arg == EOF);
         }
     }
+
+
+    /**
+     * <a href="{@docRoot}/../fusion/io.html#write">Writes</a> a text representation of a Fusion value, following Ion syntax
+     * where possible, including for strings.
+     * The result will be unreadable (by the Fusion and Ion readers) if the
+     * value contains any non-Ionizable data (void, closures, etc.).
+     *
+     * @param top must not be null.
+     * @param value must not be null.
+     * @param out the output stream; not null.
+     * @throws FusionException if there's an exception thrown by the output
+     * stream.
+     */
+    @SuppressWarnings("deprecation")
+    public static void write(TopLevel top, Object value, Appendable out)
+        throws FusionException
+    {
+        FusionWrite.write(((StandardTopLevel) top).getEvaluator(), out, value);
+    }
+
 }
 

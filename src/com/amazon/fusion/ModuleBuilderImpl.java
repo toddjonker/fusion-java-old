@@ -48,7 +48,9 @@ final class ModuleBuilderImpl
         myNamespace.setDoc(name, kind, documentation);
     }
 
-    ModuleInstance buildAndRegister()
+
+    @Override
+    public void instantiate()
         throws FusionException
     {
         ModuleStore store = new ModuleStore(myRegistry,
@@ -60,15 +62,5 @@ final class ModuleBuilderImpl
             new ModuleInstance(myNamespace.getModuleId(), store, bindings);
 
         myRegistry.register(module);
-
-        return module;
-    }
-
-    @Override
-    public void instantiate()
-        throws FusionException
-    {
-        // We don't want to return the ModuleInstance from this public API.
-        buildAndRegister();
     }
 }
