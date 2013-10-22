@@ -29,7 +29,8 @@ public class RuntimeTest
     {
         FusionRuntimeBuilder b = FusionRuntimeBuilder.standard();
         assertSame(b, b.mutable());
-        b.build();
+//        b.build();
+
     }
 
     @Test
@@ -67,15 +68,6 @@ public class RuntimeTest
         runtimeBuilder().immutable().setInitialCurrentDirectory(TEST_REPO);
     }
 
-    @Test
-    public void testUseFromCurrentDirectory()
-        throws Exception
-    {
-        runtimeBuilder().setInitialCurrentDirectory(TEST_REPO);
-        eval("(use \"grain\")");
-        assertString("soup", "barley");
-    }
-
 
     @Test(expected = UnsupportedOperationException.class)
     public void testDocumentingImmutability()
@@ -105,7 +97,7 @@ public class RuntimeTest
         assertEval(3328, "x");
 
         // Test eval'ing a module
-        loadFile("tst-repo/grain.fusion");
+        loadFile("ftst/repo/src/grain.fusion");
     }
 
     @Test
@@ -190,10 +182,10 @@ public class RuntimeTest
     public void testModuleRegistration()
         throws Exception
     {
-        final ModuleIdentity id = ModuleIdentity.internBuiltinName("#%dummy");
-        assertSame(id, ModuleIdentity.internBuiltinName("#%dummy"));
+        final ModuleIdentity id = ModuleIdentity.internBuiltinName("/tst/dummy");
+        assertSame(id, ModuleIdentity.internBuiltinName("/tst/dummy"));
 
-        ModuleBuilder builder = runtime().makeModuleBuilder("#%dummy");
+        ModuleBuilder builder = runtime().makeModuleBuilder("/tst/dummy");
         builder.instantiate();
 
         topLevel().define("callback", new Procedure0("callback")
@@ -215,7 +207,7 @@ public class RuntimeTest
 
 
         // Test registering two instances w/ same identity
-        builder = runtime().makeModuleBuilder("#%dummy");
+        builder = runtime().makeModuleBuilder("/tst/dummy");
         try {
             builder.instantiate();
             fail("expected exception");

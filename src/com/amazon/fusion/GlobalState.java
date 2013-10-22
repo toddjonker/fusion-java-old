@@ -28,7 +28,6 @@ final class GlobalState
     static final String MODULE          = "module";
     static final String PROVIDE         = "provide";
     static final String REQUIRE         = "require";
-    static final String USE             = "use";
 
     final IonSystem          myIonSystem;
     final ModuleInstance     myKernelModule;
@@ -48,7 +47,6 @@ final class GlobalState
     final Binding myKernelDefineSyntaxBinding;
     final Binding myKernelProvideBinding;
     final Binding myKernelRequireBinding;
-    final Binding myKernelUseBinding;
 
     private GlobalState(IonSystem          ionSystem,
                         ModuleInstance     kernel,
@@ -76,7 +74,6 @@ final class GlobalState
         myKernelDefineSyntaxBinding  = kernelBinding(DEFINE_SYNTAX);
         myKernelProvideBinding       = kernelBinding(PROVIDE);
         myKernelRequireBinding       = kernelBinding(REQUIRE);
-        myKernelUseBinding           = kernelBinding(USE);
     }
 
 
@@ -133,9 +130,6 @@ final class GlobalState
         ns.define(PROVIDE, new ProvideForm());
         ns.define("quote_syntax", new QuoteSyntaxForm()); // For fusion/syntax
         ns.define(REQUIRE, requireForm);
-
-        // TODO FUSION-133 remove UseForm
-        ns.define(USE, new UseForm(resolver));
 
         for (IonType t : IonType.values())
         {

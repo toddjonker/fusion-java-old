@@ -2,8 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.ion.util.IonTextUtils.symbolVariant;
-import static com.amazon.ion.util.IonTextUtils.SymbolVariant.IDENTIFIER;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -81,15 +79,6 @@ class ModuleIdentity
         }
     }
 
-    /** Allows a #% name (for now) or an absolute path */
-    static boolean isValidBuiltinName(String name)
-    {
-        // TODO FUSION-107 remove #% support
-        return name != null
-            && ((name.startsWith("#%")
-                     && symbolVariant(name.substring(2)) == IDENTIFIER)
-                || isValidAbsoluteModulePath(name));
-    }
 
     private static ModuleIdentity doIntern(String name)
     {
@@ -125,15 +114,15 @@ class ModuleIdentity
     }
 
     /**
-     * @param name must be a valid builtin module name.
+     * @param path must be an absolute module path.
      * @return not null.
      *
-     * @see #isValidBuiltinName(String)
+     * @see #isValidAbsoluteModulePath(String)
      */
-    static ModuleIdentity internBuiltinName(String name)
+    static ModuleIdentity internBuiltinName(String path)
     {
-        assert isValidBuiltinName(name);
-        return doIntern(name);
+        assert isValidAbsoluteModulePath(path);
+        return doIntern(path);
     }
 
 

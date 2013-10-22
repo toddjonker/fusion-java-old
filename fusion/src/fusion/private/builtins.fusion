@@ -6,9 +6,8 @@
 
 
   // Pass-through bindings from kernel
-  // TODO FUSION-133 remove `use`
   (provide all_defined_out begin define if lambda letrec load module provide
-    require use)
+    require)
   (provide is_bool is_int is_float is_decimal is_timestamp is_symbol
       is_string is_clob is_blob is_list is_sexp is_struct)
 
@@ -26,8 +25,6 @@
   (defpub_j is_null_null          "com.amazon.fusion.IsNullNullProc")
   (defpub_j is_procedure          "com.amazon.fusion.IsProcedureProc")
   (defpub_j not                   "com.amazon.fusion.NotProc")
-  (defpub_j to_int                "com.amazon.fusion.ToIntProc")
-  (defpub_j to_string             "com.amazon.fusion.ToStringProc")
 
 
   (defpub_j size "com.amazon.fusion.SizeProc")

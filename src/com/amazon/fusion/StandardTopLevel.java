@@ -72,23 +72,9 @@ final class StandardTopLevel
         return eval(i, name);
     }
 
-    @Deprecated @Override
-    public Object load(String source, SourceName name)
-        throws ExitException, FusionException
-    {
-        return eval(source, name);
-    }
-
 
     @Override
     public Object eval(String source)
-        throws ExitException, FusionException
-    {
-        return eval(source, null);
-    }
-
-    @Deprecated @Override
-    public Object load(String source)
         throws ExitException, FusionException
     {
         return eval(source, null);
@@ -113,23 +99,9 @@ final class StandardTopLevel
         return result;
     }
 
-    @Deprecated @Override
-    public Object load(IonReader source, SourceName name)
-        throws ExitException, FusionException
-    {
-        return eval(source, name);
-    }
-
 
     @Override
     public Object eval(IonReader source)
-        throws ExitException, FusionException
-    {
-        return eval(source, null);
-    }
-
-    @Deprecated @Override
-    public Object load(IonReader source)
         throws ExitException, FusionException
     {
         return eval(source, null);

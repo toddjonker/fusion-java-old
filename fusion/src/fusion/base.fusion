@@ -1,6 +1,6 @@
 // Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
-(module base '/fusion/private/builtins'
+(module base "/fusion/private/builtins"
 
   // WARNING: Doc syntax isn't supported yet.
   '''
@@ -18,9 +18,8 @@ To use this dialect for your module, declare it as follows:
 
 
   // Pass-through bindings from kernel
-  // TODO FUSION-133 remove `use`
   (provide all_defined_out begin define if lambda letrec module provide
-    require use)
+    require)
   (provide is_bool is_int is_float is_decimal is_timestamp is_symbol
       is_string is_clob is_blob is_list is_sexp is_struct)
   // Note that there's no is_null type checker, since that's used to
@@ -28,23 +27,12 @@ To use this dialect for your module, declare it as follows:
 
 
   // Pass-through bindings from builtins
-  (provide let let_values quote set '#%top')
-  (provide apply exit is_null is_null_null is_procedure not
-    to_int to_string)
+  (provide let let_values quote '#%top')
+  (provide apply exit is_null is_null_null is_procedure not)
 
-  // TODO FUSION-95 FUSION-173 FUSION-177 remove these from this module:
-  //  to_int to_string
 
   (require "/fusion/collection")
-  (provide . any do element elt find is_empty size)
-
-  // TODO FUSION-181 Remove from this module
-  (require "/fusion/exception")
-  (provide assert raise_argument_error raise_arity_error raise_result_error)
-
-  // TODO FUSION-180 Remove from this module
-  (require "/fusion/for")
-  (provide for_list)
+  (provide element elt is_empty size)
 
   (require "/fusion/private/bind")
   (provide lets)
@@ -56,7 +44,7 @@ To use this dialect for your module, declare it as follows:
   (provide and or when unless cond)
 
   (require "/fusion/number")
-  (provide + - * / int_to_string string_to_int)
+  (provide + - * /)
 
   (require "/fusion/void")
   (provide is_void void)

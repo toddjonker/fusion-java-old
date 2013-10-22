@@ -129,54 +129,6 @@ public class ModuleTest
     }
 
 
-    @Test(expected = FusionException.class)
-    public void testUseNonSexp()
-        throws Exception
-    {
-        eval("(use \"tst-data/hello.ion\")");
-    }
-
-    @Test(expected = FusionException.class)
-    public void testUseNonModule()
-        throws Exception
-    {
-        eval("(use \"tst-data/trivialDefine.fusion\")");
-    }
-
-    @Test @Deprecated  // TODO FUSION-133 remove 'use'
-    public void testLoadFusionBase()
-        throws Exception
-    {
-        eval("(use '/fusion/base')");
-    }
-
-    @Test @Deprecated  // TODO FUSION-133 remove 'use'
-    public void testLoadFusionBaseAsLib()
-        throws Exception
-    {
-        eval("(use (lib \"/fusion/base\"))");
-    }
-
-    @Test @Deprecated  // TODO FUSION-133 remove 'use'
-    public void testRepositoryLoad()
-        throws Exception
-    {
-        eval("(use (lib \"/fusion/list\"))");
-        assertEval("[]", "(map + [])");
-    }
-
-    @Test @Deprecated  // TODO FUSION-133 remove 'use'
-    public void testUseSyntax()
-        throws Exception
-    {
-        expectSyntaxFailure("(use {})");
-        expectSyntaxFailure("(use ())");
-        expectSyntaxFailure("(use (lib))");
-        expectSyntaxFailure("(use (lib \"/fusion/list\" \"list\"))");
-        expectSyntaxFailure("(use (lib '/fusion/list'))");
-        expectSyntaxFailure("(use (lib /fusion/list))");
-    }
-
     @Test
     public void testBadRequireSyntax()
         throws Exception
@@ -223,8 +175,6 @@ public class ModuleTest
             "   (define N (lambda () (+ 1 M)))" +
              "  (provide M N))");
         expectSyntaxFailure("M");
-
-        expectFusionException("(use mod)"); // TODO FUSION-133 remove 'use'
 
         eval("(require mod)");
         assertEval(1054, "M");

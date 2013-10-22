@@ -22,7 +22,6 @@ See also [sequence](fusion/sequence.html).
     "/fusion/private/struct"
     "/fusion/unsafe/list"
     "/fusion/unsafe/sexp"
-    "/fusion/unsafe/struct"
     "/fusion/void")
 
 
@@ -274,8 +273,8 @@ application of `pred` to the final element of the sequence is in tail position.
                  (pred h))))))   // The last predicate call is in tail position
         (true
          (raise_argument_error "any" "collection" 0 collection)))))
-         
-         
+
+
   // Name per Dylan and SRFI-1.
   (defpub every
     (lambda (pred collection)

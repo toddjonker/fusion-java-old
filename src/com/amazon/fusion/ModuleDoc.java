@@ -26,7 +26,6 @@ final class ModuleDoc
     private Map<String,BindingDoc> myBindings;
 
 
-
     public static ModuleDoc buildDocTree(FusionRuntime runtime, Filter filter,
                                          File repoDir)
         throws IOException, FusionException
@@ -226,15 +225,6 @@ final class ModuleDoc
                 String moduleName = fileName.substring(0, endIndex);
                 addSubmodule(filter, moduleName);
             }
-
-            // TODO FUSION-159 remove support for .ion extension
-            if (fileName.endsWith(".ion"))
-            {
-                // We assume that all .ion files are modules.
-                String moduleName =
-                    fileName.substring(0, fileName.length() - 4);
-                addSubmodule(filter, moduleName);
-            }
         }
 
         // Second pass: look for directories, which are implicitly submodules.
@@ -262,7 +252,11 @@ final class ModuleDoc
         ModuleNameResolver resolver =
             eval.getGlobalState().myModuleNameResolver;
 
-        return resolver.resolveLib(eval, modulePath, null);
+        return resolver.resolveModulePath(eval,
+                                          null,       // baseModule
+                                          modulePath,
+                                          true,       // load the module
+                                          null);      // syntax form for errors
     }
 
 
@@ -280,7 +274,6 @@ final class ModuleDoc
         boolean accept(ModuleIdentity id)
         {
             String name = id.internString();
-            if (name.startsWith("#%")) return false;
             if (name.endsWith("/private")) return false;
             if (name.contains("/private/")) return false;
             return true;

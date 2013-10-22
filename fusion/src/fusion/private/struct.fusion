@@ -8,4 +8,6 @@
   (defpub_j unsafe_struct_has_key
     "com.amazon.fusion.FusionStruct$UnsafeStructHasKeyProc")
 
+  (defpub_j unsafe_struct_ref
+    "com.amazon.fusion.FusionStruct$UnsafeStructRefProc")
 )

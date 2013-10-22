@@ -52,32 +52,6 @@ public interface TopLevel
      * Top-level {@code define} forms will alter the environment and will be
      * visible to later calls.
      * <p>
-     * If the reader is already positioned on a value (that is, if
-     * {@code source.getType() != null}), then that value is the first form
-     * evaluated. Otherwise, the reader is advanced to the next value
-     * automatically.
-     *
-     * @param source Fusion source code, in Ion data format. Must not be null.
-     * @param name identifies the source for error reporting. May be null.
-     *
-     * @return the resulting Fusion value; typically the value of the last
-     * expression in the source. May be null (if no value results) or an
-     * {@code Object[]} (if there are multiple values).
-     *
-     * @throws ExitException if the Fusion {@code exit} procedure is invoked.
-     *
-     * @deprecated Use {@link #eval(IonReader,SourceName)} instead.
-     */
-    @Deprecated
-    Object load(IonReader source, SourceName name)
-        throws ExitException, FusionException;
-
-
-    /**
-     * Evaluates top-level forms within this namespace.
-     * Top-level {@code define} forms will alter the environment and will be
-     * visible to later calls.
-     * <p>
      * {@link #eval(IonReader,SourceName)} should be preferred to this method,
      * since it can provide better error reporting.
      *
@@ -92,31 +66,6 @@ public interface TopLevel
      * @see #eval(IonReader,SourceName)
      */
     public Object eval(IonReader source)
-        throws ExitException, FusionException;
-
-
-    /**
-     * Evaluates top-level forms within this namespace.
-     * Top-level {@code define} forms will alter the environment and will be
-     * visible to later calls.
-     * <p>
-     * {@link #eval(IonReader,SourceName)} should be preferred to this method,
-     * since it can provide better error reporting.
-     *
-     * @param source Fusion source code, in Ion data format. Must not be null.
-     *
-     * @return the resulting Fusion value; typically the value of the last
-     * expression in the source. May be null (if no value results) or an
-     * {@code Object[]} (if there are multiple values).
-     *
-     * @throws ExitException if the Fusion {@code exit} procedure is invoked.
-     *
-     * @see #eval(IonReader,SourceName)
-     *
-     * @deprecated Use {@link #eval(IonReader)} instead.
-     */
-    @Deprecated
-    public Object load(IonReader source)
         throws ExitException, FusionException;
 
 
@@ -142,27 +91,6 @@ public interface TopLevel
      * Evaluates top-level forms within this namespace.
      * Top-level {@code define} forms will alter the environment and will be
      * visible to later calls.
-     *
-     * @param source Fusion source code, in Ion data format. Must not be null.
-     * @param name identifies the source for error reporting. May be null.
-     *
-     * @return the resulting Fusion value; typically the value of the last
-     * expression in the source. May be null (if no value results) or an
-     * {@code Object[]} (if there are multiple values).
-     *
-     * @throws ExitException if the Fusion {@code exit} procedure is invoked.
-     *
-     * @deprecated Use {@link #eval(String,SourceName)} instead
-     */
-    @Deprecated
-    public Object load(String source, SourceName name)
-        throws ExitException, FusionException;
-
-
-    /**
-     * Evaluates top-level forms within this namespace.
-     * Top-level {@code define} forms will alter the environment and will be
-     * visible to later calls.
      * <p>
      * {@link #eval(String,SourceName)} should be preferred to this method,
      * since it can provide better error reporting.
@@ -178,31 +106,6 @@ public interface TopLevel
      * @see #eval(String,SourceName)
      */
     public Object eval(String source)
-        throws ExitException, FusionException;
-
-
-    /**
-     * Evaluates top-level forms within this namespace.
-     * Top-level {@code define} forms will alter the environment and will be
-     * visible to later calls.
-     * <p>
-     * {@link #eval(String,SourceName)} should be preferred to this method,
-     * since it can provide better error reporting.
-     *
-     * @param source Fusion source code, in Ion data format. Must not be null.
-     *
-     * @return the resulting Fusion value; typically the value of the last
-     * expression in the source. May be null (if no value results) or an
-     * {@code Object[]} (if there are multiple values).
-     *
-     * @throws ExitException if the Fusion {@code exit} procedure is invoked.
-     *
-     * @see #eval(String,SourceName)
-     *
-     * @deprecated Use {@link #eval(String)} instead.
-     */
-    @Deprecated
-    public Object load(String source)
         throws ExitException, FusionException;
 
 

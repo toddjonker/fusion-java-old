@@ -105,7 +105,7 @@ public class CoreTestCase
     protected void useTstRepo()
         throws FusionException
     {
-        File tstRepo = new File("tst-repo");
+        File tstRepo = new File("ftst/repo");
         runtimeBuilder().addRepositoryDirectory(tstRepo);
     }
 

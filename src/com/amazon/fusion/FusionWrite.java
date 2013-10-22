@@ -16,7 +16,7 @@ import java.io.OutputStreamWriter;
  * @deprecated Use {@link FusionIo} instead.
  */
 @Deprecated // Deprecated for public use.
-public final class FusionWrite
+final class FusionWrite
 {
     private FusionWrite() {}
 
@@ -152,7 +152,7 @@ public final class FusionWrite
      * @deprecated Use {@link FusionIo#write(TopLevel, Object, Appendable)}.
      */
     @Deprecated
-    public static void write(TopLevel top, Appendable out, Object value)
+    static void write(TopLevel top, Appendable out, Object value)
         throws FusionException
     {
         write(((StandardTopLevel) top).getEvaluator(), out, value);
