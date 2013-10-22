@@ -207,7 +207,7 @@ public final class _Private_ModuleDocumenter
             "   display: inline;" +
             " }" +
             " .exports {" +
-            "   display: block; width: 100%;" +
+            "   display: block;" +
             "   margin-left: 1em; margin-bottom: 1em" +
             " }" +
             " .binding {" +
@@ -223,16 +223,15 @@ public final class _Private_ModuleDocumenter
             "   float: right; font-style: italic;" +
             " }" +
             " .binding .oneliner {" +
-//            "   margin-left: 1em;" +
             " }" +
             " .binding .nodoc {" +
             "   font-style: italic;" +
             " }" +
             " .binding .body {" +
-//            "   margin-left: 1em;" +
             " }" +
             " .binding .also {" +
-//            "   margin-left: 1em;" +
+            "   font-size: 0.8em;" +
+            "   font-style: italic;" +
             " }" +
             "</style>\n";
 
@@ -366,7 +365,7 @@ public final class _Private_ModuleDocumenter
             {
                 if (doc.getKind() != null)
                 {
-                    append("<span class='kind'>");
+                    append(" <span class='kind'>");
                     // Using enum toString() allows display name to be changed
                     append(doc.getKind().toString().toLowerCase());
                     append("</span>\n");
@@ -418,7 +417,7 @@ public final class _Private_ModuleDocumenter
                         }
                         else
                         {
-                            append("<p class='also'><em>Also provided by ");
+                            append("<p class='also'>Also provided by ");
                         }
 
                         linkToBindingAsModulePath(id, escapedName);
@@ -427,7 +426,7 @@ public final class _Private_ModuleDocumenter
                 }
                 if (printedOne)
                 {
-                    append("</em></p>\n");
+                    append("</p>\n");
                 }
             }
 
