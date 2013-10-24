@@ -158,8 +158,8 @@ public class FusionRuntimeBuilder
      * </ul>
      *
      * @param props must not be null.
-
-     * @return this builder, if it's immutable or if no properties were
+     *
+     * @return this builder, if it's mutable or if no properties were
      * recognized; otherwise a new mutable builder.
      *
      * @throws FusionException if there's a problem applying the properties.
@@ -190,6 +190,7 @@ public class FusionRuntimeBuilder
 
     /**
      * Configures a builder from properties at the given URL.
+     * If no such resource exists, then no configuration changes are made.
      * <p>
      * These properties are observed:
      * <ul>
@@ -198,7 +199,7 @@ public class FusionRuntimeBuilder
      *
      * @param resource may be null, in which case no configuration happens.
 
-     * @return this builder, if it's immutable or if no properties were
+     * @return this builder, if it's mutable or if no properties were
      * recognized; otherwise a new mutable builder.
      *
      * @throws FusionException if there's a problem reading the resource or
@@ -233,14 +234,14 @@ public class FusionRuntimeBuilder
      *<pre>
      *    classForLoading.getResource(resourceName)
      *</pre>
-     *
+     * If no such resource exists, then no configuration changes are made.
      * <p>
      * These properties are observed:
      * <ul>
      *   <li>{@value #PROPERTY_BOOTSTRAP_REPOSITORY}
      * </ul>
      *
-     * @return this builder, if it's immutable or if no properties were
+     * @return this builder, if it's mutable or if no properties were
      * recognized; otherwise a new mutable builder.
      *
      * @throws FusionException if there's a problem reading the resource or
@@ -315,6 +316,8 @@ public class FusionRuntimeBuilder
      * {@code "user.dir"} JVM system property when {@link #build()} is called.
      * If a relative path is given, it is immediately resolved as per
      * {@link File#getAbsolutePath()}.
+     *
+     * @return this builder, if it's mutable; otherwise a new mutable builder.
      *
      * @see #getInitialCurrentDirectory()
      * @see #setInitialCurrentDirectory(File)
@@ -408,6 +411,8 @@ public class FusionRuntimeBuilder
      * {@link File#getAbsolutePath()}.
      * May be null to clear a previously-configured directory.
      *
+     * @return this builder, if it's mutable; otherwise a new mutable builder.
+     *
      * @throws IllegalArgumentException if the directory isn't a valid
      * bootstrap repository.
      *
@@ -476,6 +481,8 @@ public class FusionRuntimeBuilder
      * @param directory must be a path to a readable directory.
      * If a relative path is given, it is immediately resolved as per
      * {@link File#getAbsolutePath()}.
+     *
+     * @return this builder, if it's mutable; otherwise a new mutable builder.
      *
      * @see #addRepositoryDirectory(File)
      */
