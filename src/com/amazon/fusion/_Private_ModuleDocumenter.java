@@ -212,26 +212,42 @@ public final class _Private_ModuleDocumenter
             " }" +
             " .binding {" +
             "   display: block;" +
-            "   margin-left: 1em;" +
             " }" +
             " .binding .name {" +
             "   font-size: 1.17em;" +
             "   font-weight: bold;" +
-            "   margin-left: -1em;" +
             " }" +
             " .binding .kind {" +
             "   float: right; font-style: italic;" +
             " }" +
-            " .binding .oneliner {" +
-            " }" +
             " .binding .nodoc {" +
             "   font-style: italic;" +
             " }" +
-            " .binding .body {" +
+            " .binding .doc {" +
+            "    margin-left: 1em;" +
             " }" +
-            " .binding .also {" +
+            " .binding .doc .oneliner {" +
+            " }" +
+            " .binding .doc .body {" +
+            " }" +
+            " .binding .doc .also {" +
             "   font-size: 0.8em;" +
             "   font-style: italic;" +
+            " }" +
+
+            // Highlight the binding when arriving via a link.
+            // From http://css-tricks.com/on-target/
+            " :target.binding {" +
+            "   -moz-animation:    highlight 2s ease;" +
+            "   -webkit-animation: highlight 2s ease;" +
+            " }" +
+            " @-moz-keyframes highlight {" +
+            "     0% { background: yellow; }" +
+            "   100% { }" +
+            " }" +
+            " @-webkit-keyframes highlight {" +
+            "     0% { background: yellow; }" +
+            "   100% { }" +
             " }" +
             "</style>\n";
 
@@ -341,9 +357,10 @@ public final class _Private_ModuleDocumenter
          *  binding
          *    name
          *    kind
-         *    oneliner
-         *    body
-         *    also
+         *    doc
+         *      oneliner
+         *      body
+         *      also
          */
         private void renderBinding(ModuleDoc moduleDoc,
                                    String name, BindingDoc doc)
@@ -351,9 +368,9 @@ public final class _Private_ModuleDocumenter
         {
             String escapedName = escapeString(name);
 
-            append("\n<div class='binding'><span class='name'><a name='");
+            append("\n<div class='binding' id='");
             append(escapedName);
-            append("'>");
+            append("'><span class='name'>");
             append(escapedName);
             append("</a></span>");   // binding div is still open
 
@@ -370,6 +387,8 @@ public final class _Private_ModuleDocumenter
                     append(doc.getKind().toString().toLowerCase());
                     append("</span>\n");
                 }
+
+                append("<div class='doc'>");
 
                 StringBuilder buf = new StringBuilder();
 
@@ -428,6 +447,8 @@ public final class _Private_ModuleDocumenter
                 {
                     append("</p>\n");
                 }
+
+                append("</div>\n"); // doc
             }
 
             append("</div>\n"); // binding
