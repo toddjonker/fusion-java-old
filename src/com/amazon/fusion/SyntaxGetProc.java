@@ -1,10 +1,10 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionIo.safeWrite;
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
 import static com.amazon.fusion.FusionVoid.voidValue;
-import static com.amazon.fusion.FusionWrite.safeWrite;
 
 final class SyntaxGetProc
     extends Procedure

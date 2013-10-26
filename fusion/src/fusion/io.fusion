@@ -53,9 +53,9 @@ There are three "styles" of output:
 
   (defpub_j is_eof  "com.amazon.fusion.FusionIo$IsEofProc")
 
-  (defpub_j display "com.amazon.fusion.FusionWrite$DisplayProc")
-  (defpub_j ionize  "com.amazon.fusion.FusionWrite$IonizeProc")
-  (defpub_j write   "com.amazon.fusion.FusionWrite$WriteProc")
+  (defpub_j display "com.amazon.fusion.FusionIo$DisplayProc")
+  (defpub_j ionize  "com.amazon.fusion.FusionIo$IonizeProc")
+  (defpub_j write   "com.amazon.fusion.FusionIo$WriteProc")
 
   (defpub displayln
     '''

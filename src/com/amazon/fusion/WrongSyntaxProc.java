@@ -1,8 +1,8 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionWrite.safeDisplayManyToString;
+import static com.amazon.fusion.FusionIo.safeDisplayManyToString;
 
 /**
  * Fusion procedure to raise a syntax error.

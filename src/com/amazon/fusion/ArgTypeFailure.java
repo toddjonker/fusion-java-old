@@ -2,8 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionIo.safeWrite;
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
-import static com.amazon.fusion.FusionWrite.safeWrite;
 import java.io.IOException;
 
 /**

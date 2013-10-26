@@ -1,13 +1,13 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionIo.dispatchIonize;
+import static com.amazon.fusion.FusionIo.dispatchWrite;
+import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionList.unsafeJavaIterate;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
-import static com.amazon.fusion.FusionWrite.dispatchIonize;
-import static com.amazon.fusion.FusionWrite.dispatchWrite;
-import static com.amazon.fusion.FusionWrite.safeWriteToString;
 import static com.amazon.ion.util.IonTextUtils.printSymbol;
 import static java.lang.Boolean.TRUE;
 import static java.util.Collections.EMPTY_MAP;

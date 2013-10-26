@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionWrite.safeWriteToString;
+import static com.amazon.fusion.FusionIo.safeWriteToString;
 
 
 final class MacroTransformer

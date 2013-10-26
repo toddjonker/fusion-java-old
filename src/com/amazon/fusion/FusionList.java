@@ -2,11 +2,11 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionIo.dispatchIonize;
+import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
-import static com.amazon.fusion.FusionWrite.dispatchIonize;
-import static com.amazon.fusion.FusionWrite.dispatchWrite;
 import com.amazon.fusion.FusionSequence.BaseSequence;
 import com.amazon.fusion.FusionSexp.BaseSexp;
 import com.amazon.ion.IonInt;

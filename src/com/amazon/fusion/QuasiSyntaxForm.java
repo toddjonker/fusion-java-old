@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionWrite.safeWriteToString;
+import static com.amazon.fusion.FusionIo.safeWriteToString;
 import com.amazon.fusion.QuoteSyntaxForm.CompiledQuoteSyntax;
 
 final class QuasiSyntaxForm

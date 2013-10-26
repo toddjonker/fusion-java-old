@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionWrite.safeWrite;
+import static com.amazon.fusion.FusionIo.safeWrite;
 import java.io.IOException;
 import java.util.Arrays;
 

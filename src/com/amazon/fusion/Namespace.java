@@ -2,8 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionVoid.voidValue;
-import static com.amazon.fusion.FusionWrite.safeWriteToString;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
 import java.util.ArrayList;
