@@ -12,8 +12,10 @@
 
 
 (define test_predicates
-  (lambda (struct expect_null expect_empty)
+  (lambda (struct expect_mutable expect_null expect_empty)
     (assert (is_struct struct))
+    (check = (is_mutable_struct   struct)      expect_mutable )
+    (check = (is_immutable_struct struct) (not expect_mutable))
     (check = (is_null  struct) expect_null)
     (check = (is_empty struct) expect_empty)
     // TODO ...
@@ -22,12 +24,17 @@
 
 // Construction via literals
 
-(test_predicates           null.struct  true  true)
-(test_predicates (quote    null.struct) true  true)
-(test_predicates (quote a::null.struct) true  true)
-(test_predicates           {}           false true)
-(test_predicates (quote    {})          false true)
-(test_predicates (quote a::{})          false true)
+(test_predicates           null.struct  false true  true)
+(test_predicates (quote    null.struct) false true  true)
+(test_predicates (quote a::null.struct) false true  true)
+(test_predicates           {}           false false true)
+(test_predicates (quote    {})          false false true)
+(test_predicates (quote a::{})          false false true)
+
+(test_predicates (struct              ) false false true)
+(test_predicates (struct "a" =        ) false false false)
+(test_predicates (mutable_struct      ) true  false true)
+(test_predicates (mutable_struct "a" =) true  false false)
 
 
 (check_annotations (quote null.struct) (quote []))
@@ -45,6 +52,8 @@
 
 (define (test_size fields expect)
   (let [(s (apply struct fields))]
+    (check = (size s) expect))
+  (let [(s (apply mutable_struct fields))]
     (check = (size s) expect)))
 
 (test_size (quote (       )) 0)
@@ -63,6 +72,8 @@
 
 (define (test_has_key fields key expect)
   (let [(s (apply struct fields))]
+    (check = (has_key s key) expect))
+  (let [(s (apply mutable_struct fields))]
     (check = (has_key s key) expect)))
 
 (test_has_key (quote ()) ""          false)
@@ -147,9 +158,16 @@
 
 
 (define (test_remove_keys fields keys expect)
-  (let [(s (apply struct fields))]
-    (check ion_equals (apply remove_keys s keys) expect)
-    (check ion_equals s (apply struct fields))))              // s not mutated
+  (lets [(s (apply struct fields)),
+         (result (apply remove_keys s keys))]
+    (check ion_equals result expect)
+    (check_pred is_immutable_struct result)
+    (check ion_equals s (apply struct fields)))               // s not mutated
+  (lets [(s (apply mutable_struct fields)),
+         (result (apply remove_keys s keys))]
+    (check ion_equals result expect)
+    (check_pred is_mutable_struct result)
+    (check ion_equals s (apply mutable_struct fields))))      // s not mutated
 
 (test_remove_keys (quote ()) [   ] {})
 (test_remove_keys (quote ()) ["f"] {})
@@ -175,8 +193,15 @@
 
 
 (define (test_retain_keys fields keys expect)
-  (let [(s (apply struct fields))]
-    (check ion_equals (apply retain_keys s keys) expect)
+  (lets [(s (apply struct fields)),
+         (result (apply retain_keys s keys))]
+    (check ion_equals result expect)
+    (check_pred is_immutable_struct result)
+    (check ion_equals s (apply struct fields)))               // s not mutated
+  (lets [(s (apply mutable_struct fields)),
+         (result (apply retain_keys s keys))]
+    (check ion_equals result expect)
+    (check_pred is_mutable_struct result)
     (check ion_equals s (apply struct fields))))              // s not mutated
 
 (test_retain_keys (quote ()) [   ] {})

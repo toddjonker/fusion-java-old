@@ -67,10 +67,16 @@ while the field values are iterated.
   // Pass-through bindings from /fusion/collection
   (provide . any do element elt every find has_key is_empty size)
 
+  (defpub_j struct          "com.amazon.fusion.FusionStruct$StructProc")
+  (defpub_j mutable_struct  "com.amazon.fusion.FusionStruct$MutableStructProc")
+
+  (defpub_j is_immutable_struct
+    "com.amazon.fusion.FusionStruct$IsImmutableStructProc")
+  (defpub_j is_mutable_struct
+    "com.amazon.fusion.FusionStruct$IsMutableStructProc")
 
   (defpub_j remove_keys       "com.amazon.fusion.FusionStruct$RemoveKeysProc")
   (defpub_j retain_keys       "com.amazon.fusion.FusionStruct$RetainKeysProc")
-  (defpub_j struct            "com.amazon.fusion.FusionStruct$StructProc")
   (defpub_j struct_merge      "com.amazon.fusion.FusionStruct$StructMergeProc")
   (defpub_j struct_zip        "com.amazon.fusion.FusionStruct$StructZipProc")
 

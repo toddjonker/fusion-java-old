@@ -140,6 +140,31 @@ final class FusionStruct
     }
 
 
+    static MutableStruct mutableStruct(String[] names,
+                                       Object[] values,
+                                       String[] anns)
+    {
+        Map<String, Object> map;
+        if (names.length == 0)
+        {
+            map = Collections.emptyMap();
+        }
+        else
+        {
+            map = new HashMap<String, Object>(names.length);
+            for (int i = 0; i < names.length; i++)
+            {
+                String field  = names[i];
+                Object newElt = values[i];
+
+                structImplAdd(map, field, newElt);
+            }
+        }
+
+        return new MutableStruct(map, anns);
+    }
+
+
     static void structImplAdd(Map<String, Object> map, String name,
                               Object value)
     {
@@ -202,6 +227,16 @@ final class FusionStruct
     static boolean isStruct(Evaluator eval, Object v)
     {
         return (v instanceof BaseStruct);
+    }
+
+    static boolean isImmutableStruct(Evaluator eval, Object v)
+    {
+        return (v instanceof ImmutableStruct);
+    }
+
+    static boolean isMutableStruct(Evaluator eval, Object v)
+    {
+        return (v instanceof MutableStruct);
     }
 
 
@@ -384,7 +419,7 @@ final class FusionStruct
             if (other.size() == 0) return this;
 
             // We know it has children.
-            NonNullImmutableStruct is = (NonNullImmutableStruct) other;
+            MapBasedStruct is = (MapBasedStruct) other;
             return new NonNullImmutableStruct(is.myMap, myAnnotations);
         }
 
@@ -415,15 +450,15 @@ final class FusionStruct
     }
 
 
-    static final class NonNullImmutableStruct
+    private abstract static class MapBasedStruct
         extends BaseCollection
-        implements ImmutableStruct
+        implements BaseStruct
     {
         /**
          * For repeated fields, the value is Object[] otherwise it's a
          * non-array Object.
          */
-        private final Map<String, Object> myMap;
+        protected final Map<String, Object> myMap;
 
         /**
          * We can't use {@link #myMap}.size() because that doesn't count
@@ -434,7 +469,7 @@ final class FusionStruct
         /**
          * @param map must not be null.
          */
-        private NonNullImmutableStruct(Map<String, Object> map, String[] anns)
+        private MapBasedStruct(Map<String, Object> map, String[] anns)
         {
             super(anns);
             assert map != null;
@@ -455,6 +490,8 @@ final class FusionStruct
             }
             mySize = size;
         }
+
+        abstract MapBasedStruct makeSimilar(Map<String, Object> map);
 
         Map<String, Object> copyMap()
         {
@@ -495,9 +532,12 @@ final class FusionStruct
         public NonNullImmutableStruct transformFields(StructFieldVisitor visitor)
             throws FusionException
         {
-            if (mySize == 0) return this;
+            boolean mustReplaceThis = (this instanceof MutableStruct);
 
-            boolean mustReplaceThis = false;
+            if (mySize == 0 && !mustReplaceThis)
+            {
+                return (NonNullImmutableStruct) this;
+            }
 
             // Make a copy of the map, then mutate it to replace children
             // as necessary.
@@ -543,7 +583,10 @@ final class FusionStruct
                 }
             }
 
-            if (! mustReplaceThis) return this;
+            if (! mustReplaceThis)
+            {
+                return (NonNullImmutableStruct) this;
+            }
 
             return new NonNullImmutableStruct(newMap, myAnnotations);
         }
@@ -611,9 +654,7 @@ final class FusionStruct
             boolean modified = newMap.keySet().removeAll(asList);
             if (! modified) return this;
 
-            if (newMap.isEmpty()) newMap = Collections.emptyMap();
-
-            return new NonNullImmutableStruct(newMap, myAnnotations);
+            return makeSimilar(newMap);
         }
 
         @Override
@@ -626,9 +667,7 @@ final class FusionStruct
             boolean modified = newMap.keySet().retainAll(asList);
             if (! modified) return this;
 
-            if (newMap.isEmpty()) newMap = Collections.emptyMap();
-
-            return new NonNullImmutableStruct(newMap, myAnnotations);
+            return makeSimilar(newMap);
         }
 
         @Override
@@ -638,7 +677,7 @@ final class FusionStruct
             if (other.size() == 0) return this;
 
             // We know it has children.
-            NonNullImmutableStruct is = (NonNullImmutableStruct) other;
+            MapBasedStruct is = (MapBasedStruct) other;
 
             Map<String,Object> newMap;
 
@@ -765,6 +804,45 @@ final class FusionStruct
     }
 
 
+    static final class NonNullImmutableStruct
+        extends MapBasedStruct
+        implements ImmutableStruct
+    {
+        /**
+         * @param map
+         * @param annotations
+         */
+        public NonNullImmutableStruct(Map<String, Object> map,
+                                      String[] annotations)
+        {
+            super(map, annotations);
+        }
+
+        @Override
+        MapBasedStruct makeSimilar(Map<String, Object> map)
+        {
+            return immutableStruct(map, myAnnotations);
+        }
+    }
+
+
+    private static final class MutableStruct
+        extends MapBasedStruct
+    {
+        public MutableStruct(Map<String, Object> map,
+                             String[] annotations)
+        {
+            super(map, annotations);
+        }
+
+        @Override
+        MapBasedStruct makeSimilar(Map<String, Object> map)
+        {
+            return new MutableStruct(map, myAnnotations);
+        }
+    }
+
+
     //========================================================================
 
 
@@ -783,6 +861,48 @@ final class FusionStruct
             throws FusionException
         {
             boolean result = isStruct(eval, arg);
+            return eval.newBool(result);
+        }
+    }
+
+
+
+    static final class IsImmutableStructProc
+        extends Procedure1
+    {
+        IsImmutableStructProc()
+        {
+            //    "                                                                               |
+            super("Determines whether `value` is an immutable struct, returning `true` or `false`.",
+                  "value");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object value)
+            throws FusionException
+        {
+            boolean result = isImmutableStruct(eval, value);
+            return eval.newBool(result);
+        }
+    }
+
+
+
+    static final class IsMutableStructProc
+        extends Procedure1
+    {
+        IsMutableStructProc()
+        {
+            //    "                                                                               |
+            super("Determines whether `value` is a mutable struct, returning `true` or `false`.",
+                  "value");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object value)
+            throws FusionException
+        {
+            boolean result = isMutableStruct(eval, value);
             return eval.newBool(result);
         }
     }
@@ -873,17 +993,12 @@ final class FusionStruct
 
 
 
-    static final class StructProc
+    abstract static class BaseStructProc
         extends Procedure
     {
-        StructProc()
+        BaseStructProc(String doc, String... argNames)
         {
-            //    "                                                                               |
-            super("Constructs an immutable, non-null struct from alternating strings and values.\n" +
-                  "Each `name` is a non-empty string or symbol denoting a field name, and the\n" +
-                  "following `value` is the field's value.  Names may be repeated to produce\n" +
-                  "repeated (multi-mapped) fields.",
-                  "name", "value", DOTDOTDOT, DOTDOTDOT);
+            super(doc, argNames);
         }
 
         void checkArityEven(Object... args)
@@ -897,8 +1012,11 @@ final class FusionStruct
             }
         }
 
+        abstract Object makeIt(String[] names, Object[] values)
+            throws FusionException;
+
         @Override
-        Object doApply(Evaluator eval, Object[] args)
+        final Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
             checkArityEven(args);
@@ -915,7 +1033,53 @@ final class FusionStruct
             }
             assert fieldPos == fieldCount;
 
+            return makeIt(names, values);
+        }
+    }
+
+
+
+    static final class StructProc
+        extends BaseStructProc
+    {
+        StructProc()
+        {
+            //    "                                                                               |
+            super("Constructs an immutable, non-null struct from alternating strings and values.\n" +
+                  "Each `name` is a non-empty string or symbol denoting a field name, and the\n" +
+                  "following `value` is the field's value.  Names may be repeated to produce\n" +
+                  "repeated (multi-mapped) fields.",
+                  "name", "value", DOTDOTDOT, DOTDOTDOT);
+        }
+
+        @Override
+        Object makeIt(String[] names, Object[] values)
+            throws FusionException
+        {
             return immutableStruct(names, values, EMPTY_STRING_ARRAY);
+        }
+    }
+
+
+
+    static final class MutableStructProc
+        extends BaseStructProc
+    {
+        MutableStructProc()
+        {
+            //    "                                                                               |
+            super("Constructs a mutable, non-null struct from alternating strings and values.\n" +
+                  "Each `name` is a non-empty string or symbol denoting a field name, and the\n" +
+                  "following `value` is the field's value.  Names may be repeated to produce\n" +
+                  "repeated (multi-mapped) fields.",
+                  "name", "value", DOTDOTDOT, DOTDOTDOT);
+        }
+
+        @Override
+        Object makeIt(String[] names, Object[] values)
+            throws FusionException
+        {
+            return mutableStruct(names, values, EMPTY_STRING_ARRAY);
         }
     }
 
