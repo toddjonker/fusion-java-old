@@ -15,6 +15,8 @@
   (defpub F (lambda rest false))
   (defpub T (lambda rest true))
 
+  (defpub NULL_SYMBOL (quote null.symbol))
+
 
   (defpub ion_equals          (java_new "com.amazon.fusion.IonEqualsProc"))
 
