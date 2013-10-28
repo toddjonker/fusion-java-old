@@ -9,6 +9,7 @@ import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionStruct.nullStruct;
 import static com.amazon.fusion.FusionStruct.structImplAdd;
 import static com.amazon.fusion.SourceLocation.currentLocation;
+import com.amazon.fusion.FusionCollection.BaseCollection;
 import com.amazon.fusion.FusionStruct.ImmutableStruct;
 import com.amazon.fusion.FusionStruct.NonNullImmutableStruct;
 import com.amazon.fusion.FusionStruct.StructFieldVisitor;
@@ -30,7 +31,7 @@ final class SyntaxStruct
     private SyntaxStruct(ImmutableStruct struct,
                          SourceLocation loc, SyntaxWraps wraps)
     {
-        super(struct.myAnnotations, loc, wraps);
+        super(((BaseCollection)struct).myAnnotations, loc, wraps);
         assert (wraps == null) || (struct.size() != 0);
         myStruct = struct;
     }
@@ -64,7 +65,7 @@ final class SyntaxStruct
     @Override
     boolean isNullValue()
     {
-        return myStruct.isAnyNull();
+        return ((FusionValue)myStruct).isAnyNull();
     }
 
 

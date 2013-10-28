@@ -258,17 +258,8 @@ final class FusionStruct
     }
 
 
-    static abstract class BaseStruct
-        extends BaseCollection
+    static interface BaseStruct
     {
-        BaseStruct() {}
-
-        BaseStruct(String[] annotations)
-        {
-            super(annotations);
-        }
-
-        @Override
         abstract int size(); // Doesn't throw
 
         /**
@@ -309,20 +300,15 @@ final class FusionStruct
     }
 
 
-    static abstract class ImmutableStruct
+    static interface ImmutableStruct
         extends BaseStruct
     {
-        ImmutableStruct() {}
-
-        ImmutableStruct(String[] annotations)
-        {
-            super(annotations);
-        }
     }
 
 
-    static final class NullStruct
-        extends ImmutableStruct
+    private static final class NullStruct
+        extends BaseCollection
+        implements ImmutableStruct
     {
         NullStruct() {}
 
@@ -332,65 +318,65 @@ final class FusionStruct
         }
 
         @Override
-        boolean isAnyNull()
+        public boolean isAnyNull()
         {
             return true;
         }
 
         @Override
-        int size()
+        public int size()
         {
             return 0;
         }
 
         @Override
-        void visitFields(StructFieldVisitor visitor)
+        public void visitFields(StructFieldVisitor visitor)
         {
         }
 
         @Override
-        NullStruct transformFields(StructFieldVisitor visitor)
+        public NullStruct transformFields(StructFieldVisitor visitor)
         {
             return this;
         }
 
         @Override
-        boolean hasKey(Evaluator eval, String key)
+        public boolean hasKey(Evaluator eval, String key)
             throws FusionException
         {
             return false;
         }
 
         @Override
-        Object elt(Evaluator eval, String field)
+        public Object elt(Evaluator eval, String field)
             throws FusionException
         {
             return voidValue(eval);
         }
 
         @Override
-        Object ref(Evaluator eval, String name, Object def)
+        public Object ref(Evaluator eval, String name, Object def)
             throws FusionException
         {
             return bounceDefaultResult(eval, def);
         }
 
         @Override
-        Object removeKeys(String[] keys)
+        public Object removeKeys(String[] keys)
             throws FusionException
         {
             return this;
         }
 
         @Override
-        Object retainKeys(String[] keys)
+        public Object retainKeys(String[] keys)
             throws FusionException
         {
             return this;
         }
 
         @Override
-        Object merge(BaseStruct other)
+        public Object merge(BaseStruct other)
             throws FusionException
         {
             if (other.size() == 0) return this;
@@ -428,7 +414,8 @@ final class FusionStruct
 
 
     static final class NonNullImmutableStruct
-        extends ImmutableStruct
+        extends BaseCollection
+        implements ImmutableStruct
     {
         /**
          * For repeated fields, the value is Object[] otherwise it's a
@@ -473,13 +460,13 @@ final class FusionStruct
         }
 
         @Override
-        int size()
+        public int size()
         {
             return mySize;
         }
 
         @Override
-        void visitFields(StructFieldVisitor visitor)
+        public void visitFields(StructFieldVisitor visitor)
             throws FusionException
         {
             for (Map.Entry<String, Object> entry : myMap.entrySet())
@@ -503,7 +490,7 @@ final class FusionStruct
 
 
         @Override
-        NonNullImmutableStruct transformFields(StructFieldVisitor visitor)
+        public NonNullImmutableStruct transformFields(StructFieldVisitor visitor)
             throws FusionException
         {
             if (mySize == 0) return this;
@@ -560,7 +547,7 @@ final class FusionStruct
         }
 
         @Override
-        boolean hasKey(Evaluator eval, String key)
+        public boolean hasKey(Evaluator eval, String key)
             throws FusionException
         {
             return myMap.get(key) != null;
@@ -579,7 +566,7 @@ final class FusionStruct
         }
 
         @Override
-        Object elt(Evaluator eval, String field)
+        public Object elt(Evaluator eval, String field)
             throws FusionException
         {
             Object result = myMap.get(field);
@@ -596,7 +583,7 @@ final class FusionStruct
         }
 
         @Override
-        Object ref(Evaluator eval, String name, Object def)
+        public Object ref(Evaluator eval, String name, Object def)
             throws FusionException
         {
             Object result = myMap.get(name);
@@ -613,7 +600,7 @@ final class FusionStruct
         }
 
         @Override
-        Object removeKeys(String[] keys)
+        public Object removeKeys(String[] keys)
             throws FusionException
         {
             Map<String,Object> newMap = new HashMap<String,Object>(myMap);
@@ -628,7 +615,7 @@ final class FusionStruct
         }
 
         @Override
-        Object retainKeys(String[] keys)
+        public Object retainKeys(String[] keys)
             throws FusionException
         {
             Map<String,Object> newMap = new HashMap<String,Object>(myMap);
@@ -643,7 +630,7 @@ final class FusionStruct
         }
 
         @Override
-        Object merge(BaseStruct other)
+        public Object merge(BaseStruct other)
             throws FusionException
         {
             if (other.size() == 0) return this;
