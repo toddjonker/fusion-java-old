@@ -191,20 +191,21 @@
     
 
 //==========================================================================
-// TODO map not implemented for sexp
-/*
+// map
+
 (check_equal (map + valNull) valNull "map1")
-(check_equal (map + valEmpty) [] "map1")
-(check_equal (map + [1, 2]) [1, 2] "map2")
-(check_equal (map (lambda (n) (+ 3 n)) [1, 2]) [4, 5] "map3")
+(check_equal (map + valEmpty) valEmpty "map2")
+(check_equal (map + (sexp 1 2)) (sexp 1 2) "map3")
+(check_equal (map (lambda (n) (+ 3 n)) (sexp 1 2)) (sexp 4 5) "map4")
 
-(check_equal (choose T []) [] "filter1")
-(check_equal (choose F []) [] "filter2")
-(check_equal (choose T [1, 2]) [1, 2] "filter3")
-(check_equal (choose F [1, 2]) [] "filter4")
+(check_equal (choose T valEmpty) valEmpty "filter1")
+(check_equal (choose F valEmpty) valEmpty "filter2")
+(check_equal (choose T valNull) valNull "filter3")
+(check_equal (choose F valNull) valNull "filter4")
+(check_equal (choose T (sexp 1 2)) (sexp 1 2) "filter5")
+(check_equal (choose F (sexp 1 2)) valEmpty "filter6")
 
-(check_equal (choose (lambda (n) (< 10 n)) [1, 11, 10, 12]) [11, 12] "filter5")
-*/
+(check_equal (choose (lambda (n) (< 10 n)) (sexp 1 11 10 12)) (sexp 11 12) "filter7")
 
 
 //==========================================================================

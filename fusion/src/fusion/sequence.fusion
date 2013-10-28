@@ -20,7 +20,9 @@ types.
     "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/private/builtins"   // Some basic list ops
-    "/fusion/unsafe/list")
+    "/fusion/private/sexp"
+    "/fusion/unsafe/list"
+    "/fusion/unsafe/sexp")
 
   // Pass-through bindings from /fusion/collection
   (provide . any do element elt every find has_key is_empty size)
@@ -56,45 +58,64 @@ elements.
 
   // Name per Dylan.  I prefer `choose` over `filter` because the latter is
   // ambiguous whether you're filtering "in" or "out".
-  // TODO FUSION-143 implement for sexp
   (defpub choose
-    (lambda (pred list)
+    (lambda (pred sequence)
       '''
-Applies the one-parameter predicate `pred` to each element of `list`, returning
-a new list of the elements (in order) for which `pred` returns truthy.
+Applies the one-parameter predicate `pred` to each element of `sequence`,
+returning a new sequence of the same type, containing the elements (in order)
+for which `pred` returns truthy.
       '''
-      (if (not (is_list list))
-        (raise_argument_error "choose" "list" 1 pred list)
-        (let [(len (size list))]
-          (let loop [(i 0),
-                     (result (stretchy_list))]
-            (if (= i len)
-              result
-              (let [(elt (. list i))]
-                (loop
-                  (+ 1 i)
-                  (if (pred elt)
-                    (unsafe_list_add_m result elt)
-                    result)))))))))
+      (cond
+        ((is_list sequence)
+          (let [(len (size sequence))]
+            (let loop [(i 0),
+                       (result (stretchy_list))]
+              (if (= i len)
+                result
+                (let [(elt (. sequence i))]
+                  (loop
+                    (+ 1 i)
+                    (if (pred elt)
+                      (unsafe_list_add_m result elt)
+                      result)))))))
+        ((is_sexp sequence)
+          (let loop [(ptr sequence)]
+            (if (is_empty ptr)
+              (quote ())
+              (let [(v (unsafe_pair_head ptr))]
+                (if (pred v)
+                  (pair v (loop (unsafe_pair_tail ptr)))
+                  (loop (unsafe_pair_tail ptr)))))))
+        (true
+          (raise_argument_error "choose" "sequence" 1 pred sequence)))))
+
 
 
   // Name per Dylan and SRFI-1. Dylan allows mapping over multiple key-value
   // collections but that's a bit crazy and it's unclear how useful that is.
-  // TODO FUSION-143 implement for sexp
   (defpub map
-    (lambda (proc list)
+    (lambda (proc sequence)
       '''
-Applies the one-parameter procedure `proc` to each element of `list`, returning
-a new list of the results in order.
+Applies the one-parameter procedure `proc` to each element of `sequence`,
+returning a new sequence of the same type, containing the results in order.
       '''
-      (if (not (is_list list))
-        (raise_argument_error "map" "list" 1 proc list)
-        (let [(len (size list))]
-          (let loop [(i 0),
-                     (result (stretchy_list))]
-            (if (= i len)
-              result
-              (loop
-                (+ 1 i)
-                (unsafe_list_add_m result (proc (. list i))))))))))
+      (cond
+        ((is_list sequence)
+          (let [(len (size sequence))]
+            (let loop [(i 0),
+                       (result (stretchy_list))]
+              (if (= i len)
+                result
+                (loop
+                  (+ 1 i)
+                  (unsafe_list_add_m result (proc (. sequence i))))))))
+        ((is_sexp sequence)
+          (let loop [(ptr sequence)]
+            (if (is_empty ptr)
+              (quote ())
+              (pair
+                (proc (unsafe_pair_head ptr))
+                (loop (unsafe_pair_tail ptr))))))
+        (true
+          (raise_argument_error "map" "sequence" 1 proc sequence)))))
 )
