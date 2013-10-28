@@ -230,6 +230,8 @@ final class FusionStruct
                                         String[] keys)
         throws FusionException
     {
+        if (keys.length == 0) return struct;
+
         return ((BaseStruct) struct).removeKeys(keys);
     }
 
@@ -990,8 +992,39 @@ final class FusionStruct
 
 
 
-    static final class RemoveKeysProc
+    abstract static class BaseKeysProc
         extends Procedure
+    {
+        BaseKeysProc(String doc, String... argNames)
+        {
+            super(doc, argNames);
+        }
+
+        abstract Object doIt(Evaluator eval, Object struct, String[] keys)
+            throws FusionException;
+
+        @Override
+        final Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityAtLeast(1, args);
+
+            Object struct = checkStructArg(eval, 0, args);
+
+            String[] keys = new String[args.length - 1];
+            for (int i = 1; i < args.length; i++)
+            {
+                keys[i-1] = checkTextArg(i, args);
+            }
+
+            return doIt(eval, struct, keys);
+        }
+    }
+
+
+
+    static final class RemoveKeysProc
+        extends BaseKeysProc
     {
         RemoveKeysProc()
         {
@@ -1003,28 +1036,16 @@ final class FusionStruct
         }
 
         @Override
-        Object doApply(Evaluator eval, Object[] args)
+        Object doIt(Evaluator eval, Object struct, String[] keys)
             throws FusionException
         {
-            checkArityAtLeast(1, args);
-
-            Object struct = checkStructArg(eval, 0, args);
-
-            if (args.length == 1) return struct;
-
-            String[] keys = new String[args.length - 1];
-            for (int i = 1; i < args.length; i++)
-            {
-                keys[i-1] = checkTextArg(i, args);
-            }
-
             return unsafeStructRemoveKey(eval, struct, keys);
         }
     }
 
 
     static final class RetainKeysProc
-        extends Procedure
+        extends BaseKeysProc
     {
         RetainKeysProc()
         {
@@ -1036,19 +1057,9 @@ final class FusionStruct
         }
 
         @Override
-        Object doApply(Evaluator eval, Object[] args)
+        Object doIt(Evaluator eval, Object struct, String[] keys)
             throws FusionException
         {
-            checkArityAtLeast(1, args);
-
-            Object struct = checkStructArg(eval, 0, args);
-
-            String[] keys = new String[args.length - 1];
-            for (int i = 1; i < args.length; i++)
-            {
-                keys[i-1] = checkTextArg(i, args);
-            }
-
             return unsafeStructRetainKey(eval, struct, keys);
         }
     }
