@@ -27,10 +27,10 @@ final class FusionSequence
      * @param sequence must be a sequence.
      * @return void if the position is out of bounds.
      */
-    static Object unsafeSequenceDot(Evaluator eval, Object sequence, int pos)
+    static Object unsafeSequenceElt(Evaluator eval, Object sequence, int pos)
         throws FusionException
     {
-        return ((BaseSequence) sequence).dot(eval, pos);
+        return ((BaseSequence) sequence).elt(eval, pos);
     }
 
 
@@ -53,7 +53,7 @@ final class FusionSequence
          * @param eval is required in case a subclass needs to create values,
          * for example due to lazy injection.
          */
-        abstract Object dot(Evaluator eval, int pos)
+        abstract Object elt(Evaluator eval, int pos)
             throws FusionException;
 
         /** Throws if the position is out of bounds. */

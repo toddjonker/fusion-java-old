@@ -222,7 +222,7 @@ final class FusionStruct
     static Object unsafeStructDot(Evaluator eval, Object struct, String field)
         throws FusionException
     {
-        return ((BaseStruct) struct).dot(eval, field);
+        return ((BaseStruct) struct).elt(eval, field);
     }
 
 
@@ -286,7 +286,7 @@ final class FusionStruct
             throws FusionException;
 
         /** Returns void if the field doesn't exist. */
-        abstract Object dot(Evaluator eval, String field)
+        abstract Object elt(Evaluator eval, String field)
             throws FusionException;
 
         /**
@@ -362,7 +362,7 @@ final class FusionStruct
         }
 
         @Override
-        Object dot(Evaluator eval, String field)
+        Object elt(Evaluator eval, String field)
             throws FusionException
         {
             return voidValue(eval);
@@ -579,7 +579,7 @@ final class FusionStruct
         }
 
         @Override
-        Object dot(Evaluator eval, String field)
+        Object elt(Evaluator eval, String field)
             throws FusionException
         {
             Object result = myMap.get(field);

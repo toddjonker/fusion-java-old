@@ -285,7 +285,7 @@ final class FusionSexp
         int size() throws FusionException { return 0; }
 
         @Override
-        Object dot(Evaluator eval, int pos)
+        Object elt(Evaluator eval, int pos)
             throws FusionException
         {
             return voidValue(eval);
@@ -432,7 +432,7 @@ final class FusionSexp
         }
 
         @Override
-        Object dot(Evaluator eval, int pos)
+        Object elt(Evaluator eval, int pos)
             throws FusionException
         {
             ImmutablePair p = this;

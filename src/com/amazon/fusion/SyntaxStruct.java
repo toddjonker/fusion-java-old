@@ -184,7 +184,7 @@ final class SyntaxStruct
         // This should only be called at runtime, after wraps are pushed.
         assert myWraps == null;
 
-        return (SyntaxValue) myStruct.dot(eval, fieldName);
+        return (SyntaxValue) myStruct.elt(eval, fieldName);
     }
 
 

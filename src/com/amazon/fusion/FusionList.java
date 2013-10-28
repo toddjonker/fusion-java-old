@@ -296,7 +296,7 @@ final class FusionList
         BaseList l = (BaseList) list;
         for (int i = l.size(); i-- != 0; )
         {
-            Object head = l.dot(eval, i);
+            Object head = l.elt(eval, i);
             s = FusionSexp.pair(eval, head, s);
         }
 
@@ -385,7 +385,7 @@ final class FusionList
 
 
         @Override
-        Object dot(Evaluator eval, int pos)
+        Object elt(Evaluator eval, int pos)
             throws FusionException
         {
             if (pos < 0 || size() <= pos) return voidValue(eval);
@@ -742,11 +742,11 @@ final class FusionList
         }
 
         @Override
-        Object dot(Evaluator eval, int pos)
+        Object elt(Evaluator eval, int pos)
             throws FusionException
         {
             injectElements(eval);
-            return super.dot(eval, pos);
+            return super.elt(eval, pos);
         }
 
         @Override
