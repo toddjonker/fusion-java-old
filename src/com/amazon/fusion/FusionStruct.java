@@ -262,13 +262,23 @@ final class FusionStruct
     }
 
 
-    static Object unsafeStructRemoveKey(Evaluator eval, Object struct,
-                                        String[] keys)
+    static Object unsafeStructRemoveKeys(Evaluator eval, Object struct,
+                                         String[] keys)
         throws FusionException
     {
         if (keys.length == 0) return struct;
 
         return ((BaseStruct) struct).removeKeys(keys);
+    }
+
+
+    static Object unsafeStructRemoveKeysM(Evaluator eval, Object struct,
+                                        String[] keys)
+        throws FusionException
+    {
+        if (keys.length == 0) return struct;
+
+        return ((BaseStruct) struct).removeKeysM(keys);
     }
 
 
@@ -329,6 +339,9 @@ final class FusionStruct
             throws FusionException;
 
         abstract Object removeKeys(String[] keys)
+            throws FusionException;
+
+        abstract Object removeKeysM(String[] keys)
             throws FusionException;
 
         abstract Object retainKeys(String[] keys)
@@ -402,6 +415,13 @@ final class FusionStruct
 
         @Override
         public Object removeKeys(String[] keys)
+            throws FusionException
+        {
+            return this;
+        }
+
+        @Override
+        public Object removeKeysM(String[] keys)
             throws FusionException
         {
             return this;
@@ -826,6 +846,13 @@ final class FusionStruct
         {
             return immutableStruct(map, myAnnotations);
         }
+
+        @Override
+        public Object removeKeysM(String[] keys)
+            throws FusionException
+        {
+            return removeKeys(keys);
+        }
     }
 
 
@@ -842,6 +869,15 @@ final class FusionStruct
         MapBasedStruct makeSimilar(Map<String, Object> map)
         {
             return new MutableStruct(map, myAnnotations);
+        }
+
+        @Override
+        public Object removeKeysM(String[] keys)
+            throws FusionException
+        {
+            List<String> asList = Arrays.asList(keys);
+            myMap.keySet().removeAll(asList);
+            return this;
         }
     }
 
@@ -1206,9 +1242,33 @@ final class FusionStruct
         Object doIt(Evaluator eval, Object struct, String[] keys)
             throws FusionException
         {
-            return unsafeStructRemoveKey(eval, struct, keys);
+            return unsafeStructRemoveKeys(eval, struct, keys);
         }
     }
+
+
+
+    static final class RemoveKeysMProc
+        extends BaseKeysProc
+    {
+        RemoveKeysMProc()
+        {
+            //    "                                                                               |
+            super("Returns a struct similar to `struct` without fields with the given `name`s.\n" +
+                  "The result may share structure with the input, which may be mutated.\n" +
+                  "If the input is `null.struct` then the result is `null.struct`.  The result\n" +
+                  "will have the same annotations as `struct`.",
+                  "struct", "name", DOTDOTDOT);
+        }
+
+        @Override
+        Object doIt(Evaluator eval, Object struct, String[] keys)
+            throws FusionException
+        {
+             return unsafeStructRemoveKeysM(eval, struct, keys);
+        }
+    }
+
 
 
     static final class RetainKeysProc
