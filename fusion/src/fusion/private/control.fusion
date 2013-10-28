@@ -8,6 +8,8 @@
     "/fusion/private/compare"
     "/fusion/void")
 
+  (provide apply not)
+
 
   (defpub_syntax and  // WARNING: Doc syntax isn't supported yet.
     '''

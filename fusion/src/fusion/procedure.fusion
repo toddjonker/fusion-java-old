@@ -1,6 +1,6 @@
 // Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
-(module procedure "/fusion/base"
+(module procedure "/fusion/private/builtins"
 
   // WARNING: Doc syntax isn't supported yet.
   '''
@@ -9,7 +9,9 @@ Operators for creating and manipulating procedures.
 
   (require
     "/fusion/experimental/defines"
-    "/fusion/experimental/syntax")
+    "/fusion/experimental/syntax"
+    "/fusion/private/compare"
+    "/fusion/private/control")
 
 
   (provide apply is_procedure lambda)
@@ -39,12 +41,12 @@ always returns `v`.
 Returns a zero-argument procedure that evaluates the `body` forms.
     '''
     (lambda (stx)
-      (when (= 1 (syntax_size stx))
-        (wrong_syntax stx "Expected at least one body form"))
-      (let [(body (syntax_subseq stx 1))]
-        (syntax_append
-          (quote_syntax (lambda ()))
-          body))))
+      (if (= 1 (syntax_size stx))
+        (wrong_syntax stx "Expected at least one body form")
+        (let [(body (syntax_subseq stx 1))]
+          (syntax_append
+            (quote_syntax (lambda ()))
+            body)))))
 
 
   (defpub compose

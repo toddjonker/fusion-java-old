@@ -1,6 +1,6 @@
 // Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
 
-(module bind '/fusion/private/builtins'
+(module bind "/fusion/private/builtins"
 
 
   (require
@@ -8,6 +8,8 @@
     "/fusion/experimental/syntax"
     "/fusion/number"
     "/fusion/private/compare")
+
+  (provide let let_values letrec)
 
 
 /*
