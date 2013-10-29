@@ -195,23 +195,31 @@
 
 
 //==========================================================================
-// retain_keys
+// retain_keys and retain_keys_m
 
 (check ion_equals (retain_keys null.struct) null.struct)
 (check ion_equals (retain_keys null.struct "f") null.struct)
 
 
 (define (test_retain_keys fields keys expect)
-  (lets [(s (apply struct fields)),
-         (result (apply retain_keys s keys))]
-    (check ion_equals result expect)
-    (check_pred is_immutable_struct result)
-    (check ion_equals s (apply struct fields)))               // s not mutated
-  (lets [(s (apply mutable_struct fields)),
-         (result (apply retain_keys s keys))]
-    (check ion_equals result expect)
-    (check_pred is_mutable_struct result)
-    (check ion_equals s (apply struct fields))))              // s not mutated
+  (let [(s (apply struct fields))]
+    (let [(result (apply retain_keys s keys))]
+      (check ion_equals result expect)
+      (check_pred is_immutable_struct result)
+      (check ion_equals s (apply struct fields)))             // s not mutated
+    (let [(result (apply retain_keys_m s keys))]
+      (check ion_equals result expect)
+      (check_pred is_immutable_struct result)
+      (check ion_equals s (apply struct fields))))            // s not mutated
+  (let [(s (apply mutable_struct fields))]
+    (let [(result (apply retain_keys s keys))]
+      (check ion_equals result expect)
+      (check_pred is_mutable_struct result)
+      (check ion_equals s (apply struct fields)))             // s not mutated
+    (let [(result (apply retain_keys_m s keys))]
+      (check ion_equals result expect)
+      (check_pred is_mutable_struct result)
+      (check ion_equals s expect))))                          // s is mutated
 
 (test_retain_keys (quote ()) [   ] {})
 (test_retain_keys (quote ()) ["f"] {})
@@ -230,6 +238,7 @@
 (check ion_equals (retain_keys (quote a::null.struct)) (quote a::null.struct))
 (check ion_equals (retain_keys (quote a::{f:1}) "f") (quote a::{f:1}))
 (check ion_equals (retain_keys (quote a::{f:1}) "g") (quote a::{}))
+// TODO check annotations of mutable inputs
 
 
 //==========================================================================

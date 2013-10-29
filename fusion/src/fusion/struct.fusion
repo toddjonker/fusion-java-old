@@ -78,6 +78,7 @@ while the field values are iterated.
   (defpub_j remove_keys       "com.amazon.fusion.FusionStruct$RemoveKeysProc")
   (defpub_j remove_keys_m     "com.amazon.fusion.FusionStruct$RemoveKeysMProc")
   (defpub_j retain_keys       "com.amazon.fusion.FusionStruct$RetainKeysProc")
+  (defpub_j retain_keys_m     "com.amazon.fusion.FusionStruct$RetainKeysMProc")
   (defpub_j struct_merge      "com.amazon.fusion.FusionStruct$StructMergeProc")
   (defpub_j struct_zip        "com.amazon.fusion.FusionStruct$StructZipProc")
 
