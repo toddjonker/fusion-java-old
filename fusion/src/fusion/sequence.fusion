@@ -21,6 +21,7 @@ types.
     "/fusion/experimental/defines"
     "/fusion/private/builtins"   // Some basic list ops
     "/fusion/private/sexp"
+    "/fusion/procedure"
     "/fusion/unsafe/list"
     "/fusion/unsafe/sexp")
 
@@ -29,6 +30,15 @@ types.
 
 
   (defpub_j add    "com.amazon.fusion.AddProc")
+
+  (defpub is_sequence
+    '''
+    (is_sequence value)
+
+Determines whether `value` is a sequence, returning `true` or `false`.
+    '''
+    (disjoin is_list is_sexp))
+
 
   (defpub first
     (lambda (sequence)
