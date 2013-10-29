@@ -2,6 +2,7 @@
 
 (require
   "/check"
+  "/fusion/list"
   "/fusion/sequence")
 
 (define nullSexp (quote null.sexp))
@@ -25,3 +26,48 @@
 (check_false (is_sequence 1d-1))
 (check_false (is_sequence 1e-1))
 (check_false (is_sequence 1970-01-01))
+
+//==========================================================================
+// fold_left
+
+(check = (fold_left + 0) 0)
+(check = (fold_left + 0 nullSexp) 0)
+(check = (fold_left + 0 emptySexp) 0)
+(check = (fold_left + 0 nullList) 0)
+(check = (fold_left + 0 []) 0)
+(check = (fold_left + 1 (sexp 2 3 4)) 10)
+(check = (fold_left + 1 [2, 3, 4]) 10)
+(check = (fold_left + 1 (sexp 2 3) [4, 5] [6, 7] (sexp 8 9)) 45)
+(check = (fold_left + 1 (sexp 2 3 4) (sexp 5 6 7 8)) 28)
+(check = (fold_left + 1 (sexp 2 3 4 8) (sexp 5 6 7)) 28)
+(check = (fold_left + 1 [2, 3, 4] [5, 6, 7, 8]) 28)
+(check = (fold_left + 1 [2, 3, 4, 8] [5, 6, 7]) 28)
+(check = (fold_left + 1 [2, 3, 4] (sexp 5 6 7 8)) 28)
+(check = (fold_left + 1 [2, 3, 4, 8] (sexp 5 6 7)) 28)
+(check = (fold_left + 1 (sexp 2 3) [4, 5] emptySexp [6, 7] (sexp 8 9)) 1)
+(check = (fold_left + 1 (sexp 2 3) [4, 5] [] [6, 7] (sexp 8 9)) 1)
+(check = (fold_left + 1 (sexp 2 3) [4, 5] nullSexp [6, 7] (sexp 8 9)) 1)
+(check = (fold_left + 1 (sexp 2 3) [4, 5] nullList [6, 7] (sexp 8 9)) 1)
+(let [(v (stretchy_list))]
+  (check
+    =
+    (fold_left (lambda (result a b) (add_m v (sexp result a b)) (+ result a b))
+      1 (sexp 2 3 4) [5, 6, 7, 8])
+    28)
+  (check_equal v [(sexp 1 2 5), (sexp 8 3 6), (sexp 17 4 7)] "fold_left visit order"))
+(check_equal
+  (fold_left (lambda (accum e) (pair e accum)) (quote ()) (sexp 1 2 3 4 5))
+  (sexp 5 4 3 2 1)
+  "fold_left reverse sexp")
+(check
+  ion_equals
+  (fold_left
+    (lambda (accum s) (struct_merge accum s))
+    {}
+    [{a:1}, {b:2}, {c:3}])
+  {a:1,b:2,c:3})
+(check_arity_exn (fold_left +))
+(check_arg_exn (fold_left + 0 {}))
+(check_arg_exn (fold_left + 0 (sexp 2 3 4) {}))
+(check_arg_exn (fold_left + 0 {} (sexp 2 3 4)))
+(check_arg_exn (fold_left {} 0))

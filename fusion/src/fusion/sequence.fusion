@@ -128,4 +128,104 @@ returning a new sequence of the same type, containing the results in order.
                 (loop (unsafe_pair_tail ptr))))))
         (true
           (raise_argument_error "map" "sequence" 1 proc sequence)))))
+
+  (defpub fold_left
+    '''
+    (fold_left proc init sequence ...)
+
+Applies the given procedure to zero or more sequences producing a single value
+determined by `proc`. `proc` must take n+1 arguments where n is the number of
+sequences. The `proc`'s first argument is the combined return value and is
+initially set to `init`. Sequences are visited left to right with the result of
+`fold_left` being the value produced by the last application of `proc` after
+one or more sequences runs out of values. If no sequences are given or any
+sequence is empty, the result is `init`.
+
+Adding numbers:
+
+    (fold_left + 0 (sexp 1 2 3) [4, 5, 6, 7])  => 21
+
+That performs these procedure calls:
+
+      (+ 0 1 4)  => 5
+      (+ 5 2 5)  => 12
+      (+ 12 3 6) => 21
+
+Reversing a linked list:
+
+    (fold_left
+      (lambda (t h) (pair h t))
+      (quote ())
+      (sexp 1 2 3 4 5)) => (sexp 5 4 3 2 1)
+
+Vizualizing `fold_left`:
+
+    (fold_left f z (1 2 3 4 5))
+
+       . --------------------> f
+      / \\                     / \\ 
+     1   .                   f   5
+        / \\                 / \\ 
+       2   .               f   4
+          / \\             / \\ 
+         3   .           f   3
+            / \\         / \\ 
+           4   .       f   2
+              / \\     / \\ 
+             5  ()   z   1
+
+
+    (fold_left f z (1 2 3 4 5) (6 7 8 9 0))
+
+       . --------------------> f
+      /|\\                     /|\\ 
+     1 6 .                   f 5 0
+        /|\\                 /|\\ 
+       2 7 .               f 4 9
+          /|\\             /|\\ 
+         3 8 .           f 3 8
+            /|\\         /|\\ 
+           4 9 .       f 2 7
+              /|\\     /|\\ 
+             5 0()   z 1 6
+    '''
+    (lambda args
+      (if (< (size args) 2)
+        (apply raise_arity_error "fold_left" 2 args)
+        (let [(proc (head args)),
+              (init (. args tail head)),
+              (seqs (. args tail tail))]
+          (cond
+            ((not (is_procedure proc))
+              (apply raise_argument_error "fold_left" "procedure" 0 args))
+            ((not (every is_sequence seqs))
+              (let errorloop [(i 2)]
+                (if (not (is_sequence (. args i)))
+                  (apply raise_argument_error "fold_left" "sequence" i args)
+                  (errorloop (+ i 1)))))
+            ((is_empty seqs) init)
+            (true
+              (let loop [(i 0),
+                         (result init),
+                         (_seqs seqs)]
+                (if
+                  (any
+                    (lambda (seq)
+                      (or
+                        (and (is_sexp seq) (is_empty seq))
+                        (and (is_list seq) (>= i (size seq)))))
+                    _seqs)
+                  result
+                  (let [(_args
+                          (pair
+                            result
+                            (map
+                              (lambda (seq)
+                                (if (is_sexp seq) (unsafe_pair_head seq) (. seq i)))
+                              _seqs))),
+                        (next
+                          (map
+                            (lambda (seq) (if (is_sexp seq) (unsafe_pair_tail seq) seq))
+                            _seqs))]
+                    (loop (+ i 1) (apply proc _args) next))))))))))
 )

@@ -22,7 +22,7 @@ sexps.
   (provide head is_pair is_sexp pair sexp tail)
 
   (require "/fusion/sequence")
-  (provide . add any choose do element elt every find first has_key is_empty
-    last map size)
+  (provide . add any choose do element elt every find first fold_left has_key
+    is_empty last map size)
 
 )
