@@ -3,11 +3,18 @@
 (module struct "/fusion/private/builtins"
 
   (require
-    "/fusion/experimental/defines")
+    "/fusion/experimental/defines"
+    "/fusion/private/control")
 
   (defpub_j unsafe_struct_has_key
     "com.amazon.fusion.FusionStruct$UnsafeStructHasKeyProc")
 
   (defpub_j unsafe_struct_ref
     "com.amazon.fusion.FusionStruct$UnsafeStructRefProc")
+
+
+  (defpub is_struct_field_name
+    (lambda (v)
+      (and (or (is_string v) (is_symbol v))
+           (not (is_null v)))))
 )

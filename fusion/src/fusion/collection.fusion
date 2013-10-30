@@ -32,8 +32,7 @@ See also [sequence](fusion/sequence.html).
     (lambda (collection key)
       (cond
         ((is_struct collection)
-         (if (and (or (is_string key) (is_symbol key))
-                  key)  // null check
+         (if (is_struct_field_name key)
            (unsafe_struct_has_key collection key)
            false))
         //-
@@ -97,8 +96,7 @@ an element within the collection.
            (raise_argument_error "element" "int" 1 collection key)))
         //-
         ((is_struct collection)
-         (if (and (or (is_string key) (is_symbol key))
-                  key)  // null check
+         (if (is_struct_field_name key)
            (unsafe_struct_ref collection key
              (lambda ()
                (raise_argument_error "element" "valid field name"
@@ -160,8 +158,7 @@ An exception is raised if the `collection` has an unsupported type.
            (unsafe_list_element collection key)))
         //-
         ((is_struct collection)
-         (when (and (or (is_string key) (is_symbol key))
-                    key)  // null check
+         (when (is_struct_field_name key)
            (unsafe_struct_ref collection key void)))
         //-
         ((is_sexp collection)
