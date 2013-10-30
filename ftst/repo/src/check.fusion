@@ -15,6 +15,7 @@
   (defpub F (lambda rest false))
   (defpub T (lambda rest true))
 
+  (defpub NULL_SEXP   (quote null.sexp))
   (defpub NULL_SYMBOL (quote null.symbol))
 
 

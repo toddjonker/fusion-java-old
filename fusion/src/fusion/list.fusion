@@ -123,7 +123,6 @@ languages, highlighting potential mutation of an argument.
   // Pass-through bindings from /fusion/sequence
   (provide . add any choose do element elt every find first has_key is_empty last map size)
 
-  (defpub_j add_m           "com.amazon.fusion.AddMProc")
   (defpub_j append_m        "com.amazon.fusion.AppendMProc")
   (defpub_j subseq          "com.amazon.fusion.IonSubseqProc")
 
@@ -159,6 +158,27 @@ holds `value`.  An exception is thrown if the position is out of bounds.
       (when (or (< pos 0) (<= (unsafe_list_size list) pos))
         (raise_argument_error "list_set" "valid position" 1 list pos value))
       (unsafe_list_set list pos value)))
+
+
+  //==========================================================================
+  // Modification
+
+  (defpub add_m
+    (lambda (list element)
+      '''
+Returns a sequence with all the elements of `list` and the `element`.  The
+result sequence is similar to the input, its size is one greater, and it may
+share structure with other sequences.  The input sequence may be mutated.
+
+In general, the position of `element` within the result is not specified, but
+particular sequence types may do so.
+
+* For stretchy lists, the `element` is added to the end of the input sequence,
+  which is then returned.
+      '''
+      (if (is_list list)
+        (unsafe_list_add_m list element)
+        (raise_argument_error "add_m" "list" 0 list element))))
 
 
   //==========================================================================

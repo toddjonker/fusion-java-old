@@ -248,6 +248,9 @@
 (test_add_m unsafe_list_add_m unsafe_list_add (stretchy_list))
 
 
+(check_arg_exn (add_m NULL_SEXP 2))
+
+
 (define str (stretchy_list 1 2))
 (unsafe_list_add_m str 3)
 { a: str }  // Once broken due to the null in the stretchy list after 3
