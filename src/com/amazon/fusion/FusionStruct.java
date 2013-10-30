@@ -749,7 +749,6 @@ final class FusionStruct
             for (Map.Entry<String, Object> entry : myMap.entrySet())
             {
                 String fieldName = entry.getKey();
-                out.setFieldName(fieldName);
 
                 Object value = entry.getValue();
                 if (value instanceof Object[])
@@ -757,11 +756,13 @@ final class FusionStruct
                     Object[] children = (Object[]) value;
                     for (Object child : children)
                     {
+                        out.setFieldName(fieldName);
                         dispatchIonize(eval, out, child);
                     }
                 }
                 else
                 {
+                    out.setFieldName(fieldName);
                     dispatchIonize(eval, out, value);
                 }
             }
