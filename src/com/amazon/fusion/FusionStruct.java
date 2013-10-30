@@ -148,7 +148,7 @@ final class FusionStruct
         Map<String, Object> map;
         if (names.length == 0)
         {
-            map = Collections.emptyMap();
+            map = new HashMap<String, Object>();
         }
         else
         {
@@ -262,6 +262,29 @@ final class FusionStruct
     }
 
 
+    //========================================================================
+    // Element modification
+
+
+    static Object unsafeStructSet(Evaluator eval, Object struct,
+                                  String key, Object value)
+        throws FusionException
+    {
+        return ((BaseStruct) struct).set(eval, key, value);
+    }
+
+
+    static Object unsafeStructSetM(Evaluator eval, Object struct,
+                                   String key, Object value)
+        throws FusionException
+    {
+        return ((BaseStruct) struct).setM(eval, key, value);
+    }
+
+
+    //========================================================================
+    // Bulk modification
+
     static Object unsafeStructRemoveKeys(Evaluator eval, Object struct,
                                          String[] keys)
         throws FusionException
@@ -346,6 +369,12 @@ final class FusionStruct
         abstract Object ref(Evaluator eval, String name, Object def)
             throws FusionException;
 
+        abstract Object set(Evaluator eval, String key, Object value)
+            throws FusionException;
+
+        abstract Object setM(Evaluator eval, String key, Object value)
+            throws FusionException;
+
         abstract Object removeKeys(String[] keys)
             throws FusionException;
 
@@ -422,6 +451,22 @@ final class FusionStruct
             throws FusionException
         {
             return bounceDefaultResult(eval, def);
+        }
+
+        @Override
+        public Object set(Evaluator eval, String key, Object value)
+            throws FusionException
+        {
+            Map<String,Object> map = new HashMap<>(1);
+            map.put(key, value);
+            return immutableStruct(map, myAnnotations);
+        }
+
+        @Override
+        public Object setM(Evaluator eval, String key, Object value)
+            throws FusionException
+        {
+            return set(eval, key, value);
         }
 
         @Override
@@ -685,6 +730,15 @@ final class FusionStruct
         }
 
         @Override
+        public Object set(Evaluator eval, String key, Object value)
+            throws FusionException
+        {
+            Map<String,Object> newMap = new HashMap<String,Object>(myMap);
+            newMap.put(key, value);
+            return makeSimilar(newMap);
+        }
+
+        @Override
         public Object removeKeys(String[] keys)
             throws FusionException
         {
@@ -866,6 +920,13 @@ final class FusionStruct
         }
 
         @Override
+        public Object setM(Evaluator eval, String key, Object value)
+            throws FusionException
+        {
+            return set(eval, key, value);
+        }
+
+        @Override
         public Object removeKeysM(String[] keys)
             throws FusionException
         {
@@ -894,6 +955,14 @@ final class FusionStruct
         MapBasedStruct makeSimilar(Map<String, Object> map)
         {
             return new MutableStruct(map, myAnnotations);
+        }
+
+        @Override
+        public Object setM(Evaluator eval, String key, Object value)
+            throws FusionException
+        {
+            myMap.put(key, value);
+            return this;
         }
 
         @Override
@@ -1024,6 +1093,48 @@ final class FusionStruct
             BaseStruct s = (BaseStruct) args[0];
             String name = unsafeTextToString(eval, args[1]);
             return s.ref(eval, name, args[2]);
+        }
+    }
+
+
+
+    static final class UnsafeStructSetProc
+        extends Procedure
+    {
+        UnsafeStructSetProc()
+        {
+            //    "                                                                               |
+            super("*UNSUPPORTED!*",
+                  "struct", "key", "value");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            String key = unsafeTextToString(eval, args[1]);
+            return unsafeStructSet(eval, args[0], key, args[2]);
+        }
+    }
+
+
+
+    static final class UnsafeStructSetMProc
+        extends Procedure
+    {
+        UnsafeStructSetMProc()
+        {
+            //    "                                                                               |
+            super("*UNSUPPORTED!*",
+                  "struct", "key", "value");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            String key = unsafeTextToString(eval, args[1]);
+            return unsafeStructSetM(eval, args[0], key, args[2]);
         }
     }
 

@@ -98,6 +98,53 @@
 
 
 //==========================================================================
+// struct_set and struct_set_m
+
+(check ion_equals (struct_set_m           null.struct  "f" 3)           {f:3})
+(check ion_equals (struct_set_m (quote a::null.struct) "f" 3) (quote a::{f:3}))
+
+(check ion_equals (struct_set_m           {}  "f" 3)           {f:3})
+(check ion_equals (struct_set_m (quote a::{}) "f" 3) (quote a::{f:3}))
+
+
+(define (test_set fields key value expect)
+  (let [(s (apply struct fields))]
+    (let [(result (struct_set s key value))]
+      (check_pred is_immutable_struct result)
+      (check ion_equals result expect)
+      (check ion_equals s (apply struct fields)))             // s not mutated
+    (let [(result (struct_set_m s key value))]
+      (check_pred is_immutable_struct result)
+      (check ion_equals result expect)
+      (check ion_equals s (apply struct fields))))            // s not mutated
+  (let [(s (apply mutable_struct fields))]
+    (let [(result (struct_set s key value))]
+      (check_pred is_mutable_struct result)
+      (check ion_equals result expect)
+      (check ion_equals s (apply struct fields)))             // s not mutated
+    (let [(result (struct_set_m s key value))]
+      (check_pred is_mutable_struct result)
+      (check ion_equals result expect)
+      (check ion_equals s expect))))                          // s is mutated
+
+(test_set (quote (           )) "f" 3 {f:3})
+(test_set (quote (a 1        )) "f" 3 {a:1,f:3})
+(test_set (quote (a 1 a 2    )) "f" 3 {a:1,a:2,f:3})
+(test_set (quote (a 1 b 2    )) "f" 3 {a:1,b:2,f:3})
+(test_set (quote (a 1 f 2    )) "f" 3 {a:1,f:3})
+(test_set (quote (a 1 f 2 f f)) "f" 3 {a:1,f:3})  // replace repeated field
+
+
+(check_arity_exn (struct_set_m))
+(check_arity_exn (struct_set_m {}))
+(check_arity_exn (struct_set_m {} "f"))
+
+(check_arg_exn (struct_set_m [] "f" 1))
+(check_arg_exn (struct_set_m {} null.string 1))
+(check_arg_exn (struct_set_m {} (quote null.symbol) 1))
+
+
+//==========================================================================
 // struct_merge
 
 (check ion_equals (struct_merge {} {}) {})
@@ -161,11 +208,11 @@
   (let [(s (apply struct fields))]
     (let [(result (apply remove_keys s keys))]
       (check ion_equals result expect)
-    (check_pred is_immutable_struct result)
+      (check_pred is_immutable_struct result)
       (check ion_equals s (apply struct fields)))             // s not mutated
     (let [(result (apply remove_keys_m s keys))]
       (check ion_equals result expect)
-    (check_pred is_immutable_struct result)
+      (check_pred is_immutable_struct result)
       (check ion_equals s (apply struct fields))))            // s not mutated
   (let [(s (apply mutable_struct fields))]
     (let [(result (apply remove_keys s keys))]

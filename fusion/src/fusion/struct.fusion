@@ -83,6 +83,62 @@ while the field values are iterated.
   (defpub_j struct_zip        "com.amazon.fusion.FusionStruct$StructZipProc")
 
 
+
+  (defpub struct_set
+    (lambda (struct key value)
+      '''
+Functionally adds a field to a `struct`, returning a new struct of the same
+type. Any existing fields (including repeats) named by the `key` are replaced
+by a single field with the `value`.
+
+    (define s {a:1, b:2, b:3})
+
+    (struct_set s "a" 4)    ==> {b:2,b:3,a:4}
+    (struct_set s "b" 5)    ==> {b:5,a:1}
+    (struct_set s "c" 6)    ==> {b:2,b:3,c:6,a:1}
+    s                       ==> {b:2,b:3,a:1}
+      '''
+      (unless (is_struct struct)
+        (raise_argument_error "struct_set" "struct" 0 struct key value))
+      (unless (is_struct_field_name key)
+        (raise_argument_error "struct_set" "field name" 1 struct key value))
+      (unsafe_struct_set struct key value)))
+
+
+  (defpub struct_set_m
+    (lambda (struct key value)
+      '''
+Adds a field to a `struct`, mutating the `struct` when possible and returning
+a struct of the same type. Any existing fields (including repeats) named by
+the `key` are replaced by a single field with the `value`.
+
+When given an immutable struct, `struct_set_m` behaves identically to
+`struct_set`:
+
+    (define s {a:1, b:2, b:3})
+
+    (struct_set s "a" 4)    ==> {b:2,b:3,a:4}
+    (struct_set s "b" 5)    ==> {b:5,a:1}
+    (struct_set s "c" 6)    ==> {b:2,b:3,c:6,a:1}
+    s                       ==> {b:2,b:3,a:1}
+
+When given a mutable struct, the struct is mutated:
+
+    (define s (mutable_struct "a" 1 "b" 2 "b" 3))
+
+    s                       ==> {b:2,b:3,a:1}
+    (struct_set_m s "a" 4)  ==> {b:2,b:3,a:4}
+    (struct_set_m s "b" 5)  ==> {b:5,a:4}
+    (struct_set_m s "c" 6)  ==> {b:5,c:6,a:4}
+    s                       ==> {b:5,c:6,a:4}
+      '''
+      (unless (is_struct struct)
+        (raise_argument_error "struct_set_m" "struct" 0 struct key value))
+      (unless (is_struct_field_name key)
+        (raise_argument_error "struct_set_m" "field name" 1 struct key value))
+      (unsafe_struct_set_m struct key value)))
+
+
   // Name per Racket, where for-each is for side effects.
   (defpub struct_for_each
     (lambda (proc struct)

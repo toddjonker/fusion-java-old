@@ -12,6 +12,12 @@
   (defpub_j unsafe_struct_ref
     "com.amazon.fusion.FusionStruct$UnsafeStructRefProc")
 
+  (defpub_j unsafe_struct_set
+     "com.amazon.fusion.FusionStruct$UnsafeStructSetProc")
+
+  (defpub_j unsafe_struct_set_m
+     "com.amazon.fusion.FusionStruct$UnsafeStructSetMProc")
+
 
   (defpub is_struct_field_name
     (lambda (v)
