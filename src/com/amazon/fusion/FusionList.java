@@ -4,12 +4,12 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
+import static com.amazon.fusion.FusionNumber.unsafeTruncateToInt;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.fusion.FusionSequence.BaseSequence;
 import com.amazon.fusion.FusionSexp.BaseSexp;
-import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
@@ -975,7 +975,7 @@ final class FusionList
 
 
     static final class UnsafeListElementProc
-        extends Procedure2
+        extends Procedure
     {
         UnsafeListElementProc()
         {
@@ -986,12 +986,12 @@ final class FusionList
         }
 
         @Override
-        Object doApply(Evaluator eval, Object list, Object posArg)
+        Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            int pos = ((IonInt) posArg).intValue();
+            int pos = unsafeTruncateToInt(eval, args[1]);
 
-            return unsafeListRef(eval, list, pos);
+            return unsafeListRef(eval, args[0], pos);
         }
     }
 
@@ -1011,14 +1011,11 @@ final class FusionList
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            checkArityExact(args);
+            int pos = unsafeTruncateToInt(eval, args[1]);
 
-            BaseList list = (BaseList) args[0];
-            int pos = ((IonInt) args[1]).intValue();
+            unsafeListSet(eval, args[0], pos, args[2]);
 
-            unsafeListSet(eval, list, pos, args[2]);
-
-            return null;
+            return voidValue(eval);
         }
     }
 

@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionList.unsafeJavaIterate;
+import static com.amazon.fusion.FusionText.unsafeTextToString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.ion.util.IonTextUtils.printSymbol;
@@ -284,6 +285,7 @@ final class FusionStruct
     {
         return ((BaseStruct) struct1).merge((BaseStruct) struct2);
     }
+
 
     //========================================================================
 
@@ -924,7 +926,7 @@ final class FusionStruct
             throws FusionException
         {
             BaseStruct s = (BaseStruct) args[0];
-            String key = checkTextArg(1, args);    // TODO reduce safety checks
+            String key = unsafeTextToString(eval, args[1]);
             return eval.newBool(s.hasKey(eval, key));
         }
     }
@@ -949,7 +951,7 @@ final class FusionStruct
             throws FusionException
         {
             BaseStruct s = (BaseStruct) args[0];
-            String name = checkTextArg(1, args);   // TODO reduce safety checks
+            String name = unsafeTextToString(eval, args[1]);
             return s.ref(eval, name, args[2]);
         }
     }
