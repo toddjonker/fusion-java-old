@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import java.util.List;
+
 
 /**
  *
@@ -25,10 +27,21 @@ class DynamicParameter
     }
 
 
+    @SuppressWarnings("unchecked")
     <T> T currentValue(Evaluator eval)
     {
         Object result = eval.firstContinuationMark(this);
         return (T) (result == null ? myInitialValue : result);
+    }
+
+
+    <T> List<T> allValues(Evaluator eval)
+    {
+        List<T> marks = (List<T>) eval.continuationMarks(this);
+
+        // TODO add initial value?
+
+        return marks;
     }
 
 

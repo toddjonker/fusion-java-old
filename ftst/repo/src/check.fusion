@@ -7,7 +7,8 @@
     "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/experimental/syntax"
-    "/fusion/ffi/java")
+    "/fusion/ffi/java"
+    "/fusion/parameter")
 
   (provide assert)
 
@@ -18,12 +19,85 @@
   (defpub NULL_SEXP   (quote null.sexp))
   (defpub NULL_SYMBOL (quote null.symbol))
 
+  (defpub is_true
+    (lambda (value)
+      (and (is_bool value) (= true value))))
+
 
   (defpub ion_equals          (java_new "com.amazon.fusion.IonEqualsProc"))
 
   // NOT PUBLIC YET
-  (define raise_check_failure (java_new "com.amazon.fusion.CheckFailureProc"))
+  (define _raise_check_failure (java_new "com.amazon.fusion.CheckFailureProc"))
   (define thunk_throws        (java_new "com.amazon.fusion.ThunkThrowsProc"))
+
+  (define check_syntax_param (make_parameter null))
+  (define raise_check_failure
+    (lambda args
+      (parameterize [(check_syntax_param (head args))]
+        (apply _raise_check_failure check_syntax_param (tail args)))))
+  (define raise_check_failure_stack
+    (lambda message
+      '''
+Raises a check failure exception, including a stack trace derived from the
+`check_syntax_param` marks.
+      '''
+      (apply _raise_check_failure check_syntax_param message)))
+
+
+  // TODO fix argument order. Requires (syntax_subseq _ from to)
+  (defpub_syntax define_check
+    (lambda (stx)
+      '''
+      (define_check (name message_arg arg ...) body ...)
+      '''
+      (when (< (syntax_size stx) 3)
+        (wrong_syntax stx
+          "Bad syntax for define_check: "
+          "(define_check (name message_arg arg ...) body ...)"))
+      (lets [(bind_stx (syntax_get stx 1)),
+             (body_stx (syntax_subseq stx 2)),
+             (name_stx    (syntax_get bind_stx 0)),  // TODO type/size check
+             (msg_arg_stx (syntax_get bind_stx 1)),
+             (arg_stx     (syntax_subseq bind_stx 2)),
+             (arg_count   (syntax_size arg_stx)),
+             (arg_ct_stx  (datum_to_syntax arg_count)),
+             (args_msg_stx (datum_to_syntax (if (= 1 arg_count)
+                                              " arg: "
+                                              " args: ")))]
+        (quasisyntax
+          (defpub_syntax (unsyntax name_stx)
+            (lambda (stx1)
+              (when (<= (syntax_size stx1) (unsyntax arg_ct_stx))
+                (wrong_syntax stx1
+                  (unsyntax name_stx)
+                  " requires at least " (unsyntax arg_ct_stx)
+                  (unsyntax args_msg_stx)))
+                  // TODO add sample eg "(check_true val message ...)"
+              (let ((msg_stx (syntax_subseq stx1 (+ 1 (unsyntax arg_ct_stx))))
+                    (arg_binding_stx
+                       (let loop ((args (syntax_unwrap (quote_syntax (unsyntax arg_stx))))
+                                  (i 1))
+                         (if (is_empty args)
+                           (quote_syntax ())
+                           (syntax_append
+                             (quasisyntax (((unsyntax (head args))
+                                            (unsyntax (syntax_get stx1 i)))))
+                             (loop (tail args) (+ 1 i)))))))
+                (quasisyntax
+                  (let (((unsyntax (quote_syntax (unsyntax msg_arg_stx)))
+                         (unsyntax (if (= 0 (syntax_size msg_stx))
+                                       (quote_syntax (void))
+// TODO handle multiple message parts
+                                       (syntax_append
+                                         (quote_syntax (lambda ()))
+                                         msg_stx)))))
+                    (parameterize
+                      ((check_syntax_param (quote_syntax (unsyntax stx1))))
+                      (unsyntax
+                        (syntax_append
+                          (quasisyntax (let (unsyntax arg_binding_stx)))
+                          (quote_syntax (unsyntax body_stx))))))))))))))
+
 
 
   (defpub check_equal_annotations
@@ -164,15 +238,13 @@ Ensures that (PRED VAL) is truthy.
         (syntax_subseq stx 3))))
 
 
-  // The failure message isn't the greatest, its in terms of the inner check
-  (defpub_syntax check_true
-    (lambda (stx)
-      (let ((val1_stx (syntax_get stx 1))
-            (msg_sexp (syntax_subseq stx 2)))
-        (syntax_append
-          (quasisyntax
-            (do_check (unsyntax stx) = (unsyntax val1_stx) true))
-          msg_sexp))))
+  (define_check (check_true message val)
+    (unless (is_true val)
+      (raise_check_failure_stack
+        (if message (message) "Expected `true`.")
+        " Received: "
+        val)))
+
 
 
   // The failure message isn't the greatest, its in terms of the inner check
