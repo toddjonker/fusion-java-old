@@ -8,12 +8,11 @@ Operations for structs.
 A _struct_ is an unordered [collection](fusion/collection.html) of values,
 keyed by strings.  Since Fusion structs are based on Ion structs, these
 collections are multi-maps: the same key can map to multiple values, or even
-multiple mappings to the same value.
+multiple mappings to the same value. The _elements_ of a struct are its values,
+but not the associated field names.
 
-The _elements_ of a struct are its values, but not the associated field names.
-
-At present, all structs are immutable.  Issue FUSION-93 covers mutable structs.
-
+Structs come in two concrete types: immutable and mutable. The procedures
+`is_immutable_struct` and `is_mutable_struct` distinguish between them.
 
 ## Creating Structs
 
@@ -32,13 +31,38 @@ struct from names and elements:
 
     (struct "name" "Steve" "age" 29)  =>  {name:"Steve", age:29}
 
-`struct_zip` is similar, but accepts lists containing the names and
-elements:
+The procedure `mutable_struct` similarly creates mutable structs:
 
-    (struct ["name", "age"] ["Doug", 38])  =>  {age:38, name:"Doug"}
+    (mutable_struct "name" "Taylor" "age" 17)  =>  {name:"Taylor", age:17}
+
+Note that the default "ionization strategy" renders all struct types the same,
+so the results _look_ similar even though the values have different types.
+Eventually the application will be able to control this strategy; these
+defaults are designed to allow a Fusion developer to construct data in various
+combinations of mutability (*etc.*) and output it as "normal" Ion data.
+
+`struct_zip` is another way to create an immutable struct. It accepts lists
+containing the names and elements:
+
+    (struct_zip ["name", "age"] ["Doug", 38])  =>  {age:38, name:"Doug"}
+
+
+## Modifying Structs
+
+Fusion provides data modification operators that have a functional style, even
+when the modification involves mutation. The functional and mutating variants
+have the same signature and operate over both immutable and mutable types; in
+general they are interchangable when used in a functional style.
+
+Changing the key-value mappings of a struct is performed via `struct_set` and
+`struct_set_m`, which guarantee that the result has only a single mapping for
+the key:
+
+    (struct_set {a:1, b:9, b:12} "b" 11)  => {a:1, b:11}
 
 The procedures `remove_keys` and `retain_keys` functionally eliminate fields
-from a struct without modifying the input.  `struct_merge` combines the fields
+from a struct without modifying the input; `remove_keys_m` and `retain_keys_m`
+modify the input when possible.  `struct_merge` combines the fields
 from two structs.
 
 
