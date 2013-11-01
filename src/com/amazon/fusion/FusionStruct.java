@@ -790,7 +790,7 @@ final class FusionStruct
                 }
             }
 
-            return new NonNullImmutableStruct(newMap, myAnnotations);
+            return makeSimilar(newMap);
         }
 
         @Override
@@ -1277,7 +1277,7 @@ final class FusionStruct
             //    "                                                                               |
             super("Returns a struct that has all the name-value elements of both arguments.  This\n" +
                   "will result in repeated fields if the names overlap or if one of the arguments\n" +
-                  "has repeats.",
+                  "has repeats. The result has the same type as the first argument.",
                   "struct1", "struct2");
         }
 
