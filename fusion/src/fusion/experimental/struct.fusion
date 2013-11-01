@@ -1,0 +1,15 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(module experimental_struct "/fusion"
+
+  '''NOT SUPPORTED'''
+
+  (require "/fusion/experimental/defines")
+
+
+  (defpub_j struct_merge1
+    "com.amazon.fusion.FusionStruct$StructMerge1Proc")
+
+  (defpub_j struct_merge1_m
+    "com.amazon.fusion.FusionStruct$StructMerge1MProc")
+)

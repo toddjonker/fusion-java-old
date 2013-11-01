@@ -216,6 +216,52 @@ final class FusionStruct
         }
     }
 
+
+    /** Mutates a multimap so it has only a single mapping for each key. */
+    private static void structImplOneifyM(Map<String, Object> map)
+    {
+        for (Map.Entry<String,Object> entry : map.entrySet())
+        {
+            Object value = entry.getValue();
+            if (value instanceof Object[])
+            {
+                Object first = ((Object[])value)[0];
+                entry.setValue(first);
+            }
+        }
+    }
+
+    private static
+    Map<String, Object> structImplOneify(Map<String, Object> map)
+    {
+        for (Object value : map.values())
+        {
+            if (value instanceof Object[])
+            {
+                Map<String,Object> newMap = new HashMap<>(map);
+                structImplOneifyM(newMap);
+                return newMap;
+            }
+        }
+        return map;
+    }
+
+    private static void structImplMerge1M(Map<String, Object> map1,
+                                          Map<String, Object> map2)
+    {
+        for (Map.Entry<String,Object> entry : map2.entrySet())
+        {
+            String key   = entry.getKey();
+            Object value = entry.getValue();
+            if (value instanceof Object[])
+            {
+                value = ((Object[])value)[0];
+            }
+            map1.put(key, value);
+        }
+    }
+
+
     private static Object[] extend(Object[] array, Object element)
     {
         int len = array.length;
@@ -349,6 +395,21 @@ final class FusionStruct
     }
 
 
+    static Object unsafeStructMerge1(Evaluator eval, Object struct1,
+                                     Object struct2)
+        throws FusionException
+    {
+        return ((BaseStruct) struct1).merge1((BaseStruct) struct2);
+    }
+
+    static Object unsafeStructMerge1M(Evaluator eval, Object struct1,
+                                      Object struct2)
+        throws FusionException
+    {
+        return ((BaseStruct) struct1).merge1M((BaseStruct) struct2);
+    }
+
+
     //========================================================================
 
 
@@ -412,6 +473,12 @@ final class FusionStruct
             throws FusionException;
 
         Object mergeM(BaseStruct other)
+            throws FusionException;
+
+        Object merge1(BaseStruct other)
+            throws FusionException;
+
+        Object merge1M(BaseStruct other)
             throws FusionException;
     }
 
@@ -537,6 +604,25 @@ final class FusionStruct
             throws FusionException
         {
             return merge(other);
+        }
+
+        @Override
+        public Object merge1(BaseStruct other)
+            throws FusionException
+        {
+            if (other.size() == 0) return this;
+
+            // We know `other` has children.
+            MapBasedStruct is = (MapBasedStruct) other;
+            Map<String,Object> map = structImplOneify(is.myMap);
+            return new NonNullImmutableStruct(map, myAnnotations);
+        }
+
+        @Override
+        public Object merge1M(BaseStruct other)
+            throws FusionException
+        {
+            return merge1(other);
         }
 
         @Override
@@ -811,6 +897,31 @@ final class FusionStruct
         }
 
         @Override
+        public Object merge1(BaseStruct other)
+            throws FusionException
+        {
+            Map<String,Object> newMap = structImplOneify(myMap);
+
+            if (other.size() == 0)
+            {
+                if (newMap == myMap) return this;
+            }
+            else  // Other is not empty, we are going to make a change
+            {
+                // Copy our map if we haven't done so already while oneifying
+                if (newMap == myMap)
+                {
+                    newMap = new HashMap<>(myMap);
+                }
+
+                MapBasedStruct is = (MapBasedStruct) other;
+                structImplMerge1M(newMap, is.myMap);
+            }
+
+            return makeSimilar(newMap);
+        }
+
+        @Override
         void write(Evaluator eval, Appendable out)
             throws IOException, FusionException
         {
@@ -963,6 +1074,13 @@ final class FusionStruct
         {
             return merge(other);
         }
+
+        @Override
+        public Object merge1M(BaseStruct other)
+            throws FusionException
+        {
+            return merge1(other);
+        }
     }
 
 
@@ -1014,6 +1132,21 @@ final class FusionStruct
             {
                 MapBasedStruct is = (MapBasedStruct) other;
                 structImplMergeM(myMap, is.myMap);
+            }
+
+            return this;
+        }
+
+        @Override
+        public Object merge1M(BaseStruct other) throws FusionException
+        {
+            // Remove any existing repeated fields.
+            structImplOneifyM(myMap);
+
+            if (other.size() != 0)
+            {
+                MapBasedStruct is = (MapBasedStruct) other;
+                structImplMerge1M(myMap, is.myMap);
             }
 
             return this;
@@ -1349,6 +1482,57 @@ final class FusionStruct
             checkStructArg(eval, 1, struct1, struct2);
 
             return unsafeStructMergeM(eval, struct1, struct2);
+        }
+    }
+
+
+
+    static final class StructMerge1Proc
+        extends Procedure2
+    {
+        StructMerge1Proc()
+        {
+            //    "                                                                               |
+            super("Functionally merges the mappings of `struct1` and `struct2`, removing repeated\n" +
+                  "fields. Mappings from `struct2` will replace those from `struct1` with the\n" +
+                  "same key. If there are repeated fields, one is selected arbitrarily.\n" +
+                  "The result has the same type as the first argument.",
+                  "struct1", "struct2");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object struct1, Object struct2)
+            throws FusionException
+        {
+            checkStructArg(eval, 0, struct1, struct2);
+            checkStructArg(eval, 1, struct1, struct2);
+
+            return unsafeStructMerge1(eval, struct1, struct2);
+        }
+    }
+
+    static final class StructMerge1MProc
+        extends Procedure2
+    {
+        StructMerge1MProc()
+        {
+            //    "                                                                               |
+            super("Merges the mappings of `struct1` and `struct2`, removing repeated fields and\n" +
+                  "mutating the first argument when possible. Mappings from `struct2` will\n" +
+                  "replace those from `struct1` with the same key.  If there are repeated fields,\n" +
+                  "one is selected arbitrarily. The result has the same type as the first\n" +
+                  "argument.",
+                  "struct1", "struct2");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object struct1, Object struct2)
+            throws FusionException
+        {
+            checkStructArg(eval, 0, struct1, struct2);
+            checkStructArg(eval, 1, struct1, struct2);
+
+            return unsafeStructMerge1M(eval, struct1, struct2);
         }
     }
 

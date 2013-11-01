@@ -244,6 +244,78 @@ to the `fields`, and the result of the operator must be the same type.
 
 
 //==========================================================================
+// struct_merge1 and struct_merge1_m
+
+(require "/fusion/experimental/struct")
+
+(do (lambda (case)
+      (let [(arg1   (element case 0)),
+            (arg2   (element case 1)),
+            (expect (element case 2))]
+        (check ion_equals (struct_merge1   arg1 arg2) expect)
+        (check ion_equals (struct_merge1_m arg1 arg2) expect)))
+  (quote
+    [(a::null.struct  null.struct  a::null.struct),
+     (a::null.struct  {}           a::null.struct),
+     (a::null.struct  {a:1}        a::{a:1}      ),
+     (a::null.struct  {a:1,b:2}    a::{a:1,b:2}  ),
+     (a::null.struct  {a:1,a:1}    a::{a:1}      )]))
+
+
+(define (check_merge1 fields other expect)
+  (assert (is_immutable_struct other))
+  (let [(other_m (mutable_struct_copy other))]
+    (check_struct_mod struct_merge1 struct_merge1_m fields (list other  ) expect)
+    (check_struct_mod struct_merge1 struct_merge1_m fields (list other_m) expect))
+
+  (let [(s (apply mutable_struct fields)),
+        (o (struct_copy other))]
+    (let [(result (struct_merge1 s o))]
+      (struct_set_m result "mod" "mod")
+      (unless (= 0 (size o))
+        (check_void (. s "mod")
+          "Unexpected mutation of 1st arg in (struct_merge1 "
+          (apply struct fields) " " other ")"))
+      (check_void (. o "mod")
+        "Unexpected mutation of 2nd arg in (struct_merge1 " s " " other ")"))
+    (let [(result (struct_merge1_m s o))]
+      (struct_set_m result "mod" "mod")
+      (check_void (. o "mod")
+        "Unexpected mutation of 2nd arg in (struct_merge_m " s " " other ")"))))
+
+
+(check_merge1 (sexp) null.struct       {})
+(check_merge1 (sexp) {}                {})
+(check_merge1 (sexp) {a:1}             {a:1})
+(check_merge1 (sexp) {a:1,b:2}         {a:1,b:2})
+(check_merge1 (sexp) {a:1,a:1}         {a:1})
+(check_merge1 (sexp) {a:1,b:2,a:1,b:2} {a:1,b:2})
+
+(check_merge1 (sexp "a" 0) null.struct       {a:0})
+(check_merge1 (sexp "a" 0) {}                {a:0})
+(check_merge1 (sexp "a" 0) {a:1}             {a:1})
+(check_merge1 (sexp "a" 0) {a:1,b:2}         {a:1,b:2})
+(check_merge1 (sexp "a" 0) {a:1,a:1}         {a:1})
+(check_merge1 (sexp "a" 0) {a:1,b:2,a:1,b:2} {a:1,b:2})
+
+(check_merge1 (sexp "a" 0 "b" 2) null.struct       {a:0,b:2})
+(check_merge1 (sexp "a" 0 "b" 2) {}                {a:0,b:2})
+(check_merge1 (sexp "a" 0 "b" 2) {a:1}             {a:1,b:2})
+(check_merge1 (sexp "a" 0 "b" 2) {a:1,b:3}         {a:1,b:3})
+(check_merge1 (sexp "a" 0 "b" 2) {a:1,a:1}         {a:1,b:2})
+(check_merge1 (sexp "a" 0 "b" 2) {a:1,b:3,a:1,b:3} {a:1,b:3})
+
+(check_merge1 (sexp "a" 0 "a" 0) null.struct       {a:0})
+(check_merge1 (sexp "a" 0 "a" 0) {}                {a:0})
+(check_merge1 (sexp "a" 0 "a" 0) {a:1}             {a:1})
+(check_merge1 (sexp "a" 0 "a" 0) {a:1,b:3}         {a:1,b:3})
+(check_merge1 (sexp "a" 0 "a" 0) {a:1,a:1}         {a:1})
+(check_merge1 (sexp "a" 0 "a" 0) {a:1,b:3,a:1,b:3} {a:1,b:3})
+
+// TODO check annotations on inputs
+
+
+//==========================================================================
 // struct_zip
 
 (check ion_equals (struct_zip ["f"] [3]) {f:3})
