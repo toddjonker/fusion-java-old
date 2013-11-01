@@ -340,24 +340,24 @@ final class FusionStruct
 
     static interface BaseStruct
     {
-        abstract int size(); // Doesn't throw
+        int size(); // Doesn't throw
 
         /**
          * Visits each field in the struct, stopping as soon as the visitation
          * returns non-null.
          */
-        abstract void visitFields(StructFieldVisitor visitor)
+        void visitFields(StructFieldVisitor visitor)
             throws FusionException;
 
         // Return type isn't really right
-        abstract ImmutableStruct transformFields(StructFieldVisitor visitor)
+        ImmutableStruct transformFields(StructFieldVisitor visitor)
             throws FusionException;
 
-        abstract boolean hasKey(Evaluator eval, String key)
+        boolean hasKey(Evaluator eval, String key)
             throws FusionException;
 
         /** Returns void if the field doesn't exist. */
-        abstract Object elt(Evaluator eval, String field)
+        Object elt(Evaluator eval, String field)
             throws FusionException;
 
         /**
@@ -366,28 +366,28 @@ final class FusionStruct
          * @param def the default result. If its a procedure, it's called with
          * no arguments to determine the result. Otherwise it's returned as-is.
          */
-        abstract Object ref(Evaluator eval, String name, Object def)
+        Object ref(Evaluator eval, String name, Object def)
             throws FusionException;
 
-        abstract Object set(Evaluator eval, String key, Object value)
+        Object set(Evaluator eval, String key, Object value)
             throws FusionException;
 
-        abstract Object setM(Evaluator eval, String key, Object value)
+        Object setM(Evaluator eval, String key, Object value)
             throws FusionException;
 
-        abstract Object removeKeys(String[] keys)
+        Object removeKeys(String[] keys)
             throws FusionException;
 
-        abstract Object removeKeysM(String[] keys)
+        Object removeKeysM(String[] keys)
             throws FusionException;
 
-        abstract Object retainKeys(String[] keys)
+        Object retainKeys(String[] keys)
             throws FusionException;
 
-        abstract Object retainKeysM(String[] keys)
+        Object retainKeysM(String[] keys)
             throws FusionException;
 
-        abstract Object merge(BaseStruct other)
+        Object merge(BaseStruct other)
             throws FusionException;
     }
 
