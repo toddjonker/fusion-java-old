@@ -62,8 +62,8 @@ the key:
 
 The procedures `remove_keys` and `retain_keys` functionally eliminate fields
 from a struct without modifying the input; `remove_keys_m` and `retain_keys_m`
-modify the input when possible.  `struct_merge` combines the fields
-from two structs.
+modify the input when possible.  `struct_merge` and `struct_merge_m` combine
+the fields from two structs.
 
 
 ## Iterating Struct Fields
@@ -104,6 +104,7 @@ while the field values are iterated.
   (defpub_j retain_keys       "com.amazon.fusion.FusionStruct$RetainKeysProc")
   (defpub_j retain_keys_m     "com.amazon.fusion.FusionStruct$RetainKeysMProc")
   (defpub_j struct_merge      "com.amazon.fusion.FusionStruct$StructMergeProc")
+  (defpub_j struct_merge_m    "com.amazon.fusion.FusionStruct$StructMergeMProc")
   (defpub_j struct_zip        "com.amazon.fusion.FusionStruct$StructZipProc")
 
 

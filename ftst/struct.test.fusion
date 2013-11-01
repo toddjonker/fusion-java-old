@@ -158,10 +158,43 @@ to the `fields`, and the result of the operator must be the same type.
 //==========================================================================
 // struct_merge
 
-(check ion_equals (struct_merge {} {}) {})
-(check ion_equals (struct_merge {f:3} {f:4}) {f:3,f:4})
-(check ion_equals (struct_merge {f:3} {g:4}) {f:3,g:4})
-(check ion_equals (struct_merge {f:3} {g:4,h:5}) {f:3,g:4,h:5})
+(check ion_equals
+  (struct_merge (quote a::null.struct) null.struct) (quote a::null.struct))
+(check ion_equals
+  (struct_merge (quote a::null.struct) {})          (quote a::null.struct))
+(check ion_equals
+  (struct_merge (quote a::null.struct) {a:1})       (quote a::{a:1}))
+(check ion_equals
+  (struct_merge (quote a::null.struct) {a:1,b:2})   (quote a::{a:1,b:2}))
+(check ion_equals
+  (struct_merge (quote a::null.struct) {a:1,a:3})   (quote a::{a:1,a:3}))
+
+(define (check_merge fields other expect)
+  (check_struct_mod struct_merge struct_merge_m fields (list other) expect))
+
+
+(check_merge (sexp) null.struct       {})
+(check_merge (sexp) {}                {})
+(check_merge (sexp) {a:1}             {a:1})
+(check_merge (sexp) {a:1,b:2}         {a:1,b:2})
+(check_merge (sexp) {a:1,a:3}         {a:1,a:3})
+(check_merge (sexp) {a:1,b:2,a:3,b:4} {a:1,b:2,a:3,b:4})
+
+(check_merge (sexp "a" 0) null.struct       {a:0})
+(check_merge (sexp "a" 0) {}                {a:0})
+(check_merge (sexp "a" 0) {a:1}             {a:0,a:1})
+(check_merge (sexp "a" 0) {a:1,b:2}         {a:0,a:1,b:2})
+(check_merge (sexp "a" 0) {a:1,a:3}         {a:0,a:1,a:3})
+(check_merge (sexp "a" 0) {a:1,b:2,a:3,b:4} {a:0,a:1,b:2,a:3,b:4})
+
+(check_merge (sexp "a" 0 "b" 2) null.struct       {a:0,b:2})
+(check_merge (sexp "a" 0 "b" 2) {}                {a:0,b:2})
+(check_merge (sexp "a" 0 "b" 2) {a:1}             {a:0,b:2,a:1})
+(check_merge (sexp "a" 0 "b" 2) {a:1,b:2}         {a:0,b:2,a:1,b:2})
+(check_merge (sexp "a" 0 "b" 2) {a:1,a:3}         {a:0,b:2,a:1,a:3})
+(check_merge (sexp "a" 0 "b" 2) {a:1,b:2,a:3,b:4} {a:0,b:2,a:1,b:2,a:3,b:4})
+
+// TODO check annotations on inputs
 
 
 //==========================================================================

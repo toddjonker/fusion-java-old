@@ -166,6 +166,9 @@ final class FusionStruct
     }
 
 
+    /**
+     * @param value may be an array (for repeated fields)
+     */
     static void structImplAdd(Map<String, Object> map, String name,
                               Object value)
     {
@@ -327,6 +330,13 @@ final class FusionStruct
         return ((BaseStruct) struct1).merge((BaseStruct) struct2);
     }
 
+    static Object unsafeStructMergeM(Evaluator eval, Object struct1,
+                                     Object struct2)
+        throws FusionException
+    {
+        return ((BaseStruct) struct1).mergeM((BaseStruct) struct2);
+    }
+
 
     //========================================================================
 
@@ -388,6 +398,9 @@ final class FusionStruct
             throws FusionException;
 
         Object merge(BaseStruct other)
+            throws FusionException;
+
+        Object mergeM(BaseStruct other)
             throws FusionException;
     }
 
@@ -506,6 +519,13 @@ final class FusionStruct
             // We know it has children.
             MapBasedStruct is = (MapBasedStruct) other;
             return new NonNullImmutableStruct(is.myMap, myAnnotations);
+        }
+
+        @Override
+        public Object mergeM(BaseStruct other)
+            throws FusionException
+        {
+            return merge(other);
         }
 
         @Override
@@ -939,6 +959,13 @@ final class FusionStruct
         {
             return retainKeys(keys);
         }
+
+        @Override
+        public Object mergeM(BaseStruct other)
+            throws FusionException
+        {
+            return merge(other);
+        }
     }
 
 
@@ -980,6 +1007,24 @@ final class FusionStruct
         {
             List<String> asList = Arrays.asList(keys);
             myMap.keySet().retainAll(asList);
+            return this;
+        }
+
+        @Override
+        public Object mergeM(BaseStruct other) throws FusionException
+        {
+            if (other.size() == 0) return this;
+
+            // We know it has children.
+            MapBasedStruct is = (MapBasedStruct) other;
+
+            for (Map.Entry<String,Object> entry : is.myMap.entrySet())
+            {
+                String name  = entry.getKey();
+                Object value = entry.getValue();
+                structImplAdd(myMap, name, value);
+            }
+
             return this;
         }
     }
@@ -1289,6 +1334,30 @@ final class FusionStruct
             checkStructArg(eval, 1, struct1, struct2);
 
             return unsafeStructMerge(eval, struct1, struct2);
+        }
+    }
+
+    static final class StructMergeMProc
+        extends Procedure2
+    {
+        StructMergeMProc()
+        {
+            //    "                                                                               |
+            super("Returns a struct that has all the name-value elements of both arguments,\n" +
+                  "mutating the first argument when possible. This will result in repeated fields\n" +
+                  "if the names overlap or if one of the arguments has repeats.  The result has\n" +
+                  "the same type as the first argument.",
+                  "struct1", "struct2");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object struct1, Object struct2)
+            throws FusionException
+        {
+            checkStructArg(eval, 0, struct1, struct2);
+            checkStructArg(eval, 1, struct1, struct2);
+
+            return unsafeStructMergeM(eval, struct1, struct2);
         }
     }
 
