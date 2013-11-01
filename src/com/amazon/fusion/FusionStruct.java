@@ -57,7 +57,7 @@ final class FusionStruct
         }
         else
         {
-            map = new HashMap<String, Object>(struct.size());
+            map = new HashMap<>(struct.size());
             for (IonValue v : struct)
             {
                 String field  = v.getFieldName();
@@ -127,7 +127,7 @@ final class FusionStruct
         }
         else
         {
-            map = new HashMap<String, Object>(names.length);
+            map = new HashMap<>(names.length);
             for (int i = 0; i < names.length; i++)
             {
                 String field  = names[i];
@@ -148,11 +148,11 @@ final class FusionStruct
         Map<String, Object> map;
         if (names.length == 0)
         {
-            map = new HashMap<String, Object>();
+            map = new HashMap<>();
         }
         else
         {
-            map = new HashMap<String, Object>(names.length);
+            map = new HashMap<>(names.length);
             for (int i = 0; i < names.length; i++)
             {
                 String field  = names[i];
@@ -202,6 +202,17 @@ final class FusionStruct
                 multi = new Object[] { prev, value };
             }
             map.put(name, multi);
+        }
+    }
+
+    private static void structImplMergeM(Map<String, Object> map1,
+                                         Map<String, Object> map2)
+    {
+        for (Map.Entry<String,Object> entry : map2.entrySet())
+        {
+            String key   = entry.getKey();
+            Object value = entry.getValue();
+            structImplAdd(map1, key, value);
         }
     }
 
@@ -600,7 +611,7 @@ final class FusionStruct
 
         Map<String, Object> copyMap()
         {
-            return new HashMap<String, Object>(myMap);
+            return new HashMap<>(myMap);
         }
 
         @Override
@@ -753,7 +764,7 @@ final class FusionStruct
         public Object set(Evaluator eval, String key, Object value)
             throws FusionException
         {
-            Map<String,Object> newMap = new HashMap<String,Object>(myMap);
+            Map<String,Object> newMap = new HashMap<>(myMap);
             newMap.put(key, value);
             return makeSimilar(newMap);
         }
@@ -762,7 +773,7 @@ final class FusionStruct
         public Object removeKeys(String[] keys)
             throws FusionException
         {
-            Map<String,Object> newMap = new HashMap<String,Object>(myMap);
+            Map<String,Object> newMap = new HashMap<>(myMap);
             List<String> asList = Arrays.asList(keys);
 
             boolean modified = newMap.keySet().removeAll(asList);
@@ -775,7 +786,7 @@ final class FusionStruct
         public Object retainKeys(String[] keys)
             throws FusionException
         {
-            Map<String,Object> newMap = new HashMap<String,Object>(myMap);
+            Map<String,Object> newMap = new HashMap<>(myMap);
             List<String> asList = Arrays.asList(keys);
 
             boolean modified = newMap.keySet().retainAll(asList);
@@ -793,22 +804,8 @@ final class FusionStruct
             // We know it has children.
             MapBasedStruct is = (MapBasedStruct) other;
 
-            Map<String,Object> newMap;
-
-            if (myMap.size() == 0)
-            {
-                newMap = is.myMap;
-            }
-            else
-            {
-                newMap = new HashMap<String,Object>(myMap);
-                for (Map.Entry<String,Object> entry : is.myMap.entrySet())
-                {
-                    String name  = entry.getKey();
-                    Object value = entry.getValue();
-                    structImplAdd(newMap, name, value);
-                }
-            }
+            Map<String,Object> newMap = new HashMap<>(myMap);
+            structImplMergeM(newMap, is.myMap);
 
             return makeSimilar(newMap);
         }
@@ -1013,16 +1010,10 @@ final class FusionStruct
         @Override
         public Object mergeM(BaseStruct other) throws FusionException
         {
-            if (other.size() == 0) return this;
-
-            // We know it has children.
-            MapBasedStruct is = (MapBasedStruct) other;
-
-            for (Map.Entry<String,Object> entry : is.myMap.entrySet())
+            if (other.size() != 0)
             {
-                String name  = entry.getKey();
-                Object value = entry.getValue();
-                structImplAdd(myMap, name, value);
+                MapBasedStruct is = (MapBasedStruct) other;
+                structImplMergeM(myMap, is.myMap);
             }
 
             return this;
