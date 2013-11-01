@@ -6,6 +6,34 @@
   "/fusion/struct")
 
 
+(define (check_struct_mod op op_m fields args expect)
+  '''
+Checks a struct-modification operator of the form (op S args...) that returns
+a struct. S is constructed twice by applying both `struct` and `mutable_struct`
+to the `fields`, and the result of the operator must be the same type.
+  '''
+  (let [(s (apply struct fields))]
+    (let [(result (apply op s args))]
+      (check_pred is_immutable_struct result)
+      (check ion_equals result expect)
+      (check ion_equals s (apply struct fields)))             // s not mutated
+    (let [(result (apply op_m s args))]
+      (check_pred is_immutable_struct result)
+      (check ion_equals result expect)
+      (check ion_equals s (apply struct fields))))            // s not mutated
+  (let [(s (apply mutable_struct fields))]
+    (let [(result (apply op s args))]
+      (check_pred is_mutable_struct result
+        "result of " op " should be mutable")
+      (check ion_equals result expect)
+      (check ion_equals s (apply struct fields)))             // s not mutated
+    (let [(result (apply op_m s args))]
+      (check_pred is_mutable_struct result)
+      (check ion_equals result expect)
+      (check ion_equals s expect))))                          // s is mutated
+
+
+
 (check_equal (. (quote {f:[]}) "f") [] "[] in quoted struct")
 
 (check_equal (append_m (. {f:[]} "f") [1]) [1] "pulling list from struct")
@@ -108,24 +136,7 @@
 
 
 (define (test_set fields key value expect)
-  (let [(s (apply struct fields))]
-    (let [(result (struct_set s key value))]
-      (check_pred is_immutable_struct result)
-      (check ion_equals result expect)
-      (check ion_equals s (apply struct fields)))             // s not mutated
-    (let [(result (struct_set_m s key value))]
-      (check_pred is_immutable_struct result)
-      (check ion_equals result expect)
-      (check ion_equals s (apply struct fields))))            // s not mutated
-  (let [(s (apply mutable_struct fields))]
-    (let [(result (struct_set s key value))]
-      (check_pred is_mutable_struct result)
-      (check ion_equals result expect)
-      (check ion_equals s (apply struct fields)))             // s not mutated
-    (let [(result (struct_set_m s key value))]
-      (check_pred is_mutable_struct result)
-      (check ion_equals result expect)
-      (check ion_equals s expect))))                          // s is mutated
+  (check_struct_mod struct_set struct_set_m fields (list key value) expect))
 
 (test_set (quote (           )) "f" 3 {f:3})
 (test_set (quote (a 1        )) "f" 3 {a:1,f:3})
@@ -205,24 +216,7 @@
 
 
 (define (test_remove_keys fields keys expect)
-  (let [(s (apply struct fields))]
-    (let [(result (apply remove_keys s keys))]
-      (check ion_equals result expect)
-      (check_pred is_immutable_struct result)
-      (check ion_equals s (apply struct fields)))             // s not mutated
-    (let [(result (apply remove_keys_m s keys))]
-      (check ion_equals result expect)
-      (check_pred is_immutable_struct result)
-      (check ion_equals s (apply struct fields))))            // s not mutated
-  (let [(s (apply mutable_struct fields))]
-    (let [(result (apply remove_keys s keys))]
-      (check ion_equals result expect)
-      (check_pred is_mutable_struct result)
-      (check ion_equals s (apply mutable_struct fields)))     // s not mutated
-    (let [(result (apply remove_keys_m s keys))]
-      (check ion_equals result expect)
-      (check_pred is_mutable_struct result)
-      (check ion_equals s expect))))                          // s is mutated
+  (check_struct_mod remove_keys remove_keys_m fields keys expect))
 
 (test_remove_keys (quote ()) [   ] {})
 (test_remove_keys (quote ()) ["f"] {})
@@ -249,24 +243,7 @@
 
 
 (define (test_retain_keys fields keys expect)
-  (let [(s (apply struct fields))]
-    (let [(result (apply retain_keys s keys))]
-      (check ion_equals result expect)
-      (check_pred is_immutable_struct result)
-      (check ion_equals s (apply struct fields)))             // s not mutated
-    (let [(result (apply retain_keys_m s keys))]
-      (check ion_equals result expect)
-      (check_pred is_immutable_struct result)
-      (check ion_equals s (apply struct fields))))            // s not mutated
-  (let [(s (apply mutable_struct fields))]
-    (let [(result (apply retain_keys s keys))]
-      (check ion_equals result expect)
-      (check_pred is_mutable_struct result)
-      (check ion_equals s (apply struct fields)))             // s not mutated
-    (let [(result (apply retain_keys_m s keys))]
-      (check ion_equals result expect)
-      (check_pred is_mutable_struct result)
-      (check ion_equals s expect))))                          // s is mutated
+  (check_struct_mod retain_keys retain_keys_m fields keys expect))
 
 (test_retain_keys (quote ()) [   ] {})
 (test_retain_keys (quote ()) ["f"] {})
