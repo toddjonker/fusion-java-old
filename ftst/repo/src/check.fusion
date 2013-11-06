@@ -68,7 +68,7 @@ Raises a check failure exception, including a stack trace derived from the
                                               " arg: "
                                               " args: ")))]
         (quasisyntax
-          (defpub_syntax (unsyntax name_stx)
+          (define_syntax (unsyntax name_stx)
             (lambda (stx1)
               (when (<= (syntax_size stx1) (unsyntax arg_ct_stx))
                 (wrong_syntax stx1
@@ -181,6 +181,7 @@ Raises a check failure exception, including a stack trace derived from the
 
 
 
+  (provide check)
   (define_check (check message op val1 val2)
     (unless (op val1 val2)
       (raise_check_failure_stack
@@ -190,6 +191,7 @@ Raises a check failure exception, including a stack trace derived from the
         "\n             " val2)))
 
 
+  (provide check_pred)
   (define_check (check_pred message pred val)
     (unless (pred val)
       (raise_check_failure_stack
@@ -198,6 +200,7 @@ Raises a check failure exception, including a stack trace derived from the
         "\n  argument : " val)))
 
 
+  (provide check_true)
   (define_check (check_true message val)
     (unless (is_true val)
       (raise_check_failure_stack
@@ -205,6 +208,7 @@ Raises a check failure exception, including a stack trace derived from the
         " Received: "
         val)))
 
+  (provide check_false)
   (define_check (check_false message val)
     (unless (is_false val)
       (raise_check_failure_stack
@@ -212,6 +216,7 @@ Raises a check failure exception, including a stack trace derived from the
         " Received: "
         val)))
 
+  (provide check_void)
   (define_check (check_void message val)
     (unless (is_void val)
       (raise_check_failure_stack
