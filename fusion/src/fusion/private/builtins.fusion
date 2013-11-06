@@ -27,6 +27,8 @@
   (defpub_j not                   "com.amazon.fusion.NotProc")
 
 
+  (defpub_j annotate "com.amazon.fusion.AnnotateProc")
+
   (defpub_j size "com.amazon.fusion.SizeProc")
 
   (defpub_j is_immutable_list

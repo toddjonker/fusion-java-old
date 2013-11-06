@@ -3,20 +3,23 @@
 (require
   "/check"
   "/fusion/list"
+  "/fusion/private/builtins"  // annotate
   "/fusion/struct")
 
 
 (define _struct_copy
   (lambda (ctor s)
-    (if (is_null s)
-      s
-      (let [(args (stretchy_list))]
-        (struct_for_each
-          (lambda (name value)
-            (add_m args name)
-            (add_m args value))
-          s)
-        (apply ctor args)))))
+    (apply annotate
+      (if (is_null s)
+        s
+        (let [(args (stretchy_list))]
+          (struct_for_each
+            (lambda (name value)
+              (add_m args name)
+              (add_m args value))
+            s)
+          (apply ctor args)))
+      (type_annotations s))))
 
 (define struct_copy
   (lambda (s)
@@ -25,6 +28,29 @@
 (define mutable_struct_copy
   (lambda (s)
     (_struct_copy mutable_struct s)))
+
+
+(define_check (check_mod_f msg op val args expect)
+  "Functional modification check"
+  (let [(s (struct_copy val))]
+    (let [(result (apply op s args))]
+      (check_pred is_immutable_struct result
+        "result of " op " should be immutable")
+      (check ion_equals result expect
+        "Unexpected result from " op " on immutable " s)
+      (check ion_equals s val                                 // s not mutated
+        "Immutable struct was mutated by " op)))
+  (unless (is_null val)                             // There's no mutable null
+    (let [(s (mutable_struct_copy val))]
+      (let [(result (apply op s args))]
+        (check_pred is_mutable_struct result
+          "result of " op " should be mutable")
+        (check ion_equals result expect
+          "Unexpected result from " op " on mutable " s)
+        (check ion_equals s val)
+        (struct_set_m result "mod" "mod")
+        (check_void (. s "mod")
+          "Unexpected mutation of original")))))
 
 
 (define (check_struct_mod op op_m fields args expect)
@@ -96,6 +122,42 @@ to the `fields`, and the result of the operator must be the same type.
 (check_annotations (quote a::{}) (quote ["a"]))
 (check_annotations (quote a::b::{}) (quote ["a","b"]))
 (check_annotations (quote a::b::a::{}) (quote ["a","b","a"]))
+
+
+//==========================================================================
+// annotate
+
+(check_mod_f annotate null.struct []                      null.struct)
+(check_mod_f annotate null.struct ["a"]      (quote a::   null.struct))
+(check_mod_f annotate null.struct ["a", "b"] (quote a::b::null.struct))
+
+(check_mod_f annotate {} []                      {})
+(check_mod_f annotate {} ["a"]      (quote a::   {}))
+(check_mod_f annotate {} ["a", "b"] (quote a::b::{}))
+
+(check_mod_f annotate {f:1} []                      {f:1})
+(check_mod_f annotate {f:1} ["a"]      (quote a::   {f:1}))
+(check_mod_f annotate {f:1} ["a", "b"] (quote a::b::{f:1}))
+
+
+// Replacing existing annotations
+(check_mod_f annotate (quote x::null.struct) ["a"]      (quote a::null.struct))
+(check_mod_f annotate (quote x::null.struct) ["a", "b"] (quote a::b::null.struct))
+
+(check_mod_f annotate (quote x::{}) []                      {})
+(check_mod_f annotate (quote x::{}) ["a"]      (quote a::   {}))
+(check_mod_f annotate (quote x::{}) ["a", "b"] (quote a::b::{}))
+
+(check_mod_f annotate (quote x::{f:1}) []                      {f:1})
+(check_mod_f annotate (quote x::{f:1}) ["a"]      (quote a::   {f:1}))
+(check_mod_f annotate (quote x::{f:1}) ["a", "b"] (quote a::b::{f:1}))
+
+
+(check_arg_exn (annotate null.struct null))
+(check_arg_exn (annotate null.struct ""))
+(check_arg_exn (annotate null.struct null.string))
+(check_arg_exn (annotate null.struct (quote null.symbol)))
+(check_arg_exn (annotate null.struct 12))
 
 
 //==========================================================================

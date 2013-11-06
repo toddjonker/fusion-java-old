@@ -3,7 +3,67 @@
 (require
   "/check"
   "/fusion/list"
+  "/fusion/private/builtins"  // annotate
   "/fusion/unsafe/list")
+
+
+(define _list_copy
+  (lambda (ctor v)
+    (apply annotate
+      (if (is_null v)
+        v
+        (apply ctor v))
+      (type_annotations v))))
+
+(define list_copy
+  (lambda (v)
+    (_list_copy list v)))
+
+(define mutable_list_copy
+  (lambda (v)
+    (_list_copy mutable_list v)))
+
+(define stretchy_list_copy
+  (lambda (v)
+    (_list_copy stretchy_list v)))
+
+
+(define_check (check_mod_f msg op val args expect)
+  "Functional modification check"
+  (let [(v (list_copy val))]
+    (let [(result (apply op v args))]
+      (check_pred is_immutable_list result
+        "result of " op " should be immutable")
+      (check ion_equals result expect
+        "Unexpected result from " op " on immutable arg")
+      (check ion_equals v val                                 // v not mutated
+        "Immutable arg was mutated by " op)))
+  (unless (is_null val)                             // There's no mutable null
+    (let [(v (mutable_list_copy val))]
+      (let [(result (apply op v args))]
+        (check_pred is_mutable_list result
+          "result of " op " should be mutable")
+        (check ion_equals result expect
+          "Unexpected result from " op " on mutable " v)
+        (check ion_equals v val                               // v not mutated
+          "Mutable arg was mutated by " op)
+        (unless (is_empty val)
+          (list_set result 0 "mod")
+          (check_equal v val "Unexpected mutation of original"))))
+    (let [(v (stretchy_list_copy val))]
+      (let [(result (apply op v args))]
+        (check_pred is_stretchy_list result
+          "result of " op " should be stretchy")
+        (check ion_equals result expect
+          "Unexpected result from " op " on stretchy " v)
+        (check ion_equals v val                               // v not mutated
+          "Stretchy arg was mutated by " op)
+        (add_m result "stretch")
+        (check_equal v val "Unexpected mutation of original")
+        (unless (is_empty val)
+          (list_set result 0 "mod")
+          (check_equal v val "Unexpected mutation of original"))))))
+
 
 
 //==========================================================================
@@ -73,6 +133,42 @@
 (test_makers list false false)
 (test_makers mutable_list true false)
 (test_makers stretchy_list true true)
+
+
+//==========================================================================
+// annotate
+
+(check_mod_f annotate null.list []                      null.list)
+(check_mod_f annotate null.list ["a"]      (quote a::   null.list))
+(check_mod_f annotate null.list ["a", "b"] (quote a::b::null.list))
+
+(check_mod_f annotate [] []                      [])
+(check_mod_f annotate [] ["a"]      (quote a::   []))
+(check_mod_f annotate [] ["a", "b"] (quote a::b::[]))
+
+(check_mod_f annotate [1] []                      [1])
+(check_mod_f annotate [1] ["a"]      (quote a::   [1]))
+(check_mod_f annotate [1] ["a", "b"] (quote a::b::[1]))
+
+
+// Replacing existing annotations
+(check_mod_f annotate (quote x::null.list) ["a"]      (quote a::null.list))
+(check_mod_f annotate (quote x::null.list) ["a", "b"] (quote a::b::null.list))
+
+(check_mod_f annotate (quote x::[]) []                      [])
+(check_mod_f annotate (quote x::[]) ["a"]      (quote a::   []))
+(check_mod_f annotate (quote x::[]) ["a", "b"] (quote a::b::[]))
+
+(check_mod_f annotate (quote x::[1]) []                      [1])
+(check_mod_f annotate (quote x::[1]) ["a"]      (quote a::   [1]))
+(check_mod_f annotate (quote x::[1]) ["a", "b"] (quote a::b::[1]))
+
+
+(check_arg_exn (annotate null.list null))
+(check_arg_exn (annotate null.list ""))
+(check_arg_exn (annotate null.list null.string))
+(check_arg_exn (annotate null.list (quote null.symbol)))
+(check_arg_exn (annotate null.list 12))
 
 
 //==========================================================================

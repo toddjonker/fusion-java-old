@@ -324,6 +324,13 @@ final class FusionSexp
         }
 
         @Override
+        Object annotate(Evaluator eval, String[] annotations)
+            throws FusionException
+        {
+            return new NullSexp(annotations);
+        }
+
+        @Override
         IonSexp copyToIonValue(ValueFactory factory,
                               boolean throwOnConversionFailure)
             throws FusionException
@@ -358,6 +365,13 @@ final class FusionSexp
         EmptySexp(String[] annotations)
         {
             super(annotations);
+        }
+
+        @Override
+        Object annotate(Evaluator eval, String[] annotations)
+            throws FusionException
+        {
+            return new EmptySexp(annotations);
         }
 
         @Override
@@ -407,6 +421,13 @@ final class FusionSexp
             myTail = tail;
         }
 
+
+        @Override
+        Object annotate(Evaluator eval, String[] annotations)
+            throws FusionException
+        {
+            return new ImmutablePair(annotations, myHead, myTail);
+        }
 
         Object head() { return myHead; }
         Object tail() { return myTail; }

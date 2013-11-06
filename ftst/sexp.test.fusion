@@ -2,13 +2,44 @@
 
 (require
   "/check"
-  "/fusion/list")
+  "/fusion/list"
+  "/fusion/private/builtins")  // annotate
 
 
 (define valNull  (quote null.sexp))
 (define valEmpty (quote ()))
 (define val12    (quote (1 2)))
 
+
+(define _sexp_copy
+  (lambda (ctor v)
+    (apply annotate
+      (if (is_null v)
+        v
+        (apply ctor v))
+      (type_annotations v))))
+
+(define sexp_copy
+  (lambda (v)
+    (_sexp_copy sexp v)))
+
+(define mutable_list_copy
+  (lambda (v)
+    (_sexp_copy mutable_sexp v)))
+
+
+(define_check (check_mod_f msg op val args expect)
+  "Functional modification check"
+  (let [(v (sexp_copy val))]
+    (let [(result (apply op v args))]
+      (check ion_equals result expect
+        "Unexpected result from " op " on immutable arg")
+      (check ion_equals v val                                 // v not mutated
+        "Immutable arg was mutated by " op))))
+
+
+//==========================================================================
+// Literals
 
 //(check_true (is_null  null.sexp))  // Not valid syntax
 //(check_true (is_empty null.sexp))
@@ -65,6 +96,42 @@
 (check_true (is_sexp (pair 1 2)))
 (check = (head (pair 1 2)) 1)
 (check = (tail (pair 1 2)) 2)
+
+
+//==========================================================================
+// annotate
+
+(check_mod_f annotate NULL_SEXP []         (quote       null.sexp))
+(check_mod_f annotate NULL_SEXP ["a"]      (quote a::   null.sexp))
+(check_mod_f annotate NULL_SEXP ["a", "b"] (quote a::b::null.sexp))
+
+(check_mod_f annotate valEmpty []         (quote       ()))
+(check_mod_f annotate valEmpty ["a"]      (quote a::   ()))
+(check_mod_f annotate valEmpty ["a", "b"] (quote a::b::()))
+
+(check_mod_f annotate val12 []         (quote       (1 2)))
+(check_mod_f annotate val12 ["a"]      (quote a::   (1 2)))
+(check_mod_f annotate val12 ["a", "b"] (quote a::b::(1 2)))
+
+
+// Replacing existing annotations
+(check_mod_f annotate (quote x::null.sexp) ["a"]      (quote a::   null.sexp))
+(check_mod_f annotate (quote x::null.sexp) ["a", "b"] (quote a::b::null.sexp))
+
+(check_mod_f annotate (quote x::()) []         (quote       ()))
+(check_mod_f annotate (quote x::()) ["a"]      (quote a::   ()))
+(check_mod_f annotate (quote x::()) ["a", "b"] (quote a::b::()))
+
+(check_mod_f annotate (quote x::(1)) []         (quote       (1)))
+(check_mod_f annotate (quote x::(1)) ["a"]      (quote a::   (1)))
+(check_mod_f annotate (quote x::(1)) ["a", "b"] (quote a::b::(1)))
+
+
+(check_arg_exn (annotate NULL_SEXP null))
+(check_arg_exn (annotate NULL_SEXP ""))
+(check_arg_exn (annotate NULL_SEXP null.string))
+(check_arg_exn (annotate NULL_SEXP (quote null.symbol)))
+(check_arg_exn (annotate NULL_SEXP 12))
 
 
 //==========================================================================
@@ -163,7 +230,7 @@
 (check_void
   (any (lambda (s) (if (is_null s) (void) null))
     (sexp false null.int null.list)))
-    
+
 
 //==========================================================================
 // every
@@ -175,7 +242,7 @@
 
 (check_false (every (lambda (e) (= e "hi")) (sexp "oh" "hi")))
 (check_true  (every (lambda (e) (= e "hi")) (sexp "hi" "hi")))
-    
+
 // Check that it returns the untruthy predicate result
 (check_void
   (every (lambda (e) (when (= e 204) e))
@@ -183,12 +250,12 @@
 (check_pred is_null
   (every (lambda (e) (if (= e 123) e null))
     (sexp 123 456 678)))
-    
+
 // Check that `every` returns the last predicate result if all are truthy
 (check = 1134
   (every (lambda (e) (when (or (= e 123) (= e 567)) (* e 2)))
     (sexp 123 123 567)))
-    
+
 
 //==========================================================================
 // map

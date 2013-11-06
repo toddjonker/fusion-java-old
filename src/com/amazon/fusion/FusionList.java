@@ -533,6 +533,14 @@ final class FusionList
             return new MutableList(annotations, values);
         }
 
+        @Override
+        Object annotate(Evaluator eval, String[] annotations)
+        {
+            // Since this instance is mutable, we cannot share the array.
+            Object[] values = Arrays.copyOf(myValues, size());
+            return makeSimilar(annotations, values);
+        }
+
         void unsafeSet(int pos, Object value)
         {
             myValues[pos] = value;
@@ -557,6 +565,13 @@ final class FusionList
         BaseList makeSimilar(String[] annotations, Object[] values)
         {
             return new ImmutableList(annotations, values);
+        }
+
+        @Override
+        Object annotate(Evaluator eval, String[] annotations)
+        {
+            // Since this instance is immutable, we can share the array.
+            return makeSimilar(annotations, myValues);
         }
     }
 
@@ -587,8 +602,14 @@ final class FusionList
         }
 
         @Override
+        Object annotate(Evaluator eval, String[] annotations)
+        {
+            return new NullList(annotations);
+        }
+
+        @Override
         IonList copyToIonValue(ValueFactory factory,
-                              boolean throwOnConversionFailure)
+                               boolean throwOnConversionFailure)
             throws FusionException
         {
             IonList list = factory.newNullList();
@@ -739,6 +760,15 @@ final class FusionList
                     myValues[i] = eval.inject((IonValue) myValues[i]);
                 }
             }
+        }
+
+        @Override
+        Object annotate(Evaluator eval, String[] annotations)
+        {
+            // Since this instance is immutable, we can share the array AFTER
+            // we inject the children.
+            injectElements(eval);
+            return super.annotate(eval, annotations);
         }
 
         @Override

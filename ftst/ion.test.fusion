@@ -1,7 +1,8 @@
 // Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check")
+  "/check"
+  "/fusion/private/builtins")  // annotate
 
 
 (assert (is_empty (type_annotations true)))
@@ -15,6 +16,39 @@
 (check_annotations (quote a::null.sexp) ["a"])
 (check_annotations (quote a::()) ["a"])
 (check_annotations (quote a::(b)) ["a"])
+
+
+//==========================================================================
+// annotate
+
+(check ion_equals (annotate null "a") (quote a::null))
+(check ion_equals (annotate true "a") (quote a::true))
+(check ion_equals (annotate 1234 "a") (quote a::1234))
+(check ion_equals (annotate 12.4 "a") (quote a::12.4))
+(check ion_equals (annotate 12e4 "a") (quote a::12e4))
+
+(check ion_equals (annotate "string"  "a") (quote a::"string"))
+(check ion_equals (annotate 2013-11T  "a") (quote a::2013-11T))
+(check ion_equals (annotate (quote s) "a") (quote a::s))
+(check ion_equals (annotate {{1111}}  "a") (quote a::{{1111}}))
+(check ion_equals (annotate {{"11"}}  "a") (quote a::{{"11"}}))
+
+
+(check ion_equals (annotate (quote x::null) "a") (quote a::null))
+(check ion_equals (annotate (quote x::true) "a") (quote a::true))
+(check ion_equals (annotate (quote x::1234) "a") (quote a::1234))
+(check ion_equals (annotate (quote x::12.4) "a") (quote a::12.4))
+(check ion_equals (annotate (quote x::12e4) "a") (quote a::12e4))
+
+(check ion_equals (annotate (quote x::"string") "a") (quote a::"string"))
+(check ion_equals (annotate (quote x::2013-11T) "a") (quote a::2013-11T))
+(check ion_equals (annotate (quote x::symbol  ) "a") (quote a::symbol  ))
+(check ion_equals (annotate (quote x::{{1111}}) "a") (quote a::{{1111}}))
+(check ion_equals (annotate (quote x::{{"11"}}) "a") (quote a::{{"11"}}))
+
+
+(check_arg_exn (annotate  void  "a"))  // procedure isn't annotatable
+(check_arg_exn (annotate (void) "a"))  // void      isn't annotatable
 
 
 //==========================================================================

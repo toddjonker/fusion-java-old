@@ -42,6 +42,23 @@ final class FusionCollection
 
 
     //========================================================================
+    // Modifiers
+
+
+    /**
+     * @param collection must be a collection.
+     * @param annotations must no elements that are null or empty.
+     */
+    static Object unsafeCollectionAnnotate(Evaluator eval,
+                                           Object collection,
+                                           String[] annotations)
+        throws FusionException
+    {
+        return ((BaseCollection) collection).annotate(eval, annotations);
+    }
+
+
+    //========================================================================
 
 
     abstract static class BaseCollection
@@ -62,6 +79,9 @@ final class FusionCollection
         }
 
         abstract int size()
+            throws FusionException;
+
+        abstract Object annotate(Evaluator eval, String[] annotations)
             throws FusionException;
     }
 }

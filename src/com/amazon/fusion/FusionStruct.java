@@ -513,6 +513,13 @@ final class FusionStruct
         }
 
         @Override
+        Object annotate(Evaluator eval, String[] annotations)
+            throws FusionException
+        {
+            return new NullStruct(annotations);
+        }
+
+        @Override
         public void visitFields(StructFieldVisitor visitor)
         {
         }
@@ -693,7 +700,13 @@ final class FusionStruct
             mySize = size;
         }
 
-        abstract MapBasedStruct makeSimilar(Map<String, Object> map);
+        abstract MapBasedStruct makeSimilar(Map<String, Object> map,
+                                            String[] annotations);
+
+        MapBasedStruct makeSimilar(Map<String, Object> map)
+        {
+            return makeSimilar(map, myAnnotations);
+        }
 
         Map<String, Object> copyMap()
         {
@@ -1042,9 +1055,17 @@ final class FusionStruct
         }
 
         @Override
-        MapBasedStruct makeSimilar(Map<String, Object> map)
+        MapBasedStruct makeSimilar(Map<String, Object> map,
+                                   String[] annotations)
         {
-            return immutableStruct(map, myAnnotations);
+            return immutableStruct(map, annotations);
+        }
+
+        @Override
+        Object annotate(Evaluator eval, String[] annotations)
+            throws FusionException
+        {
+            return makeSimilar(myMap, annotations);
         }
 
         @Override
@@ -1094,9 +1115,17 @@ final class FusionStruct
         }
 
         @Override
-        MapBasedStruct makeSimilar(Map<String, Object> map)
+        MapBasedStruct makeSimilar(Map<String, Object> map,
+                                   String[] annotations)
         {
-            return new MutableStruct(map, myAnnotations);
+            return new MutableStruct(map, annotations);
+        }
+
+        @Override
+        Object annotate(Evaluator eval, String[] annotations)
+            throws FusionException
+        {
+            return makeSimilar(copyMap(), annotations);
         }
 
         @Override
