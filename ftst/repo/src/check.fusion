@@ -204,18 +204,15 @@ Ensures that (OP VAL1 VAL2) is truthy.
                      "\n  " val1
                      "\n  " val2))))))))))
 
-  (defpub_syntax check
-    (lambda (stx)
-      '''
-(check OP VAL1 VAL2 MSG ...)
 
-Ensures that (OP VAL1 VAL2) is truthy.
-      '''
-      (when (< (syntax_size stx) 4)
-        (wrong_syntax stx "check requires at least three args: (check OP VAL1 VAL2 MSG ...)"))
-      (syntax_append
-        (quasisyntax (do_check (unsyntax stx)))
-        (syntax_subseq stx 1))))
+
+  (define_check (check message op val1 val2)
+    (unless (op val1 val2)
+      (raise_check_failure_stack
+        (if message (message) "Operation failure.")
+        "\n  operation: " op
+        "\n  arguments: " val1
+        "\n             " val2)))
 
 
   (define_check (check_pred message pred val)
