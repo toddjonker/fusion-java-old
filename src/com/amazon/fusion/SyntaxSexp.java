@@ -495,6 +495,27 @@ final class SyntaxSexp
         return null;
     }
 
+    /**
+     * Finds the binding for the leading symbol in the sexp, or null if the
+     * sexp doesn't start with a symbol with a binding.
+     */
+    Binding firstBindingMaybe(Evaluator eval)
+        throws FusionException
+    {
+        if (isPair(eval, mySexp))
+        {
+            pushWraps(eval);
+
+            Object first = unsafePairHead(eval, mySexp);
+            if (first instanceof SyntaxSymbol)
+            {
+                Binding binding = ((SyntaxSymbol)first).uncachedResolveMaybe();
+                return (binding == null ? null : binding.originalBinding());
+            }
+        }
+        return null;
+    }
+
 
     @Override
     SyntaxValue doExpand(Expander expander, Environment env)

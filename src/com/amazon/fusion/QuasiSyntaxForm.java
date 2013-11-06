@@ -70,46 +70,35 @@ final class QuasiSyntaxForm
         if (size == 0) return stx;
 
         SyntaxValue[] children = stx.extract(eval);
-        SyntaxValue first = children[0];
-        if (first instanceof SyntaxSymbol)
+
+        Binding binding = stx.firstBindingMaybe(eval);
+        if (myUsBinding == binding)
         {
-            // Be careful that we don't force a binding too early.
-            Binding binding = ((SyntaxSymbol)first).uncachedResolveMaybe();
-            if (binding != null)
+            check(eval, stx).arityExact(2);
+
+            if (depth < 1)
             {
-                binding = binding.originalBinding();
+                SyntaxValue subform = children[1];
+                children[1] = expander.expandExpression(env, subform);
 
-                if (myUsBinding == binding)
+                // TODO accept annotations on unsyntax form?
+                if (stx.getAnnotations().length != 0)
                 {
-                    check(eval, stx).arityExact(2);
-
-                    if (depth < 1)
-                    {
-                        SyntaxValue subform = children[1];
-                        children[1] = expander.expandExpression(env, subform);
-
-                        // TODO accept annotations on unsyntax form?
-                        if (stx.getAnnotations().length != 0)
-                        {
-                            String message =
-                                "Annotations not accepted on unsyntax form";
-                            throw check(eval, stx).failure(message);
-                        }
-
-                        stx = SyntaxSexp.make(eval, stx.getLocation(),
-                                              children);
-                        return stx;
-                    }
-
-                    depth--;
+                    String message =
+                        "Annotations not accepted on unsyntax form";
+                    throw check(eval, stx).failure(message);
                 }
-                else if (myQsBinding == binding)
-                {
-                    check(eval, stx).arityExact(2);
 
-                    depth++;
-                }
+                stx = SyntaxSexp.make(eval, stx.getLocation(), children);
+                return stx;
             }
+
+            depth--;
+        }
+        else if (myQsBinding == binding)
+        {
+            check(eval, stx).arityExact(2);
+            depth++;
         }
 
         for (int i = 0; i < size; i++)
@@ -161,39 +150,29 @@ final class QuasiSyntaxForm
         // Look for an (unsyntax ...) form
         if (size == 2)
         {
-            SyntaxValue first = stx.get(eval, 0);
-            if (first instanceof SyntaxSymbol)
+            Binding binding = stx.firstBindingMaybe(eval);
+            if (myUsBinding == binding)
             {
-                Binding binding = ((SyntaxSymbol)first).uncachedResolveMaybe();
-                if (binding != null)
+                if (depth == 0)
                 {
-                    binding = binding.originalBinding();
+                    assert stx.getAnnotations().length == 0;
+                    SyntaxValue unquotedSyntax = stx.get(eval, 1);
+                    CompiledForm unquotedForm =
+                        eval.compile(env, unquotedSyntax);
 
-                    if (myUsBinding == binding)
-                    {
-                        if (depth == 0)
-                        {
-                            assert stx.getAnnotations().length == 0;
-                            SyntaxValue unquotedSyntax = stx.get(eval, 1);
-                            CompiledForm unquotedForm =
-                                eval.compile(env, unquotedSyntax);
+                    SourceLocation location = unquotedSyntax.getLocation();
+                    String expression =
+                        safeWriteToString(eval, unquotedSyntax);
 
-                            SourceLocation location =
-                                unquotedSyntax.getLocation();
-                            String expression =
-                                safeWriteToString(eval, unquotedSyntax);
-
-                            return new CompiledUnsyntax(unquotedForm,
-                                                        location,
-                                                        expression);
-                        }
-                        depth--;
-                    }
-                    else if (myQsBinding == binding)
-                    {
-                        depth++;
-                    }
+                    return new CompiledUnsyntax(unquotedForm,
+                                                location,
+                                                expression);
                 }
+                depth--;
+            }
+            else if (myQsBinding == binding)
+            {
+                depth++;
             }
         }
 
