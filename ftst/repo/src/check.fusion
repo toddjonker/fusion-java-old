@@ -23,6 +23,9 @@
     (lambda (value)
       (and (is_bool value) (= true value))))
 
+  (defpub is_false
+    (lambda (value)
+      (and (is_bool value) (= false value))))
 
   (defpub ion_equals          (java_new "com.amazon.fusion.IonEqualsProc"))
 
@@ -176,34 +179,6 @@ Raises a check failure exception, including a stack trace derived from the
               )))))))
 */
 
-  (define_syntax do_check  // private
-    (lambda (stx)
-      '''
-(do_check ORIG_STX OP VAL1 VAL2 MSG ...)
-
-Ensures that (OP VAL1 VAL2) is truthy.
-      '''
-      (let ((orig_stx (syntax_get stx 1))
-            (op_stx   (syntax_get stx 2))
-            (val1_stx (syntax_get stx 3))
-            (val2_stx (syntax_get stx 4))
-            (msg_sexp (syntax_subseq stx 5)))
-        (quasisyntax
-          (let ((op   (unsyntax op_stx))
-                (val1 (unsyntax val1_stx))
-                (val2 (unsyntax val2_stx)))
-            (unless (op val1 val2)
-              (unsyntax
-                (syntax_append
-                  (quasisyntax
-                    (raise_check_failure
-                      (quote_syntax (unsyntax orig_stx))))
-                  msg_sexp
-                  (quasisyntax
-                    ("\n params:\n  " op
-                     "\n  " val1
-                     "\n  " val2))))))))))
-
 
 
   (define_check (check message op val1 val2)
@@ -230,29 +205,19 @@ Ensures that (OP VAL1 VAL2) is truthy.
         " Received: "
         val)))
 
+  (define_check (check_false message val)
+    (unless (is_false val)
+      (raise_check_failure_stack
+        (if message (message) "Expected `false`.")
+        " Received: "
+        val)))
 
-
-  // The failure message isn't the greatest, its in terms of the inner check
-  (defpub_syntax check_false
-    (lambda (stx)
-      (let ((val1_stx (syntax_get stx 1))
-            (msg_sexp (syntax_subseq stx 2)))
-        (syntax_append
-          (quasisyntax
-            (do_check (unsyntax stx) = (unsyntax val1_stx) false))
-          msg_sexp))))
-
-
-  // The failure message isn't the greatest, its in terms of the inner check
-  (defpub_syntax check_void
-    (lambda (stx)
-      (let ((val1_stx (syntax_get stx 1))
-            (msg_sexp (syntax_subseq stx 2)))
-        (syntax_append
-          (quasisyntax
-            (do_check (unsyntax stx) (lambda (actual expected) (is_void actual))
-              (unsyntax val1_stx) false))
-          msg_sexp))))
+  (define_check (check_void message val)
+    (unless (is_void val)
+      (raise_check_failure_stack
+        (if message (message) "Expected `void`.")
+        " Received: "
+        val)))
 
 
   // TODO this should accept a predicate to check exn type
