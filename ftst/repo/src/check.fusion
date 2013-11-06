@@ -218,24 +218,12 @@ Ensures that (OP VAL1 VAL2) is truthy.
         (syntax_subseq stx 1))))
 
 
-  (defpub_syntax check_pred
-    (lambda (stx)
-      '''
-(check_pred PRED VAL MSG ...)
-
-Ensures that (PRED VAL) is truthy.
-      '''
-      (when (< (syntax_size stx) 3)
-        (wrong_syntax stx
-          "check_pred requires at least two args: (check_pred PRED VAL MSG ...)"))
-      (syntax_append
-        (quasisyntax
-          (do_check (unsyntax stx)
-            (lambda (result dummy)
-              ((unsyntax (syntax_get stx 1)) result))
-            (unsyntax (syntax_get stx 2))
-            "(ignore this dummy argument)"))
-        (syntax_subseq stx 3))))
+  (define_check (check_pred message pred val)
+    (unless (pred val)
+      (raise_check_failure_stack
+        (if message (message) "Predicate failure.")
+        "\n  predicate: " pred
+        "\n  argument : " val)))
 
 
   (define_check (check_true message val)
