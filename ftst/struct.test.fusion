@@ -30,7 +30,7 @@
     (_struct_copy mutable_struct s)))
 
 
-(define_check (check_mod_f msg op val args expect)
+(define_check (check_mod msg op val args expect)            // msg is rest arg
   "Functional modification check"
   (let [(s (struct_copy val))]
     (let [(result (apply op s args))]
@@ -48,9 +48,37 @@
         (check ion_equals result expect
           "Unexpected result from " op " on mutable " s)
         (check ion_equals s val)
-        (struct_set_m result "mod" "mod")
-        (check_void (. s "mod")
-          "Unexpected mutation of original")))))
+        // If the result === the input, it's probably the same instance
+        (unless (ion_equals result val)
+          (struct_set_m result "mod" "mod")
+          (check_void (. s "mod")
+            "Unexpected mutation of original"))))))
+
+
+(define_check (check_mod_m msg op val args expect)          // msg is rest arg
+  "Mutating modification check"
+  (let [(s (struct_copy val))]
+    (let [(result (apply op s args))]
+      (check_pred is_immutable_struct result
+        "result of " op " should be immutable")
+      (check ion_equals result expect
+        "Unexpected result from " op " on immutable " s)
+      (check ion_equals s val                                 // s not mutated
+        "Immutable struct was mutated by " op)))
+  (unless (is_null val)                             // There's no mutable null
+    (let [(s (mutable_struct_copy val))]
+      (let [(result (apply op s args))]
+        (check_pred is_mutable_struct result
+          "result of " op " should be mutable")
+        (check ion_equals result expect
+          "Unexpected result from " op " on mutable " s)
+        (check ion_equals s expect)))))                        // s IS mutated
+
+
+(define_check (check_mods msg op op_m val args expect)      // msg is rest arg
+  "Functional and mutating modification check"
+  (check_mod   op   val args expect)
+  (check_mod_m op_m val args expect))
 
 
 (define (check_struct_mod op op_m fields args expect)
@@ -84,6 +112,8 @@ to the `fields`, and the result of the operator must be the same type.
         "Unexpected result from " op_m " on mutable " s)
       (check ion_equals s expect))))                          // s is mutated
 
+
+//==========================================================================
 
 
 (check_equal (. (quote {f:[]}) "f") [] "[] in quoted struct")
@@ -127,30 +157,30 @@ to the `fields`, and the result of the operator must be the same type.
 //==========================================================================
 // annotate
 
-(check_mod_f annotate null.struct []                      null.struct)
-(check_mod_f annotate null.struct ["a"]      (quote a::   null.struct))
-(check_mod_f annotate null.struct ["a", "b"] (quote a::b::null.struct))
+(check_mod annotate null.struct []                      null.struct)
+(check_mod annotate null.struct ["a"]      (quote a::   null.struct))
+(check_mod annotate null.struct ["a", "b"] (quote a::b::null.struct))
 
-(check_mod_f annotate {} []                      {})
-(check_mod_f annotate {} ["a"]      (quote a::   {}))
-(check_mod_f annotate {} ["a", "b"] (quote a::b::{}))
+(check_mod annotate {} []                      {})
+(check_mod annotate {} ["a"]      (quote a::   {}))
+(check_mod annotate {} ["a", "b"] (quote a::b::{}))
 
-(check_mod_f annotate {f:1} []                      {f:1})
-(check_mod_f annotate {f:1} ["a"]      (quote a::   {f:1}))
-(check_mod_f annotate {f:1} ["a", "b"] (quote a::b::{f:1}))
+(check_mod annotate {f:1} []                      {f:1})
+(check_mod annotate {f:1} ["a"]      (quote a::   {f:1}))
+(check_mod annotate {f:1} ["a", "b"] (quote a::b::{f:1}))
 
 
 // Replacing existing annotations
-(check_mod_f annotate (quote x::null.struct) ["a"]      (quote a::null.struct))
-(check_mod_f annotate (quote x::null.struct) ["a", "b"] (quote a::b::null.struct))
+(check_mod annotate (quote x::null.struct) ["a"]      (quote a::null.struct))
+(check_mod annotate (quote x::null.struct) ["a", "b"] (quote a::b::null.struct))
 
-(check_mod_f annotate (quote x::{}) []                      {})
-(check_mod_f annotate (quote x::{}) ["a"]      (quote a::   {}))
-(check_mod_f annotate (quote x::{}) ["a", "b"] (quote a::b::{}))
+(check_mod annotate (quote x::{}) []                      {})
+(check_mod annotate (quote x::{}) ["a"]      (quote a::   {}))
+(check_mod annotate (quote x::{}) ["a", "b"] (quote a::b::{}))
 
-(check_mod_f annotate (quote x::{f:1}) []                      {f:1})
-(check_mod_f annotate (quote x::{f:1}) ["a"]      (quote a::   {f:1}))
-(check_mod_f annotate (quote x::{f:1}) ["a", "b"] (quote a::b::{f:1}))
+(check_mod annotate (quote x::{f:1}) []                      {f:1})
+(check_mod annotate (quote x::{f:1}) ["a"]      (quote a::   {f:1}))
+(check_mod annotate (quote x::{f:1}) ["a", "b"] (quote a::b::{f:1}))
 
 
 (check_arg_exn (annotate null.struct null))
@@ -216,22 +246,20 @@ to the `fields`, and the result of the operator must be the same type.
 //==========================================================================
 // struct_set and struct_set_m
 
-(check ion_equals (struct_set_m           null.struct  "f" 3)           {f:3})
-(check ion_equals (struct_set_m (quote a::null.struct) "f" 3) (quote a::{f:3}))
+(define_check (check_set msg val key v expect)
+  (check_mods struct_set struct_set_m val (list key v) expect)
+  // Retain existing annotations
+  (let [(ann_val    (annotate val    "a" "b")),
+        (ann_expect (annotate expect "a" "b"))]
+    (check_mods struct_set struct_set_m ann_val (list key v) ann_expect)))
 
-(check ion_equals (struct_set_m           {}  "f" 3)           {f:3})
-(check ion_equals (struct_set_m (quote a::{}) "f" 3) (quote a::{f:3}))
-
-
-(define (test_set fields key value expect)
-  (check_struct_mod struct_set struct_set_m fields (list key value) expect))
-
-(test_set (quote (           )) "f" 3 {f:3})
-(test_set (quote (a 1        )) "f" 3 {a:1,f:3})
-(test_set (quote (a 1 a 2    )) "f" 3 {a:1,a:2,f:3})
-(test_set (quote (a 1 b 2    )) "f" 3 {a:1,b:2,f:3})
-(test_set (quote (a 1 f 2    )) "f" 3 {a:1,f:3})
-(test_set (quote (a 1 f 2 f f)) "f" 3 {a:1,f:3})  // replace repeated field
+(check_set null.struct   "f" 3 {f:3})
+(check_set {}            "f" 3 {f:3})
+(check_set {a:1}         "f" 3 {a:1,f:3})
+(check_set {a:1,a:2}     "f" 3 {a:1,a:2,f:3})
+(check_set {a:1,b:2}     "f" 3 {a:1,b:2,f:3})
+(check_set {a:1,f:2}     "f" 3 {a:1,f:3})
+(check_set {a:1,f:2,f:0} "f" 3 {a:1,f:3})  // replace repeated field
 
 
 (check_arity_exn (struct_set_m))
@@ -246,33 +274,23 @@ to the `fields`, and the result of the operator must be the same type.
 //==========================================================================
 // struct_merge and struct_merge_m
 
-(do (lambda (case)
-      (let [(arg1   (element case 0)),
-            (arg2   (element case 1)),
-            (expect (element case 2))]
-        (check ion_equals (struct_merge   arg1 arg2) expect)
-        (check ion_equals (struct_merge_m arg1 arg2) expect)))
-  (quote
-    [(a::null.struct  null.struct  a::null.struct),
-     (a::null.struct  {}           a::null.struct),
-     (a::null.struct  {a:1}        a::{a:1}      ),
-     (a::null.struct  {a:1,b:2}    a::{a:1,b:2}  ),
-     (a::null.struct  {a:1,a:3}    a::{a:1,a:3}  )]))
-
-
-(define (check_merge fields other expect)
+(define_check (check_merge msg val other expect)
   (assert (is_immutable_struct other))
   (let [(other_m (mutable_struct_copy other))]
-    (check_struct_mod struct_merge struct_merge_m fields (list other  ) expect)
-    (check_struct_mod struct_merge struct_merge_m fields (list other_m) expect))
-  (let [(s (apply mutable_struct fields)),
+    (check_mods struct_merge struct_merge_m val [other  ] expect)
+    (check_mods struct_merge struct_merge_m val [other_m] expect)
+    // Retain existing annotations
+    (let [(ann_val    (annotate val    "a" "b")),
+          (ann_expect (annotate expect "a" "b"))]
+      (check_mods struct_merge struct_merge_m ann_val [other  ] ann_expect)
+      (check_mods struct_merge struct_merge_m ann_val [other_m] ann_expect)))
+  (let [(s (mutable_struct_copy val)),
         (o (struct_copy other))]
     (let [(result (struct_merge s o))]
       (struct_set_m result "mod" "mod")
       (unless (= 0 (size o))
         (check_void (. s "mod")
-          "Unexpected mutation of 1st arg in (struct_merge "
-          (apply struct fields) " " other ")"))
+          "Unexpected mutation of 1st arg in (struct_merge " val " " other ")"))
       (check_void (. o "mod")
         "Unexpected mutation of 2nd arg in (struct_merge " s " " other ")"))
     (let [(result (struct_merge_m s o))]
@@ -281,28 +299,32 @@ to the `fields`, and the result of the operator must be the same type.
         "Unexpected mutation of 2nd arg in (struct_merge_m " s " " other ")"))))
 
 
-(check_merge (sexp) null.struct       {})
-(check_merge (sexp) {}                {})
-(check_merge (sexp) {a:1}             {a:1})
-(check_merge (sexp) {a:1,b:2}         {a:1,b:2})
-(check_merge (sexp) {a:1,a:3}         {a:1,a:3})
-(check_merge (sexp) {a:1,b:2,a:3,b:4} {a:1,b:2,a:3,b:4})
+(check_merge null.struct null.struct null.struct)
+(check_merge null.struct {}          null.struct)
+(check_merge null.struct {a:1}       {a:1})
+(check_merge null.struct {a:1,b:2}   {a:1,b:2})
+(check_merge null.struct {a:1,a:3}   {a:1,a:3})
 
-(check_merge (sexp "a" 0) null.struct       {a:0})
-(check_merge (sexp "a" 0) {}                {a:0})
-(check_merge (sexp "a" 0) {a:1}             {a:0,a:1})
-(check_merge (sexp "a" 0) {a:1,b:2}         {a:0,a:1,b:2})
-(check_merge (sexp "a" 0) {a:1,a:3}         {a:0,a:1,a:3})
-(check_merge (sexp "a" 0) {a:1,b:2,a:3,b:4} {a:0,a:1,b:2,a:3,b:4})
+(check_merge {} null.struct       {})
+(check_merge {} {}                {})
+(check_merge {} {a:1}             {a:1})
+(check_merge {} {a:1,b:2}         {a:1,b:2})
+(check_merge {} {a:1,a:3}         {a:1,a:3})
+(check_merge {} {a:1,b:2,a:3,b:4} {a:1,b:2,a:3,b:4})
 
-(check_merge (sexp "a" 0 "b" 2) null.struct       {a:0,b:2})
-(check_merge (sexp "a" 0 "b" 2) {}                {a:0,b:2})
-(check_merge (sexp "a" 0 "b" 2) {a:1}             {a:0,b:2,a:1})
-(check_merge (sexp "a" 0 "b" 2) {a:1,b:2}         {a:0,b:2,a:1,b:2})
-(check_merge (sexp "a" 0 "b" 2) {a:1,a:3}         {a:0,b:2,a:1,a:3})
-(check_merge (sexp "a" 0 "b" 2) {a:1,b:2,a:3,b:4} {a:0,b:2,a:1,b:2,a:3,b:4})
+(check_merge {a:0} null.struct       {a:0})
+(check_merge {a:0} {}                {a:0})
+(check_merge {a:0} {a:1}             {a:0,a:1})
+(check_merge {a:0} {a:1,b:2}         {a:0,a:1,b:2})
+(check_merge {a:0} {a:1,a:3}         {a:0,a:1,a:3})
+(check_merge {a:0} {a:1,b:2,a:3,b:4} {a:0,a:1,b:2,a:3,b:4})
 
-// TODO check annotations on inputs
+(check_merge {a:0,b:2} null.struct       {a:0,b:2})
+(check_merge {a:0,b:2} {}                {a:0,b:2})
+(check_merge {a:0,b:2} {a:1}             {a:0,b:2,a:1})
+(check_merge {a:0,b:2} {a:1,b:2}         {a:0,b:2,a:1,b:2})
+(check_merge {a:0,b:2} {a:1,a:3}         {a:0,b:2,a:1,a:3})
+(check_merge {a:0,b:2} {a:1,b:2,a:3,b:4} {a:0,b:2,a:1,b:2,a:3,b:4})
 
 
 //==========================================================================
@@ -310,34 +332,23 @@ to the `fields`, and the result of the operator must be the same type.
 
 (require "/fusion/experimental/struct")
 
-(do (lambda (case)
-      (let [(arg1   (element case 0)),
-            (arg2   (element case 1)),
-            (expect (element case 2))]
-        (check ion_equals (struct_merge1   arg1 arg2) expect)
-        (check ion_equals (struct_merge1_m arg1 arg2) expect)))
-  (quote
-    [(a::null.struct  null.struct  a::null.struct),
-     (a::null.struct  {}           a::null.struct),
-     (a::null.struct  {a:1}        a::{a:1}      ),
-     (a::null.struct  {a:1,b:2}    a::{a:1,b:2}  ),
-     (a::null.struct  {a:1,a:1}    a::{a:1}      )]))
-
-
-(define (check_merge1 fields other expect)
+(define (check_merge1 val other expect)
   (assert (is_immutable_struct other))
   (let [(other_m (mutable_struct_copy other))]
-    (check_struct_mod struct_merge1 struct_merge1_m fields (list other  ) expect)
-    (check_struct_mod struct_merge1 struct_merge1_m fields (list other_m) expect))
-
-  (let [(s (apply mutable_struct fields)),
+    (check_mods struct_merge1 struct_merge1_m val (list other  ) expect)
+    (check_mods struct_merge1 struct_merge1_m val (list other_m) expect)
+    // Retain existing annotations
+    (let [(ann_val    (annotate val    "a" "b")),
+          (ann_expect (annotate expect "a" "b"))]
+      (check_mods struct_merge1 struct_merge1_m ann_val [other  ] ann_expect)
+      (check_mods struct_merge1 struct_merge1_m ann_val [other_m] ann_expect)))
+  (let [(s (mutable_struct_copy val)),
         (o (struct_copy other))]
     (let [(result (struct_merge1 s o))]
       (struct_set_m result "mod" "mod")
       (unless (= 0 (size o))
         (check_void (. s "mod")
-          "Unexpected mutation of 1st arg in (struct_merge1 "
-          (apply struct fields) " " other ")"))
+          "Unexpected mutation of 1st arg in (struct_merge1 " val " " other ")"))
       (check_void (. o "mod")
         "Unexpected mutation of 2nd arg in (struct_merge1 " s " " other ")"))
     (let [(result (struct_merge1_m s o))]
@@ -346,35 +357,39 @@ to the `fields`, and the result of the operator must be the same type.
         "Unexpected mutation of 2nd arg in (struct_merge_m " s " " other ")"))))
 
 
-(check_merge1 (sexp) null.struct       {})
-(check_merge1 (sexp) {}                {})
-(check_merge1 (sexp) {a:1}             {a:1})
-(check_merge1 (sexp) {a:1,b:2}         {a:1,b:2})
-(check_merge1 (sexp) {a:1,a:1}         {a:1})
-(check_merge1 (sexp) {a:1,b:2,a:1,b:2} {a:1,b:2})
+(check_merge1 null.struct null.struct null.struct)
+(check_merge1 null.struct {}          null.struct)
+(check_merge1 null.struct {a:1}       {a:1})
+(check_merge1 null.struct {a:1,b:2}   {a:1,b:2})
+(check_merge1 null.struct {a:1,a:1}   {a:1})
 
-(check_merge1 (sexp "a" 0) null.struct       {a:0})
-(check_merge1 (sexp "a" 0) {}                {a:0})
-(check_merge1 (sexp "a" 0) {a:1}             {a:1})
-(check_merge1 (sexp "a" 0) {a:1,b:2}         {a:1,b:2})
-(check_merge1 (sexp "a" 0) {a:1,a:1}         {a:1})
-(check_merge1 (sexp "a" 0) {a:1,b:2,a:1,b:2} {a:1,b:2})
+(check_merge1 {} null.struct       {})
+(check_merge1 {} {}                {})
+(check_merge1 {} {a:1}             {a:1})
+(check_merge1 {} {a:1,b:2}         {a:1,b:2})
+(check_merge1 {} {a:1,a:1}         {a:1})
+(check_merge1 {} {a:1,b:2,a:1,b:2} {a:1,b:2})
 
-(check_merge1 (sexp "a" 0 "b" 2) null.struct       {a:0,b:2})
-(check_merge1 (sexp "a" 0 "b" 2) {}                {a:0,b:2})
-(check_merge1 (sexp "a" 0 "b" 2) {a:1}             {a:1,b:2})
-(check_merge1 (sexp "a" 0 "b" 2) {a:1,b:3}         {a:1,b:3})
-(check_merge1 (sexp "a" 0 "b" 2) {a:1,a:1}         {a:1,b:2})
-(check_merge1 (sexp "a" 0 "b" 2) {a:1,b:3,a:1,b:3} {a:1,b:3})
+(check_merge1 {a:0} null.struct       {a:0})
+(check_merge1 {a:0} {}                {a:0})
+(check_merge1 {a:0} {a:1}             {a:1})
+(check_merge1 {a:0} {a:1,b:2}         {a:1,b:2})
+(check_merge1 {a:0} {a:1,a:1}         {a:1})
+(check_merge1 {a:0} {a:1,b:2,a:1,b:2} {a:1,b:2})
 
-(check_merge1 (sexp "a" 0 "a" 0) null.struct       {a:0})
-(check_merge1 (sexp "a" 0 "a" 0) {}                {a:0})
-(check_merge1 (sexp "a" 0 "a" 0) {a:1}             {a:1})
-(check_merge1 (sexp "a" 0 "a" 0) {a:1,b:3}         {a:1,b:3})
-(check_merge1 (sexp "a" 0 "a" 0) {a:1,a:1}         {a:1})
-(check_merge1 (sexp "a" 0 "a" 0) {a:1,b:3,a:1,b:3} {a:1,b:3})
+(check_merge1 {a:0,b:2} null.struct       {a:0,b:2})
+(check_merge1 {a:0,b:2} {}                {a:0,b:2})
+(check_merge1 {a:0,b:2} {a:1}             {a:1,b:2})
+(check_merge1 {a:0,b:2} {a:1,b:3}         {a:1,b:3})
+(check_merge1 {a:0,b:2} {a:1,a:1}         {a:1,b:2})
+(check_merge1 {a:0,b:2} {a:1,b:3,a:1,b:3} {a:1,b:3})
 
-// TODO check annotations on inputs
+(check_merge1 {a:0,a:0} null.struct       {a:0})
+(check_merge1 {a:0,a:0} {}                {a:0})
+(check_merge1 {a:0,a:0} {a:1}             {a:1})
+(check_merge1 {a:0,a:0} {a:1,b:3}         {a:1,b:3})
+(check_merge1 {a:0,a:0} {a:1,a:1}         {a:1})
+(check_merge1 {a:0,a:0} {a:1,b:3,a:1,b:3} {a:1,b:3})
 
 
 //==========================================================================
@@ -424,58 +439,51 @@ to the `fields`, and the result of the operator must be the same type.
 //==========================================================================
 // remove_keys and remove_keys_m
 
-(check ion_equals (remove_keys null.struct) null.struct)
-(check ion_equals (remove_keys null.struct "f") null.struct)
+(define_check (check_remove_keys msg val keys expect)
+  (check_mods remove_keys remove_keys_m val keys expect)
+  // Retain existing annotations
+  (let [(ann_val    (annotate val    "a" "b")),
+        (ann_expect (annotate expect "a" "b"))]
+    (check_mods remove_keys remove_keys_m ann_val keys ann_expect)))
 
+(check_remove_keys null.struct [   ] null.struct)
+(check_remove_keys null.struct ["f"] null.struct)
 
-(define (test_remove_keys fields keys expect)
-  (check_struct_mod remove_keys remove_keys_m fields keys expect))
+(check_remove_keys {}        [   ] {})
+(check_remove_keys {}        ["f"] {})
+(check_remove_keys {f:1}     [   ] {f:1})
+(check_remove_keys {f:1}     ["f"] {})
+(check_remove_keys {f:1,f:2} ["f"] {})
+(check_remove_keys {f:1,f:2} ["g"] {f:1,f:2})
 
-(test_remove_keys (quote ()) [   ] {})
-(test_remove_keys (quote ()) ["f"] {})
-
-(test_remove_keys (quote (f 1    )) ["f"] {})
-(test_remove_keys (quote (f 1 f 2)) ["f"] {})
-(test_remove_keys (quote (f 1 f 2)) ["g"] {f:1,f:2})
-
-(test_remove_keys (quote (g 2 f 1)) ["f", "h"      ] {g:2})
-(test_remove_keys (quote (f 1 g 2)) ["f", (quote g)] {})
-
-
-(check ion_equals (remove_keys (quote a::null.struct)) (quote a::null.struct))
-(check ion_equals (remove_keys (quote a::{f:1}) "f") (quote a::{}))
-(check ion_equals (remove_keys (quote a::{f:1}) "g") (quote a::{f:1}))
-// TODO check annotations of mutable inputs
+(check_remove_keys {g:2,f:1} ["f", "h"      ] {g:2})
+(check_remove_keys {f:1,g:2} ["f", (quote g)] {})
 
 
 //==========================================================================
 // retain_keys and retain_keys_m
 
-(check ion_equals (retain_keys null.struct) null.struct)
-(check ion_equals (retain_keys null.struct "f") null.struct)
+(define_check (check_retain_keys msg val keys expect)
+  (check_mods retain_keys retain_keys_m val keys expect)
+  // Retain existing annotations
+  (let [(ann_val    (annotate val    "a" "b")),
+        (ann_expect (annotate expect "a" "b"))]
+     (check_mods retain_keys retain_keys_m ann_val keys ann_expect)))
 
+(check_retain_keys null.struct []    null.struct)
+(check_retain_keys null.struct ["f"] null.struct)
 
-(define (test_retain_keys fields keys expect)
-  (check_struct_mod retain_keys retain_keys_m fields keys expect))
+(check_retain_keys {       } [   ] {})
+(check_retain_keys {       } ["f"] {})
+(check_retain_keys {f:1    } ["g"] {})
+(check_retain_keys {f:1,f:2} ["g"] {})
+(check_retain_keys {f:1,f:2} ["f"] {f:1,f:2})
+(check_retain_keys {f:1,g:2} ["f"] {f:1})
+(check_retain_keys {f:1,g:2} ["h"] {})
+(check_retain_keys {f:1,g:2} [   ] {})
 
-(test_retain_keys (quote ()) [   ] {})
-(test_retain_keys (quote ()) ["f"] {})
-
-(test_retain_keys (quote (f 1    )) ["g"] {})
-(test_retain_keys (quote (f 1 f 2)) ["g"] {})
-(test_retain_keys (quote (f 1 f 2)) ["f"] {f:1,f:2})
-(test_retain_keys (quote (f 1 g 2)) ["f"] {f:1})
-(test_retain_keys (quote (f 1 g 2)) ["h"] {})
-(test_retain_keys (quote (f 1 g 2)) [   ] {})
-
-(test_retain_keys (quote (a 1 b 3 c 2)) [   ] {})
-(test_retain_keys (quote (a 1 b 3 c 2)) [(quote a), "c"] {a:1,c:2})
-
-
-(check ion_equals (retain_keys (quote a::null.struct)) (quote a::null.struct))
-(check ion_equals (retain_keys (quote a::{f:1}) "f") (quote a::{f:1}))
-(check ion_equals (retain_keys (quote a::{f:1}) "g") (quote a::{}))
-// TODO check annotations of mutable inputs
+(check_retain_keys {a:1,b:3,c:2} [   ] {})
+(check_retain_keys {a:1,b:3,c:2} [(quote a), "c"] {a:1,c:2})
 
 
 //==========================================================================
