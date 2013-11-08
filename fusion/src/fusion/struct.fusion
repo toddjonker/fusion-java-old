@@ -54,11 +54,11 @@ when the modification involves mutation. The functional and mutating variants
 have the same signature and operate over both immutable and mutable types; in
 general they are interchangable when used in a functional style.
 
-Changing the key-value mappings of a struct is performed via `struct_set` and
-`struct_set_m`, which guarantee that the result has only a single mapping for
+Changing the key-value mappings of a struct is performed via `struct_put` and
+`struct_put_m`, which guarantee that the result has only a single mapping for
 the key:
 
-    (struct_set {a:1, b:9, b:12} "b" 11)  => {a:1, b:11}
+    (struct_put {a:1, b:9, b:12} "b" 11)  => {a:1, b:11}
 
 The procedures `remove_keys` and `retain_keys` functionally eliminate fields
 from a struct without modifying the input; `remove_keys_m` and `retain_keys_m`
@@ -109,7 +109,7 @@ while the field values are iterated.
 
 
 
-  (defpub struct_set
+  (defpub struct_put
     (lambda (struct key value)
       '''
 Functionally adds a field to a `struct`, returning a new struct of the same
@@ -118,33 +118,33 @@ by a single field with the `value`.
 
     (define s {a:1, b:2, b:3})
 
-    (struct_set s "a" 4)    ==> {b:2,b:3,a:4}
-    (struct_set s "b" 5)    ==> {b:5,a:1}
-    (struct_set s "c" 6)    ==> {b:2,b:3,c:6,a:1}
+    (struct_put s "a" 4)    ==> {b:2,b:3,a:4}
+    (struct_put s "b" 5)    ==> {b:5,a:1}
+    (struct_put s "c" 6)    ==> {b:2,b:3,c:6,a:1}
     s                       ==> {b:2,b:3,a:1}
       '''
       (unless (is_struct struct)
-        (raise_argument_error "struct_set" "struct" 0 struct key value))
+        (raise_argument_error "struct_put" "struct" 0 struct key value))
       (unless (is_struct_field_name key)
-        (raise_argument_error "struct_set" "field name" 1 struct key value))
-      (unsafe_struct_set struct key value)))
+        (raise_argument_error "struct_put" "field name" 1 struct key value))
+      (unsafe_struct_put struct key value)))
 
 
-  (defpub struct_set_m
+  (defpub struct_put_m
     (lambda (struct key value)
       '''
 Adds a field to a `struct`, mutating the `struct` when possible and returning
 a struct of the same type. Any existing fields (including repeats) named by
 the `key` are replaced by a single field with the `value`.
 
-When given an immutable struct, `struct_set_m` behaves identically to
-`struct_set`:
+When given an immutable struct, `struct_put_m` behaves identically to
+`struct_put`:
 
     (define s {a:1, b:2, b:3})
 
-    (struct_set s "a" 4)    ==> {b:2,b:3,a:4}
-    (struct_set s "b" 5)    ==> {b:5,a:1}
-    (struct_set s "c" 6)    ==> {b:2,b:3,c:6,a:1}
+    (struct_put s "a" 4)    ==> {b:2,b:3,a:4}
+    (struct_put s "b" 5)    ==> {b:5,a:1}
+    (struct_put s "c" 6)    ==> {b:2,b:3,c:6,a:1}
     s                       ==> {b:2,b:3,a:1}
 
 When given a mutable struct, the struct is mutated:
@@ -152,16 +152,16 @@ When given a mutable struct, the struct is mutated:
     (define s (mutable_struct "a" 1 "b" 2 "b" 3))
 
     s                       ==> {b:2,b:3,a:1}
-    (struct_set_m s "a" 4)  ==> {b:2,b:3,a:4}
-    (struct_set_m s "b" 5)  ==> {b:5,a:4}
-    (struct_set_m s "c" 6)  ==> {b:5,c:6,a:4}
+    (struct_put_m s "a" 4)  ==> {b:2,b:3,a:4}
+    (struct_put_m s "b" 5)  ==> {b:5,a:4}
+    (struct_put_m s "c" 6)  ==> {b:5,c:6,a:4}
     s                       ==> {b:5,c:6,a:4}
       '''
       (unless (is_struct struct)
-        (raise_argument_error "struct_set_m" "struct" 0 struct key value))
+        (raise_argument_error "struct_put_m" "struct" 0 struct key value))
       (unless (is_struct_field_name key)
-        (raise_argument_error "struct_set_m" "field name" 1 struct key value))
-      (unsafe_struct_set_m struct key value)))
+        (raise_argument_error "struct_put_m" "field name" 1 struct key value))
+      (unsafe_struct_put_m struct key value)))
 
 
   // Name per Racket, where for-each is for side effects.

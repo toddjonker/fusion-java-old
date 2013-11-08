@@ -12,11 +12,11 @@
   (defpub_j unsafe_struct_ref
     "com.amazon.fusion.FusionStruct$UnsafeStructRefProc")
 
-  (defpub_j unsafe_struct_set
-     "com.amazon.fusion.FusionStruct$UnsafeStructSetProc")
+  (defpub_j unsafe_struct_put
+     "com.amazon.fusion.FusionStruct$UnsafeStructPutProc")
 
-  (defpub_j unsafe_struct_set_m
-     "com.amazon.fusion.FusionStruct$UnsafeStructSetMProc")
+  (defpub_j unsafe_struct_put_m
+     "com.amazon.fusion.FusionStruct$UnsafeStructPutMProc")
 
 
   (defpub is_struct_field_name

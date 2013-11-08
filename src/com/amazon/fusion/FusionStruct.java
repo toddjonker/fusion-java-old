@@ -326,19 +326,19 @@ final class FusionStruct
     // Element modification
 
 
-    static Object unsafeStructSet(Evaluator eval, Object struct,
+    static Object unsafeStructPut(Evaluator eval, Object struct,
                                   String key, Object value)
         throws FusionException
     {
-        return ((BaseStruct) struct).set(eval, key, value);
+        return ((BaseStruct) struct).put(eval, key, value);
     }
 
 
-    static Object unsafeStructSetM(Evaluator eval, Object struct,
+    static Object unsafeStructPutM(Evaluator eval, Object struct,
                                    String key, Object value)
         throws FusionException
     {
-        return ((BaseStruct) struct).setM(eval, key, value);
+        return ((BaseStruct) struct).putM(eval, key, value);
     }
 
 
@@ -451,10 +451,10 @@ final class FusionStruct
         Object ref(Evaluator eval, String name, Object def)
             throws FusionException;
 
-        Object set(Evaluator eval, String key, Object value)
+        Object put(Evaluator eval, String key, Object value)
             throws FusionException;
 
-        Object setM(Evaluator eval, String key, Object value)
+        Object putM(Evaluator eval, String key, Object value)
             throws FusionException;
 
         Object removeKeys(String[] keys)
@@ -552,7 +552,7 @@ final class FusionStruct
         }
 
         @Override
-        public Object set(Evaluator eval, String key, Object value)
+        public Object put(Evaluator eval, String key, Object value)
             throws FusionException
         {
             Map<String,Object> map = new HashMap<>(1);
@@ -561,10 +561,10 @@ final class FusionStruct
         }
 
         @Override
-        public Object setM(Evaluator eval, String key, Object value)
+        public Object putM(Evaluator eval, String key, Object value)
             throws FusionException
         {
-            return set(eval, key, value);
+            return put(eval, key, value);
         }
 
         @Override
@@ -860,7 +860,7 @@ final class FusionStruct
         }
 
         @Override
-        public Object set(Evaluator eval, String key, Object value)
+        public Object put(Evaluator eval, String key, Object value)
             throws FusionException
         {
             Map<String,Object> newMap = new HashMap<>(myMap);
@@ -1069,10 +1069,10 @@ final class FusionStruct
         }
 
         @Override
-        public Object setM(Evaluator eval, String key, Object value)
+        public Object putM(Evaluator eval, String key, Object value)
             throws FusionException
         {
-            return set(eval, key, value);
+            return put(eval, key, value);
         }
 
         @Override
@@ -1129,7 +1129,7 @@ final class FusionStruct
         }
 
         @Override
-        public Object setM(Evaluator eval, String key, Object value)
+        public Object putM(Evaluator eval, String key, Object value)
             throws FusionException
         {
             myMap.put(key, value);
@@ -1296,10 +1296,10 @@ final class FusionStruct
 
 
 
-    static final class UnsafeStructSetProc
+    static final class UnsafeStructPutProc
         extends Procedure
     {
-        UnsafeStructSetProc()
+        UnsafeStructPutProc()
         {
             //    "                                                                               |
             super("*UNSUPPORTED!*",
@@ -1311,16 +1311,16 @@ final class FusionStruct
             throws FusionException
         {
             String key = unsafeTextToString(eval, args[1]);
-            return unsafeStructSet(eval, args[0], key, args[2]);
+            return unsafeStructPut(eval, args[0], key, args[2]);
         }
     }
 
 
 
-    static final class UnsafeStructSetMProc
+    static final class UnsafeStructPutMProc
         extends Procedure
     {
-        UnsafeStructSetMProc()
+        UnsafeStructPutMProc()
         {
             //    "                                                                               |
             super("*UNSUPPORTED!*",
@@ -1332,7 +1332,7 @@ final class FusionStruct
             throws FusionException
         {
             String key = unsafeTextToString(eval, args[1]);
-            return unsafeStructSetM(eval, args[0], key, args[2]);
+            return unsafeStructPutM(eval, args[0], key, args[2]);
         }
     }
 
