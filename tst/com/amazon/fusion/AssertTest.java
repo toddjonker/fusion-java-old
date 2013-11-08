@@ -25,7 +25,7 @@ public class AssertTest
             eval("(assert " + expr + ")");
             Assert.fail("Expected exception");
         }
-        catch (FusionAssertionFailure e)
+        catch (FusionAssertionException e)
         {
             Assert.assertEquals(null, e.getUserMessage());
         }
@@ -35,7 +35,7 @@ public class AssertTest
             eval("(assert " + expr + " \"barney\")");
             Assert.fail("Expected exception");
         }
-        catch (FusionAssertionFailure e)
+        catch (FusionAssertionException e)
         {
             Assert.assertEquals("barney", e.getUserMessage());
         }
@@ -45,7 +45,7 @@ public class AssertTest
             eval("(assert " + expr + " \"barney\" 13)");
             Assert.fail("Expected exception");
         }
-        catch (FusionAssertionFailure e)
+        catch (FusionAssertionException e)
         {
             Assert.assertEquals("barney13", e.getUserMessage());
         }

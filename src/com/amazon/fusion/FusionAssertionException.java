@@ -6,7 +6,7 @@ import static com.amazon.fusion.FusionIo.safeWrite;
 import java.io.IOException;
 
 @SuppressWarnings("serial")
-final class FusionAssertionFailure
+public final class FusionAssertionException
     extends FusionException
 {
     private final SourceLocation myLocation;
@@ -18,10 +18,10 @@ final class FusionAssertionFailure
      * @param location may be null.
      * @param result must not be null.
      */
-    FusionAssertionFailure(String message,
-                           SourceLocation location,
-                           String expression,
-                           Object result)
+    FusionAssertionException(String message,
+                             SourceLocation location,
+                             String expression,
+                             Object result)
     {
         super(message);
         myLocation = location;
@@ -29,13 +29,13 @@ final class FusionAssertionFailure
         myResult = result;
     }
 
-    String getUserMessage()
+    public String getUserMessage()
     {
         return getBaseMessage();
     }
 
     @Override
-    void displayMessage(Evaluator eval, Appendable out)
+    public void displayMessage(Evaluator eval, Appendable out)
         throws IOException, FusionException
     {
         out.append("Assertion failure: ");

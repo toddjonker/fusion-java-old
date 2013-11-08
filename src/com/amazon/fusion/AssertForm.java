@@ -95,8 +95,7 @@ final class AssertForm
                 message = null;
             }
 
-            throw new FusionAssertionFailure(message, myLocation, myExpression,
-                                             result);
+            throw new FusionAssertionException(message, myLocation, myExpression, result);
         }
     }
 }
