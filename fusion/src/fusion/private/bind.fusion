@@ -46,7 +46,7 @@ and the `ident`s are bound in the following `expr`s as well as the `body`.
               (let [(binding (syntax_get    bindings 0)),
                     (others  (syntax_subseq bindings 1))]
                 (quasisyntax
-                  (let ((unsyntax binding))   // TODO FUSION-46 can't use [] here
+                  (let [(unsyntax binding)]
                     (unsyntax
                       (syntax_append
                         (quasisyntax (lets (unsyntax others)))

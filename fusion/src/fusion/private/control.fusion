@@ -35,7 +35,7 @@ The last `expr` is in tail position. Given no `expr`s, the result is true.
                   (rest  (syntax_subseq stx 2))]
               (let [(inner (syntax_cons_q and rest))]
                 (quasisyntax
-                  (let ((a (unsyntax first)))
+                  (let [(a (unsyntax first))]
                     (if a (unsyntax inner) a))))))))))
 
 
@@ -64,7 +64,7 @@ The last `expr` is in tail position. Given no `expr`s, the result is false.
                   (rest  (syntax_subseq stx 2))]
               (let [(inner (syntax_cons_q or rest))]
                 (quasisyntax
-                  (let ((a (unsyntax first)))
+                  (let [(a (unsyntax first))]
                     (if a a (unsyntax inner)))))))))))
 
 
@@ -84,9 +84,9 @@ A companion form is `unless`.
 
       (if (= 1 (syntax_size stx))
         (wrong_syntax stx "expected condition")
-        (let ((test (syntax_get    stx 1))
-              (body (syntax_subseq stx 2)))
-          (let ((begin_body (syntax_cons_q begin body)))
+        (let [(test (syntax_get    stx 1)),
+              (body (syntax_subseq stx 2))]
+          (let [(begin_body (syntax_cons_q begin body))]
             (quasisyntax
               (if (unsyntax test)
                   (unsyntax begin_body)
@@ -108,9 +108,9 @@ A companion form is `when`.
 
       (if (= 1 (syntax_size stx))
         (wrong_syntax stx "expected condition")
-        (let ((test (syntax_get    stx 1))
-              (body (syntax_subseq stx 2)))
-          (let ((begin_body (syntax_cons_q begin body)))
+        (let [(test (syntax_get    stx 1)),
+              (body (syntax_subseq stx 2))]
+          (let [(begin_body (syntax_cons_q begin body))]
             (quasisyntax
               (if (unsyntax test)
                   (void)
@@ -129,18 +129,18 @@ then evaluates the corresponding `body` expressions in tail position.
 If no `test` is truthy, the result is void.
     '''
     (lambda (stx)
-      (let ((size (syntax_size stx)))
+      (let [(size (syntax_size stx))]
         (if (= 1 size)               // (cond) with no clauses
           (quote_syntax (void))
-          (let ((clause (syntax_get    stx 1))
-                (tail   (syntax_subseq stx 2)))
+          (let [(clause (syntax_get    stx 1)),
+                (tail   (syntax_subseq stx 2))]
             // TODO FUSION-120 check type of clause
             (when (> 1 (syntax_size clause))
               (wrong_syntax stx "cond: bad clause " clause))
-            (let ((test (syntax_get    clause 0))
-                  (body (syntax_subseq clause 1)))
-              (let ((begin_body (syntax_cons_q begin body))
-                    (cond_tail  (syntax_cons_q cond  tail)))
+            (let [(test (syntax_get    clause 0)),
+                  (body (syntax_subseq clause 1))]
+              (let [(begin_body (syntax_cons_q begin body)),
+                    (cond_tail  (syntax_cons_q cond  tail))]
                 (quasisyntax
                   (if (unsyntax test)
                       (unsyntax begin_body)

@@ -49,10 +49,14 @@ final class QuasiSyntaxForm
                                SyntaxValue stx, int depth)
         throws FusionException
     {
-        // TODO FUSION-46 handle unsyntax inside lists and structs
+        // TODO FUSION-225 handle unsyntax inside structs
         if (stx instanceof SyntaxSexp)
         {
             return expand(expander, env, (SyntaxSexp) stx, depth);
+        }
+        else if (stx instanceof SyntaxList)
+        {
+            return expand(expander, env, (SyntaxList) stx, depth);
         }
         else
         {
@@ -89,8 +93,7 @@ final class QuasiSyntaxForm
                     throw check(eval, stx).failure(message);
                 }
 
-                stx = SyntaxSexp.make(eval, stx.getLocation(), children);
-                return stx;
+                return SyntaxSexp.make(eval, stx.getLocation(), children);
             }
 
             depth--;
@@ -101,15 +104,47 @@ final class QuasiSyntaxForm
             depth++;
         }
 
+        boolean same = true;
         for (int i = 0; i < size; i++)
         {
             SyntaxValue subform = stx.get(eval, i);
-            children[i] = expand(expander, env, subform, depth);
+            SyntaxValue expanded = expand(expander, env, subform, depth);
+            same &= (subform == expanded);
+            children[i] = expanded;
         }
 
-        stx = SyntaxSexp.make(eval, stx.getLocation(), stx.getAnnotations(),
-                              children);
-        return stx;
+        if (same) return stx;
+
+        return SyntaxSexp.make(eval, stx.getLocation(), stx.getAnnotations(),
+                               children);
+    }
+
+
+    private SyntaxValue expand(Expander expander, Environment env,
+                               SyntaxList stx, int depth)
+        throws FusionException
+    {
+        final Evaluator eval = expander.getEvaluator();
+
+        int size = stx.size();
+        if (size == 0) return stx;
+
+        boolean same = true;
+
+        SyntaxValue[] children = stx.extract(eval);
+        for (int i = 0; i < size; i++)
+        {
+            SyntaxValue subform = children[i];
+            SyntaxValue expanded = expand(expander, env, subform, depth);
+            same &= (subform == expanded);
+            children[i] = expanded;
+        }
+
+        if (same) return stx;
+
+        return SyntaxList.make(stx.getLocation(),
+                               stx.getAnnotations(),
+                               children);
     }
 
 
@@ -129,9 +164,14 @@ final class QuasiSyntaxForm
                                  SyntaxValue stx, int depth)
         throws FusionException
     {
+        // TODO FUSION-225 handle unsyntax inside structs
         if (stx instanceof SyntaxSexp)
         {
             return compile(eval, env, (SyntaxSexp) stx, depth);
+        }
+        else if (stx instanceof SyntaxList)
+        {
+            return compile(eval, env, (SyntaxList) stx, depth);
         }
         else
         {
@@ -197,6 +237,34 @@ final class QuasiSyntaxForm
     }
 
 
+    private CompiledForm compile(Evaluator eval, Environment env,
+                                 SyntaxList stx, int depth)
+        throws FusionException
+    {
+        int size = stx.size();
+        if (size == 0) return new CompiledQuoteSyntax(stx);
+
+        boolean same = true;
+        CompiledForm[] children = new CompiledForm[size];
+        for (int i = 0; i < size; i++)
+        {
+            SyntaxValue orig = stx.get(eval, i);
+            children[i] = compile(eval, env, orig, depth);
+            same &= (children[i] instanceof CompiledQuoteSyntax);
+        }
+
+        if (same)
+        {
+            // There's no unsyntax within the children, so use the original.
+            return new CompiledQuoteSyntax(stx);
+        }
+
+        return new CompiledQuasiSyntaxList(stx.getLocation(),
+                                           stx.getAnnotations(),
+                                           children);
+    }
+
+
     //========================================================================
 
 
@@ -231,6 +299,41 @@ final class QuasiSyntaxForm
                 children[i] = (SyntaxValue) child;
             }
             return SyntaxSexp.make(eval, myLocation, myAnnotations, children);
+        }
+    }
+
+
+    private static final class CompiledQuasiSyntaxList
+        implements CompiledForm
+    {
+        private final SourceLocation myLocation;
+        private final String[]       myAnnotations;
+        private final CompiledForm[] myChildForms;
+
+        CompiledQuasiSyntaxList(SourceLocation location,
+                                String[]       annotations,
+                                CompiledForm[] childForms)
+        {
+            myLocation    = location;
+            myAnnotations = annotations;
+            myChildForms  = childForms;
+        }
+
+        @Override
+        public SyntaxValue doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            int size = myChildForms.length;
+            SyntaxValue[] children = new SyntaxValue[size];
+            for (int i = 0; i < size; i++)
+            {
+                Object child = eval.eval(store, myChildForms[i]);
+
+                // This cast is safe because children are either quote-syntax
+                // or unsyntax, which always return syntax.
+                children[i] = (SyntaxValue) child;
+            }
+            return SyntaxList.make(myLocation, myAnnotations, children);
         }
     }
 

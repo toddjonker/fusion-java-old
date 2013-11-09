@@ -76,7 +76,7 @@ Raises a check failure exception, including a stack trace derived from the
                   " requires at least " (unsyntax arg_ct_stx)
                   (unsyntax args_msg_stx)))
                   // TODO add sample eg "(check_true val message ...)"
-              (let ((msg_stx (syntax_subseq stx1 (+ 1 (unsyntax arg_ct_stx))))
+              (let [(msg_stx (syntax_subseq stx1 (+ 1 (unsyntax arg_ct_stx)))),
                     (arg_binding_stx
                        (let loop ((args (syntax_unwrap (quote_syntax (unsyntax arg_stx))))
                                   (i 1))
@@ -85,17 +85,17 @@ Raises a check failure exception, including a stack trace derived from the
                            (syntax_append
                              (quasisyntax (((unsyntax (head args))
                                             (unsyntax (syntax_get stx1 i)))))
-                             (loop (tail args) (+ 1 i)))))))
+                             (loop (tail args) (+ 1 i))))))]
                 (quasisyntax
-                  (let (((unsyntax (quote_syntax (unsyntax msg_arg_stx)))
+                  (let [((unsyntax (quote_syntax (unsyntax msg_arg_stx)))
                          (unsyntax (if (= 0 (syntax_size msg_stx))
                                        (quote_syntax (void))
 // TODO handle multiple message parts
                                        (syntax_append
                                          (quote_syntax (lambda ()))
-                                         msg_stx)))))
+                                         msg_stx))))]
                     (parameterize
-                      ((check_syntax_param (quote_syntax (unsyntax stx1))))
+                      [(check_syntax_param (quote_syntax (unsyntax stx1)))]
                       (unsyntax
                         (syntax_append
                           (quasisyntax (let (unsyntax arg_binding_stx)))
@@ -132,7 +132,7 @@ Raises a check failure exception, including a stack trace derived from the
       (assert (is_list actual) "expected list, received: " actual)
       (assert (= (size actual) (size expected))
         "list lengths don't match. Actual: " actual " Expected: " expected)
-      (let loop ((i 0))
+      (let loop [(i 0)]
         (when (< i (size actual))
           (check_equal (element actual i) (element expected i)
             (string_append "list element #" (int_to_string i)))
@@ -166,11 +166,11 @@ Raises a check failure exception, including a stack trace derived from the
 /* This is nowhere near working yet...
   (defpub_syntax define_simple_check
     (lambda (stx)
-      (let ((bindings (syntax_get stx 1))
-            (body_sexp (syntax_subseq stx 2)))
-        (let ((name (syntax_get bindings 0))
-              (params (syntax_subseq bindings 1))
-              (body_begin (syntax_cons_q begin body_sexp)))
+      (let [(bindings (syntax_get stx 1)),
+            (body_sexp (syntax_subseq stx 2))]
+        (let [(name (syntax_get bindings 0)),
+              (params (syntax_subseq bindings 1)),
+              (body_begin (syntax_cons_q begin body_sexp))]
 
           (quasisyntax
             (define (unsyntax name)
@@ -233,7 +233,7 @@ Raises a check failure exception, including a stack trace derived from the
       (let [(thunk_stx (syntax_get stx 1))]
         (quasisyntax
           // TODO type-check thunk
-          (let ((e (thunk_throws (unsyntax thunk_stx))))
+          (let [(e (thunk_throws (unsyntax thunk_stx)))]
             (cond
               ((and (is_string e) (= e "syntax"))
                (void))
@@ -249,11 +249,11 @@ Raises a check failure exception, including a stack trace derived from the
         (quasisyntax
           (lambda (stx)
             // TODO check arity
-            (let ((thunk_stx (syntax_get stx 1))
-                  (exn_tag (quote_syntax (unsyntax tag))))
+            (let [(thunk_stx (syntax_get stx 1)),
+                  (exn_tag (quote_syntax (unsyntax tag)))]
               (quasisyntax
                 // TODO type-check thunk
-                (let ((e (thunk_throws (lambda () (unsyntax thunk_stx)))))
+                (let [(e (thunk_throws (lambda () (unsyntax thunk_stx))))]
                   (cond
                     ((and (is_string e) (= e (unsyntax exn_tag)))
                      (void))
