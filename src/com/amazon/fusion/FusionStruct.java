@@ -141,6 +141,12 @@ final class FusionStruct
     }
 
 
+    static MutableStruct mutableStruct(Map<String, Object> map)
+    {
+        return new MutableStruct(map, EMPTY_STRING_ARRAY);
+    }
+
+
     static MutableStruct mutableStruct(String[] names,
                                        Object[] values,
                                        String[] anns)
@@ -1567,24 +1573,22 @@ final class FusionStruct
 
 
 
-    static final class StructZipProc
-        extends Procedure2
+    static abstract class AbstractZipProc
+        extends Procedure
     {
-        StructZipProc()
+        AbstractZipProc(String docBody)
         {
             //    "                                                                               |
-            super("Constructs a struct from a list of field names and a list of values.  The names\n" +
-                  "must be non-empty strings or symbols.",
+            super(docBody,
                   "names", "values");
         }
 
-
-        @Override
-        Object doApply(Evaluator eval, Object names, Object values)
+        final Map<String,Object> _doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            checkListArg(eval, 0, names, values);
-            checkListArg(eval, 1, names, values);
+            checkArityExact(2, args);
+            Object names =  checkListArg(eval, 0, args);
+            Object values = checkListArg(eval, 1, args);
 
             Iterator<?> fieldIterator = unsafeJavaIterate(eval, names);
             Iterator<?> valueIterator = unsafeJavaIterate(eval, values);
@@ -1607,7 +1611,57 @@ final class FusionStruct
                 structImplAdd(map, name, valueObj);
             }
 
-            return immutableStruct(map);
+            return map;
+        }
+    }
+
+
+    static final class StructZipProc
+        extends AbstractZipProc
+    {
+        StructZipProc()
+        {
+            //    "                                                                               |
+            super("Constructs an immutable struct from a list of field names and a list of values.\n" +
+                  "If the lists have unequal lengths, only the first _n_ elements will be used\n" +
+                  "where _n_ is the shorter length.\n" +
+                  "The names must be non-empty strings or symbols.\n" +
+                  "\n" +
+                  "    (struct_zip [\"f\", \"g\"] [1, 2])  => {f:1,g:2}\n" +
+                  "    (struct_zip [\"f\", \"f\"] [1, 2])  => {f:1,f:2}\n" +
+                  "    (struct_zip [\"f\"] [1, 2])       => {f:1}");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            return immutableStruct(_doApply(eval, args));
+        }
+    }
+
+
+    static final class MutableStructZipProc
+        extends AbstractZipProc
+    {
+        MutableStructZipProc()
+        {
+            //    "                                                                               |
+            super("Constructs a mutable struct from a list of field names and a list of values.\n" +
+                  "If the lists have unequal lengths, only the first _n_ elements will be used\n" +
+                  "where _n_ is the shorter length.\n" +
+                  "The names must be non-empty strings or symbols..\n" +
+                  "\n" +
+                  "    (mutable_struct_zip [\"f\", \"g\"] [1, 2])  => {f:1,g:2}\n" +
+                  "    (mutable_struct_zip [\"f\", \"f\"] [1, 2])  => {f:1,f:2}\n" +
+                  "    (mutable_struct_zip [\"f\"] [1, 2])       => {f:1}");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            return mutableStruct(_doApply(eval, args));
         }
     }
 

@@ -41,8 +41,8 @@ Eventually the application will be able to control this strategy; these
 defaults are designed to allow a Fusion developer to construct data in various
 combinations of mutability (*etc.*) and output it as "normal" Ion data.
 
-`struct_zip` is another way to create an immutable struct. It accepts lists
-containing the names and elements:
+`struct_zip` and `mutable_struct_zip` provide another way to create (immutable
+and mutable) structs. They accept two lists containing the names and elements:
 
     (struct_zip ["name", "age"] ["Doug", 38])  =>  {age:38, name:"Doug"}
 
@@ -94,6 +94,11 @@ while the field values are iterated.
   (defpub_j struct          "com.amazon.fusion.FusionStruct$StructProc")
   (defpub_j mutable_struct  "com.amazon.fusion.FusionStruct$MutableStructProc")
 
+  (defpub_j struct_zip
+    "com.amazon.fusion.FusionStruct$StructZipProc")
+  (defpub_j mutable_struct_zip
+    "com.amazon.fusion.FusionStruct$MutableStructZipProc")
+
   (defpub_j is_immutable_struct
     "com.amazon.fusion.FusionStruct$IsImmutableStructProc")
   (defpub_j is_mutable_struct
@@ -105,14 +110,14 @@ while the field values are iterated.
   (defpub_j retain_keys_m     "com.amazon.fusion.FusionStruct$RetainKeysMProc")
   (defpub_j struct_merge      "com.amazon.fusion.FusionStruct$StructMergeProc")
   (defpub_j struct_merge_m    "com.amazon.fusion.FusionStruct$StructMergeMProc")
-  (defpub_j struct_zip        "com.amazon.fusion.FusionStruct$StructZipProc")
+
 
 
 
   (defpub struct_put
     (lambda (struct key value)
       '''
-Functionally adds a field to a `struct`, returning a new struct of the same
+Functionally modifies a field of a `struct`, returning a new struct of the same
 type. Any existing fields (including repeats) named by the `key` are replaced
 by a single field with the `value`.
 
@@ -133,9 +138,9 @@ by a single field with the `value`.
   (defpub struct_put_m
     (lambda (struct key value)
       '''
-Adds a field to a `struct`, mutating the `struct` when possible and returning
-a struct of the same type. Any existing fields (including repeats) named by
-the `key` are replaced by a single field with the `value`.
+Modifies a field of a `struct`, mutating the `struct` when possible and
+returning a struct of the same type. Any existing fields (including repeats)
+named by the `key` are replaced by a single field with the `value`.
 
 When given an immutable struct, `struct_put_m` behaves identically to
 `struct_put`:

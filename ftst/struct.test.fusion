@@ -401,19 +401,41 @@ to the `fields`, and the result of the operator must be the same type.
 
 
 //==========================================================================
-// struct_zip
+// struct_zip and mutable_struct_zip
 
-(check ion_equals (struct_zip ["f"] [3]) {f:3})
-(check ion_equals (struct_zip ["hello"] ["world"]) {hello:"world"})
-(check ion_equals (struct_zip ["f","g"] [3,"hello"]) {f:3,g:"hello"})
-(check ion_equals (struct_zip ["A","B"] [3,[true,false,[]]])
+(define_check (check_zip msg keys values expect)
+  (let [(v (struct_zip keys values))]
+    (check_pred is_immutable_struct v)
+    (check ion_equals v expect))
+  (let [(v (mutable_struct_zip keys values))]
+    (check_pred is_mutable_struct v)
+    (check ion_equals v expect)))
+
+(check_zip null.list [1] {})
+(check_zip ["f"] null.list {})
+
+(check_zip ["f"] [3] {f:3})
+(check_zip ["hello"] ["world"] {hello:"world"})
+(check_zip ["f","g"] [3,"hello"] {f:3,g:"hello"})
+(check_zip ["A","B"] [3,[true,false,[]]]
   {A:3,B:[true,false,[]]})
 
 // Repeated fields
-(check ion_equals (struct_zip ["A","A","A"] [2,1,3]) {A:1,A:2,A:3})
+(check_zip ["A","A","A"] [2,1,3] {A:1,A:2,A:3})
 
 // Unequal lengths
-(check ion_equals (struct_zip ["A","B"] [3]) {A:3})
+(check_zip ["A","B"] [3] {A:3})
+
+
+(check_arity_exn (        struct_zip))
+(check_arity_exn (mutable_struct_zip))
+(check_arity_exn (        struct_zip ["f"]))
+(check_arity_exn (mutable_struct_zip ["f"]))
+
+(check_arg_exn (        struct_zip  "f"  [3]))
+(check_arg_exn (mutable_struct_zip  "f"  [3]))
+(check_arg_exn (        struct_zip ["f"]  3 ))
+(check_arg_exn (mutable_struct_zip ["f"]  3 ))
 
 
 //==========================================================================
