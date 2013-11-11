@@ -79,7 +79,7 @@ contact us for clarification.
   //=========================================================================
   // Binding Forms
 
-  (provide let let_values letrec lets)
+  (provide let let_values letrec lets values)
 
 
   //=========================================================================

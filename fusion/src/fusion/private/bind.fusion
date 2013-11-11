@@ -9,7 +9,7 @@
     "/fusion/number"
     "/fusion/private/compare")
 
-  (provide let let_values letrec)
+  (provide let let_values letrec values)
 
 
 /*

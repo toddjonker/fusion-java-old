@@ -27,7 +27,7 @@ To use this dialect for your module, declare it as follows:
 
 
   // Pass-through bindings from builtins
-  (provide let let_values quote '#%top')
+  (provide let let_values quote values '#%top')
   (provide apply exit is_null is_null_null is_procedure not)
 
 

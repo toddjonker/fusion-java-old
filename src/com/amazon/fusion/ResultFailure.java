@@ -55,13 +55,13 @@ final class ResultFailure
      * @param expectation
      * @param badPos the zero-based index of the problematic value.
      *   -1 means a specific position isn't implicated.
-     * @param actuals must not be null or zero-length.
+     * @param actuals must not be null.
      */
     ResultFailure(String name, String expectation,
                   int badPos, Object[] actuals)
     {
         super("result failure");
-        assert name != null && actuals.length != 0;
+        assert name != null;
         assert badPos < actuals.length;
 
         myName = name;
@@ -89,7 +89,7 @@ final class ResultFailure
             safeWrite(eval, out, myActuals[actualsLen == 1 ? 0 : myBadPos]);
         }
 
-        if (actualsLen != 1 || myBadPos < 0)
+        if (actualsLen > 1 || (myBadPos < 0 && actualsLen != 0))
         {
             out.append(myBadPos < 0
                      ? "\nResults were:"

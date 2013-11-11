@@ -25,6 +25,7 @@
   (defpub_j is_null_null          "com.amazon.fusion.IsNullNullProc")
   (defpub_j is_procedure          "com.amazon.fusion.IsProcedureProc")
   (defpub_j not                   "com.amazon.fusion.NotProc")
+  (defpub_j values                "com.amazon.fusion.ValuesProc")
 
 
   (defpub_j annotate "com.amazon.fusion.AnnotateProc")

@@ -202,7 +202,7 @@ final class LetValuesForm
             {
                 CompiledForm form = myValueForms[i];
                 Object values = eval.eval(store, form);
-                checkSingleResult(values);
+                eval.checkSingleResult(values, "local-binding form");
                 boundValues[i] = values;
             }
 
@@ -229,7 +229,7 @@ final class LetValuesForm
             throws FusionException
         {
             Object value = eval.eval(store, myValueForm0);
-            checkSingleResult(value);
+            eval.checkSingleResult(value, "local-binding form");
 
             Store localStore = new LocalStore1(store, value);
             return eval.bounceTailForm(localStore, myBody);
@@ -256,10 +256,10 @@ final class LetValuesForm
             throws FusionException
         {
             Object value0 = eval.eval(store, myValueForm0);
-            checkSingleResult(value0);
+            eval.checkSingleResult(value0, "local-binding form");
 
             Object value1 = eval.eval(store, myValueForm1);
-            checkSingleResult(value1);
+            eval.checkSingleResult(value1, "local-binding form");
 
             Store localStore = new LocalStore2(store, value0, value1);
             return eval.bounceTailForm(localStore, myBody);
@@ -306,13 +306,26 @@ final class LetValuesForm
                 int expectedCount = myValueCounts[i];
                 if (expectedCount == 1)
                 {
-                    checkSingleResult(values);
+                    eval.checkSingleResult(values, "let_values");
                     boundValues[bindingPos++] = values;
                 }
                 else if (values instanceof Object[])
                 {
-                    String message = "Can't bind multiple values";
-                    throw new UnsupportedOperationException(message);
+                    Object[] vals = (Object[]) values;
+                    int actualCount = vals.length;
+                    if (expectedCount != actualCount)
+                    {
+                        String expectation =
+                            expectedCount + " results but received " +
+                            actualCount;
+                        throw new ResultFailure("local-binding form",
+                                                expectation, -1, vals);
+                    }
+
+                    System.arraycopy(values, 0,
+                                     boundValues, bindingPos,
+                                     actualCount);
+                    bindingPos += actualCount;
                 }
                 else
                 {
@@ -325,20 +338,6 @@ final class LetValuesForm
 
             Store localStore = new LocalStore(store, boundValues);
             return eval.bounceTailForm(localStore, myBody);
-        }
-    }
-
-    private static final void checkSingleResult(Object values)
-        throws FusionException
-    {
-        if (values instanceof Object[])
-        {
-            Object[] valuesArray = (Object[]) values;
-            assert valuesArray.length > 1;
-            String expectation =
-                "1 result but received " + valuesArray.length;
-            throw new ResultFailure("local-binding form",
-                                    expectation, -1, valuesArray);
         }
     }
 }

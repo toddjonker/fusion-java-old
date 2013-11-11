@@ -50,7 +50,6 @@
 
 //==========================================================================
 // let_values
-// TODO FUSION-84 test multiple return values
 
 (check = (let_values [] 1) 1)
 
@@ -59,7 +58,7 @@
 (check =
   (let_values
     [((x) 1),
-     ((y) 2)]
+     ((y) (values 2))]
     (+ x y))
   3)
 
@@ -80,6 +79,16 @@
       y))
   11)
 
+(check =
+  (let_values [(() (values))] 303)
+  303)
+(check =
+  (let [(dummy -1), (x 1)]
+    (let_values [((x y) (values 10 x)),
+                 ((z p) (values x 100))]
+      (+ x y z p)))
+  112)
+
 
 // Duplicate bound names
 (check_compile_exn
@@ -87,7 +96,21 @@
 (check_compile_exn
   (let_values [((x x) (values 1 2))] 3))
 
-
+// Arity mismatch
+(check_contract_exn
+  (let_values [(() 1)] 3))
+(check_contract_exn
+  (let_values [((x) (values))] 3))
+(check_contract_exn
+  (let_values [((x) (values 1 2 3))] 3))
+(check_contract_exn
+  (let_values [((x y) (values 1))] 3))
+(check_contract_exn
+  (let_values [((x y) (values 1 2 3))] 3))
+(check_contract_exn
+  (let_values [((x) 1), ((y z) (values 1 2 3))] 3))
+  
+  
 //==========================================================================
 // letrec
 
