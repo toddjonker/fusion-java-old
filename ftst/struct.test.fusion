@@ -81,38 +81,6 @@
   (check_mod_m op_m val args expect))
 
 
-(define (check_struct_mod op op_m fields args expect)
-  '''
-Checks a struct-modification operator of the form (op S args...) that returns
-a struct. S is constructed twice by applying both `struct` and `mutable_struct`
-to the `fields`, and the result of the operator must be the same type.
-  '''
-  (let [(s (apply struct fields))]
-    (let [(result (apply op s args))]
-      (check_pred is_immutable_struct result)
-      (check ion_equals result expect
-        "Unexpected result from " op " on immutable " s)
-      (check ion_equals s (apply struct fields)               // s not mutated
-        "Immutable struct was mutated by " op))
-    (let [(result (apply op_m s args))]
-      (check_pred is_immutable_struct result)
-      (check ion_equals result expect
-        "Unexpected result from " op_m " on immutable " s)
-      (check ion_equals s (apply struct fields))))            // s not mutated
-  (let [(s (apply mutable_struct fields))]
-    (let [(result (apply op s args))]
-      (check_pred is_mutable_struct result
-        "result of " op " should be mutable")
-      (check ion_equals result expect
-        "Unexpected result from " op " on mutable " s)
-      (check ion_equals s (apply struct fields)))             // s not mutated
-    (let [(result (apply op_m s args))]
-      (check_pred is_mutable_struct result)
-      (check ion_equals result expect
-        "Unexpected result from " op_m " on mutable " s)
-      (check ion_equals s expect))))                          // s is mutated
-
-
 //==========================================================================
 
 
