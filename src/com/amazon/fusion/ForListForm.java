@@ -57,7 +57,7 @@ final class ForListForm
             boundValues[i] = expander.expandExpression(env, subform);
         }
 
-        LocalEnvironment bodyEnv = new LocalEnvironment(env, boundNames);
+        LocalEnvironment bodyEnv = new LocalEnvironment(env, boundNames, stx);
         SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
 
         // Wrap the bound names so they resolve to their own binding.
@@ -115,7 +115,7 @@ final class ForListForm
         }
 
         // Dummy environment to keep track of depth
-        env = new LocalEnvironment(env, SyntaxSymbol.EMPTY_ARRAY);
+        env = new LocalEnvironment(env);
 
         CompiledForm body = BeginForm.compile(eval, env, forStx, 2);
 

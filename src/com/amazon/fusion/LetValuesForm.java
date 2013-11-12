@@ -57,7 +57,7 @@ final class LetValuesForm
 
         SyntaxSymbol[] boundNames =
             boundNameList.toArray(new SyntaxSymbol[boundNameList.size()]);
-        Environment bodyEnv = new LocalEnvironment(env, boundNames);
+        Environment bodyEnv = new LocalEnvironment(env, boundNames, stx);
         SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
 
         // Expand the bound-value expressions
@@ -145,7 +145,7 @@ final class LetValuesForm
         }
 
         // Dummy environment to keep track of depth
-        env = new LocalEnvironment(env, SyntaxSymbol.EMPTY_ARRAY);
+        env = new LocalEnvironment(env);
         CompiledForm body = BeginForm.compile(eval, env, expr, 2);
 
         if (allSingles)

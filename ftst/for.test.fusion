@@ -94,5 +94,8 @@
 (check_compile_exn (for_list ((name 1) ()) 13))
 (check_compile_exn (for_list ((name 1) (name2)) 13))
 
+// Duplicate name
+(check_compile_exn (for_list [(name []), (name [])] 13))
+
 
 "PASSED" // Helpful output if you run this stand-alone

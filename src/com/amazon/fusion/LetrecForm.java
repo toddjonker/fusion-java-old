@@ -41,7 +41,7 @@ final class LetrecForm
             boundNames[i] = checkPair.requiredIdentifier("bound name", 0);
         }
 
-        Environment bodyEnv = new LocalEnvironment(env, boundNames);
+        Environment bodyEnv = new LocalEnvironment(env, boundNames, stx);
         SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
 
         // Expand the bound-value expressions
@@ -91,7 +91,7 @@ final class LetrecForm
         throws FusionException
     {
         // Dummy environment to keep track of depth
-        env = new LocalEnvironment(env, SyntaxSymbol.EMPTY_ARRAY);
+        env = new LocalEnvironment(env);
 
         SyntaxSexp bindingForms = (SyntaxSexp) stx.get(eval, 1);
 

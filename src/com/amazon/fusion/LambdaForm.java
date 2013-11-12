@@ -67,7 +67,7 @@ final class LambdaForm
 
         // We create a wrap even if there's no arguments, because there may be
         // local definitions that will be added to the wrap.
-        Environment bodyEnv = new LocalEnvironment(env, args);
+        Environment bodyEnv = new LocalEnvironment(env, args, stx);
         SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
 
         // Prepare the bound names so they resolve to their own binding.
@@ -158,7 +158,7 @@ final class LambdaForm
         }
 
         // Dummy environment to keep track of depth
-        env = new LocalEnvironment(env, SyntaxSymbol.EMPTY_ARRAY);
+        env = new LocalEnvironment(env);
 
         CompiledForm body = BeginForm.compile(eval, env, stx, bodyStart);
 

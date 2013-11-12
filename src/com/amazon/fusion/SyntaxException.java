@@ -17,6 +17,10 @@ public class SyntaxException
     private final String myName;
     private SyntaxValue[] mySources;
 
+    /**
+     * @param whatForm may be null.
+     * @param message must not be null.
+     */
     SyntaxException(String whatForm, String message, SyntaxValue... sources)
     {
         super(message);

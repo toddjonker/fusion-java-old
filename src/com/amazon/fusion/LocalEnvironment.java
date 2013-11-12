@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import java.util.Set;
 
 final class LocalEnvironment
@@ -124,15 +125,44 @@ final class LocalEnvironment
     private final LocalBinding[] myBindings;
 
 
-    /** Expand-time environment construction */
+    /**
+     * Expand-time environment construction.
+     *
+     * @throws FusionException if there's a duplicate identifier.
+     */
     LocalEnvironment(Environment enclosure,
-                     SyntaxSymbol[] identifiers)
+                     SyntaxSymbol[] identifiers,
+                     SyntaxValue formForErrors)
+        throws FusionException
     {
         myEnclosure = enclosure;
         myNamespace = enclosure.namespace();
         myDepth = 1 + enclosure.getDepth();
 
         int count = identifiers.length;
+        if (count > 1)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                SyntaxSymbol idI = identifiers[i];
+
+                for (int j = i + 1; j < count; j++)
+                {
+                    SyntaxSymbol idJ = identifiers[j];
+
+                    if (idI.freeIdentifierEqual(idJ))
+                    {
+                        String message =
+                            "duplicate binding: " +
+                            printQuotedSymbol(idJ.stringValue());
+
+                        throw new SyntaxException(null, message,
+                                                  formForErrors);
+                    }
+                }
+            }
+        }
+
         myBindings = new LocalBinding[count];
         for (int i = 0; i < count; i++)
         {
@@ -145,6 +175,21 @@ final class LocalEnvironment
 
             myBindings[i] = new LocalBinding(identifier, myDepth, i);
         }
+
+    }
+
+
+    /**
+     * Compile-time environment construction; makes a dummy environment to
+     * keep track of the current depth.
+     */
+    LocalEnvironment(Environment enclosure)
+    {
+        myEnclosure = enclosure;
+        myNamespace = enclosure.namespace();
+        myDepth = 1 + enclosure.getDepth();
+
+        myBindings = null;
     }
 
 
