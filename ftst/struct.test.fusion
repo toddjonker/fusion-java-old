@@ -369,6 +369,26 @@
 
 
 //==========================================================================
+// struct_unzip
+
+(define_check (check_unzip msg struct keys vals)
+  (let_values [((k v) (struct_unzip struct))]
+    (check_equal k keys "")
+    (check_equal v vals "")
+    (unless (is_null struct)
+      (check ion_equals (struct_zip k v) struct))))
+
+
+(check_unzip null.struct [] [])
+(check_unzip {}          [] [])
+
+(check_unzip {a:1}     (quote [a]  ) [1])
+(check_unzip {a:1,a:1} (quote [a,a]) [1,1])
+(check_unzip {a:1,a:2} (quote [a,a]) [1,2])
+(check_unzip {a:1,b:2} (quote [b,a]) [2,1])   // TODO shady test assumes order
+
+
+//==========================================================================
 // struct_zip and mutable_struct_zip
 
 (define_check (check_zip msg keys values expect)

@@ -81,6 +81,7 @@ while the field values are iterated.
     "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/ffi/java"
+    "/fusion/list"
     "/fusion/private/builtins"   // unsafe_struct_visit
     "/fusion/private/struct")
 
@@ -187,4 +188,28 @@ ignored.
         (lambda (name elt) (proc name elt) false)
         struct)))
 
+
+  (defpub struct_unzip
+    (lambda (struct)
+      '''
+Deconstructs a `struct` and returns two values: a list of field names (as
+symbols) and a list of associated values. This is the inverse of `struct_zip`.
+
+    (let_values [((keys vals) (struct_unzip {a:1, b:2}))]
+      (struct_zip keys (map - vals)))
+    =>
+    {b:-2,a:-1}
+      '''
+      (unless (is_struct struct)
+        (raise_argument_error "struct_unzip" "struct" 0 struct))
+      // TODO FUSION-226 Allocated these lists with the correct size
+      (let [(keys (stretchy_list)),
+            (vals (stretchy_list))]
+        (unsafe_struct_visit
+          (lambda (k v)
+            (add_m keys k)
+            (add_m vals v)
+            false)
+          struct)
+        (values (apply list keys) (apply list vals)))))
 )
