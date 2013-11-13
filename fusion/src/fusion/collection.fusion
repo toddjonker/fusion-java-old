@@ -14,6 +14,7 @@ See also [sequence](fusion/sequence.html).
   (require
     "/fusion/exception"
     "/fusion/experimental/defines"
+    "/fusion/iterator"
     "/fusion/number"
     "/fusion/private/bind"
     "/fusion/private/compare"
@@ -238,13 +239,13 @@ application of `pred` to the final element of the sequence is in tail position.
       '''
       (cond
         ((is_struct collection)
-         (let [(result false)]
-           // WARNING!  This unsafe procedure is UNSUPPORTED!
-           (unsafe_struct_visit (lambda (key elt)
-                                  (set result (pred elt))
-                                  result)  // Stop visits if result is truthy
-             collection)
-           result))
+         (let [(iter (unsafe_struct_iterator collection))]
+           (let loop [(result false)]
+             (if (iterator_has_next iter)
+               (let_values [((k v) (iterator_next iter))]
+                 (let [(r (pred v))]
+                   (or r (loop r))))  // TODO this should use a tail call
+               result))))
         ((is_list collection)
          (let [(len (size collection))]
            (if (= 0 len)
@@ -285,13 +286,13 @@ application of `pred` to the final element of the sequence is in tail position.
       '''
       (cond
         ((is_struct collection)
-         (let [(result true)]
-           // WARNING!  This unsafe procedure is UNSUPPORTED!
-           (unsafe_struct_visit (lambda (key elt)
-                                  (set result (pred elt))
-                                  (not result))  // Stop visits if result is untruthy
-             collection)
-           result))
+         (let [(iter (unsafe_struct_iterator collection))]
+           (let loop [(result true)]
+             (if (iterator_has_next iter)
+               (let_values [((k v) (iterator_next iter))]
+                 (let [(r (pred v))]
+                   (and r (loop r))))  // TODO this should use a tail call
+               result))))
         ((is_list collection)
          (let [(len (size collection))]
            (if (= 0 len)
@@ -340,14 +341,12 @@ When `collection` is a sequence, the elements are visited in order.
       '''
       (cond
         ((is_struct collection)
-         (let [(result (void))]
-           // WARNING!  This unsafe procedure is UNSUPPORTED!
-           (unsafe_struct_visit (lambda (key elt)
-                                  (let [(elt_result (pred elt))]
-                                    (when elt_result (set result elt))
-                                    elt_result))
-             collection)
-           result))
+         (let [(iter (unsafe_struct_iterator collection))]
+           (let loop [(result false)]
+             (when (iterator_has_next iter)
+               (let_values [((k v) (iterator_next iter))]
+                 (let [(r (pred v))]
+                   (if r v (loop r)))))))) // TODO this should use a tail call
         ((is_list collection)
          (let [(len (size collection))]
            (let loop [(i 0)]
@@ -384,11 +383,12 @@ When `collection` is a sequence, the elements are visited in order.
       // it doesn't make sense to return the first one.
       (cond
         ((is_struct collection)
-         // WARNING!  This unsafe procedure is UNSUPPORTED!
-         (unsafe_struct_visit
-           (lambda (key elt) (proc elt) false)
-           collection)
-         (void))
+         (let [(iter (unsafe_struct_iterator collection))]
+           (let loop []
+             (when (iterator_has_next iter)
+               (let_values [((k v) (iterator_next iter))]
+                 (proc v)
+                 (loop))))))
         ((is_list collection)
          (let [(len (size collection))]
            (let loop [(i 0)]

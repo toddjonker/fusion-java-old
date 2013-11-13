@@ -11,7 +11,6 @@ import static com.amazon.fusion.FusionText.unsafeTextToString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.ion.util.IonTextUtils.printSymbol;
-import static java.lang.Boolean.TRUE;
 import static java.util.Collections.EMPTY_MAP;
 import com.amazon.fusion.FusionCollection.BaseCollection;
 import com.amazon.fusion.FusionIterator.AbstractIterator;
@@ -1341,43 +1340,6 @@ final class FusionStruct
         {
             String key = unsafeTextToString(eval, args[1]);
             return unsafeStructPutM(eval, args[0], key, args[2]);
-        }
-    }
-
-
-
-    static final class UnsafeStructVisitProc
-        extends Procedure2
-    {
-        UnsafeStructVisitProc()
-        {
-            //    "                                                                               |
-            super("*UNSUPPORTED!*  Applies `proc` to the fields of the `struct`, stopping when\n" +
-                  "the result of the call is truthy.",
-                  "proc", "struct");
-        }
-
-        @Override
-        Object doApply(final Evaluator eval, Object proc, Object struct)
-            throws FusionException
-        {
-            final Procedure p = (Procedure) proc;
-
-            StructFieldVisitor visitor = new StructFieldVisitor()
-            {
-                @Override
-                public Object visit(String name, Object value)
-                    throws FusionException
-                {
-                    Object nameSym = eval.newSymbol(name);
-                    Object result = eval.callNonTail(p, nameSym, value);
-                    return (isTruthy(eval, result) ? TRUE : null);
-                }
-            };
-
-            unsafeStructFieldVisit(eval, struct, visitor);
-
-            return struct;
         }
     }
 

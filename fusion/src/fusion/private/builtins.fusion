@@ -45,9 +45,4 @@
     "com.amazon.fusion.FusionList$MutableListProc")
   (defpub_j stretchy_list
     "com.amazon.fusion.FusionList$StretchyListProc")
-
-  // TODO FUSION-94 replace this with struct_iterator
-  // Not ready for this to be private, no better place to put it.
-  (defpub_j unsafe_struct_visit
-    "com.amazon.fusion.FusionStruct$UnsafeStructVisitProc")
 )

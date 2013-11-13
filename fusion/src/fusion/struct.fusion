@@ -81,8 +81,8 @@ while the field values are iterated.
     "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/ffi/java"
+    "/fusion/iterator"
     "/fusion/list"
-    "/fusion/private/builtins"   // unsafe_struct_visit
     "/fusion/private/struct")
 
 
@@ -208,14 +208,17 @@ name/value field.  Returns `struct`.  The `proc` must accept two arguments, a
 field name symbol and a value; any results from applying the procedure are
 ignored.
       '''
-      // This is pretty much the same as struct_visit except we never return early.
       (unless (is_procedure proc)
         (raise_argument_error "struct_for_each" "procedure" 0 proc struct))
       (unless (is_struct struct)
         (raise_argument_error "struct_for_each" "struct" 1 proc struct))
-      (unsafe_struct_visit
-        (lambda (name elt) (proc name elt) false)
-        struct)))
+      (let [(iter (unsafe_struct_iterator struct))]
+        (let loop []
+          (if (iterator_has_next iter)
+            (let_values [((k v) (iterator_next iter))]
+              (proc k v)
+              (loop))
+            struct)))))
 
 
   (defpub struct_unzip
@@ -231,14 +234,12 @@ symbols) and a list of associated values. This is the inverse of `struct_zip`.
       '''
       (unless (is_struct struct)
         (raise_argument_error "struct_unzip" "struct" 0 struct))
-      // TODO FUSION-226 Allocated these lists with the correct size
-      (let [(keys (stretchy_list)),
-            (vals (stretchy_list))]
-        (unsafe_struct_visit
-          (lambda (k v)
-            (add_m keys k)
-            (add_m vals v)
-            false)
-          struct)
-        (values (apply list keys) (apply list vals)))))
+      (let [(iter (unsafe_struct_iterator struct))]
+        // TODO FUSION-226 Allocated these lists with the correct size
+        (let loop [(keys (stretchy_list)),
+                   (vals (stretchy_list))]
+          (if (iterator_has_next iter)
+            (let_values [((k v) (iterator_next iter))]
+              (loop (add_m keys k) (add_m vals v)))
+            (values (apply list keys) (apply list vals)))))))
 )
