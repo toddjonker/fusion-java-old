@@ -170,6 +170,35 @@ When given a mutable struct, the struct is mutated:
       (unsafe_struct_put_m struct key value)))
 
 
+  (defpub struct_iterator
+    (lambda (struct)
+      '''
+Returns an [iterator][] over the content of `struct`. Calls to `iterator_next` will
+return two results representing a single field: the field's name (as a symbol)
+and the field's value.
+
+[iterator]: fusion/iterator.html
+
+    (define (show struct)
+      (let [(iter (struct_iterator struct))]
+        (let loop []
+          (when (iterator_has_next iter)
+            (let_values [((k v) (iterator_next iter))]
+              (displayln k " --> " v)
+              (loop))))))
+    (show {foo:"bar", hello:"goodbye", yes:false})
+
+This code displays:
+
+    yes --> false
+    hello --> goodbye
+    foo --> bar
+      '''
+      (unless (is_struct struct)
+        (raise_argument_error "struct_iterator" "struct" 0 struct))
+      (unsafe_struct_iterator struct)))
+
+
   // Name per Racket, where for-each is for side effects.
   (defpub struct_for_each
     (lambda (proc struct)

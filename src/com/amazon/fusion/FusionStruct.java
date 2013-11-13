@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionIo.safeWriteToString;
+import static com.amazon.fusion.FusionIterator.iterate;
 import static com.amazon.fusion.FusionList.unsafeJavaIterate;
 import static com.amazon.fusion.FusionText.unsafeTextToString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
@@ -13,6 +14,7 @@ import static com.amazon.ion.util.IonTextUtils.printSymbol;
 import static java.lang.Boolean.TRUE;
 import static java.util.Collections.EMPTY_MAP;
 import com.amazon.fusion.FusionCollection.BaseCollection;
+import com.amazon.fusion.FusionIterator.AbstractIterator;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
@@ -1376,6 +1378,91 @@ final class FusionStruct
             unsafeStructFieldVisit(eval, struct, visitor);
 
             return struct;
+        }
+    }
+
+
+
+    private static final class StructIterator
+        extends AbstractIterator
+    {
+        private final Iterator<Map.Entry<String,Object>> myEntryIterator;
+        private Iterator<Object>                         myMultiIterator;
+        private Object                                   myCurrentKey;
+
+        private StructIterator(MapBasedStruct struct)
+        {
+            myEntryIterator = struct.myMap.entrySet().iterator();
+        }
+
+        @Override
+        boolean hasNext(Evaluator eval)
+            throws FusionException
+        {
+            if (myMultiIterator != null)
+            {
+                if (myMultiIterator.hasNext())
+                {
+                    return true;
+                }
+                myMultiIterator = null;
+            }
+            return myEntryIterator.hasNext();
+        }
+
+        @Override
+        Object next(Evaluator eval)
+            throws FusionException
+        {
+            Object value;
+            if (myMultiIterator != null)
+            {
+                value = myMultiIterator.next();
+            }
+            else
+            {
+                Map.Entry<String, Object> entry = myEntryIterator.next();
+                myCurrentKey = eval.newSymbol(entry.getKey());
+
+                value = entry.getValue();
+                if (value instanceof Object[])
+                {
+                    Object[] vals = (Object[]) value;
+                    myMultiIterator = Arrays.asList(vals).iterator();
+
+                    // Safe since we have at least 1 element in the array:
+                    value = myMultiIterator.next();
+                }
+            }
+
+            // TODO route multi-values through the evaluator
+            return new Object[] { myCurrentKey, value };
+        }
+    }
+
+    static final class UnsafeStructIteratorProc
+        extends Procedure1
+    {
+        UnsafeStructIteratorProc()
+        {
+            //    "                                                                               |
+            super("Returns an iterator over the content of `struct`. Calls to `iterator_next` will\n" +
+                  "return two results representing a single field: the field's name (as a symbol)\n" +
+                  "and the field's value.",
+                  "struct");
+        }
+
+        @Override
+        Object doApply(final Evaluator eval, Object struct)
+            throws FusionException
+        {
+            BaseStruct s = (BaseStruct) struct;
+            if (s.size() == 0)
+            {
+                return iterate(eval, Arrays.asList().iterator());
+            }
+
+            return new StructIterator((MapBasedStruct) s);
         }
     }
 

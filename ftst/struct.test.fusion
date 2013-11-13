@@ -2,6 +2,7 @@
 
 (require
   "/check"
+  "/fusion/iterator"
   "/fusion/list"
   "/fusion/private/builtins"  // annotate
   "/fusion/struct")
@@ -584,3 +585,29 @@
 (check = (find T {f:1}) 1)
 
 (check = (find (lambda (e) (= e "hi")) {f:"oh", g:"hi"}) "hi")
+
+
+//==========================================================================
+// Iteration
+
+(define check_iter
+  (lambda (iter values)
+    "Checks that the ITER produces the VALUES (given as a list)"
+    (check_pred is_iterator iter)
+    (let [(len (size values))]
+      (let loop [(i 0)]
+        (if (= i len)
+          (check_true (not (iterator_has_next iter)) "iterator should be empty")
+          (begin
+            (check_pred iterator_has_next iter)
+            (let_values [((key value) (iterator_next iter))]
+              (let [(actual   [key, value]),
+                    (expected (. values i))]
+              (check_equal actual expected "iterator element")
+              (loop (+ 1 i))))))))))
+
+(check_iter (struct_iterator null.struct) [])
+(check_iter (struct_iterator {}) [])
+(check_iter (struct_iterator {a:1}) (quote [[a,1]]))
+(check_iter (struct_iterator {a:1,a:2}) (quote [[a,1],[a,2]]))
+(check_iter (struct_iterator {a:1,b:3,a:2}) (quote [[b,3],[a,1],[a,2]]))

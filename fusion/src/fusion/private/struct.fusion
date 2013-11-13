@@ -18,6 +18,9 @@
   (defpub_j unsafe_struct_put_m
      "com.amazon.fusion.FusionStruct$UnsafeStructPutMProc")
 
+  (defpub_j unsafe_struct_iterator
+     "com.amazon.fusion.FusionStruct$UnsafeStructIteratorProc")
+
 
   (defpub is_struct_field_name
     (lambda (v)

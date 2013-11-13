@@ -12,14 +12,14 @@
     "Checks that the ITER produces the VALUES (given as a list)"
     (unless (is_iterator iter)
       (raise_argument_error "check_iter" "iterator" 0 iter values))
-    (let ((len (size values)))
-      (let loop ((i 0))
+    (let [(len (size values))]
+      (let loop [(i 0)]
         (if (= i len)
           (assert (not (iterator_has_next iter)) "iterator should be empty")
           (begin
             (assert (iterator_has_next iter) "iterator should have next")
-            (let ((actual   (iterator_next iter))
-                  (expected (. values i)))
+            (let [(actual   (iterator_next iter)),
+                  (expected (. values i))]
               (check_equal actual expected "iterator element")
               (loop (+ 1 i)))))))))
 
