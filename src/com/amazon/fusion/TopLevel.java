@@ -17,8 +17,11 @@ import java.io.File;
  * to use the same instance from multiple threads, unless all such use is
  * functional (that is, no mutations are made) with respect to any common data.
  * Put another way, this library does not perform any synchronization on
- * namespaces or user-visibile data structures, so your application must take
+ * namespaces or user-visible data structures, so your application must take
  * steps to handle such synchronization when and if it is needed.
+ * <p>
+ * Using thread-local {@link TopLevel}s is reasonable, if you can properly
+ * isolate state changes between requests on the same thread.
  * <p>
  * To create a {@link TopLevel}, use a {@link FusionRuntime}.
  */
