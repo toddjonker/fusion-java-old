@@ -100,9 +100,12 @@ final class Evaluator
 
     Object injectMaybe(Number value)
     {
-        if (value instanceof Integer)
+        if (   value instanceof Long
+            || value instanceof Integer
+            || value instanceof Short
+            || value instanceof Byte)
         {
-            return newInt(((Integer) value).longValue());
+            return newInt(value.longValue());
         }
         else if (value instanceof BigInteger)
         {

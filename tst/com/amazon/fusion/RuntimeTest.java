@@ -120,9 +120,24 @@ public class RuntimeTest
         Object fv = topLevel().call("<", 22, BigInteger.valueOf(23));
         assertTrue(isTrue(topLevel(), fv));
 
-        // Check that define() injects the given value.
+        // Inject Byte
+        topLevel().define("v", Byte.valueOf(Byte.MAX_VALUE));
+        fv = topLevel().eval("(= v " + Byte.MAX_VALUE + ")");
+        assertTrue(isTrue(topLevel(), fv));
+
+        // Inject Short
+        topLevel().define("v", Short.valueOf(Short.MAX_VALUE));
+        fv = topLevel().eval("(= v " + Short.MAX_VALUE + ")");
+        assertTrue(isTrue(topLevel(), fv));
+
+        // Inject Integer
         topLevel().define("v", 22);
         fv = topLevel().eval("(= v 22)");
+        assertTrue(isTrue(topLevel(), fv));
+
+        // Inject Long
+        topLevel().define("v", Long.valueOf(Long.MAX_VALUE));
+        fv = topLevel().eval("(= v " + Long.MAX_VALUE + ")");
         assertTrue(isTrue(topLevel(), fv));
     }
 
