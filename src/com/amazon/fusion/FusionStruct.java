@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
-import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionIterator.iterate;
 import static com.amazon.fusion.FusionList.unsafeJavaIterate;
 import static com.amazon.fusion.FusionText.unsafeTextToString;
@@ -1651,9 +1650,8 @@ final class FusionStruct
                 if (name == null || name.isEmpty())
                 {
                     String expectation =
-                        "non-empty string or symbol in field-name sequence";
-                    throw new ResultFailure(identify(), expectation,
-                                            safeWriteToString(eval, nameObj));
+                        "sequence of non-empty strings or symbols";
+                    throw new ArgTypeFailure(identify(), expectation, 0, args);
                 }
 
                 Object valueObj = valueIterator.next();

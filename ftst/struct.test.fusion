@@ -426,6 +426,11 @@
 (check_arg_exn (        struct_zip ["f"]  3 ))
 (check_arg_exn (mutable_struct_zip ["f"]  3 ))
 
+(check_arg_exn (struct_zip [""] [0]))
+(check_arg_exn (struct_zip [null.string] [0]))
+(check_arg_exn (struct_zip (quote [null.symbol]) [0]))
+// TODO FUSION-204 test struct_zip with empty symbol
+
 
 //==========================================================================
 // struct_do (aka struct_for_each)
@@ -447,7 +452,6 @@
 (rip_and_zip {a:1,b:[2,3],c:{d:(quote e)}})
 (rip_and_zip {a:1,b:[2,3],a:{d:(quote e)}})  // Repeated field
 
-// TODO test struct_zip with null/empty string/symbol
 
 // struct_for_each returns its input struct.
 (check =
