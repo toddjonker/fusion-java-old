@@ -36,4 +36,14 @@
 (check ion_equals (string_to_symbol null.string) (quote null.symbol))
 (check = (string_to_symbol "text") (quote text))
 
+// TODO FUSION-204 support empty symbol
 (check_arg_exn (string_to_symbol ""))
+
+
+//============================================================================
+// symbol_to_string
+
+(check ion_equals (symbol_to_string (quote null.symbol)) null.string)
+(check = (symbol_to_string (quote text)) "text")
+
+// TODO FUSION-204 support empty symbol

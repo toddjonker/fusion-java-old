@@ -410,9 +410,9 @@ abstract class Procedure
     }
 
 
-    private <T extends IonValue> T checkDomArg(Class<T> klass, String typeName,
-                                               boolean nullable,
-                                               int argNum, Object... args)
+    <T extends IonValue> T checkDomArg(Class<T> klass, String typeName,
+                                       boolean nullable,
+                                       int argNum, Object... args)
         throws ArgTypeFailure
     {
         try
