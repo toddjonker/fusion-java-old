@@ -145,6 +145,14 @@ thrown if the position is out of bounds.
         (raise_argument_error "list_element" "valid position" 1 list pos))
       (unsafe_list_element list pos)))
 
+  (defpub list_ref
+      '''
+DEPRECATED. Renamed to `list_element`.
+
+**This binding will be removed in Q2 2014.**
+      '''
+      list_element)
+
 
   (defpub list_set
     (lambda (list pos value)
