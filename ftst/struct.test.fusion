@@ -428,7 +428,7 @@
 
 
 //==========================================================================
-// struct_for_each
+// struct_do (aka struct_for_each)
 
 (define rip_and_zip
   (lambda (struct)

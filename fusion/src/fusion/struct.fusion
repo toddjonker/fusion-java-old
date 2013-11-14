@@ -200,19 +200,22 @@ This code displays:
       (unsafe_struct_iterator struct)))
 
 
-  // Name per Racket, where for-each is for side effects.
-  (defpub struct_for_each
+  // Name per Dylan.  Equivalent to SRFI-1 `for_each` but I don't want this to
+  // be confused with the `for` syntax from Racket (which I intend to provide).
+  (defpub struct_do
     (lambda (proc struct)
       '''
 Iterates the fields of `struct` for side-effects, applying `proc` to each
 name/value field.  Returns `struct`.  The `proc` must accept two arguments, a
 field name symbol and a value; any results from applying the procedure are
 ignored.
+
+See also: [`do`](fusion/collection.html#do)
       '''
       (unless (is_procedure proc)
-        (raise_argument_error "struct_for_each" "procedure" 0 proc struct))
+        (raise_argument_error "struct_do" "procedure" 0 proc struct))
       (unless (is_struct struct)
-        (raise_argument_error "struct_for_each" "struct" 1 proc struct))
+        (raise_argument_error "struct_do" "struct" 1 proc struct))
       (let [(iter (unsafe_struct_iterator struct))]
         (let loop []
           (if (iterator_has_next iter)
@@ -220,6 +223,16 @@ ignored.
               (proc k v)
               (loop))
             struct)))))
+
+  (defpub struct_for_each
+    '''
+DEPRECATED: renamed to [`struct_do`](fusion/struct.html#struct_do) for
+consistency with [`do`](fusion/collection.html#do).
+
+**This binding will be removed in Q2 2014.**
+    '''
+    struct_do)
+
 
 
   (defpub struct_unzip

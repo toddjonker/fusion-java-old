@@ -377,6 +377,8 @@ Applies the one-argument procedure `proc` to the elements of `collection`,
 ignoring any results.  Returns void.
 
 When `collection` is a sequence, the elements are visited in order.
+
+See also: [`struct_do`](fusion/struct.html#struct_do)
       '''
       // We return void (rather than the collection) because this should
       // eventually accept multiple collections to walk in parallel, and then
