@@ -6,8 +6,8 @@
 // Here's the bindings we expect to be available:
 (module check_bindings '/fusion/timestamp'
   [ '<', '<=', '=', '>=', '>',
-    is_timestamp,
-    timestamp_now, timestamp_to_epoch_millis,
+    is_timestamp, string_to_timestamp,
+    timestamp_now, timestamp_to_epoch_millis, timestamp_to_string
   ])
 
 
@@ -19,3 +19,36 @@
 
 (check = (timestamp_to_epoch_millis 1970-01-01T00:00:00.00123+01:00)
          (- 1.23 (* 60 /*minutes*/ 60 /*seconds*/ 1000 /*millis*/)))
+
+
+//============================================================================
+// string_to_timestamp
+
+(check ion_equals (string_to_timestamp null.string) null.timestamp)
+(check ion_equals (timestamp_to_string null.timestamp) null.string)
+
+
+(define_check (check_conversion msg string time)
+  (check = (string_to_timestamp string) time)
+  (check = (timestamp_to_string time) string))
+
+(check_conversion "2013T"                       2013T)
+(check_conversion "2013-11T"                    2013-11T)
+(check_conversion "2013-11-13"                  2013-11-13T)
+(check_conversion "2013-11-13T17:33Z"           2013-11-13T17:33Z)
+(check_conversion "2013-11-13T17:33:12.0-08:00" 2013-11-13T17:33:12.0-08:00)
+
+
+(check_arg_exn (string_to_timestamp 12))
+(check_arg_exn (string_to_timestamp ""))
+(check_arg_exn (string_to_timestamp "not a timestamp"))
+(check_arg_exn (string_to_timestamp "null.timestamp"))
+
+(check_arg_exn (string_to_timestamp " 2013T"))
+(check_arg_exn (string_to_timestamp "2013T "))
+(check_arg_exn (string_to_timestamp "2013T,"))
+(check_arg_exn (string_to_timestamp "2013-11-13T "))
+(check_arg_exn (string_to_timestamp "2013-11-13T17:35Z "))
+(check_arg_exn (string_to_timestamp "2013-11-13T17:35-00:00 "))
+
+(check_arg_exn (timestamp_to_string 12))

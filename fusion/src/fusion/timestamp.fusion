@@ -17,11 +17,14 @@ Fusion timestamp values are identical to Ion timestamps.
   (provide < <= = >= >)
 
 
+  (defpub_j string_to_timestamp
+    "com.amazon.fusion.FusionTimestamp$StringToTimestampProc")
   (defpub_j timestamp_now
     "com.amazon.fusion.FusionTimestamp$TimestampNowProc")
-
   (defpub_j timestamp_to_epoch_millis
     "com.amazon.fusion.FusionTimestamp$TimestampToEpochMillisProc")
+  (defpub_j timestamp_to_string
+    "com.amazon.fusion.FusionTimestamp$TimestampToStringProc")
 
   // TODO FUSION-106 timestamp slot accessors
 )
