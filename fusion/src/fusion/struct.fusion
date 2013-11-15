@@ -229,7 +229,10 @@ See also: [`do`](fusion/collection.html#do)
 DEPRECATED: renamed to [`struct_do`](fusion/struct.html#struct_do) for
 consistency with [`do`](fusion/collection.html#do).
 
-**This binding will be removed in Q2 2014.**
+**This binding was deprecated in R11 (November 2013) and will be removed in**
+**Q2 2014.**
+Comment on [FUSION-233](issue:FUSION-233) if you
+cannot migrate in time.
     '''
     struct_do)
 

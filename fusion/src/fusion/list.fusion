@@ -149,7 +149,10 @@ thrown if the position is out of bounds.
       '''
 DEPRECATED. Renamed to `list_element`.
 
-**This binding will be removed in Q2 2014.**
+**This binding was deprecated in R8 (October 2013) and will be removed in**
+**Q2 2014.**
+Comment on [FUSION-232](issue:FUSION-232) if you
+cannot migrate in time.
       '''
       list_element)
 
