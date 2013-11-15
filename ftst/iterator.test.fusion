@@ -2,9 +2,7 @@
 
 (require
   "/check"
-  "/fusion/exception"
-  "/fusion/iterator"
-  "/fusion/list")
+  "/fusion/exception")
 
 
 (define check_iter

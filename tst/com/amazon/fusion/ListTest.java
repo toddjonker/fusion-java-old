@@ -22,7 +22,6 @@ public class ListTest
     public void listTestBegin()
         throws Exception
     {
-        topLevel().requireModule("/fusion/iterator");
         topLevel().requireModule("/fusion/list");
 
         eval("(define smList "+ionListGenerator(1)+")");

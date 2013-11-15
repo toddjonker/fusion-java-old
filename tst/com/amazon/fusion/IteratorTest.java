@@ -6,21 +6,12 @@ import static com.amazon.fusion.FusionIterator.injectIonIterator;
 import static com.amazon.fusion.FusionIterator.injectIterator;
 import com.amazon.ion.IonList;
 import java.util.ArrayList;
-import org.junit.Before;
 import org.junit.Test;
 
 
 public class IteratorTest
     extends CoreTestCase
 {
-    @Before
-    public void requires()
-        throws Exception
-    {
-        topLevel().requireModule("/fusion/iterator");
-    }
-
-
     @Test()
     public void testIterateValueFailures()
         throws Exception
