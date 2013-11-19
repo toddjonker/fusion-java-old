@@ -14,7 +14,22 @@ final class LetForm
               "covers the `body`, not the `expr`s.\n" +
               "\n" +
               "`body` may be one or more forms; the last form is in tail position and its\n" +
-              "result is the result of the entire expression.");
+              "result is the result of the entire expression.\n" +
+              "\n" +
+              "    (let loop_id [(ident expr), ...] body ...+)\n" +
+              "\n" +
+              "This variant also creates a procedure, bound to the given name `loop_id`, that\n" +
+              "accepts the same number of arguments as there are `ident`s. When invoked, the\n" +
+              "procedure binds the `ident`s to the arguments and evaluates the body.\n" +
+              "\n" +
+              "For example, this snippet loops through the standard input stream and writes\n" +
+              "the `title` field of each item:\n" +
+              "\n" +
+              "    (let loop [(item (read))]\n" +
+              "      (unless (is_eof item)\n" +
+              "        (let [(title (. item \"title\"))]\n" +
+              "          (writeln title)\n" +
+              "          (loop (read)))))");
     }
 
     /**

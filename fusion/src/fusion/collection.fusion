@@ -5,10 +5,13 @@
   '''
 Generic operations over collection types.
 
+A Fusion collection is, abstractly, a mapping from keys to values. The values
+are known as the _elements_ of the collection.
+A [sequence](fusion/sequence.html) is a collection where the keys are
+sequential integers starting from zero.
+
 The built-in collection types are [list](fusion/list.html),
 [sexp](fusion/sexp.html), and [struct](fusion/struct.html).
-
-See also [sequence](fusion/sequence.html).
   '''
 
   (require
@@ -31,6 +34,16 @@ See also [sequence](fusion/sequence.html).
 
   (defpub has_key
     (lambda (collection key)
+      '''
+Determines whether a `collection` has a mapping for a given `key`.
+When `has_key` returns `true`, then `(element collection key)` will
+succeed.
+
+    (has_key {f:12} "f")    ==> true
+    (has_key [0,1,2] 0)     ==> true
+    (has_key [0,1,2] 3)     ==> false
+    (has_key [0,1,2] null)  ==> false
+      '''
       (cond
         ((is_struct collection)
          (if (is_struct_field_name key)

@@ -6,13 +6,10 @@
 Ordered collections of values.
 
 A _sequence_ is an ordered [collection](fusion/collection.html) of values,
-keyed by non-negative integers.
+keyed by sequential integers starting from zero.
 
 The built-in sequence types are [list](fusion/list.html) and
 [sexp](fusion/sexp.html).
-
-Currently, some of these features may be restricted to a subset of sequence
-types.
   '''
 
   (require
@@ -172,7 +169,7 @@ Vizualizing `fold_left`:
             / \\         / \\ 
            4   .       f   2
               / \\     / \\ 
-             5  ()   z   1
+             5   ()  z   1
 
 
     (fold_left f z (1 2 3 4 5) (6 7 8 9 0))
@@ -187,7 +184,7 @@ Vizualizing `fold_left`:
             /|\\         /|\\ 
            4 9 .       f 2 7
               /|\\     /|\\ 
-             5 0()   z 1 6
+             5 0 ()  z 1 6
     '''
     (lambda args
       (if (< (size args) 2)
