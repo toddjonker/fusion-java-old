@@ -260,4 +260,67 @@ public class RuntimeTest
         Object result = topLevel().eval(r);
         checkLong(338, result);
     }
+
+
+    //========================================================================
+    // loadModule()
+
+    private static final String GOOD_MODULE =
+        "(module m '/fusion' (define x 1115) (provide x))";
+
+    @Test
+    public void testLoadModule()
+        throws Exception
+    {
+        topLevel().loadModule("/local/manual",
+                              system().newReader(GOOD_MODULE),
+                              SourceName.forDisplay("manual source"));
+
+        topLevel().requireModule("/local/manual");
+        assertEval(1115, "x");
+    }
+
+    @Test
+    public void testLoadModuleOnCurrentValue()
+        throws Exception
+    {
+        IonReader reader = system().newReader(GOOD_MODULE);
+        reader.next();
+
+        topLevel().loadModule("/local/manual",
+                              reader,
+                              SourceName.forDisplay("manual source"));
+
+        topLevel().requireModule("/local/manual");
+        assertEval(1115, "x");
+    }
+
+    @Test
+    public void testLoadModuleNoName()
+        throws Exception
+    {
+        topLevel().loadModule("/local/manual",
+                              system().newReader(GOOD_MODULE),
+                              null);
+        topLevel().requireModule("/local/manual");
+        assertEval(1115, "x");
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testLoadModuleNullPath()
+        throws Exception
+    {
+        topLevel().loadModule(null,
+                              system().newReader(GOOD_MODULE),
+                              SourceName.forDisplay("manual source"));
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testLoadModuleBadPath()
+        throws Exception
+    {
+        topLevel().loadModule("/a bad path",
+                              system().newReader(GOOD_MODULE),
+                              SourceName.forDisplay("manual source"));
+    }
 }

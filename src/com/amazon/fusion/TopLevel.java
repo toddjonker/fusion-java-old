@@ -132,6 +132,28 @@ public interface TopLevel
 
 
     /**
+     * Loads a module declaration from source code. This compiles the module,
+     * but does not instantiate it (evaluate the module's body); that happens
+     * when the module is first {@code require}d.
+     * <p>
+     * If the reader is positioned on a value, it will be read; otherwise the
+     * {@linkplain IonReader#next() next} value will be read.
+     * <p>
+     * If the reader doesn't provide exactly one top-level value, an exception
+     * is thrown.
+     *
+     * @param absoluteModulePath identifies the module to be loaded.
+     * Must be an absolute module path, starting with {@code '/'}.
+     * @param source the Ion source of the module.
+     * @param name may be null.
+     */
+    public void loadModule(String absoluteModulePath,
+                           IonReader source,
+                           SourceName name)
+        throws FusionException;
+
+
+    /**
      * Imports all exported bindings from a module into this namespace.
      * <p>
      * If any imported names have top-level definitions, those definitions will

@@ -84,13 +84,22 @@ final class LoadHandler
     }
 
 
+    /**
+     * If the reader is positioned on a value, it will be read; otherwise the
+     * {@linkplain IonReader#next() next} value will be read.
+     * <p>
+     * If the reader doesn't provide exactly one top-level value, an exception
+     * is thrown.
+     *
+     * @param sourceName may be null.
+     */
     private SyntaxSexp readModuleDeclaration(Evaluator eval,
                                              ModuleIdentity id,
                                              SourceName sourceName,
                                              IonReader reader)
         throws FusionException
     {
-        if (reader.next() == null)
+        if (reader.getType() == null && reader.next() == null)
         {
             String message = "Module source has no top-level forms: " + id;
             throw new FusionException(message);

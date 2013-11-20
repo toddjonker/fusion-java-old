@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static java.lang.Boolean.TRUE;
 import com.amazon.ion.IonReader;
@@ -28,7 +29,7 @@ final class StandardTopLevel
                      boolean documenting)
         throws FusionException
     {
-        assert initialModulePath.startsWith("/");
+        assert ModuleIdentity.isValidAbsoluteModulePath(initialModulePath);
 
         Evaluator eval = new Evaluator(globalState);
         if (documenting)
@@ -114,6 +115,30 @@ final class StandardTopLevel
     {
         LoadHandler load = myEvaluator.getGlobalState().myLoadHandler;
         return load.loadTopLevel(myEvaluator, myNamespace, source.toString());
+    }
+
+
+    @Override
+    public void loadModule(String     absoluteModulePath,
+                           IonReader  source,
+                           SourceName name)
+        throws FusionException
+    {
+        if (! isValidAbsoluteModulePath(absoluteModulePath))
+        {
+            String message =
+                "Invalid absolute module path: " + absoluteModulePath;
+            throw new IllegalArgumentException(message);
+        }
+
+        ModuleNameResolver resolver =
+            myEvaluator.getGlobalState().myModuleNameResolver;
+        ModuleIdentity id =
+            ModuleIdentity.forAbsolutePath(absoluteModulePath);
+        ModuleLocation loc =
+            new IonReaderModuleLocation(source, name);
+
+        resolver.loadModule(myEvaluator, id, loc);
     }
 
 
