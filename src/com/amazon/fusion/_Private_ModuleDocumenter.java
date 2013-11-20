@@ -198,64 +198,11 @@ public final class _Private_ModuleDocumenter
             myBaseUrl = baseUrl;
         }
 
-        private static final String STYLE =
-            "<style type='text/css'>" +
-            " .indexlink {" +
-            "   float: right;" +
-            " }" +
-            " .submodules .oneliner p {" +
-            "   display: inline;" +
-            " }" +
-            " .exports {" +
-            "   display: block;" +
-            "   margin-left: 1em; margin-bottom: 1em" +
-            " }" +
-            " .binding {" +
-            "   display: block;" +
-            " }" +
-            " .binding .name {" +
-            "   font-size: 1.17em;" +
-            "   font-weight: bold;" +
-            " }" +
-            " .binding .kind {" +
-            "   float: right; font-style: italic;" +
-            " }" +
-            " .binding .nodoc {" +
-            "   font-style: italic;" +
-            " }" +
-            " .binding .doc {" +
-            "    margin-left: 1em;" +
-            " }" +
-            " .binding .doc .oneliner {" +
-            " }" +
-            " .binding .doc .body {" +
-            " }" +
-            " .binding .doc .also {" +
-            "   font-size: 0.8em;" +
-            "   font-style: italic;" +
-            " }" +
-
-            // Highlight the binding when arriving via a link.
-            // From http://css-tricks.com/on-target/
-            " :target.binding {" +
-            "   -moz-animation:    highlight 2s ease;" +
-            "   -webkit-animation: highlight 2s ease;" +
-            " }" +
-            " @-moz-keyframes highlight {" +
-            "     0% { background: yellow; }" +
-            "   100% { }" +
-            " }" +
-            " @-webkit-keyframes highlight {" +
-            "     0% { background: yellow; }" +
-            "   100% { }" +
-            " }" +
-            "</style>\n";
-
         void renderModule(ModuleDoc doc)
             throws IOException
         {
             String modulePath = doc.myModuleId.internString();
-            renderHead(modulePath, myBaseUrl, STYLE);
+            renderHead(modulePath, myBaseUrl, "module.css");
 
             append("<div class='indexlink'>" +
                    "<a href='index.html'>Top</a> " +
@@ -481,20 +428,10 @@ public final class _Private_ModuleDocumenter
         }
 
 
-        private static final String STYLE =
-            "<style type='text/css'>" +
-            " .indexlink {" +
-            "   float: right;" +
-            " }" +
-            " td.bound {" +
-            "   font-family: monospace;" +
-            " }" +
-            "</style>\n";
-
         void renderIndex(DocIndex index)
             throws IOException
         {
-            renderHead("Fusion Binding Index", null, STYLE);
+            renderHead("Fusion Binding Index", null, "index.css");
 
             append("<div class='indexlink'>" +
                    "<a href='index.html'>Top</a> " +
@@ -648,31 +585,12 @@ public final class _Private_ModuleDocumenter
         }
 
 
-        private static final String STYLE =
-            "<style type='text/css'>" +
-            " .indexlink {" +
-            "   float: right;" +
-            " }" +
-            " td.prefix {" +
-            "   font-family: monospace;" +
-            "   text-align: right;" +
-            "   padding-right: 0;" +
-            " }" +
-            " td.tail {" +
-            "   font-family: monospace;" +
-            "   padding-left: 0;" +
-            " }" +
-            " td .keyword {" +
-            "   font-weight: bold;" +
-            " }" +
-            "</style>\n";
-
         void renderIndex()
             throws IOException
         {
             permute();
 
-            renderHead("Fusion Binding Index (Permuted)", null, STYLE);
+            renderHead("Fusion Binding Index (Permuted)", null, "index.css");
 
             append("<div class='indexlink'>" +
                    "<a href='index.html'>Top</a> " +

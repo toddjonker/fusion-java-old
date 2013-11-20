@@ -75,7 +75,9 @@ class HtmlWriter
         myOut.append("<title>");
         escape(title);
         myOut.append("</title>\n");
-        myOut.append(style);
+        myOut.append("<link href='");
+        escape(style);
+        myOut.append("' rel='stylesheet' type='text/css'></link>\n");
         myOut.append("</head>\n");
     }
 
