@@ -33,7 +33,6 @@ final class GlobalState
     final ModuleInstance     myKernelModule;
     final ModuleNameResolver myModuleNameResolver;
     final LoadHandler        myLoadHandler;
-    final RequireForm        myRequireForm;
     final DynamicParameter   myCurrentNamespaceParam;
 
     final SyntaxSymbol       myKernelBeginIdentifier;
@@ -52,14 +51,12 @@ final class GlobalState
                         ModuleInstance     kernel,
                         ModuleNameResolver resolver,
                         LoadHandler        loadHandler,
-                        RequireForm        requireForm,
                         DynamicParameter   currentNamespaceParam)
     {
         myIonSystem             = ionSystem;
         myKernelModule          = kernel;
         myModuleNameResolver    = resolver;
         myLoadHandler           = loadHandler;
-        myRequireForm           = requireForm;
         myCurrentNamespaceParam = currentNamespaceParam;
 
         SyntaxWrap wrap = new ModuleRenameWrap(kernel);
@@ -105,8 +102,6 @@ final class GlobalState
                                    currentModuleDeclareName,
                                    builder.buildModuleRepositories());
 
-        RequireForm requireForm = new RequireForm(resolver);
-
         ns.define(ALL_DEFINED_OUT, new ProvideForm.AllDefinedOutForm());
         ns.define(BEGIN, new BeginForm());    // Needed by hard-coded macro
 
@@ -129,7 +124,7 @@ final class GlobalState
         ns.define(MODULE, new ModuleForm(resolver, currentModuleDeclareName));
         ns.define(PROVIDE, new ProvideForm());
         ns.define("quote_syntax", new QuoteSyntaxForm()); // For fusion/syntax
-        ns.define(REQUIRE, requireForm);
+        ns.define(REQUIRE, new RequireForm(resolver));
 
         for (IonType t : IonType.values())
         {
@@ -155,7 +150,7 @@ final class GlobalState
         ModuleInstance kernel = registry.lookup(KERNEL_MODULE_IDENTITY);
 
         GlobalState globals =
-            new GlobalState(system, kernel, resolver, loadHandler, requireForm,
+            new GlobalState(system, kernel, resolver, loadHandler,
                             currentNamespaceParam);
         return globals;
     }

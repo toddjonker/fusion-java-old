@@ -79,22 +79,6 @@ final class RequireForm
     }
 
 
-    /**
-     * @param modulePath is an absolute or relative module path.
-     */
-    void require(Evaluator eval, Namespace ns, String modulePath)
-        throws FusionException
-    {
-        ModuleIdentity baseModule = ns.getModuleId();
-        ModuleIdentity id =
-            myModuleNameResolver.resolveModulePath(eval, baseModule,
-                                                   modulePath,
-                                                   true /* load */,
-                                                   null /* stxForErrors */);
-        ns.require(eval, id);
-    }
-
-
     //========================================================================
 
 
