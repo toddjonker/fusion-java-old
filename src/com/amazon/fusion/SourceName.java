@@ -54,17 +54,6 @@ public class SourceName
     }
 
 
-    /**
-     * Not public yet. This should probably include the concrete location of
-     * the module source, not just its identity.
-     */
-    static SourceName forModule(ModuleIdentity id)
-    {
-        // TODO identify may not be right for jar-based modules.
-        return new SourceName(id.identify());
-    }
-
-
     private SourceName(String display)
     {
         myDisplay = display;

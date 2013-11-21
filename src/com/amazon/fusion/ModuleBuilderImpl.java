@@ -10,14 +10,18 @@ import java.util.Collection;
 final class ModuleBuilderImpl
     implements ModuleBuilder
 {
-    private final ModuleRegistry  myRegistry;
-    private final ModuleNamespace myNamespace;
+    private final ModuleNameResolver myResolver;
+    private final ModuleRegistry     myRegistry;
+    private final ModuleNamespace    myNamespace;
 
     /**
      * Prepares to build a module with no language.
      */
-    ModuleBuilderImpl(ModuleRegistry registry, ModuleIdentity moduleId)
+    ModuleBuilderImpl(ModuleNameResolver resolver,
+                      ModuleRegistry registry,
+                      ModuleIdentity moduleId)
     {
+        myResolver = resolver;
         myRegistry = registry;
         myNamespace = new ModuleNamespace(registry, moduleId);
     }
@@ -58,9 +62,12 @@ final class ModuleBuilderImpl
                                             myNamespace.extractBindingDocs());
         Collection<NsBinding> bindings = myNamespace.getBindings();
 
-        ModuleInstance module =
-            new ModuleInstance(myNamespace.getModuleId(), store, bindings);
+        ModuleIdentity id = myNamespace.getModuleId();
+
+        ModuleInstance module = new ModuleInstance(id, store, bindings);
 
         myRegistry.register(module);
+
+        myResolver.registerDeclaredModule(myRegistry, id);
     }
 }

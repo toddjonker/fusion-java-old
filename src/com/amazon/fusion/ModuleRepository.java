@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 /**
- *
+ * Provides access to module source code in some (usually persistent) store.
  */
 abstract class ModuleRepository
 {
@@ -14,7 +14,6 @@ abstract class ModuleRepository
      */
     abstract String identify();
 
-    abstract ModuleIdentity resolveLib(Evaluator eval,
-                                       String absoluteModulePath)
+    abstract ModuleLocation locateModule(Evaluator eval, ModuleIdentity id)
         throws FusionException;
 }

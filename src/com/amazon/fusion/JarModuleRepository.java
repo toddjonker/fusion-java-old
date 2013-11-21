@@ -3,7 +3,8 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.GlobalState.FUSION_SOURCE_EXTENSION;
-import static com.amazon.fusion.ModuleIdentity.internFromClasspath;
+import java.io.IOException;
+import java.io.InputStream;
 
 final class JarModuleRepository
     extends ModuleRepository
@@ -16,17 +17,36 @@ final class JarModuleRepository
 
 
     @Override
-    ModuleIdentity resolveLib(Evaluator eval, String absoluteModulePath)
+    ModuleLocation locateModule(Evaluator eval, final ModuleIdentity id)
         throws FusionException
     {
-        assert absoluteModulePath.startsWith("/");
+        String absoluteModulePath = id.internString();
 
         // TODO ugly hard-coding
-        String fileName =
+        final String fileName =
             "/FUSION-REPO" + absoluteModulePath + FUSION_SOURCE_EXTENSION;
+
         if (getClass().getResource(fileName) != null)
         {
-            return internFromClasspath(absoluteModulePath, fileName);
+            ModuleLocation loc = new InputStreamModuleLocation()
+            {
+                @Override
+                SourceName sourceName()
+                {
+                    // TODO Maybe not the best output this way.
+                    String name = id + " (at classpath:" + fileName + ")";
+                    return SourceName.forDisplay(name);
+                }
+
+                @Override
+                InputStream open()
+                    throws IOException
+                {
+                    return getClass().getResourceAsStream(fileName);
+                }
+            };
+
+            return loc;
         }
 
         return null;

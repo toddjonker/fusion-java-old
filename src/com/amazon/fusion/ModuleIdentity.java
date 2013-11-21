@@ -2,10 +2,6 @@
 
 package com.amazon.fusion;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -13,7 +9,11 @@ import java.util.regex.Pattern;
 
 /**
  * A unique identitier for modules available to the Fusion runtime system.
- * This plays the same role as Racket's "resolved module path".
+ * This plays the same role as Racket's "resolved module path", except it does
+ * not contain location information about the source of the module.
+ * <p>
+ * Instances are interned because identity comparisons are extremely common
+ * during compilation.
  */
 class ModuleIdentity
     implements Comparable<ModuleIdentity>
@@ -94,6 +94,9 @@ class ModuleIdentity
     }
 
 
+    /**
+     * @return an absolute module path
+     */
     private static String localPath(Namespace ns, String name)
     {
         assert isValidLocalName(name) : name;
@@ -107,7 +110,7 @@ class ModuleIdentity
      *
      * @see #isValidLocalName(String)
      */
-    static ModuleIdentity internLocalName(Namespace ns, String name)
+    static ModuleIdentity forLocalName(Namespace ns, String name)
     {
         String path = localPath(ns, name);
         return doIntern(path);
@@ -119,56 +122,42 @@ class ModuleIdentity
      *
      * @see #isValidAbsoluteModulePath(String)
      */
-    static ModuleIdentity internBuiltinName(String path)
+    static ModuleIdentity forAbsolutePath(String path)
     {
         assert isValidAbsoluteModulePath(path);
         return doIntern(path);
     }
 
 
-    static ModuleIdentity locate(String absoluteModulePath)
+    static ModuleIdentity forPath(ModuleIdentity baseModule,
+                                  String modulePath)
     {
-        synchronized (ourInternedIdentities)
+        if (! isValidAbsoluteModulePath(modulePath))
         {
-            return ourInternedIdentities.get(absoluteModulePath);
+            // Relative path
+            assert isValidLocalName(modulePath);  // For now...
+            String basePath = baseModule.relativeBasePath();
+            modulePath = basePath + modulePath;
         }
-    }
-
-    // TODO merge with above?
-    /**
-     * @param baseModule must not be null.
-     * @param relativePath must not be null.
-     * @return null if the referenced module hasn't been interned.
-     */
-    static ModuleIdentity locateRelative(ModuleIdentity baseModule,
-                                         String relativePath)
-    {
-        assert ! relativePath.startsWith("/");
-        String basePath = baseModule.relativeBasePath();
-        return locate(basePath + relativePath);
+        return doIntern(modulePath);
     }
 
 
     /**
-     * Looks for an interned local module ID, but doesn't intern a new one.
-     *
-     * @return null if the local module hasn't been interned.
-     */
-    static ModuleIdentity locateLocal(Namespace ns, String name)
-    {
-        return locate(localPath(ns, name));
-    }
-
-    /**
+     * WORKAROUND for not being able to put ModuleIdentity as the value of
+     * current_module_declare_name or as a syntax property on `module` forms.
      *
      * @param name must be the result of {@link #internString()}.
      * @return not null.
      */
     static ModuleIdentity reIntern(String name)
     {
-        ModuleIdentity interned = locate(name);
-        assert interned != null;
-        return interned;
+        synchronized (ourInternedIdentities)
+        {
+            ModuleIdentity interned = ourInternedIdentities.get(name);
+            assert interned != null;
+            return interned;
+        }
     }
 
 
@@ -195,75 +184,6 @@ class ModuleIdentity
         return id;
     }
 
-    static ModuleIdentity internFromClasspath(String modulePath,
-                                              final String resource)
-    {
-        assert modulePath.startsWith("/");
-        assert resource.startsWith("/");
-
-        synchronized (ourInternedIdentities)
-        {
-            ModuleIdentity interned = ourInternedIdentities.get(modulePath);
-            if (interned != null) return interned;
-
-            ModuleIdentity id = new ModuleIdentity(modulePath)
-            {
-                @Override
-                public String identify()
-                {
-                    return internString() + " (at classpath:" + resource + ")";
-                }
-
-                @Override
-                InputStream open()
-                    throws IOException
-                {
-                    return getClass().getResourceAsStream(resource);
-                }
-            };
-
-            ourInternedIdentities.put(modulePath, id);
-            return id;
-        }
-    }
-
-
-    static ModuleIdentity internFromFile(String modulePath, final File file)
-    {
-        assert modulePath.startsWith("/");
-        assert file.isAbsolute();
-
-        synchronized (ourInternedIdentities)
-        {
-            ModuleIdentity interned = ourInternedIdentities.get(modulePath);
-            if (interned != null) return interned;
-
-            ModuleIdentity id = new ModuleIdentity(modulePath)
-            {
-                @Override
-                public String identify()
-                {
-                    return internString() + " (at file:" + file + ")";
-                }
-
-                @Override
-                InputStream open()
-                    throws IOException
-                {
-                    return new FileInputStream(file);
-                }
-
-                @Override
-                String parentDirectory()
-                {
-                    return file.getParentFile().getAbsolutePath();
-                }
-            };
-
-            ourInternedIdentities.put(modulePath, id);
-            return id;
-        }
-    }
 
     /** Not null or empty */
     private final String myName;
@@ -273,17 +193,6 @@ class ModuleIdentity
         myName = name;
     }
 
-
-    InputStream open()
-        throws IOException
-    {
-        throw new UnsupportedOperationException("Cannot open " + myName);
-    }
-
-    String parentDirectory()
-    {
-        return null;
-    }
 
     String identify()
     {
@@ -338,11 +247,18 @@ class ModuleIdentity
     @Override
     public boolean equals(Object obj)
     {
+        // Since we are interning instances, it would be nice to use reference
+        // equality here. However we don't intern local IDs, so that's not
+        // correct.
+
         if (this == obj) return true;
         if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        ModuleIdentity other = (ModuleIdentity) obj;
-        return myName.equals(other.myName);
+        if (obj instanceof ModuleIdentity)
+        {
+            ModuleIdentity other = (ModuleIdentity) obj;
+            return myName.equals(other.myName);
+        }
+        return false;
     }
 
 

@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.ModuleIdentity.internBuiltinName;
+import static com.amazon.fusion.ModuleIdentity.forAbsolutePath;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
@@ -108,8 +108,10 @@ final class StandardRuntime
             throw new IllegalArgumentException(message);
         }
 
-        ModuleIdentity id = internBuiltinName(absoluteModulePath);
-        return new ModuleBuilderImpl(myRegistry, id);
+        ModuleIdentity id = forAbsolutePath(absoluteModulePath);
+        return new ModuleBuilderImpl(myGlobalState.myModuleNameResolver,
+                                     myRegistry,
+                                     id);
     }
 
 

@@ -16,7 +16,7 @@ final class GlobalState
 
     static final String KERNEL_MODULE_NAME = "/fusion/private/kernel";
     static final ModuleIdentity KERNEL_MODULE_IDENTITY =
-        ModuleIdentity.internBuiltinName(KERNEL_MODULE_NAME);
+        ModuleIdentity.forAbsolutePath(KERNEL_MODULE_NAME);
 
     static final String ALL_DEFINED_OUT = "all_defined_out";
     static final String BEGIN           = "begin";
@@ -80,9 +80,6 @@ final class GlobalState
                                   Namespace initialCurrentNamespace)
         throws FusionException
     {
-        ModuleBuilderImpl ns =
-            new ModuleBuilderImpl(registry, KERNEL_MODULE_IDENTITY);
-
         Object userDir =
             FusionValue.forIonValue(system.newString(builder.getInitialCurrentDirectory().toString()));
         DynamicParameter currentDirectory =
@@ -101,6 +98,9 @@ final class GlobalState
                                    currentDirectory,
                                    currentModuleDeclareName,
                                    builder.buildModuleRepositories());
+
+        ModuleBuilderImpl ns =
+            new ModuleBuilderImpl(resolver, registry, KERNEL_MODULE_IDENTITY);
 
         ns.define(ALL_DEFINED_OUT, new ProvideForm.AllDefinedOutForm());
         ns.define(BEGIN, new BeginForm());    // Needed by hard-coded macro

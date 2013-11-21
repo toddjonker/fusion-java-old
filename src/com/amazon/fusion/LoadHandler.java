@@ -10,7 +10,6 @@ import com.amazon.ion.IonReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Parallel to Racket's load handler.
@@ -87,6 +86,7 @@ final class LoadHandler
 
     private SyntaxSexp readModuleDeclaration(Evaluator eval,
                                              ModuleIdentity id,
+                                             SourceName sourceName,
                                              IonReader reader)
         throws FusionException
     {
@@ -96,8 +96,7 @@ final class LoadHandler
             throw new FusionException(message);
         }
 
-        SourceName name = SourceName.forModule(id);
-        SyntaxValue firstTopLevel = Syntax.read(eval, reader, name);
+        SyntaxValue firstTopLevel = Syntax.read(eval, reader, sourceName);
         if (reader.next() != null)
         {
             String message =
@@ -125,27 +124,22 @@ final class LoadHandler
     }
 
 
-    private SyntaxSexp readModuleDeclaration(Evaluator eval, ModuleIdentity id)
+    private SyntaxSexp readModuleDeclaration(Evaluator eval,
+                                             ModuleIdentity id,
+                                             ModuleLocation loc)
         throws FusionException
     {
         try
         {
-            InputStream in = id.open();
+            IonReader reader = loc.read(eval);
             try
             {
-                IonReader reader = eval.getSystem().newReader(in);
-                try
-                {
-                    return readModuleDeclaration(eval, id, reader);
-                }
-                finally
-                {
-                    reader.close();
-                }
+                SourceName sourceName = loc.sourceName();
+                return readModuleDeclaration(eval, id, sourceName, reader);
             }
             finally
             {
-                in.close();
+                reader.close();
             }
         }
         catch (IOException e)
@@ -177,7 +171,7 @@ final class LoadHandler
      * The module is not instantiated.
      */
     private void evalModuleDeclaration(Evaluator eval,
-                                       ModuleIdentity id,
+                                       ModuleLocation loc,
                                        SyntaxSexp moduleDeclaration)
         throws FusionException
     {
@@ -185,7 +179,7 @@ final class LoadHandler
             wrapModuleIdentifierWithKernelBindings(eval, moduleDeclaration);
 
         Evaluator bodyEval = eval;
-        String dirPath = id.parentDirectory();
+        String dirPath = loc.parentDirectory();
         if (dirPath != null)
         {
             bodyEval =
@@ -204,14 +198,14 @@ final class LoadHandler
      * Reads module source and declares it in the current namespace's registry.
      * The module is not instantiated.
      */
-    void loadModule(Evaluator eval, ModuleIdentity id)
+    void loadModule(Evaluator eval, ModuleIdentity id, ModuleLocation loc)
         throws FusionException
     {
         try
         {
-            SyntaxSexp moduleDeclaration = readModuleDeclaration(eval, id);
+            SyntaxSexp moduleDeclaration = readModuleDeclaration(eval, id, loc);
 
-            evalModuleDeclaration(eval, id, moduleDeclaration);
+            evalModuleDeclaration(eval, loc, moduleDeclaration);
         }
         catch (FusionException e)
         {

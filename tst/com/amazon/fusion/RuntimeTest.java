@@ -197,8 +197,8 @@ public class RuntimeTest
     public void testModuleRegistration()
         throws Exception
     {
-        final ModuleIdentity id = ModuleIdentity.internBuiltinName("/tst/dummy");
-        assertSame(id, ModuleIdentity.internBuiltinName("/tst/dummy"));
+        final ModuleIdentity id = ModuleIdentity.forAbsolutePath("/tst/dummy");
+        assertSame(id, ModuleIdentity.forAbsolutePath("/tst/dummy"));
 
         ModuleBuilder builder = runtime().makeModuleBuilder("/tst/dummy");
         builder.instantiate();

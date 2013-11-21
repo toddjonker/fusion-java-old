@@ -340,8 +340,8 @@ final class ModuleForm
         Namespace moduleNamespace;
         {
             SyntaxText form = (SyntaxText) meta.get(eval, "language_identity");
-            String identity = form.stringValue();
-            ModuleIdentity languageId = ModuleIdentity.reIntern(identity);
+            ModuleIdentity languageId =
+                ModuleIdentity.forAbsolutePath(form.stringValue());
 
             ModuleRegistry registry =
                 envOutsideModule.namespace().getRegistry();
@@ -422,7 +422,7 @@ final class ModuleForm
             assert outsideNs == eval.findCurrentNamespace();
 
             String declaredName = moduleNameSymbol.stringValue();
-            id = ModuleIdentity.internLocalName(outsideNs, declaredName);
+            id = ModuleIdentity.forLocalName(outsideNs, declaredName);
         }
         return id;
     }
@@ -527,6 +527,10 @@ final class ModuleForm
             ModuleRegistry registry =
                 eval.findCurrentNamespace().getRegistry();
             registry.declare(myId, this);
+
+            ModuleNameResolver resolver =
+                eval.getGlobalState().myModuleNameResolver;
+            resolver.registerDeclaredModule(registry, myId);
 
             return voidValue(eval);
         }

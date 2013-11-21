@@ -5,6 +5,8 @@ package com.amazon.fusion;
 import static com.amazon.fusion.ModuleIdentity.isValidModulePath;
 import static com.amazon.ion.util.IonTextUtils.printString;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -21,6 +23,11 @@ final class ModuleNameResolver
     private final DynamicParameter myCurrentModuleDeclareName;
     private final ModuleRepository[] myRepositories;
 
+    /**
+     * Access to this map must be synchronized on it!
+     */
+    private final Set<ModuleIdentity> myLoadedModuleIds =
+        new HashSet<>();
 
     ModuleNameResolver(LoadHandler loadHandler,
                        DynamicParameter currentLoadRelativeDirectory,
@@ -33,6 +40,21 @@ final class ModuleNameResolver
         myCurrentDirectory = currentDirectory;
         myCurrentModuleDeclareName = currentModuleDeclareName;
         myRepositories = repositories;
+    }
+
+
+    /**
+     * Asserts that a particular module has already had its declaration loaded
+     * in the given registry.
+     */
+    void registerDeclaredModule(ModuleRegistry registry, ModuleIdentity id)
+        throws FusionException
+    {
+        // TODO FUSION-239 Keep a set per registry
+        synchronized (myLoadedModuleIds)
+        {
+            myLoadedModuleIds.add(id);
+        }
     }
 
 
@@ -66,35 +88,21 @@ final class ModuleNameResolver
 
 
     /**
-     * @param baseModule the starting point for relative references; not null.
-     *
      * @return null if the referenced module couldn't be located in the current
      * registry or any repository.
      */
-    ModuleIdentity locate(Evaluator eval, ModuleIdentity baseModule,
-                          String modulePath, SyntaxValue stxForErrors)
+    private ModuleLocation locate(Evaluator eval,
+                                  ModuleIdentity id,
+                                  SyntaxValue stxForErrors)
         throws FusionException
     {
-        ModuleIdentity id;
-        if (modulePath.startsWith("/"))
+        for (ModuleRepository repo : myRepositories)
         {
-            id = ModuleIdentity.locate(modulePath);
-        }
-        else
-        {
-            // Relative path
-            id = ModuleIdentity.locateRelative(baseModule, modulePath);
+            ModuleLocation loc = repo.locateModule(eval, id);
+            if (loc != null) return loc;
         }
 
-        if (id == null)
-        {
-            for (ModuleRepository repo : myRepositories)
-            {
-                id = repo.resolveLib(eval, modulePath);
-                if (id != null) break;
-            }
-        }
-        return id;
+        return null;
     }
 
 
@@ -122,10 +130,16 @@ final class ModuleNameResolver
             throw new SyntaxException(null, message, stxForErrors);
         }
 
-        ModuleIdentity id = locate(eval, baseModule, modulePath, stxForErrors);
-        if (id != null)
+        ModuleIdentity id = ModuleIdentity.forPath(baseModule, modulePath);
+        synchronized (myLoadedModuleIds)
         {
-            if (load) loadModule(eval, id);
+            if (myLoadedModuleIds.contains(id)) return id;
+        }
+
+        ModuleLocation loc = locate(eval, id, stxForErrors);
+        if (loc != null)
+        {
+            if (load) loadModule(eval, id, loc);
             return id;
         }
 
@@ -179,11 +193,22 @@ final class ModuleNameResolver
     }
 
 
-    private ModuleIdentity loadModule(Evaluator eval, ModuleIdentity id)
+    /**
+     * Loads a module from a known location.
+     * <p>
+     * This method is awkwardly placed in this class, and might make more sense
+     * in {@link LoadHandler}.  However, Racket gives this component the task
+     * of parameterizing current_module_declare_name and performing cycle
+     * detection, and I'm loath to change that without good cause.
+     * <p>
+     * Also, its unclear how all of this will play out for enclosed submodules
+     * like {@code (module Parent ... (module Child ...))}.
+     */
+    void loadModule(Evaluator      eval,
+                    ModuleIdentity id,
+                    ModuleLocation loc)
         throws FusionException
     {
-        // TODO Need a way to resolve only, avoid loading, as per Racket.
-
         ModuleRegistry reg = eval.findCurrentNamespace().getRegistry();
 
         // Ensure that we don't try to load the module twice simultaneously.
@@ -200,11 +225,9 @@ final class ModuleNameResolver
                     eval.markedContinuation(new Object[]{ myCurrentModuleDeclareName,
                                                           MODULE_LOADING_MARK },
                                             new Object[]{ idString, idString });
-                myLoadHandler.loadModule(loadEval, id);
+                myLoadHandler.loadModule(loadEval, id, loc);
                 // Evaluation of 'module' declares it, but doesn't instantiate.
             }
         }
-
-        return id;
     }
 }
