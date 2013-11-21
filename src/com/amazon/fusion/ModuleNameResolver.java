@@ -139,7 +139,7 @@ final class ModuleNameResolver
         ModuleLocation loc = locate(eval, id, stxForErrors);
         if (loc != null)
         {
-            if (load) loadModule(eval, id, loc);
+            if (load) loadModule(eval, id, loc, false /* don't reload */);
             return id;
         }
 
@@ -194,7 +194,8 @@ final class ModuleNameResolver
 
 
     /**
-     * Loads a module from a known location.
+     * Loads a module from a known location into the current namespace's
+     * registry.
      * <p>
      * This method is awkwardly placed in this class, and might make more sense
      * in {@link LoadHandler}.  However, Racket gives this component the task
@@ -203,10 +204,14 @@ final class ModuleNameResolver
      * <p>
      * Also, its unclear how all of this will play out for enclosed submodules
      * like {@code (module Parent ... (module Child ...))}.
+     *
+     * @param reload indicates whether the module should be reloaded if it's
+     * already in the registry.
      */
     void loadModule(Evaluator      eval,
                     ModuleIdentity id,
-                    ModuleLocation loc)
+                    ModuleLocation loc,
+                    boolean reload)
         throws FusionException
     {
         ModuleRegistry reg = eval.findCurrentNamespace().getRegistry();
@@ -215,7 +220,7 @@ final class ModuleNameResolver
         // TODO FUSION-73 This is probably far too coarse-grained in general.
         synchronized (reg)
         {
-            if (! reg.isLoaded(id))
+            if (reload || ! reg.isLoaded(id))
             {
                 Object idString = eval.newString(id.internString());
 

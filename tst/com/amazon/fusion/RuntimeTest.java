@@ -323,4 +323,21 @@ public class RuntimeTest
                               system().newReader(GOOD_MODULE),
                               SourceName.forDisplay("manual source"));
     }
+
+    @Test
+    public void testLoadModuleThatsAlreadyRegistered()
+        throws Exception
+    {
+        topLevel().loadModule("/local/manual",
+                              system().newReader(GOOD_MODULE),
+                              SourceName.forDisplay("manual source"));
+        try
+        {
+            topLevel().loadModule("/local/manual",
+                                  system().newReader(GOOD_MODULE),
+                                  SourceName.forDisplay("manual source"));
+            fail("Expected exception");
+        }
+        catch (FusionException e) { }
+    }
 }

@@ -144,8 +144,12 @@ public interface TopLevel
      *
      * @param absoluteModulePath identifies the module to be loaded.
      * Must be an absolute module path, starting with {@code '/'}.
-     * @param source the Ion source of the module.
-     * @param name may be null.
+     * @param source Fusion source code, in Ion data format. Must not be null.
+     * @param name identifies the source for error reporting. May be null.
+     *
+     * @throws FusionException if the reader doesn't provide exactly one
+     * top-level value, if a module with the given identity has already been
+     * loaded, or if there's any other problem reading or compiling the module.
      */
     public void loadModule(String absoluteModulePath,
                            IonReader source,

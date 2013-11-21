@@ -138,7 +138,7 @@ final class StandardTopLevel
         ModuleLocation loc =
             new IonReaderModuleLocation(source, name);
 
-        resolver.loadModule(myEvaluator, id, loc);
+        resolver.loadModule(myEvaluator, id, loc, true /* reload it */);
     }
 
 
