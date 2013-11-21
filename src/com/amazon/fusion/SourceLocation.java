@@ -9,6 +9,7 @@ import java.io.IOException;
 
 final class SourceLocation
 {
+    /** May be null. */
     final SourceName myName;
     /** Zero-based */
     final long myLine;
@@ -20,6 +21,11 @@ final class SourceLocation
      * Returns an instance that represents the current span of the reader.
      * This currently only supports Ion text sources, and only captures the
      * start position.
+     *
+     * @param source may be null.
+     * @param name may be null.
+     *
+     * @return null if no location could be determined.
      */
     static SourceLocation currentLocation(IonReader source, SourceName name)
     {
@@ -36,6 +42,7 @@ final class SourceLocation
 
 
     /**
+     * @param name may be null
      * @param line zero-based
      * @param column zero-based
      */

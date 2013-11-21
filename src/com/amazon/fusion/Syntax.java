@@ -44,6 +44,10 @@ final class Syntax
     }
 
     /**
+     * Reads a single Ion datum as source.
+     *
+     * @param source must be positioned on the value to be read.
+     * @param name may be null.
      * @throws IonException if there's a problem reading the source data.
      */
     static SyntaxValue read(Evaluator eval, IonReader source, SourceName name)
@@ -135,6 +139,13 @@ final class Syntax
     }
 
 
+    /**
+     * @param source must be positioned on the value to be read, but not
+     * stepped-in.
+     * @param name may be null.
+     *
+     * @return null if the sequence is null (eg, {@code null.list}).
+     */
     static SyntaxValue[] readSequence(Evaluator eval,
                                       IonReader source,
                                       SourceName name)
