@@ -34,11 +34,8 @@ final class FileSystemModuleRepository
     ModuleLocation locateModule(Evaluator eval, final ModuleIdentity id)
         throws FusionException
     {
-        String absoluteModulePath = id.internString();
-
-        // TODO ugly hard-coding
-        String fileName =
-            absoluteModulePath.substring(1) + FUSION_SOURCE_EXTENSION;
+        String path = id.absolutePath();
+        String fileName = path.substring(1) + FUSION_SOURCE_EXTENSION;
 
         final File libFile = new File(myRepoDir, fileName);
         if (libFile.exists())

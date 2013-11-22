@@ -132,7 +132,7 @@ final class ModuleInstance
                     {
                         String msg =
                             "WARNING: using doc-on-value for " +
-                                myIdentity.internString() + ' ' + name;
+                                myIdentity.absolutePath() + ' ' + name;
                         System.err.println(msg);
                     }
 
@@ -140,7 +140,7 @@ final class ModuleInstance
                     {
                         String msg =
                             "WARNING: potential documented-name mismatch in " +
-                            myIdentity.internString() + ": " +
+                            myIdentity.absolutePath() + ": " +
                             name + " vs " + doc.getName();
                         System.err.println(msg);
                     }
@@ -186,6 +186,6 @@ final class ModuleInstance
         throws IOException
     {
         out.append("module ");
-        out.append(myIdentity.toString());
+        out.append(myIdentity.absolutePath());
     }
 }

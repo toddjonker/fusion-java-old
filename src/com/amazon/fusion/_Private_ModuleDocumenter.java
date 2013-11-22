@@ -201,7 +201,7 @@ public final class _Private_ModuleDocumenter
         void renderModule(ModuleDoc doc)
             throws IOException
         {
-            String modulePath = doc.myModuleId.internString();
+            String modulePath = doc.myModuleId.absolutePath();
             renderHead(modulePath, myBaseUrl, "module.css");
 
             append("<div class='indexlink'>" +

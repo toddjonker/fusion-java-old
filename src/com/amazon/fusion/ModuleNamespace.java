@@ -108,7 +108,7 @@ class ModuleNamespace
         @Override
         public String toString()
         {
-            return "{{{ModuleBinding " + myModuleId.internString()
+            return "{{{ModuleBinding " + myModuleId.absolutePath()
                 + ' ' + getIdentifier().debugString() + "}}}";
         }
     }
@@ -138,9 +138,9 @@ class ModuleNamespace
         @Override
         public String toString()
         {
-            String name =
-                ((ModuleNamespace)getEnvironment()).myModuleId.internString();
-            return "{{{ModuleWrap " + name + "}}}";
+            ModuleIdentity id =
+                ((ModuleNamespace) getEnvironment()).getModuleId();
+            return "{{{ModuleWrap " + id.absolutePath() + "}}}";
         }
     }
 

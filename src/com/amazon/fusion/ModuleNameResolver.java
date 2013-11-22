@@ -222,7 +222,7 @@ final class ModuleNameResolver
         {
             if (reload || ! reg.isLoaded(id))
             {
-                Object idString = eval.newString(id.internString());
+                Object idString = eval.newString(id.absolutePath());
 
                 checkForCycles(eval, idString);
 

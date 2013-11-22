@@ -312,7 +312,7 @@ class TopLevelNamespace
         public String toString()
         {
             return "{{{TopLevelRequireBinding "
-                 + myBinding.myModuleId.internString()
+                 + myBinding.myModuleId.absolutePath()
                  + ' ' + getName() + "}}}";
         }
     }

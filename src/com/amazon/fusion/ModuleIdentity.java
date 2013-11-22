@@ -80,39 +80,30 @@ class ModuleIdentity
     }
 
 
-    private static ModuleIdentity doIntern(String name)
+    private static ModuleIdentity doIntern(String path)
     {
         synchronized (ourInternedIdentities)
         {
-            ModuleIdentity interned = ourInternedIdentities.get(name);
+            ModuleIdentity interned = ourInternedIdentities.get(path);
             if (interned != null) return interned;
 
-            ModuleIdentity id = new ModuleIdentity(name);
-            ourInternedIdentities.put(name, id);
+            ModuleIdentity id = new ModuleIdentity(path);
+            ourInternedIdentities.put(path, id);
             return id;
         }
     }
 
 
     /**
-     * @return an absolute module path
-     */
-    private static String localPath(Namespace ns, String name)
-    {
-        assert isValidLocalName(name) : name;
-        return ns.getModuleId().internString() + '/' + name;
-    }
-
-
-    /**
-     * @param name must be a valid local module name.
+     * @param name must be a valid local module name (not a general path).
      * @return not null.
      *
      * @see #isValidLocalName(String)
      */
     static ModuleIdentity forLocalName(Namespace ns, String name)
     {
-        String path = localPath(ns, name);
+        assert isValidLocalName(name) : name;
+        String path = ns.getModuleId().absolutePath() + '/' + name;
         return doIntern(path);
     }
 
@@ -129,17 +120,20 @@ class ModuleIdentity
     }
 
 
-    static ModuleIdentity forPath(ModuleIdentity baseModule,
-                                  String modulePath)
+    /**
+     * @param baseModule must not be null if the path is relative.
+     * @param path may be absolute or relative.
+     */
+    static ModuleIdentity forPath(ModuleIdentity baseModule, String path)
     {
-        if (! isValidAbsoluteModulePath(modulePath))
+        if (! isValidAbsoluteModulePath(path))
         {
             // Relative path
-            assert isValidLocalName(modulePath);  // For now...
+            assert isValidLocalName(path);  // For now...
             String basePath = baseModule.relativeBasePath();
-            modulePath = basePath + modulePath;
+            path = basePath + path;
         }
-        return doIntern(modulePath);
+        return doIntern(path);
     }
 
 
@@ -147,14 +141,14 @@ class ModuleIdentity
      * WORKAROUND for not being able to put ModuleIdentity as the value of
      * current_module_declare_name or as a syntax property on `module` forms.
      *
-     * @param name must be the result of {@link #internString()}.
+     * @param path must be the result of {@link #absolutePath()}.
      * @return not null.
      */
-    static ModuleIdentity reIntern(String name)
+    static ModuleIdentity reIntern(String path)
     {
         synchronized (ourInternedIdentities)
         {
-            ModuleIdentity interned = ourInternedIdentities.get(name);
+            ModuleIdentity interned = ourInternedIdentities.get(path);
             assert interned != null;
             return interned;
         }
@@ -177,7 +171,7 @@ class ModuleIdentity
             @Override
             String relativeBasePath()
             {
-                return internString() + "/";
+                return absolutePath() + "/";
             }
         };
 
@@ -185,42 +179,50 @@ class ModuleIdentity
     }
 
 
-    /** Not null or empty */
-    private final String myName;
+    /** An absolute path, not null or empty */
+    private final String myPath;
 
     private ModuleIdentity(String name)
     {
-        myName = name;
-    }
-
-
-    String identify()
-    {
-        return myName;
+        myPath = name;
     }
 
 
     @Override
     public String toString()
     {
-        return identify();
+        return myPath;
     }
 
-    public String internString()
+
+    /**
+     * Returns the absolute path of this identity.  The result can be turned
+     * back into an (interned) identity via {@link #forAbsolutePath(String)}.
+     *
+     * @return a non-empty string starting (but not ending) with {@code '/'}.
+     */
+    public String absolutePath()
     {
-        return myName;
+        return myPath;
     }
+
 
     public String baseName()
     {
-        int slashIndex = myName.lastIndexOf('/');
-        if (slashIndex == -1) return myName;
-        return myName.substring(slashIndex + 1);
+        int slashIndex = myPath.lastIndexOf('/');
+        if (slashIndex == -1) return myPath;
+        return myPath.substring(slashIndex + 1);
     }
 
+
+    /**
+     * Returns a base path to which a relative path can be appended.
+     *
+     * @return a string starting and ending with {@code '/'}.
+     */
     String relativeBasePath()
     {
-        String path = myName;
+        String path = myPath;
         int slashIndex = path.lastIndexOf('/');
         assert slashIndex >= 0;
         if (slashIndex == 0)
@@ -240,7 +242,7 @@ class ModuleIdentity
     public int hashCode()
     {
         final int prime = 31;
-        return prime + myName.hashCode();
+        return prime + myPath.hashCode();
     }
 
 
@@ -256,7 +258,7 @@ class ModuleIdentity
         if (obj instanceof ModuleIdentity)
         {
             ModuleIdentity other = (ModuleIdentity) obj;
-            return myName.equals(other.myName);
+            return myPath.equals(other.myPath);
         }
         return false;
     }
@@ -265,6 +267,6 @@ class ModuleIdentity
     @Override
     public int compareTo(ModuleIdentity that)
     {
-        return this.myName.compareTo(that.myName);
+        return this.myPath.compareTo(that.myPath);
     }
 }

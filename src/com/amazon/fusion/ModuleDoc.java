@@ -80,7 +80,7 @@ final class ModuleDoc
             return "/" + name;
         }
 
-        String parentPath = myModuleId.internString();
+        String parentPath = myModuleId.absolutePath();
         assert parentPath.startsWith("/");
 
         return parentPath + "/" + name;
@@ -273,9 +273,9 @@ final class ModuleDoc
     {
         boolean accept(ModuleIdentity id)
         {
-            String name = id.internString();
-            if (name.endsWith("/private")) return false;
-            if (name.contains("/private/")) return false;
+            String path = id.absolutePath();
+            if (path.endsWith("/private")) return false;
+            if (path.contains("/private/")) return false;
             return true;
         }
     }

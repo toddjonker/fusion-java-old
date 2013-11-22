@@ -20,11 +20,9 @@ final class JarModuleRepository
     ModuleLocation locateModule(Evaluator eval, final ModuleIdentity id)
         throws FusionException
     {
-        String absoluteModulePath = id.internString();
-
-        // TODO ugly hard-coding
+        String path = id.absolutePath();
         final String fileName =
-            "/FUSION-REPO" + absoluteModulePath + FUSION_SOURCE_EXTENSION;
+            "/FUSION-REPO" + path + FUSION_SOURCE_EXTENSION;
 
         if (getClass().getResource(fileName) != null)
         {

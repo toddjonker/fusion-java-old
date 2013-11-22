@@ -54,7 +54,7 @@ class ModuleRenameWrap
     @Override
     public String toString()
     {
-        String id = myModule.getIdentity().internString();
+        String id = myModule.getIdentity().absolutePath();
         return "{{{Module renames for " + id + "}}}";
     }
 }

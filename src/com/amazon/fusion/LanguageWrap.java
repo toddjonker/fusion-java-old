@@ -85,7 +85,7 @@ final class LanguageWrap
         @Override
         public String toString()
         {
-            return "{{{LanguageBinding " + myBinding.myModuleId.internString()
+            return "{{{LanguageBinding " + myBinding.myModuleId.absolutePath()
                  + ' ' + getName() + "}}}";
         }
     }
@@ -129,7 +129,7 @@ final class LanguageWrap
     @Override
     public String toString()
     {
-        String id = myModule.getIdentity().internString();
+        String id = myModule.getIdentity().absolutePath();
         return "{{{Language wrap for " + id + "}}}";
     }
 }
