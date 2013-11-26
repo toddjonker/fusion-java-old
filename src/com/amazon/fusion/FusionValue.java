@@ -37,7 +37,7 @@ public abstract class FusionValue
 
 
     /** The singular {@code undef} value. */
-    final static FusionValue UNDEF = new Undef();
+    static final FusionValue UNDEF = new Undef();
 
 
     //========================================================================
@@ -75,13 +75,6 @@ public abstract class FusionValue
 
         IonValue iv = castToIonValueMaybe(value);
         return (iv != null ? iv.isNullValue() : false);
-    }
-
-
-    static boolean isNullNull(Evaluator eval, Object value)
-    {
-        IonValue iv = castToIonValueMaybe(value);
-        return (iv != null && iv.getType() == IonType.NULL);
     }
 
 

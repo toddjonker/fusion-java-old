@@ -4,6 +4,8 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionCollection.isCollection;
 import static com.amazon.fusion.FusionCollection.unsafeCollectionAnnotate;
+import static com.amazon.fusion.FusionNull.isNullNull;
+import static com.amazon.fusion.FusionNull.makeNullNull;
 import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
 import com.amazon.ion.IonValue;
 
@@ -35,6 +37,11 @@ final class AnnotateProc
         if (isCollection(eval, target))
         {
             return unsafeCollectionAnnotate(eval, target, annotations);
+        }
+
+        if (isNullNull(eval, target))
+        {
+            return makeNullNull(eval, annotations);
         }
 
         IonValue value = castToIonValueMaybe(target);

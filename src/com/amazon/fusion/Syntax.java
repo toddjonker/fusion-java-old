@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionList.isList;
 import static com.amazon.fusion.FusionList.isNullList;
 import static com.amazon.fusion.FusionList.unsafeListRef;
 import static com.amazon.fusion.FusionList.unsafeListSize;
+import static com.amazon.fusion.FusionNull.isNullNull;
 import static com.amazon.fusion.FusionSexp.isEmptySexp;
 import static com.amazon.fusion.FusionSexp.isPair;
 import static com.amazon.fusion.FusionSexp.isSexp;
@@ -65,7 +66,7 @@ final class Syntax
         {
             case NULL:
             {
-                return SyntaxNull.make(anns, loc);
+                return SyntaxNull.make(eval, loc, anns);
             }
             case BOOL:
             {
@@ -310,6 +311,11 @@ final class Syntax
             {
                 return null;
             }
+        }
+
+        if (isNullNull(eval, datum))
+        {
+            return SyntaxNull.make(eval, /*location*/ null, datum);
         }
 
         return null;

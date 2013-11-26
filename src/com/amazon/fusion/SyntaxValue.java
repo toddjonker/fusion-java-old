@@ -41,6 +41,9 @@ abstract class SyntaxValue
     }
 
 
+    /**
+     * @return not null.
+     */
     final String[] getAnnotations()
     {
         return myAnnotations;

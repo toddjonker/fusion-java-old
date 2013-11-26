@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionList.listFromIonSequence;
+import static com.amazon.fusion.FusionNull.makeNullNull;
 import static com.amazon.fusion.FusionSexp.sexpFromIonSequence;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionStruct.structFromIonStruct;
@@ -82,19 +83,27 @@ final class Evaluator
         {
             return voidValue(this);
         }
-        else if (value instanceof IonStruct)
+
+        switch (value.getType())
         {
-            return structFromIonStruct(this, (IonStruct) value);
-        }
-        else if (value instanceof IonList)
-        {
-            IonList list = (IonList) value;
-            return listFromIonSequence(this, list);
-        }
-        else if (value instanceof IonSexp)
-        {
-            IonSexp sexp = (IonSexp) value;
-            return sexpFromIonSequence(this, sexp);
+            case NULL:
+            {
+                return makeNullNull(this, value.getTypeAnnotations());
+            }
+            case LIST:
+            {
+                IonList list = (IonList) value;
+                return listFromIonSequence(this, list);
+            }
+            case SEXP:
+            {
+                IonSexp sexp = (IonSexp) value;
+                return sexpFromIonSequence(this, sexp);
+            }
+            case STRUCT:
+            {
+                return structFromIonStruct(this, (IonStruct) value);
+            }
         }
         return value;
     }
@@ -172,11 +181,14 @@ final class Evaluator
     //========================================================================
 
 
+    /**
+     * @deprecated Use {@link FusionNull#makeNullNull(Evaluator)} or
+     * {@link FusionNull#makeNullNull(Evaluator, String[])}.
+     */
+    @Deprecated
     Object newNull(String... annotations)
     {
-        IonValue dom = mySystem.newNull();
-        if (annotations != null) dom.setTypeAnnotations(annotations);
-        return inject(dom);
+        return makeNullNull(this, annotations);
     }
 
     Object newBool(boolean value)
