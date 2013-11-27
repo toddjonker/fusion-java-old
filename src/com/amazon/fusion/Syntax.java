@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionList.isList;
+import static com.amazon.fusion.FusionList.isNullList;
 import static com.amazon.fusion.FusionList.unsafeListRef;
 import static com.amazon.fusion.FusionList.unsafeListSize;
 import static com.amazon.fusion.FusionSexp.isEmptySexp;
@@ -12,6 +13,7 @@ import static com.amazon.fusion.FusionSexp.pair;
 import static com.amazon.fusion.FusionSexp.unsafePairHead;
 import static com.amazon.fusion.FusionSexp.unsafePairTail;
 import static com.amazon.fusion.FusionStruct.isStruct;
+import static com.amazon.fusion.FusionValue.annotationsAsJavaStrings;
 import static com.amazon.fusion.FusionValue.castToIonValueMaybe;
 import static com.amazon.fusion.SourceLocation.currentLocation;
 import com.amazon.fusion.FusionSexp.BaseSexp;
@@ -240,20 +242,28 @@ final class Syntax
 
         if (isList(eval, datum))
         {
-            int size = unsafeListSize(eval, datum);
-            SyntaxValue[] children = new SyntaxValue[size];
-            for (int i = 0; i < size; i++)
+            String[] anns = annotationsAsJavaStrings(eval, datum);
+            SyntaxValue[] children = null;
+
+            if (! isNullList(eval, datum))
             {
-                Object rawChild = unsafeListRef(eval, datum, i);
-                SyntaxValue child = datumToStrippedSyntaxMaybe(eval, rawChild);
-                if (child == null)
+                int size = unsafeListSize(eval, datum);
+                children = new SyntaxValue[size];
+                for (int i = 0; i < size; i++)
                 {
-                    // Hit something that's not syntax-able
-                    return null;
+                    Object rawChild = unsafeListRef(eval, datum, i);
+                    SyntaxValue child =
+                        datumToStrippedSyntaxMaybe(eval, rawChild);
+                    if (child == null)
+                    {
+                        // Hit something that's not syntax-able
+                        return null;
+                    }
+                    children[i] = child;
                 }
-                children[i] = child;
             }
-            return SyntaxList.make(null, children);
+
+            return SyntaxList.make(null, anns, children);
         }
 
         if (isPair(eval, datum))

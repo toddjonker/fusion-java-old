@@ -41,6 +41,12 @@
 // syntax_to_datum
 
 
+(check ion_equals (syntax_to_datum (quote_syntax a::null))
+  (quote a::null))
+(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::null)))
+  (quote a::null))
+
+
 (check = true        (syntax_to_datum (quote_syntax true)))
 (check = 159         (syntax_to_datum (quote_syntax 159)))
 //(check = 2.57e0      (syntax_to_datum (quote_syntax 2.57e0)))   // TODO
@@ -85,6 +91,19 @@
   (quote a::(b c)) "")
 
 
+(check ion_equals (syntax_to_datum (quote_syntax a::null.list))
+  (quote a::null.list))
+(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::null.list)))
+  (quote a::null.list))
+(check ion_equals (syntax_to_datum (quote_syntax a::[]))
+  (quote a::[]))
+(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::[])))
+  (quote a::[]))
+(check ion_equals (syntax_to_datum (quote_syntax a::[1]))
+  (quote a::[1]))
+(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::[1])))
+  (quote a::[1]))
+
 (lets [(stx (quote_syntax [a, 2])),
        (unwrapped (syntax_to_datum stx))]
   (check_equal (quote [a, 2]) unwrapped ""))
@@ -94,6 +113,20 @@
   (check = (quote a) (head unwrapped))
   (check = 2 (. unwrapped 1 "f") "f")
   (check_equal ["hi"] (. unwrapped 1 "g") "g"))
+
+
+(check ion_equals (syntax_to_datum (quote_syntax a::null.struct))
+  (quote a::null.struct))
+(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::null.struct)))
+  (quote a::null.struct))
+(check ion_equals (syntax_to_datum (quote_syntax a::{}))
+  (quote a::{}))
+(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::{})))
+  (quote a::{}))
+(check ion_equals (syntax_to_datum (quote_syntax a::{f:1}))
+  (quote a::{f:1}))
+(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::{f:1})))
+  (quote a::{f:1}))
 
 
 //==========================================================================
