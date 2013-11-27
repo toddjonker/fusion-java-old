@@ -129,6 +129,7 @@ final class GlobalState
         for (IonType t : IonType.values())
         {
             if (t != IonType.NULL &&
+                t != IonType.BOOL &&
                 t != IonType.DATAGRAM &&
                 t != IonType.LIST &&
                 t != IonType.SEXP &&

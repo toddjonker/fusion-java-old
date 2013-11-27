@@ -2,10 +2,11 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.isBool;
+import static com.amazon.fusion.FusionBool.unsafeBoolIsTrue;
 import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.isVoid;
-import com.amazon.ion.IonBool;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonType;
@@ -107,11 +108,9 @@ public abstract class FusionValue
 
         if (isAnyNull(eval, value)) return false;
 
-        IonValue iv = FusionValue.castToIonValueMaybe(value);
-        if (iv instanceof IonBool)
+        if (isBool(eval, value))
         {
-            IonBool bv = (IonBool) iv;
-            return bv.booleanValue();
+            return unsafeBoolIsTrue(eval, value);
         }
 
         return true;
@@ -380,21 +379,6 @@ public abstract class FusionValue
         if (iv != null && iv.getType() == IonType.INT)
         {
             return ((IonInt) iv).longValue();
-        }
-        return null;
-    }
-
-
-    /**
-     * Returns a Fusion bool as a Java Boolean.
-     * @return null if the value isn't true or false.
-     */
-    static Boolean asBoolean(Object value)
-    {
-        IonValue iv = castToIonValueMaybe(value);
-        if (iv != null && iv.getType() == IonType.BOOL && ! iv.isNullValue())
-        {
-            return ((IonBool) iv).booleanValue();
         }
         return null;
     }

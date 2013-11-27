@@ -298,6 +298,18 @@ public class CoreTestCase
     }
 
 
+    void checkIon(IonValue expected, Object actual)
+        throws FusionException
+    {
+        IonValue iv = runtime().ionizeMaybe(actual, system());
+        if (iv == null)
+        {
+            Assert.fail("Result isn't ion: " + actual);
+        }
+        assertEquals(expected, iv);
+    }
+
+
     //========================================================================
 
 

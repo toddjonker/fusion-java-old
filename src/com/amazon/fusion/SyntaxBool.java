@@ -2,26 +2,52 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonType;
+import static com.amazon.fusion.FusionBool.makeBool;
+import com.amazon.fusion.FusionBool.BaseBool;
+import com.amazon.ion.IonException;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
 final class SyntaxBool
     extends SyntaxValue
 {
-    private final Boolean myValue;
+    private final BaseBool myDatum;
 
 
-    private SyntaxBool(Boolean value, String[] anns, SourceLocation loc)
+    private SyntaxBool(SourceLocation loc, BaseBool datum)
     {
-        super(anns, loc);
-        myValue = value;
+        super(datum.annotationsAsJavaStrings(), loc);
+        myDatum = datum;
     }
 
-    static SyntaxBool make(Boolean value, String[] anns, SourceLocation loc)
+
+    /**
+     * @param datum must be a Fusion bool.
+     */
+    static SyntaxBool make(Evaluator eval, SourceLocation loc, Object datum)
     {
-        return new SyntaxBool(value, anns, loc);
+        BaseBool bool = (BaseBool) datum;
+        return new SyntaxBool(loc, bool);
     }
+
+
+    /**
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     * @param value may be null.
+     */
+    static SyntaxBool make(Evaluator eval,
+                           SourceLocation loc,
+                           String[] annotations,
+                           Boolean value)
+    {
+        BaseBool b = makeBool(eval, annotations, value);
+        return new SyntaxBool(loc, b);
+    }
+
+
+    //========================================================================
 
 
     @Override
@@ -31,35 +57,28 @@ final class SyntaxBool
     }
 
     @Override
-    Object doCompileIonConstant(Evaluator eval, Environment env)
+    CompiledForm doCompile(Evaluator eval, Environment env)
         throws FusionException
     {
-        return eval.newBool(myValue);
+        return new CompiledConstant(myDatum);
     }
 
     @Override
     Object unwrap(Evaluator eval, boolean recurse)
     {
-        return eval.newBool(myValue, getAnnotations());
+        return myDatum;
     }
 
     @Override
-    void ionize(Evaluator eval, IonWriter writer) throws IOException
+    void ionize(Evaluator eval, IonWriter writer)
+        throws IOException, IonException, FusionException, IonizeFailure
     {
-        ionizeAnnotations(writer);
-        if (myValue == null)
-        {
-            writer.writeNull(IonType.BOOL);
-        }
-        else
-        {
-            writer.writeBool(myValue);
-        }
+        myDatum.ionize(eval, writer);
     }
 
     @Override
     boolean isNullValue()
     {
-        return myValue == null;
+        return myDatum.isAnyNull();
     }
 }

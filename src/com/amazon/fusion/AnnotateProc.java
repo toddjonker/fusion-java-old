@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.isBool;
+import static com.amazon.fusion.FusionBool.unsafeBoolAnnotate;
 import static com.amazon.fusion.FusionCollection.isCollection;
 import static com.amazon.fusion.FusionCollection.unsafeCollectionAnnotate;
 import static com.amazon.fusion.FusionNull.isNullNull;
@@ -37,6 +39,11 @@ final class AnnotateProc
         if (isCollection(eval, target))
         {
             return unsafeCollectionAnnotate(eval, target, annotations);
+        }
+
+        if (isBool(eval, target))
+        {
+            return unsafeBoolAnnotate(eval, target, annotations);
         }
 
         if (isNullNull(eval, target))

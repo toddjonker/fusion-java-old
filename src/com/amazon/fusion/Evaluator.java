@@ -2,12 +2,14 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionList.listFromIonSequence;
 import static com.amazon.fusion.FusionNull.makeNullNull;
 import static com.amazon.fusion.FusionSexp.sexpFromIonSequence;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionStruct.structFromIonStruct;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import com.amazon.ion.IonBool;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonStruct;
@@ -90,6 +92,13 @@ final class Evaluator
             {
                 return makeNullNull(this, value.getTypeAnnotations());
             }
+            case BOOL:
+            {
+                Boolean b = (value.isNullValue()
+                                 ? null
+                                 : ((IonBool)value).booleanValue());
+                return makeBool(this, value.getTypeAnnotations(), b);
+            }
             case LIST:
             {
                 IonList list = (IonList) value;
@@ -165,7 +174,7 @@ final class Evaluator
         }
         else if (javaValue instanceof Boolean)
         {
-            return newBool((Boolean) javaValue);
+            return makeBool(this, (Boolean) javaValue);
         }
 
         // ******** Be sure to document types as they are added! ********
@@ -191,30 +200,40 @@ final class Evaluator
         return makeNullNull(this, annotations);
     }
 
+    /**
+     * @deprecated Use {@link FusionBool#makeBool(Evaluator,boolean)}.
+     */
+    @Deprecated
     Object newBool(boolean value)
     {
-        IonValue dom = mySystem.newBool(value);
-        return inject(dom);
+        return makeBool(this, value);
     }
 
+    /**
+     * @deprecated Use {@link FusionBool#makeBool(Evaluator,String[],boolean)}.
+     */
+    @Deprecated
     Object newBool(boolean value, String... annotations)
     {
-        IonValue dom = mySystem.newBool(value);
-        if (annotations != null) dom.setTypeAnnotations(annotations);
-        return inject(dom);
+        return makeBool(this, annotations, value);
     }
 
+    /**
+     * @deprecated Use {@link FusionBool#makeBool(Evaluator,Boolean)}.
+     */
+    @Deprecated
     Object newBool(Boolean value)
     {
-        IonValue dom = mySystem.newBool(value);
-        return inject(dom);
+        return makeBool(this, value);
     }
 
+    /**
+     * @deprecated Use {@link FusionBool#makeBool(Evaluator,String[],Boolean)}.
+     */
+    @Deprecated
     Object newBool(Boolean value, String... annotations)
     {
-        IonValue dom = mySystem.newBool(value);
-        if (annotations != null) dom.setTypeAnnotations(annotations);
-        return inject(dom);
+        return makeBool(this, annotations, value);
     }
 
     Object newInt(long value, String... annotations)

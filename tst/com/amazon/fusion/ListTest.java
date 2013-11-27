@@ -280,9 +280,9 @@ public class ListTest
         result = topLevel().call("append_m", iList, fList);
         assertEquals(4, unsafeListSize(null, result));
 
-        assertSame(iList.get(0), unsafeListRef(null, result, 0));
-        assertSame(iList.get(1), unsafeListRef(null, result, 1));
-        assertSame(iList.get(2), unsafeListRef(null, result, 2));
+        checkIon(iList.get(0), unsafeListRef(null, result, 0));
+        checkIon(iList.get(1), unsafeListRef(null, result, 1));
+        checkIon(iList.get(2), unsafeListRef(null, result, 2));
         assertSame(unsafeListRef(null, fList, 0),
                    unsafeListRef(null, result, 3));
     }

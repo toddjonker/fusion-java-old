@@ -2,7 +2,9 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonBool;
+import static com.amazon.fusion.FusionBool.isBool;
+import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionBool.unsafeBoolToJavaBoolean;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonString;
@@ -106,11 +108,33 @@ final class FusionCompare
             throws FusionException;
 
 
+        boolean compareBooleans(Boolean left, Boolean right, Object[] args)
+            throws FusionException
+        {
+            throw failure(args);
+        }
+
+
         @Override
         final Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
             checkArityExact(args);
+
+            Object arg0 = args[0];
+            Object arg1 = args[1];
+
+            if (isBool(eval, arg0) && isBool(eval, arg1))
+            {
+                Boolean left  = unsafeBoolToJavaBoolean(eval, arg0);
+                Boolean right = unsafeBoolToJavaBoolean(eval, arg1);
+
+                if (left != null && right != null)
+                {
+                    boolean r = compareBooleans(left, right, args);
+                    return makeBool(eval, r);
+                }
+            }
 
             IonValue leftVal  = FusionValue.castToIonValueMaybe(args[0]);
             IonValue rightVal = FusionValue.castToIonValueMaybe(args[1]);
@@ -243,16 +267,6 @@ final class FusionCompare
                     }
                     break;
                 }
-                case BOOL:
-                {
-                    if (rightVal instanceof IonBool)
-                    {
-                        IonBool left  = (IonBool) leftVal;
-                        IonBool right = (IonBool) rightVal;
-                        return left.booleanValue() == right.booleanValue();
-                    }
-                    break;
-                }
                 default:
                 {
                     return compareNumbers(leftVal, rightVal, args) == 0;
@@ -260,6 +274,14 @@ final class FusionCompare
             }
 
             throw failure(args);
+        }
+
+        @Override
+        boolean compareBooleans(Boolean left, Boolean right, Object[] args)
+            throws FusionException
+        {
+            // Boolean instances are interned so identity equality is correct.
+            return left == right;
         }
     }
 }

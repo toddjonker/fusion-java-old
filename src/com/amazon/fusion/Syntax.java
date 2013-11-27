@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.isBool;
+import static com.amazon.fusion.FusionBool.unsafeBoolToJavaBoolean;
 import static com.amazon.fusion.FusionList.isList;
 import static com.amazon.fusion.FusionList.isNullList;
 import static com.amazon.fusion.FusionList.unsafeListRef;
@@ -72,7 +74,7 @@ final class Syntax
             {
                 Boolean value =
                     (source.isNullValue() ? null : source.booleanValue());
-                return SyntaxBool.make(value, anns, loc);
+                return SyntaxBool.make(eval, loc, anns, value);
             }
             case INT:
             {
@@ -316,6 +318,11 @@ final class Syntax
         if (isNullNull(eval, datum))
         {
             return SyntaxNull.make(eval, /*location*/ null, datum);
+        }
+
+        if (isBool(eval, datum))
+        {
+            return SyntaxBool.make(eval, /*location*/ null, datum);
         }
 
         return null;

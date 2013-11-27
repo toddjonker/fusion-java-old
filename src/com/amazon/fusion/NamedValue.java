@@ -2,8 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonBool;
-import com.amazon.ion.NullValueException;
 import java.io.IOException;
 
 
@@ -70,24 +68,6 @@ abstract class NamedValue
         out.append("{{{");
         identify(out);
         out.append("}}}");
-    }
-
-    //========================================================================
-    // Type-checking helpers
-
-    final boolean checkBoolArg(Object arg)
-        throws ContractException
-    {
-        try
-        {
-            IonBool iv = (IonBool) FusionValue.castToIonValueMaybe(arg);
-            return iv.booleanValue();
-        }
-        catch (ClassCastException e) {}
-        catch (NullPointerException e) {}
-        catch (NullValueException e) {}
-
-        throw contractFailure("Expected true or false: " + arg);
     }
 
 
