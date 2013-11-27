@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.voidValue;
-import static com.amazon.fusion.Syntax.datumToSyntaxMaybe;
+import static com.amazon.fusion.Syntax.datumToSyntax;
 import static com.amazon.fusion.Syntax.isSyntax;
 import java.util.LinkedList;
 
@@ -17,7 +17,7 @@ final class FusionEval
      * Turns a given form (datum or syntax) into a top-level syntax object,
      * and optionally enriching it.
      *
-     * @param whosCalling The form to name for error messages.
+     * @param whosCalling The form to name for error messages; may be null.
      */
     private static SyntaxValue topLevelStx(Evaluator eval,
                                            Object topLevelForm,
@@ -26,7 +26,7 @@ final class FusionEval
         throws FusionException
     {
         SyntaxValue stx;
-        if (Syntax.isSyntax(eval, topLevelForm))
+        if (isSyntax(eval, topLevelForm))
         {
             stx = (SyntaxValue) topLevelForm;
             if (enrichSyntaxObject)
@@ -36,13 +36,7 @@ final class FusionEval
         }
         else
         {
-            stx = datumToSyntaxMaybe(eval, topLevelForm, null);
-            if (topLevelForm == null)
-            {
-                throw new ArgTypeFailure(whosCalling,
-                                         "Syntax object or Ionizable data",
-                                         0, topLevelForm);
-            }
+            stx = datumToSyntax(eval, topLevelForm, null, whosCalling);
             stx = enrich(eval, stx);
         }
 

@@ -170,6 +170,9 @@ final class Syntax
     }
 
 
+    /**
+     * @param context may be null, in which case nothing happens.
+     */
     private static SyntaxValue applyContext(Evaluator eval,
                                             SyntaxSymbol context,
                                             SyntaxValue datum)
@@ -342,22 +345,42 @@ final class Syntax
     /**
      * @param context may be null, in which case no lexical information is
      * applied (and any existing is stripped).
+     * @param whosCalling The form to name for error messages; may be null.
+     *
+     * @return not null.
+     */
+    static SyntaxValue datumToSyntax(Evaluator eval,
+                                     Object datum,
+                                     SyntaxSymbol context,
+                                     String whosCalling)
+        throws FusionException
+    {
+        SyntaxValue stx = datumToSyntaxMaybe(eval, datum, context);
+        if (stx == null)
+        {
+            String message =
+                (whosCalling == null ? "datum_to_syntax" : whosCalling) +
+                " expects syntax object or ionizable data, given " + datum;
+            throw new ContractException(message);
+        }
+
+        return stx;
+    }
+
+    /**
+     * @param context may be null, in which case no lexical information is
+     * applied (and any existing is stripped).
+     *
+     * @return not null.
      */
     static SyntaxValue datumToSyntax(Evaluator eval,
                                      Object datum,
                                      SyntaxSymbol context)
         throws FusionException
     {
-        SyntaxValue stx = datumToSyntaxMaybe(eval, datum, context);
-        if (stx == null)
-        {
-            throw new ArgTypeFailure("datum_to_syntax",
-                                     "Syntax object or Ionizable data",
-                                     0, datum, context);
-        }
-
-        return stx;
+        return datumToSyntax(eval, datum, context, null);
     }
+
 
     /**
      * @param context may be null, in which case no lexical information is
