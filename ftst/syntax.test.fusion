@@ -41,17 +41,77 @@
 // syntax_to_datum
 
 
-(check ion_equals (syntax_to_datum (quote_syntax a::null))
+(check ion_equals
+  (syntax_to_datum (quote_syntax null))
+  (quote null))
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (quote null)))
+  (quote null))
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (quote_syntax null)))
+  (quote null))
+(check ion_equals
+  (syntax_to_datum (quote_syntax a::null))
   (quote a::null))
-(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::null)))
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (quote a::null)))
+  (quote a::null))
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (quote_syntax a::null)))
   (quote a::null))
 
 
-(check = true        (syntax_to_datum (quote_syntax true)))
+(check ion_equals (syntax_to_datum (quote_syntax true))
+  (quote true))
+(check ion_equals (syntax_to_datum (quote_syntax a::true))
+  (quote a::true))
+(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::false)))
+  (quote a::false))
+
+
 (check = 159         (syntax_to_datum (quote_syntax 159)))
 //(check = 2.57e0      (syntax_to_datum (quote_syntax 2.57e0)))   // TODO
 (check = 2.57        (syntax_to_datum (quote_syntax 2.57)))
-(check = 2013-02-08T (syntax_to_datum (quote_syntax 2013-02-08T)))
+
+
+(check ion_equals
+  (syntax_to_datum (quote_syntax null.timestamp))
+  (quote null.timestamp))
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (quote null.timestamp)))
+  (quote null.timestamp))
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (quote_syntax null.timestamp)))
+  (quote null.timestamp))
+(check ion_equals
+  (syntax_to_datum (quote_syntax 2013-02-08T))
+  (quote 2013-02-08T))
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (quote 2013-02-08T)))
+  (quote 2013-02-08T))
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (quote_syntax 2013-02-08T)))
+  (quote 2013-02-08T))
+(check ion_equals
+  (syntax_to_datum (quote_syntax a::null.timestamp))
+  (quote a::null.timestamp))
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (quote a::null.timestamp)))
+  (quote a::null.timestamp))
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (quote_syntax a::null.timestamp)))
+  (quote a::null.timestamp))
+(check ion_equals
+  (syntax_to_datum (quote_syntax a::2013-02-08T))
+  (quote a::2013-02-08T))
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (quote a::2013-02-08T)))
+  (quote a::2013-02-08T))
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (quote_syntax a::2013-02-08T)))
+  (quote a::2013-02-08T))
+
+
 (check = (quote u)   (syntax_to_datum (quote_syntax u)))
 (check = "unwrap"    (syntax_to_datum (quote_syntax "unwrap")))
 // TODO test blob, clob
