@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionString.checkNullableStringArg;
 import static com.amazon.ion.util.IonTextUtils.isDigit;
 import com.amazon.ion.IonTimestamp;
 import com.amazon.ion.IonValue;
@@ -45,7 +46,7 @@ final class FusionTimestamp
         {
             checkArityExact(args);
 
-            String input = checkNullableStringArg(0, args);
+            String input = checkNullableStringArg(eval, this, 0, args);
 
             Timestamp result;
             if (input == null)

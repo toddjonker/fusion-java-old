@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionString.checkNonEmptyStringArg;
 import static com.amazon.fusion.FusionUtils.resolvePath;
 import com.amazon.ion.IonReader;
 import java.io.File;
@@ -47,11 +48,7 @@ final class WithIonFromFileProc
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
-        String path = checkStringArg(0, args);
-        if (path.length() == 0)
-        {
-            throw argFailure("non-empty string", 0, args);
-        }
+        String path = checkNonEmptyStringArg(eval, this, 0, args);
 
         Procedure thunk = checkProcArg(1, args);
         // TODO FUSION-85 check thunk arity

@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
 import static java.util.Arrays.copyOfRange;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -28,7 +29,7 @@ final class JavaNewProc
         throws FusionException
     {
         checkArityAtLeast(1, args);
-        String className = checkTextArg(0, args);
+        String className = checkNonEmptyTextArg(eval, this, 0, args);
 
         Class<?> klass = determineClass(className);
 

@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionCollection.isCollection;
 import static com.amazon.fusion.FusionCollection.unsafeCollectionAnnotate;
+import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
 import com.amazon.ion.IonValue;
 
 
@@ -26,11 +27,7 @@ final class AnnotateProc
         String[] annotations = new String[arity - 1];
         for (int i = 0; i < arity - 1; i++)
         {
-            String a = checkTextArg(i+1, args);
-            if (a.isEmpty())
-            {
-                throw argFailure("valid annotation", i+1, args);
-            }
+            String a = checkNonEmptyTextArg(eval, this, i+1, args);
             annotations[i] = a;
         }
 

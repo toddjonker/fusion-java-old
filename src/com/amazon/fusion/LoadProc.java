@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionString.checkNonEmptyStringArg;
+
 
 final class LoadProc
     extends Procedure1
@@ -25,7 +27,7 @@ final class LoadProc
     public Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        String fileName = checkStringArg(0, arg);
+        String fileName = checkNonEmptyStringArg(eval, this, 0, arg);
 
         return myLoadHandler.loadTopLevel(eval, null, fileName);
     }

@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionString.checkRequiredStringArg;
+
 /**
  * Procedures for working with namespaces.
  */
@@ -50,7 +52,7 @@ final class FusionNamespace
         @Override
         Object doApply(Evaluator eval, Object arg) throws FusionException
         {
-            String language = checkStringArg(0, arg);
+            String language = checkRequiredStringArg(eval, this, 0, arg);
             if (! (language.startsWith("/") && 1 < language.length()))
             {
                 throw argFailure("absolute module path", 0, arg);

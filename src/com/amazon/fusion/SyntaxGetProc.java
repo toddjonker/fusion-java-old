@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.safeWrite;
+import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
 import static com.amazon.fusion.FusionVoid.voidValue;
 
@@ -46,7 +47,7 @@ final class SyntaxGetProc
                 }
                 case STRUCT:
                 {
-                    String field = checkTextArg(i, args);
+                    String field = checkNonEmptyTextArg(eval, this, i, args);
                     SyntaxStruct s = (SyntaxStruct) stx;
                     value = s.get(eval, field);
                     break;

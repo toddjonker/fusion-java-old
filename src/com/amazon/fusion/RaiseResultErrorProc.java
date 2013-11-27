@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionString.checkRequiredStringArg;
+import static com.amazon.fusion.FusionText.checkRequiredTextArg;
+
 
 
 final class RaiseResultErrorProc
@@ -23,8 +26,8 @@ final class RaiseResultErrorProc
     {
         checkArityExact(3, args);
 
-        String name     = checkTextArg(0, args);
-        String expected = checkStringArg(1, args);
+        String name     = checkRequiredTextArg(eval, this, 0, args);
+        String expected = checkRequiredStringArg(eval, this, 1, args);
         Object actual = args[2];
 
         if (name.isEmpty()) name = "unknown procedure";

@@ -2,10 +2,90 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionText.checkRequiredTextArg;
+import com.amazon.ion.IonString;
+
 
 final class FusionString
 {
     private FusionString() {}
+
+
+    //========================================================================
+    // Procedure Helpers
+
+
+    /**
+     * @param expectation must not be null.
+     * @return may be null
+     */
+    static String checkStringArg(Evaluator eval,
+                                 Procedure who,
+                                 String    expectation,
+                                 int       argNum,
+                                 Object... args)
+        throws ArgTypeFailure
+    {
+        IonString iv = who.checkDomArg(IonString.class, expectation,
+                                       true /* nullable */, argNum, args);
+        return iv.stringValue();
+    }
+
+
+    /**
+     * @return may be null
+     */
+    static String checkNullableStringArg(Evaluator eval,
+                                         Procedure who,
+                                         int       argNum,
+                                         Object... args)
+        throws ArgTypeFailure
+    {
+        String expectation = "nullable string";
+        return checkStringArg(eval, who, expectation, argNum, args);
+    }
+
+
+    /**
+     * @return not null
+     */
+    static String checkRequiredStringArg(Evaluator eval,
+                                         Procedure who,
+                                         int       argNum,
+                                         Object... args)
+        throws ArgTypeFailure
+    {
+        String expectation = "non-null string";
+        String result = checkStringArg(eval, who, expectation, argNum, args);
+        if (result == null)
+        {
+            throw who.argFailure(expectation, argNum, args);
+        }
+        return result;
+    }
+
+
+    /**
+     * @return not null or empty
+     */
+    static String checkNonEmptyStringArg(Evaluator eval,
+                                         Procedure who,
+                                         int       argNum,
+                                         Object... args)
+        throws ArgTypeFailure
+    {
+        String expectation = "non-empty string";
+        String result = checkStringArg(eval, who, expectation, argNum, args);
+        if (result == null || result.isEmpty())
+        {
+            throw who.argFailure(expectation, argNum, args);
+        }
+        return result;
+    }
+
+
+    //========================================================================
+    // Procedures
 
 
     static final class AppendProc
@@ -27,7 +107,7 @@ final class FusionString
 
             for (int i = 0; i < args.length; i++)
             {
-                String v = checkTextArg(i, args);
+                String v = checkRequiredTextArg(eval, this, i, args);
                 resultBuilder.append(v);
             }
 
@@ -52,7 +132,7 @@ final class FusionString
         {
             checkArityExact(args);
 
-            String input = checkStringArg(0, args);
+            String input = checkRequiredStringArg(eval, this, 0, args);
             return eval.newString(input.toLowerCase());
         }
     }
@@ -74,7 +154,7 @@ final class FusionString
         {
             checkArityExact(args);
 
-            String input = checkStringArg(0, args);
+            String input = checkRequiredStringArg(eval, this, 0, args);
             return eval.newString(input.toUpperCase());
         }
     }
@@ -98,7 +178,7 @@ final class FusionString
         {
             checkArityExact(args);
 
-            String input = checkNullableStringArg(0, args);
+            String input = checkNullableStringArg(eval, this, 0, args);
 
             if (input != null && input.isEmpty())
             {

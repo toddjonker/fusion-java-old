@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionText.checkRequiredTextArg;
 import java.util.Arrays;
 
 
@@ -25,7 +26,7 @@ final class RaiseArityErrorProc
     {
         checkArityAtLeast(2, args);
 
-        String name      = checkTextArg(0, args);
+        String name      = checkRequiredTextArg(eval, this, 0, args);
         int arity        = checkIntArg(1, args);
         Object[] actuals = Arrays.copyOfRange(args, 2, args.length);
 

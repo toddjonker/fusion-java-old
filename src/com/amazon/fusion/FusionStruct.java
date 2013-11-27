@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionIterator.iterate;
 import static com.amazon.fusion.FusionList.unsafeJavaIterate;
+import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
 import static com.amazon.fusion.FusionText.unsafeTextToString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
@@ -1464,7 +1465,7 @@ final class FusionStruct
             int fieldPos = 0;
             for (int i = 0; i < args.length; i++, fieldPos++)
             {
-                names [fieldPos] = checkTextArg(i, args);
+                names [fieldPos] = checkNonEmptyTextArg(eval, this, i, args);
                 values[fieldPos] = args[++i];
             }
             assert fieldPos == fieldCount;
@@ -1736,7 +1737,7 @@ final class FusionStruct
             String[] keys = new String[args.length - 1];
             for (int i = 1; i < args.length; i++)
             {
-                keys[i-1] = checkTextArg(i, args);
+                keys[i-1] = checkNonEmptyTextArg(eval, this, i, args);
             }
 
             return doIt(eval, struct, keys);

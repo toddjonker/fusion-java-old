@@ -9,9 +9,7 @@ import static com.amazon.fusion.FusionStruct.isStruct;
 import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
-import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
-import com.amazon.ion.IonText;
 import com.amazon.ion.IonTimestamp;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.NullValueException;
@@ -301,40 +299,6 @@ abstract class Procedure
         IonTimestamp iv = checkDomArg(IonTimestamp.class, "timestamp",
                                       true /* nullable */, argNum, args);
         return iv.timestampValue();
-    }
-
-
-    /**
-     * @return not null
-     */
-    String checkTextArg(int argNum, Object... args)
-        throws ArgTypeFailure
-    {
-        IonText iv = checkDomArg(IonText.class, "text",
-                                 false /* nullable */, argNum, args);
-        return iv.stringValue();
-    }
-
-    /**
-     * @return not null
-     */
-    String checkStringArg(int argNum, Object... args)
-        throws ArgTypeFailure
-    {
-        IonString iv = checkDomArg(IonString.class, "string",
-                                   false /* nullable */, argNum, args);
-        return iv.stringValue();
-    }
-
-    /**
-     * @return may be null
-     */
-    String checkNullableStringArg(int argNum, Object... args)
-        throws ArgTypeFailure
-    {
-        IonString iv = checkDomArg(IonString.class, "string",
-                                   true /* nullable */, argNum, args);
-        return iv.stringValue();
     }
 
 

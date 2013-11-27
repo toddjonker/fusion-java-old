@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionString.checkNullableStringArg;
 import java.math.BigInteger;
 
 final class StringToIntProc
@@ -23,7 +24,7 @@ final class StringToIntProc
     {
         checkArityExact(1, args);
 
-        String val = checkNullableStringArg(0, args);
+        String val = checkNullableStringArg(eval, this, 0, args);
 
         BigInteger bigInt = (val != null ? parse(val, args) : null);
 
