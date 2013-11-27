@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.safeWriteToString;
+import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.isVoid;
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonException;
@@ -123,6 +124,34 @@ public abstract class FusionValue
         }
 
         return true;
+    }
+
+
+    /**
+     * Gets the annotations on a Fusion value as Java strings.
+     *
+     * @return not null, but possibly empty.
+     */
+    static String[] annotationsAsJavaStrings(Evaluator eval, Object value)
+        throws FusionException
+    {
+        String[] anns = EMPTY_STRING_ARRAY;
+
+        if (value instanceof Annotated)
+        {
+            anns = ((Annotated) value).annotationsAsJavaStrings();
+        }
+        else
+        {
+            IonValue iv = castToIonValueMaybe(value);
+
+            if (iv != null)
+            {
+                anns = iv.getTypeAnnotations();
+            }
+        }
+
+        return anns;
     }
 
 

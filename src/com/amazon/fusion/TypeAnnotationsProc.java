@@ -4,8 +4,6 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionList.immutableList;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
-import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
-import com.amazon.ion.IonValue;
 
 final class TypeAnnotationsProc
     extends Procedure1
@@ -22,21 +20,7 @@ final class TypeAnnotationsProc
     Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        String[] anns = EMPTY_STRING_ARRAY;
-
-        if (arg instanceof Annotated)
-        {
-            anns = ((Annotated) arg).annotationsAsJavaStrings();
-        }
-        else
-        {
-            IonValue value = castToIonValueMaybe(arg);
-
-            if (value != null)
-            {
-                anns = value.getTypeAnnotations();
-            }
-        }
+        String[] anns = annotationsAsJavaStrings(eval, arg);
 
         Object[] result = EMPTY_OBJECT_ARRAY;
         int length = anns.length;
