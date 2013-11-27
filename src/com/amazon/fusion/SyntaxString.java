@@ -4,26 +4,88 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
+import com.amazon.fusion.FusionString.BaseString;
+import com.amazon.ion.IonException;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
 final class SyntaxString
     extends SyntaxText
 {
-    private SyntaxString(String value, String[] anns, SourceLocation loc)
+    private final BaseString myDatum;
+
+    /**
+     * @param datum must not be null.
+     */
+    private SyntaxString(Evaluator eval, SourceLocation loc, BaseString datum)
     {
-        super(value, anns, loc);
+        super(datum.stringValue(), datum.annotationsAsJavaStrings(), loc);
+        myDatum = datum;
     }
 
-    static SyntaxString make(String value, String[] anns, SourceLocation loc)
+
+    /**
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     * @param value may be null.
+     */
+    private SyntaxString(Evaluator eval,
+                         SourceLocation loc,
+                         String[] annotations,
+                         String value)
     {
-        return new SyntaxString(value, anns, loc);
+        super(value, annotations, loc);
+        myDatum = makeString(eval, annotations, value);
     }
 
-    static SyntaxString make(String value)
+
+    /**
+     * @param datum must not be null.
+     */
+    static SyntaxString make(Evaluator eval,
+                             SourceLocation loc,
+                             BaseString datum)
     {
-        return new SyntaxString(value, EMPTY_STRING_ARRAY, null);
+        return new SyntaxString(eval, loc, datum);
     }
+
+
+    /**
+     * @param datum must be a Fusion string.
+     */
+    static SyntaxString make(Evaluator eval, SourceLocation loc, Object datum)
+    {
+        BaseString string = (BaseString) datum;
+        return new SyntaxString(eval, loc, string);
+    }
+
+
+    /**
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     * @param value may be null.
+     */
+    static SyntaxString make(Evaluator eval,
+                             SourceLocation loc,
+                             String[] annotations,
+                             String value)
+    {
+        return new SyntaxString(eval, loc, annotations, value);
+    }
+
+
+    /**
+     * @param value may be null.
+     */
+    static SyntaxString make(Evaluator eval, String value)
+    {
+        return new SyntaxString(eval, null, EMPTY_STRING_ARRAY, value);
+    }
+
+
+    //========================================================================
 
 
     @Override
@@ -34,25 +96,23 @@ final class SyntaxString
 
 
     @Override
-    Object unwrap(Evaluator eval, boolean recurse)
-    {
-        return makeString(eval, getAnnotations(), myText);
-    }
-
-
-    @Override
-    Object doCompileIonConstant(Evaluator eval, Environment env)
+    CompiledForm doCompile(Evaluator eval, Environment env)
         throws FusionException
     {
-        return eval.newString(myText);
+        return new CompiledConstant(myDatum);
+    }
+
+    @Override
+    Object unwrap(Evaluator eval, boolean recurse)
+    {
+        return myDatum;
     }
 
 
     @Override
     void ionize(Evaluator eval, IonWriter writer)
-        throws IOException
+        throws IOException, IonException, FusionException, IonizeFailure
     {
-        ionizeAnnotations(writer);
-        writer.writeString(myText);
+        myDatum.ionize(eval, writer);
     }
 }

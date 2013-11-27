@@ -22,6 +22,12 @@ final class FusionUtils
     static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 
+    static boolean safeEquals(Object left, Object right)
+    {
+        return (left == null ? right == null : left.equals(right));
+    }
+
+
     /**
      * @param value must not be null.
      */

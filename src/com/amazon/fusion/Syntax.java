@@ -15,6 +15,7 @@ import static com.amazon.fusion.FusionSexp.isSexp;
 import static com.amazon.fusion.FusionSexp.pair;
 import static com.amazon.fusion.FusionSexp.unsafePairHead;
 import static com.amazon.fusion.FusionSexp.unsafePairTail;
+import static com.amazon.fusion.FusionString.isString;
 import static com.amazon.fusion.FusionStruct.isStruct;
 import static com.amazon.fusion.FusionValue.annotationsAsJavaStrings;
 import static com.amazon.fusion.FusionValue.castToIonValueMaybe;
@@ -99,7 +100,7 @@ final class Syntax
             case STRING:
             {
                 String value = source.stringValue();
-                return SyntaxString.make(value, anns, loc);
+                return SyntaxString.make(eval, loc, anns, value);
             }
             case SYMBOL:
             {
@@ -323,6 +324,11 @@ final class Syntax
         if (isBool(eval, datum))
         {
             return SyntaxBool.make(eval, /*location*/ null, datum);
+        }
+
+        if (isString(eval, datum))
+        {
+            return SyntaxString.make(eval, /*location*/ null, datum);
         }
 
         return null;

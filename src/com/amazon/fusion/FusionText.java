@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionString.isString;
+import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
+import com.amazon.fusion.FusionString.BaseString;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonValue;
 
@@ -20,14 +23,14 @@ final class FusionText
     public static boolean isText(TopLevel top, Object value)
         throws FusionException
     {
-        return (value instanceof IonText);
+        return (value instanceof BaseString || value instanceof IonText);
     }
 
 
     static boolean isText(Evaluator eval, Object value)
         throws FusionException
     {
-        return (value instanceof IonText);
+        return (value instanceof BaseString || value instanceof IonText);
     }
 
 
@@ -41,6 +44,10 @@ final class FusionText
     static String unsafeTextToJavaString(Evaluator eval, Object stringOrSymbol)
         throws FusionException
     {
+        if (stringOrSymbol instanceof BaseString)
+        {
+            return unsafeStringToJavaString(eval, stringOrSymbol);
+        }
         return ((IonText) stringOrSymbol).stringValue();
     }
 
@@ -53,6 +60,11 @@ final class FusionText
     static String textToJavaString(Evaluator eval, Object value)
         throws FusionException
     {
+        if (isString(eval, value))
+        {
+            return unsafeStringToJavaString(eval, value);
+        }
+
         IonValue iv = FusionValue.castToIonValueMaybe(value);
         if (iv != null && iv instanceof IonText)
         {
@@ -75,8 +87,14 @@ final class FusionText
                                String    expectation,
                                int       argNum,
                                Object... args)
-        throws ArgTypeFailure
+        throws FusionException, ArgTypeFailure
     {
+        Object arg = args[argNum];
+        if (arg instanceof BaseString)
+        {
+            return ((BaseString) arg).stringValue();
+        }
+
         IonText iv = who.checkDomArg(IonText.class, expectation,
                                      true /* nullable */, argNum, args);
         return iv.stringValue();

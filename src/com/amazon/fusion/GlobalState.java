@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionValue.UNDEF;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonType;
@@ -80,8 +81,11 @@ final class GlobalState
                                   Namespace initialCurrentNamespace)
         throws FusionException
     {
+        // WARNING: We pass null evaluator because we know its not used.
+        //          That is NOT SUPPORTED for user code!
         Object userDir =
-            FusionValue.forIonValue(system.newString(builder.getInitialCurrentDirectory().toString()));
+            makeString(null, builder.getInitialCurrentDirectory().toString());
+
         DynamicParameter currentDirectory =
             new DynamicParameter(userDir);
         DynamicParameter currentLoadRelativeDirectory =
@@ -133,6 +137,7 @@ final class GlobalState
                 t != IonType.DATAGRAM &&
                 t != IonType.LIST &&
                 t != IonType.SEXP &&
+                t != IonType.STRING &&
                 t != IonType.STRUCT)
             {
                 String name = "is_" + t.name().toLowerCase();
@@ -142,6 +147,7 @@ final class GlobalState
 
         ns.define("is_list",   new FusionList.IsListProc());
         ns.define("is_sexp",   new FusionSexp.IsSexpProc());
+        ns.define("is_string", new FusionString.IsStringProc());
         ns.define("is_struct", new FusionStruct.IsStructProc());
 
         ns.define("=", new FusionCompare.EqualProc());

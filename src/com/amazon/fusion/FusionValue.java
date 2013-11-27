@@ -357,20 +357,6 @@ public abstract class FusionValue
 
 
     /**
-     * FOR INTERNAL USE ONLY!
-     *
-     * @param dom must not be null.
-     * @deprecated DO NOT USE! Use {@link Evaluator#inject(IonValue)} instead
-     */
-    @Deprecated
-    static Object forIonValue(IonValue dom)
-    {
-        dom.getClass();  // Forces a null check
-        return dom;
-    }
-
-
-    /**
      * @return null if the value isn't a Fusion int
      */
     static Long asJavaLong(Object value)

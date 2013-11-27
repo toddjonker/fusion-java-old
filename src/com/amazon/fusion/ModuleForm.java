@@ -261,10 +261,10 @@ final class ModuleForm
                 SyntaxInt.make(moduleNamespace.getBindings().size());
 
             SyntaxString identity =
-                SyntaxString.make(id.absolutePath());
+                SyntaxString.make(eval, id.absolutePath());
 
             SyntaxString languageIdentity =
-                SyntaxString.make(initialBindingsId.absolutePath());
+                SyntaxString.make(eval, initialBindingsId.absolutePath());
 
             SyntaxStruct meta =
                 SyntaxStruct.make(new String[] { "variable_count",

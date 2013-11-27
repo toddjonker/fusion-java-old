@@ -12,6 +12,7 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSexp;
+import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
@@ -98,6 +99,11 @@ final class Evaluator
                                  ? null
                                  : ((IonBool)value).booleanValue());
                 return makeBool(this, value.getTypeAnnotations(), b);
+            }
+            case STRING:
+            {
+                String text = ((IonString)value).stringValue();
+                return makeString(this, value.getTypeAnnotations(), text);
             }
             case LIST:
             {
@@ -250,6 +256,10 @@ final class Evaluator
         return inject(dom);
     }
 
+    /**
+     * @deprecated Use {@link FusionString#makeString(Evaluator, String)}.
+     */
+    @Deprecated
     Object newString(String value)
     {
         return makeString(this, value);

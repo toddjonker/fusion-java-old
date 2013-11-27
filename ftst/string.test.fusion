@@ -16,7 +16,7 @@
 // Comparisons
 
 (define_check (check_comparisons msg lo hi)                 // msg is rest arg
-//  (check <  lo hi)
+//  (check <  lo hi)  TODO FUSION-243 string ordering
 //  (check <= lo hi)
   (check =  lo lo)
   (check =  hi hi)

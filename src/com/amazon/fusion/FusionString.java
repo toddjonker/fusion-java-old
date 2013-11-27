@@ -2,9 +2,18 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionText.checkRequiredTextArg;
-import com.amazon.ion.IonString;
+import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
+import static com.amazon.fusion.FusionUtils.safeEquals;
+import com.amazon.ion.IonException;
+import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
+import com.amazon.ion.IonWriter;
+import com.amazon.ion.ValueFactory;
+import com.amazon.ion.util.IonTextUtils;
+import java.io.IOException;
+import java.util.Arrays;
 
 
 final class FusionString
@@ -12,23 +21,243 @@ final class FusionString
     private FusionString() {}
 
 
+    abstract static class BaseString
+        extends FusionValue
+    {
+        private BaseString() {}
+
+        String[] annotationsAsJavaStrings()
+        {
+            return EMPTY_STRING_ARRAY;
+        }
+
+        abstract String stringValue();
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (o instanceof BaseString)
+            {
+                BaseString that = (BaseString) o;
+                return (safeEquals(this.stringValue(), that.stringValue())
+                        && Arrays.equals(this.annotationsAsJavaStrings(),
+                                         that.annotationsAsJavaStrings()));
+            }
+            return false;
+        }
+    }
+
+
+    private static class NullString
+        extends BaseString
+    {
+        private NullString() {}
+
+        @Override
+        String stringValue()
+        {
+            return null;
+        }
+
+        @Override
+        boolean isAnyNull()
+        {
+            return true;
+        }
+
+        @Override
+        IonValue copyToIonValue(ValueFactory factory,
+                                boolean throwOnConversionFailure)
+            throws FusionException, IonizeFailure
+        {
+            return factory.newNullString();
+        }
+
+        @Override
+        void ionize(Evaluator eval, IonWriter out)
+            throws IOException, IonException, FusionException, IonizeFailure
+        {
+            out.writeNull(IonType.STRING);
+        }
+
+        @Override
+        void write(Evaluator eval, Appendable out)
+            throws IOException, FusionException
+        {
+            out.append("null.string");
+        }
+    }
+
+
+    private static class ActualString
+        extends BaseString
+    {
+        private final String myContent;
+
+        private ActualString(String content)
+        {
+            assert content != null;
+            myContent = content;
+        }
+
+        @Override
+        String stringValue()
+        {
+            return myContent;
+        }
+
+        @Override
+        IonValue copyToIonValue(ValueFactory factory,
+                                boolean throwOnConversionFailure)
+            throws FusionException, IonizeFailure
+        {
+            return factory.newString(myContent);
+        }
+
+        @Override
+        void ionize(Evaluator eval, IonWriter out)
+            throws IOException, IonException, FusionException, IonizeFailure
+        {
+            out.writeString(myContent);
+        }
+
+        @Override
+        void write(Evaluator eval, Appendable out)
+            throws IOException, FusionException
+        {
+            IonTextUtils.printString(out, myContent);
+        }
+
+        @Override
+        void display(Evaluator eval, Appendable out)
+            throws IOException, FusionException
+        {
+            out.append(myContent);
+        }
+    }
+
+
+    private static class AnnotatedString
+        extends BaseString
+        implements Annotated
+    {
+        /** Not null or empty */
+        final String[] myAnnotations;
+
+        /** Not null, and not AnnotatedBool */
+        final BaseString  myValue;
+
+        private AnnotatedString(String[] annotations, BaseString value)
+        {
+            assert annotations.length != 0;
+            myAnnotations = annotations;
+            myValue = value;
+        }
+
+        @Override
+        public String[] annotationsAsJavaStrings()
+        {
+            return myAnnotations;
+        }
+
+        @Override
+        boolean isAnyNull() { return myValue.isAnyNull(); }
+
+        @Override
+        String stringValue()
+        {
+            return myValue.stringValue();
+        }
+
+        @Override
+        IonValue copyToIonValue(ValueFactory factory,
+                                boolean throwOnConversionFailure)
+            throws FusionException, IonizeFailure
+        {
+            IonValue iv = myValue.copyToIonValue(factory,
+                                                 throwOnConversionFailure);
+            iv.setTypeAnnotations(myAnnotations);
+            return iv;
+        }
+
+        @Override
+        void ionize(Evaluator eval, IonWriter out)
+            throws IOException, IonException, FusionException, IonizeFailure
+        {
+            out.setTypeAnnotations(myAnnotations);
+            myValue.ionize(eval, out);
+        }
+
+        @Override
+        void write(Evaluator eval, Appendable out)
+            throws IOException, FusionException
+        {
+            writeAnnotations(out, myAnnotations);
+            myValue.write(eval, out);
+        }
+    }
+
+
     //========================================================================
     // Constructors
 
 
-    static Object makeString(Evaluator eval, String value)
+    private static final BaseString NULL_STRING  = new NullString();
+
+
+    /**
+     * @param value may be null.
+     *
+     * @return not null.
+     */
+    static BaseString makeString(Evaluator eval, String value)
     {
-        return eval.getSystem().newString(value);
+        return (value == null ? NULL_STRING : new ActualString(value));
     }
 
 
-    static Object makeString(Evaluator eval,
-                             String[]  annotations,
-                             String    value)
+    /**
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     * @param value may be null to make {@code null.string}.
+     *
+     * @return not null.
+     */
+    static BaseString makeString(Evaluator eval,
+                                 String[]  annotations,
+                                 String    value)
     {
-        IonValue dom = eval.getSystem().newString(value);
-        if (annotations != null) dom.setTypeAnnotations(annotations);
-        return dom;
+        BaseString base = makeString(eval, value);
+
+        if (annotations.length != 0)
+        {
+            base = new AnnotatedString(annotations, base);
+        }
+
+        return base;
+    }
+
+
+    /**
+     * @param fusionString must be a Fusion string.
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     *
+     * @return not null.
+     */
+    static BaseString unsafeStringAnnotate(Evaluator eval,
+                                           Object fusionString,
+                                           String[] annotations)
+    {
+        BaseString base = (BaseString) fusionString;
+        if (base instanceof AnnotatedString)
+        {
+            base = ((AnnotatedString) base).myValue;
+        }
+        return new AnnotatedString(annotations, base);
     }
 
 
@@ -39,13 +268,13 @@ final class FusionString
     public static boolean isString(TopLevel top, Object value)
         throws FusionException
     {
-        return (value instanceof IonString);
+        return (value instanceof BaseString);
     }
 
     static boolean isString(Evaluator eval, Object value)
         throws FusionException
     {
-        return (value instanceof IonString);
+        return (value instanceof BaseString);
     }
 
 
@@ -53,10 +282,15 @@ final class FusionString
     // Conversions
 
 
+    /**
+     * @param value must be a Fusion string.
+     *
+     * @return null if given {@code null.string}.
+     */
     static String unsafeStringToJavaString(Evaluator eval, Object value)
         throws FusionException
     {
-        return ((IonString) value).stringValue();
+        return ((BaseString) value).stringValue();
     }
 
 
@@ -89,11 +323,15 @@ final class FusionString
                                  String    expectation,
                                  int       argNum,
                                  Object... args)
-        throws ArgTypeFailure
+        throws FusionException, ArgTypeFailure
     {
-        IonString iv = who.checkDomArg(IonString.class, expectation,
-                                       true /* nullable */, argNum, args);
-        return iv.stringValue();
+        Object arg = args[argNum];
+        if (arg instanceof BaseString)
+        {
+            return ((BaseString) arg).stringValue();
+        }
+
+        throw who.argFailure(expectation, argNum, args);
     }
 
 
@@ -151,6 +389,26 @@ final class FusionString
 
     //========================================================================
     // Procedures
+
+
+    static final class IsStringProc
+        extends Procedure1
+    {
+        IsStringProc()
+        {
+            //    "                                                                               |
+            super("Determines whether a `value` is of type `string`, returning `true` or `false`.",
+                  "value");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object arg)
+            throws FusionException
+        {
+            boolean r = isString(eval, arg);
+            return makeBool(eval, r);
+        }
+    }
 
 
     static final class AppendProc

@@ -5,9 +5,11 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionBool.isBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.unsafeBoolToJavaBoolean;
+import static com.amazon.fusion.FusionString.isString;
+import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
+import static com.amazon.fusion.FusionUtils.safeEquals;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
-import com.amazon.ion.IonString;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonTimestamp;
 import com.amazon.ion.IonValue;
@@ -114,6 +116,12 @@ final class FusionCompare
             throw failure(args);
         }
 
+        boolean compareStrings(String left, String right, Object[] args)
+            throws FusionException
+        {
+            throw failure(args);
+        }
+
 
         @Override
         final Object doApply(Evaluator eval, Object[] args)
@@ -132,6 +140,18 @@ final class FusionCompare
                 if (left != null && right != null)
                 {
                     boolean r = compareBooleans(left, right, args);
+                    return makeBool(eval, r);
+                }
+            }
+
+            if (isString(eval, arg0) && isString(eval, arg1))
+            {
+                String left  = unsafeStringToJavaString(eval, arg0);
+                String right = unsafeStringToJavaString(eval, arg1);
+
+                if (left != null && right != null)
+                {
+                    boolean r = compareStrings(left, right, args);
                     return makeBool(eval, r);
                 }
             }
@@ -247,16 +267,6 @@ final class FusionCompare
         {
             switch (leftVal.getType())
             {
-                case STRING:
-                {
-                    if (rightVal instanceof IonString)
-                    {
-                        IonString left  = (IonString) leftVal;
-                        IonString right = (IonString) rightVal;
-                        return left.stringValue().equals(right.stringValue());
-                    }
-                    break;
-                }
                 case SYMBOL:
                 {
                     if (rightVal instanceof IonSymbol)
@@ -282,6 +292,13 @@ final class FusionCompare
         {
             // Boolean instances are interned so identity equality is correct.
             return left == right;
+        }
+
+        @Override
+        boolean compareStrings(String left, String right, Object[] args)
+            throws FusionException
+        {
+            return safeEquals(left, right);
         }
     }
 }
