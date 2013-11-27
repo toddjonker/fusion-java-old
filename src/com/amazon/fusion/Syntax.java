@@ -220,6 +220,8 @@ final class Syntax
 
 
     /**
+     * TODO FUSION-242 This needs to do cycle detection.
+     *
      * @return null if something in the datum can't be converted into syntax.
      */
     private static SyntaxValue

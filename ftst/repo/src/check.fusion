@@ -204,7 +204,7 @@ Raises a check failure exception, including a stack trace derived from the
   (define_check (check_true message val)
     (unless (is_true val)
       (raise_check_failure_stack
-        (if message (message) "Expected `true`.")
+        (if message (message) "Expected true.")
         " Received: "
         val)))
 
@@ -212,7 +212,7 @@ Raises a check failure exception, including a stack trace derived from the
   (define_check (check_false message val)
     (unless (is_false val)
       (raise_check_failure_stack
-        (if message (message) "Expected `false`.")
+        (if message (message) "Expected false.")
         " Received: "
         val)))
 
@@ -220,7 +220,7 @@ Raises a check failure exception, including a stack trace derived from the
   (define_check (check_void message val)
     (unless (is_void val)
       (raise_check_failure_stack
-        (if message (message) "Expected `void`.")
+        (if message (message) "Expected void.")
         " Received: "
         val)))
 
@@ -286,6 +286,9 @@ Raises a check failure exception, including a stack trace derived from the
       // TODO check arity
       (let [(top_form (syntax_get stx 1))]
         (quasisyntax
-          (check_exn
-            (lambda () (eval (quote_syntax (unsyntax top_form)))))))))
+          (begin
+            (check_exn
+              (lambda () (eval (quote_syntax (unsyntax top_form)))))
+            (check_exn
+              (lambda () (eval (quote (unsyntax top_form))))))))))
 )

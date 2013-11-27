@@ -12,11 +12,13 @@
   (provide eval))   // ERROR: not at module level
 
 
-(check_exn // exn:fail?
-  (lambda ()
-    (eval (quote
-      (module M "/fusion"
-         (if true (provide if) true))))))   // ERROR: not at module level
+// TODO FUSION-166 Using check_compile_exn should work, but crashes
+(check_syntax_exn
+  (eval (quote
+    (module M "/fusion"
+       (if true
+         (provide if)  // ERROR: not at module level
+         true)))))
 
 
 //============================================================================
