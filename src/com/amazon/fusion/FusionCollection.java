@@ -63,6 +63,7 @@ final class FusionCollection
 
     abstract static class BaseCollection
         extends FusionValue
+        implements Annotated
     {
         /** Not null */
         final String[] myAnnotations;
@@ -76,6 +77,12 @@ final class FusionCollection
         {
             assert annotations != null;
             myAnnotations = annotations;
+        }
+
+        @Override
+        public String[] annotationsAsJavaStrings()
+        {
+            return myAnnotations;
         }
 
         abstract int size()

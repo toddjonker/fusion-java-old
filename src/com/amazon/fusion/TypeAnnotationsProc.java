@@ -2,8 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionCollection.isCollection;
-import static com.amazon.fusion.FusionCollection.unsafeCollectionAnnotationStrings;
 import static com.amazon.fusion.FusionList.immutableList;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
@@ -26,9 +24,9 @@ final class TypeAnnotationsProc
     {
         String[] anns = EMPTY_STRING_ARRAY;
 
-        if (isCollection(eval, arg))
+        if (arg instanceof Annotated)
         {
-            anns = unsafeCollectionAnnotationStrings(eval, arg);
+            anns = ((Annotated) arg).annotationsAsJavaStrings();
         }
         else
         {
