@@ -4,11 +4,76 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionText.checkRequiredTextArg;
 import com.amazon.ion.IonString;
+import com.amazon.ion.IonValue;
 
 
 final class FusionString
 {
     private FusionString() {}
+
+
+    //========================================================================
+    // Constructors
+
+
+    static Object makeString(Evaluator eval, String value)
+    {
+        return eval.getSystem().newString(value);
+    }
+
+
+    static Object makeString(Evaluator eval,
+                             String[]  annotations,
+                             String    value)
+    {
+        IonValue dom = eval.getSystem().newString(value);
+        if (annotations != null) dom.setTypeAnnotations(annotations);
+        return dom;
+    }
+
+
+    //========================================================================
+    // Predicates
+
+
+    public static boolean isString(TopLevel top, Object value)
+        throws FusionException
+    {
+        return (value instanceof IonString);
+    }
+
+    static boolean isString(Evaluator eval, Object value)
+        throws FusionException
+    {
+        return (value instanceof IonString);
+    }
+
+
+    //========================================================================
+    // Conversions
+
+
+    static String unsafeStringToJavaString(Evaluator eval, Object value)
+        throws FusionException
+    {
+        return ((IonString) value).stringValue();
+    }
+
+
+    /**
+     * Converts a Fusion string to a {@link String}.
+     *
+     * @return null if the value isn't a Fusion string.
+     */
+    static String stringToJavaString(Evaluator eval, Object value)
+        throws FusionException
+    {
+        if (isString(eval, value))
+        {
+            return unsafeStringToJavaString(eval, value);
+        }
+        return null;
+    }
 
 
     //========================================================================
@@ -39,7 +104,7 @@ final class FusionString
                                          Procedure who,
                                          int       argNum,
                                          Object... args)
-        throws ArgTypeFailure
+        throws FusionException, ArgTypeFailure
     {
         String expectation = "nullable string";
         return checkStringArg(eval, who, expectation, argNum, args);
@@ -53,7 +118,7 @@ final class FusionString
                                          Procedure who,
                                          int       argNum,
                                          Object... args)
-        throws ArgTypeFailure
+        throws FusionException, ArgTypeFailure
     {
         String expectation = "non-null string";
         String result = checkStringArg(eval, who, expectation, argNum, args);
@@ -72,7 +137,7 @@ final class FusionString
                                          Procedure who,
                                          int       argNum,
                                          Object... args)
-        throws ArgTypeFailure
+        throws FusionException, ArgTypeFailure
     {
         String expectation = "non-empty string";
         String result = checkStringArg(eval, who, expectation, argNum, args);

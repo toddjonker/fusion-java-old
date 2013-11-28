@@ -7,7 +7,8 @@ import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionIterator.iterate;
 import static com.amazon.fusion.FusionList.unsafeJavaIterate;
 import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
-import static com.amazon.fusion.FusionText.unsafeTextToString;
+import static com.amazon.fusion.FusionText.textToJavaString;
+import static com.amazon.fusion.FusionText.unsafeTextToJavaString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.ion.util.IonTextUtils.printSymbol;
@@ -1271,7 +1272,7 @@ final class FusionStruct
             throws FusionException
         {
             BaseStruct s = (BaseStruct) args[0];
-            String key = unsafeTextToString(eval, args[1]);
+            String key = unsafeTextToJavaString(eval, args[1]);
             return eval.newBool(s.hasKey(eval, key));
         }
     }
@@ -1296,7 +1297,7 @@ final class FusionStruct
             throws FusionException
         {
             BaseStruct s = (BaseStruct) args[0];
-            String name = unsafeTextToString(eval, args[1]);
+            String name = unsafeTextToJavaString(eval, args[1]);
             return s.ref(eval, name, args[2]);
         }
     }
@@ -1317,7 +1318,7 @@ final class FusionStruct
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            String key = unsafeTextToString(eval, args[1]);
+            String key = unsafeTextToJavaString(eval, args[1]);
             return unsafeStructPut(eval, args[0], key, args[2]);
         }
     }
@@ -1338,7 +1339,7 @@ final class FusionStruct
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            String key = unsafeTextToString(eval, args[1]);
+            String key = unsafeTextToJavaString(eval, args[1]);
             return unsafeStructPutM(eval, args[0], key, args[2]);
         }
     }
@@ -1647,7 +1648,7 @@ final class FusionStruct
             while (fieldIterator.hasNext() && valueIterator.hasNext())
             {
                 Object nameObj = fieldIterator.next();
-                String name = copyTextToJavaString(nameObj);
+                String name = textToJavaString(eval, nameObj);
                 if (name == null || name.isEmpty())
                 {
                     String expectation =

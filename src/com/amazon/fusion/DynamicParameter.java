@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionString.stringToJavaString;
 import java.util.List;
 
 
@@ -49,7 +50,7 @@ class DynamicParameter
         throws FusionException
     {
         Object value = currentValue(eval);
-        return FusionValue.asJavaString(value);
+        return stringToJavaString(eval, value);
     }
 
 

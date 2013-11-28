@@ -8,8 +8,6 @@ import static com.amazon.fusion.FusionVoid.isVoid;
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonInt;
-import com.amazon.ion.IonString;
-import com.amazon.ion.IonText;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
@@ -253,16 +251,6 @@ public abstract class FusionValue
 
 
     /**
-     * @param value must not be null
-     * @return not null.
-     */
-    static IonValue unsafeCastToIonValue(Object value)
-    {
-        return (IonValue) value;
-    }
-
-
-    /**
      * Performs an immediate cast (not conversion) of the given Fusion value
      * to an IonValue. The result may have a container!
      * <p>
@@ -389,44 +377,6 @@ public abstract class FusionValue
         return dom;
     }
 
-
-    @Deprecated
-    static boolean isAnyIonNull(Object value)
-    {
-        IonValue iv = castToIonValueMaybe(value);
-        return (iv != null ? iv.isNullValue() : false);
-    }
-
-    /**
-     * Returns a Fusion string as a Java string.
-     * @return null if the value isn't a string.
-     */
-    static String asJavaString(Object value)
-    {
-        IonValue iv = castToIonValueMaybe(value);
-        if (iv != null && iv.getType() == IonType.STRING)
-        {
-            return ((IonString) iv).stringValue();
-        }
-        return null;
-    }
-
-    /**
-     * Given Fusion symbol or string, returns the Java string value.
-     *
-     * @param value
-     * @return null if the value isn't a symbol or string, or if its
-     * null.symbol or null.string.
-     */
-    static String copyTextToJavaString(Object value)
-    {
-        IonValue iv = castToIonValueMaybe(value);
-        if (iv != null && iv instanceof IonText)
-        {
-            return ((IonText) iv).stringValue();
-        }
-        return null;
-    }
 
     /**
      * @return null if the value isn't a Fusion int

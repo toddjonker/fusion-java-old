@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonText;
+import com.amazon.ion.IonValue;
 
 /**
  *
@@ -12,13 +13,52 @@ final class FusionText
     private FusionText() {}
 
 
+    //========================================================================
+    // Predicates
+
+
+    public static boolean isText(TopLevel top, Object value)
+        throws FusionException
+    {
+        return (value instanceof IonText);
+    }
+
+
+    static boolean isText(Evaluator eval, Object value)
+        throws FusionException
+    {
+        return (value instanceof IonText);
+    }
+
+
+    //========================================================================
+    // Conversions
+
+
     /**
      * @return null if given {@code null.string} or {@code null.symbol}.
      */
-    static String unsafeTextToString(Evaluator eval, Object stringOrSymbol)
+    static String unsafeTextToJavaString(Evaluator eval, Object stringOrSymbol)
         throws FusionException
     {
         return ((IonText) stringOrSymbol).stringValue();
+    }
+
+
+    /**
+     * Converts a Fusion text value to a {@link String}.
+     *
+     * @return null if the value isn't a Fusion string or symbol.
+     */
+    static String textToJavaString(Evaluator eval, Object value)
+        throws FusionException
+    {
+        IonValue iv = FusionValue.castToIonValueMaybe(value);
+        if (iv != null && iv instanceof IonText)
+        {
+            return ((IonText) iv).stringValue();
+        }
+        return null;
     }
 
 
@@ -50,7 +90,7 @@ final class FusionText
                                        Procedure who,
                                        int       argNum,
                                        Object... args)
-        throws ArgTypeFailure
+        throws FusionException, ArgTypeFailure
     {
         String expectation = "non-null string or symbol";
         String result = checkTextArg(eval, who, expectation, argNum, args);
@@ -69,7 +109,7 @@ final class FusionText
                                        Procedure who,
                                        int       argNum,
                                        Object... args)
-        throws ArgTypeFailure
+        throws FusionException, ArgTypeFailure
     {
         String expectation = "non-empty string or symbol";
         String result = checkTextArg(eval, who, expectation, argNum, args);

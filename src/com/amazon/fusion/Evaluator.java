@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionList.listFromIonSequence;
 import static com.amazon.fusion.FusionSexp.sexpFromIonSequence;
+import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionStruct.structFromIonStruct;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonList;
@@ -218,11 +219,9 @@ final class Evaluator
         return inject(dom);
     }
 
-    Object newString(String value, String... annotations)
+    Object newString(String value)
     {
-        IonValue dom = mySystem.newString(value);
-        if (annotations != null) dom.setTypeAnnotations(annotations);
-        return inject(dom);
+        return makeString(this, value);
     }
 
     Object newSymbol(String value, String... annotations)

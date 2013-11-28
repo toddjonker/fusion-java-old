@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
@@ -35,7 +36,7 @@ final class SyntaxString
     @Override
     Object unwrap(Evaluator eval, boolean recurse)
     {
-        return eval.newString(myText, getAnnotations());
+        return makeString(eval, getAnnotations(), myText);
     }
 
 

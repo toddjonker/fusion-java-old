@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionString.isString;
+import static com.amazon.fusion.FusionString.stringToJavaString;
+import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
 import static com.amazon.fusion.FusionVoid.isVoid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -10,7 +13,6 @@ import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
-import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonText;
@@ -278,8 +280,10 @@ public class CoreTestCase
 
 
     void checkString(String expected, Object actual)
+        throws FusionException
     {
-        String actualString = FusionValue.asJavaString(actual);
+        // TODO UNSAFE use of null Evaluator
+        String actualString = stringToJavaString(null, actual);
         assertEquals(expected, actualString);
     }
 
@@ -407,15 +411,14 @@ public class CoreTestCase
         throws FusionException
     {
         Object fv = eval(expressionIon);
-        IonValue iv = FusionValue.castToIonValueMaybe(fv);
-        if (iv instanceof IonString)
+        if (!isString(topLevel(), fv))
         {
-            IonString is = (IonString)iv;
-            String result = is.stringValue();
-            assertEquals(expressionIon, expectedString, result);
-            return;
+            fail("Expected string, got " + fv);
         }
-        Assert.fail("Input arg is of invalid type.");
+
+        // TODO UNSAFE use of null Evaluator
+        String result = unsafeStringToJavaString(null, fv);
+        assertEquals(expressionIon, expectedString, result);
     }
 
     protected void assertSelfEval(String expressionIon)
