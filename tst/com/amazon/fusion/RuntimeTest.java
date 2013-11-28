@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionBool.isTrue;
 import static com.amazon.fusion.FusionVoid.isVoid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -14,7 +13,6 @@ import com.amazon.ion.IonInt;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonValue;
 import java.io.File;
-import java.math.BigInteger;
 import org.junit.Test;
 
 public class RuntimeTest
@@ -100,58 +98,7 @@ public class RuntimeTest
         loadFile("ftst/repo/src/grain.fusion");
     }
 
-    @Test
-    public void testNullInjection()
-        throws Exception
-    {
-        Object fv = topLevel().call("identity", (Object) null);
-        assertTrue(isVoid(topLevel(), fv));
 
-        // Check that define() injects the given value.
-        topLevel().define("v", null);
-        fv = topLevel().eval("(identity v)");
-        assertTrue(isVoid(topLevel(), fv));
-    }
-
-    @Test
-    public void testIntInjection()
-        throws Exception
-    {
-        Object fv = topLevel().call("<", 22, BigInteger.valueOf(23));
-        assertTrue(isTrue(topLevel(), fv));
-
-        // Inject Byte
-        topLevel().define("v", Byte.valueOf(Byte.MAX_VALUE));
-        fv = topLevel().eval("(= v " + Byte.MAX_VALUE + ")");
-        assertTrue(isTrue(topLevel(), fv));
-
-        // Inject Short
-        topLevel().define("v", Short.valueOf(Short.MAX_VALUE));
-        fv = topLevel().eval("(= v " + Short.MAX_VALUE + ")");
-        assertTrue(isTrue(topLevel(), fv));
-
-        // Inject Integer
-        topLevel().define("v", 22);
-        fv = topLevel().eval("(= v 22)");
-        assertTrue(isTrue(topLevel(), fv));
-
-        // Inject Long
-        topLevel().define("v", Long.valueOf(Long.MAX_VALUE));
-        fv = topLevel().eval("(= v " + Long.MAX_VALUE + ")");
-        assertTrue(isTrue(topLevel(), fv));
-    }
-
-    @Test
-    public void testBoolInjection()
-        throws Exception
-    {
-        Object fv = topLevel().call("=", true, Boolean.FALSE);
-        assertFalse(isTrue(topLevel(), fv));
-
-        topLevel().define("v", true);
-        fv = topLevel().eval("v");
-        assertTrue(isTrue(topLevel(), fv));
-    }
 
     @Test
     public void testVoidReturn()
