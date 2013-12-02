@@ -373,7 +373,10 @@ final class FusionList
         }
 
 
-        /** Takes ownership of the array, doesn't make a copy. */
+        /**
+         * @param annotations must not be null. This method assumes ownership
+         * of the array and it must not be modified later.
+         */
         abstract BaseList makeSimilar(String[] annotations, Object[] values);
 
 

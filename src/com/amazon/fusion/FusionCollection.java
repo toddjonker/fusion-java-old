@@ -47,7 +47,9 @@ final class FusionCollection
 
     /**
      * @param collection must be a collection.
-     * @param annotations must no elements that are null or empty.
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
      */
     static Object unsafeCollectionAnnotate(Evaluator eval,
                                            Object collection,
@@ -88,6 +90,11 @@ final class FusionCollection
         abstract int size()
             throws FusionException;
 
+        /**
+         * @param annotations must not be null and must not contain elements
+         * that are null or empty. This method assumes ownership of the array
+         * and it must not be modified later.
+         */
         abstract Object annotate(Evaluator eval, String[] annotations)
             throws FusionException;
     }
