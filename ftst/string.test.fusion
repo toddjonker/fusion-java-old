@@ -12,6 +12,30 @@
   ])
 
 
+//============================================================================
+// Comparisons
+
+(define_check (check_comparisons msg lo hi)                 // msg is rest arg
+//  (check <  lo hi)
+//  (check <= lo hi)
+  (check =  lo lo)
+  (check =  hi hi)
+//  (check >= hi lo)
+//  (check >  hi lo)
+)
+
+(check_comparisons ""  "a")
+(check_comparisons "a" "b")
+
+(check_comparisons (quote f::"" ) (quote e::"a"))
+(check_comparisons (quote f::"a") (quote e::"b"))
+
+(check_arg_exn (= null.string null.string))
+
+
+//============================================================================
+// string_append
+
 (check = (string_append ""   "")  "")
 (check = (string_append "aB" "")  "aB")
 (check = (string_append "aB" "c") "aBc")

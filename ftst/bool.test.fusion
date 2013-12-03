@@ -1,0 +1,15 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(require "/check")
+
+
+//============================================================================
+// Comparisons
+
+(check = true true)
+(check = false false)
+
+(check = (quote a::true) true)
+(check = (quote a::false) false)
+
+(check_arg_exn (= null.bool null.bool))
