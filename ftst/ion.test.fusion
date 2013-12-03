@@ -8,14 +8,85 @@
 (assert (is_empty (type_annotations true)))
 
 (check_annotations null [])
+(check_annotations (quote a::null)    ["a"])
+(check_annotations (quote a::a::null) ["a","a"])
+(check_annotations (quote a::b::null) ["a","b"])
+
+(check_annotations null.bool [])
+(check_annotations (quote a::null.bool) ["a"])
+(check_annotations (quote a::a::null.bool) ["a", "a"])
+(check_annotations (quote a::b::null.bool) ["a", "b"])
+(check_annotations true [])
+
 (check_annotations (quote a::true) ["a"])
 (check_annotations (quote a::a::true) ["a", "a"])
 (check_annotations (quote a::b::true) ["a", "b"])
-(check_annotations (quote [a::true]) [])
+(check_annotations false [])
+(check_annotations (quote a::false) ["a"])
+(check_annotations (quote a::a::false) ["a", "a"])
+(check_annotations (quote a::b::false) ["a", "b"])
 
+// TODO FUSION-204 empty symbol testing
+(check_annotations (quote null.symbol) [])
+(check_annotations (quote a::null.symbol) ["a"])
+(check_annotations (quote a::a::null.symbol) ["a", "a"])
+(check_annotations (quote a::b::null.symbol) ["a", "b"])
+(check_annotations (quote S) [])
+(check_annotations (quote a::S) ["a"])
+(check_annotations (quote a::a::S) ["a", "a"])
+(check_annotations (quote a::b::S) ["a", "b"])
+
+(check_annotations null.string [])
+(check_annotations (quote a::null.string) ["a"])
+(check_annotations (quote a::a::null.string) ["a", "a"])
+(check_annotations (quote a::b::null.string) ["a", "b"])
+(check_annotations "" [])
+(check_annotations (quote a::"") ["a"])
+(check_annotations (quote a::a::"") ["a", "a"])
+(check_annotations (quote a::b::"") ["a", "b"])
+(check_annotations "S" [])
+(check_annotations (quote a::"S") ["a"])
+(check_annotations (quote a::a::"S") ["a", "a"])
+(check_annotations (quote a::b::"S") ["a", "b"])
+
+(check_annotations null.list [])
+(check_annotations (quote a::null.list) ["a"])
+(check_annotations (quote a::a::null.list) ["a", "a"])
+(check_annotations (quote a::b::null.list) ["a", "b"])
+(check_annotations [] [])
+(check_annotations (quote a::[]) ["a"])
+(check_annotations (quote a::a::[]) ["a", "a"])
+(check_annotations (quote a::b::[]) ["a", "b"])
+(check_annotations (quote [1]) [])
+(check_annotations (quote a::[1]) ["a"])
+(check_annotations (quote a::a::[1]) ["a", "a"])
+(check_annotations (quote a::b::[1]) ["a", "b"])
+
+(check_annotations (quote null.sexp) [])
 (check_annotations (quote a::null.sexp) ["a"])
+(check_annotations (quote a::a::null.sexp) ["a", "a"])
+(check_annotations (quote a::b::null.sexp) ["a", "b"])
+(check_annotations (quote ()) [])
 (check_annotations (quote a::()) ["a"])
+(check_annotations (quote a::a::()) ["a", "a"])
+(check_annotations (quote a::b::()) ["a", "b"])
+(check_annotations (quote (b)) [])
 (check_annotations (quote a::(b)) ["a"])
+(check_annotations (quote a::a::(b)) ["a", "a"])
+(check_annotations (quote a::b::(b)) ["a", "b"])
+
+(check_annotations (quote null.struct) [])
+(check_annotations (quote a::null.struct) ["a"])
+(check_annotations (quote a::a::null.struct) ["a", "a"])
+(check_annotations (quote a::b::null.struct) ["a", "b"])
+(check_annotations (quote {}) [])
+(check_annotations (quote a::{}) ["a"])
+(check_annotations (quote a::a::{}) ["a", "a"])
+(check_annotations (quote a::b::{}) ["a", "b"])
+(check_annotations (quote {f:1}) [])
+(check_annotations (quote a::{f:1}) ["a"])
+(check_annotations (quote a::a::{f:1}) ["a", "a"])
+(check_annotations (quote a::b::{f:1}) ["a", "b"])
 
 
 //==========================================================================
@@ -29,20 +100,27 @@
 
 (check ion_equals (annotate "string"  "a") (quote a::"string"))
 (check ion_equals (annotate 2013-11T  "a") (quote a::2013-11T))
-(check ion_equals (annotate (quote s) "a") (quote a::s))
 (check ion_equals (annotate {{1111}}  "a") (quote a::{{1111}}))
 (check ion_equals (annotate {{"11"}}  "a") (quote a::{{"11"}}))
 
 
 (check ion_equals (annotate (quote x::null) "a") (quote a::null))
+
+(check ion_equals (annotate (quote x::null.bool) "a") (quote a::null.bool))
 (check ion_equals (annotate (quote x::true) "a") (quote a::true))
+
 (check ion_equals (annotate (quote x::1234) "a") (quote a::1234))
 (check ion_equals (annotate (quote x::12.4) "a") (quote a::12.4))
 (check ion_equals (annotate (quote x::12e4) "a") (quote a::12e4))
 
+// TODO FUSION-204 empty symbol testing
+(check ion_equals (annotate (quote null.symbol) "a") (quote a::null.symbol))
+(check ion_equals (annotate (quote      symbol) "a") (quote a::symbol))
+
+(check ion_equals (annotate (quote x::null.string) "a") (quote a::null.string))
 (check ion_equals (annotate (quote x::"string") "a") (quote a::"string"))
+
 (check ion_equals (annotate (quote x::2013-11T) "a") (quote a::2013-11T))
-(check ion_equals (annotate (quote x::symbol  ) "a") (quote a::symbol  ))
 (check ion_equals (annotate (quote x::{{1111}}) "a") (quote a::{{1111}}))
 (check ion_equals (annotate (quote x::{{"11"}}) "a") (quote a::{{"11"}}))
 
