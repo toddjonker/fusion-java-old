@@ -10,6 +10,8 @@ import static com.amazon.fusion.FusionNull.isNullNull;
 import static com.amazon.fusion.FusionNull.makeNullNull;
 import static com.amazon.fusion.FusionString.isString;
 import static com.amazon.fusion.FusionString.unsafeStringAnnotate;
+import static com.amazon.fusion.FusionSymbol.isSymbol;
+import static com.amazon.fusion.FusionSymbol.unsafeSymbolAnnotate;
 import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
 import com.amazon.ion.IonValue;
 
@@ -46,6 +48,11 @@ final class AnnotateProc
         if (isString(eval, target))
         {
             return unsafeStringAnnotate(eval, target, annotations);
+        }
+
+        if (isSymbol(eval, target))
+        {
+            return unsafeSymbolAnnotate(eval, target, annotations);
         }
 
         if (isBool(eval, target))

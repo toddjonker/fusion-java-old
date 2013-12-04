@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionList.immutableList;
+import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 
 final class TypeAnnotationsProc
@@ -29,7 +30,7 @@ final class TypeAnnotationsProc
             result = new Object[length];
             for (int i = 0; i < length; i++)
             {
-                result[i] = eval.newSymbol(anns[i]);
+                result[i] = makeSymbol(eval, anns[i]);
             }
         }
 

@@ -3,9 +3,10 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionText.checkRequiredTextArg;
-import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionUtils.safeEquals;
+import com.amazon.fusion.FusionText.BaseText;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
@@ -22,16 +23,9 @@ final class FusionString
 
 
     abstract static class BaseString
-        extends FusionValue
+        extends BaseText
     {
         private BaseString() {}
-
-        String[] annotationsAsJavaStrings()
-        {
-            return EMPTY_STRING_ARRAY;
-        }
-
-        abstract String stringValue();
 
         @Override
         public boolean equals(Object o)
@@ -207,7 +201,7 @@ final class FusionString
 
 
     /**
-     * @param value may be null.
+     * @param value may be null to make {@code null.string}.
      *
      * @return not null.
      */
@@ -283,14 +277,14 @@ final class FusionString
 
 
     /**
-     * @param value must be a Fusion string.
+     * @param fusionString must be a Fusion string.
      *
      * @return null if given {@code null.string}.
      */
-    static String unsafeStringToJavaString(Evaluator eval, Object value)
+    static String unsafeStringToJavaString(Evaluator eval, Object fusionString)
         throws FusionException
     {
-        return ((BaseString) value).stringValue();
+        return ((BaseString) fusionString).stringValue();
     }
 
 
@@ -508,7 +502,7 @@ final class FusionString
                 throw argFailure("non-empty string", 0, args);
             }
 
-            return eval.newSymbol(input);
+            return makeSymbol(eval, input);
         }
     }
 }

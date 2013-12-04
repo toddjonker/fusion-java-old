@@ -2,7 +2,11 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
+import com.amazon.ion.IonException;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 import java.util.Collections;
@@ -32,38 +36,100 @@ final class SyntaxSymbol
         }
     }
 
+    private final BaseSymbol myDatum;
 
-    /** Initialized during {@link #prepare} */
+    /** Initialized during {@link #doExpand} */
     private Binding myBinding;
 
     final SyntaxWraps myWraps;
 
     /**
-     * @param anns the new instance assumes ownership of the array and
-     * it must not be modified later. Must not be null.
+     * @param datum must not be null.
      */
-    private SyntaxSymbol(String name, String[] anns, SourceLocation loc,
-                         SyntaxWraps wraps)
+    private SyntaxSymbol(Evaluator      eval,
+                         SyntaxWraps    wraps,
+                         SourceLocation loc,
+                         BaseSymbol     datum)
     {
-        super(name, anns, loc);
+        super(datum.stringValue(), datum.annotationsAsJavaStrings(), loc);
+        myDatum = datum;
         myWraps = wraps;
     }
 
-    static SyntaxSymbol make(String name)
+    /**
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     * @param value may be null but must not be empty.
+     */
+    private SyntaxSymbol(Evaluator      eval,
+                         SyntaxWraps    wraps,
+                         SourceLocation loc,
+                         String[]       annotations,
+                         String         value)
     {
-        return new SyntaxSymbol(name, EMPTY_STRING_ARRAY, null, null);
+        super(value, annotations, loc);
+        myDatum = makeSymbol(eval, annotations, value);
+        myWraps = wraps;
     }
 
-    static SyntaxSymbol make(String name, SyntaxWrap wrap)
+
+    /**
+     * @param datum must be a Fusion symbol.
+     */
+    static SyntaxSymbol make(Evaluator eval, SourceLocation loc, Object datum)
     {
-        return new SyntaxSymbol(name, EMPTY_STRING_ARRAY, null,
-                                SyntaxWraps.make(wrap));
+        BaseSymbol symbol = (BaseSymbol) datum;
+        return new SyntaxSymbol(eval, null, loc, symbol);
     }
 
-    static SyntaxSymbol make(String name, String[] anns, SourceLocation loc)
+
+    /**
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     * @param value may be null.
+     */
+    static SyntaxSymbol make(Evaluator eval,
+                             SourceLocation loc,
+                             String[] annotations,
+                             String value)
     {
-        return new SyntaxSymbol(name, anns, loc, null);
+        return new SyntaxSymbol(eval, /*wraps*/ null, loc, annotations, value);
     }
+
+
+    /**
+     * @param value may be null.
+     */
+    static SyntaxSymbol make(Evaluator eval, SyntaxWraps wraps, String value)
+    {
+        return new SyntaxSymbol(eval, wraps, /*location*/ null,
+                                EMPTY_STRING_ARRAY, value);
+    }
+
+
+    /**
+     * @param value may be null.
+     */
+    static SyntaxSymbol make(Evaluator eval, SyntaxWrap wrap, String value)
+    {
+        return new SyntaxSymbol(eval,
+                                SyntaxWraps.make(wrap),
+                                /*location*/ null,
+                                EMPTY_STRING_ARRAY,
+                                value);
+    }
+
+
+    /**
+     * @param value may be null.
+     */
+    static SyntaxSymbol make(Evaluator eval, String value)
+    {
+        return new SyntaxSymbol(eval, null, null, EMPTY_STRING_ARRAY, value);
+    }
+
 
     /**
      * @param wraps may be null.
@@ -74,17 +140,21 @@ final class SyntaxSymbol
         // probably different, so the binding may be different.
 
         SyntaxSymbol copy =
-            new SyntaxSymbol(myText, getAnnotations(), getLocation(), wraps);
+            new SyntaxSymbol(null, wraps, getLocation(), myDatum);
         return copy;
     }
+
 
     SyntaxSymbol copyReplacingBinding(Binding binding)
     {
         SyntaxSymbol copy =
-            new SyntaxSymbol(myText, getAnnotations(), getLocation(), myWraps);
+            new SyntaxSymbol(null, myWraps, getLocation(), myDatum);
         copy.myBinding = binding;
         return copy;
     }
+
+
+    //========================================================================
 
 
     @Override
@@ -344,8 +414,11 @@ final class SyntaxSymbol
             if (myBinding instanceof FreeBinding)
             {
                 SyntaxSymbol top =
-                    new SyntaxSymbol("#%top", EMPTY_STRING_ARRAY,
-                                     null, myWraps);
+                    new SyntaxSymbol(expander.getEvaluator(),
+                                     myWraps,
+                                     /*location*/ null,
+                                     EMPTY_STRING_ARRAY,
+                                     "#%top");
                 if (top.resolve() instanceof FreeBinding)
                 {
                     throw new UnboundIdentifierFailure(myText, this);
@@ -372,23 +445,22 @@ final class SyntaxSymbol
 
     Object freeIdentifierEqual(Evaluator eval, SyntaxSymbol that)
     {
-        return eval.newBool(freeIdentifierEqual(that));
+        return makeBool(eval, freeIdentifierEqual(that));
     }
 
 
     @Override
     Object unwrap(Evaluator eval, boolean recurse)
     {
-        return eval.newSymbol(myText, getAnnotations());
+        return myDatum;
     }
 
 
     @Override
     void ionize(Evaluator eval, IonWriter writer)
-        throws IOException
+        throws IOException, IonException, FusionException, IonizeFailure
     {
-        ionizeAnnotations(writer);
-        writer.writeSymbol(myText);
+        myDatum.ionize(eval, writer);
     }
 
     String debugString()
@@ -402,6 +474,7 @@ final class SyntaxSymbol
         }
         return base;
     }
+
 
     //========================================================================
 

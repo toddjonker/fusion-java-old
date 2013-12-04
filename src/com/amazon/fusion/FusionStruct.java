@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionIterator.iterate;
 import static com.amazon.fusion.FusionList.unsafeJavaIterate;
+import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
 import static com.amazon.fusion.FusionText.textToJavaString;
 import static com.amazon.fusion.FusionText.unsafeTextToJavaString;
@@ -1385,7 +1386,7 @@ final class FusionStruct
             else
             {
                 Map.Entry<String, Object> entry = myEntryIterator.next();
-                myCurrentKey = eval.newSymbol(entry.getKey());
+                myCurrentKey = makeSymbol(eval, entry.getKey());
 
                 value = entry.getValue();
                 if (value instanceof Object[])

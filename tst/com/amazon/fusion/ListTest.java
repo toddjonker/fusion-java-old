@@ -57,8 +57,8 @@ public class ListTest
         Object result = topLevel().call("add", list, 2);
         assertEquals(2, list.size());
         assertEquals(3, unsafeListSize(null, result));
-        assertSame(list.get(0), unsafeListRef(null, result, 0));
-        assertSame(list.get(1), unsafeListRef(null, result, 1));
+        checkIon(list.get(0), unsafeListRef(null, result, 0));
+        checkIon(list.get(1), unsafeListRef(null, result, 1));
     }
 
 
@@ -71,8 +71,8 @@ public class ListTest
         Object result = topLevel().call("add_m", list, 2);
         assertEquals(2, list.size());
         assertEquals(3, unsafeListSize(null, result));
-        assertSame(list.get(0), unsafeListRef(null, result, 0));
-        assertSame(list.get(1), unsafeListRef(null, result, 1));
+        checkIon(list.get(0), unsafeListRef(null, result, 0));
+        checkIon(list.get(1), unsafeListRef(null, result, 1));
     }
 
 

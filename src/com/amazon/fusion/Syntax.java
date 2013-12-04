@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.isBool;
-import static com.amazon.fusion.FusionBool.unsafeBoolToJavaBoolean;
 import static com.amazon.fusion.FusionList.isList;
 import static com.amazon.fusion.FusionList.isNullList;
 import static com.amazon.fusion.FusionList.unsafeListRef;
@@ -17,6 +16,8 @@ import static com.amazon.fusion.FusionSexp.unsafePairHead;
 import static com.amazon.fusion.FusionSexp.unsafePairTail;
 import static com.amazon.fusion.FusionString.isString;
 import static com.amazon.fusion.FusionStruct.isStruct;
+import static com.amazon.fusion.FusionSymbol.isSymbol;
+import static com.amazon.fusion.FusionSymbol.unsafeSymbolToJavaString;
 import static com.amazon.fusion.FusionValue.annotationsAsJavaStrings;
 import static com.amazon.fusion.FusionValue.castToIonValueMaybe;
 import static com.amazon.fusion.SourceLocation.currentLocation;
@@ -109,9 +110,9 @@ final class Syntax
                     value.startsWith("_") &&
                     value.endsWith("_"))
                 {
-                    return SyntaxKeyword.make(value, anns, loc);
+                    return SyntaxKeyword.make(eval, loc, anns, value);
                 }
-                return SyntaxSymbol.make(value, anns, loc);
+                return SyntaxSymbol.make(eval, loc, anns, value);
             }
             case BLOB:
             {
@@ -247,6 +248,18 @@ final class Syntax
             r.next();
             return read(eval, r, null);
             // No need to strip wraps here
+        }
+
+        if (isSymbol(eval, datum))
+        {
+            String value = unsafeSymbolToJavaString(eval, datum);
+            if (value != null &&
+                value.startsWith("_") &&
+                value.endsWith("_"))
+            {
+                return SyntaxKeyword.make(eval, /*location*/ null, datum);
+            }
+            return SyntaxSymbol.make(eval, /*locaton*/ null, datum);
         }
 
         if (isList(eval, datum))

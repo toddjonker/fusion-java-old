@@ -2,11 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionString.isString;
-import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
-import com.amazon.fusion.FusionString.BaseString;
-import com.amazon.ion.IonText;
-import com.amazon.ion.IonValue;
+import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 
 /**
  *
@@ -16,6 +12,19 @@ final class FusionText
     private FusionText() {}
 
 
+    abstract static class BaseText
+        extends FusionValue
+    {
+        BaseText() {}
+
+        String[] annotationsAsJavaStrings()
+        {
+            return EMPTY_STRING_ARRAY;
+        }
+
+        abstract String stringValue();
+    }
+
     //========================================================================
     // Predicates
 
@@ -23,14 +32,14 @@ final class FusionText
     public static boolean isText(TopLevel top, Object value)
         throws FusionException
     {
-        return (value instanceof BaseString || value instanceof IonText);
+        return (value instanceof BaseText);
     }
 
 
     static boolean isText(Evaluator eval, Object value)
         throws FusionException
     {
-        return (value instanceof BaseString || value instanceof IonText);
+        return (value instanceof BaseText);
     }
 
 
@@ -39,16 +48,14 @@ final class FusionText
 
 
     /**
+     * @param stringOrSymbol must be a Fusion string or symbol.
+     *
      * @return null if given {@code null.string} or {@code null.symbol}.
      */
     static String unsafeTextToJavaString(Evaluator eval, Object stringOrSymbol)
         throws FusionException
     {
-        if (stringOrSymbol instanceof BaseString)
-        {
-            return unsafeStringToJavaString(eval, stringOrSymbol);
-        }
-        return ((IonText) stringOrSymbol).stringValue();
+        return ((BaseText) stringOrSymbol).stringValue();
     }
 
 
@@ -60,15 +67,9 @@ final class FusionText
     static String textToJavaString(Evaluator eval, Object value)
         throws FusionException
     {
-        if (isString(eval, value))
+        if (isText(eval, value))
         {
-            return unsafeStringToJavaString(eval, value);
-        }
-
-        IonValue iv = FusionValue.castToIonValueMaybe(value);
-        if (iv != null && iv instanceof IonText)
-        {
-            return ((IonText) iv).stringValue();
+            return unsafeTextToJavaString(eval, value);
         }
         return null;
     }
@@ -90,14 +91,11 @@ final class FusionText
         throws FusionException, ArgTypeFailure
     {
         Object arg = args[argNum];
-        if (arg instanceof BaseString)
+        if (arg instanceof BaseText)
         {
-            return ((BaseString) arg).stringValue();
+            return ((BaseText) arg).stringValue();
         }
-
-        IonText iv = who.checkDomArg(IonText.class, expectation,
-                                     true /* nullable */, argNum, args);
-        return iv.stringValue();
+        throw who.argFailure(expectation, argNum, args);
     }
 
 

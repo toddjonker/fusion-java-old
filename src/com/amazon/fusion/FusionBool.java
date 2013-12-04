@@ -387,9 +387,14 @@ public final class FusionBool
     // Conversions
 
 
-    static Boolean unsafeBoolToJavaBoolean(Evaluator eval, Object value)
+    /**
+     * @param fusionBool must be a Fusion bool.
+     *
+     * @return null if given {@code null.bool}.
+     */
+    static Boolean unsafeBoolToJavaBoolean(Evaluator eval, Object fusionBool)
     {
-        return ((BaseBool) value).asJavaBoolean();
+        return ((BaseBool) fusionBool).asJavaBoolean();
     }
 
 

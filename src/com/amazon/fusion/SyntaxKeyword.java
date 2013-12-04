@@ -2,27 +2,62 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
+import static com.amazon.fusion.FusionSymbol.makeSymbol;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
+import com.amazon.ion.IonException;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
 final class SyntaxKeyword
     extends SyntaxText
 {
-    private SyntaxKeyword(String value, String[] anns, SourceLocation loc)
+    private final BaseSymbol myDatum;
+
+    /**
+     * @param datum must not be null.
+     */
+    private SyntaxKeyword(Evaluator eval, SourceLocation loc, BaseSymbol datum)
     {
-        super(value, anns, loc);
+        super(datum.stringValue(), datum.annotationsAsJavaStrings(), loc);
+        myDatum = datum;
     }
 
-    static SyntaxKeyword make(String value)
+
+    private SyntaxKeyword(Evaluator eval,
+                          SourceLocation loc,
+                          String[] annotations,
+                          String value)
     {
-        return new SyntaxKeyword(value, EMPTY_STRING_ARRAY, null);
+        super(value, annotations, loc);
+        myDatum = makeSymbol(eval, annotations, value);
     }
 
-    static SyntaxKeyword make(String value, String[] anns, SourceLocation loc)
+
+    /**
+     * @param datum must be a Fusion symbol.
+     */
+    static SyntaxKeyword make(Evaluator eval, SourceLocation loc, Object datum)
     {
-        return new SyntaxKeyword(value, anns, loc);
+        BaseSymbol symbol = (BaseSymbol) datum;
+        return new SyntaxKeyword(eval, loc, symbol);
     }
+
+
+    /**
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     */
+    static SyntaxKeyword make(Evaluator eval,
+                              SourceLocation loc,
+                              String[] annotations,
+                              String value)
+    {
+        return new SyntaxKeyword(eval, loc, annotations, value);
+    }
+
+
+    //========================================================================
 
 
     @Override
@@ -45,16 +80,16 @@ final class SyntaxKeyword
     {
         // TODO I have no idea if this is correct long-term.
         // Should we allow it at the moment?
-        return eval.newSymbol(myText, getAnnotations());
+        return myDatum;
     }
 
 
     @Override
     void ionize(Evaluator eval, IonWriter writer)
-        throws IOException
+        throws IOException, IonException, FusionException, IonizeFailure
     {
-        ionizeAnnotations(writer);
-        writer.writeSymbol(myText);  // TODO __ ??
+        // TODO __ ??
+        myDatum.ionize(eval, writer);
     }
 
 

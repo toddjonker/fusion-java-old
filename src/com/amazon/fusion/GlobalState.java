@@ -61,10 +61,13 @@ final class GlobalState
         myCurrentNamespaceParam = currentNamespaceParam;
 
         SyntaxWrap wrap = new ModuleRenameWrap(kernel);
-        myKernelBeginIdentifier  = SyntaxSymbol.make(BEGIN, wrap);
-        myKernelLambdaIdentifier = SyntaxSymbol.make(LAMBDA, wrap);
-        myKernelLetrecIdentifier = SyntaxSymbol.make(LETREC, wrap);
-        myKernelModuleIdentifier = SyntaxSymbol.make(MODULE, wrap);
+
+        // WARNING: We pass null evaluator because we know its not used.
+        //          That is NOT SUPPORTED for user code!
+        myKernelBeginIdentifier  = SyntaxSymbol.make(null, wrap, BEGIN);
+        myKernelLambdaIdentifier = SyntaxSymbol.make(null, wrap, LAMBDA);
+        myKernelLetrecIdentifier = SyntaxSymbol.make(null, wrap, LETREC);
+        myKernelModuleIdentifier = SyntaxSymbol.make(null, wrap, MODULE);
 
         myKernelAllDefinedOutBinding = kernelBinding(ALL_DEFINED_OUT);
         myKernelBeginBinding         = kernelBinding(BEGIN);
@@ -138,7 +141,8 @@ final class GlobalState
                 t != IonType.LIST &&
                 t != IonType.SEXP &&
                 t != IonType.STRING &&
-                t != IonType.STRUCT)
+                t != IonType.STRUCT &&
+                t != IonType.SYMBOL)
             {
                 String name = "is_" + t.name().toLowerCase();
                 ns.define(name, new IonTypeCheckingProc(t));

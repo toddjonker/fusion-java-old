@@ -171,7 +171,7 @@ final class StandardTopLevel
     private Procedure lookupProcedure(String procedureName)
         throws FusionException
     {
-        SyntaxSymbol id = SyntaxSymbol.make(procedureName);
+        SyntaxSymbol id = SyntaxSymbol.make(myEvaluator, procedureName);
 
         Object proc = FusionEval.eval(myEvaluator, id, myNamespace);
         if (proc instanceof Procedure)

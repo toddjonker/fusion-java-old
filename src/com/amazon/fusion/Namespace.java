@@ -357,7 +357,10 @@ abstract class Namespace
             throw new IllegalArgumentException(message);
         }
 
-        SyntaxSymbol identifier = SyntaxSymbol.make(name);
+        // WARNING: We pass null evaluator because we know its not used.
+        //          That is NOT SUPPORTED for user code!
+        SyntaxSymbol identifier = SyntaxSymbol.make(null, name);
+
         identifier = predefine(identifier, null);
         NsBinding binding = (NsBinding) identifier.getBinding();
         bind(binding, value);

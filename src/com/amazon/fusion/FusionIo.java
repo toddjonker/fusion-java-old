@@ -122,15 +122,8 @@ public final class FusionIo
         else if (value instanceof IonValue)
         {
             IonValue iv = (IonValue) value;
-            if (iv instanceof IonText)
-            {
-                String text = ((IonText) iv).stringValue();
-                out.append(text);
-            }
-            else
-            {
-                FusionUtils.writeIon(out, iv);
-            }
+            assert ! (iv instanceof IonText);
+            FusionUtils.writeIon(out, iv);
         }
         else
         {

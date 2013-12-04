@@ -144,7 +144,7 @@ final class ProvideForm
                 // it has been pushed down to children.
                 SyntaxSymbol localized = (SyntaxSymbol)
                     datumToSyntax(eval,
-                                  SyntaxSymbol.make(binding.getName()),
+                                  SyntaxSymbol.make(eval, binding.getName()),
                                   tag);
                 localized = localized.copyAndResolveTop();
                 Binding localBinding = moduleNamespace.localResolve(localized);

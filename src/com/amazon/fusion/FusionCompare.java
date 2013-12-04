@@ -7,10 +7,11 @@ import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.unsafeBoolToJavaBoolean;
 import static com.amazon.fusion.FusionString.isString;
 import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
+import static com.amazon.fusion.FusionSymbol.isSymbol;
+import static com.amazon.fusion.FusionSymbol.unsafeSymbolToJavaString;
 import static com.amazon.fusion.FusionUtils.safeEquals;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
-import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonTimestamp;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
@@ -156,6 +157,19 @@ final class FusionCompare
                 }
             }
 
+            if (isSymbol(eval, arg0) && isSymbol(eval, arg1))
+            {
+                String left  = unsafeSymbolToJavaString(eval, arg0);
+                String right = unsafeSymbolToJavaString(eval, arg1);
+
+                if (left != null && right != null)
+                {
+                    boolean r = compareStrings(left, right, args);
+                    return makeBool(eval, r);
+                }
+            }
+
+
             IonValue leftVal  = FusionValue.castToIonValueMaybe(args[0]);
             IonValue rightVal = FusionValue.castToIonValueMaybe(args[1]);
 
@@ -265,25 +279,7 @@ final class FusionCompare
         boolean compare(IonValue leftVal, IonValue rightVal, Object[] args)
             throws FusionException
         {
-            switch (leftVal.getType())
-            {
-                case SYMBOL:
-                {
-                    if (rightVal instanceof IonSymbol)
-                    {
-                        IonSymbol left  = (IonSymbol) leftVal;
-                        IonSymbol right = (IonSymbol) rightVal;
-                        return left.stringValue().equals(right.stringValue());
-                    }
-                    break;
-                }
-                default:
-                {
-                    return compareNumbers(leftVal, rightVal, args) == 0;
-                }
-            }
-
-            throw failure(args);
+            return compareNumbers(leftVal, rightVal, args) == 0;
         }
 
         @Override

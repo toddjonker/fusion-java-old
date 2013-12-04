@@ -8,12 +8,14 @@ import static com.amazon.fusion.FusionNull.makeNullNull;
 import static com.amazon.fusion.FusionSexp.sexpFromIonSequence;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionStruct.structFromIonStruct;
+import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
+import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
@@ -99,6 +101,11 @@ final class Evaluator
                                  ? null
                                  : ((IonBool)value).booleanValue());
                 return makeBool(this, value.getTypeAnnotations(), b);
+            }
+            case SYMBOL:
+            {
+                String text = ((IonSymbol)value).stringValue();
+                return makeSymbol(this, value.getTypeAnnotations(), text);
             }
             case STRING:
             {
@@ -265,11 +272,23 @@ final class Evaluator
         return makeString(this, value);
     }
 
+    /**
+     * @deprecated Use {@link FusionSymbol#makeSymbol(Evaluator, String)}.
+     */
+    @Deprecated
+    Object newSymbol(String value)
+    {
+        return makeSymbol(this, value);
+    }
+
+    /**
+     * @deprecated Use
+     * {@link FusionSymbol#makeSymbol(Evaluator, String[], String)}.
+     */
+    @Deprecated
     Object newSymbol(String value, String... annotations)
     {
-        IonValue dom = mySystem.newSymbol(value);
-        if (annotations != null) dom.setTypeAnnotations(annotations);
-        return inject(dom);
+        return makeSymbol(this, annotations, value);
     }
 
     Object newDecimal(BigDecimal value, String... annotations)
