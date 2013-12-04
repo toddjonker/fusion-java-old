@@ -2,7 +2,8 @@
 
 (require
   "/check"
-  "/fusion/experimental/syntax")
+  "/fusion/experimental/syntax"
+  "/fusion/private/builtins")   // annotate
 
 (define id (quote_syntax identifier))
 (define some_syntax (quote_syntax (op arg)))
@@ -38,131 +39,122 @@
 
 
 //==========================================================================
-// syntax_to_datum
+// datum_to_syntax and syntax_to_datum
+
+(define_syntax check_xforms1
+  (lambda (stx)
+    '''
+    (check_xforms1 datum annotations)
+    =>
+    (begin (check ion_equals ... (quote datum)))
+    '''
+    (lets [(datum_stx (syntax_get stx 1)),
+           (quote_datum_stx (quasisyntax (quote (unsyntax datum_stx))))]
+      (quasisyntax
+        (begin
+          // This ensures that our attempt to annotate the original datum
+          // (in check_xforms) has succeeded.
+          (check ion_equals
+            (type_annotations (unsyntax quote_datum_stx))
+            (quote (unsyntax (syntax_get stx 2)))
+            "annotations on " (unsyntax quote_datum_stx))
+          (check ion_equals
+            (syntax_to_datum (quote_syntax (unsyntax datum_stx)))
+            (unsyntax quote_datum_stx))
+          (check ion_equals
+            (syntax_to_datum ((unsyntax (quote_syntax quasisyntax))
+                              (unsyntax datum_stx)))
+            (unsyntax quote_datum_stx))
+          (check ion_equals
+            (syntax_to_datum (datum_to_syntax (quote (unsyntax datum_stx))))
+            (unsyntax quote_datum_stx))
+          (check ion_equals
+            (syntax_to_datum (datum_to_syntax (quote_syntax (unsyntax datum_stx))))
+            (unsyntax quote_datum_stx))
+          (check ion_equals
+            (syntax_to_datum (datum_to_syntax ((unsyntax (quote_syntax quasisyntax))
+                                               (unsyntax datum_stx))))
+            (unsyntax quote_datum_stx)))))))
+
+(define_syntax check_xforms
+  (lambda (stx)
+    '''
+    (check_xforms datum)
+    =>
+    (begin (check_xforms1 datum)
+           (check_xforms1 a::datum)    // TODO How to annotate syntax objects?
+           (check_xforms1 a::a::datum)
+           (check_xforms1 a::b::datum))
+    '''
+    (lets [(datum_stx (syntax_get stx 1)),
+           (datum     (syntax_unwrap datum_stx)),
+           (  a_datum_stx (datum_to_syntax (annotate datum "a"    ))),
+           (a_a_datum_stx (datum_to_syntax (annotate datum "a" "a"))),
+           (a_b_datum_stx (datum_to_syntax (annotate datum "a" "b")))]
+      (quasisyntax
+        (begin
+          (check_xforms1 (unsyntax     datum_stx) [])
+          (check_xforms1 (unsyntax   a_datum_stx) [a])
+          (check_xforms1 (unsyntax a_a_datum_stx) [a, a])
+          (check_xforms1 (unsyntax a_b_datum_stx) [a, b]))))))
 
 
-(check ion_equals
-  (syntax_to_datum (quote_syntax null))
-  (quote null))
-(check ion_equals
-  (syntax_to_datum (datum_to_syntax (quote null)))
-  (quote null))
-(check ion_equals
-  (syntax_to_datum (datum_to_syntax (quote_syntax null)))
-  (quote null))
-(check ion_equals
-  (syntax_to_datum (quote_syntax a::null))
-  (quote a::null))
-(check ion_equals
-  (syntax_to_datum (datum_to_syntax (quote a::null)))
-  (quote a::null))
-(check ion_equals
-  (syntax_to_datum (datum_to_syntax (quote_syntax a::null)))
-  (quote a::null))
+(check_xforms null)
+
+(check_xforms null.bool)
+(check_xforms true)
+(check_xforms false)
+
+(check_xforms null.int)
+(check_xforms 0)
+(check_xforms 123456)
+
+(check_xforms null.float)
+(check_xforms 2.56e0)
+
+(check_xforms null.decimal)
+(check_xforms -0d0)
+(check_xforms 0d0)
+(check_xforms 2.57)
+
+(check_xforms null.timestamp)
+(check_xforms 2013-02-08T)
+
+(check_xforms null.symbol)
+(check_xforms symbol)
+
+(check_xforms null.string)
+(check_xforms "")
+(check_xforms "a real string")
+
+(check_xforms null.clob)
+(check_xforms {{""}})
+(check_xforms {{"a real clob"}})
+
+(check_xforms null.blob)
+(check_xforms {{}})
+(check_xforms {{abcd}})
+
+(check_xforms null.list)
+(check_xforms [])
+(check_xforms [1])
+(check_xforms [1,2])
+
+(check_xforms null.sexp)
+(check_xforms ())
+(check_xforms (1))
+(check_xforms (1 2))
+
+(check_xforms null.struct)
+(check_xforms {})
+(check_xforms {f:1})
+(check_xforms {f:1, g:2})
 
 
-(check ion_equals (syntax_to_datum (quote_syntax true))
-  (quote true))
-(check ion_equals (syntax_to_datum (quote_syntax a::true))
-  (quote a::true))
-(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::false)))
-  (quote a::false))
-
-
-(check = 159         (syntax_to_datum (quote_syntax 159)))
-//(check = 2.57e0      (syntax_to_datum (quote_syntax 2.57e0)))   // TODO
-(check = 2.57        (syntax_to_datum (quote_syntax 2.57)))
-
-
-(check ion_equals
-  (syntax_to_datum (quote_syntax null.timestamp))
-  (quote null.timestamp))
-(check ion_equals
-  (syntax_to_datum (datum_to_syntax (quote null.timestamp)))
-  (quote null.timestamp))
-(check ion_equals
-  (syntax_to_datum (datum_to_syntax (quote_syntax null.timestamp)))
-  (quote null.timestamp))
-(check ion_equals
-  (syntax_to_datum (quote_syntax 2013-02-08T))
-  (quote 2013-02-08T))
-(check ion_equals
-  (syntax_to_datum (datum_to_syntax (quote 2013-02-08T)))
-  (quote 2013-02-08T))
-(check ion_equals
-  (syntax_to_datum (datum_to_syntax (quote_syntax 2013-02-08T)))
-  (quote 2013-02-08T))
-(check ion_equals
-  (syntax_to_datum (quote_syntax a::null.timestamp))
-  (quote a::null.timestamp))
-(check ion_equals
-  (syntax_to_datum (datum_to_syntax (quote a::null.timestamp)))
-  (quote a::null.timestamp))
-(check ion_equals
-  (syntax_to_datum (datum_to_syntax (quote_syntax a::null.timestamp)))
-  (quote a::null.timestamp))
-(check ion_equals
-  (syntax_to_datum (quote_syntax a::2013-02-08T))
-  (quote a::2013-02-08T))
-(check ion_equals
-  (syntax_to_datum (datum_to_syntax (quote a::2013-02-08T)))
-  (quote a::2013-02-08T))
-(check ion_equals
-  (syntax_to_datum (datum_to_syntax (quote_syntax a::2013-02-08T)))
-  (quote a::2013-02-08T))
-
-
-(check = (quote u)   (syntax_to_datum (quote_syntax u)))
-(check = "unwrap"    (syntax_to_datum (quote_syntax "unwrap")))
-// TODO test blob, clob
-
-(check ion_equals (syntax_to_datum (quote_syntax a::null.sexp))
-  (quote a::null.sexp))
-(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::null.sexp)))
-  (quote a::null.sexp))
-
-(check ion_equals (syntax_to_datum (quote_syntax a::()))
-  (quote a::()))
-(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::())))
-  (quote a::()))
-(check ion_equals (syntax_to_datum (datum_to_syntax (quote_syntax a::())))
-  (quote a::()))
-(check ion_equals (syntax_to_datum (datum_to_syntax (quasisyntax a::())))
-  (quote a::()))
-(check ion_equals (syntax_to_datum (quote_syntax a::(b)))
-  (quote a::(b)))
-(check ion_equals (syntax_to_datum (quasisyntax a::(b)))
-  (quote a::(b)))
-(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::(b))))
-  (quote a::(b)))
-(check ion_equals (syntax_to_datum (datum_to_syntax (quote_syntax a::(b))))
-  (quote a::(b)))
-(check ion_equals (syntax_to_datum (datum_to_syntax (quasisyntax a::(b))))
-  (quote a::(b)))
-(check ion_equals (syntax_to_datum (quote_syntax a::(b c)))
-  (quote a::(b c)))
-
-
-(check ion_equals
-  (syntax_to_datum (quasisyntax a::(b)))
-  (quote a::(b)) "")
 (check ion_equals
   (syntax_to_datum (quasisyntax a::(b (unsyntax (quote_syntax c)))))
   (quote a::(b c)) "")
 
-
-(check ion_equals (syntax_to_datum (quote_syntax a::null.list))
-  (quote a::null.list))
-(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::null.list)))
-  (quote a::null.list))
-(check ion_equals (syntax_to_datum (quote_syntax a::[]))
-  (quote a::[]))
-(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::[])))
-  (quote a::[]))
-(check ion_equals (syntax_to_datum (quote_syntax a::[1]))
-  (quote a::[1]))
-(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::[1])))
-  (quote a::[1]))
 
 (lets [(stx (quote_syntax [a, 2])),
        (unwrapped (syntax_to_datum stx))]
@@ -173,20 +165,6 @@
   (check = (quote a) (head unwrapped))
   (check = 2 (. unwrapped 1 "f") "f")
   (check_equal ["hi"] (. unwrapped 1 "g") "g"))
-
-
-(check ion_equals (syntax_to_datum (quote_syntax a::null.struct))
-  (quote a::null.struct))
-(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::null.struct)))
-  (quote a::null.struct))
-(check ion_equals (syntax_to_datum (quote_syntax a::{}))
-  (quote a::{}))
-(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::{})))
-  (quote a::{}))
-(check ion_equals (syntax_to_datum (quote_syntax a::{f:1}))
-  (quote a::{f:1}))
-(check ion_equals (syntax_to_datum (datum_to_syntax (quote a::{f:1})))
-  (quote a::{f:1}))
 
 
 //==========================================================================

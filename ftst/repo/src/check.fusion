@@ -51,7 +51,24 @@ Raises a check failure exception, including a stack trace derived from the
   (defpub_syntax define_check
     (lambda (stx)
       '''
-      (define_check (name message_arg arg ...) body ...)
+    (define_check (name message_arg arg ...) body ...)
+
+Creates a macro that's invoked as:
+
+    (name arg_expr ... message_expr)
+
+(At present, multiple `message_expr`s can be given, but only the last is used.)
+
+That expands to:
+
+    (let [(message_arg (lambda () message_expr))] // or (void) if no message
+      (parameterize
+        [(check_syntax_param /* original syntax */)]
+        (let [(arg arg_expr), /*...*/ ]
+          body ...))))
+
+The outer `let` has the effect of avoiding evaluation of the `message_expr`
+unless it is required.  It's also a bit odd to use.
       '''
       (when (< (syntax_size stx) 3)
         (wrong_syntax stx
