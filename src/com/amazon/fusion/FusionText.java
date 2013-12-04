@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 
 /**
  *
@@ -16,11 +15,6 @@ final class FusionText
         extends FusionValue
     {
         BaseText() {}
-
-        String[] annotationsAsJavaStrings()
-        {
-            return EMPTY_STRING_ARRAY;
-        }
 
         abstract String stringValue();
     }

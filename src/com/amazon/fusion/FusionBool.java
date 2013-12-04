@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionValue.evaluator;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
@@ -26,11 +25,6 @@ public final class FusionBool
         extends FusionValue
     {
         private BaseBool() {}
-
-        String[] annotationsAsJavaStrings()
-        {
-            return EMPTY_STRING_ARRAY;
-        }
 
         abstract boolean isTrue();
         abstract boolean isFalse();

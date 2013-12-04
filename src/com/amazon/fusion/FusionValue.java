@@ -54,6 +54,12 @@ public abstract class FusionValue
     }
 
 
+    String[] annotationsAsJavaStrings()
+    {
+        return EMPTY_STRING_ARRAY;
+    }
+
+
     boolean isAnyNull()
     {
         return false;

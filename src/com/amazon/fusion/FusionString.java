@@ -197,7 +197,7 @@ final class FusionString
     // Constructors
 
 
-    private static final BaseString NULL_STRING  = new NullString();
+    private static final BaseString NULL_STRING = new NullString();
 
 
     /**

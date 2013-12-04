@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
@@ -22,11 +21,6 @@ final class FusionNull
         extends FusionValue
     {
         private NullNull() {}
-
-        String[] annotationsAsJavaStrings()
-        {
-            return EMPTY_STRING_ARRAY;
-        }
 
         @Override
         boolean isAnyNull()
