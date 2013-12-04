@@ -13,6 +13,8 @@ import static com.amazon.fusion.FusionString.unsafeStringAnnotate;
 import static com.amazon.fusion.FusionSymbol.isSymbol;
 import static com.amazon.fusion.FusionSymbol.unsafeSymbolAnnotate;
 import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
+import static com.amazon.fusion.FusionTimestamp.isTimestamp;
+import static com.amazon.fusion.FusionTimestamp.unsafeTimestampAnnotate;
 import com.amazon.ion.IonValue;
 
 
@@ -58,6 +60,11 @@ final class AnnotateProc
         if (isBool(eval, target))
         {
             return unsafeBoolAnnotate(eval, target, annotations);
+        }
+
+        if (isTimestamp(eval, target))
+        {
+            return unsafeTimestampAnnotate(eval, target, annotations);
         }
 
         if (isNullNull(eval, target))

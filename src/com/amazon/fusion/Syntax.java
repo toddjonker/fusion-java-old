@@ -18,6 +18,7 @@ import static com.amazon.fusion.FusionString.isString;
 import static com.amazon.fusion.FusionStruct.isStruct;
 import static com.amazon.fusion.FusionSymbol.isSymbol;
 import static com.amazon.fusion.FusionSymbol.unsafeSymbolToJavaString;
+import static com.amazon.fusion.FusionTimestamp.isTimestamp;
 import static com.amazon.fusion.FusionValue.annotationsAsJavaStrings;
 import static com.amazon.fusion.FusionValue.castToIonValueMaybe;
 import static com.amazon.fusion.SourceLocation.currentLocation;
@@ -96,7 +97,7 @@ final class Syntax
             case TIMESTAMP:
             {
                 Timestamp value = source.timestampValue();
-                return SyntaxTimestamp.make(value, anns, loc);
+                return SyntaxTimestamp.make(eval, loc, anns, value);
             }
             case STRING:
             {
@@ -342,6 +343,11 @@ final class Syntax
         if (isString(eval, datum))
         {
             return SyntaxString.make(eval, /*location*/ null, datum);
+        }
+
+        if (isTimestamp(eval, datum))
+        {
+            return SyntaxTimestamp.make(eval, /*location*/ null, datum);
         }
 
         return null;

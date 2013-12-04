@@ -11,6 +11,29 @@
   ])
 
 
+//============================================================================
+// Comparisons
+
+(define_check (check_comparisons msg lo hi)                 // msg is rest arg
+  (check <  lo hi)
+  (check <= lo hi)
+  (check =  lo lo)
+  (check =  hi hi)
+  (check >= hi lo)
+  (check >  hi lo))
+
+(check_comparisons 1980T 1981T)
+(check_comparisons 0001T 0001-02T)
+
+(check_comparisons (quote f::1980T   ) (quote e::1981T))
+(check_comparisons (quote f::1980-02T) (quote e::1980-03T))
+
+(check_arg_exn (= null.timestamp null.timestamp))
+
+
+//============================================================================
+// timestamp_to_epech_millis
+
 (check = (timestamp_to_epoch_millis 1970-01-01                )   0)
 (check = (timestamp_to_epoch_millis 1970-01-01T00:00:00.001Z  )   1)
 (check = (timestamp_to_epoch_millis 1970-01-01T00:00:00.00123Z)  1.23)

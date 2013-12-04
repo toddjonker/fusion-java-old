@@ -9,6 +9,7 @@ import static com.amazon.fusion.FusionSexp.sexpFromIonSequence;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionStruct.structFromIonStruct;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
+import static com.amazon.fusion.FusionTimestamp.makeTimestamp;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonList;
@@ -17,6 +18,7 @@ import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonSystem;
+import com.amazon.ion.IonTimestamp;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
 import java.math.BigDecimal;
@@ -101,6 +103,11 @@ final class Evaluator
                                  ? null
                                  : ((IonBool)value).booleanValue());
                 return makeBool(this, value.getTypeAnnotations(), b);
+            }
+            case TIMESTAMP:
+            {
+                Timestamp t = ((IonTimestamp)value).timestampValue();
+                return makeTimestamp(this, value.getTypeAnnotations(), t);
             }
             case SYMBOL:
             {
@@ -335,11 +342,24 @@ final class Evaluator
         return inject(dom);
     }
 
+    /**
+     * @deprecated Use
+     * {@link FusionTimestamp#makeTimestamp(Evaluator, Timestamp)}.
+     */
+    @Deprecated
+    Object newTimestamp(Timestamp value)
+    {
+        return makeTimestamp(this, value);
+    }
+
+    /**
+     * @deprecated Use
+     * {@link FusionTimestamp#makeTimestamp(Evaluator, String[], Timestamp)}.
+     */
+    @Deprecated
     Object newTimestamp(Timestamp value, String... annotations)
     {
-        IonValue dom = mySystem.newTimestamp(value);
-        if (annotations != null) dom.setTypeAnnotations(annotations);
-        return inject(dom);
+        return makeTimestamp(this, annotations, value);
     }
 
     Object newBlob(byte[] value, String... annotations)

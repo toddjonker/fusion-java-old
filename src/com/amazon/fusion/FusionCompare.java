@@ -9,6 +9,8 @@ import static com.amazon.fusion.FusionString.isString;
 import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
 import static com.amazon.fusion.FusionSymbol.isSymbol;
 import static com.amazon.fusion.FusionSymbol.unsafeSymbolToJavaString;
+import static com.amazon.fusion.FusionTimestamp.isTimestamp;
+import static com.amazon.fusion.FusionTimestamp.unsafeTimestampToJavaTimestamp;
 import static com.amazon.fusion.FusionUtils.safeEquals;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
@@ -117,6 +119,12 @@ final class FusionCompare
             throw failure(args);
         }
 
+        boolean compareTimestamps(Timestamp left, Timestamp right, Object[] args)
+            throws FusionException
+        {
+            throw failure(args);
+        }
+
         boolean compareStrings(String left, String right, Object[] args)
             throws FusionException
         {
@@ -169,6 +177,18 @@ final class FusionCompare
                 }
             }
 
+            if (isTimestamp(eval, arg0) && isTimestamp(eval, arg1))
+            {
+                Timestamp left  = unsafeTimestampToJavaTimestamp(eval, arg0);
+                Timestamp right = unsafeTimestampToJavaTimestamp(eval, arg1);
+
+                if (left != null && right != null)
+                {
+                    boolean r = compareTimestamps(left, right, args);
+                    return makeBool(eval, r);
+                }
+            }
+
 
             IonValue leftVal  = FusionValue.castToIonValueMaybe(args[0]);
             IonValue rightVal = FusionValue.castToIonValueMaybe(args[1]);
@@ -201,6 +221,14 @@ final class FusionCompare
             int r = compareNumbers(leftVal, rightVal, args);
             return (r < 0);
         }
+
+        @Override
+        boolean compareTimestamps(Timestamp left, Timestamp right, Object[] args)
+            throws FusionException
+        {
+            int r = left.compareTo(right);
+            return (r < 0);
+        }
     }
 
 
@@ -218,6 +246,14 @@ final class FusionCompare
             throws FusionException
         {
             int r = compareNumbers(leftVal, rightVal, args);
+            return (r <= 0);
+        }
+
+        @Override
+        boolean compareTimestamps(Timestamp left, Timestamp right, Object[] args)
+            throws FusionException
+        {
+            int r = left.compareTo(right);
             return (r <= 0);
         }
     }
@@ -239,6 +275,14 @@ final class FusionCompare
             int r = compareNumbers(leftVal, rightVal, args);
             return (r > 0);
         }
+
+        @Override
+        boolean compareTimestamps(Timestamp left, Timestamp right, Object[] args)
+            throws FusionException
+        {
+            int r = left.compareTo(right);
+            return (r > 0);
+        }
     }
 
 
@@ -256,6 +300,14 @@ final class FusionCompare
             throws FusionException
         {
             int r = compareNumbers(leftVal, rightVal, args);
+            return (r >= 0);
+        }
+
+        @Override
+        boolean compareTimestamps(Timestamp left, Timestamp right, Object[] args)
+            throws FusionException
+        {
+            int r = left.compareTo(right);
             return (r >= 0);
         }
     }
@@ -295,6 +347,14 @@ final class FusionCompare
             throws FusionException
         {
             return safeEquals(left, right);
+        }
+
+        @Override
+        boolean compareTimestamps(Timestamp left, Timestamp right, Object[] args)
+            throws FusionException
+        {
+            int r = left.compareTo(right);
+            return (r == 0);
         }
     }
 }

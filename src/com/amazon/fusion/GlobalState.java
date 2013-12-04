@@ -142,7 +142,8 @@ final class GlobalState
                 t != IonType.SEXP &&
                 t != IonType.STRING &&
                 t != IonType.STRUCT &&
-                t != IonType.SYMBOL)
+                t != IonType.SYMBOL &&
+                t != IonType.TIMESTAMP)
             {
                 String name = "is_" + t.name().toLowerCase();
                 ns.define(name, new IonTypeCheckingProc(t));

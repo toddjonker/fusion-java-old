@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionTimestamp.makeTimestamp;
+import com.amazon.fusion.FusionTimestamp.BaseTimestamp;
+import com.amazon.ion.IonException;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.Timestamp;
 import java.io.IOException;
@@ -9,20 +12,45 @@ import java.io.IOException;
 final class SyntaxTimestamp
     extends SyntaxValue
 {
-    private final Timestamp myValue;
+    private final BaseTimestamp myDatum;
 
 
-    private SyntaxTimestamp(Timestamp value, String[] anns, SourceLocation loc)
+    private SyntaxTimestamp(SourceLocation loc, BaseTimestamp datum)
     {
-        super(anns, loc);
-        myValue = value;
+        super(datum.annotationsAsJavaStrings(), loc);
+        myDatum = datum;
     }
 
-    static SyntaxTimestamp make(Timestamp value, String[] anns,
-                                SourceLocation loc)
+
+    /**
+     * @param fusionTimestamp must be a Fusion timestamp.
+     */
+    static SyntaxTimestamp make(Evaluator      eval,
+                                SourceLocation loc,
+                                Object         fusionTimestamp)
     {
-        return new SyntaxTimestamp(value, anns, loc);
+        BaseTimestamp ts = (BaseTimestamp) fusionTimestamp;
+        return new SyntaxTimestamp(loc, ts);
     }
+
+
+    /**
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     * @param value may be null.
+     */
+    static SyntaxTimestamp make(Evaluator      eval,
+                                SourceLocation loc,
+                                String[]       annotations,
+                                Timestamp      value)
+    {
+        BaseTimestamp ts = makeTimestamp(eval, annotations, value);
+        return new SyntaxTimestamp(loc, ts);
+    }
+
+
+    //========================================================================
 
 
     @Override
@@ -33,31 +61,31 @@ final class SyntaxTimestamp
 
 
     @Override
-    Object doCompileIonConstant(Evaluator eval, Environment env)
+    CompiledForm doCompile(Evaluator eval, Environment env)
         throws FusionException
     {
-        return eval.newTimestamp(myValue);
+        return new CompiledConstant(myDatum);
     }
 
 
     @Override
     Object unwrap(Evaluator eval, boolean recurse)
     {
-        return eval.newTimestamp(myValue, getAnnotations());
+        return myDatum;
     }
 
 
     @Override
-    void ionize(Evaluator eval, IonWriter writer) throws IOException
+    void ionize(Evaluator eval, IonWriter writer)
+        throws IOException, IonException, FusionException, IonizeFailure
     {
-        ionizeAnnotations(writer);
-        writer.writeTimestamp(myValue);
+        myDatum.ionize(eval, writer);
     }
 
 
     @Override
     boolean isNullValue()
     {
-        return myValue == null;
+        return myDatum.isAnyNull();
     }
 }
