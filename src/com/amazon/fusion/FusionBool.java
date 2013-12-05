@@ -246,6 +246,17 @@ public final class FusionBool
     }
 
 
+    private static BaseBool annotate(BaseBool unannotated,
+                                     String[] annotations)
+    {
+        assert ! (unannotated instanceof AnnotatedBool);
+
+        if (annotations.length == 0) return unannotated;
+
+        return new AnnotatedBool(annotations, unannotated);
+    }
+
+
     /**
      * @param annotations must not be null and must not contain elements
      * that are null or empty. This method assumes ownership of the array
@@ -258,13 +269,7 @@ public final class FusionBool
                              boolean   value)
     {
         BaseBool base = makeBool(eval, value);
-
-        if (annotations.length != 0)
-        {
-            base = new AnnotatedBool(annotations, base);
-        }
-
-        return base;
+        return annotate(base, annotations);
     }
 
 
@@ -281,13 +286,7 @@ public final class FusionBool
                              Boolean   value)
     {
         BaseBool base = makeBool(eval, value);
-
-        if (annotations.length != 0)
-        {
-            base = new AnnotatedBool(annotations, base);
-        }
-
-        return base;
+        return annotate(base, annotations);
     }
 
 
@@ -308,7 +307,7 @@ public final class FusionBool
         {
             base = ((AnnotatedBool) base).myValue;
         }
-        return new AnnotatedBool(annotations, base);
+        return annotate(base, annotations);
     }
 
 

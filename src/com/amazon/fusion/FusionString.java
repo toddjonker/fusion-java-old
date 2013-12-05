@@ -211,6 +211,17 @@ final class FusionString
     }
 
 
+    private static BaseString annotate(BaseString unannotated,
+                                       String[] annotations)
+    {
+        assert ! (unannotated instanceof AnnotatedString);
+
+        if (annotations.length == 0) return unannotated;
+
+        return new AnnotatedString(annotations, unannotated);
+    }
+
+
     /**
      * @param annotations must not be null and must not contain elements
      * that are null or empty. This method assumes ownership of the array
@@ -224,13 +235,7 @@ final class FusionString
                                  String    value)
     {
         BaseString base = makeString(eval, value);
-
-        if (annotations.length != 0)
-        {
-            base = new AnnotatedString(annotations, base);
-        }
-
-        return base;
+        return annotate(base, annotations);
     }
 
 
@@ -251,7 +256,7 @@ final class FusionString
         {
             base = ((AnnotatedString) base).myValue;
         }
-        return new AnnotatedString(annotations, base);
+        return annotate(base, annotations);
     }
 
 

@@ -201,6 +201,17 @@ final class FusionSymbol
     }
 
 
+    private static BaseSymbol annotate(BaseSymbol unannotated,
+                                       String[] annotations)
+    {
+        assert ! (unannotated instanceof AnnotatedSymbol);
+
+        if (annotations.length == 0) return unannotated;
+
+        return new AnnotatedSymbol(annotations, unannotated);
+    }
+
+
     /**
      * @param annotations must not be null and must not contain elements
      * that are null or empty. This method assumes ownership of the array
@@ -214,13 +225,7 @@ final class FusionSymbol
                                  String    value)
     {
         BaseSymbol base = makeSymbol(eval, value);
-
-        if (annotations.length != 0)
-        {
-            base = new AnnotatedSymbol(annotations, base);
-        }
-
-        return base;
+        return annotate(base, annotations);
     }
 
 
@@ -241,7 +246,7 @@ final class FusionSymbol
         {
             base = ((AnnotatedSymbol) base).myValue;
         }
-        return new AnnotatedSymbol(annotations, base);
+        return annotate(base, annotations);
     }
 
 

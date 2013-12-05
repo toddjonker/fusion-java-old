@@ -204,6 +204,17 @@ final class FusionTimestamp
     }
 
 
+    private static BaseTimestamp annotate(BaseTimestamp unannotated,
+                                          String[] annotations)
+    {
+        assert ! (unannotated instanceof AnnotatedTimestamp);
+
+        if (annotations.length == 0) return unannotated;
+
+        return new AnnotatedTimestamp(annotations, unannotated);
+    }
+
+
     /**
      * @param annotations must not be null and must not contain elements
      * that are null or empty. This method assumes ownership of the array
@@ -217,13 +228,7 @@ final class FusionTimestamp
                                        Timestamp value)
     {
         BaseTimestamp base = makeTimestamp(eval, value);
-
-        if (annotations.length != 0)
-        {
-            base = new AnnotatedTimestamp(annotations, base);
-        }
-
-        return base;
+        return annotate(base, annotations);
     }
 
 
@@ -244,7 +249,7 @@ final class FusionTimestamp
         {
             base = ((AnnotatedTimestamp) base).myValue;
         }
-        return new AnnotatedTimestamp(annotations, base);
+        return annotate(base, annotations);
     }
 
 
