@@ -63,8 +63,8 @@ That expands to:
 
     (let [(message_arg (lambda () message_expr))] // or (void) if no message
       (parameterize
-        [(check_syntax_param /* original syntax */)]
-        (let [(arg arg_expr), /*...*/ ]
+        [(check_syntax_param ORIGINAL_SYNTAX)]
+        (let [(arg arg_expr), ... ]
           body ...))))
 
 The outer `let` has the effect of avoiding evaluation of the `message_expr`
@@ -308,4 +308,79 @@ unless it is required.  It's also a bit odd to use.
               (lambda () (eval (quote_syntax (unsyntax top_form)))))
             (check_exn
               (lambda () (eval (quote (unsyntax top_form))))))))))
+
+
+
+  (defpub representative_ion_data
+    (quote (null
+
+            null.bool
+            true
+            false
+
+            null.int
+            0
+            123456
+
+            null.float
+            -0e0
+            0e0
+            2.56e0
+
+            null.decimal
+            -0d0
+            0d0
+            2.57
+
+            null.timestamp
+            2013-02-08T
+
+            null.symbol
+//          ''                   // TODO FUSION-204 empty symbol
+            symbol
+
+            null.string
+            ""
+            "a real string"
+
+            null.clob
+            {{""}}
+            {{"a real clob"}}
+
+            null.blob
+            {{}}
+            {{abcd}}
+
+            null.list
+            []
+            [1]
+            [1,2]
+
+            null.sexp
+            ()
+            (1)
+            (1 2)
+
+            null.struct
+            {}
+            {f:1}
+            {f:1, g:2})))
+
+
+  (defpub_syntax check_representative_ion_data
+    (lambda (stx)
+      '''
+      (check_representative_ion_data FORM)
+
+Maps the given syntactic form over each entry in `representative_ion_data`.
+      '''
+      (let [(form_stx (syntax_get stx 1))]
+        (syntax_cons_q begin
+          (let loop [(data representative_ion_data)]
+            (if (is_empty data)
+              (quote_syntax ())
+              (let [(datum_stx (datum_to_syntax (head data)))]
+                (syntax_append
+                  (quasisyntax (((unsyntax form_stx) (unsyntax datum_stx))))
+                  (loop (tail data))))))))))
 )
