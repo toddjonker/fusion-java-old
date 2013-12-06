@@ -8,8 +8,6 @@ import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.isVoid;
 import com.amazon.ion.IonException;
-import com.amazon.ion.IonInt;
-import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
@@ -358,20 +356,6 @@ public abstract class FusionValue
             throw new IonizeFailure(this);
         }
 
-        return null;
-    }
-
-
-    /**
-     * @return null if the value isn't a Fusion int
-     */
-    static Long asJavaLong(Object value)
-    {
-        IonValue iv = castToIonValueMaybe(value);
-        if (iv != null && iv.getType() == IonType.INT)
-        {
-            return ((IonInt) iv).longValue();
-        }
         return null;
     }
 }

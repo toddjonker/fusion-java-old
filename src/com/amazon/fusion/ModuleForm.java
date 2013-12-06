@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionEval.evalSyntax;
+import static com.amazon.fusion.FusionNumber.unsafeTruncateIntToJavaInt;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.GlobalState.DEFINE_SYNTAX;
 import static com.amazon.fusion.GlobalState.PROVIDE;
@@ -258,7 +259,7 @@ final class ModuleForm
         // FIXME a ludicrous hack to communicate this data to the compiler!
         {
             SyntaxInt variableCount =
-                SyntaxInt.make(moduleNamespace.getBindings().size());
+                SyntaxInt.make(eval, moduleNamespace.getBindings().size());
 
             SyntaxString identity =
                 SyntaxString.make(eval, id.absolutePath());
@@ -353,7 +354,8 @@ final class ModuleForm
         int variableCount;
         {
             SyntaxInt form = (SyntaxInt) meta.get(eval, "variable_count");
-            variableCount = form.bigIntegerValue().intValue();
+            Object i = form.unwrap(eval, false);
+            variableCount = unsafeTruncateIntToJavaInt(eval, i);
         }
 
         ArrayList<CompiledForm> otherForms = new ArrayList<>();

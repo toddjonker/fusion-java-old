@@ -2,8 +2,10 @@
 
 package com.amazon.fusion;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
+import static com.amazon.fusion.FusionNumber.ZERO_INT;
+import com.amazon.fusion.FusionNumber.BaseDecimal;
+import com.amazon.fusion.FusionNumber.BaseInt;
+import com.amazon.fusion.FusionNumber.BaseNumber;
 
 /**
  * Numeric difference and negation.
@@ -21,55 +23,44 @@ final class DifferenceProc
     }
 
 
-    private static BigDecimal toBigDecimal(Number num)
-    {
-        if (num instanceof BigDecimal) return (BigDecimal) num;
-        return new BigDecimal((BigInteger) num);
-    }
-
-    private static Number subtract(Number left, Number right)
-        throws FusionException
-    {
-        Number result;
-        if (left instanceof BigInteger && right instanceof BigInteger)
-        {
-            BigInteger leftInt  = (BigInteger)left;
-            BigInteger rightInt = (BigInteger)right;
-            result = leftInt.subtract(rightInt);
-        }
-        else
-        {
-            BigDecimal leftDec  = toBigDecimal(left);
-            BigDecimal rightDec = toBigDecimal(right);
-            result = leftDec.subtract(rightDec);
-        }
-
-        return result;
-    }
-
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
         checkArityAtLeast(1, args);
 
-        Number result;
+        Object arg0 = args[0];
+        if (arg0 instanceof BaseInt || arg0 instanceof BaseDecimal)
+        {
+            BaseNumber accum = (BaseNumber) arg0;
 
-        Number num = checkBigArg(0, args);
-        if (args.length == 1)
-        {
-            result = subtract(BigInteger.ZERO, num);
-        }
-        else
-        {
-            result = num;
-            for (int i = 1; i < args.length; i++)
+            int arity = args.length;
+            if (arity == 1)
             {
-                num = checkBigArg(i, args);
-                result = subtract(result, num);
+                return ZERO_INT.subtract(accum);
+            }
+            else
+            {
+                for (int i = 1; i < arity; i++)
+                {
+                    Object arg = args[i];
+                    if (arg instanceof BaseInt || arg instanceof BaseDecimal)
+                    {
+                        BaseNumber num = (BaseNumber) arg;
+                        if (! num.isAnyNull())
+                        {
+                            accum = accum.subtract(num);
+                            continue;
+                        }
+                    }
+
+                    throw argFailure("non-null int or decimal", i, args);
+                }
+
+                return accum;
             }
         }
 
-        return eval.injectMaybe(result);
+        throw argFailure("non-null int or decimal", 0, args);
     }
 }

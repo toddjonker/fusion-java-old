@@ -8,6 +8,10 @@ import static com.amazon.fusion.FusionCollection.isCollection;
 import static com.amazon.fusion.FusionCollection.unsafeCollectionAnnotate;
 import static com.amazon.fusion.FusionNull.isNullNull;
 import static com.amazon.fusion.FusionNull.makeNullNull;
+import static com.amazon.fusion.FusionNumber.isDecimal;
+import static com.amazon.fusion.FusionNumber.isInt;
+import static com.amazon.fusion.FusionNumber.unsafeDecimalAnnotate;
+import static com.amazon.fusion.FusionNumber.unsafeIntAnnotate;
 import static com.amazon.fusion.FusionString.isString;
 import static com.amazon.fusion.FusionString.unsafeStringAnnotate;
 import static com.amazon.fusion.FusionSymbol.isSymbol;
@@ -60,6 +64,16 @@ final class AnnotateProc
         if (isBool(eval, target))
         {
             return unsafeBoolAnnotate(eval, target, annotations);
+        }
+
+        if (isInt(eval, target))
+        {
+            return unsafeIntAnnotate(eval, target, annotations);
+        }
+
+        if (isDecimal(eval, target))
+        {
+            return unsafeDecimalAnnotate(eval, target, annotations);
         }
 
         if (isTimestamp(eval, target))

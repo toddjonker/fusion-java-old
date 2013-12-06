@@ -2,8 +2,10 @@
 
 package com.amazon.fusion;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
+import static com.amazon.fusion.FusionNumber.ONE_INT;
+import com.amazon.fusion.FusionNumber.BaseDecimal;
+import com.amazon.fusion.FusionNumber.BaseInt;
+import com.amazon.fusion.FusionNumber.BaseNumber;
 
 
 /**
@@ -20,44 +22,41 @@ final class ProductProc
               "num", DOTDOTDOT);
     }
 
-    private static BigDecimal toBigDecimal(Number num)
-    {
-        if (num instanceof BigDecimal) return (BigDecimal) num;
-        return new BigDecimal((BigInteger) num);
-    }
-
-    private static Number multiply(Number left, Number right)
-        throws FusionException
-    {
-        Number result;
-        if (left instanceof BigInteger && right instanceof BigInteger)
-        {
-            BigInteger leftInt  = (BigInteger)left;
-            BigInteger rightInt = (BigInteger)right;
-            result = leftInt.multiply(rightInt);
-        }
-        else
-        {
-            BigDecimal leftDec  = toBigDecimal(left);
-            BigDecimal rightDec = toBigDecimal(right);
-            result = leftDec.multiply(rightDec);
-        }
-
-        return result;
-    }
 
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
-        Number result = BigInteger.ONE;
+        int arity = args.length;
 
-        for (int i = 0; i < args.length; i++)
+        if (arity == 0) return ONE_INT;
+
+        Object arg0 = args[0];
+        if (arg0 instanceof BaseInt || arg0 instanceof BaseDecimal)
         {
-            Number num = checkBigArg(i, args);
-            result = multiply(result, num);
+            if (arity == 1) return arg0;
+
+            BaseNumber accum = (BaseNumber) arg0;
+
+            for (int i = 1; i < arity; i++)
+            {
+                Object arg = args[i];
+                if (arg instanceof BaseInt || arg instanceof BaseDecimal)
+                {
+                    BaseNumber num = (BaseNumber) arg;
+                    if (! num.isAnyNull())
+                    {
+                        accum = accum.multiply(num);
+                        continue;
+                    }
+                }
+
+                throw argFailure("non-null int or decimal", i, args);
+            }
+
+            return accum;
         }
 
-        return eval.injectMaybe(result);
+        throw argFailure("non-null int or decimal", 0, args);
     }
 }

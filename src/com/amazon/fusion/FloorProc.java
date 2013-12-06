@@ -2,12 +2,13 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonDecimal;
-import com.amazon.ion.IonInt;
-import com.amazon.ion.IonValue;
+import static com.amazon.fusion.FusionNumber.isDecimal;
+import static com.amazon.fusion.FusionNumber.isInt;
+import static com.amazon.fusion.FusionNumber.makeInt;
+import static com.amazon.fusion.FusionNumber.unsafeNumberToBigDecimal;
+import static java.math.RoundingMode.FLOOR;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 
 
 /**
@@ -20,8 +21,8 @@ final class FloorProc
     {
         //    "                                                                               |
         super("Returns the largest int less than or equal to `number` (that is, truncate\n"
-            + "toward negative infinity).  The input must be an int or decimal, and the result\n"
-            + "is an int.",
+            + "toward negative infinity). The input must be a non-null int or decimal, and the\n"
+            + "result is an int.",
               "number");
     }
 
@@ -29,21 +30,21 @@ final class FloorProc
     Object doApply(Evaluator eval, Object arg0)
         throws FusionException
     {
-        IonValue arg = FusionValue.castToIonValueMaybe(arg0);
-
-        if (arg instanceof IonInt)
+        if (! isAnyNull(eval, arg0))
         {
-            return arg0;
+            if (isDecimal(eval, arg0))
+            {
+                BigDecimal d = unsafeNumberToBigDecimal(eval, arg0);
+                BigInteger i = d.setScale(0, FLOOR).toBigInteger();
+                return makeInt(eval, i);
+            }
+
+            if (isInt(eval, arg0))
+            {
+                return arg0;
+            }
         }
 
-        if (arg instanceof IonDecimal)
-        {
-            IonDecimal dArg = (IonDecimal)arg;
-            BigDecimal dVal = dArg.bigDecimalValue();
-            BigInteger iVal = dVal.setScale(0, RoundingMode.FLOOR).toBigInteger();
-            return eval.newInt(iVal);
-        }
-
-        throw new ArgTypeFailure(this, "int or decimal", 0, arg0);
+        throw new ArgTypeFailure(this, "non-null int or decimal", 0, arg0);
     }
 }

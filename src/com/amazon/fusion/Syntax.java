@@ -8,6 +8,8 @@ import static com.amazon.fusion.FusionList.isNullList;
 import static com.amazon.fusion.FusionList.unsafeListRef;
 import static com.amazon.fusion.FusionList.unsafeListSize;
 import static com.amazon.fusion.FusionNull.isNullNull;
+import static com.amazon.fusion.FusionNumber.isDecimal;
+import static com.amazon.fusion.FusionNumber.isInt;
 import static com.amazon.fusion.FusionSexp.isEmptySexp;
 import static com.amazon.fusion.FusionSexp.isPair;
 import static com.amazon.fusion.FusionSexp.isSexp;
@@ -22,6 +24,7 @@ import static com.amazon.fusion.FusionTimestamp.isTimestamp;
 import static com.amazon.fusion.FusionValue.annotationsAsJavaStrings;
 import static com.amazon.fusion.FusionValue.castToIonValueMaybe;
 import static com.amazon.fusion.SourceLocation.currentLocation;
+import java.math.BigInteger;
 import com.amazon.fusion.FusionSexp.BaseSexp;
 import com.amazon.fusion.FusionStruct.BaseStruct;
 import com.amazon.fusion.FusionStruct.ImmutableStruct;
@@ -81,12 +84,13 @@ final class Syntax
             }
             case INT:
             {
-                return SyntaxInt.make(source.bigIntegerValue(), anns, loc);
+                BigInteger value = source.bigIntegerValue();
+                return SyntaxInt.make(eval, loc, anns, value);
             }
             case DECIMAL:
             {
                 Decimal value = source.decimalValue();
-                return SyntaxDecimal.make(value, anns, loc);
+                return SyntaxDecimal.make(eval, loc, anns, value);
             }
             case FLOAT:
             {
@@ -260,7 +264,17 @@ final class Syntax
             {
                 return SyntaxKeyword.make(eval, /*location*/ null, datum);
             }
-            return SyntaxSymbol.make(eval, /*locaton*/ null, datum);
+            return SyntaxSymbol.make(eval, /*location*/ null, datum);
+        }
+
+        if (isInt(eval, datum))
+        {
+            return SyntaxInt.make(eval, /*location*/ null, datum);
+        }
+
+        if (isDecimal(eval, datum))
+        {
+            return SyntaxDecimal.make(eval, /*location*/ null, datum);
         }
 
         if (isList(eval, datum))

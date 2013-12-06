@@ -2,14 +2,15 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionString.isString;
+import static com.amazon.fusion.FusionNumber.isDecimal;
+import static com.amazon.fusion.FusionNumber.isInt;
+import static com.amazon.fusion.FusionNumber.unsafeIntToJavaBigInteger;
+import static com.amazon.fusion.FusionNumber.unsafeNumberToBigDecimal;
 import static com.amazon.fusion.FusionString.stringToJavaString;
-import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
 import static com.amazon.fusion.FusionVoid.isVoid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import com.amazon.ion.IonContainer;
-import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
@@ -287,14 +288,47 @@ public class CoreTestCase
         assertEquals(expected, actualString);
     }
 
-    void checkLong(Integer expected, Object actual)
+
+    void checkInt(BigInteger expected, Object actual)
+        throws FusionException
     {
-        Long actualLong = FusionValue.asJavaLong(actual);
-        if (actualLong == null)
+        TopLevel top = topLevel();
+        if (isInt(top, actual))
         {
-            fail("Expected " + expected + " but got " + actual);
+            BigInteger actualInt = unsafeIntToJavaBigInteger(top, actual);
+            if (actualInt != null)
+            {
+                assertEquals(expected, actualInt);
+                return;
+            }
         }
-        assertEquals(expected.longValue(), actualLong.longValue());
+
+        fail("Expected " + expected + " but got " + actual);
+    }
+
+    // TODO rename
+    void checkLong(long expected, Object actual)
+        throws FusionException
+    {
+        checkInt(BigInteger.valueOf(expected), actual);
+    }
+
+
+    void checkDecimal(BigDecimal expected, Object actual)
+        throws FusionException
+    {
+        TopLevel top = topLevel();
+        if (isDecimal(top, actual))
+        {
+            BigDecimal actualDec = unsafeNumberToBigDecimal(top, actual);
+            if (actualDec != null)
+            {
+                assertEquals(expected, actualDec);
+                return;
+            }
+        }
+
+        fail("Expected " + expected + " but got " + actual);
     }
 
 
@@ -361,14 +395,14 @@ public class CoreTestCase
 
 
     protected void assertEval(TopLevel top,
-                              int expectedInt, String expressionIon)
+                              long expectedInt, String expressionIon)
         throws FusionException
     {
-        IonValue expected = mySystem.newInt(expectedInt);
-        assertEval(top, expected, expressionIon);
+        Object fv = top.eval(expressionIon);
+        checkLong(expectedInt, fv);
     }
 
-    protected void assertEval(int expectedInt, String expressionIon)
+    protected void assertEval(long expectedInt, String expressionIon)
         throws FusionException
     {
         TopLevel top = topLevel();
@@ -380,36 +414,14 @@ public class CoreTestCase
         throws FusionException
     {
         Object fv = eval(expressionIon);
-        IonValue observed = FusionValue.castToIonValueMaybe(fv);
-        if (observed instanceof IonInt)
-        {
-            IonInt iObsExp = (IonInt)observed;
-            BigInteger obsExp = iObsExp.bigIntegerValue();
-            if (obsExp.compareTo(expectedInt) == 0)
-            {
-                return;
-            }
-            Assert.fail("Discrepency: Observed "+obsExp.toString()+", expected "+expectedInt.toString());
-        }
-        Assert.fail("Invalid type.");
+        checkInt(expectedInt, fv);
     }
 
     protected void assertEval(BigDecimal expected, String expressionIon)
         throws FusionException
     {
         Object fv = eval(expressionIon);
-        IonValue observed = FusionValue.castToIonValueMaybe(fv);
-        if (observed instanceof IonDecimal)
-        {
-            IonDecimal iObsExp = (IonDecimal)observed;
-            BigDecimal obsExp = iObsExp.bigDecimalValue();
-            if (obsExp.compareTo(expected) == 0)
-            {
-                return;
-            }
-            Assert.fail("Discrepency: Observed "+obsExp.toString()+", expected "+expected.toString());
-        }
-        Assert.fail("Invalid type.");
+        checkDecimal(expected, fv);
     }
 
     protected void assertBigInt(int expectedInt, String expressionIon)
@@ -423,14 +435,7 @@ public class CoreTestCase
         throws FusionException
     {
         Object fv = eval(expressionIon);
-        if (!isString(topLevel(), fv))
-        {
-            fail("Expected string, got " + fv);
-        }
-
-        // TODO UNSAFE use of null Evaluator
-        String result = unsafeStringToJavaString(null, fv);
-        assertEquals(expressionIon, expectedString, result);
+        checkString(expectedString, fv);
     }
 
     protected void assertSelfEval(String expressionIon)

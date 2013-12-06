@@ -2,7 +2,9 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
+import static com.amazon.fusion.FusionNumber.makeInt;
+import com.amazon.fusion.FusionNumber.BaseInt;
+import com.amazon.ion.IonException;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -10,25 +12,46 @@ import java.math.BigInteger;
 final class SyntaxInt
     extends SyntaxValue
 {
-    private final BigInteger myValue;
+    private final BaseInt myDatum;
 
 
-    private SyntaxInt(BigInteger value, String[] anns, SourceLocation loc)
+    /**
+     * @param datum must not be null.
+     */
+    private SyntaxInt(SourceLocation loc, BaseInt datum)
     {
-        super(anns, loc);
-        myValue = value;
+        super(datum.annotationsAsJavaStrings(), loc);
+        myDatum = datum;
     }
 
-    static SyntaxInt make(BigInteger value, String[] anns, SourceLocation loc)
+
+    /**
+     * @param datum must be a Fusion int.
+     */
+    static SyntaxInt make(Evaluator eval, SourceLocation loc, Object datum)
     {
-        return new SyntaxInt(value, anns, loc);
+        return new SyntaxInt(loc, (BaseInt) datum);
     }
 
-    static SyntaxInt make(int value)
+
+    static SyntaxInt make(Evaluator      eval,
+                          SourceLocation loc,
+                          String[]       annotations,
+                          BigInteger     value)
     {
-        return new SyntaxInt(BigInteger.valueOf(value),
-                             EMPTY_STRING_ARRAY, null);
+        BaseInt datum = makeInt(eval, annotations, value);
+        return new SyntaxInt(loc, datum);
     }
+
+
+    static SyntaxInt make(Evaluator eval, int value)
+    {
+        BaseInt datum = makeInt(eval, value);
+        return new SyntaxInt(/*location*/ null, datum);
+    }
+
+
+    //========================================================================
 
 
     @Override
@@ -39,36 +62,31 @@ final class SyntaxInt
 
 
     @Override
-    Object doCompileIonConstant(Evaluator eval, Environment env)
+    CompiledForm doCompile(Evaluator eval, Environment env)
         throws FusionException
     {
-        return eval.newInt(myValue);
+        return new CompiledConstant(myDatum);
     }
 
 
     @Override
     Object unwrap(Evaluator eval, boolean recurse)
     {
-        return eval.newInt(myValue, getAnnotations());
+        return myDatum;
     }
 
 
     @Override
-    void ionize(Evaluator eval, IonWriter writer) throws IOException
+    void ionize(Evaluator eval, IonWriter writer)
+        throws IOException, IonException, FusionException, IonizeFailure
     {
-        ionizeAnnotations(writer);
-        writer.writeInt(myValue);
+        myDatum.ionize(eval, writer);
     }
 
 
     @Override
     boolean isNullValue()
     {
-        return myValue == null;
-    }
-
-    BigInteger bigIntegerValue()
-    {
-        return myValue;
+        return myDatum.isAnyNull();
     }
 }

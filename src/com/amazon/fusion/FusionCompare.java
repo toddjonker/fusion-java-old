@@ -5,6 +5,8 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionBool.isBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.unsafeBoolToJavaBoolean;
+import static com.amazon.fusion.FusionNumber.isIntOrDecimal;
+import static com.amazon.fusion.FusionNumber.unsafeNumberToBigDecimal;
 import static com.amazon.fusion.FusionString.isString;
 import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
 import static com.amazon.fusion.FusionSymbol.isSymbol;
@@ -12,13 +14,8 @@ import static com.amazon.fusion.FusionSymbol.unsafeSymbolToJavaString;
 import static com.amazon.fusion.FusionTimestamp.isTimestamp;
 import static com.amazon.fusion.FusionTimestamp.unsafeTimestampToJavaTimestamp;
 import static com.amazon.fusion.FusionUtils.safeEquals;
-import com.amazon.ion.IonDecimal;
-import com.amazon.ion.IonInt;
-import com.amazon.ion.IonTimestamp;
-import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 /**
  *
@@ -43,83 +40,12 @@ final class FusionCompare
         }
 
 
-        int compareNumbers(IonValue leftVal, IonValue rightVal, Object[] args)
-            throws FusionException
-        {
-            switch (leftVal.getType())
-            {
-                case INT:
-                {
-                    BigInteger lInt = ((IonInt) leftVal).bigIntegerValue();
-
-                    switch (rightVal.getType())
-                    {
-                        case INT:
-                        {
-                            BigInteger rInt = ((IonInt) rightVal).bigIntegerValue();
-                            return lInt.compareTo(rInt);
-                        }
-                        case DECIMAL:
-                        {
-                            BigDecimal lDec = new BigDecimal(lInt);
-                            BigDecimal rDec = ((IonDecimal) rightVal).bigDecimalValue();
-                            return lDec.compareTo(rDec);
-                        }
-                    }
-                    break;
-                }
-                case DECIMAL:
-                {
-                    BigDecimal lDec = ((IonDecimal) leftVal).bigDecimalValue();
-
-                    switch (rightVal.getType())
-                    {
-                        case INT:
-                        {
-                            BigInteger rInt = ((IonInt) rightVal).bigIntegerValue();
-                            BigDecimal rDec = new BigDecimal(rInt);
-                            return lDec.compareTo(rDec);
-                        }
-                        case DECIMAL:
-                        {
-                            BigDecimal rDec = ((IonDecimal) rightVal).bigDecimalValue();
-                            return lDec.compareTo(rDec);
-                        }
-                    }
-                    break;
-                }
-                case TIMESTAMP:
-                {
-                    Timestamp lTime = ((IonTimestamp) leftVal).timestampValue();
-
-                    switch (rightVal.getType())
-                    {
-                        case TIMESTAMP:
-                        {
-                            Timestamp rTime = ((IonTimestamp) rightVal).timestampValue();
-                            return lTime.compareTo(rTime);
-                        }
-                    }
-                    break;
-                }
-            }
-
-            throw failure(args);
-        }
-
-
-        abstract boolean compare(IonValue leftVal, IonValue rightVal,
-                                 Object[] args)
+        abstract <T> boolean compare(Comparable<T> left,
+                                     T             right,
+                                     Object[]      args)
             throws FusionException;
 
-
         boolean compareBooleans(Boolean left, Boolean right, Object[] args)
-            throws FusionException
-        {
-            throw failure(args);
-        }
-
-        boolean compareTimestamps(Timestamp left, Timestamp right, Object[] args)
             throws FusionException
         {
             throw failure(args);
@@ -149,6 +75,18 @@ final class FusionCompare
                 if (left != null && right != null)
                 {
                     boolean r = compareBooleans(left, right, args);
+                    return makeBool(eval, r);
+                }
+            }
+
+            if (isIntOrDecimal(eval, arg0) && isIntOrDecimal(eval, arg1))
+            {
+                BigDecimal left  = unsafeNumberToBigDecimal(eval, arg0);
+                BigDecimal right = unsafeNumberToBigDecimal(eval, arg1);
+
+                if (left != null && right != null)
+                {
+                    boolean r = compare(left, right, args);
                     return makeBool(eval, r);
                 }
             }
@@ -184,23 +122,12 @@ final class FusionCompare
 
                 if (left != null && right != null)
                 {
-                    boolean r = compareTimestamps(left, right, args);
+                    boolean r = compare(left, right, args);
                     return makeBool(eval, r);
                 }
             }
 
-
-            IonValue leftVal  = FusionValue.castToIonValueMaybe(args[0]);
-            IonValue rightVal = FusionValue.castToIonValueMaybe(args[1]);
-
-            if (leftVal  == null || leftVal.isNullValue() ||
-                rightVal == null || rightVal.isNullValue())
-            {
-                throw failure(args);
-            }
-
-            boolean r = compare(leftVal, rightVal, args);
-            return eval.newBool(r);
+            throw failure(args);
         }
     }
 
@@ -215,15 +142,7 @@ final class FusionCompare
         }
 
         @Override
-        boolean compare(IonValue leftVal, IonValue rightVal, Object[] args)
-            throws FusionException
-        {
-            int r = compareNumbers(leftVal, rightVal, args);
-            return (r < 0);
-        }
-
-        @Override
-        boolean compareTimestamps(Timestamp left, Timestamp right, Object[] args)
+        <T> boolean compare(Comparable<T> left, T right, Object[] args)
             throws FusionException
         {
             int r = left.compareTo(right);
@@ -242,15 +161,7 @@ final class FusionCompare
         }
 
         @Override
-        boolean compare(IonValue leftVal, IonValue rightVal, Object[] args)
-            throws FusionException
-        {
-            int r = compareNumbers(leftVal, rightVal, args);
-            return (r <= 0);
-        }
-
-        @Override
-        boolean compareTimestamps(Timestamp left, Timestamp right, Object[] args)
+        <T> boolean compare(Comparable<T> left, T right, Object[] args)
             throws FusionException
         {
             int r = left.compareTo(right);
@@ -269,15 +180,7 @@ final class FusionCompare
         }
 
         @Override
-        boolean compare(IonValue leftVal, IonValue rightVal, Object[] args)
-            throws FusionException
-        {
-            int r = compareNumbers(leftVal, rightVal, args);
-            return (r > 0);
-        }
-
-        @Override
-        boolean compareTimestamps(Timestamp left, Timestamp right, Object[] args)
+        <T> boolean compare(Comparable<T> left, T right, Object[] args)
             throws FusionException
         {
             int r = left.compareTo(right);
@@ -296,15 +199,7 @@ final class FusionCompare
         }
 
         @Override
-        boolean compare(IonValue leftVal, IonValue rightVal, Object[] args)
-            throws FusionException
-        {
-            int r = compareNumbers(leftVal, rightVal, args);
-            return (r >= 0);
-        }
-
-        @Override
-        boolean compareTimestamps(Timestamp left, Timestamp right, Object[] args)
+        <T> boolean compare(Comparable<T> left, T right, Object[] args)
             throws FusionException
         {
             int r = left.compareTo(right);
@@ -328,13 +223,6 @@ final class FusionCompare
         }
 
         @Override
-        boolean compare(IonValue leftVal, IonValue rightVal, Object[] args)
-            throws FusionException
-        {
-            return compareNumbers(leftVal, rightVal, args) == 0;
-        }
-
-        @Override
         boolean compareBooleans(Boolean left, Boolean right, Object[] args)
             throws FusionException
         {
@@ -350,7 +238,7 @@ final class FusionCompare
         }
 
         @Override
-        boolean compareTimestamps(Timestamp left, Timestamp right, Object[] args)
+        <T> boolean compare(Comparable<T> left, T right, Object[] args)
             throws FusionException
         {
             int r = left.compareTo(right);

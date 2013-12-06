@@ -137,6 +137,8 @@ final class GlobalState
         {
             if (t != IonType.NULL &&
                 t != IonType.BOOL &&
+                t != IonType.INT &&
+                t != IonType.DECIMAL &&
                 t != IonType.DATAGRAM &&
                 t != IonType.LIST &&
                 t != IonType.SEXP &&

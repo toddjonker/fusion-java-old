@@ -8,8 +8,7 @@
   // Pass-through bindings from kernel
   (provide all_defined_out begin define if lambda letrec load module provide
     require)
-  (provide is_int is_float is_decimal
-      is_string is_clob is_blob is_list is_sexp is_struct)
+  (provide is_float is_string is_clob is_blob is_list is_sexp is_struct)
 
 
   (defpub_j_syntax let            "com.amazon.fusion.LetForm")

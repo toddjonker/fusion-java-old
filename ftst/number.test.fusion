@@ -63,6 +63,8 @@
 (check_arity_exn (ceiling))
 (check_arity_exn (ceiling 0 1))
 
+(check_arg_exn (ceiling null.int))
+(check_arg_exn (ceiling null.decimal))
 (check_arg_exn (ceiling 1e0))
 (check_arg_exn (ceiling "1"))
 
@@ -83,6 +85,8 @@
 (check_arity_exn (floor))
 (check_arity_exn (floor 0 1))
 
+(check_arg_exn (floor null.int))
+(check_arg_exn (floor null.decimal))
 (check_arg_exn (floor 1e0))
 (check_arg_exn (floor "1"))
 

@@ -10,6 +10,10 @@ import org.junit.Test;
 public class NumericsTest
     extends CoreTestCase
 {
+    static final BigInteger VERY_BIG_INTEGER =
+        new BigInteger(Long.MAX_VALUE + "123");
+
+
     @Before
     public void requires()
         throws FusionException
@@ -106,7 +110,7 @@ public class NumericsTest
         // big integer test suite
         String bigIntStr = "8888888888888888888888888888888888888888888888888888888888";
         String expectedStr = "4444444444444444444444444444444444444444444444444444444444";
-        BigDecimal expected = new BigDecimal(expectedStr);
+        BigDecimal expected = new BigDecimal(expectedStr + ".0");
         assertEval(expected,"(* "+bigIntStr+" 0.5)");
     }
 

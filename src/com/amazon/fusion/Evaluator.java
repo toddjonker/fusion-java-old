@@ -5,6 +5,8 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionList.listFromIonSequence;
 import static com.amazon.fusion.FusionNull.makeNullNull;
+import static com.amazon.fusion.FusionNumber.makeDecimal;
+import static com.amazon.fusion.FusionNumber.makeInt;
 import static com.amazon.fusion.FusionSexp.sexpFromIonSequence;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionStruct.structFromIonStruct;
@@ -12,6 +14,8 @@ import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionTimestamp.makeTimestamp;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonBool;
+import com.amazon.ion.IonDecimal;
+import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
@@ -77,6 +81,7 @@ final class Evaluator
 
     //========================================================================
 
+
     /**
      * Injects an Ion DOM into the equivalent Fusion runtime objects.
      * It is an error for modifications to be made to the argument instance
@@ -103,6 +108,16 @@ final class Evaluator
                                  ? null
                                  : ((IonBool)value).booleanValue());
                 return makeBool(this, value.getTypeAnnotations(), b);
+            }
+            case INT:
+            {
+                BigInteger big = ((IonInt)value).bigIntegerValue();
+                return makeInt(this, value.getTypeAnnotations(), big);
+            }
+            case DECIMAL:
+            {
+                BigDecimal big = ((IonDecimal)value).decimalValue();
+                return makeDecimal(this, value.getTypeAnnotations(), big);
             }
             case TIMESTAMP:
             {
@@ -144,11 +159,11 @@ final class Evaluator
             || value instanceof Short
             || value instanceof Byte)
         {
-            return newInt(value.longValue());
+            return makeInt(this, value.longValue());
         }
         else if (value instanceof BigInteger)
         {
-            return newInt((BigInteger) value);
+            return makeInt(this, (BigInteger) value);
         }
         else if (value instanceof BigDecimal)
         {
@@ -256,18 +271,41 @@ final class Evaluator
         return makeBool(this, annotations, value);
     }
 
-    Object newInt(long value, String... annotations)
+    /**
+     * @deprecated Use {@link FusionNumber#makeInt(Evaluator,long)}.
+     */
+    @Deprecated
+    Object newInt(long value)
     {
-        IonValue dom = mySystem.newInt(value);
-        if (annotations != null) dom.setTypeAnnotations(annotations);
-        return inject(dom);
+        return makeInt(this, value);
     }
 
+    /**
+     * @deprecated Use {@link FusionNumber#makeInt(Evaluator,String[],long)}.
+     */
+    @Deprecated
+    Object newInt(long value, String... annotations)
+    {
+        return makeInt(this, annotations, value);
+    }
+
+    /**
+     * @deprecated Use {@link FusionNumber#makeInt(Evaluator,BigInteger)}.
+     */
+    @Deprecated
+    Object newInt(BigInteger value)
+    {
+        return makeInt(this, value);
+    }
+
+    /**
+     * @deprecated Use
+     * {@link FusionNumber#makeInt(Evaluator,String[],BigInteger)}.
+     */
+    @Deprecated
     Object newInt(BigInteger value, String... annotations)
     {
-        IonValue dom = mySystem.newInt(value);
-        if (annotations != null) dom.setTypeAnnotations(annotations);
-        return inject(dom);
+        return makeInt(this, annotations, value);
     }
 
     /**
@@ -298,18 +336,22 @@ final class Evaluator
         return makeSymbol(this, annotations, value);
     }
 
-    Object newDecimal(BigDecimal value, String... annotations)
+    /**
+     * @deprecated Use helpers in {@link FusionNumber}.
+     */
+    @Deprecated
+    Object newDecimal(BigDecimal value)
     {
-        IonValue dom = mySystem.newDecimal(value);
-        if (annotations != null) dom.setTypeAnnotations(annotations);
-        return inject(dom);
+        return makeDecimal(this, value);
     }
 
-    Object newDecimal(double value, String... annotations)
+    /**
+     * @deprecated Use helpers in {@link FusionNumber}.
+     */
+    @Deprecated
+    Object newDecimal(BigDecimal value, String... annotations)
     {
-        IonValue dom = mySystem.newDecimal(value);
-        if (annotations != null) dom.setTypeAnnotations(annotations);
-        return inject(dom);
+        return makeDecimal(this, annotations, value);
     }
 
     Object newFloat(double value)

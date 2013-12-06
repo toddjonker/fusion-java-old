@@ -7,7 +7,7 @@ Operations on numbers (int, decimal, and float).
   '''
 
   // Pass-through bindings from kernel
-  (provide is_int is_float is_decimal)
+  (provide is_float)
 
   (require "/fusion/experimental/defines")
 
@@ -20,6 +20,8 @@ Operations on numbers (int, decimal, and float).
   (defpub_j  *  "com.amazon.fusion.ProductProc")
   (defpub_j  /  "com.amazon.fusion.DivideProc")
 
+  (defpub_j is_int     "com.amazon.fusion.FusionNumber$IsIntProc")
+  (defpub_j is_decimal "com.amazon.fusion.FusionNumber$IsDecimalProc")
 
   (defpub_j ceiling  "com.amazon.fusion.CeilingProc")
   (defpub_j floor    "com.amazon.fusion.FloorProc")

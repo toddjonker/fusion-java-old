@@ -4,17 +4,13 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionCollection.isCollection;
 import static com.amazon.fusion.FusionList.isList;
+import static com.amazon.fusion.FusionNumber.checkIntArgToJavaInt;
+import static com.amazon.fusion.FusionNumber.checkIntArgToJavaLong;
+import static com.amazon.fusion.FusionNumber.checkNullableIntArg;
+import static com.amazon.fusion.FusionNumber.checkRequiredIntArg;
 import static com.amazon.fusion.FusionSequence.isSequence;
 import static com.amazon.fusion.FusionStruct.isStruct;
 import com.amazon.fusion.BindingDoc.Kind;
-import com.amazon.ion.IonDecimal;
-import com.amazon.ion.IonInt;
-import com.amazon.ion.IonStruct;
-import com.amazon.ion.IonTimestamp;
-import com.amazon.ion.IonValue;
-import com.amazon.ion.NullValueException;
-import com.amazon.ion.Timestamp;
-import com.amazon.ion.ValueFactory;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -163,142 +159,70 @@ abstract class Procedure
 
     /**
      * Checks that an argument fits safely into Java's {@code int} type.
+     *
+     * @deprecated Use helpers in {@link FusionNumber}.
      */
+    @Deprecated
     int checkIntArg(int argNum, Object... args)
-        throws ArgTypeFailure
+        throws FusionException, ArgTypeFailure
     {
-        try
-        {
-            IonInt iv = (IonInt) castToIonValueMaybe(args[argNum]);
-            long v = iv.longValue();
-            if (Integer.MIN_VALUE <= v && v <= Integer.MAX_VALUE)
-            {
-                return (int) v;
-            }
-        }
-        catch (ClassCastException e)   {}
-        catch (NullValueException e)   {}    // iv == null
-        catch (NullPointerException e) {}    // iv.isNullValue()
-
-        throw new ArgTypeFailure(this, "32-bit int", argNum, args);
+        return checkIntArgToJavaInt(/*eval*/ null,           // NOT SUPPORTED!
+                                    this, argNum, args);
     }
 
 
+    /**
+     * Checks that an argument fits safely into Java's {@code long} type.
+     *
+     * @deprecated Use helpers in {@link FusionNumber}.
+     */
+    @Deprecated
     long checkLongArg(int argNum, Object... args)
-        throws ArgTypeFailure
+        throws FusionException, ArgTypeFailure
     {
-        try
-        {
-            IonInt iv = (IonInt) castToIonValueMaybe(args[argNum]);
-            // TODO FUSION-205 range check
-            return iv.longValue();
-        }
-        catch (ClassCastException e)   {}
-        catch (NullValueException e)   {}    // iv == null
-        catch (NullPointerException e) {}    // iv.isNullValue()
-
-        throw new ArgTypeFailure(this, "int", argNum, args);
+        return checkIntArgToJavaLong(/*eval*/ null,          // NOT SUPPORTED!
+                                     this, argNum, args);
     }
 
 
     /**
      * @return not null.
+     *
+     * @deprecated Use helpers in {@link FusionNumber}.
      */
+    @Deprecated
     BigInteger checkBigIntArg(int argNum, Object... args)
-        throws ArgTypeFailure
+        throws FusionException, ArgTypeFailure
     {
-        try
-        {
-            IonInt iv = (IonInt) castToIonValueMaybe(args[argNum]);
-            BigInteger result = iv.bigIntegerValue();
-            if (result != null)
-            {
-                return result;
-            }
-        }
-        catch (ClassCastException e)   {}
-        catch (NullPointerException e) {}    // iv == null
-
-        throw new ArgTypeFailure(this, "non-null int", argNum, args);
+        return checkRequiredIntArg(/*eval*/ null,            // NOT SUPPORTED!
+                                   this, argNum, args);
     }
 
     /**
      * @return may be null.
+     *
+     * @deprecated Use helpers in {@link FusionNumber}.
      */
+    @Deprecated
     BigInteger checkBigIntArg(Evaluator eval, int argNum, Object... args)
-        throws ArgTypeFailure
+        throws FusionException, ArgTypeFailure
     {
-        try
-        {
-            IonInt iv = (IonInt) castToIonValueMaybe(args[argNum]);
-            BigInteger result = iv.bigIntegerValue();
-            return result;
-        }
-        catch (ClassCastException e)   {}
-        catch (NullPointerException e) {}    // iv == null
-
-        throw new ArgTypeFailure(this, "int", argNum, args);
+        return checkNullableIntArg(eval, this, argNum, args);
     }
 
 
     /**
      * @return not null.
+     *
+     * @deprecated Use helpers in {@link FusionNumber}.
      */
+    @Deprecated
     BigDecimal checkRequiredDecimalArg(Evaluator eval, // Newer name+signature
                                        int argNum,
                                        Object... args)
-        throws ArgTypeFailure
+        throws FusionException, ArgTypeFailure
     {
-        try
-        {
-            IonDecimal iv = (IonDecimal) castToIonValueMaybe(args[argNum]);
-            BigDecimal result = iv.bigDecimalValue();
-            if (result != null)
-            {
-                return result;
-            }
-        }
-        catch (ClassCastException e)   {}
-        catch (NullPointerException e) {}    // iv == null
-
-        throw new ArgTypeFailure(this, "non-null decimal", argNum, args);
-    }
-
-    Number checkBigArg(int argNum, Object... args)
-        throws ArgTypeFailure
-    {
-        try
-        {
-            IonValue ionValue = castToIonValueMaybe(args[argNum]);
-            Number result = null;
-            if (ionValue instanceof IonInt)
-            {
-                IonInt iv = (IonInt)ionValue;
-                result = iv.bigIntegerValue();
-            }
-            else if (ionValue instanceof IonDecimal)
-            {
-                IonDecimal iv = (IonDecimal)ionValue;
-                result = iv.bigDecimalValue();
-            }
-
-            if (result != null)
-            {
-                return result;
-            }
-        }
-        catch (ClassCastException e)   {}
-        catch (NullPointerException e) {}    // iv == null
-
-        throw new ArgTypeFailure(this, "int or decimal", argNum, args);
-    }
-
-    Timestamp checkTimestampArg(int argNum, Object... args)
-        throws ArgTypeFailure
-    {
-        IonTimestamp iv = checkDomArg(IonTimestamp.class, "timestamp",
-                                      true /* nullable */, argNum, args);
-        return iv.timestampValue();
+        return FusionNumber.checkRequiredDecimalArg(eval, this, argNum, args);
     }
 
 
@@ -350,49 +274,6 @@ abstract class Procedure
         if (isStruct(eval, arg)) return arg;
 
         throw argFailure("struct", argNum, args);
-    }
-
-    /**
-     * Allows {@code null.struct}.
-     * @return not null.
-     */
-    IonStruct copyStructArgToIonStruct(Evaluator eval, ValueFactory factory,
-                                       int argNum, Object... args)
-        throws FusionException
-    {
-        Object arg = args[argNum];
-        if (isStruct(eval, arg))
-        {
-            IonValue iv = copyToIonValueMaybe(arg, factory);
-            if (iv != null)
-            {
-                return (IonStruct) iv;
-            }
-        }
-
-        throw argFailure("ionizable struct", argNum, args);
-    }
-
-
-    <T extends IonValue> T checkDomArg(Class<T> klass, String typeName,
-                                       boolean nullable,
-                                       int argNum, Object... args)
-        throws ArgTypeFailure
-    {
-        try
-        {
-            IonValue iv = castToIonValueMaybe(args[argNum]);
-            if (iv != null && (nullable || ! iv.isNullValue()))
-            {
-                return klass.cast(iv);
-            }
-        }
-        catch (ClassCastException e) {}
-
-        String expectation =
-            (nullable ? typeName : "non-null " + typeName);
-
-        throw new ArgTypeFailure(this, expectation, argNum, args);
     }
 
 

@@ -20,9 +20,8 @@ public class FusionValueTest
         throws Exception
     {
         Object fv = eval("12");
-        IonValue iv = FusionValue.castToIonValueMaybe(fv);
-        assertEquals(12, ((IonInt)iv).intValue());
-        iv = FusionValue.copyToIonValue(fv, system());
+        checkLong(12, fv);
+        IonValue iv = FusionValue.copyToIonValue(fv, system());
         assertEquals(12, ((IonInt)iv).intValue());
 
         fv = eval("(lambda () 12)");

@@ -5,9 +5,11 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionBool.isTrue;
 import static com.amazon.fusion.FusionValue.isAnyNull;
 import static com.amazon.fusion.FusionVoid.isVoid;
+import static com.amazon.fusion.NumericsTest.VERY_BIG_INTEGER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import com.amazon.ion.Decimal;
 import com.amazon.ion.IonBlob;
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonClob;
@@ -20,6 +22,7 @@ import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonTimestamp;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import org.junit.Test;
 
@@ -60,40 +63,54 @@ public class InjectionTest
     public void testIntInjection()
         throws Exception
     {
-        Object fv = topLevel().call("<", 22, BigInteger.valueOf(23));
-        assertTrue(isTrue(topLevel(), fv));
+        TopLevel top = topLevel();
+
+        // For each case we inject the Java type, make sure it round-trips,
+        // and make sure it can be used in an expression.
+
+        top.define("v", 22);
+        Object fv = top.call("<", 22, BigInteger.valueOf(23));
+        assertTrue(isTrue(top, fv));
 
         // Inject Byte
-        topLevel().define("v", Byte.valueOf(Byte.MAX_VALUE));
-        fv = topLevel().eval("(= v " + Byte.MAX_VALUE + ")");
-        assertTrue(isTrue(topLevel(), fv));
+        top.define("v", Byte.valueOf(Byte.MAX_VALUE));
+        assertEval(Byte.MAX_VALUE, "v");
+        assertEval(Byte.MAX_VALUE * 3, "(* 3 v)");
 
         // Inject Short
-        topLevel().define("v", Short.valueOf(Short.MAX_VALUE));
-        fv = topLevel().eval("(= v " + Short.MAX_VALUE + ")");
-        assertTrue(isTrue(topLevel(), fv));
+        top.define("v", Short.valueOf(Short.MAX_VALUE));
+        assertEval(Short.MAX_VALUE, "v");
+        assertEval(Short.MAX_VALUE * 2, "(* 2 v)");
 
         // Inject Integer
-        topLevel().define("v", 22);
-        fv = topLevel().eval("(= v 22)");
-        assertTrue(isTrue(topLevel(), fv));
+        top.define("v", 22);
+        assertEval(22, "v");
+        assertEval(44, "(* 2 v)");
 
         // Inject Long
-        topLevel().define("v", Long.valueOf(Long.MAX_VALUE));
-        fv = topLevel().eval("(= v " + Long.MAX_VALUE + ")");
-        assertTrue(isTrue(topLevel(), fv));
+        top.define("v", Long.valueOf(Long.MAX_VALUE));
+        assertEval(Long.MAX_VALUE, "v");
+        assertEval(Long.MAX_VALUE - 5, "(- v 5)");
 
-        // Inject IonInt
-        IonInt iv = system().newInt(Long.MAX_VALUE);
-        topLevel().define("v", iv);
-        fv = topLevel().eval("(= v " + Long.MAX_VALUE + ")");
-        assertTrue(isTrue(topLevel(), fv));
-
-        iv.setTypeAnnotations("a");
-        topLevel().define("v", iv);
-        assertEval(iv, "v");
+        // Inject BigInteger
+        top.define("v", VERY_BIG_INTEGER);
+        assertEval(VERY_BIG_INTEGER, "v");
+        assertEval(VERY_BIG_INTEGER.multiply(BigInteger.valueOf(2)),
+                   "(* 2 v)");
     }
 
+
+    @Test
+    public void testDecimalInjection()
+        throws Exception
+    {
+        TopLevel top = topLevel();
+
+        BigDecimal d = BigDecimal.valueOf(420);
+        top.define("v", d);
+        assertEval(d, "v");
+        assertEval(d.add(d), "(+ v v)");
+    }
 
 
     //========================================================================
@@ -149,6 +166,9 @@ public class InjectionTest
 
         iv = system().newInt(Long.MAX_VALUE);
         testIonValueInjection(iv);
+
+        iv = system().newInt(NumericsTest.VERY_BIG_INTEGER);
+        testIonValueInjection(iv);
     }
 
 
@@ -173,6 +193,11 @@ public class InjectionTest
 
         iv = system().newDecimal(12345);
         testIonValueInjection(iv);
+
+        Decimal negativeZero = Decimal.negativeZero(1);
+        iv = system().newDecimal(negativeZero);
+        testIonValueInjection(iv);
+        assertEval(true, "(= 0 v)");
     }
 
 

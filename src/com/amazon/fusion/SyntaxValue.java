@@ -116,7 +116,7 @@ abstract class SyntaxValue
     {
         Object constant = doCompileIonConstant(eval, env);
         IonValue iv = FusionValue.castToIonValueMaybe(constant);
-        assert iv != null;
+        assert iv != null : this;
         return new CompiledIonConstant(iv);
     }
 

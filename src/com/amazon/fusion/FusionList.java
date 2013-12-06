@@ -4,7 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
-import static com.amazon.fusion.FusionNumber.unsafeTruncateToInt;
+import static com.amazon.fusion.FusionNumber.unsafeTruncateIntToJavaInt;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
@@ -1022,7 +1022,7 @@ final class FusionList
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            int pos = unsafeTruncateToInt(eval, args[1]);
+            int pos = unsafeTruncateIntToJavaInt(eval, args[1]);
 
             return unsafeListRef(eval, args[0], pos);
         }
@@ -1044,7 +1044,7 @@ final class FusionList
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            int pos = unsafeTruncateToInt(eval, args[1]);
+            int pos = unsafeTruncateIntToJavaInt(eval, args[1]);
 
             unsafeListSet(eval, args[0], pos, args[2]);
 
