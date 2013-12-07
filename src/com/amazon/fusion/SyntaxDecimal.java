@@ -33,6 +33,12 @@ final class SyntaxDecimal
         return new SyntaxDecimal(loc, (BaseDecimal) datum);
     }
 
+    /**
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     * @param value may be null.
+     */
     static SyntaxDecimal make(Evaluator      eval,
                               SourceLocation loc,
                               String[]       annotations,

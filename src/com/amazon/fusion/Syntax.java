@@ -78,8 +78,11 @@ final class Syntax
             }
             case BOOL:
             {
-                Boolean value =
-                    (source.isNullValue() ? null : source.booleanValue());
+                if (source.isNullValue())
+                {
+                    return SyntaxBool.make(eval, loc, anns, (Boolean) null);
+                }
+                boolean value = source.booleanValue();
                 return SyntaxBool.make(eval, loc, anns, value);
             }
             case INT:

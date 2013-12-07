@@ -35,6 +35,20 @@ final class SyntaxBool
      * @param annotations must not be null and must not contain elements
      * that are null or empty. This method assumes ownership of the array
      * and it must not be modified later.
+     */
+    static SyntaxBool make(Evaluator eval,
+                           SourceLocation loc,
+                           String[] annotations,
+                           boolean value)
+    {
+        BaseBool b = makeBool(eval, annotations, value);
+        return new SyntaxBool(loc, b);
+    }
+
+    /**
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
      * @param value may be null.
      */
     static SyntaxBool make(Evaluator eval,
