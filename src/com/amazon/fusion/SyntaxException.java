@@ -15,7 +15,9 @@ public class SyntaxException
     extends FusionException
 {
     private final String myName;
+    /** Not null, but may be empty. */
     private SyntaxValue[] mySources;
+
 
     /**
      * @param whatForm may be null.
@@ -41,8 +43,8 @@ public class SyntaxException
         }
 
         mySources = sources;
-        assert mySources[0] != null;
     }
+
 
     void addContext(SyntaxValue syntax)
     {
