@@ -66,6 +66,10 @@ final class FusionNumber
     }
 
 
+    //========================================================================
+    // Int Representation
+
+
     abstract static class BaseInt
         extends BaseNumber
     {
@@ -360,6 +364,10 @@ final class FusionNumber
     }
 
 
+    //========================================================================
+    // Decimal Representation
+
+
     abstract static class BaseDecimal
         extends BaseNumber
     {
@@ -462,6 +470,11 @@ final class FusionNumber
     }
 
 
+    /** HORRIBLE HORRIBLE HACK! */
+    private static final IonTextWriterBuilder WRITER_BUILDER =
+        IonTextWriterBuilder.minimal().immutable();
+
+
     private static class ActualDecimal
         extends BaseDecimal
     {
@@ -493,10 +506,6 @@ final class FusionNumber
         {
             out.writeDecimal(myContent);
         }
-
-        /** HORRIBLE HORRIBLE HACK! */
-        private static final IonTextWriterBuilder WRITER_BUILDER =
-            IonTextWriterBuilder.minimal().immutable();
 
         @Override
         void write(Evaluator eval, Appendable out)
@@ -541,6 +550,164 @@ final class FusionNumber
         BigDecimal toBigDecimal()
         {
             return myValue.toBigDecimal();
+        }
+
+        @Override
+        IonValue copyToIonValue(ValueFactory factory,
+                                boolean throwOnConversionFailure)
+            throws FusionException, IonizeFailure
+        {
+            IonValue iv = myValue.copyToIonValue(factory,
+                                                 throwOnConversionFailure);
+            iv.setTypeAnnotations(myAnnotations);
+            return iv;
+        }
+
+        @Override
+        void ionize(Evaluator eval, IonWriter out)
+            throws IOException, IonException, FusionException, IonizeFailure
+        {
+            out.setTypeAnnotations(myAnnotations);
+            myValue.ionize(eval, out);
+        }
+
+        @Override
+        void write(Evaluator eval, Appendable out)
+            throws IOException, FusionException
+        {
+            writeAnnotations(out, myAnnotations);
+            myValue.write(eval, out);
+        }
+    }
+
+
+    //========================================================================
+    // Float Representation
+
+    abstract static class BaseFloat
+        extends FusionValue
+    {
+        private BaseFloat() {}
+
+        abstract double doubleValue();
+    }
+
+
+    private static class NullFloat
+        extends BaseFloat
+    {
+        private NullFloat() {}
+
+        @Override
+        double doubleValue()
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        boolean isAnyNull()
+        {
+            return true;
+        }
+
+        @Override
+        IonValue copyToIonValue(ValueFactory factory,
+                                boolean throwOnConversionFailure)
+            throws FusionException, IonizeFailure
+        {
+            return factory.newNullFloat();
+        }
+
+        @Override
+        void ionize(Evaluator eval, IonWriter out)
+            throws IOException, IonException, FusionException, IonizeFailure
+        {
+            out.writeNull(IonType.FLOAT);
+        }
+
+        @Override
+        void write(Evaluator eval, Appendable out)
+            throws IOException, FusionException
+        {
+            out.append("null.float");
+        }
+    }
+
+
+    private static class ActualFloat
+        extends BaseFloat
+    {
+        private final double myContent;
+
+        private ActualFloat(double content)
+        {
+            myContent = content;
+        }
+
+        @Override
+        double doubleValue()
+        {
+            return myContent;
+        }
+
+        @Override
+        IonValue copyToIonValue(ValueFactory factory,
+                                boolean throwOnConversionFailure)
+            throws FusionException, IonizeFailure
+        {
+            return factory.newFloat(myContent);
+        }
+
+        @Override
+        void ionize(Evaluator eval, IonWriter out)
+            throws IOException, IonException, FusionException, IonizeFailure
+        {
+            out.writeFloat(myContent);
+        }
+
+        @Override
+        void write(Evaluator eval, Appendable out)
+            throws IOException, FusionException
+        {
+            // TODO WORKAROUND ION-398
+            // TODO FUSION-247 Write output without building an IonWriter.
+            IonWriter iw = WRITER_BUILDER.build(out);
+            iw.writeFloat(myContent);
+            iw.finish();
+        }
+    }
+
+
+    private static class AnnotatedFloat
+        extends BaseFloat
+        implements Annotated
+    {
+        /** Not null or empty */
+        final String[] myAnnotations;
+
+        /** Not null, and not AnnotatedBool */
+        final BaseFloat  myValue;
+
+        private AnnotatedFloat(String[] annotations, BaseFloat value)
+        {
+            assert annotations.length != 0;
+            myAnnotations = annotations;
+            myValue = value;
+        }
+
+        @Override
+        public String[] annotationsAsJavaStrings()
+        {
+            return myAnnotations;
+        }
+
+        @Override
+        boolean isAnyNull() { return myValue.isAnyNull(); }
+
+        @Override
+        double doubleValue()
+        {
+            return myValue.doubleValue();
         }
 
         @Override
@@ -749,6 +916,98 @@ final class FusionNumber
 
 
     //========================================================================
+    // Float Constructors
+
+
+    private static final BaseFloat NULL_FLOAT = new NullFloat();
+
+
+    /**
+     * @return not null.
+     */
+    static BaseFloat makeFloat(Evaluator eval, double value)
+    {
+        return new ActualFloat(value);
+    }
+
+
+    /**
+     * @param value may be null to make {@code null.float}.
+     *
+     * @return not null.
+     */
+    static BaseFloat makeFloat(Evaluator eval, Double value)
+    {
+        return (value == null ? NULL_FLOAT : new ActualFloat(value));
+    }
+
+
+    private static BaseFloat annotate(BaseFloat unannotated,
+                                      String[]  annotations)
+    {
+        assert ! (unannotated instanceof AnnotatedFloat);
+
+        if (annotations.length == 0) return unannotated;
+
+        return new AnnotatedFloat(annotations, unannotated);
+    }
+
+
+    /**
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     *
+     * @return not null.
+     */
+    static BaseFloat makeFloat(Evaluator eval,
+                               String[]  annotations,
+                               double    value)
+    {
+        BaseFloat base = makeFloat(eval, value);
+        return annotate(base, annotations);
+    }
+
+
+    /**
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     * @param value may be null to make {@code null.float}.
+     *
+     * @return not null.
+     */
+    static BaseFloat makeFloat(Evaluator eval,
+                               String[]  annotations,
+                               Double    value)
+    {
+        BaseFloat base = makeFloat(eval, value);
+        return annotate(base, annotations);
+    }
+
+
+    /**
+     * @param fusionFloat must be a Fusion float.
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     *
+     * @return not null.
+     */
+    static BaseFloat unsafeFloatAnnotate(Evaluator eval,
+                                         Object    fusionFloat,
+                                         String[]  annotations)
+    {
+        BaseFloat base = (BaseFloat) fusionFloat;
+        if (base instanceof AnnotatedFloat)
+        {
+            base = ((AnnotatedFloat) base).myValue;
+        }
+        return annotate(base, annotations);
+    }
+
+
+    //========================================================================
     // Predicates
 
 
@@ -782,6 +1041,19 @@ final class FusionNumber
         throws FusionException
     {
         return (value instanceof BaseInt || value instanceof BaseDecimal);
+    }
+
+
+    public static boolean isFloat(TopLevel top, Object value)
+        throws FusionException
+    {
+        return (value instanceof BaseFloat);
+    }
+
+    static boolean isFloat(Evaluator eval, Object value)
+        throws FusionException
+    {
+        return (value instanceof BaseFloat);
     }
 
 
@@ -821,6 +1093,19 @@ final class FusionNumber
         throws FusionException
     {
         return ((BaseInt) fusionInt).truncateToBigInteger();
+    }
+
+
+    static double unsafeFloatToDouble(TopLevel top, Object fusionFloat)
+        throws FusionException
+    {
+        return ((BaseFloat) fusionFloat).doubleValue();
+    }
+
+    static double unsafeFloatToDouble(Evaluator eval, Object fusionFloat)
+        throws FusionException
+    {
+        return ((BaseFloat) fusionFloat).doubleValue();
     }
 
 
@@ -991,6 +1276,63 @@ final class FusionNumber
 
 
     //========================================================================
+    // Float Procedure Helpers
+
+
+    /**
+     * @param expectation must not be null.
+     * @return may be null
+     */
+    static Double checkFloatArg(Evaluator eval,
+                                Procedure who,
+                                String    expectation,
+                                int       argNum,
+                                Object... args)
+        throws FusionException, ArgTypeFailure
+    {
+        Object arg = args[argNum];
+        if (arg instanceof BaseFloat)
+        {
+            return ((BaseFloat) arg).doubleValue();
+        }
+
+        throw who.argFailure(expectation, argNum, args);
+    }
+
+
+    static Double checkNullableFloatArg(Evaluator eval,
+                                        Procedure who,
+                                        int       argNum,
+                                        Object... args)
+        throws FusionException, ArgTypeFailure
+    {
+        String expectation = "nullable float";
+        return checkFloatArg(eval, who, expectation, argNum, args);
+    }
+
+
+    /**
+     * @return not null
+     */
+    static double checkRequiredFloatArg(Evaluator eval,
+                                        Procedure who,
+                                        int       argNum,
+                                        Object... args)
+        throws FusionException, ArgTypeFailure
+    {
+        String expectation = "non-null float";
+
+        // TODO avoid wrap/unwrap
+        Double result = checkFloatArg(eval, who, expectation, argNum, args);
+        if (result == null)
+        {
+            throw who.argFailure(expectation, argNum, args);
+        }
+        return result;
+    }
+
+
+    //========================================================================
     // Procedures
 
 
@@ -1029,6 +1371,26 @@ final class FusionNumber
             throws FusionException
         {
             boolean r = isDecimal(eval, arg);
+            return makeBool(eval, r);
+        }
+    }
+
+
+    static final class IsFloatProc
+        extends Procedure1
+    {
+        IsFloatProc()
+        {
+            //    "                                                                               |
+            super("Determines whether a `value` is of type `float`, returning `true` or `false`.",
+                  "value");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object arg)
+            throws FusionException
+        {
+            boolean r = isFloat(eval, arg);
             return makeBool(eval, r);
         }
     }

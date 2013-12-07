@@ -139,6 +139,7 @@ final class GlobalState
                 t != IonType.BOOL &&
                 t != IonType.INT &&
                 t != IonType.DECIMAL &&
+                t != IonType.FLOAT &&
                 t != IonType.DATAGRAM &&
                 t != IonType.LIST &&
                 t != IonType.SEXP &&

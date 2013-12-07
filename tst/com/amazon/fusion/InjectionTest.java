@@ -101,6 +101,18 @@ public class InjectionTest
 
 
     @Test
+    public void testFloatInjection()
+        throws Exception
+    {
+        TopLevel top = topLevel();
+
+        top.define("v", 123.2);
+        assertEval(123.2, "v");
+//      assertEval(246.4, "(+ v v)");
+    }
+
+
+    @Test
     public void testDecimalInjection()
         throws Exception
     {

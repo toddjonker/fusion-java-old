@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionList.listFromIonSequence;
 import static com.amazon.fusion.FusionNull.makeNullNull;
 import static com.amazon.fusion.FusionNumber.makeDecimal;
+import static com.amazon.fusion.FusionNumber.makeFloat;
 import static com.amazon.fusion.FusionNumber.makeInt;
 import static com.amazon.fusion.FusionSexp.sexpFromIonSequence;
 import static com.amazon.fusion.FusionString.makeString;
@@ -167,7 +168,11 @@ final class Evaluator
         }
         else if (value instanceof BigDecimal)
         {
-            return newDecimal((BigDecimal) value);
+            return makeDecimal(this, (BigDecimal) value);
+        }
+        else if (value instanceof Double)
+        {
+            return makeFloat(this, value.doubleValue());
         }
 
         // TODO this API forces us to use a non-null object for VOID!
@@ -354,34 +359,40 @@ final class Evaluator
         return makeDecimal(this, annotations, value);
     }
 
+    /**
+     * @deprecated Use helpers in {@link FusionNumber}.
+     */
+    @Deprecated
     Object newFloat(double value)
     {
-        IonValue dom = mySystem.newFloat(value);
-        return inject(dom);
+        return makeFloat(this, value);
     }
 
+    /**
+     * @deprecated Use helpers in {@link FusionNumber}.
+     */
+    @Deprecated
     Object newFloat(double value, String... annotations)
     {
-        IonValue dom = mySystem.newFloat(value);
-        if (annotations != null) dom.setTypeAnnotations(annotations);
-        return inject(dom);
+        return makeFloat(this, annotations, value);
     }
 
+    /**
+     * @deprecated Use helpers in {@link FusionNumber}.
+     */
+    @Deprecated
     Object newFloat(Double value)
     {
-        IonValue dom = (value == null
-                           ? mySystem.newNullFloat()
-                           : mySystem.newFloat(value));
-        return inject(dom);
+        return makeFloat(this, value);
     }
 
+    /**
+     * @deprecated Use helpers in {@link FusionNumber}.
+     */
+    @Deprecated
     Object newFloat(Double value, String... annotations)
     {
-        IonValue dom = (value == null
-                           ? mySystem.newNullFloat()
-                           : mySystem.newFloat(value));
-        if (annotations != null) dom.setTypeAnnotations(annotations);
-        return inject(dom);
+        return makeFloat(this, annotations, value);
     }
 
     /**

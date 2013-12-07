@@ -24,7 +24,6 @@ import static com.amazon.fusion.FusionTimestamp.isTimestamp;
 import static com.amazon.fusion.FusionValue.annotationsAsJavaStrings;
 import static com.amazon.fusion.FusionValue.castToIonValueMaybe;
 import static com.amazon.fusion.SourceLocation.currentLocation;
-import java.math.BigInteger;
 import com.amazon.fusion.FusionSexp.BaseSexp;
 import com.amazon.fusion.FusionStruct.BaseStruct;
 import com.amazon.fusion.FusionStruct.ImmutableStruct;
@@ -35,6 +34,7 @@ import com.amazon.ion.IonReader;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 /**
@@ -94,9 +94,12 @@ final class Syntax
             }
             case FLOAT:
             {
-                Double value =
-                    (source.isNullValue() ? null : source.doubleValue());
-                return SyntaxFloat.make(value, anns, loc);
+                if (source.isNullValue())
+                {
+                    return SyntaxFloat.make(eval, loc, anns, (Double) null);
+                }
+                double value = source.doubleValue();
+                return SyntaxFloat.make(eval, loc, anns, value);
             }
             case TIMESTAMP:
             {
@@ -362,6 +365,11 @@ final class Syntax
         if (isTimestamp(eval, datum))
         {
             return SyntaxTimestamp.make(eval, /*location*/ null, datum);
+        }
+
+        if (FusionNumber.isFloat(eval, datum))
+        {
+            return SyntaxFloat.make(eval, /*location*/ null, datum);
         }
 
         return null;

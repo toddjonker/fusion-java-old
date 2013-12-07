@@ -3,10 +3,12 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionNumber.isDecimal;
+import static com.amazon.fusion.FusionNumber.isFloat;
 import static com.amazon.fusion.FusionNumber.isInt;
 import static com.amazon.fusion.FusionNumber.unsafeIntToJavaBigInteger;
 import static com.amazon.fusion.FusionNumber.unsafeNumberToBigDecimal;
 import static com.amazon.fusion.FusionString.stringToJavaString;
+import static com.amazon.fusion.FusionValue.isAnyNull;
 import static com.amazon.fusion.FusionVoid.isVoid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -331,6 +333,20 @@ public class CoreTestCase
         fail("Expected " + expected + " but got " + actual);
     }
 
+    void checkFloat(double expected, Object actual)
+        throws FusionException
+    {
+        TopLevel top = topLevel();
+        if (isFloat(top, actual) && ! isAnyNull(top, actual))
+        {
+            double d = FusionNumber.unsafeFloatToDouble(top, actual);
+            assertEquals(expected, d, 0);
+            return;
+        }
+
+        fail("Expected " + expected + " but got " + actual);
+    }
+
 
     void checkIon(IonValue expected, Object actual)
         throws FusionException
@@ -424,11 +440,19 @@ public class CoreTestCase
         checkDecimal(expected, fv);
     }
 
+    // TODO remove, it's redundant.
     protected void assertBigInt(int expectedInt, String expressionIon)
         throws FusionException
     {
         BigInteger bExpInt = BigInteger.valueOf(expectedInt);
         assertEval(bExpInt, expressionIon);
+    }
+
+    protected void assertEval(double expected, String expressionIon)
+        throws FusionException
+    {
+        Object fv = eval(expressionIon);
+        checkFloat(expected, fv);
     }
 
     protected void assertString(String expectedString, String expressionIon)

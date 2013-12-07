@@ -9,8 +9,10 @@ import static com.amazon.fusion.FusionCollection.unsafeCollectionAnnotate;
 import static com.amazon.fusion.FusionNull.isNullNull;
 import static com.amazon.fusion.FusionNull.makeNullNull;
 import static com.amazon.fusion.FusionNumber.isDecimal;
+import static com.amazon.fusion.FusionNumber.isFloat;
 import static com.amazon.fusion.FusionNumber.isInt;
 import static com.amazon.fusion.FusionNumber.unsafeDecimalAnnotate;
+import static com.amazon.fusion.FusionNumber.unsafeFloatAnnotate;
 import static com.amazon.fusion.FusionNumber.unsafeIntAnnotate;
 import static com.amazon.fusion.FusionString.isString;
 import static com.amazon.fusion.FusionString.unsafeStringAnnotate;
@@ -84,6 +86,11 @@ final class AnnotateProc
         if (isNullNull(eval, target))
         {
             return makeNullNull(eval, annotations);
+        }
+
+        if (isFloat(eval, target))
+        {
+            return unsafeFloatAnnotate(eval, target, annotations);
         }
 
         IonValue value = castToIonValueMaybe(target);

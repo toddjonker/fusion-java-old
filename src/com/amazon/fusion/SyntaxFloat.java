@@ -2,26 +2,67 @@
 
 package com.amazon.fusion;
 
-import com.amazon.ion.IonType;
+import static com.amazon.fusion.FusionNumber.makeFloat;
+import com.amazon.fusion.FusionNumber.BaseFloat;
+import com.amazon.ion.IonException;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
 final class SyntaxFloat
     extends SyntaxValue
 {
-    private final Double myValue;
+    private final BaseFloat myDatum;
 
 
-    private SyntaxFloat(Double value, String[] anns, SourceLocation loc)
+    /**
+     * @param datum must not be null.
+     */
+    private SyntaxFloat(SourceLocation loc, BaseFloat datum)
     {
-        super(anns, loc);
-        myValue = value;
+        super(datum.annotationsAsJavaStrings(), loc);
+        myDatum = datum;
     }
 
-    static SyntaxFloat make(Double value, String[] anns, SourceLocation loc)
+
+    /**
+     * @param datum must be a Fusion decimal.
+     */
+    static SyntaxFloat make(Evaluator eval, SourceLocation loc, Object datum)
     {
-        return new SyntaxFloat(value, anns, loc);
+        return new SyntaxFloat(loc, (BaseFloat) datum);
     }
+
+    /**
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     */
+    static SyntaxFloat make(Evaluator      eval,
+                            SourceLocation loc,
+                            String[]       annotations,
+                            double         value)
+    {
+        BaseFloat datum = makeFloat(eval, annotations, value);
+        return new SyntaxFloat(loc, datum);
+    }
+
+    /**
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     * @param value may be null.
+     */
+    static SyntaxFloat make(Evaluator      eval,
+                            SourceLocation loc,
+                            String[]       annotations,
+                            Double         value)
+    {
+        BaseFloat datum = makeFloat(eval, annotations, value);
+        return new SyntaxFloat(loc, datum);
+    }
+
+
+    //========================================================================
 
 
     @Override
@@ -32,38 +73,31 @@ final class SyntaxFloat
 
 
     @Override
-    Object doCompileIonConstant(Evaluator eval, Environment env)
+    CompiledForm doCompile(Evaluator eval, Environment env)
         throws FusionException
     {
-        return eval.newFloat(myValue);
+        return new CompiledConstant(myDatum);
     }
 
 
     @Override
     Object unwrap(Evaluator eval, boolean recurse)
     {
-        return eval.newFloat(myValue, getAnnotations());
+        return myDatum;
     }
 
 
     @Override
-    void ionize(Evaluator eval, IonWriter writer) throws IOException
+    void ionize(Evaluator eval, IonWriter writer)
+        throws IOException, IonException, FusionException, IonizeFailure
     {
-        ionizeAnnotations(writer);
-        if (myValue != null)
-        {
-            writer.writeFloat(myValue);
-        }
-        else
-        {
-            writer.writeNull(IonType.FLOAT);
-        }
+        myDatum.ionize(eval, writer);
     }
 
 
     @Override
     boolean isNullValue()
     {
-        return myValue == null;
+        return myDatum.isAnyNull();
     }
 }
