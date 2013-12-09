@@ -47,6 +47,12 @@ public final class FusionBool
         boolean isFalse()   { return false; }
 
         @Override
+        BaseBool isTruthy(Evaluator eval)  { return FALSE_BOOL; }
+
+        @Override
+        BaseBool not(Evaluator eval) { return TRUE_BOOL; }
+
+        @Override
         Boolean asJavaBoolean() { return null; }
 
         @Override
@@ -86,6 +92,12 @@ public final class FusionBool
 
         @Override
         boolean isFalse()   { return false; }
+
+        @Override
+        BaseBool isTruthy(Evaluator eval)  { return TRUE_BOOL; }
+
+        @Override
+        BaseBool not(Evaluator eval) { return FALSE_BOOL; }
 
         @Override
         Boolean asJavaBoolean() { return TRUE; }
@@ -128,6 +140,12 @@ public final class FusionBool
 
         @Override
         boolean isFalse()   { return true; }
+
+        @Override
+        BaseBool isTruthy(Evaluator eval)  { return FALSE_BOOL; }
+
+        @Override
+        BaseBool not(Evaluator eval) { return TRUE_BOOL; }
 
         @Override
         Boolean asJavaBoolean() { return FALSE; }
@@ -189,6 +207,9 @@ public final class FusionBool
         boolean isFalse()   { return myValue.isFalse(); }
 
         @Override
+        BaseBool not(Evaluator eval) { return myValue.not(eval); }
+
+        @Override
         Boolean asJavaBoolean() { return myValue.asJavaBoolean(); }
 
         @Override
@@ -225,8 +246,19 @@ public final class FusionBool
 
 
     private static final BaseBool NULL_BOOL  = new NullBool();
-    private static final BaseBool TRUE_BOOL  = new TrueBool();
-    private static final BaseBool FALSE_BOOL = new FalseBool();
+    private static final TrueBool TRUE_BOOL  = new TrueBool();
+    private static final FalseBool FALSE_BOOL = new FalseBool();
+
+
+    static TrueBool trueBool(Evaluator eval)
+    {
+        return TRUE_BOOL;
+    }
+
+    static FalseBool falseBool(Evaluator eval)
+    {
+        return FALSE_BOOL;
+    }
 
 
     static BaseBool makeBool(Evaluator eval, boolean value)

@@ -18,7 +18,6 @@ final class NotProc
     Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        boolean b = isTruthy(eval, arg);
-        return eval.newBool(! b);
+        return FusionValue.not(eval, arg);
     }
 }

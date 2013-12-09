@@ -2,11 +2,12 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionBool.isBool;
-import static com.amazon.fusion.FusionBool.unsafeBoolIsTrue;
+import static com.amazon.fusion.FusionBool.falseBool;
+import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
-import static com.amazon.fusion.FusionVoid.isVoid;
+import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
@@ -83,6 +84,17 @@ public abstract class FusionValue
     }
 
 
+    BaseBool isTruthy(Evaluator eval)
+    {
+        return makeBool(eval, ! isAnyNull());
+    }
+
+    BaseBool not(Evaluator eval)
+    {
+        return makeBool(eval, isAnyNull());
+    }
+
+
     /**
      * Determines whether a given Fusion value is "truthy".
      * Fusion defines truthiness as follows:
@@ -102,22 +114,30 @@ public abstract class FusionValue
     public static boolean isTruthy(TopLevel top, Object value)
         throws FusionException
     {
-        return isTruthy(evaluator(top), value);
+        return isTruthy(evaluator(top), value).isTrue();
     }
 
-    static boolean isTruthy(Evaluator eval, Object value)
+    static BaseBool isTruthy(Evaluator eval, Object value)
         throws FusionException
     {
-        if (isVoid(eval, value)) return false;
-
-        if (isAnyNull(eval, value)) return false;
-
-        if (isBool(eval, value))
+        if (value instanceof FusionValue)
         {
-            return unsafeBoolIsTrue(eval, value);
+            return ((FusionValue) value).isTruthy(eval);
         }
 
-        return true;
+        return trueBool(eval);
+    }
+
+
+    static BaseBool not(Evaluator eval, Object value)
+        throws FusionException
+    {
+        if (value instanceof FusionValue)
+        {
+            return ((FusionValue) value).not(eval);
+        }
+
+        return falseBool(eval);
     }
 
 

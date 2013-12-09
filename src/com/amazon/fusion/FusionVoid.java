@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.falseBool;
+import static com.amazon.fusion.FusionBool.trueBool;
+import com.amazon.fusion.FusionBool.BaseBool;
 import java.io.IOException;
 
 
@@ -17,6 +20,18 @@ public final class FusionVoid
     private final static FusionValue VOID =
         new FusionValue()
         {
+            @Override
+            BaseBool isTruthy(Evaluator eval)
+            {
+                return falseBool(eval);
+            }
+
+            @Override
+            BaseBool not(Evaluator eval)
+            {
+                return trueBool(eval);
+            }
+
             @Override
             void write(Evaluator eval, Appendable out) throws IOException
             {

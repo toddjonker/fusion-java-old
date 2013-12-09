@@ -69,7 +69,7 @@ final class IfForm
         {
             Object result = eval.eval(store, myTestForm);
 
-            boolean truthy = isTruthy(eval, result);
+            boolean truthy = isTruthy(eval, result).isTrue();
 
             CompiledForm branch = truthy ? myThenForm : myElseForm;
 
