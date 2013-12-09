@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionNumber.makeDecimal;
 import static java.math.RoundingMode.HALF_EVEN;
 import java.math.BigDecimal;
 
@@ -28,6 +29,6 @@ class DecimalDivideRescaleProc
         int scale = checkIntArg(2, args);
 
         BigDecimal result = dividend.divide(divisor, scale, HALF_EVEN);
-        return eval.newDecimal(result);
+        return makeDecimal(eval, result);
     }
 }

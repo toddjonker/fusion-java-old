@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.makeBool;
 import com.amazon.ion.IonValue;
 
 /** FOR TESTING ONLY */
@@ -16,14 +17,13 @@ final class IonEqualsProc
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     Object doApply(Evaluator eval, Object arg0, Object arg1)
         throws FusionException
     {
-        IonValue iv0 = eval.convertToIonValueMaybe(arg0);
-        IonValue iv1 = eval.convertToIonValueMaybe(arg1);
+        IonValue iv0 = copyToIonValueMaybe(arg0, eval.getSystem());
+        IonValue iv1 = copyToIonValueMaybe(arg1, eval.getSystem());
 
         boolean result = iv0 != null && iv0.equals(iv1);
-        return eval.newBool(result);
+        return makeBool(eval, result);
     }
 }

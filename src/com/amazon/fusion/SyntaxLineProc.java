@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionNumber.makeInt;
 import static com.amazon.fusion.FusionVoid.voidValue;
 
 
@@ -23,7 +24,7 @@ class SyntaxLineProc
         SourceLocation location = stx.getLocation();
         if (location != null)
         {
-            return eval.newInt(location.myLine);
+            return makeInt(eval, location.myLine);
         }
         return voidValue(eval);
     }

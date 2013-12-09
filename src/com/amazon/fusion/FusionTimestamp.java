@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionNumber.makeDecimal;
 import static com.amazon.fusion.FusionString.checkNullableStringArg;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.ion.util.IonTextUtils.isDigit;
@@ -516,7 +517,7 @@ final class FusionTimestamp
         {
             Timestamp ts = checkRequiredTimestampArg(eval, this, 0, arg);
             BigDecimal millis = ts.getDecimalMillis();
-            return eval.newDecimal(millis);
+            return makeDecimal(eval, millis);
         }
     }
 }

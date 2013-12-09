@@ -1,8 +1,9 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.falseBool;
+import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
 import com.amazon.fusion.FusionBool.BaseBool;
 import java.io.IOException;
@@ -102,7 +103,7 @@ public final class FusionVoid
         @Override
         Object doApply(Evaluator eval, Object arg)
         {
-            return eval.newBool(arg == VOID);
+            return makeBool(eval, arg == VOID);
         }
     }
 }

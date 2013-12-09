@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.ModuleIdentity.isValidModulePath;
 import static com.amazon.ion.util.IonTextUtils.printString;
 import java.util.ArrayList;
@@ -222,7 +223,7 @@ final class ModuleNameResolver
         {
             if (reload || ! reg.isLoaded(id))
             {
-                Object idString = eval.newString(id.absolutePath());
+                Object idString = makeString(eval, id.absolutePath());
 
                 checkForCycles(eval, idString);
 

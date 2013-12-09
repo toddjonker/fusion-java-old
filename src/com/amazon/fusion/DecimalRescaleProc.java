@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionNumber.makeDecimal;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -27,6 +28,6 @@ final class DecimalRescaleProc
         int scale = checkIntArg(1, args);
 
         BigDecimal result = value.setScale(scale, RoundingMode.HALF_EVEN);
-        return eval.newDecimal(result);
+        return makeDecimal(eval, result);
     }
 }

@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionText.checkRequiredTextArg;
 import static com.amazon.fusion.FusionUtils.safeEquals;
@@ -433,7 +434,7 @@ final class FusionString
                 resultBuilder.append(v);
             }
 
-            return eval.newString(resultBuilder.toString());
+            return makeString(eval, resultBuilder.toString());
         }
     }
 
@@ -455,7 +456,7 @@ final class FusionString
             checkArityExact(args);
 
             String input = checkRequiredStringArg(eval, this, 0, args);
-            return eval.newString(input.toLowerCase());
+            return makeString(eval, input.toLowerCase());
         }
     }
 
@@ -477,7 +478,7 @@ final class FusionString
             checkArityExact(args);
 
             String input = checkRequiredStringArg(eval, this, 0, args);
-            return eval.newString(input.toUpperCase());
+            return makeString(eval, input.toUpperCase());
         }
     }
 

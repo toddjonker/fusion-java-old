@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionNumber.makeInt;
 import static com.amazon.fusion.FusionString.checkNullableStringArg;
 import java.math.BigInteger;
 
@@ -28,7 +29,7 @@ final class StringToIntProc
 
         BigInteger bigInt = (val != null ? parse(val, args) : null);
 
-        return eval.newInt(bigInt);
+        return makeInt(eval, bigInt);
     }
 
 

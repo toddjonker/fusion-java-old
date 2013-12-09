@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionEval.callCurrentEval;
+import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionUtils.resolvePath;
 import static com.amazon.fusion.GlobalState.MODULE;
 import com.amazon.ion.IonException;
@@ -49,7 +50,7 @@ final class LoadHandler
         File parent = file.getParentFile();
 
         eval = eval.markedContinuation(myCurrentLoadRelativeDirectory,
-                                       eval.newString(parent.getAbsolutePath()));
+                                       makeString(eval, parent.getAbsolutePath()));
 
         try
         {
@@ -193,7 +194,7 @@ final class LoadHandler
         {
             bodyEval =
                 eval.markedContinuation(myCurrentLoadRelativeDirectory,
-                                        eval.newString(dirPath));
+                                        makeString(eval, dirPath));
         }
 
         // TODO Do we need an Evaluator with no continuation marks?

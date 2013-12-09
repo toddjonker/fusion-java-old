@@ -1,6 +1,8 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
+
+import static com.amazon.fusion.FusionNumber.makeInt;
 
 final class SyntaxSizeProc
     extends Procedure1
@@ -18,6 +20,6 @@ final class SyntaxSizeProc
         throws FusionException
     {
         SyntaxSequence c = checkSyntaxSequenceArg(0, arg);
-        return eval.newInt(c.size());
+        return makeInt(eval, c.size());
     }
 }

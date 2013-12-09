@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionNumber.makeInt;
 import org.junit.Test;
 
 public class TailCallTest
@@ -66,7 +67,7 @@ public class TailCallTest
 
             if (i == limit) return arg0;
 
-            Object newI = eval.newInt(i+ 1);
+            Object newI = makeInt(eval, i + 1);
             return eval.bounceTailCall(this, newI, arg1);
         }
     }

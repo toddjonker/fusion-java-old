@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonValue;
@@ -58,7 +59,7 @@ public final class FusionIo
         @Override
         Object doApply(Evaluator eval, Object arg)
         {
-            return eval.newBool(arg == EOF);
+            return makeBool(eval, arg == EOF);
         }
     }
 

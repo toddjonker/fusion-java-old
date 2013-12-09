@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.makeBool;
+
 
 final class FusionSyntax
 {
@@ -24,7 +26,7 @@ final class FusionSyntax
             throws FusionException
         {
             boolean result = Syntax.isIdentifier(eval, arg);
-            return eval.newBool(result);
+            return makeBool(eval, result);
         }
     }
 
@@ -44,7 +46,7 @@ final class FusionSyntax
             throws FusionException
         {
             boolean result = Syntax.isSyntax(eval, arg);
-            return eval.newBool(result);
+            return makeBool(eval, result);
         }
     }
 

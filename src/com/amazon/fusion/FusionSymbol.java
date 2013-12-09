@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionString.makeString;
 import com.amazon.fusion.FusionText.BaseText;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
@@ -422,7 +423,7 @@ final class FusionSymbol
             checkArityExact(args);
 
             String input = checkNullableArg(this, 0, args);
-            return eval.newString(input);
+            return makeString(eval, input);
         }
     }
 }

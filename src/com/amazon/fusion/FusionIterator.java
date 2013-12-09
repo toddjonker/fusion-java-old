@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.boolToJavaBoolean;
+import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionList.isList;
 import static com.amazon.fusion.FusionList.unsafeListIterator;
 import static com.amazon.fusion.FusionSexp.isSexp;
@@ -188,7 +189,7 @@ class FusionIterator
         Object doHasNextTail(Evaluator eval)
             throws FusionException
         {
-            return eval.newBool(hasNext(eval));
+            return makeBool(eval, hasNext(eval));
         }
 
         @Override
@@ -297,7 +298,7 @@ class FusionIterator
             throws FusionException
         {
             boolean b = (arg instanceof FusionIterator);
-            return eval.newBool(b);
+            return makeBool(eval, b);
         }
     }
 

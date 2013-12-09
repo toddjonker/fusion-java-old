@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionCollection.unsafeCollectionSize;
+import static com.amazon.fusion.FusionNumber.makeInt;
 
 final class SizeProc
     extends Procedure1
@@ -22,6 +23,6 @@ final class SizeProc
     {
         checkCollectionArg(eval, 0, arg);
         int size = unsafeCollectionSize(eval, arg);
-        return eval.newInt(size);
+        return makeInt(eval, size);
     }
 }

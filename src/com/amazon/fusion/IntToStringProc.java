@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionString.makeString;
 import java.math.BigInteger;
 
 final class IntToStringProc
@@ -23,6 +24,6 @@ final class IntToStringProc
         BigInteger val = checkBigIntArg(eval, 0, args);
         String text = (val == null ? null : val.toString());
 
-        return eval.newString(text);
+        return makeString(eval, text);
     }
 }

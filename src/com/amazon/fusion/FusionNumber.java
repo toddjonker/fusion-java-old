@@ -785,6 +785,13 @@ final class FusionNumber
     }
 
 
+    // We may want to optimize this further
+    static BaseInt makeInt(Evaluator eval, int value)
+    {
+        return makeInt(eval, (long) value);
+    }
+
+
     /**
      * @param value may be null to make {@code null.int}.
      *

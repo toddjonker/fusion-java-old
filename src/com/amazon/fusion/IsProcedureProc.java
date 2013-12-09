@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.makeBool;
+
 final class IsProcedureProc
     extends Procedure1
 {
@@ -16,6 +18,6 @@ final class IsProcedureProc
     Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        return eval.newBool(arg instanceof Procedure);
+        return makeBool(eval, arg instanceof Procedure);
     }
 }

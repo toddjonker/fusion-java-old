@@ -232,7 +232,7 @@ final class Evaluator
         }
         else if (javaValue instanceof String)
         {
-            return newString((String) javaValue);
+            return makeString(this, (String) javaValue);
         }
         else if (javaValue instanceof Number)
         {
@@ -443,35 +443,6 @@ final class Evaluator
     Object newTimestamp(Timestamp value, String... annotations)
     {
         return makeTimestamp(this, annotations, value);
-    }
-
-
-    //========================================================================
-
-
-    /**
-     * Casts or copies as necessary.
-     * Returns null if value contains non-Ionizable data!
-     *
-     * @deprecated This is of questionable design, and should probably be
-     * removed. Please limit use carefully.
-     */
-    @Deprecated
-    IonValue convertToIonValueMaybe(Object value)
-        throws FusionException
-    {
-        if (value instanceof IonValue)
-        {
-            return (IonValue) value;
-        }
-
-        if (value instanceof FusionValue)
-        {
-            FusionValue fv = (FusionValue) value;
-            return fv.copyToIonValue(mySystem, false);
-        }
-
-        return null;
     }
 
 

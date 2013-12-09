@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.safeWriteToString;
+import static com.amazon.fusion.FusionNumber.makeDecimal;
 import java.math.BigDecimal;
 
 
@@ -51,6 +52,6 @@ class DivideProc
         BigDecimal divisor  = checkRequiredDecimalArg(eval, 1, args);
 
         BigDecimal result = divide(eval, args, dividend, divisor);
-        return eval.newDecimal(result);
+        return makeDecimal(eval, result);
     }
 }

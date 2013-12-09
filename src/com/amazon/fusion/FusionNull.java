@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.makeBool;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
@@ -159,7 +160,7 @@ final class FusionNull
             throws FusionException
         {
             boolean isNull = isNullNull(eval, arg);
-            return eval.newBool(isNull);
+            return makeBool(eval, isNull);
         }
     }
 }

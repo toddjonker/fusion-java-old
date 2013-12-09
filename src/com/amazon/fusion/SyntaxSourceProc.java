@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionVoid.voidValue;
 
 
@@ -26,7 +27,7 @@ class SyntaxSourceProc
             SourceName name = location.myName;
             if (name != null)
             {
-                return eval.newString(name.display());
+                return makeString(eval, name.display());
             }
         }
         return voidValue(eval);

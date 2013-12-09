@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionVoid.voidValue;
@@ -617,7 +618,7 @@ final class FusionSexp
             throws FusionException
         {
             boolean result = isSexp(eval, arg);
-            return eval.newBool(result);
+            return makeBool(eval, result);
         }
     }
 
@@ -656,7 +657,7 @@ final class FusionSexp
             throws FusionException
         {
             boolean result = isPair(eval, value);
-            return eval.newBool(result);
+            return makeBool(eval, result);
         }
     }
 

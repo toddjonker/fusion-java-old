@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionIterator.iterate;
@@ -1210,7 +1211,7 @@ final class FusionStruct
             throws FusionException
         {
             boolean result = isStruct(eval, arg);
-            return eval.newBool(result);
+            return makeBool(eval, result);
         }
     }
 
@@ -1231,7 +1232,7 @@ final class FusionStruct
             throws FusionException
         {
             boolean result = isImmutableStruct(eval, value);
-            return eval.newBool(result);
+            return makeBool(eval, result);
         }
     }
 
@@ -1252,7 +1253,7 @@ final class FusionStruct
             throws FusionException
         {
             boolean result = isMutableStruct(eval, value);
-            return eval.newBool(result);
+            return makeBool(eval, result);
         }
     }
 
@@ -1274,7 +1275,7 @@ final class FusionStruct
         {
             BaseStruct s = (BaseStruct) args[0];
             String key = unsafeTextToJavaString(eval, args[1]);
-            return eval.newBool(s.hasKey(eval, key));
+            return makeBool(eval, s.hasKey(eval, key));
         }
     }
 

@@ -2,8 +2,10 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
+import static com.amazon.fusion.FusionNumber.makeInt;
 import static com.amazon.fusion.FusionNumber.unsafeTruncateIntToJavaInt;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
@@ -882,7 +884,7 @@ final class FusionList
             throws FusionException
         {
             boolean result = isList(eval, value);
-            return eval.newBool(result);
+            return makeBool(eval, result);
         }
     }
 
@@ -902,7 +904,7 @@ final class FusionList
             throws FusionException
         {
             boolean result = isImmutableList(eval, value);
-            return eval.newBool(result);
+            return makeBool(eval, result);
         }
     }
 
@@ -922,7 +924,7 @@ final class FusionList
             throws FusionException
         {
             boolean result = isMutableList(eval, value);
-            return eval.newBool(result);
+            return makeBool(eval, result);
         }
     }
 
@@ -942,7 +944,7 @@ final class FusionList
             throws FusionException
         {
             boolean result = isStretchyList(eval, value);
-            return eval.newBool(result);
+            return makeBool(eval, result);
         }
     }
 
@@ -1019,7 +1021,7 @@ final class FusionList
             throws FusionException
         {
             int result = unsafeListSize(eval, list);
-            return eval.newInt(result);
+            return makeInt(eval, result);
         }
     }
 

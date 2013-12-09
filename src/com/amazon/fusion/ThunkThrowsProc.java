@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionString.makeString;
+
 
 final class ThunkThrowsProc
     extends Procedure1
@@ -26,25 +29,25 @@ final class ThunkThrowsProc
         catch (SyntaxException e)
         {
             // Good!  We are expecting this.
-            return eval.newString("syntax");
+            return makeString(eval, "syntax");
         }
         catch (ArgTypeFailure e)
         {
-            return eval.newString("arg");
+            return makeString(eval, "arg");
         }
         catch (ArityFailure e)
         {
-            return eval.newString("arity");
+            return makeString(eval, "arity");
         }
         catch (ContractException e)
         {
-            return eval.newString("contract");
+            return makeString(eval, "contract");
         }
         catch (FusionException e)
         {
             return e;
         }
 
-        return eval.newBool(false);
+        return makeBool(eval, false);
     }
 }
