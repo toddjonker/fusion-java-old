@@ -2,13 +2,16 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBlob.isBlob;
 import static com.amazon.fusion.FusionBool.isBool;
 import static com.amazon.fusion.FusionList.isList;
 import static com.amazon.fusion.FusionList.isNullList;
 import static com.amazon.fusion.FusionList.unsafeListRef;
 import static com.amazon.fusion.FusionList.unsafeListSize;
+import static com.amazon.fusion.FusionLob.isLob;
 import static com.amazon.fusion.FusionNull.isNullNull;
 import static com.amazon.fusion.FusionNumber.isDecimal;
+import static com.amazon.fusion.FusionNumber.isFloat;
 import static com.amazon.fusion.FusionNumber.isInt;
 import static com.amazon.fusion.FusionSexp.isEmptySexp;
 import static com.amazon.fusion.FusionSexp.isPair;
@@ -129,13 +132,13 @@ final class Syntax
             {
                 byte[] value =
                     (source.isNullValue() ? null : source.newBytes());
-                return SyntaxBlob.make(value, anns, loc);
+                return SyntaxBlob.make(eval, loc, anns, value);
             }
             case CLOB:
             {
                 byte[] value =
                     (source.isNullValue() ? null : source.newBytes());
-                return SyntaxClob.make(value, anns, loc);
+                return SyntaxClob.make(eval, loc, anns, value);
             }
             case LIST:
             {
@@ -370,9 +373,18 @@ final class Syntax
             return SyntaxTimestamp.make(eval, /*location*/ null, datum);
         }
 
-        if (FusionNumber.isFloat(eval, datum))
+        if (isFloat(eval, datum))
         {
             return SyntaxFloat.make(eval, /*location*/ null, datum);
+        }
+
+        if (isLob(eval, datum))
+        {
+            if (isBlob(eval, datum))
+            {
+                return SyntaxBlob.make(eval, /*location*/ null, datum);
+            }
+            return SyntaxClob.make(eval, /*location*/ null, datum);
         }
 
         return null;

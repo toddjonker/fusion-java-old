@@ -16,8 +16,11 @@ import com.amazon.ion.IonClob;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonFloat;
 import com.amazon.ion.IonInt;
+import com.amazon.ion.IonList;
 import com.amazon.ion.IonNull;
+import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
+import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonTimestamp;
 import com.amazon.ion.IonValue;
@@ -32,6 +35,9 @@ import org.junit.Test;
 public class InjectionTest
     extends CoreTestCase
 {
+    private static final byte[] BYTES = { 0, 1, 2, 3 };
+
+
     @Test
     public void testNullInjection()
         throws Exception
@@ -125,23 +131,95 @@ public class InjectionTest
     }
 
 
+    @Test
+    public void testBlobInjection()
+        throws Exception
+    {
+        TopLevel top = topLevel();
+
+        top.define("v", BYTES);
+        assertEval(system().newBlob(BYTES), "v");
+    }
+
+
     //========================================================================
     // Injection IonValues
 
 
-    void testIonValueInjection(IonValue iv)
+    void testIonValueInjection(IonValue iv, String predicate)
         throws Exception
     {
-        topLevel().define("v", iv);
+        TopLevel top = topLevel();
+
+        top.define("v", iv);
         assertEval(iv, "v");
         Object fv = eval("v");
-        assertEquals(iv.isNullValue(), isAnyNull(topLevel(), fv));
+        assertEquals(iv.isNullValue(), isAnyNull(top, fv));
+        assertEval(true, "(" + predicate + " v)");
 
+        // App must not modify an injected object, so we clone.
+        iv = iv.clone();
         iv.setTypeAnnotations("a");
-        topLevel().define("v", iv);
+        top.define("v", iv);
         assertEval(iv, "v");
         fv = eval("v");
-        assertEquals(iv.isNullValue(), isAnyNull(topLevel(), fv));
+        assertEquals(iv.isNullValue(), isAnyNull(top, fv));
+
+        {
+            IonList c = system().newList(iv.clone());
+            top.define("c", c);
+            assertEval(c, "c");
+            assertEval(iv, "(element c 0)");
+            fv = eval("(element c 0)");
+            assertEquals(iv.isNullValue(), isAnyNull(top, fv));
+
+            iv = iv.clone();
+            iv.setTypeAnnotations();
+            c = system().newList(iv);
+            top.define("c", c);
+            assertEval(c, "c");
+            assertEval(iv, "(element c 0)");
+            fv = eval("(element c 0)");
+            assertEquals(iv.isNullValue(), isAnyNull(top, fv));
+        }
+
+        {
+            IonSexp c = system().newSexp(iv.clone());
+            top.define("c", c);
+            assertEval(c, "c");
+            assertEval(iv, "(element c 0)");
+            fv = eval("(element c 0)");
+            assertEquals(iv.isNullValue(), isAnyNull(top, fv));
+
+            iv = iv.clone();
+            iv.setTypeAnnotations();
+            c = system().newSexp(iv);
+            top.define("c", c);
+            assertEval(c, "c");
+            assertEval(iv, "(element c 0)");
+            fv = eval("(element c 0)");
+            assertEquals(iv.isNullValue(), isAnyNull(top, fv));
+        }
+
+        {
+            IonStruct c = system().newEmptyStruct();
+            c.put("f", iv.clone());
+            top.define("c", c);
+            assertEval(c, "c");
+            assertEval(iv, "(element c '''f''')");
+            fv = eval("(element c '''f''')");
+            assertEquals(iv.isNullValue(), isAnyNull(top, fv));
+
+            iv = iv.clone();
+            iv.setTypeAnnotations();
+            c = system().newEmptyStruct();
+            c.put("f", iv);
+            top.define("c", c);
+            assertEval(c, "c");
+            assertEval(iv, "(element c '''f''')");
+            fv = eval("(element c '''f''')");
+            assertEquals(iv.isNullValue(), isAnyNull(top, fv));
+        }
     }
 
 
@@ -150,7 +228,7 @@ public class InjectionTest
         throws Exception
     {
         IonNull iv = system().newNull();
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_null_null");
     }
 
 
@@ -159,13 +237,13 @@ public class InjectionTest
         throws Exception
     {
         IonBool iv = system().newNullBool();
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_bool");
 
         iv = system().newBool(false);
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_bool");
 
         iv = system().newBool(true);
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_bool");
     }
 
 
@@ -174,13 +252,13 @@ public class InjectionTest
         throws Exception
     {
         IonInt iv = system().newNullInt();
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_int");
 
         iv = system().newInt(Long.MAX_VALUE);
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_int");
 
         iv = system().newInt(NumericsTest.VERY_BIG_INTEGER);
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_int");
     }
 
 
@@ -189,10 +267,10 @@ public class InjectionTest
         throws Exception
     {
         IonFloat iv = system().newNullFloat();
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_float");
 
         iv = system().newFloat(Float.MAX_VALUE);
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_float");
     }
 
 
@@ -201,14 +279,14 @@ public class InjectionTest
         throws Exception
     {
         IonDecimal iv = system().newNullDecimal();
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_decimal");
 
         iv = system().newDecimal(12345);
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_decimal");
 
         Decimal negativeZero = Decimal.negativeZero(1);
         iv = system().newDecimal(negativeZero);
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_decimal");
         assertEval(true, "(= 0 v)");
     }
 
@@ -218,10 +296,10 @@ public class InjectionTest
         throws Exception
     {
         IonTimestamp iv = system().newNullTimestamp();
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_timestamp");
 
         iv = system().newTimestamp(Timestamp.forDay(2013, 12, 2));
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_timestamp");
     }
 
 
@@ -230,10 +308,10 @@ public class InjectionTest
         throws Exception
     {
         IonSymbol iv = system().newNullSymbol();
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_symbol");
 
         iv = system().newSymbol("vanilla soy mocha");
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_symbol");
     }
 
 
@@ -242,24 +320,22 @@ public class InjectionTest
         throws Exception
     {
         IonString iv = system().newNullString();
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_string");
 
         iv = system().newString("pumpkin spice latte");
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_string");
     }
 
-
-    private static final byte[] BYTES = { 0, 1, 2, 3 };
 
     @Test
     public void testIonClobInjection()
         throws Exception
     {
         IonClob iv = system().newNullClob();
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_clob");
 
         iv = system().newClob(BYTES);
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_clob");
     }
 
 
@@ -268,9 +344,9 @@ public class InjectionTest
         throws Exception
     {
         IonBlob iv = system().newNullBlob();
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_blob");
 
         iv = system().newBlob(BYTES);
-        testIonValueInjection(iv);
+        testIonValueInjection(iv, "is_blob");
     }
 }

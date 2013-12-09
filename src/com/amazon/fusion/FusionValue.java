@@ -11,6 +11,7 @@ import com.amazon.ion.IonException;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
+import com.amazon.ion.system.IonTextWriterBuilder;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 
@@ -150,6 +151,22 @@ public abstract class FusionValue
 
 
     //========================================================================
+    // Output methods
+
+
+    /**
+     * Builder for temporary IonWriters needed for writing scalars.
+     * <p>
+     * TODO WORKAROUND ION-398
+     * <p>
+     * TODO FUSION-247 Write output without building an IonWriter.
+     *
+     * @deprecated Try to avoid this.
+     */
+    @Deprecated
+    static final IonTextWriterBuilder WRITER_BUILDER =
+        IonTextWriterBuilder.minimal().immutable();
+
 
     /** Helper method for subclasses. */
     void writeAnnotations(Appendable out, String[] annotations)

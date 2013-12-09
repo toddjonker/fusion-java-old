@@ -1,0 +1,33 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/check"
+  "/fusion/procedure")
+
+
+(define is_not_blob (negate is_blob))
+(define is_not_clob (negate is_clob))
+
+
+(check_pred is_blob null.blob)
+(check_pred is_blob (quote null.blob))
+(check_pred is_blob {{}})
+(check_pred is_blob (quote {{}}))
+(check_pred is_blob {{1234}})
+(check_pred is_blob (quote {{1234}}))
+
+(check_pred is_not_blob null.clob)
+(check_pred is_not_blob {{""}})
+(check_pred is_not_blob {{"abcd"}})
+
+
+(check_pred is_clob null.clob)
+(check_pred is_clob (quote null.clob))
+(check_pred is_clob {{""}})
+(check_pred is_clob (quote {{""}}))
+(check_pred is_clob {{"abcd"}})
+(check_pred is_clob (quote {{"abcd"}}))
+
+(check_pred is_not_clob null.blob)
+(check_pred is_not_clob {{}})
+(check_pred is_not_clob {{1234}})

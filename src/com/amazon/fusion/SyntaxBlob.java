@@ -2,25 +2,53 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBlob.makeBlob;
+import com.amazon.fusion.FusionBlob.BaseBlob;
+import com.amazon.ion.IonException;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
 final class SyntaxBlob
     extends SyntaxValue
 {
-    private final byte[] myValue;
+    private final BaseBlob myDatum;
 
 
-    private SyntaxBlob(byte[] value, String[] anns, SourceLocation loc)
+    private SyntaxBlob(SourceLocation loc, BaseBlob datum)
     {
-        super(anns, loc);
-        myValue = value;
+        super(datum.annotationsAsJavaStrings(), loc);
+        myDatum = datum;
     }
 
-    static SyntaxBlob make(byte[] value, String[] anns, SourceLocation loc)
+
+    /**
+     * @param datum must be a Fusion blob.
+     */
+    static SyntaxBlob make(Evaluator eval, SourceLocation loc, Object datum)
     {
-        return new SyntaxBlob(value, anns, loc);
+        return new SyntaxBlob(loc, (BaseBlob) datum);
     }
+
+
+    /**
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     * @param value may be null.
+     * This method assumes ownership of the array and it must not be modified
+     * later.
+     */
+    static SyntaxBlob make(Evaluator      eval,
+                           SourceLocation loc,
+                           String[]       annotations,
+                           byte[]         value)
+    {
+        BaseBlob datum = makeBlob(eval, annotations, value);
+        return new SyntaxBlob(loc, datum);
+    }
+
+
+    //========================================================================
 
 
     @Override
@@ -29,33 +57,29 @@ final class SyntaxBlob
         return Type.BLOB;
     }
 
-
     @Override
-    Object doCompileIonConstant(Evaluator eval, Environment env)
+    CompiledForm doCompile(Evaluator eval, Environment env)
         throws FusionException
     {
-        return eval.newBlob(myValue);
+        return new CompiledConstant(myDatum);
     }
-
 
     @Override
     Object unwrap(Evaluator eval, boolean recurse)
     {
-        return eval.newBlob(myValue, getAnnotations());
+        return myDatum;
     }
-
 
     @Override
-    void ionize(Evaluator eval, IonWriter writer) throws IOException
+    void ionize(Evaluator eval, IonWriter writer)
+        throws IOException, IonException, FusionException, IonizeFailure
     {
-        ionizeAnnotations(writer);
-        writer.writeBlob(myValue);
+        myDatum.ionize(eval, writer);
     }
-
 
     @Override
     boolean isNullValue()
     {
-        return myValue == null;
+        return myDatum.isAnyNull();
     }
 }

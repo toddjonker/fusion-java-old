@@ -134,7 +134,16 @@
 (check = 2013-02-08T (syntax_unwrap (quote_syntax 2013-02-08T)))
 (check = (quote u)   (syntax_unwrap (quote_syntax u)))
 (check = "unwrap"    (syntax_unwrap (quote_syntax "unwrap")))
-// TODO test blob, clob
+
+
+(check ion_equals null.blob (syntax_unwrap (quote_syntax null.blob)))
+(check ion_equals {{}}      (syntax_unwrap (quote_syntax {{}})))
+(check ion_equals {{1234}}  (syntax_unwrap (quote_syntax {{1234}})))
+
+(check ion_equals null.clob  (syntax_unwrap (quote_syntax null.clob)))
+(check ion_equals {{""}}     (syntax_unwrap (quote_syntax {{""}})))
+(check ion_equals {{"abcd"}} (syntax_unwrap (quote_syntax {{"abcd"}})))
+
 
 (lets [(stx (quote_syntax [a, 2])),
        (unwrapped (syntax_unwrap stx))]

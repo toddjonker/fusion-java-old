@@ -5,7 +5,6 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionValue.UNDEF;
 import com.amazon.ion.IonSystem;
-import com.amazon.ion.IonType;
 
 /**
  * The core set of objects from that are needed by other parts of the
@@ -132,26 +131,6 @@ final class GlobalState
         ns.define(PROVIDE, new ProvideForm());
         ns.define("quote_syntax", new QuoteSyntaxForm()); // For fusion/syntax
         ns.define(REQUIRE, new RequireForm(resolver));
-
-        for (IonType t : IonType.values())
-        {
-            if (t != IonType.NULL &&
-                t != IonType.BOOL &&
-                t != IonType.INT &&
-                t != IonType.DECIMAL &&
-                t != IonType.FLOAT &&
-                t != IonType.DATAGRAM &&
-                t != IonType.LIST &&
-                t != IonType.SEXP &&
-                t != IonType.STRING &&
-                t != IonType.STRUCT &&
-                t != IonType.SYMBOL &&
-                t != IonType.TIMESTAMP)
-            {
-                String name = "is_" + t.name().toLowerCase();
-                ns.define(name, new IonTypeCheckingProc(t));
-            }
-        }
 
         ns.define("is_list",   new FusionList.IsListProc());
         ns.define("is_sexp",   new FusionSexp.IsSexpProc());

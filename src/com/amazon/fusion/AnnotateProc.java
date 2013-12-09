@@ -2,8 +2,12 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBlob.isBlob;
+import static com.amazon.fusion.FusionBlob.unsafeBlobAnnotate;
 import static com.amazon.fusion.FusionBool.isBool;
 import static com.amazon.fusion.FusionBool.unsafeBoolAnnotate;
+import static com.amazon.fusion.FusionClob.isClob;
+import static com.amazon.fusion.FusionClob.unsafeClobAnnotate;
 import static com.amazon.fusion.FusionCollection.isCollection;
 import static com.amazon.fusion.FusionCollection.unsafeCollectionAnnotate;
 import static com.amazon.fusion.FusionNull.isNullNull;
@@ -93,7 +97,16 @@ final class AnnotateProc
             return unsafeFloatAnnotate(eval, target, annotations);
         }
 
-        IonValue value = castToIonValueMaybe(target);
+        if (isBlob(eval, target))
+        {
+            return unsafeBlobAnnotate(eval, target, annotations);
+        }
+
+        if (isClob(eval, target))
+        {
+            return unsafeClobAnnotate(eval, target, annotations);
+        }
+
         if (value == null)
         {
             throw argFailure("annotatable type", 0, args);

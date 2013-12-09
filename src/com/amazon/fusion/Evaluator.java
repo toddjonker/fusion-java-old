@@ -2,7 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBlob.makeBlob;
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionClob.makeClob;
 import static com.amazon.fusion.FusionList.listFromIonSequence;
 import static com.amazon.fusion.FusionNull.makeNullNull;
 import static com.amazon.fusion.FusionNumber.makeDecimal;
@@ -16,8 +18,10 @@ import static com.amazon.fusion.FusionTimestamp.makeTimestamp;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonDecimal;
+import com.amazon.ion.IonFloat;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
+import com.amazon.ion.IonLob;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
@@ -97,43 +101,65 @@ final class Evaluator
             return voidValue(this);
         }
 
+        // TODO this copied array is wasted for containers
+        String[] annotations = value.getTypeAnnotations();
+
         switch (value.getType())
         {
             case NULL:
             {
-                return makeNullNull(this, value.getTypeAnnotations());
+                return makeNullNull(this, annotations);
             }
             case BOOL:
             {
                 Boolean b = (value.isNullValue()
                                  ? null
                                  : ((IonBool)value).booleanValue());
-                return makeBool(this, value.getTypeAnnotations(), b);
+                return makeBool(this, annotations, b);
             }
             case INT:
             {
                 BigInteger big = ((IonInt)value).bigIntegerValue();
-                return makeInt(this, value.getTypeAnnotations(), big);
+                return makeInt(this, annotations, big);
+            }
+            case FLOAT:
+            {
+                if (value.isNullValue())
+                {
+                    return makeFloat(this, annotations, (Double) null);
+                }
+                double d = ((IonFloat)value).doubleValue();
+                return makeFloat(this, annotations, d);
             }
             case DECIMAL:
             {
                 BigDecimal big = ((IonDecimal)value).decimalValue();
-                return makeDecimal(this, value.getTypeAnnotations(), big);
+                return makeDecimal(this, annotations, big);
             }
             case TIMESTAMP:
             {
                 Timestamp t = ((IonTimestamp)value).timestampValue();
-                return makeTimestamp(this, value.getTypeAnnotations(), t);
+                return makeTimestamp(this, annotations, t);
             }
             case SYMBOL:
             {
                 String text = ((IonSymbol)value).stringValue();
-                return makeSymbol(this, value.getTypeAnnotations(), text);
+                return makeSymbol(this, annotations, text);
             }
             case STRING:
             {
                 String text = ((IonString)value).stringValue();
-                return makeString(this, value.getTypeAnnotations(), text);
+                return makeString(this, annotations, text);
+            }
+            case CLOB:
+            {
+                byte[] bytes = ((IonLob)value).getBytes();
+                return makeClob(this, annotations, bytes);
+            }
+            case BLOB:
+            {
+                byte[] bytes = ((IonLob)value).getBytes();
+                return makeBlob(this, annotations, bytes);
             }
             case LIST:
             {
@@ -216,11 +242,15 @@ final class Evaluator
         {
             return makeBool(this, (Boolean) javaValue);
         }
+        else if (javaValue instanceof byte[])
+        {
+            return makeBlob(this, (byte[]) javaValue);
+        }
 
         // ******** Be sure to document types as they are added! ********
 
 
-        // TODO FUSION-206 should handle Double, Timestamp, Object[], ArrayList
+        // TODO FUSION-206 should handle Timestamp, Object[], ArrayList
 
         // TODO this API forces us to use a non-null object for VOID!
         return null;
@@ -413,20 +443,6 @@ final class Evaluator
     Object newTimestamp(Timestamp value, String... annotations)
     {
         return makeTimestamp(this, annotations, value);
-    }
-
-    Object newBlob(byte[] value, String... annotations)
-    {
-        IonValue dom = mySystem.newBlob(value);
-        if (annotations != null) dom.setTypeAnnotations(annotations);
-        return inject(dom);
-    }
-
-    Object newClob(byte[] value, String... annotations)
-    {
-        IonValue dom = mySystem.newClob(value);
-        if (annotations != null) dom.setTypeAnnotations(annotations);
-        return inject(dom);
     }
 
 

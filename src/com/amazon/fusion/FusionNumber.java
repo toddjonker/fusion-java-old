@@ -8,7 +8,6 @@ import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
-import com.amazon.ion.system.IonTextWriterBuilder;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -470,11 +469,6 @@ final class FusionNumber
     }
 
 
-    /** HORRIBLE HORRIBLE HACK! */
-    private static final IonTextWriterBuilder WRITER_BUILDER =
-        IonTextWriterBuilder.minimal().immutable();
-
-
     private static class ActualDecimal
         extends BaseDecimal
     {
@@ -513,7 +507,7 @@ final class FusionNumber
         {
             // TODO WORKAROUND ION-398
             // TODO FUSION-247 Write output without building an IonWriter.
-            IonWriter iw = WRITER_BUILDER.build(out);
+            IonWriter iw = FusionValue.WRITER_BUILDER.build(out);
             iw.writeDecimal(myContent);
             iw.finish();
         }
@@ -671,7 +665,7 @@ final class FusionNumber
         {
             // TODO WORKAROUND ION-398
             // TODO FUSION-247 Write output without building an IonWriter.
-            IonWriter iw = WRITER_BUILDER.build(out);
+            IonWriter iw = FusionValue.WRITER_BUILDER.build(out);
             iw.writeFloat(myContent);
             iw.finish();
         }
