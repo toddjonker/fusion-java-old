@@ -24,7 +24,7 @@ final class FusionTimestamp
 
 
     //========================================================================
-    // Constructors
+    // Representation
 
 
     abstract static class BaseTimestamp

@@ -2,14 +2,14 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionCollection.isCollection;
-import static com.amazon.fusion.FusionList.isList;
+import static com.amazon.fusion.FusionCollection.checkNullableCollectionArg;
+import static com.amazon.fusion.FusionList.checkNullableListArg;
 import static com.amazon.fusion.FusionNumber.checkIntArgToJavaInt;
 import static com.amazon.fusion.FusionNumber.checkIntArgToJavaLong;
 import static com.amazon.fusion.FusionNumber.checkNullableIntArg;
 import static com.amazon.fusion.FusionNumber.checkRequiredIntArg;
-import static com.amazon.fusion.FusionSequence.isSequence;
-import static com.amazon.fusion.FusionStruct.isStruct;
+import static com.amazon.fusion.FusionSequence.checkNullableSequenceArg;
+import static com.amazon.fusion.FusionStruct.checkNullableStructArg;
 import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
@@ -212,52 +212,56 @@ abstract class Procedure
 
     /**
      * Expects a collection argument, including typed nulls.
+     *
+     * @deprecated Use
+     * {@link FusionCollection#checkNullableCollectionArg(Evaluator, Procedure, int, Object...)}
      */
+    @Deprecated
     Object checkCollectionArg(Evaluator eval, int argNum, Object... args)
-        throws ArgTypeFailure
+        throws FusionException, ArgTypeFailure
     {
-        Object arg = args[argNum];
-        if (isCollection(eval, arg)) return arg;
-
-        throw argFailure("collection", argNum, args);
+        return checkNullableCollectionArg(eval, this, argNum, args);
     }
 
 
     /**
      * Expects a sequence argument, including typed nulls.
+     *
+     * @deprecated Use
+     * {@link FusionSequence#checkNullableSequenceArg(Evaluator, Procedure, int, Object...)}
      */
+    @Deprecated
     Object checkSequenceArg(Evaluator eval, int argNum, Object... args)
-        throws ArgTypeFailure
+        throws FusionException, ArgTypeFailure
     {
-        Object arg = args[argNum];
-        if (isSequence(eval, arg)) return arg;
-
-        throw argFailure("sequence", argNum, args);
+        return checkNullableSequenceArg(eval, this, argNum, args);
     }
 
     /**
      * Expects a list argument, including null.list.
+     *
+     * @deprecated Use
+     * {@link FusionList#checkNullableListArg(Evaluator, Procedure, int, Object...)}
      */
+    @Deprecated
     Object checkListArg(Evaluator eval, int argNum, Object... args)
-        throws ArgTypeFailure
+        throws FusionException, ArgTypeFailure
     {
-        Object arg = args[argNum];
-        if (isList(eval, arg)) return arg;
-
-        throw argFailure("list", argNum, args);
+        return checkNullableListArg(eval, this, argNum, args);
     }
 
 
     /**
      * Expects a struct argument, including null.struct.
+     *
+     * @deprecated Use
+     * {@link FusionStruct#checkNullableStructArg(Evaluator, Procedure, int, Object...)}
      */
+    @Deprecated
     Object checkStructArg(Evaluator eval, int argNum, Object... args)
-        throws ArgTypeFailure
+        throws FusionException, ArgTypeFailure
     {
-        Object arg = args[argNum];
-        if (isStruct(eval, arg)) return arg;
-
-        throw argFailure("struct", argNum, args);
+        return checkNullableStructArg(eval, this, argNum, args);
     }
 
 

@@ -33,7 +33,7 @@
 
   (defpub_j annotate "com.amazon.fusion.AnnotateProc")
 
-  (defpub_j size "com.amazon.fusion.SizeProc")
+  (defpub_j size "com.amazon.fusion.FusionCollection$SizeProc")
 
   (defpub_j is_immutable_list
     "com.amazon.fusion.FusionList$IsImmutableListProc")

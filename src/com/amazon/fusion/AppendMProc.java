@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionList.checkNullableListArg;
 import static com.amazon.fusion.FusionList.unsafeListAppendM;
 
 
@@ -25,7 +26,7 @@ final class AppendMProc
         checkArityAtLeast(1, args);
         int arity = args.length;
 
-        Object first = checkListArg(eval, 0, args);
+        Object first = checkNullableListArg(eval, this, 0, args);
 
         if (arity == 1) return first;
 
@@ -33,7 +34,7 @@ final class AppendMProc
 
         for (int i = 1; i < arity; i++)
         {
-            listArgs[i - 1] = checkListArg(eval, i, args);
+            listArgs[i - 1] = checkNullableListArg(eval, this, i, args);
         }
 
         return unsafeListAppendM(eval, first, listArgs);

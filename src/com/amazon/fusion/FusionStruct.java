@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionIterator.iterate;
+import static com.amazon.fusion.FusionList.checkNullableListArg;
 import static com.amazon.fusion.FusionList.unsafeJavaIterate;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
@@ -1194,6 +1195,46 @@ final class FusionStruct
 
 
     //========================================================================
+    // Procedure Helpers
+
+
+    /**
+     * @param expectation must not be null.
+     * @return the Fusion struct, not null.
+     */
+    static Object checkStructArg(Evaluator eval,
+                                 Procedure who,
+                                 String    expectation,
+                                 int       argNum,
+                                 Object... args)
+        throws FusionException, ArgTypeFailure
+    {
+        Object arg = args[argNum];
+        if (arg instanceof BaseStruct)
+        {
+            return arg;
+        }
+
+        throw who.argFailure(expectation, argNum, args);
+    }
+
+
+    /**
+     * @return the Fusion struct, not null.
+     */
+    static Object checkNullableStructArg(Evaluator eval,
+                                         Procedure who,
+                                         int       argNum,
+                                         Object... args)
+        throws FusionException, ArgTypeFailure
+    {
+        String expectation = "nullable struct";
+        return checkStructArg(eval, who, expectation, argNum, args);
+    }
+
+
+    //========================================================================
+    // Procedures
 
 
     static final class IsStructProc
@@ -1541,8 +1582,8 @@ final class FusionStruct
         Object doApply(Evaluator eval, Object struct1, Object struct2)
             throws FusionException
         {
-            checkStructArg(eval, 0, struct1, struct2);
-            checkStructArg(eval, 1, struct1, struct2);
+            checkNullableStructArg(eval, this, 0, struct1, struct2);
+            checkNullableStructArg(eval, this, 1, struct1, struct2);
 
             return unsafeStructMerge(eval, struct1, struct2);
         }
@@ -1565,8 +1606,8 @@ final class FusionStruct
         Object doApply(Evaluator eval, Object struct1, Object struct2)
             throws FusionException
         {
-            checkStructArg(eval, 0, struct1, struct2);
-            checkStructArg(eval, 1, struct1, struct2);
+            checkNullableStructArg(eval, this, 0, struct1, struct2);
+            checkNullableStructArg(eval, this, 1, struct1, struct2);
 
             return unsafeStructMergeM(eval, struct1, struct2);
         }
@@ -1591,8 +1632,8 @@ final class FusionStruct
         Object doApply(Evaluator eval, Object struct1, Object struct2)
             throws FusionException
         {
-            checkStructArg(eval, 0, struct1, struct2);
-            checkStructArg(eval, 1, struct1, struct2);
+            checkNullableStructArg(eval, this, 0, struct1, struct2);
+            checkNullableStructArg(eval, this, 1, struct1, struct2);
 
             return unsafeStructMerge1(eval, struct1, struct2);
         }
@@ -1616,8 +1657,8 @@ final class FusionStruct
         Object doApply(Evaluator eval, Object struct1, Object struct2)
             throws FusionException
         {
-            checkStructArg(eval, 0, struct1, struct2);
-            checkStructArg(eval, 1, struct1, struct2);
+            checkNullableStructArg(eval, this, 0, struct1, struct2);
+            checkNullableStructArg(eval, this, 1, struct1, struct2);
 
             return unsafeStructMerge1M(eval, struct1, struct2);
         }
@@ -1639,8 +1680,8 @@ final class FusionStruct
             throws FusionException
         {
             checkArityExact(2, args);
-            Object names =  checkListArg(eval, 0, args);
-            Object values = checkListArg(eval, 1, args);
+            Object names =  checkNullableListArg(eval, this, 0, args);
+            Object values = checkNullableListArg(eval, this, 1, args);
 
             Iterator<?> fieldIterator = unsafeJavaIterate(eval, names);
             Iterator<?> valueIterator = unsafeJavaIterate(eval, values);
@@ -1735,7 +1776,7 @@ final class FusionStruct
         {
             checkArityAtLeast(1, args);
 
-            Object struct = checkStructArg(eval, 0, args);
+            Object struct = checkNullableStructArg(eval, this, 0, args);
 
             String[] keys = new String[args.length - 1];
             for (int i = 1; i < args.length; i++)

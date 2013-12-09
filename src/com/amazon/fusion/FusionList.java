@@ -866,7 +866,48 @@ final class FusionList
         }
     }
 
+
     //========================================================================
+    // Procedure Helpers
+
+
+    /**
+     * @param expectation must not be null.
+     * @return the Fusion list, not null.
+     */
+    static Object checkListArg(Evaluator eval,
+                               Procedure who,
+                               String    expectation,
+                               int       argNum,
+                               Object... args)
+        throws FusionException, ArgTypeFailure
+    {
+        Object arg = args[argNum];
+        if (arg instanceof BaseList)
+        {
+            return arg;
+        }
+
+        throw who.argFailure(expectation, argNum, args);
+    }
+
+
+    /**
+     * @return the Fusion list, not null.
+     */
+    static Object checkNullableListArg(Evaluator eval,
+                                       Procedure who,
+                                       int       argNum,
+                                       Object... args)
+        throws FusionException, ArgTypeFailure
+    {
+        String expectation = "nullable list";
+        return checkListArg(eval, who, expectation, argNum, args);
+    }
+
+
+    //========================================================================
+    // Procedures
 
 
     static final class IsListProc

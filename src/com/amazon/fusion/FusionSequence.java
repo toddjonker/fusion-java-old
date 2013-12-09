@@ -11,30 +11,7 @@ final class FusionSequence
 
 
     //========================================================================
-    // Predicates
-
-
-    static boolean isSequence(Evaluator eval, Object v)
-    {
-        return (v instanceof BaseSequence);
-    }
-
-
-    //========================================================================
-    // Accessors
-
-    /**
-     * @param sequence must be a sequence.
-     * @return void if the position is out of bounds.
-     */
-    static Object unsafeSequenceElt(Evaluator eval, Object sequence, int pos)
-        throws FusionException
-    {
-        return ((BaseSequence) sequence).elt(eval, pos);
-    }
-
-
-    //========================================================================
+    // Representation
 
 
     abstract static class BaseSequence
@@ -59,5 +36,68 @@ final class FusionSequence
         /** Throws if the position is out of bounds. */
         abstract Object unsafeRef(Evaluator eval, int pos)
             throws FusionException;
+    }
+
+
+    //========================================================================
+    // Predicates
+
+
+    static boolean isSequence(Evaluator eval, Object v)
+    {
+        return (v instanceof BaseSequence);
+    }
+
+
+    //========================================================================
+    // Accessors
+
+    /**
+     * @param sequence must be a sequence.
+     * @return void if the position is out of bounds.
+     */
+    static Object unsafeSequenceElt(Evaluator eval, Object sequence, int pos)
+        throws FusionException
+    {
+        return ((BaseSequence) sequence).elt(eval, pos);
+    }
+
+
+    //========================================================================
+    // Procedure Helpers
+
+
+    /**
+     * @param expectation must not be null.
+     * @return the Fusion sequence, not null.
+     */
+    static Object checkSequenceArg(Evaluator eval,
+                                   Procedure who,
+                                   String    expectation,
+                                   int       argNum,
+                                   Object... args)
+        throws FusionException, ArgTypeFailure
+    {
+        Object arg = args[argNum];
+        if (arg instanceof BaseSequence)
+        {
+            return arg;
+        }
+
+        throw who.argFailure(expectation, argNum, args);
+    }
+
+
+    /**
+     * @return the Fusion sequence, not null.
+     */
+    static Object checkNullableSequenceArg(Evaluator eval,
+                                           Procedure who,
+                                           int       argNum,
+                                           Object... args)
+        throws FusionException, ArgTypeFailure
+    {
+        String expectation = "nullable sequence";
+        return checkSequenceArg(eval, who, expectation, argNum, args);
     }
 }
