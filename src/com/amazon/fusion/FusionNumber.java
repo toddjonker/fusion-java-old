@@ -583,7 +583,12 @@ final class FusionNumber
     {
         private BaseFloat() {}
 
-        abstract double doubleValue();
+        /**
+         * This must not be {@code null.float}.
+         */
+        abstract double primitiveDoubleValue();
+
+        abstract Double objectDoubleValue();
     }
 
 
@@ -593,9 +598,15 @@ final class FusionNumber
         private NullFloat() {}
 
         @Override
-        double doubleValue()
+        double primitiveDoubleValue()
         {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        Double objectDoubleValue()
+        {
+            return null;
         }
 
         @Override
@@ -639,7 +650,13 @@ final class FusionNumber
         }
 
         @Override
-        double doubleValue()
+        double primitiveDoubleValue()
+        {
+            return myContent;
+        }
+
+        @Override
+        Double objectDoubleValue()
         {
             return myContent;
         }
@@ -699,9 +716,15 @@ final class FusionNumber
         boolean isAnyNull() { return myValue.isAnyNull(); }
 
         @Override
-        double doubleValue()
+        double primitiveDoubleValue()
         {
-            return myValue.doubleValue();
+            return myValue.primitiveDoubleValue();
+        }
+
+        @Override
+        Double objectDoubleValue()
+        {
+            return myValue.objectDoubleValue();
         }
 
         @Override
@@ -1093,13 +1116,13 @@ final class FusionNumber
     static double unsafeFloatToDouble(TopLevel top, Object fusionFloat)
         throws FusionException
     {
-        return ((BaseFloat) fusionFloat).doubleValue();
+        return ((BaseFloat) fusionFloat).primitiveDoubleValue();
     }
 
     static double unsafeFloatToDouble(Evaluator eval, Object fusionFloat)
         throws FusionException
     {
-        return ((BaseFloat) fusionFloat).doubleValue();
+        return ((BaseFloat) fusionFloat).primitiveDoubleValue();
     }
 
 
@@ -1277,17 +1300,17 @@ final class FusionNumber
      * @param expectation must not be null.
      * @return may be null
      */
-    static Double checkFloatArg(Evaluator eval,
-                                Procedure who,
-                                String    expectation,
-                                int       argNum,
-                                Object... args)
+    static BaseFloat checkFloatArg(Evaluator eval,
+                                   Procedure who,
+                                   String    expectation,
+                                   int       argNum,
+                                   Object... args)
         throws FusionException, ArgTypeFailure
     {
         Object arg = args[argNum];
         if (arg instanceof BaseFloat)
         {
-            return ((BaseFloat) arg).doubleValue();
+            return (BaseFloat) arg;
         }
 
         throw who.argFailure(expectation, argNum, args);
@@ -1301,7 +1324,8 @@ final class FusionNumber
         throws FusionException, ArgTypeFailure
     {
         String expectation = "nullable float";
-        return checkFloatArg(eval, who, expectation, argNum, args);
+        BaseFloat f = checkFloatArg(eval, who, expectation, argNum, args);
+        return f.objectDoubleValue();
     }
 
 
@@ -1316,13 +1340,12 @@ final class FusionNumber
     {
         String expectation = "non-null float";
 
-        // TODO avoid wrap/unwrap
-        Double result = checkFloatArg(eval, who, expectation, argNum, args);
-        if (result == null)
+        BaseFloat f = checkFloatArg(eval, who, expectation, argNum, args);
+        if (f.isAnyNull())
         {
             throw who.argFailure(expectation, argNum, args);
         }
-        return result;
+        return f.primitiveDoubleValue();
     }
 
 
