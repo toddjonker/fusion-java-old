@@ -13,7 +13,6 @@ import static com.amazon.fusion.FusionStruct.isStruct;
 import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
@@ -208,21 +207,6 @@ abstract class Procedure
         throws FusionException, ArgTypeFailure
     {
         return checkNullableIntArg(eval, this, argNum, args);
-    }
-
-
-    /**
-     * @return not null.
-     *
-     * @deprecated Use helpers in {@link FusionNumber}.
-     */
-    @Deprecated
-    BigDecimal checkRequiredDecimalArg(Evaluator eval, // Newer name+signature
-                                       int argNum,
-                                       Object... args)
-        throws FusionException, ArgTypeFailure
-    {
-        return FusionNumber.checkRequiredDecimalArg(eval, this, argNum, args);
     }
 
 

@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionNumber.checkIntArgToJavaInt;
 import static com.amazon.fusion.FusionNumber.makeInt;
 import org.junit.Test;
 
@@ -51,7 +52,7 @@ public class TailCallTest
 
 
     private static final class CountupProc
-        extends Procedure2
+        extends Procedure
     {
         CountupProc()
         {
@@ -59,16 +60,16 @@ public class TailCallTest
         }
 
         @Override
-        Object doApply(Evaluator eval, Object arg0, Object arg1)
+        Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            int i     = checkIntArg(0, arg0, arg1);
-            int limit = checkIntArg(1, arg0, arg1);
+            int i     = checkIntArgToJavaInt(eval, this, 0, args);
+            int limit = checkIntArgToJavaInt(eval, this, 1, args);
 
-            if (i == limit) return arg0;
+            if (i == limit) return args[0];
 
             Object newI = makeInt(eval, i + 1);
-            return eval.bounceTailCall(this, newI, arg1);
+            return eval.bounceTailCall(this, newI, args[1]);
         }
     }
 

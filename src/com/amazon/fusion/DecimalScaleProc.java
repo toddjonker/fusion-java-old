@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionNumber.checkRequiredDecimalArg;
 import static com.amazon.fusion.FusionNumber.makeInt;
 import java.math.BigDecimal;
 
@@ -23,7 +24,7 @@ final class DecimalScaleProc
     {
         checkArityExact(1, args);
 
-        BigDecimal value = checkRequiredDecimalArg(eval, 0, args);
+        BigDecimal value = checkRequiredDecimalArg(eval, this, 0, args);
 
         int result = value.scale();
         return makeInt(eval, result);

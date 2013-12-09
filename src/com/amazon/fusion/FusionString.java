@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
-import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionText.checkRequiredTextArg;
 import static com.amazon.fusion.FusionUtils.safeEquals;

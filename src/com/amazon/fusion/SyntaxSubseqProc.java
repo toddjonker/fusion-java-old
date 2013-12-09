@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionNumber.checkIntArgToJavaInt;
+
 final class SyntaxSubseqProc
     extends Procedure
 {
@@ -20,7 +22,7 @@ final class SyntaxSubseqProc
     {
         checkArityExact(args);
         SyntaxSequence sequence = checkSyntaxSequenceArg(0, args);
-        int from = checkIntArg(1, args);
+        int from = checkIntArgToJavaInt(eval, this, 1, args);
         int size = sequence.size();
 
         if (size < from) from = size;

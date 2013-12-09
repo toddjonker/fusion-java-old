@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.safeWrite;
+import static com.amazon.fusion.FusionNumber.checkIntArgToJavaInt;
 import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
 import static com.amazon.fusion.FusionVoid.voidValue;
@@ -36,7 +37,7 @@ final class SyntaxGetProc
                 case LIST:
                 case SEXP:
                 {
-                    int index = checkIntArg(i, args);
+                    int index = checkIntArgToJavaInt(eval, this, i, args);
                     SyntaxSequence s = (SyntaxSequence) stx;
                     if (s.size() <= index)
                     {
