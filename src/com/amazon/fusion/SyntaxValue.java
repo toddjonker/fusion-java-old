@@ -111,21 +111,8 @@ abstract class SyntaxValue
 
 
     /** Don't call directly! Go through the evaluator. */
-    CompiledForm doCompile(Evaluator eval, Environment env)
-        throws FusionException
-    {
-        Object constant = doCompileIonConstant(eval, env);
-        IonValue iv = FusionValue.castToIonValueMaybe(constant);
-        assert iv != null : this;
-        return new CompiledIonConstant(iv);
-    }
-
-
-    Object doCompileIonConstant(Evaluator eval, Environment env)
-        throws FusionException
-    {
-        throw new IllegalStateException();
-    }
+    abstract CompiledForm doCompile(Evaluator eval, Environment env)
+        throws FusionException;
 
 
     /**
@@ -152,27 +139,4 @@ abstract class SyntaxValue
     }
 
     abstract boolean isNullValue();
-
-
-    //========================================================================
-
-
-    static final class CompiledIonConstant
-        implements CompiledForm
-    {
-        private final IonValue myConstant;
-
-        CompiledIonConstant(IonValue constant)
-        {
-            constant.makeReadOnly();
-            myConstant = constant;
-        }
-
-        @Override
-        public Object doEval(Evaluator eval, Store store)
-            throws FusionException
-        {
-            return eval.inject(myConstant.clone());
-        }
-    }
 }

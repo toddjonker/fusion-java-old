@@ -798,12 +798,29 @@ final class FusionList
         }
 
         @Override
-        synchronized // So another thread doesn't inject while we copy.
         IonList copyToIonValue(ValueFactory factory,
                                boolean throwOnConversionFailure)
             throws FusionException
         {
-            // No need to inject our elements, they will still be copied.
+            synchronized (this)
+            {
+                if (myValues[0] instanceof IonValue)
+                {
+                    int len = size();
+                    IonValue[] ions = new IonValue[len];
+
+                    for (int i = 0; i < len; i++)
+                    {
+                        ions[i] = factory.clone((IonValue) myValues[i]);
+                    }
+
+                    IonList list = factory.newList(ions);
+                    list.setTypeAnnotations(myAnnotations);
+                    return list;
+                }
+            }
+            // else our elements have already been injected, copy as normal.
+
             return super.copyToIonValue(factory, throwOnConversionFailure);
         }
 

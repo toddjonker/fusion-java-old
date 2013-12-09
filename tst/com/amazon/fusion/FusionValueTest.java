@@ -25,7 +25,7 @@ public class FusionValueTest
         assertEquals(12, ((IonInt)iv).intValue());
 
         fv = eval("(lambda () 12)");
-        assertSame(null, FusionValue.castToIonValueMaybe(fv));
+        assertSame(null, FusionValue.copyToIonValueMaybe(fv, system()));
     }
 
     @Test(expected = FusionException.class)

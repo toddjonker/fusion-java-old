@@ -25,7 +25,6 @@ import static com.amazon.fusion.FusionSymbol.unsafeSymbolAnnotate;
 import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
 import static com.amazon.fusion.FusionTimestamp.isTimestamp;
 import static com.amazon.fusion.FusionTimestamp.unsafeTimestampAnnotate;
-import com.amazon.ion.IonValue;
 
 
 final class AnnotateProc
@@ -107,13 +106,6 @@ final class AnnotateProc
             return unsafeClobAnnotate(eval, target, annotations);
         }
 
-        if (value == null)
-        {
-            throw argFailure("annotatable type", 0, args);
-        }
-
-        value = value.clone();
-        value.setTypeAnnotations(annotations);
-        return value;
+        throw argFailure("annotatable type", 0, args);
     }
 }

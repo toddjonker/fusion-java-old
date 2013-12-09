@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonException;
-import com.amazon.ion.IonText;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.system.IonTextWriterBuilder;
@@ -71,18 +70,19 @@ public final class FusionIo
     static void dispatchIonize(Evaluator eval, IonWriter out, Object value)
         throws IOException, FusionException, IonException
     {
-        if (value instanceof FusionValue)
+        // Optimized to avoid instanceof, we are going to fail anyway and that
+        // doesn't need to be fast.
+        FusionValue fv;
+        try
         {
-            ((FusionValue) value).ionize(eval, out);
+            fv = (FusionValue) value;
         }
-        else if (value instanceof IonValue)
-        {
-            ((IonValue)value).writeTo(out);
-        }
-        else
+        catch (ClassCastException e)
         {
             throw new IonizeFailure(value);
         }
+
+        fv.ionize(eval, out);
     }
 
 
@@ -97,10 +97,6 @@ public final class FusionIo
         if (value instanceof FusionValue)
         {
             ((FusionValue) value).write(eval, out);
-        }
-        else if (value instanceof IonValue)
-        {
-            FusionUtils.writeIon(out, (IonValue) value);
         }
         else
         {
@@ -118,12 +114,6 @@ public final class FusionIo
         if (value instanceof FusionValue)
         {
             ((FusionValue) value).display(eval, out);
-        }
-        else if (value instanceof IonValue)
-        {
-            IonValue iv = (IonValue) value;
-            assert ! (iv instanceof IonText);
-            FusionUtils.writeIon(out, iv);
         }
         else
         {

@@ -79,8 +79,7 @@ public abstract class FusionValue
             return ((FusionValue) value).isAnyNull();
         }
 
-        IonValue iv = castToIonValueMaybe(value);
-        return (iv != null ? iv.isNullValue() : false);
+        return false;
     }
 
 
@@ -130,7 +129,7 @@ public abstract class FusionValue
     static String[] annotationsAsJavaStrings(Evaluator eval, Object value)
         throws FusionException
     {
-        String[] anns = EMPTY_STRING_ARRAY;
+        String[] anns;
 
         if (value instanceof Annotated)
         {
@@ -138,12 +137,7 @@ public abstract class FusionValue
         }
         else
         {
-            IonValue iv = castToIonValueMaybe(value);
-
-            if (iv != null)
-            {
-                anns = iv.getTypeAnnotations();
-            }
+            anns = EMPTY_STRING_ARRAY;
         }
 
         return anns;
@@ -264,26 +258,6 @@ public abstract class FusionValue
 
 
     /**
-     * Performs an immediate cast (not conversion) of the given Fusion value
-     * to an IonValue. The result may have a container!
-     * <p>
-     * This isn't public because I'm not convinced that the runtime should have
-     * IonValues at all.
-     *
-     * @return null if the value's type isn't an Ion type.
-     */
-    static IonValue castToIonValueMaybe(Object value)
-    {
-        if (value instanceof IonValue)
-        {
-            return (IonValue) value;
-        }
-
-        return null;
-    }
-
-
-    /**
      * Returns a new {@link IonValue} representation of a Fusion value,
      * if its type falls within the Ion type system.
      * The {@link IonValue} will use the given factory and will not have a
@@ -339,12 +313,6 @@ public abstract class FusionValue
                                    boolean throwOnConversionFailure)
         throws FusionException, IonizeFailure
     {
-        if (value instanceof IonValue)
-        {
-            IonValue iv = (IonValue) value;
-            return factory.clone(iv);
-        }
-
         if (value instanceof FusionValue)
         {
             FusionValue fv = (FusionValue)value;

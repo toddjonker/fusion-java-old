@@ -25,7 +25,6 @@ import static com.amazon.fusion.FusionSymbol.isSymbol;
 import static com.amazon.fusion.FusionSymbol.unsafeSymbolToJavaString;
 import static com.amazon.fusion.FusionTimestamp.isTimestamp;
 import static com.amazon.fusion.FusionValue.annotationsAsJavaStrings;
-import static com.amazon.fusion.FusionValue.castToIonValueMaybe;
 import static com.amazon.fusion.SourceLocation.currentLocation;
 import com.amazon.fusion.FusionSexp.BaseSexp;
 import com.amazon.fusion.FusionStruct.BaseStruct;
@@ -35,7 +34,6 @@ import com.amazon.ion.Decimal;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonType;
-import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -253,15 +251,6 @@ final class Syntax
             //      Well, probably not, that throws away existing
             //      context when called from datum_to_syntax
             return ((SyntaxValue) datum).stripWraps(eval);
-        }
-
-        IonValue iv = castToIonValueMaybe(datum);
-        if (iv != null)
-        {
-            IonReader r = eval.getSystem().newReader(iv);
-            r.next();
-            return read(eval, r, null);
-            // No need to strip wraps here
         }
 
         if (isSymbol(eval, datum))

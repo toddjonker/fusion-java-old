@@ -171,7 +171,7 @@ final class FusionCompare
 
 
     static final class GreaterThanProc
-    extends BaseCompareProc
+        extends BaseCompareProc
     {
         GreaterThanProc()
         {

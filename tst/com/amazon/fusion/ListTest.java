@@ -31,20 +31,6 @@ public class ListTest
 
 
     //========================================================================
-    // Annotations
-
-    @Test
-    public void testListInjection()
-        throws Exception
-    {
-        IonList list = (IonList) system().singleValue("a::[1]");
-        Object result = topLevel().call("identity", list);
-        result = runtime().ionize(result, system());
-        assertEquals(list, result);
-    }
-
-
-    //========================================================================
     // Adding and removing elements
 
 
