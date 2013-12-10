@@ -6,7 +6,7 @@ import java.io.IOException;
 
 
 abstract class NamedValue
-    extends FusionValue
+    extends BaseValue
 {
     private String myName;
 

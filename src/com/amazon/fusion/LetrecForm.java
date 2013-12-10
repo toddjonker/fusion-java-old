@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionValue.UNDEF;
 import java.util.Arrays;
 
 final class LetrecForm

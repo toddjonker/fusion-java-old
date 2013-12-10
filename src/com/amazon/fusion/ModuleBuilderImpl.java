@@ -32,9 +32,9 @@ final class ModuleBuilderImpl
     {
         myNamespace.bind(name, value);
 
-        if (value instanceof FusionValue)
+        if (value instanceof BaseValue)
         {
-            BindingDoc doc = ((FusionValue) value).document();
+            BindingDoc doc = ((BaseValue) value).document();
             if (doc != null)
             {
                 myNamespace.setDoc(name, doc);

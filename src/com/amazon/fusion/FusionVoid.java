@@ -18,8 +18,8 @@ public final class FusionVoid
 
 
     /** The singular {@code void} value. */
-    private final static FusionValue VOID =
-        new FusionValue()
+    private final static BaseValue VOID =
+        new BaseValue()
         {
             @Override
             BaseBool isTruthy(Evaluator eval)

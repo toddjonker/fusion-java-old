@@ -222,7 +222,7 @@ final class Evaluator
         {
             return voidValue(this);
         }
-        else if (javaValue instanceof FusionValue)
+        else if (javaValue instanceof BaseValue)
         {
             return javaValue;
         }

@@ -65,7 +65,7 @@ final class SyntaxStruct
     @Override
     boolean isNullValue()
     {
-        return ((FusionValue)myStruct).isAnyNull();
+        return ((BaseValue)myStruct).isAnyNull();
     }
 
 

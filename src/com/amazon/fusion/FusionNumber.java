@@ -25,7 +25,7 @@ final class FusionNumber
 
 
     abstract static class BaseNumber
-        extends FusionValue
+        extends BaseValue
     {
         private BaseNumber() {}
 
@@ -511,7 +511,7 @@ final class FusionNumber
         {
             // TODO WORKAROUND ION-398
             // TODO FUSION-247 Write output without building an IonWriter.
-            IonWriter iw = FusionValue.WRITER_BUILDER.build(out);
+            IonWriter iw = WRITER_BUILDER.build(out);
             iw.writeDecimal(myContent);
             iw.finish();
         }
@@ -583,7 +583,7 @@ final class FusionNumber
     // Float Representation
 
     abstract static class BaseFloat
-        extends FusionValue
+        extends BaseValue
     {
         private BaseFloat() {}
 
@@ -686,7 +686,7 @@ final class FusionNumber
         {
             // TODO WORKAROUND ION-398
             // TODO FUSION-247 Write output without building an IonWriter.
-            IonWriter iw = FusionValue.WRITER_BUILDER.build(out);
+            IonWriter iw = WRITER_BUILDER.build(out);
             iw.writeFloat(myContent);
             iw.finish();
         }

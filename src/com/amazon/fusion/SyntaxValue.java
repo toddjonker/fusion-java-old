@@ -13,7 +13,7 @@ import java.io.IOException;
  * DAG structure.
  */
 abstract class SyntaxValue
-    extends FusionValue
+    extends BaseValue
 {
     enum Type {
         NULL, BOOL, INT, DECIMAL, FLOAT, TIMESTAMP, BLOB, CLOB,

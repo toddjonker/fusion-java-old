@@ -21,8 +21,8 @@ public final class FusionIo
 
 
     /** The singular {@code eof} value. */
-    private final static FusionValue EOF =
-        new FusionValue()
+    private final static BaseValue EOF =
+        new BaseValue()
         {
             @Override
             void write(Evaluator eval, Appendable out) throws IOException
@@ -73,10 +73,10 @@ public final class FusionIo
     {
         // Optimized to avoid instanceof, we are going to fail anyway and that
         // doesn't need to be fast.
-        FusionValue fv;
+        BaseValue fv;
         try
         {
-            fv = (FusionValue) value;
+            fv = (BaseValue) value;
         }
         catch (ClassCastException e)
         {
@@ -95,9 +95,9 @@ public final class FusionIo
     static void dispatchWrite(Evaluator eval, Appendable out, Object value)
         throws IOException, FusionException
     {
-        if (value instanceof FusionValue)
+        if (value instanceof BaseValue)
         {
-            ((FusionValue) value).write(eval, out);
+            ((BaseValue) value).write(eval, out);
         }
         else
         {
@@ -112,9 +112,9 @@ public final class FusionIo
     static void dispatchDisplay(Evaluator eval, Appendable out, Object value)
         throws IOException, FusionException
     {
-        if (value instanceof FusionValue)
+        if (value instanceof BaseValue)
         {
-            ((FusionValue) value).display(eval, out);
+            ((BaseValue) value).display(eval, out);
         }
         else
         {

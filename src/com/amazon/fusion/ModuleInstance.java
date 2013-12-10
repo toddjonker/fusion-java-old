@@ -123,9 +123,9 @@ final class ModuleInstance
         if (doc == null)
         {
             Object value = binding.lookup(this);
-            if (value instanceof FusionValue)
+            if (value instanceof BaseValue)
             {
-                FusionValue fv = (FusionValue) value;
+                BaseValue fv = (BaseValue) value;
                 doc = fv.document();
                 if (doc != null)
                 {

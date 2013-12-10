@@ -21,8 +21,12 @@ public final class FusionBool
     private FusionBool() {}
 
 
+    //========================================================================
+    // Representation Classes
+
+
     abstract static class BaseBool
-        extends FusionValue
+        extends BaseValue
     {
         private BaseBool() {}
 

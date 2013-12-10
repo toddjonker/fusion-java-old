@@ -19,7 +19,7 @@ final class FusionNull
 
 
     static class NullNull
-        extends FusionValue
+        extends BaseValue
     {
         private NullNull() {}
 

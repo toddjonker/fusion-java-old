@@ -18,6 +18,6 @@ final class NotProc
     Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        return FusionValue.not(eval, arg);
+        return not(eval, arg);
     }
 }

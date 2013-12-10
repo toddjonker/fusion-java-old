@@ -12,11 +12,11 @@ final class FusionCollection
 
 
     //========================================================================
-    // Representation
+    // Representation Classes
 
 
     abstract static class BaseCollection
-        extends FusionValue
+        extends BaseValue
         implements Annotated
     {
         /** Not null */

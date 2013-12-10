@@ -12,7 +12,7 @@ final class FusionLob
 
 
     abstract static class BaseLob
-        extends FusionValue
+        extends BaseValue
     {
         BaseLob() {}
     }

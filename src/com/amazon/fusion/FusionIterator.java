@@ -16,7 +16,7 @@ import java.util.Iterator;
 // TODO Add abstract class so subclasses don't have blank procs?
 
 class FusionIterator
-    extends FusionValue
+    extends BaseValue
 {
     static FusionIterator checkArg(Procedure who, int argNum, Object... args)
         throws ArgTypeFailure

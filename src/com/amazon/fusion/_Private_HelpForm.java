@@ -16,7 +16,7 @@ public final class _Private_HelpForm
     extends SyntacticForm
 {
     private static final class HelpDocument
-        extends FusionValue
+        extends BaseValue
     {
         private final Object[] myArgs;
 
@@ -36,10 +36,10 @@ public final class _Private_HelpForm
                 {
                     doc = (BindingDoc) arg;
                 }
-                else if (arg instanceof FusionValue)
+                else if (arg instanceof BaseValue)
                 {
 
-                    doc = ((FusionValue) arg).document();
+                    doc = ((BaseValue) arg).document();
                 }
 
                 if (doc == null)

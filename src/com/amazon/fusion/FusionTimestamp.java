@@ -28,7 +28,7 @@ final class FusionTimestamp
 
 
     abstract static class BaseTimestamp
-        extends FusionValue
+        extends BaseValue
     {
         private BaseTimestamp() {}
 

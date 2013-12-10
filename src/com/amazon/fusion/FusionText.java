@@ -12,7 +12,7 @@ final class FusionText
 
 
     abstract static class BaseText
-        extends FusionValue
+        extends BaseValue
     {
         BaseText() {}
 

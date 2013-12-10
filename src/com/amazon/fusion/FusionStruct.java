@@ -1031,8 +1031,9 @@ final class FusionStruct
                     Object[] children = (Object[]) value;
                     for (Object child : children)
                     {
-                        IonValue ion = copyToIonValue(child, factory,
-                                                      throwOnConversionFailure);
+                        IonValue ion =
+                            copyToIonValue(child, factory,
+                                           throwOnConversionFailure);
                         if (ion == null) return null;
                         is.add(fieldName, ion);
                     }
