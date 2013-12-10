@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.ion.util.IonTextUtils.printString;
+import com.amazon.fusion.FusionNumber.SumProc;
 import org.junit.Before;
 import org.junit.Test;
 

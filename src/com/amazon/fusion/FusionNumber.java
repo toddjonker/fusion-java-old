@@ -3,6 +3,9 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionIo.safeWriteToString;
+import static java.math.RoundingMode.CEILING;
+import static java.math.RoundingMode.FLOOR;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
@@ -11,6 +14,7 @@ import com.amazon.ion.ValueFactory;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 
 /**
  *
@@ -1416,6 +1420,295 @@ final class FusionNumber
         {
             boolean r = isFloat(eval, arg);
             return makeBool(eval, r);
+        }
+    }
+
+
+    static final class SumProc
+        extends Procedure
+    {
+        SumProc()
+        {
+            //    "                                                                               |
+            super("Returns the sum of the `num`bers, which must be int or decimal.  With no\n" +
+                  "arguments, returns integer 0.",
+                  "num", DOTDOTDOT);
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            int arity = args.length;
+
+            if (arity == 0) return ZERO_INT;
+
+            Object arg0 = args[0];
+            if (arg0 instanceof BaseInt || arg0 instanceof BaseDecimal)
+            {
+                if (arity == 1) return arg0;
+
+                BaseNumber accum = (BaseNumber) arg0;
+
+                for (int i = 1; i < arity; i++)
+                {
+                    Object arg = args[i];
+                    if (arg instanceof BaseInt || arg instanceof BaseDecimal)
+                    {
+                        BaseNumber num = (BaseNumber) arg;
+                        if (! num.isAnyNull())
+                        {
+                            accum = accum.add(num);
+                            continue;
+                        }
+                    }
+
+                    throw argFailure("non-null int or decimal", i, args);
+                }
+
+                return accum;
+            }
+
+            throw argFailure("non-null int or decimal", 0, args);
+        }
+    }
+
+
+    static final class ProductProc
+        extends Procedure
+    {
+        ProductProc()
+        {
+            //    "                                                                               |
+            super("Returns the product of the `num`bers, which must be int or decimal.  With no\n" +
+                  "arguments, returns integer 1.",
+                  "num", DOTDOTDOT);
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            int arity = args.length;
+
+            if (arity == 0) return ONE_INT;
+
+            Object arg0 = args[0];
+            if (arg0 instanceof BaseInt || arg0 instanceof BaseDecimal)
+            {
+                if (arity == 1) return arg0;
+
+                BaseNumber accum = (BaseNumber) arg0;
+
+                for (int i = 1; i < arity; i++)
+                {
+                    Object arg = args[i];
+                    if (arg instanceof BaseInt || arg instanceof BaseDecimal)
+                    {
+                        BaseNumber num = (BaseNumber) arg;
+                        if (! num.isAnyNull())
+                        {
+                            accum = accum.multiply(num);
+                            continue;
+                        }
+                    }
+
+                    throw argFailure("non-null int or decimal", i, args);
+                }
+
+                return accum;
+            }
+
+            throw argFailure("non-null int or decimal", 0, args);
+        }
+    }
+
+
+    static final class DifferenceProc
+        extends Procedure
+    {
+        DifferenceProc()
+        {
+            //    "                                                                               |
+            super("With two or more int or decimal `num`bers, returns their difference,\n" +
+                  "associating to the left.  With one int or decimal argument, returns its\n" +
+                  "negation.",
+                  "num", DOTDOTDOTPLUS);
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityAtLeast(1, args);
+
+            Object arg0 = args[0];
+            if (arg0 instanceof BaseInt || arg0 instanceof BaseDecimal)
+            {
+                BaseNumber accum = (BaseNumber) arg0;
+
+                int arity = args.length;
+                if (arity == 1)
+                {
+                    return ZERO_INT.subtract(accum);
+                }
+                else
+                {
+                    for (int i = 1; i < arity; i++)
+                    {
+                        Object arg = args[i];
+                        if (arg instanceof BaseInt || arg instanceof BaseDecimal)
+                        {
+                            BaseNumber num = (BaseNumber) arg;
+                            if (! num.isAnyNull())
+                            {
+                                accum = accum.subtract(num);
+                                continue;
+                            }
+                        }
+
+                        throw argFailure("non-null int or decimal", i, args);
+                    }
+
+                    return accum;
+                }
+            }
+
+            throw argFailure("non-null int or decimal", 0, args);
+        }
+    }
+
+
+    static class DivideProc
+        extends Procedure
+    {
+        DivideProc()
+        {
+            //    "                                                                               |
+            super("Returns a decimal whose numeric value is `(dividend / divisor)`.  Both\n" +
+                  "arguments must be decimals.  An exception is thrown if the result cannot be\n" +
+                  "represented exactly.",
+                  "dividend", "divisor");
+        }
+
+        /**
+         * Helper to allow subclass to tweak the divison context.
+         */
+        BigDecimal divide(Evaluator eval, Object[] args,
+                          BigDecimal dividend, BigDecimal divisor)
+            throws FusionException
+        {
+            try
+            {
+                return dividend.divide(divisor);
+            }
+            catch (ArithmeticException e)
+            {
+                String message =
+                    getInferredName() + ": result of division isn't exact.\n" +
+                        "Arguments were:\n  " + safeWriteToString(eval, args[0]) +
+                        "\n  " + safeWriteToString(eval, args[1]);
+                throw new ContractException(message);
+            }
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(args);
+
+            BigDecimal dividend = checkRequiredDecimalArg(eval, this, 0, args);
+            BigDecimal divisor  = checkRequiredDecimalArg(eval, this, 1, args);
+
+            BigDecimal result = divide(eval, args, dividend, divisor);
+            return makeDecimal(eval, result);
+        }
+    }
+
+
+    /** EXPERIMENTAL **/
+    static final class DecimalDivideProc
+        extends DivideProc
+    {
+        @Override
+        BigDecimal divide(Evaluator eval, Object[] args,
+                          BigDecimal dividend, BigDecimal divisor)
+            throws FusionException
+        {
+            return dividend.divide(divisor, MathContext.DECIMAL128);
+        }
+    }
+
+
+    static final class CeilingProc
+        extends Procedure1
+    {
+        CeilingProc()
+        {
+            //    "                                                                               |
+            super("Returns the smallest int greater than or equal to `number` (that is, truncate\n" +
+                  "toward positive infinity). The input must be a non-null int or decimal, and\n" +
+                  "the result is an int.",
+                  "number");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object arg0)
+            throws FusionException
+        {
+            if (! isAnyNull(eval, arg0))
+            {
+                if (isDecimal(eval, arg0))
+                {
+                    BigDecimal d = unsafeNumberToBigDecimal(eval, arg0);
+                    BigInteger i = d.setScale(0, CEILING).toBigInteger();
+                    return makeInt(eval, i);
+                }
+
+                if (isInt(eval, arg0))
+                {
+                    return arg0;
+                }
+            }
+
+            throw new ArgTypeFailure(this, "non-null int or decimal", 0, arg0);
+        }
+    }
+
+
+    static final class FloorProc
+        extends Procedure1
+    {
+        FloorProc()
+        {
+            //    "                                                                               |
+            super("Returns the largest int less than or equal to `number` (that is, truncate\n" +
+                  "toward negative infinity). The input must be a non-null int or decimal, and the\n" +
+                  "result is an int.",
+                  "number");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object arg0)
+            throws FusionException
+        {
+            if (! isAnyNull(eval, arg0))
+            {
+                if (isDecimal(eval, arg0))
+                {
+                    BigDecimal d = unsafeNumberToBigDecimal(eval, arg0);
+                    BigInteger i = d.setScale(0, FLOOR).toBigInteger();
+                    return makeInt(eval, i);
+                }
+
+                if (isInt(eval, arg0))
+                {
+                    return arg0;
+                }
+            }
+
+            throw new ArgTypeFailure(this, "non-null int or decimal", 0, arg0);
         }
     }
 }

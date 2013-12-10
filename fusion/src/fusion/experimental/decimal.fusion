@@ -52,7 +52,7 @@ This is equivalent to the "decimal128" default context of IEEE 754.
 
 In the future this procedure will be replaced with a programmatic math context.
     '''
-    (java_new "com.amazon.fusion.DecimalDivideProc"))
+    (java_new "com.amazon.fusion.FusionNumber$DecimalDivideProc"))
 
 
   (defpub decimal_rescale
