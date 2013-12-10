@@ -101,8 +101,8 @@ contact us for clarification.
   // Procedures
 
   (require "/fusion/procedure")
-  (provide always apply compose conjoin disjoin identity is_procedure lambda
-    negate thunk)
+  (provide always apply compose conjoin curry_left curry_right disjoin
+    identity is_procedure lambda negate thunk)
 
 
   //=========================================================================

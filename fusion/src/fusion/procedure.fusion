@@ -11,7 +11,8 @@ Operators for creating and manipulating procedures.
     "/fusion/experimental/defines"
     "/fusion/experimental/syntax"
     "/fusion/private/compare"
-    "/fusion/private/control")
+    "/fusion/private/control"
+    "/fusion/private/sexp")
 
 
   (provide apply is_procedure lambda)
@@ -101,5 +102,27 @@ single-argument procedure `p`.
       '''
       (lambda (x)
         (not (p x)))))
+
+  //==========================================================================
+
+  (defpub curry_left
+    (lambda (p operand)
+      '''
+Returns a prodedure the same as `p` except with its first argument always
+substituted in with `operand`.
+      '''
+     (lambda args 
+       (apply p operand args))))
+
+  //==========================================================================
+
+  (defpub curry_right
+    (lambda (p operand)
+      '''
+Returns a prodedure the same as `p` except with its last argument always
+substituted in with `operand`.
+      '''
+     (lambda args
+       (apply p (pair operand args)))))
 
 ) // end module

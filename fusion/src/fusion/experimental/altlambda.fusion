@@ -10,10 +10,9 @@
 
   //  (|| body ...) -> (lambda () body ...)
 
-
-  //  (|<| proc arg0 arg1)   -> (curryl proc arg0 arg1 /*...*/)
-  //  (|>| proc argm argn)   -> (curryr proc /*...*/ argm argn)
-
+  //  Note: Punctuation-centric currying doesn't actual need alternate syntax
+  //  (define |<<| curry_left)
+  //  (define |>>| curry_right)
 
   (provide |)
   (define_syntax |

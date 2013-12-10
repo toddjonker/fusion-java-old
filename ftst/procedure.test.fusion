@@ -79,3 +79,21 @@
 (check_false (is_not_null null))
 
 (check_true ((negate is_not_null) null))
+
+
+//==========================================================================
+// curry_left
+
+(define is_8_gt (curry_left > 8))
+(check_false (is_8_gt 10))
+(check_false (is_8_gt  8))
+(check_true  (is_8_gt  6))
+
+
+//==========================================================================
+// curry_right
+
+(define is_6_gt_than_x (curry_right > 6))
+(check_true (is_6_gt_than_x 5))
+(check_false (is_6_gt_than_x 6))
+(check_false (is_6_gt_than_x 7))
