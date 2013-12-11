@@ -11,6 +11,8 @@ import java.io.IOException;
 
 /**
  * Utilities for working with Fusion's singular {@code void} value.
+ *
+ * @see FusionValue
  */
 public final class FusionVoid
 {

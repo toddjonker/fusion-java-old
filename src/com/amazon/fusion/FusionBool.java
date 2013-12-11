@@ -14,7 +14,9 @@ import java.io.IOException;
 
 
 /**
- * Utilities for Fusion {@code bool} values.
+ * Utilities for working with Fusion {@code bool} values.
+ *
+ * @see FusionValue
  */
 public final class FusionBool
 {
@@ -351,6 +353,9 @@ public final class FusionBool
     // Predicates
 
 
+    /**
+     * Determines whether a Fusion value has type {@code bool}.
+     */
     public static boolean isBool(TopLevel top, Object value)
         throws FusionException
     {
@@ -365,7 +370,9 @@ public final class FusionBool
 
 
     /**
-     * @param value must be a Fusion bool
+     * Determines whether a Fusion {@code bool} value is {@code true}.
+     *
+     * @param value must be a Fusion {@code bool}.
      */
     static boolean unsafeBoolIsTrue(Evaluator eval, Object value)
         throws FusionException
@@ -374,7 +381,9 @@ public final class FusionBool
         return b.isTrue();
     }
 
-
+    /**
+     * Determines whether a Fusion value is {@code true}.
+     */
     public static boolean isTrue(TopLevel top, Object value)
         throws FusionException
     {
@@ -393,6 +402,9 @@ public final class FusionBool
     }
 
 
+    /**
+     * Determines whether a Fusion value is {@code false}.
+     */
     public static boolean isFalse(TopLevel top, Object value)
         throws FusionException
     {

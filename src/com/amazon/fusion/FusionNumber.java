@@ -898,7 +898,7 @@ final class FusionNumber
 
 
     private static BaseDecimal annotate(BaseDecimal unannotated,
-                                          String[] annotations)
+                                        String[] annotations)
     {
         assert ! (unannotated instanceof AnnotatedDecimal);
 

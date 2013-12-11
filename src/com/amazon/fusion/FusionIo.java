@@ -163,7 +163,8 @@ public final class FusionIo
 
 
     /**
-     * <a href="{@docRoot}/../fusion/io.html#write">Writes</a> a text representation of a Fusion value, following Ion syntax
+     * <a href="{@docRoot}/../fusion/io.html#write">Writes</a> a text
+     * representation of a Fusion value, following Ion syntax
      * where possible, including for strings.
      * The result will be unreadable (by the Fusion and Ion readers) if the
      * value contains any non-Ionizable data (void, closures, etc.).

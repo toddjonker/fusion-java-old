@@ -17,9 +17,18 @@ import java.io.IOException;
 import java.util.Arrays;
 
 
-final class FusionString
+/**
+ * Utilities for working with Fusion {@code string} values.
+ *
+ * @see FusionValue
+ */
+public final class FusionString
 {
     private FusionString() {}
+
+
+    //========================================================================
+    // Representation Classes
 
 
     abstract static class BaseString

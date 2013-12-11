@@ -4,11 +4,17 @@ package com.amazon.fusion;
 
 
 /**
+ * Utilities for working with Fusion {@code blob} and {@code clob} values.
  *
+ * @see FusionValue
  */
-final class FusionLob
+public final class FusionLob
 {
     private FusionLob() {}
+
+
+    //========================================================================
+    // Representation Classes
 
 
     abstract static class BaseLob
@@ -22,6 +28,9 @@ final class FusionLob
     // Predicates
 
 
+    /**
+     * Determines whether a Fusion value has type {@code blob} or {@code clob}.
+     */
     public static boolean isLob(TopLevel top, Object value)
         throws FusionException
     {
@@ -43,6 +52,4 @@ final class FusionLob
     //========================================================================
     // Procedure Helpers
 
-
-    // TODO is_lob
 }

@@ -11,9 +11,9 @@ import com.amazon.ion.ValueFactory;
 import java.io.IOException;
 
 /**
- * The core features of a Fusion run-time value.  Note that the set of Fusion
- * values is a superset of the Ion values, so not all of them are
- * representable as Ion data values.
+ * Utilities for working with arbitrary Fusion runtime values.
+ * Note that the set of Fusion values is a superset of the Ion values, so no
+ * all of them are representable as Ion data values.
  */
 public final class FusionValue
 {
