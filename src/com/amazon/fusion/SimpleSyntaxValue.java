@@ -20,10 +20,16 @@ abstract class SimpleSyntaxValue
      */
     SimpleSyntaxValue(SourceLocation loc, BaseValue datum)
     {
-        super(datum.annotationsAsJavaStrings(), loc);
+        super(loc);
         myDatum = datum;
     }
 
+
+    @Override
+    String[] annotationsAsJavaStrings()
+    {
+        return myDatum.annotationsAsJavaStrings();
+    }
 
     @Override
     abstract Type getType();

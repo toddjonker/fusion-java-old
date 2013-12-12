@@ -137,6 +137,13 @@ final class SyntaxList
 
 
     @Override
+    String[] annotationsAsJavaStrings()
+    {
+        return myImmutableList.annotationsAsJavaStrings();
+    }
+
+
+    @Override
     final boolean isNullValue()
     {
         return myImmutableList.isAnyNull();

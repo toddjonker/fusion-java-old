@@ -23,31 +23,29 @@ abstract class SyntaxValue
     /** A zero-length array. */
     final static SyntaxValue[] EMPTY_ARRAY = new SyntaxValue[0];
 
-    private final String[] myAnnotations;
     private final SourceLocation mySrcLoc;
 
     /**
      *
-     * @param annotations the new instance assumes ownership of the array and
-     * it must not be modified later. Must not be null.
-     *
      * @param loc may be null;
      */
-    SyntaxValue(String[] annotations, SourceLocation loc)
+    SyntaxValue(SourceLocation loc)
     {
-        assert annotations != null : "annotations must not be null";
-        myAnnotations = annotations;
         mySrcLoc = loc;
     }
 
 
     /**
      * @return not null.
+     *
+     * @deprecated Use {@link #annotationsAsJavaStrings()}.
      */
+    @Deprecated
     final String[] getAnnotations()
     {
-        return myAnnotations;
+        return annotationsAsJavaStrings();
     }
+
 
     /**
      * Gets the location associated with this syntax node, if it exists.
@@ -135,7 +133,7 @@ abstract class SyntaxValue
 
     void ionizeAnnotations(IonWriter writer)
     {
-        writer.setTypeAnnotations(myAnnotations);
+        writer.setTypeAnnotations(annotationsAsJavaStrings());
     }
 
     abstract boolean isNullValue();

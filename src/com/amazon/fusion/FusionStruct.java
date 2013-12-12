@@ -433,6 +433,8 @@ final class FusionStruct
 
     static interface BaseStruct
     {
+        String[] annotationsAsJavaStrings();
+
         int size(); // Doesn't throw
 
         /**

@@ -282,6 +282,13 @@ final class SyntaxSexp
 
 
     @Override
+    String[] annotationsAsJavaStrings()
+    {
+        return mySexp.annotationsAsJavaStrings();
+    }
+
+
+    @Override
     boolean isNullValue()
     {
         return mySexp.isAnyNull();

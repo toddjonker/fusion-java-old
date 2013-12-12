@@ -51,6 +51,13 @@ final class SyntaxStruct
 
 
     @Override
+    String[] annotationsAsJavaStrings()
+    {
+        return myStruct.annotationsAsJavaStrings();
+    }
+
+
+    @Override
     boolean isNullValue()
     {
         return ((BaseValue)myStruct).isAnyNull();
