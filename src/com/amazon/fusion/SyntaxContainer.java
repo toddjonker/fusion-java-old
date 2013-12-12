@@ -14,9 +14,9 @@ abstract class SyntaxContainer
      */
     SyntaxWraps myWraps;
 
-    SyntaxContainer(String[] anns, SourceLocation loc, SyntaxWraps wraps)
+    SyntaxContainer(SourceLocation loc, SyntaxWraps wraps, BaseValue datum)
     {
-        super(anns, loc);
+        super(datum.annotationsAsJavaStrings(), loc);
         myWraps = wraps;
     }
 

@@ -30,7 +30,7 @@ final class SyntaxList
                        SourceLocation loc,
                        BaseList datum)
     {
-        super(loc, datum.annotationsAsJavaStrings());
+        super(loc, datum);
         assert isImmutableList(eval, datum);
         myImmutableList = datum;
     }
@@ -41,7 +41,7 @@ final class SyntaxList
      */
     private SyntaxList(SyntaxList that, SyntaxWraps wraps)
     {
-        super(that.getAnnotations(), that.getLocation(), wraps);
+        super(that.getLocation(), wraps, that.myImmutableList);
         assert wraps != null;
         myImmutableList = that.myImmutableList;
     }

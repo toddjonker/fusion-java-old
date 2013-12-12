@@ -35,44 +35,24 @@ final class SyntaxSexp
     /**
      * @param sexp must not be null.
      */
-    private SyntaxSexp(Evaluator eval, SourceLocation loc, BaseSexp sexp)
+    private SyntaxSexp(SourceLocation loc, BaseSexp sexp)
     {
-        super(loc, sexp.myAnnotations);
-        assert eval != null;
+        super(loc, sexp);
         mySexp = sexp;
     }
 
-    /**
-     * Instance will be {@link #isNullValue()} if children is null.
-     *
-     * @param anns must not be null.
-     * This method takes ownership of the array; the array and its elements
-     * must not be changed by calling code afterwards!
-     * @param children the children of the new sexp.
-     * This method takes ownership of the array; the array and its elements
-     * must not be changed by calling code afterwards!
-     */
-    private SyntaxSexp(Evaluator eval, SourceLocation loc, String[] anns,
-                       SyntaxValue[] children)
-    {
-        super(loc, anns);
-        assert eval != null;
-        mySexp = (children == null
-                      ? nullSexp(eval, anns)
-                      : immutableSexp(eval, anns, children));
-    }
 
     /** Copy constructor shares children and replaces unpushed wraps. */
     private SyntaxSexp(SyntaxSexp that, SyntaxWraps wraps)
     {
-        super(that.getAnnotations(), that.getLocation(), wraps);
+        super(that.getLocation(), wraps, that.mySexp);
         mySexp = that.mySexp;
     }
 
 
     static SyntaxSexp make(Evaluator eval, SourceLocation loc, BaseSexp sexp)
     {
-        return new SyntaxSexp(eval, loc, sexp);
+        return new SyntaxSexp(loc, sexp);
     }
 
     /**
@@ -90,7 +70,10 @@ final class SyntaxSexp
                            String[] anns,
                            SyntaxValue[] children)
     {
-        return new SyntaxSexp(eval, loc, anns, children);
+        BaseSexp datum = (children == null
+                              ? nullSexp(eval, anns)
+                              : immutableSexp(eval, anns, children));
+        return new SyntaxSexp(loc, datum);
     }
 
     /**
@@ -102,7 +85,7 @@ final class SyntaxSexp
      */
     static SyntaxSexp make(Evaluator eval, SyntaxValue... children)
     {
-        return new SyntaxSexp(eval, null, EMPTY_STRING_ARRAY, children);
+        return make(eval, null, EMPTY_STRING_ARRAY, children);
     }
 
     /**
@@ -115,7 +98,7 @@ final class SyntaxSexp
     static SyntaxSexp make(Evaluator eval, SourceLocation loc,
                            SyntaxValue... children)
     {
-        return new SyntaxSexp(eval, loc, EMPTY_STRING_ARRAY, children);
+        return make(eval, loc, EMPTY_STRING_ARRAY, children);
     }
 
     /**
@@ -127,8 +110,8 @@ final class SyntaxSexp
      */
     static SyntaxSexp make(Expander expander, SyntaxValue... children)
     {
-        return new SyntaxSexp(expander.getEvaluator(), null,
-                              EMPTY_STRING_ARRAY, children);
+        return make(expander.getEvaluator(), null,
+                    EMPTY_STRING_ARRAY, children);
     }
 
 
@@ -142,8 +125,8 @@ final class SyntaxSexp
     static SyntaxSexp make(Expander expander, SourceLocation loc,
                            SyntaxValue... children)
     {
-        return new SyntaxSexp(expander.getEvaluator(), loc,
-                              EMPTY_STRING_ARRAY, children);
+        return make(expander.getEvaluator(), loc,
+                    EMPTY_STRING_ARRAY, children);
     }
 
 
@@ -278,7 +261,7 @@ final class SyntaxSexp
         if (hasNoChildren()) return this;  // No children, no marks, all okay!
 
         BaseSexp newSexp = stripWraps(eval, (ImmutablePair) mySexp);
-        return new SyntaxSexp(eval, getLocation(), newSexp);
+        return new SyntaxSexp(getLocation(), newSexp);
     }
 
 

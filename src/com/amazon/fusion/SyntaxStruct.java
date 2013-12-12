@@ -9,7 +9,6 @@ import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionStruct.nullStruct;
 import static com.amazon.fusion.FusionStruct.structImplAdd;
 import static com.amazon.fusion.SourceLocation.currentLocation;
-import com.amazon.fusion.FusionCollection.BaseCollection;
 import com.amazon.fusion.FusionStruct.ImmutableStruct;
 import com.amazon.fusion.FusionStruct.NonNullImmutableStruct;
 import com.amazon.fusion.FusionStruct.StructFieldVisitor;
@@ -31,20 +30,9 @@ final class SyntaxStruct
     private SyntaxStruct(ImmutableStruct struct,
                          SourceLocation loc, SyntaxWraps wraps)
     {
-        super(((BaseCollection)struct).myAnnotations, loc, wraps);
+        super(loc, wraps, (BaseValue) struct);
         assert (wraps == null) || (struct.size() != 0);
         myStruct = struct;
-    }
-
-    /**
-     * @param map may be null but may only be non-null when map has children.
-     */
-    private SyntaxStruct(Map<String, Object> map, String[] anns,
-                         SourceLocation loc, SyntaxWraps wraps)
-    {
-        super(anns, loc, wraps);
-        assert (wraps == null) || (map != null && ! map.isEmpty());
-        myStruct = immutableStruct(map, anns);
     }
 
 
@@ -139,7 +127,8 @@ final class SyntaxStruct
 
         if (! mustReplace) return this;
 
-        return new SyntaxStruct(newMap, getAnnotations(), getLocation(), null);
+        ImmutableStruct s = immutableStruct(newMap, getAnnotations());
+        return new SyntaxStruct(s, getLocation(), null);
     }
 
 
@@ -296,7 +285,8 @@ final class SyntaxStruct
 
 
         // Wraps have been pushed down so the copy doesn't need them.
-        return new SyntaxStruct(newMap, getAnnotations(), getLocation(), null);
+        ImmutableStruct s = immutableStruct(newMap, getAnnotations());
+        return new SyntaxStruct(s, getLocation(), null);
     }
 
 
