@@ -4,21 +4,14 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionTimestamp.makeTimestamp;
 import com.amazon.fusion.FusionTimestamp.BaseTimestamp;
-import com.amazon.ion.IonException;
-import com.amazon.ion.IonWriter;
 import com.amazon.ion.Timestamp;
-import java.io.IOException;
 
 final class SyntaxTimestamp
-    extends SyntaxValue
+    extends SimpleSyntaxValue
 {
-    private final BaseTimestamp myDatum;
-
-
     private SyntaxTimestamp(SourceLocation loc, BaseTimestamp datum)
     {
-        super(datum.annotationsAsJavaStrings(), loc);
-        myDatum = datum;
+        super(loc, datum);
     }
 
 
@@ -57,35 +50,5 @@ final class SyntaxTimestamp
     Type getType()
     {
         return Type.TIMESTAMP;
-    }
-
-
-    @Override
-    CompiledForm doCompile(Evaluator eval, Environment env)
-        throws FusionException
-    {
-        return new CompiledConstant(myDatum);
-    }
-
-
-    @Override
-    Object unwrap(Evaluator eval, boolean recurse)
-    {
-        return myDatum;
-    }
-
-
-    @Override
-    void ionize(Evaluator eval, IonWriter writer)
-        throws IOException, IonException, FusionException, IonizeFailure
-    {
-        myDatum.ionize(eval, writer);
-    }
-
-
-    @Override
-    boolean isNullValue()
-    {
-        return myDatum.isAnyNull();
     }
 }

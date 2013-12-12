@@ -4,11 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
-import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
-import com.amazon.ion.IonException;
-import com.amazon.ion.IonWriter;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 
@@ -36,7 +32,6 @@ final class SyntaxSymbol
         }
     }
 
-    private final BaseSymbol myDatum;
 
     /** Initialized during {@link #doExpand} */
     private Binding myBinding;
@@ -51,25 +46,7 @@ final class SyntaxSymbol
                          SourceLocation loc,
                          BaseSymbol     datum)
     {
-        super(datum.stringValue(), datum.annotationsAsJavaStrings(), loc);
-        myDatum = datum;
-        myWraps = wraps;
-    }
-
-    /**
-     * @param annotations must not be null and must not contain elements
-     * that are null or empty. This method assumes ownership of the array
-     * and it must not be modified later.
-     * @param value may be null but must not be empty.
-     */
-    private SyntaxSymbol(Evaluator      eval,
-                         SyntaxWraps    wraps,
-                         SourceLocation loc,
-                         String[]       annotations,
-                         String         value)
-    {
-        super(value, annotations, loc);
-        myDatum = makeSymbol(eval, annotations, value);
+        super(loc, datum);
         myWraps = wraps;
     }
 
@@ -95,7 +72,8 @@ final class SyntaxSymbol
                              String[] annotations,
                              String value)
     {
-        return new SyntaxSymbol(eval, /*wraps*/ null, loc, annotations, value);
+        BaseSymbol datum = makeSymbol(eval, annotations, value);
+        return new SyntaxSymbol(eval, /*wraps*/ null, loc, datum);
     }
 
 
@@ -104,8 +82,8 @@ final class SyntaxSymbol
      */
     static SyntaxSymbol make(Evaluator eval, SyntaxWraps wraps, String value)
     {
-        return new SyntaxSymbol(eval, wraps, /*location*/ null,
-                                EMPTY_STRING_ARRAY, value);
+        BaseSymbol datum = makeSymbol(eval, value);
+        return new SyntaxSymbol(eval, wraps, /*location*/ null, datum);
     }
 
 
@@ -114,11 +92,7 @@ final class SyntaxSymbol
      */
     static SyntaxSymbol make(Evaluator eval, SyntaxWrap wrap, String value)
     {
-        return new SyntaxSymbol(eval,
-                                SyntaxWraps.make(wrap),
-                                /*location*/ null,
-                                EMPTY_STRING_ARRAY,
-                                value);
+        return make(eval, SyntaxWraps.make(wrap), value);
     }
 
 
@@ -127,7 +101,8 @@ final class SyntaxSymbol
      */
     static SyntaxSymbol make(Evaluator eval, String value)
     {
-        return new SyntaxSymbol(eval, null, null, EMPTY_STRING_ARRAY, value);
+        BaseSymbol datum = makeSymbol(eval, value);
+        return new SyntaxSymbol(eval, null, null, datum);
     }
 
 
@@ -140,7 +115,7 @@ final class SyntaxSymbol
         // probably different, so the binding may be different.
 
         SyntaxSymbol copy =
-            new SyntaxSymbol(null, wraps, getLocation(), myDatum);
+            new SyntaxSymbol(null, wraps, getLocation(), (BaseSymbol) myDatum);
         return copy;
     }
 
@@ -148,7 +123,7 @@ final class SyntaxSymbol
     SyntaxSymbol copyReplacingBinding(Binding binding)
     {
         SyntaxSymbol copy =
-            new SyntaxSymbol(null, myWraps, getLocation(), myDatum);
+            new SyntaxSymbol(null, myWraps, getLocation(), (BaseSymbol) myDatum);
         copy.myBinding = binding;
         return copy;
     }
@@ -393,7 +368,8 @@ final class SyntaxSymbol
     {
         if (myBinding == null)        // Otherwise we've already been expanded
         {
-            if (myText == null)
+            String text = stringValue();
+            if (text == null)
             {
                 String message =
                     "null.symbol is not an expression. " +
@@ -401,7 +377,7 @@ final class SyntaxSymbol
                 throw new SyntaxException(null, message, this);
             }
 
-            if (myText.length() == 0)
+            if (text.length() == 0)
             {
                 String message =
                     "Not an expression. " +
@@ -413,12 +389,13 @@ final class SyntaxSymbol
 
             if (myBinding instanceof FreeBinding)
             {
+                BaseSymbol topSym =
+                    FusionSymbol.makeSymbol(expander.getEvaluator(), "#%top");
                 SyntaxSymbol top =
                     new SyntaxSymbol(expander.getEvaluator(),
                                      myWraps,
                                      /*location*/ null,
-                                     EMPTY_STRING_ARRAY,
-                                     "#%top");
+                                     topSym);
                 if (top.resolve() instanceof FreeBinding)
                 {
                     throw new UnboundIdentifierException(this);
@@ -448,20 +425,6 @@ final class SyntaxSymbol
         return makeBool(eval, freeIdentifierEqual(that));
     }
 
-
-    @Override
-    Object unwrap(Evaluator eval, boolean recurse)
-    {
-        return myDatum;
-    }
-
-
-    @Override
-    void ionize(Evaluator eval, IonWriter writer)
-        throws IOException, IonException, FusionException, IonizeFailure
-    {
-        myDatum.ionize(eval, writer);
-    }
 
     String debugString()
     {

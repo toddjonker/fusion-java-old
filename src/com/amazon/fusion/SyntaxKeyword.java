@@ -11,25 +11,12 @@ import java.io.IOException;
 final class SyntaxKeyword
     extends SyntaxText
 {
-    private final BaseSymbol myDatum;
-
     /**
      * @param datum must not be null.
      */
-    private SyntaxKeyword(Evaluator eval, SourceLocation loc, BaseSymbol datum)
+    private SyntaxKeyword(SourceLocation loc, BaseSymbol datum)
     {
-        super(datum.stringValue(), datum.annotationsAsJavaStrings(), loc);
-        myDatum = datum;
-    }
-
-
-    private SyntaxKeyword(Evaluator eval,
-                          SourceLocation loc,
-                          String[] annotations,
-                          String value)
-    {
-        super(value, annotations, loc);
-        myDatum = makeSymbol(eval, annotations, value);
+        super(loc, datum);
     }
 
 
@@ -39,7 +26,7 @@ final class SyntaxKeyword
     static SyntaxKeyword make(Evaluator eval, SourceLocation loc, Object datum)
     {
         BaseSymbol symbol = (BaseSymbol) datum;
-        return new SyntaxKeyword(eval, loc, symbol);
+        return new SyntaxKeyword(loc, symbol);
     }
 
 
@@ -53,7 +40,8 @@ final class SyntaxKeyword
                               String[] annotations,
                               String value)
     {
-        return new SyntaxKeyword(eval, loc, annotations, value);
+        BaseSymbol datum = makeSymbol(eval, annotations, value);
+        return new SyntaxKeyword(loc, datum);
     }
 
 
@@ -77,10 +65,11 @@ final class SyntaxKeyword
 
     @Override
     Object unwrap(Evaluator eval, boolean recurse)
+        throws FusionException
     {
         // TODO I have no idea if this is correct long-term.
         // Should we allow it at the moment?
-        return myDatum;
+        return super.unwrap(eval, recurse);
     }
 
 
@@ -89,7 +78,7 @@ final class SyntaxKeyword
         throws IOException, IonException, FusionException, IonizeFailure
     {
         // TODO __ ??
-        myDatum.ionize(eval, writer);
+        super.ionize(eval, writer);
     }
 
 

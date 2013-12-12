@@ -107,7 +107,7 @@ final class FusionNull
     private static final NullNull NULL_NULL = new NullNull();
 
 
-    static Object makeNullNull(Evaluator eval)
+    static NullNull makeNullNull(Evaluator eval)
     {
         return NULL_NULL;
     }
@@ -120,7 +120,7 @@ final class FusionNull
      *
      * @return not null.
      */
-    static Object makeNullNull(Evaluator eval, String[] annotations)
+    static NullNull makeNullNull(Evaluator eval, String[] annotations)
     {
         if (annotations.length == 0)
         {

@@ -4,21 +4,13 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionNull.makeNullNull;
 import com.amazon.fusion.FusionNull.NullNull;
-import com.amazon.ion.IonWriter;
-import java.io.IOException;
 
 final class SyntaxNull
-    extends SyntaxValue
+    extends SimpleSyntaxValue
 {
-    private SyntaxNull(SourceLocation loc, String[] anns)
-    {
-        super(anns, loc);
-    }
-
-
     private SyntaxNull(SourceLocation loc, NullNull datum)
     {
-        super(datum.annotationsAsJavaStrings(), loc);
+        super(loc, datum);
     }
 
 
@@ -31,7 +23,8 @@ final class SyntaxNull
                            SourceLocation loc,
                            String[] annotations)
     {
-        return new SyntaxNull(loc, annotations);
+        NullNull n = makeNullNull(eval, annotations);
+        return new SyntaxNull(loc, n);
     }
 
 
@@ -52,32 +45,5 @@ final class SyntaxNull
     Type getType()
     {
         return Type.NULL;
-    }
-
-    @Override
-    CompiledForm doCompile(Evaluator eval, Environment env)
-        throws FusionException
-    {
-        Object fv = makeNullNull(eval, getAnnotations());
-        return new CompiledConstant(fv);
-    }
-
-    @Override
-    Object unwrap(Evaluator eval, boolean recurse)
-    {
-        return makeNullNull(eval, getAnnotations());
-    }
-
-    @Override
-    void ionize(Evaluator eval, IonWriter writer) throws IOException
-    {
-        ionizeAnnotations(writer);
-        writer.writeNull();
-    }
-
-    @Override
-    boolean isNullValue()
-    {
-        return true;
     }
 }

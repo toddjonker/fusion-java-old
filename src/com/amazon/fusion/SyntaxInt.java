@@ -4,24 +4,17 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionNumber.makeInt;
 import com.amazon.fusion.FusionNumber.BaseInt;
-import com.amazon.ion.IonException;
-import com.amazon.ion.IonWriter;
-import java.io.IOException;
 import java.math.BigInteger;
 
 final class SyntaxInt
-    extends SyntaxValue
+    extends SimpleSyntaxValue
 {
-    private final BaseInt myDatum;
-
-
     /**
      * @param datum must not be null.
      */
     private SyntaxInt(SourceLocation loc, BaseInt datum)
     {
-        super(datum.annotationsAsJavaStrings(), loc);
-        myDatum = datum;
+        super(loc, datum);
     }
 
 
@@ -58,35 +51,5 @@ final class SyntaxInt
     Type getType()
     {
         return Type.INT;
-    }
-
-
-    @Override
-    CompiledForm doCompile(Evaluator eval, Environment env)
-        throws FusionException
-    {
-        return new CompiledConstant(myDatum);
-    }
-
-
-    @Override
-    Object unwrap(Evaluator eval, boolean recurse)
-    {
-        return myDatum;
-    }
-
-
-    @Override
-    void ionize(Evaluator eval, IonWriter writer)
-        throws IOException, IonException, FusionException, IonizeFailure
-    {
-        myDatum.ionize(eval, writer);
-    }
-
-
-    @Override
-    boolean isNullValue()
-    {
-        return myDatum.isAnyNull();
     }
 }

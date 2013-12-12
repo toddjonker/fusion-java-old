@@ -125,7 +125,7 @@ abstract class SyntaxValue
 
 
     @Override
-    void write(Evaluator eval, Appendable out)
+    final void write(Evaluator eval, Appendable out)
         throws IOException, FusionException
     {
         IonWriter writer = IonTextWriterBuilder.standard().build(out);

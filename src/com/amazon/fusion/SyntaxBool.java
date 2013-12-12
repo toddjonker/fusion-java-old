@@ -4,20 +4,13 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
 import com.amazon.fusion.FusionBool.BaseBool;
-import com.amazon.ion.IonException;
-import com.amazon.ion.IonWriter;
-import java.io.IOException;
 
 final class SyntaxBool
-    extends SyntaxValue
+    extends SimpleSyntaxValue
 {
-    private final BaseBool myDatum;
-
-
     private SyntaxBool(SourceLocation loc, BaseBool datum)
     {
-        super(datum.annotationsAsJavaStrings(), loc);
-        myDatum = datum;
+        super(loc, datum);
     }
 
 
@@ -68,31 +61,5 @@ final class SyntaxBool
     Type getType()
     {
         return Type.BOOL;
-    }
-
-    @Override
-    CompiledForm doCompile(Evaluator eval, Environment env)
-        throws FusionException
-    {
-        return new CompiledConstant(myDatum);
-    }
-
-    @Override
-    Object unwrap(Evaluator eval, boolean recurse)
-    {
-        return myDatum;
-    }
-
-    @Override
-    void ionize(Evaluator eval, IonWriter writer)
-        throws IOException, IonException, FusionException, IonizeFailure
-    {
-        myDatum.ionize(eval, writer);
-    }
-
-    @Override
-    boolean isNullValue()
-    {
-        return myDatum.isAnyNull();
     }
 }

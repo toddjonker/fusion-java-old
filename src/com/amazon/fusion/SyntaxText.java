@@ -1,31 +1,23 @@
-// Copyright (c) 2012 Amazon.com, Inc. All rights reserved.
+// Copyright (c) 2012-2013 Amazon.com, Inc. All rights reserved.
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.FusionText.BaseText;
+
 abstract class SyntaxText
-    extends SyntaxValue
+    extends SimpleSyntaxValue
 {
-    protected final String myText;
-
     /**
-     * @param anns the new instance assumes ownership of the array and
-     * it must not be modified later. Must not be null.
-     * @param text may be null.
+     * @param datum must not be null.
      */
-    SyntaxText(String text, String[] anns, SourceLocation loc)
+    SyntaxText(SourceLocation loc, BaseText datum)
     {
-        super(anns, loc);
-        myText = text;
+        super(loc, datum);
     }
 
-    @Override
-    protected boolean isNullValue()
-    {
-        return myText == null;
-    }
 
-    protected final String stringValue()
+    final String stringValue()
     {
-        return myText;
+        return ((BaseText) myDatum).stringValue();
     }
 }

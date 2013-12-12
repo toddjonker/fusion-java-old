@@ -4,23 +4,16 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionNumber.makeFloat;
 import com.amazon.fusion.FusionNumber.BaseFloat;
-import com.amazon.ion.IonException;
-import com.amazon.ion.IonWriter;
-import java.io.IOException;
 
 final class SyntaxFloat
-    extends SyntaxValue
+    extends SimpleSyntaxValue
 {
-    private final BaseFloat myDatum;
-
-
     /**
      * @param datum must not be null.
      */
     private SyntaxFloat(SourceLocation loc, BaseFloat datum)
     {
-        super(datum.annotationsAsJavaStrings(), loc);
-        myDatum = datum;
+        super(loc, datum);
     }
 
 
@@ -69,35 +62,5 @@ final class SyntaxFloat
     Type getType()
     {
         return Type.FLOAT;
-    }
-
-
-    @Override
-    CompiledForm doCompile(Evaluator eval, Environment env)
-        throws FusionException
-    {
-        return new CompiledConstant(myDatum);
-    }
-
-
-    @Override
-    Object unwrap(Evaluator eval, boolean recurse)
-    {
-        return myDatum;
-    }
-
-
-    @Override
-    void ionize(Evaluator eval, IonWriter writer)
-        throws IOException, IonException, FusionException, IonizeFailure
-    {
-        myDatum.ionize(eval, writer);
-    }
-
-
-    @Override
-    boolean isNullValue()
-    {
-        return myDatum.isAnyNull();
     }
 }

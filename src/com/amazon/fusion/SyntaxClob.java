@@ -4,20 +4,13 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionClob.makeClob;
 import com.amazon.fusion.FusionClob.BaseClob;
-import com.amazon.ion.IonException;
-import com.amazon.ion.IonWriter;
-import java.io.IOException;
 
 final class SyntaxClob
-    extends SyntaxValue
+    extends SimpleSyntaxValue
 {
-    private final BaseClob myDatum;
-
-
     private SyntaxClob(SourceLocation loc, BaseClob datum)
     {
-        super(datum.annotationsAsJavaStrings(), loc);
-        myDatum = datum;
+        super(loc, datum);
     }
 
 
@@ -55,31 +48,5 @@ final class SyntaxClob
     Type getType()
     {
         return Type.CLOB;
-    }
-
-    @Override
-    CompiledForm doCompile(Evaluator eval, Environment env)
-        throws FusionException
-    {
-        return new CompiledConstant(myDatum);
-    }
-
-    @Override
-    Object unwrap(Evaluator eval, boolean recurse)
-    {
-        return myDatum;
-    }
-
-    @Override
-    void ionize(Evaluator eval, IonWriter writer)
-        throws IOException, IonException, FusionException, IonizeFailure
-    {
-        myDatum.ionize(eval, writer);
-    }
-
-    @Override
-    boolean isNullValue()
-    {
-        return myDatum.isAnyNull();
     }
 }
