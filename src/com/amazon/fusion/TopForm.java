@@ -81,7 +81,7 @@ final class TopForm
                 }
             }
 
-            throw new UnboundIdentifierFailure(null, id);
+            throw new UnboundIdentifierException(id);
         }
 
         children[1] = id;

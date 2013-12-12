@@ -547,7 +547,7 @@ class TopLevelNamespace
                     NsBinding binding = ns.localResolve(topId);
                     if (binding == null)
                     {
-                        throw new UnboundIdentifierFailure(null, myId);
+                        throw new UnboundIdentifierException(myId);
                     }
 
                     address = binding.myAddress;
@@ -559,7 +559,7 @@ class TopLevelNamespace
             Object result = ns.lookup(address);
             if (result == null)
             {
-                throw new UnboundIdentifierFailure(null, myId);
+                throw new UnboundIdentifierException(myId);
             }
 
             return result;

@@ -83,7 +83,7 @@ public class ModuleTest
     }
 
 
-    @Test(expected = UnboundIdentifierFailure.class)
+    @Test(expected = UnboundIdentifierException.class)
     public void testUseModuleWithNoProvides()
         throws Exception
     {
@@ -121,7 +121,7 @@ public class ModuleTest
     }
 
 
-    @Test(expected = UnboundIdentifierFailure.class)
+    @Test(expected = UnboundIdentifierException.class)
     public void testIntialModuleImportsWithNoProvides()
         throws Exception
     {
@@ -184,7 +184,7 @@ public class ModuleTest
      * We shouldn't fail `provide` at expand-time, since that may hide the
      * compile-time errors that caused provide to fail.
      */
-    @Test(expected=UnboundIdentifierFailure.class)
+    @Test(expected=UnboundIdentifierException.class)
     public void testProvideFailsLate()
         throws Exception
     {

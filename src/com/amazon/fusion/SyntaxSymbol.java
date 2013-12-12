@@ -421,7 +421,7 @@ final class SyntaxSymbol
                                      "#%top");
                 if (top.resolve() instanceof FreeBinding)
                 {
-                    throw new UnboundIdentifierFailure(myText, this);
+                    throw new UnboundIdentifierException(this);
                 }
 
                 assert getAnnotations().length == 0;
@@ -483,11 +483,11 @@ final class SyntaxSymbol
     CompiledForm doCompile(Evaluator eval, Environment env)
         throws FusionException
     {
-        assert myBinding != null : "No binding for " + myText;
+        assert myBinding != null : "No binding for " + this;
 
         if (myBinding instanceof FreeBinding)
         {
-            throw new UnboundIdentifierFailure(myText, this);
+            throw new UnboundIdentifierException(this);
         }
 
         return myBinding.compileReference(eval, env);

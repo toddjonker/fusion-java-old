@@ -10,7 +10,7 @@ import org.junit.Test;
 public class BindingTest
     extends CoreTestCase
 {
-    @Test(expected = UnboundIdentifierFailure.class)
+    @Test(expected = UnboundIdentifierException.class)
     public void testNoBindingAtTop()
         throws Exception
     {
@@ -18,21 +18,21 @@ public class BindingTest
     }
 
 
-    @Test(expected = UnboundIdentifierFailure.class)
+    @Test(expected = UnboundIdentifierException.class)
     public void testNoProcBindingAtTop()
         throws Exception
     {
         eval("(g)");
     }
 
-    @Test(expected = UnboundIdentifierFailure.class)
+    @Test(expected = UnboundIdentifierException.class)
     public void testNoArgBindingAtTop()
         throws Exception
     {
         eval("(is_int g)");
     }
 
-    @Test(expected = UnboundIdentifierFailure.class)
+    @Test(expected = UnboundIdentifierException.class)
     public void testNoBindingInProcedureBody()
         throws Exception
     {
