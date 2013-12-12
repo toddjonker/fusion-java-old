@@ -2,14 +2,12 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionList.NULL_LIST;
 import static com.amazon.fusion.FusionList.immutableList;
-import static com.amazon.fusion.FusionList.nullList;
-import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
+import static com.amazon.fusion.FusionList.isImmutableList;
+import static com.amazon.fusion.FusionList.unsafeListRef;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static java.lang.System.arraycopy;
-import static java.util.Arrays.copyOfRange;
-import com.amazon.ion.IonType;
+import com.amazon.fusion.FusionList.BaseList;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
@@ -17,29 +15,24 @@ final class SyntaxList
     extends SyntaxSequence
 {
     /**
-     * Both the array and its content may be shared with other instances.
-     * When we push down wraps, we copy the array and the children.
+     * Both the list and its elements may be shared with other instances.
+     * When we push down wraps, we copy the list and the children as needed.
      * We push lazily to aggregate as many wraps here and only push once.
      * That avoids repeated cloning of the children.
      */
-    private SyntaxValue[] myChildren;
+    private BaseList myImmutableList;
 
 
     /**
-     * Instance will be {@link #isNullValue()} if children is null.
-     *
-     * @param anns must not be null.
-     * This method takes ownership of the array; the array and its elements
-     * must not be changed by calling code afterwards!
-     * @param children the children of the new list.
-     * This method takes ownership of the array; the array and its elements
-     * must not be changed by calling code afterwards!
+     * @param datum an immutable list of {@link SyntaxValue}s.
      */
-    private SyntaxList(SourceLocation loc, String[] anns,
-                       SyntaxValue[] children)
+    private SyntaxList(Evaluator eval,
+                       SourceLocation loc,
+                       BaseList datum)
     {
-        super(loc, anns);
-        myChildren = children;
+        super(loc, datum.annotationsAsJavaStrings());
+        assert isImmutableList(eval, datum);
+        myImmutableList = datum;
     }
 
     /**
@@ -49,38 +42,20 @@ final class SyntaxList
     private SyntaxList(SyntaxList that, SyntaxWraps wraps)
     {
         super(that.getAnnotations(), that.getLocation(), wraps);
-        assert that.myChildren.length != 0 && wraps != null;
-        myChildren = that.myChildren;
+        assert wraps != null;
+        myImmutableList = that.myImmutableList;
     }
 
 
-    /**
-     * Instance will be {@link #isNullValue()} if children is null.
-     *
-     * @param anns must not be null.
-     * This method takes ownership of the array; the array and its elements
-     * must not be changed by calling code afterwards!
-     * @param children the children of the new list.
-     * This method takes ownership of the array; the array and its elements
-     * must not be changed by calling code afterwards!
-     */
-    static SyntaxList make(SourceLocation loc, String[] anns,
-                           SyntaxValue[] children)
-    {
-        return new SyntaxList(loc, anns, children);
-    }
-
 
     /**
-     * Instance will be {@link #isNullValue()} if children is null.
-
-     * @param children the children of the new list.
-     * This method takes ownership of the array; the array and its elements
-     * must not be changed by calling code afterwards!
+     * @param datum an immutable list of {@link SyntaxValue}s.
      */
-    static SyntaxList make(SourceLocation loc, SyntaxValue... children)
+    static SyntaxList make(Evaluator      eval,
+                           SourceLocation loc,
+                           Object         datum)
     {
-        return new SyntaxList(loc, EMPTY_STRING_ARRAY, children);
+        return new SyntaxList(eval, loc, (BaseList) datum);
     }
 
 
@@ -91,23 +66,27 @@ final class SyntaxList
      * this instance, so that it appears as if the wraps were pushed when they
      * were created.
      */
-    private void pushWraps()
+    private synchronized void pushWraps(Evaluator eval)
         throws FusionException
     {
         if (myWraps != null)  // We only have wraps when we have children.
         {
             boolean changed = false;
-            int len = myChildren.length;
+            int len = myImmutableList.size();
             SyntaxValue[] newChildren = new SyntaxValue[len];
             for (int i = 0; i < len; i++)
             {
-                SyntaxValue child = myChildren[i];
+                SyntaxValue child = (SyntaxValue) myImmutableList.elt(eval, i);
                 SyntaxValue wrapped = child.addWraps(myWraps);
                 newChildren[i] = wrapped;
                 changed |= wrapped != child;
             }
 
-            if (changed) myChildren = newChildren; // Keep sharing when we can
+            if (changed) // Keep sharing when we can
+            {
+                myImmutableList =
+                    immutableList(eval, getAnnotations(), newChildren);
+            }
 
             myWraps = null;
         }
@@ -123,11 +102,11 @@ final class SyntaxList
         // Even if we have no marks, some children may have them.
         boolean mustCopy = (myWraps != null);
 
-        int len = myChildren.length;
+        int len = myImmutableList.size();
         SyntaxValue[] newChildren = new SyntaxValue[len];
         for (int i = 0; i < len; i++)
         {
-            SyntaxValue child = myChildren[i];
+            SyntaxValue child = (SyntaxValue) myImmutableList.elt(eval, i);
             SyntaxValue stripped = child.stripWraps(eval);
             newChildren[i] = stripped;
             mustCopy |= stripped != child;
@@ -135,7 +114,11 @@ final class SyntaxList
 
         if (! mustCopy) return this;
 
-        return new SyntaxList(getLocation(), getAnnotations(), newChildren);
+        BaseList newList =
+            immutableList(eval,
+                          myImmutableList.annotationsAsJavaStrings(),
+                          newChildren);
+        return new SyntaxList(eval, getLocation(), newList);
     }
 
 
@@ -156,21 +139,21 @@ final class SyntaxList
     @Override
     final boolean isNullValue()
     {
-        return myChildren == null;
+        return myImmutableList.isAnyNull();
     }
 
 
     @Override
     final boolean hasNoChildren()
     {
-        return myChildren == null || myChildren.length == 0;
+        return myImmutableList.size() == 0;
     }
 
 
     @Override
     final int size()
     {
-        return (myChildren == null ? 0 : myChildren.length);
+        return myImmutableList.size();
     }
 
 
@@ -178,13 +161,13 @@ final class SyntaxList
     SyntaxValue[] extract(Evaluator eval)
         throws FusionException
     {
-        if (myChildren == null) return null;
+        if (isNullValue()) return null;
 
-        pushWraps();
+        pushWraps(eval);
 
-        int len = myChildren.length;
+        int len = myImmutableList.size();
         SyntaxValue[] extracted = new SyntaxValue[len];
-        arraycopy(myChildren, 0, extracted, 0, len);
+        myImmutableList.unsafeCopy(eval, 0, extracted, 0, len);
         return extracted;
     }
 
@@ -193,8 +176,8 @@ final class SyntaxList
     SyntaxValue get(Evaluator eval, int index)
         throws FusionException
     {
-        pushWraps();
-        return myChildren[index];
+        pushWraps(eval);
+        return (SyntaxValue) myImmutableList.elt(eval, index);
     }
 
 
@@ -206,27 +189,24 @@ final class SyntaxList
         int thatLength = that.size();
         int newLength  = thisLength + thatLength;
 
-        SyntaxValue[] children;
-        if (newLength == 0)
+        if (newLength == 0) return this;
+
+        Object[] children = new Object[newLength];
+        if (thisLength != 0)
         {
-            children = SyntaxValue.EMPTY_ARRAY;
+            pushWraps(eval);
+            myImmutableList.unsafeCopy(eval, 0, children, 0, thisLength);
         }
-        else
+        if (thatLength != 0)
         {
-            children = new SyntaxValue[thisLength + thatLength];
-            if (thisLength != 0)
-            {
-                this.pushWraps();
-                arraycopy(this.myChildren, 0, children, 0, thisLength);
-            }
-            if (thatLength != 0)
-            {
-                SyntaxValue[] c = that.extract(eval);
-                arraycopy(c, 0, children, thisLength, thatLength);
-            }
+            // that could be a sexp so we cant copy directly
+            // TODO avoid intermediate array copy
+            SyntaxValue[] c = that.extract(eval);
+            arraycopy(c, 0, children, thisLength, thatLength);
         }
 
-        return new SyntaxList(null, EMPTY_STRING_ARRAY, children);
+        BaseList list = immutableList(eval, getAnnotations(), children);
+        return new SyntaxList(eval, null, list);
     }
 
 
@@ -234,33 +214,31 @@ final class SyntaxList
     SyntaxSequence makeSubseq(Evaluator eval, int from)
         throws FusionException
     {
-        pushWraps();
-        SyntaxValue[] children =
-            (myChildren == null
-                 ? null
-                 : copyOfRange(myChildren, from, myChildren.length));
-        return new SyntaxList(null, EMPTY_STRING_ARRAY, children);
-    }
-
-
-    void ionizeSequence(Evaluator eval, IonWriter writer, IonType type)
-        throws IOException, FusionException
-    {
-        ionizeAnnotations(writer);
-        if (myChildren == null)
+        if ((myImmutableList.size() == 0 || from == 0)
+            && myImmutableList.annotationsAsJavaStrings().length == 0)
         {
-            writer.writeNull(type);
+            return this;
+        }
+
+        pushWraps(eval);
+
+        BaseList list;
+        if (isNullValue())
+        {
+            list = FusionList.NULL_LIST;
         }
         else
         {
-            writer.stepIn(type);
-            for (SyntaxValue child : myChildren)
-            {
-                child.ionize(eval, writer);
-            }
-            writer.stepOut();
+            // TODO will crash is from is beyond the end of the list
+            int len = myImmutableList.size();
+            Object[] children = new Object[len - from];
+            myImmutableList.unsafeCopy(eval, from, children, 0, children.length);
+            list = immutableList(eval, EMPTY_STRING_ARRAY, children);
         }
+
+        return new SyntaxList(eval, null, list);
     }
+
 
     @Override
     SyntaxValue doExpand(Expander expander, Environment env)
@@ -269,16 +247,24 @@ final class SyntaxList
         int len = size();
         if (len == 0) return this;
 
-        SyntaxValue[] children = extract(expander.getEvaluator());
+        Evaluator eval = expander.getEvaluator();
 
+        Object list = unwrap(eval, false);
+
+        boolean same = true;
+        Object[] children = new Object[len];
         for (int i = 0; i < len; i++)
         {
-            SyntaxValue subform = children[i];
-            children[i] = expander.expandExpression(env, subform);
+            SyntaxValue subform = (SyntaxValue) unsafeListRef(eval, list, i);
+            Object expanded = expander.expandExpression(env, subform);
+            same &= (subform == expanded);
+            children[i] = expanded;
         }
 
-        SyntaxList expanded = SyntaxList.make(this.getLocation(), children);
-        return expanded;
+        if (same) return this;
+
+        list = immutableList(eval, getAnnotations(), children);
+        return SyntaxList.make(eval, getLocation(), list);
     }
 
 
@@ -286,7 +272,7 @@ final class SyntaxList
     void ionize(Evaluator eval, IonWriter out)
         throws IOException, FusionException
     {
-        ionizeSequence(eval, out, IonType.LIST);
+        myImmutableList.ionize(eval, out);
     }
 
 
@@ -294,40 +280,27 @@ final class SyntaxList
     Object unwrap(Evaluator eval, boolean recurse)
         throws FusionException
     {
+        int size = myImmutableList.size();
+        if (size == 0)
+        {
+            return myImmutableList;
+        }
+
+        if (! recurse)
+        {
+            pushWraps(eval);
+            return myImmutableList;
+        }
+
+        // Don't bother to push wraps; we'll just discard them anyway.
+        Object[] children = new Object[size];
+        for (int i = 0; i < size; i++)
+        {
+            SyntaxValue child = (SyntaxValue) myImmutableList.elt(eval, i);
+            children[i] = child.unwrap(eval, true);
+        }
+
         String[] annotations = getAnnotations();
-
-        if (isNullValue())
-        {
-            return nullList(eval, annotations);
-        }
-
-        Object[] children;
-
-        if (recurse)
-        {
-            // Don't bother to push wraps; we'll just discard them anyway.
-            SyntaxValue[] stxChildren = myChildren;
-
-            int size = stxChildren.length;
-            if (size == 0)  // Avoid allocation of child array
-            {
-                children = EMPTY_OBJECT_ARRAY;
-            }
-            else
-            {
-                children = new Object[size];
-                for (int i = 0; i < size; i++)
-                {
-                    children[i] = stxChildren[i].unwrap(eval, true);
-                }
-            }
-        }
-        else
-        {
-            pushWraps();
-            children = myChildren;
-        }
-
         return immutableList(eval, annotations, children);
     }
 
@@ -343,7 +316,7 @@ final class SyntaxList
         // syntax.
         if (isNullValue())
         {
-            return new CompiledConstant(NULL_LIST);
+            return new CompiledConstant(myImmutableList);
         }
 
         int len = size();

@@ -4,8 +4,9 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBlob.isBlob;
 import static com.amazon.fusion.FusionBool.isBool;
+import static com.amazon.fusion.FusionList.immutableList;
 import static com.amazon.fusion.FusionList.isList;
-import static com.amazon.fusion.FusionList.isNullList;
+import static com.amazon.fusion.FusionList.nullList;
 import static com.amazon.fusion.FusionList.unsafeListRef;
 import static com.amazon.fusion.FusionList.unsafeListSize;
 import static com.amazon.fusion.FusionLob.isLob;
@@ -26,6 +27,7 @@ import static com.amazon.fusion.FusionSymbol.unsafeSymbolToJavaString;
 import static com.amazon.fusion.FusionTimestamp.isTimestamp;
 import static com.amazon.fusion.FusionValue.annotationsAsJavaStrings;
 import static com.amazon.fusion.SourceLocation.currentLocation;
+import com.amazon.fusion.FusionList.BaseList;
 import com.amazon.fusion.FusionSexp.BaseSexp;
 import com.amazon.fusion.FusionStruct.BaseStruct;
 import com.amazon.fusion.FusionStruct.ImmutableStruct;
@@ -140,8 +142,8 @@ final class Syntax
             }
             case LIST:
             {
-                SyntaxValue[] value = readSequence(eval, source, name);
-                return SyntaxList.make(loc, anns, value);
+                BaseList datum = readList(eval, name, source, anns);
+                return SyntaxList.make(eval, loc, datum);
             }
             case SEXP:
             {
@@ -184,6 +186,21 @@ final class Syntax
         SyntaxValue[] childs = new SyntaxValue[children.size()];
         children.toArray(childs);
         return childs;
+    }
+
+
+    /**
+     * @return an immutable list of syntax objects.
+     */
+    static BaseList readList(Evaluator  eval,
+                             SourceName name,
+                             IonReader  source,
+                             String[]   annotations)
+    {
+        if (source.isNullValue()) return nullList(eval, annotations);
+
+        Object[] elements = readSequence(eval, source, name);
+        return immutableList(eval, annotations, elements);
     }
 
 
@@ -277,28 +294,28 @@ final class Syntax
 
         if (isList(eval, datum))
         {
-            String[] anns = annotationsAsJavaStrings(eval, datum);
-            SyntaxValue[] children = null;
-
-            if (! isNullList(eval, datum))
+            int size = unsafeListSize(eval, datum);
+            if (size == 0)
             {
-                int size = unsafeListSize(eval, datum);
-                children = new SyntaxValue[size];
-                for (int i = 0; i < size; i++)
-                {
-                    Object rawChild = unsafeListRef(eval, datum, i);
-                    SyntaxValue child =
-                        datumToStrippedSyntaxMaybe(eval, rawChild);
-                    if (child == null)
-                    {
-                        // Hit something that's not syntax-able
-                        return null;
-                    }
-                    children[i] = child;
-                }
+                return SyntaxList.make(eval, null, datum);
             }
 
-            return SyntaxList.make(null, anns, children);
+            Object[] children = new Object[size];
+            for (int i = 0; i < size; i++)
+            {
+                Object rawChild = unsafeListRef(eval, datum, i);
+                Object child = datumToStrippedSyntaxMaybe(eval, rawChild);
+                if (child == null)
+                {
+                    // Hit something that's not syntax-able
+                    return null;
+                }
+                children[i] = child;
+            }
+
+            String[] anns = annotationsAsJavaStrings(eval, datum);
+            Object list = immutableList(eval, anns, children);
+            return SyntaxList.make(eval, null, list);
         }
 
         if (isPair(eval, datum))

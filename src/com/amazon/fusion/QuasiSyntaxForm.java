@@ -3,6 +3,8 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.safeWriteToString;
+import static com.amazon.fusion.FusionList.immutableList;
+import static com.amazon.fusion.FusionList.unsafeListRef;
 import com.amazon.fusion.QuoteSyntaxForm.CompiledQuoteSyntax;
 
 final class QuasiSyntaxForm
@@ -129,12 +131,13 @@ final class QuasiSyntaxForm
         int size = stx.size();
         if (size == 0) return stx;
 
-        boolean same = true;
+        Object list = stx.unwrap(eval, false);
 
-        SyntaxValue[] children = stx.extract(eval);
+        boolean same = true;
+        Object[] children = new Object[size];
         for (int i = 0; i < size; i++)
         {
-            SyntaxValue subform = children[i];
+            SyntaxValue subform = (SyntaxValue) unsafeListRef(eval, list, i);
             SyntaxValue expanded = expand(expander, env, subform, depth);
             same &= (subform == expanded);
             children[i] = expanded;
@@ -142,9 +145,8 @@ final class QuasiSyntaxForm
 
         if (same) return stx;
 
-        return SyntaxList.make(stx.getLocation(),
-                               stx.getAnnotations(),
-                               children);
+        list = immutableList(eval, stx.getAnnotations(), children);
+        return SyntaxList.make(eval, stx.getLocation(), list);
     }
 
 
@@ -279,6 +281,7 @@ final class QuasiSyntaxForm
                                 String[]       annotations,
                                 CompiledForm[] childForms)
         {
+            assert childForms.length != 0;
             myLocation    = location;
             myAnnotations = annotations;
             myChildForms  = childForms;
@@ -324,16 +327,13 @@ final class QuasiSyntaxForm
             throws FusionException
         {
             int size = myChildForms.length;
-            SyntaxValue[] children = new SyntaxValue[size];
+            Object[] children = new Object[size];
             for (int i = 0; i < size; i++)
             {
-                Object child = eval.eval(store, myChildForms[i]);
-
-                // This cast is safe because children are either quote-syntax
-                // or unsyntax, which always return syntax.
-                children[i] = (SyntaxValue) child;
+                children[i] = eval.eval(store, myChildForms[i]);
             }
-            return SyntaxList.make(myLocation, myAnnotations, children);
+            Object list = immutableList(eval, myAnnotations, children);
+            return SyntaxList.make(eval, myLocation, list);
         }
     }
 

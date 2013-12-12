@@ -259,6 +259,19 @@ final class FusionList
 
 
     /**
+     * Copies the elements of this list into a new array.
+     *
+     * @param list must be a list; it is not type-checked!
+     *
+     * @return null if this is null.list.
+     */
+    static Object[] unsafeListExtract(Evaluator eval, Object list)
+    {
+        return ((BaseList) list).extract(eval);
+    }
+
+
+    /**
      * @param list must be a list; it is not type-checked!
      */
     static BaseList unsafeListSubseq(Evaluator eval, Object list,
@@ -350,7 +363,7 @@ final class FusionList
      * Prevents mutation from Java code and is distinguishable from mutable
      * lists.
      */
-    private abstract static class BaseList
+    abstract static class BaseList
         extends BaseSequence
     {
         /**
@@ -408,6 +421,14 @@ final class FusionList
                         int length)
         {
             System.arraycopy(myValues, srcPos, dest, destPos, length);
+        }
+
+        Object[] extract(Evaluator eval)
+        {
+            int size = size();
+            Object[] elements = new Object[size];
+            unsafeCopy(eval, 0, elements, 0, size);
+            return elements;
         }
 
         /**
@@ -610,6 +631,12 @@ final class FusionList
         Object annotate(Evaluator eval, String[] annotations)
         {
             return new NullList(annotations);
+        }
+
+        @Override
+        Object[] extract(Evaluator eval)
+        {
+            return null;
         }
 
         @Override
