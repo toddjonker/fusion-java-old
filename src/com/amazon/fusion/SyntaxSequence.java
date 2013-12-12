@@ -2,20 +2,19 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.FusionSequence.BaseSequence;
 
 
 abstract class SyntaxSequence
     extends SyntaxContainer
 {
-    SyntaxSequence(SourceLocation loc, BaseSequence datum)
+    SyntaxSequence(SourceLocation loc)
     {
-        super(loc, null, datum);
+        super(loc);
     }
 
-    SyntaxSequence(SourceLocation loc, SyntaxWraps wraps, BaseSequence datum)
+    SyntaxSequence(SourceLocation loc, SyntaxWraps wraps)
     {
-        super(loc, wraps, datum);
+        super(loc, wraps);
     }
 
 

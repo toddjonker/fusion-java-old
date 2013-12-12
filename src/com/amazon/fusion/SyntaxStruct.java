@@ -27,27 +27,40 @@ final class SyntaxStruct
     /**
      * @param struct must not be null.
      */
-    private SyntaxStruct(ImmutableStruct struct,
-                         SourceLocation loc, SyntaxWraps wraps)
+    private SyntaxStruct(SourceLocation  loc,
+                         ImmutableStruct struct)
     {
-        super(loc, wraps, (BaseValue) struct);
-        assert (wraps == null) || (struct.size() != 0);
+        super(loc);
         myStruct = struct;
     }
 
-
-    static SyntaxStruct make(ImmutableStruct struct,
-                             SourceLocation loc, SyntaxWraps wraps)
+    /**
+     * Copy constructor, shares the enclosed datum and replaces wraps.
+     * The datum will be copied when wraps are pushed but not before.
+     *
+     * @param wraps must not be null.
+     */
+    private SyntaxStruct(SyntaxStruct that,
+                         SyntaxWraps  wraps)
     {
-        return new SyntaxStruct(struct, loc, wraps);
+        super(that.getLocation(), wraps);
+        assert wraps != null;
+        myStruct = that.myStruct;
     }
 
-    static SyntaxStruct make(String[] names, SyntaxValue[] values,
-                             String[] anns)
+
+    /**
+     * @param datum must be an immutable struct
+     */
+    static SyntaxStruct make(Evaluator eval,
+                             SourceLocation loc,
+                             Object datum)
     {
-        ImmutableStruct struct = immutableStruct(names, values, anns);
-        return new SyntaxStruct(struct, null, null);
+        return new SyntaxStruct(loc, (ImmutableStruct) datum);
     }
+
+
+    //========================================================================
 
 
     @Override
@@ -74,8 +87,7 @@ final class SyntaxStruct
     @Override
     SyntaxStruct copyReplacingWraps(SyntaxWraps wraps)
     {
-        // We can share the Map because its never mutated.
-        return new SyntaxStruct(myStruct, getLocation(), wraps);
+        return new SyntaxStruct(this, wraps);
     }
 
 
@@ -134,8 +146,9 @@ final class SyntaxStruct
 
         if (! mustReplace) return this;
 
-        ImmutableStruct s = immutableStruct(newMap, getAnnotations());
-        return new SyntaxStruct(s, getLocation(), null);
+        ImmutableStruct s =
+            immutableStruct(newMap, annotationsAsJavaStrings());
+        return new SyntaxStruct(getLocation(), s);
     }
 
 
@@ -164,7 +177,7 @@ final class SyntaxStruct
             struct = immutableStruct(map, anns);
         }
 
-        return new SyntaxStruct(struct, loc, null);
+        return new SyntaxStruct(loc, struct);
     }
 
 
@@ -233,7 +246,7 @@ final class SyntaxStruct
         }
 
         NonNullImmutableStruct result =
-            immutableStruct(newMap, getAnnotations());
+            immutableStruct(newMap, annotationsAsJavaStrings());
         if (!recurse) // We've push wraps to children, retain them!
         {
             myStruct = result;
@@ -292,8 +305,9 @@ final class SyntaxStruct
 
 
         // Wraps have been pushed down so the copy doesn't need them.
-        ImmutableStruct s = immutableStruct(newMap, getAnnotations());
-        return new SyntaxStruct(s, getLocation(), null);
+        ImmutableStruct s =
+            immutableStruct(newMap, annotationsAsJavaStrings());
+        return new SyntaxStruct(getLocation(), s);
     }
 
 

@@ -37,7 +37,7 @@ final class SyntaxSexp
      */
     private SyntaxSexp(SourceLocation loc, BaseSexp sexp)
     {
-        super(loc, sexp);
+        super(loc);
         mySexp = sexp;
     }
 
@@ -45,7 +45,7 @@ final class SyntaxSexp
     /** Copy constructor shares children and replaces unpushed wraps. */
     private SyntaxSexp(SyntaxSexp that, SyntaxWraps wraps)
     {
-        super(that.getLocation(), wraps, that.mySexp);
+        super(that.getLocation(), wraps);
         mySexp = that.mySexp;
     }
 

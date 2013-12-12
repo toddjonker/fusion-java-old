@@ -30,7 +30,6 @@ import static com.amazon.fusion.SourceLocation.currentLocation;
 import com.amazon.fusion.FusionList.BaseList;
 import com.amazon.fusion.FusionSexp.BaseSexp;
 import com.amazon.fusion.FusionStruct.BaseStruct;
-import com.amazon.fusion.FusionStruct.ImmutableStruct;
 import com.amazon.fusion.FusionStruct.StructFieldVisitor;
 import com.amazon.ion.Decimal;
 import com.amazon.ion.IonException;
@@ -349,9 +348,8 @@ final class Syntax
 
             try
             {
-                ImmutableStruct struct =
-                    ((BaseStruct) datum).transformFields(visitor);
-                return SyntaxStruct.make(struct, null, null);
+                datum = ((BaseStruct) datum).transformFields(visitor);
+                return SyntaxStruct.make(eval, /*location*/ null, datum);
             }
             catch (StripFailure e)  // This is crazy.
             {

@@ -30,18 +30,18 @@ final class SyntaxList
                        SourceLocation loc,
                        BaseList datum)
     {
-        super(loc, datum);
+        super(loc);
         assert isImmutableList(eval, datum);
         myImmutableList = datum;
     }
 
     /**
-     * Copy constructor, shares the myChildren array and replaces wraps.
-     * The array will be copied when wraps are pushed but not before.
+     * Copy constructor, shares the enclosed datum and replaces wraps.
+     * The datum will be copied when wraps are pushed but not before.
      */
     private SyntaxList(SyntaxList that, SyntaxWraps wraps)
     {
-        super(that.getLocation(), wraps, that.myImmutableList);
+        super(that.getLocation(), wraps);
         assert wraps != null;
         myImmutableList = that.myImmutableList;
     }
@@ -73,19 +73,19 @@ final class SyntaxList
         {
             boolean changed = false;
             int len = myImmutableList.size();
-            SyntaxValue[] newChildren = new SyntaxValue[len];
+            SyntaxValue[] children = new SyntaxValue[len];
             for (int i = 0; i < len; i++)
             {
                 SyntaxValue child = (SyntaxValue) myImmutableList.elt(eval, i);
                 SyntaxValue wrapped = child.addWraps(myWraps);
-                newChildren[i] = wrapped;
+                children[i] = wrapped;
                 changed |= wrapped != child;
             }
 
             if (changed) // Keep sharing when we can
             {
                 myImmutableList =
-                    immutableList(eval, getAnnotations(), newChildren);
+                    immutableList(eval, annotationsAsJavaStrings(), children);
             }
 
             myWraps = null;
@@ -97,18 +97,19 @@ final class SyntaxList
     SyntaxSequence stripWraps(Evaluator eval)
         throws FusionException
     {
-        if (hasNoChildren()) return this;  // No children, no marks, all okay!
+        int len = myImmutableList.size();
+
+        if (len == 0) return this;  // No children, no marks, all okay!
 
         // Even if we have no marks, some children may have them.
         boolean mustCopy = (myWraps != null);
 
-        int len = myImmutableList.size();
-        SyntaxValue[] newChildren = new SyntaxValue[len];
+        Object[] children = new Object[len];
         for (int i = 0; i < len; i++)
         {
             SyntaxValue child = (SyntaxValue) myImmutableList.elt(eval, i);
             SyntaxValue stripped = child.stripWraps(eval);
-            newChildren[i] = stripped;
+            children[i] = stripped;
             mustCopy |= stripped != child;
         }
 
@@ -117,7 +118,7 @@ final class SyntaxList
         BaseList newList =
             immutableList(eval,
                           myImmutableList.annotationsAsJavaStrings(),
-                          newChildren);
+                          children);
         return new SyntaxList(eval, getLocation(), newList);
     }
 
@@ -212,7 +213,8 @@ final class SyntaxList
             arraycopy(c, 0, children, thisLength, thatLength);
         }
 
-        BaseList list = immutableList(eval, getAnnotations(), children);
+        BaseList list =
+            immutableList(eval, annotationsAsJavaStrings(), children);
         return new SyntaxList(eval, null, list);
     }
 
@@ -270,7 +272,7 @@ final class SyntaxList
 
         if (same) return this;
 
-        list = immutableList(eval, getAnnotations(), children);
+        list = immutableList(eval, annotationsAsJavaStrings(), children);
         return SyntaxList.make(eval, getLocation(), list);
     }
 
@@ -307,8 +309,7 @@ final class SyntaxList
             children[i] = child.unwrap(eval, true);
         }
 
-        String[] annotations = getAnnotations();
-        return immutableList(eval, annotations, children);
+        return immutableList(eval, annotationsAsJavaStrings(), children);
     }
 
 

@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionEval.evalSyntax;
 import static com.amazon.fusion.FusionNumber.unsafeTruncateIntToJavaInt;
+import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.GlobalState.DEFINE_SYNTAX;
 import static com.amazon.fusion.GlobalState.PROVIDE;
@@ -267,16 +268,15 @@ final class ModuleForm
             SyntaxString languageIdentity =
                 SyntaxString.make(eval, initialBindingsId.absolutePath());
 
-            SyntaxStruct meta =
-                SyntaxStruct.make(new String[] { "variable_count",
-                                                 "identity",
-                                                 "language_identity" },
-                                  new SyntaxValue[] { variableCount,
-                                                      identity,
-                                                      languageIdentity },
-                                  new String[] { "InjectedMetadata" });
-
-            subforms[i++] = meta;
+            Object s =
+                immutableStruct(new String[] { "variable_count",
+                                               "identity",
+                                               "language_identity" },
+                                new SyntaxValue[] { variableCount,
+                                                    identity,
+                                                    languageIdentity },
+                                new String[] { "InjectedMetadata" });
+            subforms[i++] = SyntaxStruct.make(eval, null, s);
         }
 
         Iterator<Boolean> prepared = preparedFormFlags.iterator();
