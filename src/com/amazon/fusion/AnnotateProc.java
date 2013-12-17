@@ -1,30 +1,8 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionBlob.isBlob;
-import static com.amazon.fusion.FusionBlob.unsafeBlobAnnotate;
-import static com.amazon.fusion.FusionBool.isBool;
-import static com.amazon.fusion.FusionBool.unsafeBoolAnnotate;
-import static com.amazon.fusion.FusionClob.isClob;
-import static com.amazon.fusion.FusionClob.unsafeClobAnnotate;
-import static com.amazon.fusion.FusionCollection.isCollection;
-import static com.amazon.fusion.FusionCollection.unsafeCollectionAnnotate;
-import static com.amazon.fusion.FusionNull.isNullNull;
-import static com.amazon.fusion.FusionNull.makeNullNull;
-import static com.amazon.fusion.FusionNumber.isDecimal;
-import static com.amazon.fusion.FusionNumber.isFloat;
-import static com.amazon.fusion.FusionNumber.isInt;
-import static com.amazon.fusion.FusionNumber.unsafeDecimalAnnotate;
-import static com.amazon.fusion.FusionNumber.unsafeFloatAnnotate;
-import static com.amazon.fusion.FusionNumber.unsafeIntAnnotate;
-import static com.amazon.fusion.FusionString.isString;
-import static com.amazon.fusion.FusionString.unsafeStringAnnotate;
-import static com.amazon.fusion.FusionSymbol.isSymbol;
-import static com.amazon.fusion.FusionSymbol.unsafeSymbolAnnotate;
 import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
-import static com.amazon.fusion.FusionTimestamp.isTimestamp;
-import static com.amazon.fusion.FusionTimestamp.unsafeTimestampAnnotate;
 
 
 final class AnnotateProc
@@ -51,59 +29,11 @@ final class AnnotateProc
         }
 
         Object target = args[0];
-        if (isCollection(eval, target))
-        {
-            return unsafeCollectionAnnotate(eval, target, annotations);
-        }
 
-        if (isString(eval, target))
+        if (target instanceof BaseValue)
         {
-            return unsafeStringAnnotate(eval, target, annotations);
-        }
-
-        if (isSymbol(eval, target))
-        {
-            return unsafeSymbolAnnotate(eval, target, annotations);
-        }
-
-        if (isBool(eval, target))
-        {
-            return unsafeBoolAnnotate(eval, target, annotations);
-        }
-
-        if (isInt(eval, target))
-        {
-            return unsafeIntAnnotate(eval, target, annotations);
-        }
-
-        if (isDecimal(eval, target))
-        {
-            return unsafeDecimalAnnotate(eval, target, annotations);
-        }
-
-        if (isTimestamp(eval, target))
-        {
-            return unsafeTimestampAnnotate(eval, target, annotations);
-        }
-
-        if (isNullNull(eval, target))
-        {
-            return makeNullNull(eval, annotations);
-        }
-
-        if (isFloat(eval, target))
-        {
-            return unsafeFloatAnnotate(eval, target, annotations);
-        }
-
-        if (isBlob(eval, target))
-        {
-            return unsafeBlobAnnotate(eval, target, annotations);
-        }
-
-        if (isClob(eval, target))
-        {
-            return unsafeClobAnnotate(eval, target, annotations);
+            Object r = ((BaseValue) target).annotate(eval, annotations);
+            if (r != null) return r;
         }
 
         throw argFailure("annotatable type", 0, args);

@@ -39,6 +39,12 @@ final class FusionTimestamp
         abstract Timestamp timestampValue();
 
         @Override
+        BaseTimestamp annotate(Evaluator eval, String[] annotations)
+        {
+            return FusionTimestamp.annotate(this, annotations);
+        }
+
+        @Override
         SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
         {
             return makeSyntax(eval, /*location*/ null, this);
@@ -207,6 +213,12 @@ final class FusionTimestamp
         }
 
         @Override
+        BaseTimestamp annotate(Evaluator eval, String[] annotations)
+        {
+            return FusionTimestamp.annotate(myValue, annotations);
+        }
+
+        @Override
         boolean isAnyNull() { return myValue.isAnyNull(); }
 
         @Override
@@ -325,11 +337,7 @@ final class FusionTimestamp
                                                  String[]  annotations)
     {
         BaseTimestamp base = (BaseTimestamp) fusionTimestamp;
-        if (base instanceof AnnotatedTimestamp)
-        {
-            base = ((AnnotatedTimestamp) base).myValue;
-        }
-        return annotate(base, annotations);
+        return base.annotate(eval, annotations);
     }
 
 

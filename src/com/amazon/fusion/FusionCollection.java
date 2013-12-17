@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -40,14 +40,6 @@ final class FusionCollection
         }
 
         abstract int size()
-            throws FusionException;
-
-        /**
-         * @param annotations must not be null and must not contain elements
-         * that are null or empty. This method assumes ownership of the array
-         * and it must not be modified later.
-         */
-        abstract Object annotate(Evaluator eval, String[] annotations)
             throws FusionException;
     }
 

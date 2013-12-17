@@ -28,6 +28,12 @@ final class FusionSymbol
         private BaseSymbol() {}
 
         @Override
+        BaseSymbol annotate(Evaluator eval, String[] annotations)
+        {
+            return FusionSymbol.annotate(this, annotations);
+        }
+
+        @Override
         BaseBool tightEquals(Evaluator eval, Object right)
             throws FusionException
         {
@@ -192,6 +198,12 @@ final class FusionSymbol
         }
 
         @Override
+        BaseSymbol annotate(Evaluator eval, String[] annotations)
+        {
+            return FusionSymbol.annotate(myValue, annotations);
+        }
+
+        @Override
         boolean isAnyNull() { return myValue.isAnyNull(); }
 
         @Override
@@ -310,11 +322,7 @@ final class FusionSymbol
                                            String[] annotations)
     {
         BaseSymbol base = (BaseSymbol) fusionSymbol;
-        if (base instanceof AnnotatedSymbol)
-        {
-            base = ((AnnotatedSymbol) base).myValue;
-        }
-        return annotate(base, annotations);
+        return base.annotate(eval, annotations);
     }
 
 

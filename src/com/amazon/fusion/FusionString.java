@@ -52,6 +52,12 @@ public final class FusionString
         private BaseString() {}
 
         @Override
+        BaseString annotate(Evaluator eval, String[] annotations)
+        {
+            return FusionString.annotate(this, annotations);
+        }
+
+        @Override
         BaseBool tightEquals(Evaluator eval, Object right)
             throws FusionException
         {
@@ -222,6 +228,12 @@ public final class FusionString
         }
 
         @Override
+        BaseString annotate(Evaluator eval, String[] annotations)
+        {
+            return FusionString.annotate(myValue, annotations);
+        }
+
+        @Override
         boolean isAnyNull() { return myValue.isAnyNull(); }
 
         @Override
@@ -332,11 +344,7 @@ public final class FusionString
                                            String[] annotations)
     {
         BaseString base = (BaseString) fusionString;
-        if (base instanceof AnnotatedString)
-        {
-            base = ((AnnotatedString) base).myValue;
-        }
-        return annotate(base, annotations);
+        return base.annotate(eval, annotations);
     }
 
 

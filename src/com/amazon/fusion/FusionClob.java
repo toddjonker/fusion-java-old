@@ -25,6 +25,12 @@ final class FusionClob
         extends BaseLob
     {
         private BaseClob() {}
+
+        @Override
+        BaseClob annotate(Evaluator eval, String[] annotations)
+        {
+            return FusionClob.annotate(this, annotations);
+        }
     }
 
 
@@ -158,6 +164,12 @@ final class FusionClob
         }
 
         @Override
+        BaseClob annotate(Evaluator eval, String[] annotations)
+        {
+            return FusionClob.annotate(myValue, annotations);
+        }
+
+        @Override
         boolean isAnyNull()
         {
             return myValue.isAnyNull();
@@ -275,11 +287,7 @@ final class FusionClob
                                        String[] annotations)
     {
         BaseClob base = (BaseClob) fusionClob;
-        if (base instanceof AnnotatedClob)
-        {
-            base = ((AnnotatedClob) base).myValue;
-        }
-        return annotate(base, annotations);
+        return base.annotate(eval, annotations);
     }
 
 

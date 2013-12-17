@@ -12,5 +12,6 @@ interface Annotated
      *
      * @return not null, but possibly empty.
      */
-    String[] annotationsAsJavaStrings();
+    String[] annotationsAsJavaStrings()
+        throws FusionException;
 }

@@ -30,6 +30,18 @@ abstract class BaseValue
         return EMPTY_STRING_ARRAY;
     }
 
+    /**
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty. This method assumes ownership of the array
+     * and it must not be modified later.
+     * @return null if this value isn't annotatable.
+     */
+    Object annotate(Evaluator eval, String[] annotations)
+        throws FusionException
+    {
+        return null;
+    }
+
 
     boolean isAnyNull()
     {

@@ -38,6 +38,12 @@ public final class FusionBool
         abstract Boolean asJavaBoolean();
 
         @Override
+        BaseBool annotate(Evaluator eval, String[] annotations)
+        {
+            return FusionBool.annotate(this, annotations);
+        }
+
+        @Override
         SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
         {
             return makeSyntax(eval, /*location*/ null, this);
@@ -257,6 +263,12 @@ public final class FusionBool
         }
 
         @Override
+        BaseBool annotate(Evaluator eval, String[] annotations)
+        {
+            return FusionBool.annotate(myValue, annotations);
+        }
+
+        @Override
         boolean isAnyNull() { return myValue.isAnyNull(); }
 
         @Override
@@ -408,11 +420,7 @@ public final class FusionBool
                                        String[]  annotations)
     {
         BaseBool base = (BaseBool) fusionBool;
-        if (base instanceof AnnotatedBool)
-        {
-            base = ((AnnotatedBool) base).myValue;
-        }
-        return annotate(base, annotations);
+        return base.annotate(eval, annotations);
     }
 
 

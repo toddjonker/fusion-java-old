@@ -34,6 +34,12 @@ public final class FusionNull
         }
 
         @Override
+        NullNull annotate(Evaluator eval, String[] annotations)
+        {
+            return makeNullNull(eval, annotations);
+        }
+
+        @Override
         BaseBool tightEquals(Evaluator eval, Object right)
             throws FusionException
         {

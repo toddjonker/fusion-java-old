@@ -128,6 +128,12 @@ final class FusionNumber
         private BaseInt() {}
 
         @Override
+        BaseInt annotate(Evaluator eval, String[] annotations)
+        {
+            return FusionNumber.annotate(this, annotations);
+        }
+
+        @Override
         BaseBool looseEquals(Evaluator eval, Object right)
             throws FusionException
         {
@@ -460,6 +466,18 @@ final class FusionNumber
         }
 
         @Override
+        public String[] annotationsAsJavaStrings()
+        {
+            return myAnnotations;
+        }
+
+        @Override
+        BaseInt annotate(Evaluator eval, String[] annotations)
+        {
+            return myValue.annotate(eval, annotations);
+        }
+
+        @Override
         int truncateToJavaInt()
         {
             return myValue.truncateToJavaInt();
@@ -481,12 +499,6 @@ final class FusionNumber
         BigInteger truncateToBigInteger()
         {
             return myValue.truncateToBigInteger();
-        }
-
-        @Override
-        public String[] annotationsAsJavaStrings()
-        {
-            return myAnnotations;
         }
 
         @Override
@@ -550,6 +562,12 @@ final class FusionNumber
         extends BaseNumber
     {
         private BaseDecimal() {}
+
+        @Override
+        BaseDecimal annotate(Evaluator eval, String[] annotations)
+        {
+            return FusionNumber.annotate(this, annotations);
+        }
 
         @Override
         BaseNumber add(BaseNumber right)
@@ -826,6 +844,12 @@ final class FusionNumber
         }
 
         @Override
+        BaseDecimal annotate(Evaluator eval, String[] annotations)
+        {
+            return myValue.annotate(eval, annotations);
+        }
+
+        @Override
         boolean isAnyNull() { return myValue.isAnyNull(); }
 
         @Override
@@ -915,6 +939,12 @@ final class FusionNumber
 
         abstract BaseBool tightEquals2(Evaluator eval, ActualFloat left)
             throws FusionException;
+
+        @Override
+        BaseFloat annotate(Evaluator eval, String[] annotations)
+        {
+            return FusionNumber.annotate(this, annotations);
+        }
 
         @Override
         SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
@@ -1227,6 +1257,12 @@ final class FusionNumber
         }
 
         @Override
+        BaseFloat annotate(Evaluator eval, String[] annotations)
+        {
+            return FusionNumber.annotate(myValue, annotations);
+        }
+
+        @Override
         boolean isAnyNull() { return myValue.isAnyNull(); }
 
         @Override
@@ -1466,11 +1502,7 @@ final class FusionNumber
                                      String[] annotations)
     {
         BaseInt base = (BaseInt) fusionInt;
-        if (base instanceof AnnotatedInt)
-        {
-            base = ((AnnotatedInt) base).myValue;
-        }
-        return annotate(base, annotations);
+        return base.annotate(eval, annotations);
     }
 
 
@@ -1530,11 +1562,7 @@ final class FusionNumber
                                              String[] annotations)
     {
         BaseDecimal base = (BaseDecimal) fusionDecimal;
-        if (base instanceof AnnotatedDecimal)
-        {
-            base = ((AnnotatedDecimal) base).myValue;
-        }
-        return annotate(base, annotations);
+        return base.annotate(eval, annotations);
     }
 
 
@@ -1622,11 +1650,7 @@ final class FusionNumber
                                          String[]  annotations)
     {
         BaseFloat base = (BaseFloat) fusionFloat;
-        if (base instanceof AnnotatedFloat)
-        {
-            base = ((AnnotatedFloat) base).myValue;
-        }
-        return annotate(base, annotations);
+        return base.annotate(eval, annotations);
     }
 
 
