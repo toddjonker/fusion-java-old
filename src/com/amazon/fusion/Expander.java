@@ -66,7 +66,7 @@ final class Expander
     SyntaxValue expand(Environment env, SyntaxValue stx)
         throws FusionException
     {
-        if (stx.getAnnotations().length != 0)
+        if (stx.annotationsAsJavaStrings().length != 0)
         {
             String message =
                 "Annotations not supported in raw syntax. You probably " +

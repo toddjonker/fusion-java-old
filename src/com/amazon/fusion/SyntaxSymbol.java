@@ -401,7 +401,7 @@ final class SyntaxSymbol
                     throw new UnboundIdentifierException(this);
                 }
 
-                assert getAnnotations().length == 0;
+                assert annotationsAsJavaStrings().length == 0;
                 SyntaxSexp topExpr = SyntaxSexp.make(expander, top, this);
 
                 // TODO FUSION-207 tail expand

@@ -57,7 +57,7 @@ final class DefineForm
             sig[0] = ns.predefine(identifier, formForErrors);
             children[1] = SyntaxSexp.make(eval,
                                           first.getLocation(),
-                                          first.getAnnotations(),
+                                          first.annotationsAsJavaStrings(),
                                           sig);
         }
         else
@@ -66,7 +66,9 @@ final class DefineForm
             children[1] = ns.predefine(identifier, formForErrors);
         }
 
-        return SyntaxSexp.make(eval, defineStx.getLocation(), defineStx.getAnnotations(),
+        return SyntaxSexp.make(eval,
+                               defineStx.getLocation(),
+                               defineStx.annotationsAsJavaStrings(),
                                children);
     }
 

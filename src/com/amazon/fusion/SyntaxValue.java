@@ -36,18 +36,6 @@ abstract class SyntaxValue
 
 
     /**
-     * @return not null.
-     *
-     * @deprecated Use {@link #annotationsAsJavaStrings()}.
-     */
-    @Deprecated
-    final String[] getAnnotations()
-    {
-        return annotationsAsJavaStrings();
-    }
-
-
-    /**
      * Determines whether the wrapped datum is a null value.
      */
     @Override

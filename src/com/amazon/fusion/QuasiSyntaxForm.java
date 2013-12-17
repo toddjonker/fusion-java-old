@@ -88,7 +88,7 @@ final class QuasiSyntaxForm
                 children[1] = expander.expandExpression(env, subform);
 
                 // TODO accept annotations on unsyntax form?
-                if (stx.getAnnotations().length != 0)
+                if (stx.annotationsAsJavaStrings().length != 0)
                 {
                     String message =
                         "Annotations not accepted on unsyntax form";
@@ -117,7 +117,9 @@ final class QuasiSyntaxForm
 
         if (same) return stx;
 
-        return SyntaxSexp.make(eval, stx.getLocation(), stx.getAnnotations(),
+        return SyntaxSexp.make(eval,
+                               stx.getLocation(),
+                               stx.annotationsAsJavaStrings(),
                                children);
     }
 
@@ -145,7 +147,7 @@ final class QuasiSyntaxForm
 
         if (same) return stx;
 
-        list = immutableList(eval, stx.getAnnotations(), children);
+        list = immutableList(eval, stx.annotationsAsJavaStrings(), children);
         return SyntaxList.make(eval, stx.getLocation(), list);
     }
 
@@ -197,7 +199,7 @@ final class QuasiSyntaxForm
             {
                 if (depth == 0)
                 {
-                    assert stx.getAnnotations().length == 0;
+                    assert stx.annotationsAsJavaStrings().length == 0;
                     SyntaxValue unquotedSyntax = stx.get(eval, 1);
                     CompiledForm unquotedForm =
                         eval.compile(env, unquotedSyntax);
@@ -234,7 +236,7 @@ final class QuasiSyntaxForm
         }
 
         return new CompiledQuasiSyntaxSexp(stx.getLocation(),
-                                           stx.getAnnotations(),
+                                           stx.annotationsAsJavaStrings(),
                                            children);
     }
 
@@ -262,7 +264,7 @@ final class QuasiSyntaxForm
         }
 
         return new CompiledQuasiSyntaxList(stx.getLocation(),
-                                           stx.getAnnotations(),
+                                           stx.annotationsAsJavaStrings(),
                                            children);
     }
 
