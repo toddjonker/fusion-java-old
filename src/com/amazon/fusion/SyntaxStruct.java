@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionStruct.EMPTY_STRUCT;
 import static com.amazon.fusion.FusionStruct.NULL_STRUCT;
 import static com.amazon.fusion.FusionStruct.immutableStruct;
@@ -12,6 +11,7 @@ import static com.amazon.fusion.SourceLocation.currentLocation;
 import com.amazon.fusion.FusionStruct.ImmutableStruct;
 import com.amazon.fusion.FusionStruct.NonNullImmutableStruct;
 import com.amazon.fusion.FusionStruct.StructFieldVisitor;
+import com.amazon.ion.IonException;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
@@ -353,9 +353,9 @@ final class SyntaxStruct
 
     @Override
     void ionize(Evaluator eval, IonWriter writer)
-        throws IOException, FusionException
+        throws IOException, IonException, FusionException, IonizeFailure
     {
-        dispatchIonize(null, writer, myStruct);
+        myStruct.ionize(eval, writer);
     }
 
 

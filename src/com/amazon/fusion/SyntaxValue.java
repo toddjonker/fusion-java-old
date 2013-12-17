@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
-import com.amazon.ion.system.IonTextWriterBuilder;
 import java.io.IOException;
 
 /**
@@ -128,13 +127,8 @@ abstract class SyntaxValue
     final void write(Evaluator eval, Appendable out)
         throws IOException, FusionException
     {
-        IonWriter writer = IonTextWriterBuilder.standard().build(out);
+        IonWriter writer = WRITER_BUILDER.build(out);
         ionize(eval, writer);
         writer.flush();
-    }
-
-    void ionizeAnnotations(IonWriter writer)
-    {
-        writer.setTypeAnnotations(annotationsAsJavaStrings());
     }
 }

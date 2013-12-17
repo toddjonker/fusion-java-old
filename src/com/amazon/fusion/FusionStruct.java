@@ -18,6 +18,7 @@ import static com.amazon.ion.util.IonTextUtils.printSymbol;
 import static java.util.Collections.EMPTY_MAP;
 import com.amazon.fusion.FusionCollection.BaseCollection;
 import com.amazon.fusion.FusionIterator.AbstractIterator;
+import com.amazon.ion.IonException;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
@@ -434,6 +435,9 @@ final class FusionStruct
     static interface BaseStruct
     {
         String[] annotationsAsJavaStrings();
+
+        void ionize(Evaluator eval, IonWriter out)
+            throws IOException, IonException, FusionException, IonizeFailure;
 
         int size(); // Doesn't throw
 
