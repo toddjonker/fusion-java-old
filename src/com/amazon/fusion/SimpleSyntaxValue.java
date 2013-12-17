@@ -57,7 +57,7 @@ abstract class SimpleSyntaxValue
     }
 
     @Override
-    boolean isNullValue()
+    boolean isAnyNull()
     {
         return myDatum.isAnyNull();
     }

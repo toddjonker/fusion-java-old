@@ -287,7 +287,7 @@ abstract class Procedure
         try
         {
             SyntaxValue stx = (SyntaxValue) arg;
-            if (nullable || ! stx.isNullValue())
+            if (nullable || ! stx.isAnyNull())
             {
                 return klass.cast(stx);
             }

@@ -48,6 +48,13 @@ abstract class SyntaxValue
 
 
     /**
+     * Determines whether the wrapped datum is a null value.
+     */
+    @Override
+    abstract boolean isAnyNull();
+
+
+    /**
      * Gets the location associated with this syntax node, if it exists.
      * @return may be null.
      */
@@ -142,6 +149,4 @@ abstract class SyntaxValue
     {
         writer.setTypeAnnotations(annotationsAsJavaStrings());
     }
-
-    abstract boolean isNullValue();
 }

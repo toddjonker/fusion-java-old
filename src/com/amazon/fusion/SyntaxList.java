@@ -145,7 +145,7 @@ final class SyntaxList
 
 
     @Override
-    final boolean isNullValue()
+    final boolean isAnyNull()
     {
         return myImmutableList.isAnyNull();
     }
@@ -169,7 +169,7 @@ final class SyntaxList
     SyntaxValue[] extract(Evaluator eval)
         throws FusionException
     {
-        if (isNullValue()) return null;
+        if (isAnyNull()) return null;
 
         pushWraps(eval);
 
@@ -232,7 +232,7 @@ final class SyntaxList
         pushWraps(eval);
 
         BaseList list;
-        if (isNullValue())
+        if (isAnyNull())
         {
             list = FusionList.NULL_LIST;
         }
@@ -325,7 +325,7 @@ final class SyntaxList
     {
         // We don't have to worry about annotations, since that's not valid
         // syntax.
-        if (isNullValue())
+        if (isAnyNull())
         {
             return new CompiledConstant(myImmutableList);
         }

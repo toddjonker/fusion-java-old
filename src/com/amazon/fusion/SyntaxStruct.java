@@ -71,7 +71,7 @@ final class SyntaxStruct
 
 
     @Override
-    boolean isNullValue()
+    boolean isAnyNull()
     {
         return ((BaseValue)myStruct).isAnyNull();
     }
@@ -368,7 +368,7 @@ final class SyntaxStruct
     {
         assert myWraps == null;
 
-        if (isNullValue())
+        if (isAnyNull())
         {
             return new CompiledConstant(NULL_STRUCT);
         }

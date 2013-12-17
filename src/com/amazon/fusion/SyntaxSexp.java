@@ -56,7 +56,7 @@ final class SyntaxSexp
     }
 
     /**
-     * Instance will be {@link #isNullValue()} if children is null.
+     * Instance will be {@link #isAnyNull()} if children is null.
      *
      * @param anns must not be null.
      * This method takes ownership of the array; the array and its elements
@@ -77,7 +77,7 @@ final class SyntaxSexp
     }
 
     /**
-     * Instance will be {@link #isNullValue()} if children is null.
+     * Instance will be {@link #isAnyNull()} if children is null.
 
      * @param children the children of the new sexp.
      * This method takes ownership of the array; the array and its elements
@@ -89,7 +89,7 @@ final class SyntaxSexp
     }
 
     /**
-     * Instance will be {@link #isNullValue()} if children is null.
+     * Instance will be {@link #isAnyNull()} if children is null.
 
      * @param children the children of the new sexp.
      * This method takes ownership of the array; the array and its elements
@@ -102,7 +102,7 @@ final class SyntaxSexp
     }
 
     /**
-     * Instance will be {@link #isNullValue()} if children is null.
+     * Instance will be {@link #isAnyNull()} if children is null.
 
      * @param children the children of the new sexp.
      * This method takes ownership of the array; the array and its elements
@@ -116,7 +116,7 @@ final class SyntaxSexp
 
 
     /**
-     * Instance will be {@link #isNullValue()} if children is null.
+     * Instance will be {@link #isAnyNull()} if children is null.
 
      * @param children the children of the new sexp.
      * This method takes ownership of the array; the array and its elements
@@ -289,7 +289,7 @@ final class SyntaxSexp
 
 
     @Override
-    boolean isNullValue()
+    boolean isAnyNull()
     {
         return mySexp.isAnyNull();
     }

@@ -167,7 +167,7 @@ class SyntaxChecker
     {
         try
         {
-            if (nullable || ! form.isNullValue())
+            if (nullable || ! form.isAnyNull())
             {
                 return klass.cast(form);
             }
