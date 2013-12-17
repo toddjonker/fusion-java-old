@@ -114,11 +114,18 @@ abstract class SyntaxValue
 
 
     /**
-     * Unwraps syntax, returning plain values.
-     * @param recurse if true, unwrapping is recursive (as per `quote` or
-     *  `synatax_to_datum`); otherwise only one layer is unwrapped.
+     * Unwraps syntax, returning plain values. Only one layer is unwrapped, so
+     * if this is a container, the result will contain syntax objects.
      */
-    abstract Object unwrap(Evaluator eval, boolean recurse)
+    abstract Object unwrap(Evaluator eval)
+        throws FusionException;
+
+
+    /**
+     * Unwraps syntax recursively, returning plain values.
+     * Used by `quote` and `synatax_to_datum`.
+     */
+    abstract Object syntaxToDatum(Evaluator eval)
         throws FusionException;
 
 

@@ -43,7 +43,14 @@ abstract class SimpleSyntaxValue
     }
 
     @Override
-    Object unwrap(Evaluator eval, boolean recurse)
+    Object unwrap(Evaluator eval)
+        throws FusionException
+    {
+        return myDatum;
+    }
+
+    @Override
+    Object syntaxToDatum(Evaluator eval)
         throws FusionException
     {
         return myDatum;

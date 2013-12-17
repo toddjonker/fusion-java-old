@@ -34,7 +34,7 @@ final class QuoteForm
         throws FusionException
     {
         SyntaxValue quotedSource = stx.get(eval, 1);
-        Object result = quotedSource.unwrap(eval, true);
+        Object result = quotedSource.syntaxToDatum(eval);
         return new CompiledConstant(result);
     }
 }

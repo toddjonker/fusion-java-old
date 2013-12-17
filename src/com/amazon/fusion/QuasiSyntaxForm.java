@@ -131,7 +131,7 @@ final class QuasiSyntaxForm
         int size = stx.size();
         if (size == 0) return stx;
 
-        Object list = stx.unwrap(eval, false);
+        Object list = stx.unwrap(eval);
 
         boolean same = true;
         Object[] children = new Object[size];

@@ -258,7 +258,7 @@ final class SyntaxList
 
         Evaluator eval = expander.getEvaluator();
 
-        Object list = unwrap(eval, false);
+        Object list = unwrap(eval);
 
         boolean same = true;
         Object[] children = new Object[len];
@@ -286,7 +286,16 @@ final class SyntaxList
 
 
     @Override
-    Object unwrap(Evaluator eval, boolean recurse)
+    Object unwrap(Evaluator eval)
+        throws FusionException
+    {
+        pushWraps(eval);
+        return myImmutableList;
+    }
+
+
+    @Override
+    Object syntaxToDatum(Evaluator eval)
         throws FusionException
     {
         int size = myImmutableList.size();
@@ -295,18 +304,12 @@ final class SyntaxList
             return myImmutableList;
         }
 
-        if (! recurse)
-        {
-            pushWraps(eval);
-            return myImmutableList;
-        }
-
         // Don't bother to push wraps; we'll just discard them anyway.
         Object[] children = new Object[size];
         for (int i = 0; i < size; i++)
         {
             SyntaxValue child = (SyntaxValue) myImmutableList.elt(eval, i);
-            children[i] = child.unwrap(eval, true);
+            children[i] = child.syntaxToDatum(eval);
         }
 
         return immutableList(eval, annotationsAsJavaStrings(), children);

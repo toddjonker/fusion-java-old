@@ -199,10 +199,62 @@ final class SyntaxStruct
 
 
     @Override
-    Object unwrap(Evaluator eval, boolean recurse)
+    Object unwrap(Evaluator eval)
         throws FusionException
     {
-        if (recurse ? myStruct.size() == 0 : myWraps == null)
+        if (myWraps == null)
+        {
+            return myStruct;
+        }
+
+        // We have wraps to propagate (and therefore children).
+
+        // Make a copy of the map, then mutate it to replace children
+        // as necessary.
+        Map<String, Object> newMap =
+            ((NonNullImmutableStruct) myStruct).copyMap();
+
+        // TODO optimize this to not allocate new objects when nothing changes.
+        // Idea: keep track of when there are symbols contained (recursively),
+        // when there's not, maybe we can skip all this.
+
+        for (Map.Entry<String, Object> entry : newMap.entrySet())
+        {
+            Object value = entry.getValue();
+            if (! (value instanceof Object[]))
+            {
+                SyntaxValue child = (SyntaxValue) value;
+                Object childValue = child.addWraps(myWraps);
+                entry.setValue(childValue);
+            }
+            else
+            {
+                Object[] children = (Object[]) value;
+                Object[] childValues = new Object[children.length];
+
+                int cPos = 0;
+                for (Object c : children)
+                {
+                    SyntaxValue child = (SyntaxValue) c;
+                    Object childValue = child.addWraps(myWraps);
+                    childValues[cPos++] = childValue;
+                }
+                entry.setValue(childValues);
+            }
+        }
+
+        myStruct = immutableStruct(newMap, annotationsAsJavaStrings());
+        myWraps = null;
+
+        return myStruct;
+    }
+
+
+    @Override
+    Object syntaxToDatum(Evaluator eval)
+        throws FusionException
+    {
+        if (myStruct.size() == 0)
         {
             return myStruct;
         }
@@ -222,9 +274,7 @@ final class SyntaxStruct
             if (! (value instanceof Object[]))
             {
                 SyntaxValue child = (SyntaxValue) value;
-                Object childValue =
-                    (recurse ? child.unwrap(eval, true)
-                             : child.addWraps(myWraps));
+                Object childValue = child.syntaxToDatum(eval);
                 entry.setValue(childValue);
             }
             else
@@ -236,24 +286,14 @@ final class SyntaxStruct
                 for (Object c : children)
                 {
                     SyntaxValue child = (SyntaxValue) c;
-                    Object childValue =
-                        (recurse ? child.unwrap(eval, true)
-                                 : child.addWraps(myWraps));
+                    Object childValue = child.syntaxToDatum(eval);
                     childValues[cPos++] = childValue;
                 }
                 entry.setValue(childValues);
             }
         }
 
-        NonNullImmutableStruct result =
-            immutableStruct(newMap, annotationsAsJavaStrings());
-        if (!recurse) // We've push wraps to children, retain them!
-        {
-            myStruct = result;
-            myWraps = null;
-        }
-
-        return result;
+        return immutableStruct(newMap, annotationsAsJavaStrings());
     }
 
 

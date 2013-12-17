@@ -64,12 +64,12 @@ final class SyntaxKeyword
 
 
     @Override
-    Object unwrap(Evaluator eval, boolean recurse)
+    Object unwrap(Evaluator eval)
         throws FusionException
     {
         // TODO I have no idea if this is correct long-term.
         // Should we allow it at the moment?
-        return super.unwrap(eval, recurse);
+        return super.unwrap(eval);
     }
 
 

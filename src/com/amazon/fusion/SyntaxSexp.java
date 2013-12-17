@@ -333,22 +333,24 @@ final class SyntaxSexp
     // Helpers for quote, syntax_to_datum, and syntax_unwrap
 
 
-    private static Object unwrap(Evaluator eval, BaseSexp sexp)
+    private static Object syntaxToDatum(Evaluator eval, BaseSexp sexp)
         throws FusionException
     {
         if (isPair(eval, sexp))
         {
             Object head = unsafePairHead(eval, sexp);
-            head = ((SyntaxValue) head).unwrap(eval, true);
+            head = ((SyntaxValue) head).syntaxToDatum(eval);
 
             Object tail = unsafePairTail(eval, sexp);
             if (isSexp(eval, tail))
             {
-                tail = unwrap(eval, (BaseSexp) tail);
+                tail = syntaxToDatum(eval, (BaseSexp) tail);
             }
             else
             {
-                tail = ((SyntaxValue) tail).unwrap(eval, true);
+                // TODO this is different from Racket, where only the first
+                //  pair of a (proper) sexp is wrapped in a syntax object.
+                tail = ((SyntaxValue) tail).syntaxToDatum(eval);
             }
 
             sexp = pair(eval, sexp.myAnnotations, head, tail);
@@ -359,17 +361,20 @@ final class SyntaxSexp
 
 
     @Override
-    Object unwrap(Evaluator eval, boolean recurse)
+    Object unwrap(Evaluator eval)
         throws FusionException
     {
         pushWraps(eval);
-
-        if (recurse)
-        {
-            return unwrap(eval, mySexp);
-        }
-
         return mySexp;
+    }
+
+
+    @Override
+    Object syntaxToDatum(Evaluator eval)
+        throws FusionException
+    {
+        // Don't bother to push wraps; we'll just discard them anyway.
+        return syntaxToDatum(eval, mySexp);
     }
 
 
@@ -403,7 +408,7 @@ final class SyntaxSexp
     SyntaxSequence makeAppended(Evaluator eval, SyntaxSequence that)
         throws FusionException
     {
-        Object back = that.unwrap(eval, false);
+        Object back = that.unwrap(eval);
 
         BaseSexp backSexp;
         if (that instanceof SyntaxSexp)

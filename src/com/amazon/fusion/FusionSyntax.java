@@ -68,7 +68,7 @@ final class FusionSyntax
         {
             checkArityExact(1, args);
             SyntaxValue stx = checkSyntaxArg(0, args);
-            return stx.unwrap(eval, true);
+            return stx.syntaxToDatum(eval);
         }
     }
 
@@ -90,7 +90,7 @@ final class FusionSyntax
         {
             checkArityExact(1, args);
             SyntaxValue stx = checkSyntaxArg(0, args);
-            return stx.unwrap(eval, false);
+            return stx.unwrap(eval);
         }
     }
 }

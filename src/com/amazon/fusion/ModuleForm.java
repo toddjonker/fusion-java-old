@@ -354,7 +354,7 @@ final class ModuleForm
         int variableCount;
         {
             SyntaxInt form = (SyntaxInt) meta.get(eval, "variable_count");
-            Object i = form.unwrap(eval, false);
+            Object i = form.syntaxToDatum(eval);
             variableCount = unsafeTruncateIntToJavaInt(eval, i);
         }
 
