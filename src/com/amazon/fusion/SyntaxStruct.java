@@ -103,7 +103,7 @@ final class SyntaxStruct
         // Make a copy of the map, then mutate it to replace children
         // as necessary.
         Map<String, Object> newMap =
-            ((NonNullImmutableStruct) myStruct).copyMap();
+            ((NonNullImmutableStruct) myStruct).copyMap(eval);
 
         for (Map.Entry<String, Object> entry : newMap.entrySet())
         {
@@ -205,7 +205,7 @@ final class SyntaxStruct
         // Make a copy of the map, then mutate it to replace children
         // as necessary.
         Map<String, Object> newMap =
-            ((NonNullImmutableStruct) myStruct).copyMap();
+            ((NonNullImmutableStruct) myStruct).copyMap(eval);
 
         // TODO optimize this to not allocate new objects when nothing changes.
         // Idea: keep track of when there are symbols contained (recursively),
@@ -257,7 +257,7 @@ final class SyntaxStruct
         // Make a copy of the map, then mutate it to replace children
         // as necessary.
         Map<String, Object> newMap =
-            ((NonNullImmutableStruct) myStruct).copyMap();
+            ((NonNullImmutableStruct) myStruct).copyMap(eval);
 
         // TODO optimize this to not allocate new objects when nothing changes.
 
@@ -302,7 +302,7 @@ final class SyntaxStruct
         // Make a copy of the map, then mutate it to replace children
         // as necessary.
         Map<String, Object> newMap =
-            ((NonNullImmutableStruct) myStruct).copyMap();
+            ((NonNullImmutableStruct) myStruct).copyMap(expander.getEvaluator());
 
         for (Map.Entry<String, Object> entry : newMap.entrySet())
         {
@@ -392,7 +392,8 @@ final class SyntaxStruct
                 return null;
             }
         };
-        myStruct.visitFields(visitor);
+
+        myStruct.visitFields(eval, visitor);
 
         return new CompiledStruct(fieldNames, fieldForms);
     }

@@ -321,7 +321,7 @@ final class FusionStruct
                                        StructFieldVisitor visitor)
         throws FusionException
     {
-        ((BaseStruct) struct).visitFields(visitor);
+        ((BaseStruct) struct).visitFields(eval, visitor);
     }
 
     /**
@@ -364,7 +364,7 @@ final class FusionStruct
     {
         if (keys.length == 0) return struct;
 
-        return ((BaseStruct) struct).removeKeys(keys);
+        return ((BaseStruct) struct).removeKeys(eval, keys);
     }
 
 
@@ -374,7 +374,7 @@ final class FusionStruct
     {
         if (keys.length == 0) return struct;
 
-        return ((BaseStruct) struct).removeKeysM(keys);
+        return ((BaseStruct) struct).removeKeysM(eval, keys);
     }
 
 
@@ -382,14 +382,14 @@ final class FusionStruct
                                          String[] keys)
         throws FusionException
     {
-        return ((BaseStruct) struct).retainKeys(keys);
+        return ((BaseStruct) struct).retainKeys(eval, keys);
     }
 
     static Object unsafeStructRetainKeysM(Evaluator eval, Object struct,
                                           String[] keys)
         throws FusionException
     {
-        return ((BaseStruct) struct).retainKeysM(keys);
+        return ((BaseStruct) struct).retainKeysM(eval, keys);
     }
 
 
@@ -397,14 +397,14 @@ final class FusionStruct
                                     Object struct2)
         throws FusionException
     {
-        return ((BaseStruct) struct1).merge((BaseStruct) struct2);
+        return ((BaseStruct) struct1).merge(eval, (BaseStruct) struct2);
     }
 
     static Object unsafeStructMergeM(Evaluator eval, Object struct1,
                                      Object struct2)
         throws FusionException
     {
-        return ((BaseStruct) struct1).mergeM((BaseStruct) struct2);
+        return ((BaseStruct) struct1).mergeM(eval, (BaseStruct) struct2);
     }
 
 
@@ -412,14 +412,14 @@ final class FusionStruct
                                      Object struct2)
         throws FusionException
     {
-        return ((BaseStruct) struct1).merge1((BaseStruct) struct2);
+        return ((BaseStruct) struct1).merge1(eval, (BaseStruct) struct2);
     }
 
     static Object unsafeStructMerge1M(Evaluator eval, Object struct1,
                                       Object struct2)
         throws FusionException
     {
-        return ((BaseStruct) struct1).merge1M((BaseStruct) struct2);
+        return ((BaseStruct) struct1).merge1M(eval, (BaseStruct) struct2);
     }
 
 
@@ -446,11 +446,12 @@ final class FusionStruct
          * Visits each field in the struct, stopping as soon as the visitation
          * returns non-null.
          */
-        void visitFields(StructFieldVisitor visitor)
+        void visitFields(Evaluator eval, StructFieldVisitor visitor)
             throws FusionException;
 
         // Return type isn't really right
-        ImmutableStruct transformFields(StructFieldVisitor visitor)
+        ImmutableStruct transformFields(Evaluator eval,
+                                        StructFieldVisitor visitor)
             throws FusionException;
 
         boolean hasKey(Evaluator eval, String key)
@@ -475,28 +476,28 @@ final class FusionStruct
         Object putM(Evaluator eval, String key, Object value)
             throws FusionException;
 
-        Object removeKeys(String[] keys)
+        Object removeKeys(Evaluator eval, String[] keys)
             throws FusionException;
 
-        Object removeKeysM(String[] keys)
+        Object removeKeysM(Evaluator eval, String[] keys)
             throws FusionException;
 
-        Object retainKeys(String[] keys)
+        Object retainKeys(Evaluator eval, String[] keys)
             throws FusionException;
 
-        Object retainKeysM(String[] keys)
+        Object retainKeysM(Evaluator eval, String[] keys)
             throws FusionException;
 
-        Object merge(BaseStruct other)
+        Object merge(Evaluator eval, BaseStruct other)
             throws FusionException;
 
-        Object mergeM(BaseStruct other)
+        Object mergeM(Evaluator eval, BaseStruct other)
             throws FusionException;
 
-        Object merge1(BaseStruct other)
+        Object merge1(Evaluator eval, BaseStruct other)
             throws FusionException;
 
-        Object merge1M(BaseStruct other)
+        Object merge1M(Evaluator eval, BaseStruct other)
             throws FusionException;
     }
 
@@ -545,12 +546,13 @@ final class FusionStruct
         }
 
         @Override
-        public void visitFields(StructFieldVisitor visitor)
+        public void visitFields(Evaluator eval, StructFieldVisitor visitor)
         {
         }
 
         @Override
-        public NullStruct transformFields(StructFieldVisitor visitor)
+        public NullStruct transformFields(Evaluator eval,
+                                          StructFieldVisitor visitor)
         {
             return this;
         }
@@ -593,68 +595,66 @@ final class FusionStruct
         }
 
         @Override
-        public Object removeKeys(String[] keys)
+        public Object removeKeys(Evaluator eval, String[] keys)
             throws FusionException
         {
             return this;
         }
 
         @Override
-        public Object removeKeysM(String[] keys)
+        public Object removeKeysM(Evaluator eval, String[] keys)
             throws FusionException
         {
             return this;
         }
 
         @Override
-        public Object retainKeys(String[] keys)
+        public Object retainKeys(Evaluator eval, String[] keys)
             throws FusionException
         {
             return this;
         }
 
         @Override
-        public Object retainKeysM(String[] keys)
+        public Object retainKeysM(Evaluator eval, String[] keys)
             throws FusionException
         {
             return this;
         }
 
         @Override
-        public Object merge(BaseStruct other)
+        public Object merge(Evaluator eval, BaseStruct other)
             throws FusionException
         {
             if (other.size() == 0) return this;
 
-            // We know it has children.
             MapBasedStruct is = (MapBasedStruct) other;
             return new NonNullImmutableStruct(is.myMap, myAnnotations);
         }
 
         @Override
-        public Object mergeM(BaseStruct other)
+        public Object mergeM(Evaluator eval, BaseStruct other)
             throws FusionException
         {
-            return merge(other);
+            return merge(eval, other);
         }
 
         @Override
-        public Object merge1(BaseStruct other)
+        public Object merge1(Evaluator eval, BaseStruct other)
             throws FusionException
         {
             if (other.size() == 0) return this;
 
-            // We know `other` has children.
             MapBasedStruct is = (MapBasedStruct) other;
             Map<String,Object> map = structImplOneify(is.myMap);
             return new NonNullImmutableStruct(map, myAnnotations);
         }
 
         @Override
-        public Object merge1M(BaseStruct other)
+        public Object merge1M(Evaluator eval, BaseStruct other)
             throws FusionException
         {
-            return merge1(other);
+            return merge1(eval, other);
         }
 
         @Override
@@ -701,7 +701,8 @@ final class FusionStruct
         private final int mySize;
 
         /**
-         * @param map must not be null.
+         * @param map must not be null. It is not copied; a reference is
+         * retained.
          */
         private MapBasedStruct(Map<String, Object> map, String[] anns)
         {
@@ -733,7 +734,7 @@ final class FusionStruct
             return makeSimilar(map, myAnnotations);
         }
 
-        Map<String, Object> copyMap()
+        Map<String, Object> copyMap(Evaluator eval)
         {
             return new HashMap<>(myMap);
         }
@@ -745,7 +746,7 @@ final class FusionStruct
         }
 
         @Override
-        public void visitFields(StructFieldVisitor visitor)
+        public void visitFields(Evaluator eval, StructFieldVisitor visitor)
             throws FusionException
         {
             for (Map.Entry<String, Object> entry : myMap.entrySet())
@@ -769,7 +770,9 @@ final class FusionStruct
 
 
         @Override
-        public NonNullImmutableStruct transformFields(StructFieldVisitor visitor)
+        public
+        NonNullImmutableStruct transformFields(Evaluator eval,
+                                               StructFieldVisitor visitor)
             throws FusionException
         {
             boolean mustReplaceThis = (this instanceof MutableStruct);
@@ -781,7 +784,7 @@ final class FusionStruct
 
             // Make a copy of the map, then mutate it to replace children
             // as necessary.
-            Map<String, Object> newMap = copyMap();
+            Map<String, Object> newMap = copyMap(eval);
 
             for (Map.Entry<String, Object> entry : newMap.entrySet())
             {
@@ -864,7 +867,7 @@ final class FusionStruct
 
             try
             {
-                Object datum = transformFields(visitor);
+                Object datum = transformFields(eval, visitor);
                 return SyntaxStruct.make(eval, /*location*/ null, datum);
             }
             catch (StripFailure e)  // This is crazy.
@@ -880,10 +883,9 @@ final class FusionStruct
             return myMap.get(key) != null;
         }
 
-        Object get(String fieldName)
+        Object get(Evaluator eval, String fieldName)
         {
             Object result = myMap.get(fieldName);
-            if (result == null) return null;
             if (result instanceof Object[])
             {
                 return ((Object[]) result)[0];
@@ -930,16 +932,16 @@ final class FusionStruct
         public Object put(Evaluator eval, String key, Object value)
             throws FusionException
         {
-            Map<String,Object> newMap = new HashMap<>(myMap);
+            Map<String,Object> newMap = copyMap(eval);
             newMap.put(key, value);
             return makeSimilar(newMap);
         }
 
         @Override
-        public Object removeKeys(String[] keys)
+        public Object removeKeys(Evaluator eval, String[] keys)
             throws FusionException
         {
-            Map<String,Object> newMap = new HashMap<>(myMap);
+            Map<String,Object> newMap = copyMap(eval);
             List<String> asList = Arrays.asList(keys);
 
             boolean modified = newMap.keySet().removeAll(asList);
@@ -949,10 +951,10 @@ final class FusionStruct
         }
 
         @Override
-        public Object retainKeys(String[] keys)
+        public Object retainKeys(Evaluator eval, String[] keys)
             throws FusionException
         {
-            Map<String,Object> newMap = new HashMap<>(myMap);
+            Map<String,Object> newMap = copyMap(eval);
             List<String> asList = Arrays.asList(keys);
 
             boolean modified = newMap.keySet().retainAll(asList);
@@ -962,7 +964,7 @@ final class FusionStruct
         }
 
         @Override
-        public Object merge(BaseStruct other)
+        public Object merge(Evaluator eval, BaseStruct other)
             throws FusionException
         {
             if (other.size() == 0) return this;
@@ -977,7 +979,7 @@ final class FusionStruct
         }
 
         @Override
-        public Object merge1(BaseStruct other)
+        public Object merge1(Evaluator eval, BaseStruct other)
             throws FusionException
         {
             Map<String,Object> newMap = structImplOneify(myMap);
@@ -1144,31 +1146,31 @@ final class FusionStruct
         }
 
         @Override
-        public Object removeKeysM(String[] keys)
+        public Object removeKeysM(Evaluator eval, String[] keys)
             throws FusionException
         {
-            return removeKeys(keys);
+            return removeKeys(eval, keys);
         }
 
         @Override
-        public Object retainKeysM(String[] keys)
+        public Object retainKeysM(Evaluator eval, String[] keys)
             throws FusionException
         {
-            return retainKeys(keys);
+            return retainKeys(eval, keys);
         }
 
         @Override
-        public Object mergeM(BaseStruct other)
+        public Object mergeM(Evaluator eval, BaseStruct other)
             throws FusionException
         {
-            return merge(other);
+            return merge(eval, other);
         }
 
         @Override
-        public Object merge1M(BaseStruct other)
+        public Object merge1M(Evaluator eval, BaseStruct other)
             throws FusionException
         {
-            return merge1(other);
+            return merge1(eval, other);
         }
     }
 
@@ -1193,7 +1195,7 @@ final class FusionStruct
         Object annotate(Evaluator eval, String[] annotations)
             throws FusionException
         {
-            return makeSimilar(copyMap(), annotations);
+            return makeSimilar(copyMap(eval), annotations);
         }
 
         @Override
@@ -1205,7 +1207,7 @@ final class FusionStruct
         }
 
         @Override
-        public Object removeKeysM(String[] keys)
+        public Object removeKeysM(Evaluator eval, String[] keys)
             throws FusionException
         {
             List<String> asList = Arrays.asList(keys);
@@ -1214,7 +1216,7 @@ final class FusionStruct
         }
 
         @Override
-        public Object retainKeysM(String[] keys)
+        public Object retainKeysM(Evaluator eval, String[] keys)
             throws FusionException
         {
             List<String> asList = Arrays.asList(keys);
@@ -1223,7 +1225,8 @@ final class FusionStruct
         }
 
         @Override
-        public Object mergeM(BaseStruct other) throws FusionException
+        public Object mergeM(Evaluator eval, BaseStruct other)
+            throws FusionException
         {
             if (other.size() != 0)
             {
@@ -1235,7 +1238,8 @@ final class FusionStruct
         }
 
         @Override
-        public Object merge1M(BaseStruct other) throws FusionException
+        public Object merge1M(Evaluator eval, BaseStruct other)
+            throws FusionException
         {
             // Remove any existing repeated fields.
             structImplOneifyM(myMap);
