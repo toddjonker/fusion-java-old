@@ -2,8 +2,10 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionBlob.isBlob;
+import static com.amazon.fusion.FusionBlob.makeBlob;
 import static com.amazon.fusion.FusionBool.isBool;
+import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionClob.makeClob;
 import static com.amazon.fusion.FusionList.immutableList;
 import static com.amazon.fusion.FusionList.isList;
 import static com.amazon.fusion.FusionList.nullList;
@@ -11,9 +13,11 @@ import static com.amazon.fusion.FusionList.unsafeListRef;
 import static com.amazon.fusion.FusionList.unsafeListSize;
 import static com.amazon.fusion.FusionLob.isLob;
 import static com.amazon.fusion.FusionNull.isNullNull;
-import static com.amazon.fusion.FusionNumber.isDecimal;
 import static com.amazon.fusion.FusionNumber.isFloat;
-import static com.amazon.fusion.FusionNumber.isInt;
+import static com.amazon.fusion.FusionNumber.isIntOrDecimal;
+import static com.amazon.fusion.FusionNumber.makeDecimal;
+import static com.amazon.fusion.FusionNumber.makeFloat;
+import static com.amazon.fusion.FusionNumber.makeInt;
 import static com.amazon.fusion.FusionSexp.isEmptySexp;
 import static com.amazon.fusion.FusionSexp.isPair;
 import static com.amazon.fusion.FusionSexp.isSexp;
@@ -25,7 +29,9 @@ import static com.amazon.fusion.FusionStruct.isStruct;
 import static com.amazon.fusion.FusionSymbol.isSymbol;
 import static com.amazon.fusion.FusionSymbol.unsafeSymbolToJavaString;
 import static com.amazon.fusion.FusionTimestamp.isTimestamp;
+import static com.amazon.fusion.FusionTimestamp.makeTimestamp;
 import static com.amazon.fusion.FusionValue.annotationsAsJavaStrings;
+import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import static com.amazon.fusion.SourceLocation.currentLocation;
 import com.amazon.fusion.FusionList.BaseList;
 import com.amazon.fusion.FusionSexp.BaseSexp;
@@ -72,44 +78,57 @@ final class Syntax
         String[] anns = source.getTypeAnnotations();
         SourceLocation loc = currentLocation(source, name);
 
+        BaseValue datum;
         switch (type)
         {
             case NULL:
             {
-                return SyntaxNull.make(eval, loc, anns);
+                datum = FusionNull.makeNullNull(eval, anns);
+                break;
             }
             case BOOL:
             {
                 if (source.isNullValue())
                 {
-                    return SyntaxBool.make(eval, loc, anns, (Boolean) null);
+                    datum = makeBool(eval, anns, (Boolean) null);
                 }
-                boolean value = source.booleanValue();
-                return SyntaxBool.make(eval, loc, anns, value);
+                else
+                {
+                    boolean value = source.booleanValue();
+                    datum = makeBool(eval, anns, value);
+                }
+                break;
             }
             case INT:
             {
                 BigInteger value = source.bigIntegerValue();
-                return SyntaxInt.make(eval, loc, anns, value);
+                datum = makeInt(eval, anns, value);
+                break;
             }
             case DECIMAL:
             {
                 Decimal value = source.decimalValue();
-                return SyntaxDecimal.make(eval, loc, anns, value);
+                datum = makeDecimal(eval, anns, value);
+                break;
             }
             case FLOAT:
             {
                 if (source.isNullValue())
                 {
-                    return SyntaxFloat.make(eval, loc, anns, (Double) null);
+                    datum = makeFloat(eval, anns, (Double) null);
                 }
-                double value = source.doubleValue();
-                return SyntaxFloat.make(eval, loc, anns, value);
+                else
+                {
+                    double value = source.doubleValue();
+                    datum = makeFloat(eval, anns, value);
+                }
+                break;
             }
             case TIMESTAMP:
             {
                 Timestamp value = source.timestampValue();
-                return SyntaxTimestamp.make(eval, loc, anns, value);
+                datum = makeTimestamp(eval, anns, value);
+                break;
             }
             case STRING:
             {
@@ -131,17 +150,19 @@ final class Syntax
             {
                 byte[] value =
                     (source.isNullValue() ? null : source.newBytes());
-                return SyntaxBlob.make(eval, loc, anns, value);
+                datum = makeBlob(eval, anns, value);
+                break;
             }
             case CLOB:
             {
                 byte[] value =
                     (source.isNullValue() ? null : source.newBytes());
-                return SyntaxClob.make(eval, loc, anns, value);
+                datum = makeClob(eval, anns, value);
+                break;
             }
             case LIST:
             {
-                BaseList datum = readList(eval, name, source, anns);
+                datum = readList(eval, name, source, anns);
                 return SyntaxList.make(eval, loc, datum);
             }
             case SEXP:
@@ -153,9 +174,13 @@ final class Syntax
             {
                 return SyntaxStruct.read(eval, source, name, anns);
             }
+            default:
+            {
+                throw new UnsupportedOperationException("Bad type: " + type);
+            }
         }
 
-        throw new UnsupportedOperationException("Bad type: " + type);
+        return makeSyntax(eval, loc, datum);
     }
 
 
@@ -269,6 +294,16 @@ final class Syntax
             return ((SyntaxValue) datum).stripWraps(eval);
         }
 
+        if (isPair(eval, datum))
+        {
+            return (SyntaxValue) pairToStrippedSyntaxMaybe(eval, datum, true);
+        }
+
+        if (isSexp(eval, datum))  // null.sexp or ()
+        {
+            return SyntaxSexp.make(eval, null, (BaseSexp) datum);
+        }
+
         if (isSymbol(eval, datum))
         {
             String value = unsafeSymbolToJavaString(eval, datum);
@@ -279,16 +314,6 @@ final class Syntax
                 return SyntaxKeyword.make(eval, /*location*/ null, datum);
             }
             return SyntaxSymbol.make(eval, /*location*/ null, datum);
-        }
-
-        if (isInt(eval, datum))
-        {
-            return SyntaxInt.make(eval, /*location*/ null, datum);
-        }
-
-        if (isDecimal(eval, datum))
-        {
-            return SyntaxDecimal.make(eval, /*location*/ null, datum);
         }
 
         if (isList(eval, datum))
@@ -315,16 +340,6 @@ final class Syntax
             String[] anns = annotationsAsJavaStrings(eval, datum);
             Object list = immutableList(eval, anns, children);
             return SyntaxList.make(eval, null, list);
-        }
-
-        if (isPair(eval, datum))
-        {
-            return (SyntaxValue) pairToStrippedSyntaxMaybe(eval, datum, true);
-        }
-
-        if (isSexp(eval, datum))  // null.sexp or ()
-        {
-            return SyntaxSexp.make(eval, null, (BaseSexp) datum);
         }
 
         if (isStruct(eval, datum))
@@ -357,38 +372,19 @@ final class Syntax
             }
         }
 
-        if (isNullNull(eval, datum))
-        {
-            return SyntaxNull.make(eval, /*location*/ null, datum);
-        }
-
-        if (isBool(eval, datum))
-        {
-            return SyntaxBool.make(eval, /*location*/ null, datum);
-        }
-
         if (isString(eval, datum))
         {
             return SyntaxString.make(eval, /*location*/ null, datum);
         }
 
-        if (isTimestamp(eval, datum))
+        if (isIntOrDecimal(eval, datum) ||
+            isBool(eval, datum)         ||
+            isTimestamp(eval, datum)    ||
+            isNullNull(eval, datum)     ||
+            isFloat(eval, datum)        ||
+            isLob(eval, datum))
         {
-            return SyntaxTimestamp.make(eval, /*location*/ null, datum);
-        }
-
-        if (isFloat(eval, datum))
-        {
-            return SyntaxFloat.make(eval, /*location*/ null, datum);
-        }
-
-        if (isLob(eval, datum))
-        {
-            if (isBlob(eval, datum))
-            {
-                return SyntaxBlob.make(eval, /*location*/ null, datum);
-            }
-            return SyntaxClob.make(eval, /*location*/ null, datum);
+            return makeSyntax(eval, /*location*/ null, datum);
         }
 
         return null;

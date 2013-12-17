@@ -582,6 +582,7 @@ final class FusionNumber
     //========================================================================
     // Float Representation
 
+    // TODO BaseFloat should extend BaseNumber
     abstract static class BaseFloat
         extends BaseValue
     {

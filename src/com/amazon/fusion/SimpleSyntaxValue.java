@@ -7,21 +7,47 @@ import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
 /**
- *
+ * Implementation of most {@link SyntaxValue}s, which consist of a simple
+ * wrapped datum.
  */
-abstract class SimpleSyntaxValue
+class SimpleSyntaxValue
     extends SyntaxValue
 {
     final BaseValue myDatum;
 
 
     /**
-     * @param datum must not be null.
+     * @param loc may be null.
+     * @param datum must not be null and must not be a {@link SyntaxValue}.
      */
     SimpleSyntaxValue(SourceLocation loc, BaseValue datum)
     {
         super(loc);
+        assert ! (datum instanceof SyntaxValue);
         myDatum = datum;
+    }
+
+
+    /**
+     * @param loc may be null.
+     * @param datum must not be null and must not be a {@link SyntaxValue}.
+     */
+    static SyntaxValue makeSyntax(Evaluator      eval,
+                                  SourceLocation loc,
+                                  BaseValue      datum)
+    {
+        return new SimpleSyntaxValue(loc, datum);
+    }
+
+    /**
+     * @param loc may be null.
+     * @param datum must be a Fusion value but not a {@link SyntaxValue}.
+     */
+    static SyntaxValue makeSyntax(Evaluator      eval,
+                                  SourceLocation loc,
+                                  Object         datum)
+    {
+        return new SimpleSyntaxValue(loc, (BaseValue) datum);
     }
 
 

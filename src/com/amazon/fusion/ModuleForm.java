@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionEval.evalSyntax;
+import static com.amazon.fusion.FusionNumber.makeInt;
 import static com.amazon.fusion.FusionNumber.unsafeTruncateIntToJavaInt;
 import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionVoid.voidValue;
@@ -11,6 +12,7 @@ import static com.amazon.fusion.GlobalState.DEFINE_SYNTAX;
 import static com.amazon.fusion.GlobalState.PROVIDE;
 import static com.amazon.fusion.GlobalState.REQUIRE;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
+import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -259,13 +261,15 @@ final class ModuleForm
 
         // FIXME a ludicrous hack to communicate this data to the compiler!
         {
-            SyntaxInt variableCount =
-                SyntaxInt.make(eval, moduleNamespace.getBindings().size());
+            BaseValue datum =
+                makeInt(eval, moduleNamespace.getBindings().size());
+            SyntaxValue variableCount =
+                makeSyntax(eval, /*location*/ null, datum);
 
-            SyntaxString identity =
+            SyntaxValue identity =
                 SyntaxString.make(eval, id.absolutePath());
 
-            SyntaxString languageIdentity =
+            SyntaxValue languageIdentity =
                 SyntaxString.make(eval, initialBindingsId.absolutePath());
 
             Object s =
@@ -353,7 +357,7 @@ final class ModuleForm
 
         int variableCount;
         {
-            SyntaxInt form = (SyntaxInt) meta.get(eval, "variable_count");
+            SyntaxValue form = meta.get(eval, "variable_count");
             Object i = form.syntaxToDatum(eval);
             variableCount = unsafeTruncateIntToJavaInt(eval, i);
         }
