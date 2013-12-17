@@ -11,9 +11,11 @@ import com.amazon.ion.ValueFactory;
 import java.io.IOException;
 
 /**
- * Implementation of {@code null.null}.
+ * Utilities for working with Fusion {@code bool} values.
+ *
+ * @see FusionValue
  */
-final class FusionNull
+public final class FusionNull
 {
     /** Not for application use. */
     private FusionNull() {}
@@ -141,6 +143,17 @@ final class FusionNull
     //========================================================================
     // Predicates
 
+
+    /**
+     * Determines whether a Fusion value has type {@code null}; that is, is it
+     * {@code null.null}?
+     *
+     * @see FusionValue#isAnyNull(TopLevel, Object)
+     */
+    static boolean isNullNull(TopLevel top, Object value)
+    {
+        return (value instanceof NullNull);
+    }
 
     static boolean isNullNull(Evaluator eval, Object value)
     {

@@ -44,6 +44,12 @@ public final class FusionValue
     }
 
 
+    /**
+     * Determines whether a Fusion value is a null of an type; that is, is it
+     * {@code null.null}, {@code null.bool}, {@code null.int}, <em>etc.</em>?
+     *
+     * @see FusionNull#isNullNull(Evaluator, Object)
+     */
     public static boolean isAnyNull(TopLevel top, Object value)
         throws FusionException
     {
