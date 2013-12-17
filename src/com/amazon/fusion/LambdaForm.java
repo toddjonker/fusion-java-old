@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionSexp.immutableSexp;
+import static com.amazon.fusion.FusionString.isString;
 
 /**
  * The {@code lambda} syntactic form, which evaluates to a {@link Closure}.
@@ -40,7 +41,7 @@ final class LambdaForm
 
         int bodyStart;
         SyntaxValue maybeDoc = children[2];
-        if (maybeDoc.getType() == SyntaxValue.Type.STRING && arity > 3)
+        if (isString(eval, maybeDoc.unwrap(eval)) && arity > 3)
         {
             bodyStart = 3;
         }
@@ -143,7 +144,7 @@ final class LambdaForm
 
         {
             SyntaxValue maybeDoc = stx.get(eval, 2);
-            if (maybeDoc.getType() == SyntaxValue.Type.STRING
+            if (isString(eval, maybeDoc.unwrap(eval))
                 && stx.size() > 3)
             {
                 doc = ((SyntaxString) maybeDoc).stringValue();

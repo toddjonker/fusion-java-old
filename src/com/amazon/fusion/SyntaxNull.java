@@ -36,14 +36,4 @@ final class SyntaxNull
         NullNull n = (NullNull) datum;
         return new SyntaxNull(loc, n);
     }
-
-
-    //========================================================================
-
-
-    @Override
-    Type getType()
-    {
-        return Type.NULL;
-    }
 }

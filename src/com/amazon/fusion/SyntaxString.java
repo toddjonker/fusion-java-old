@@ -62,14 +62,4 @@ final class SyntaxString
         BaseString datum = makeString(eval, value);
         return new SyntaxString(eval, null, datum);
     }
-
-
-    //========================================================================
-
-
-    @Override
-    Type getType()
-    {
-        return Type.STRING;
-    }
 }

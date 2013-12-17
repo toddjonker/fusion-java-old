@@ -42,14 +42,4 @@ final class SyntaxInt
         BaseInt datum = makeInt(eval, value);
         return new SyntaxInt(/*location*/ null, datum);
     }
-
-
-    //========================================================================
-
-
-    @Override
-    Type getType()
-    {
-        return Type.INT;
-    }
 }

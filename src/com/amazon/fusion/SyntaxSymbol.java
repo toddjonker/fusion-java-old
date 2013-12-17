@@ -133,13 +133,6 @@ final class SyntaxSymbol
 
 
     @Override
-    Type getType()
-    {
-        return Type.SYMBOL;
-    }
-
-
-    @Override
     SyntaxSymbol addWrap(SyntaxWrap wrap)
     {
         SyntaxWraps newWraps;

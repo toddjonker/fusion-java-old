@@ -3,6 +3,8 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionString.makeString;
+import static com.amazon.fusion.FusionText.isText;
+import static com.amazon.fusion.FusionText.unsafeTextToJavaString;
 import static com.amazon.fusion.ModuleIdentity.isValidModulePath;
 import static com.amazon.ion.util.IonTextUtils.printString;
 import java.util.ArrayList;
@@ -67,21 +69,18 @@ final class ModuleNameResolver
      *
      * @throws ModuleNotFoundException if the module could not be found.
      */
-    ModuleIdentity resolve(Evaluator eval,
+    ModuleIdentity resolve(Evaluator      eval,
                            ModuleIdentity baseModule,
-                           SyntaxValue pathStx,
-                           boolean load)
+                           SyntaxValue    pathStx,
+                           boolean        load)
         throws FusionException, ModuleNotFoundException
     {
-        switch (pathStx.getType())
+        Object datum = pathStx.unwrap(eval);
+        if (isText(eval, datum))
         {
-            case STRING:
-            case SYMBOL:
-            {
-                String path = ((SyntaxText) pathStx).stringValue();
-                // TODO check null/empty
-                return resolveModulePath(eval, baseModule, path, load, pathStx);
-            }
+            String path = unsafeTextToJavaString(eval, datum);
+            // TODO check null/empty
+            return resolveModulePath(eval, baseModule, path, load, pathStx);
         }
 
         throw new SyntaxException("module path", "unrecognized form", pathStx);

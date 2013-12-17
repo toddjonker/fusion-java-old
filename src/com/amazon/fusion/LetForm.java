@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSymbol.isSymbol;
+
 final class LetForm
     extends MacroForm
 {
@@ -52,8 +54,17 @@ final class LetForm
         SyntaxChecker check = check(eval, stx);
         final int letExprSize = check.arityAtLeast(3);
 
-        SyntaxSymbol loopName = determineLoopName(check);
-        int bindingPos = (loopName == null ? 1 : 2);
+        SyntaxValue loopName = null;
+        int bindingPos = 1;
+        {
+            SyntaxValue maybeName =
+                check.requiredForm("loop name or binding pairs", 1);
+            if (isSymbol(eval, maybeName.unwrap(eval)))
+            {
+                loopName = maybeName;
+                bindingPos = 2;
+            }
+        }
         if (letExprSize < bindingPos + 2)
         {
             throw check.failure("no body");
@@ -118,17 +129,5 @@ final class LetForm
         }
 
         return SyntaxSexp.make(eval, stx.getLocation(), subforms);
-    }
-
-    SyntaxSymbol determineLoopName(SyntaxChecker check)
-        throws FusionException
-    {
-        SyntaxValue maybeName =
-            check.requiredForm("loop name or binding pairs", 1);
-        if (maybeName.getType() == SyntaxValue.Type.SYMBOL)
-        {
-            return (SyntaxSymbol) maybeName;
-        }
-        return null;
     }
 }

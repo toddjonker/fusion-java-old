@@ -40,14 +40,4 @@ final class SyntaxDecimal
         BaseDecimal datum = makeDecimal(eval, annotations, value);
         return new SyntaxDecimal(loc, datum);
     }
-
-
-    //========================================================================
-
-
-    @Override
-    Type getType()
-    {
-        return Type.DECIMAL;
-    }
 }

@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
+import static com.amazon.fusion.FusionString.isString;
 import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.fusion.Namespace.NsBinding;
 
@@ -46,7 +47,7 @@ final class DefineSyntaxForm
 
         int bodyPos;
         SyntaxValue maybeDoc = children[2];
-        if (maybeDoc.getType() == SyntaxValue.Type.STRING && arity > 3)
+        if (isString(eval, maybeDoc.unwrap(eval)) && arity > 3)
         {
             bodyPos = 3;
         }

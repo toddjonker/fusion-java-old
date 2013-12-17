@@ -39,14 +39,4 @@ final class SyntaxBlob
         BaseBlob datum = makeBlob(eval, annotations, value);
         return new SyntaxBlob(loc, datum);
     }
-
-
-    //========================================================================
-
-
-    @Override
-    Type getType()
-    {
-        return Type.BLOB;
-    }
 }

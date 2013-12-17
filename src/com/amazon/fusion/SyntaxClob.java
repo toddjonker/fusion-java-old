@@ -39,14 +39,4 @@ final class SyntaxClob
         BaseClob datum = makeClob(eval, annotations, value);
         return new SyntaxClob(loc, datum);
     }
-
-
-    //========================================================================
-
-
-    @Override
-    Type getType()
-    {
-        return Type.CLOB;
-    }
 }

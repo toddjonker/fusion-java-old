@@ -181,13 +181,6 @@ final class SyntaxStruct
     }
 
 
-    @Override
-    Type getType()
-    {
-        return Type.STRUCT;
-    }
-
-
     SyntaxValue get(Evaluator eval, String fieldName)
         throws FusionException
     {

@@ -131,13 +131,6 @@ final class SyntaxList
 
 
     @Override
-    Type getType()
-    {
-        return Type.LIST;
-    }
-
-
-    @Override
     String[] annotationsAsJavaStrings()
     {
         return myImmutableList.annotationsAsJavaStrings();

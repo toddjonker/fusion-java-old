@@ -275,13 +275,6 @@ final class SyntaxSexp
 
 
     @Override
-    Type getType()
-    {
-        return Type.SEXP;
-    }
-
-
-    @Override
     String[] annotationsAsJavaStrings()
     {
         return mySexp.annotationsAsJavaStrings();

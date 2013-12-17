@@ -49,13 +49,6 @@ final class SyntaxKeyword
 
 
     @Override
-    Type getType()
-    {
-        return Type.KEYWORD;
-    }
-
-
-    @Override
     SyntaxValue doExpand(Expander eval, Environment env)
         throws SyntaxException
     {

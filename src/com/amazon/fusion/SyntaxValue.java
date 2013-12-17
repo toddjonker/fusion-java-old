@@ -14,11 +14,6 @@ import java.io.IOException;
 abstract class SyntaxValue
     extends BaseValue
 {
-    enum Type {
-        NULL, BOOL, INT, DECIMAL, FLOAT, TIMESTAMP, BLOB, CLOB,
-        STRING, SYMBOL, LIST, SEXP, STRUCT, KEYWORD
-    }
-
     /** A zero-length array. */
     final static SyntaxValue[] EMPTY_ARRAY = new SyntaxValue[0];
 
@@ -49,8 +44,6 @@ abstract class SyntaxValue
     {
         return mySrcLoc;
     }
-
-    abstract Type getType();
 
 
     /**

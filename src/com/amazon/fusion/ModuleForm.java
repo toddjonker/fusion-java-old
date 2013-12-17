@@ -436,10 +436,10 @@ final class ModuleForm
     /**
      * @return [String[] names, ModuleBinding[] bindings]
      */
-    private Object[] providedSymbols(Evaluator eval,
-                                           Namespace ns,
-                                           SyntaxSexp moduleStx,
-                                           int firstProvidePos)
+    private Object[] providedSymbols(Evaluator  eval,
+                                     Namespace  ns,
+                                     SyntaxSexp moduleStx,
+                                     int        firstProvidePos)
         throws FusionException
     {
         Map<String,Binding>      bound    = new HashMap<>();
@@ -455,29 +455,29 @@ final class ModuleForm
             for (int i = 1; i < size; i++)
             {
                 SyntaxValue spec = form.get(eval, i);
-                switch (spec.getType())
+
+                SyntaxSymbol id;
+                try
                 {
-                    case SYMBOL:
-                    {
-                        SyntaxSymbol id = (SyntaxSymbol) spec;
-                        Binding binding = id.getBinding();
-                        Binding prior = bound.put(id.stringValue(), binding);
-                        if (prior != null && ! binding.sameTarget(prior))
-                        {
-                            String message =
-                                "identifier already provided with a different" +
-                                " binding";
-                            throw check.failure(message, id);
-                        }
-                        names.add(id.stringValue());
-                        bindings.add((ModuleBinding) binding.originalBinding());
-                        break;
-                    }
-                    default:
-                    {
-                        throw check.failure("invalid provide-spec");
-                    }
+                    id = (SyntaxSymbol) spec;
                 }
+                catch (ClassCastException e)
+                {
+                    throw check.failure("invalid provide-spec");
+                }
+
+                Binding binding = id.getBinding();
+                String name = id.stringValue();
+                Binding prior = bound.put(name, binding);
+                if (prior != null && ! binding.sameTarget(prior))
+                {
+                    String message =
+                        "identifier already provided with a different" +
+                        " binding";
+                    throw check.failure(message, id);
+                }
+                names.add(name);
+                bindings.add((ModuleBinding) binding.originalBinding());
             }
         }
 

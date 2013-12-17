@@ -32,10 +32,6 @@ abstract class SimpleSyntaxValue
     }
 
     @Override
-    abstract Type getType();
-
-
-    @Override
     CompiledForm doCompile(Evaluator eval, Environment env)
         throws FusionException
     {

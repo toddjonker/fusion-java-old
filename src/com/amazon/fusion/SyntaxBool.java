@@ -52,14 +52,4 @@ final class SyntaxBool
         BaseBool b = makeBool(eval, annotations, value);
         return new SyntaxBool(loc, b);
     }
-
-
-    //========================================================================
-
-
-    @Override
-    Type getType()
-    {
-        return Type.BOOL;
-    }
 }

@@ -53,14 +53,4 @@ final class SyntaxFloat
         BaseFloat datum = makeFloat(eval, annotations, value);
         return new SyntaxFloat(loc, datum);
     }
-
-
-    //========================================================================
-
-
-    @Override
-    Type getType()
-    {
-        return Type.FLOAT;
-    }
 }

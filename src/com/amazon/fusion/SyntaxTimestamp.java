@@ -41,14 +41,4 @@ final class SyntaxTimestamp
         BaseTimestamp ts = makeTimestamp(eval, annotations, value);
         return new SyntaxTimestamp(loc, ts);
     }
-
-
-    //========================================================================
-
-
-    @Override
-    Type getType()
-    {
-        return Type.TIMESTAMP;
-    }
 }

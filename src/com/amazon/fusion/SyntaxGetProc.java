@@ -32,31 +32,21 @@ final class SyntaxGetProc
         final int lastArg = args.length - 1;
         for (int i = 1; i <= lastArg; i++)
         {
-            switch (stx.getType())
+            if (stx instanceof SyntaxSequence)
             {
-                case LIST:
-                case SEXP:
+                int index = checkIntArgToJavaInt(eval, this, i, args);
+                SyntaxSequence s = (SyntaxSequence) stx;
+                if (s.size() <= index)
                 {
-                    int index = checkIntArgToJavaInt(eval, this, i, args);
-                    SyntaxSequence s = (SyntaxSequence) stx;
-                    if (s.size() <= index)
-                    {
-                        return voidValue(eval);
-                    }
-                    value = s.get(eval, index);
-                    break;
+                    return voidValue(eval);
                 }
-                case STRUCT:
-                {
-                    String field = checkNonEmptyTextArg(eval, this, i, args);
-                    SyntaxStruct s = (SyntaxStruct) stx;
-                    value = s.get(eval, field);
-                    break;
-                }
-                default:
-                {
-                    throw new IllegalStateException();
-                }
+                value = s.get(eval, index);
+            }
+            else
+            {
+                String field = checkNonEmptyTextArg(eval, this, i, args);
+                SyntaxStruct s = (SyntaxStruct) stx;
+                value = s.get(eval, field);
             }
 
             if (value == null) return voidValue(eval);
