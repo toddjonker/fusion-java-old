@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionNumber.makeDecimal;
 import static com.amazon.fusion.FusionString.checkNullableStringArg;
 import static com.amazon.fusion.FusionString.makeString;
+import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import static com.amazon.ion.util.IonTextUtils.isDigit;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
@@ -33,6 +34,12 @@ final class FusionTimestamp
         private BaseTimestamp() {}
 
         abstract Timestamp timestampValue();
+
+        @Override
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        {
+            return makeSyntax(eval, /*location*/ null, this);
+        }
     }
 
 

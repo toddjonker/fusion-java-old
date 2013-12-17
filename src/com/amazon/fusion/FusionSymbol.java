@@ -23,6 +23,20 @@ final class FusionSymbol
         extends BaseText
     {
         private BaseSymbol() {}
+
+        @Override
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+            throws FusionException
+        {
+            String value = stringValue();
+            if (value != null &&
+                value.startsWith("_") &&
+                value.endsWith("_"))
+            {
+                return SyntaxKeyword.make(eval, /*location*/ null, this);
+            }
+            return SyntaxSymbol.make(eval, /*location*/ null, this);
+        }
     }
 
 

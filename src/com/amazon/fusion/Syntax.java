@@ -3,40 +3,17 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBlob.makeBlob;
-import static com.amazon.fusion.FusionBool.isBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionClob.makeClob;
 import static com.amazon.fusion.FusionList.immutableList;
-import static com.amazon.fusion.FusionList.isList;
 import static com.amazon.fusion.FusionList.nullList;
-import static com.amazon.fusion.FusionList.unsafeListRef;
-import static com.amazon.fusion.FusionList.unsafeListSize;
-import static com.amazon.fusion.FusionLob.isLob;
-import static com.amazon.fusion.FusionNull.isNullNull;
-import static com.amazon.fusion.FusionNumber.isFloat;
-import static com.amazon.fusion.FusionNumber.isIntOrDecimal;
 import static com.amazon.fusion.FusionNumber.makeDecimal;
 import static com.amazon.fusion.FusionNumber.makeFloat;
 import static com.amazon.fusion.FusionNumber.makeInt;
-import static com.amazon.fusion.FusionSexp.isEmptySexp;
-import static com.amazon.fusion.FusionSexp.isPair;
-import static com.amazon.fusion.FusionSexp.isSexp;
-import static com.amazon.fusion.FusionSexp.pair;
-import static com.amazon.fusion.FusionSexp.unsafePairHead;
-import static com.amazon.fusion.FusionSexp.unsafePairTail;
-import static com.amazon.fusion.FusionString.isString;
-import static com.amazon.fusion.FusionStruct.isStruct;
-import static com.amazon.fusion.FusionSymbol.isSymbol;
-import static com.amazon.fusion.FusionSymbol.unsafeSymbolToJavaString;
-import static com.amazon.fusion.FusionTimestamp.isTimestamp;
 import static com.amazon.fusion.FusionTimestamp.makeTimestamp;
-import static com.amazon.fusion.FusionValue.annotationsAsJavaStrings;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import static com.amazon.fusion.SourceLocation.currentLocation;
 import com.amazon.fusion.FusionList.BaseList;
-import com.amazon.fusion.FusionSexp.BaseSexp;
-import com.amazon.fusion.FusionStruct.BaseStruct;
-import com.amazon.fusion.FusionStruct.StructFieldVisitor;
 import com.amazon.ion.Decimal;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonReader;
@@ -244,155 +221,20 @@ final class Syntax
     }
 
 
-    private static Object pairToStrippedSyntaxMaybe(Evaluator eval,
-                                                    Object pair,
-                                                    boolean first)
-        throws FusionException
-    {
-        Object rawHead = unsafePairHead(eval, pair);
-        Object rawTail = unsafePairTail(eval, pair);
-
-        SyntaxValue newHead = datumToStrippedSyntaxMaybe(eval, rawHead);
-
-        Object newTail;
-        if (isPair(eval, rawTail))
-        {
-            newTail = pairToStrippedSyntaxMaybe(eval, rawTail, false);
-        }
-        else if (isEmptySexp(eval, rawTail))
-        {
-            newTail = rawTail;
-        }
-        else
-        {
-            newTail = datumToStrippedSyntaxMaybe(eval, rawTail);
-        }
-
-        if (newHead == null || newTail == null) return null;
-
-        BaseSexp newPair = pair(eval, ((BaseSexp) pair).myAnnotations,
-                                newHead, newTail);
-
-        return (first ? SyntaxSexp.make(eval, null, newPair) : newPair);
-    }
-
-
     /**
      * TODO FUSION-242 This needs to do cycle detection.
      *
      * @return null if something in the datum can't be converted into syntax.
      */
-    private static SyntaxValue
-    datumToStrippedSyntaxMaybe(final Evaluator eval, Object datum)
+    static SyntaxValue datumToStrippedSyntaxMaybe(Evaluator eval, Object datum)
         throws FusionException
     {
-        if (isSyntax(eval, datum))
+        if (datum instanceof BaseValue)
         {
-            // TODO FUSION-183 Should strip location and properties?
-            //      Well, probably not, that throws away existing
-            //      context when called from datum_to_syntax
-            return ((SyntaxValue) datum).stripWraps(eval);
-        }
-
-        if (isPair(eval, datum))
-        {
-            return (SyntaxValue) pairToStrippedSyntaxMaybe(eval, datum, true);
-        }
-
-        if (isSexp(eval, datum))  // null.sexp or ()
-        {
-            return SyntaxSexp.make(eval, null, (BaseSexp) datum);
-        }
-
-        if (isSymbol(eval, datum))
-        {
-            String value = unsafeSymbolToJavaString(eval, datum);
-            if (value != null &&
-                value.startsWith("_") &&
-                value.endsWith("_"))
-            {
-                return SyntaxKeyword.make(eval, /*location*/ null, datum);
-            }
-            return SyntaxSymbol.make(eval, /*location*/ null, datum);
-        }
-
-        if (isList(eval, datum))
-        {
-            int size = unsafeListSize(eval, datum);
-            if (size == 0)
-            {
-                return SyntaxList.make(eval, null, datum);
-            }
-
-            Object[] children = new Object[size];
-            for (int i = 0; i < size; i++)
-            {
-                Object rawChild = unsafeListRef(eval, datum, i);
-                Object child = datumToStrippedSyntaxMaybe(eval, rawChild);
-                if (child == null)
-                {
-                    // Hit something that's not syntax-able
-                    return null;
-                }
-                children[i] = child;
-            }
-
-            String[] anns = annotationsAsJavaStrings(eval, datum);
-            Object list = immutableList(eval, anns, children);
-            return SyntaxList.make(eval, null, list);
-        }
-
-        if (isStruct(eval, datum))
-        {
-            StructFieldVisitor visitor = new StructFieldVisitor()
-            {
-                @Override
-                public Object visit(String name, Object value)
-                    throws FusionException
-                {
-                    SyntaxValue stripped =
-                        datumToStrippedSyntaxMaybe(eval, value);
-                    if (stripped == null)
-                    {
-                        // Hit something that's not syntax-able
-                        throw new StripFailure();
-                    }
-                    return stripped;
-                }
-            };
-
-            try
-            {
-                datum = ((BaseStruct) datum).transformFields(visitor);
-                return SyntaxStruct.make(eval, /*location*/ null, datum);
-            }
-            catch (StripFailure e)  // This is crazy.
-            {
-                return null;
-            }
-        }
-
-        if (isString(eval, datum))
-        {
-            return SyntaxString.make(eval, /*location*/ null, datum);
-        }
-
-        if (isIntOrDecimal(eval, datum) ||
-            isBool(eval, datum)         ||
-            isTimestamp(eval, datum)    ||
-            isNullNull(eval, datum)     ||
-            isFloat(eval, datum)        ||
-            isLob(eval, datum))
-        {
-            return makeSyntax(eval, /*location*/ null, datum);
+            return ((BaseValue) datum).toStrippedSyntaxMaybe(eval);
         }
 
         return null;
-    }
-
-    @SuppressWarnings("serial")
-    private static final class StripFailure extends RuntimeException
-    {
     }
 
 

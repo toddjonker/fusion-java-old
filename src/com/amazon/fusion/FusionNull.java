@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
@@ -27,6 +28,12 @@ final class FusionNull
         boolean isAnyNull()
         {
             return true;
+        }
+
+        @Override
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        {
+            return makeSyntax(eval, /*location*/ null, this);
         }
 
         @Override

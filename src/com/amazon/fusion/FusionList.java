@@ -10,6 +10,7 @@ import static com.amazon.fusion.FusionNumber.unsafeTruncateIntToJavaInt;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.fusion.Syntax.datumToStrippedSyntaxMaybe;
 import com.amazon.fusion.FusionSequence.BaseSequence;
 import com.amazon.fusion.FusionSexp.BaseSexp;
 import com.amazon.ion.IonList;
@@ -430,6 +431,40 @@ final class FusionList
             unsafeCopy(eval, 0, elements, 0, size);
             return elements;
         }
+
+        /**
+         * TODO FUSION-242 This needs to do cycle detection.
+         *
+         * @return null if an element can't be converted into syntax.
+         */
+        @Override
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+            throws FusionException
+        {
+            int size = size();
+            if (size == 0 && (this instanceof ImmutableList))
+            {
+                return SyntaxList.make(eval, null, this);
+            }
+
+            Object[] children = new Object[size];
+            for (int i = 0; i < size; i++)
+            {
+                Object rawChild = unsafeRef(eval, i);
+                Object child = datumToStrippedSyntaxMaybe(eval, rawChild);
+                if (child == null)
+                {
+                    // Hit something that's not syntax-able
+                    return null;
+                }
+                children[i] = child;
+            }
+
+            String[] anns = annotationsAsJavaStrings();
+            Object list = immutableList(eval, anns, children);
+            return SyntaxList.make(eval, null, list);
+        }
+
 
         /**
          * @return null if the list and its elements cannot be ionized

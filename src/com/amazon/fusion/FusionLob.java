@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
+
 
 /**
  * Utilities for working with Fusion {@code blob} and {@code clob} values.
@@ -21,6 +23,12 @@ public final class FusionLob
         extends BaseValue
     {
         BaseLob() {}
+
+        @Override
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        {
+            return makeSyntax(eval, /*location*/ null, this);
+        }
     }
 
 

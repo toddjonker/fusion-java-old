@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.fusion.Syntax.datumToStrippedSyntaxMaybe;
 import com.amazon.fusion.FusionIterator.AbstractIterator;
 import com.amazon.fusion.FusionSequence.BaseSequence;
 import com.amazon.ion.IonSequence;
@@ -302,6 +303,13 @@ final class FusionSexp
         }
 
         @Override
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+            throws FusionException
+        {
+            return SyntaxSexp.make(eval, null, this);
+        }
+
+        @Override
         abstract IonSexp copyToIonValue(ValueFactory factory,
                                         boolean throwOnConversionFailure)
             throws FusionException;
@@ -478,6 +486,44 @@ final class FusionSexp
                 "No index " + i + " in sequence " + this;
             throw new IndexOutOfBoundsException(message);
         }
+
+
+        /**
+         * Converts this pair to a normal pair of syntax objects.
+         */
+        private BaseSexp toPairOfStrippedSyntaxMaybe(Evaluator eval)
+            throws FusionException
+        {
+            SyntaxValue head = datumToStrippedSyntaxMaybe(eval, myHead);
+            if (head == null) return null;
+
+            Object tail = myTail;
+            if (isPair(eval, tail))
+            {
+                tail = ((ImmutablePair)tail).toPairOfStrippedSyntaxMaybe(eval);
+            }
+            else if (! isEmptySexp(eval, tail))
+            {
+                tail = datumToStrippedSyntaxMaybe(eval, tail);
+            }
+            if (tail == null) return null;
+
+            return pair(eval, myAnnotations, head, tail);
+        }
+
+        /**
+         * TODO FUSION-242 This needs to do cycle detection.
+         *
+         * @return null if an element can't be converted into syntax.
+         */
+        @Override
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+            throws FusionException
+        {
+            BaseSexp newPair = toPairOfStrippedSyntaxMaybe(eval);
+            return SyntaxSexp.make(eval, null, newPair);
+        }
+
 
         @Override
         IonSexp copyToIonValue(ValueFactory factory,

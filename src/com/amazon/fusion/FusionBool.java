@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionValue.evaluator;
+import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import com.amazon.ion.IonException;
@@ -35,6 +36,12 @@ public final class FusionBool
         abstract boolean isTrue();
         abstract boolean isFalse();
         abstract Boolean asJavaBoolean();
+
+        @Override
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        {
+            return makeSyntax(eval, /*location*/ null, this);
+        }
     }
 
 

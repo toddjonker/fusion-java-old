@@ -14,6 +14,7 @@ import static com.amazon.fusion.FusionText.textToJavaString;
 import static com.amazon.fusion.FusionText.unsafeTextToJavaString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.fusion.Syntax.datumToStrippedSyntaxMaybe;
 import static com.amazon.ion.util.IonTextUtils.printSymbol;
 import static java.util.Collections.EMPTY_MAP;
 import com.amazon.fusion.FusionCollection.BaseCollection;
@@ -524,6 +525,13 @@ final class FusionStruct
         }
 
         @Override
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+            throws FusionException
+        {
+            return SyntaxStruct.make(eval, /*location*/ null, this);
+        }
+
+        @Override
         public int size()
         {
             return 0;
@@ -821,6 +829,48 @@ final class FusionStruct
             }
 
             return new NonNullImmutableStruct(newMap, myAnnotations);
+        }
+
+        @SuppressWarnings("serial")
+        private static final class StripFailure extends RuntimeException
+        {
+        }
+
+        /**
+         * TODO FUSION-242 This needs to do cycle detection.
+         *
+         * @return null if an element can't be converted into syntax.
+         */
+        @Override
+        SyntaxValue toStrippedSyntaxMaybe(final Evaluator eval)
+            throws FusionException
+        {
+            StructFieldVisitor visitor = new StructFieldVisitor()
+            {
+                @Override
+                public Object visit(String name, Object value)
+                    throws FusionException
+                {
+                    SyntaxValue stripped =
+                        datumToStrippedSyntaxMaybe(eval, value);
+                    if (stripped == null)
+                    {
+                        // Hit something that's not syntax-able
+                        throw new StripFailure();
+                    }
+                    return stripped;
+                }
+            };
+
+            try
+            {
+                Object datum = transformFields(visitor);
+                return SyntaxStruct.make(eval, /*location*/ null, datum);
+            }
+            catch (StripFailure e)  // This is crazy.
+            {
+                return null;
+            }
         }
 
         @Override

@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionIo.safeWriteToString;
+import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import static java.math.RoundingMode.CEILING;
 import static java.math.RoundingMode.FLOOR;
 import com.amazon.ion.IonException;
@@ -66,6 +67,12 @@ final class FusionNumber
         abstract BaseNumber multiply(BaseNumber right);
         /** Second part of double-dispatch. */
         abstract BaseNumber multiply(BaseInt left);
+
+        @Override
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        {
+            return makeSyntax(eval, /*location*/ null, this);
+        }
     }
 
 
@@ -594,6 +601,12 @@ final class FusionNumber
         abstract double primitiveDoubleValue();
 
         abstract Double objectDoubleValue();
+
+        @Override
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        {
+            return makeSyntax(eval, /*location*/ null, this);
+        }
     }
 
 

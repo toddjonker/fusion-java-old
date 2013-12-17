@@ -37,6 +37,12 @@ public final class FusionString
         private BaseString() {}
 
         @Override
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        {
+            return SyntaxString.make(eval, /*location*/ null, this);
+        }
+
+        @Override
         public boolean equals(Object o)
         {
             if (this == o) return true;

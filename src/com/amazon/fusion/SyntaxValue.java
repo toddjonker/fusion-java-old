@@ -117,6 +117,17 @@ abstract class SyntaxValue
 
 
     @Override
+    SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        throws FusionException
+    {
+        // TODO FUSION-183 Should strip location and properties?
+        //      Well, probably not, that throws away existing
+        //      context when called from datum_to_syntax
+        return stripWraps(eval);
+    }
+
+
+    @Override
     final void write(Evaluator eval, Appendable out)
         throws IOException, FusionException
     {

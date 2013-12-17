@@ -48,7 +48,7 @@
     =>
     (begin (check ion_equals
              (type_annotations (quote DATUM))
-              (quote ANNOTATIONS))
+             (quote ANNOTATIONS))
            (check ion_equals
              (syntax_to_datum (quote_syntax DATUM))
              (quote DATUM))
@@ -105,6 +105,27 @@
           (check_xforms1 (unsyntax a_b_datum_stx) [a, b]))))))
 
 (check_representative_ion_data check_xforms)
+
+
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (mutable_list)))
+  [])
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (mutable_list 1)))
+  [1])
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (mutable_list 1 2)))
+  [1, 2])
+
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (stretchy_list)))
+  [])
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (stretchy_list 1)))
+  [1])
+(check ion_equals
+  (syntax_to_datum (datum_to_syntax (stretchy_list 1 2)))
+  [1, 2])
 
 
 (check ion_equals

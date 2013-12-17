@@ -47,6 +47,16 @@ abstract class BaseValue
 
 
     /**
+     * @return null if something in the datum can't be converted into syntax.
+     */
+    SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        throws FusionException
+    {
+        return null;
+    }
+
+
+    /**
      * Returns the documentation of this value.
      * <p>
      * <b>Implementations are expected to return the same object instance on
