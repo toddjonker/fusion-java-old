@@ -52,31 +52,18 @@ final class FusionStruct
         String[] annotations = struct.getTypeAnnotations();
         // TODO FUSION-47 intern annotation text
 
-        if (struct.isNullValue())
+        if (struct.isEmpty()) // No use being lazy in these cases.
         {
-            return nullStruct(eval, annotations);
-        }
-
-        Map<String, Object> map;
-        if (struct.size() == 0)
-        {
-            map = Collections.emptyMap();
-        }
-        else
-        {
-            map = new HashMap<>(struct.size());
-            for (IonValue v : struct)
+            if (struct.isNullValue())
             {
-                String field  = v.getFieldName();
-
-                // TODO be lazy about this injection
-                Object newElt = eval.inject(v);
-                structImplAdd(map, field, newElt);
+                return nullStruct(eval, annotations);
             }
+
+            Map<String, Object> map = Collections.emptyMap();
+            return immutableStruct(map, annotations);
         }
 
-        return immutableStruct(map, annotations);
-
+        return new LazyInjectingStruct(annotations, struct);
     }
 
 
@@ -629,7 +616,7 @@ final class FusionStruct
             if (other.size() == 0) return this;
 
             MapBasedStruct is = (MapBasedStruct) other;
-            return new NonNullImmutableStruct(is.myMap, myAnnotations);
+            return new NonNullImmutableStruct(is.getMap(eval), myAnnotations);
         }
 
         @Override
@@ -646,7 +633,7 @@ final class FusionStruct
             if (other.size() == 0) return this;
 
             MapBasedStruct is = (MapBasedStruct) other;
-            Map<String,Object> map = structImplOneify(is.myMap);
+            Map<String,Object> map = structImplOneify(is.getMap(eval));
             return new NonNullImmutableStruct(map, myAnnotations);
         }
 
@@ -691,8 +678,12 @@ final class FusionStruct
         /**
          * For repeated fields, the value is Object[] otherwise it's a
          * non-array Object.
+         * <p>
+         * In the case of {@link LazyInjectingStruct}, this map is empty until
+         * an element is accessed. <b>Most access to this field should be
+         * routed through {@link #getMap} to force injection into this map!</b>
          */
-        protected final Map<String, Object> myMap;
+        final Map<String, Object> myMap;
 
         /**
          * We can't use {@link #myMap}.size() because that doesn't count
@@ -726,6 +717,22 @@ final class FusionStruct
             mySize = size;
         }
 
+        private MapBasedStruct(String[] annotations, int size)
+        {
+            myMap = new HashMap<>();
+            mySize = size;
+        }
+
+        /**
+         * Gets the implementation map, first injecting elements if needed.
+         *
+         * @return not null; perhaps empty if this is mutable.
+         */
+        Map<String, Object> getMap(Evaluator eval)
+        {
+            return myMap;
+        }
+
         abstract MapBasedStruct makeSimilar(Map<String, Object> map,
                                             String[] annotations);
 
@@ -736,7 +743,7 @@ final class FusionStruct
 
         Map<String, Object> copyMap(Evaluator eval)
         {
-            return new HashMap<>(myMap);
+            return new HashMap<>(getMap(eval));
         }
 
         @Override
@@ -749,7 +756,7 @@ final class FusionStruct
         public void visitFields(Evaluator eval, StructFieldVisitor visitor)
             throws FusionException
         {
-            for (Map.Entry<String, Object> entry : myMap.entrySet())
+            for (Map.Entry<String, Object> entry : getMap(eval).entrySet())
             {
                 String fieldName = entry.getKey();
 
@@ -880,12 +887,14 @@ final class FusionStruct
         public boolean hasKey(Evaluator eval, String key)
             throws FusionException
         {
-            return myMap.get(key) != null;
+            // There's no real need to inject, but otherwise it's hard to find
+            // a good way to synchronize properly to read from the map.
+            return getMap(eval).get(key) != null;
         }
 
         Object get(Evaluator eval, String fieldName)
         {
-            Object result = myMap.get(fieldName);
+            Object result = getMap(eval).get(fieldName);
             if (result instanceof Object[])
             {
                 return ((Object[]) result)[0];
@@ -898,7 +907,7 @@ final class FusionStruct
         public Object elt(Evaluator eval, String field)
             throws FusionException
         {
-            Object result = myMap.get(field);
+            Object result = getMap(eval).get(field);
             if (result == null)
             {
                 return voidValue(eval);
@@ -915,7 +924,7 @@ final class FusionStruct
         public Object ref(Evaluator eval, String name, Object def)
             throws FusionException
         {
-            Object result = myMap.get(name);
+            Object result = getMap(eval).get(name);
             if (result == null)
             {
                 return bounceDefaultResult(eval, def);
@@ -972,8 +981,8 @@ final class FusionStruct
             // We know it has children.
             MapBasedStruct is = (MapBasedStruct) other;
 
-            Map<String,Object> newMap = new HashMap<>(myMap);
-            structImplMergeM(newMap, is.myMap);
+            Map<String,Object> newMap = copyMap(eval);
+            structImplMergeM(newMap, is.getMap(eval));
 
             return makeSimilar(newMap);
         }
@@ -982,27 +991,34 @@ final class FusionStruct
         public Object merge1(Evaluator eval, BaseStruct other)
             throws FusionException
         {
-            Map<String,Object> newMap = structImplOneify(myMap);
+            Map<String, Object> origMap = getMap(eval);
+            Map<String,Object> newMap = structImplOneify(origMap);
 
             if (other.size() == 0)
             {
-                if (newMap == myMap) return this;
+                if (newMap == origMap) return this;
             }
             else  // Other is not empty, we are going to make a change
             {
                 // Copy our map if we haven't done so already while oneifying
-                if (newMap == myMap)
+                if (newMap == origMap)
                 {
-                    newMap = new HashMap<>(myMap);
+                    newMap = new HashMap<>(origMap);
                 }
 
                 MapBasedStruct is = (MapBasedStruct) other;
-                structImplMerge1M(newMap, is.myMap);
+                structImplMerge1M(newMap, is.getMap(eval));
             }
 
             return makeSimilar(newMap);
         }
 
+        /**
+         * Unlike {@link #ionize} and {@link #copyToIonValue}, here we route
+         * through {@link #getMap} rather than writing any lazily-injected
+         * IonStruct directly. That's to ensure that the output looks the same
+         * in both cases.
+         */
         @Override
         void write(Evaluator eval, Appendable out)
             throws IOException, FusionException
@@ -1011,7 +1027,7 @@ final class FusionStruct
             out.append('{');
 
             boolean comma = false;
-            for (Map.Entry<String, Object> entry : myMap.entrySet())
+            for (Map.Entry<String, Object> entry : getMap(eval).entrySet())
             {
                 String fieldName = entry.getKey();
 
@@ -1041,6 +1057,11 @@ final class FusionStruct
             out.append('}');
         }
 
+        /**
+         * We access {@link #myMap} directly here because the override
+         * {@link LazyInjectingStruct#ionize(Evaluator, IonWriter)}
+         * only calls here after injecting the elements.
+         */
         @Override
         public void ionize(Evaluator eval, IonWriter out)
             throws IOException, FusionException
@@ -1071,6 +1092,11 @@ final class FusionStruct
             out.stepOut();
         }
 
+        /**
+         * We access {@link #myMap} directly here because the override
+         * {@link LazyInjectingStruct#copyToIonValue(ValueFactory, boolean)}
+         * only calls here after injecting the elements.
+         */
         @Override
         IonValue copyToIonValue(ValueFactory factory,
                                 boolean throwOnConversionFailure)
@@ -1110,7 +1136,7 @@ final class FusionStruct
     }
 
 
-    static final class NonNullImmutableStruct
+    static class NonNullImmutableStruct
         extends MapBasedStruct
         implements ImmutableStruct
     {
@@ -1124,6 +1150,11 @@ final class FusionStruct
             super(map, annotations);
         }
 
+        private NonNullImmutableStruct(String[] annotations, int size)
+        {
+            super(annotations, size);
+        }
+
         @Override
         MapBasedStruct makeSimilar(Map<String, Object> map,
                                    String[] annotations)
@@ -1135,7 +1166,7 @@ final class FusionStruct
         Object annotate(Evaluator eval, String[] annotations)
             throws FusionException
         {
-            return makeSimilar(myMap, annotations);
+            return makeSimilar(getMap(eval), annotations);
         }
 
         @Override
@@ -1175,7 +1206,78 @@ final class FusionStruct
     }
 
 
-    private static final class MutableStruct
+    private static final class LazyInjectingStruct
+        extends NonNullImmutableStruct
+    {
+        private IonStruct myIonStruct;
+
+        public LazyInjectingStruct(String[] annotations, IonStruct struct)
+        {
+            super(annotations, struct.size());
+            myIonStruct = struct;
+        }
+
+        private synchronized IonStruct getIonStruct()
+        {
+            return myIonStruct;
+        }
+
+        /**
+         * Synchronized so this immutable class is thread-safe for reads.
+         */
+        @Override
+        synchronized Map<String, Object> getMap(Evaluator eval)
+        {
+            if (myIonStruct != null)
+            {
+                for (IonValue v : myIonStruct)
+                {
+                    String field  = v.getFieldName();
+                    Object newElt = eval.inject(v);
+                    structImplAdd(myMap, field, newElt);
+                }
+
+                myIonStruct = null;
+            }
+
+            return myMap;
+        }
+
+        @Override
+        public void ionize(Evaluator eval, IonWriter out)
+            throws IOException, FusionException
+        {
+            IonStruct s = getIonStruct();
+            if (s != null)
+            {
+                s.writeTo(out);
+            }
+            else
+            {
+                super.ionize(eval, out);
+            }
+        }
+
+        @Override
+        IonValue copyToIonValue(ValueFactory factory,
+                                boolean throwOnConversionFailure)
+            throws FusionException
+        {
+            IonStruct s = getIonStruct();
+            if (s != null)
+            {
+                return factory.clone(s);
+            }
+
+            return super.copyToIonValue(factory, throwOnConversionFailure);
+        }
+    }
+
+
+    /**
+     * Since this type is never lazy-injecting, we don't need to worry about
+     * protecting access to {@link MapBasedStruct#myMap}.
+     */
         extends MapBasedStruct
     {
         public MutableStruct(Map<String, Object> map,
@@ -1231,7 +1333,7 @@ final class FusionStruct
             if (other.size() != 0)
             {
                 MapBasedStruct is = (MapBasedStruct) other;
-                structImplMergeM(myMap, is.myMap);
+                structImplMergeM(myMap, is.getMap(eval));
             }
 
             return this;
@@ -1247,7 +1349,7 @@ final class FusionStruct
             if (other.size() != 0)
             {
                 MapBasedStruct is = (MapBasedStruct) other;
-                structImplMerge1M(myMap, is.myMap);
+                structImplMerge1M(myMap, is.getMap(eval));
             }
 
             return this;
@@ -1457,9 +1559,9 @@ final class FusionStruct
         private Iterator<Object>                         myMultiIterator;
         private Object                                   myCurrentKey;
 
-        private StructIterator(MapBasedStruct struct)
+        private StructIterator(Map<String,Object> map)
         {
-            myEntryIterator = struct.myMap.entrySet().iterator();
+            myEntryIterator = map.entrySet().iterator();
         }
 
         @Override
@@ -1529,7 +1631,8 @@ final class FusionStruct
                 return iterate(eval, Arrays.asList().iterator());
             }
 
-            return new StructIterator((MapBasedStruct) s);
+            Map<String, Object> map = ((MapBasedStruct) s).getMap(eval);
+            return new StructIterator(map);
         }
     }
 

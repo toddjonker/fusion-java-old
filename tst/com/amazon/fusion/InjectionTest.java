@@ -168,6 +168,7 @@ public class InjectionTest
         {
             IonList c = system().newList(iv.clone());
             top.define("c", c);
+            assertEval(1, "(size c)");
             assertEval(c, "c");
             assertEval(iv, "(element c 0)");
             fv = eval("(element c 0)");
@@ -177,6 +178,7 @@ public class InjectionTest
             iv.setTypeAnnotations();
             c = system().newList(iv);
             top.define("c", c);
+            assertEval(1, "(size c)");
             assertEval(c, "c");
             assertEval(iv, "(element c 0)");
             fv = eval("(element c 0)");
@@ -186,6 +188,7 @@ public class InjectionTest
         {
             IonSexp c = system().newSexp(iv.clone());
             top.define("c", c);
+            assertEval(1, "(size c)");
             assertEval(c, "c");
             assertEval(iv, "(element c 0)");
             fv = eval("(element c 0)");
@@ -195,6 +198,7 @@ public class InjectionTest
             iv.setTypeAnnotations();
             c = system().newSexp(iv);
             top.define("c", c);
+            assertEval(1, "(size c)");
             assertEval(c, "c");
             assertEval(iv, "(element c 0)");
             fv = eval("(element c 0)");
@@ -205,6 +209,7 @@ public class InjectionTest
             IonStruct c = system().newEmptyStruct();
             c.put("f", iv.clone());
             top.define("c", c);
+            assertEval(1, "(size c)");
             assertEval(c, "c");
             assertEval(iv, "(element c '''f''')");
             fv = eval("(element c '''f''')");
@@ -215,6 +220,7 @@ public class InjectionTest
             c = system().newEmptyStruct();
             c.put("f", iv);
             top.define("c", c);
+            assertEval(1, "(size c)");
             assertEval(c, "c");
             assertEval(iv, "(element c '''f''')");
             fv = eval("(element c '''f''')");
