@@ -689,7 +689,7 @@ final class FusionStruct
          * We can't use {@link #myMap}.size() because that doesn't count
          * repeated fields.
          */
-        private final int mySize;
+        int mySize;
 
         /**
          * @param map must not be null. It is not copied; a reference is
@@ -701,25 +701,28 @@ final class FusionStruct
             assert map != null;
             myMap = map;
 
-            int size = 0;
-            for (Object values : map.values())
-            {
-                if (values instanceof Object[])
-                {
-                    size += ((Object[]) values).length;
-                }
-                else
-                {
-                    size++;
-                }
-
-            }
-            mySize = size;
+            updateSize();
         }
 
         private MapBasedStruct(String[] annotations, int size)
         {
             myMap = new HashMap<>();
+            mySize = size;
+        }
+
+        /**
+         * Recomputes {@link #mySize} based on {@link #myMap}.
+         */
+        void updateSize()
+        {
+            int size = myMap.size();
+            for (Object values : myMap.values())
+            {
+                if (values instanceof Object[])
+                {
+                    size += ((Object[]) values).length - 1;
+                }
+            }
             mySize = size;
         }
 
@@ -1278,6 +1281,7 @@ final class FusionStruct
      * Since this type is never lazy-injecting, we don't need to worry about
      * protecting access to {@link MapBasedStruct#myMap}.
      */
+    private static final class MutableStruct
         extends MapBasedStruct
     {
         public MutableStruct(Map<String, Object> map,
@@ -1304,7 +1308,16 @@ final class FusionStruct
         public Object putM(Evaluator eval, String key, Object value)
             throws FusionException
         {
-            myMap.put(key, value);
+            Object prior = myMap.put(key, value);
+            if (prior == null)
+            {
+                mySize++;
+            }
+            else if (prior instanceof Object[])
+            {
+                // We've replaced >1 element with 1
+                mySize -= (((Object[]) prior).length - 1);
+            }
             return this;
         }
 
@@ -1314,6 +1327,7 @@ final class FusionStruct
         {
             List<String> asList = Arrays.asList(keys);
             myMap.keySet().removeAll(asList);
+            updateSize();
             return this;
         }
 
@@ -1323,6 +1337,7 @@ final class FusionStruct
         {
             List<String> asList = Arrays.asList(keys);
             myMap.keySet().retainAll(asList);
+            updateSize();
             return this;
         }
 
@@ -1330,10 +1345,12 @@ final class FusionStruct
         public Object mergeM(Evaluator eval, BaseStruct other)
             throws FusionException
         {
-            if (other.size() != 0)
+            int otherSize = other.size();
+            if (otherSize != 0)
             {
                 MapBasedStruct is = (MapBasedStruct) other;
                 structImplMergeM(myMap, is.getMap(eval));
+                mySize += otherSize;
             }
 
             return this;
@@ -1352,6 +1369,7 @@ final class FusionStruct
                 structImplMerge1M(myMap, is.getMap(eval));
             }
 
+            updateSize();
             return this;
         }
     }

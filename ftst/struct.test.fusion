@@ -229,6 +229,24 @@
 (check_put {a:1,f:2}     "f" 3 {a:1,f:3})
 (check_put {a:1,f:2,f:0} "f" 3 {a:1,f:3})  // replace repeated field
 
+(let [(s (mutable_struct))]
+  (check = 0 (size s))
+  (put_m s "f" 1)
+  (check = 1 (size s))
+  (put_m s "f" 2)
+  (check = 1 (size s))
+  (put_m s "g" 3)
+  (check = 2 (size s)))
+
+(let [(s (mutable_struct "f" 1 "f" 2))]
+  (check = 2 (size s))
+  (put_m s "g" 1)
+  (check = 3 (size s))
+  (put_m s "f" 3)
+  (check = 2 (size s))
+  (put_m s "g" 3)
+  (check = 2 (size s)))
+
 
 (check_arity_exn (put))
 (check_arity_exn (put   {}))
@@ -303,6 +321,21 @@
 (check_merge {a:0,b:2} {a:1,b:2,a:3,b:4} {a:0,b:2,a:1,b:2,a:3,b:4})
 
 
+(let [(s (mutable_struct))]
+  (struct_merge_m s {f:1,g:2,f:1})
+  (check = 3 (size s))
+  (struct_merge_m s {f:1,g:2})
+  (check = 5 (size s)))
+
+(let [(s (mutable_struct "f" 1 "f" 2 "g" 3))]
+  (struct_merge_m s {h:1})
+  (check = 4 (size s))
+  (struct_merge_m s {i:1,i:2})
+  (check = 6 (size s))
+  (struct_merge_m s {g:1})
+  (check = 7 (size s)))
+  
+  
 //==========================================================================
 // struct_merge1 and struct_merge1_m
 
@@ -366,6 +399,23 @@
 (check_merge1 {a:0,a:0} {a:1,b:3}         {a:1,b:3})
 (check_merge1 {a:0,a:0} {a:1,a:1}         {a:1})
 (check_merge1 {a:0,a:0} {a:1,b:3,a:1,b:3} {a:1,b:3})
+
+
+(let [(s (mutable_struct))]
+  (struct_merge1_m s {f:1,g:2,f:1})
+  (check = 2 (size s))
+  (struct_merge1_m s {f:1,g:2})
+  (check = 2 (size s))
+  (struct_merge1_m s {h:1,h:2})
+  (check = 3 (size s)))
+
+(let [(s (mutable_struct "f" 1 "f" 2 "g" 3))]
+  (struct_merge1_m s {h:1})
+  (check = 3 (size s))
+  (struct_merge1_m s {i:1,i:2})
+  (check = 4 (size s))
+  (struct_merge1_m s {g:1})
+  (check = 4 (size s)))
 
 
 //==========================================================================
@@ -482,6 +532,17 @@
 (check_remove_keys {f:1,g:2} ["f", (quote g)] {})
 
 
+(let [(s (mutable_struct))]
+  (remove_keys_m s "f" "g")
+  (check = 0 (size s)))
+
+(let [(s (mutable_struct "f" 1 "f" 2 "g" 3))]
+  (remove_keys_m s "g")
+  (check = 2 (size s))
+  (remove_keys_m s "f")
+  (check = 0 (size s)))
+
+
 //==========================================================================
 // retain_keys and retain_keys_m
 
@@ -506,6 +567,19 @@
 
 (check_retain_keys {a:1,b:3,c:2} [   ] {})
 (check_retain_keys {a:1,b:3,c:2} [(quote a), "c"] {a:1,c:2})
+
+
+(let [(s (mutable_struct))]
+  (retain_keys_m s "f" "g")
+  (check = 0 (size s)))
+
+(let [(s (mutable_struct "f" 1 "f" 2 "g" 3))]
+  (retain_keys_m s "g" "f")
+  (check = 3 (size s))
+  (retain_keys_m s "f")
+  (check = 2 (size s))
+  (retain_keys_m s "g")
+  (check = 0 (size s)))
 
 
 //==========================================================================
