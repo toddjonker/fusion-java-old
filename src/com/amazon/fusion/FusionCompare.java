@@ -261,7 +261,8 @@ final class FusionCompare
                   "  * Nulls of any type are considered equal.\n" +
                   "  * Int and decimal values are compared without regard to precision.\n" +
                   "  * Timestamps are compared to each other without regard to precision.\n" +
-                  "  * Strings, symbols, and bools are compared to values of the same type.",
+                  "  * Strings, symbols, and bools are compared to values of the same type.\n" +
+                  "  * Void is equal to itself only.",
                   "left", "right");
         }
 

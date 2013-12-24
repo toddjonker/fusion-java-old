@@ -36,6 +36,13 @@ public final class FusionVoid
             }
 
             @Override
+            BaseBool looseEquals(Evaluator eval, Object right)
+                throws FusionException
+            {
+                return makeBool(eval, right == VOID);
+            }
+
+            @Override
             void write(Evaluator eval, Appendable out) throws IOException
             {
                 out.append("{{{void}}}");

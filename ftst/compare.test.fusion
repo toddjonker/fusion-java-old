@@ -35,3 +35,15 @@
               (check <> val nil))
           all_nulls)))
   representative_ion_data)
+
+
+// Void is = to itself but nothing else
+
+(define VOID (void))
+
+(check = (void) (void))
+
+(do (|val|
+      (check <> VOID val)
+      (check <> val VOID))
+  representative_ion_data)
