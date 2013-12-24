@@ -1671,7 +1671,7 @@ final class FusionNumber
         Object doApply(Evaluator eval, Object arg0)
             throws FusionException
         {
-            if (! isAnyNull(eval, arg0))
+            if (isAnyNull(eval, arg0).isFalse())
             {
                 if (isDecimal(eval, arg0))
                 {
@@ -1707,7 +1707,7 @@ final class FusionNumber
         Object doApply(Evaluator eval, Object arg0)
             throws FusionException
         {
-            if (! isAnyNull(eval, arg0))
+            if (isAnyNull(eval, arg0).isFalse())
             {
                 if (isDecimal(eval, arg0))
                 {

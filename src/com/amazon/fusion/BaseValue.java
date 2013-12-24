@@ -182,10 +182,11 @@ abstract class BaseValue
     // Helper methods to avoid name conflicts with FusionValue imports
 
 
-    static boolean isAnyNull(Evaluator eval, Object value)
+    static BaseBool isAnyNull(Evaluator eval, Object value)
         throws FusionException
     {
-        return FusionValue.isAnyNull(eval, value);
+        boolean r = FusionValue.isAnyNull(eval, value);
+        return makeBool(eval, r);
     }
 
 

@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionBool.makeBool;
 
 final class IsNullProc
     extends Procedure1
@@ -18,7 +17,6 @@ final class IsNullProc
     Object doApply(Evaluator eval, Object arg)
         throws FusionException
     {
-        boolean isNull = isAnyNull(eval, arg);
-        return makeBool(eval, isNull);
+        return isAnyNull(eval, arg);
     }
 }
