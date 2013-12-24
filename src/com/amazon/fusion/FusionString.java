@@ -1,11 +1,14 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionText.checkRequiredTextArg;
 import static com.amazon.fusion.FusionUtils.safeEquals;
+import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionText.BaseText;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
@@ -35,6 +38,26 @@ public final class FusionString
         extends BaseText
     {
         private BaseString() {}
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseString)
+            {
+                String r = unsafeStringToJavaString(eval, right);
+                if (r != null)
+                {
+                    String l = this.stringValue(); // not null
+                    if (l.equals(r))
+                    {
+                        return trueBool(eval);
+                    }
+                }
+            }
+
+            return falseBool(eval);
+        }
 
         @Override
         SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
@@ -73,6 +96,13 @@ public final class FusionString
         boolean isAnyNull()
         {
             return true;
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return isAnyNull(eval, right);
         }
 
         @Override
@@ -177,6 +207,13 @@ public final class FusionString
         String stringValue()
         {
             return myValue.stringValue();
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.looseEquals(eval, right);
         }
 
         @Override

@@ -1,7 +1,8 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.isBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.unsafeBoolToJavaBoolean;
@@ -14,6 +15,7 @@ import static com.amazon.fusion.FusionSymbol.unsafeSymbolToJavaString;
 import static com.amazon.fusion.FusionTimestamp.isTimestamp;
 import static com.amazon.fusion.FusionTimestamp.unsafeTimestampToJavaTimestamp;
 import static com.amazon.fusion.FusionUtils.safeEquals;
+import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.ion.Timestamp;
 import java.math.BigDecimal;
 
@@ -243,6 +245,47 @@ final class FusionCompare
         {
             int r = left.compareTo(right);
             return (r == 0);
+        }
+    }
+
+
+    static final class LooseEqualProc
+        extends Procedure
+    {
+        LooseEqualProc()
+        {
+            //    "                                                                               |
+            super("Returns true if the parameters are equivalent, possibly by coercing values to\n" +
+                  "a common type. Annotations are ignored.\n" +
+                  "\n" +
+                  "  * Nulls of any type are considered equal.\n" +
+                  "  * Int and decimal values are compared without regard to precision.\n" +
+                  "  * Timestamps are compared to each other without regard to precision.\n" +
+                  "  * Strings, symbols, and bools are compared to values of the same type.",
+                  "left", "right");
+        }
+
+        @Override
+        final BaseBool doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(args);
+
+            Object arg0 = args[0];
+            Object arg1 = args[1];
+
+            // TODO This would be a valuable shortcut, but it goes beyond the
+            //   current specification.
+//          if (arg0 == arg1) return trueBool(eval);
+
+            if (arg0 instanceof BaseValue)
+            {
+                BaseValue left  = (BaseValue) arg0;
+
+                return left.looseEquals(eval, arg1);
+            }
+
+            return falseBool(eval);
         }
     }
 }

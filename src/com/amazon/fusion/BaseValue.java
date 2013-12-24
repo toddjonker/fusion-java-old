@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
@@ -45,6 +46,12 @@ abstract class BaseValue
         return makeBool(eval, isAnyNull());
     }
 
+
+    BaseBool looseEquals(Evaluator eval, Object right)
+        throws FusionException
+    {
+        return falseBool(eval);
+    }
 
     /**
      * @return null if something in the datum can't be converted into syntax.

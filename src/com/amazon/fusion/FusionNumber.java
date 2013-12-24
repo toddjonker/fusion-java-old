@@ -1,12 +1,15 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import static java.math.RoundingMode.CEILING;
 import static java.math.RoundingMode.FLOOR;
+import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
@@ -68,6 +71,13 @@ final class FusionNumber
         /** Second part of double-dispatch. */
         abstract BaseNumber multiply(BaseInt left);
 
+        /**
+         * Second part of double-dispatch.
+         * @param left is not a null value
+         */
+        abstract BaseBool looseEquals(Evaluator eval, BaseInt left)
+            throws FusionException;
+
         @Override
         SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
         {
@@ -86,6 +96,31 @@ final class FusionNumber
         private BaseInt() {}
 
         @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseNumber)
+            {
+                return ((BaseNumber) right).looseEquals(eval, this);
+            }
+
+            return falseBool(eval);
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, BaseInt left)
+            throws FusionException
+        {
+            // Both left and right (this) are ints, so "truncation" doesn't
+            // affect the value.  Also, neither are null.int due to override
+            // of this method by NullInt.
+            BigInteger leftInt  = left.truncateToBigInteger();
+            BigInteger rightInt = this.truncateToBigInteger();
+            boolean result = leftInt.equals(rightInt);
+            return makeBool(eval, result);
+        }
+
+        @Override
         BaseNumber add(BaseNumber right)
         {
             return right.add(this);
@@ -94,7 +129,7 @@ final class FusionNumber
         @Override
         BaseNumber add(BaseInt left)
         {
-            BigInteger leftInt = left.truncateToBigInteger();
+            BigInteger leftInt  = left.truncateToBigInteger();
             BigInteger rightInt = this.truncateToBigInteger();
             BigInteger result = leftInt.add(rightInt);
             return makeInt(null, result);
@@ -154,6 +189,21 @@ final class FusionNumber
         BigDecimal toBigDecimal()
         {
             return null;
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return isAnyNull(eval, right);
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, BaseInt left)
+            throws FusionException
+        {
+            // left is not null, but right (this) is null.
+            return falseBool(eval);
         }
 
         @Override
@@ -346,6 +396,13 @@ final class FusionNumber
         boolean isAnyNull() { return myValue.isAnyNull(); }
 
         @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.looseEquals(eval, right);
+        }
+
+        @Override
         IonValue copyToIonValue(ValueFactory factory,
                                 boolean throwOnConversionFailure)
             throws FusionException, IonizeFailure
@@ -382,6 +439,38 @@ final class FusionNumber
         extends BaseNumber
     {
         private BaseDecimal() {}
+
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseNumber)
+            {
+                BigDecimal rightDec = ((BaseNumber) right).toBigDecimal();
+                if (rightDec != null)
+                {
+                    BigDecimal leftDec  = this.toBigDecimal(); // not null
+                    if (leftDec.compareTo(rightDec) == 0)
+                    {
+                        return trueBool(eval);
+                    }
+                }
+            }
+
+            return falseBool(eval);
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, BaseInt left)
+            throws FusionException
+        {
+            BigDecimal leftDec  = left.toBigDecimal();
+            BigDecimal rightDec = this.toBigDecimal();
+            boolean result = leftDec.compareTo(rightDec) == 0;
+            return makeBool(eval, result);
+        }
+
 
         @Override
         BaseNumber add(BaseNumber right)
@@ -454,6 +543,21 @@ final class FusionNumber
         BigDecimal toBigDecimal()
         {
             return null;
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return isAnyNull(eval, right);
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, BaseInt left)
+            throws FusionException
+        {
+            // left is not null, but right (this) is null.
+            return falseBool(eval);
         }
 
         @Override
@@ -558,6 +662,13 @@ final class FusionNumber
         }
 
         @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.looseEquals(eval, right);
+        }
+
+        @Override
         IonValue copyToIonValue(ValueFactory factory,
                                 boolean throwOnConversionFailure)
             throws FusionException, IonizeFailure
@@ -631,6 +742,13 @@ final class FusionNumber
         boolean isAnyNull()
         {
             return true;
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return isAnyNull(eval, right);
         }
 
         @Override
@@ -743,6 +861,13 @@ final class FusionNumber
         Double objectDoubleValue()
         {
             return myValue.objectDoubleValue();
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.looseEquals(eval, right);
         }
 
         @Override

@@ -1,0 +1,37 @@
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/check"
+  "/fusion/experimental/altlambda"
+  "/fusion/experimental/compare"
+  "/fusion/private/builtins")      // for `annotate`
+
+
+// All nulls are =
+
+(do (|null1|
+      (check = null1 null1)
+      (let [(annotated_null1 (annotate null1 "a"))]
+        (check = annotated_null1 annotated_null1)
+        (check = null1 annotated_null1)
+        (check = annotated_null1 null1)
+        (do (|null2|
+              (check = null1 null2)
+              (check = null2 null1)
+              // Note that annotations differ, = ignores them
+              (let [(annotated_null2 (annotate null2 "b"))]
+                (check = null1 annotated_null2)
+                (check = annotated_null2 null1)))
+          all_nulls)))
+  all_nulls)
+
+
+// Non-nulls are NOT = nulls
+
+(do (|val|
+      (unless (is_null val)
+        (do (|nil|
+              (check <> nil val)
+              (check <> val nil))
+          all_nulls)))
+  representative_ion_data)

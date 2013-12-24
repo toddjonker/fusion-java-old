@@ -1,13 +1,16 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionNumber.makeDecimal;
 import static com.amazon.fusion.FusionString.checkNullableStringArg;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import static com.amazon.ion.util.IonTextUtils.isDigit;
+import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
@@ -36,6 +39,26 @@ final class FusionTimestamp
         abstract Timestamp timestampValue();
 
         @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseTimestamp)
+            {
+                Timestamp rt = unsafeTimestampToJavaTimestamp(eval, right);
+                if (rt != null)
+                {
+                    Timestamp lt = this.timestampValue(); // not null
+                    if (lt.compareTo(rt) == 0)
+                    {
+                        return trueBool(eval);
+                    }
+                }
+            }
+
+            return falseBool(eval);
+        }
+
+        @Override
         SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
         {
             return makeSyntax(eval, /*location*/ null, this);
@@ -58,6 +81,13 @@ final class FusionTimestamp
         boolean isAnyNull()
         {
             return true;
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return isAnyNull(eval, right);
         }
 
         @Override
@@ -162,6 +192,13 @@ final class FusionTimestamp
         Timestamp timestampValue()
         {
             return myValue.timestampValue();
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.looseEquals(eval, right);
         }
 
         @Override

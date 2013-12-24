@@ -1,9 +1,10 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
+import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
@@ -30,6 +31,13 @@ public final class FusionNull
         boolean isAnyNull()
         {
             return true;
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return isAnyNull(eval, right);
         }
 
         @Override

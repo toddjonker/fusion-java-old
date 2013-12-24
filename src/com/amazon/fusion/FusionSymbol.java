@@ -1,9 +1,12 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionString.makeString;
+import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionText.BaseText;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
@@ -23,6 +26,26 @@ final class FusionSymbol
         extends BaseText
     {
         private BaseSymbol() {}
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseSymbol)
+            {
+                String r = unsafeSymbolToJavaString(eval, right);
+                if (r != null)
+                {
+                    String l = this.stringValue(); // not null
+                    if (l.equals(r))
+                    {
+                        return trueBool(eval);
+                    }
+                }
+            }
+
+            return falseBool(eval);
+        }
 
         @Override
         SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
@@ -55,6 +78,13 @@ final class FusionSymbol
         boolean isAnyNull()
         {
             return true;
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return isAnyNull(eval, right);
         }
 
         @Override
@@ -159,6 +189,13 @@ final class FusionSymbol
         String stringValue()
         {
             return myValue.stringValue();
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.looseEquals(eval, right);
         }
 
         @Override

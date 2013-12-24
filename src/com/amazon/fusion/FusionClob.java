@@ -1,8 +1,9 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
+import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionLob.BaseLob;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
@@ -35,6 +36,13 @@ final class FusionClob
         boolean isAnyNull()
         {
             return true;
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return isAnyNull(eval, right);
         }
 
         @Override
@@ -128,6 +136,13 @@ final class FusionClob
         boolean isAnyNull()
         {
             return myValue.isAnyNull();
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.looseEquals(eval, right);
         }
 
         @Override

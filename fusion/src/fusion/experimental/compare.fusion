@@ -1,0 +1,13 @@
+// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+
+(module compare "/fusion"
+
+  (require "/fusion/experimental/defines")
+
+
+  (defpub_j = "com.amazon.fusion.FusionCompare$LooseEqualProc")
+
+  (defpub <>
+    (lambda (left right)
+      (not (= left right))))
+)

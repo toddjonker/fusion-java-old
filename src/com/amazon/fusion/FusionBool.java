@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -66,6 +66,13 @@ public final class FusionBool
         BaseBool not(Evaluator eval) { return TRUE_BOOL; }
 
         @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return isAnyNull(eval, right);
+        }
+
+        @Override
         Boolean asJavaBoolean() { return null; }
 
         @Override
@@ -115,6 +122,21 @@ public final class FusionBool
         @Override
         Boolean asJavaBoolean() { return TRUE; }
 
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseBool)
+            {
+                if (((BaseBool) right).isTrue())
+                {
+                    return TRUE_BOOL;
+                }
+            }
+
+            return FALSE_BOOL;
+        }
+
 
         @Override
         IonValue copyToIonValue(ValueFactory factory,
@@ -162,6 +184,21 @@ public final class FusionBool
 
         @Override
         Boolean asJavaBoolean() { return FALSE; }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseBool)
+            {
+                if (((BaseBool) right).isFalse())
+                {
+                    return TRUE_BOOL;
+                }
+            }
+
+            return FALSE_BOOL;
+        }
 
         @Override
         IonValue copyToIonValue(ValueFactory factory,
@@ -221,6 +258,13 @@ public final class FusionBool
 
         @Override
         BaseBool not(Evaluator eval) { return myValue.not(eval); }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.looseEquals(eval, right);
+        }
 
         @Override
         Boolean asJavaBoolean() { return myValue.asJavaBoolean(); }

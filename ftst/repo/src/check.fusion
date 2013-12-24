@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (module check "/fusion"
 
@@ -310,6 +310,21 @@ unless it is required.  It's also a bit odd to use.
               (lambda () (eval (quote (unsyntax top_form))))))))))
 
 
+
+  (defpub all_nulls
+    (quote (null
+            null.bool
+            null.int
+            null.float
+            null.decimal
+            null.timestamp
+            null.symbol
+            null.string
+            null.clob
+            null.blob
+            null.list
+            null.sexp
+            null.struct)))
 
   (defpub representative_ion_data
     (quote (null

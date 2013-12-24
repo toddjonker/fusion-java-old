@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -17,6 +17,7 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.Syntax.datumToStrippedSyntaxMaybe;
 import static com.amazon.ion.util.IonTextUtils.printSymbol;
 import static java.util.Collections.EMPTY_MAP;
+import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionCollection.BaseCollection;
 import com.amazon.fusion.FusionIterator.AbstractIterator;
 import com.amazon.ion.IonException;
@@ -642,6 +643,13 @@ final class FusionStruct
             throws FusionException
         {
             return merge1(eval, other);
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return isAnyNull(eval, right);
         }
 
         @Override
