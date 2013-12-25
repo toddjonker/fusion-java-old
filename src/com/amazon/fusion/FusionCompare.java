@@ -275,18 +275,7 @@ final class FusionCompare
             Object arg0 = args[0];
             Object arg1 = args[1];
 
-            // TODO This would be a valuable shortcut, but it goes beyond the
-            //   current specification.
-//          if (arg0 == arg1) return trueBool(eval);
-
-            if (arg0 instanceof BaseValue)
-            {
-                BaseValue left  = (BaseValue) arg0;
-
-                return left.looseEquals(eval, arg1);
-            }
-
-            return falseBool(eval);
+            return BaseValue.looseEquals(eval, arg0, arg1);
         }
     }
 }

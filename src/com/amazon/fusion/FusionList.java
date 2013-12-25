@@ -2,7 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionNumber.makeInt;
@@ -433,6 +435,45 @@ final class FusionList
             return elements;
         }
 
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseList)
+            {
+                BaseList rl = (BaseList) right;
+                return rl.looseEquals2(eval, this);
+            }
+            return falseBool(eval);
+        }
+
+        /**
+         * Second part of double-dispatch.
+         * @param left is not a null value.
+         */
+        BaseBool looseEquals2(Evaluator eval, BaseList left)
+            throws FusionException
+        {
+            // Neither is null.list
+            int size = size();
+            if (size == left.size())
+            {
+                Object[] lVals = this.myValues;
+                Object[] rVals = left.myValues;
+
+                for (int i = 0; i < size; i++)
+                {
+                    if (looseEquals(eval, lVals[i], rVals[i]).isFalse())
+                    {
+                        return falseBool(eval);
+                    }
+                }
+
+                return trueBool(eval);
+            }
+            return falseBool(eval);
+        }
+
         /**
          * TODO FUSION-242 This needs to do cycle detection.
          *
@@ -683,6 +724,13 @@ final class FusionList
         }
 
         @Override
+        BaseBool looseEquals2(Evaluator eval, BaseList left)
+            throws FusionException
+        {
+            return falseBool(eval);
+        }
+
+        @Override
         IonList copyToIonValue(ValueFactory factory,
                                boolean throwOnConversionFailure)
             throws FusionException
@@ -867,6 +915,22 @@ final class FusionList
         {
             injectElements(eval);
             System.arraycopy(myValues, srcPos, dest, destPos, length);
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            injectElements(eval);
+            return super.looseEquals(eval, right);
+        }
+
+        @Override
+        BaseBool looseEquals2(Evaluator eval, BaseList left)
+            throws FusionException
+        {
+            injectElements(eval);
+            return super.looseEquals2(eval, left);
         }
 
         @Override

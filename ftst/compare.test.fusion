@@ -7,25 +7,6 @@
   "/fusion/private/builtins")      // for `annotate`
 
 
-// All nulls are =
-
-(do (|null1|
-      (check = null1 null1)
-      (let [(annotated_null1 (annotate null1 "a"))]
-        (check = annotated_null1 annotated_null1)
-        (check = null1 annotated_null1)
-        (check = annotated_null1 null1)
-        (do (|null2|
-              (check = null1 null2)
-              (check = null2 null1)
-              // Note that annotations differ, = ignores them
-              (let [(annotated_null2 (annotate null2 "b"))]
-                (check = null1 annotated_null2)
-                (check = annotated_null2 null1)))
-          all_nulls)))
-  all_nulls)
-
-
 // Non-nulls are NOT = nulls
 
 (do (|val|
@@ -47,3 +28,70 @@
       (check <> VOID val)
       (check <> val VOID))
   representative_ion_data)
+
+
+(define (add_annotations vals)
+  (fold_left
+    (|accum val|
+      (if (is_void val)   // TODO need is_annotatable
+        (pair val accum)
+        (apply sexp
+          val (annotate val "a") (annotate val "b") (annotate val "a" "c")
+          accum)))
+    (sexp)
+    vals))
+
+(define (test_pairwise op vals)
+  (unless (is_empty vals)
+    (let [(val1 (head vals))]
+      (check op val1 val1)
+      (do (|val2|
+            (check op val1 val2)
+            (check op val2 val1))
+        (tail vals))
+      (test_pairwise op (tail vals)))))
+
+(define (test_equivalence equiv_sets)
+  (let [(num_sets (size equiv_sets)),
+        (equiv_sets (map add_annotations (apply list equiv_sets)))]
+    // Create a list so we can index into it
+    (do (|set| (test_pairwise = set)) equiv_sets)
+
+    // Pick each set in the loop to compare its elements to the other sets
+    (let set_loop [(i 0)]
+      (when (< i num_sets)
+        (do (|val1|
+              (let other_set_loop [(j (+ 1 i))]
+                (when (< j num_sets)
+                  // Now we have a different equivalence set, all of its elts
+                  // must be <> our chosen elt
+                  (do (|val2|
+                        (check <> val1 val2)
+                        (check <> val2 val1))
+                    (. equiv_sets j))
+                  (other_set_loop (+ 1 j)))))
+          (. equiv_sets i))
+        (set_loop (+ 1 i))))))
+
+(define '= equivs'
+  '''
+Sequence of equivalence sets.  Values shouldn't be annotated.
+  '''
+  (sexp
+    // Each entry at this level is an equivalence set
+    all_nulls
+    (sexp VOID)
+    (sexp true)
+    (sexp false)
+    (sexp "")
+    (sexp "true")
+    (sexp (quote 'true'))
+    (sexp 1 1. 1.0 1.00)
+    (sexp 0 0. -0. 0.00 -0.000)
+    (sexp [] (mutable_list) (stretchy_list))
+    (sexp [null] [null.int] (mutable_list null.bool) (stretchy_list null.list))
+    (sexp [1] [1.0] [1.00])
+    (sexp [1, true, [2.0]] [1.0, true, [2.00]] [1.00, true, [2.0]])
+  ))
+
+(test_equivalence '= equivs')

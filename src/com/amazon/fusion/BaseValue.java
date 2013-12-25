@@ -211,6 +211,21 @@ abstract class BaseValue
     }
 
 
+    static BaseBool looseEquals(Evaluator eval, Object left, Object right)
+        throws FusionException
+    {
+        // TODO This would be a valuable shortcut, but it goes beyond the
+        //   current specification.
+//      if (arg0 == arg1) return trueBool(eval);
+
+        if (left instanceof BaseValue)
+        {
+            return ((BaseValue) left).looseEquals(eval, right);
+        }
+
+        return falseBool(eval);
+    }
+
     /**
      * Gets the annotations on a Fusion value as Java strings.
      *

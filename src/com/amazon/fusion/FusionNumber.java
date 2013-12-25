@@ -669,6 +669,13 @@ final class FusionNumber
         }
 
         @Override
+        BaseBool looseEquals(Evaluator eval, BaseInt right)
+            throws FusionException
+        {
+            return myValue.looseEquals(eval, right);
+        }
+
+        @Override
         IonValue copyToIonValue(ValueFactory factory,
                                 boolean throwOnConversionFailure)
             throws FusionException, IonizeFailure
