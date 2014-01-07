@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -226,6 +226,7 @@ public final class FusionIo
 
     //========================================================================
 
+
     /**
      * Returns the output of {@link #write} as a
      * {@link String}.
@@ -241,7 +242,21 @@ public final class FusionIo
     }
 
 
+    /**
+     * Returns the output of {@link #write(Evaluator, Appendable, Object)}
+     * as a {@link String}.
+     *
+     * @return not null.
+     */
+    public static String writeToString(TopLevel top, Object value)
+        throws FusionException
+    {
+        return writeToString(((StandardTopLevel) top).getEvaluator(), value);
+    }
+
+
     //========================================================================
+
 
     /**
      * {@linkplain #write Writes}
@@ -405,8 +420,9 @@ public final class FusionIo
 
 
     /**
-     * Returns the output of {@link #write} as a {@link String}, handling any
-     * exceptions by writing their message into the output.
+     * Returns the output of {@link #write(TopLevel, Object, Appendable)} as a
+     * {@link String}, handling any exceptions by writing their message into
+     * the output.
      *
      * @return not null.
      */
@@ -415,6 +431,20 @@ public final class FusionIo
         StringBuilder out = new StringBuilder();
         safeWrite(eval, out, value);
         return out.toString();
+    }
+
+
+    /**
+     * Returns the output of {@link #write(TopLevel, Object, Appendable)} as a
+     * {@link String}, handling any exceptions by writing their message into
+     * the output.
+     *
+     * @return not null.
+     */
+    public static String safeWriteToString(TopLevel top, Object value)
+    {
+        return safeWriteToString(((StandardTopLevel) top).getEvaluator(),
+                                 value);
     }
 
 

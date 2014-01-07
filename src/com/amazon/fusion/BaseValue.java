@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc. All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc. All rights reserved.
 
 package com.amazon.fusion;
 
@@ -157,7 +157,7 @@ abstract class BaseValue
     @Override
     public final String toString()
     {
-        return safeWriteToString(null, this);
+        return safeWriteToString((Evaluator) null, this);
     }
 
 
