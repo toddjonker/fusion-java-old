@@ -1247,6 +1247,23 @@ final class FusionStruct
         }
 
         @Override
+        void write(Evaluator eval, Appendable out)
+            throws IOException, FusionException
+        {
+            IonStruct s = getIonStruct();
+            if (s != null)
+            {
+                IonWriter iw = WRITER_BUILDER.build(out);
+                s.writeTo(iw);
+                iw.finish();
+            }
+            else
+            {
+                super.write(eval, out);
+            }
+        }
+
+        @Override
         public void ionize(Evaluator eval, IonWriter out)
             throws IOException, FusionException
         {
