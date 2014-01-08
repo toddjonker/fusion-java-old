@@ -262,6 +262,7 @@ final class FusionCompare
                   "  * Int and decimal values are compared without regard to precision.\n" +
                   "  * Timestamps are compared to each other without regard to precision.\n" +
                   "  * Strings, symbols, and bools are compared to values of the same type.\n" +
+                  "  * Lists and sexps are compared recursively, and can be compared to each other.\n" +
                   "  * Void is equal to itself only.",
                   "left", "right");
         }

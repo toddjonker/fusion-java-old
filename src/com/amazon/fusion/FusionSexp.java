@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
@@ -392,6 +393,13 @@ final class FusionSexp
         }
 
         @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return makeBool(eval, right instanceof EmptySexp);
+        }
+
+        @Override
         IonSexp copyToIonValue(ValueFactory factory,
                               boolean throwOnConversionFailure)
             throws FusionException
@@ -495,6 +503,37 @@ final class FusionSexp
             throw new IndexOutOfBoundsException(message);
         }
 
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            for (ImmutablePair lp = this; ;)
+            {
+                if (right instanceof ImmutablePair)
+                {
+                    ImmutablePair rp = (ImmutablePair) right;
+
+                    BaseBool result = looseEquals(eval, lp.myHead, rp.myHead);
+
+                    if (result.isFalse()) return result;
+
+                    Object tail = lp.myTail;
+                    if (tail instanceof ImmutablePair)
+                    {
+                        lp = (ImmutablePair) tail;
+                        right = rp.myTail;
+                    }
+                    else
+                    {
+                        return looseEquals(eval, tail, rp.myTail);
+                    }
+                }
+                else
+                {
+                    return falseBool(eval);
+                }
+            }
+        }
 
         /**
          * Converts this pair to a normal pair of syntax objects.

@@ -88,10 +88,18 @@ Sequence of equivalence sets.  Values shouldn't be annotated.
     (sexp (quote 'true'))
     (sexp 1 1. 1.0 1.00)
     (sexp 0 0. -0. 0.00 -0.000)
+
+    // Comparing lists
     (sexp [] (mutable_list) (stretchy_list))
     (sexp [null] [null.int] (mutable_list null.bool) (stretchy_list null.list))
     (sexp [1] [1.0] [1.00])
     (sexp [1, true, [2.0]] [1.0, true, [2.00]] [1.00, true, [2.0]])
+
+    // Comparing sexps
+    (sexp (quote ()) (sexp))
+    (sexp (sexp null) (sexp null.int) (sexp (quote null.sexp)))
+    (sexp (sexp null 1) (sexp null.int 1.0) (sexp (quote null.sexp) 1.00))
+    (sexp (sexp 1 true [2.0]) (sexp 1.0 true [2.00]) (sexp 1.00 true [2.0]))
   ))
 
 (test_equivalence '= equivs')
