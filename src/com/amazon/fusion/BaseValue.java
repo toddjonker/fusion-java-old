@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import com.amazon.fusion.FusionBool.BaseBool;
@@ -214,9 +215,7 @@ abstract class BaseValue
     static BaseBool looseEquals(Evaluator eval, Object left, Object right)
         throws FusionException
     {
-        // TODO This would be a valuable shortcut, but it goes beyond the
-        //   current specification.
-//      if (arg0 == arg1) return trueBool(eval);
+        if (left == right) return trueBool(eval);
 
         if (left instanceof BaseValue)
         {

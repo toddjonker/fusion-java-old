@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.isBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.unsafeBoolToJavaBoolean;
@@ -249,6 +248,31 @@ final class FusionCompare
     }
 
 
+    static final class IsIdenticalProc
+        extends Procedure
+    {
+        IsIdenticalProc()
+        {
+            //    "                                                                               |
+            super("Returns true if and only if the arguments are the same object; that is, when\n" +
+                  "they have the same object identity.",
+                  "left", "right");
+        }
+
+        @Override
+        final BaseBool doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(args);
+
+            Object arg0 = args[0];
+            Object arg1 = args[1];
+
+            return makeBool(eval, arg0 == arg1);
+        }
+    }
+
+
     static final class LooseEqualProc
         extends Procedure
     {
@@ -264,7 +288,7 @@ final class FusionCompare
                   "  * Strings, symbols, and bools are compared to values of the same type.\n" +
                   "  * Lists and sexps are compared recursively, and can be compared to each other.\n" +
                   "  * Structs are compared recursively.\n" +
-                  "  * Void is equal to itself only.",
+                  "  * Any object is `=` to itself.",
                   "left", "right");
         }
 

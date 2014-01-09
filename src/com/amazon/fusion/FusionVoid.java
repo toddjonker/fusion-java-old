@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -39,7 +39,9 @@ public final class FusionVoid
             BaseBool looseEquals(Evaluator eval, Object right)
                 throws FusionException
             {
-                return makeBool(eval, right == VOID);
+                // Object comparison has already been performed, so we know
+                // we've not been given void.
+                return falseBool(eval);
             }
 
             @Override

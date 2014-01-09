@@ -4,6 +4,7 @@
 
   (require "/fusion/experimental/defines")
 
+  (defpub_j is_identical "com.amazon.fusion.FusionCompare$IsIdenticalProc")
 
   (defpub_j = "com.amazon.fusion.FusionCompare$LooseEqualProc")
 

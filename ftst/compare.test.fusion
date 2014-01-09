@@ -21,10 +21,6 @@
 
 // Void is = to itself but nothing else
 
-(define VOID (void))
-
-(check = (void) (void))
-
 (do (|val|
       (check <> VOID val)
       (check <> val VOID))
@@ -34,7 +30,8 @@
 (define (add_annotations vals)
   (fold_left
     (|accum val|
-      (if (is_void val)   // TODO need is_annotatable
+      // TODO need is_annotatable
+      (if (or (is_void val) (is_eof val) (is_identical val UNDEF))
         (pair val accum)
         (apply sexp
           val (annotate val "a") (annotate val "b") (annotate val "a" "c")
@@ -82,6 +79,8 @@ Sequence of equivalence sets.  Values shouldn't be annotated.
     // Each entry at this level is an equivalence set
     all_nulls
     (sexp VOID)
+    (sexp UNDEF)
+    (sexp eof)
     (sexp true)
     (sexp false)
     (sexp "")
@@ -93,15 +92,15 @@ Sequence of equivalence sets.  Values shouldn't be annotated.
     (sexp (pair 1 2) (pair 1.0 2.0))
     // These are similar to (but not =) 2-element sequences below:
     (sexp (pair null 1) (pair null.int 1.0))
-    (sexp (pair 1 (quote null.sexp)) (pair 1.0 null.clob))
+    (sexp (pair 1 NULL_SEXP) (pair 1.0 null.clob))
 
     (sexp [] (mutable_list) (stretchy_list)
       (quote ()) (sexp))
     (sexp [null] [null.int] (mutable_list null.bool) (stretchy_list null.list)
-      (sexp null) (sexp null.int) (sexp (quote null.sexp)))
+      (sexp null) (sexp null.int) (sexp NULL_SEXP))
     // These are similar to (but not =) the pairs above:
-    (sexp [null, 1] [null.int, 1.0] [(quote null.sexp), 1.00]
-      (sexp null 1) (sexp null.int 1.0) (sexp (quote null.sexp) 1.00))
+    (sexp [null, 1] [null.int, 1.0] [NULL_SEXP, 1.00]
+      (sexp null 1) (sexp null.int 1.0) (sexp NULL_SEXP 1.00))
     (sexp [1] [1.0] [1.00]
       (sexp 1) (sexp 1.0) (sexp 1.00))
     // Note that the prior set is a prefix of this set.
