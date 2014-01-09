@@ -2,7 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionIterator.iterate;
@@ -431,6 +433,19 @@ final class FusionStruct
         int size(); // Doesn't throw
 
         /**
+         * Second part of double-dispatch from {@link BaseValue#looseEquals}.
+         * @param left is not a null value.
+         */
+        BaseBool looseEquals2(Evaluator eval, MapBasedStruct left)
+            throws FusionException;
+        /**
+         * Second part of double-dispatch from {@link BaseValue#looseEquals}.
+         * @param left is not a null value.
+         */
+        BaseBool looseEquals2(Evaluator eval, NullStruct left)
+            throws FusionException;
+
+        /**
          * Visits each field in the struct, stopping as soon as the visitation
          * returns non-null.
          */
@@ -650,6 +665,20 @@ final class FusionStruct
             throws FusionException
         {
             return isAnyNull(eval, right);
+        }
+
+        @Override
+        public BaseBool looseEquals2(Evaluator eval, MapBasedStruct left)
+            throws FusionException
+        {
+            return falseBool(eval);
+        }
+
+        @Override
+        public BaseBool looseEquals2(Evaluator eval, NullStruct left)
+            throws FusionException
+        {
+            return trueBool(eval);
         }
 
         @Override
@@ -1022,6 +1051,89 @@ final class FusionStruct
             }
 
             return makeSimilar(newMap);
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (this == right) return trueBool(eval);
+
+            if (right instanceof BaseStruct)
+            {
+                BaseStruct rs = (BaseStruct) right;
+                return rs.looseEquals2(eval, this);
+            }
+            return falseBool(eval);
+        }
+
+        @Override
+        public BaseBool looseEquals2(Evaluator eval, MapBasedStruct left)
+            throws FusionException
+        {
+            if (size() != left.size()) return falseBool(eval);
+
+            Map<String, Object> leftMap = left.getMap(eval);
+
+            for (Map.Entry<String, Object> entry : getMap(eval).entrySet())
+            {
+                String fieldName = entry.getKey();
+
+                Object lv = leftMap.get(fieldName);
+                Object rv = entry.getValue();
+                if (lv instanceof Object[])
+                {
+                    if (! (rv instanceof Object[])) return falseBool(eval);
+
+                    Object[] lArray = (Object[]) lv;
+                    Object[] rArray = (Object[]) rv;
+
+                    int lCount = lArray.length;
+                    int rCount = rArray.length;
+                    if (lCount != rCount) return falseBool(eval);
+
+                    rArray = Arrays.copyOf(rArray, rCount);
+                    for (int i = 0; i < lCount; i++)
+                    {
+                        lv = lArray[i];
+
+                        // Seek a matching element from rArray
+                        boolean found = false;
+                        for (int j = 0; j < rCount; j++)
+                        {
+                            if (looseEquals(eval, lv, rArray[j]).isTrue())
+                            {
+                                found = true;
+                                rArray[j] = rArray[--rCount];
+                                break;
+                            }
+                        }
+
+                        if (!found) return falseBool(eval);
+                    }
+
+                    // By now we've found a match for everything!
+                    assert rCount == 0;
+                }
+                else
+                {
+                    if (rv instanceof Object[]) return falseBool(eval);
+
+                    if (looseEquals(eval, lv, rv).isFalse())
+                    {
+                        return falseBool(eval);
+                    }
+                }
+            }
+
+            return trueBool(eval);
+        }
+
+        @Override
+        public BaseBool looseEquals2(Evaluator eval, NullStruct left)
+            throws FusionException
+        {
+            return falseBool(eval);
         }
 
         /**

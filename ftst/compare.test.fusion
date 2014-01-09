@@ -4,7 +4,8 @@
   "/check"
   "/fusion/experimental/altlambda"
   "/fusion/experimental/compare"
-  "/fusion/private/builtins")      // for `annotate`
+  "/fusion/private/builtins"       // for `annotate`
+  "/fusion/struct")
 
 
 // Non-nulls are NOT = nulls
@@ -106,6 +107,13 @@ Sequence of equivalence sets.  Values shouldn't be annotated.
     // Note that the prior set is a prefix of this set.
     (sexp [1, true, [2.0]] [1.0, true, [2.00]] [1.00, true, [2.0]]
       (sexp 1 true [2.0]) (sexp 1.0 true [2.00]) (sexp 1.00 true [2.0]))
+
+    (sexp {} (struct) (mutable_struct))
+    (sexp {f:1} {f:1.0} {f:1.00})
+    (sexp {f:1, g:2} {g:2.0, f:1.0} {f:1.00, g:2.00})
+    (sexp {f:1, f:2} {f:1.0, f:2.0} {f:2, f:1.000})
+    (sexp {f:1, g:9, f:2, f:2} {f:2, f:1.0, g:9, f:2.0}
+      {g:9, f:2, f:1.000, f:2.00})
   ))
 
 (test_equivalence '= equivs')
