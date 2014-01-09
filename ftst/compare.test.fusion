@@ -89,17 +89,23 @@ Sequence of equivalence sets.  Values shouldn't be annotated.
     (sexp 1 1. 1.0 1.00)
     (sexp 0 0. -0. 0.00 -0.000)
 
-    // Comparing lists
-    (sexp [] (mutable_list) (stretchy_list))
-    (sexp [null] [null.int] (mutable_list null.bool) (stretchy_list null.list))
-    (sexp [1] [1.0] [1.00])
-    (sexp [1, true, [2.0]] [1.0, true, [2.00]] [1.00, true, [2.0]])
+    (sexp (pair 1 2) (pair 1.0 2.0))
+    // These are similar to (but not =) 2-element sequences below:
+    (sexp (pair null 1) (pair null.int 1.0))
+    (sexp (pair 1 (quote null.sexp)) (pair 1.0 null.clob))
 
-    // Comparing sexps
-    (sexp (quote ()) (sexp))
-    (sexp (sexp null) (sexp null.int) (sexp (quote null.sexp)))
-    (sexp (sexp null 1) (sexp null.int 1.0) (sexp (quote null.sexp) 1.00))
-    (sexp (sexp 1 true [2.0]) (sexp 1.0 true [2.00]) (sexp 1.00 true [2.0]))
+    (sexp [] (mutable_list) (stretchy_list)
+      (quote ()) (sexp))
+    (sexp [null] [null.int] (mutable_list null.bool) (stretchy_list null.list)
+      (sexp null) (sexp null.int) (sexp (quote null.sexp)))
+    // These are similar to (but not =) the pairs above:
+    (sexp [null, 1] [null.int, 1.0] [(quote null.sexp), 1.00]
+      (sexp null 1) (sexp null.int 1.0) (sexp (quote null.sexp) 1.00))
+    (sexp [1] [1.0] [1.00]
+      (sexp 1) (sexp 1.0) (sexp 1.00))
+    // Note that the prior set is a prefix of this set.
+    (sexp [1, true, [2.0]] [1.0, true, [2.00]] [1.00, true, [2.0]]
+      (sexp 1 true [2.0]) (sexp 1.0 true [2.00]) (sexp 1.00 true [2.0]))
   ))
 
 (test_equivalence '= equivs')

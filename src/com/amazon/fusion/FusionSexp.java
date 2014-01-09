@@ -4,12 +4,14 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.Syntax.datumToStrippedSyntaxMaybe;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionIterator.AbstractIterator;
+import com.amazon.fusion.FusionList.BaseList;
 import com.amazon.fusion.FusionSequence.BaseSequence;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonSexp;
@@ -305,6 +307,20 @@ final class FusionSexp
         }
 
         @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (this == right) return trueBool(eval);
+
+            if (right instanceof BaseSequence)
+            {
+                BaseSequence r = (BaseSequence) right;
+                return r.looseEquals2(eval, this);
+            }
+            return falseBool(eval);
+        }
+
+        @Override
         SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
             throws FusionException
         {
@@ -346,6 +362,20 @@ final class FusionSexp
             throws FusionException
         {
             return isAnyNull(eval, right);
+        }
+
+        @Override
+        BaseBool looseEquals2(Evaluator eval, BaseList left)
+            throws FusionException
+        {
+            return falseBool(eval);
+        }
+
+        @Override
+        BaseBool looseEquals2(Evaluator eval, BaseSexp left)
+            throws FusionException
+        {
+            return falseBool(eval);
         }
 
         @Override
@@ -393,10 +423,17 @@ final class FusionSexp
         }
 
         @Override
-        BaseBool looseEquals(Evaluator eval, Object right)
+        BaseBool looseEquals2(Evaluator eval, BaseSexp right)
             throws FusionException
         {
             return makeBool(eval, right instanceof EmptySexp);
+        }
+
+        @Override
+        BaseBool looseEquals2(Evaluator eval, BaseList right)
+            throws FusionException
+        {
+            return makeBool(eval, right.size() == 0);
         }
 
         @Override
@@ -504,35 +541,69 @@ final class FusionSexp
         }
 
         @Override
-        BaseBool looseEquals(Evaluator eval, Object right)
+        BaseBool looseEquals2(Evaluator eval, BaseSexp right)
             throws FusionException
         {
-            for (ImmutablePair lp = this; ;)
+            if (right instanceof ImmutablePair)
             {
-                if (right instanceof ImmutablePair)
-                {
-                    ImmutablePair rp = (ImmutablePair) right;
+                ImmutablePair rp = (ImmutablePair) right;
 
+                for (ImmutablePair lp = this; ;)
+                {
                     BaseBool result = looseEquals(eval, lp.myHead, rp.myHead);
 
                     if (result.isFalse()) return result;
 
-                    Object tail = lp.myTail;
-                    if (tail instanceof ImmutablePair)
+                    Object lt = lp.myTail;
+                    Object rt = rp.myTail;
+                    if (lt instanceof ImmutablePair)
                     {
-                        lp = (ImmutablePair) tail;
-                        right = rp.myTail;
+                        if (rt instanceof ImmutablePair)
+                        {
+                            lp = (ImmutablePair) lt;
+                            rp = (ImmutablePair) rt;
+                        }
+                        else
+                        {
+                            break;
+                        }
                     }
                     else
                     {
-                        return looseEquals(eval, tail, rp.myTail);
+                        return looseEquals(eval, lt, rt);
                     }
                 }
-                else
-                {
-                    return falseBool(eval);
-                }
             }
+            return falseBool(eval);
+        }
+
+        @Override
+        BaseBool looseEquals2(Evaluator eval, BaseList right)
+            throws FusionException
+        {
+            final int rSize = right.size();
+
+            ImmutablePair lp = this;
+            for (int i = 0; i < rSize; i++)
+            {
+                BaseBool result =
+                    looseEquals(eval, lp.myHead, right.unsafeRef(eval, i));
+
+                if (result.isFalse()) return result;
+
+                Object tail = lp.myTail;
+                if (tail instanceof ImmutablePair)
+                {
+                    lp = (ImmutablePair) tail;
+                }
+                else if (tail instanceof EmptySexp)
+                {
+                    return makeBool(eval, i+1 == rSize);
+                }
+                else break;
+            }
+
+            return falseBool(eval);
         }
 
         /**

@@ -1,8 +1,11 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionCollection.BaseCollection;
+import com.amazon.fusion.FusionList.BaseList;
+import com.amazon.fusion.FusionSexp.BaseSexp;
 
 
 final class FusionSequence
@@ -23,6 +26,20 @@ final class FusionSequence
         {
             super(annotations);
         }
+
+        /**
+         * Second part of double-dispatch from {@link #looseEquals}.
+         * @param left is not a null value.
+         */
+        abstract BaseBool looseEquals2(Evaluator eval, BaseList left)
+            throws FusionException;
+
+        /**
+         * Second part of double-dispatch from {@link #looseEquals}.
+         * @param left is not a null value.
+         */
+        abstract BaseBool looseEquals2(Evaluator eval, BaseSexp left)
+            throws FusionException;
 
         /**
          * Returns void if the position is out of bounds.

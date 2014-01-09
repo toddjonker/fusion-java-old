@@ -439,18 +439,17 @@ final class FusionList
         BaseBool looseEquals(Evaluator eval, Object right)
             throws FusionException
         {
-            if (right instanceof BaseList)
+            if (this == right) return trueBool(eval);
+
+            if (right instanceof BaseSequence)
             {
-                BaseList rl = (BaseList) right;
-                return rl.looseEquals2(eval, this);
+                BaseSequence r = (BaseSequence) right;
+                return r.looseEquals2(eval, this);
             }
             return falseBool(eval);
         }
 
-        /**
-         * Second part of double-dispatch.
-         * @param left is not a null value.
-         */
+        @Override
         BaseBool looseEquals2(Evaluator eval, BaseList left)
             throws FusionException
         {
@@ -472,6 +471,14 @@ final class FusionList
                 return trueBool(eval);
             }
             return falseBool(eval);
+        }
+
+        @Override
+        BaseBool looseEquals2(Evaluator eval, BaseSexp left)
+            throws FusionException
+        {
+            // (= <BaseList> <BaseSexp>) is implemented the other way
+            return left.looseEquals2(eval, this);
         }
 
         /**
@@ -728,6 +735,13 @@ final class FusionList
             throws FusionException
         {
             return falseBool(eval);
+        }
+
+        @Override
+        BaseBool looseEquals2(Evaluator eval, BaseSexp left)
+            throws FusionException
+        {
+            return makeBool(eval, left.isAnyNull());
         }
 
         @Override
