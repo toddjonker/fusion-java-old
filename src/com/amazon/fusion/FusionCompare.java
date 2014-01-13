@@ -254,8 +254,7 @@ final class FusionCompare
         IsIdenticalProc()
         {
             //    "                                                                               |
-            super("Returns true if and only if the arguments are the same object; that is, when\n" +
-                  "they have the same object identity.",
+            super("Docs in Fusion source",
                   "left", "right");
         }
 
@@ -279,16 +278,7 @@ final class FusionCompare
         LooseEqualProc()
         {
             //    "                                                                               |
-            super("Returns true if the parameters are equivalent, possibly by coercing values to\n" +
-                  "a common type. Annotations are ignored.\n" +
-                  "\n" +
-                  "  * Nulls of any type are considered equal.\n" +
-                  "  * Int and decimal values are compared without regard to precision.\n" +
-                  "  * Timestamps are compared to each other without regard to precision.\n" +
-                  "  * Strings, symbols, and bools are compared to values of the same type.\n" +
-                  "  * Lists and sexps are compared recursively, and can be compared to each other.\n" +
-                  "  * Structs are compared recursively.\n" +
-                  "  * Any object is `=` to itself.",
+            super("Docs in Fusion source",
                   "left", "right");
         }
 
