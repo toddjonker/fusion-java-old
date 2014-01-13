@@ -358,6 +358,13 @@ final class FusionSexp
         }
 
         @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return makeBool(eval, right instanceof NullSexp);
+        }
+
+        @Override
         BaseBool looseEquals(Evaluator eval, Object right)
             throws FusionException
         {
@@ -420,6 +427,13 @@ final class FusionSexp
             throws FusionException
         {
             return new EmptySexp(annotations);
+        }
+
+        @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return makeBool(eval, right instanceof EmptySexp);
         }
 
         @Override
@@ -540,6 +554,59 @@ final class FusionSexp
             throw new IndexOutOfBoundsException(message);
         }
 
+
+        private static BaseBool actualPairEqual(Evaluator eval,
+                                                boolean   loose,
+                                                ImmutablePair left,
+                                                ImmutablePair right)
+            throws FusionException
+        {
+            while (true)
+            {
+                Object lv = left.myHead;
+                Object rv = right.myHead;
+
+                BaseBool b = (loose ? looseEquals(eval, lv, rv)
+                                    : tightEquals(eval, lv, rv));
+                if (b.isFalse()) return b;
+
+                lv = left.myTail;
+                rv = right.myTail;
+                if (lv instanceof ImmutablePair)
+                {
+                    if (rv instanceof ImmutablePair)
+                    {
+                        left  = (ImmutablePair) lv;
+                        right = (ImmutablePair) rv;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    b = (loose ? looseEquals(eval, lv, rv)
+                               : tightEquals(eval, lv, rv));
+                    return b;
+                }
+            }
+
+            return falseBool(eval);
+        }
+
+        @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof ImmutablePair)
+            {
+                ImmutablePair rp = (ImmutablePair) right;
+                return actualPairEqual(eval, false, this, rp);
+            }
+            return falseBool(eval);
+        }
+
         @Override
         BaseBool looseEquals2(Evaluator eval, BaseSexp right)
             throws FusionException
@@ -547,32 +614,7 @@ final class FusionSexp
             if (right instanceof ImmutablePair)
             {
                 ImmutablePair rp = (ImmutablePair) right;
-
-                for (ImmutablePair lp = this; ;)
-                {
-                    BaseBool result = looseEquals(eval, lp.myHead, rp.myHead);
-
-                    if (result.isFalse()) return result;
-
-                    Object lt = lp.myTail;
-                    Object rt = rp.myTail;
-                    if (lt instanceof ImmutablePair)
-                    {
-                        if (rt instanceof ImmutablePair)
-                        {
-                            lp = (ImmutablePair) lt;
-                            rp = (ImmutablePair) rt;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        return looseEquals(eval, lt, rt);
-                    }
-                }
+                return actualPairEqual(eval, true, this, rp);
             }
             return falseBool(eval);
         }

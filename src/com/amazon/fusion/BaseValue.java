@@ -54,6 +54,19 @@ abstract class BaseValue
         return falseBool(eval);
     }
 
+    BaseBool tightEquals(Evaluator eval, Object right)
+        throws FusionException
+    {
+        return looseEquals(eval, right);
+    }
+
+    BaseBool strictEquals(Evaluator eval, Object right)
+        throws FusionException
+    {
+        return tightEquals(eval, right);
+    }
+
+
     /**
      * @return null if something in the datum can't be converted into syntax.
      */
@@ -224,6 +237,33 @@ abstract class BaseValue
 
         return falseBool(eval);
     }
+
+    static BaseBool tightEquals(Evaluator eval, Object left, Object right)
+        throws FusionException
+    {
+        if (left == right) return trueBool(eval);
+
+        if (left instanceof BaseValue)
+        {
+            return ((BaseValue) left).tightEquals(eval, right);
+        }
+
+        return falseBool(eval);
+    }
+
+    static BaseBool strictEquals(Evaluator eval, Object left, Object right)
+        throws FusionException
+    {
+        if (left == right) return trueBool(eval);
+
+        if (left instanceof BaseValue)
+        {
+            return ((BaseValue) left).strictEquals(eval, right);
+        }
+
+        return falseBool(eval);
+    }
+
 
     /**
      * Gets the annotations on a Fusion value as Java strings.

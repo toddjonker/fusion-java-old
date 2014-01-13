@@ -435,12 +435,55 @@ final class FusionList
             return elements;
         }
 
+
+        private static BaseBool actualListEqual(Evaluator eval,
+                                                boolean   loose,
+                                                BaseList  left,
+                                                BaseList  right)
+            throws FusionException
+        {
+            assert ! (left.isAnyNull() || right.isAnyNull());
+
+            int size = left.size();
+            if (size == right.size())
+            {
+                Object[] lVals = left.myValues;
+                Object[] rVals = right.myValues;
+
+                for (int i = 0; i < size; i++)
+                {
+                    Object lv = lVals[i];
+                    Object rv = rVals[i];
+
+                    BaseBool b = (loose ? looseEquals(eval, lv, rv)
+                                        : tightEquals(eval, lv, rv));
+                    if (b.isFalse()) return b;
+                }
+
+                return trueBool(eval);
+            }
+            return falseBool(eval);
+        }
+
+        @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseList)
+            {
+                BaseList r = (BaseList) right;
+                if (! r.isAnyNull())
+                {
+                    return actualListEqual(eval, false, this, r);
+                }
+            }
+            return falseBool(eval);
+        }
+
         @Override
         BaseBool looseEquals(Evaluator eval, Object right)
             throws FusionException
         {
-            if (this == right) return trueBool(eval);
-
             if (right instanceof BaseSequence)
             {
                 BaseSequence r = (BaseSequence) right;
@@ -454,23 +497,7 @@ final class FusionList
             throws FusionException
         {
             // Neither is null.list
-            int size = size();
-            if (size == left.size())
-            {
-                Object[] lVals = this.myValues;
-                Object[] rVals = left.myValues;
-
-                for (int i = 0; i < size; i++)
-                {
-                    if (looseEquals(eval, lVals[i], rVals[i]).isFalse())
-                    {
-                        return falseBool(eval);
-                    }
-                }
-
-                return trueBool(eval);
-            }
-            return falseBool(eval);
+            return actualListEqual(eval, true, left, this);
         }
 
         @Override
@@ -721,6 +748,14 @@ final class FusionList
         Object[] extract(Evaluator eval)
         {
             return null;
+        }
+
+        @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            boolean b = (right instanceof NullList);
+            return makeBool(eval, b);
         }
 
         @Override

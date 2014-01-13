@@ -294,4 +294,52 @@ final class FusionCompare
             return BaseValue.looseEquals(eval, arg0, arg1);
         }
     }
+
+
+    static final class TightEqualProc
+        extends Procedure
+    {
+        TightEqualProc()
+        {
+            //    "                                                                               |
+            super("Docs in Fusion source",
+                  "left", "right");
+        }
+
+        @Override
+        final BaseBool doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(args);
+
+            Object arg0 = args[0];
+            Object arg1 = args[1];
+
+            return BaseValue.tightEquals(eval, arg0, arg1);
+        }
+    }
+
+
+    static final class StrictEqualProc
+        extends Procedure
+    {
+        StrictEqualProc()
+        {
+            //    "                                                                               |
+            super("Docs in Fusion source",
+                  "left", "right");
+        }
+
+        @Override
+        final BaseBool doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(args);
+
+            Object arg0 = args[0];
+            Object arg1 = args[1];
+
+            return BaseValue.strictEquals(eval, arg0, arg1);
+        }
+    }
 }

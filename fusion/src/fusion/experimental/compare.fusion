@@ -10,8 +10,8 @@ so it's not possible for Fusion to provide operators that will be sufficient
 for all circumstances. With that in mind, this module provides a spectrum of
 equality relations that should be sufficient for the majority of use cases.
 
-The standard equality operators, from most lenient to most strict, are briefly
-described as follows:
+The standard equality procedures, from most lenient to most strict, are
+briefly described as follows:
 
  *  `=`
 
@@ -214,8 +214,7 @@ For example:
     (== [1, 2  ] (sexp 1 2.00))           --> false
     (== [1, 2.0] (sexp 1 2.00))           --> true
     '''
-    (lambda (left right)
-      (= left right)))    // XXX
+    (java_new "com.amazon.fusion.FusionCompare$TightEqualProc"))
 
 
   (defpub ===
@@ -246,8 +245,7 @@ For example:
     (=== (quote    a::1) (quote a::a::1))  --> false
     (=== (quote b::a::1) (quote a::b::1))  --> false
     '''
-    (lambda (left right)
-      (== left right)))    // XXX
+    (java_new "com.amazon.fusion.FusionCompare$StrictEqualProc"))
 
 
   (defpub <>

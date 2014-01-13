@@ -99,6 +99,15 @@ public final class FusionString
         }
 
         @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            boolean b = (right instanceof BaseString
+                         && ((BaseString) right).isAnyNull());
+            return makeBool(eval, b);
+        }
+
+        @Override
         BaseBool looseEquals(Evaluator eval, Object right)
             throws FusionException
         {
@@ -207,6 +216,13 @@ public final class FusionString
         String stringValue()
         {
             return myValue.stringValue();
+        }
+
+        @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.tightEquals(eval, right);
         }
 
         @Override

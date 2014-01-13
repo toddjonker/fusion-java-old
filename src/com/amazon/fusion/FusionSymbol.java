@@ -81,6 +81,15 @@ final class FusionSymbol
         }
 
         @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            boolean b = (right instanceof BaseSymbol
+                         && ((BaseSymbol) right).isAnyNull());
+            return makeBool(eval, b);
+        }
+
+        @Override
         BaseBool looseEquals(Evaluator eval, Object right)
             throws FusionException
         {
@@ -189,6 +198,13 @@ final class FusionSymbol
         String stringValue()
         {
             return myValue.stringValue();
+        }
+
+        @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.tightEquals(eval, right);
         }
 
         @Override

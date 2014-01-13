@@ -34,6 +34,13 @@ public final class FusionNull
         }
 
         @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return makeBool(eval, right instanceof NullNull);
+        }
+
+        @Override
         BaseBool looseEquals(Evaluator eval, Object right)
             throws FusionException
         {

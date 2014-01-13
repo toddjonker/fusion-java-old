@@ -121,6 +121,18 @@ final class FusionNumber
         }
 
         @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseInt)
+            {
+                return ((BaseInt) right).looseEquals(eval, this);
+            }
+
+            return falseBool(eval);
+        }
+
+        @Override
         BaseNumber add(BaseNumber right)
         {
             return right.add(this);
@@ -189,6 +201,15 @@ final class FusionNumber
         BigDecimal toBigDecimal()
         {
             return null;
+        }
+
+        @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            boolean b = (right instanceof BaseInt
+                         && ((BaseInt) right).isAnyNull());
+            return makeBool(eval, b);
         }
 
         @Override
@@ -396,6 +417,13 @@ final class FusionNumber
         boolean isAnyNull() { return myValue.isAnyNull(); }
 
         @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.tightEquals(eval, right);
+        }
+
+        @Override
         BaseBool looseEquals(Evaluator eval, Object right)
             throws FusionException
         {
@@ -439,38 +467,6 @@ final class FusionNumber
         extends BaseNumber
     {
         private BaseDecimal() {}
-
-
-        @Override
-        BaseBool looseEquals(Evaluator eval, Object right)
-            throws FusionException
-        {
-            if (right instanceof BaseNumber)
-            {
-                BigDecimal rightDec = ((BaseNumber) right).toBigDecimal();
-                if (rightDec != null)
-                {
-                    BigDecimal leftDec  = this.toBigDecimal(); // not null
-                    if (leftDec.compareTo(rightDec) == 0)
-                    {
-                        return trueBool(eval);
-                    }
-                }
-            }
-
-            return falseBool(eval);
-        }
-
-        @Override
-        BaseBool looseEquals(Evaluator eval, BaseInt left)
-            throws FusionException
-        {
-            BigDecimal leftDec  = left.toBigDecimal();
-            BigDecimal rightDec = this.toBigDecimal();
-            boolean result = leftDec.compareTo(rightDec) == 0;
-            return makeBool(eval, result);
-        }
-
 
         @Override
         BaseNumber add(BaseNumber right)
@@ -546,6 +542,15 @@ final class FusionNumber
         }
 
         @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            boolean b = (right instanceof BaseDecimal
+                         && ((BaseDecimal) right).isAnyNull());
+            return makeBool(eval, b);
+        }
+
+        @Override
         BaseBool looseEquals(Evaluator eval, Object right)
             throws FusionException
         {
@@ -599,6 +604,52 @@ final class FusionNumber
         BigDecimal toBigDecimal()
         {
             return myContent;
+        }
+
+        private BaseBool tightEquals(Evaluator eval, BigDecimal rightDec)
+        {
+            if (rightDec != null)
+            {
+                if (myContent.compareTo(rightDec) == 0)
+                {
+                    return trueBool(eval);
+                }
+            }
+            return falseBool(eval);
+        }
+
+        @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseDecimal)
+            {
+                BigDecimal rightDec = ((BaseDecimal) right).toBigDecimal();
+                return tightEquals(eval, rightDec);
+            }
+            return falseBool(eval);
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseNumber)
+            {
+                BigDecimal rightDec = ((BaseNumber) right).toBigDecimal();
+                return tightEquals(eval, rightDec);
+            }
+
+            return falseBool(eval);
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, BaseInt left)
+            throws FusionException
+        {
+            BigDecimal leftDec  = left.toBigDecimal();
+            boolean result = leftDec.compareTo(myContent) == 0;
+            return makeBool(eval, result);
         }
 
         @Override
@@ -659,6 +710,13 @@ final class FusionNumber
         BigDecimal toBigDecimal()
         {
             return myValue.toBigDecimal();
+        }
+
+        @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.tightEquals(eval, right);
         }
 
         @Override
@@ -749,6 +807,15 @@ final class FusionNumber
         boolean isAnyNull()
         {
             return true;
+        }
+
+        @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            boolean b = (right instanceof BaseFloat
+                         && ((BaseFloat) right).isAnyNull());
+            return makeBool(eval, b);
         }
 
         @Override
@@ -868,6 +935,13 @@ final class FusionNumber
         Double objectDoubleValue()
         {
             return myValue.objectDoubleValue();
+        }
+
+        @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.tightEquals(eval, right);
         }
 
         @Override

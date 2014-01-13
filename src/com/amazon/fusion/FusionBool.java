@@ -66,6 +66,15 @@ public final class FusionBool
         BaseBool not(Evaluator eval) { return TRUE_BOOL; }
 
         @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            boolean b = (right instanceof BaseBool
+                         && ((BaseBool) right).isAnyNull());
+            return makeBool(eval, b);
+        }
+
+        @Override
         BaseBool looseEquals(Evaluator eval, Object right)
             throws FusionException
         {
@@ -258,6 +267,13 @@ public final class FusionBool
 
         @Override
         BaseBool not(Evaluator eval) { return myValue.not(eval); }
+
+        @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.tightEquals(eval, right);
+        }
 
         @Override
         BaseBool looseEquals(Evaluator eval, Object right)
