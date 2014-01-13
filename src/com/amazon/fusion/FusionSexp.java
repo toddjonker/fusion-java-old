@@ -5,11 +5,15 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
+import static com.amazon.fusion.FusionCompare.EqualityTier.LOOSE_EQUAL;
+import static com.amazon.fusion.FusionCompare.EqualityTier.STRICT_EQUAL;
+import static com.amazon.fusion.FusionCompare.EqualityTier.TIGHT_EQUAL;
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.Syntax.datumToStrippedSyntaxMaybe;
 import com.amazon.fusion.FusionBool.BaseBool;
+import com.amazon.fusion.FusionCompare.EqualityTier;
 import com.amazon.fusion.FusionIterator.AbstractIterator;
 import com.amazon.fusion.FusionList.BaseList;
 import com.amazon.fusion.FusionSequence.BaseSequence;
@@ -556,7 +560,7 @@ final class FusionSexp
 
 
         private static BaseBool actualPairEqual(Evaluator eval,
-                                                boolean   loose,
+                                                EqualityTier  tier,
                                                 ImmutablePair left,
                                                 ImmutablePair right)
             throws FusionException
@@ -566,8 +570,7 @@ final class FusionSexp
                 Object lv = left.myHead;
                 Object rv = right.myHead;
 
-                BaseBool b = (loose ? looseEquals(eval, lv, rv)
-                                    : tightEquals(eval, lv, rv));
+                BaseBool b = tier.eval(eval, lv, rv);
                 if (b.isFalse()) return b;
 
                 lv = left.myTail;
@@ -586,9 +589,7 @@ final class FusionSexp
                 }
                 else
                 {
-                    b = (loose ? looseEquals(eval, lv, rv)
-                               : tightEquals(eval, lv, rv));
-                    return b;
+                    return tier.eval(eval, lv, rv);
                 }
             }
 
@@ -602,7 +603,7 @@ final class FusionSexp
             if (right instanceof ImmutablePair)
             {
                 ImmutablePair rp = (ImmutablePair) right;
-                return actualPairEqual(eval, false, this, rp);
+                return actualPairEqual(eval, TIGHT_EQUAL, this, rp);
             }
             return falseBool(eval);
         }
@@ -614,7 +615,7 @@ final class FusionSexp
             if (right instanceof ImmutablePair)
             {
                 ImmutablePair rp = (ImmutablePair) right;
-                return actualPairEqual(eval, true, this, rp);
+                return actualPairEqual(eval, LOOSE_EQUAL, this, rp);
             }
             return falseBool(eval);
         }

@@ -5,6 +5,8 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
+import static com.amazon.fusion.FusionCompare.EqualityTier.LOOSE_EQUAL;
+import static com.amazon.fusion.FusionCompare.EqualityTier.TIGHT_EQUAL;
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionIterator.iterate;
@@ -21,6 +23,7 @@ import static com.amazon.ion.util.IonTextUtils.printSymbol;
 import static java.util.Collections.EMPTY_MAP;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionCollection.BaseCollection;
+import com.amazon.fusion.FusionCompare.EqualityTier;
 import com.amazon.fusion.FusionIterator.AbstractIterator;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonStruct;
@@ -1040,7 +1043,7 @@ final class FusionStruct
             if (right instanceof MapBasedStruct)
             {
                 MapBasedStruct rs = (MapBasedStruct) right;
-                return rs.actualStructEqual(eval, false, this);
+                return rs.actualStructEqual(eval, TIGHT_EQUAL, this);
             }
             return falseBool(eval);
         }
@@ -1052,13 +1055,13 @@ final class FusionStruct
             if (right instanceof MapBasedStruct)
             {
                 MapBasedStruct rs = (MapBasedStruct) right;
-                return rs.actualStructEqual(eval, true, this);
+                return rs.actualStructEqual(eval, LOOSE_EQUAL, this);
             }
             return falseBool(eval);
         }
 
         private BaseBool actualStructEqual(Evaluator eval,
-                                           boolean loose,
+                                           EqualityTier tier,
                                            MapBasedStruct left)
             throws FusionException
         {
@@ -1093,8 +1096,7 @@ final class FusionStruct
                         for (int j = 0; j < rCount; j++)
                         {
                             rv = rArray[j];
-                            BaseBool b = (loose ? looseEquals(eval, lv, rv)
-                                                : tightEquals(eval, lv, rv));
+                            BaseBool b = tier.eval(eval, lv, rv);
                             if (b.isTrue())
                             {
                                 found = true;
@@ -1113,8 +1115,7 @@ final class FusionStruct
                 {
                     if (rv instanceof Object[]) return falseBool(eval);
 
-                    BaseBool b = (loose ? looseEquals(eval, lv, rv)
-                                        : tightEquals(eval, lv, rv));
+                    BaseBool b = tier.eval(eval, lv, rv);
                     if (b.isFalse()) return b;
                 }
             }

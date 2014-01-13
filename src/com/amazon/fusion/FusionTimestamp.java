@@ -39,26 +39,6 @@ final class FusionTimestamp
         abstract Timestamp timestampValue();
 
         @Override
-        BaseBool looseEquals(Evaluator eval, Object right)
-            throws FusionException
-        {
-            if (right instanceof BaseTimestamp)
-            {
-                Timestamp rt = unsafeTimestampToJavaTimestamp(eval, right);
-                if (rt != null)
-                {
-                    Timestamp lt = this.timestampValue(); // not null
-                    if (lt.compareTo(rt) == 0)
-                    {
-                        return trueBool(eval);
-                    }
-                }
-            }
-
-            return falseBool(eval);
-        }
-
-        @Override
         SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
         {
             return makeSyntax(eval, /*location*/ null, this);
@@ -138,6 +118,22 @@ final class FusionTimestamp
         Timestamp timestampValue()
         {
             return myContent;
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseTimestamp)
+            {
+                Timestamp rt = ((BaseTimestamp) right).timestampValue();
+                if (rt != null && myContent.compareTo(rt) == 0)
+                {
+                    return trueBool(eval);
+                }
+            }
+
+            return falseBool(eval);
         }
 
         @Override

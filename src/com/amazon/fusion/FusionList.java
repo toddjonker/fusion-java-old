@@ -5,6 +5,9 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
+import static com.amazon.fusion.FusionCompare.EqualityTier.LOOSE_EQUAL;
+import static com.amazon.fusion.FusionCompare.EqualityTier.STRICT_EQUAL;
+import static com.amazon.fusion.FusionCompare.EqualityTier.TIGHT_EQUAL;
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionNumber.makeInt;
@@ -14,6 +17,7 @@ import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.Syntax.datumToStrippedSyntaxMaybe;
 import com.amazon.fusion.FusionBool.BaseBool;
+import com.amazon.fusion.FusionCompare.EqualityTier;
 import com.amazon.fusion.FusionSequence.BaseSequence;
 import com.amazon.fusion.FusionSexp.BaseSexp;
 import com.amazon.ion.IonList;
@@ -437,7 +441,7 @@ final class FusionList
 
 
         private static BaseBool actualListEqual(Evaluator eval,
-                                                boolean   loose,
+                                                EqualityTier tier,
                                                 BaseList  left,
                                                 BaseList  right)
             throws FusionException
@@ -455,8 +459,7 @@ final class FusionList
                     Object lv = lVals[i];
                     Object rv = rVals[i];
 
-                    BaseBool b = (loose ? looseEquals(eval, lv, rv)
-                                        : tightEquals(eval, lv, rv));
+                    BaseBool b = tier.eval(eval, lv, rv);
                     if (b.isFalse()) return b;
                 }
 
@@ -474,7 +477,7 @@ final class FusionList
                 BaseList r = (BaseList) right;
                 if (! r.isAnyNull())
                 {
-                    return actualListEqual(eval, false, this, r);
+                    return actualListEqual(eval, TIGHT_EQUAL, this, r);
                 }
             }
             return falseBool(eval);
@@ -497,7 +500,7 @@ final class FusionList
             throws FusionException
         {
             // Neither is null.list
-            return actualListEqual(eval, true, left, this);
+            return actualListEqual(eval, LOOSE_EQUAL, left, this);
         }
 
         @Override

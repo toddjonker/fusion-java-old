@@ -26,6 +26,41 @@ final class FusionCompare
     private FusionCompare() {}
 
 
+    enum EqualityTier
+    {
+        STRICT_EQUAL
+        {
+            @Override
+            BaseBool eval(Evaluator eval, Object left, Object right)
+                throws FusionException
+            {
+                return BaseValue.strictEquals(eval, left, right);
+            }
+        },
+        TIGHT_EQUAL
+        {
+            @Override
+            BaseBool eval(Evaluator eval, Object left, Object right)
+                throws FusionException
+            {
+                return BaseValue.tightEquals(eval, left, right);
+            }
+        },
+        LOOSE_EQUAL
+        {
+            @Override
+            BaseBool eval(Evaluator eval, Object left, Object right)
+                throws FusionException
+            {
+                return BaseValue.looseEquals(eval, left, right);
+            }
+        };
+
+        abstract BaseBool eval(Evaluator eval, Object left, Object right)
+            throws FusionException;
+    }
+
+
     private static abstract class BaseCompareProc
         extends Procedure
     {
