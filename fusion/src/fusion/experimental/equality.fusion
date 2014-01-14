@@ -1,9 +1,9 @@
 // Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
 
-(module compare "/fusion"
+(module equality "/fusion"
 
   '''
-Experimental equality and comparison operators.
+Experimental equality procedures.
 
 The definition of "equality" between values often depends upon the application,
 so it's not possible for Fusion to provide operators that will be sufficient
