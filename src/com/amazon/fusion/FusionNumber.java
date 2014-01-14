@@ -10,6 +10,7 @@ import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import static java.math.RoundingMode.CEILING;
 import static java.math.RoundingMode.FLOOR;
 import com.amazon.fusion.FusionBool.BaseBool;
+import com.amazon.ion.Decimal;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
@@ -649,6 +650,21 @@ final class FusionNumber
             return myContent;
         }
 
+        @Override
+        BaseBool strictEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseDecimal)
+            {
+                BigDecimal rightDec = ((BaseDecimal) right).toBigDecimal();
+                if (rightDec != null && Decimal.equals(myContent, rightDec))
+                {
+                    return trueBool(eval);
+                }
+            }
+            return falseBool(eval);
+        }
+
         private BaseBool tightEquals(Evaluator eval, BigDecimal rightDec)
         {
             if (rightDec != null)
@@ -762,6 +778,13 @@ final class FusionNumber
         BigDecimal toBigDecimal()
         {
             return myValue.toBigDecimal();
+        }
+
+        @Override
+        BaseBool strictEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.strictEquals(eval, right);
         }
 
         @Override
@@ -988,6 +1011,22 @@ final class FusionNumber
         }
 
         @Override
+        BaseBool strictEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseFloat)
+            {
+                Double rightDouble = ((BaseFloat) right).objectDoubleValue();
+                if (rightDouble != null
+                    && Double.compare(myContent, rightDouble) == 0)
+                {
+                    return trueBool(eval);
+                }
+            }
+            return falseBool(eval);
+        }
+
+        @Override
         BaseBool tightEquals(Evaluator eval, Object right)
             throws FusionException
         {
@@ -1137,6 +1176,14 @@ final class FusionNumber
         BigDecimal toBigDecimal()
         {
             return myValue.toBigDecimal();
+        }
+
+
+        @Override
+        BaseBool strictEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.strictEquals(eval, right);
         }
 
         @Override

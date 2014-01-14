@@ -31,7 +31,7 @@
     (lambda (value)
       (and (is_bool value) (= false value))))
 
-  (defpub ion_equals          (java_new "com.amazon.fusion.IonEqualsProc"))
+  (defpub_j ion_equals "com.amazon.fusion.FusionCompare$StrictEqualProc")
 
   // NOT PUBLIC YET
   (define _raise_check_failure (java_new "com.amazon.fusion.CheckFailureProc"))

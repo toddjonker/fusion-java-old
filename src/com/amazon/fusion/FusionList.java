@@ -440,10 +440,10 @@ final class FusionList
         }
 
 
-        private static BaseBool actualListEqual(Evaluator eval,
+        private static BaseBool actualListEqual(Evaluator    eval,
                                                 EqualityTier tier,
-                                                BaseList  left,
-                                                BaseList  right)
+                                                BaseList     left,
+                                                BaseList     right)
             throws FusionException
         {
             assert ! (left.isAnyNull() || right.isAnyNull());
@@ -464,6 +464,21 @@ final class FusionList
                 }
 
                 return trueBool(eval);
+            }
+            return falseBool(eval);
+        }
+
+        @Override
+        BaseBool strictEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseList)
+            {
+                BaseList r = (BaseList) right;
+                if (! r.isAnyNull())
+                {
+                    return actualListEqual(eval, STRICT_EQUAL, this, r);
+                }
             }
             return falseBool(eval);
         }
@@ -751,6 +766,14 @@ final class FusionList
         Object[] extract(Evaluator eval)
         {
             return null;
+        }
+
+        @Override
+        BaseBool strictEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            boolean b = (right instanceof NullList);
+            return makeBool(eval, b);
         }
 
         @Override

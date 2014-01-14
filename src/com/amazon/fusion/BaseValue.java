@@ -15,6 +15,7 @@ import com.amazon.ion.ValueFactory;
 import com.amazon.ion.system.IonTextWriterBuilder;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Root class for most (if not all) Fusion values.
@@ -60,6 +61,9 @@ abstract class BaseValue
         return looseEquals(eval, right);
     }
 
+    /**
+     * Implementation of {@code ===}, <em>without</em> checking annotations.
+     */
     BaseBool strictEquals(Evaluator eval, Object right)
         throws FusionException
     {
@@ -258,7 +262,17 @@ abstract class BaseValue
 
         if (left instanceof BaseValue)
         {
-            return ((BaseValue) left).strictEquals(eval, right);
+            BaseValue lv = (BaseValue) left;
+            BaseBool b = lv.strictEquals(eval, right);
+            if (b.isTrue())
+            {
+                BaseValue rv = (BaseValue) right;
+
+                String[] lAnn = lv.annotationsAsJavaStrings();
+                String[] rAnn = rv.annotationsAsJavaStrings();
+
+                if (Arrays.equals(lAnn, rAnn)) return b;
+            }
         }
 
         return falseBool(eval);

@@ -121,6 +121,22 @@ final class FusionTimestamp
         }
 
         @Override
+        BaseBool strictEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseTimestamp)
+            {
+                Timestamp rt = ((BaseTimestamp) right).timestampValue();
+                if (myContent.equals(rt))
+                {
+                    return trueBool(eval);
+                }
+            }
+
+            return falseBool(eval);
+        }
+
+        @Override
         BaseBool looseEquals(Evaluator eval, Object right)
             throws FusionException
         {
@@ -197,6 +213,13 @@ final class FusionTimestamp
         Timestamp timestampValue()
         {
             return myValue.timestampValue();
+        }
+
+        @Override
+        BaseBool strictEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return myValue.strictEquals(eval, right);
         }
 
         @Override

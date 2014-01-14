@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionCompare.EqualityTier.LOOSE_EQUAL;
+import static com.amazon.fusion.FusionCompare.EqualityTier.STRICT_EQUAL;
 import static com.amazon.fusion.FusionCompare.EqualityTier.TIGHT_EQUAL;
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
@@ -1034,6 +1035,18 @@ final class FusionStruct
             }
 
             return makeSimilar(newMap);
+        }
+
+        @Override
+        BaseBool strictEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof MapBasedStruct)
+            {
+                MapBasedStruct rs = (MapBasedStruct) right;
+                return rs.actualStructEqual(eval, STRICT_EQUAL, this);
+            }
+            return falseBool(eval);
         }
 
         @Override

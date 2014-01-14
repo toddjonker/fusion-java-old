@@ -559,7 +559,7 @@ final class FusionSexp
         }
 
 
-        private static BaseBool actualPairEqual(Evaluator eval,
+        private static BaseBool actualPairEqual(Evaluator     eval,
                                                 EqualityTier  tier,
                                                 ImmutablePair left,
                                                 ImmutablePair right)
@@ -593,6 +593,18 @@ final class FusionSexp
                 }
             }
 
+            return falseBool(eval);
+        }
+
+        @Override
+        BaseBool strictEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof ImmutablePair)
+            {
+                ImmutablePair rp = (ImmutablePair) right;
+                return actualPairEqual(eval, STRICT_EQUAL, this, rp);
+            }
             return falseBool(eval);
         }
 
