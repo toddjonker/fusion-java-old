@@ -5,6 +5,15 @@
   '''
 Experimental equality procedures.
 
+<!-- FUSION-185 This comment forces FusionDoc to stop the one-liner here. -->
+
+## WARNING
+
+This module contains unstable, experimental features.
+There is **NO SUPPORT** for this module.
+
+## Equality Procedures
+
 The definition of "equality" between values often depends upon the application,
 so it's not possible for Fusion to provide operators that will be sufficient
 for all circumstances. With that in mind, this module provides a spectrum of
