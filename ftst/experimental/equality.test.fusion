@@ -18,6 +18,8 @@
 (define !==  (|a b| (not (==  a b))))
 (define !=== (|a b| (not (=== a b))))
 
+(define not_same (|a b| (not (is_same a b))))
+
 
 (define (add_annotations vals)
   '''
@@ -84,7 +86,8 @@ orders, including each value paired with itself.
       (sexp true)
       (sexp false)
       (sexp "")
-      (sexp "true" (quote 'true'))
+      (sexp "true" (quote "true") (quote "true")
+        (quote 'true') (quote 'true') (string_to_symbol "true"))
       (sexp 1 1. 1.0 1.00 10e-1)
       (sexp 0 0. -0. 0.00 -0.000 0e0 -0e0)
       (sexp 123 123. 123.0e0)
@@ -132,8 +135,8 @@ orders, including each value paired with itself.
         (sexp true)
         (sexp false)
         (sexp "")
-        (sexp "true")
-        (sexp (quote 'true'))
+        (sexp "true" (quote "true") (quote "true"))
+        (sexp (quote 'true') (quote 'true') (string_to_symbol "true"))
         (sexp 1)
         (sexp 1. 1.0 1.00)
         (sexp 0)
@@ -209,8 +212,8 @@ orders, including each value paired with itself.
           (sexp true)
           (sexp false)
           (sexp "")
-          (sexp "true")
-          (sexp (quote 'true'))
+          (sexp "true" (quote "true") (quote "true"))
+          (sexp (quote 'true') (quote 'true') (string_to_symbol "true"))
           (sexp 1)
           (sexp 1.)
           (sexp 1.0)
@@ -279,3 +282,26 @@ orders, including each value paired with itself.
           (sexp {f:1., g:9, f:2, f:2})
           (sexp {f:2, f:1.0, g:9, f:2})
 )))))
+
+
+(test_equivalence [is_same, '===', '==', '='] not_same
+  (append_m
+    // Nulls are their own equivalence sets
+    (apply mutable_list (map sexp all_nulls))
+    (list
+      (sexp 19  19  (+ 9 10 ) (quote 19))
+      (sexp    92233720368547758070   // Larger than 64-bit long
+               92233720368547758070
+        (quote 92233720368547758070)
+        (* 10  9223372036854775807 ))
+      (sexp 19. 19. (+ 9 10.))
+      (sexp 19.0 19.0 (+ 9.0 10.0))
+      (sexp 19.e0 19.e0 1.90e1)       // TODO FUSION-248 use arithmetic results
+      (sexp (quote a::19))
+      (sexp (quote a::19.))
+      (sexp (quote a::92233720368547758070))
+      (sexp (quote a::19.e0))
+      (sexp "str")
+      (sexp (quote str))              // TODO FUSION-47 intern symbols
+      (sexp (quote a::str))
+)))

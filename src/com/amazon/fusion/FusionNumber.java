@@ -73,6 +73,16 @@ final class FusionNumber
         abstract BaseNumber multiply(BaseInt left);
 
         /**
+         * Compare value strictly, annotations cannot match.
+         * Instance identity has already been performed by the caller.
+         */
+        BaseBool isSame(Evaluator eval, Object right)
+            throws FusionException
+        {
+            return falseBool(eval);
+        }
+
+        /**
          * Second part of double-dispatch.
          * @param left is not a null value
          */
@@ -155,7 +165,7 @@ final class FusionNumber
         {
             if (right instanceof BaseInt)
             {
-                return ((BaseInt) right).looseEquals(eval, this);
+                return ((BaseInt) right).looseEquals2(eval, this);
             }
 
             return falseBool(eval);
@@ -323,6 +333,20 @@ final class FusionNumber
         }
 
         @Override
+        BaseBool isSame(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof LongInt)
+            {
+                if (myContent == ((LongInt) right).myContent)
+                {
+                    return trueBool(eval);
+                }
+            }
+            return falseBool(eval);
+        }
+
+        @Override
         IonValue copyToIonValue(ValueFactory factory,
                                 boolean throwOnConversionFailure)
             throws FusionException, IonizeFailure
@@ -375,6 +399,21 @@ final class FusionNumber
         BigDecimal toBigDecimal()
         {
             return new BigDecimal(myContent);
+        }
+
+        @Override
+        BaseBool isSame(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BigInt)
+            {
+                BigInteger rightInt = ((BigInt) right).myContent;
+                if (myContent.equals(rightInt))
+                {
+                    return trueBool(eval);
+                }
+            }
+            return falseBool(eval);
         }
 
         @Override
@@ -648,6 +687,21 @@ final class FusionNumber
         BigDecimal toBigDecimal()
         {
             return myContent;
+        }
+
+        @Override
+        BaseBool isSame(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof ActualDecimal)
+            {
+                BigDecimal rightDec = ((ActualDecimal) right).myContent;
+                if (Decimal.equals(myContent, rightDec))
+                {
+                    return trueBool(eval);
+                }
+            }
+            return falseBool(eval);
         }
 
         @Override
@@ -1008,6 +1062,21 @@ final class FusionNumber
         BigDecimal toBigDecimal()
         {
             return new BigDecimal(myContent);
+        }
+
+        @Override
+        BaseBool isSame(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof ActualFloat)
+            {
+                double rightDouble = ((ActualFloat) right).myContent;
+                if (Double.compare(myContent, rightDouble) == 0)
+                {
+                    return trueBool(eval);
+                }
+            }
+            return falseBool(eval);
         }
 
         @Override

@@ -140,8 +140,7 @@ As with `is_identical`, values with different annotations are never `is_same`.
 
     (is_same (quote a::"hi") (quote a::"hi"))  --> // unspecified
     '''
-    (lambda (left right)
-      (is_identical left right))) // XXX
+    (java_new "com.amazon.fusion.FusionCompare$IsSameProc"))
 
 
   (defpub =

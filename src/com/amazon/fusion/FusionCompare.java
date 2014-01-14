@@ -2,8 +2,10 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.isBool;
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionBool.unsafeBoolToJavaBoolean;
 import static com.amazon.fusion.FusionNumber.isIntOrDecimal;
 import static com.amazon.fusion.FusionNumber.unsafeNumberToBigDecimal;
@@ -15,6 +17,7 @@ import static com.amazon.fusion.FusionTimestamp.isTimestamp;
 import static com.amazon.fusion.FusionTimestamp.unsafeTimestampToJavaTimestamp;
 import static com.amazon.fusion.FusionUtils.safeEquals;
 import com.amazon.fusion.FusionBool.BaseBool;
+import com.amazon.fusion.FusionNumber.BaseNumber;
 import com.amazon.ion.Timestamp;
 import java.math.BigDecimal;
 
@@ -25,6 +28,24 @@ final class FusionCompare
 {
     private FusionCompare() {}
 
+
+
+    static BaseBool isSame(Evaluator eval, Object left, Object right)
+        throws FusionException
+    {
+        if (left == right) return trueBool(eval);
+
+        if (left instanceof BaseNumber)
+        {
+            return ((BaseNumber) left).isSame(eval, right);
+        }
+
+        return falseBool(eval);
+    }
+
+
+    //========================================================================
+    // Procedures
 
     enum EqualityTier
     {
@@ -303,6 +324,30 @@ final class FusionCompare
             Object arg1 = args[1];
 
             return makeBool(eval, arg0 == arg1);
+        }
+    }
+
+
+    static final class IsSameProc
+        extends Procedure
+    {
+        IsSameProc()
+        {
+            //    "                                                                               |
+            super("Docs in Fusion source",
+                  "left", "right");
+        }
+
+        @Override
+        final BaseBool doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(args);
+
+            Object arg0 = args[0];
+            Object arg1 = args[1];
+
+            return isSame(eval, arg0, arg1);
         }
     }
 
