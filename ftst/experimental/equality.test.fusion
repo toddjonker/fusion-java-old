@@ -52,9 +52,9 @@ orders, including each value paired with itself.
       (test_pairwise op (tail vals)))))
 
 
-(define (test_equivalence eq neq equiv_sets)
+(define (test_equivalence eqs neq equiv_sets)
   (let [(num_sets (size equiv_sets))]
-    (do (|set| (test_pairwise eq set)) equiv_sets)
+    (do (|set| (do (|eq| (test_pairwise eq set)) eqs)) equiv_sets)
 
     // Pick each set in the loop to compare its elements to the other sets
     (let set_loop [(i 0)]
@@ -73,7 +73,7 @@ orders, including each value paired with itself.
         (set_loop (+ 1 i))))))
 
 
-(test_equivalence = !=
+(test_equivalence ['='] !=
   (map add_annotations
     (list
       // Each entry at this level is an equivalence set
@@ -120,7 +120,7 @@ orders, including each value paired with itself.
 )))
 
 
-(test_equivalence == !==
+(test_equivalence ['==', '='] !==
   (map add_annotations
     (append_m
       // Nulls are their own equivalence sets
@@ -184,7 +184,7 @@ orders, including each value paired with itself.
 ))))
 
 
-(test_equivalence === !===
+(test_equivalence ['===', '==', '='] !===
   (apply list
     (fold_left
       (|accum eqSet|
