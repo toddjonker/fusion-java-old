@@ -28,12 +28,12 @@ final class FusionSymbol
         private BaseSymbol() {}
 
         @Override
-        BaseBool looseEquals(Evaluator eval, Object right)
+        BaseBool tightEquals(Evaluator eval, Object right)
             throws FusionException
         {
             if (right instanceof BaseSymbol)
             {
-                String r = unsafeSymbolToJavaString(eval, right);
+                String r = ((BaseSymbol) right).stringValue();
                 if (r != null)
                 {
                     String l = this.stringValue(); // not null

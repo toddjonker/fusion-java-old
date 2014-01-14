@@ -1,6 +1,10 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
+
+import static com.amazon.fusion.FusionBool.falseBool;
+import static com.amazon.fusion.FusionBool.trueBool;
+import com.amazon.fusion.FusionBool.BaseBool;
 
 
 /**
@@ -17,7 +21,28 @@ final class FusionText
         BaseText() {}
 
         abstract String stringValue();
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseText)
+            {
+                String r = ((BaseText) right).stringValue();
+                if (r != null)
+                {
+                    String l = this.stringValue(); // not null
+                    if (l.equals(r))
+                    {
+                        return trueBool(eval);
+                    }
+                }
+            }
+
+            return falseBool(eval);
+        }
     }
+
 
     //========================================================================
     // Predicates

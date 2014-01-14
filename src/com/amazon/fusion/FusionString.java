@@ -40,12 +40,12 @@ public final class FusionString
         private BaseString() {}
 
         @Override
-        BaseBool looseEquals(Evaluator eval, Object right)
+        BaseBool tightEquals(Evaluator eval, Object right)
             throws FusionException
         {
             if (right instanceof BaseString)
             {
-                String r = unsafeStringToJavaString(eval, right);
+                String r = ((BaseString) right).stringValue();
                 if (r != null)
                 {
                     String l = this.stringValue(); // not null
