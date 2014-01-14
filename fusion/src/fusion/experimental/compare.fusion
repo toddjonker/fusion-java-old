@@ -11,7 +11,8 @@ for all circumstances. With that in mind, this module provides a spectrum of
 equality relations that should be sufficient for the majority of use cases.
 
 The standard equality procedures, from most lenient to most strict, are
-briefly described as follows:
+briefly described here; see the reference below for full details.
+As a mnemonic, observe that longer names mean stricter comparisons.
 
  *  `=`
 
@@ -60,7 +61,6 @@ Note that these operations define "nested" equivalence classes:
  *  If `(is_same a b)` is true then `(=== a b)` is true.
  *  If `(=== a b)` is true then `(== a b)` is true.
  *  If `(== a b)` is true then `(= a b)` is true.
-
 
 Here's a rough comparison to other languages:
 
@@ -119,7 +119,7 @@ value:
 
 Like `is_identical` but sound for numbers. That is, this procedure guarantees
 equivalence of (unannotated) numbers with the same type, value, and precision,
-while `is_identical` does not. In effect, unannotated numbers are behave as if
+while `is_identical` does not. In effect, unannotated numbers behave as if
 they were interned.
 
 As with `is_identical`, values with different annotations are never `is_same`.
@@ -146,8 +146,8 @@ coercing values to a common type. Annotations and precision are ignored.
  *  Nulls of any type are `=` to each other.
  *  Bools are `=` in the obvious way.
  *  Numbers are `=` when they represent the same numeric value, without regard
-    to precision. When a float is compared to an int or decimal, it is coerced
-    to a decimal.
+    to precision or negative zeros.
+    When a float is compared to an int or decimal, it is coerced to a decimal.
  *  Timestamps are `=` when they represent the same point-in-time, without
     regard to precision or local offset.
  *  Strings and symbols are `=` (interchangably) when they contain the same
@@ -165,6 +165,7 @@ For example:
     (= null (quote a::null))             --> true
     (= null null.clob)                   --> true
     (= 1 1.00)                           --> true
+    (= 0 -0e-3)                          --> true
     (= 2014T 2014-01-01T02:00+02:00)     --> true
     (= 2014T 2014)                       --> false
 
@@ -176,6 +177,10 @@ For example:
 
     (= (struct "f" 1) (mutable_struct "f" 1.0))   --> true
     (= {f:1, f:1} {f:1})                          --> false
+
+**Warning:** The behavior of this procedure is undefined for values `+inf`,
+`-inf`, and `nan`.
+See [FUSION-249](issue:FUSION-249).
     '''
     (java_new "com.amazon.fusion.FusionCompare$LooseEqualProc"))
 
@@ -190,7 +195,7 @@ Annotations and precision are ignored.
  *  Any value is `==` to itself.
  *  Nulls are only `==` to nulls of the same type.
  *  Numbers are `==` when they have the same type and numeric value, without
-    regard.
+    regard to precision or negative zeros.
  *  Strings are only `==` to strings, and symbols to symbols.
  *  Blobs are only `==` to blobs, and clobs to clobs.
  *  Pairs are `==` when their heads and tails are `==`.
@@ -205,6 +210,7 @@ For example:
     (== null null.clob)                   --> false
     (== 1  1.)                            --> false
     (== 1. 1.0)                           --> true
+    (=== 0. -0.)                          --> true
     (== 2014T 2014-01-01T02:00+02:00)     --> true
     (== 2014T 2014)                       --> false
 
@@ -213,6 +219,10 @@ For example:
 
     (== [1, 2  ] (sexp 1 2.00))           --> false
     (== [1, 2.0] (sexp 1 2.00))           --> true
+
+**Warning:** The behavior of this procedure is undefined for values `+inf`,
+`-inf`, and `nan`.
+See [FUSION-249](issue:FUSION-249).
     '''
     (java_new "com.amazon.fusion.FusionCompare$TightEqualProc"))
 
@@ -225,7 +235,7 @@ Like `==` but annotations and precision are _not_ ignored.
 
  *  Values are `===` only when their annotations are equal.
  *  Decimals are `===` only when they have the same numeric value and
-    precision.
+    precision. Negative zeros are not `===` to positive zeros.
  *  Timestamps are `===` only when they represent the same point-in-time and
     have the same precision and local offset.
 
@@ -237,6 +247,7 @@ For example:
     (=== 1   1.)                           --> false
     (=== 1.  1.0)                          --> false
     (=== 1.0 1.0)                          --> true
+    (=== 0. -0.)                           --> false
 
     (=== 2014T 2014-01-01T02:00+02:00)     --> false
     (=== 2014-01-01T00:00+00:00
@@ -244,16 +255,11 @@ For example:
 
     (=== (quote    a::1) (quote a::a::1))  --> false
     (=== (quote b::a::1) (quote a::b::1))  --> false
+
+**Warning:** The behavior of this procedure is undefined for values `+inf`,
+`-inf`, and `nan`.
+See [FUSION-249](issue:FUSION-249).
     '''
     (java_new "com.amazon.fusion.FusionCompare$StrictEqualProc"))
 
-
-  (defpub <>
-    '''
-    (<> left right)
-
-Equivalent to `(not (= left right))`.
-    '''
-    (lambda (left right)
-      (not (= left right))))
 )
