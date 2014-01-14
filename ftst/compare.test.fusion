@@ -51,9 +51,7 @@
       (test_pairwise op (tail vals)))))
 
 (define (test_equivalence eq neq equiv_sets)
-  (let [(num_sets (size equiv_sets)),
-        (equiv_sets (map add_annotations (apply list equiv_sets)))]
-    // Create a list so we can index into it
+  (let [(num_sets (size equiv_sets))]
     (do (|set| (test_pairwise eq set)) equiv_sets)
 
     // Pick each set in the loop to compare its elements to the other sets
@@ -73,7 +71,8 @@
         (set_loop (+ 1 i))))))
 
 (test_equivalence = <>
-  (sexp
+  (map add_annotations
+    (list
     // Each entry at this level is an equivalence set
     all_nulls
     (sexp VOID)
@@ -84,11 +83,16 @@
     (sexp "")
     (sexp "true")
     (sexp (quote 'true'))
-    (sexp 1 1. 1.0 1.00)
-    (sexp 0 0. -0. 0.00 -0.000)
-
-    (sexp 2014T 2014-01T 2014-01-01T 2014-01-01T00:00Z 2014-01-01T02:00+02:00)
-
+    (sexp 1 1. 1.0 1.00 10e-1)
+    (sexp 0 0. -0. 0.00 -0.000 0e0 -0e0)
+    (sexp 123 123. 123.0e0)
+    (sexp 2014T
+          2014-01T
+          2014-01-01T
+          2014-01-01T00:00Z
+          2014-01-01T02:00+02:00)
+    (sexp {{}} {{""}})
+    (sexp {{Zm9vYmFy}} {{"foobar"}})
     (sexp (pair 1 2) (pair 1.0 2.0))
     // These are similar to (but not =) 2-element sequences below:
     (sexp (pair null 1) (pair null.int 1.0))
@@ -113,12 +117,13 @@
     (sexp {f:1, f:2} {f:1.0, f:2.0} {f:2, f:1.000})
     (sexp {f:1, g:9, f:2, f:2} {f:2, f:1.0, g:9, f:2.0}
       {g:9, f:2, f:1.000, f:2.00})
-  ))
+  )))
 
 (define !== (|a b| (not (== a b))))
 
 (test_equivalence == !==
-  (append_m
+  (map add_annotations
+    (append_m
     // Nulls are their own equivalence sets
     (apply mutable_list (map sexp all_nulls))
     (list
@@ -134,18 +139,22 @@
       (sexp 1. 1.0 1.00)
       (sexp 0)
       (sexp 0. -0. 0.00 -0.000)
+      (sexp 0e0 -0e0 0.00e-1)
       (sexp 2014T
             2014-01T
             2014-01-01T
             2014-01-01T00:00Z
             2014-01-01T02:00+02:00)
-  
+      (sexp {{}})
+      (sexp {{""}})
+      (sexp {{Zm9vYmFy}})
+      (sexp {{"foobar"}})
       (sexp (pair 1 2))
       (sexp (pair 1.0 2.0) (pair 1. 2.000))
       // These are similar to (but not ==) 2-element sequences below:
       (sexp (pair null 1))
       (sexp (pair null.int 1))
-  
+
       (sexp [] (mutable_list) (stretchy_list))
       (sexp (quote ()) (sexp))
       (sexp [null])
@@ -153,7 +162,6 @@
       (sexp (sexp null))
       (sexp (sexp null.int))
       (sexp (sexp NULL_SEXP))
-      // These are similar to (but not =) the pairs above:
       (sexp [null, 1])
       (sexp [null.int, 1.0] [null.int, 1.])
       (sexp [NULL_SEXP, 1.00])
@@ -163,11 +171,10 @@
       (sexp [1.0] [1.00])
       (sexp (sexp 1))
       (sexp (sexp 1.0) (sexp 1.00))
-      // Note that the prior set is a prefix of this set.
       (sexp [1 , true, [2.0]] [1  , true, [2.00]])
       (sexp [1., true, [2.0]] [1.0, true, [2.00]] [1.00, true, [2.0]])
       (sexp (sexp 1 true [2.0]) (sexp 1 true [2.00]) (sexp 1 true [2.0]))
-  
+
       (sexp {} (struct) (mutable_struct))
       (sexp {f:1})
       (sexp {f:1.0} {f:1.00})
@@ -178,5 +185,6 @@
       (sexp {f:2, f:1.000})
       (sexp {f:1., g:9, f:2, f:2} {f:2, f:1.0, g:9, f:2}
         {g:9, f:2, f:1.000, f:2})
-    )))
+    ))))
+
 

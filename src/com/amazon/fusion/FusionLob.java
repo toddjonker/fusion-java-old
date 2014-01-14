@@ -1,8 +1,12 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.falseBool;
+import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
+import com.amazon.fusion.FusionBool.BaseBool;
+import java.util.Arrays;
 
 
 /**
@@ -23,6 +27,32 @@ public final class FusionLob
         extends BaseValue
     {
         BaseLob() {}
+
+        byte[] bytesNoCopy()
+        {
+            return null;
+        }
+
+        static BaseBool actualLobEquals(Evaluator eval,
+                                        byte[]    leftBytes,
+                                        Object    rightLob)
+        {
+            byte[] rightBytes = ((BaseLob) rightLob).bytesNoCopy();
+            boolean b = Arrays.equals(leftBytes, rightBytes);
+            return makeBool(eval, b);
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseLob)
+            {
+                byte[] leftBytes = bytesNoCopy();
+                return actualLobEquals(eval, leftBytes, right);
+            }
+            return falseBool(eval);
+        }
 
         @Override
         SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)

@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionLob.BaseLob;
@@ -89,6 +90,21 @@ final class FusionClob
             myContent = content;
         }
 
+        @Override
+        byte[] bytesNoCopy()
+        {
+            return myContent;
+        }
+
+        @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+        {
+            if (right instanceof BaseClob)
+            {
+                return actualLobEquals(eval, myContent, right);
+            }
+            return falseBool(eval);
+        }
 
         @Override
         IonValue copyToIonValue(ValueFactory factory,
@@ -145,6 +161,12 @@ final class FusionClob
         boolean isAnyNull()
         {
             return myValue.isAnyNull();
+        }
+
+        @Override
+        byte[] bytesNoCopy()
+        {
+            return myValue.bytesNoCopy();
         }
 
         @Override

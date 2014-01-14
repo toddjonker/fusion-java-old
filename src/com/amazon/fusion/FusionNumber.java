@@ -75,14 +75,35 @@ final class FusionNumber
          * Second part of double-dispatch.
          * @param left is not a null value
          */
-        abstract BaseBool looseEquals(Evaluator eval, BaseInt left)
-            throws FusionException;
+        BaseBool looseEquals2(Evaluator eval, BaseInt left)
+            throws FusionException
+        {
+            return falseBool(eval);
+        }
+
+        BaseBool looseEquals2(Evaluator eval, ActualFloat left)
+            throws FusionException
+        {
+            return falseBool(eval);
+        }
 
         @Override
         SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
         {
             return makeSyntax(eval, /*location*/ null, this);
         }
+    }
+
+
+    private static BaseBool looseEqualsAsDecimal(Evaluator eval,
+                                                 BaseNumber left,
+                                                 BaseNumber right)
+        throws FusionException
+    {
+        BigDecimal leftDec  = left.toBigDecimal();
+        BigDecimal rightDec = right.toBigDecimal();
+        boolean result = leftDec.compareTo(rightDec) == 0;
+        return makeBool(eval, result);
     }
 
 
@@ -101,14 +122,14 @@ final class FusionNumber
         {
             if (right instanceof BaseNumber)
             {
-                return ((BaseNumber) right).looseEquals(eval, this);
+                return ((BaseNumber) right).looseEquals2(eval, this);
             }
 
             return falseBool(eval);
         }
 
         @Override
-        BaseBool looseEquals(Evaluator eval, BaseInt left)
+        BaseBool looseEquals2(Evaluator eval, BaseInt left)
             throws FusionException
         {
             // Both left and right (this) are ints, so "truncation" doesn't
@@ -118,6 +139,13 @@ final class FusionNumber
             BigInteger rightInt = this.truncateToBigInteger();
             boolean result = leftInt.equals(rightInt);
             return makeBool(eval, result);
+        }
+
+        @Override
+        BaseBool looseEquals2(Evaluator eval, ActualFloat left)
+            throws FusionException
+        {
+            return looseEqualsAsDecimal(eval, left, this);
         }
 
         @Override
@@ -220,7 +248,15 @@ final class FusionNumber
         }
 
         @Override
-        BaseBool looseEquals(Evaluator eval, BaseInt left)
+        BaseBool looseEquals2(Evaluator eval, BaseInt left)
+            throws FusionException
+        {
+            // left is not null, but right (this) is null.
+            return falseBool(eval);
+        }
+
+        @Override
+        BaseBool looseEquals2(Evaluator eval, ActualFloat left)
             throws FusionException
         {
             // left is not null, but right (this) is null.
@@ -431,6 +467,13 @@ final class FusionNumber
         }
 
         @Override
+        BaseBool looseEquals2(Evaluator eval, ActualFloat left)
+            throws FusionException
+        {
+            return myValue.looseEquals2(eval, left);
+        }
+
+        @Override
         IonValue copyToIonValue(ValueFactory factory,
                                 boolean throwOnConversionFailure)
             throws FusionException, IonizeFailure
@@ -558,7 +601,7 @@ final class FusionNumber
         }
 
         @Override
-        BaseBool looseEquals(Evaluator eval, BaseInt left)
+        BaseBool looseEquals2(Evaluator eval, BaseInt left)
             throws FusionException
         {
             // left is not null, but right (this) is null.
@@ -644,7 +687,16 @@ final class FusionNumber
         }
 
         @Override
-        BaseBool looseEquals(Evaluator eval, BaseInt left)
+        BaseBool looseEquals2(Evaluator eval, BaseInt left)
+            throws FusionException
+        {
+            BigDecimal leftDec  = left.toBigDecimal();
+            boolean result = leftDec.compareTo(myContent) == 0;
+            return makeBool(eval, result);
+        }
+
+        @Override
+        BaseBool looseEquals2(Evaluator eval, ActualFloat left)
             throws FusionException
         {
             BigDecimal leftDec  = left.toBigDecimal();
@@ -727,10 +779,17 @@ final class FusionNumber
         }
 
         @Override
-        BaseBool looseEquals(Evaluator eval, BaseInt right)
+        BaseBool looseEquals2(Evaluator eval, BaseInt right)
             throws FusionException
         {
             return myValue.looseEquals(eval, right);
+        }
+
+        @Override
+        BaseBool looseEquals2(Evaluator eval, ActualFloat left)
+            throws FusionException
+        {
+            return myValue.looseEquals2(eval, left);
         }
 
         @Override
@@ -765,9 +824,8 @@ final class FusionNumber
     //========================================================================
     // Float Representation
 
-    // TODO BaseFloat should extend BaseNumber
     abstract static class BaseFloat
-        extends BaseValue
+        extends BaseNumber
     {
         private BaseFloat() {}
 
@@ -777,6 +835,9 @@ final class FusionNumber
         abstract double primitiveDoubleValue();
 
         abstract Double objectDoubleValue();
+
+        abstract BaseBool tightEquals2(Evaluator eval, ActualFloat left)
+            throws FusionException;
 
         @Override
         SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
@@ -804,6 +865,12 @@ final class FusionNumber
         }
 
         @Override
+        BigDecimal toBigDecimal()
+        {
+            return null;
+        }
+
+        @Override
         boolean isAnyNull()
         {
             return true;
@@ -819,10 +886,53 @@ final class FusionNumber
         }
 
         @Override
+        BaseBool tightEquals2(Evaluator eval, ActualFloat right)
+            throws FusionException
+        {
+            return falseBool(eval);
+        }
+
+        @Override
         BaseBool looseEquals(Evaluator eval, Object right)
             throws FusionException
         {
             return isAnyNull(eval, right);
+        }
+
+        @Override
+        BaseNumber add(BaseNumber right)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        BaseNumber add(BaseInt left)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        BaseNumber subtract(BaseNumber right)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        BaseNumber subtractFrom(BaseInt left)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        BaseNumber multiply(BaseNumber right)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        BaseNumber multiply(BaseInt left)
+        {
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -869,6 +979,92 @@ final class FusionNumber
         Double objectDoubleValue()
         {
             return myContent;
+        }
+
+        @Override
+        BigDecimal toBigDecimal()
+        {
+            return new BigDecimal(myContent);
+        }
+
+        @Override
+        BaseBool tightEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseFloat)
+            {
+                return ((BaseFloat) right).tightEquals2(eval, this);
+            }
+            return falseBool(eval);
+        }
+
+        @Override
+        BaseBool tightEquals2(Evaluator eval, ActualFloat left)
+            throws FusionException
+        {
+            return makeBool(eval, left.myContent == this.myContent);
+        }
+
+        @Override
+        BaseBool looseEquals(Evaluator eval, Object right)
+            throws FusionException
+        {
+            if (right instanceof BaseNumber)
+            {
+                return ((BaseNumber) right).looseEquals2(eval, this);
+            }
+
+            return falseBool(eval);
+        }
+
+        @Override
+        BaseBool looseEquals2(Evaluator eval, BaseInt left)
+            throws FusionException
+        {
+            return looseEqualsAsDecimal(eval, left, this);
+        }
+
+        @Override
+        BaseBool looseEquals2(Evaluator eval, ActualFloat left)
+            throws FusionException
+        {
+            return makeBool(eval, myContent == left.myContent);
+        }
+
+        @Override
+        BaseNumber add(BaseNumber right)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        BaseNumber add(BaseInt left)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        BaseNumber subtract(BaseNumber right)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        BaseNumber subtractFrom(BaseInt left)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        BaseNumber multiply(BaseNumber right)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        BaseNumber multiply(BaseInt left)
+        {
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -938,6 +1134,12 @@ final class FusionNumber
         }
 
         @Override
+        BigDecimal toBigDecimal()
+        {
+            return myValue.toBigDecimal();
+        }
+
+        @Override
         BaseBool tightEquals(Evaluator eval, Object right)
             throws FusionException
         {
@@ -945,10 +1147,67 @@ final class FusionNumber
         }
 
         @Override
+        BaseBool tightEquals2(Evaluator eval, ActualFloat left)
+            throws FusionException
+        {
+            return myValue.tightEquals2(eval, left);
+        }
+
+        @Override
         BaseBool looseEquals(Evaluator eval, Object right)
             throws FusionException
         {
             return myValue.looseEquals(eval, right);
+        }
+
+        @Override
+        BaseBool looseEquals2(Evaluator eval, BaseInt left)
+            throws FusionException
+        {
+            return myValue.looseEquals2(eval, left);
+        }
+
+        @Override
+        BaseBool looseEquals2(Evaluator eval, ActualFloat left)
+            throws FusionException
+        {
+            return myValue.looseEquals2(eval, left);
+        }
+
+        @Override
+        BaseNumber add(BaseNumber right)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        BaseNumber add(BaseInt left)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        BaseNumber subtract(BaseNumber right)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        BaseNumber subtractFrom(BaseInt left)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        BaseNumber multiply(BaseNumber right)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        BaseNumber multiply(BaseInt left)
+        {
+            throw new UnsupportedOperationException();
         }
 
         @Override
