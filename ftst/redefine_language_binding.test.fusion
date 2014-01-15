@@ -1,20 +1,42 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
-// Test that a module can define a name that's been imported from the
-// language.  Unlike imports via `use`, language bindings can be
-// shadowed within a module body.
+// A module can `define` a name that's bound by the module's language.
+// Unlike binding introduced via `require`, language bindings can be
+// shadowed by module-level `define`s.
+
+(require "/check")
+
+
+// Make sure `apply` has a language binding, otherwise we're not checking what
+// we want to test.
+(check = 3 (apply + 1 [2]))
+
 
 (module local "/fusion"
-
   (define apply 99)
-
   (define result (+ apply 1))
+  (provide result))
 
-  (provide result)
-)
-
-(require
-  local
-  "/check")
-
+(require local)
 (check = result 100)
+
+// Make sure `apply` still has the language binding.
+(check = 3 (apply + 1 [2]))
+
+
+// Module-level `require` can also shadow a language binding.
+
+(module local2 "/fusion"
+  (define apply 990)
+  (provide apply))
+
+(module local3 "/fusion"
+  (require local2)
+  (define result (+ apply 1))
+  (provide result))
+
+(require local3)
+(check = result 991)
+
+// Make sure `apply` still has the language binding.
+(check = 3 (apply + 1 [2]))
