@@ -1,7 +1,8 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/check"
+  "/fusion/experimental/equality"
   "/fusion/list"
   "/fusion/private/builtins")  // annotate
 
@@ -32,9 +33,9 @@
   "Functional modification check"
   (let [(v (sexp_copy val))]
     (let [(result (apply op v args))]
-      (check ion_equals result expect
+      (check === result expect
         "Unexpected result from " op " on immutable arg")
-      (check ion_equals v val                                 // v not mutated
+      (check === v val                                        // v not mutated
         "Immutable arg was mutated by " op))))
 
 
@@ -75,10 +76,9 @@
   (lambda (maker)
     (test_predicates (apply maker (quote ())) true)
     (test_predicates (apply maker (quote (0))) false)
-    (check_equal (apply maker (quote ()))
-      (quote ()) "()")
-    (check_equal (apply maker (quote (0 1)))
-      (quote (0 1)) "(0 1)")))
+    (check === (apply maker (quote ())) EMPTY_SEXP)
+    (check === (apply maker (quote (0 1)))
+      (quote (0 1)))))
 
 (test_makers sexp)
 // TODO immutable_sexp
@@ -93,9 +93,13 @@
 //==========================================================================
 // pair
 
-(check_true (is_sexp (pair 1 2)))
-(check = (head (pair 1 2)) 1)
-(check = (tail (pair 1 2)) 2)
+(lets [(h (list 1)),
+       (t (list 2)),
+       (p (pair h t))]
+  (check_true (is_sexp p))
+  (check ident (head p) h)
+  (check ident (tail p) t)
+  (check === p (pair [1] [2])))
 
 
 //==========================================================================
@@ -187,8 +191,8 @@
 //==========================================================================
 // add
 
-(check_equal (add (sexp 1 2) 3)  (sexp 3 1 2)  "add 3")
-(check_equal (add (sexp 1 2) [3])  (sexp [3] 1 2)  "add [3]")
+(check === (add (sexp 1 2) 3)  (sexp 3 1 2))
+(check === (add (sexp 1 2) [3])  (sexp [3] 1 2))
 
 
 //==========================================================================
@@ -213,10 +217,10 @@
 (check_false (any (lambda (e) (= e "ho")) (sexp "oh" "hi")))
 
 // Check that it returns the truthy predicate result, not the selected element
-(check = 408
+(check === 408
   (any (lambda (e) (when (= e 204) (* e 2)))
     (sexp 123 204 567)))
-(check = 1134
+(check === 1134
   (any (lambda (e) (when (= e 567) (* e 2)))
     (sexp 123 204 567)))
 
@@ -252,7 +256,7 @@
     (sexp 123 456 678)))
 
 // Check that `every` returns the last predicate result if all are truthy
-(check = 1134
+(check === 1134
   (every (lambda (e) (when (or (= e 123) (= e 567)) (* e 2)))
     (sexp 123 123 567)))
 
@@ -260,38 +264,37 @@
 //==========================================================================
 // map
 
-(check_equal (map + valNull) valNull "map1")
-(check_equal (map + valEmpty) valEmpty "map2")
-(check_equal (map + (sexp 1 2)) (sexp 1 2) "map3")
-(check_equal (map (lambda (n) (+ 3 n)) (sexp 1 2)) (sexp 4 5) "map4")
+(check === (map + NULL_SEXP) EMPTY_SEXP)
+(check === (map + EMPTY_SEXP) EMPTY_SEXP)
+(check === (map + (sexp 1 2)) (sexp 1 2))
+(check === (map (lambda (n) (+ 3 n)) (sexp 1 2)) (sexp 4 5))
 
-(check_equal (choose T valEmpty) valEmpty "filter1")
-(check_equal (choose F valEmpty) valEmpty "filter2")
-(check_equal (choose T valNull) valNull "filter3")
-(check_equal (choose F valNull) valNull "filter4")
-(check_equal (choose T (sexp 1 2)) (sexp 1 2) "filter5")
-(check_equal (choose F (sexp 1 2)) valEmpty "filter6")
+(check === (choose T EMPTY_SEXP) EMPTY_SEXP)
+(check === (choose F EMPTY_SEXP) EMPTY_SEXP)
+(check === (choose T NULL_SEXP)  EMPTY_SEXP)
+(check === (choose F NULL_SEXP)  EMPTY_SEXP)
+(check === (choose T (sexp 1 2)) (sexp 1 2))
+(check === (choose F (sexp 1 2)) EMPTY_SEXP)
 
-(check_equal (choose (lambda (n) (< 10 n)) (sexp 1 11 10 12)) (sexp 11 12) "filter7")
+(check === (choose (lambda (n) (< 10 n)) (sexp 1 11 10 12)) (sexp 11 12))
 
 
 //==========================================================================
 // do
 
-(check_equal (do (lambda (x) (+ 1 x)) (quote (2 3)))
-   (void) "do returns void")
+(check_void (do (lambda (x) (+ 1 x)) (quote (2 3))))
 
 (let [(v (stretchy_list))]
   (do (lambda (x) (add_m v (+ 1 x))) (quote (2 3)))
-  (check_equal v [3, 4] "do side effects"))
+  (check === v [3, 4] "do side effects"))
 
 
 //==========================================================================
 // size
 
-(check = (size (quote ())) 0)
-(check = (size (sexp 1)) 1)
-(check = (size (sexp 1 51)) 2)
-(check = (size (pair 1 (pair 2 (quote ())))) 2)
+(check === (size (quote ())) 0)
+(check === (size (sexp 1)) 1)
+(check === (size (sexp 1 51)) 2)
+(check === (size (pair 1 (pair 2 (quote ())))) 2)
 
 (check_arg_exn (size (pair 1 215)))

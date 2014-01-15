@@ -1,38 +1,39 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/check"
+  "/fusion/experimental/equality"
   "/fusion/parameter")
 
 
 (define p (make_parameter 19))
 
-(check_equal (p) 19 "parameter default")
+(check === (p) 19)
 
-(check_equal (parameterize () 3) 3 "")
-(check_equal (parameterize () (p)) 19 "")
-(check_equal (parameterize ((p 91)) (p)) 91 "")
+(check === (parameterize () 3) 3)
+(check === (parameterize () (p)) 19)
+(check === (parameterize ((p 91)) (p)) 91)
 
-(check_equal (p) 19 "")
+(check === (p) 19)
 
-(check_equal
+(check ===
   (parameterize ((p 13))
     (+ (parameterize ((p 7))
          (p))
        (p)))
-   20 "")
+   20)
 
-(check_equal (p) 19 "")
+(check === (p) 19)
 
 
 // Using a macro in the parameter position
-(check_equal (parameterize (((let ((v p)) p) 92)) (p)) 92 "")
+(check === (parameterize (((let ((v p)) p) 92)) (p)) 92)
 
 // Using a macro in the bound-value position
-(check_equal (parameterize ((p (let ((v 93)) v))) (p)) 93 "")
+(check === (parameterize ((p (let ((v 93)) v))) (p)) 93)
 
 // Using a macro in the body
-(check_equal (parameterize ((p 94)) (let ((v p)) (v))) 94 "")
+(check === (parameterize ((p 94)) (let ((v p)) (v))) 94)
 
 
 "PASSED" // Helpful output if you run this stand-alone

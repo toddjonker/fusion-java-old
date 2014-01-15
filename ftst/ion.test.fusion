@@ -1,7 +1,8 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/check"
+  "/fusion/experimental/equality"
   "/fusion/experimental/syntax"
   "/fusion/private/builtins")  // annotate
 
@@ -29,16 +30,16 @@
            (a_b_datum_stx (datum_to_syntax (checked_annotate datum ["a", "b"])))]
       (quasisyntax
         (begin
-          (check ion_equals
+          (check ===
             (annotate (quote (unsyntax orig_datum_stx)))
             (quote (unsyntax datum_stx)))
-          (check ion_equals
+          (check ===
             (annotate (quote (unsyntax orig_datum_stx)) "a")
             (quote (unsyntax a_datum_stx)))
-          (check ion_equals
+          (check ===
             (annotate (quote (unsyntax orig_datum_stx)) "a" "a")
             (quote (unsyntax a_a_datum_stx)))
-          (check ion_equals
+          (check ===
             (annotate (quote (unsyntax orig_datum_stx)) "a" "b")
             (quote (unsyntax a_b_datum_stx))))))))
 
@@ -51,7 +52,7 @@
            (a_b_datum_stx (datum_to_syntax (checked_annotate datum ["a", "b"])))]
       (quasisyntax
         (begin
-          (check ion_equals (type_annotations (quote (unsyntax datum_stx))) [])
+          (check === (type_annotations (quote (unsyntax datum_stx))) [])
           (check_annotate1 (unsyntax     datum_stx))
           (check_annotate1 (unsyntax   a_datum_stx))
           (check_annotate1 (unsyntax a_a_datum_stx))

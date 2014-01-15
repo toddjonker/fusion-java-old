@@ -1,8 +1,9 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/check"
-  "/fusion/exception")
+  "/fusion/exception"
+  "/fusion/experimental/equality")
 
 
 (define check_iter
@@ -13,12 +14,12 @@
     (let [(len (size values))]
       (let loop [(i 0)]
         (if (= i len)
-          (assert (not (iterator_has_next iter)) "iterator should be empty")
+          (check_false (iterator_has_next iter) "iterator should be empty")
           (begin
             (assert (iterator_has_next iter) "iterator should have next")
             (let [(actual   (iterator_next iter)),
                   (expected (. values i))]
-              (check_equal actual expected "iterator element")
+              (check === actual expected "iterator element")
               (loop (+ 1 i)))))))))
 
 (check_iter empty_iterator [])
@@ -56,9 +57,9 @@
 (check_iter (iterator_append (list_iterator [1,2,3]) (list_iterator [4,5]))
   [1,2,3,4,5])
 
-(check_equal (list_from_iterator empty_iterator) [] "635")
-(check_equal (list_from_iterator (list_iterator [1])) [1]  "1")
-(check_equal (list_from_iterator (list_iterator [1,2])) [1,2]  "1,2")
+(check === (list_from_iterator empty_iterator) [])
+(check === (list_from_iterator (list_iterator [1])) [1])
+(check === (list_from_iterator (list_iterator [1,2])) [1,2])
 
 (check_iter
   (iterator_map_splicing list_iterator empty_iterator)

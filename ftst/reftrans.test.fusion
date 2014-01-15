@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 // Tests referential transparency through macro expansion.
 
@@ -31,16 +31,17 @@
 (require
   reftrans1
   reftrans2
-  "/check")
+  "/check"
+  "/fusion/experimental/equality")
 
-(check_equal one 1 "")
-(check_equal two 2 "")
+(check === one 1)
+(check === two 2)
 
 (define lambda null)
 (define let null)
 
-(check_equal one 1 "")
-(check_equal two 2 "")
+(check === one 1)
+(check === two 2)
 
 
 (module reftrans3 "/fusion"
@@ -56,7 +57,7 @@
 )
 
 (require reftrans3)
-(check_equal (three) 3 "3")
+(check === (three) 3)
 
 // TODO test "export" of a lexical binding
 

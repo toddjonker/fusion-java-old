@@ -1,7 +1,8 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/check"
+  "/fusion/experimental/equality"
   "/fusion/experimental/syntax"
   "/fusion/private/builtins")   // annotate
 
@@ -28,12 +29,12 @@
 (check_false (is_identifier (quote a)))
 (check_false (is_identifier (quote "a")))
 
-(define (check_identifier expected_sym v)
+(define_check (check_identifier msg expected_sym v)
   (check_true (is_syntax v))
   (check_true (is_identifier v))
   (let [(sym (syntax_unwrap v))]
     (check_true (is_symbol sym))
-    (check = expected_sym sym)))
+    (check === expected_sym sym)))
 
 (check_identifier (quote a) (quote_syntax a))
 
@@ -46,10 +47,10 @@
     '''
     (check_xforms1 datum annotations)
     =>
-    (begin (check ion_equals
+    (begin (check ===
              (type_annotations (quote DATUM))
              (quote ANNOTATIONS))
-           (check ion_equals
+           (check ===
              (syntax_to_datum (quote_syntax DATUM))
              (quote DATUM))
            /* And several variants */ )
@@ -60,24 +61,22 @@
         (begin
           // This ensures that our attempt to annotate the original datum
           // (in check_xforms) has succeeded.
-          (check ion_equals
-            (type_annotations (unsyntax quote_datum_stx))
-            (quote (unsyntax (syntax_get stx 2)))
-            "annotations on " (unsyntax quote_datum_stx))
-          (check ion_equals
+          (check_annotations (unsyntax quote_datum_stx)
+            (quote (unsyntax (syntax_get stx 2))))
+          (check ===
             (syntax_to_datum (quote_syntax (unsyntax datum_stx)))
             (unsyntax quote_datum_stx))
-          (check ion_equals
+          (check ===
             (syntax_to_datum ((unsyntax (quote_syntax quasisyntax))
                               (unsyntax datum_stx)))
             (unsyntax quote_datum_stx))
-          (check ion_equals
+          (check ===
             (syntax_to_datum (datum_to_syntax (quote (unsyntax datum_stx))))
             (unsyntax quote_datum_stx))
-          (check ion_equals
+          (check ===
             (syntax_to_datum (datum_to_syntax (quote_syntax (unsyntax datum_stx))))
             (unsyntax quote_datum_stx))
-          (check ion_equals
+          (check ===
             (syntax_to_datum (datum_to_syntax ((unsyntax (quote_syntax quasisyntax))
                                                (unsyntax datum_stx))))
             (unsyntax quote_datum_stx)))))))
@@ -107,63 +106,63 @@
 (check_representative_ion_data check_xforms)
 
 
-(check ion_equals
+(check ===
   (syntax_to_datum (datum_to_syntax (mutable_list)))
   [])
-(check ion_equals
+(check ===
   (syntax_to_datum (datum_to_syntax (mutable_list 1)))
   [1])
-(check ion_equals
+(check ===
   (syntax_to_datum (datum_to_syntax (mutable_list 1 2)))
   [1, 2])
 
-(check ion_equals
+(check ===
   (syntax_to_datum (datum_to_syntax (stretchy_list)))
   [])
-(check ion_equals
+(check ===
   (syntax_to_datum (datum_to_syntax (stretchy_list 1)))
   [1])
-(check ion_equals
+(check ===
   (syntax_to_datum (datum_to_syntax (stretchy_list 1 2)))
   [1, 2])
 
 
-(check ion_equals
+(check ===
   (syntax_to_datum (quasisyntax a::(b (unsyntax (quote_syntax c)))))
-  (quote a::(b c)) "")
+  (quote a::(b c)))
 
 
 (lets [(stx (quote_syntax [a, 2])),
        (unwrapped (syntax_to_datum stx))]
-  (check_equal (quote [a, 2]) unwrapped ""))
+  (check === (quote [a, 2]) unwrapped))
 
 (lets [(stx (quote_syntax (a {f:2, g:["hi"]}))),
        (unwrapped (syntax_to_datum stx))]
-  (check = (quote a) (head unwrapped))
-  (check = 2 (. unwrapped 1 "f") "f")
-  (check_equal ["hi"] (. unwrapped 1 "g") "g"))
+  (check === (quote a) (head unwrapped))
+  (check === 2 (. unwrapped 1 "f"))
+  (check === ["hi"] (. unwrapped 1 "g")))
 
 
 //==========================================================================
 // syntax_unwrap   aka syntax-e
 
 
-(check = true        (syntax_unwrap (quote_syntax true)))
-(check = 159         (syntax_unwrap (quote_syntax 159)))
-//(check = 2.57e0      (syntax_unwrap (quote_syntax 2.57e0)))   // TODO
-(check = 2.57        (syntax_unwrap (quote_syntax 2.57)))
-(check = 2013-02-08T (syntax_unwrap (quote_syntax 2013-02-08T)))
-(check = (quote u)   (syntax_unwrap (quote_syntax u)))
-(check = "unwrap"    (syntax_unwrap (quote_syntax "unwrap")))
+(check === true        (syntax_unwrap (quote_syntax true)))
+(check === 159         (syntax_unwrap (quote_syntax 159)))
+(check === 2.57e0      (syntax_unwrap (quote_syntax 2.57e0)))
+(check === 2.57        (syntax_unwrap (quote_syntax 2.57)))
+(check === 2013-02-08T (syntax_unwrap (quote_syntax 2013-02-08T)))
+(check === (quote u)   (syntax_unwrap (quote_syntax u)))
+(check === "unwrap"    (syntax_unwrap (quote_syntax "unwrap")))
 
 
-(check ion_equals null.blob (syntax_unwrap (quote_syntax null.blob)))
-(check ion_equals {{}}      (syntax_unwrap (quote_syntax {{}})))
-(check ion_equals {{1234}}  (syntax_unwrap (quote_syntax {{1234}})))
+(check === null.blob   (syntax_unwrap (quote_syntax null.blob)))
+(check === {{}}        (syntax_unwrap (quote_syntax {{}})))
+(check === {{1234}}    (syntax_unwrap (quote_syntax {{1234}})))
 
-(check ion_equals null.clob  (syntax_unwrap (quote_syntax null.clob)))
-(check ion_equals {{""}}     (syntax_unwrap (quote_syntax {{""}})))
-(check ion_equals {{"abcd"}} (syntax_unwrap (quote_syntax {{"abcd"}})))
+(check === null.clob   (syntax_unwrap (quote_syntax null.clob)))
+(check === {{""}}      (syntax_unwrap (quote_syntax {{""}})))
+(check === {{"abcd"}}  (syntax_unwrap (quote_syntax {{"abcd"}})))
 
 
 (lets [(stx (quote_syntax [a, 2])),
@@ -171,11 +170,11 @@
   (check_true (is_list unwrapped))
   (let [(u1 (syntax_unwrap (list_element unwrapped 1)))]
     (check_identifier (quote a) (list_element unwrapped 0))
-    (check = 2 u1)))
+    (check === 2 u1)))
 
-(check ion_equals (syntax_unwrap (quote_syntax a::null.sexp))
+(check === (syntax_unwrap (quote_syntax a::null.sexp))
   (quote a::null.sexp))
-(check ion_equals (syntax_unwrap (quote_syntax a::()))
+(check === (syntax_unwrap (quote_syntax a::()))
   (quote a::()))
 
 (lets [(stx (quote_syntax a::(b 2))),
@@ -185,10 +184,10 @@
   (let [(h (head unwrapped)),
         (t (tail unwrapped))]
     (check_true (is_identifier h))
-    (check = (quote b) (syntax_unwrap h))
+    (check === (quote b) (syntax_unwrap h))
     (check_true (is_pair t))
-    (check = 1 (size t))
-    (check = 2 (syntax_unwrap (head t)))))
+    (check === 1 (size t))
+    (check === 2 (syntax_unwrap (head t)))))
 
 (define s (quote_syntax (1 2 3)))
 (define se (syntax_unwrap s))
@@ -199,7 +198,7 @@
 // quasisyntax
 
 (define outside (quote_syntax im_out))
-(check ion_equals
+(check ===
   (syntax_to_datum (quasisyntax ((unsyntax outside)
                                  mid
                                  (quasisyntax ((unsyntax (unsyntax outside))
@@ -208,7 +207,7 @@
   (quote (im_out mid (quasisyntax ((unsyntax im_out) (unsyntax mid) inner)))))
 
 
-(check ion_equals
+(check ===
   (syntax_to_datum (quasisyntax [(unsyntax outside),
                                  mid,
                                  (quasisyntax ((unsyntax (unsyntax outside))

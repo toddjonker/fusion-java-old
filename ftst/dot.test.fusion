@@ -1,6 +1,8 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
-(require "/check")
+(require
+  "/check"
+  "/fusion/experimental/equality")
 
 (define I identity)
 
@@ -110,37 +112,37 @@
 
 // No path
 
-(check_equal (. (void)) (void) "")
-(check_equal (. 7287) 7287 "")
-(check_equal (. []  ) []   "")
+(check_void (. (void)))
+(check === (. 7287) 7287)
+(check === (. []  ) [])
 
 
 // Check key parts
 
-(check = (. [0,1,2,3] 0) 0)
-(check = (. [0,1,2,3] 1) 1)
+(check === (. [0,1,2,3] 0) 0)
+(check === (. [0,1,2,3] 1) 1)
 
-(check = (. (sexp 0 1 2 3) 0) 0)
-(check = (. (sexp 0 1 2 3) 1) 1)
+(check === (. (sexp 0 1 2 3) 0) 0)
+(check === (. (sexp 0 1 2 3) 1) 1)
 
-(check_equal (. {f:1,g:[2]} "f") 1   "")
-(check_equal (. {f:1,g:[2]} "g") [2] "")
+(check === (. {f:1,g:[2]} "f") 1)
+(check === (. {f:1,g:[2]} "g") [2])
 
-(check = (. {f:{g:"oy"}, h:true} "f" (quote g)) "oy")
-(check = (. {f:1,g:[2]} (quote f)) 1)
+(check === (. {f:{g:"oy"}, h:true} "f" (quote g)) "oy")
+(check === (. {f:1,g:[2]} (quote f)) 1)
 
 
 // Check procedure parts
 
-(check = (. [0,1,2,3] size) 4)
-(check = (. [0,1,2,3] I size) 4)
+(check === (. [0,1,2,3] size) 4)
+(check === (. [0,1,2,3] I size) 4)
 
-(check =     (. (sexp 0 1 2 3) head) 0)
-(check_equal (. (sexp 0 1 2 3) tail) (sexp 1 2 3) "")
-(check_equal (. (sexp 0 1 2 3) tail I tail) (sexp 2 3) "")
-(check_equal (. (sexp 0 1 2 3) tail tail head) 2 "")
+(check ===     (. (sexp 0 1 2 3) head) 0)
+(check === (. (sexp 0 1 2 3) tail) (sexp 1 2 3))
+(check === (. (sexp 0 1 2 3) tail I tail) (sexp 2 3))
+(check === (. (sexp 0 1 2 3) tail tail head) 2)
 
-(check = (. [1,2,3] I size I) 3)
+(check === (. [1,2,3] I size I) 3)
 
 
 // Check key out-of-bounds

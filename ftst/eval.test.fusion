@@ -1,8 +1,9 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/check"
   "/fusion/eval"
+  "/fusion/experimental/equality"
   "/fusion/experimental/syntax"
   "/fusion/namespace"
   "/fusion/parameter")
@@ -10,31 +11,31 @@
 
 (define ns (make_namespace_with_language "/grain")) // In test repo
 
-(check_equal (eval (quote_syntax barley) ns)
-  "soup" "eval 1")
+(check === (eval (quote_syntax barley) ns)
+  "soup")
 
-(check_equal
+(check ===
   (parameterize ((current_namespace ns))
     (eval (quote_syntax barley)))
-  "soup" "eval 2")
+  "soup")
 
 
-(check_equal (eval (quote barley) ns)
-  "soup" "eval 3")
+(check === (eval (quote barley) ns)
+  "soup")
 
-(check_equal (eval [] ns)
-  [] "eval 4")
+(check === (eval [] ns)
+  [])
 
 
 (define ns (make_namespace_with_language "/fusion"))
 
 (eval (quote (define something 1150)) ns)
-(check_equal (eval (quote something) ns) 1150 "eval 1150")
+(check === (eval (quote something) ns) 1150)
 
-(check_equal (eval (quote [something, something]) ns)
-  [1150, 1150] "eval [1150,1150]")
+(check === (eval (quote [something, something]) ns)
+  [1150, 1150])
 
-(check = (eval (quote (. {f:2} "f")) ns) 2)
+(check === (eval (quote (. {f:2} "f")) ns) 2)
 
 
 (check_contract_exn
@@ -44,23 +45,19 @@
 //==========================================================================
 // expand
 
-(check_equal
+(check ===
   (syntax_to_datum (expand (quote_syntax (and))))
-  (quote true)
-  "(and)")
+  (quote true))
 
-(check_equal
+(check ===
   (syntax_to_datum (expand (quote (and))))
-  (quote true)
-  "(and)")
+  (quote true))
 
-(check_equal
+(check ===
   (syntax_to_datum (expand (quote (let [(a 3)] a))))
-  (quote ((lambda (a) a) 3))
-  "let")
+  (quote ((lambda (a) a) 3)))
 
-(check_equal
+(check ===
   (syntax_to_datum (expand (quote (let [(a b)] a))))
-  (quote ((lambda (a) a) ('#%top' b)))
-  "let w/ unbound var")
+  (quote ((lambda (a) a) ('#%top' b))))
 

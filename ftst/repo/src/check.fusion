@@ -6,6 +6,7 @@
     "/fusion/eval"
     "/fusion/exception"
     "/fusion/experimental/defines"
+    "/fusion/experimental/equality"
     "/fusion/experimental/syntax"
     "/fusion/ffi/java"
     "/fusion/parameter")
@@ -16,22 +17,14 @@
   (defpub F (lambda rest false))
   (defpub T (lambda rest true))
 
-  (defpub NULL_SEXP   (quote null.sexp))
   (defpub NULL_SYMBOL (quote null.symbol))
+  (defpub NULL_SEXP   (quote null.sexp))
+  (defpub EMPTY_SEXP  (quote ()))
 
   (defpub VOID  (void))
   (defpub UNDEF (letrec [(x y), (y 1)] x))
 
 
-  (defpub is_true
-    (lambda (value)
-      (and (is_bool value) (= true value))))
-
-  (defpub is_false
-    (lambda (value)
-      (and (is_bool value) (= false value))))
-
-  (defpub_j ion_equals "com.amazon.fusion.FusionCompare$StrictEqualProc")
 
   // NOT PUBLIC YET
   (define _raise_check_failure (java_new "com.amazon.fusion.CheckFailureProc"))
@@ -124,66 +117,6 @@ unless it is required.  It's also a bit odd to use.
 
 
 
-  (defpub check_equal_annotations
-    (lambda (actual expected)
-      (check_list_equal (type_annotations actual) (type_annotations expected))))
-
-  (defpub check_equal
-    (lambda (actual expected descr)
-      (cond
-
-// TODO FUSION-88 should support undef
-//        ((is_undef expected)
-//         (assert (is_undef actual)
-//           descr " not equal.\nActual: " actual "\nExpected: " expected))
-        ((is_list expected)
-         (check_list_equal actual expected))
-        ((is_sexp expected)
-         (check_sexp_equal actual expected))
-        ((is_void expected)
-         (assert (is_void actual)
-           descr " not equal.\nActual: " actual "\nExpected: " expected))
-        (true
-         (assert (= actual expected)
-           descr " not equal.\nActual: " actual "\nExpected: " expected)))
-      (check_equal_annotations actual expected)))
-
-  (defpub check_list_equal
-    (lambda (actual expected)
-      (assert (is_list actual) "expected list, received: " actual)
-      (assert (= (size actual) (size expected))
-        "list lengths don't match. Actual: " actual " Expected: " expected)
-      (let loop [(i 0)]
-        (when (< i (size actual))
-          (check_equal (element actual i) (element expected i)
-            (string_append "list element #" (int_to_string i)))
-          (loop (+ 1 i))))))
-
-  (defpub check_sexp_equal
-    (lambda (actual expected)
-      (assert (is_sexp actual) "expected sexp, received: " actual)
-      (assert (= (size actual) (size expected))
-        "sexp sizes don't match. Actual: " actual " Expected: " expected)
-      (let loop
-           [(pos 0), (a actual), (e expected)]
-        (if (is_void e)
-          (assert (is_void a)
-            "sexp tails don't match at pos " pos ". Actual: " actual
-            " Expected: " expected)
-          (begin
-            (check_equal (head a) (head e)
-              // TODO bad message
-              (string_append "sexp element at position " (int_to_string pos)))
-            (loop (+ 1 pos) (tail a) (tail e)))))))
-
-
-  (defpub check_annotations
-    (lambda (value expected)
-      (let [(expected (map string_to_symbol expected)),
-            (anns (type_annotations value))]
-        (check_list_equal anns expected))))
-
-
 /* This is nowhere near working yet...
   (defpub_syntax define_simple_check
     (lambda (stx)
@@ -223,7 +156,7 @@ unless it is required.  It's also a bit odd to use.
 
   (provide check_true)
   (define_check (check_true message val)
-    (unless (is_true val)
+    (unless (= true val)
       (raise_check_failure_stack
         (if message (message) "Expected true.")
         " Received: "
@@ -231,7 +164,7 @@ unless it is required.  It's also a bit odd to use.
 
   (provide check_false)
   (define_check (check_false message val)
-    (unless (is_false val)
+    (unless (= false val)
       (raise_check_failure_stack
         (if message (message) "Expected false.")
         " Received: "
@@ -246,6 +179,11 @@ unless it is required.  It's also a bit odd to use.
         val)))
 
 
+  (provide check_annotations)
+  (define_check (check_annotations msg value expected)
+    (check = (type_annotations value) expected))
+
+
   // TODO this should accept a predicate to check exn type
   // TODO why doesn't this auto-thunk its body?
   (defpub_syntax check_exn
@@ -256,7 +194,7 @@ unless it is required.  It's also a bit odd to use.
           // TODO type-check thunk
           (let [(e (thunk_throws (unsyntax thunk_stx)))]
             (cond
-              ((and (is_string e) (= e "syntax"))
+              ((== e "syntax")
                (void))
               (e  (raise_check_failure (quote_syntax (unsyntax stx))
                     "expected syntax failure, got " e " exception"))
@@ -276,7 +214,7 @@ unless it is required.  It's also a bit odd to use.
                 // TODO type-check thunk
                 (let [(e (thunk_throws (lambda () (unsyntax thunk_stx))))]
                   (cond
-                    ((and (is_string e) (= e (unsyntax exn_tag)))
+                    ((== e (unsyntax exn_tag))
                      (void))
                     (e  (raise_check_failure (quote_syntax (unsyntax stx))
                           "expected " (unsyntax exn_tag) " failure, got "

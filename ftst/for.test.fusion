@@ -1,38 +1,39 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/check"
+  "/fusion/experimental/equality"
   "/fusion/for")
 
 
-(check_list_equal
+(check ===
   (for_list () 73)
   [])
 
 
-(check_list_equal
+(check ===
   (for_list ((e [])) /* no body */)
   [])
 
-(check_list_equal
+(check ===
   (for_list ((e [])) 73)
   [])
 
-(check_list_equal
+(check ===
   (for_list ((e [1])) 73)
   [73])
 
-(check_list_equal
+(check ===
   (for_list ((e [1])) e)
   [1])
 
-(check_list_equal
+(check ===
   (for_list ((e [1, 2, 3])
              (f [10, 20, 30]))
     (+ e f))
   [11, 22, 33])
 
-(check_list_equal
+(check ===
   (for_list ((e [1, 2, 3])
              (f [10, 20]))
     (+ e f))
@@ -40,7 +41,7 @@
 
 
 // Sexp works too
-(check_list_equal
+(check ===
   (for_list ((e (quote (1 2)))
              (f [10, 20, 30]))
     (+ e f))
@@ -48,13 +49,13 @@
 
 
 // Macro in bound-value position
-(check_list_equal
+(check ===
   (for_list ((e (let ((list [1])) list))) (+ e 73))
   [74])
 
 
 // Macro in body position
-(check_list_equal
+(check ===
   (for_list ((e [1])) (let ((v 73)) (+ e 73)))
   [74])
 
@@ -63,7 +64,7 @@
 //  2) use of new locations for the bound variables each iteration.
 //     The thunks are applied after iteration completes, each one should have
 //     its own location for variable `e`.
-(check_list_equal
+(check ===
   (map (lambda (thunk) (thunk))
     (for_list ((e [1, 2, 3]))
       (lambda () (* 2 e))))
@@ -75,7 +76,7 @@
                       { amountPosted:{ amount:-49.99 }} ]),
        (amountPosted "amountPosted"),
        (amount       "amount")]
-  (check_list_equal
+  (check ===
     (for_list [(x data)]
       (. x  amountPosted   amount))
      [-39.99, -49.99]))

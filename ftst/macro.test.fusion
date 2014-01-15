@@ -1,7 +1,8 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/check"
+  "/fusion/experimental/equality"
   "/fusion/experimental/syntax")
 
 
@@ -9,7 +10,7 @@
 (define_syntax S1
   (lambda (stx) (quote_syntax 99)))
 
-(check_equal (S1) 99 "S1 macro expansion")
+(check === (S1) 99)
 
 
 // Test use of macro as body of define_syntax
@@ -17,7 +18,7 @@
   (let ((xform (lambda (stx) (quote_syntax 99))))
     xform))
 
-(check_equal (S2) 99 "S2 macro expansion")
+(check === (S2) 99)
 
 
 // (D v i) => (define i (lambda () v))
@@ -28,7 +29,7 @@
         (lambda () (unsyntax (syntax_get stx 1)))))))
 
 (D 67 x)
-(check_equal (x) 67 "D macro expansion")
+(check === (x) 67)
 
 
 // Macro inside of unsyntax
@@ -37,7 +38,7 @@
     (quasisyntax
       ( + 2 (unsyntax (let ((x (quote_syntax 220)))
                         (quasisyntax (unsyntax x))))))))
-(check_equal (D2) 222 "D2")
+(check === (D2) 222)
 
 
 // Macro with tail call
@@ -45,7 +46,7 @@
   (lambda () (quote_syntax 99)))
 (define_syntax S3
   (lambda (stx) (apply s3 [])))
-(check_equal (S3) 99 "S3 macro expansion")
+(check === (S3) 99)
 
 
 //============================================================================
@@ -58,9 +59,9 @@
       (if (free_identifier_equal id1 id2)
         (quote_syntax true)
         (quote_syntax false)))))
-(check_equal (fie < <) true  "fie1")
-(check_equal (fie < >) false "fie2")
-(check_equal (fie unbound unbound) true "fie unbound")
+(check === (fie < <) true )
+(check === (fie < >) false)
+(check === (fie unbound unbound) true)
 
 // Generate two identifiers with the same name but different marks.
 // They are not free_identifier_equal because of those marks.
@@ -74,7 +75,7 @@
     (let ((id1 (make_id))
           (id2 (make_id)))
       (quasisyntax (fie (unsyntax id1) (unsyntax id2))))))
-(check_equal (compare_diff_ids) false "fie3")
+(check === (compare_diff_ids) false)
 
 
 //============================================================================
@@ -84,7 +85,7 @@
   (lambda (stx)
     (syntax_append (syntax_get stx 1) (syntax_get stx 2))))
 
-(check_equal (let ((x 3)) (join (+ 10 x) (x))) 16 "")
+(check === (let ((x 3)) (join (+ 10 x) (x))) 16)
 
 
 //============================================================================
@@ -94,16 +95,16 @@
   (lambda (stx)
     (syntax_subseq (syntax_get stx 1) 1)))
 
-(check_equal (from1 (ignored + 2 3)) 5 "")
+(check === (from1 (ignored + 2 3)) 5)
 
 (define_syntax prepend_from1
   (lambda (stx)
     (syntax_append (quasisyntax (+ 1)) (syntax_subseq (syntax_get stx 1) 1))))
 
 // Test syntax_subseq with index over size
-(check_equal (prepend_from1 (2 3)) 4 "")
-(check_equal (prepend_from1 (2  )) 1 "")
-(check_equal (prepend_from1 (   )) 1 "")
+(check === (prepend_from1 (2 3)) 4)
+(check === (prepend_from1 (2  )) 1)
+(check === (prepend_from1 (   )) 1)
 
 
 //============================================================================
@@ -117,7 +118,7 @@
       (let ((x 9))
         (unsyntax (syntax_get stx 1))))))
 
-(check_equal (let ((x 3)) (dont_capture x)) 3 "macro capture")
+(check === (let ((x 3)) (dont_capture x)) 3)
 
 
 // Macro use must not capture bindings from inside the macro.
@@ -129,7 +130,7 @@
       (quasisyntax
         (let ((t (unsyntax e1))) (if t t (unsyntax e2)))))))
 
-(check_equal (let ((t true) (if false)) (or2 if t)) true "or2")
+(check === (let ((t true) (if false)) (or2 if t)) true)
 
 
 // Macro-defining macros require multiple syntax marks to maintain hygiene.
@@ -148,7 +149,7 @@
 
 (make_plus_N plus10 10)
 
-(check_equal (plus10 3) 13 "use of plus10")
+(check === (plus10 3) 13)
 
 
 //============================================================================
@@ -160,10 +161,10 @@
       (quasisyntax
         (let ((c 2))
           (unsyntax (datum_to_syntax arg (quote_syntax here))))))))
-(check_equal
+(check ===
   (let ((c 5))
     (capture (* 10 c)))
-  20 "20")
+  20)
 
 
 "PASSED" // Helpful output if you run this stand-alone

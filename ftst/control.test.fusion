@@ -1,12 +1,14 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
-(require "/check")
+(require
+  "/check"
+  "/fusion/experimental/equality")
 
 
-(check_equal (begin)  (void) "(begin)")
-(check_equal (begin 1)    1  "(begin 1)")
-(check_equal (begin 1 2)  2  "(begin 1 2)")
-(check_equal (begin 1 []) [] "(begin 1 2 [])")
+(check_void (begin))
+(check === (begin 1)    1)
+(check === (begin 1 2)  2)
+(check === (begin 1 []) [])
 
 
 //============================================================================
@@ -26,8 +28,7 @@
 (check_true  (if 0  true false))
 (check_true  (if "" true false))
 
-(define undef (letrec [(x y), (y 2)] x))
-(check_true (if undef true false))
+(check_true (if UNDEF true false))
 
 (check_false (if (void) true false))
 (check_false (if null true false))
@@ -48,8 +49,8 @@
 (check_false (and true false true (exit)))
 
 
-(check = (and 1  0) 0)
-(check = (and 1. 0.) 0.)
+(check === (and 1  0) 0)
+(check === (and 1. 0.) 0.)
 
 (check_true (is_void (and true (void))))
 
@@ -96,41 +97,43 @@
 //============================================================================
 // when
 
-(check_equal (when true)    (void)    "when")
-(check_equal (when false 1) (void)    "when 1")
-(check_equal (when true 2)         2  "when 2")
-(check_equal (when true (begin 3)) 3  "when 3")
-(check_equal (when (not false) 1 2 3 4) 4 "when 4")
-(check_equal (when (not true) 1 2 3 4 5) (void) "when 5")
+(check_void (when true))
+(check_void (when false 1))
+(check_void (when (not true) 1 2 3 4 5))
+
+(check === (when true 2)         2)
+(check === (when true (begin 3)) 3)
+(check === (when (not false) 1 2 3 4) 4)
 
 
 //============================================================================
 // unless
 
-(check_equal (unless false)  (void)      "unless")
-(check_equal (unless true 1) (void)      "unless 1")
-(check_equal (unless false 2)         2  "unless 2")
-(check_equal (unless false (begin 3)) 3  "unless 3")
-(check_equal (unless (not true) 1 2 3 4) 4 "unless 4")
-(check_equal (unless (not false) 1 2 3 4 5) (void) "unless 5")
+(check_void (unless false))
+(check_void (unless true 1))
+(check_void (unless (not false) 1 2 3 4 5))
+
+(check === (unless false 2)         2)
+(check === (unless false (begin 3)) 3)
+(check === (unless (not true) 1 2 3 4) 4)
 
 
 //============================================================================
 // cond
 
-(check_equal (cond) (void) "(cond)")
+(check_void (cond))
 
-(check_equal (cond (true 1)) 1 "1")
-(check_equal (cond (true 1 2)) 2 "2")
-(check_equal (cond (false 3)) (void) "3")
+(check === (cond (true 1)) 1)
+(check === (cond (true 1 2)) 2)
+(check_void (cond (false 3)))
 
-(check_equal (let ((x 2))
-               (cond ((= 1 x) (+ x "hi"))
-                     ((= x 3) x)
-                     (true    (+ x 2))))
-   4 "4")
+(check === (let ((x 2))
+             (cond ((= 1 x) (+ x "hi"))
+                   ((= x 3) x)
+                   (true    (+ x 2))))
+   4)
 
-(check_equal (cond ((= 1 2) "bad")
-                   ((= 3 3) "body stuff" 5)
-                   (true    "bad"))
-   5 "5")
+(check === (cond ((= 1 2) "bad")
+                 ((= 3 3) "body stuff" 5)
+                 (true    "bad"))
+   5)

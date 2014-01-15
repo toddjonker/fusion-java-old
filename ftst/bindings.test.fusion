@@ -1,6 +1,8 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
-(require "/check")
+(require
+  "/check"
+  "/fusion/experimental/equality")
 
 
 (define rester
@@ -8,13 +10,13 @@
     (assert (is_sexp rest))
     rest))
 
-(check_equal (rester)       (sexp)       "rest param 0")
-(check_equal (rester 1)     (sexp 1)     "rest param 1")
-(check_equal (rester 1 2 3) (sexp 1 2 3) "rest param 3")
+(check === (rester)       (sexp))
+(check === (rester 1)     (sexp 1))
+(check === (rester 1 2 3) (sexp 1 2 3))
 
-(check_equal (apply rester [])         (sexp)         "apply rester 0")
-(check_equal (apply rester [1])        (sexp 1)       "apply rester 1")
-(check_equal (apply rester 1 2 [3, 4]) (sexp 1 2 3 4) "apply rester 4")
+(check === (apply rester [])         (sexp))
+(check === (apply rester [1])        (sexp 1))
+(check === (apply rester 1 2 [3, 4]) (sexp 1 2 3 4))
 
 
 // Duplicate bound names
@@ -27,7 +29,7 @@
 //==========================================================================
 // set
 
-(check_equal ((lambda (x) (set x (+ x 1)) x) 0) 1 "set1")
+(check === ((lambda (x) (set x (+ x 1)) x) 0) 1)
 
 (define counter
   (let ((c 0))
@@ -35,9 +37,9 @@
       (set c (+ 1 c))
       c)))
 
-(check_equal (counter) 1 "counter1")
-(check_equal (counter) 2 "counter2")
-(check_equal (counter) 3 "counter3")
+(check === (counter) 1)
+(check === (counter) 2)
+(check === (counter) 3)
 
 
 //==========================================================================
@@ -55,14 +57,14 @@
 
 (check = (let_values [((x) 1)] x) 1)
 
-(check =
+(check ===
   (let_values
     [((x) 1),
      ((y) (values 2))]
     (+ x y))
   3)
 
-(check =
+(check ===
   (let_values
     [((x) 1),
      ((y) 2),
@@ -70,7 +72,7 @@
     (+ x y z))
   6)
 
-(check =
+(check ===
   // The dummy var ensures that the x vars have different offsets
   (let [(dummy -1), (x 1)]
     (let_values
@@ -82,7 +84,7 @@
 (check =
   (let_values [(() (values))] 303)
   303)
-(check =
+(check ===
   (let [(dummy -1), (x 1)]
     (let_values [((x y) (values 10 x)),
                  ((z p) (values x 100))]
@@ -109,18 +111,15 @@
   (let_values [((x y) (values 1 2 3))] 3))
 (check_contract_exn
   (let_values [((x) 1), ((y z) (values 1 2 3))] 3))
-  
-  
+
+
 //==========================================================================
 // letrec
 
 (check = (letrec [] 1) 1)
 
-(when false // TODO FUSION-88 undef should be instance-equal.
-(check =
-  (letrec [(x y), (y 2)] x)
+(check ident UNDEF
   (letrec [(a b), (c 3), (b a)] a))
-)
 
 
 // Duplicate bound names
@@ -134,12 +133,12 @@
 (check = (lets [] 225) 225)
 (check = (lets [(x 226)] x) 226)
 
-(check =
+(check ===
   (let [(x 5)]
     (lets [(x 19), (y (+ x 222))] y))
   (+ 19 222))
 
-(check =
+(check ===
   (lets [(x 19), (y (+ x 222))] y)
   (+ 19 222))
 
@@ -148,16 +147,14 @@
 // is_undef
 //   ... tested here because undef should only come out of letrec
 
-// TODO FUSION-88 undef should be instance-equal.
-(define is_undef 1)
-(define undef 1)
+(define (is_undef v)
+  (ident UNDEF v))
 
-(when false // TODO FUSION-88 undef should be instance-equal.
-(check_equal (is_undef undef)  true  "is_undef undef")
-(check_equal (is_undef (void)) false "is_undef void")
-(check_equal (is_undef null)   false "is_undef null")
-(check_equal (is_undef true)   false "is_undef true")
-(check_equal (is_undef false)  false "is_undef false")
-(check_equal (is_undef 0)      false "is_undef 0")
-(check_equal (is_undef "")     false "is_undef \"\"")
-)
+(check_true  (is_undef UNDEF))
+(check_false (is_undef (void)))
+(check_false (is_undef null))
+(check_false (is_undef true))
+(check_false (is_undef false))
+(check_false (is_undef 0))
+(check_false (is_undef ""))
+

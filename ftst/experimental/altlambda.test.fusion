@@ -1,13 +1,14 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/check"
   "/fusion/experimental/altlambda"
+  "/fusion/experimental/equality"
   "/fusion/experimental/syntax")
 
 (define sub1
   (|x| (- x 1)))
-(check_equal (sub1 2) 1 "1")
+(check === (sub1 2) 1)
 
 (define_syntax dont_capture_pipe
   (lambda (stx)
@@ -18,4 +19,4 @@
 (define pipearg
   (let ((| "dummy"))  // Ensure a different binding for | than the global
     (dont_capture_pipe | (+ | 2))))
-(check_equal (pipearg 0) 2 "2")
+(check === (pipearg 0) 2)

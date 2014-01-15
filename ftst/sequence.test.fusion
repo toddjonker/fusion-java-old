@@ -1,22 +1,20 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/check"
+  "/fusion/experimental/equality"
   "/fusion/list"
   "/fusion/sequence")
 
-(define nullSexp (quote null.sexp))
-(define emptySexp (quote ()))
-(define nullList (quote null.list))
 
 //==========================================================================
 // is_sequence
 
-(check_true (is_sequence nullList))
+(check_true (is_sequence null.list))
 (check_true (is_sequence []))
 (check_true (is_sequence [1]))
-(check_true (is_sequence nullSexp))
-(check_true (is_sequence emptySexp))
+(check_true (is_sequence NULL_SEXP))
+(check_true (is_sequence EMPTY_SEXP))
 (check_true (is_sequence (sexp 1)))
 (check_false (is_sequence {}))
 (check_false (is_sequence null.null))
@@ -30,37 +28,36 @@
 //==========================================================================
 // fold_left
 
-(check = (fold_left + 0) 0)
-(check = (fold_left + 0 nullSexp) 0)
-(check = (fold_left + 0 emptySexp) 0)
-(check = (fold_left + 0 nullList) 0)
-(check = (fold_left + 0 []) 0)
-(check = (fold_left + 1 (sexp 2 3 4)) 10)
-(check = (fold_left + 1 [2, 3, 4]) 10)
-(check = (fold_left + 1 (sexp 2 3) [4, 5] [6, 7] (sexp 8 9)) 45)
-(check = (fold_left + 1 (sexp 2 3 4) (sexp 5 6 7 8)) 28)
-(check = (fold_left + 1 (sexp 2 3 4 8) (sexp 5 6 7)) 28)
-(check = (fold_left + 1 [2, 3, 4] [5, 6, 7, 8]) 28)
-(check = (fold_left + 1 [2, 3, 4, 8] [5, 6, 7]) 28)
-(check = (fold_left + 1 [2, 3, 4] (sexp 5 6 7 8)) 28)
-(check = (fold_left + 1 [2, 3, 4, 8] (sexp 5 6 7)) 28)
-(check = (fold_left + 1 (sexp 2 3) [4, 5] emptySexp [6, 7] (sexp 8 9)) 1)
-(check = (fold_left + 1 (sexp 2 3) [4, 5] [] [6, 7] (sexp 8 9)) 1)
-(check = (fold_left + 1 (sexp 2 3) [4, 5] nullSexp [6, 7] (sexp 8 9)) 1)
-(check = (fold_left + 1 (sexp 2 3) [4, 5] nullList [6, 7] (sexp 8 9)) 1)
+(check === (fold_left + 0) 0)
+(check === (fold_left + 0 NULL_SEXP) 0)
+(check === (fold_left + 0 EMPTY_SEXP) 0)
+(check === (fold_left + 0 null.list) 0)
+(check === (fold_left + 0 []) 0)
+(check === (fold_left + 1 (sexp 2 3 4)) 10)
+(check === (fold_left + 1 [2, 3, 4]) 10)
+(check === (fold_left + 1 (sexp 2 3) [4, 5] [6, 7] (sexp 8 9)) 45)
+(check === (fold_left + 1 (sexp 2 3 4) (sexp 5 6 7 8)) 28)
+(check === (fold_left + 1 (sexp 2 3 4 8) (sexp 5 6 7)) 28)
+(check === (fold_left + 1 [2, 3, 4] [5, 6, 7, 8]) 28)
+(check === (fold_left + 1 [2, 3, 4, 8] [5, 6, 7]) 28)
+(check === (fold_left + 1 [2, 3, 4] (sexp 5 6 7 8)) 28)
+(check === (fold_left + 1 [2, 3, 4, 8] (sexp 5 6 7)) 28)
+(check === (fold_left + 1 (sexp 2 3) [4, 5] EMPTY_SEXP [6, 7] (sexp 8 9)) 1)
+(check === (fold_left + 1 (sexp 2 3) [4, 5] [] [6, 7] (sexp 8 9)) 1)
+(check === (fold_left + 1 (sexp 2 3) [4, 5] NULL_SEXP [6, 7] (sexp 8 9)) 1)
+(check === (fold_left + 1 (sexp 2 3) [4, 5] null.list [6, 7] (sexp 8 9)) 1)
 (let [(v (stretchy_list))]
-  (check
-    =
+  (check ===
     (fold_left (lambda (result a b) (add_m v (sexp result a b)) (+ result a b))
       1 (sexp 2 3 4) [5, 6, 7, 8])
     28)
-  (check_equal v [(sexp 1 2 5), (sexp 8 3 6), (sexp 17 4 7)] "fold_left visit order"))
-(check_equal
-  (fold_left (lambda (accum e) (pair e accum)) (quote ()) (sexp 1 2 3 4 5))
+  // Check visit order
+  (check === v [(sexp 1 2 5), (sexp 8 3 6), (sexp 17 4 7)]))
+(check ===
+  (fold_left (lambda (accum e) (pair e accum)) EMPTY_SEXP (sexp 1 2 3 4 5))
   (sexp 5 4 3 2 1)
   "fold_left reverse sexp")
-(check
-  ion_equals
+(check ===
   (fold_left
     (lambda (accum s) (struct_merge accum s))
     {}

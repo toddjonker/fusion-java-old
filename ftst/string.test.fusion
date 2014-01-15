@@ -2,6 +2,7 @@
 
 (require
   "/check"
+  "/fusion/experimental/equality"
   "/fusion/experimental/string"
   "/fusion/string")
 
@@ -31,28 +32,26 @@
 (check_comparisons (quote f::"" ) (quote e::"a"))
 (check_comparisons (quote f::"a") (quote e::"b"))
 
-(check_arg_exn (= null.string null.string))
-
 
 //============================================================================
 // string_append
 
-(check = (string_append ""   "")  "")
-(check = (string_append "aB" "")  "aB")
-(check = (string_append "aB" "c") "aBc")
+(check === (string_append ""   "")  "")
+(check === (string_append "aB" "")  "aB")
+(check === (string_append "aB" "c") "aBc")
 
-(check = (string_append "aB" (quote c) "d") "aBcd")
-(check = (string_append (quote aB) "") "aB")
-(check = (string_append (quote aB) "c") "aBc")
-(check = (string_append (quote aB) "c" (quote d)) "aBcd")
-
-
-(check = (string_to_lower "")    "")
-(check = (string_to_lower "AbC") "abc")
+(check === (string_append "aB" (quote c) "d") "aBcd")
+(check === (string_append (quote aB) "") "aB")
+(check === (string_append (quote aB) "c") "aBc")
+(check === (string_append (quote aB) "c" (quote d)) "aBcd")
 
 
-(check = (string_to_upper "")    "")
-(check = (string_to_upper "AbC") "ABC")
+(check === (string_to_lower "")    "")
+(check === (string_to_lower "AbC") "abc")
+
+
+(check === (string_to_upper "")    "")
+(check === (string_to_upper "AbC") "ABC")
 
 
 //============================================================================
@@ -71,8 +70,8 @@
 //============================================================================
 // string_to_symbol
 
-(check ion_equals (string_to_symbol null.string) (quote null.symbol))
-(check = (string_to_symbol "text") (quote text))
+(check === (string_to_symbol null.string) (quote null.symbol))
+(check === (string_to_symbol "text") (quote text))
 
 // TODO FUSION-204 support empty symbol
 (check_arg_exn (string_to_symbol ""))
@@ -81,7 +80,7 @@
 //============================================================================
 // symbol_to_string
 
-(check ion_equals (symbol_to_string (quote null.symbol)) null.string)
-(check = (symbol_to_string (quote text)) "text")
+(check === (symbol_to_string (quote null.symbol)) null.string)
+(check === (symbol_to_string (quote text)) "text")
 
 // TODO FUSION-204 support empty symbol
