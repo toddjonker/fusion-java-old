@@ -12,6 +12,10 @@ Experimental equality procedures.
 This module contains unstable, experimental features.
 There is **NO SUPPORT** for this module.
 
+
+ * * *
+
+
 ## Equality Procedures
 
 The definition of "equality" between values often depends upon the application,
@@ -47,39 +51,39 @@ As a mnemonic, observe that longer names mean stricter comparisons.
 
     Use `===` when you care about the data's (default) ionized form.
 
- *  `is_same`
+ *  `same`
 
     *Abstract identity equivalence.*
     Compares object references, but treats (unannotated) numbers as if they
     were interned.
 
-    Use `is_same` when you care about identity and may encounter numbers.
+    Use `same` when you care about identity and may encounter numbers.
 
- *  `is_identical`
+ *  `ident`
 
     *Concrete identity equivalence.*
     Not sound for numbers due to potential optimization effects.
 
-    Use `is_identical` for best performance when you care about identity
+    Use `ident` for best performance when you care about identity
     and are not using numbers.
 
 
 Note that these operations define "nested" equivalence classes:
 
- *  If `(is_identical a b)` is true then `(is_same a b)` is true.
- *  If `(is_same a b)` is true then `(=== a b)` is true.
+ *  If `(ident a b)` is true then `(same a b)` is true.
+ *  If `(same a b)` is true then `(=== a b)` is true.
  *  If `(=== a b)` is true then `(== a b)` is true.
  *  If `(== a b)` is true then `(= a b)` is true.
 
 Here's a rough comparison to other languages:
 
-        Fusion         Scheme   Ruby     Python   Dylan   Java
-
-        =                       ==                =
-        ==             equal?   eql?     ==
-        ===                                               equals()
-        is_same        eqv?                       ==
-        is_identical   eq?      equal?   is               ==
+        Fusion   Scheme   Ruby     Python   Dylan   Java
+      --------------------------------------------------------
+        =                 ==                =
+        ==       equal?   eql?     ==
+        ===                                         equals()
+        same     eqv?                       ==
+        ident    eq?      equal?   is               ==
 
   '''
 
@@ -88,18 +92,18 @@ Here's a rough comparison to other languages:
     "/fusion/ffi/java")
 
 
-  (defpub is_identical
+  (defpub ident
     '''
-    (is_identical left right)
+    (ident left right)
 
 Returns true if and only if the arguments are the same object; that is, when
 they have the same object identity.
 
-    (is_identical 1 (quote a::1))                   --> false
-    (let [(v "hi")] (is_identical v v))             --> true
-    (let [(v (quote a::"hi"))] (is_identical v v))  --> true
+    (ident 1 (quote a::1))                   --> false
+    (let [(v "hi")] (ident v v))             --> true
+    (let [(v (quote a::"hi"))] (ident v v))  --> true
 
-At the implementation level, `is_identical` is a trivial pointer comparison.
+At the implementation level, `ident` is a trivial pointer comparison.
 As such, it exposes some implementation details that may change over time or
 across platforms.
 
@@ -108,37 +112,37 @@ values as needed. Therefore there's no promise of
 stable object identity for numbers, and this operator may behave in unexpected
 and implementation-defined ways when applied to them.
 
-    (is_identical 2 (+ 1 1))                        --> // unspecified
-    (let [(v 2)] (is_identical v v))                --> // unspecified
+    (ident 2 (+ 1 1))                        --> // unspecified
+    (let [(v 2)] (ident v v))                --> // unspecified
 
 It is not specified whether literals or quoted data are interned, so there's
 no promise of identity across two different syntactic instances of the same
 value:
 
-    (is_identical 10600439 10600439)                --> // unspecified
-    (is_identical "hi" "hi")                        --> // unspecified
-    (is_identical (quote a::"hi") (quote a::"hi"))  --> // unspecified
+    (ident 10600439 10600439)                --> // unspecified
+    (ident "hi" "hi")                        --> // unspecified
+    (ident (quote a::"hi") (quote a::"hi"))  --> // unspecified
     '''
     (java_new "com.amazon.fusion.FusionCompare$IsIdenticalProc"))
 
 
-  (defpub is_same
+  (defpub same
     '''
-    (is_same left right)
+    (same left right)
 
-Like `is_identical` but sound for numbers. That is, this procedure guarantees
+Like `ident` but sound for numbers. That is, this procedure guarantees
 equivalence of (unannotated) numbers with the same type, value, and precision,
-while `is_identical` does not. In effect, unannotated numbers behave as if
+while `ident` does not. In effect, unannotated numbers behave as if
 they were interned.
 
-As with `is_identical`, values with different annotations are never `is_same`.
+As with `ident`, values with different annotations are never `same`.
 
-    (is_same 1 (quote a::1))                   --> false
-    (is_same 2 (+ 1 1))                        --> true
-    (let [(v 2)] (is_same v v))                --> true
-    (is_same 10600439 10600439)                --> true
+    (same 1 (quote a::1))                   --> false
+    (same 2 (+ 1 1))                        --> true
+    (let [(v 2)] (same v v))                --> true
+    (same 10600439 10600439)                --> true
 
-    (is_same (quote a::"hi") (quote a::"hi"))  --> // unspecified
+    (same (quote a::"hi") (quote a::"hi"))  --> // unspecified
     '''
     (java_new "com.amazon.fusion.FusionCompare$IsSameProc"))
 

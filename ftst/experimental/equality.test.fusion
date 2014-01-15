@@ -18,7 +18,10 @@
 (define !==  (|a b| (not (==  a b))))
 (define !=== (|a b| (not (=== a b))))
 
-(define not_same (|a b| (not (is_same a b))))
+(define not_same (|a b| (not (same a b))))
+
+(define (is_annotatable val)
+  (not (or (is_void val) (is_eof val) (ident val UNDEF))))
 
 
 (define (add_annotations vals)
@@ -28,13 +31,12 @@ annotated variants of each value.
   '''
   (fold_left
     (|accum val|
-      // TODO need is_annotatable
-      (if (or (is_void val) (is_eof val) (is_identical val UNDEF))
-        (pair val accum)
+      (if (is_annotatable val)
         (apply sexp
           val (annotate val "a") (annotate val "b")
           (annotate val "a" "a") (annotate val "a" "c")
-          accum)))
+          accum)
+        (pair val accum)))
     (sexp)
     vals))
 
@@ -192,15 +194,14 @@ orders, including each value paired with itself.
     (fold_left
       (|accum eqSet|
         (let [(val (. eqSet 0))]
-          // TODO need is_annotatable
-          (if (or (is_void val) (is_eof val) (is_identical val UNDEF))
-            (pair eqSet accum)
+          (if (is_annotatable val)
             (apply sexp
               eqSet
               (map (|val| (annotate val "a"    )) eqSet)
               (map (|val| (annotate val "b"    )) eqSet)
               (map (|val| (annotate val "a" "c")) eqSet)
-              accum))))
+              accum)
+            (pair eqSet accum))))
       (sexp)
       (append_m
         // Nulls are their own equivalence sets
@@ -284,7 +285,7 @@ orders, including each value paired with itself.
 )))))
 
 
-(test_equivalence [is_same, '===', '==', '='] not_same
+(test_equivalence [same, '===', '==', '='] not_same
   (append_m
     // Nulls are their own equivalence sets
     (apply mutable_list (map sexp all_nulls))
