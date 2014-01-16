@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
+import static com.amazon.fusion.FusionNumber.makeInt;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionText.checkRequiredTextArg;
 import static com.amazon.fusion.FusionUtils.safeEquals;
@@ -17,6 +18,11 @@ import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 import java.util.Arrays;
 
 
@@ -28,6 +34,12 @@ import java.util.Arrays;
 public final class FusionString
 {
     private FusionString() {}
+
+    /** The string {@code "UTF-8"}. */
+    public static final String UTF8_CHARSET_NAME = "UTF-8";
+
+    public static final Charset UTF8_CHARSET =
+        Charset.forName(UTF8_CHARSET_NAME);
 
 
     //========================================================================
@@ -474,6 +486,36 @@ public final class FusionString
         {
             boolean r = isString(eval, arg);
             return makeBool(eval, r);
+        }
+    }
+
+
+    static final class SizeUtf8
+        extends Procedure1
+    {
+        SizeUtf8()
+        {
+            super("Docs in Fusion",
+                  "string");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object arg)
+            throws FusionException
+        {
+            String s = checkRequiredStringArg(eval, this, 0, arg);
+
+            CharsetEncoder encoder = UTF8_CHARSET.newEncoder();
+            try
+            {
+                ByteBuffer buffer = encoder.encode(CharBuffer.wrap(s));
+                int limit = buffer.limit();
+                return makeInt(eval, limit);
+            }
+            catch (CharacterCodingException e)
+            {
+                throw argFailure("valid Unicode string", 0, arg);
+            }
         }
     }
 

@@ -1,0 +1,37 @@
+// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+
+/*                       *** WARNING ***
+ *
+ * There may be customer dependencies on this module!  See FUSION-184
+ */
+
+
+(module string '/fusion/private/kernel'
+
+  '''
+Experimental string operators.
+
+<!-- FUSION-185 This comment forces FusionDoc to stop the one-liner here. -->
+
+## WARNING
+
+This module contains unstable, experimental features.
+There is **NO SUPPORT** for this module.
+  '''
+
+  (require
+    "/fusion/experimental/defines")
+
+
+  (defpub_j string_size_utf8
+    '''
+    (string_size_utf8 string)
+
+Returns the size of a string in UTF-8 bytes. Throws an exception if the
+argument contains invalid Unicode data (such as mismatch surrogates).
+
+Note that this is an inefficient operation since it requires a transcoding
+from UTF-16 (Java's native String representation) to UTF-8.
+    '''"com.amazon.fusion.FusionString$SizeUtf8"
+  )
+)

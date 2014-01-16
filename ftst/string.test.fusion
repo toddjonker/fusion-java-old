@@ -1,7 +1,8 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/check"
+  "/fusion/experimental/string"
   "/fusion/string")
 
 
@@ -52,6 +53,18 @@
 
 (check = (string_to_upper "")    "")
 (check = (string_to_upper "AbC") "ABC")
+
+
+//============================================================================
+// string_size_utf8
+
+(check = 0  (string_size_utf8 ""))
+(check = 1  (string_size_utf8 "a"))
+(check = 5  (string_size_utf8 "hello"))
+(check = 7  (string_size_utf8 "hello\x80"))
+(check = 9  (string_size_utf8 "hello\x80\u07ff"))
+(check = 12 (string_size_utf8 "hello\x80\u07ff\uffff"))
+(check = 16 (string_size_utf8 "hello\x80\u07ff\uffff\U000ffff1"))
 
 
 //============================================================================
