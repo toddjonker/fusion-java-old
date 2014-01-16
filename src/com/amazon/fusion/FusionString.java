@@ -503,14 +503,16 @@ public final class FusionString
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
         {
-            String s = checkRequiredStringArg(eval, this, 0, arg);
+            String s = checkNullableStringArg(eval, this, 0, arg);
+
+            if (s == null || s.isEmpty()) return FusionNumber.ZERO_INT;
 
             CharsetEncoder encoder = UTF8_CHARSET.newEncoder();
             try
             {
                 ByteBuffer buffer = encoder.encode(CharBuffer.wrap(s));
-                int limit = buffer.limit();
-                return makeInt(eval, limit);
+                int size = buffer.limit();
+                return makeInt(eval, size);
             }
             catch (CharacterCodingException e)
             {

@@ -58,6 +58,7 @@
 //============================================================================
 // string_size_utf8
 
+(check = 0  (string_size_utf8 null.string))
 (check = 0  (string_size_utf8 ""))
 (check = 1  (string_size_utf8 "a"))
 (check = 5  (string_size_utf8 "hello"))
