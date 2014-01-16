@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -21,10 +21,17 @@ final class LambdaForm
               "`body` may be one or more forms; the last form is in tail position and its\n" +
               "result is the result of the procedure invocation.\n" +
               "\n" +
+              "The Fusion runtime system may optimize procedure instantiation, so it is\n" +
+              "unspecified whether one or more `lambda` expressions will return distinct\n" +
+              "or identical objects for any evaluation.\n" +
+              "\n" +
               "    (lambda rest_id doc? body ...+)\n" +
               "\n" +
-              "This variant returns a procedure that accepts any number of arguments, which\n" +
-              "are collected into an immutable sexp and bound to `rest_id`.");
+              "This variant, which declares a single formal argument rather than a sequence\n" +
+              "of them, returns a procedure that accepts any number of values, which are\n" +
+              "collected into an immutable sexp and bound to the `rest_id`:\n" +
+              "\n" +
+              "    ((lambda args args) 8 9 10)   --> (8 9 10)\n");
     }
 
 
