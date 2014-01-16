@@ -102,6 +102,7 @@ they have the same object identity.
     (ident 1 (quote a::1))                   --> false
     (let [(v "hi")] (ident v v))             --> true
     (let [(v (quote a::"hi"))] (ident v v))  --> true
+    (ident (void) (void))                    --> true
 
 At the implementation level, `ident` is a trivial pointer comparison.
 As such, it exposes some implementation details that may change over time or
@@ -115,7 +116,7 @@ and implementation-defined ways when applied to them.
     (ident 2 (+ 1 1))                        --> // unspecified
     (let [(v 2)] (ident v v))                --> // unspecified
 
-It is not specified whether literals or quoted data are interned, so there's
+It is not specified whether literals or `quote`d data are interned, so there's
 no promise of identity across two different syntactic instances of the same
 value:
 
@@ -171,6 +172,9 @@ coercing values to a common type. Annotations and precision are ignored.
     index are `=`.
  *  Structs are `=` when they have the same set of field names, and each name
     maps to a set of elements that are `=`.
+ *  Void is `=` only to itself.
+ *  Exceptions are not thrown due to mismatched types; instead the result is
+    `false`.
 
 For example:
 
@@ -189,6 +193,15 @@ For example:
 
     (= (struct "f" 1) (mutable_struct "f" 1.0))   --> true
     (= {f:1, f:1} {f:1})                          --> false
+
+At present, the coercion of float to decimal is precise, without rounding to
+approximate a prettier decimal form. This may lead to strange behavior since
+most decimal numbers don't have a precise binary representation:
+
+    (= 1.2 1.2e0)  --> false
+    (= 1.5 1.5e0)  --> true
+
+It’s possible this may change in a future release.
 
 **Warning:** The behavior of this procedure is undefined for values `+inf`,
 `-inf`, and `nan`.
@@ -229,8 +242,10 @@ For example:
     (== "text" (quote text))              --> false
     (== "text" (quote a::"text"))         --> true
 
-    (== [1, 2  ] (sexp 1 2.00))           --> false
-    (== [1, 2.0] (sexp 1 2.00))           --> true
+    (== [1, 2] (sexp 1 2   ))             --> false
+    (== [1, 2] (list 1 2.00))             --> false
+    (== [1, 2] (list 1 2   ))             --> true
+    (== [1, 2] (mutable_list 1 2))        --> true
 
 **Warning:** The behavior of this procedure is undefined for values `+inf`,
 `-inf`, and `nan`.
