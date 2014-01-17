@@ -355,4 +355,40 @@ public class InjectionTest
         iv = system().newBlob(BYTES);
         testIonValueInjection(iv, "is_blob");
     }
+
+
+    @Test
+    public void testIonListInjection()
+        throws Exception
+    {
+        IonList iv = system().newNullList();
+        testIonValueInjection(iv, "is_list");
+
+        iv = system().newEmptyList();
+        testIonValueInjection(iv, "is_list");
+    }
+
+
+    @Test
+    public void testIonSexpInjection()
+        throws Exception
+    {
+        IonSexp iv = system().newNullSexp();
+        testIonValueInjection(iv, "is_sexp");
+
+        iv = system().newEmptySexp();
+        testIonValueInjection(iv, "is_sexp");
+    }
+
+
+    @Test
+    public void testIonStructInjection()
+        throws Exception
+    {
+        IonStruct iv = system().newNullStruct();
+        testIonValueInjection(iv, "is_struct");
+
+        iv = system().newEmptyStruct();
+        testIonValueInjection(iv, "is_struct");
+    }
 }

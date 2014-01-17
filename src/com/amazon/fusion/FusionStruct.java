@@ -59,13 +59,14 @@ final class FusionStruct
         String[] annotations = struct.getTypeAnnotations();
         // TODO FUSION-47 intern annotation text
 
-        if (struct.isEmpty()) // No use being lazy in these cases.
+        // There's no benefit to being lazy injecting null.struct or {}.
+        if (struct.isNullValue())
         {
-            if (struct.isNullValue())
-            {
-                return nullStruct(eval, annotations);
-            }
+            return nullStruct(eval, annotations);
+        }
 
+        if (struct.isEmpty())
+        {
             Map<String, Object> map = Collections.emptyMap();
             return immutableStruct(map, annotations);
         }
