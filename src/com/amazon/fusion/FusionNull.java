@@ -171,7 +171,7 @@ public final class FusionNull
      *
      * @see FusionValue#isAnyNull(TopLevel, Object)
      */
-    static boolean isNullNull(TopLevel top, Object value)
+    public static boolean isNullNull(TopLevel top, Object value)
     {
         return (value instanceof NullNull);
     }

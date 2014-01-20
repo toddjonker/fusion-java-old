@@ -12,7 +12,7 @@ import java.io.IOException;
 
 /**
  * Utilities for working with arbitrary Fusion runtime values.
- * Note that the set of Fusion values is a superset of the Ion values, so no
+ * Note that the set of Fusion values is a superset of the Ion values, so not
  * all of them are representable as Ion data values.
  */
 public final class FusionValue
@@ -79,7 +79,6 @@ public final class FusionValue
      * </ul>
      * This definition is more lax (and hopefully more convenient) than Java,
      * but less lenient (and hopefully less error-prone) than C or C++.
-     * See <a Null and Void for more explanation.
      *
      * @see <a href="{@docRoot}/../nullvoid.html">Null and Void</a>
      * @see FusionBool#isTrue(TopLevel, Object)

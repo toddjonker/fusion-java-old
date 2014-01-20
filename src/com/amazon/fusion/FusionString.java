@@ -36,10 +36,9 @@ public final class FusionString
     private FusionString() {}
 
     /** The string {@code "UTF-8"}. */
-    public static final String UTF8_CHARSET_NAME = "UTF-8";
+    static final String UTF8_CHARSET_NAME = "UTF-8";
 
-    public static final Charset UTF8_CHARSET =
-        Charset.forName(UTF8_CHARSET_NAME);
+    static final Charset UTF8_CHARSET = Charset.forName(UTF8_CHARSET_NAME);
 
 
     //========================================================================
