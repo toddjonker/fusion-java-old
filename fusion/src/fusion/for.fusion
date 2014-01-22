@@ -8,6 +8,32 @@ Generic collection "comprehension" forms.
 
 
   (require "/fusion/experimental/defines")
+  (require "/fusion/experimental/syntax")
+  (require "/fusion/base")
+  (require "/fusion/list")
 
   (defpub_j_syntax for_list "com.amazon.fusion.ForListForm")
+  
+  (provide fors_list)
+  
+  (define_syntax fors_list
+    (lambda (stx)
+      (if (< (syntax_size stx) 3)
+        (wrong_syntax stx "expecting bindings and body")
+        (let [(bindings (syntax_get stx 1)),
+              (body (syntax_subseq stx 2))]
+          (if (= 1 (syntax_size bindings))
+            (syntax_append
+              (quasisyntax
+                (for_list (unsyntax bindings)))
+              body)
+            (let [(binding (syntax_get bindings 0)),
+                  (others (syntax_subseq bindings 1))]
+              (quasisyntax
+                (apply append_m
+                  (for_list [(unsyntax binding)]
+                    (unsyntax
+                      (syntax_append
+                        (quasisyntax (fors_list (unsyntax others)))
+                        body)))))))))))
 )
