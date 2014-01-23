@@ -2,7 +2,8 @@
 
 (require
   "/check"
-  "/fusion/experimental/equality")
+  "/fusion/experimental/equality"
+  "/fusion/list")
 
 
 (define boom (lambda rest (assert false "boom")))
@@ -86,16 +87,16 @@
 //==========================================================================
 // curry_left
 
-(define is_8_gt (curry_left > 8))
-(check_false (is_8_gt 10))
-(check_false (is_8_gt  8))
-(check_true  (is_8_gt  6))
+(define prepend56 (curry_left append_m [5, 6]))
+(check === [5,6] (prepend56))
+(check === [5,6,1] (prepend56 [1]))
+(check === [5,6,1,2,3] (prepend56 [1] [2,3]))
 
 
 //==========================================================================
 // curry_right
 
-(define is_6_gt_than_x (curry_right > 6))
-(check_true (is_6_gt_than_x 5))
-(check_false (is_6_gt_than_x 6))
-(check_false (is_6_gt_than_x 7))
+(define append56 (curry_right append_m [5, 6]))
+(check === [5,6] (append56))
+(check === [1,5,6] (append56 [1]))
+(check === [1,2,3,5,6] (append56 [1] [2,3]))
