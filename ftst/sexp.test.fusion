@@ -4,7 +4,8 @@
   "/check"
   "/fusion/experimental/equality"
   "/fusion/list"
-  "/fusion/private/builtins")  // annotate
+  "/fusion/private/builtins"  // annotate
+  "/fusion/private/sexp")
 
 
 (define valNull  (quote null.sexp))
@@ -298,3 +299,42 @@
 (check === (size (pair 1 (pair 2 (quote ())))) 2)
 
 (check_arg_exn (size (pair 1 215)))
+
+
+//==========================================================================
+// sexp_append
+
+(check === EMPTY_SEXP
+  (sexp_append EMPTY_SEXP EMPTY_SEXP))
+(check === EMPTY_SEXP
+  (sexp_append EMPTY_SEXP NULL_SEXP))
+(check === EMPTY_SEXP
+  (sexp_append NULL_SEXP EMPTY_SEXP))
+(check === EMPTY_SEXP
+  (sexp_append NULL_SEXP NULL_SEXP))
+
+(check === (sexp 1)
+  (sexp_append (sexp 1) EMPTY_SEXP))
+(check === (sexp 1)
+  (sexp_append (sexp 1) NULL_SEXP))
+
+(check === (sexp 1 2 3)
+  (sexp_append (sexp 1 2 3) EMPTY_SEXP))
+(check === (sexp 1 2 3)
+  (sexp_append (sexp 1 2 3) NULL_SEXP))
+
+(let [(s123 (sexp 1 2 3))]
+  (check ident s123
+    (sexp_append EMPTY_SEXP s123))
+  (check ident s123
+    (sexp_append NULL_SEXP s123))
+  (let [(r (sexp_append (sexp 4 5 6) s123))]
+    (check === (sexp 4 5 6 1 2 3) r)
+    (check ident s123 (tail (tail (tail r))))))
+
+(check === (sexp 1 2)
+  (sexp_append (sexp 1) (sexp 2)))
+
+
+// TODO test annotations
+
