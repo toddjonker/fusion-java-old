@@ -8,6 +8,7 @@ Operators for creating and manipulating procedures.
   '''
 
   (require
+    "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/experimental/syntax"
     "/fusion/private/compare"
@@ -106,23 +107,63 @@ single-argument procedure `p`.
   //==========================================================================
 
   (defpub curry_left
-    (lambda (p operand)
-      '''
-Returns a prodedure the same as `p` except with its first argument always
-substituted in with `operand`.
-      '''
-      (lambda args
-        (apply p operand args))))
+    '''
+    (curry_left proc arg ...+)
+
+Returns a prodedure based on `proc` and the given leftmost `arg`s.
+
+    (define prepend56
+      (curry_left append_m [5, 6]))
+    (prepend56)                           --> [5,6]
+    (prepend56 [1])                       --> [5,6,1]
+
+    (define prepend567
+      (curry_left append_m [5, 6] [7]))
+    (prepend567 [1] [2,3])                --> [5,6,7,1,2,3]
+    '''
+    (lambda rest
+      (let [(size_rest (size rest))]
+        (when (< size_rest 2)
+          (apply raise_arity_error "curry_left" 2 rest))
+        (let [(proc (head rest)),
+              (left_args (tail rest))]
+          (unless (is_procedure (head rest))
+            (apply raise_argument_error "curry_left" "procedure" 0 rest))
+          (if (= size_rest 2)
+            // Only one argument, so we can optimize the apply call.
+            (let [(left_arg (head left_args))]
+              (lambda args
+                (apply proc left_arg args)))
+            (lambda args
+              (apply proc (sexp_append left_args args))))))))
+
 
   //==========================================================================
 
   (defpub curry_right
-    (lambda (p operand)
-      '''
-Returns a prodedure the same as `p` except with its last argument always
-substituted in with `operand`.
-      '''
-      (lambda args
-        (apply p (sexp_append args (sexp operand))))))
+    '''
+    (curry_right proc arg ...+)
+
+Returns a prodedure based on `proc` and the given rightmost `arg`s.
+
+    (define append56
+      (curry_right append_m [5, 6]))
+    (append56)                             --> [5,6]
+    (append56 [1])                         --> [1,5,6]
+
+    (define append567
+      (curry_right append_m [5, 6] [7]))
+    (append567 [1] [2,3])                  --> [1,2,3,5,6,7]
+    '''
+    (lambda rest
+      (let [(size_rest (size rest))]
+        (when (< size_rest 2)
+          (apply raise_arity_error "curry_right" 2 rest))
+        (let [(proc (head rest)),
+              (right_args (tail rest))]
+          (unless (is_procedure (head rest))
+            (apply raise_argument_error "curry_right" "procedure" 0 rest))
+          (lambda args
+            (apply proc (sexp_append args right_args)))))))
 
 ) // end module
