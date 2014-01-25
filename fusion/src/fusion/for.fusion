@@ -18,22 +18,31 @@ Generic collection "comprehension" forms.
   
   (define_syntax fors_list
     (lambda (stx)
-      (if (< (syntax_size stx) 3)
-        (wrong_syntax stx "expecting bindings and body")
+      (if (or (< (syntax_size stx) 2)
+              (is_null (syntax_get stx 1)))
+        (wrong_syntax stx "expecting bindings")
         (let [(bindings (syntax_get stx 1)),
               (body (syntax_subseq stx 2))]
-          (if (= 1 (syntax_size bindings))
-            (syntax_append
-              (quasisyntax
-                (for_list (unsyntax bindings)))
-              body)
-            (let [(binding (syntax_get bindings 0)),
-                  (others (syntax_subseq bindings 1))]
-              (quasisyntax
-                (apply append_m
-                  (for_list [(unsyntax binding)]
-                    (unsyntax
-                      (syntax_append
-                        (quasisyntax (fors_list (unsyntax others)))
-                        body)))))))))))
+          (if (or (= 0 (syntax_size bindings))
+                  (= 2 (syntax_size stx)))
+            /* Base case -- no bindings or no body*/
+            (quasisyntax [])
+            (if (= 1 (syntax_size bindings))
+              /* Base case -- single binding */
+              (syntax_append
+                (quasisyntax
+                  (for_list (unsyntax bindings)))
+                body)
+              /* Recursive case */
+              (let [(binding (syntax_get bindings 0)),
+                    (others (syntax_subseq bindings 1))]
+                (if (not (= 2 (syntax_size binding)))
+                  (wrong_syntax stx "expected 2 subforms in binding pair")
+                  (quasisyntax
+                    (apply append_m
+                      (for_list [(unsyntax binding)]
+                        (unsyntax
+                          (syntax_append
+                            (quasisyntax (fors_list (unsyntax others)))
+                            body)))))))))))))
 )
