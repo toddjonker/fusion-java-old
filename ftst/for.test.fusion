@@ -164,5 +164,13 @@
 // Duplicate name
 (check_compile_exn (for_list [(name []), (name [])] 13))
 
+// Duplicate fors_list binding names are allowed because they shadow 
+// each other in order, the last of which is still meaningful.
+(check === 
+  (fors_list [(name []), (name [])] 14)
+  [])
+(check ===
+  (fors_list [(name [1,2]), (name [3,4])] name)
+  [3,4,3,4])
 
 "PASSED" // Helpful output if you run this stand-alone

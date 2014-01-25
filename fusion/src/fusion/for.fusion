@@ -41,7 +41,7 @@ Generic collection "comprehension" forms.
                 (if (not (= 2 (syntax_size binding)))
                   (wrong_syntax "expecting 2 forms in in each binding pair")
                   (quasisyntax
-                    (apply append_m
+                    (apply append_m []
                       (for_list [(unsyntax binding)]
                         (unsyntax
                           (syntax_append
