@@ -23,30 +23,28 @@ Generic collection "comprehension" forms.
         (wrong_syntax stx "expecting bindings")
         (let [(bindings (syntax_get stx 1)),
               (body (syntax_subseq stx 2))]
-          /* Check binding syntax */
-          (map (lambda (b)
-                 (if (or (is_null b)
-                         (not (= 2 (size b))))
-                   (wrong_syntax "expecting 2 forms in in each binding pair") true)) 
-               (syntax_to_datum bindings))
           (if (or (= 0 (syntax_size bindings))
                   (= 2 (syntax_size stx)))
             /* Base case -- no bindings or no body */
             (quasisyntax [])
             (if (= 1 (syntax_size bindings))
               /* Base case -- single binding */
-              (syntax_append
-                (quasisyntax
-                  (for_list (unsyntax bindings)))
-                body)
+              (if (not (= 2 (syntax_size (syntax_get bindings 0))))
+                (wrong_syntax "expecting 2 forms in in each binding pair")
+                (syntax_append
+                  (quasisyntax
+                    (for_list (unsyntax bindings)))
+                  body))
               /* Recursive case */
               (let [(binding (syntax_get bindings 0)),
                     (others (syntax_subseq bindings 1))]
-                (quasisyntax
-                  (apply append_m
-                    (for_list [(unsyntax binding)]
-                      (unsyntax
-                        (syntax_append
-                          (quasisyntax (fors_list (unsyntax others)))
-                          body))))))))))))
+                (if (not (= 2 (syntax_size binding)))
+                  (wrong_syntax "expecting 2 forms in in each binding pair")
+                  (quasisyntax
+                    (apply append_m
+                      (for_list [(unsyntax binding)]
+                        (unsyntax
+                          (syntax_append
+                            (quasisyntax (fors_list (unsyntax others)))
+                            body)))))))))))))
 )
