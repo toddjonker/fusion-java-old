@@ -159,7 +159,7 @@
 (check_compile_exn (for_list ((name 1) ()) 13))
 (check_compile_exn (fors_list ((name 2) ()) 24))
 (check_compile_exn (for_list ((name 1) (name2)) 13))
-//(check_compile_exn (fors_list ((name 2)) (name3)) 24))
+(check_compile_exn (fors_list ((name 2) (name3)) 24))
 
 // Duplicate name
 (check_compile_exn (for_list [(name []), (name [])] 13))
