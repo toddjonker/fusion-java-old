@@ -7,10 +7,10 @@ Generic collection "comprehension" forms.
   '''
 
 
-  (require "/fusion/experimental/defines")
-  (require "/fusion/experimental/syntax")
-  (require "/fusion/base")
-  (require "/fusion/list")
+  (require "/fusion/base"
+           "/fusion/experimental/defines"
+           "/fusion/experimental/syntax"
+           "/fusion/list")
 
   (defpub_j_syntax for_list "com.amazon.fusion.ForListForm")
   
