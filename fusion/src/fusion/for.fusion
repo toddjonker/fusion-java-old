@@ -14,9 +14,7 @@ Generic collection "comprehension" forms.
 
   (defpub_j_syntax for_list "com.amazon.fusion.ForListForm")
   
-  (provide fors_list)
-  
-  (define_syntax fors_list
+  (defpub_syntax fors_list
     (lambda (stx)
       (if (or (< (syntax_size stx) 2)
               (is_null (syntax_get stx 1)))
