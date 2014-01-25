@@ -15,6 +15,29 @@ Generic collection "comprehension" forms.
   (defpub_j_syntax for_list "com.amazon.fusion.ForListForm")
   
   (defpub_syntax fors_list
+    '''
+    (fors_list [(ident series), ...] body ...+)
+
+Like `for_list`, but the `series` are iterated in nested loops instead of in parallel. 
+Each binding is made available to the following `series` as well as the `body` allowing 
+for list comprehension.
+
+    (fors_list [(a [1,2]),
+                (b [5,7])]
+      (* a b))                             => [5, 7, 10, 14]
+
+    (define data [{a:[ {b:1}, {b:2} ]}, 
+                  {a:[ {b:3}, {b:4} ]} ])
+    (fors_list [(x data),
+                (y (. x "a"))]
+      (. y "b"))                           => [1, 2, 3, 4]
+
+    (define data [[[1],[2]],[[3],[4]]])
+    (fors_list [(x data),
+                (y x),
+                (z y)]
+      z)                                   => [1, 2, 3, 4]
+    '''  
     (lambda (stx)
       (if (or (< (syntax_size stx) 2)
               (is_null (syntax_get stx 1)))
