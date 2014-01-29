@@ -43,7 +43,7 @@
   [1])
 
 (check ===
-  (for_list ((e [2])) e)
+  (fors_list ((e [2])) e)
   [2])
   
 (check ===
