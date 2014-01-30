@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 (module for '/fusion/private/kernel'
 
@@ -7,7 +7,65 @@ Generic collection "comprehension" forms.
   '''
 
 
-  (require "/fusion/experimental/defines")
+  (require "/fusion/base"
+           "/fusion/experimental/defines"
+           "/fusion/experimental/syntax"
+           "/fusion/list")
 
   (defpub_j_syntax for_list "com.amazon.fusion.ForListForm")
+  
+  (defpub_syntax fors_list
+    '''
+    (fors_list [(ident series), ...] body ...+)
+
+Like `for_list`, but the `series` are iterated in nested loops instead of in parallel. 
+Each binding is made available to the following `series` as well as the `body` allowing 
+for list comprehension.
+
+    (fors_list [(a [1,2]),
+                (b [5,7])]
+      (* a b))                             => [5, 7, 10, 14]
+
+    (define data [{a:[ {b:1}, {b:2} ]}, 
+                  {a:[ {b:3}, {b:4} ]} ])
+    (fors_list [(x data),
+                (y (. x "a"))]
+      (. y "b"))                           => [1, 2, 3, 4]
+
+    (define data [[[1],[2]],[[3],[4]]])
+    (fors_list [(x data),
+                (y x),
+                (z y)]
+      z)                                   => [1, 2, 3, 4]
+    '''  
+    (lambda (stx)
+      (if (or (< (syntax_size stx) 2)
+              (is_null (syntax_get stx 1)))
+        (wrong_syntax stx "expecting bindings")
+        (let [(bindings (syntax_get stx 1)),
+              (body (syntax_subseq stx 2))]
+          (if (or (= 0 (syntax_size bindings))
+                  (= 2 (syntax_size stx)))
+            /* Base case -- no bindings or no body */
+            (quasisyntax [])
+            (if (= 1 (syntax_size bindings))
+              /* Base case -- single binding */
+              (if (not (= 2 (syntax_size (syntax_get bindings 0))))
+                (wrong_syntax stx "expecting 2 forms in in each binding pair")
+                (syntax_append
+                  (quasisyntax
+                    (for_list (unsyntax bindings)))
+                  body))
+              /* Recursive case */
+              (let [(binding (syntax_get bindings 0)),
+                    (others (syntax_subseq bindings 1))]
+                (if (not (= 2 (syntax_size binding)))
+                  (wrong_syntax stx "expecting 2 forms in in each binding pair")
+                  (quasisyntax
+                    (apply append_m []
+                      (for_list [(unsyntax binding)]
+                        (unsyntax
+                          (syntax_append
+                            (quasisyntax (fors_list (unsyntax others)))
+                            body)))))))))))))
 )

@@ -10,9 +10,16 @@
   (for_list () 73)
   [])
 
+(check ===
+  (fors_list [] 84)
+  [])
 
 (check ===
   (for_list ((e [])) /* no body */)
+  [])
+
+(check ===
+  (fors_list ((e [])) /* no body */)
   [])
 
 (check ===
@@ -20,13 +27,25 @@
   [])
 
 (check ===
+  (fors_list ((e [])) 84)
+  [])
+
+(check ===
   (for_list ((e [1])) 73)
   [73])
+
+(check ===
+  (fors_list ((e [2])) 84)
+  [84])
 
 (check ===
   (for_list ((e [1])) e)
   [1])
 
+(check ===
+  (fors_list ((e [2])) e)
+  [2])
+  
 (check ===
   (for_list ((e [1, 2, 3])
              (f [10, 20, 30]))
@@ -34,11 +53,22 @@
   [11, 22, 33])
 
 (check ===
+  (fors_list ((e [1, 2, 3])
+              (f [10, 20, 30]))
+    (+ e f))
+  [11, 21, 31, 12, 22, 32, 13, 23, 33])
+
+(check ===
   (for_list ((e [1, 2, 3])
              (f [10, 20]))
     (+ e f))
   [11, 22])
 
+(check ===
+  (fors_list ((e [1, 2, 3])
+              (f [10, 20]))
+    (+ e f))
+  [11, 21, 12, 22, 13, 23])
 
 // Sexp works too
 (check ===
@@ -47,17 +77,29 @@
     (+ e f))
   [11, 22])
 
+(check ===
+  (fors_list ((e (quote (1 2)))
+              (f [10, 20, 30]))
+    (+ e f))
+  [11, 21, 31, 12, 22, 32])
 
 // Macro in bound-value position
 (check ===
   (for_list ((e (let ((list [1])) list))) (+ e 73))
   [74])
 
+(check ===
+  (fors_list ((e (let ((list [1])) list))) (+ e 84))
+  [85])
 
 // Macro in body position
 (check ===
-  (for_list ((e [1])) (let ((v 73)) (+ e 73)))
+  (for_list ((e [1])) (let ((v 73)) (+ e v)))
   [74])
+
+(check ===
+  (fors_list ((e [1])) (let ((v 84)) (+ e v)))
+  [85])
 
 // This tests two things:
 //  1) non-Ion types in the result; here, closures.
@@ -70,6 +112,11 @@
       (lambda () (* 2 e))))
   [2, 4, 6])
 
+(check ===
+  (map (lambda (thunk) (thunk))
+    (fors_list ((e [1, 2, 3]))
+      (lambda () (* 3 e))))
+  [3, 6, 9])
 
 // Check access to variables in surrounding scopes.
 (lets [(data         [{ amountPosted:{ amount:-39.99 }},
@@ -81,22 +128,49 @@
       (. x  amountPosted   amount))
      [-39.99, -49.99]))
 
-
+(lets [(data         [{ amountsPosted:[ { amount:-39.99 }, { amount:-29.99 } ]},
+                      { amountsPosted:[ { amount:-49.99 }, { amount:-59.99 } ]} ]),
+       (amountsPosted "amountsPosted"),
+       (amount        "amount")]
+  (check ===
+    (fors_list [(x data),
+                (y (. x amountsPosted))]
+      (. y amount))
+     [-39.99, -29.99, -49.99, -59.99]))
 
 (check_compile_exn (for_list))
+(check_compile_exn (fors_list))
 (check_compile_exn (for_list 1 2))
+(check_compile_exn (fors_list 1 2 ))
 (check_compile_exn (for_list null.sexp 13))
+(check_compile_exn (fors_list null.sexp 24))
 (check_compile_exn (for_list (12) 13))
+(check_compile_exn (fors_list (23) 24))
 (check_compile_exn (for_list (1 2) 13))
+(check_compile_exn (fors_list (2 3) 24))
 (check_compile_exn (for_list (()) 13))
+(check_compile_exn (fors_list (()) 24))
 (check_compile_exn (for_list ((12)) 13))
+(check_compile_exn (fors_list ((23)) 24))
 (check_compile_exn (for_list ((name)) 13))
+(check_compile_exn (fors_list ((name)) 24))
 (check_compile_exn (for_list ((name 1 2)) 13))
+(check_compile_exn (fors_list ((name 2 3)) 24))
 (check_compile_exn (for_list ((name 1) ()) 13))
+(check_compile_exn (fors_list ((name 2) ()) 24))
 (check_compile_exn (for_list ((name 1) (name2)) 13))
+(check_compile_exn (fors_list ((name 2) (name3)) 24))
 
 // Duplicate name
 (check_compile_exn (for_list [(name []), (name [])] 13))
 
+// Duplicate fors_list binding names are allowed because they shadow 
+// each other in order, the last of which is still meaningful.
+(check === 
+  (fors_list [(name []), (name [])] 14)
+  [])
+(check ===
+  (fors_list [(name [1,2]), (name [3,4])] name)
+  [3,4,3,4])
 
 "PASSED" // Helpful output if you run this stand-alone
