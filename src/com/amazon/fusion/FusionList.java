@@ -403,6 +403,11 @@ final class FusionList
         abstract BaseList makeSimilar(String[] annotations, Object[] values);
 
 
+        Object[] values(Evaluator eval)
+        {
+            return myValues;
+        }
+
         @Override
         int size()
         {
@@ -451,8 +456,8 @@ final class FusionList
             int size = left.size();
             if (size == right.size())
             {
-                Object[] lVals = left.myValues;
-                Object[] rVals = right.myValues;
+                Object[] lVals = left.values(eval);
+                Object[] rVals = right.values(eval);
 
                 for (int i = 0; i < size; i++)
                 {
@@ -961,6 +966,13 @@ final class FusionList
         }
 
         @Override
+        Object[] values(Evaluator eval)
+        {
+            injectElements(eval);
+            return myValues;
+        }
+
+        @Override
         Object annotate(Evaluator eval, String[] annotations)
         {
             // Since this instance is immutable, we can share the array AFTER
@@ -1057,11 +1069,12 @@ final class FusionList
         }
 
         @Override
-        synchronized // So another thread doesn't inject while we write.
         void write(Evaluator eval, Appendable out)
             throws IOException, FusionException
         {
-            // No need to inject our elements, they'll be output identically.
+            // Must inject elements since IonValue writes out with type
+            // annotation.
+            injectElements(eval);
             super.write(eval, out);
         }
 
