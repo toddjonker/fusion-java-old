@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -56,20 +56,16 @@ final class WithIonFromFileProc
         try
         {
             File inFile = resolvePath(eval, myCurrentDirectoryParam, path);
-            FileInputStream in = new FileInputStream(inFile);
-            try
+
+            try (FileInputStream in = new FileInputStream(inFile))
             {
                 IonReader reader = eval.getSystem().newReader(in);
                 Evaluator parameterized =
                     eval.markedContinuation(myCurrentIonReaderParam, reader);
 
-                // This looks like its a tail call, but its not!  We must not
-                // close the stream until after the call returns.
+                // We cannot use a tail call here, since we must not close the
+                // stream until after the call returns.
                 return parameterized.callNonTail(thunk);
-            }
-            finally
-            {
-                in.close();
             }
         }
         catch (IOException e)

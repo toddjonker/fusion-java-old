@@ -2,8 +2,10 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBlob.makeBlob;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import com.amazon.ion.IonBinaryWriter;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
@@ -497,6 +499,38 @@ public final class FusionIo
             }
 
             return voidValue(eval);
+        }
+    }
+
+
+    final static class IonizeToBlobProc
+        extends Procedure
+    {
+        IonizeToBlobProc()
+        {
+            //    "                                                                               |
+            super("Encodes an Ion binary representation of `value`, throwing an exception if the\n" +
+                  "value contains any non-Ionizable data like closures. The result is a blob\n" +
+                  "containing an Ion binary document.",
+                  "value");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            try (IonBinaryWriter writer = eval.getSystem().newBinaryWriter())
+            {
+                FusionIo.ionize(eval, writer, args[0]);
+                writer.finish();
+                byte[] bytes = writer.getBytes();
+
+                return makeBlob(eval, bytes);
+            }
+            catch (IOException e)
+            {
+                throw new FusionException("I/O Exception", e);
+            }
         }
     }
 
