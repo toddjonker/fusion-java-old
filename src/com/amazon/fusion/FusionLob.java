@@ -33,6 +33,11 @@ public final class FusionLob
             return null;
         }
 
+        byte[] copyBytes()
+        {
+            return null;
+        }
+
         static BaseBool actualLobEquals(Evaluator eval,
                                         byte[]    leftBytes,
                                         Object    rightLob)
@@ -63,6 +68,21 @@ public final class FusionLob
 
 
     //========================================================================
+    // Constructors
+
+
+    static Object unsafeLobAnnotate(TopLevel top,
+                                    Object fusionLob,
+                                    String[] annotations)
+        throws FusionException
+    {
+        BaseLob base = (BaseLob) fusionLob;
+        return base.annotate(((StandardTopLevel) top).getEvaluator(),
+                             annotations);
+    }
+
+
+    //========================================================================
     // Predicates
 
 
@@ -86,6 +106,16 @@ public final class FusionLob
     //========================================================================
     // Conversions
 
+    /**
+     * @param lob must be a Fusion blob or clob.
+     *
+     * @return null if {@code lob} is {@code null.blob} or {@code null.clob},
+     * otherwise a fresh copy of the data within the lob.
+     */
+    public static byte[] copyLobBytes(TopLevel top, Object lob)
+    {
+        return ((BaseLob) lob).copyBytes();
+    }
 
     //========================================================================
     // Procedure Helpers

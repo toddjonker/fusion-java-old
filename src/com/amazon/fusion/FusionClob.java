@@ -12,6 +12,7 @@ import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  *
@@ -103,6 +104,12 @@ final class FusionClob
         }
 
         @Override
+        byte[] copyBytes()
+        {
+            return Arrays.copyOf(myContent, myContent.length);
+        }
+
+        @Override
         BaseBool tightEquals(Evaluator eval, Object right)
         {
             if (right instanceof BaseClob)
@@ -182,6 +189,12 @@ final class FusionClob
         }
 
         @Override
+        byte[] copyBytes()
+        {
+            return myValue.copyBytes();
+        }
+
+        @Override
         BaseBool tightEquals(Evaluator eval, Object right)
             throws FusionException
         {
@@ -241,6 +254,12 @@ final class FusionClob
     static BaseClob makeClob(Evaluator eval, byte[] value)
     {
         return (value == null ? NULL_CLOB : new ActualClob(value));
+    }
+
+    public static Object makeClob(TopLevel top, byte[] value)
+        throws FusionException
+    {
+        return makeClob(((StandardTopLevel) top).getEvaluator(), value);
     }
 
 

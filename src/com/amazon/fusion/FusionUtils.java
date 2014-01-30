@@ -18,6 +18,7 @@ final class FusionUtils
     private FusionUtils() { }
 
 
+    static final byte[]   EMPTY_BYTE_ARRAY   = new byte[0];
     static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
     static final String[] EMPTY_STRING_ARRAY = new String[0];
 
