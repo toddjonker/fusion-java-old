@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 /*                       *** WARNING ***
  *
@@ -26,13 +26,15 @@ There is **NO SUPPORT** for this module.
 
   (require "/fusion/private/metasyntax")
 
-  (provide datum_to_syntax define_syntax free_identifier_equal is_identifier is_syntax
+  (provide datum_to_syntax define_syntax expand_once free_identifier_equal
+    is_identifier is_syntax
     quasisyntax quote_syntax
     syntax_append syntax_cons_q syntax_get syntax_size
     syntax_subseq syntax_to_datum syntax_unwrap unsyntax wrong_syntax)
 
 
   (define datum_to_syntax (java_new "com.amazon.fusion.DatumToSyntaxProc"))
+  (define expand_once     (java_new "com.amazon.fusion.FusionEval$ExpandOnceProc"))
   (define is_identifier   (java_new "com.amazon.fusion.FusionSyntax$IsIdentifierProc"))
   (define is_syntax       (java_new "com.amazon.fusion.FusionSyntax$IsSyntaxProc"))
   (define syntax_append   (java_new "com.amazon.fusion.SyntaxAppendProc"))

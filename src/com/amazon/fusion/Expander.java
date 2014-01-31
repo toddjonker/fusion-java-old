@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -79,13 +79,13 @@ final class Expander
 
 
     /**
-     * Partially-expands the syntax until a core syntactic form is exposed.
+     * Expands a syntax form through one step of macro expansion.
      * <p>
      * This is close to (or perhaps exactly) Racket's {@code expand-once}.
      *
      * @param stx is not enriched before expansion.
      */
-    SyntaxValue partialExpand(Environment env, SyntaxValue stx)
+    SyntaxValue expandOnce(Environment env, SyntaxValue stx)
         throws FusionException
     {
         // Handle other cases as per Racket spec. In particular:
@@ -93,35 +93,54 @@ final class Expander
         // TODO FUSION-136 rename transformers
         // TODO FUSION-138 #%app
 
-        while (stx instanceof SyntaxSexp)
+        if (! (stx instanceof SyntaxSexp)) return stx;
+
+        SyntaxSexp sexp = (SyntaxSexp) stx;
+        if (sexp.size() == 0) return stx;
+
+        SyntaxValue first = sexp.get(myEval, 0);
+        if (! (first instanceof SyntaxSymbol)) return stx;
+
+        SyntaxSymbol maybeMacro = (SyntaxSymbol) first;
+
+        SyntacticForm form = maybeMacro.resolveSyntaxMaybe(env);
+        if (form == null || ! (form instanceof MacroTransformer))
         {
-            SyntaxSexp sexp = (SyntaxSexp) stx;
-            if (sexp.size() == 0) break;
+            // Found a core form or some other kind of binding.
 
-            SyntaxValue first = sexp.get(myEval, 0);
-            if (! (first instanceof SyntaxSymbol)) break;
+            // TODO FUSION-121 This treats `let` as a core form since
+            // LetForm is the only MacroForm that's not a
+            // MacroTransformer.  But let expands to procedure call,
+            // which no callers of partial expansion care about yet.
 
-            SyntaxSymbol maybeMacro = (SyntaxSymbol) first;
-
-            SyntacticForm form = maybeMacro.resolveSyntaxMaybe(env);
-            if (form == null || ! (form instanceof MacroTransformer))
-            {
-                // Found a core form or some other kind of binding.
-
-                // TODO FUSION-121 This treats `let` as a core form since
-                // LetForm is the only MacroForm that's not a
-                // MacroTransformer.  But let expands to procedure call,
-                // which no callers of partial expansion care about yet.
-
-                break;
-            }
-
-            // We found a static top-level macro binding.
-            // Expand it and try again.
-            stx = ((MacroTransformer)form).expandOnce(this, sexp);
+            return stx;
         }
 
+        // We found a static top-level macro binding.
+        // Expand it and try again.
+        stx = ((MacroTransformer)form).expandOnce(this, sexp);
+
         return stx;
+    }
+
+
+    /**
+     * Partially-expands the syntax until a core syntactic form is exposed.
+     *
+     * @param stx is not enriched before expansion.
+     */
+    SyntaxValue partialExpand(Environment env, SyntaxValue stx)
+        throws FusionException
+    {
+        while (true)
+        {
+            SyntaxValue expanded = expandOnce(env, stx);
+            if (expanded == stx)
+            {
+                return stx;
+            }
+            stx = expanded;
+        }
     }
 
 

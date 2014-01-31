@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -221,6 +221,35 @@ final class FusionEval
             Namespace ns = eval.findCurrentNamespace();
             Expander expander = new Expander(eval);
             topLevelForm = expander.expand(ns, topLevelForm);
+
+            return topLevelForm;
+        }
+    }
+
+
+    static final class ExpandOnceProc
+        extends Procedure1
+    {
+        ExpandOnceProc()
+        {
+            //    "                                                                               |
+            super("Expands a top-level form through one step of macro expansion, using the\n" +
+                  "bindings of the current namespace.\n" +
+                  "\n" +
+                  "The `top_level_form` may be a syntax object or another datum.",
+                  "top_level_form");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object arg0)
+            throws FusionException
+        {
+            SyntaxValue topLevelForm =
+                topLevelStx(eval, arg0, true, identify());
+
+            Namespace ns = eval.findCurrentNamespace();
+            Expander expander = new Expander(eval);
+            topLevelForm = expander.expandOnce(ns, topLevelForm);
 
             return topLevelForm;
         }
