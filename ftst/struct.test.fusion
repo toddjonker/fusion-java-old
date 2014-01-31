@@ -92,7 +92,8 @@
 
 (define test_predicates
   (lambda (struct expect_mutable expect_null expect_empty)
-    (assert (is_struct struct))
+    (check_pred is_collection struct)
+    (check_pred is_struct struct)
     (check = (is_mutable_struct   struct)      expect_mutable )
     (check = (is_immutable_struct struct) (not expect_mutable))
     (check = (is_null  struct) expect_null)

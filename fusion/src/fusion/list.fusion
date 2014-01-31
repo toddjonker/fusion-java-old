@@ -122,7 +122,7 @@ languages, highlighting potential mutation of an argument.
 
   // Pass-through bindings from /fusion/sequence
   (provide . add any choose do element elt every find first fold_left has_key
-    is_empty last map size)
+    is_collection is_empty last map size)
 
   (defpub_j append_m        "com.amazon.fusion.AppendMProc")
   (defpub_j subseq          "com.amazon.fusion.IonSubseqProc")

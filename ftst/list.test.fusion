@@ -99,6 +99,8 @@
 (define test_predicates
   (lambda (list mutable stretchy)
     (assert (is_list list))
+    (check_pred is_collection list)
+    (check_pred is_sequence list)
     (check = (is_mutable_list   list) mutable)
     (check = (is_immutable_list list) (not mutable))
     (check = (is_stretchy_list  list) stretchy)))

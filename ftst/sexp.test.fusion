@@ -56,7 +56,9 @@
 
 (define test_predicates
   (lambda (sexp empty)
-    (assert (is_sexp sexp))
+    (check_pred is_collection sexp)
+    (check_pred is_sequence sexp)
+    (check_pred is_sexp sexp)
     (check = (is_empty sexp) empty)
     // TODO ...
     ))
@@ -94,10 +96,15 @@
 //==========================================================================
 // pair
 
+
+// TODO FUSION-268 is_sexp/is_collection accept any pair, not just proper sexp
+// Need to analyze that before releasing this!
 (lets [(h (list 1)),
        (t (list 2)),
        (p (pair h t))]
-  (check_true (is_sexp p))
+  (check_pred is_collection p)
+  (check_pred is_sequence p)
+  (check_pred is_sexp p)
   (check ident (head p) h)
   (check ident (tail p) t)
   (check === p (pair [1] [2])))
