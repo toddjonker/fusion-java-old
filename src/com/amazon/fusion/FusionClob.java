@@ -249,9 +249,11 @@ public final class FusionClob
 
 
     /**
-     * @param value may be null to make {@code null.clob}.
+     * Returns a clob with the given byte content.
      * This method assumes ownership of the array and it must not be modified
      * later.
+     *
+     * @param value may be null to make {@code null.clob}.
      *
      * @return not null.
      */
@@ -260,6 +262,16 @@ public final class FusionClob
         return (value == null ? NULL_CLOB : new ActualClob(value));
     }
 
+
+    /**
+     * Returns a clob with the given byte content.
+     * This method assumes ownership of the array and it must not be modified
+     * later.
+     *
+     * @param value may be null to make {@code null.clob}.
+     *
+     * @return not null.
+     */
     public static Object makeClob(TopLevel top, byte[] value)
         throws FusionException
     {
@@ -318,6 +330,9 @@ public final class FusionClob
     // Predicates
 
 
+    /**
+     * Determines whether a given Fusion value is a clob.
+     */
     public static boolean isClob(TopLevel top, Object value)
         throws FusionException
     {

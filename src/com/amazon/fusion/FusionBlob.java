@@ -249,9 +249,11 @@ public final class FusionBlob
 
 
     /**
-     * @param value may be null to make {@code null.blob}.
+     * Returns a blob with the given byte content.
      * This method assumes ownership of the array and it must not be modified
      * later.
+     *
+     * @param value may be null to make {@code null.blob}.
      *
      * @return not null.
      */
@@ -260,6 +262,16 @@ public final class FusionBlob
         return (value == null ? NULL_BLOB : new ActualBlob(value));
     }
 
+
+    /**
+     * Returns a blob with the given byte content.
+     * This method assumes ownership of the array and it must not be modified
+     * later.
+     *
+     * @param value may be null to make {@code null.blob}.
+     *
+     * @return not null.
+     */
     public static Object makeBlob(TopLevel top, byte[] value)
         throws FusionException
     {
@@ -328,6 +340,9 @@ public final class FusionBlob
     // Predicates
 
 
+    /**
+     * Determines whether a given Fusion value is a blob.
+     */
     public static boolean isBlob(TopLevel top, Object value)
         throws FusionException
     {
