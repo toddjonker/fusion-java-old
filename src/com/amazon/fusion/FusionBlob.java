@@ -104,7 +104,7 @@ final class FusionBlob
         }
 
         @Override
-        byte[] copyBytes()
+        byte[] bytesCopy()
         {
             return Arrays.copyOf(myContent, myContent.length);
         }
@@ -189,9 +189,9 @@ final class FusionBlob
         }
 
         @Override
-        byte[] copyBytes()
+        byte[] bytesCopy()
         {
-            return myValue.copyBytes();
+            return myValue.bytesCopy();
         }
 
         @Override

@@ -33,7 +33,7 @@ public final class FusionLob
             return null;
         }
 
-        byte[] copyBytes()
+        byte[] bytesCopy()
         {
             return null;
         }
@@ -123,9 +123,9 @@ public final class FusionLob
      * @return null if {@code lob} is {@code null.blob} or {@code null.clob},
      * otherwise a fresh copy of the data within the lob.
      */
-    public static byte[] copyLobBytes(TopLevel top, Object lob)
+    public static byte[] unsafeLobBytesCopy(TopLevel top, Object lob)
     {
-        return ((BaseLob) lob).copyBytes();
+        return ((BaseLob) lob).bytesCopy();
     }
 
 
