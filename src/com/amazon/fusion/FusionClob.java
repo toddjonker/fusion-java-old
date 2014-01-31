@@ -15,9 +15,13 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
+ * Utilities for working with Fusion {@code clob} values.
  *
+ * @see FusionLob
+ * @see FusionBlob
+ * @see FusionValue
  */
-final class FusionClob
+public final class FusionClob
 {
     private FusionClob() {}
 
