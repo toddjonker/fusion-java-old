@@ -2,8 +2,9 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionLob.unsafeLobBytesCopy;
 import static com.amazon.fusion.FusionLob.unsafeLobAnnotate;
+import static com.amazon.fusion.FusionLob.unsafeLobBytesCopy;
+import static com.amazon.fusion.FusionLob.unsafeLobBytesNoCopy;
 import static com.amazon.fusion.FusionUtils.EMPTY_BYTE_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionValue.isAnyNull;
@@ -41,6 +42,7 @@ public abstract class LobTestCase
         checkLobType(lob);
         assertTrue(isAnyNull(top, lob));
         assertNull(unsafeLobBytesCopy(top, lob));
+        assertNull(unsafeLobBytesNoCopy(top, lob));
 
         Object annotated = unsafeLobAnnotate(top, lob, EMPTY_STRING_ARRAY);
         assertSame(lob, annotated);
@@ -50,6 +52,7 @@ public abstract class LobTestCase
         checkLobType(lob);
         assertTrue(isAnyNull(top, annotated));
         assertNull(unsafeLobBytesCopy(top, annotated));
+        assertNull(unsafeLobBytesNoCopy(top, annotated));
     }
 
 
@@ -63,6 +66,7 @@ public abstract class LobTestCase
         checkLobType(lob);
         assertFalse(isAnyNull(top, lob));
         assertArrayEquals(EMPTY_BYTE_ARRAY, unsafeLobBytesCopy(top, lob));
+        assertArrayEquals(EMPTY_BYTE_ARRAY, unsafeLobBytesNoCopy(top, lob));
 
         Object annotated = unsafeLobAnnotate(top, lob, EMPTY_STRING_ARRAY);
         assertSame(lob, annotated);
@@ -72,6 +76,7 @@ public abstract class LobTestCase
         checkLobType(lob);
         assertFalse(isAnyNull(top, annotated));
         assertArrayEquals(EMPTY_BYTE_ARRAY, unsafeLobBytesCopy(top, annotated));
+        assertArrayEquals(EMPTY_BYTE_ARRAY, unsafeLobBytesNoCopy(top, annotated));
     }
 
 
@@ -87,11 +92,13 @@ public abstract class LobTestCase
         byte[] bytes = unsafeLobBytesCopy(top, lob);
         assertArrayEquals(new byte[]{ 0, 1, 2 }, bytes);
         assertNotSame(bytes, unsafeLobBytesCopy(top, lob));
+        byte[] noCopy = unsafeLobBytesNoCopy(top, lob);
+        assertArrayEquals(bytes, noCopy);
+        assertNotSame(bytes, noCopy);
 
         // Check that we've got an independent copy
         bytes[0] = 5;
-        bytes = unsafeLobBytesCopy(top, lob);
-        assertArrayEquals(new byte[]{ 0, 1, 2 }, bytes);
+        assertArrayEquals(new byte[]{ 0, 1, 2 }, unsafeLobBytesNoCopy(top, lob));
 
         Object annotated = unsafeLobAnnotate(top, lob, EMPTY_STRING_ARRAY);
         assertSame(lob, annotated);
@@ -100,10 +107,12 @@ public abstract class LobTestCase
         checkLobType(annotated);
         bytes = unsafeLobBytesCopy(top, lob);
         assertArrayEquals(new byte[]{ 0, 1, 2 }, bytes);
+        noCopy = unsafeLobBytesNoCopy(top, lob);
+        assertArrayEquals(bytes, noCopy);
+        assertNotSame(bytes, noCopy);
 
         // Check that we've got an independent copy
         bytes[0] = 5;
-        bytes = unsafeLobBytesCopy(top, lob);
-        assertArrayEquals(new byte[]{ 0, 1, 2 }, bytes);
+        assertArrayEquals(new byte[]{ 0, 1, 2 }, unsafeLobBytesNoCopy(top, lob));
     }
 }

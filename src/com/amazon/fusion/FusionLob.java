@@ -115,6 +115,23 @@ public final class FusionLob
 
 
     /**
+     * Returns the contents of a lob as a byte array, without making extra
+     * copies. <b>The caller must take great care not to modify the content of
+     * the array!</b> Any changes will violate the lob's immutability contract,
+     * which may cause terrible problems.
+     *
+     * @param lob must be a Fusion blob or clob.
+     *
+     * @return null if {@code lob} is {@code null.blob} or {@code null.clob},
+     * otherwise a byte array of the data within the lob.
+     */
+    public static byte[] unsafeLobBytesNoCopy(TopLevel top, Object lob)
+    {
+        return ((BaseLob) lob).bytesNoCopy();
+    }
+
+
+    /**
      * Extracts the contents of a lob into a byte array. The bytes are copied
      * from the lob to prevent modification to the value.
      *
