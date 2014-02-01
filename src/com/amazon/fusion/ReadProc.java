@@ -1,10 +1,9 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.eof;
 import com.amazon.ion.IonReader;
-import com.amazon.ion.IonValue;
 
 
 final class ReadProc
@@ -32,8 +31,7 @@ final class ReadProc
         Object result;
         if (r.next() != null)
         {
-            IonValue v = eval.getSystem().newValue(r);
-            result = eval.inject(v);
+            result = StandardReader.read(eval, r);
         }
         else
         {

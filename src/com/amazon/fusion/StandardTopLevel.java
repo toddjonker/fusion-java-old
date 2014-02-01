@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,6 +6,7 @@ import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
+import static com.amazon.fusion.StandardReader.readSyntax;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static java.lang.Boolean.TRUE;
 import com.amazon.ion.IonReader;
@@ -92,7 +93,7 @@ final class StandardTopLevel
 
         while (source.getType() != null)
         {
-            SyntaxValue sourceExpr = Syntax.read(myEvaluator, source, name);
+            SyntaxValue sourceExpr = readSyntax(myEvaluator, source, name);
             result = FusionEval.eval(myEvaluator, sourceExpr, myNamespace);
             source.next();
         }

@@ -5,14 +5,11 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionStruct.EMPTY_STRUCT;
 import static com.amazon.fusion.FusionStruct.NULL_STRUCT;
 import static com.amazon.fusion.FusionStruct.immutableStruct;
-import static com.amazon.fusion.FusionStruct.nullStruct;
 import static com.amazon.fusion.FusionStruct.structImplAdd;
-import static com.amazon.fusion.SourceLocation.currentLocation;
 import com.amazon.fusion.FusionStruct.ImmutableStruct;
 import com.amazon.fusion.FusionStruct.NonNullImmutableStruct;
 import com.amazon.fusion.FusionStruct.StructFieldVisitor;
 import com.amazon.ion.IonException;
-import com.amazon.ion.IonReader;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 import java.util.HashMap;
@@ -149,35 +146,6 @@ final class SyntaxStruct
         ImmutableStruct s =
             immutableStruct(newMap, annotationsAsJavaStrings());
         return new SyntaxStruct(getLocation(), s);
-    }
-
-
-    static SyntaxStruct read(Evaluator eval, IonReader source, SourceName name,
-                             String[] anns)
-    {
-        SourceLocation loc = currentLocation(source, name);
-
-        ImmutableStruct struct;
-        if (source.isNullValue())
-        {
-            struct = nullStruct(eval, anns);
-        }
-        else
-        {
-            Map<String, Object> map = new HashMap<String, Object>();
-            source.stepIn();
-            while (source.next() != null)
-            {
-                String field = source.getFieldName();
-                SyntaxValue child = Syntax.read(eval, source, name);
-                structImplAdd(map, field, child);
-            }
-            source.stepOut();
-
-            struct = immutableStruct(map, anns);
-        }
-
-        return new SyntaxStruct(loc, struct);
     }
 
 

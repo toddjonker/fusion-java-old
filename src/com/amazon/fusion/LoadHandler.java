@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionEval.callCurrentEval;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionUtils.resolvePath;
 import static com.amazon.fusion.GlobalState.MODULE;
+import static com.amazon.fusion.StandardReader.readSyntax;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonReader;
 import java.io.File;
@@ -64,7 +65,7 @@ final class LoadHandler
                 while (reader.next() != null)
                 {
                     result = null;  // Don't hold onto garbage
-                    SyntaxValue fileExpr = Syntax.read(eval, reader, name);
+                    SyntaxValue fileExpr = readSyntax(eval, reader, name);
                     result = FusionEval.eval(eval, fileExpr, namespace);
                     // TODO TAIL
                 }
@@ -106,7 +107,7 @@ final class LoadHandler
             throw new FusionException(message);
         }
 
-        SyntaxValue firstTopLevel = Syntax.read(eval, reader, sourceName);
+        SyntaxValue firstTopLevel = readSyntax(eval, reader, sourceName);
         if (reader.next() != null)
         {
             String message =
