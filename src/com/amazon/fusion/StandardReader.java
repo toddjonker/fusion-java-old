@@ -97,7 +97,8 @@ class StandardReader
         assert type != null;
 
         String[] anns = source.getTypeAnnotations();
-        SourceLocation loc = currentLocation(source, name);
+        SourceLocation loc =
+            (readingSyntax ? currentLocation(source, name) : null);
 
         BaseValue datum;
         switch (type)
@@ -155,28 +156,11 @@ class StandardReader
             {
                 String value = source.stringValue();
                 datum = makeString(eval, anns, value);
-
-                if (readingSyntax)
-                {
-                    return SyntaxString.make(eval, loc, datum);
-                }
                 break;
             }
             case SYMBOL:
             {
                 String value = source.stringValue();
-
-                if (readingSyntax)
-                {
-                    if (value != null &&
-                        value.startsWith("_") &&
-                        value.endsWith("_"))
-                    {
-                        return SyntaxKeyword.make(eval, loc, anns, value);
-                    }
-                    return SyntaxSymbol.make(eval, loc, anns, value);
-                }
-
                 datum = makeSymbol(eval, anns, value);
                 break;
             }
@@ -197,30 +181,16 @@ class StandardReader
             case LIST:
             {
                 datum = readList(eval, source, name, readingSyntax, anns);
-
-                if (readingSyntax)
-                {
-                    return SyntaxList.make(eval, loc, datum);
-                }
                 break;
             }
             case SEXP:
             {
                 datum = readSexp(eval, source, name, readingSyntax, anns);
-
-                if (readingSyntax)
-                {
-                    return SyntaxSexp.make(eval, loc, (BaseSexp) datum);
-                }
                 break;
             }
             case STRUCT:
             {
                 datum = readStruct(eval, source, name, readingSyntax, anns);
-                if (readingSyntax)
-                {
-                    return SyntaxStruct.make(eval, loc, datum);
-                }
                 break;
             }
             default:
@@ -231,7 +201,7 @@ class StandardReader
 
         if (readingSyntax)
         {
-            return SimpleSyntaxValue.makeSyntax(eval, loc, datum);
+            return datum.wrapAsSyntax(eval, loc);
         }
 
         return datum;

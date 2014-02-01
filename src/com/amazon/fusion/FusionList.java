@@ -531,6 +531,12 @@ final class FusionList
             return left.looseEquals2(eval, this);
         }
 
+        @Override
+        SyntaxValue wrapAsSyntax(Evaluator eval, SourceLocation loc)
+        {
+            return SyntaxList.make(eval, loc, this);
+        }
+
         /**
          * TODO FUSION-242 This needs to do cycle detection.
          *

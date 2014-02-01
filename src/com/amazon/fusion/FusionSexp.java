@@ -325,6 +325,12 @@ final class FusionSexp
         }
 
         @Override
+        SyntaxValue wrapAsSyntax(Evaluator eval, SourceLocation loc)
+        {
+            return SyntaxSexp.make(eval, loc, this);
+        }
+
+        @Override
         SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
             throws FusionException
         {

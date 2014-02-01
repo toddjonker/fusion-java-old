@@ -83,6 +83,12 @@ abstract class BaseValue
     }
 
 
+    SyntaxValue wrapAsSyntax(Evaluator eval, SourceLocation loc)
+    {
+        return SimpleSyntaxValue.makeSyntax(eval, loc, this);
+    }
+
+
     /**
      * @return null if something in the datum can't be converted into syntax.
      */

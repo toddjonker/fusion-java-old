@@ -54,17 +54,23 @@ final class FusionSymbol
         }
 
         @Override
-        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
-            throws FusionException
+        SyntaxValue wrapAsSyntax(Evaluator eval, SourceLocation loc)
         {
             String value = stringValue();
             if (value != null &&
                 value.startsWith("_") &&
                 value.endsWith("_"))
             {
-                return SyntaxKeyword.make(eval, /*location*/ null, this);
+                return SyntaxKeyword.make(eval, loc, this);
             }
-            return SyntaxSymbol.make(eval, /*location*/ null, this);
+            return SyntaxSymbol.make(eval, loc, this);
+        }
+
+        @Override
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+            throws FusionException
+        {
+            return wrapAsSyntax(eval, null);
         }
     }
 
@@ -100,6 +106,13 @@ final class FusionSymbol
             throws FusionException
         {
             return isAnyNull(eval, right);
+        }
+
+        @Override
+        SyntaxValue wrapAsSyntax(Evaluator eval, SourceLocation loc)
+        {
+            // No need to check for keywords.
+            return SyntaxSymbol.make(eval, loc, this);
         }
 
         @Override

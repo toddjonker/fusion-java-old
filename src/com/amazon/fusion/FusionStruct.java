@@ -521,6 +521,12 @@ final class FusionStruct
         }
 
         @Override
+        SyntaxValue wrapAsSyntax(Evaluator eval, SourceLocation loc)
+        {
+            return SyntaxStruct.make(eval, loc, this);
+        }
+
+        @Override
         SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
             throws FusionException
         {
@@ -864,6 +870,12 @@ final class FusionStruct
             }
 
             return new NonNullImmutableStruct(newMap, myAnnotations);
+        }
+
+        @Override
+        SyntaxValue wrapAsSyntax(Evaluator eval, SourceLocation loc)
+        {
+            return SyntaxStruct.make(eval, loc, this);
         }
 
         @SuppressWarnings("serial")

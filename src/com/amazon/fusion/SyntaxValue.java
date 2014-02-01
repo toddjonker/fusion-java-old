@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -134,5 +134,12 @@ abstract class SyntaxValue
         IonWriter writer = WRITER_BUILDER.build(out);
         ionize(eval, writer);
         writer.flush();
+    }
+
+
+    @Override
+    SyntaxValue wrapAsSyntax(Evaluator eval, SourceLocation loc)
+    {
+        throw new IllegalStateException("Cannot wrap syntax as syntax");
     }
 }

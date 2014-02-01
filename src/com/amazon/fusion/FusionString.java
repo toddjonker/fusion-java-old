@@ -83,6 +83,12 @@ public final class FusionString
         }
 
         @Override
+        SyntaxValue wrapAsSyntax(Evaluator eval, SourceLocation loc)
+        {
+            return SyntaxString.make(eval, loc, this);
+        }
+
+        @Override
         public boolean equals(Object o)
         {
             if (this == o) return true;
