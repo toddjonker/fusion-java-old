@@ -1,8 +1,15 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionIo.isEof;
+import static com.amazon.fusion.FusionIo.read;
+import static com.amazon.fusion.FusionStruct.isImmutableStruct;
+import static com.amazon.fusion.FusionStruct.unsafeStructSize;
 import static com.amazon.ion.util.IonTextUtils.printString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import com.amazon.ion.IonReader;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -60,5 +67,33 @@ public class IoTest
         expectArityFailure("(load \"x\" \"y\")");
 
         expectContractFailure("(load 12)");
+    }
+
+
+    @Test
+    public void testFfiRead()
+        throws Exception
+    {
+        TopLevel  top  = topLevel();
+        Evaluator eval = evaluator();
+
+        IonReader reader = system().newReader("{}");
+        Object fv = read(top, reader);
+        assertTrue(isImmutableStruct(eval, fv));
+        assertEquals(0, unsafeStructSize(eval, fv));
+        fv = read(top, reader);
+        assertTrue(isEof(top, fv));
+
+        reader = system().newReader("{f:9} 10");
+        reader.next();
+        fv = FusionIo.read(top, reader);
+        assertTrue(isImmutableStruct(eval, fv));
+        assertEquals(1, unsafeStructSize(eval, fv));
+        fv = read(top, reader);
+        checkLong(10, fv);
+        fv = read(top, reader);
+        assertTrue(isEof(top, fv));
+        fv = read(top, reader);
+        assertTrue(isEof(top, fv));  // EOF "sticks"
     }
 }

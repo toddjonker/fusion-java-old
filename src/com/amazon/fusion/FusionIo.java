@@ -7,6 +7,7 @@ import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonBinaryWriter;
 import com.amazon.ion.IonException;
+import com.amazon.ion.IonReader;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.system.IonTextWriterBuilder;
@@ -16,6 +17,10 @@ import java.io.OutputStreamWriter;
 
 /**
  * Utilities for input and output of Fusion data.
+ *
+ * <h2>EOF</h2>
+ * Fusion defines a unique {@code eof} value for denoting the end of an input
+ * stream. This value can be detected via {@link #isEof(TopLevel, Object)}.
  */
 public final class FusionIo
 {
@@ -43,6 +48,14 @@ public final class FusionIo
     static boolean isEof(Evaluator eval, Object v)
     {
         assert eval != null;
+        return (v == EOF);
+    }
+
+    /**
+     * Determines whether a value is the unique EOF object.
+     */
+    public static boolean isEof(TopLevel top, Object v)
+    {
         return (v == EOF);
     }
 
@@ -124,6 +137,57 @@ public final class FusionIo
             out.append("::{{{");
             out.append(value.toString());
             out.append("}}}");
+        }
+    }
+
+
+    //========================================================================
+    // Basic input procedures
+
+
+    /**
+     * Reads a single Fusion value from an Ion stream.
+     * If the reader is positioned on a value, that value is read and returned.
+     * Otherwise, the reader's {@link IonReader#next()} method is called;
+     * if there's not another value then the result is {@code eof}.
+     * <p>
+     * After consuming the value, the reader is moved to the next
+     * value by calling {@link IonReader#next()}.
+     *
+     * @param reader must be positioned on the value to read.
+     *
+     * @return a immutable Fusion value.
+     *
+     * @see #isEof(TopLevel, Object)
+     */
+    public static Object read(TopLevel top, IonReader reader)
+        throws FusionException
+    {
+        Evaluator eval = ((StandardTopLevel) top).getEvaluator();
+        return read(eval, reader);
+    }
+
+    static Object read(Evaluator eval, IonReader reader)
+        throws FusionException
+    {
+        try
+        {
+            if (reader.getType() == null)
+            {
+                if (reader.next() == null)
+                {
+                    return eof(eval);
+                }
+            }
+
+            Object fv = StandardReader.read(eval, reader);
+            reader.next();
+            return fv;
+        }
+        catch (IonException e)
+        {
+            throw new FusionException("Error reading data: " + e.getMessage(),
+                                      e);
         }
     }
 
@@ -469,7 +533,34 @@ public final class FusionIo
     //========================================================================
 
 
-    final static class IonizeProc
+    static final class ReadProc
+        extends Procedure
+    {
+        private final DynamicParameter myCurrentIonReaderParam;
+
+        public ReadProc(Object currentIonReaderParam)
+        {
+            //    "                                                                               |
+            super("Reads an Ion value from the current Ion input stream.  Returns `eof` when\n" +
+                  "there's no more data.");
+
+            myCurrentIonReaderParam = (DynamicParameter) currentIonReaderParam;
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(args);
+
+            IonReader r = myCurrentIonReaderParam.currentValue(eval);
+
+            return FusionIo.read(eval, r);
+        }
+    }
+
+
+    static final class IonizeProc
         extends Procedure
     {
         IonizeProc()
@@ -503,7 +594,7 @@ public final class FusionIo
     }
 
 
-    final static class IonizeToBlobProc
+    static final class IonizeToBlobProc
         extends Procedure
     {
         IonizeToBlobProc()
@@ -535,7 +626,7 @@ public final class FusionIo
     }
 
 
-    final static class WriteProc
+    static final class WriteProc
         extends Procedure
     {
         WriteProc()
@@ -558,7 +649,7 @@ public final class FusionIo
     }
 
 
-    final static class DisplayProc
+    static final class DisplayProc
         extends Procedure
     {
         DisplayProc()

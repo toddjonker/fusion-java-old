@@ -52,7 +52,7 @@ There are three "styles" of output:
       current_ion_reader))
 
   (defpub read
-    (java_new "com.amazon.fusion.ReadProc" current_ion_reader))
+    (java_new "com.amazon.fusion.FusionIo$ReadProc" current_ion_reader))
 
   (defpub_j is_eof  "com.amazon.fusion.FusionIo$IsEofProc")
 
