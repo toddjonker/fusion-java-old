@@ -1,10 +1,11 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionSexp.isSexp;
 import static com.amazon.fusion.FusionString.isString;
+import static com.amazon.fusion.FusionString.stringToJavaString;
 import static com.amazon.fusion.GlobalState.DEFINE;
 import com.amazon.fusion.Namespace.NsBinding;
 
@@ -205,11 +206,11 @@ final class DefineForm
             && eval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
         {
             // We have documentation. Sort of.
-            SyntaxString docString = (SyntaxString) stx.get(eval, 2);
+            Object docString = stx.get(eval, 2).unwrap(eval);
             BindingDoc doc = new BindingDoc(identifier.stringValue(),
                                             null, // kind
                                             null, // usage
-                                            docString.stringValue());
+                                            stringToJavaString(eval, docString));
             int address = ((NsBinding) binding).myAddress;
             env.namespace().setDoc(address, doc);
         }

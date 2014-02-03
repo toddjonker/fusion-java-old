@@ -79,13 +79,13 @@ public final class FusionString
         @Override
         SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
         {
-            return SyntaxString.make(eval, /*location*/ null, this);
+            return SimpleSyntaxValue.makeSyntax(eval, /*location*/ null, this);
         }
 
         @Override
         SyntaxValue wrapAsSyntax(Evaluator eval, SourceLocation loc)
         {
-            return SyntaxString.make(eval, loc, this);
+            return SimpleSyntaxValue.makeSyntax(eval, loc, this);
         }
 
         @Override

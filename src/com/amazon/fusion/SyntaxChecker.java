@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -98,24 +98,6 @@ class SyntaxChecker
     }
 
 
-    final String requiredString(String expectation, int argNum)
-        throws FusionException
-    {
-        SyntaxValue form = requiredForm(expectation, argNum);
-        return checkSyntax(SyntaxString.class, expectation,
-                           false /* nullable */, form).stringValue();
-    }
-
-
-    final String requiredNonEmptyString(String expectation, int argNum)
-        throws FusionException
-    {
-        String str = requiredString(expectation, argNum);
-        // TODO check emptyness
-        return str;
-    }
-
-
     // TODO problematic WRT keywords
     @Deprecated
     final SyntaxSymbol requiredSymbol(String expectation, int argNum)
@@ -127,12 +109,17 @@ class SyntaxChecker
     }
 
 
-    final String requiredText(String expectation, int argNum)
+    final String requiredText(Evaluator eval, String expectation, int argNum)
         throws FusionException
     {
         SyntaxValue form = requiredForm(expectation, argNum);
-        return checkSyntax(SyntaxText.class, expectation,
-                           false /* nullable */, form).stringValue();
+        Object datum = form.unwrap(eval);
+        String text = FusionText.textToJavaString(eval, datum);
+        if (text == null)
+        {
+            throw failure("expected " + expectation, form);
+        }
+        return text;
     }
 
 

@@ -76,7 +76,7 @@ final class RequireForm
 
         for (int i = 1; i < arity; i++)
         {
-            String path = check.requiredText("module path", i);
+            String path = check.requiredText(eval, "module path", i);
             if (! ModuleIdentity.isValidModulePath(path))
             {
                 String message =

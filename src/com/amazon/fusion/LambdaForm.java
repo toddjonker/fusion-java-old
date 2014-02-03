@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionSexp.immutableSexp;
 import static com.amazon.fusion.FusionString.isString;
+import static com.amazon.fusion.FusionString.stringToJavaString;
 
 /**
  * The {@code lambda} syntactic form, which evaluates to a {@link Closure}.
@@ -146,22 +147,17 @@ final class LambdaForm
     CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        String doc;
-        int bodyStart;
+        String doc = null;
+        int bodyStart = 2;
 
+        if (stx.size() > 3)
         {
-            SyntaxValue maybeDoc = stx.get(eval, 2);
-            if (isString(eval, maybeDoc.unwrap(eval))
-                && stx.size() > 3)
+            Object maybeDoc = stx.get(eval, 2).unwrap(eval);
+            if (isString(eval, maybeDoc))
             {
-                doc = ((SyntaxString) maybeDoc).stringValue();
+                doc = stringToJavaString(eval, maybeDoc);
                 if (doc != null) doc = doc.trim();
                 bodyStart = 3;
-            }
-            else
-            {
-                doc = null;
-                bodyStart = 2;
             }
         }
 

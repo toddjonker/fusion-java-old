@@ -1,9 +1,10 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionString.isString;
+import static com.amazon.fusion.FusionString.stringToJavaString;
 import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.fusion.Namespace.NsBinding;
 
@@ -89,11 +90,11 @@ final class DefineSyntaxForm
             && eval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
         {
             // We have documentation. Sort of.
-            SyntaxString docString = (SyntaxString) stx.get(eval, 2);
+            Object docString = stx.get(eval, 2).unwrap(eval);
             BindingDoc doc = new BindingDoc(identifier.stringValue(),
                                             Kind.SYNTAX,
                                             null, // usage
-                                            docString.stringValue());
+                                            stringToJavaString(eval, docString));
             env.namespace().setDoc(binding.myAddress, doc);
         }
 

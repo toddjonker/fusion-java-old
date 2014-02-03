@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,6 +6,9 @@ import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionEval.evalSyntax;
 import static com.amazon.fusion.FusionNumber.makeInt;
 import static com.amazon.fusion.FusionNumber.unsafeTruncateIntToJavaInt;
+import static com.amazon.fusion.FusionString.isString;
+import static com.amazon.fusion.FusionString.makeString;
+import static com.amazon.fusion.FusionString.stringToJavaString;
 import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.GlobalState.DEFINE_SYNTAX;
@@ -98,7 +101,7 @@ final class ModuleForm
         ModuleIdentity initialBindingsId;
         ModuleInstance language;
         {
-            String path = check.requiredText("initial module path", 2);
+            String path = check.requiredText(eval, "initial module path", 2);
             SyntaxValue initialBindingsStx = source.get(eval, 2);
 
             if (! isValidAbsoluteModulePath(path))
@@ -267,10 +270,12 @@ final class ModuleForm
                 makeSyntax(eval, /*location*/ null, datum);
 
             SyntaxValue identity =
-                SyntaxString.make(eval, id.absolutePath());
+                makeString(eval, id.absolutePath())
+                .wrapAsSyntax(eval, null);
 
             SyntaxValue languageIdentity =
-                SyntaxString.make(eval, initialBindingsId.absolutePath());
+                makeString(eval, initialBindingsId.absolutePath())
+                .wrapAsSyntax(eval, null);
 
             Object s =
                 immutableStruct(new String[] { "variable_count",
@@ -337,16 +342,17 @@ final class ModuleForm
 
         ModuleIdentity id;
         {
-            SyntaxText form = (SyntaxText) meta.get(eval, "identity");
-            String identity = form.stringValue();
+            Object datum = meta.get(eval, "identity").unwrap(eval);
+            String identity = stringToJavaString(eval, datum);
             id = ModuleIdentity.reIntern(identity);
         }
 
         Namespace moduleNamespace;
         {
-            SyntaxText form = (SyntaxText) meta.get(eval, "language_identity");
+            Object datum = meta.get(eval, "language_identity").unwrap(eval);
+            String identity = stringToJavaString(eval, datum);
             ModuleIdentity languageId =
-                ModuleIdentity.forAbsolutePath(form.stringValue());
+                ModuleIdentity.forAbsolutePath(identity);
 
             ModuleRegistry registry =
                 envOutsideModule.namespace().getRegistry();
@@ -357,8 +363,7 @@ final class ModuleForm
 
         int variableCount;
         {
-            SyntaxValue form = meta.get(eval, "variable_count");
-            Object i = form.syntaxToDatum(eval);
+            Object i = meta.get(eval, "variable_count").unwrap(eval);
             variableCount = unsafeTruncateIntToJavaInt(eval, i);
         }
 
@@ -366,13 +371,17 @@ final class ModuleForm
 
         int bodyPos = 4;
         String docs = null;
-        if (stx.size() > 5 && stx.get(eval, 4) instanceof SyntaxString)
+        if (stx.size() > 5)
         {
-            // We're gonna call this documentation!
-            bodyPos++;
-            if (eval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
+            Object maybeDoc = stx.get(eval, 4).unwrap(eval);
+            if (isString(eval, maybeDoc))
             {
-                docs = ((SyntaxString) stx.get(eval, 4)).stringValue();
+                // We're gonna call this documentation!
+                bodyPos++;
+                if (eval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
+                {
+                    docs = stringToJavaString(eval, maybeDoc);
+                }
             }
         }
 
