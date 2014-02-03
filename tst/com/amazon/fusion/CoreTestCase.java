@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -135,6 +135,16 @@ public class CoreTestCase
             myTopLevel = runtime().getDefaultTopLevel();
         }
         return myTopLevel;
+    }
+
+    /**
+     * For use only in testing internal APIs.
+     */
+    protected Evaluator evaluator()
+        throws FusionException
+    {
+        StandardTopLevel top = (StandardTopLevel) topLevel();
+        return top.getEvaluator();
     }
 
 

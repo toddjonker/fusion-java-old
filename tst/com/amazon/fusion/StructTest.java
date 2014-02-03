@@ -1,7 +1,13 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionStruct.asImmutableStruct;
+import static com.amazon.fusion.FusionStruct.isImmutableStruct;
+import static com.amazon.fusion.FusionStruct.isMutableStruct;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -174,5 +180,34 @@ public class StructTest
         expectArityFailure("(struct_merge {f:3})");
 
         expectArgTypeFailure("(struct_merge {f:3} 4)",1);
+    }
+
+
+    @Test
+    public void testMakeMutableStruct()
+        throws Exception
+    {
+        Evaluator eval = evaluator();
+
+        Object ms = FusionStruct.mutableStruct(eval);
+        assertTrue(isMutableStruct(eval, ms));
+        assertEquals(0, FusionStruct.unsafeStructSize(eval, ms));
+    }
+
+
+    @Test
+    public void testAsImmutableStruct()
+        throws Exception
+    {
+        Evaluator eval = evaluator();
+
+        Object ms = eval("(mutable_struct \"a\" 1 \"b\" 2)");
+        checkIon(system().singleValue("{a:1,b:2}"), ms);
+        assertTrue(isMutableStruct(eval, ms));
+
+        Object is = asImmutableStruct(eval, ms);
+        assertNotSame(ms, is);
+        assertTrue(isImmutableStruct(eval, is));
+        checkIon(system().singleValue("{a:1,b:2}"), is);
     }
 }

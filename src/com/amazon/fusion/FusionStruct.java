@@ -75,6 +75,12 @@ final class FusionStruct
     }
 
 
+    static NullStruct nullStruct(Evaluator eval)
+    {
+        return NULL_STRUCT;
+    }
+
+
     static NullStruct nullStruct(Evaluator eval, String[] annotations)
     {
         if (annotations.length == 0)
@@ -95,6 +101,7 @@ final class FusionStruct
 
         return new NonNullImmutableStruct(map, EMPTY_STRING_ARRAY);
     }
+
 
     static NonNullImmutableStruct immutableStruct(Map<String, Object> map,
                                                   String[] anns)
@@ -142,6 +149,36 @@ final class FusionStruct
         return new NonNullImmutableStruct(map, anns);
     }
 
+
+    /**
+     * Returns an immutable struct with the same content as {@code struct}.
+     * This is not a deep conversion: if any elements within {@code struct}
+     * are mutable, the same mutable instances will be in the result.
+     *
+     * @param eval must not be null.
+     * @param struct must be a Fusion struct.
+     */
+    static Object asImmutableStruct(Evaluator eval, Object struct)
+        throws FusionException
+    {
+        if (struct instanceof ImmutableStruct) return struct;
+
+        MutableStruct s = (MutableStruct) struct;
+        Map<String, Object> map = s.copyMap(eval);
+        return immutableStruct(map);
+    }
+
+
+    /**
+     * Returns a new, empty mutable struct.  This is equivalent to the Fusion
+     * code {@code (mutable_struct)}.
+     */
+    static Object mutableStruct(Evaluator eval)
+        throws FusionException
+    {
+        return new MutableStruct(new HashMap<String, Object>(),
+                                 EMPTY_STRING_ARRAY);
+    }
 
     static MutableStruct mutableStruct(Map<String, Object> map)
     {
@@ -311,6 +348,13 @@ final class FusionStruct
 
     //========================================================================
     // Accessors
+
+
+    static int unsafeStructSize(Evaluator eval, Object struct)
+    {
+        return ((BaseStruct) struct).size();
+    }
+
 
     static void unsafeStructFieldVisit(Evaluator eval, Object struct,
                                        StructFieldVisitor visitor)
