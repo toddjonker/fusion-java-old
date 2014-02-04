@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionClob.isClob;
-import static com.amazon.fusion.FusionClob.makeClob;
 import static com.amazon.fusion.FusionLob.isLob;
 import static org.junit.Assert.assertTrue;
 
@@ -18,7 +17,7 @@ public class ClobTest
         throws FusionException
     {
         TopLevel top = topLevel();
-        return makeClob(top, value);
+        return FusionClob.forBytesNoCopy(top, value);
     }
 
 

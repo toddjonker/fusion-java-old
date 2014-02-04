@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionBlob.makeBlob;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonBinaryWriter;
@@ -616,7 +615,7 @@ public final class FusionIo
                 writer.finish();
                 byte[] bytes = writer.getBytes();
 
-                return makeBlob(eval, bytes);
+                return FusionBlob.forBytesNoCopy(eval, bytes);
             }
             catch (IOException e)
             {

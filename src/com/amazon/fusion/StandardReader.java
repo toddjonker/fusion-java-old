@@ -2,9 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionBlob.makeBlob;
 import static com.amazon.fusion.FusionBool.makeBool;
-import static com.amazon.fusion.FusionClob.makeClob;
 import static com.amazon.fusion.FusionList.immutableList;
 import static com.amazon.fusion.FusionList.nullList;
 import static com.amazon.fusion.FusionNumber.makeDecimal;
@@ -168,14 +166,14 @@ class StandardReader
             {
                 byte[] value =
                     (source.isNullValue() ? null : source.newBytes());
-                datum = makeBlob(eval, anns, value);
+                datum = FusionBlob.forBytesNoCopy(eval, anns, value);
                 break;
             }
             case CLOB:
             {
                 byte[] value =
                     (source.isNullValue() ? null : source.newBytes());
-                datum = makeClob(eval, anns, value);
+                datum = FusionClob.forBytesNoCopy(eval, anns, value);
                 break;
             }
             case LIST:

@@ -257,7 +257,7 @@ public final class FusionClob
      *
      * @return not null.
      */
-    static BaseClob makeClob(Evaluator eval, byte[] value)
+    static BaseClob forBytesNoCopy(Evaluator eval, byte[] value)
     {
         return (value == null ? NULL_CLOB : new ActualClob(value));
     }
@@ -272,10 +272,10 @@ public final class FusionClob
      *
      * @return not null.
      */
-    public static Object makeClob(TopLevel top, byte[] value)
+    public static Object forBytesNoCopy(TopLevel top, byte[] value)
         throws FusionException
     {
-        return makeClob(((StandardTopLevel) top).getEvaluator(), value);
+        return forBytesNoCopy(((StandardTopLevel) top).getEvaluator(), value);
     }
 
 
@@ -300,11 +300,11 @@ public final class FusionClob
      *
      * @return not null.
      */
-    static BaseClob makeClob(Evaluator eval,
-                             String[]  annotations,
-                             byte[]    value)
+    static BaseClob forBytesNoCopy(Evaluator eval,
+                                   String[]  annotations,
+                                   byte[]    value)
     {
-        BaseClob base = makeClob(eval, value);
+        BaseClob base = forBytesNoCopy(eval, value);
         return annotate(base, annotations);
     }
 

@@ -1,10 +1,8 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionBlob.makeBlob;
 import static com.amazon.fusion.FusionBool.makeBool;
-import static com.amazon.fusion.FusionClob.makeClob;
 import static com.amazon.fusion.FusionList.listFromIonSequence;
 import static com.amazon.fusion.FusionNull.makeNullNull;
 import static com.amazon.fusion.FusionNumber.makeDecimal;
@@ -154,12 +152,12 @@ final class Evaluator
             case CLOB:
             {
                 byte[] bytes = ((IonLob)value).getBytes();
-                return makeClob(this, annotations, bytes);
+                return FusionClob.forBytesNoCopy(this, annotations, bytes);
             }
             case BLOB:
             {
                 byte[] bytes = ((IonLob)value).getBytes();
-                return makeBlob(this, annotations, bytes);
+                return FusionBlob.forBytesNoCopy(this, annotations, bytes);
             }
             case LIST:
             {
@@ -244,7 +242,7 @@ final class Evaluator
         }
         else if (javaValue instanceof byte[])
         {
-            return makeBlob(this, (byte[]) javaValue);
+            return FusionBlob.forBytesNoCopy(this, (byte[]) javaValue);
         }
 
         // ******** Be sure to document types as they are added! ********

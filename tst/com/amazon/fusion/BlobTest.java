@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBlob.isBlob;
-import static com.amazon.fusion.FusionBlob.makeBlob;
 import static com.amazon.fusion.FusionLob.isLob;
 import static org.junit.Assert.assertTrue;
 
@@ -18,7 +17,7 @@ public class BlobTest
         throws FusionException
     {
         TopLevel top = topLevel();
-        return makeBlob(top, value);
+        return FusionBlob.forBytesNoCopy(top, value);
     }
 
 
