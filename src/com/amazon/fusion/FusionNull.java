@@ -12,7 +12,7 @@ import com.amazon.ion.ValueFactory;
 import java.io.IOException;
 
 /**
- * Utilities for working with Fusion {@code bool} values.
+ * Utilities for working with Fusion {@code null} values.
  *
  * @see FusionValue
  */

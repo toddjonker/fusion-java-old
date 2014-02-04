@@ -51,7 +51,7 @@ public final class FusionIo
     }
 
     /**
-     * Determines whether a value is the unique EOF object.
+     * Determines whether a value is Fusion's unique EOF object.
      */
     public static boolean isEof(TopLevel top, Object v)
     {
@@ -155,7 +155,7 @@ public final class FusionIo
      *
      * @param reader must be positioned on the value to read.
      *
-     * @return a immutable Fusion value.
+     * @return an immutable Fusion value.
      *
      * @see #isEof(TopLevel, Object)
      */
