@@ -51,29 +51,11 @@ final class SyntaxSymbol
     }
 
 
-    /**
-     * @param datum must be a Fusion symbol.
-     */
-    static SyntaxSymbol make(Evaluator eval, SourceLocation loc, Object datum)
-    {
-        BaseSymbol symbol = (BaseSymbol) datum;
-        return new SyntaxSymbol(eval, null, loc, symbol);
-    }
-
-
-    /**
-     * @param annotations must not be null and must not contain elements
-     * that are null or empty. This method assumes ownership of the array
-     * and it must not be modified later.
-     * @param value may be null.
-     */
-    static SyntaxSymbol make(Evaluator eval,
+    static SyntaxSymbol make(Evaluator      eval,
                              SourceLocation loc,
-                             String[] annotations,
-                             String value)
+                             BaseSymbol     symbol)
     {
-        BaseSymbol datum = makeSymbol(eval, annotations, value);
-        return new SyntaxSymbol(eval, /*wraps*/ null, loc, datum);
+        return new SyntaxSymbol(eval, null, loc, symbol);
     }
 
 
@@ -104,6 +86,9 @@ final class SyntaxSymbol
         BaseSymbol datum = makeSymbol(eval, value);
         return new SyntaxSymbol(eval, null, null, datum);
     }
+
+
+    //========================================================================
 
 
     /**

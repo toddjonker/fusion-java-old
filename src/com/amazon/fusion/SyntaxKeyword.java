@@ -1,8 +1,7 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonWriter;
@@ -20,28 +19,11 @@ final class SyntaxKeyword
     }
 
 
-    /**
-     * @param datum must be a Fusion symbol.
-     */
-    static SyntaxKeyword make(Evaluator eval, SourceLocation loc, Object datum)
-    {
-        BaseSymbol symbol = (BaseSymbol) datum;
-        return new SyntaxKeyword(loc, symbol);
-    }
-
-
-    /**
-     * @param annotations must not be null and must not contain elements
-     * that are null or empty. This method assumes ownership of the array
-     * and it must not be modified later.
-     */
-    static SyntaxKeyword make(Evaluator eval,
+    static SyntaxKeyword make(Evaluator      eval,
                               SourceLocation loc,
-                              String[] annotations,
-                              String value)
+                              BaseSymbol     symbol)
     {
-        BaseSymbol datum = makeSymbol(eval, annotations, value);
-        return new SyntaxKeyword(loc, datum);
+        return new SyntaxKeyword(loc, symbol);
     }
 
 
