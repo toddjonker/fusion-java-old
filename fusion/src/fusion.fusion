@@ -94,7 +94,7 @@ contact us for clarification.
     iterator_next make_iterator value_iterator)
 
   (require "/fusion/for")
-  (provide for_list)
+  (provide for_list fors_list)
 
 
   //=========================================================================
