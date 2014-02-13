@@ -36,13 +36,15 @@ The built-in collection types are [list](fusion/list.html),
     (lambda (collection key)
       '''
 Determines whether a `collection` has a mapping for a given `key`.
-When `has_key` returns `true`, then `(element collection key)` will
-succeed.
+When `has_key` returns `true`, then `(element collection key)` will succeed.
 
-    (has_key {f:12} "f")    ==> true
-    (has_key [0,1,2] 0)     ==> true
-    (has_key [0,1,2] 3)     ==> false
-    (has_key [0,1,2] null)  ==> false
+Note that the keys of a sequence are the zero-based integer indices of the
+elements within the sequence, not the elements themselves.
+
+    (has_key {f:12} "f")           ==> true
+    (has_key [9,true,2014T] 0)     ==> true
+    (has_key [9,true,2014T] 3)     ==> false
+    (has_key [9,true,2014T] null)  ==> false
       '''
       (cond
         ((is_struct collection)
