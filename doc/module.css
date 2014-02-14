@@ -12,8 +12,11 @@
 }
 .binding {
   display: block;
+  border-top: 1px solid #999;
+  padding-top: .5em;
 }
 .binding .name {
+  font-family: monospace;
   font-size: 1.17em;
   font-weight: bold;
 }
