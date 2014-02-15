@@ -60,6 +60,9 @@ class HtmlWriter
     }
 
 
+    /**
+     * @param style may be null
+     */
     void renderHead(String title, String baseUrl, String style)
         throws IOException
     {
@@ -75,9 +78,13 @@ class HtmlWriter
         myOut.append("<title>");
         escape(title);
         myOut.append("</title>\n");
-        myOut.append("<link href='");
-        escape(style);
-        myOut.append("' rel='stylesheet' type='text/css'></link>\n");
+        if (style != null)
+        {
+            myOut.append("<link href='");
+            escape(style);
+            myOut.append("' rel='stylesheet' type='text/css'></link>\n");
+        }
+        
         myOut.append("</head>\n");
     }
 
