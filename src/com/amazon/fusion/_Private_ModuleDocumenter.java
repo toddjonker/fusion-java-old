@@ -10,18 +10,17 @@ import com.amazon.ion.Timestamp;
 import com.petebevin.markdown.MarkdownProcessor;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
-import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * NOT FOR APPLICATION USE
@@ -52,7 +51,7 @@ public final class _Private_ModuleDocumenter
         writePermutedIndexFile(filter, outputDir, index);
 
         log("Writing Markdown pages");
-        writeMarkdownPages(outputDir, repoDir);
+        writeMarkdownPages(outputDir, ".", repoDir);
 
         log("DONE writing HTML docs to " + outputDir);
     }
@@ -128,7 +127,14 @@ public final class _Private_ModuleDocumenter
     //========================================================================
 
 
-    private static void writeMarkdownPage(File outputFile, File inputFile)
+    private static final String TITLE_REGEX =
+        "^#\\s+(\\p{Print}+)\\s*$";
+    private static final Pattern TITLE_PATTERN =
+        Pattern.compile(TITLE_REGEX, Pattern.MULTILINE);
+
+    private static void writeMarkdownPage(File   outputFile,
+                                          String baseUrl,
+                                          File   inputFile)
         throws IOException
     {
         String markdownContent;
@@ -140,15 +146,17 @@ public final class _Private_ModuleDocumenter
             }
         }
 
+        Matcher matcher = TITLE_PATTERN.matcher(markdownContent);
+        String title =
+            (matcher.find() ? matcher.group(1) : "Fusion Documentation");
+
         final MarkdownProcessor markdowner = new MarkdownProcessor();
         String html = markdowner.markdown(markdownContent);
 
-        try (FileOutputStream outStream = new FileOutputStream(outputFile))
+        try (HtmlWriter writer = new HtmlWriter(outputFile))
         {
-            try (Writer writer = new OutputStreamWriter(outStream, UTF8))
-            {
-                writer.write(html);
-            }
+            writer.renderHead(title, baseUrl, null /*style*/);
+            writer.append(html);
         }
     }
 
@@ -156,7 +164,9 @@ public final class _Private_ModuleDocumenter
     /**
      * Recursively discover {@code .md} files and transform to {@code .html}.
      */
-    private static void writeMarkdownPages(File outputDir, File repoDir)
+    private static void writeMarkdownPages(File   outputDir,
+                                           String baseUrl,
+                                           File   repoDir)
         throws IOException
     {
         String[] fileNames = repoDir.list();
@@ -169,12 +179,12 @@ public final class _Private_ModuleDocumenter
             {
                 String docName = fileName.substring(0, fileName.length() - 2);
                 File outputFile = new File(outputDir, docName + "html");
-                writeMarkdownPage(outputFile, repoFile);
+                writeMarkdownPage(outputFile, baseUrl, repoFile);
             }
             else if (repoFile.isDirectory())
             {
                 File subOutputDir = new File(outputDir, fileName);
-                writeMarkdownPages(subOutputDir, repoFile);
+                writeMarkdownPages(subOutputDir, baseUrl + "/..", repoFile);
             }
         }
     }
