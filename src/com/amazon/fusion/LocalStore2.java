@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -31,6 +31,7 @@ final class LocalStore2
     @Override
     public Object lookup(int address)
     {
+        assert address < 2;
         return (address == 0 ? myValue0 : myValue1);
     }
 
@@ -39,6 +40,7 @@ final class LocalStore2
     {
         if (rib == 0)
         {
+            assert address < 2;
             return (address == 0 ? myValue0 : myValue1);
         }
         return myEnclosure.lookup(rib - 1, address);
@@ -47,6 +49,7 @@ final class LocalStore2
     @Override
     public void set(int address, Object value)
     {
+        assert address < 2;
         if (address == 0)
         {
             myValue0 = value;
@@ -62,6 +65,7 @@ final class LocalStore2
     {
         if (rib == 0)
         {
+            assert address < 2;
             if (address == 0)
             {
                 myValue0 = value;

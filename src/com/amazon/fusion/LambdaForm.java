@@ -91,7 +91,8 @@ final class LambdaForm
         children[1] = (isRest
                           ? args[0]
                           : SyntaxSexp.make(expander,
-                                            children[1].getLocation(), args));
+                                            children[1].getLocation(),
+                                            args));
 
         // TODO FUSION-36 Should allow internal definitions
         for (int i = bodyStart; i < children.length; i++)
@@ -126,16 +127,16 @@ final class LambdaForm
 
 
     private static String[] determineArgNames(Evaluator eval,
-                                              SyntaxSexp argSexp)
+                                              SyntaxSexp formalsDecl)
         throws FusionException
     {
-        int size = argSexp.size();
+        int size = formalsDecl.size();
         if (size == 0) return FusionUtils.EMPTY_STRING_ARRAY;
 
         String[] args = new String[size];
         for (int i = 0; i < size; i++)
         {
-            SyntaxSymbol identifier = (SyntaxSymbol) argSexp.get(eval, i);
+            SyntaxSymbol identifier = (SyntaxSymbol) formalsDecl.get(eval, i);
             Binding binding = identifier.resolve();
             args[i] = binding.getName();
         }
@@ -163,20 +164,21 @@ final class LambdaForm
 
         // Dummy environment to keep track of depth
         env = new LocalEnvironment(env);
+        SyntaxValue formalsDecl = stx.get(eval, 1);
 
         CompiledForm body = BeginForm.compile(eval, env, stx, bodyStart);
 
-        boolean isRest = (stx.get(eval, 1) instanceof SyntaxSymbol);
+        boolean isRest = (formalsDecl instanceof SyntaxSymbol);
         if (isRest)
         {
-            SyntaxSymbol identifier = (SyntaxSymbol) stx.get(eval, 1);
+            SyntaxSymbol identifier = (SyntaxSymbol) formalsDecl;
             Binding binding = identifier.getBinding();
             return new CompiledLambdaRest(doc, binding.getName(), body);
         }
         else
         {
             String[] argNames =
-                determineArgNames(eval, (SyntaxSexp) stx.get(eval, 1));
+                determineArgNames(eval, (SyntaxSexp) formalsDecl);
             switch (argNames.length)
             {
                 case 1:

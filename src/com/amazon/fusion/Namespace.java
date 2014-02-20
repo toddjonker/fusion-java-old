@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -149,13 +149,15 @@ abstract class Namespace
     @Override
     public Object lookup(int rib, int address)
     {
-        throw new IllegalStateException("Rib not found");
+        String message = "Rib not found: " + rib + ',' + address;
+        throw new IllegalStateException(message);
     }
 
     @Override
     public void set(int rib, int address, Object value)
     {
-        throw new IllegalStateException("Rib not found");
+        String message = "Rib not found: " + rib + ',' + address;
+        throw new IllegalStateException(message);
     }
 
     /**
