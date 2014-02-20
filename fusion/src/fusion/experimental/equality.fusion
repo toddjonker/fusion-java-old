@@ -201,7 +201,7 @@ most decimal numbers don't have a precise binary representation:
     (= 1.2 1.2e0)  --> false
     (= 1.5 1.5e0)  --> true
 
-It’s possible this may change in a future release.
+It's possible this may change in a future release.
 
 **Warning:** The behavior of this procedure is undefined for values `+inf`,
 `-inf`, and `nan`.
