@@ -26,6 +26,12 @@
   (lambda (x a b c x) true))
 
 
+// These expressions crashed due to FUSION-273:
+((lambda (t) ((lambda () t))) 1)
+(let [(t 1)] ((lambda () t)))
+(let [(t 1)] (let_values [] t))
+
+
 //==========================================================================
 // set
 

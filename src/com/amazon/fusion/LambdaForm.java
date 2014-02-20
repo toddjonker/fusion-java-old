@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionSexp.immutableSexp;
 import static com.amazon.fusion.FusionString.isString;
 import static com.amazon.fusion.FusionString.stringToJavaString;
+import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 
 /**
  * The {@code lambda} syntactic form, which evaluates to a {@link Closure}.
@@ -74,10 +75,15 @@ final class LambdaForm
             args = determineArgs(checkFormals);
         }
 
-        // We create a wrap even if there's no arguments, because there may be
-        // local definitions that will be added to the wrap.
-        Environment bodyEnv = new LocalEnvironment(env, args, stx);
-        SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
+        // When there's no args, we can avoid an empty binding rib at runtime.
+        // TODO FUSION-36 This will need changing for internal definitions
+        //      since we won't know yet whether the rib will be empty or not.
+        SyntaxWrap localWrap = null;
+        if (args.length != 0)
+        {
+            env = new LocalEnvironment(env, args, stx);
+            localWrap = new EnvironmentRenameWrap(env);
+        }
 
         // Prepare the bound names so they resolve to their own binding.
         for (int i = 0; i < args.length; i++)
@@ -98,8 +104,11 @@ final class LambdaForm
         for (int i = bodyStart; i < children.length; i++)
         {
             SyntaxValue bodyForm = children[i];
-            bodyForm = bodyForm.addWrap(localWrap);
-            bodyForm = expander.expandExpression(bodyEnv, bodyForm);
+            if (localWrap != null)
+            {
+                bodyForm = bodyForm.addWrap(localWrap);
+            }
+            bodyForm = expander.expandExpression(env, bodyForm);
             children[i] = bodyForm;
         }
 
@@ -124,6 +133,17 @@ final class LambdaForm
     }
 
     //========================================================================
+
+
+    private static int countFormals(SyntaxValue formalsDecl)
+        throws FusionException
+    {
+        // (lambda rest ___)
+        if (formalsDecl instanceof SyntaxSymbol) return 1;
+
+        // (lambda (formal ...) ___)
+        return ((SyntaxSexp) formalsDecl).size();
+    }
 
 
     private static String[] determineArgNames(Evaluator eval,
@@ -162,9 +182,12 @@ final class LambdaForm
             }
         }
 
-        // Dummy environment to keep track of depth
-        env = new LocalEnvironment(env);
         SyntaxValue formalsDecl = stx.get(eval, 1);
+        if (countFormals(formalsDecl) != 0)
+        {
+            // Dummy environment to keep track of depth
+            env = new LocalEnvironment(env);
+        }
 
         CompiledForm body = BeginForm.compile(eval, env, stx, bodyStart);
 
@@ -181,6 +204,8 @@ final class LambdaForm
                 determineArgNames(eval, (SyntaxSexp) formalsDecl);
             switch (argNames.length)
             {
+                case 0:
+                    return new CompiledLambda0(doc, body);
                 case 1:
                     return new CompiledLambda1(doc, argNames, body);
                 case 2:
@@ -265,6 +290,47 @@ final class LambdaForm
             Store localStore = new LocalStore(myEnclosure, args);
 
             return eval.bounceTailForm(localStore, myBody);
+        }
+    }
+
+
+    //========================================================================
+
+
+    private static final class CompiledLambda0
+        extends CompiledLambdaBase
+        implements CompiledLambdaExact
+    {
+        CompiledLambda0(String doc, CompiledForm body)
+        {
+            super(doc, EMPTY_STRING_ARRAY, body);
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            return new Closure0(store, myDoc, myBody);
+        }
+    }
+
+
+    private static final class Closure0
+        extends Closure
+    {
+        Closure0(Store enclosure, String doc, CompiledForm body)
+        {
+            super(enclosure, doc, EMPTY_STRING_ARRAY, body);
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(0, args);
+
+            // No local store is created to wrap myEnclosure!
+            return eval.bounceTailForm(myEnclosure, myBody);
         }
     }
 

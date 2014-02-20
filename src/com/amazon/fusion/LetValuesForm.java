@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -55,10 +55,25 @@ final class LetValuesForm
             }
         }
 
-        SyntaxSymbol[] boundNames =
-            boundNameList.toArray(new SyntaxSymbol[boundNameList.size()]);
-        Environment bodyEnv = new LocalEnvironment(env, boundNames, stx);
-        SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
+
+        SyntaxSymbol[] boundNames;
+        Environment bodyEnv;
+        SyntaxWrap localWrap;
+
+        final int bindingCount = boundNameList.size();
+        if (bindingCount == 0)
+        {
+            boundNames = null;
+            bodyEnv = env;
+            localWrap = null;
+        }
+        else
+        {
+            boundNames =
+                boundNameList.toArray(new SyntaxSymbol[bindingCount]);
+            bodyEnv = new LocalEnvironment(env, boundNames, stx);
+            localWrap = new EnvironmentRenameWrap(bodyEnv);
+        }
 
         // Expand the bound-value expressions
         SyntaxValue[] expandedForms = new SyntaxValue[numBindingForms];
@@ -91,7 +106,7 @@ final class LetValuesForm
                                       boundExpr);
             expandedForms[i] = binding;
         }
-        assert bindingPos == boundNames.length;
+        assert bindingPos == bindingCount;
 
         bindingForms = SyntaxSexp.make(eval, bindingForms.getLocation(),
                                        expandedForms);
@@ -104,7 +119,10 @@ final class LetValuesForm
         for (int i = 2; i < letExprSize; i++)
         {
             SyntaxValue subform = stx.get(eval, i);
-            subform = subform.addWrap(localWrap);
+            if (localWrap != null)
+            {
+                subform = subform.addWrap(localWrap);
+            }
             expandedForms[i] = expander.expandExpression(bodyEnv, subform);
         }
 
@@ -144,8 +162,12 @@ final class LetValuesForm
             valueForms[i] = eval.compile(env, boundExpr);
         }
 
-        // Dummy environment to keep track of depth
-        env = new LocalEnvironment(env);
+        if (bindingCount != 0)
+        {
+            // Dummy environment to keep track of depth
+            env = new LocalEnvironment(env);
+        }
+
         CompiledForm body = BeginForm.compile(eval, env, expr, 2);
 
         if (allSingles)
@@ -164,6 +186,9 @@ final class LetValuesForm
         switch (valueForms.length)
         {
             case 0:
+                // Note that this doesn't allocate an environment rib!
+                // This only works because no-arg lambdas and no-binding
+                // let_values are compiled without a local environment.
                 return body;
             case 1:
                 return new CompiledPlainLet1(valueForms, body);
