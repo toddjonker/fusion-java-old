@@ -228,6 +228,25 @@ public final class FusionIo
 
 
     /**
+     * <a href="{@docRoot}/../fusion/io.html#ionize">Ionizes</a> a text
+     * representation of a Fusion value, throwing an exception when any part
+     * of the data is outside the Ion type system.
+     *
+     * @param top must not be null.
+     * @param fusionValue must not be null.
+     * @param out the output stream; not null.
+     *
+     * @throws FusionException if some part of the value cannot be ionized,
+     * or if there's an exception thrown by the output stream.
+     */
+    public static void ionize(TopLevel top, Object fusionValue, IonWriter out)
+        throws FusionException
+    {
+        ionize(((StandardTopLevel) top).getEvaluator(), out, fusionValue);
+    }
+
+
+    /**
      * <a href="{@docRoot}/../fusion/io.html#write">Writes</a> a text
      * representation of a Fusion value, following Ion syntax
      * where possible, including for strings.
