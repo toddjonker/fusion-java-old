@@ -1084,12 +1084,36 @@ final class FusionList
             super.write(eval, out);
         }
 
+        /**
+         * This implementation avoids injecting children while ionizing.
+         * On the assumption that most ionization occurs just before data is
+         * released (that is, at the end of data processing), this avoids
+         * generating a useless deep transformation of the data.
+         */
         @Override
-        synchronized // So another thread doesn't inject while we ionize.
         void ionize(Evaluator eval, IonWriter out)
             throws IOException, FusionException
         {
-            // No need to inject our elements, they'll be output identically.
+            synchronized (this)
+            {
+                if (myValues[0] instanceof IonValue)
+                {
+                    out.setTypeAnnotations(myAnnotations);
+                    out.stepIn(IonType.LIST);
+                    {
+                        int len = myValues.length;
+                        for (int i = 0; i < len; i++)
+                        {
+                            IonValue iv = (IonValue) myValues[i];
+                            iv.writeTo(out);
+                        }
+                    }
+                    out.stepOut();
+                    return;
+                }
+            }
+            // else our elements have already been injected, ionize as normal.
+
             super.ionize(eval, out);
         }
     }

@@ -9,7 +9,10 @@ import static com.amazon.fusion.FusionStruct.unsafeStructSize;
 import static com.amazon.ion.util.IonTextUtils.printString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import com.amazon.ion.IonList;
 import com.amazon.ion.IonReader;
+import com.amazon.ion.IonValue;
+import com.amazon.ion.IonWriter;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -95,5 +98,69 @@ public class IoTest
         assertTrue(isEof(top, fv));
         fv = read(top, reader);
         assertTrue(isEof(top, fv));  // EOF "sticks"
+    }
+
+
+    /**
+     * This attempts to have interesting combinations of data to trigger
+     * various injection cases.
+     */
+    private static final String INJECTION_SAMPLE =
+        "[   [],    (),    {},  " +
+        " a::[], b::(), c::{},  " +
+        " d::[ 1,               " +
+        "      { f:null },      " +
+        "      e::{ g:(sym) },  " +
+        "      ('''str'''),     " +
+        "    ],                 " +
+        "]";
+
+
+    private void writeInjectedDom(String ion)
+        throws Exception
+    {
+        TopLevel  top  = topLevel();
+
+        IonValue iv = system().singleValue(INJECTION_SAMPLE);
+        Object fv = top.call("identity", iv);  // inject the value
+
+        StringBuilder sb = new StringBuilder();
+
+        FusionIo.write(top, fv, sb);
+
+        assertEquals(iv, system().singleValue(sb.toString()));
+    }
+
+    @Test
+    public void testWriteInjectedDom()
+        throws Exception
+    {
+        writeInjectedDom(INJECTION_SAMPLE);
+        writeInjectedDom("a::" + INJECTION_SAMPLE);
+    }
+
+
+    private void ionizeInjectedDom(String ion)
+        throws Exception
+    {
+        TopLevel  top  = topLevel();
+
+        IonValue iv = system().singleValue(ion);
+        Object fv = top.call("identity", iv);  // inject the value
+
+        IonList container = system().newEmptyList();
+        IonWriter iw = system().newWriter(container);
+
+        FusionIo.ionize(top, fv, iw);
+
+        assertEquals(iv, container.get(0));
+    }
+
+    @Test
+    public void testIonizeInjectedDom()
+        throws Exception
+    {
+        ionizeInjectedDom(INJECTION_SAMPLE);
+        ionizeInjectedDom("a::" + INJECTION_SAMPLE);
     }
 }
