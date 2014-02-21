@@ -156,6 +156,7 @@ public class InjectionTest
         Object fv = eval("v");
         assertEquals(iv.isNullValue(), isAnyNull(top, fv));
         assertEval(true, "(" + predicate + " v)");
+        fv.toString();                // Ensure that toString() doesn't throw.
 
         // App must not modify an injected object, so we clone.
         iv = iv.clone();
@@ -164,15 +165,19 @@ public class InjectionTest
         assertEval(iv, "v");
         fv = eval("v");
         assertEquals(iv.isNullValue(), isAnyNull(top, fv));
+        fv.toString();
 
         {
             IonList c = system().newList(iv.clone());
             top.define("c", c);
             assertEval(1, "(size c)");
             assertEval(c, "c");
+            fv = eval("c");
+            fv.toString();
             assertEval(iv, "(element c 0)");
             fv = eval("(element c 0)");
             assertEquals(iv.isNullValue(), isAnyNull(top, fv));
+            fv.toString();
 
             iv = iv.clone();
             iv.setTypeAnnotations();
@@ -180,9 +185,12 @@ public class InjectionTest
             top.define("c", c);
             assertEval(1, "(size c)");
             assertEval(c, "c");
+            fv = eval("c");
+            fv.toString();
             assertEval(iv, "(element c 0)");
             fv = eval("(element c 0)");
             assertEquals(iv.isNullValue(), isAnyNull(top, fv));
+            fv.toString();
         }
 
         {
@@ -190,9 +198,12 @@ public class InjectionTest
             top.define("c", c);
             assertEval(1, "(size c)");
             assertEval(c, "c");
+            fv = eval("c");
+            fv.toString();
             assertEval(iv, "(element c 0)");
             fv = eval("(element c 0)");
             assertEquals(iv.isNullValue(), isAnyNull(top, fv));
+            fv.toString();
 
             iv = iv.clone();
             iv.setTypeAnnotations();
@@ -200,9 +211,12 @@ public class InjectionTest
             top.define("c", c);
             assertEval(1, "(size c)");
             assertEval(c, "c");
+            fv = eval("c");
+            fv.toString();
             assertEval(iv, "(element c 0)");
             fv = eval("(element c 0)");
             assertEquals(iv.isNullValue(), isAnyNull(top, fv));
+            fv.toString();
         }
 
         {
@@ -211,9 +225,12 @@ public class InjectionTest
             top.define("c", c);
             assertEval(1, "(size c)");
             assertEval(c, "c");
+            fv = eval("c");
+            fv.toString();
             assertEval(iv, "(element c '''f''')");
             fv = eval("(element c '''f''')");
             assertEquals(iv.isNullValue(), isAnyNull(top, fv));
+            fv.toString();
 
             iv = iv.clone();
             iv.setTypeAnnotations();
@@ -222,9 +239,12 @@ public class InjectionTest
             top.define("c", c);
             assertEval(1, "(size c)");
             assertEval(c, "c");
+            fv = eval("c");
+            fv.toString();
             assertEval(iv, "(element c '''f''')");
             fv = eval("(element c '''f''')");
             assertEquals(iv.isNullValue(), isAnyNull(top, fv));
+            fv.toString();
         }
     }
 
