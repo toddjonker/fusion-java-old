@@ -42,9 +42,9 @@ Note that the keys of a sequence are the zero-based integer indices of the
 elements within the sequence, not the elements themselves.
 
     (has_key {f:12} "f")           ==> true
-    (has_key [9,true,2014T] 0)     ==> true
-    (has_key [9,true,2014T] 3)     ==> false
-    (has_key [9,true,2014T] null)  ==> false
+    (has_key [3,true,2014T] 0)     ==> true
+    (has_key [3,true,2014T] 3)     ==> false
+    (has_key [3,true,2014T] null)  ==> false
       '''
       (cond
         ((is_struct collection)

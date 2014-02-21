@@ -228,9 +228,9 @@ public final class FusionIo
 
 
     /**
-     * <a href="{@docRoot}/../fusion/io.html#ionize">Ionizes</a> a text
-     * representation of a Fusion value, throwing an exception when any part
-     * of the data is outside the Ion type system.
+     * <a href="{@docRoot}/../fusion/io.html#ionize">Ionizes</a> a Fusion
+     * value, throwing an exception when any part of the value is outside the
+     * Ion type system.
      *
      * @param top must not be null.
      * @param fusionValue must not be null.
