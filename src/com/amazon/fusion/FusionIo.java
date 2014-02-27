@@ -254,15 +254,16 @@ public final class FusionIo
      * value contains any non-Ionizable data (void, closures, etc.).
      *
      * @param top must not be null.
-     * @param value must not be null.
+     * @param fusionValue must not be null.
      * @param out the output stream; not null.
+     *
      * @throws FusionException if there's an exception thrown by the output
      * stream.
      */
-    public static void write(TopLevel top, Object value, Appendable out)
+    public static void write(TopLevel top, Object fusionValue, Appendable out)
         throws FusionException
     {
-        write(((StandardTopLevel) top).getEvaluator(), out, value);
+        write(((StandardTopLevel) top).getEvaluator(), out, fusionValue);
     }
 
 
@@ -327,15 +328,18 @@ public final class FusionIo
 
 
     /**
-     * Returns the output of {@link #write(Evaluator, Appendable, Object)}
+     * Returns the output of {@link #write(TopLevel, Object, Appendable)}
      * as a {@link String}.
      *
      * @return not null.
+     *
+     * @see #safeWriteToString(TopLevel, Object)
      */
-    public static String writeToString(TopLevel top, Object value)
+    public static String writeToString(TopLevel top, Object fusionValue)
         throws FusionException
     {
-        return writeToString(((StandardTopLevel) top).getEvaluator(), value);
+        Evaluator eval = ((StandardTopLevel) top).getEvaluator();
+        return writeToString(eval, fusionValue);
     }
 
 
@@ -529,11 +533,13 @@ public final class FusionIo
      * message into the output.
      *
      * @return not null.
+     *
+     * @see #writeToString(TopLevel, Object)
      */
-    public static String safeWriteToString(TopLevel top, Object value)
+    public static String safeWriteToString(TopLevel top, Object fusionValue)
     {
-        return safeWriteToString(((StandardTopLevel) top).getEvaluator(),
-                                 value);
+        Evaluator eval = ((StandardTopLevel) top).getEvaluator();
+        return safeWriteToString(eval, fusionValue);
     }
 
 
