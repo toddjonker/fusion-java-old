@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionValue.evaluator;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
@@ -462,7 +461,8 @@ public final class FusionBool
     public static boolean isTrue(TopLevel top, Object value)
         throws FusionException
     {
-        return isTrue(evaluator(top), value);
+        Evaluator eval = StandardTopLevel.toEvaluator(top);
+        return isTrue(eval, value);
     }
 
     static boolean isTrue(Evaluator eval, Object value)
@@ -483,7 +483,8 @@ public final class FusionBool
     public static boolean isFalse(TopLevel top, Object value)
         throws FusionException
     {
-        return isFalse(evaluator(top), value);
+        Evaluator eval = StandardTopLevel.toEvaluator(top);
+        return isFalse(eval, value);
     }
 
     static boolean isFalse(Evaluator eval, Object value)

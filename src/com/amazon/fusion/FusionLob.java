@@ -76,9 +76,9 @@ public final class FusionLob
                                     String[] annotations)
         throws FusionException
     {
+        Evaluator eval = StandardTopLevel.toEvaluator(top);
         BaseLob base = (BaseLob) fusionLob;
-        return base.annotate(((StandardTopLevel) top).getEvaluator(),
-                             annotations);
+        return base.annotate(eval, annotations);
     }
 
 

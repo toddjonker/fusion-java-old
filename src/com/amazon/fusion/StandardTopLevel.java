@@ -58,6 +58,15 @@ final class StandardTopLevel
 
     //========================================================================
 
+    /**
+     * Helper method for internal APIs
+     */
+    static Evaluator toEvaluator(TopLevel top)
+    {
+        return ((StandardTopLevel) top).myEvaluator;
+    }
+
+
     // NOT PUBLIC
     Evaluator getEvaluator()
     {

@@ -38,12 +38,6 @@ public final class FusionValue
     //========================================================================
 
 
-    static Evaluator evaluator(TopLevel top)
-    {
-        return ((StandardTopLevel) top).getEvaluator();
-    }
-
-
     /**
      * Determines whether a Fusion value is a null of an type; that is, is it
      * {@code null.null}, {@code null.bool}, {@code null.int}, <em>etc.</em>?
@@ -53,7 +47,8 @@ public final class FusionValue
     public static boolean isAnyNull(TopLevel top, Object value)
         throws FusionException
     {
-        return isAnyNull(evaluator(top), value);
+        Evaluator eval = StandardTopLevel.toEvaluator(top);
+        return isAnyNull(eval, value);
     }
 
     static boolean isAnyNull(Evaluator eval, Object value)
@@ -86,7 +81,8 @@ public final class FusionValue
     public static boolean isTruthy(TopLevel top, Object value)
         throws FusionException
     {
-        return isTruthy(evaluator(top), value).isTrue();
+        Evaluator eval = StandardTopLevel.toEvaluator(top);
+        return isTruthy(eval, value).isTrue();
     }
 
     static BaseBool isTruthy(Evaluator eval, Object value)

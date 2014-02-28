@@ -275,7 +275,8 @@ public final class FusionClob
     public static Object forBytesNoCopy(TopLevel top, byte[] value)
         throws FusionException
     {
-        return forBytesNoCopy(((StandardTopLevel) top).getEvaluator(), value);
+        Evaluator eval = StandardTopLevel.toEvaluator(top);
+        return forBytesNoCopy(eval, value);
     }
 
 

@@ -275,7 +275,8 @@ public final class FusionBlob
     public static Object forBytesNoCopy(TopLevel top, byte[] value)
         throws FusionException
     {
-        return forBytesNoCopy(((StandardTopLevel) top).getEvaluator(), value);
+        Evaluator eval = StandardTopLevel.toEvaluator(top);
+        return forBytesNoCopy(eval, value);
     }
 
 
@@ -330,9 +331,8 @@ public final class FusionBlob
                                        String[] annotations)
         throws FusionException
     {
-        return unsafeBlobAnnotate(((StandardTopLevel) top).getEvaluator(),
-                                  fusionBlob,
-                                  annotations);
+        Evaluator eval = StandardTopLevel.toEvaluator(top);
+        return unsafeBlobAnnotate(eval, fusionBlob, annotations);
     }
 
 

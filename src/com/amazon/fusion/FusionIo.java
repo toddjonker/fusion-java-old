@@ -162,7 +162,7 @@ public final class FusionIo
     public static Object read(TopLevel top, IonReader reader)
         throws FusionException
     {
-        Evaluator eval = ((StandardTopLevel) top).getEvaluator();
+        Evaluator eval = StandardTopLevel.toEvaluator(top);
         return read(eval, reader);
     }
 
@@ -242,7 +242,8 @@ public final class FusionIo
     public static void ionize(TopLevel top, Object fusionValue, IonWriter out)
         throws FusionException
     {
-        ionize(((StandardTopLevel) top).getEvaluator(), out, fusionValue);
+        Evaluator eval = StandardTopLevel.toEvaluator(top);
+        ionize(eval, out, fusionValue);
     }
 
 
@@ -263,7 +264,8 @@ public final class FusionIo
     public static void write(TopLevel top, Object fusionValue, Appendable out)
         throws FusionException
     {
-        write(((StandardTopLevel) top).getEvaluator(), out, fusionValue);
+        Evaluator eval = StandardTopLevel.toEvaluator(top);
+        write(eval, out, fusionValue);
     }
 
 
@@ -338,7 +340,7 @@ public final class FusionIo
     public static String writeToString(TopLevel top, Object fusionValue)
         throws FusionException
     {
-        Evaluator eval = ((StandardTopLevel) top).getEvaluator();
+        Evaluator eval = StandardTopLevel.toEvaluator(top);
         return writeToString(eval, fusionValue);
     }
 
@@ -538,7 +540,7 @@ public final class FusionIo
      */
     public static String safeWriteToString(TopLevel top, Object fusionValue)
     {
-        Evaluator eval = ((StandardTopLevel) top).getEvaluator();
+        Evaluator eval = StandardTopLevel.toEvaluator(top);
         return safeWriteToString(eval, fusionValue);
     }
 
