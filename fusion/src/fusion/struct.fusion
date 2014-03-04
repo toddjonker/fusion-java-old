@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (module struct '/fusion/base'
 
@@ -242,12 +242,18 @@ cannot migrate in time.
     (lambda (struct)
       '''
 Deconstructs a `struct` and returns two values: a list of field names (as
-symbols) and a list of associated values. This is the inverse of `struct_zip`.
+symbols) and a list of associated values. This is the inverse of
+[`struct_zip`](fusion/struct.html#struct_zip).
 
     (let_values [((keys vals) (struct_unzip {a:1, b:2}))]
       (struct_zip keys (map - vals)))
     =>
     {b:-2,a:-1}
+
+This procedure returns [multiple results](fusion/procedure.html#results), not
+a pair or sequence, so it must be called from a context that expects that, like
+a [`let_values`](fusion/procedure.html#let_values) clause with two bound
+identifiers.
       '''
       (unless (is_struct struct)
         (raise_argument_error "struct_unzip" "struct" 0 struct))

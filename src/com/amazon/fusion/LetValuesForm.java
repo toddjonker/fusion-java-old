@@ -11,7 +11,8 @@ final class LetValuesForm
     {
         //    "                                                                               |
         super("(((ident ...) expr) ...) body ...+",
-              "Creates local bindings for the `ident`s, with the `body` in scope.  The `expr`s\n" +
+              "Captures [multiple results](fusion/procedure.html#results), creating local\n" +
+              "bindings for the `ident`s, with the `body` in scope.  The `expr`s\n" +
               "are evaluated left-to-right, and must return as many values as there are\n" +
               "corresponding `ident`s, which are then bound to those results.  After the\n" +
               "bindings are installed the `body` is evaluated.  `body` may be one or more forms;\n" +

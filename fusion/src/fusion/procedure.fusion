@@ -5,6 +5,81 @@
   // WARNING: Doc syntax isn't supported yet.
   '''
 Operators for creating and manipulating procedures.
+
+While Fusion (and Lisps in general) are commonly perceived as functional
+languages, they are built around _procedures_ that may or may not operate in
+a functional manner. That is, Fusion procedures may or may not cause side
+effects, and the language carefully avoids the term "function" except when
+describing code known to be free of side effects.
+
+## Multiple Results <a id="results"/>
+
+As expected, procedures accept arguments and return values. But you may not
+expect that a procedure can return _multiple_ values. This feature is distinct
+from "returning a sequence of values": they are honest-to-goodness individual
+return values, not wrapped up in a collection object.
+
+While use of multiple results should be rare, there are use cases where they
+are worthwhile. For example, [`struct_zip`](fusion/struct.html#struct_zip) and
+[`struct_unzip`](fusion/struct.html#struct_unzip) are mirror procedures for
+transforming between a struct and two lists (names and elements). Since the
+whole point of `struct_unzip` is to build two lists, the most natural design
+is to use multiple results, rather than a pair or list of values which
+the caller must then destructure. Similarly, an integer division operator
+could return the quotient and the remainder.
+
+This feature is expressed by two forms: [`values`][values] returns zero or
+more results, and [`let_values`][let_values] binds them to local names:
+
+    (values 1 true "thing")    =>  1
+                                   true
+                                   "thing"
+    (let_values
+      [((a b c)                      // The names to bind
+        (values 1 true "thing"))]    // The multiple results
+      (list c b a))
+                               =>  ["thing", true, 1]
+
+To define a procedure with multiple results, use `values` in tail position:
+
+    (define (struct_unzip s)
+      // The real implementation isn't arranged this way,
+      // but you get the point.
+      (let [(names ...),
+            (elements ...)]
+        (values names elements)))
+
+Since `struct_unzip` returns two values, it must be called in a context that
+expects two values. The values don't get spliced into place as multiple
+arguments:
+
+    (struct_zip (struct_unzip {g:1,f:2,h:3}))
+    =>
+    ERROR: procedure argument expects 1 result but received 2
+    Results were:
+      [f, g, h]
+      [2, 1, 3]
+
+And since the results are not a list or sexp, you can't use `apply` either:
+
+    (apply struct_zip (struct_unzip {g:1,f:2,h:3}))
+    =>
+    ERROR: procedure argument expects 1 result but received 2
+    Results were:
+      [f, g, h]
+      [2, 1, 3]
+
+The only context that works is a `let_values` clause with the correct number
+of bound identifiers:
+
+    (let_values
+      [((names elements)
+        (struct_unzip {g:1,f:2,h:3}))]
+      (struct_zip names elements))        => {f:2,g:1,h:3}
+
+
+  [values]:     fusion/procedure.html#values
+  [let_values]: fusion/procedure.html#let_values
   '''
 
   (require
@@ -16,7 +91,7 @@ Operators for creating and manipulating procedures.
     "/fusion/private/sexp")
 
 
-  (provide apply is_procedure lambda)
+  (provide apply is_procedure lambda let_values values)
 
 
   (defpub identity

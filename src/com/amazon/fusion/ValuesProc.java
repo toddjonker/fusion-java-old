@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -9,8 +9,9 @@ final class ValuesProc
     ValuesProc()
     {
         //    "                                                                               |
-        super("Returns all the given `value`s; that is, returns zero, one, or multiple values.\n" +
-              "Usually used in conjuction with `let_values` to bind the results to names.",
+        super("Produces [multiple results](fusion/procedure.html#results), returning the zero\n" +
+              "or more `value`s. Usually used in conjuction with `let_values` to bind the\n" +
+              "results to names.",
               "value", DOTDOTDOT);
     }
 
