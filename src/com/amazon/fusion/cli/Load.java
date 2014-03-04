@@ -64,9 +64,17 @@ final class Load
             try
             {
                 Object result = loadFile(top, myFileName);
-                if (result != null && ! isVoid(top, result))
+                if (result instanceof Object[])
                 {
-                    // TODO handle multiple values
+                    Object[] results = (Object[]) result;
+                    for (Object r : results)
+                    {
+                        write(top, r, System.out);
+                        System.out.println();
+                    }
+                }
+                else if (result != null && ! isVoid(top, result))
+                {
                     write(top, result, System.out);
                     System.out.println();
                 }
@@ -89,8 +97,8 @@ final class Load
 
 
         /**
-         * @return may be null (when void results) or an {@code Object[]} (when
-         * multiple values are returned.
+         * @return may be null (when no values are returned) or an
+         * {@code Object[]} (when multiple values are returned).
          */
         private Object loadFile(TopLevel top, String fileName)
             throws FusionException, IOException

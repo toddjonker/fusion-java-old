@@ -131,10 +131,21 @@ class Repl
             throws FusionException
         {
             TopLevel top = runtime().getDefaultTopLevel();
-            if (isVoid(top, v)) return;
 
-            write(top, v, myOut);
-            myOut.println();
+            if (v instanceof Object[])
+            {
+                Object[] results = (Object[]) v;
+                for (Object r : results)
+                {
+                    write(top, r, myOut);
+                    myOut.println();
+                }
+            }
+            else if (v != null && ! isVoid(top, v))
+            {
+                write(top, v, myOut);
+                myOut.println();
+            }
         }
 
 
