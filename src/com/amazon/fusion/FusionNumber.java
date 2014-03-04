@@ -1514,7 +1514,8 @@ final class FusionNumber
 
 
     /**
-     * @param value may be null to make {@code null.decimal}.
+     * @param value may be null to make {@code null.decimal}. An instance of
+     * {@link Decimal} should be used to create a negative zero value.
      *
      * @return not null.
      */
@@ -1536,7 +1537,8 @@ final class FusionNumber
 
 
     /**
-     * @param value may be null to make {@code null.decimal}.
+     * @param value may be null to make {@code null.decimal}. An instance of
+     * {@link Decimal} should be used to create a negative zero value.
      *
      * @return not null.
      */
