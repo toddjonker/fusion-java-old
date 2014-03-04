@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -27,9 +27,58 @@ public class RuntimeTest
     {
         FusionRuntimeBuilder b = FusionRuntimeBuilder.standard();
         assertSame(b, b.mutable());
-//        b.build();
 
+        assertEquals("/fusion", b.getDefaultLanguage());
+        assertEquals("/fusion", b.copy().getDefaultLanguage());
+        assertEquals("/fusion", b.immutable().getDefaultLanguage());
     }
+
+
+    @Test
+    public void testSetDefaultLanguage()
+        throws Exception
+    {
+        FusionRuntimeBuilder b = runtimeBuilder();
+        b.setDefaultLanguage("/fusion/base");
+        assertEquals("/fusion/base", runtime().getDefaultLanguage());
+        expectUnboundIdentifierException("always");
+
+        assertEquals("/fusion/base", b.getDefaultLanguage());
+        assertEquals("/fusion/base", b.copy().getDefaultLanguage());
+        assertEquals("/fusion/base", b.immutable().getDefaultLanguage());
+
+        b = b.immutable().withDefaultLanguage("/fusion");
+        assertEquals("/fusion", b.getDefaultLanguage());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullDefaultLanguage()
+        throws Exception
+    {
+        runtimeBuilder().setDefaultLanguage(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testEmptyDefaultLanguage()
+        throws Exception
+    {
+        runtimeBuilder().setDefaultLanguage("");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testMalformedDefaultLanguage()
+        throws Exception
+    {
+        runtimeBuilder().setDefaultLanguage("fusion");
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testDefaultLanguageImmutablity()
+        throws Exception
+    {
+        runtimeBuilder().immutable().setDefaultLanguage("/fusion/base");
+    }
+
 
     @Test
     public void testDefaultCurrentDirectory()

@@ -1,7 +1,8 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,6 +58,15 @@ import java.util.Properties;
  * resources are discovered by searching the bootstrap repository first, then
  * searching other repositories in the order they were declared.
  *
+ * <h3>Default Language</h3>
+ *
+ * One of the runtime's main responsibilities is creation of {@link TopLevel}
+ * namespaces in which evaluation can occur. The baseline semantics of such
+ * evaluation is defined by the language used to create the namespace.
+ * By default, all such namespaces are created with the bindings from the
+ * {@code /fusion} language, but this default is controlled by the
+ * configuration declared here.
+ *
  * <h3>Initial Current Directory</h3>
  *
  * Fusion's {@code current_directory} parameter holds the current working
@@ -72,6 +82,8 @@ public class FusionRuntimeBuilder
      */
     public static final String PROPERTY_BOOTSTRAP_REPOSITORY =
         "com.amazon.fusion.BootstrapRepository";
+
+    private static final String STANDARD_DEFAULT_LANGUAGE = "/fusion";
 
 
     /**
@@ -89,9 +101,10 @@ public class FusionRuntimeBuilder
     //=========================================================================
 
 
-    private File myCurrentDirectory;
-    private File myBootstrapRepository;
-    private File[] myRepositoryDirectories;
+    private File    myCurrentDirectory;
+    private File    myBootstrapRepository;
+    private File[]  myRepositoryDirectories;
+    private String  myDefaultLanguage = STANDARD_DEFAULT_LANGUAGE;
     private boolean myDocumenting;
 
 
@@ -102,6 +115,7 @@ public class FusionRuntimeBuilder
         this.myCurrentDirectory      = that.myCurrentDirectory;
         this.myBootstrapRepository   = that.myBootstrapRepository;
         this.myRepositoryDirectories = that.myRepositoryDirectories;
+        this.myDefaultLanguage       = that.myDefaultLanguage;
         this.myDocumenting           = that.myDocumenting;
     }
 
@@ -255,6 +269,68 @@ public class FusionRuntimeBuilder
     {
         URL url = classForLoading.getResource(resourceName);
         return withConfigProperties(url);
+    }
+
+
+    //=========================================================================
+
+
+    /**
+     * Gets the default language used to bootstrap the runtime's
+     * {@link TopLevel} namespaces.
+     * The standard value of this property is {@code "/fusion"}.
+     *
+     * @return an absolute module path.
+     *
+     * @see #setDefaultLanguage(String)
+     * @see #withDefaultLanguage(String)
+     */
+    public String getDefaultLanguage()
+    {
+        return myDefaultLanguage;
+    }
+
+
+    /**
+     * Sets the default language used to bootstrap the runtime's
+     * {@link TopLevel} namespaces.
+     *
+     * @param absoluteModulePath identifies the language; must not be null.
+     *
+     * @see #getDefaultLanguage()
+     * @see #withDefaultLanguage(String)
+     */
+    public void setDefaultLanguage(String absoluteModulePath)
+    {
+        mutationCheck();
+
+        if (! isValidAbsoluteModulePath(absoluteModulePath))
+        {
+            String message =
+                "Not a valid absolute module path: " + absoluteModulePath;
+            throw new IllegalArgumentException(message);
+        }
+
+        myDefaultLanguage = absoluteModulePath;
+    }
+
+
+    /**
+     * Declares the default language used to bootstrap the runtime's
+     * {@link TopLevel} namespaces.
+     *
+     * @param absoluteModulePath identifies the language; must not be null.
+     *
+     * @return this builder, if it's mutable; otherwise a new mutable builder.
+     *
+     * @see #getDefaultLanguage()
+     * @see #withDefaultLanguage(String)
+     */
+    public FusionRuntimeBuilder withDefaultLanguage(String absoluteModulePath)
+    {
+        FusionRuntimeBuilder b = mutable();
+        b.setDefaultLanguage(absoluteModulePath);
+        return b;
     }
 
 

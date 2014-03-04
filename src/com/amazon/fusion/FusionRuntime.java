@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -27,21 +27,42 @@ import com.amazon.ion.ValueFactory;
 public interface FusionRuntime
 {
     /**
+     * Gets the identifier for this runtime's default language, which supplies
+     * the initial bindings for its {@link TopLevel} namespaces.
+     * Unless configured otherwise by the {@link FusionRuntimeBuilder}, this
+     * value is {@code "/fusion"}.
+     *
+     * @return an absolute module path.
+     *
+     * @see FusionRuntimeBuilder#getDefaultLanguage()
+     */
+    public String getDefaultLanguage();
+
+
+    /**
      * Returns a singular {@link TopLevel} for this runtime; each call returns
      * the same instance.  All uses of the instance will share bindings and
      * state, so applications that require isolated state must create
      * additional {@link TopLevel}s via {@link #makeTopLevel()}.
+     * <p>
+     * The default {@link TopLevel} is bootstrapped with bindings from this
+     * runtime's default language.
      *
      * @return not null.
+     *
+     * @see #getDefaultLanguage()
      */
     public TopLevel getDefaultTopLevel()
         throws FusionException;
 
+
     /**
-     * Returns a fresh {@link TopLevel} instance, bootstrapped with the
-     * {@code /fusion} language.
+     * Returns a fresh {@link TopLevel} instance, bootstrapped with this
+     * runtime's default language.
      *
      * @return not null.
+     *
+     * @see #getDefaultLanguage()
      */
     public TopLevel makeTopLevel()
         throws FusionException;
@@ -49,7 +70,7 @@ public interface FusionRuntime
 
     /**
      * Returns a fresh {@link TopLevel} instance, populated with bindings from
-     * a given module.
+     * a given module.  The default language is <em>not</em> imported.
      *
      * @param initialModulePath must be an absolute module path, starting with
      * {@code '/'}.

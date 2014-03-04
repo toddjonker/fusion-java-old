@@ -513,6 +513,13 @@ public class CoreTestCase
     }
 
 
+    void expectUnboundIdentifierException(String expr)
+        throws Exception
+    {
+        expectFailure(UnboundIdentifierException.class, expr);
+    }
+
+
     void expectContractFailure(String expr)
         throws Exception
     {
