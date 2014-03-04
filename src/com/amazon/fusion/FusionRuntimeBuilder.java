@@ -644,8 +644,15 @@ public class FusionRuntimeBuilder
     public FusionRuntime build()
         throws FusionException
     {
-        FusionRuntimeBuilder b = fillDefaults();
-        return new StandardRuntime(b);
+        try
+        {
+            FusionRuntimeBuilder b = fillDefaults();
+            return new StandardRuntime(b);
+        }
+        catch (FusionInterrupt e)
+        {
+            throw new FusionInterruptedException(e);
+        }
     }
 
 

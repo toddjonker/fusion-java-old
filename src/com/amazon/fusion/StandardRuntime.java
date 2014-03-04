@@ -20,6 +20,7 @@ final class StandardRuntime
 
 
     StandardRuntime(FusionRuntimeBuilder builder)
+        throws FusionInterrupt
     {
         IonSystem ionSystem = IonSystemBuilder.standard().build();
         myRegistry = new ModuleRegistry();
@@ -88,8 +89,15 @@ final class StandardRuntime
             throw new IllegalArgumentException(message);
         }
 
-        return new StandardTopLevel(myGlobalState, myRegistry,
-                                    initialModulePath);
+        try
+        {
+            return new StandardTopLevel(myGlobalState, myRegistry,
+                                        initialModulePath);
+        }
+        catch (FusionInterrupt e)
+        {
+            throw new FusionInterruptedException(e);
+        }
     }
 
 

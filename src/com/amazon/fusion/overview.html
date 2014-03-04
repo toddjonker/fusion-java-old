@@ -70,13 +70,22 @@ Here's a typical processing sequence:
 </pre>
 
 
-<h2>Thread Safety</h2>
+<h2>Concurrency</h2>
 
-Unless document otherwise, these Java APIs do not provide thread-safety
+Unless documented otherwise, these Java APIs do not provide thread-safety
 guarantees, nor does the Fusion language itself. If you need to evaluate
 Fusion code from multiple threads, you will need to provide your own
 synchronization. In most cases this will involve preventing threads from
 simultaneous use of the same {@link com.amazon.fusion.TopLevel}.
+<p>
+All evaluation APIs such as {@link com.amazon.fusion.TopLevel#eval(String)}
+can be cancelled by calling {@link java.lang.Thread#interrupt()} on the
+evaluation thread. The evaluator periodically checks the thread interrupt
+status, and cancels the computation when it is set. The evaluation API then
+throws {@link com.amazon.fusion.FusionInterruptedException}, leaving the
+thread interrupt status set. Be aware that some activities, notably reading
+from an {@link java.io.InputStream}, are uninterruptible and will block until
+control returns to the evaluator.
 
 
 <h2>Representation of Values</h2>

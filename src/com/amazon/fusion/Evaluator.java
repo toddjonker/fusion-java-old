@@ -592,6 +592,11 @@ final class Evaluator
 
             checkingResult: while (true)
             {
+                if (Thread.currentThread().isInterrupted())
+                {
+                    throw new FusionInterrupt();
+                }
+
                 if (result instanceof TailForm)
                 {
                     TailForm tail = (TailForm) result;
@@ -635,6 +640,11 @@ final class Evaluator
 
             checkingResult: while (true)
             {
+                if (Thread.currentThread().isInterrupted())
+                {
+                    throw new FusionInterrupt();
+                }
+
                 if (result instanceof TailForm)
                 {
                     TailForm tail = (TailForm) result;

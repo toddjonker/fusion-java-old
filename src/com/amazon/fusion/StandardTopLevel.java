@@ -28,7 +28,7 @@ final class StandardTopLevel
                      Namespace namespace,
                      String initialModulePath,
                      boolean documenting)
-        throws FusionException
+        throws FusionInterrupt, FusionException
     {
         assert ModuleIdentity.isValidAbsoluteModulePath(initialModulePath);
 
@@ -40,6 +40,7 @@ final class StandardTopLevel
 
         myEvaluator = eval;
         myNamespace = namespace;
+
         namespace.require(myEvaluator, initialModulePath);
     }
 
@@ -49,7 +50,7 @@ final class StandardTopLevel
     StandardTopLevel(GlobalState globalState,
                      ModuleRegistry registry,
                      String initialModulePath)
-        throws FusionException
+        throws FusionInterrupt, FusionException
     {
         this(globalState, new TopLevelNamespace(registry), initialModulePath,
              false);
@@ -76,7 +77,7 @@ final class StandardTopLevel
 
     @Override
     public Object eval(String source, SourceName name)
-        throws ExitException, FusionException
+        throws FusionInterruptedException, FusionException
     {
         IonSystem system = myEvaluator.getGlobalState().myIonSystem;
         IonReader i = system.newReader(source);
@@ -86,7 +87,7 @@ final class StandardTopLevel
 
     @Override
     public Object eval(String source)
-        throws ExitException, FusionException
+        throws FusionInterruptedException, FusionException
     {
         return eval(source, null);
     }
@@ -94,26 +95,32 @@ final class StandardTopLevel
 
     @Override
     public Object eval(IonReader source, SourceName name)
-        throws ExitException, FusionException
+        throws FusionInterruptedException, FusionException
     {
-        Object result = voidValue(myEvaluator);
-
-        if (source.getType() == null) source.next();
-
-        while (source.getType() != null)
+        try
         {
-            SyntaxValue sourceExpr = readSyntax(myEvaluator, source, name);
-            result = FusionEval.eval(myEvaluator, sourceExpr, myNamespace);
-            source.next();
-        }
+            Object result = voidValue(myEvaluator);
 
-        return result;
+            if (source.getType() == null) source.next();
+            while (source.getType() != null)
+            {
+                SyntaxValue sourceExpr = readSyntax(myEvaluator, source, name);
+                result = FusionEval.eval(myEvaluator, sourceExpr, myNamespace);
+                source.next();
+            }
+
+            return result;
+        }
+        catch (FusionInterrupt e)
+        {
+            throw new FusionInterruptedException(e);
+        }
     }
 
 
     @Override
     public Object eval(IonReader source)
-        throws ExitException, FusionException
+        throws FusionInterruptedException, FusionException
     {
         return eval(source, null);
     }
@@ -121,10 +128,19 @@ final class StandardTopLevel
 
     @Override
     public Object load(File source)
-        throws ExitException, FusionException
+        throws FusionInterruptedException, FusionException
     {
-        LoadHandler load = myEvaluator.getGlobalState().myLoadHandler;
-        return load.loadTopLevel(myEvaluator, myNamespace, source.toString());
+        try
+        {
+            LoadHandler load = myEvaluator.getGlobalState().myLoadHandler;
+            return load.loadTopLevel(myEvaluator,
+                                     myNamespace,
+                                     source.toString());
+        }
+        catch (FusionInterrupt e)
+        {
+            throw new FusionInterruptedException(e);
+        }
     }
 
 
@@ -132,7 +148,7 @@ final class StandardTopLevel
     public void loadModule(String     absoluteModulePath,
                            IonReader  source,
                            SourceName name)
-        throws FusionException
+        throws FusionInterruptedException, FusionException
     {
         if (! isValidAbsoluteModulePath(absoluteModulePath))
         {
@@ -141,22 +157,35 @@ final class StandardTopLevel
             throw new IllegalArgumentException(message);
         }
 
-        ModuleNameResolver resolver =
-            myEvaluator.getGlobalState().myModuleNameResolver;
-        ModuleIdentity id =
-            ModuleIdentity.forAbsolutePath(absoluteModulePath);
-        ModuleLocation loc =
-            new IonReaderModuleLocation(source, name);
-
-        resolver.loadModule(myEvaluator, id, loc, true /* reload it */);
+        try
+        {
+            ModuleNameResolver resolver =
+                myEvaluator.getGlobalState().myModuleNameResolver;
+            ModuleIdentity id =
+                ModuleIdentity.forAbsolutePath(absoluteModulePath);
+            ModuleLocation loc =
+                new IonReaderModuleLocation(source, name);
+            resolver.loadModule(myEvaluator, id, loc, true /* reload it */);
+        }
+        catch (FusionInterrupt e)
+        {
+            throw new FusionInterruptedException(e);
+        }
     }
 
 
     @Override
     public void requireModule(String modulePath)
-        throws FusionException
+        throws FusionInterruptedException, FusionException
     {
-        myNamespace.require(myEvaluator, modulePath);
+        try
+        {
+            myNamespace.require(myEvaluator, modulePath);
+        }
+        catch (FusionInterrupt e)
+        {
+            throw new FusionInterruptedException(e);
+        }
     }
 
 
@@ -164,64 +193,99 @@ final class StandardTopLevel
     public void define(String name, Object value)
         throws FusionException
     {
-        Object fv = myEvaluator.injectMaybe(value);
-        if (fv == null)
+        try
         {
-            String expected =
-                "injectable Java type but received " +
-                value.getClass().getName();
-            throw new ArgTypeFailure("TopLevel.define", expected,
-                                     -1, value);
-        }
-
-        myNamespace.bind(name, fv);
-    }
-
-
-    private Procedure lookupProcedure(String procedureName)
-        throws FusionException
-    {
-        SyntaxSymbol id = SyntaxSymbol.make(myEvaluator, procedureName);
-
-        Object proc = FusionEval.eval(myEvaluator, id, myNamespace);
-        if (proc instanceof Procedure)
-        {
-            return (Procedure) proc;
-        }
-
-        if (proc == null)
-        {
-            throw new FusionException(printQuotedSymbol(procedureName) +
-                                      " is not defined");
-        }
-
-        throw new FusionException(printQuotedSymbol(procedureName) +
-                                  " is not a procedure: " +
-                                  safeWriteToString(myEvaluator, proc));
-    }
-
-    @Override
-    public Object call(String procedureName, Object... arguments)
-        throws FusionException
-    {
-        Procedure proc = lookupProcedure(procedureName);
-
-        for (int i = 0; i < arguments.length; i++)
-        {
-            Object arg = arguments[i];
-            Object fv = myEvaluator.injectMaybe(arg);
+            Object fv = myEvaluator.injectMaybe(value);
             if (fv == null)
             {
                 String expected =
                     "injectable Java type but received " +
-                    arg.getClass().getName();
-                throw new ArgTypeFailure("TopLevel.call",
-                                         expected,
-                                         i, arguments);
+                        value.getClass().getName();
+                throw new ArgTypeFailure("TopLevel.define", expected,
+                                         -1, value);
             }
-            arguments[i] = fv;
-        }
 
-        return myEvaluator.callNonTail(proc, arguments);
+            myNamespace.bind(name, fv);
+        }
+        catch (FusionInterrupt e)
+        {
+            throw new FusionInterruptedException(e);
+        }
+    }
+
+
+    private Object lookupBinding(String name)
+        throws FusionInterruptedException, FusionException
+    {
+        try
+        {
+            SyntaxSymbol id = SyntaxSymbol.make(myEvaluator, name);
+            return FusionEval.eval(myEvaluator, id, myNamespace);
+        }
+        catch (FusionInterrupt e)
+        {
+            throw new FusionInterruptedException(e);
+        }
+    }
+
+
+    private Procedure lookupProcedure(String procedureName)
+        throws FusionInterruptedException, FusionException
+    {
+        try
+        {
+            Object proc = lookupBinding(procedureName);
+            if (proc instanceof Procedure)
+            {
+                return (Procedure) proc;
+            }
+
+            if (proc == null)
+            {
+                throw new FusionException(printQuotedSymbol(procedureName) +
+                    " is not defined");
+            }
+
+            throw new FusionException(printQuotedSymbol(procedureName) +
+                                      " is not a procedure: " +
+                                      safeWriteToString(myEvaluator, proc));
+        }
+        catch (FusionInterrupt e)
+        {
+            throw new FusionInterruptedException(e);
+        }
+    }
+
+
+    @Override
+    public Object call(String procedureName, Object... arguments)
+        throws FusionInterruptedException, FusionException
+    {
+        try
+        {
+            Procedure proc = lookupProcedure(procedureName);
+
+            for (int i = 0; i < arguments.length; i++)
+            {
+                Object arg = arguments[i];
+                Object fv = myEvaluator.injectMaybe(arg);
+                if (fv == null)
+                {
+                    String expected =
+                        "injectable Java type but received " +
+                            arg.getClass().getName();
+                    throw new ArgTypeFailure("TopLevel.call",
+                                             expected,
+                                             i, arguments);
+                }
+                arguments[i] = fv;
+            }
+
+            return myEvaluator.callNonTail(proc, arguments);
+        }
+        catch (FusionInterrupt e)
+        {
+            throw new FusionInterruptedException(e);
+        }
     }
 }

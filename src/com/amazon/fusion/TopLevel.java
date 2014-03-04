@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -24,6 +24,25 @@ import java.io.File;
  * isolate state changes between requests on the same thread.
  * <p>
  * To create a {@link TopLevel}, use a {@link FusionRuntime}.
+ *
+ * <h2>Exceptions</h2>
+ *
+ * Most of the methods on this class are capable of throwing two subclasses of
+ * {@link FusionException} that are noteworthy in that applications may
+ * require special handling for them:
+ *
+ * <ul>
+ *   <li>
+ *     {@link ExitException} is thrown if Fusion's {@code exit} procedure
+ *     is invoked.
+ *   </li>
+ *   <li>
+ *     {@link FusionInterruptedException} is thrown if the evaluation is
+ *     cancelled by calling {@link Thread#interrupt()} on the current thread.
+ *     When this is thrown the thread's interrupt status will have been set.
+ *   </li>
+ * </ul>
+ *
  */
 public interface TopLevel
 {
@@ -43,11 +62,9 @@ public interface TopLevel
      * @return the resulting Fusion value; typically the value of the last
      * expression in the source. May be null (if no value results) or an
      * {@code Object[]} (if there are multiple values).
-     *
-     * @throws ExitException if the Fusion {@code exit} procedure is invoked.
      */
     Object eval(IonReader source, SourceName name)
-        throws ExitException, FusionException;
+        throws FusionException;
 
 
     /**
@@ -64,12 +81,10 @@ public interface TopLevel
      * expression in the source. May be null (if no value results) or an
      * {@code Object[]} (if there are multiple values).
      *
-     * @throws ExitException if the Fusion {@code exit} procedure is invoked.
-     *
      * @see #eval(IonReader,SourceName)
      */
     public Object eval(IonReader source)
-        throws ExitException, FusionException;
+        throws FusionException;
 
 
     /**
@@ -83,11 +98,9 @@ public interface TopLevel
      * @return the resulting Fusion value; typically the value of the last
      * expression in the source. May be null (if no value results) or an
      * {@code Object[]} (if there are multiple values).
-     *
-     * @throws ExitException if the Fusion {@code exit} procedure is invoked.
      */
     public Object eval(String source, SourceName name)
-        throws ExitException, FusionException;
+        throws FusionException;
 
 
     /**
@@ -104,12 +117,10 @@ public interface TopLevel
      * expression in the source. May be null (if no value results) or an
      * {@code Object[]} (if there are multiple values).
      *
-     * @throws ExitException if the Fusion {@code exit} procedure is invoked.
-     *
      * @see #eval(String,SourceName)
      */
     public Object eval(String source)
-        throws ExitException, FusionException;
+        throws FusionException;
 
 
 
@@ -124,11 +135,9 @@ public interface TopLevel
      * @return the resulting Fusion value; typically the value of the last
      * expression in the source. May be null (if no value results) or an
      * {@code Object[]} (if there are multiple values).
-     *
-     * @throws ExitException if the Fusion {@code exit} procedure is invoked.
      */
     public Object load(File source)
-        throws ExitException, FusionException;
+        throws FusionException;
 
 
     /**

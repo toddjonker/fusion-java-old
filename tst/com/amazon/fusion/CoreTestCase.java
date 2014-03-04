@@ -114,7 +114,7 @@ public class CoreTestCase
         runtimeBuilder().addRepositoryDirectory(tstRepo);
     }
 
-    protected FusionRuntime runtime()
+    protected synchronized FusionRuntime runtime()
         throws FusionException
     {
         if (myRuntime == null)
@@ -127,7 +127,7 @@ public class CoreTestCase
     /**
      * Gets the default TopLevel from the {@link #runtime()}.
      */
-    protected TopLevel topLevel()
+    protected synchronized TopLevel topLevel()
         throws FusionException
     {
         if (myTopLevel == null)
