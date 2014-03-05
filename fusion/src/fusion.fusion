@@ -46,8 +46,8 @@ contact us for clarification.
   (provide is_string string_append string_to_symbol symbol_to_string)
 
   (require "/fusion/timestamp")
-  (provide is_timestamp string_to_timestamp timestamp_now
-    timestamp_to_epoch_millis timestamp_to_string)
+  (provide epoch_millis_to_timestamp is_timestamp string_to_timestamp
+    timestamp_now timestamp_to_epoch_millis timestamp_to_string)
 
   (require "/fusion/void")
   (provide is_void void)

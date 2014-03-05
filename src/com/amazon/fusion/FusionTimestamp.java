@@ -5,10 +5,13 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
+import static com.amazon.fusion.FusionNumber.isIntOrDecimal;
 import static com.amazon.fusion.FusionNumber.makeDecimal;
+import static com.amazon.fusion.FusionNumber.unsafeNumberToBigDecimal;
 import static com.amazon.fusion.FusionString.checkNullableStringArg;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
+import static com.amazon.ion.Timestamp.UTC_OFFSET;
 import static com.amazon.ion.util.IonTextUtils.isDigit;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.ion.IonException;
@@ -607,4 +610,31 @@ final class FusionTimestamp
             return makeDecimal(eval, millis);
         }
     }
+
+
+    static final class EpochMillisToTimestampProc
+        extends Procedure1
+    {
+        public EpochMillisToTimestampProc()
+        {
+            //    "                                                                               |
+           super("Returns a timestamp for the point in time given as the number of milliseconds\n" +
+                 "since 1970-01-01T00:00Z. The `epoch_millis` may be a decimal or int.",
+                 "epoch_millis");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object arg)
+            throws FusionException
+        {
+            if (! isIntOrDecimal(eval, arg) || isAnyNull(eval, arg).isTrue())
+            {
+                throw argFailure("non-null int or decimal", 0, arg);
+            }
+
+            BigDecimal epochMillis = unsafeNumberToBigDecimal(eval, arg);
+            Timestamp ts = Timestamp.forMillis(epochMillis, UTC_OFFSET);
+            return makeTimestamp(eval, ts);
+        }
+     }
 }
