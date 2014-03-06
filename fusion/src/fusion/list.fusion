@@ -5,7 +5,7 @@
   '''
 Operations for lists (_a.k.a._ arrays).
 
-A _list_ is a [sequence](fusion/sequence.html) of values with zero-based
+A _list_ is a [sequence][] of values with zero-based
 integer keys and constant-time lookup of elements.  Lists come in three
 concrete types: immutable, mutable, or stretchy; a stretchy list IS-A mutable
 list.  Non-stretchy lists are comparable to Java arrays, while stretchy lists
@@ -101,6 +101,44 @@ The semantics of `add` and `add_m` are described a bit oddly here because they
 are polymorphic operations applicable to other Fusion container types.  The
 `'_m'` suffix is Fusion's spelling of the traditional `'!'` suffix in Scheme
 languages, highlighting potential mutation of an argument.
+
+## Traversing Lists
+
+Lists support the many traversal operators defined over [sequences][sequence]
+and [collections][collection], such as `map`, `choose`, `find`, and
+`fold_left`, and generally you should use those when applicable.
+
+To directly traverse a list, you can write a loop that increments a position
+variable. For example, here's a (list-only) version of `choose`:
+
+    (define (choose pred lst)
+      (let loop [(i 0),
+                 (result (stretchy_list))]
+        (if (= i (size lst))
+          result
+          (let [(e (element lst i))]
+            (loop
+              (+ 1 i)
+              (if (pred e)
+                (add_m result e)
+                result))))))
+
+This loop uses two variables: `i` is the current position in the list, and
+`result` contains the chosen elements. When the loop is called, it receives
+the incremented position, along with either the extended result (if the
+current element `e` satisfies the predicate) or the earlier result as-is.
+
+Bonus tip: the code above would still work if the use of a `strechy_list`
+was replaced with a normal immutable `list`. In that case, `add_m` would
+return a new immutable list, which would then be passed as the new result.
+
+Other alternative traversal forms include [iterators][] and [comprehensions][].
+
+
+  [collection]:     fusion/collection.html
+  [comprehensions]: fusion/for.html
+  [iterators]:      fusion/iterator.html
+  [sequence]:       fusion/sequence.html
   '''
 
 
