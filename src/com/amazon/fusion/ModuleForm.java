@@ -11,7 +11,6 @@ import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionString.stringToJavaString;
 import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionVoid.voidValue;
-import static com.amazon.fusion.GlobalState.DEFINE_SYNTAX;
 import static com.amazon.fusion.GlobalState.PROVIDE;
 import static com.amazon.fusion.GlobalState.REQUIRE;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
@@ -197,16 +196,10 @@ final class ModuleForm
                             eval.compile(moduleNamespace, expanded);
                         eval.eval(moduleNamespace, compiled);
                     }
-                    catch (SyntaxException e)
+                    catch (FusionException e)
                     {
                         e.addContext(form);
                         throw e;
-                    }
-                    catch (FusionException e)
-                    {
-                        String message = e.getMessage();
-                        throw new SyntaxException(DEFINE_SYNTAX, message,
-                                                  form);
                     }
                     formIsPrepared = true;
                 }

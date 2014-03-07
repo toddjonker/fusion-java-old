@@ -35,7 +35,9 @@ class SyntaxChecker
 
     SyntaxException failure(String message, SyntaxValue subform)
     {
-        return new SyntaxException(myFormName, message, subform, myForm);
+        SyntaxException e = new SyntaxException(myFormName, message, subform);
+        e.addContext(myForm);
+        return e;
     }
 
     /**
@@ -194,15 +196,19 @@ class SyntaxChecker
         @Override
         SyntaxException failure(String message)
         {
-            return new SyntaxException(myBaseForm.myFormName, message,
-                                       myForm, myBaseForm.myForm);
+            SyntaxException e =
+                new SyntaxException(myBaseForm.myFormName, message, myForm);
+            e.addContext(myBaseForm.myForm);
+            return e;
         }
 
         @Override
         SyntaxException failure(String message, SyntaxValue subform)
         {
-            return new SyntaxException(myBaseForm.myFormName, message,
-                                       subform, myBaseForm.myForm);
+            SyntaxException e =
+                new SyntaxException(myBaseForm.myFormName, message, subform);
+            e.addContext(myBaseForm.myForm);
+            return e;
         }
 
         @Override

@@ -105,8 +105,16 @@ final class RequireForm
         {
             SyntaxValue moduleSpec = stx.get(eval, i);
 
-            ids[i-1] = myModuleNameResolver.resolve(eval, baseModule,
-                                                    moduleSpec, true);
+            try
+            {
+                ids[i-1] = myModuleNameResolver.resolve(eval, baseModule,
+                                                        moduleSpec, true);
+            }
+            catch (FusionException e)
+            {
+                e.addContext(moduleSpec);
+                throw e;
+            }
         }
 
         return new CompiledRequire(ids);

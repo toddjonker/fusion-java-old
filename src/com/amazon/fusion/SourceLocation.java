@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -73,16 +73,11 @@ final class SourceLocation
     public String toString()
     {
         StringBuilder out = new StringBuilder();
-        FusionUtils.writeFriendlyIndex(out, myLine);
-        out.append(" line, ");
-        FusionUtils.writeFriendlyIndex(out, myColumn);
-        out.append(" column");
-
-        if (myName != null)
+        try
         {
-            out.append(" of ");
-            out.append(myName.display());
+            display(out);
         }
+        catch (IOException e) { /* shouldn't happen */ }
         return out.toString();
     }
 }

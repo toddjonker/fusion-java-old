@@ -1,8 +1,10 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents conditions raised within Fusion code, as opposed to failures
@@ -12,6 +14,8 @@ import java.io.IOException;
 public class FusionException
     extends Exception
 {
+    private List<SourceLocation> myContinuation;
+
     // Constructors aren't public because I don't want applications to create
     // exceptions directly or subclass them.
 
@@ -32,6 +36,64 @@ public class FusionException
 
 
     /**
+     * Prepends a now location to the continuation of this exception.
+     *
+     * @param location can be null to indicate an unknown location.
+     */
+    void addContext(SourceLocation location)
+    {
+        if (myContinuation == null)
+        {
+            myContinuation = new ArrayList<>(32);
+            myContinuation.add(location);
+        }
+        else if (location != null ||
+                 myContinuation.get(myContinuation.size() - 1) != null)
+        {
+            // Collapse adjacent nulls
+            myContinuation.add(location);
+        }
+    }
+
+
+    /**
+     * Prepends a now location to the continuation of this exception.
+     *
+     * @param stx can be null to indicate an unknown location.
+     */
+    void addContext(SyntaxValue stx)
+    {
+        if (stx != null)
+        {
+            addContext(stx.getLocation());
+        }
+    }
+
+
+    // Before making this public, think about whether it needs Evaluator
+    // and should throw FusionException
+    void displayContinuation(Appendable out)
+        throws IOException
+    {
+        if (myContinuation != null)
+        {
+            for (SourceLocation loc : myContinuation)
+            {
+                if (loc == null)
+                {
+                    out.append("\n  ...");
+                }
+                else
+                {
+                    out.append("\n  ...at ");
+                    loc.display(out);
+                }
+            }
+        }
+    }
+
+
+    /**
      * Returns the message string given to the exception constructor.
      * This should be used instead of {@link #getMessage()} since the latter is
      * overridden here to delegate to {@link #displayMessage}.
@@ -44,7 +106,11 @@ public class FusionException
     void displayMessage(Evaluator eval, Appendable out)
         throws IOException, FusionException
     {
-        out.append(super.getMessage());
+        String superMessage = getBaseMessage();
+        if (superMessage != null)
+        {
+            out.append(superMessage);
+        }
     }
 
     /**
@@ -58,6 +124,7 @@ public class FusionException
         try
         {
             displayMessage(null, out);
+            displayContinuation(out);
         }
         catch (IOException e) {}
         catch (FusionException e) {}

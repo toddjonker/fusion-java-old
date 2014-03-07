@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -9,9 +9,8 @@ import java.io.IOException;
 public final class FusionAssertionException
     extends FusionException
 {
-    private final SourceLocation myLocation;
-    private final String         myExpression;
-    private final Object         myResult;
+    private final String myExpression;
+    private final Object myResult;
 
     /**
      * @param message may be null.
@@ -24,9 +23,10 @@ public final class FusionAssertionException
                              Object result)
     {
         super(message);
-        myLocation = location;
         myExpression = expression;
         myResult = result;
+
+        addContext(location);
     }
 
     public String getUserMessage()
@@ -35,26 +35,16 @@ public final class FusionAssertionException
     }
 
     @Override
-    public void displayMessage(Evaluator eval, Appendable out)
+    void displayMessage(Evaluator eval, Appendable out)
         throws IOException, FusionException
     {
         out.append("Assertion failure: ");
 
-        String superMessage = getBaseMessage();
-        if (superMessage != null)
-        {
-            out.append(superMessage);
-        }
-
-        if (myLocation != null)
-        {
-            out.append("\nLocation: ");
-            myLocation.display(out);
-        }
+        super.displayMessage(eval, out);
 
         out.append("\nExpression: ");
         out.append(myExpression);
-        out.append("\nResult: ");
+        out.append("\nResult:     ");
         safeWrite(eval, out, myResult);
     }
 }

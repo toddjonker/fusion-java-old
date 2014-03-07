@@ -1,11 +1,10 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.safeWrite;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * Indicates a compile-time syntax error.
@@ -15,49 +14,49 @@ public class SyntaxException
     extends FusionException
 {
     private final String myName;
-    /** Not null, but may be empty. */
-    private SyntaxValue[] mySources;
+    /** May be null. */
+    private final SyntaxValue mySource;
 
 
     /**
      * @param whatForm may be null.
      * @param message must not be null.
      */
-    SyntaxException(String whatForm, String message, SyntaxValue... sources)
+    SyntaxException(String whatForm, String message)
     {
         super(message);
         myName = whatForm;
+        mySource = null;
+    }
 
-        for (SyntaxValue s : sources)
+    /**
+     * @param whatForm may be null.
+     * @param message must not be null.
+     * @param source the innermost continuation location; may be null.
+     */
+    SyntaxException(String whatForm, String message, SyntaxValue source)
+    {
+        super(message);
+        myName = whatForm;
+        mySource = source;
+
+        if (mySource != null)
         {
-            if (s == null)
-            {
-                // Long way around to filter nulls
-                mySources = SyntaxValue.EMPTY_ARRAY;
-                for (SyntaxValue s2 : sources)
-                {
-                    if (s2 != null) addContext(s2);
-                }
-                return;
-            }
+            addContext(source.getLocation());
         }
-
-        mySources = sources;
     }
 
 
+    @Override
     void addContext(SyntaxValue syntax)
     {
-        assert syntax != null;
-        int len = mySources.length;
-        mySources = Arrays.copyOf(mySources, len + 1);
-        mySources[len] = syntax;
+        super.addContext(syntax);
     }
 
 
     @Override
     public void displayMessage(Evaluator eval, Appendable out)
-        throws IOException
+        throws IOException, FusionException
     {
         out.append("Bad syntax");
         if (myName != null)
@@ -66,23 +65,12 @@ public class SyntaxException
             IonTextUtils.printQuotedSymbol(out, myName);
         }
         out.append(": ");
-        out.append(getBaseMessage());
+        super.displayMessage(eval, out);
 
-        if (mySources.length != 0)
+        if (mySource != null)
         {
-            SourceLocation loc = mySources[0].getLocation();
-            if (loc != null)
-            {
-                out.append("\nat ");
-                loc.display(out);
-            }
-
-            out.append("\nSources:");
-            for (SyntaxValue expr : mySources)
-            {
-                out.append("\n  ");
-                safeWrite(eval, out, expr);
-            }
+            out.append("\nSource: ");
+            safeWrite(eval, out, mySource);
         }
     }
 }
