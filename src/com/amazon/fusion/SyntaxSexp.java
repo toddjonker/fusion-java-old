@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -670,7 +670,7 @@ final class SyntaxSexp
             return compilePlainLet(argForms, lambda.myBody);
         }
 
-        return new CompiledPlainApp(procForm, argForms);
+        return new CompiledPlainApp(getLocation(), procForm, argForms);
     }
 
 
@@ -680,11 +680,15 @@ final class SyntaxSexp
     private static final class CompiledPlainApp
         implements CompiledForm
     {
+        private final SourceLocation myLocation;
         private final CompiledForm   myProcForm;
         private final CompiledForm[] myArgForms;
 
-        CompiledPlainApp(CompiledForm procForm, CompiledForm[] argForms)
+        CompiledPlainApp(SourceLocation location,
+                         CompiledForm   procForm,
+                         CompiledForm[] argForms)
         {
+            myLocation = location;
             myProcForm = procForm;
             myArgForms = argForms;
         }
@@ -693,7 +697,7 @@ final class SyntaxSexp
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            Object proc = eval.eval(store, myProcForm);
+            Object proc = eval.eval(store, myProcForm, myLocation);
 
             int argCount = myArgForms.length;
 
@@ -707,7 +711,7 @@ final class SyntaxSexp
                 args = new Object[argCount];
                 for (int i = 0; i < argCount; i++)
                 {
-                    args[i] = eval.eval(store, myArgForms[i]);
+                    args[i] = eval.eval(store, myArgForms[i], myLocation);
                 }
             }
 
@@ -738,7 +742,7 @@ final class SyntaxSexp
                 throw new FusionException(b.toString());
             }
 
-            return eval.bounceTailCall(p, args);
+            return eval.bounceTailCall(myLocation, p, args);
         }
     }
 }
