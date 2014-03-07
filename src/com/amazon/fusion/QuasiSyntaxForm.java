@@ -34,7 +34,7 @@ final class QuasiSyntaxForm
 
         if (stx.size() != 2)
         {
-            throw new SyntaxException(identify(),
+            throw new SyntaxException(getInferredName(),
                                       "a single template required",
                                       stx);
         }
