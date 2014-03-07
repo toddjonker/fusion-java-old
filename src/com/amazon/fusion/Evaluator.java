@@ -13,6 +13,7 @@ import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionStruct.structFromIonStruct;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionTimestamp.makeTimestamp;
+import static com.amazon.fusion.FusionUtils.friendlyIndex;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonDecimal;
@@ -668,11 +669,18 @@ final class Evaluator
     }
 
 
-    final void checkSingleResult(Object values, String formIdentifier)
+    final void checkSingleResult(Object values,
+                                 long   index,
+                                 String formIdentifier)
         throws FusionException
     {
         if (values instanceof Object[])
         {
+            if (index >= 0)
+            {
+                formIdentifier = friendlyIndex(index) + ' ' + formIdentifier;
+            }
+
             Object[] valuesArray = (Object[]) values;
             String expectation =
                 "1 result but received " + valuesArray.length;
@@ -681,13 +689,20 @@ final class Evaluator
         }
     }
 
+    final void checkSingleResult(Object values, String formIdentifier)
+        throws FusionException
+    {
+        checkSingleResult(values, -1, formIdentifier);
+    }
+
 
     private final void checkSingleArgResults(Object[] args)
         throws FusionException
     {
-        for (Object o : args)
+        int len = args.length;
+        for (int i = 0; i < len; i++)
         {
-            checkSingleResult(o, "procedure argument");
+            checkSingleResult(args[i], i, "procedure argument");
         }
     }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -58,6 +58,13 @@ final class FusionUtils
             return "rd";
         }
         return "th";
+    }
+
+
+    static String friendlyIndex(long i)
+    {
+        i++;
+        return i + friendlySuffix(i);
     }
 
 
