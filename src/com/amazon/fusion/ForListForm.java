@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -19,6 +19,8 @@ final class ForListForm
               "evaluate to a list, sexp, or iterator.  Returns a stretchy list of the\n" +
               "results.\n" +
               "\n" +
+              "If there are no `ident`s declared, then the body is executed once.\n" +
+              "\n" +
               "    (for_list\n" +
               "      [ (even [0, 2, 4]),\n" +
               "        (odd  [1, 3, 5]) ]\n" +
@@ -33,7 +35,7 @@ final class ForListForm
         final Evaluator eval = expander.getEvaluator();
 
         SyntaxChecker check = check(eval, stx);
-        check.arityAtLeast(2);
+        check.arityAtLeast(3);  // Must have bindings and body.
 
         SyntaxChecker checkBindings =
             check.subformSeq("sequence of bindings", 1);
@@ -125,6 +127,8 @@ final class ForListForm
 
     //========================================================================
 
+    // TODO Optimize for single-series case.
+    //      That will make fors_list much more efficient.
 
     private final class CompiledForList
         implements CompiledForm
@@ -172,6 +176,12 @@ final class ForListForm
                     Object nextResult = eval.eval(localStore, myBody);
                     unsafeListAddM(eval, resultList, nextResult);
                 }
+            }
+            else // No bindings, evaluate the body once.
+            {
+                Store localStore = new LocalStore(store, EMPTY_OBJECT_ARRAY);
+                Object nextResult = eval.eval(localStore, myBody);
+                unsafeListAddM(eval, resultList, nextResult);
             }
 
             return resultList;

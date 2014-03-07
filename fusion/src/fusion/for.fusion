@@ -39,17 +39,19 @@ for list comprehension.
       z)                                   => [1, 2, 3, 4]
     '''
     (lambda (stx)
-      (if (or (< (syntax_size stx) 2)
+      (if (or (< (syntax_size stx) 3)
               (is_null (syntax_get stx 1)))
-        (wrong_syntax stx "expecting bindings")
+        (wrong_syntax stx "expecting bindings and body")
         (let [(bindings (syntax_get stx 1)),
               (body (syntax_subseq stx 2))]
           (unless (is_sequence (syntax_unwrap bindings))
             (wrong_syntax stx "bindings must be a sequence"))
-          (if (or (= 0 (syntax_size bindings))
-                  (= 2 (syntax_size stx)))
-            /* Base case -- no bindings or no body */
-            (quasisyntax [])
+          (if (= 0 (syntax_size bindings))
+            /* Base case -- no bindings */
+            (syntax_append
+              (quasisyntax
+                (for_list []))
+              body)
             (if (= 1 (syntax_size bindings))
               /* Base case -- single binding */
               (let [(binding (syntax_get bindings 0))]
