@@ -711,16 +711,6 @@ final class Evaluator
 
 
     /**
-     * Wraps an expression for evaluation in tail position.
-     * Must be returned back to this {@link Evaluator} for proper behavior.
-     */
-    Object bounceTailForm(Store store, CompiledForm form)
-    {
-        return new TailForm(store, form);
-    }
-
-
-    /**
      * Returned from evaluation of a form when evaluation needs to continue in
      * a tail position. This allows the {@link Evaluator} to trampoline into
      * the tail call without growing the stack.  Not the most efficient
@@ -740,18 +730,14 @@ final class Evaluator
 
 
     /**
-     * Makes a procedure call from tail position.
-     * The result MUST be immediately returned to the evaluator,
-     * it's not a normal value!
-     *
-     * @return not null
+     * Wraps an expression for evaluation in tail position.
+     * Must be returned back to this {@link Evaluator} for proper behavior.
      */
-    Object bounceTailCall(Procedure proc, Object... args)
-        throws FusionException
+    Object bounceTailForm(Store store, CompiledForm form)
     {
-        return new TailCall(proc, args);
-
+        return new TailForm(store, form);
     }
+
 
     /**
      * Returned from evaluation of a form when evaluation needs to continue in
@@ -769,5 +755,19 @@ final class Evaluator
             myProc = proc;
             myArgs = args;
         }
+    }
+
+
+    /**
+     * Makes a procedure call from tail position.
+     * The result MUST be immediately returned to the evaluator,
+     * it's not a normal value!
+     *
+     * @return not null
+     */
+    Object bounceTailCall(Procedure proc, Object... args)
+        throws FusionException
+    {
+        return new TailCall(proc, args);
     }
 }
