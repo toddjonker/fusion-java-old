@@ -16,7 +16,7 @@ import static com.amazon.fusion.FusionStruct.nullStruct;
 import static com.amazon.fusion.FusionStruct.structImplAdd;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionTimestamp.makeTimestamp;
-import static com.amazon.fusion.SourceLocation.currentLocation;
+import static com.amazon.fusion.SourceLocation.forCurrentSpan;
 import com.amazon.fusion.FusionList.BaseList;
 import com.amazon.fusion.FusionSexp.BaseSexp;
 import com.amazon.ion.Decimal;
@@ -96,7 +96,7 @@ class StandardReader
 
         String[] anns = source.getTypeAnnotations();
         SourceLocation loc =
-            (readingSyntax ? currentLocation(source, name) : null);
+            (readingSyntax ? forCurrentSpan(source, name) : null);
 
         BaseValue datum;
         switch (type)

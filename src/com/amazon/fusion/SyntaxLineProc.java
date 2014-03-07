@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -24,7 +24,7 @@ class SyntaxLineProc
         SourceLocation location = stx.getLocation();
         if (location != null)
         {
-            return makeInt(eval, location.myLine);
+            return makeInt(eval, location.getLine());
         }
         return voidValue(eval);
     }

@@ -7,14 +7,120 @@ import com.amazon.ion.TextSpan;
 import com.amazon.ion.util.Spans;
 import java.io.IOException;
 
-final class SourceLocation
+
+class SourceLocation
 {
     /** May be null. */
     final SourceName myName;
-    /** Zero-based */
-    final long myLine;
-    /** Zero-based */
-    final long myColumn;
+
+
+    /**
+     * @param name may be null
+     */
+    private SourceLocation(SourceName name)
+    {
+        myName = name;
+    }
+
+
+    /**
+     * Gets the zero-based line number.
+     * @return -1 if the line is unknown.
+     */
+    long getLine()
+    {
+        return -1;
+    }
+
+    /**
+     * Gets the zero-based column number.
+     * @return -1 if the column is unknown.
+     */
+    long getColumn()
+    {
+        return -1;
+    }
+
+
+    private static final class Shorts
+        extends SourceLocation
+    {
+        private final short myLine;
+        private final short myColumn;
+
+        private Shorts(SourceName name, short line, short column)
+        {
+            super(name);
+            myLine = line;
+            myColumn = column;
+        }
+
+        @Override
+        long getLine()
+        {
+            return myLine;
+        }
+
+        @Override
+        long getColumn()
+        {
+            return myColumn;
+        }
+    }
+
+
+    private static final class Ints
+        extends SourceLocation
+    {
+        private final int myLine;
+        private final int myColumn;
+
+        private Ints(SourceName name, int line, int column)
+        {
+            super(name);
+            myLine = line;
+            myColumn = column;
+        }
+
+        @Override
+        long getLine()
+        {
+            return myLine;
+        }
+
+        @Override
+        long getColumn()
+        {
+            return myColumn;
+        }
+    }
+
+
+    private static final class Longs
+        extends SourceLocation
+    {
+        private final long myLine;
+        private final long myColumn;
+
+        private Longs(SourceName name, long line, long column)
+        {
+            super(name);
+            myLine = line;
+            myColumn = column;
+        }
+
+        @Override
+        long getLine()
+        {
+            return myLine;
+        }
+
+        @Override
+        long getColumn()
+        {
+            return myColumn;
+        }
+    }
 
 
     /**
@@ -27,45 +133,76 @@ final class SourceLocation
      *
      * @return null if no location could be determined.
      */
-    static SourceLocation currentLocation(IonReader source, SourceName name)
+    static SourceLocation forCurrentSpan(IonReader source, SourceName name)
     {
         TextSpan ts = Spans.currentSpan(TextSpan.class, source);
         if (ts != null)
         {
             // Convert from one-based to zero-based.
-            return new SourceLocation(name,
-                                      ts.getStartLine() - 1,
-                                      ts.getStartColumn() - 1);
+            long line   = ts.getStartLine  () - 1;
+            long column = ts.getStartColumn() - 1;
+
+            if (line <= Short.MAX_VALUE && column <= Short.MAX_VALUE)
+            {
+                return new Shorts(name, (short) line, (short) column);
+            }
+
+            if (line <= Integer.MAX_VALUE && column <= Integer.MAX_VALUE)
+            {
+                return new Ints(name, (int) line, (int) column);
+            }
+
+            return new Longs(name, line, column);
         }
+
+        if (name != null)
+        {
+            // TODO Can this allocation be eliminated?
+            //      We'll probably be creating lots of identical instances.
+            return new SourceLocation(name);
+        }
+
         return null;
     }
 
 
-    /**
-     * @param name may be null
-     * @param line zero-based
-     * @param column zero-based
-     */
-    private SourceLocation(SourceName name, long line, long column)
+    private void displayOrdinal(Appendable out, long ord)
+        throws IOException
     {
-        myName = name;
-        myLine = line;
-        myColumn = column;
+        if (ord < 0)
+        {
+            out.append("???");
+        }
+        else
+        {
+            FusionUtils.writeFriendlyIndex(out, ord);
+        }
     }
 
 
     void display(Appendable out)
         throws IOException
     {
-        FusionUtils.writeFriendlyIndex(out, myLine);
-        out.append(" line, ");
-        FusionUtils.writeFriendlyIndex(out, myColumn);
-        out.append(" column");
+        long line   = getLine();
+        long column = getColumn();
 
-        if (myName != null)
+        if (line < 0)
         {
-            out.append(" of ");
+            out.append("unknown location in ");
             out.append(myName.display());
+        }
+        else
+        {
+            displayOrdinal(out, line);
+            out.append(" line, ");
+            displayOrdinal(out, column);
+            out.append(" column");
+
+            if (myName != null)
+            {
+                out.append(" of ");
+                out.append(myName.display());
+            }
         }
     }
 
