@@ -59,6 +59,7 @@ final class FusionEval
     {
         SyntaxValue stx =
             topLevelStx(eval, topLevelForm, false, "default_eval_handler");
+        SourceLocation topLocation = stx.getLocation();
 
         Namespace ns = eval.findCurrentNamespace();
 
@@ -67,46 +68,54 @@ final class FusionEval
         LinkedList<SyntaxValue> forms = new LinkedList<>();
         forms.push(stx);
 
-        Object result = voidValue(eval);
-        while (! forms.isEmpty())
+        try
         {
-            stx = expander.partialExpand(ns, forms.pop());
-
-            if (stx instanceof SyntaxSexp)
+            Object result = voidValue(eval);
+            while (! forms.isEmpty())
             {
-                SyntaxSexp sexp = (SyntaxSexp) stx;
-                Binding binding = sexp.firstBinding(eval);
-                if (binding == eval.getGlobalState().myKernelBeginBinding)
+                stx = expander.partialExpand(ns, forms.pop());
+
+                if (stx instanceof SyntaxSexp)
                 {
-                    // Splice 'begin' into the top-level sequence
-                    int last = sexp.size() - 1;
-                    for (int i = last; i != 0;  i--)
+                    SyntaxSexp sexp = (SyntaxSexp) stx;
+                    Binding binding = sexp.firstBinding(eval);
+                    if (binding == eval.getGlobalState().myKernelBeginBinding)
                     {
-                        forms.push(sexp.get(eval, i));
+                        // Splice 'begin' into the top-level sequence
+                        int last = sexp.size() - 1;
+                        for (int i = last; i != 0;  i--)
+                        {
+                            forms.push(sexp.get(eval, i));
+                        }
+                        stx = null;
                     }
-                    stx = null;
                 }
-            }
 
-            if (stx != null)
-            {
-                // We've partial-expanded, now full-expand.
-                stx = expander.expand(ns, stx);
-
-                CompiledForm compiled = eval.compile(ns, stx);
-                stx = null; // Don't hold garbage
-
-                Object r = eval.eval(ns, compiled); // TODO TAIL
-
-                // Take care not to retain the result value longer than needed
-                if (forms.isEmpty())
+                if (stx != null)
                 {
-                    result = r;
+                    // We've partial-expanded, now full-expand.
+                    stx = expander.expand(ns, stx);
+
+                    CompiledForm compiled = eval.compile(ns, stx);
+                    stx = null; // Don't hold garbage
+
+                    Object r = eval.eval(ns, compiled); // TODO TAIL
+
+                    // Don't retain the result value longer than needed.
+                    if (forms.isEmpty())
+                    {
+                        result = r;
+                    }
                 }
             }
-        }
 
-        return result;
+            return result;
+        }
+        catch (FusionException e)
+        {
+            e.addContext(topLocation);
+            throw e;
+        }
     }
 
 
