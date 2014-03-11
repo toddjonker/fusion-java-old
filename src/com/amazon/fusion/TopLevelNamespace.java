@@ -531,7 +531,7 @@ class TopLevelNamespace
         }
 
         @Override
-        public synchronized Object doEval(Evaluator eval, Store store)
+        public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
             int address;
