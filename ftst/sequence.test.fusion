@@ -26,6 +26,49 @@
 (check_false (is_sequence 1970-01-01))
 
 //==========================================================================
+// subseq
+
+(define_check (check_subseq msg orig from to expect)
+  (check === (subseq orig from to) expect)
+  (let [(s (subseq (apply mutable_list orig) from to))]
+    (check === s expect)
+    (check_pred is_mutable_list s))
+  (let [(s (subseq (apply stretchy_list orig) from to))]
+    (check === s expect)
+    (check_pred is_stretchy_list s))
+  (check === (subseq (apply sexp orig) from to) (apply sexp expect)))
+
+
+(check_subseq []      0 0 [])
+(check_subseq [1]     0 0 [])
+(check_subseq [1]     0 1 [1])
+(check_subseq [1]     1 1 [])
+(check_subseq [1,2,3] 0 0 [])
+(check_subseq [1,2,3] 0 1 [1])
+(check_subseq [1,2,3] 0 3 [1,2,3])
+(check_subseq [1,2,3] 1 1 [])
+(check_subseq [1,2,3] 1 2 [2])
+(check_subseq [1,2,3] 1 3 [2,3])
+(check_subseq [1,2,3] 0 3 [1,2,3])
+(check_subseq [1,2,3] 3 3 [])
+
+(check_arity_exn (subseq))
+(check_arity_exn (subseq []))
+(check_arity_exn (subseq [] 0 0 0))
+(check_arity_exn (subseq EMPTY_SEXP))
+(check_arity_exn (subseq EMPTY_SEXP 0 0 0))
+
+(check_arg_exn (subseq 99 0 0))       // 1st arg not a sequence
+
+(check_arg_exn (subseq null.list 0 0))
+(check_arg_exn (subseq NULL_SEXP 0 0))
+
+(check_arg_exn (subseq [1,2,3] 4 4))  // expects from <= size
+(check_arg_exn (subseq [1,2,3] 1 4))  // expects to <= size
+(check_arg_exn (subseq [1,2,3] 2 1))  // expects from <= to
+
+
+//==========================================================================
 // fold_left
 
 (check === (fold_left + 0) 0)

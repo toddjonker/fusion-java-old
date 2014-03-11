@@ -285,6 +285,10 @@ final class FusionList
     static BaseList unsafeListSubseq(Evaluator eval, Object list,
                                      int srcPos, int length)
     {
+        BaseList lst = (BaseList) list;
+
+        if (srcPos == 0 && length == lst.size()) return lst;
+
         Object[] copy;
         if (length == 0)
         {
@@ -296,7 +300,7 @@ final class FusionList
             unsafeListCopy(eval, list, srcPos, copy, 0, length);
         }
 
-        return ((BaseList) list).makeSimilar(EMPTY_STRING_ARRAY, copy);
+        return lst.makeSimilar(EMPTY_STRING_ARRAY, copy);
     }
 
 
@@ -1346,6 +1350,34 @@ final class FusionList
             int pos = unsafeTruncateIntToJavaInt(eval, args[1]);
 
             return unsafeListRef(eval, args[0], pos);
+        }
+    }
+
+
+    static final class UnsafeListSubseqProc
+        extends Procedure
+    {
+        UnsafeListSubseqProc()
+        {
+            //    "                                                                               |
+            super("Returns a list holding the elements from `list` between positions\n" +
+                  "`from` and `to`.  The following precondition applies:\n" +
+                  "\n" +
+                  "    0 <= from <= to <= (size list)\n" +
+                  "\n" +
+                  "The result may share structure with `list`.",
+                  "list", "from", "to");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            int from = unsafeTruncateIntToJavaInt(eval, args[1]);
+            int to   = unsafeTruncateIntToJavaInt(eval, args[2]);
+            int len  = to - from;
+
+            return unsafeListSubseq(eval, args[0], from, len);
         }
     }
 

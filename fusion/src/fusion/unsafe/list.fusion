@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (module unsafe_list '/fusion/private/builtins'
 
@@ -22,6 +22,9 @@ related operations on lists.
 
   (defpub_j unsafe_list_element
     "com.amazon.fusion.FusionList$UnsafeListElementProc")
+
+  (defpub_j unsafe_list_subseq
+    "com.amazon.fusion.FusionList$UnsafeListSubseqProc")
 
   (defpub_j unsafe_list_set
     "com.amazon.fusion.FusionList$UnsafeListSetProc")

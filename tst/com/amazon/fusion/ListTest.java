@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -181,51 +181,6 @@ public class ListTest
     public String ionListGenerator(int length)
     {
         return ionListGeneratorWithOffset(length, 0);
-    }
-
-
-    @Test
-    public void testSubsequence()
-        throws Exception
-    {
-        assertEval("[]",    "(subseq [] 0 0)");
-        assertEval("[]",    "(subseq smList 0 0)");
-        assertEval("[0]",   "(subseq smList 0 1)");
-        assertEval("[1]",   "(subseq medList 1 2)");
-        assertEval("[1,2]", "(subseq medList 1 3)");
-        assertEval(ionListGeneratorWithOffset(1000,4000),
-                "(subseq lgList 4000 5000)");
-
-        // I'm not certain how to specify the result in this case.
-        // Should it return null.list or [] ?
-        eval("(subseq null.list 0 0)");
-    }
-
-    @Test
-    public void testSubsequenceFail()
-        throws Exception
-    {
-        expectArityFailure("(subseq)");
-        expectArityFailure("(subseq 1 2 3 4)");
-        expectArityFailure("(subseq [])");
-
-        expectArgTypeFailure("(subseq \"optimus prime\" 2 3)", 0);
-
-        // Problem here is index too large, not null.list
-        expectArgTypeFailure("(subseq null.list 0 1)", 2);
-
-        expectArgTypeFailure("(subseq lgList 8886 6666)", 1);
-        expectArgTypeFailure("(subseq smList 5 8)", 2);
-        expectArgTypeFailure("(subseq lgList 5555 88888)", 2);
-
-        // Test conversion of long to int
-        long big = 4294967298L;
-        assertEquals(2, (int)big);
-        expectArgTypeFailure("(subseq smList " + big + " " + (big + 1) + ")", 1);
-
-        big = -9223372036854775806L;
-        assertEquals(2, (int)big);
-        expectArgTypeFailure("(subseq smList " + big + " " + (big + 1) + ")", 1);
     }
 
 

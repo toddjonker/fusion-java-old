@@ -45,7 +45,7 @@ elements.
       '''
       (if (= 0 (size sequence))
         (raise_argument_error "first" "non-empty sequence" 0 sequence)
-        (. sequence 0))))
+        (element sequence 0))))
 
 
   (defpub last
@@ -57,7 +57,52 @@ elements.
       (let [(s (size sequence))]
         (if (= 0 s)
           (raise_argument_error "last" "non-empty sequence" 0 sequence)
-          (. sequence (- s 1))))))
+          (element sequence (- s 1))))))
+
+
+  (defpub subseq
+    (lambda (seq from to)
+      '''
+Returns a sequence holding the elements of the non-null sequence `seq` between
+positions `from` and `to`.  The following precondition applies:
+
+    0 <= from <= to <= (size seq)
+
+The result may share structure with `seq` and has the same type as `seq`.
+      '''
+      (unless (and (is_int from) (<= 0 from))
+        (raise_argument_error "subseq" "non-negative int" 1 seq from to))
+      (unless (is_int to)  // Non-negativity is checked in the next clause.
+        (raise_argument_error "subseq" "non-negative int" 2 seq from to))
+      (unless (<= from to)
+        (raise_argument_error "subseq" "'from' less than 'to'"
+          1 seq from to))
+      (when (is_null seq)
+        (raise_argument_error "subseq" "non-null sequence" 0 seq from to))
+      (cond
+        ((is_list seq)
+         (let [(size (unsafe_list_size seq))]
+           (if (< size to)
+             (raise_argument_error "subseq" "'to' less than (size seq)"
+               2 seq from to)
+             (unsafe_list_subseq seq from to))))
+        ((is_sexp seq)
+         (let find_head [(s seq), (f from), (t to)]
+           (if (= 0 f)
+             (let prefix [(s s), (t t)]
+               (if (= 0 t)
+                 (quote ())
+                 (if (is_pair s)
+                   (pair (head s) (prefix (tail s) (- t 1)))
+                   (raise_argument_error "subseq"
+                     "'to' less than (size seq)"
+                     2 seq from to))))
+             (if (is_pair s)
+               (find_head (tail s) (- f 1) (- t 1))
+               (raise_argument_error "subseq" "'to' less than (size seq)"
+                 2 seq from to)))))
+        (true (raise_argument_error "subseq" "non-null sequence"
+                0 seq from to)))))
 
 
   //==========================================================================
