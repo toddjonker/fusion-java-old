@@ -1078,9 +1078,18 @@ final class FusionList
         void write(Evaluator eval, Appendable out)
             throws IOException, FusionException
         {
-            // Must inject elements since IonValue writes out with type
-            // annotation.
-            injectElements(eval);
+            synchronized (this)
+            {
+                if (myValues[0] instanceof IonValue)
+                {
+                    // TODO WORKAROUND ION-398
+                    // TODO FUSION-247 Write output without building an IonWriter.
+                    IonWriter iw = WRITER_BUILDER.build(out);
+                    ionize(eval, iw);
+                    return;
+                }
+            }
+            // else our elements have already been injected, ionize as normal.
             super.write(eval, out);
         }
 
