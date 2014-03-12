@@ -1,6 +1,6 @@
 // Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
 
-(module equality "/fusion"
+(module equality "/fusion/private/kernel"
 
   '''
 Experimental equality procedures.

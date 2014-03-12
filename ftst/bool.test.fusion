@@ -1,6 +1,63 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 (require "/check")
+
+
+// Here's the bindings we expect to be available:
+(module check_bindings '/fusion/bool'
+  [
+    and, cond, if, is_bool,
+    is_false, is_true, is_truthy, is_untruthy,
+    not, or, unless, when,
+  ])
+
+
+(check_pred is_true true)
+(check_pred is_true (quote a::true))
+
+(check_pred is_false false)
+(check_pred is_false (quote a::false))
+
+(check_false (is_true false))
+(check_false (is_false true))
+
+
+// Truthiness for true/false
+(check_true  (is_truthy   true))
+(check_true  (is_truthy   (quote a::true)))
+(check_false (is_untruthy true))
+
+(check_false (is_truthy   false))
+//(check_false (is_truthy   (quote a::false)))
+(check_true  (is_untruthy false))
+
+
+// Truthy values (but not true)
+(map
+  (lambda (v)
+    (check_pred         is_truthy    v)
+    (check_pred (negate is_untruthy) v)
+    (check_pred (negate is_true    ) v)
+    (check_pred (negate is_false   ) v)
+    (check_true (if v true false)))
+  [
+    0, 1,
+    "", "true", "false",
+  ])
+
+
+// Untruthy values (but not false)
+(map
+  (lambda (v)
+    (check_pred (negate is_truthy  ) v)
+    (check_pred         is_untruthy  v)
+    (check_pred (negate is_true    ) v)
+    (check_pred (negate is_false   ) v)
+    (check_false (if v true false)))
+  [
+    (void),
+    null, null.bool, null.int, (quote a::null), (quote a::null.bool),
+  ])
 
 
 //============================================================================

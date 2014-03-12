@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (module fusion "/fusion/base"
 
@@ -37,7 +37,8 @@ contact us for clarification.
   (provide is_null is_null_null)
 
   // bool
-  (provide is_bool not)
+  (require "/fusion/bool")
+  (provide is_bool is_false is_true is_truthy is_untruthy not)
 
   (require "/fusion/number")
   (provide + - * / int_to_string is_decimal is_float is_int string_to_int)

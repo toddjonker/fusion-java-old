@@ -9,7 +9,7 @@ final class NotProc
     NotProc()
     {
         //    "                                                                               |
-        super("Returns `true` if `value` is untruthy, `false` if `value` is truthy. Truthiness"
+        super("Returns `true` if `value` is untruthy, `false` if `value` is truthy. Truthiness\n"
             + "is as defined by `if`.",
               "value");
     }

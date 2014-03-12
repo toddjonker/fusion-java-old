@@ -277,6 +277,9 @@ public final class FusionBool
         boolean isFalse()   { return myValue.isFalse(); }
 
         @Override
+        BaseBool isTruthy(Evaluator eval)  { return myValue.isTruthy(eval); }
+
+        @Override
         BaseBool not(Evaluator eval) { return myValue.not(eval); }
 
         @Override

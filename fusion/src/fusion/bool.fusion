@@ -1,0 +1,72 @@
+// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+
+(module bool '/fusion/private/builtins'
+
+  '''
+Operations on boolean values, and related control forms.
+  '''
+
+  // Pass-through bindings from kernel
+  (provide if is_bool)
+
+  // Pass-through bindings from builtins
+  (provide not)
+
+  (require "/fusion/private/control")
+  (provide and cond or unless when)
+
+
+  (require "/fusion/experimental/defines")
+  (require "/fusion/experimental/equality")
+
+
+  (defpub is_truthy
+    (lambda (v)
+      '''
+Returns `true` when the argument is truthy, or `false` otherwise.
+
+Equivalent to:
+
+    (if v true false)
+      '''
+      (if v true false)))
+
+
+  (defpub is_untruthy
+    (lambda (v)
+      '''
+Returns `true` when the argument is untruthy, or `false` otherwise.
+
+Equivalent to:
+
+    (if v false true)
+      '''
+      (if v false true)))
+
+
+  (defpub is_true
+    (lambda (v)
+      '''
+Returns `true` when the argument is `true` (annotated or not), or `false`
+otherwise.
+
+Equivalent to:
+
+    (== v true)
+      '''
+      (== v true)))
+
+
+  (defpub is_false
+    (lambda (v)
+      '''
+Returns `true` when the argument is `false` (annotated or not), or `false`
+otherwise.
+
+Equivalent to:
+
+    (== v false)
+      '''
+      (== v false)))
+
+)
