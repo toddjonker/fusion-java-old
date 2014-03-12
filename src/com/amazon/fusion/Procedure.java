@@ -135,6 +135,20 @@ abstract class Procedure
     }
 
 
+    /**
+     * Creates, but does not throw, an exception that indicates a contract
+     * failure with a given argument.
+     *
+     * @param expectation describes the expectation that was not met.  When
+     * displayed, this string is prefixed by "procedure <i>p</i> expects",
+     * so the content should be a noun phrase.
+     * @param badPos the zero-based index of the problematic value.
+     * -1 means a specific position isn't implicated.
+     * @param actuals the provided procedure arguments;
+     * must not be null or zero-length.
+     *
+     * @return a new exception.
+     */
     ArgTypeFailure argFailure(String expectation, int badPos, Object... actuals)
     {
         return new ArgTypeFailure(this, expectation, badPos, actuals);
