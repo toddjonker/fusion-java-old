@@ -34,7 +34,7 @@ or [`unless`][unless]:
 Both examples either display a line of text or do nothing.
 
 
-## Truthiness
+## Truthiness <a id="truthiness"/>
 
 Fusion's conditional expressions branch based on the "truthiness" of the
 condition value, which means the result of the condition expression
@@ -95,6 +95,8 @@ Fusion defines truthiness as follows:
 Equivalent to:
 
     (if v true false)
+
+See also: <a href="fusion/bool.html#truthiness">Truthiness</a>
       '''
       (if v true false)))
 
@@ -108,6 +110,8 @@ The untruthy values are `false`, void, and any variant of `null`.
 Equivalent to:
 
     (if v false true)
+
+See also: <a href="fusion/bool.html#truthiness">Truthiness</a>
       '''
       (if v false true)))
 

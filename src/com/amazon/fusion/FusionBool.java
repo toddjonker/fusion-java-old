@@ -17,6 +17,7 @@ import java.io.IOException;
  * Utilities for working with Fusion {@code bool} values.
  *
  * @see FusionValue
+ * @see <a href="{@docRoot}/../fusion/bool.html"><code>/fusion/bool</code></a>
  */
 public final class FusionBool
 {
@@ -460,6 +461,11 @@ public final class FusionBool
 
     /**
      * Determines whether a Fusion value is {@code true}.
+     * Equivalent to {@code (== true value)}.
+     * <p>
+     * This is <em>not</em> a
+     * <a href="{@docRoot}/../fusion/bool.html#truthiness">truthiness</a>
+     * test; use {@link #isTruthy(TopLevel, Object)} for that purpose.
      */
     public static boolean isTrue(TopLevel top, Object value)
         throws FusionException
@@ -482,6 +488,11 @@ public final class FusionBool
 
     /**
      * Determines whether a Fusion value is {@code false}.
+     * Equivalent to {@code (== false value)}.
+     * <p>
+     * This is <em>not</em> a
+     * <a href="{@docRoot}/../fusion/bool.html#truthiness">truthiness</a>
+     * test; use {@link #isTruthy(TopLevel, Object)} for that purpose.
      */
     public static boolean isFalse(TopLevel top, Object value)
         throws FusionException
@@ -500,6 +511,42 @@ public final class FusionBool
         }
 
         return false;
+    }
+
+
+    /**
+     * Determines whether a given Fusion value is "truthy".
+     * Fusion defines
+     * <a href="{@docRoot}/../fusion/bool.html#truthiness">truthiness</a>
+     * as follows:
+     * <ul>
+     *   <li>
+     *     Every value is truthy except for {@code false}, void, and any
+     *     variant of {@code null}.
+     *   </li>
+     * </ul>
+     * This definition is more lax (and hopefully more convenient) than Java,
+     * but less lenient (and hopefully less error-prone) than C or C++.
+     *
+     * @see <a href="{@docRoot}/../fusion/bool.html#truthiness">Truthiness</a>
+     * @see FusionBool#isTrue(TopLevel, Object)
+     */
+    public static boolean isTruthy(TopLevel top, Object value)
+        throws FusionException
+    {
+        Evaluator eval = StandardTopLevel.toEvaluator(top);
+        return isTruthy(eval, value).isTrue();
+    }
+
+    static BaseBool isTruthy(Evaluator eval, Object value)
+        throws FusionException
+    {
+        if (value instanceof BaseValue)
+        {
+            return ((BaseValue) value).isTruthy(eval);
+        }
+
+        return trueBool(eval);
     }
 
 

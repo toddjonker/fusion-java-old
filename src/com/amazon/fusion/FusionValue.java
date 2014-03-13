@@ -1,9 +1,8 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.falseBool;
-import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.ion.IonValue;
@@ -77,23 +76,26 @@ public final class FusionValue
      *
      * @see <a href="{@docRoot}/../nullvoid.html">Null and Void</a>
      * @see FusionBool#isTrue(TopLevel, Object)
+     *
+     * @deprecated As of R15 in March 2014.
+     * Moved to {@link FusionBool#isTruthy(TopLevel, Object)}.
      */
+    @Deprecated
     public static boolean isTruthy(TopLevel top, Object value)
         throws FusionException
     {
-        Evaluator eval = StandardTopLevel.toEvaluator(top);
-        return isTruthy(eval, value).isTrue();
+        return FusionBool.isTruthy(top, value);
     }
 
+    /**
+     * @deprecated As of R15 in March 2014.
+     * Moved to {@link FusionBool#isTruthy(Evaluator, Object)}.
+     */
+    @Deprecated
     static BaseBool isTruthy(Evaluator eval, Object value)
         throws FusionException
     {
-        if (value instanceof BaseValue)
-        {
-            return ((BaseValue) value).isTruthy(eval);
-        }
-
-        return trueBool(eval);
+        return FusionBool.isTruthy(eval, value);
     }
 
 
