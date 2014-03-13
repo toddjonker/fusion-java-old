@@ -72,8 +72,7 @@ Displays the values, then a newline.
       (display "\n")))
 
 
-  (provide writeln)  // defpub doesn't work for this form
-  (define (writeln value)
+  (defpub (writeln value)
     '''
 Writes the value, then a newline.
     '''

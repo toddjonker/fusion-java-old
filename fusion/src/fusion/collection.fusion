@@ -32,18 +32,16 @@ The built-in collection types are [list](fusion/list.html),
   (provide size)
 
 
-  (defpub is_collection
-    (lambda (value)
-      '''
+  (defpub (is_collection value)
+    '''
 Determines whether `value` is a collection (struct, list, or sexp), returning
 `true` or `false`.
-      '''
-      (or (is_struct value) (is_list value) (is_sexp value))))
+    '''
+    (or (is_struct value) (is_list value) (is_sexp value)))
 
 
-  (defpub has_key
-    (lambda (collection key)
-      '''
+  (defpub (has_key collection key)
+    '''
 Determines whether a `collection` has a mapping for a given `key`.
 When `has_key` returns `true`, then `(element collection key)` will succeed.
 
@@ -54,39 +52,38 @@ elements within the sequence, not the elements themselves.
     (has_key [3,true,2014T] 0)     ==> true
     (has_key [3,true,2014T] 3)     ==> false
     (has_key [3,true,2014T] null)  ==> false
-      '''
-      (cond
-        ((is_struct collection)
-         (if (is_struct_field_name key)
-           (unsafe_struct_has_key collection key)
-           false))
-        //-
-        ((is_list collection)
-         (if (and (is_int key)
-                  key          // null check
-                  (< key (unsafe_list_size collection))
-                  (<= 0 key))
-           true
-           false))
-        //-
-        ((is_sexp collection)
-         (if (and (is_int key)
-                  key  // null check
-                  (<= 0 key))
-           (let loop [(key key), (s collection)]
-             (if (is_pair s)
-               (or (= 0 key)
-                 (loop (- key 1) (unsafe_pair_tail s)))
-               false))
-           false))
-        //-
-        (true
-         (raise_argument_error "element" "collection" 0 collection key)))))
+    '''
+    (cond
+      ((is_struct collection)
+       (if (is_struct_field_name key)
+         (unsafe_struct_has_key collection key)
+         false))
+      //-
+      ((is_list collection)
+       (if (and (is_int key)
+                key          // null check
+                (< key (unsafe_list_size collection))
+                (<= 0 key))
+         true
+         false))
+      //-
+      ((is_sexp collection)
+       (if (and (is_int key)
+                key  // null check
+                (<= 0 key))
+         (let loop [(key key), (s collection)]
+           (if (is_pair s)
+             (or (= 0 key)
+               (loop (- key 1) (unsafe_pair_tail s)))
+             false))
+         false))
+      //-
+      (true
+       (raise_argument_error "element" "collection" 0 collection key))))
 
 
-  (defpub element
-    (lambda (collection key)
-      '''
+  (defpub (element collection key)
+    '''
 Returns an element within a collection.  The `collection` must be a non-null,
 non-empty list, sexp, or struct.  The `key` must have a type appropriate for
 the collection: an int for lists or sexps, a string or symbol for structs.
@@ -109,45 +106,44 @@ an element within the collection.
     (element [0, 1] 2)       =>  ERROR
     (element [0, 1] "2")     =>  ERROR
     (element {f:2} "g")      =>  ERROR
-      '''
-      (cond
-        ((is_list collection)
-         (if (is_int key)
-           (if (and key  // null check
-                    (<= 0 key)
-                    (< key (unsafe_list_size collection)))
-             (unsafe_list_element collection key)
-             (raise_argument_error "element" "valid position" 1 collection key))
-           (raise_argument_error "element" "int" 1 collection key)))
-        //-
-        ((is_struct collection)
-         (if (is_struct_field_name key)
-           (unsafe_struct_ref collection key
-             (lambda ()
-               (raise_argument_error "element" "valid field name"
+    '''
+    (cond
+      ((is_list collection)
+       (if (is_int key)
+         (if (and key  // null check
+                  (<= 0 key)
+                  (< key (unsafe_list_size collection)))
+           (unsafe_list_element collection key)
+           (raise_argument_error "element" "valid position" 1 collection key))
+         (raise_argument_error "element" "int" 1 collection key)))
+      //-
+      ((is_struct collection)
+       (if (is_struct_field_name key)
+         (unsafe_struct_ref collection key
+           (lambda ()
+             (raise_argument_error "element" "valid field name"
+               1 collection key)))
+         (raise_argument_error "element" "non-null string or symbol"
+           1 collection key)))
+      ((is_sexp collection)
+       (if (is_int key)
+         (if (and key  // null check
+                  (<= 0 key))
+           (let loop [(key key), (s collection)]
+             (if (is_pair s)
+               (if (= 0 key)
+                 (unsafe_pair_head s)
+                 (loop (- key 1) (unsafe_pair_tail s)))
+               (raise_argument_error "element" "valid position"
                  1 collection key)))
-           (raise_argument_error "element" "non-null string or symbol"
-             1 collection key)))
-        ((is_sexp collection)
-         (if (is_int key)
-           (if (and key  // null check
-                    (<= 0 key))
-             (let loop [(key key), (s collection)]
-               (if (is_pair s)
-                 (if (= 0 key)
-                   (unsafe_pair_head s)
-                   (loop (- key 1) (unsafe_pair_tail s)))
-                 (raise_argument_error "element" "valid position"
-                   1 collection key)))
-             (raise_argument_error "element" "valid position" 1 collection key))
-           (raise_argument_error "element" "int" 1 collection key)))
-        (true
-         (raise_argument_error "element" "collection" 0 collection key)))))
+           (raise_argument_error "element" "valid position" 1 collection key))
+         (raise_argument_error "element" "int" 1 collection key)))
+      (true
+       (raise_argument_error "element" "collection" 0 collection key))))
 
 
-  (defpub elt
-    (lambda (collection key)
-      '''
+  (defpub (elt collection key)
+    '''
 Returns an element within a collection, being lenient.  The `collection` must
 be a list, sexp, struct, or void.  The `key` must have a type appropriate for
 the collection: an int for lists or sexps, a string or symbol for structs.
@@ -173,34 +169,34 @@ be evaluated as a variable reference:
       (elt {f:2} g))     => 2
 
 An exception is raised if the `collection` has an unsupported type.
-      '''
-      (cond
-        ((is_list collection)
-         (when (and (is_int key)
-                    key  // null check
-                    (<= 0 key)
-                    (< key (unsafe_list_size collection)))
-           (unsafe_list_element collection key)))
-        //-
-        ((is_struct collection)
-         (when (is_struct_field_name key)
-           (unsafe_struct_ref collection key void)))
-        //-
-        ((is_sexp collection)
-         (when (and (is_int key)
-                    key  // null check
-                    (<= 0 key))
-           (let loop [(key key), (s collection)]
-             (if (is_pair s)
-               (if (= 0 key)
-                 (unsafe_pair_head s)
-                 (loop (- key 1) (unsafe_pair_tail s)))
-               (void)))))
-        //-
-        ((is_void collection)
-         (void))
-        (true
-         (raise_argument_error "elt" "collection or void" 0 collection key)))))
+    '''
+    (cond
+      ((is_list collection)
+       (when (and (is_int key)
+                  key  // null check
+                  (<= 0 key)
+                  (< key (unsafe_list_size collection)))
+         (unsafe_list_element collection key)))
+      //-
+      ((is_struct collection)
+       (when (is_struct_field_name key)
+         (unsafe_struct_ref collection key void)))
+      //-
+      ((is_sexp collection)
+       (when (and (is_int key)
+                  key  // null check
+                  (<= 0 key))
+         (let loop [(key key), (s collection)]
+           (if (is_pair s)
+             (if (= 0 key)
+               (unsafe_pair_head s)
+               (loop (- key 1) (unsafe_pair_tail s)))
+             (void)))))
+      //-
+      ((is_void collection)
+       (void))
+      (true
+       (raise_argument_error "elt" "collection or void" 0 collection key))))
 
 
   (defpub .
@@ -249,9 +245,8 @@ be evaluated as a variable reference:
 
 
   // Name per Dylan and SRFI-1.
-  (defpub any
-    (lambda (pred collection)
-      '''
+  (defpub (any pred collection)
+    '''
 Applies the one-argument predicate `pred` to the elements of `collection`;
 the first time `pred` returns a truthy value that truthy value is returned and
 no more elements are visited.  If no call returns a truthy value, then the
@@ -260,177 +255,172 @@ empty.
 
 When `collection` is a sequence, the elements are visited in order, and the
 application of `pred` to the final element of the sequence is in tail position.
-      '''
-      (cond
-        ((is_struct collection)
-         (let [(iter (unsafe_struct_iterator collection))]
-           (let loop [(result false)]
-             (if (iterator_has_next iter)
-               (let_values [((k v) (iterator_next iter))]
-                 (let [(r (pred v))]
-                   (or r (loop r))))  // TODO this should use a tail call
-               result))))
-        ((is_list collection)
-         (let [(len (size collection))]
-           (if (= 0 len)
-             false
-             (let loop [(i 0)]
-               (assert (< i len))
-               (let [(elt (unsafe_list_element collection i)),
-                     (i   (+ 1 i))]
-                 (if (= i len)
-                   (pred elt)    // The last predicate call is in tail position
-                   (or (pred elt)
-                       (loop i))))))))
-        ((is_sexp collection)
-         (if (is_empty collection)
+    '''
+    (cond
+      ((is_struct collection)
+       (let [(iter (unsafe_struct_iterator collection))]
+         (let loop [(result false)]
+           (if (iterator_has_next iter)
+             (let_values [((k v) (iterator_next iter))]
+               (let [(r (pred v))]
+                 (or r (loop r))))  // TODO this should use a tail call
+             result))))
+      ((is_list collection)
+       (let [(len (size collection))]
+         (if (= 0 len)
            false
-           (let loop [(s collection)]
-             (assert (not (is_empty s)))
-             (let [(h (head s)),
-                   (t (tail s))]
-               (if (is_pair t)
-                 (or (pred h)
-                     (loop t))
-                 (pred h))))))   // The last predicate call is in tail position
-        (true
-         (raise_argument_error "any" "collection" 0 collection)))))
+           (let loop [(i 0)]
+             (assert (< i len))
+             (let [(elt (unsafe_list_element collection i)),
+                   (i   (+ 1 i))]
+               (if (= i len)
+                 (pred elt)    // The last predicate call is in tail position
+                 (or (pred elt)
+                     (loop i))))))))
+      ((is_sexp collection)
+       (if (is_empty collection)
+         false
+         (let loop [(s collection)]
+           (assert (not (is_empty s)))
+           (let [(h (head s)),
+                 (t (tail s))]
+             (if (is_pair t)
+               (or (pred h)
+                   (loop t))
+               (pred h))))))   // The last predicate call is in tail position
+      (true
+       (raise_argument_error "any" "collection" 0 collection))))
 
 
   // Name per Dylan and SRFI-1.
-  (defpub every
-    (lambda (pred collection)
-      '''
+  (defpub (every pred collection)
+    '''
 Applies the one-argument predicate `pred` to the elements of `collection`;
 the first time `pred` returns an untruthy value that untruthy value is returned
 and no more elements are visited.  If no call returns an untruthy value, then the
 result is that of the final predicate call, or `true` if the collection is empty.
 When `collection` is a sequence, the elements are visited in order, and the
 application of `pred` to the final element of the sequence is in tail position.
-      '''
-      (cond
-        ((is_struct collection)
-         (let [(iter (unsafe_struct_iterator collection))]
-           (let loop [(result true)]
-             (if (iterator_has_next iter)
-               (let_values [((k v) (iterator_next iter))]
-                 (let [(r (pred v))]
-                   (and r (loop r))))  // TODO this should use a tail call
-               result))))
-        ((is_list collection)
-         (let [(len (size collection))]
-           (if (= 0 len)
-             true
-             (let loop [(i 0)]
-               (assert (< i len))
-               (let [(elt (unsafe_list_element collection i)),
-                     (i   (+ 1 i))]
-                 (if (= i len)
-                   (pred elt)    // The last predicate call is in tail position
-                   (and (pred elt)
-                       (loop i))))))))
-        ((is_sexp collection)
-         (if (is_empty collection)
+    '''
+    (cond
+      ((is_struct collection)
+       (let [(iter (unsafe_struct_iterator collection))]
+         (let loop [(result true)]
+           (if (iterator_has_next iter)
+             (let_values [((k v) (iterator_next iter))]
+               (let [(r (pred v))]
+                 (and r (loop r))))  // TODO this should use a tail call
+             result))))
+      ((is_list collection)
+       (let [(len (size collection))]
+         (if (= 0 len)
            true
-           (let loop [(s collection)]
-             (assert (not (is_empty s)))
-             (let [(h (head s)),
-                   (t (tail s))]
-               (if (is_pair t)
-                 (and (pred h)
-                     (loop t))
-                 (pred h))))))   // The last predicate call is in tail position
-        (true
-         (raise_argument_error "every" "collection" 0 collection)))))
+           (let loop [(i 0)]
+             (assert (< i len))
+             (let [(elt (unsafe_list_element collection i)),
+                   (i   (+ 1 i))]
+               (if (= i len)
+                 (pred elt)    // The last predicate call is in tail position
+                 (and (pred elt)
+                     (loop i))))))))
+      ((is_sexp collection)
+       (if (is_empty collection)
+         true
+         (let loop [(s collection)]
+           (assert (not (is_empty s)))
+           (let [(h (head s)),
+                 (t (tail s))]
+             (if (is_pair t)
+               (and (pred h)
+                    (loop t))
+               (pred h))))))   // The last predicate call is in tail position
+      (true
+       (raise_argument_error "every" "collection" 0 collection))))
 
 
-  (defpub is_empty
-    (lambda (collection)
-      '''
+  (defpub (is_empty collection)
+    '''
 Returns `true` if the size of the `collection` is zero, otherwise returns
 `false`.
-      '''
-      (= 0 (size collection))))
+    '''
+    (= 0 (size collection)))
 
 
   // Name per SRFI-1
-  (defpub find
-    (lambda (pred collection)
-      '''
+  (defpub (find pred collection)
+    '''
 Applies the one-argument predicate `pred` to each element of `collection`;
 the first time `pred` returns a truthy value that element is returned.
 If no such element is found, the result is void.
 
 When `collection` is a sequence, the elements are visited in order.
-      '''
-      (cond
-        ((is_struct collection)
-         (let [(iter (unsafe_struct_iterator collection))]
-           (let loop [(result false)]
-             (when (iterator_has_next iter)
-               (let_values [((k v) (iterator_next iter))]
-                 (let [(r (pred v))]
-                   (if r v (loop r)))))))) // TODO this should use a tail call
-        ((is_list collection)
-         (let [(len (size collection))]
-           (let loop [(i 0)]
-             (if (= i len)
-               (void)
-               (let [(elt (unsafe_list_element collection i))]
-                 (if (pred elt)
-                   elt
-                   (loop (+ i 1))))))))
-        ((is_sexp collection)
-         (let loop [(s collection)]
-           (if (is_empty s)
+    '''
+    (cond
+      ((is_struct collection)
+       (let [(iter (unsafe_struct_iterator collection))]
+         (let loop [(result false)]
+           (when (iterator_has_next iter)
+             (let_values [((k v) (iterator_next iter))]
+               (let [(r (pred v))]
+                 (if r v (loop r)))))))) // TODO this should use a tail call
+      ((is_list collection)
+       (let [(len (size collection))]
+         (let loop [(i 0)]
+           (if (= i len)
              (void)
-             (let [(elt (head s))]
+             (let [(elt (unsafe_list_element collection i))]
                (if (pred elt)
                  elt
-                 (loop (tail s)))))))
-        (true
-         (raise_argument_error "any" "collection" 0 collection)))))
-
+                 (loop (+ i 1))))))))
+      ((is_sexp collection)
+       (let loop [(s collection)]
+         (if (is_empty s)
+           (void)
+           (let [(elt (head s))]
+             (if (pred elt)
+               elt
+               (loop (tail s)))))))
+      (true
+       (raise_argument_error "any" "collection" 0 collection))))
 
   // Name per Dylan.  Equivalent to SRFI-1 `for_each` but I don't want this to
   // be confused with the `for` syntax from Racket (which I intend to provide).
-  (defpub do
-    (lambda (proc collection)
-      '''
+  (defpub (do proc collection)
+    '''
 Applies the one-argument procedure `proc` to the elements of `collection`,
 ignoring any results.  Returns void.
 
 When `collection` is a sequence, the elements are visited in order.
 
 See also: [`struct_do`](fusion/struct.html#struct_do)
-      '''
-      // We return void (rather than the collection) because this should
-      // eventually accept multiple collections to walk in parallel, and then
-      // it doesn't make sense to return the first one.
-      (cond
-        ((is_struct collection)
-         (let [(iter (unsafe_struct_iterator collection))]
-           (let loop []
-             (when (iterator_has_next iter)
-               (let_values [((k v) (iterator_next iter))]
-                 (proc v)
-                 (loop))))))
-        ((is_list collection)
-         (let [(len (size collection))]
-           (let loop [(i 0)]
-             (if (= i len)
-               (void)
-               (begin
-                 (proc (unsafe_list_element collection i))
-                 (loop (+ 1 i)))))))
-        ((is_sexp collection)
-         (let loop [(s collection)]
-           (if (is_empty s)
+    '''
+    // We return void (rather than the collection) because this should
+    // eventually accept multiple collections to walk in parallel, and then
+    // it doesn't make sense to return the first one.
+    (cond
+      ((is_struct collection)
+       (let [(iter (unsafe_struct_iterator collection))]
+         (let loop []
+           (when (iterator_has_next iter)
+             (let_values [((k v) (iterator_next iter))]
+               (proc v)
+               (loop))))))
+      ((is_list collection)
+       (let [(len (size collection))]
+         (let loop [(i 0)]
+           (if (= i len)
              (void)
              (begin
-               (proc (head s))
-               (loop (tail s))))))
-        (true
-         (raise_argument_error "any" "collection" 0 collection)))))
+               (proc (unsafe_list_element collection i))
+               (loop (+ 1 i)))))))
+      ((is_sexp collection)
+       (let loop [(s collection)]
+         (if (is_empty s)
+           (void)
+           (begin
+             (proc (head s))
+             (loop (tail s))))))
+      (true
+       (raise_argument_error "any" "collection" 0 collection))))
 
 )

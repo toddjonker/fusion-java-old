@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (module defines '/fusion/private/kernel'
 
@@ -10,13 +10,21 @@
     '''
     (defpub name value)
 
-Defines and provides a transformer binding for ID to the VALUE.
+Defines and provides a binding for ID to the VALUE.
+
+    (defpub (name arg ...) body ...+)
+
+Defines and provides a procedure named ID with the BODY.
     '''
     (lambda (stx)
-      (quasisyntax
-        (begin
-          (unsyntax (syntax_cons_q define (syntax_subseq stx 1)))
-          (provide (unsyntax (syntax_get stx 1)))))))
+      (let_values [((name_or_args) (syntax_get stx 1))]
+        (let_values [((name) (if (is_identifier name_or_args)
+                               name_or_args
+                               (syntax_get name_or_args 0)))]
+          (quasisyntax
+            (begin
+              (unsyntax (syntax_cons_q define (syntax_subseq stx 1)))
+              (provide (unsyntax name))))))))
 
 
   (define_syntax defpub_j  // WARNING: Doc syntax isn't supported yet.
