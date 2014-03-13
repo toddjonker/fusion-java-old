@@ -2,7 +2,7 @@
 
 (require
   "/check"
-  "/fusion/experimental/equality")
+)
 
 
 (check_true (is_void (void)))

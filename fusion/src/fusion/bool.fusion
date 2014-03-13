@@ -80,8 +80,10 @@ forms return the result of the last expression evaluated rather than always
   (provide and cond or unless when)
 
 
-  (require "/fusion/experimental/defines")
-  (require "/fusion/experimental/equality")
+  (require
+    "/fusion/equality"
+    "/fusion/experimental/defines"
+  )
 
 
   (defpub is_truthy

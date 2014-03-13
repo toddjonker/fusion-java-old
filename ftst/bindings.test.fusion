@@ -2,7 +2,7 @@
 
 (require
   "/check"
-  "/fusion/experimental/equality")
+)
 
 
 (define rester

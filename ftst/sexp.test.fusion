@@ -2,7 +2,6 @@
 
 (require
   "/check"
-  "/fusion/experimental/equality"
   "/fusion/list"
   "/fusion/private/builtins"  // annotate
   "/fusion/private/sexp")

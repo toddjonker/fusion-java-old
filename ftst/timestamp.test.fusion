@@ -2,7 +2,7 @@
 
 (require
   "/check"
-  "/fusion/experimental/equality")
+)
 
 
 // Here's the bindings we expect to be available:

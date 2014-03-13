@@ -32,7 +32,7 @@
   reftrans1
   reftrans2
   "/check"
-  "/fusion/experimental/equality")
+)
 
 (check === one 1)
 (check === two 2)

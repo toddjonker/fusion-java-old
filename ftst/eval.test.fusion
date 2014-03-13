@@ -3,7 +3,6 @@
 (require
   "/check"
   "/fusion/eval"
-  "/fusion/experimental/equality"
   "/fusion/experimental/syntax"
   "/fusion/namespace"
   "/fusion/parameter")

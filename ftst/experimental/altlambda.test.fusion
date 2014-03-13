@@ -3,7 +3,6 @@
 (require
   "/check"
   "/fusion/experimental/altlambda"
-  "/fusion/experimental/equality"
   "/fusion/experimental/syntax")
 
 (define sub1

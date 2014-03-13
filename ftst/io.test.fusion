@@ -2,7 +2,7 @@
 
 (require
   "/check"
-  "/fusion/experimental/equality")
+)
 
 
 // This assumes that current_directory is at the project root.

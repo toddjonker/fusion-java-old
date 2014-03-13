@@ -6,7 +6,6 @@
     "/fusion/eval"
     "/fusion/exception"
     "/fusion/experimental/defines"
-    "/fusion/experimental/equality"
     "/fusion/experimental/syntax"
     "/fusion/ffi/java"
     "/fusion/parameter")

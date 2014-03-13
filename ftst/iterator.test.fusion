@@ -3,7 +3,7 @@
 (require
   "/check"
   "/fusion/exception"
-  "/fusion/experimental/equality")
+)
 
 
 (define check_iter
