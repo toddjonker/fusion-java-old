@@ -3,7 +3,6 @@
 (require
   "/check"
   "/fusion/experimental/altlambda"
-  "/fusion/experimental/equality"
   "/fusion/list"
   "/fusion/private/builtins"       // for `annotate`
   "/fusion/struct")

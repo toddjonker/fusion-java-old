@@ -43,6 +43,9 @@ To use this dialect for your module, declare it as follows:
   (require "/fusion/private/control")
   (provide and or when unless cond)
 
+  (require "/fusion/equality")
+  (provide = == === same ident)
+
   (require "/fusion/number")
   (provide + - * /)
 

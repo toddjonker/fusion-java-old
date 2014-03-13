@@ -59,14 +59,3 @@
     null, null.bool, null.int, (quote a::null), (quote a::null.bool),
   ])
 
-
-//============================================================================
-// Comparisons
-
-(check = true true)
-(check = false false)
-
-(check = (quote a::true) true)
-(check = (quote a::false) false)
-
-(check_arg_exn (= null.bool null.bool))

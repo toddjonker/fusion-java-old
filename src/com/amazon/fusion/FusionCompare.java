@@ -3,10 +3,8 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.falseBool;
-import static com.amazon.fusion.FusionBool.isBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
-import static com.amazon.fusion.FusionBool.unsafeBoolToJavaBoolean;
 import static com.amazon.fusion.FusionNumber.isIntOrDecimal;
 import static com.amazon.fusion.FusionNumber.unsafeNumberToBigDecimal;
 import static com.amazon.fusion.FusionString.isString;
@@ -15,7 +13,6 @@ import static com.amazon.fusion.FusionSymbol.isSymbol;
 import static com.amazon.fusion.FusionSymbol.unsafeSymbolToJavaString;
 import static com.amazon.fusion.FusionTimestamp.isTimestamp;
 import static com.amazon.fusion.FusionTimestamp.unsafeTimestampToJavaTimestamp;
-import static com.amazon.fusion.FusionUtils.safeEquals;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionNumber.BaseNumber;
 import com.amazon.ion.Timestamp;
@@ -102,11 +99,6 @@ final class FusionCompare
                                      Object[]      args)
             throws FusionException;
 
-        boolean compareBooleans(Boolean left, Boolean right, Object[] args)
-            throws FusionException
-        {
-            throw failure(args);
-        }
 
         boolean compareStrings(String left, String right, Object[] args)
             throws FusionException
@@ -123,18 +115,6 @@ final class FusionCompare
 
             Object arg0 = args[0];
             Object arg1 = args[1];
-
-            if (isBool(eval, arg0) && isBool(eval, arg1))
-            {
-                Boolean left  = unsafeBoolToJavaBoolean(eval, arg0);
-                Boolean right = unsafeBoolToJavaBoolean(eval, arg1);
-
-                if (left != null && right != null)
-                {
-                    boolean r = compareBooleans(left, right, args);
-                    return makeBool(eval, r);
-                }
-            }
 
             if (isIntOrDecimal(eval, arg0) && isIntOrDecimal(eval, arg1))
             {
@@ -261,45 +241,6 @@ final class FusionCompare
         {
             int r = left.compareTo(right);
             return (r >= 0);
-        }
-    }
-
-
-    static final class EqualProc
-        extends BaseCompareProc
-    {
-        EqualProc()
-        {
-            //    "                                                                               |
-            super("Returns true if the parameters are equivalent, depending on their types.  Int\n" +
-                  "and decimal values may be mixed and are compared without regard to precision.\n" +
-                  "Timestamps are compared to each other without regard to precision.  String and\n" +
-                  "symbol values are compared by character. Bool values may also be compared.\n" +
-                  "Annotations are ignored.",
-                  "a", "b");
-        }
-
-        @Override
-        boolean compareBooleans(Boolean left, Boolean right, Object[] args)
-            throws FusionException
-        {
-            // Boolean instances are interned so identity equality is correct.
-            return left == right;
-        }
-
-        @Override
-        boolean compareStrings(String left, String right, Object[] args)
-            throws FusionException
-        {
-            return safeEquals(left, right);
-        }
-
-        @Override
-        <T> boolean compare(Comparable<T> left, T right, Object[] args)
-            throws FusionException
-        {
-            int r = left.compareTo(right);
-            return (r == 0);
         }
     }
 

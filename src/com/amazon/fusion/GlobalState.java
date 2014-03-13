@@ -139,8 +139,6 @@ final class GlobalState
         ns.define("is_string", new FusionString.IsStringProc());
         ns.define("is_struct", new FusionStruct.IsStructProc());
 
-        ns.define("=", new FusionCompare.EqualProc());
-
         ns.instantiate();
 
         ModuleInstance kernel = registry.lookup(KERNEL_MODULE_IDENTITY);

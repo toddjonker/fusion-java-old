@@ -1,8 +1,8 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 (module compare '/fusion/private/builtins'
 
-  (require "/fusion/private/kernel")
+  (require "/fusion/equality")
   (provide =)
 
   (require "/fusion/experimental/defines")
