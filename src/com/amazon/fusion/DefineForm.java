@@ -5,8 +5,11 @@ package com.amazon.fusion;
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionSexp.isSexp;
 import static com.amazon.fusion.FusionString.isString;
+import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionString.stringToJavaString;
+import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
 import static com.amazon.fusion.GlobalState.DEFINE;
+import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import com.amazon.fusion.Namespace.NsBinding;
 
 final class DefineForm
@@ -103,9 +106,10 @@ final class DefineForm
         }
 
         SyntaxValue[] origDefineElts = stx.extract(eval);
+        SyntaxValue docStx = origDefineElts[2];
         boolean hasDoc =
             (defineArity > 3 &&
-             isString(eval, origDefineElts[2].unwrap(eval)));
+             isString(eval, docStx.unwrap(eval)));
         int docOffset = (hasDoc ? 1 : 0);
 
         int bodyStart = 2 + docOffset;
@@ -125,7 +129,19 @@ final class DefineForm
         newDefineElts[1] = procName;
         if (hasDoc)
         {
-            newDefineElts[2] = origDefineElts[2];
+            String doc = unsafeStringToJavaString(eval, docStx.unwrap(eval));
+            if (! (doc.startsWith("    ") || doc.startsWith("\n    ")))
+            {
+                String newDoc = "\n    " + origDefineElts[1] + "\n" + doc;
+                docStx =
+                    makeSyntax(eval,
+                               docStx.getLocation(),
+                               makeString(eval,
+                                          docStx.annotationsAsJavaStrings(),
+                                          newDoc));
+            }
+
+            newDefineElts[2] = docStx;
         }
         newDefineElts[2 + docOffset] =
             SyntaxSexp.make(expander, lambda);
