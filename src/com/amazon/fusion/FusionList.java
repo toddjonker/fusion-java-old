@@ -1158,7 +1158,7 @@ final class FusionList
 
 
     /**
-     * @return the Fusion list, not null.
+     * @return the Fusion list, not null (but maybe {@code null.list}).
      */
     static Object checkNullableListArg(Evaluator eval,
                                        Procedure who,
@@ -1168,6 +1168,25 @@ final class FusionList
     {
         String expectation = "nullable list";
         return checkListArg(eval, who, expectation, argNum, args);
+    }
+
+
+    /**
+     * @return not null or {@code null.list}.
+     */
+    static Object checkActualListArg(Evaluator eval,
+                                     Procedure who,
+                                     int       argNum,
+                                     Object... args)
+        throws FusionException, ArgTypeFailure
+    {
+        String expectation = "non-null list";
+        Object result = checkListArg(eval, who, expectation, argNum, args);
+        if (result == null)
+        {
+            throw who.argFailure(expectation, argNum, args);
+        }
+        return result;
     }
 
 
