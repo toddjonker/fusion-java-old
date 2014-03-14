@@ -24,6 +24,7 @@ final class GlobalState
     static final String DEFINE_SYNTAX   = "define_syntax";
     static final String EOF             = "eof";
     static final String LAMBDA          = "lambda";
+    static final String LET_VALUES      = "let_values";
     static final String LETREC          = "letrec";
     static final String MODULE          = "module";
     static final String PROVIDE         = "provide";
@@ -125,6 +126,7 @@ final class GlobalState
         ns.define("if", new IfForm());          // Needed by hard-coded macro
         ns.define("java_new", new JavaNewProc());
         ns.define(LAMBDA, new LambdaForm());    // Needed by hard-coded macro
+        ns.define(LET_VALUES, new LetValuesForm());
         ns.define(LETREC, new LetrecForm());    // Needed by hard-coded macro
         ns.define("load", new LoadProc(loadHandler));
         ns.define(MODULE, new ModuleForm(resolver, currentModuleDeclareName));

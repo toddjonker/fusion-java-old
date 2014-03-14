@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (module builtins '/fusion/private/kernel'
 
@@ -6,13 +6,12 @@
 
 
   // Pass-through bindings from kernel
-  (provide all_defined_out begin define if lambda letrec load module provide
-    require)
+  (provide all_defined_out begin define if lambda let_values letrec load module
+    provide require)
   (provide is_string is_list is_sexp is_struct)
 
 
   (defpub_j_syntax let            "com.amazon.fusion.LetForm")
-  (defpub_j_syntax let_values     "com.amazon.fusion.LetValuesForm")
   (defpub_j_syntax quote          "com.amazon.fusion.QuoteForm")
   (defpub_j_syntax set            "com.amazon.fusion.SetForm")
   (defpub_j_syntax '#%top'        "com.amazon.fusion.TopForm")
