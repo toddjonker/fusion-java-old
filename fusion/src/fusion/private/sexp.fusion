@@ -54,13 +54,18 @@ Appends two sexps, reusing the second.
 
 This is a temporary, limited implementation for internal use.
       '''
-      (let loop [(s1 front), (s2 back)]
-        (if (is_pair s1)
-          (pair (head s1) (sexp_append (tail s1) s2))
-          (if (is_sexp s1)
-            // s1 must be () or null.sexp
-            (if (is_sexp s2)
-              (if (is_null s2) (quote ()) s2)
-              (raise_argument_error "sexp_append" "sexp" 1 front back))
-            (raise_argument_error "sexp_append" "sexp" 0 front back))))))
+      (letrec
+        [(loop
+          (lambda (s1 s2)
+            (if (is_pair s1)
+              (pair (unsafe_pair_head s1)
+                    (loop (unsafe_pair_tail s1) s2))
+              (if (is_sexp s1)
+                // s1 must be () or null.sexp
+                (if (is_sexp s2)
+                  (if (is_null s2) (quote ()) s2)
+                  (raise_argument_error "sexp_append" "sexp" 1 front back))
+                (raise_argument_error "sexp_append" "sexp" 0 front back)))))]
+        (loop front back))))
+
 )
