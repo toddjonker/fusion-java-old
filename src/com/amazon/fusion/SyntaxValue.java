@@ -3,8 +3,6 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonValue;
-import com.amazon.ion.IonWriter;
-import java.io.IOException;
 
 /**
  * Models Fusion source code, using a custom DOM implementation of Ion.
@@ -124,16 +122,6 @@ abstract class SyntaxValue
         //      Well, probably not, that throws away existing
         //      context when called from datum_to_syntax
         return stripWraps(eval);
-    }
-
-
-    @Override
-    final void write(Evaluator eval, Appendable out)
-        throws IOException, FusionException
-    {
-        IonWriter writer = WRITER_BUILDER.build(out);
-        ionize(eval, writer);
-        writer.flush();
     }
 
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -89,5 +89,12 @@ class SimpleSyntaxValue
         throws IOException, IonException, FusionException, IonizeFailure
     {
         myDatum.ionize(eval, writer);
+    }
+
+    @Override
+    final void write(Evaluator eval, Appendable out)
+        throws IOException, FusionException
+    {
+        myDatum.write(eval, out);
     }
 }

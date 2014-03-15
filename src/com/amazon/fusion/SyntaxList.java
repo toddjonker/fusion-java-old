@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -271,10 +271,17 @@ final class SyntaxList
 
 
     @Override
-    void ionize(Evaluator eval, IonWriter out)
+    final void ionize(Evaluator eval, IonWriter out)
         throws IOException, FusionException
     {
         myImmutableList.ionize(eval, out);
+    }
+
+    @Override
+    final void write(Evaluator eval, Appendable out)
+        throws IOException, FusionException
+    {
+        myImmutableList.write(eval, out);
     }
 
 

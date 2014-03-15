@@ -479,6 +479,9 @@ final class FusionStruct
         void ionize(Evaluator eval, IonWriter out)
             throws IOException, IonException, FusionException, IonizeFailure;
 
+        void write(Evaluator eval, Appendable out)
+            throws IOException, FusionException;
+
         int size(); // Doesn't throw
 
         /**
@@ -717,7 +720,8 @@ final class FusionStruct
         }
 
         @Override
-        void write(Evaluator eval, Appendable out) throws IOException
+        public void write(Evaluator eval, Appendable out)
+            throws IOException
         {
             writeAnnotations(out, myAnnotations);
             out.append("null.struct");
@@ -1200,7 +1204,7 @@ final class FusionStruct
          * in both cases.
          */
         @Override
-        void write(Evaluator eval, Appendable out)
+        public void write(Evaluator eval, Appendable out)
             throws IOException, FusionException
         {
             writeAnnotations(out, myAnnotations);
@@ -1424,7 +1428,7 @@ final class FusionStruct
         }
 
         @Override
-        void write(Evaluator eval, Appendable out)
+        public void write(Evaluator eval, Appendable out)
             throws IOException, FusionException
         {
             IonStruct s = getIonStruct();

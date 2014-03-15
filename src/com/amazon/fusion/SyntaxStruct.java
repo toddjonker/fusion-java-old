@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -317,6 +317,13 @@ final class SyntaxStruct
         throws IOException, IonException, FusionException, IonizeFailure
     {
         myStruct.ionize(eval, writer);
+    }
+
+    @Override
+    final void write(Evaluator eval, Appendable out)
+        throws IOException, FusionException
+    {
+        myStruct.write(eval, out);
     }
 
 
