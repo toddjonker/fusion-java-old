@@ -55,6 +55,25 @@
 
 
 //============================================================================
+// string_explode, string_implode
+
+(define_check (check_explode msg str scalars)
+  (check === (string_explode str) scalars)
+  (check === (string_implode scalars) str)
+  (check === (string_implode (string_explode str)) str)
+  (check === (string_explode (string_implode scalars)) scalars))
+
+(check_explode ""                     [])
+(check_explode "\0"                   [0])
+(check_explode "a B"                  [97, 32, 66])
+(check_explode "\u1234"               [0x1234])
+(check_explode "\U00100000\U0010FFFF" [0x100000, 0x10FFFF])
+
+// Start with ASCII then switch to supplementary plane.
+(check_explode "abc\U00100000"        [97, 98, 99, 0x100000])
+
+
+//============================================================================
 // string_size_utf8
 
 (check = 0  (string_size_utf8 null.string))

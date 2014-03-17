@@ -5,10 +5,19 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
+import static com.amazon.fusion.FusionList.checkActualListArg;
+import static com.amazon.fusion.FusionList.stretchyList;
+import static com.amazon.fusion.FusionList.unsafeListRef;
+import static com.amazon.fusion.FusionList.unsafeListSize;
+import static com.amazon.fusion.FusionNumber.isInt;
 import static com.amazon.fusion.FusionNumber.makeInt;
+import static com.amazon.fusion.FusionNumber.unsafeTruncateIntToJavaInt;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionText.checkRequiredTextArg;
 import static com.amazon.fusion.FusionUtils.safeEquals;
+import static java.lang.Character.highSurrogate;
+import static java.lang.Character.isSupplementaryCodePoint;
+import static java.lang.Character.lowSurrogate;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionText.BaseText;
 import com.amazon.ion.IonException;
@@ -633,6 +642,119 @@ public final class FusionString
             }
 
             return makeSymbol(eval, input);
+        }
+    }
+
+
+    /**
+     * EXPERIMENTAL!
+     *
+     * One thing to consider before finalizing is whether the result should be
+     * a stretchy list or immutable or mutable.  Stretchy allows the user to
+     * edit the data before imploding it back into a string.
+     */
+    static final class ExplodeProc
+        extends Procedure
+    {
+       public ExplodeProc()
+       {
+           //    "                                                                               |
+          super("Returns a stretchy list of the Unicode scalar values (code points) in the given\n" +
+                "non-null string.",
+                "string");
+       }
+
+       @Override
+       Object doApply(Evaluator eval, Object[] args)
+           throws FusionException
+       {
+          checkArityExact(args);
+
+          // TODO what about annotations?
+          String string = checkRequiredStringArg(eval, this, 0, args);
+
+          int charSize   = string.length();
+          int scalarSize = string.codePointCount(0, charSize);
+
+          Object[] exploded = new Object[scalarSize];
+
+          int charPos = 0;
+          for (int scalarPos = 0; scalarPos < scalarSize; scalarPos++)
+          {
+             int codePoint = string.codePointAt(charPos);
+
+             exploded[scalarPos] = makeInt(eval, codePoint);
+
+             charPos += Character.charCount(codePoint);
+          }
+          assert charPos == charSize;
+
+          return stretchyList(eval, exploded);
+       }
+    }
+
+
+    static final class ImplodeProc
+        extends Procedure
+    {
+        public ImplodeProc()
+        {
+            //    "                                                                               |
+           super("Returns a string filled by the given list of Unicode scalar values.",
+                 "list");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(args);
+
+            // TODO what about annotations?
+            Object list = checkActualListArg(eval, this, 0, args);
+
+            final int scalarSize = unsafeListSize(eval, list);
+            int charSize = scalarSize;
+
+            char[] chars = new char[charSize];
+            int charPos = 0;
+
+            for (int scalarPos = 0; scalarPos < scalarSize; scalarPos++)
+            {
+                Object scalarObj = unsafeListRef(eval, list, scalarPos);
+
+                if (isInt(eval, scalarObj)
+                    && isAnyNull(eval, scalarObj).isFalse())
+                {
+                    // TODO range check on the scalar
+                    int scalar =
+                        unsafeTruncateIntToJavaInt(eval, scalarObj);
+
+                    if (isSupplementaryCodePoint(scalar))
+                    {
+                        if (charSize == scalarSize)
+                        {
+                            // So far we've only hit BMP code points, but now
+                            // we have a supplemental code point, and there
+                            // won't have enough room in the buffer.  Allocate
+                            // enough extra room for all remaining data to be
+                            // supplemental.  We only need to do this once.
+                            charSize = charPos + 2 * (charSize - charPos);
+                            chars = Arrays.copyOf(chars, charSize);
+                        }
+
+                        chars[charPos++] = highSurrogate(scalar);
+                        chars[charPos++] = lowSurrogate(scalar);
+                    }
+                    else
+                    {
+                        chars[charPos++] = (char) scalar;
+                    }
+                }
+            }
+
+            String string = new String(chars, 0, charPos);
+            return makeString(eval, string);
         }
     }
 }

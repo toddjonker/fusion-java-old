@@ -28,12 +28,18 @@ There is **NO SUPPORT** for this module.
     (string_size_utf8 string)
 
 Returns the size of a string in UTF-8 bytes. Throws an exception if the
-argument contains invalid Unicode data (such as mismatch surrogates).
+argument contains invalid Unicode data (such as mismatched surrogates).
 Given `null.string` the result is zero.
 
 Note that this is an inefficient operation since it requires a transcoding
 from UTF-16 (Java's native String representation) to UTF-8.
     '''
-    "com.amazon.fusion.FusionString$SizeUtf8"
-  )
+    "com.amazon.fusion.FusionString$SizeUtf8")
+
+
+  // TODO See TODOs in the implementation before finalizing these procedures.
+  (defpub_j string_explode
+    "com.amazon.fusion.FusionString$ExplodeProc")
+  (defpub_j string_implode
+    "com.amazon.fusion.FusionString$ImplodeProc")
 )
