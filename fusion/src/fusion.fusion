@@ -63,7 +63,8 @@ contact us for clarification.
   // Collection Types
 
   (require "/fusion/collection")
-  (provide . any do element elt every find has_key is_empty size)
+  (provide . any do element elt every find has_key is_collection is_empty
+    size)
 
   (require "/fusion/sequence")
   (provide add choose first fold_left is_sequence last map)
