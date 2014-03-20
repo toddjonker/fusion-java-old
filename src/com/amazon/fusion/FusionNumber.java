@@ -2226,10 +2226,10 @@ final class FusionNumber
             catch (ArithmeticException e)
             {
                 String message =
-                    getInferredName() + ": result of division isn't exact.\n" +
-                        "Arguments were:\n  " + safeWriteToString(eval, args[0]) +
-                        "\n  " + safeWriteToString(eval, args[1]);
-                throw new ContractException(message);
+                    "Result of division isn't exact.\n" +
+                    "Arguments were:\n  " + safeWriteToString(eval, args[0]) +
+                    "\n  " + safeWriteToString(eval, args[1]);
+                throw contractFailure(message, e);
             }
         }
 

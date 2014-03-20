@@ -89,10 +89,38 @@ abstract class NamedValue
      * </pre>
      *
      * @param message the message to render in the exception.
+     * Must not be null.
+     *
      * @return a new exception
      */
     ContractException contractFailure(String message)
     {
         return new ContractException(identify() + ": " + message);
+    }
+
+    /**
+     * Returns a new {@link ContractException} with the given message and
+     * cause, and with
+     * the identification of this value. This is preferable to creating
+     * the exception directly, since this method can annotate it with location
+     * information.
+     * <p>
+     * Expected usage:
+     * <pre>
+     * catch (SomeException e)
+     * {
+     *   throw contractFailure("somebody screwed up", e);
+     * }
+     * </pre>
+     *
+     * @param message the message to render in the exception.
+     * Must not be null.
+     * @param cause may be null.
+     *
+     * @return a new exception
+     */
+    ContractException contractFailure(String message, Throwable cause)
+    {
+        return new ContractException(identify() + ": " + message, cause);
     }
 }

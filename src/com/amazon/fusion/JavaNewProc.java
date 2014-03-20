@@ -59,7 +59,7 @@ final class JavaNewProc
         }
         catch (ClassNotFoundException e)
         {
-            throw contractFailure("Java class isn't found: " + className);
+            throw contractFailure("Java class isn't found: " + className, e);
         }
     }
 
@@ -77,11 +77,11 @@ final class JavaNewProc
                 "Unable to instantiate Java " + klass +
                 "; does it have a no-argument constructor? " +
                 "If an inner class, is it static?";
-            throw contractFailure(message);
+            throw contractFailure(message, e);
         }
         catch (IllegalAccessException e)
         {
-            throw contractFailure("Java class isn't accessible: " + klass);
+            throw contractFailure("Java class isn't accessible: " + klass, e);
         }
     }
 
@@ -100,16 +100,15 @@ final class JavaNewProc
         catch (SecurityException e)
         {
             String message =
-                "The Java security manager denied access to " + klass + ": " +
-                e.getMessage();
-            throw contractFailure(message);
+                "The Java security manager denied access to " + klass;
+            throw contractFailure(message, e);
         }
         catch (NoSuchMethodException e)
         {
             String message =
                 klass + " doesn't have a public constructor accepting " +
                 args.length + " Object args";
-            throw contractFailure(message);
+            throw contractFailure(message, e);
         }
     }
 
@@ -123,28 +122,22 @@ final class JavaNewProc
         }
         catch (IllegalAccessException e)
         {
-            throw contractFailure("Java constructor isn't accessible: " + constructor);
+            String message =
+                "Java constructor isn't accessible: " + constructor;
+            throw contractFailure(message, e);
         }
         catch (IllegalArgumentException e)
         {
             String message =
                 "Illegal argument to Java constructor: " + constructor +
                 e.getMessage();
-            throw contractFailure(message);
+            throw contractFailure(message, e);
         }
-        catch (InstantiationException e)
+        catch (InstantiationException | InvocationTargetException e)
         {
             String message =
-                "Exception from Java constructor: " + constructor +
-                e.getMessage();
-            throw contractFailure(message);
-        }
-        catch (InvocationTargetException e)
-        {
-            String message =
-                "Exception from Java constructor: " + constructor +
-                e.getMessage();
-            throw contractFailure(message);
+                "Exception from Java constructor: " + constructor;
+            throw contractFailure(message, e);
         }
     }
 }
