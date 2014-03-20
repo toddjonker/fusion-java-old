@@ -1903,6 +1903,17 @@ final class FusionNumber
         throw who.argFailure(expectation, argNum, args);
     }
 
+    static BigDecimal checkNullableDecimalArg(Evaluator eval,
+                                              Procedure who,
+                                              int       argNum,
+                                              Object... args)
+        throws FusionException, ArgTypeFailure
+    {
+        String expectation = "nullable decimal";
+        BigDecimal result = checkDecimalArg(eval, who, expectation, argNum, args);
+        return result;
+    }
+
 
     /**
      * @return not null

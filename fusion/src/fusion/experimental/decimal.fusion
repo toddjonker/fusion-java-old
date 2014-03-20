@@ -82,4 +82,30 @@ This function is similar to:
 except only a single rounding operation occurs.
     '''
     (java_new "com.amazon.fusion.DecimalDivideRescaleProc"))
+
+
+  (defpub_j decimal_to_string
+    '''
+Converts a decimal to a string using Ion notation.
+Returns `null.string` when given `null.decimal`.
+    '''
+    "com.amazon.fusion.DecimalToStringProc")
+
+
+  (defpub_j string_to_decimal
+    '''
+Returns the decimal equivalent of a properly formatted string value. Returns
+`null.decimal` when given `null.string`.
+
+The string can contain an optional minus sign (`\"-\"` aka `\"\\x2D\"`) and must
+be followed by one or more ASCII digits. An exception is raised if the string is
+a format which cannot be interpreted as a decimal value.
+
+Note: This implementation is experimental! It relies on Java's `BigDecimal`
+API to perform string -> decimal parsing. This means it will _not_ handle
+[Ion's `decimal` exponent notation](https://amazon-ion.github.io/ion-docs/docs/spec.html#real-numbers).
+It also _will_ (incorrectly) accept the
+[Java `BigDecimal` exponent notation](http://download.java.net/jdk7/archive/b123/docs/api/java/math/BigDecimal.html#BigDecimal%28java.lang.String%29).
+    '''
+    "com.amazon.fusion.StringToDecimalProc")
 )

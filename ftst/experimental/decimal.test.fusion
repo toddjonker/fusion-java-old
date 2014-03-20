@@ -45,3 +45,61 @@
 
 (check = (decimal_divide_rescale 1. 2. 2) 0.50)
 (check = (decimal_divide_rescale 2. 3. 2) 0.67)
+
+//============================================================================
+// decimal_to_string
+
+(check === (decimal_to_string null.decimal) null.string)
+
+(check === (decimal_to_string 0.0) "0d-1")
+(check === (decimal_to_string 0.10) "1.0d-1")
+(check === (decimal_to_string 0.000) "0d-3")
+(check === (decimal_to_string -0.0) "-0d-1")
+(check === (decimal_to_string 15.00) "15.00")
+(check === (decimal_to_string 1.234) "1.234")
+(check === (decimal_to_string -99.9) "-99.9")
+
+(check === (decimal_to_string -1.23456789012345678901234567890)
+                             "-1.23456789012345678901234567890")
+
+(check_arg_exn (decimal_to_string 1))
+(check_arg_exn (decimal_to_string "1"))
+
+//============================================================================
+// string_to_decimal
+
+(check === (string_to_decimal null.string) null.decimal)
+
+(check === (string_to_decimal "0.0") 0.0)
+(check === (string_to_decimal "1.234") 1.234)
+(check === (string_to_decimal "-99.9") -99.9)
+(check === (string_to_decimal "-0.0") -0.0)
+
+// Note: The following test will not pass, which is one of the primary reasons that
+// string_to_decimal / decimal_to_string is located within /experimental. They
+// do not pass because there is insufficient support for native
+// IonDecimal <-> IonString conversions and we are forced to use java's BigDecimal
+// for some aspects, which deviates from the IonDecimal spec.
+//    (check === (string_to_decimal "0d-3") 0.000)
+
+// Note: The following tests will pass, but ideally should not, because they rely on
+// the fact that Fusion currently depends on java's BigDecimal class to do its 
+// IonString <-> IonDecimal conversions. This is one of the main reasons why these
+// conversions are located within /experimental at this time. The exponent notation
+// shown to work below are not part of the IonDecimal spec.
+      (check === (string_to_decimal "1.234E1") 12.34)
+      (check === (string_to_decimal "1.234e1") 12.34)
+      (check === (string_to_decimal "1.234E+1") 12.34)
+      (check === (string_to_decimal "1.234E-1") 0.1234)
+
+(check === (string_to_decimal "-1.23456789012345678901234567890")
+                               -1.23456789012345678901234567890)
+
+(check_arg_exn (string_to_decimal ""))
+(check_arg_exn (string_to_decimal " 0.0"))
+(check_arg_exn (string_to_decimal "0.0 "))
+(check_arg_exn (string_to_decimal " 0.0 "))
+(check_arg_exn (string_to_decimal "0.0-"))
+(check_arg_exn (string_to_decimal "0.0,"))
+(check_arg_exn (string_to_decimal "+1.0"))
+(check_arg_exn (string_to_decimal "--1.0"))
