@@ -410,7 +410,7 @@ public class FusionRuntimeBuilder
     //=========================================================================
 
 
-    private boolean isValidBootstrapRepo(File repo)
+    private static boolean isValidBootstrapRepo(File repo)
     {
         File src = new File(repo, "src");
         File fusionModule = new File(new File(src, "fusion"), "base.fusion");
@@ -592,8 +592,10 @@ public class FusionRuntimeBuilder
 
     private FusionRuntimeBuilder fillDefaults()
     {
-        FusionRuntimeBuilder b = this;
-        if (b.myCurrentDirectory == null)
+        // Ensure that we don't modify the user's builder.
+        FusionRuntimeBuilder b = copy();
+
+        if (b.getInitialCurrentDirectory() == null)
         {
             String userDir = System.getProperty("user.dir", "");
             if (userDir.isEmpty())
@@ -605,10 +607,10 @@ public class FusionRuntimeBuilder
             }
 
             // Don't change the caller's instance
-            b = b.withInitialCurrentDirectory(new File(userDir));
+            b.setInitialCurrentDirectory(new File(userDir));
         }
 
-        if (b.myBootstrapRepository == null)
+        if (b.getBootstrapRepository() == null)
         {
             String property = PROPERTY_BOOTSTRAP_REPOSITORY;
             String bootstrap = System.getProperty(property);
@@ -628,7 +630,7 @@ public class FusionRuntimeBuilder
                     throw new IllegalArgumentException(message);
                 }
 
-                b = b.withBootstrapRepository(file);
+                b.setBootstrapRepository(file);
             }
         }
 
