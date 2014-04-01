@@ -29,6 +29,11 @@ public final class FusionAssertionException
         addContext(location);
     }
 
+    /**
+     * Returns the formatted message as provided by the application.
+     *
+     * @return may be null if no message values were provided.
+     */
     public String getUserMessage()
     {
         return getBaseMessage();
