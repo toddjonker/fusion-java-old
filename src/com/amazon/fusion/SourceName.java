@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -70,5 +70,17 @@ public class SourceName
     public String toString()
     {
         return myDisplay;
+    }
+
+
+    boolean equals(SourceName other)
+    {
+        return (other != null && myDisplay.equals(other.myDisplay));
+    }
+
+    @Override
+    public boolean equals(Object other)
+    {
+        return (other instanceof SourceName && equals((SourceName) other));
     }
 }
