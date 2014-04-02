@@ -105,6 +105,9 @@ public class FusionRuntimeBuilder
     private File    myBootstrapRepository;
     private File[]  myRepositoryDirectories;
     private String  myDefaultLanguage = STANDARD_DEFAULT_LANGUAGE;
+
+    private _Private_CoverageCollector myCollector;
+
     private boolean myDocumenting;
 
 
@@ -116,6 +119,7 @@ public class FusionRuntimeBuilder
         this.myBootstrapRepository   = that.myBootstrapRepository;
         this.myRepositoryDirectories = that.myRepositoryDirectories;
         this.myDefaultLanguage       = that.myDefaultLanguage;
+        this.myCollector             = that.myCollector;
         this.myDocumenting           = that.myDocumenting;
     }
 
@@ -584,6 +588,20 @@ public class FusionRuntimeBuilder
     {
         mutationCheck();
         myDocumenting = documenting;
+    }
+
+
+    /** NOT FOR APPLICATION USE */
+    _Private_CoverageCollector getCoverageCollector()
+    {
+        return myCollector;
+    }
+
+    /** NOT FOR APPLICATION USE */
+    void setCoverageCollector(_Private_CoverageCollector collector)
+    {
+        mutationCheck();
+        myCollector = collector;
     }
 
 

@@ -39,6 +39,7 @@ final class StandardRuntime
 
             myTopLevel =
                 new StandardTopLevel(myGlobalState, topNs, myDefaultLanguage,
+                                     builder.getCoverageCollector(),
                                      builder.isDocumenting());
         }
         catch (FusionException e)

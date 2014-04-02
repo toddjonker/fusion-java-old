@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -16,6 +16,11 @@ public class _Private_Trampoline
         rb.setDocumenting(documenting);
     }
 
+    public static void setCoverageCollector(FusionRuntimeBuilder rb,
+                                            _Private_CoverageCollector collector)
+    {
+        rb.setCoverageCollector(collector);
+    }
 
     public static FusionException newFusionException(String message,
                                                      Throwable cause)
