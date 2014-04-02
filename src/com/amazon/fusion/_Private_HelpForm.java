@@ -119,7 +119,7 @@ public final class _Private_HelpForm
         CompiledForm[] children = new CompiledForm[arity - 1];
         for (int i = 1; i < arity; i++)
         {
-            children[i-1] = stx.get(eval, i).doCompile(eval, env);
+            children[i-1] = eval.compile(env, stx.get(eval, i));
         }
         return new CompiledHelp(children);
     }
