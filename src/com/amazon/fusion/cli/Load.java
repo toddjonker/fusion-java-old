@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.IOException;
 
 
-final class Load
+class Load
     extends Command
 {
     //=+===============================================================================
@@ -23,9 +23,14 @@ final class Load
         "Loads and evaluates the Fusion script in the given FILE.  If the result of the\n" +
         "last expression is not void, it is sent to standard output via `write`.";
 
+    Load(String command)
+    {
+        super(command);
+    }
+
     Load()
     {
-        super("load");
+        this("load");
         putHelpText(HELP_ONE_LINER, HELP_USAGE, HELP_BODY);
     }
 
@@ -41,13 +46,13 @@ final class Load
     }
 
 
-    private static class Executor
+    static class Executor
         extends FusionExecutor
     {
-        private final String myFileName;
+        final String myFileName;
 
 
-        private Executor(String fileName)
+        Executor(String fileName)
         {
             super(/* documenting */ false);
 
