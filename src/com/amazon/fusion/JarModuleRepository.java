@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -28,12 +28,15 @@ final class JarModuleRepository
         {
             ModuleLocation loc = new InputStreamModuleLocation()
             {
+                // TODO Maybe not the best output this way.
+                private final SourceName myName =
+                    SourceName.forDisplay(id + " (at classpath:" + fileName
+                                             + ")");
+
                 @Override
                 SourceName sourceName()
                 {
-                    // TODO Maybe not the best output this way.
-                    String name = id + " (at classpath:" + fileName + ")";
-                    return SourceName.forDisplay(name);
+                    return myName;
                 }
 
                 @Override

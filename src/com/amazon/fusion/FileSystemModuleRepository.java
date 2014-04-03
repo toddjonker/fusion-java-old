@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -42,11 +42,13 @@ final class FileSystemModuleRepository
         {
             ModuleLocation loc = new InputStreamModuleLocation()
             {
+                private final SourceName myName =
+                    SourceName.forModule(id, libFile);
+
                 @Override
                 SourceName sourceName()
                 {
-                    String name = id + " (at file:" + libFile + ")";
-                    return SourceName.forDisplay(name);
+                    return myName;
                 }
 
                 @Override

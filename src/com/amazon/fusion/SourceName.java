@@ -25,7 +25,7 @@ public class SourceName
         if (path.length() == 0) {
             throw new IllegalArgumentException("path must not be empty");
         }
-        return new SourceName(path);
+        return new FileSourceName(new File(path));
     }
 
     /**
@@ -38,7 +38,7 @@ public class SourceName
      */
     public static SourceName forFile(File path)
     {
-        return new SourceName(path.getAbsolutePath());
+        return new FileSourceName(path);
     }
 
     /**
@@ -66,6 +66,13 @@ public class SourceName
         return myDisplay;
     }
 
+
+    File getFile()
+    {
+        return null;
+    }
+
+
     @Override
     public String toString()
     {
@@ -92,5 +99,50 @@ public class SourceName
         int result = HASH_SEED + myDisplay.hashCode();
         result ^= (result << 29) ^ (result >> 3);
         return result;
+    }
+
+
+    //=========================================================================
+
+
+    private static class FileSourceName
+        extends SourceName
+    {
+        private final File myFile;
+
+        FileSourceName(File file)
+        {
+            super(file.getAbsolutePath());
+            myFile = file;
+        }
+
+        @Override
+        File getFile() { return myFile; }
+    }
+
+
+    //=========================================================================
+
+
+    private static class ModuleSourceName
+        extends SourceName
+    {
+        private final File myFile;
+
+        ModuleSourceName(ModuleIdentity id, File file)
+        {
+            super(id + " (at file:" + file + ")");
+            myFile = file;
+        }
+
+        @Override
+        File getFile() { return myFile; }
+    }
+
+
+    static SourceName forModule(ModuleIdentity id, File sourceFile)
+    {
+        assert sourceFile != null;
+        return new ModuleSourceName(id, sourceFile);
     }
 }
