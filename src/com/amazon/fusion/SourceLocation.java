@@ -123,6 +123,36 @@ class SourceLocation
     }
 
 
+    static SourceLocation forLineColumn(SourceName name, long line, long column)
+    {
+        if (line < 0 && column < 0)
+        {
+            if (name == null) return null;
+
+            // TODO Can this allocation be eliminated?
+            //      We'll probably be creating lots of identical instances.
+            return new SourceLocation(name);
+        }
+
+        if (line <= Short.MAX_VALUE && column <= Short.MAX_VALUE)
+        {
+            return new Shorts(name, (short) line, (short) column);
+        }
+
+        if (line <= Integer.MAX_VALUE && column <= Integer.MAX_VALUE)
+        {
+            return new Ints(name, (int) line, (int) column);
+        }
+
+        return new Longs(name, line, column);
+    }
+
+    static SourceLocation forLineColumn(long line, long column)
+    {
+        return forLineColumn(null, line, column);
+    }
+
+
     /**
      * Returns an instance that represents the current span of the reader.
      * This currently only supports Ion text sources, and only captures the
