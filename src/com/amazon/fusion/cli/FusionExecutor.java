@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -24,15 +24,22 @@ abstract class FusionExecutor
     }
 
 
+    FusionRuntimeBuilder runtimeBuilder()
+    {
+        FusionRuntimeBuilder builder = FusionRuntimeBuilder.standard();
+
+        _Private_Trampoline.setDocumenting(builder, isDocumenting);
+
+        return builder;
+    }
+
+
     FusionRuntime runtime()
         throws FusionException
     {
         if (myRuntime == null)
         {
-            FusionRuntimeBuilder builder = FusionRuntimeBuilder.standard();
-
-            _Private_Trampoline.setDocumenting(builder, isDocumenting);
-
+            FusionRuntimeBuilder builder = runtimeBuilder();
             myRuntime = builder.build();
         }
         return myRuntime;
