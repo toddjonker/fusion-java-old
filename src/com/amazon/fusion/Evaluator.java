@@ -38,7 +38,7 @@ import java.util.Map;
 /**
  * Main entry point to the Fusion evaluation engine.
  */
-final class Evaluator
+class Evaluator
 {
     private final GlobalState myGlobalState;
     private final IonSystem mySystem;
@@ -61,6 +61,38 @@ final class Evaluator
         myOuterFrame      = outerBindings;
         myContinuationMarks = new HashMap<Object, Object>();
     }
+
+    /**
+     * Construct an evaluator with a single continuation mark.
+     */
+    Evaluator(Evaluator outer, Object key, Object mark)
+    {
+        this(outer);
+
+        // The keys must be hashable and equals-able!
+        assert key instanceof DynamicParameter;
+
+        myContinuationMarks.put(key, mark);
+    }
+
+    /**
+     * Construct an evaluator with multiple continuation marks.
+     */
+    Evaluator(Evaluator outer, Object[] keys, Object[] marks)
+    {
+        this(outer);
+
+        assert keys.length == marks.length;
+
+        for (int i = 0; i < keys.length; i++)
+        {
+            // The keys must be hashable and equals-able!
+            assert keys[i] instanceof DynamicParameter;
+
+            myContinuationMarks.put(keys[i], marks[i]);
+        }
+    }
+
 
     IonSystem getSystem()
     {
@@ -497,27 +529,12 @@ final class Evaluator
 
     Evaluator markedContinuation(Object key, Object mark)
     {
-        // The keys must be hashable and equals-able!
-        assert key instanceof DynamicParameter;
-
-        Evaluator innerFrame = new Evaluator(this);
-        innerFrame.myContinuationMarks.put(key, mark);
-        return innerFrame;
+        return new Evaluator(this, key, mark);
     }
 
     Evaluator markedContinuation(Object[] keys, Object[] marks)
     {
-        assert keys.length == marks.length;
-
-        Evaluator innerFrame = new Evaluator(this);
-        for (int i = 0; i < keys.length; i++)
-        {
-            // The keys must be hashable and equals-able!
-            assert keys[i] instanceof DynamicParameter;
-
-            innerFrame.myContinuationMarks.put(keys[i], marks[i]);
-        }
-        return innerFrame;
+        return new Evaluator(this, keys, marks);
     }
 
 
