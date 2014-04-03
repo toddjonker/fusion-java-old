@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionUtils.safeEquals;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.TextSpan;
 import com.amazon.ion.util.Spans;
@@ -246,5 +247,20 @@ class SourceLocation
         }
         catch (IOException e) { /* shouldn't happen */ }
         return out.toString();
+    }
+
+
+    public boolean equals(SourceLocation that)
+    {
+        return (that != null
+                && safeEquals(this.myName, that.myName)
+                && this.getLine() == that.getLine()
+                && this.getColumn() == that.getColumn());
+    }
+
+    @Override
+    public boolean equals(Object that)
+    {
+        return that instanceof SourceLocation && equals((SourceLocation) that);
     }
 }
