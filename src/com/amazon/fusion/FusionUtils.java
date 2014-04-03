@@ -28,6 +28,14 @@ final class FusionUtils
         return (left == null ? right == null : left.equals(right));
     }
 
+    /**
+     * The value's hash code, or zero if value is null.
+     */
+    static int safeHashCode(Object value)
+    {
+        return (value == null ? 0 : value.hashCode());
+    }
+
 
     /**
      * @param value must not be null.

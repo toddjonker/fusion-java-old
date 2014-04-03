@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.safeEquals;
+import static com.amazon.fusion.FusionUtils.safeHashCode;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.TextSpan;
 import com.amazon.ion.util.Spans;
@@ -262,5 +263,21 @@ class SourceLocation
     public boolean equals(Object that)
     {
         return that instanceof SourceLocation && equals((SourceLocation) that);
+    }
+
+
+    private static final int HASH_SEED = SourceLocation.class.hashCode();
+
+    @Override
+    public int hashCode()
+    {
+        final int prime = 8191;
+        int result = HASH_SEED + safeHashCode(myName);
+        result ^= (result << 29) ^ (result >> 3);
+        result = prime * result + (int) getLine();
+        result ^= (result << 29) ^ (result >> 3);
+        result = prime * result + (int) getColumn();
+        result ^= (result << 29) ^ (result >> 3);
+        return result;
     }
 }
