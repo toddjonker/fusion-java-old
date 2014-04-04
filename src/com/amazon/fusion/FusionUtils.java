@@ -151,6 +151,16 @@ final class FusionUtils
     }
 
 
+    static void createParentDirs(File file)
+    {
+        File parent = file.getParentFile();
+        if (parent != null)
+        {
+            parent.mkdirs();
+        }
+    }
+
+
     public static String loadReader(Reader in)
         throws IOException
     {
