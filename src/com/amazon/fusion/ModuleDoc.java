@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -163,9 +163,7 @@ final class ModuleDoc
         catch (ModuleNotFoundException e)
         {
             // This can happen for implicit modules with no stub .fusion file.
-            // For now we just stop here and don't handle further submodules.
-            // TODO Recurse into implicit modules that don't have stub source.
-            return null;
+            id = ModuleIdentity.forAbsolutePath(submodulePath(name));
         }
 
         if (! filter.accept(id)) return null;
@@ -173,8 +171,17 @@ final class ModuleDoc
         ModuleInstance moduleInstance =
             myRuntime.getDefaultRegistry().instantiate(evaluator(), id);
 
-        ModuleDoc doc = new ModuleDoc(myRuntime, id, moduleInstance.getDocs());
-        doc.addBindings(moduleInstance);
+        ModuleDoc doc;
+        if (moduleInstance != null)
+        {
+            doc = new ModuleDoc(myRuntime, id, moduleInstance.getDocs());
+            doc.addBindings(moduleInstance);
+        }
+        else
+        {
+            // This is an implicit module with no code.
+            doc = new ModuleDoc(myRuntime, id, null);
+        }
 
         if (mySubmodules == null)
         {
