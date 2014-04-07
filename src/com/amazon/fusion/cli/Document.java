@@ -3,6 +3,7 @@
 package com.amazon.fusion.cli;
 
 import static com.amazon.fusion._Private_ModuleDocumenter.writeHtmlTree;
+import com.amazon.fusion.FusionRuntimeBuilder;
 import java.io.File;
 
 
@@ -86,6 +87,13 @@ class Document
             myRepoDir   = repoDir;
         }
 
+        @Override
+        FusionRuntimeBuilder runtimeBuilder()
+        {
+            FusionRuntimeBuilder builder = super.runtimeBuilder();
+            builder.addRepositoryDirectory(myRepoDir);
+            return builder;
+        }
 
         @Override
         public int execute()
