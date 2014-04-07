@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -65,7 +65,16 @@ final class DocIndex
                     ids = new TreeSet<>();
                     myNameMap.put(name, ids);
                 }
-                ids.addAll(entry.getValue().getProvidingModules());
+
+                BindingDoc bindingDoc = entry.getValue();
+                if (bindingDoc == null)
+                {
+                    ids.add(doc.myModuleId);
+                }
+                else
+                {
+                    ids.addAll(bindingDoc.getProvidingModules());
+                }
             }
         }
     }
