@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -50,14 +50,21 @@ class Document
         if (outputDir.isFile())
         {
             System.err.print("Output location is a file: ");
-            System.err.println(args[0]);
+            System.err.println(outputDir);
             return null;
         }
 
         if (! repoDir.isDirectory())
         {
             System.err.print("Repository is not a directory: ");
-            System.err.println(args[1]);
+            System.err.println(repoDir);
+            return null;
+        }
+
+        if (! new File(repoDir, "src").isDirectory())
+        {
+            System.err.print("Repository has no src directory: ");
+            System.err.println(repoDir);
             return null;
         }
 
@@ -84,7 +91,8 @@ class Document
         public int execute()
             throws Exception
         {
-            writeHtmlTree(runtime(), myOutputDir, myRepoDir);
+            File srcDir = new File(myRepoDir, "src");
+            writeHtmlTree(runtime(), myOutputDir, srcDir);
             return 0;
         }
     }

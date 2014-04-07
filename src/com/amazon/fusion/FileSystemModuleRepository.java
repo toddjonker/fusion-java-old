@@ -70,4 +70,10 @@ final class FileSystemModuleRepository
 
         return null;
     }
+
+    @Override
+    public String toString()
+    {
+        return "[FileSystemModuleRepository " + identify() + ']';
+    }
 }
