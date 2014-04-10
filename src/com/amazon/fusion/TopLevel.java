@@ -140,30 +140,8 @@ public interface TopLevel
         throws FusionException;
 
 
-    /**
-     * Loads a module declaration from source code. This compiles the module,
-     * but does not instantiate it (evaluate the module's body); that happens
-     * when the module is first {@code require}d.
-     * <p>
-     * If the reader is positioned on a value, it will be read; otherwise the
-     * {@linkplain IonReader#next() next} value will be read.
-     * <p>
-     * If the reader doesn't provide exactly one top-level value, an exception
-     * is thrown.
-     *
-     * @param absoluteModulePath identifies the module to be loaded.
-     * Must be an absolute module path, starting with {@code '/'}.
-     * @param source Fusion source code, in Ion data format. Must not be null.
-     * @param name identifies the source for error reporting. May be null.
-     *
-     * @throws FusionException if the reader doesn't provide exactly one
-     * top-level value, if a module with the given identity has already been
-     * loaded, or if there's any other problem reading or compiling the module.
-     */
-    public void loadModule(String absoluteModulePath,
-                           IonReader source,
-                           SourceName name)
-        throws FusionException;
+    //========================================================================
+    // Common operations
 
 
     /**
@@ -216,5 +194,35 @@ public interface TopLevel
      * Note that "no value" is not the same as "returns void".
      */
     public Object call(String procedureName, Object... arguments)
+        throws FusionException;
+
+
+    //========================================================================
+    // Dynamic module definitions
+
+
+    /**
+     * Loads a module declaration from source code. This compiles the module,
+     * but does not instantiate it (evaluate the module's body); that happens
+     * when the module is first {@code require}d.
+     * <p>
+     * If the reader is positioned on a value, it will be read; otherwise the
+     * {@linkplain IonReader#next() next} value will be read.
+     * <p>
+     * If the reader doesn't provide exactly one top-level value, an exception
+     * is thrown.
+     *
+     * @param absoluteModulePath identifies the module to be loaded.
+     * Must be an absolute module path, starting with {@code '/'}.
+     * @param source Fusion source code, in Ion data format. Must not be null.
+     * @param name identifies the source for error reporting. May be null.
+     *
+     * @throws FusionException if the reader doesn't provide exactly one
+     * top-level value, if a module with the given identity has already been
+     * loaded, or if there's any other problem reading or compiling the module.
+     */
+    public void loadModule(String absoluteModulePath,
+                           IonReader source,
+                           SourceName name)
         throws FusionException;
 }
