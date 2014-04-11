@@ -518,12 +518,20 @@ final class TopLevelNamespace
     /**
      * A reference to a top-level variable in the lexically-enclosing
      * namespace, when the binding isn't known at compile-time.
+     * In other words, a forward reference.
+     * <p>
+     * The first time the variable is dereferenced, we have to resolve the
+     * binding. We cache the resulting address so we only have to perform the
+     * expensive work once.
+     * <p>
+     * This uses a rare safe instance of the double-checked locking idiom:
+     * http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html
      */
     private static final class CompiledFreeVariableReference
         implements CompiledForm
     {
-        private final SyntaxSymbol myId;
-        private int myAddress = -1;
+        private SyntaxSymbol myId;
+        private volatile int myAddress = -1;
 
         CompiledFreeVariableReference(SyntaxSymbol id)
         {
@@ -534,33 +542,39 @@ final class TopLevelNamespace
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            int address;
+            Namespace ns = (Namespace) store.namespace();
 
-            synchronized (this)
+            int address = myAddress;
+            if (address < 0)
             {
-                address = myAddress;
-                if (address < 0)
+                synchronized (this)
                 {
-                    SyntaxSymbol topId = myId.copyAndResolveTop();
-
-                    Namespace ns = (Namespace) store.namespace();
-                    NsBinding binding = ns.localResolve(topId);
-                    if (binding == null)
+                    if (myAddress < 0)
                     {
-                        throw new UnboundIdentifierException(myId);
-                    }
+                        SyntaxSymbol topId = myId.copyAndResolveTop();
 
-                    address = binding.myAddress;
-                    myAddress = address;
+                        NsBinding binding = ns.localResolve(topId);
+                        if (binding == null)
+                        {
+                            throw new UnboundIdentifierException(myId);
+                        }
+
+                        myAddress = address = binding.myAddress;
+                        myId = null;
+                    }
                 }
             }
 
-            NamespaceStore ns = store.namespace();
             Object result = ns.lookup(address);
-            if (result == null)
-            {
-                throw new UnboundIdentifierException(myId);
-            }
+
+            // There's a potential failure here: the binding may have had an
+            // address assigned, but not yet a value. That could happen when
+            // another thread is in the midst of defining the binding.
+            // In such a scenario, the `result` may be null or even corrupt
+            // (if we happen to read from the store while it's being updated).
+            // However, that scenario is an *application* thread-safety
+            // violation since Fusion doesn't promise that concurrent
+            // mutation of a top-level namespace is thread-safe.
 
             return result;
         }
