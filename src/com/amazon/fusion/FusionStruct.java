@@ -366,8 +366,26 @@ final class FusionStruct
     /**
      * @param struct must be a {@link BaseStruct}.
      * @return void if the position is out of bounds.
+     *
+     * @deprecated
+     * Renamed to {@link #unsafeStructElt(Evaluator, Object, String)}.
      */
+    @Deprecated
     static Object unsafeStructDot(Evaluator eval, Object struct, String field)
+        throws FusionException
+    {
+        return ((BaseStruct) struct).elt(eval, field);
+    }
+
+    /**
+     * Equivalent to {@code (elt struct field)}.
+     *
+     * @param struct must be a struct; it may be {@code null.struct} or empty.
+     *
+     * @return void if the struct is null or if the field name doesn't
+     * exist in the struct.
+     */
+    static Object unsafeStructElt(Evaluator eval, Object struct, String field)
         throws FusionException
     {
         return ((BaseStruct) struct).elt(eval, field);
