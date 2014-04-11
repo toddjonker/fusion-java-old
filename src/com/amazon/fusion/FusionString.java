@@ -7,7 +7,7 @@ import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionList.checkActualListArg;
 import static com.amazon.fusion.FusionList.stretchyList;
-import static com.amazon.fusion.FusionList.unsafeListRef;
+import static com.amazon.fusion.FusionList.unsafeListElement;
 import static com.amazon.fusion.FusionList.unsafeListSize;
 import static com.amazon.fusion.FusionNumber.isInt;
 import static com.amazon.fusion.FusionNumber.makeInt;
@@ -721,7 +721,7 @@ public final class FusionString
 
             for (int scalarPos = 0; scalarPos < scalarSize; scalarPos++)
             {
-                Object scalarObj = unsafeListRef(eval, list, scalarPos);
+                Object scalarObj = unsafeListElement(eval, list, scalarPos);
 
                 if (isInt(eval, scalarObj)
                     && isAnyNull(eval, scalarObj).isFalse())

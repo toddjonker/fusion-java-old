@@ -217,14 +217,24 @@ final class FusionList
     }
 
 
-    static Object unsafeListRef(Evaluator eval, Object list, int pos)
+    static Object unsafeListElement(Evaluator eval, Object list, int pos)
     {
         return ((BaseList) list).unsafeRef(eval, pos);
     }
 
+    /**
+     * @deprecated
+     * Renamed to {@link #unsafeListElement(Evaluator, Object, int)}.
+     */
+    @Deprecated
+    static Object unsafeListRef(Evaluator eval, Object list, int pos)
+    {
+        return unsafeListElement(eval, list, pos);
+    }
+
 
     static void unsafeListSet(Evaluator eval, Object list,
-                                int pos, Object value)
+                              int pos, Object value)
     {
         ((MutableList) list).unsafeSet(pos, value);
     }
@@ -1368,7 +1378,7 @@ final class FusionList
         {
             int pos = unsafeTruncateIntToJavaInt(eval, args[1]);
 
-            return unsafeListRef(eval, args[0], pos);
+            return unsafeListElement(eval, args[0], pos);
         }
     }
 

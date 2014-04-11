@@ -1,10 +1,10 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionList.immutableList;
-import static com.amazon.fusion.FusionList.unsafeListRef;
+import static com.amazon.fusion.FusionList.unsafeListElement;
 import com.amazon.fusion.QuoteSyntaxForm.CompiledQuoteSyntax;
 
 final class QuasiSyntaxForm
@@ -139,7 +139,7 @@ final class QuasiSyntaxForm
         Object[] children = new Object[size];
         for (int i = 0; i < size; i++)
         {
-            SyntaxValue subform = (SyntaxValue) unsafeListRef(eval, list, i);
+            SyntaxValue subform = (SyntaxValue) unsafeListElement(eval, list, i);
             SyntaxValue expanded = expand(expander, env, subform, depth);
             same &= (subform == expanded);
             children[i] = expanded;

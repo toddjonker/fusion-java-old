@@ -4,7 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionList.immutableList;
 import static com.amazon.fusion.FusionList.isImmutableList;
-import static com.amazon.fusion.FusionList.unsafeListRef;
+import static com.amazon.fusion.FusionList.unsafeListElement;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static java.lang.System.arraycopy;
 import com.amazon.fusion.FusionList.BaseList;
@@ -257,7 +257,7 @@ final class SyntaxList
         Object[] children = new Object[len];
         for (int i = 0; i < len; i++)
         {
-            SyntaxValue subform = (SyntaxValue) unsafeListRef(eval, list, i);
+            SyntaxValue subform = (SyntaxValue) unsafeListElement(eval, list, i);
             Object expanded = expander.expandExpression(env, subform);
             same &= (subform == expanded);
             children[i] = expanded;
