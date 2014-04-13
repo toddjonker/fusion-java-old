@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -235,6 +235,26 @@ class ModuleIdentity
         }
 
         return path;
+    }
+
+
+    /**
+     * @return null if there's no parent; eg if this is "/foo".
+     */
+    ModuleIdentity parent()
+    {
+        String path = myPath;
+        int slashIndex = path.lastIndexOf('/');
+        assert slashIndex >= 0;
+        if (slashIndex == 0)
+        {
+            return null;
+        }
+        else
+        {
+            path = path.substring(0, slashIndex);
+            return forAbsolutePath(path);
+        }
     }
 
 
