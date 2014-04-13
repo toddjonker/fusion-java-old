@@ -228,6 +228,30 @@ public final class _Private_ModuleDocumenter
         }
 
 
+        private void renderModulePathWithLinks(ModuleIdentity id)
+            throws IOException
+        {
+            ModuleIdentity parent = id.parent();
+            if (parent != null)
+            {
+                renderModulePathWithLinks(parent);
+            }
+
+            append('/');
+
+            String baseName = id.baseName();
+
+            if (id == myModuleId)
+            {
+                // Don't link to ourselves, that's silly.
+                append(baseName);
+            }
+            else
+            {
+                linkToModule(id, baseName);
+            }
+        }
+
         private void renderHeader()
             throws IOException
         {
@@ -237,9 +261,9 @@ public final class _Private_ModuleDocumenter
                    "(<a href='permuted-index.html'>Permuted</a>)" +
                    "</div>\n");
 
-            String modulePath = myModuleId.absolutePath();
-
-            renderHeader1("Module " + modulePath);
+            append("<h1>Module ");
+            renderModulePathWithLinks(myModuleId);
+            append("</h1>");
         }
 
         private void renderModuleIntro()
