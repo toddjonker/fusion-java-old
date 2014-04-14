@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -18,7 +18,7 @@ import java.util.Set;
  * they are defined or redefined, and compare those numbers to determine which
  * binding has precedence.
  */
-class TopLevelNamespace
+final class TopLevelNamespace
     extends Namespace
 {
     /**

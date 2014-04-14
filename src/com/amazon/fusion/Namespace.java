@@ -59,7 +59,7 @@ abstract class Namespace
             return env.namespace().lookup(this);
         }
 
-        CompiledForm compileLocalTopReference(Evaluator eval)
+        final CompiledForm compileLocalTopReference(Evaluator eval)
             throws FusionException
         {
             return new CompiledTopVariableReference(myAddress);
@@ -94,7 +94,7 @@ abstract class Namespace
     }
 
     private final ModuleRegistry myRegistry;
-            final ModuleIdentity myModuleId;
+    private final ModuleIdentity myModuleId;
 
     /**
      * Assigns required modules to integer addresses, for use in compiled
@@ -129,32 +129,32 @@ abstract class Namespace
 
 
     @Override
-    public ModuleRegistry getRegistry()
+    public final ModuleRegistry getRegistry()
     {
         return myRegistry;
     }
 
     @Override
-    public Namespace namespace()
+    public final Namespace namespace()
     {
         return this;
     }
 
     @Override
-    public int getDepth()
+    public final int getDepth()
     {
         return 0;
     }
 
     @Override
-    public Object lookup(int rib, int address)
+    public final Object lookup(int rib, int address)
     {
         String message = "Rib not found: " + rib + ',' + address;
         throw new IllegalStateException(message);
     }
 
     @Override
-    public void set(int rib, int address, Object value)
+    public final void set(int rib, int address, Object value)
     {
         String message = "Rib not found: " + rib + ',' + address;
         throw new IllegalStateException(message);
@@ -179,7 +179,7 @@ abstract class Namespace
      *
      * @return not null.
      */
-    Collection<NsBinding> getBindings()
+    final Collection<NsBinding> getBindings()
     {
         return Collections.unmodifiableCollection(myBindings);
     }
@@ -190,7 +190,7 @@ abstract class Namespace
      * Adds wraps to the syntax object to give it the bindings of this
      * namespace and of required modules.
      */
-    SyntaxValue syntaxIntroduce(SyntaxValue source)
+    final SyntaxValue syntaxIntroduce(SyntaxValue source)
         throws FusionException
     {
         // TODO there's a case where we are applying the same wraps that are
@@ -206,7 +206,7 @@ abstract class Namespace
      *
      * @return null if identifier isn't bound here.
      */
-    NsBinding localSubstitute(Binding binding, Set<Integer> marks)
+    final NsBinding localSubstitute(Binding binding, Set<Integer> marks)
     {
         for (NsBinding b : myBindings)
         {
@@ -219,7 +219,7 @@ abstract class Namespace
     }
 
     @Override
-    public Binding substitute(Binding binding, Set<Integer> marks)
+    public final Binding substitute(Binding binding, Set<Integer> marks)
     {
         Binding subst = localSubstitute(binding, marks);
         if (subst == null) subst = binding;
@@ -227,7 +227,7 @@ abstract class Namespace
     }
 
     @Override
-    public NsBinding substituteFree(String name, Set<Integer> marks)
+    public final NsBinding substituteFree(String name, Set<Integer> marks)
     {
         for (NsBinding b : myBindings)
         {
@@ -259,7 +259,7 @@ abstract class Namespace
      * @param name must be non-empty.
      * @return null is equivalent to a {@link FreeBinding}.
      */
-    Binding resolve(String name)
+    final Binding resolve(String name)
     {
         return myWraps.resolve(name);
     }
@@ -268,7 +268,7 @@ abstract class Namespace
     abstract NsBinding newBinding(SyntaxSymbol identifier, int address);
 
 
-    NsBinding addBinding(SyntaxSymbol identifier)
+    final NsBinding addBinding(SyntaxSymbol identifier)
         throws FusionException
     {
         int address = myBindings.size();
@@ -295,7 +295,7 @@ abstract class Namespace
      *
      * @param value must not be null
      */
-    void bind(NsBinding binding, Object value)
+    final void bind(NsBinding binding, Object value)
     {
         set(binding.myAddress, value);
 
@@ -336,7 +336,7 @@ abstract class Namespace
      * @param value must not be null
      */
     @Override
-    public void set(int address, Object value)
+    public final void set(int address, Object value)
     {
         set(myValues, address, value);
     }
@@ -350,7 +350,7 @@ abstract class Namespace
      *
      * @throws IllegalArgumentException if the name is null or empty.
      */
-    public void bind(String name, Object value)
+    public final void bind(String name, Object value)
         throws FusionException
     {
         if (name == null || name.length() == 0)
@@ -372,7 +372,7 @@ abstract class Namespace
     /**
      * @param modulePath is an absolute or relative module path.
      */
-    void require(Evaluator eval, String modulePath)
+    final void require(Evaluator eval, String modulePath)
         throws FusionException
     {
         ModuleNameResolver resolver =
@@ -386,7 +386,7 @@ abstract class Namespace
         require(eval, id);
     }
 
-    void require(Evaluator eval, ModuleIdentity id)
+    final void require(Evaluator eval, ModuleIdentity id)
         throws FusionException
     {
         ModuleInstance module = myRegistry.instantiate(eval, id);
@@ -396,20 +396,20 @@ abstract class Namespace
     abstract void require(ModuleInstance module)
         throws FusionException;
 
-    void addWrap(SyntaxWrap wrap)
+    final void addWrap(SyntaxWrap wrap)
     {
         myWraps = myWraps.addWrap(wrap);
     }
 
 
-    boolean ownsBinding(NsBinding binding)
+    final boolean ownsBinding(NsBinding binding)
     {
         int address = binding.myAddress;
         return (address < myBindings.size()
                 && binding == myBindings.get(address));
     }
 
-    boolean ownsBinding(Binding binding)
+    final boolean ownsBinding(Binding binding)
     {
         if (binding instanceof NsBinding)
         {
@@ -448,7 +448,7 @@ abstract class Namespace
 
 
     @Override
-    public Object lookup(Binding binding)
+    public final Object lookup(Binding binding)
     {
         if (binding instanceof NsBinding)    // else it can't possibly be ours
         {
@@ -457,7 +457,7 @@ abstract class Namespace
         return null;
     }
 
-    public Object lookup(NsBinding binding)
+    public final Object lookup(NsBinding binding)
     {
         int address = binding.myAddress;
         if (address < myValues.size())              // for prepare-time lookup
@@ -471,7 +471,7 @@ abstract class Namespace
         return null;
     }
 
-    Object lookup(String name)
+    final Object lookup(String name)
     {
         Binding b = resolve(name);
         return lookup(b);
@@ -479,19 +479,19 @@ abstract class Namespace
 
 
     @Override
-    public Object lookup(int address)
+    public final Object lookup(int address)
     {
         return myValues.get(address);
     }
 
     @Override
-    public Object lookupImport(int moduleAddress, int bindingAddress)
+    public final Object lookupImport(int moduleAddress, int bindingAddress)
     {
         ModuleStore store = myRequiredModuleStores.get(moduleAddress);
         return store.lookup(bindingAddress);
     }
 
-    Object[] extractValues()
+    final Object[] extractValues()
     {
         Object[] values = new Object[myValues.size()];
         myValues.toArray(values);
@@ -512,7 +512,7 @@ abstract class Namespace
      * @return a zero-based address for the module, valid only within this
      * namespace (or its compiled form).
      */
-    synchronized int requiredModuleAddress(ModuleIdentity moduleId)
+    final synchronized int requiredModuleAddress(ModuleIdentity moduleId)
     {
         Integer id = myRequiredModules.get(moduleId);
         if (id == null)
@@ -526,7 +526,7 @@ abstract class Namespace
         return id;
     }
 
-    synchronized ModuleIdentity[] requiredModuleIds()
+    final synchronized ModuleIdentity[] requiredModuleIds()
     {
         ModuleIdentity[] ids = new ModuleIdentity[myRequiredModules.size()];
         for (Map.Entry<ModuleIdentity, Integer> entry
@@ -539,7 +539,7 @@ abstract class Namespace
     }
 
     @Override
-    public ModuleStore lookupRequiredModule(int moduleAddress)
+    public final ModuleStore lookupRequiredModule(int moduleAddress)
     {
         return myRequiredModuleStores.get(moduleAddress);
     }
@@ -549,7 +549,7 @@ abstract class Namespace
     // Documentation
 
 
-    void setDoc(String name, BindingDoc.Kind kind, String doc)
+    final void setDoc(String name, BindingDoc.Kind kind, String doc)
     {
         BindingDoc bDoc = new BindingDoc(name, kind,
                                          null, // usage
@@ -557,7 +557,7 @@ abstract class Namespace
         setDoc(name, bDoc);
     }
 
-    void setDoc(String name, BindingDoc doc)
+    final void setDoc(String name, BindingDoc doc)
     {
         NsBinding binding = (NsBinding) resolve(name);
         setDoc(binding.myAddress, doc);
@@ -572,7 +572,7 @@ abstract class Namespace
         set(myBindingDocs, address, doc);
     }
 
-    BindingDoc document(int address)
+    final BindingDoc document(int address)
     {
         if (myBindingDocs != null && address < myBindingDocs.size())
         {
@@ -584,7 +584,7 @@ abstract class Namespace
     /**
      * @return may be shorter than the number of provided variables.
      */
-    BindingDoc[] extractBindingDocs()
+    final BindingDoc[] extractBindingDocs()
     {
         if (myBindingDocs == null) return BindingDoc.EMPTY_ARRAY;
 
@@ -639,7 +639,7 @@ abstract class Namespace
         }
 
         @Override
-        public Object doEval(Evaluator eval, Store store)
+        public final Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
             Object value = eval.eval(store, myValueForm);

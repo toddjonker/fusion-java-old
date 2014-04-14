@@ -13,7 +13,7 @@ import java.util.Set;
  * This exists to create special bindings that can refer module variables that
  * are not exported (but that are accessible through macro-generated code).
  */
-class ModuleNamespace
+final class ModuleNamespace
     extends Namespace
 {
     static final class ModuleBinding
@@ -201,13 +201,13 @@ class ModuleNamespace
     @Override
     NsBinding newBinding(SyntaxSymbol identifier, int address)
     {
-        return new ModuleBinding(identifier, address, myModuleId);
+        return new ModuleBinding(identifier, address, getModuleId());
     }
 
     @Override
     public void setDoc(int address, BindingDoc doc)
     {
-        doc.addProvidingModule(myModuleId);
+        doc.addProvidingModule(getModuleId());
 
         super.setDoc(address, doc);
     }
