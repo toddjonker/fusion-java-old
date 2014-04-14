@@ -69,6 +69,12 @@ final class FusionUtils
     }
 
 
+    /**
+     * Renders a zero-based index as a one-based ordinal like
+     * "1st", "12th, or "23rd".
+     *
+     * @param i the zero-based index to display.
+     */
     static String friendlyIndex(long i)
     {
         i++;
@@ -76,8 +82,26 @@ final class FusionUtils
     }
 
 
+
     /**
-     * Writes a zero-based index as a one-based position like
+     * Writes a one-based ordinal like "1st", "12th, or "23rd".
+     *
+     * @param out must not be null.
+     * @param i the one-based ordinal to display.
+     *
+     * @throws IOException if thrown by {@code out}.
+     */
+    static void writeFriendlyOrdinal(Appendable out, long i)
+        throws IOException
+    {
+        out.append(Long.toString(i));
+        String suffix = friendlySuffix(i);
+        out.append(suffix);
+    }
+
+
+    /**
+     * Writes a zero-based index as a one-based ordinal like
      * "1st", "12th, or "23rd".
      *
      * @param out must not be null.
@@ -88,15 +112,12 @@ final class FusionUtils
     static void writeFriendlyIndex(Appendable out, long i)
         throws IOException
     {
-        i++;
-        out.append(Long.toString(i));
-        String suffix = friendlySuffix(i);
-        out.append(suffix);
+        writeFriendlyOrdinal(out, i++);
     }
 
 
     /**
-     * Writes a zero-based index as a one-based position like
+     * Writes a zero-based index as a one-based ordinal like
      * "1st", "12th, or "23rd".
      *
      * @param out must not be null.

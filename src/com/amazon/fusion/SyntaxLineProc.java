@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionNumber.makeInt;
-import static com.amazon.fusion.FusionVoid.voidValue;
 
 
 class SyntaxLineProc
@@ -12,7 +11,8 @@ class SyntaxLineProc
     SyntaxLineProc()
     {
         //    "                                                                               |
-        super("Returns the line number of the source of a syntax object.",
+        super("Returns the one-based line number of the source of a syntax object.\n" +
+              "The result is zero if there's no line number available.",
               "stx");
     }
 
@@ -26,6 +26,6 @@ class SyntaxLineProc
         {
             return makeInt(eval, location.getLine());
         }
-        return voidValue(eval);
+        return FusionNumber.ZERO_INT;
     }
 }

@@ -17,7 +17,7 @@ public class CoverageTest
     static class Collector
         implements _Private_CoverageCollector
     {
-        boolean coverOnlyLineZero = false;
+        boolean coverOnlyLineOne = false;
 
         Set<SourceLocation> coverable = new HashSet<>();
         Set<SourceLocation> covered   = new HashSet<>();
@@ -26,7 +26,7 @@ public class CoverageTest
         public boolean coverableLocation(SourceLocation loc)
         {
             coverable.add(loc);
-            return (coverOnlyLineZero ? loc.getLine() == 0 : true);
+            return (coverOnlyLineOne ? loc.getLine() == 1 : true);
         }
 
         @Override
@@ -40,6 +40,10 @@ public class CoverageTest
     private final Collector collector = new Collector();
 
 
+    /**
+     * @param line one-based
+     * @param column one-based
+     */
     private void checkCovered(SourceName name, long line, long column)
     {
         SourceLocation loc = SourceLocation.forLineColumn(name, line, column);
@@ -47,12 +51,21 @@ public class CoverageTest
         assertTrue(collector.covered.contains(loc));
     }
 
+
+    /**
+     * @param line one-based
+     * @param column one-based
+     */
     private void checkCovered(long line, long column)
     {
         checkCovered(null, line, column);
     }
 
 
+    /**
+     * @param line one-based
+     * @param column one-based
+     */
     private void checkNotCovered(SourceName name, long line, long column)
     {
         SourceLocation loc = SourceLocation.forLineColumn(name, line, column);
@@ -62,6 +75,11 @@ public class CoverageTest
                     collector.covered.contains(loc));
     }
 
+
+    /**
+     * @param line one-based
+     * @param column one-based
+     */
     private void checkNotCovered(long line, long column)
     {
         checkNotCovered(null, line, column);
@@ -88,57 +106,57 @@ public class CoverageTest
         TopLevel top = topLevel();
 
         eval("0");
-        checkCovered(0, 0);
+        checkCovered(1, 1);
 
-        //    0   4 6  9 11
+        //    1 3 5 7 9
         eval("(if true\n" +
              "    1 2)");
-        checkCovered(0, 0);
-        checkCovered(0, 4);
-        checkCovered(1, 4);
-        checkNotCovered(1, 6);
+        checkCovered   (1, 1);
+        checkCovered   (1, 5);
+        checkCovered   (2, 5);
+        checkNotCovered(2, 7);
 
         SourceName name1 = SourceName.forDisplay("define");
-        //        0 2 4 6 8
+        //        1 3 5 7 9
         top.eval("(define (f t)\n" +
                  "  (if t      \n" +
                  "      1      \n" +
                  "      2))",
                  name1);
-        checkCovered(name1, 0, 0);
-        checkNotCovered(name1, 1, 2);
-        checkNotCovered(name1, 1, 6);
-        checkNotCovered(name1, 2, 6);
-        checkNotCovered(name1, 3, 6);
+        checkCovered   (name1, 1, 1);
+        checkNotCovered(name1, 2, 3);
+        checkNotCovered(name1, 2, 7);
+        checkNotCovered(name1, 3, 7);
+        checkNotCovered(name1, 4, 7);
 
         top.call("f", true);
-        checkCovered(name1, 1, 2);
-        checkCovered(name1, 1, 6);
-        checkCovered(name1, 2, 6);
-        checkNotCovered(name1, 3, 6);
+        checkCovered   (name1, 2, 3);
+        checkCovered   (name1, 2, 7);
+        checkCovered   (name1, 3, 7);
+        checkNotCovered(name1, 4, 7);
 
         SourceName name2 = SourceName.forDisplay("invoke");
-        //        0 2 4 6 8
+        //        1 3 5 7 9
         top.eval("(f false)",
                  name2);
-        checkCovered(name2, 0, 0);
-        checkCovered(name2, 0, 1);
-        checkCovered(name2, 0, 3);
-        checkCovered(name1, 3, 6);
+        checkCovered(name2, 1, 1);
+        checkCovered(name2, 1, 2);
+        checkCovered(name2, 1, 4);
+        checkCovered(name1, 4, 7);
     }
 
     @Test
     public void testPartialCollection()
         throws FusionException
     {
-        collector.coverOnlyLineZero = true;
+        collector.coverOnlyLineOne = true;
 
-        //    0   4 6  9 11
+        //    1 3 5 7 9
         eval("(if true\n" +
              "    1 2)");
-        checkCovered(0, 0);
-        checkCovered(0, 4);
-        checkNotCovered(1, 4);
-        checkNotCovered(1, 6);
+        checkCovered   (1, 1);
+        checkCovered   (1, 5);
+        checkNotCovered(2, 5);
+        checkNotCovered(2, 7);
     }
 }

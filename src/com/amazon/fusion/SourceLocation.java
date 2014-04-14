@@ -26,21 +26,21 @@ class SourceLocation
 
 
     /**
-     * Gets the zero-based line number.
-     * @return -1 if the line is unknown.
+     * Gets the one-based line number.
+     * @return zero if the line is unknown.
      */
     long getLine()
     {
-        return -1;
+        return 0;
     }
 
     /**
-     * Gets the zero-based column number.
-     * @return -1 if the column is unknown.
+     * Gets the one-based column number.
+     * @return zero if the column is unknown.
      */
     long getColumn()
     {
-        return -1;
+        return 0;
     }
 
 
@@ -125,9 +125,13 @@ class SourceLocation
     }
 
 
+    /**
+     * @param line one-based
+     * @param column one-based
+     */
     static SourceLocation forLineColumn(SourceName name, long line, long column)
     {
-        if (line < 0 && column < 0)
+        if (line < 1 && column < 1)
         {
             if (name == null) return null;
 
@@ -149,6 +153,11 @@ class SourceLocation
         return new Longs(name, line, column);
     }
 
+
+    /**
+     * @param line one-based
+     * @param column one-based
+     */
     static SourceLocation forLineColumn(long line, long column)
     {
         return forLineColumn(null, line, column);
@@ -170,9 +179,8 @@ class SourceLocation
         TextSpan ts = Spans.currentSpan(TextSpan.class, source);
         if (ts != null)
         {
-            // Convert from one-based to zero-based.
-            long line   = ts.getStartLine  () - 1;
-            long column = ts.getStartColumn() - 1;
+            long line   = ts.getStartLine  ();
+            long column = ts.getStartColumn();
 
             if (line <= Short.MAX_VALUE && column <= Short.MAX_VALUE)
             {
@@ -201,13 +209,13 @@ class SourceLocation
     private void displayOrdinal(Appendable out, long ord)
         throws IOException
     {
-        if (ord < 0)
+        if (ord < 1)
         {
             out.append("???");
         }
         else
         {
-            FusionUtils.writeFriendlyIndex(out, ord);
+            FusionUtils.writeFriendlyOrdinal(out, ord);
         }
     }
 
@@ -218,7 +226,7 @@ class SourceLocation
         long line   = getLine();
         long column = getColumn();
 
-        if (line < 0)
+        if (line < 1)
         {
             out.append("unknown location in ");
             out.append(myName.display());

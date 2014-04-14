@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionNumber.makeInt;
-import static com.amazon.fusion.FusionVoid.voidValue;
 
 
 class SyntaxColumnProc
@@ -12,7 +11,8 @@ class SyntaxColumnProc
     SyntaxColumnProc()
     {
         //    "                                                                               |
-        super("Returns the column number of the source of a syntax object.",
+        super("Returns the one-based column number of the source of a syntax object.\n" +
+              "The result is zero if there's no column number available.",
               "stx");
     }
 
@@ -26,6 +26,6 @@ class SyntaxColumnProc
         {
             return makeInt(eval, location.getColumn());
         }
-        return voidValue(eval);
+        return FusionNumber.ZERO_INT;
     }
 }
