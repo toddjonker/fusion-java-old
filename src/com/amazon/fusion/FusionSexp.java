@@ -331,10 +331,10 @@ final class FusionSexp
         }
 
         @Override
-        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)
             throws FusionException
         {
-            return SyntaxSexp.make(eval, null, this);
+            return SyntaxSexp.make(eval, loc, this);
         }
 
         @Override
@@ -670,20 +670,21 @@ final class FusionSexp
         /**
          * Converts this pair to a normal pair of syntax objects.
          */
-        private BaseSexp toPairOfStrippedSyntaxMaybe(Evaluator eval)
+        private BaseSexp toPairOfStrippedSyntaxMaybe(Evaluator eval,
+                                                     SourceLocation loc)
             throws FusionException
         {
-            SyntaxValue head = datumToStrippedSyntaxMaybe(eval, myHead);
+            SyntaxValue head = datumToStrippedSyntaxMaybe(eval, myHead, loc);
             if (head == null) return null;
 
             Object tail = myTail;
             if (isPair(eval, tail))
             {
-                tail = ((ImmutablePair)tail).toPairOfStrippedSyntaxMaybe(eval);
+                tail = ((ImmutablePair)tail).toPairOfStrippedSyntaxMaybe(eval, loc);
             }
             else if (! isEmptySexp(eval, tail))
             {
-                tail = datumToStrippedSyntaxMaybe(eval, tail);
+                tail = datumToStrippedSyntaxMaybe(eval, tail, loc);
             }
             if (tail == null) return null;
 
@@ -696,12 +697,12 @@ final class FusionSexp
          * @return null if an element can't be converted into syntax.
          */
         @Override
-        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)
             throws FusionException
         {
-            BaseSexp newPair = toPairOfStrippedSyntaxMaybe(eval);
+            BaseSexp newPair = toPairOfStrippedSyntaxMaybe(eval, loc);
             if (newPair == null) return null;
-            return SyntaxSexp.make(eval, null, newPair);
+            return SyntaxSexp.make(eval, loc, newPair);
         }
 
 

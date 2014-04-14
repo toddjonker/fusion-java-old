@@ -115,7 +115,7 @@ abstract class SyntaxValue
 
 
     @Override
-    SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+    SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)
         throws FusionException
     {
         // TODO FUSION-183 Should strip location and properties?

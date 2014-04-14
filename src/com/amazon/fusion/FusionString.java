@@ -86,9 +86,9 @@ public final class FusionString
         }
 
         @Override
-        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)
         {
-            return SimpleSyntaxValue.makeSyntax(eval, /*location*/ null, this);
+            return SimpleSyntaxValue.makeSyntax(eval, loc, this);
         }
 
         @Override

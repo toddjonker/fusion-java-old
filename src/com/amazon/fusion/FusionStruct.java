@@ -592,10 +592,10 @@ final class FusionStruct
         }
 
         @Override
-        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)
             throws FusionException
         {
-            return SyntaxStruct.make(eval, /*location*/ null, this);
+            return SyntaxStruct.make(eval, loc, this);
         }
 
         @Override
@@ -955,7 +955,8 @@ final class FusionStruct
          * @return null if an element can't be converted into syntax.
          */
         @Override
-        SyntaxValue toStrippedSyntaxMaybe(final Evaluator eval)
+        SyntaxValue toStrippedSyntaxMaybe(final Evaluator      eval,
+                                          final SourceLocation loc)
             throws FusionException
         {
             StructFieldVisitor visitor = new StructFieldVisitor()
@@ -965,7 +966,7 @@ final class FusionStruct
                     throws FusionException
                 {
                     SyntaxValue stripped =
-                        datumToStrippedSyntaxMaybe(eval, value);
+                        datumToStrippedSyntaxMaybe(eval, value, loc);
                     if (stripped == null)
                     {
                         // Hit something that's not syntax-able
@@ -978,7 +979,7 @@ final class FusionStruct
             try
             {
                 Object datum = transformFields(eval, visitor);
-                return SyntaxStruct.make(eval, /*location*/ null, datum);
+                return SyntaxStruct.make(eval, loc, datum);
             }
             catch (StripFailure e)  // This is crazy.
             {

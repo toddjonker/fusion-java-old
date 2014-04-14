@@ -67,10 +67,10 @@ final class FusionSymbol
         }
 
         @Override
-        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)
             throws FusionException
         {
-            return wrapAsSyntax(eval, null);
+            return wrapAsSyntax(eval, loc);
         }
     }
 

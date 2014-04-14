@@ -99,9 +99,9 @@ final class FusionNumber
         }
 
         @Override
-        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)
         {
-            return makeSyntax(eval, /*location*/ null, this);
+            return makeSyntax(eval, loc, this);
         }
     }
 
@@ -946,10 +946,11 @@ final class FusionNumber
             return FusionNumber.annotate(this, annotations);
         }
 
+        // TODO remove
         @Override
-        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)
         {
-            return makeSyntax(eval, /*location*/ null, this);
+            return makeSyntax(eval, loc, this);
         }
     }
 

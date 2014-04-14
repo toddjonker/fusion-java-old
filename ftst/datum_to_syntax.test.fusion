@@ -1,0 +1,40 @@
+// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/check"
+  "/fusion/experimental/syntax"
+)
+
+(define ctx (quote_syntax ctx))
+
+(define (check_loc actual expected)
+  (check == (syntax_line     actual) (syntax_line     expected))
+  (check == (syntax_column   actual) (syntax_column   expected))
+//(check == (syntax-position actual) (syntax-position expected))
+  )
+
+// When given a location, datum->syntax uses it for all new syntax objects
+// created, not just the outermost one.
+
+(let [(s (datum_to_syntax
+           (quote (a (b)))
+           ctx
+           ctx))]
+  (check_loc s ctx)
+  (check_loc (. (syntax_unwrap s) 0) ctx)  // a
+  (check_loc (. (syntax_unwrap s) 1) ctx)  // (b)
+  (check_loc (. (syntax_unwrap (. (syntax_unwrap s) 1)) 0) ctx))  // b
+
+// Exiting syntax objects keep their locations.
+
+(define inner1 (quote_syntax inner1))
+(define inner2 (datum_to_syntax (quote inner2) ctx)) // no location
+
+(let [(s (datum_to_syntax
+           (sexp inner1 (sexp inner2))  // TODO use quasiquote
+           ctx
+           ctx))]
+  (check_loc s ctx)
+  (check_loc (. (syntax_unwrap s) 0) inner1)                        // inner1
+  (check_loc (. (syntax_unwrap s) 1) ctx)                           // (inner)
+  (check_loc (. (syntax_unwrap (. (syntax_unwrap s) 1)) 0) inner2)) // inner2

@@ -36,7 +36,10 @@ final class FusionEval
         }
         else
         {
-            stx = datumToSyntax(eval, topLevelForm, null, whosCalling);
+            stx = datumToSyntax(eval, topLevelForm,
+                                null, // context
+                                null, // location
+                                whosCalling);
             stx = enrich(eval, stx);
         }
 

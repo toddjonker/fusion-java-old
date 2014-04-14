@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -9,6 +9,15 @@ final class FusionSyntax
 {
     private FusionSyntax() {}
 
+
+    static SourceLocation unsafeSyntaxLocation(Evaluator eval, Object stx)
+    {
+        return ((SyntaxValue) stx).getLocation();
+    }
+
+
+    //========================================================================
+    // Procedures
 
     static final class IsIdentifierProc
         extends Procedure1

@@ -557,7 +557,7 @@ final class FusionList
          * @return null if an element can't be converted into syntax.
          */
         @Override
-        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)
             throws FusionException
         {
             int size = size();
@@ -570,7 +570,7 @@ final class FusionList
             for (int i = 0; i < size; i++)
             {
                 Object rawChild = unsafeRef(eval, i);
-                Object child = datumToStrippedSyntaxMaybe(eval, rawChild);
+                Object child = datumToStrippedSyntaxMaybe(eval, rawChild, loc);
                 if (child == null)
                 {
                     // Hit something that's not syntax-able
@@ -581,7 +581,7 @@ final class FusionList
 
             String[] anns = annotationsAsJavaStrings();
             Object list = immutableList(eval, anns, children);
-            return SyntaxList.make(eval, null, list);
+            return SyntaxList.make(eval, loc, list);
         }
 
 

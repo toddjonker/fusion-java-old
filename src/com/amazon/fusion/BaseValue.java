@@ -92,7 +92,7 @@ abstract class BaseValue
     /**
      * @return null if something in the datum can't be converted into syntax.
      */
-    SyntaxValue toStrippedSyntaxMaybe(Evaluator eval)
+    SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)
         throws FusionException
     {
         return null;

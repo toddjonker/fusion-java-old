@@ -43,12 +43,14 @@ final class Syntax
      *
      * @return null if something in the datum can't be converted into syntax.
      */
-    static SyntaxValue datumToStrippedSyntaxMaybe(Evaluator eval, Object datum)
+    static SyntaxValue datumToStrippedSyntaxMaybe(Evaluator      eval,
+                                                  Object         datum,
+                                                  SourceLocation location)
         throws FusionException
     {
         if (datum instanceof BaseValue)
         {
-            return ((BaseValue) datum).toStrippedSyntaxMaybe(eval);
+            return ((BaseValue) datum).toStrippedSyntaxMaybe(eval, location);
         }
 
         return null;
@@ -61,9 +63,10 @@ final class Syntax
      *
      * @return null if something in the datum can't be converted into syntax.
      */
-    static SyntaxValue datumToSyntaxMaybe(Evaluator eval,
-                                          Object datum,
-                                          SyntaxSymbol context)
+    static SyntaxValue datumToSyntaxMaybe(Evaluator      eval,
+                                          Object         datum,
+                                          SyntaxSymbol   context,
+                                          SourceLocation location)
         throws FusionException
     {
         if (isSyntax(eval, datum))
@@ -71,7 +74,7 @@ final class Syntax
             return datumToSyntax(eval, (SyntaxValue) datum, context);
         }
 
-        SyntaxValue stx = datumToStrippedSyntaxMaybe(eval, datum);
+        SyntaxValue stx = datumToStrippedSyntaxMaybe(eval, datum, location);
         if (stx == null) return null;
 
         return applyContext(eval, context, stx);
@@ -88,10 +91,11 @@ final class Syntax
     static SyntaxValue datumToSyntax(Evaluator eval,
                                      Object datum,
                                      SyntaxSymbol context,
+                                     SourceLocation location,
                                      String whosCalling)
         throws FusionException
     {
-        SyntaxValue stx = datumToSyntaxMaybe(eval, datum, context);
+        SyntaxValue stx = datumToSyntaxMaybe(eval, datum, context, location);
         if (stx == null)
         {
             String message =
@@ -111,10 +115,11 @@ final class Syntax
      */
     static SyntaxValue datumToSyntax(Evaluator eval,
                                      Object datum,
-                                     SyntaxSymbol context)
+                                     SyntaxSymbol context,
+                                     SourceLocation location)
         throws FusionException
     {
-        return datumToSyntax(eval, datum, context, null);
+        return datumToSyntax(eval, datum, context, location, null);
     }
 
 
