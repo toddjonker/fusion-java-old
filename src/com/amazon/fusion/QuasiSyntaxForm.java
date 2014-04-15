@@ -5,7 +5,6 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionList.immutableList;
 import static com.amazon.fusion.FusionList.unsafeListElement;
-import com.amazon.fusion.QuoteSyntaxForm.CompiledQuoteSyntax;
 
 final class QuasiSyntaxForm
     extends SyntacticForm
@@ -179,7 +178,7 @@ final class QuasiSyntaxForm
         }
         else
         {
-            return new CompiledQuoteSyntax(stx);
+            return new CompiledConstant(stx);
         }
     }
 
@@ -189,7 +188,7 @@ final class QuasiSyntaxForm
         throws FusionException
     {
         int size = stx.size();
-        if (size == 0) return new CompiledQuoteSyntax(stx);
+        if (size == 0) return new CompiledConstant(stx);
 
         // Look for an (unsyntax ...) form
         if (size == 2)
@@ -226,13 +225,13 @@ final class QuasiSyntaxForm
         {
             SyntaxValue orig = stx.get(eval, i);
             children[i] = compile(eval, env, orig, depth);
-            same &= (children[i] instanceof CompiledQuoteSyntax);
+            same &= (children[i] instanceof CompiledConstant);
         }
 
         if (same)
         {
             // There's no unsyntax within the children, so use the original.
-            return new CompiledQuoteSyntax(stx);
+            return new CompiledConstant(stx);
         }
 
         return new CompiledQuasiSyntaxSexp(stx.getLocation(),
@@ -246,7 +245,7 @@ final class QuasiSyntaxForm
         throws FusionException
     {
         int size = stx.size();
-        if (size == 0) return new CompiledQuoteSyntax(stx);
+        if (size == 0) return new CompiledConstant(stx);
 
         boolean same = true;
         CompiledForm[] children = new CompiledForm[size];
@@ -254,13 +253,13 @@ final class QuasiSyntaxForm
         {
             SyntaxValue orig = stx.get(eval, i);
             children[i] = compile(eval, env, orig, depth);
-            same &= (children[i] instanceof CompiledQuoteSyntax);
+            same &= (children[i] instanceof CompiledConstant);
         }
 
         if (same)
         {
             // There's no unsyntax within the children, so use the original.
-            return new CompiledQuoteSyntax(stx);
+            return new CompiledConstant(stx);
         }
 
         return new CompiledQuasiSyntaxList(stx.getLocation(),

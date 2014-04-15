@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -27,28 +27,6 @@ final class QuoteSyntaxForm
         throws FusionException
     {
         SyntaxValue quoted = stx.get(eval, 1);
-        return new CompiledQuoteSyntax(quoted);
-    }
-
-
-    //========================================================================
-
-
-    static final class CompiledQuoteSyntax
-        implements CompiledForm
-    {
-        private final SyntaxValue myQuoted;
-
-        CompiledQuoteSyntax(SyntaxValue quoted)
-        {
-            myQuoted = quoted;
-        }
-
-        @Override
-        public SyntaxValue doEval(Evaluator eval, Store store)
-            throws FusionException
-        {
-            return myQuoted;
-        }
+        return new CompiledConstant(quoted);
     }
 }
