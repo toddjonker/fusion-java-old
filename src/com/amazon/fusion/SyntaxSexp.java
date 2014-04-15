@@ -38,6 +38,7 @@ final class SyntaxSexp
     private SyntaxSexp(SourceLocation loc, BaseSexp sexp)
     {
         super(loc);
+        assert sexp != null;
         mySexp = sexp;
     }
 

@@ -700,6 +700,7 @@ final class FusionSexp
             throws FusionException
         {
             BaseSexp newPair = toPairOfStrippedSyntaxMaybe(eval);
+            if (newPair == null) return null;
             return SyntaxSexp.make(eval, null, newPair);
         }
 
