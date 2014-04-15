@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (module base "/fusion/private/builtins"
 
@@ -27,7 +27,7 @@ To use this dialect for your module, declare it as follows:
 
 
   // Pass-through bindings from builtins
-  (provide let let_values quote values '#%top')
+  (provide let let_values quasiquote quote unquote values '#%top')
   (provide apply exit is_null is_null_null is_procedure not)
 
 

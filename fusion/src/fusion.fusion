@@ -28,7 +28,7 @@ contact us for clarification.
   (provide all_defined_out module provide require)
 
   // Misc core forms
-  (provide quote set type_annotations '#%top')
+  (provide quasiquote quote set type_annotations unquote '#%top')
 
 
   //=========================================================================

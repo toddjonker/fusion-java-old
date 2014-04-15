@@ -7,12 +7,28 @@
   (define wrong_syntax (java_new "com.amazon.fusion.WrongSyntaxProc"))
 
   (define_syntax unsyntax
+    '''
+    (unsyntax expr)
+
+Used as an escape within a `quasisyntax` form; not valid in any other context.
+    '''
     (lambda (stx)
       (wrong_syntax stx "must be used inside quasisyntax.  Sorry, but it "
         "currently doesn't work inside a struct; see FUSION-34."
       )))
 
-  (define_syntax quasisyntax (java_new "com.amazon.fusion.QuasiSyntaxForm"
-                                       (quote_syntax quasisyntax)
-                                       (quote_syntax unsyntax)))
+  (define_syntax quasisyntax
+    '''
+    (quasisyntax template)
+
+Like `quote_syntax`, but the `template` datum may contain nested `unsyntax`
+forms that act as escapes.  The `unsyntax`ed expression is evaluated when the
+containing `quasisyntax` is evaluated, and its result is inserted into the
+containing quoted datum.
+
+As with `unquote`, `unsyntax` forms only escape one "level" of quasiquotation.
+    '''
+    (java_new "com.amazon.fusion.QuasiSyntaxForm"
+              (quote_syntax quasisyntax)
+              (quote_syntax unsyntax)))
 )

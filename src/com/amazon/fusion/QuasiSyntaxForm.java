@@ -4,150 +4,14 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionList.immutableList;
-import static com.amazon.fusion.FusionList.unsafeListElement;
 
 final class QuasiSyntaxForm
-    extends SyntacticForm
+    extends QuasiBaseForm
 {
-    private final Binding myQsBinding;
-    private final Binding myUsBinding;
-
     public QuasiSyntaxForm(Object qsIdentifier,
                            Object usIdentifier)
     {
-        super("template", "...");
-
-        SyntaxSymbol id = (SyntaxSymbol) qsIdentifier;
-        myQsBinding = id.resolve();
-
-        id = (SyntaxSymbol) usIdentifier;
-        myUsBinding = id.resolve();
-    }
-
-
-    @Override
-    SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
-        throws FusionException
-    {
-        final Evaluator eval = expander.getEvaluator();
-
-        if (stx.size() != 2)
-        {
-            throw new SyntaxException(getInferredName(),
-                                      "a single template required",
-                                      stx);
-        }
-
-        SyntaxValue subform = stx.get(eval, 1);
-        subform = expand(expander, env, subform, 0);
-
-        stx = SyntaxSexp.make(expander, stx.getLocation(),
-                              stx.get(eval, 0), subform);
-        return stx;
-    }
-
-    private SyntaxValue expand(Expander expander, Environment env,
-                               SyntaxValue stx, int depth)
-        throws FusionException
-    {
-        // TODO FUSION-225 handle unsyntax inside structs
-        if (stx instanceof SyntaxSexp)
-        {
-            return expand(expander, env, (SyntaxSexp) stx, depth);
-        }
-        else if (stx instanceof SyntaxList)
-        {
-            return expand(expander, env, (SyntaxList) stx, depth);
-        }
-        else
-        {
-            return stx;
-        }
-    }
-
-    private SyntaxValue expand(Expander expander, Environment env,
-                               SyntaxSexp stx, int depth)
-        throws FusionException
-    {
-        final Evaluator eval = expander.getEvaluator();
-
-        int size = stx.size();
-        if (size == 0) return stx;
-
-        SyntaxValue[] children = stx.extract(eval);
-
-        Binding binding = stx.firstBindingMaybe(eval);
-        if (myUsBinding == binding)
-        {
-            check(eval, stx).arityExact(2);
-
-            if (depth < 1)
-            {
-                SyntaxValue subform = children[1];
-                children[1] = expander.expandExpression(env, subform);
-
-                // TODO accept annotations on unsyntax form?
-                if (stx.annotationsAsJavaStrings().length != 0)
-                {
-                    String message =
-                        "Annotations not accepted on unsyntax form";
-                    throw check(eval, stx).failure(message);
-                }
-
-                return SyntaxSexp.make(eval, stx.getLocation(), children);
-            }
-
-            depth--;
-        }
-        else if (myQsBinding == binding)
-        {
-            check(eval, stx).arityExact(2);
-            depth++;
-        }
-
-        boolean same = true;
-        for (int i = 0; i < size; i++)
-        {
-            SyntaxValue subform = stx.get(eval, i);
-            SyntaxValue expanded = expand(expander, env, subform, depth);
-            same &= (subform == expanded);
-            children[i] = expanded;
-        }
-
-        if (same) return stx;
-
-        return SyntaxSexp.make(eval,
-                               stx.getLocation(),
-                               stx.annotationsAsJavaStrings(),
-                               children);
-    }
-
-
-    private SyntaxValue expand(Expander expander, Environment env,
-                               SyntaxList stx, int depth)
-        throws FusionException
-    {
-        final Evaluator eval = expander.getEvaluator();
-
-        int size = stx.size();
-        if (size == 0) return stx;
-
-        Object list = stx.unwrap(eval);
-
-        boolean same = true;
-        Object[] children = new Object[size];
-        for (int i = 0; i < size; i++)
-        {
-            SyntaxValue subform = (SyntaxValue) unsafeListElement(eval, list, i);
-            SyntaxValue expanded = expand(expander, env, subform, depth);
-            same &= (subform == expanded);
-            children[i] = expanded;
-        }
-
-        if (same) return stx;
-
-        list = immutableList(eval, stx.annotationsAsJavaStrings(), children);
-        return SyntaxList.make(eval, stx.getLocation(), list);
+        super(qsIdentifier, usIdentifier);
     }
 
 
@@ -155,116 +19,46 @@ final class QuasiSyntaxForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledConstant constant(Evaluator eval, SyntaxValue quotedStx)
         throws FusionException
     {
-        SyntaxValue node = stx.get(eval, 1);
-        return compile(eval, env, node, 0);
+        return new CompiledConstant(quotedStx);
     }
 
 
-    private CompiledForm compile(Evaluator eval, Environment env,
-                                 SyntaxValue stx, int depth)
+    @Override
+    CompiledForm unquote(Evaluator    eval,
+                         SyntaxValue  unquotedStx,
+                         CompiledForm unquotedForm)
         throws FusionException
     {
-        // TODO FUSION-225 handle unsyntax inside structs
-        if (stx instanceof SyntaxSexp)
-        {
-            return compile(eval, env, (SyntaxSexp) stx, depth);
-        }
-        else if (stx instanceof SyntaxList)
-        {
-            return compile(eval, env, (SyntaxList) stx, depth);
-        }
-        else
-        {
-            return new CompiledConstant(stx);
-        }
+        SourceLocation location = unquotedStx.getLocation();
+        String expression = safeWriteToString(eval, unquotedStx);
+        return new CompiledUnsyntax(unquotedForm, location, expression);
     }
 
 
-    private CompiledForm compile(Evaluator eval, Environment env,
-                                 SyntaxSexp stx, int depth)
+    @Override
+    CompiledForm quasiSexp(Evaluator      eval,
+                           SyntaxSexp     originalStx,
+                           CompiledForm[] children)
         throws FusionException
     {
-        int size = stx.size();
-        if (size == 0) return new CompiledConstant(stx);
-
-        // Look for an (unsyntax ...) form
-        if (size == 2)
-        {
-            Binding binding = stx.firstBindingMaybe(eval);
-            if (myUsBinding == binding)
-            {
-                if (depth == 0)
-                {
-                    assert stx.annotationsAsJavaStrings().length == 0;
-                    SyntaxValue unquotedSyntax = stx.get(eval, 1);
-                    CompiledForm unquotedForm =
-                        eval.compile(env, unquotedSyntax);
-
-                    SourceLocation location = unquotedSyntax.getLocation();
-                    String expression =
-                        safeWriteToString(eval, unquotedSyntax);
-
-                    return new CompiledUnsyntax(unquotedForm,
-                                                location,
-                                                expression);
-                }
-                depth--;
-            }
-            else if (myQsBinding == binding)
-            {
-                depth++;
-            }
-        }
-
-        boolean same = true;
-        CompiledForm[] children = new CompiledForm[size];
-        for (int i = 0; i < size; i++)
-        {
-            SyntaxValue orig = stx.get(eval, i);
-            children[i] = compile(eval, env, orig, depth);
-            same &= (children[i] instanceof CompiledConstant);
-        }
-
-        if (same)
-        {
-            // There's no unsyntax within the children, so use the original.
-            return new CompiledConstant(stx);
-        }
-
-        return new CompiledQuasiSyntaxSexp(stx.getLocation(),
-                                           stx.annotationsAsJavaStrings(),
-                                           children);
+        SourceLocation location    = originalStx.getLocation();
+        String[]       annotations = originalStx.annotationsAsJavaStrings();
+        return new CompiledQuasiSyntaxSexp(location, annotations, children);
     }
 
 
-    private CompiledForm compile(Evaluator eval, Environment env,
-                                 SyntaxList stx, int depth)
+    @Override
+    CompiledForm quasiList(Evaluator      eval,
+                           SyntaxList     originalStx,
+                           CompiledForm[] children)
         throws FusionException
     {
-        int size = stx.size();
-        if (size == 0) return new CompiledConstant(stx);
-
-        boolean same = true;
-        CompiledForm[] children = new CompiledForm[size];
-        for (int i = 0; i < size; i++)
-        {
-            SyntaxValue orig = stx.get(eval, i);
-            children[i] = compile(eval, env, orig, depth);
-            same &= (children[i] instanceof CompiledConstant);
-        }
-
-        if (same)
-        {
-            // There's no unsyntax within the children, so use the original.
-            return new CompiledConstant(stx);
-        }
-
-        return new CompiledQuasiSyntaxList(stx.getLocation(),
-                                           stx.annotationsAsJavaStrings(),
-                                           children);
+        SourceLocation location    = originalStx.getLocation();
+        String[] annotations = originalStx.annotationsAsJavaStrings();
+        return new CompiledQuasiSyntaxList(location, annotations, children);
     }
 
 

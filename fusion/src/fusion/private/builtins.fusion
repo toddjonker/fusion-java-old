@@ -2,13 +2,54 @@
 
 (module builtins '/fusion/private/kernel'
 
-  (require "/fusion/experimental/defines")
+  (require
+    "/fusion/experimental/defines"
+    "/fusion/private/metasyntax"
+  )
 
 
   // Pass-through bindings from kernel
   (provide all_defined_out begin define if lambda let_values letrec load module
     provide require)
   (provide is_string is_list is_sexp is_struct)
+
+
+  (define_syntax unquote
+    '''
+    (unquote expr)
+
+Used as an escape within a `quasiquote` form; not valid in any other context.
+    '''
+    (lambda (stx)
+      (wrong_syntax stx "must be used inside quasiquote.  Sorry, but it "
+        "currently doesn't work inside a struct; see FUSION-34.")))
+
+  (define_syntax quasiquote
+    '''
+    (quasiquote template)
+
+Like `quote`, but the `template` datum may contain nested `unquote`
+forms that act as escapes.  The `unquote`d expression is evaluated when the
+containing `quasiquote` is evaluated, and its result is inserted into the
+containing quoted datum.
+
+    (quasiquote [(+ 1 2), (unquote (+ 1 2))])
+
+    ==> [(+ 1 2), 3]
+
+`unquote` forms only escape one "level" of quasiquotation:
+
+    (let [(v 1)]
+      (quasiquote (a (quasiquote (b (unquote v) (unquote (unquote v)))))))
+
+    ==> (a (quasiquote (b (unquote v) (unquote 1))))
+    '''
+    (java_new "com.amazon.fusion.QuasiQuoteForm"
+              (quote_syntax quasiquote)
+              (quote_syntax unquote)))
+
+  (provide quasiquote unquote)
+
 
 
   (defpub_j_syntax let            "com.amazon.fusion.LetForm")

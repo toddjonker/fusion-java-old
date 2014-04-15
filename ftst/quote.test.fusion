@@ -1,0 +1,37 @@
+// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/check"
+)
+
+
+//==========================================================================
+// quasisyntax
+
+(check === (quasiquote null.sexp) (quote null.sexp))
+(check === (quasiquote null.list) (quote null.list))
+
+(check === (quasiquote ()) (quote ()))
+(check === (quasiquote []) (quote []))
+
+(check === (quasiquote (1)) (quote (1)))
+(check === (quasiquote [1]) (quote [1]))
+
+
+(define outside (quote im_out))
+(check ===
+  (quasiquote ((unquote outside)
+               mid
+               (quasiquote ((unquote (unquote outside))
+                            (unquote mid)
+                            inner))))
+  (quote (im_out mid (quasiquote ((unquote im_out) (unquote mid) inner)))))
+
+
+(check ===
+  (quasiquote [(unquote outside),
+               mid,
+               (quasiquote ((unquote (unquote outside))
+                            (unquote mid)
+                            inner))])
+  (quote [im_out, mid, (quasiquote ((unquote im_out) (unquote mid) inner))]))
