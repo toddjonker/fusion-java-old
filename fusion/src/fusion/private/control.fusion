@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (module control "/fusion/private/builtins"
 
@@ -6,6 +6,8 @@
     "/fusion/experimental/defines"
     "/fusion/experimental/syntax"
     "/fusion/private/compare"
+    "/fusion/private/sexp"
+    "/fusion/unsafe/sexp"
     "/fusion/void")
 
   (provide apply not)
@@ -21,22 +23,30 @@ values, the last one is returned.
 
 The last `expr` is in tail position. Given no `expr`s, the result is true.
     '''
-    (lambda (stx)
-      // (and)          -->  true
-      // (and A)        -->  A
-      // (and A B ...)  -->  (let [(a A)] (if a (and B ...) a))
+    (let_values [((ctx) (quote_syntax context))]
+      (lambda (stx)
+        (let_values [((body) (tail (syntax_unwrap stx)))]
+          (if (not (is_pair body))
 
-      (let [(size (syntax_size stx))]
-        (if (= 1 size)
-          (quote_syntax true)
-          (if (= 2 size)
-            (syntax_get stx 1)
-            (let [(first (syntax_get    stx 1)),
-                  (rest  (syntax_subseq stx 2))]
-              (let [(inner (syntax_cons_q and rest))]
-                (quasisyntax
-                  (let [(a (unsyntax first))]
-                    (if a (unsyntax inner) a))))))))))
+            // (and)  -->  true
+            (datum_to_syntax (quote_syntax true) ctx stx)
+
+            (let_values [((first) (unsafe_pair_head body)),
+                         ((rest)  (unsafe_pair_tail body))]
+              (if (not (is_pair rest))
+
+                // (and FIRST)  -->  FIRST
+                first
+
+                // (and FIRST REST...)  -->
+                (datum_to_syntax
+                  (sexp (quote_syntax let)               // (let
+                    (sexp (sexp (quote a) first))        //   ((a FIRST))
+                    (sexp (quote_syntax if) (quote a)    //   (if a
+                          (pair (quote_syntax and) rest) //     (and REST...)
+                          (quote a)))                    //     a))
+                  ctx
+                  stx))))))))
 
 
   (defpub_syntax or  // WARNING: Doc syntax isn't supported yet.
@@ -49,23 +59,30 @@ values, the last one is returned.
 
 The last `expr` is in tail position. Given no `expr`s, the result is false.
     '''
-    (lambda (stx)
+    (let_values [((ctx) (quote_syntax context))]
+      (lambda (stx)
+        (let_values [((body) (tail (syntax_unwrap stx)))]
+          (if (not (is_pair body))
 
-      // (or)          -->  false
-      // (or A)        -->  A
-      // (or A B ...)  -->  (let [(a A)] (if a a (or B ...)))
+            // (or)  -->  false
+            (datum_to_syntax (quote_syntax false) ctx stx)
 
-      (let [(size (syntax_size stx))]
-        (if (= 1 size)
-          (quote_syntax false)
-          (if (= 2 size)
-            (syntax_get stx 1)
-            (let [(first (syntax_get    stx 1)),
-                  (rest  (syntax_subseq stx 2))]
-              (let [(inner (syntax_cons_q or rest))]
-                (quasisyntax
-                  (let [(a (unsyntax first))]
-                    (if a a (unsyntax inner)))))))))))
+            (let_values [((first) (unsafe_pair_head body)),
+                         ((rest)  (unsafe_pair_tail body))]
+              (if (not (is_pair rest))
+
+                // (or FIRST)  -->  FIRST
+                first
+
+                // (or FIRST REST...)  -->
+                (datum_to_syntax
+                  (sexp (quote_syntax let)                // (let
+                    (sexp (sexp (quote a) first))         //   ((a FIRST))
+                    (sexp (quote_syntax if) (quote a)     //   (if a
+                          (quote a)                       //     a
+                          (pair (quote_syntax or) rest))) //     (or REST...)))
+                  ctx
+                  stx))))))))
 
 
   (defpub_syntax when  // WARNING: Doc syntax isn't supported yet.
