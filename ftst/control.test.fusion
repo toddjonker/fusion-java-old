@@ -109,6 +109,13 @@
 (check === (when (not false) 1 2 3 4) 4)
 
 
+// Check that lexical context is retained
+(define (loop i)
+  (when (> i 0)
+    (loop (- i 1))))
+(loop 3)
+
+
 //============================================================================
 // unless
 
@@ -119,6 +126,13 @@
 (check === (unless false 2)         2)
 (check === (unless false (begin 3)) 3)
 (check === (unless (not true) 1 2 3 4) 4)
+
+
+// Check that lexical context is retained
+(define (loop i)
+  (unless (== i 0)
+    (loop (- i 1))))
+(loop 3)
 
 
 //============================================================================

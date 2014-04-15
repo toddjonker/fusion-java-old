@@ -74,7 +74,7 @@ The last `expr` is in tail position. Given no `expr`s, the result is false.
                 // (or FIRST)  -->  FIRST
                 first
 
-                // (or FIRST REST...)  -->
+                //                                      (or FIRST REST...)  -->
                 (datum_to_syntax
                   (sexp (quote_syntax let)                // (let
                     (sexp (sexp (quote a) first))         //   ((a FIRST))
@@ -95,19 +95,22 @@ the entire form.  If the body isn't evaluated, the result is void.
 
 A companion form is `unless`.
     '''
-    (lambda (stx)
+    (let_values [((ctx) (quote_syntax context))]
+      (lambda (stx)
+        (let_values [((body) (tail (syntax_unwrap stx)))]
+          (if (not (is_pair body))
+            (wrong_syntax stx "expected condition")
+            (let_values [((test) (unsafe_pair_head body)),
+                         ((body) (unsafe_pair_tail body))]
 
-      // (when TEST BODY ...)  -->  (if TEST (begin BODY ...) (void))
+              //                                       (when TEST BODY...)  -->
+              (datum_to_syntax
+                (sexp (quote_syntax if) test          // (if TEST
+                  (pair (quote_syntax begin) body)    //   (begin BODY...)
+                  (sexp (quote_syntax void)))         //   (void))
+                ctx
+                stx)))))))
 
-      (if (= 1 (syntax_size stx))
-        (wrong_syntax stx "expected condition")
-        (let [(test (syntax_get    stx 1)),
-              (body (syntax_subseq stx 2))]
-          (let [(begin_body (syntax_cons_q begin body))]
-            (quasisyntax
-              (if (unsyntax test)
-                  (unsyntax begin_body)
-                  (void))))))))
 
   (defpub_syntax unless  // WARNING: Doc syntax isn't supported yet.
     '''
@@ -119,19 +122,21 @@ result of the entire form.  If the body isn't evaluated, the result is void.
 
 A companion form is `when`.
     '''
-    (lambda (stx)
+    (let_values [((ctx) (quote_syntax context))]
+      (lambda (stx)
+        (let_values [((body) (tail (syntax_unwrap stx)))]
+          (if (not (is_pair body))
+            (wrong_syntax stx "expected condition")
+            (let_values [((test) (unsafe_pair_head body)),
+                         ((body) (unsafe_pair_tail body))]
 
-      // (unless TEST BODY ...)  -->  (if TEST (void) (begin BODY ...))
-
-      (if (= 1 (syntax_size stx))
-        (wrong_syntax stx "expected condition")
-        (let [(test (syntax_get    stx 1)),
-              (body (syntax_subseq stx 2))]
-          (let [(begin_body (syntax_cons_q begin body))]
-            (quasisyntax
-              (if (unsyntax test)
-                  (void)
-                  (unsyntax begin_body))))))))
+              //                                     (unless TEST BODY...)  -->
+              (datum_to_syntax
+                (sexp (quote_syntax if) test          // (if TEST
+                  (sexp (quote_syntax void))          //   (void)
+                  (pair (quote_syntax begin) body))   //   (begin BODY...))
+                ctx
+                stx)))))))
 
 
 // TODO FUSION-36  Support internal definitions in body sequences.
