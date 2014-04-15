@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -105,18 +105,25 @@ final class LanguageWrap
                     Iterator<SyntaxWrap> moreWraps,
                     Set<Integer> returnMarks)
     {
-        // TODO FUSION-166 This is not always true
-        assert ! moreWraps.hasNext();
-        // If that's not always true we must collect marks from moreWraps.
-        // and perhaps look up name there too?
-
-        ModuleBinding local = myModule.resolveProvidedName(name);
-        if (local != null)
+        Binding b = null;
+        if (moreWraps.hasNext())
         {
-            return new LanguageBinding(local);
+            SyntaxWrap nextWrap = moreWraps.next();
+            b = nextWrap.resolve(name, moreWraps, returnMarks);
         }
 
-        return null;
+        // Language-provided bindings never have marks!
+        // We should not match unbound macro-introduced identifiers.
+        if (b == null && returnMarks.isEmpty())
+        {
+            ModuleBinding local = myModule.resolveProvidedName(name);
+            if (local != null)
+            {
+                return new LanguageBinding(local);
+            }
+        }
+
+        return b;
     }
 
 

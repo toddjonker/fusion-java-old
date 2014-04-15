@@ -1,4 +1,4 @@
-;; Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+;; Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 (require rackunit)
 
@@ -62,5 +62,31 @@
   (check-eq? top "in_M3")
   (check-eq? (get_top_in2) "macro_in2"))
 (require 'M3)
+
+
+;;============================================================================
+;;  A macro-introduced identifier cannot reference a language binding.
+
+(module HasMacro racket
+  (define-syntax reference_mib
+    (lambda (stx)
+      (quote-syntax mib)))
+  (provide reference_mib))
+
+(module Language racket
+  (define mib 17316)
+  (provide mib quote require #%module-begin))
+
+;; This works:
+(module Test2 'Language
+  (require 'HasMacro)
+  mib)
+
+;; This doesn't work:
+(check-exn exn:fail?
+  (lambda ()
+    (eval '(module Test2 'Language
+             (require 'HasMacro)
+             (reference_mib)))))
 
 (printf "success~n")

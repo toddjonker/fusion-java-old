@@ -340,6 +340,7 @@ final class TopLevelNamespace
                         Iterator<SyntaxWrap> moreWraps,
                         Set<Integer> returnMarks)
         {
+            // TODO FUSION-117 Resolve the whole identifier, including marks???
             ModuleBinding local = localResolveMaybe(name);
             if (local != null)
             {

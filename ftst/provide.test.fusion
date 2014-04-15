@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/check"
@@ -12,13 +12,11 @@
   (provide eval))   // ERROR: not at module level
 
 
-// TODO FUSION-166 Using check_compile_exn should work, but crashes
-(check_syntax_exn
-  (eval (quote
-    (module M "/fusion"
-       (if true
-         (provide if)  // ERROR: not at module level
-         true)))))
+(check_compile_exn
+  (module M "/fusion"
+    (if true
+      (provide if)  // ERROR: not at module level
+      true)))
 
 
 //============================================================================

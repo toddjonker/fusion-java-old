@@ -1,0 +1,10 @@
+// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+
+// Used by macro_introduced_bindings.test.fusion
+// TODO FUSION-151 This shouldn't be necessary but we can't define a language
+//      at top-level since it can't be referenced.
+
+
+(module Language "/fusion"
+  (define mib 17316)
+  (provide mib quote require))  // TODO #%module_begin
