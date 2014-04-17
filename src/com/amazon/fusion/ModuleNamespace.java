@@ -102,7 +102,7 @@ final class ModuleNamespace
                                                              myAddress);
             }
 
-            return compileLocalTopReference(eval);
+            return compileLocalTopReference(eval, env);
         }
 
         @Override

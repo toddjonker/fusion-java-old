@@ -59,9 +59,14 @@ abstract class Namespace
             return env.namespace().lookup(this);
         }
 
-        final CompiledForm compileLocalTopReference(Evaluator eval)
+        final CompiledForm compileLocalTopReference(Evaluator   eval,
+                                                    Environment env)
             throws FusionException
         {
+            // TODO This fails when a macro references a prior local defn
+            // since the defn isn't installed yet.  I think the code is bad
+            // and mixes phases of macro processing.
+//          assert (env.namespace().ownsBinding(this));
             return new CompiledTopVariableReference(myAddress);
         }
 

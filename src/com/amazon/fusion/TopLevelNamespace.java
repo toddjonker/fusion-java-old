@@ -86,7 +86,9 @@ final class TopLevelNamespace
         {
             if (myTarget == this)
             {
-                return compileLocalTopReference(eval);
+                // TODO FUSION-117 This should be pushed down but it fails there.
+                assert (env.namespace().ownsBinding(this));
+                return compileLocalTopReference(eval, env);
             }
             return myTarget.compileReference(eval, env);
         }
@@ -164,8 +166,8 @@ final class TopLevelNamespace
 
         @Override
         TopLevelBinding resolve(String name,
-                                Iterator<SyntaxWrap> moreWraps,
-                                Set<Integer> returnMarks)
+                        Iterator<SyntaxWrap> moreWraps,
+                        Set<Integer>         returnMarks)
         {
             // Check our environment directly. This will handle identifiers
             // that have top-level definitions, but not those that only map to
