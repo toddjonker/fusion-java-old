@@ -15,7 +15,6 @@ import static com.amazon.fusion.FusionNumber.unsafeTruncateIntToJavaInt;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
-import static com.amazon.fusion.Syntax.datumToStrippedSyntaxMaybe;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionCompare.EqualityTier;
 import com.amazon.fusion.FusionSequence.BaseSequence;
@@ -557,31 +556,43 @@ final class FusionList
          * @return null if an element can't be converted into syntax.
          */
         @Override
-        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)
+        SyntaxValue datumToSyntaxMaybe(Evaluator      eval,
+                                       SyntaxSymbol   context,
+                                       SourceLocation loc)
             throws FusionException
         {
+            SyntaxList stx;
+
             int size = size();
             if (size == 0 && (this instanceof ImmutableList))
             {
-                return SyntaxList.make(eval, null, this);
+                stx = SyntaxList.make(eval, null, this);
             }
-
-            Object[] children = new Object[size];
-            for (int i = 0; i < size; i++)
+            else
             {
-                Object rawChild = unsafeRef(eval, i);
-                Object child = datumToStrippedSyntaxMaybe(eval, rawChild, loc);
-                if (child == null)
+                Object[] children = new Object[size];
+                for (int i = 0; i < size; i++)
                 {
-                    // Hit something that's not syntax-able
-                    return null;
+                    Object rawChild = unsafeRef(eval, i);
+                    Object child = Syntax.datumToSyntaxMaybe(eval, rawChild, context, loc);
+                    if (child == null)
+                    {
+                        // Hit something that's not syntax-able
+                        return null;
+                    }
+                    children[i] = child;
                 }
-                children[i] = child;
+
+                String[] anns = annotationsAsJavaStrings();
+                Object list = immutableList(eval, anns, children);
+                stx = SyntaxList.make(eval, loc, list);
             }
 
-            String[] anns = annotationsAsJavaStrings();
-            Object list = immutableList(eval, anns, children);
-            return SyntaxList.make(eval, loc, list);
+            // TODO FUSION-329 This should retain context, but not push it
+            //      down to the current children (which already have it).
+            //return Syntax.applyContext(eval, context, stx);
+
+            return stx;
         }
 
 

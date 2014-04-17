@@ -2,6 +2,7 @@
 
 (require
   "/check"
+  "/fusion/eval"
   "/fusion/experimental/syntax"
 )
 
@@ -38,3 +39,25 @@
   (check_loc (. (syntax_unwrap s) 0) inner1)                        // inner1
   (check_loc (. (syntax_unwrap s) 1) ctx)                           // (inner)
   (check_loc (. (syntax_unwrap (. (syntax_unwrap s) 1)) 0) inner2)) // inner2
+
+
+(define val "outside_M")
+
+(module M "/fusion"
+  (require "/fusion/experimental/syntax")
+  (define val "inside_M")
+  (define inside_id (quote_syntax inside_id))
+  (provide inside_id))
+(require M)
+
+(check == (eval (datum_to_syntax (quote_syntax val) inside_id)) "outside_M")
+
+(let ((val (quote_syntax val)))
+  (check same (datum_to_syntax val inside_id) val))
+
+
+// Context must be copied eagerly, without replacing existing syntax objects.
+(let ((val (quote_syntax val)))
+  (check same
+    (syntax_get (datum_to_syntax (sexp 1 val) inside_id) 1)
+    val))

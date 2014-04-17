@@ -90,6 +90,23 @@ abstract class BaseValue
 
 
     /**
+     * Contained {@link SyntaxValue}s must be left unchanged, so the context
+     * is pushed eagerly.
+     *
+     * @return null if something in this datum can't be converted into syntax.
+     */
+    SyntaxValue datumToSyntaxMaybe(Evaluator      eval,
+                                   SyntaxSymbol   context,
+                                   SourceLocation loc)
+        throws FusionException
+    {
+        SyntaxValue stx = toStrippedSyntaxMaybe(eval, loc);
+        if (stx == null) return null;
+
+        return Syntax.applyContext(eval, context, stx);
+    }
+
+    /**
      * @return null if something in the datum can't be converted into syntax.
      */
     SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)

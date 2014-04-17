@@ -25,7 +25,7 @@ final class Syntax
     /**
      * @param context may be null, in which case nothing happens.
      */
-    private static SyntaxValue applyContext(Evaluator eval,
+    static SyntaxValue applyContext(Evaluator eval,
                                             SyntaxSymbol context,
                                             SyntaxValue datum)
         throws FusionException
@@ -69,15 +69,17 @@ final class Syntax
                                           SourceLocation location)
         throws FusionException
     {
-        if (isSyntax(eval, datum))
+        if (false && isSyntax(eval, datum))
         {
-            return datumToSyntax(eval, (SyntaxValue) datum, context);
+            return (SyntaxValue) datum;
         }
 
-        SyntaxValue stx = datumToStrippedSyntaxMaybe(eval, datum, location);
-        if (stx == null) return null;
+        if (datum instanceof BaseValue)
+        {
+            return ((BaseValue) datum).datumToSyntaxMaybe(eval, context, location);
+        }
 
-        return applyContext(eval, context, stx);
+        return null;
     }
 
 

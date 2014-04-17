@@ -156,10 +156,14 @@
 
 (define_syntax capture  // capture use of 'c'
   (lambda (stx)
-    (let ((arg (syntax_get stx 1)))
+    (lets [(arg (syntax_get stx 1)),
+           // TODO FUSION-329 Use entire arg, not first elt, as context
+           (ctx (syntax_get arg 0)),
+           (c   (datum_to_syntax (quote c) ctx))]
       (quasisyntax
-        (let ((c 2))
+        (let [((unsyntax c) 2)]
           (unsyntax (datum_to_syntax arg (quote_syntax here))))))))
+
 (check ===
   (let ((c 5))
     (capture (* 10 c)))

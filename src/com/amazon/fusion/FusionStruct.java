@@ -19,7 +19,6 @@ import static com.amazon.fusion.FusionText.textToJavaString;
 import static com.amazon.fusion.FusionText.unsafeTextToJavaString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
-import static com.amazon.fusion.Syntax.datumToStrippedSyntaxMaybe;
 import static com.amazon.ion.util.IonTextUtils.printSymbol;
 import static java.util.Collections.EMPTY_MAP;
 import com.amazon.fusion.FusionBool.BaseBool;
@@ -592,11 +591,20 @@ final class FusionStruct
         }
 
         @Override
-        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)
+        SyntaxValue datumToSyntaxMaybe(Evaluator      eval,
+                                       SyntaxSymbol   context,
+                                       SourceLocation loc)
             throws FusionException
         {
-            return SyntaxStruct.make(eval, loc, this);
+            SyntaxValue stx = SyntaxStruct.make(eval, loc, this);
+
+            // TODO FUSION-329 This should retain context, but not push it
+            //      down to the current children (which already have it).
+            //return Syntax.applyContext(eval, context, stx);
+
+            return stx;
         }
+
 
         @Override
         public int size()
@@ -955,8 +963,9 @@ final class FusionStruct
          * @return null if an element can't be converted into syntax.
          */
         @Override
-        SyntaxValue toStrippedSyntaxMaybe(final Evaluator      eval,
-                                          final SourceLocation loc)
+        SyntaxValue datumToSyntaxMaybe(final Evaluator      eval,
+                                       final SyntaxSymbol   context,
+                                       final SourceLocation loc)
             throws FusionException
         {
             StructFieldVisitor visitor = new StructFieldVisitor()
@@ -966,7 +975,7 @@ final class FusionStruct
                     throws FusionException
                 {
                     SyntaxValue stripped =
-                        datumToStrippedSyntaxMaybe(eval, value, loc);
+                        Syntax.datumToSyntaxMaybe(eval, value, context, loc);
                     if (stripped == null)
                     {
                         // Hit something that's not syntax-able
@@ -979,7 +988,8 @@ final class FusionStruct
             try
             {
                 Object datum = transformFields(eval, visitor);
-                return SyntaxStruct.make(eval, loc, datum);
+                SyntaxValue stx = SyntaxStruct.make(eval, loc, datum);
+                return Syntax.applyContext(eval, context, stx);
             }
             catch (StripFailure e)  // This is crazy.
             {

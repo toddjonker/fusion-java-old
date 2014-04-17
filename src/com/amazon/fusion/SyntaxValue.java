@@ -115,13 +115,12 @@ abstract class SyntaxValue
 
 
     @Override
-    SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)
+    SyntaxValue datumToSyntaxMaybe(Evaluator      eval,
+                                   SyntaxSymbol   context,
+                                   SourceLocation loc)
         throws FusionException
     {
-        // TODO FUSION-183 Should strip location and properties?
-        //      Well, probably not, that throws away existing
-        //      context when called from datum_to_syntax
-        return stripWraps(eval);
+        return this;
     }
 
 
