@@ -1,49 +1,52 @@
 // Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
-(module compare '/fusion/private/builtins'
+(module compare '/fusion/private/kernel'
 
   (require "/fusion/equality")
   (provide =)
 
-  (require "/fusion/experimental/defines")
 
-  (defpub_j <
+  (provide <)
+  (define <
     '''
     (< a b)
 Returns true if `a` is less than `b`.  Int and decimal values may be mixed and
 are compared without regard to precision.  Timestamps are compared to each
 other without regard to precision.  Annotations are ignored.
     '''
-    "com.amazon.fusion.FusionCompare$LessThanProc")
+    (java_new "com.amazon.fusion.FusionCompare$LessThanProc"))
 
 
-  (defpub_j >
+  (provide >)
+  (define >
     '''
     (> a b)
 Returns true if `a` is greater than `b`.  Int and decimal values may be mixed
 and are compared without regard to precision.  Timestamps are compared to each
 other without regard to precision.  Annotations are ignored.
     '''
-    "com.amazon.fusion.FusionCompare$GreaterThanProc")
+    (java_new "com.amazon.fusion.FusionCompare$GreaterThanProc"))
 
 
-  (defpub_j <=
+  (provide <=)
+  (define <=
     '''
     (<= a b)
 Returns true if `a` is less than or equal to `b`.  Int and decimal values may
 be mixed and are compared without regard to precision.  Timestamps are compared
 to each other without regard to precision.  Annotations are ignored.
     '''
-    "com.amazon.fusion.FusionCompare$LessThanOrEqualToProc")
+    (java_new "com.amazon.fusion.FusionCompare$LessThanOrEqualToProc"))
 
 
-  (defpub_j >=
+  (provide >=)
+  (define >=
     '''
     (>= a b)
 Returns true if `a` is greater than or equal to `b`.  Int and decimal values
 may be mixed and are compared without regard to precision.  Timestamps are
 compared to each other without regard to precision.  Annotations are ignored.
     '''
-    "com.amazon.fusion.FusionCompare$GreaterThanOrEqualToProc")
+    (java_new "com.amazon.fusion.FusionCompare$GreaterThanOrEqualToProc"))
 
 )

@@ -1,6 +1,6 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
-(module exception '/fusion/private/builtins'
+(module exception '/fusion/private/kernel'
 
   '''
 Operations for working with exceptions.
@@ -10,13 +10,19 @@ custom exception types.
   '''
 
 
-  (require "/fusion/experimental/defines")
+  (provide assert)
+  (define_syntax assert
+    (java_new "com.amazon.fusion.AssertForm"))
 
-  (defpub_j_syntax assert         "com.amazon.fusion.AssertForm")
+  (provide raise_argument_error)
+  (define raise_argument_error
+    (java_new "com.amazon.fusion.RaiseArgumentErrorProc"))
 
-  (defpub_j raise_argument_error  "com.amazon.fusion.RaiseArgumentErrorProc")
-  (defpub_j raise_arity_error     "com.amazon.fusion.RaiseArityErrorProc")
-  (defpub_j raise_result_error    "com.amazon.fusion.RaiseResultErrorProc")
+  (provide raise_arity_error)
+  (define raise_arity_error
+    (java_new "com.amazon.fusion.RaiseArityErrorProc"))
 
-  (provide assert raise_argument_error raise_arity_error raise_result_error)
+  (provide raise_result_error)
+  (define raise_result_error
+    (java_new "com.amazon.fusion.RaiseResultErrorProc"))
 )

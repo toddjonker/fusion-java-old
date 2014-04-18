@@ -4,7 +4,7 @@
 
   (require
     "/fusion/exception"
-    "/fusion/experimental/defines"
+    "/fusion/ffi/java"
     "/fusion/unsafe/sexp"
     "/fusion/void")
 
@@ -14,12 +14,21 @@
 
   // TODO FUSION-102 mutable_sexp
 
-  (defpub_j sexp    "com.amazon.fusion.FusionSexp$SexpProc")
-  (defpub_j pair    "com.amazon.fusion.FusionSexp$PairProc")
-  (defpub_j is_pair "com.amazon.fusion.FusionSexp$IsPairProc")
+  (provide sexp)
+  (define sexp
+    (java_new "com.amazon.fusion.FusionSexp$SexpProc"))
+
+  (provide pair)
+  (define pair
+    (java_new "com.amazon.fusion.FusionSexp$PairProc"))
+
+  (provide is_pair)
+  (define is_pair
+    (java_new "com.amazon.fusion.FusionSexp$IsPairProc"))
 
 
-  (defpub head
+  (provide head)
+  (define head
     (lambda (sexp)
       '''
 Returns the first element of `sexp`.  If `sexp` is a pair, the result is its
@@ -33,7 +42,8 @@ the result is void.
           (raise_argument_error "head" "sexp" 0 sexp)))))
 
 
-  (defpub tail
+  (provide tail)
+  (define tail
     (lambda (sexp)
       '''
 Returns the elements _after_ the first element of `sexp`.  If `sexp` is a
@@ -47,7 +57,8 @@ zero-length or `null.sexp`), the result is void.
           (raise_argument_error "tail" "sexp" 0 sexp)))))
 
 
-  (defpub sexp_append
+  (provide sexp_append)
+  (define sexp_append
     (lambda (front back)
       '''
 Appends two sexps, reusing the second.

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (module void "/fusion/private/kernel"
 
@@ -22,9 +22,13 @@ Along with all nulls and `false`, the void value is untruthy:
     "no"
   '''
 
-  (require "/fusion/experimental/defines")
 
-  (defpub_j is_void  "com.amazon.fusion.FusionVoid$IsVoidProc")
-  (defpub_j void     "com.amazon.fusion.FusionVoid$VoidProc")
+  (provide is_void)
+  (define is_void
+    (java_new "com.amazon.fusion.FusionVoid$IsVoidProc"))
+
+  (provide void)
+  (define void
+    (java_new "com.amazon.fusion.FusionVoid$VoidProc"))
 
 )

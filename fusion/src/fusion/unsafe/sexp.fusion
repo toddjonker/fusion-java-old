@@ -1,6 +1,6 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
-(module unsafe_struct '/fusion/private/builtins'
+(module unsafe_struct '/fusion/private/kernel'
 
   '''
 Unsafe (but fast) operations on sexps.
@@ -14,10 +14,13 @@ See the module [`/fusion/sexp`](fusion/sexp.html) for more information and
 related operations on sexps.
   '''
 
-  (require "/fusion/experimental/defines")
 
+  (provide unsafe_pair_head)
+  (define unsafe_pair_head
+    (java_new "com.amazon.fusion.FusionSexp$UnsafePairHeadProc"))
 
-  (defpub_j unsafe_pair_head "com.amazon.fusion.FusionSexp$UnsafePairHeadProc")
-  (defpub_j unsafe_pair_tail "com.amazon.fusion.FusionSexp$UnsafePairTailProc")
+  (provide unsafe_pair_tail)
+  (define unsafe_pair_tail
+    (java_new "com.amazon.fusion.FusionSexp$UnsafePairTailProc"))
 
 )
