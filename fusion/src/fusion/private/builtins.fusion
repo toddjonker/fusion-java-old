@@ -10,8 +10,8 @@
 
   // Pass-through bindings from kernel
   (provide all_defined_out begin define if lambda let_values letrec load module
-    provide require)
-  (provide is_string is_list is_sexp is_struct)
+    not provide quote require)
+  (provide is_list is_null is_sexp is_string is_struct)
 
 
   (define_syntax unquote
@@ -53,7 +53,6 @@ containing quoted datum.
 
 
   (defpub_j_syntax let            "com.amazon.fusion.LetForm")
-  (defpub_j_syntax quote          "com.amazon.fusion.QuoteForm")
   (defpub_j_syntax set            "com.amazon.fusion.SetForm")
   (defpub_j_syntax '#%top'        "com.amazon.fusion.TopForm")
 
@@ -63,11 +62,9 @@ containing quoted datum.
   (defpub_j is_blob               "com.amazon.fusion.FusionBlob$IsBlobProc")
   (defpub_j is_bool               "com.amazon.fusion.FusionBool$IsBoolProc")
   (defpub_j is_clob               "com.amazon.fusion.FusionClob$IsClobProc")
-  (defpub_j is_null               "com.amazon.fusion.IsNullProc")
   (defpub_j is_null_null          "com.amazon.fusion.FusionNull$IsNullNullProc")
   (defpub_j is_procedure          "com.amazon.fusion.IsProcedureProc")
   (defpub_j is_symbol             "com.amazon.fusion.FusionSymbol$IsSymbolProc")
-  (defpub_j not                   "com.amazon.fusion.NotProc")
   (defpub_j values                "com.amazon.fusion.ValuesProc")
 
 

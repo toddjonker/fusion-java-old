@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -130,11 +130,14 @@ final class GlobalState
         ns.define(LETREC, new LetrecForm());    // Needed by hard-coded macro
         ns.define("load", new LoadProc(loadHandler));
         ns.define(MODULE, new ModuleForm(resolver, currentModuleDeclareName));
+        ns.define("not", new NotProc());
         ns.define(PROVIDE, new ProvideForm());
+        ns.define("quote", new QuoteForm());
         ns.define("quote_syntax", new QuoteSyntaxForm()); // For fusion/syntax
         ns.define(REQUIRE, new RequireForm(resolver));
 
         ns.define("is_list",   new FusionList.IsListProc());
+        ns.define("is_null",   new IsNullProc());
         ns.define("is_sexp",   new FusionSexp.IsSexpProc());
         ns.define("is_string", new FusionString.IsStringProc());
         ns.define("is_struct", new FusionStruct.IsStructProc());

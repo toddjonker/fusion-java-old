@@ -1,6 +1,6 @@
 // Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
-(module control "/fusion/private/builtins"
+(module control "/fusion/private/kernel"
 
   (require
     "/fusion/experimental/syntax"
@@ -9,7 +9,7 @@
     "/fusion/unsafe/sexp"
     "/fusion/void")
 
-  (provide apply not)
+  (provide not)
 
 
   (provide and)
@@ -40,8 +40,8 @@ The last `expr` is in tail position. Given no `expr`s, the result is true.
 
                 // (and FIRST REST...)  -->
                 (datum_to_syntax
-                  (sexp (quote_syntax let)               // (let
-                    (sexp (sexp (quote a) first))        //   ((a FIRST))
+                  (sexp (quote_syntax let_values)        // (let_values
+                    (sexp (sexp (sexp (quote a)) first)) //   (((a) FIRST))
                     (sexp (quote_syntax if) (quote a)    //   (if a
                           (pair (quote_syntax and) rest) //     (and REST...)
                           (quote a)))                    //     a))
@@ -77,8 +77,8 @@ The last `expr` is in tail position. Given no `expr`s, the result is false.
 
                 //                                      (or FIRST REST...)  -->
                 (datum_to_syntax
-                  (sexp (quote_syntax let)                // (let
-                    (sexp (sexp (quote a) first))         //   ((a FIRST))
+                  (sexp (quote_syntax let_values)         // (let_values
+                    (sexp (sexp (sexp (quote a)) first))  //   (((a) FIRST))
                     (sexp (quote_syntax if) (quote a)     //   (if a
                           (quote a)                       //     a
                           (pair (quote_syntax or) rest))) //     (or REST...)))
