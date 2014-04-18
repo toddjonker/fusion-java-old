@@ -5,10 +5,19 @@
   (require
     "/fusion/equality"
     "/fusion/experimental/syntax"
+    "/fusion/private/compare"
+    "/fusion/private/control"
+    "/fusion/private/sexp"
+    "/fusion/unsafe/sexp"
   )
 
-  (provide defpub defpub_j defpub_syntax defpub_j_syntax)
 
+  (define ctx  // PRIVATE!
+    "Lexical context for expanded macros."
+    (quote_syntax context))
+
+
+  (provide defpub)
   (define_syntax defpub  // WARNING: Doc syntax isn't supported yet.
     '''
     (defpub name value)
@@ -20,16 +29,22 @@ Defines and provides a binding for ID to the VALUE.
 Defines and provides a procedure named ID with the BODY.
     '''
     (lambda (stx)
-      (let_values [((name_or_args) (syntax_get stx 1))]
-        (let_values [((name) (if (is_identifier name_or_args)
-                               name_or_args
-                               (syntax_get name_or_args 0)))]
-          (quasisyntax
-            (begin
-              (unsyntax (syntax_cons_q define (syntax_subseq stx 1)))
-              (provide (unsyntax name))))))))
+      (let_values [((content) (unsafe_pair_tail (syntax_unwrap stx)))]
+        (if (not (and (is_pair content) (is_pair (unsafe_pair_tail content))))
+          (wrong_syntax stx "expected name and body")
+          (let_values [((name_or_args) (unsafe_pair_head content))]
+            (let_values [((name) (if (is_identifier name_or_args)
+                                   name_or_args
+                                   (syntax_get name_or_args 0)))]
+              (datum_to_syntax
+                (sexp (quote_syntax begin)              // (begin
+                  (pair (quote_syntax define) content)  //   (define ...)
+                  (sexp (quote_syntax provide) name))   //   (provide NAME))
+                ctx
+                stx)))))))
 
 
+  (provide defpub_j)
   (define_syntax defpub_j  // WARNING: Doc syntax isn't supported yet.
     '''
     (defpub_j id fqcn)
@@ -41,16 +56,23 @@ fully-qualified class name string FQCN.
       (if (= 4 (syntax_size stx))
         (if (is_string (syntax_to_datum (syntax_get stx 2)))
           // We have docs
-          (quasisyntax
-            (defpub (unsyntax (syntax_get stx 1))
-              (unsyntax (syntax_get stx 2))
-              (java_new (unsyntax (syntax_get stx 3)))))
+          (datum_to_syntax
+            (sexp (quote_syntax defpub) (syntax_get stx 1)  // (defpub ID
+              (syntax_get stx 2)                            //   DOC
+              (sexp (quote_syntax java_new)                 //   (java_new
+                    (syntax_get stx 3)))                    //     FQCN))
+              ctx
+              stx)
           (wrong_syntax (syntax_get stx 2) "Expected documentation string"))
-        (quasisyntax
-          (defpub (unsyntax (syntax_get stx 1))
-            (java_new (unsyntax (syntax_get stx 2))))))))
+        (datum_to_syntax
+          (sexp (quote_syntax defpub) (syntax_get stx 1)    // (defpub ID
+            (sexp (quote_syntax java_new)                   //   (java_new
+                  (syntax_get stx 2)))                      //     FQCN))
+          ctx
+          stx))))
 
 
+  (provide defpub_syntax)
   (define_syntax defpub_syntax  // WARNING: Doc syntax isn't supported yet.
     '''
     (defpub_syntax name value)
@@ -59,21 +81,29 @@ Defines and provides a transformer binding for ID to the VALUE (which must
 generally be a transform procedure).
     '''
     (lambda (stx)
-      (quasisyntax
-        (begin
-          (unsyntax (syntax_cons_q define_syntax (syntax_subseq stx 1)))
-          (provide (unsyntax (syntax_get stx 1)))))))
+      (let_values [((args) (tail (syntax_unwrap stx)))]
+        (datum_to_syntax
+          (sexp (quote_syntax begin)                   // (begin
+            (pair (quote_syntax define_syntax) args)   //   (define_syntax ...)
+            (sexp (quote_syntax provide) (head args))) //   (provide NAME))
+          ctx
+          stx))))
 
 
+  (provide defpub_j_syntax)
   (define_syntax defpub_j_syntax  // WARNING: Doc syntax isn't supported yet.
     '''
-    (defpub_j_syntax_j id fqcn)
+    (defpub_j_syntax id fqcn)
 
 Defines and provides a transformer binding for ID, using `java_new` and the
 given fully-qualified class name string FQCN.
     '''
-    (lambda (stx)
-      (quasisyntax
-        (defpub_syntax (unsyntax (syntax_get stx 1))
-          (java_new (unsyntax (syntax_get stx 2)))))))
+    (lambda (stx)                             // (defpub_j_syntax ID FQCN)  -->
+      (datum_to_syntax
+        (sexp (quote_syntax defpub_syntax)              // (defpub_syntax
+          (syntax_get stx 1)                            //    ID
+          (sexp (quote_syntax java_new)                 //    (java_new
+                (syntax_get stx 2)))                    //      FQCN))
+        ctx
+        stx)))
 )
