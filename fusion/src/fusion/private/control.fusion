@@ -150,22 +150,27 @@ Evaluates the `test` expressions left to right until one returns a truthy value,
 then evaluates the corresponding `body` expressions in tail position.
 If no `test` is truthy, the result is void.
     '''
-    (lambda (stx)
-      (let [(size (syntax_size stx))]
-        (if (= 1 size)               // (cond) with no clauses
-          (quote_syntax (void))
-          (let [(clause (syntax_get    stx 1)),
-                (tail   (syntax_subseq stx 2))]
-            // TODO FUSION-120 check type of clause
-            (when (> 1 (syntax_size clause))
-              (wrong_syntax stx "cond: bad clause " clause))
-            (let [(test (syntax_get    clause 0)),
-                  (body (syntax_subseq clause 1))]
-              (let [(begin_body (syntax_cons_q begin body)),
-                    (cond_tail  (syntax_cons_q cond  tail))]
-                (quasisyntax
-                  (if (unsyntax test)
-                      (unsyntax begin_body)
-                      (unsyntax cond_tail))))))))))
+    (let_values [((ctx) (quote_syntax context))]
+      (lambda (stx)
+        (let_values [((clauses) (tail (syntax_unwrap stx)))]
+          (if (not (is_pair clauses))
+
+            // (cond)  -->  (void)
+            (datum_to_syntax (sexp (quote_syntax void)) ctx stx)
+
+            (let_values [((clause) (syntax_unwrap (unsafe_pair_head clauses))),
+                         ((tail  ) (unsafe_pair_tail clauses))]
+              (if (not (is_pair clause))
+                (wrong_syntax stx "cond: bad clause " clause)
+                (let_values [((test) (unsafe_pair_head clause)),
+                             ((body) (unsafe_pair_tail clause))]
+
+                  //                         (cond (TEST BODY...) TAIL...)  -->
+                  (datum_to_syntax
+                    (sexp (quote_syntax if) test        // (if TEST
+                      (pair (quote_syntax begin) body)  //   (begin BODY...)
+                      (pair (quote_syntax cond)  tail)) //   (cond TAIL...))
+                    ctx
+                    stx)))))))))
 
 )
