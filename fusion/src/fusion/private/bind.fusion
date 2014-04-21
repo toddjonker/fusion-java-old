@@ -1,28 +1,24 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 (module bind "/fusion/private/builtins"
 
 
   (require
+    "/fusion/sequence"
     "/fusion/experimental/defines"
     "/fusion/experimental/syntax"
     "/fusion/number"
-    "/fusion/private/compare")
+    "/fusion/private/compare"
+    "/fusion/private/sexp"
+    "/fusion/unsafe/sexp")
 
   (provide let let_values letrec values)
 
 
-/*
-(lets [] body ...+)
-=>
-(begin body ...)
+  (define ctx  // PRIVATE!
+    "Lexical context for expanded macros."
+    (quote_syntax context))
 
-(lets [binding, others ...] body ...+)
-=>
-(let [binding]
-  (lets [others ...]
-    body ...))
-*/
 
   (defpub_syntax lets
     '''
@@ -38,17 +34,27 @@ and the `ident`s are bound in the following `expr`s as well as the `body`.
     (lambda (stx)
       (if (< (syntax_size stx) 3)
         (wrong_syntax stx "expecting bindings and body")
-        (let [(bindings (syntax_get    stx 1)),
-              (body     (syntax_subseq stx 2))]
-          // TODO FUSION-120 check type of bindings, bound identifier
-          (if (= 0 (syntax_size bindings))
-              (syntax_cons_q begin body)
-              (let [(binding (syntax_get    bindings 0)),
-                    (others  (syntax_subseq bindings 1))]
-                (quasisyntax
-                  (let [(unsyntax binding)]
-                    (unsyntax
-                      (syntax_append
-                        (quasisyntax (lets (unsyntax others)))
-                        body))))))))))
+        (let_values [((content) (unsafe_pair_tail (syntax_unwrap stx)))]
+          (let_values [((bindings) (syntax_unwrap (unsafe_pair_head content))),
+                       ((body)     (unsafe_pair_tail content))]
+            // TODO FUSION-120 check type of bindings, bound identifier
+            (if (= 0 (size bindings))
+
+              //                                       (lets [] BODY...)  -->
+              (datum_to_syntax
+                (pair (quote_syntax begin) body)    // (begin BODY...)
+                ctx
+                stx)
+              (let_values [((binding) (element bindings 0)),
+                           ((others)  (subseq bindings 1 (size bindings)))]
+
+                //                     (lets [BINDING, OTHERS...] BODY...)  -->
+                (datum_to_syntax
+                  (sexp (quote_syntax let)       // (let
+                    (sexp binding)               //    (BINDING)
+                    (pair (quote_syntax lets)    //    (lets
+                      (pair others               //      OTHERS
+                            body)))              //      BODY...))
+                  ctx
+                  stx))))))))
 )

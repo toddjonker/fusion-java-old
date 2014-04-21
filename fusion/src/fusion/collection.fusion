@@ -19,7 +19,6 @@ The built-in collection types are [list](fusion/list.html),
     "/fusion/experimental/defines"
     "/fusion/iterator"
     "/fusion/number"
-    "/fusion/private/bind"
     "/fusion/private/compare"
     "/fusion/private/control"
     "/fusion/private/sexp"
