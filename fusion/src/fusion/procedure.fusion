@@ -83,12 +83,14 @@ of bound identifiers:
   '''
 
   (require
+    "/fusion/equality"
     "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/experimental/syntax"
     "/fusion/private/compare"
     "/fusion/private/control"
-    "/fusion/private/sexp")
+    "/fusion/private/sexp"
+    "/fusion/unsafe/sexp")
 
 
   (provide apply is_procedure lambda let_values values)
@@ -118,12 +120,15 @@ always returns `v`.
 Returns a zero-argument procedure that evaluates the `body` forms.
     '''
     (lambda (stx)
-      (if (= 1 (syntax_size stx))
-        (wrong_syntax stx "Expected at least one body form")
-        (let [(body (syntax_subseq stx 1))]
-          (syntax_append
-            (quote_syntax (lambda ()))
-            body)))))
+      (let [(body (unsafe_pair_tail (syntax_unwrap stx)))]
+        (if (== 0 (size body))
+          (wrong_syntax stx "Expected at least one body form")
+          (datum_to_syntax
+            (pair (quote_syntax lambda)
+              (pair (quote ())
+                body))
+            (quote_syntax context)
+            stx)))))
 
 
   (defpub compose
