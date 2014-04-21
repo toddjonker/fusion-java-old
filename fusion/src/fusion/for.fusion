@@ -10,9 +10,17 @@ Generic collection "comprehension" forms.
   (require "/fusion/base"
            "/fusion/experimental/defines"
            "/fusion/experimental/syntax"
-           "/fusion/list")
+           "/fusion/list"
+           "/fusion/sexp"
+           "/fusion/unsafe/sexp")
 
   (defpub_j_syntax for_list "com.amazon.fusion.ForListForm")
+
+
+  (define ctx  // PRIVATE!
+    "Lexical context for expanded macros."
+    (quote_syntax context))
+
 
   (defpub_syntax fors_list
     '''
@@ -39,40 +47,44 @@ for list comprehension.
       z)                                   => [1, 2, 3, 4]
     '''
     (lambda (stx)
-      (if (or (< (syntax_size stx) 3)
-              (is_null (syntax_get stx 1)))
-        (wrong_syntax stx "expecting bindings and body")
-        (let [(bindings (syntax_get stx 1)),
-              (body (syntax_subseq stx 2))]
-          (unless (is_sequence (syntax_unwrap bindings))
-            (wrong_syntax stx "bindings must be a sequence"))
-          (if (= 0 (syntax_size bindings))
+      (let [(content (unsafe_pair_tail (syntax_unwrap stx)))]
+        (when (< (size content) 2)
+          (wrong_syntax stx "expecting bindings and body"))
+        (let [(bindings (syntax_unwrap (unsafe_pair_head content))),
+              (body (unsafe_pair_tail content))]
+          (unless (and (is_sequence bindings) (not (is_null bindings)))
+            (wrong_syntax stx "bindings must be a non-null sequence"))
+          (if (== 0 (size bindings))
             /* Base case -- no bindings */
-            (syntax_append
-              (quasisyntax
-                (for_list []))
-              body)
-            (if (= 1 (syntax_size bindings))
-              /* Base case -- single binding */
-              (let [(binding (syntax_get bindings 0))]
-                (if (or (not (is_sequence (syntax_unwrap binding)))
-                        (not (= 2 (syntax_size binding))))
-                  (wrong_syntax stx "expecting 2 forms in in each binding pair")
-                  (syntax_append
-                    (quasisyntax
-                      (for_list (unsyntax bindings)))
-                    body)))
-              /* Recursive case */
-              (let [(binding (syntax_get bindings 0)),
-                    (others (syntax_subseq bindings 1))]
-                (if (or (not (is_sequence (syntax_unwrap binding)))
-                        (not (= 2 (syntax_size binding))))
-                  (wrong_syntax stx "expecting 2 forms in in each binding pair")
-                  (quasisyntax
-                    (apply append_m []
-                      (for_list [(unsyntax binding)]
-                        (unsyntax
-                          (syntax_append
-                            (quasisyntax (fors_list (unsyntax others)))
-                            body)))))))))))))
+            (datum_to_syntax
+              (pair (quote_syntax for_list)   // (for_list
+                    (pair []                  //    []
+                          body))              //    BODY...)
+              ctx
+              stx)
+            (let [(binding (syntax_unwrap (element bindings 0))),
+                  (others  (subseq bindings 1 (size bindings)))]
+              (when (or (not (is_sequence binding))
+                        (not (= 2 (size binding))))
+                (wrong_syntax stx "expecting 2 forms in in each binding pair"))
+              (if (== 0 (size others))
+                /* Base case -- single binding */
+                (datum_to_syntax
+                  (pair (quote_syntax for_list)   // (for_list
+                        (pair bindings            //    BINDINGS
+                              body))              //    BODY...)
+                  ctx
+                  stx)
+                /* Recursive case */
+                (datum_to_syntax
+                  (sexp (quote_syntax apply)         // (apply
+                    (quote_syntax append_m)          //   append_m
+                    []                               //   []
+                    (sexp (quote_syntax for_list)    //   (for_list
+                      (sexp (element bindings 0))    //     (BINDING)
+                      (pair (quote_syntax fors_list) //     (fors_list
+                        (pair others                 //       (OTHERS...)
+                              body))))               //       BODY...)))
+                  ctx
+                  stx))))))))
 )
