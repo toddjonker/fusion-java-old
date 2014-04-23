@@ -54,6 +54,6 @@ class EnvironmentRenameWrap
     @Override
     public String toString()
     {
-        return "{{{Environment renames}}}";
+        return "{{{Environment renames for " + myEnvironment + "}}}";
     }
 }

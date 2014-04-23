@@ -240,6 +240,22 @@ final class LocalEnvironment
     }
 
 
+    @Override
+    public String toString()
+    {
+        StringBuilder buf = new StringBuilder("{{{LocalEnv (");
+        boolean first = true;
+        for (LocalBinding b : myBindings)
+        {
+            if (! first) buf.append(' ');
+            buf.append(b.myIdentifier);
+            first = false;
+        }
+        buf.append(")}}}");
+        return buf.toString();
+    }
+
+
     //========================================================================
 
 
