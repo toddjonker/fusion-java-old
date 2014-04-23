@@ -1,0 +1,18 @@
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+
+(module check "/fusion"
+
+  (require "/fusion/experimental/defines")
+
+
+  (defpub F (lambda rest false))
+  (defpub T (lambda rest true))
+
+  (defpub NULL_SYMBOL (quote null.symbol))
+  (defpub NULL_SEXP   (quote null.sexp))
+  (defpub EMPTY_SEXP  (quote ()))
+
+  (defpub VOID  (void))
+  (defpub UNDEF (letrec [(x y), (y 1)] x))
+
+)

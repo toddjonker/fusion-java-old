@@ -1,0 +1,58 @@
+// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+
+// Test of macro-generating macros
+
+(module mgm "/fusion"
+
+  (require
+    "/fusion/experimental/syntax"
+  )
+
+
+'''
+(mgm NAME)
+-->
+(begin
+  (define _NAME
+    (lambda (x) true))
+  (define_syntax NAME
+    (lambda (stx1)
+      (datum_to_syntax
+        (_NAME 1)
+        ctx
+        stx1))))
+'''
+
+  // TODO CRASH if ctx is hoisted to module level.
+
+
+
+  (provide mgm)
+  (define_syntax mgm
+    (lambda (stx)
+      (lets [(ctx (quote_syntax here)),
+             (orig_args (tail (syntax_unwrap stx))),
+             (name_stx (head orig_args)),
+             (proc_name
+               (datum_to_syntax
+                 (string_to_symbol
+                   (string_append "_" (syntax_unwrap name_stx)))
+                 (syntax_get stx 0)))
+            ]
+        (datum_to_syntax
+          (quasiquote
+            (begin
+              (define (unquote proc_name)
+                (lambda (x) true))
+              (define_syntax (unquote name_stx)
+                (lambda (stx1)
+                  (let [(ctx1 (quote_syntax here1)),
+                       ]
+                    (datum_to_syntax
+                      (sexp (quote_syntax (unquote proc_name))
+                            "actual-arg")
+                      ctx1 //(unquote ctx) // ??? remove ctx1 above?
+                      stx1))))))
+          ctx
+          stx))))
+)

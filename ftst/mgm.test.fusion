@@ -1,0 +1,11 @@
+// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/mgm"
+)
+
+(mgm mine)
+(mine)
+
+// TODO same thing inside a module
+// TODO use from outside defining module

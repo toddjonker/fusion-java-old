@@ -1,0 +1,162 @@
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+
+(module check "/fusion"
+
+  (require
+    "/fusion/eval"
+    "/fusion/exception"
+    "/fusion/experimental/defines"
+    "/fusion/experimental/syntax"
+    "/fusion/ffi/java"
+    "/fusion/parameter")
+
+  (provide assert)
+
+
+  (define _raise_check2_failure
+    (java_new "com.amazon.fusion.Check2FailureProc"))
+
+  (define check_stack_param
+    (make_parameter null))
+
+  (define fail_check
+    '''
+    (fail_check meta)
+
+Raises a check failure exception, including a stack trace derived from the
+`check_stack_param` marks.
+    '''
+    (lambda (meta)
+      (parameterize [(check_stack_param meta)]
+        (_raise_check2_failure check_stack_param))))
+
+
+  (defpub_syntax define_check
+    (let [(ctx (quote_syntax here))]
+    (lambda (stx)
+      '''
+    (define_check (name arg ...) body ...)
+
+Creates a macro that's invoked as:
+
+    (name arg_expr ... message_expr)
+
+(At present, multiple `message_expr`s can be given, but only the last is used.)
+
+That expands to:
+
+    (let [(message_arg (lambda () message_expr))] // or (void) if no message
+      (parameterize
+        [(check_syntax_param ORIGINAL_SYNTAX)]
+        (let [(arg arg_expr), ... ]
+          body ...)))
+
+The outer `let` has the effect of avoiding evaluation of the `message_expr`
+unless it is required.  It's also a bit odd to use.
+      '''
+      (when (< (syntax_size stx) 3)
+        (wrong_syntax stx
+          "Bad syntax for define_check: "
+          "(define_check (name message_arg arg ...) body ...)"))
+      (lets [(orig_args (tail (syntax_unwrap stx))),
+             (bind_stx (head orig_args)),
+             (body     (tail orig_args)),
+             (name_stx (head (syntax_unwrap bind_stx))), // TODO type/size check
+             (args     (tail (syntax_unwrap bind_stx))),
+             (arg_count   (size args)),
+             (arg_ct_stx  (datum_to_syntax arg_count)),
+             (args_msg_stx (datum_to_syntax (if (= 1 arg_count)
+                                              " arg: "
+                                              " args: "))),
+             (proc_name (datum_to_syntax
+                          (string_to_symbol
+                            (string_append "_" (syntax_unwrap name_stx)))
+                          // TODO FUSION-329 should use stx directly
+                          (syntax_get stx 0)))
+            ]
+'''
+(define_check (NAME ARG...) BODY...)
+
+(begin
+  (define _NAME
+    (lambda (meta ARG...) BODY...))
+  (define_syntax NAME
+     (lambda (stx1)
+       ... arity check...
+       (datum_to_syntax
+         (_NAME (quote META) ARG...)
+         ctx
+         stx1))))
+'''
+        (datum_to_syntax
+          (quasiquote
+            (begin
+              (define (unquote proc_name)
+                (lambda (unquote (pair (quote meta) args))
+                  (parameterize
+                    [(check_stack_param
+                       (struct_merge meta
+                         (struct
+                           "name" (quote (unquote name_stx))
+                           "args" (unquote (pair (quote list) args)))))]
+                    (unquote (pair (quote begin) body)))))
+              (define_syntax (unquote name_stx)
+                (let [(ctx1 (quote_syntax here1))]
+                  (lambda (stx1)
+                    (when (<= (syntax_size stx1) (unquote arg_ct_stx))
+                      (wrong_syntax stx1
+                        (unquote name_stx)
+                        " requires at least " (unquote arg_ct_stx)
+                        (unquote args_msg_stx)))
+                        // TODO add sample eg "(check_true val message ...)"
+                    (let [(meta { expression: (syntax_to_datum stx1),
+                                  line:(syntax_line stx1),
+                                  column:(syntax_column stx1) }),
+                          (actuals (subseq (syntax_unwrap stx1)
+                                           1
+                                           (+ 1 (unquote arg_ct_stx))))]
+                      (datum_to_syntax
+                        (pair (quote_syntax (unquote proc_name))
+                              (pair (sexp (quote quote) meta)
+                                    actuals))
+                        ctx1
+                        stx1)))))))
+          ctx
+          stx)))))
+
+
+  //===========================================================================
+
+
+  (provide check)
+  (define_check (check op val1 val2)
+    (unless (op val1 val2)
+      (fail_check {})))
+
+  (provide check_pred)
+  (define_check (check_pred pred val)
+    (unless (pred val)
+      (fail_check {})))
+
+  (provide check_true)
+  (define_check (check_true val)
+    (unless (= true val)
+      (fail_check {actual:val})))
+
+  (provide check_false)
+  (define_check (check_false val)
+    (unless (= false val)
+      (fail_check {actual:val})))
+
+  (provide check_void)
+  (define_check (check_void val)
+    (unless (is_void val)
+      (fail_check {actual:val})))
+
+
+  (provide check_annotations)
+  (define_check (check_annotations expected value)
+    (unless (= expected (type_annotations value))
+      (fail_check {expected:expected, actual:(type_annotations value)})))
+
+)

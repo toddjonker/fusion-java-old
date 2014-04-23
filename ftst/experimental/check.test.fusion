@@ -1,0 +1,13 @@
+// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/fusion/exception"
+  "/fusion/experimental/check"
+)
+
+(check = 1 1)
+(check_pred is_truthy 12)
+(check_true true)
+(check_false false)
+(check_void (void))
+(check_annotations ["a", "b"] (quote a::b::c))
