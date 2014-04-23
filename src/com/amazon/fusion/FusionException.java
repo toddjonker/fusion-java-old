@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionUtils.safeEquals;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,11 +48,15 @@ public class FusionException
             myContinuation = new ArrayList<>(32);
             myContinuation.add(location);
         }
-        else if (location != null ||
-                 myContinuation.get(myContinuation.size() - 1) != null)
+        else
         {
-            // Collapse adjacent nulls
-            myContinuation.add(location);
+            SourceLocation prev =
+                myContinuation.get(myContinuation.size() - 1);
+            if (! safeEquals(prev, location))
+            {
+                // Collapse equal adjacent locations
+                myContinuation.add(location);
+            }
         }
     }
 
