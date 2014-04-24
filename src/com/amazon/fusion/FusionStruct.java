@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 final class FusionStruct
@@ -355,6 +356,20 @@ final class FusionStruct
     }
 
 
+    static Set<String> unsafeStructKeys(Evaluator eval, Object struct)
+        throws FusionException
+    {
+        return ((BaseStruct) struct).keys(eval);
+    }
+
+
+    static boolean unsafeStructHasKey(Evaluator eval, Object struct, String key)
+        throws FusionException
+    {
+        return ((BaseStruct) struct).hasKey(eval, key);
+    }
+
+
     static void unsafeStructFieldVisit(Evaluator eval, Object struct,
                                        StructFieldVisitor visitor)
         throws FusionException
@@ -484,6 +499,9 @@ final class FusionStruct
 
     static interface StructFieldVisitor
     {
+        /**
+         * @return null means continue visiting, non-null means abort visiting.
+         */
         Object visit(String name, Object value)
             throws FusionException;
     }
@@ -500,6 +518,8 @@ final class FusionStruct
             throws IOException, FusionException;
 
         int size(); // Doesn't throw
+
+        Set<String> keys(Evaluator eval);
 
         /**
          * Visits each field in the struct, stopping as soon as the visitation
@@ -610,6 +630,12 @@ final class FusionStruct
         public int size()
         {
             return 0;
+        }
+
+        @Override
+        public Set<String> keys(Evaluator eval)
+        {
+            return Collections.emptySet();
         }
 
         @Override
@@ -855,6 +881,12 @@ final class FusionStruct
         public int size()
         {
             return mySize;
+        }
+
+        @Override
+        public Set<String> keys(Evaluator eval)
+        {
+            return Collections.unmodifiableSet(getMap(eval).keySet());
         }
 
         @Override
