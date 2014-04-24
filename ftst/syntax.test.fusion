@@ -1,9 +1,11 @@
 // Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
+  "/fusion/experimental/check"
   "/fusion/experimental/syntax"
-  "/fusion/private/builtins")   // annotate
+  "/fusion/private/builtins"    // annotate
+  "/testutils"
+  )
 
 (define id (quote_syntax identifier))
 (define some_syntax (quote_syntax (op arg)))
@@ -28,11 +30,11 @@
 (check_false (is_identifier (quote a)))
 (check_false (is_identifier (quote "a")))
 
-(define_check (check_identifier msg expected_sym v)
-  (check_true (is_syntax v))
-  (check_true (is_identifier v))
+(define_check (check_identifier expected_sym v)
+  (check_pred is_syntax v)
+  (check_pred is_identifier v)
   (let [(sym (syntax_unwrap v))]
-    (check_true (is_symbol sym))
+    (check_pred is_symbol sym)
     (check === expected_sym sym)))
 
 (check_identifier (quote a) (quote_syntax a))
@@ -60,25 +62,23 @@
         (begin
           // This ensures that our attempt to annotate the original datum
           // (in check_xforms) has succeeded.
-          (check_annotations (unsyntax quote_datum_stx)
-            (quote (unsyntax (syntax_get stx 2))))
-          (check ===
-            (syntax_to_datum (quote_syntax (unsyntax datum_stx)))
+          (check_annotations (quote (unsyntax (syntax_get stx 2)))
             (unsyntax quote_datum_stx))
-          (check ===
+          (check === (unsyntax quote_datum_stx)
+            (syntax_to_datum (quote_syntax (unsyntax datum_stx))))
+          (check === (unsyntax quote_datum_stx)
             (syntax_to_datum ((unsyntax (quote_syntax quasisyntax))
-                              (unsyntax datum_stx)))
-            (unsyntax quote_datum_stx))
-          (check ===
-            (syntax_to_datum (datum_to_syntax (quote (unsyntax datum_stx))))
-            (unsyntax quote_datum_stx))
-          (check ===
-            (syntax_to_datum (datum_to_syntax (quote_syntax (unsyntax datum_stx))))
-            (unsyntax quote_datum_stx))
-          (check ===
-            (syntax_to_datum (datum_to_syntax ((unsyntax (quote_syntax quasisyntax))
-                                               (unsyntax datum_stx))))
-            (unsyntax quote_datum_stx)))))))
+                              (unsyntax datum_stx))))
+          (check === (unsyntax quote_datum_stx)
+            (syntax_to_datum
+              (datum_to_syntax (quote (unsyntax datum_stx)))))
+          (check === (unsyntax quote_datum_stx)
+            (syntax_to_datum
+              (datum_to_syntax (quote_syntax (unsyntax datum_stx)))))
+          (check === (unsyntax quote_datum_stx)
+            (syntax_to_datum
+              (datum_to_syntax ((unsyntax (quote_syntax quasisyntax))
+                                (unsyntax datum_stx))))))))))
 
 (define_syntax check_xforms
   (lambda (stx)
@@ -105,30 +105,23 @@
 (check_representative_ion_data check_xforms)
 
 
-(check ===
-  (syntax_to_datum (datum_to_syntax (mutable_list)))
-  [])
-(check ===
-  (syntax_to_datum (datum_to_syntax (mutable_list 1)))
-  [1])
-(check ===
-  (syntax_to_datum (datum_to_syntax (mutable_list 1 2)))
-  [1, 2])
+(check === []
+  (syntax_to_datum (datum_to_syntax (mutable_list))))
+(check === [1]
+  (syntax_to_datum (datum_to_syntax (mutable_list 1))))
+(check === [1, 2]
+  (syntax_to_datum (datum_to_syntax (mutable_list 1 2))))
 
-(check ===
-  (syntax_to_datum (datum_to_syntax (stretchy_list)))
-  [])
-(check ===
-  (syntax_to_datum (datum_to_syntax (stretchy_list 1)))
-  [1])
-(check ===
-  (syntax_to_datum (datum_to_syntax (stretchy_list 1 2)))
-  [1, 2])
+(check === []
+  (syntax_to_datum (datum_to_syntax (stretchy_list))))
+(check === [1]
+  (syntax_to_datum (datum_to_syntax (stretchy_list 1))))
+(check === [1, 2]
+  (syntax_to_datum (datum_to_syntax (stretchy_list 1 2))))
 
 
-(check ===
-  (syntax_to_datum (quasisyntax a::(b (unsyntax (quote_syntax c)))))
-  (quote a::(b c)))
+(check === (quote a::(b c))
+  (syntax_to_datum (quasisyntax a::(b (unsyntax (quote_syntax c))))))
 
 
 (lets [(stx (quote_syntax [a, 2])),
@@ -137,9 +130,9 @@
 
 (lets [(stx (quote_syntax (a {f:2, g:["hi"]}))),
        (unwrapped (syntax_to_datum stx))]
-  (check === (quote a) (head unwrapped))
-  (check === 2 (. unwrapped 1 "f"))
-  (check === ["hi"] (. unwrapped 1 "g")))
+  (check === (quote a) (. unwrapped 0))
+  (check === 2         (. unwrapped 1 "f"))
+  (check === ["hi"]    (. unwrapped 1 "g")))
 
 
 //==========================================================================
@@ -166,7 +159,7 @@
 
 (lets [(stx (quote_syntax [a, 2])),
        (unwrapped (syntax_unwrap stx))]
-  (check_true (is_list unwrapped))
+  (check_pred is_list unwrapped)
   (let [(u1 (syntax_unwrap (list_element unwrapped 1)))]
     (check_identifier (quote a) (list_element unwrapped 0))
     (check === 2 u1)))
@@ -178,19 +171,19 @@
 
 (lets [(stx (quote_syntax a::(b 2))),
        (unwrapped (syntax_unwrap stx))]
-  (check_annotations unwrapped ["a"])
-  (check_true (is_pair unwrapped))
+  (check_annotations ["a"] unwrapped)
+  (check_pred is_pair unwrapped)
   (let [(h (head unwrapped)),
         (t (tail unwrapped))]
-    (check_true (is_identifier h))
+    (check_pred is_identifier h)
     (check === (quote b) (syntax_unwrap h))
-    (check_true (is_pair t))
+    (check_pred is_pair t)
     (check === 1 (size t))
     (check === 2 (syntax_unwrap (head t)))))
 
 (define s (quote_syntax (1 2 3)))
 (define se (syntax_unwrap s))
-(check_true (is_pair (tail se)))
+(check_pred is_pair (tail se))
 
 
 //==========================================================================
@@ -198,21 +191,23 @@
 
 (define outside (quote_syntax im_out))
 (check ===
+  (quote (im_out mid (quasisyntax ((unsyntax im_out) (unsyntax mid) inner))))
   (syntax_to_datum (quasisyntax ((unsyntax outside)
                                  mid
                                  (quasisyntax ((unsyntax (unsyntax outside))
                                                (unsyntax mid)
-                                               inner)))))
-  (quote (im_out mid (quasisyntax ((unsyntax im_out) (unsyntax mid) inner)))))
+                                               inner))))))
 
 
 (check ===
+  (quote [ im_out,
+           mid,
+           (quasisyntax ((unsyntax im_out) (unsyntax mid) inner))])
   (syntax_to_datum (quasisyntax [(unsyntax outside),
                                  mid,
                                  (quasisyntax ((unsyntax (unsyntax outside))
                                                (unsyntax mid)
-                                               inner))]))
-  (quote [im_out, mid, (quasisyntax ((unsyntax im_out) (unsyntax mid) inner))]))
+                                               inner))])))
 
 
 //==========================================================================

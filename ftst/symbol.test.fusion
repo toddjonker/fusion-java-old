@@ -1,8 +1,0 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
-
-(require "/check")
-
-
-(check = (quote sym) (quote sym))
-
-(check (lambda (a b) (not (= a b))) (quote separate) (quote equal))

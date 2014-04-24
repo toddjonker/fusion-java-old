@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 // Test that imports into a module are scoped across the entire module body.
 
@@ -17,7 +17,7 @@
   (provide result)
 )
 
-(require "/check")
+(require "/fusion/experimental/check")
 
 (require local2)
-(check = result 144)
+(check === 144 result)

@@ -1,72 +1,68 @@
 // Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
   "/fusion/exception"
+  "/fusion/experimental/check"
 )
 
 
-(define check_iter
-  (lambda (iter values)
-    "Checks that the ITER produces the VALUES (given as a list)"
-    (unless (is_iterator iter)
-      (raise_argument_error "check_iter" "iterator" 0 iter values))
-    (let [(len (size values))]
-      (let loop [(i 0)]
-        (if (= i len)
-          (check_false (iterator_has_next iter) "iterator should be empty")
-          (begin
-            (assert (iterator_has_next iter) "iterator should have next")
-            (let [(actual   (iterator_next iter)),
-                  (expected (. values i))]
-              (check === actual expected "iterator element")
-              (loop (+ 1 i)))))))))
+(define_check (check_iter values iter)
+  "Checks that the ITER produces the VALUES (given as a list)"
+  (check_pred is_iterator iter)
+  (let [(len (size values))]
+    (let loop [(i 0)]
+      (if (= i len)
+        (check_false (iterator_has_next iter) "iterator should be empty")
+        (begin
+          (check_pred iterator_has_next iter "iterator should have next")
+          (let [(actual   (iterator_next iter)),
+                (expected (. values i))]
+            (check === expected actual "iterator element")
+            (loop (+ 1 i))))))))
 
-(check_iter empty_iterator [])
+(check_iter [] empty_iterator)
 
-(check_iter (list_iterator [])      [])
-(check_iter (list_iterator [1])     [1])
-(check_iter (list_iterator [1, 2])  [1, 2])
-(check_iter (list_iterator ["a", true])  ["a", true])
-(check_iter (list_iterator [["a"], [true]])  [["a"], [true]])
+(check_iter []              (list_iterator [])     )
+(check_iter [1]             (list_iterator [1])    )
+(check_iter [1, 2]          (list_iterator [1, 2]))
+(check_iter ["a", true]     (list_iterator ["a", true]))
+(check_iter [["a"], [true]] (list_iterator [["a"], [true]]) )
 
-(check_iter (value_iterator []) [[]])
-(check_iter (value_iterator 509) [509])
+(check_iter [[]]  (value_iterator []))
+(check_iter [509] (value_iterator 509))
 
 (define plus1 (lambda (n) (+ 1 n)))
 
-(check_iter (iterator_map plus1 empty_iterator) [])
-(check_iter (iterator_map plus1 (list_iterator [1, 7])) [2, 8])
+(check_iter []     (iterator_map plus1 empty_iterator))
+(check_iter [2, 8] (iterator_map plus1 (list_iterator [1, 7])))
 
 
-(check_iter (iterator_choose is_int empty_iterator) [])
-(check_iter (iterator_choose is_int (value_iterator true)) [])
-(check_iter (iterator_choose is_int (value_iterator 614)) [614])
-(check_iter (iterator_choose is_int (list_iterator [true, 1, 2, false, 3])) [1,2,3])
+(check_iter []    (iterator_choose is_int empty_iterator))
+(check_iter []    (iterator_choose is_int (value_iterator true)))
+(check_iter [614] (iterator_choose is_int (value_iterator 614)))
+(check_iter [1,2,3]
+  (iterator_choose is_int (list_iterator [true, 1, 2, false, 3])))
 
 
-(check_true (is_void (iterator_find (lambda (e) true) empty_iterator)))
+(check_void (iterator_find (lambda (e) true) empty_iterator))
 (check = 6 (iterator_find is_int (list_iterator [true, "", 6])))
 (check = 2 (iterator_find plus1 (list_iterator [2, 6])))
 
 
-(check_iter (iterator_append empty_iterator empty_iterator) [])
-(check_iter (iterator_append empty_iterator (value_iterator 601)) [601])
-(check_iter (iterator_append (value_iterator 616) empty_iterator) [616])
-(check_iter (iterator_append (value_iterator 1) (value_iterator 2)) [1,2])
-(check_iter (iterator_append (list_iterator [1,2,3]) (list_iterator [4,5]))
-  [1,2,3,4,5])
+(check_iter [] (iterator_append empty_iterator empty_iterator))
+(check_iter [601] (iterator_append empty_iterator (value_iterator 601)))
+(check_iter [616] (iterator_append (value_iterator 616) empty_iterator))
+(check_iter [1,2] (iterator_append (value_iterator 1) (value_iterator 2)))
+(check_iter [1,2,3,4,5]
+  (iterator_append (list_iterator [1,2,3]) (list_iterator [4,5])))
 
-(check === (list_from_iterator empty_iterator) [])
-(check === (list_from_iterator (list_iterator [1])) [1])
-(check === (list_from_iterator (list_iterator [1,2])) [1,2])
+(check === []    (list_from_iterator empty_iterator))
+(check === [1]   (list_from_iterator (list_iterator [1])))
+(check === [1,2] (list_from_iterator (list_iterator [1,2])))
 
-(check_iter
-  (iterator_map_splicing list_iterator empty_iterator)
-  [])
-(check_iter
-  (iterator_map_splicing value_iterator (list_iterator [1,2,3,4]))
-  [1,2,3,4])
-(check_iter
-  (iterator_map_splicing list_iterator (list_iterator [[1],[2,3],[],[4]]))
-  [1,2,3,4])
+(check_iter []
+  (iterator_map_splicing list_iterator empty_iterator))
+(check_iter [1,2,3,4]
+  (iterator_map_splicing value_iterator (list_iterator [1,2,3,4])))
+(check_iter [1,2,3,4]
+  (iterator_map_splicing list_iterator (list_iterator [[1],[2,3],[],[4]])))

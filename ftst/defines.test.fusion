@@ -1,36 +1,37 @@
 // Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
-  "/defpub_use")
+  "/defpub_use"
+  "/fusion/experimental/check"
+  )
 
 // Exported variable defined via `defpub`
-(check = jonny 39)
+(check === 39 jonny)
 
 
 (define (thunk) 513)
 (check_true (is_procedure thunk))
-(check = (thunk) 513)
+(check === 513 (thunk))
 
 (define (thunk) 514 515)
-(check = (thunk) 515)
+(check === 515 (thunk))
 
 (define (thunk) "doc" "body")
-(check = (thunk) "body")
+(check === "body" (thunk))
 
 (define (thunk) "doc" 516 517)
-(check = (thunk) 517)
+(check === 517 (thunk))
 
 
 (define (proc arg) arg)
 (check_true (is_procedure proc))
-(check = (proc 518) 518)
+(check === 518 (proc 518))
 
 (define (proc arg) 532 arg)
-(check = (proc 533) 533)
+(check === 533 (proc 533))
 
 (define (proc arg) "doc" arg)
-(check = (proc 545) 545)
+(check === 545 (proc 545))
 
 (define (proc arg) "doc" 546 arg)
-(check = (proc 547) 547)
+(check === 547 (proc 547))

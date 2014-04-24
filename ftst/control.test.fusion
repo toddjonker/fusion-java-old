@@ -1,14 +1,15 @@
 // Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
+  "/fusion/experimental/check"
+  "/testutils"
 )
 
 
 (check_void (begin))
-(check === (begin 1)    1)
-(check === (begin 1 2)  2)
-(check === (begin 1 []) [])
+(check === 1  (begin 1))
+(check === 2  (begin 1 2))
+(check === [] (begin 1 []))
 
 
 //============================================================================
@@ -22,9 +23,9 @@
 
 // Using exit ensure we don't evaluate the other branch
 
-(check = (if true  1 (exit)) 1)
-(check = (if false (exit) 2) 2)
-(check = (if (if false false true) 4 2) 4)
+(check === 1 (if true  1 (exit)))
+(check === 2 (if false (exit) 2))
+(check === 4 (if (if false false true) 4 2))
 
 // Truthiness of other types
 
@@ -52,8 +53,8 @@
 (check_false (and true false true (exit)))
 
 
-(check === (and 1  0) 0)
-(check === (and 1. 0.) 0.)
+(check === 0  (and 1  0))
+(check === 0. (and 1. 0.))
 
 (check_true (is_void (and true (void))))
 
@@ -72,9 +73,9 @@
 (check_false (or false))
 (check_false (or false false))
 
-(check = (or 1      0) 1)
-(check = (or null   0) 0)
-(check = (or (void) 0) 0)
+(check === 1 (or 1      0))
+(check === 0 (or null   0))
+(check === 0 (or (void) 0))
 
 (check_true (is_void (or false (void))))
 
@@ -104,9 +105,9 @@
 (check_void (when false 1))
 (check_void (when (not true) 1 2 3 4 5))
 
-(check === (when true 2)         2)
-(check === (when true (begin 3)) 3)
-(check === (when (not false) 1 2 3 4) 4)
+(check === 2 (when true 2))
+(check === 3 (when true (begin 3)))
+(check === 4 (when (not false) 1 2 3 4))
 
 
 // Check that lexical context is retained
@@ -123,9 +124,9 @@
 (check_void (unless true 1))
 (check_void (unless (not false) 1 2 3 4 5))
 
-(check === (unless false 2)         2)
-(check === (unless false (begin 3)) 3)
-(check === (unless (not true) 1 2 3 4) 4)
+(check === 2 (unless false 2))
+(check === 3 (unless false (begin 3)))
+(check === 4 (unless (not true) 1 2 3 4))
 
 
 // Check that lexical context is retained
@@ -140,17 +141,17 @@
 
 (check_void (cond))
 
-(check === (cond (true 1)) 1)
-(check === (cond (true 1 2)) 2)
+(check === 1 (cond (true 1)))
+(check === 2 (cond (true 1 2)))
 (check_void (cond (false 3)))
 
-(check === (let ((x 2))
-             (cond ((= 1 x) (+ x "hi"))
-                   ((= x 3) x)
-                   (true    (+ x 2))))
-   4)
+(check === 4
+  (let ((x 2))
+    (cond ((= 1 x) (+ x "hi"))
+          ((= x 3) x)
+          (true    (+ x 2)))))
 
-(check === (cond ((= 1 2) "bad")
-                 ((= 3 3) "body stuff" 5)
-                 (true    "bad"))
-   5)
+(check === 5
+  (cond ((= 1 2) "bad")
+        ((= 3 3) "body stuff" 5)
+        (true    "bad")))

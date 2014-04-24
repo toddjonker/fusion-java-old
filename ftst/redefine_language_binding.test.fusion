@@ -4,12 +4,12 @@
 // Unlike binding introduced via `require`, language bindings can be
 // shadowed by module-level `define`s.
 
-(require "/check")
+(require "/fusion/experimental/check")
 
 
 // Make sure `apply` has a language binding, otherwise we're not checking what
 // we want to test.
-(check = 3 (apply + 1 [2]))
+(check === 3 (apply + 1 [2]))
 
 
 (module local "/fusion"
@@ -18,10 +18,10 @@
   (provide result))
 
 (require local)
-(check = result 100)
+(check === 100 result)
 
 // Make sure `apply` still has the language binding.
-(check = 3 (apply + 1 [2]))
+(check === 3 (apply + 1 [2]))
 
 
 // Module-level `require` can also shadow a language binding.
@@ -36,7 +36,7 @@
   (provide result))
 
 (require local3)
-(check = result 991)
+(check === 991 result)
 
 // Make sure `apply` still has the language binding.
-(check = 3 (apply + 1 [2]))
+(check === 3 (apply + 1 [2]))

@@ -1,9 +1,9 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 // Check that top-level module declarations can refer to each other via
 // relative paths.
 
-(require "/check")
+(require "/fusion/experimental/check")
 
 (module leaf "/fusion"
   (provide leaf_fn leaf_var)
@@ -23,6 +23,6 @@
 
 (require root)
 
-(check = leaf_var  437)
-(check = (root_fn) 437)
-(check = (mid_fn)  437)
+(check === 437 leaf_var)
+(check === 437 (root_fn))
+(check === 437 (mid_fn))

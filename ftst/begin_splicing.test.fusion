@@ -1,6 +1,6 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
-(require "/check")
+(require "/fusion/experimental/check")
 
 
 // Check that top-level `begin` is spliced.
@@ -10,10 +10,10 @@
     (begin
       (define b "b")
       (define c "c")))
-  (check = a "a"))
-(check = a "a")
-(check = b "b")
-(check = c "c")
+  (check === "a" a))
+(check === "a" a)
+(check === "b" b)
+(check === "c" c)
 
 
 // Check that module-level `begin` is spliced.
@@ -28,6 +28,6 @@
 )
 (require begin_splice)
 
-(check = top "top")
-(check = middle "middle")
-(check = bottom "bottom")
+(check === "top"    top)
+(check === "middle" middle)
+(check === "bottom" bottom)

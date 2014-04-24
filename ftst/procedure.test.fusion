@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
+  "/fusion/experimental/check"
   "/fusion/list")
 
 
@@ -13,37 +13,37 @@
 
 (define ten (always 10))
 
-(check === (ten) 10)
-(check === (ten 1) 10)
-(check === (ten 1 2 3) 10)
-(check === (apply ten [{}, true, "hi"]) 10)
+(check === 10 (ten))
+(check === 10 (ten 1))
+(check === 10 (ten 1 2 3))
+(check === 10 (apply ten [{}, true, "hi"]))
 
 
 //==========================================================================
 // thunk
 
-(check === ((thunk 1 2 3)) 3)
+(check === 3 ((thunk 1 2 3)))
 
 (let [(x 0)]
   (let [(t (thunk (set x (+ 1 x)) x))]
-    (check === x 0)
-    (check === (t) 1)
-    (check === x 1)))
+    (check === 0 x)
+    (check === 1 (t))
+    (check === 1 x)))
 
 
 //==========================================================================
 // compose
 
-(check === ((compose list (always 46)) 22) [46])
-(check === ((compose identity list) 47) [47])
+(check === [46] ((compose list (always 46)) 22))
+(check === [47] ((compose identity list) 47))
 
 (define add1 (lambda (x) (+ x 1)))
 (define add2 (compose add1 add1))
 (define add3 (compose add1 add2))
-(check = (add3 4) 7)
+(check === 7 (add3 4))
 
 (define list1 (compose list_from_iterator value_iterator))
-(check === (list1 12) [12])
+(check === [12] (list1 12))
 
 
 //==========================================================================

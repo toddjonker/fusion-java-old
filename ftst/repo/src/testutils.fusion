@@ -2,7 +2,10 @@
 
 (module check "/fusion"
 
-  (require "/fusion/experimental/defines")
+  (require
+    "/fusion/experimental/defines"
+    "/fusion/experimental/syntax"
+    )
 
 
   (defpub F (lambda rest false))
@@ -14,5 +17,100 @@
 
   (defpub VOID  (void))
   (defpub UNDEF (letrec [(x y), (y 1)] x))
+
+  (defpub I identity)
+
+
+  (defpub all_nulls
+    (quote (null
+            null.bool
+            null.int
+            null.float
+            null.decimal
+            null.timestamp
+            null.symbol
+            null.string
+            null.clob
+            null.blob
+            null.list
+            null.sexp
+            null.struct)))
+
+
+  (defpub representative_ion_data
+    (quote (null
+
+            null.bool
+            true
+            false
+
+            null.int
+            0
+            123456
+
+            null.float
+            -0e0
+            0e0
+            2.56e0
+
+            null.decimal
+            -0d0
+            0d0
+            2.57
+
+            null.timestamp
+            2013-02-08T
+
+            null.symbol
+//          ''                   // TODO FUSION-204 empty symbol
+            symbol
+
+            null.string
+            ""
+            "a real string"
+
+            null.clob
+            {{""}}
+            {{"a real clob"}}
+
+            null.blob
+            {{}}
+            {{abcd}}
+
+            null.list
+            []
+            [1]
+            [1,2]
+
+            null.sexp
+            ()
+            (1)
+            (1 2)
+
+            null.struct
+            {}
+            {f:1}
+            {f:1, g:2})))
+
+
+  (defpub_syntax check_representative_ion_data
+    (lambda (stx)
+      '''
+      (check_representative_ion_data FORM)
+
+Maps the given syntactic form over each entry in `representative_ion_data`.
+      '''
+      (let [(form_stx (syntax_get stx 1))]
+        (datum_to_syntax
+          (pair (quote begin)
+            (let loop [(data representative_ion_data)]
+              (if (is_empty data)
+                (quote ())
+                (let [(datum_stx (datum_to_syntax (head data)))]
+                  (pair
+                    (sexp form_stx (head data))
+                    (loop (tail data)))))))
+          (quote_syntax here)
+          stx))))
 
 )

@@ -17,3 +17,5 @@
 (check_false (is_void false))
 
 (check_false (is_void UNDEF))
+
+(check_void (void))

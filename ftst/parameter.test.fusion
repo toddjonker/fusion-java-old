@@ -1,38 +1,40 @@
 // Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
+  "/fusion/experimental/check"
   "/fusion/parameter")
 
 
 (define p (make_parameter 19))
 
-(check === (p) 19)
+(check === 19 (p))
 
-(check === (parameterize () 3) 3)
-(check === (parameterize () (p)) 19)
-(check === (parameterize ((p 91)) (p)) 91)
+(check === 3  (parameterize () 3))
+(check === 19 (parameterize () (p)))
+(check === 91 (parameterize ((p 91)) (p)))
 
-(check === (p) 19)
+(check === 19 (p))
 
-(check ===
+(check === 20
   (parameterize ((p 13))
     (+ (parameterize ((p 7))
          (p))
-       (p)))
-   20)
+       (p))))
 
-(check === (p) 19)
+(check === 19 (p))
 
 
 // Using a macro in the parameter position
-(check === (parameterize (((let ((v p)) p) 92)) (p)) 92)
+(check === 92
+  (parameterize (((let ((v p)) p) 92)) (p)))
 
 // Using a macro in the bound-value position
-(check === (parameterize ((p (let ((v 93)) v))) (p)) 93)
+(check === 93
+  (parameterize ((p (let ((v 93)) v))) (p)))
 
 // Using a macro in the body
-(check === (parameterize ((p 94)) (let ((v p)) (v))) 94)
+(check === 94
+  (parameterize ((p 94)) (let ((v p)) (v))))
 
 
 "PASSED" // Helpful output if you run this stand-alone

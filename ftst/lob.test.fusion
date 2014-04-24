@@ -1,7 +1,7 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
+  "/fusion/experimental/check"
   "/fusion/procedure")
 
 

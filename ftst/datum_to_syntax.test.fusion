@@ -1,17 +1,17 @@
 // Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
   "/fusion/eval"
+  "/fusion/experimental/check"
   "/fusion/experimental/syntax"
 )
 
 (define ctx (quote_syntax ctx))
 
-(define (check_loc actual expected)
-  (check == (syntax_line     actual) (syntax_line     expected))
-  (check == (syntax_column   actual) (syntax_column   expected))
-//(check == (syntax-position actual) (syntax-position expected))
+(define_check (check_loc expected actual)
+  (check === (syntax_line     expected) (syntax_line     actual))
+  (check === (syntax_column   expected) (syntax_column   actual))
+//(check === (syntax-position expected) (syntax-position actual))
   )
 
 // When given a location, datum->syntax uses it for all new syntax objects
@@ -21,10 +21,10 @@
            (quote (a (b)))
            ctx
            ctx))]
-  (check_loc s ctx)
-  (check_loc (. (syntax_unwrap s) 0) ctx)  // a
-  (check_loc (. (syntax_unwrap s) 1) ctx)  // (b)
-  (check_loc (. (syntax_unwrap (. (syntax_unwrap s) 1)) 0) ctx))  // b
+  (check_loc ctx s)
+  (check_loc ctx (. (syntax_unwrap s) 0))  // a
+  (check_loc ctx (. (syntax_unwrap s) 1))  // (b)
+  (check_loc ctx (. (syntax_unwrap (. (syntax_unwrap s) 1)) 0)))  // b
 
 // Exiting syntax objects keep their locations.
 
@@ -35,10 +35,10 @@
            (sexp inner1 (sexp inner2))  // TODO use quasiquote
            ctx
            ctx))]
-  (check_loc s ctx)
-  (check_loc (. (syntax_unwrap s) 0) inner1)                        // inner1
-  (check_loc (. (syntax_unwrap s) 1) ctx)                           // (inner)
-  (check_loc (. (syntax_unwrap (. (syntax_unwrap s) 1)) 0) inner2)) // inner2
+  (check_loc ctx    s)
+  (check_loc inner1 (. (syntax_unwrap s) 0))                        // inner1
+  (check_loc ctx    (. (syntax_unwrap s) 1))                        // (inner)
+  (check_loc inner2 (. (syntax_unwrap (. (syntax_unwrap s) 1)) 0))) // inner2
 
 
 (define val "outside_M")
@@ -50,7 +50,8 @@
   (provide inside_id))
 (require M)
 
-(check == (eval (datum_to_syntax (quote_syntax val) inside_id)) "outside_M")
+(check === "outside_M"
+  (eval (datum_to_syntax (quote_syntax val) inside_id)))
 
 (let ((val (quote_syntax val)))
   (check same (datum_to_syntax val inside_id) val))
@@ -58,6 +59,5 @@
 
 // Context must be copied eagerly, without replacing existing syntax objects.
 (let ((val (quote_syntax val)))
-  (check same
-    (syntax_get (datum_to_syntax (sexp 1 val) inside_id) 1)
-    val))
+  (check same val
+    (syntax_get (datum_to_syntax (sexp 1 val) inside_id) 1)))

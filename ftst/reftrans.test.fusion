@@ -31,17 +31,17 @@
 (require
   reftrans1
   reftrans2
-  "/check"
+  "/fusion/experimental/check"
 )
 
-(check === one 1)
-(check === two 2)
+(check === 1 one)
+(check === 2 two)
 
 (define lambda null)
 (define let null)
 
-(check === one 1)
-(check === two 2)
+(check === 1 one)
+(check === 2 two)
 
 
 (module reftrans3 "/fusion"
@@ -57,7 +57,7 @@
 )
 
 (require reftrans3)
-(check === (three) 3)
+(check === 3 (three))
 
 // TODO test "export" of a lexical binding
 

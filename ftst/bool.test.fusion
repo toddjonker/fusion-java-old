@@ -1,6 +1,6 @@
 // Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
-(require "/check")
+(require "/fusion/experimental/check")
 
 
 // Here's the bindings we expect to be available:

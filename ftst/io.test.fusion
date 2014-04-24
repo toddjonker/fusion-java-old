@@ -1,21 +1,22 @@
 // Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
+  "/fusion/experimental/check"
+  "/testutils"
 )
 
 
 // This assumes that current_directory is at the project root.
 (with_ion_from_file "tst-data/ints.ion"
   (lambda ()
-    (check = 0 (read))
-    (check = 1 (read))
+    (check === 0 (read))
+    (check === 1 (read))
     (with_ion_from_file "tst-data/hello.ion"
       (lambda ()
         (check = "hello" (read))
         (check_true (is_eof (read)))))
-    (check = 2 (read))
-    (check = 3 (read))
+    (check === 2 (read))
+    (check === 3 (read))
     (check_true (is_eof (read)))))
 
 // A nice shortcut for reading a single value.
@@ -27,7 +28,7 @@
 
 // Lob I/O
 
-(define_check (check_lob_io msg value)
+(define_check (check_lob_io value)
   (let [(lob (ionize_to_blob value))]
     (check_pred is_blob lob)
     (check_pred (negate is_null) lob)

@@ -1,6 +1,6 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
-(require "/check")
+(require "/fusion/experimental/check")
 
 
 // Test that we can define a name that's already imported.
@@ -9,29 +9,29 @@
 (require "/module/dupe1")
 (define (d1) dupe)
 
-(check = dupe 1)
-(check = (d1) 1)
+(check === 1 dupe)
+(check === 1 (d1))
 
 (require "/module/dupe2")
 (define (d2) dupe)
 
-(check = dupe 2)
-(check = (d1) 1)
-(check = (d2) 2)
+(check === 2 dupe)
+(check === 1 (d1))
+(check === 2 (d2))
 
 (define dupe 4)
-(check = dupe 4)
-(check = (d1) 1)
-(check = (d2) 2)
+(check === 4 dupe)
+(check === 1 (d1))
+(check === 2 (d2))
 
 (define (d_local) dupe)
 
 (define dupe 5)
-(check = dupe 5)
-(check = (d_local) 5)
+(check === 5 dupe)
+(check === 5 (d_local))
 
 (require "/module/dupe2")
-(check = dupe 2)
-(check = (d1) 1)
-(check = (d2) 2)
-(check = (d_local) 5)
+(check === 2 dupe)
+(check === 1 (d1))
+(check === 2 (d2))
+(check === 5 (d_local))

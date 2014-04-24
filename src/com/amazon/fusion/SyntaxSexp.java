@@ -747,7 +747,9 @@ final class SyntaxSexp
                     }
                 }
 
-                throw new FusionException(b.toString());
+                FusionException fe = new FusionException(b.toString());
+                fe.addContext(myLocation);
+                throw fe;
             }
 
             return eval.bounceTailCall(myLocation, p, args);

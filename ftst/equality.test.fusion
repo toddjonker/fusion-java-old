@@ -1,11 +1,13 @@
 // Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
   "/fusion/experimental/altlambda"
+  "/fusion/experimental/check"
   "/fusion/list"
   "/fusion/private/builtins"       // for `annotate`
-  "/fusion/struct")
+  "/fusion/struct"
+  "/testutils"
+  )
 
 
 // The code below tests equality procedures by defining equivalence classes,
@@ -40,22 +42,23 @@ annotated variants of each value.
     vals))
 
 
-(define (test_pairwise op vals)
+(define_check (test_pairwise op vals)
   '''
 Given an sexp of values, applies the operator `op` to each pair, in both
 orders, including each value paired with itself.
   '''
-  (unless (is_empty vals)
-    (let [(val1 (head vals))]
-      (check op val1 val1)
-      (do (|val2|
-            (check op val1 val2)
-            (check op val2 val1))
-        (tail vals))
-      (test_pairwise op (tail vals)))))
+  (let loop [(vals vals)]
+    (unless (is_empty vals)
+      (let [(val1 (head vals))]
+        (check op val1 val1)
+        (do (|val2|
+              (check op val1 val2)
+              (check op val2 val1))
+            (tail vals))
+        (loop (tail vals))))))
 
 
-(define (test_equivalence eqs neq equiv_sets)
+(define_check (test_equivalence eqs neq equiv_sets)
   (let [(num_sets (size equiv_sets))]
     (do (|set| (do (|eq| (test_pairwise eq set)) eqs)) equiv_sets)
 
