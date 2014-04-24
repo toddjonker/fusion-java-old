@@ -15,6 +15,7 @@ The built-in collection types are [list](fusion/list.html),
   '''
 
   (require
+    "/fusion/equality"
     "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/iterator"
@@ -422,4 +423,12 @@ See also: [`struct_do`](fusion/struct.html#struct_do)
       (true
        (raise_argument_error "any" "collection" 0 collection))))
 
+
+  (defpub (same_size collection1 collection2)
+    '''
+Returns whether two collections have the same size.
+    '''
+    (==
+      (size collection1)
+      (size collection2)))
 )
