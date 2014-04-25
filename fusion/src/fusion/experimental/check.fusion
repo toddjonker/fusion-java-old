@@ -10,8 +10,6 @@
     "/fusion/ffi/java"
     "/fusion/parameter")
 
-  (provide assert)
-
 
   (define _raise_check2_failure
     (java_new "com.amazon.fusion.Check2FailureProc"))

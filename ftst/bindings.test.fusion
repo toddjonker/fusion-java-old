@@ -8,7 +8,7 @@
 
 (define rester
   (lambda rest
-    (assert (is_sexp rest))
+    (check_pred is_sexp rest)
     rest))
 
 (check === (sexp)       (rester))
