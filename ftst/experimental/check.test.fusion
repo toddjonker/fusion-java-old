@@ -13,6 +13,27 @@
 (check_annotations ["a", "b"] (quote a::b::c))
 
 
+
+//==========================================================================
+// define_check
+
+(check_compile_exn (define_check))
+(check_compile_exn (define_check () 1))
+(check_compile_exn (define_check [check_foo] 1))
+(check_compile_exn (define_check ("check_foo") 1))
+(check_compile_exn (define_check ((check_foo)) 1))
+(check_compile_exn (define_check (check_foo "arg") 1))
+(check_compile_exn (define_check (check_foo "arg" arg) 1))
+(check_compile_exn (define_check (check_foo arg "arg" arg) 1))
+
+(define_check (check_foo0) 1)
+(define_check (check_foo1 arg) 1)
+(check_foo0)
+(check_foo1 1)
+
+(check_compile_exn (check_foo1))
+
+
 //==========================================================================
 // check_arity_exn
 

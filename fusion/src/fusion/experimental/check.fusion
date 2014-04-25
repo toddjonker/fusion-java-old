@@ -49,7 +49,11 @@ Raises a check failure exception, including a stack trace derived from the
 
   // TODO enable recursive checks?
   (defpub_syntax define_check
-    (let [(ctx (quote_syntax here))]
+    (let [(ctx   (quote_syntax here)),
+          (wrong (lambda (stx)
+                   (wrong_syntax stx
+                     '''Bad syntax for define_check; usage: '''
+                     '''(define_check (name arg_name ...) body ...)''')))]
       (lambda (stx)
         '''
     (define_check (name arg ...) body ...)
@@ -62,23 +66,32 @@ The body of the check can use other checks, but (at present) may not use
 itself recursively.
         '''
         (when (< (syntax_size stx) 3)
-          (wrong_syntax stx
-            '''Bad syntax for define_check: '''
-            '''(define_check (name arg_name ...) body ...)'''))
+          (wrong stx))
         (lets
           [(orig_args (tail (syntax_unwrap stx))),
-           // TODO type/size check of binding sexp
-           (signature (syntax_unwrap (head orig_args))),
+           (signature (let [(s (syntax_unwrap (head orig_args)))]
+                        (if (and (is_sexp s)
+                                 (> (size s) 0)
+                                 (every is_identifier s))
+                            s
+                            (wrong stx)))),
            (body      (tail orig_args)),
            (name_stx  (head signature)),
            // TODO check for duplicate arg names
            (args      (tail signature)),
            (arg_count (size args)),
-           // TODO add sample eg "(check_true val message ...)"
            (arity_msg (string_append (syntax_unwrap name_stx)
                                      " requires at least "
                                      (int_to_string arg_count)
-                                     (if (= 1 arg_count) " arg: " " args: "))),
+                                     (if (= 1 arg_count) " arg" " args")
+                                     "; usage: ("
+                                     (apply string_append
+                                       (map (lambda (i)
+                                              (string_append
+                                                (syntax_unwrap i)
+                                                " "))
+                                          signature))
+                                     "message ...)")),
            (proc_name (datum_to_syntax
                           (string_to_symbol
                             (string_append "_" (syntax_unwrap name_stx)))

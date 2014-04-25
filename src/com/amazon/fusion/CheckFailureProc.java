@@ -80,7 +80,8 @@ final class CheckFailureProc
             displayField(eval, out, frame, "name");
             displayField(eval, out, frame, "expression");
 
-            if (unsafeStructHasKey(eval, frame, "actual"))
+            if (unsafeStructHasKey(eval, frame, "actual") ||
+                unsafeStructHasKey(eval, frame, "expected"))
             {
                 displayField(eval, out, frame, "actual");
                 displayField(eval, out, frame, "expected");
