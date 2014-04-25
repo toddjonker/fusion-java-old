@@ -60,7 +60,7 @@ Raises a check failure exception, including a stack trace derived from the
 
 Defines a new check form that's invoked as:
 
-    (name arg_expr ... message_expr ...)
+    (name arg_expr ... [message])
 
 The body of the check can use other checks, but (at present) may not use
 itself recursively.
@@ -101,33 +101,41 @@ itself recursively.
             (quasiquote
               (begin
                 (define (unquote proc_name)
-                  (lambda (unquote (pair (quote meta) args))
-                    (parameterize
-                      [(check_stack_param
-                         (struct_merge meta
-                           (struct
-                             "name" (quote (unquote name_stx))
-                             "args" (unquote (pair (quote list) args)))))]
-                      (unquote (pair (quote begin) body))
-                      // All checks should return void.
-                      (void))))
+                  (lambda rest  // (meta ARG ... [message])
+                    // Arity checking has happened in the calling check macro.
+                    (let [(named_args (subseq rest
+                                              1
+                                              (unquote (+ 1 arg_count))))]
+                      (parameterize
+                        [(check_stack_param
+                           (struct_merge (head rest)
+                             (apply struct
+                               "name" (quote (unquote name_stx))
+                               "args" named_args
+                               (if (> (size rest) (unquote (+ 1 arg_count)))
+                                   (sexp "message" (last rest))
+                                   (quote ())))))]
+                        (apply (lambda (unquote args)
+                                 (unquote (pair (quote begin) body)))
+                          named_args)
+                        // All checks should return void.
+                        (void)))))
                 (define_syntax (unquote name_stx)
                   (let [(ctx1 (quote_syntax here1))]
                     (lambda (stx1)
-                      (when (<= (syntax_size stx1) (unquote arg_count))
-                        (wrong_syntax stx1 (unquote arity_msg)))
-                      (let [(meta { expression: (syntax_to_datum stx1),
-                                    line:(syntax_line stx1),
-                                    column:(syntax_column stx1) }),
-                            (actuals (subseq (syntax_unwrap stx1)
-                                             1
-                                             (unquote (+ 1 arg_count))))]
-                        (datum_to_syntax
-                          (pair (quote_syntax (unquote proc_name))
-                                (pair (sexp (quote quote) meta)
-                                      actuals))
-                          ctx1
-                          stx1)))))))
+                      (let [(actuals (tail (syntax_unwrap stx1)))]
+                        (when (or (< (size actuals) (unquote arg_count))
+                                  (> (size actuals) (unquote (+ 1 arg_count))))
+                          (wrong_syntax stx1 (unquote arity_msg)))
+                        (let [(meta { expression: (syntax_to_datum stx1),
+                                      line:       (syntax_line stx1),
+                                      column:     (syntax_column stx1) })]
+                          (datum_to_syntax
+                            (pair (quote_syntax (unquote proc_name))
+                                  (pair (sexp (quote quote) meta)
+                                        actuals))
+                            ctx1
+                            stx1))))))))
             ctx
             stx)))))
 

@@ -27,11 +27,15 @@
 (check_compile_exn (define_check (check_foo arg "arg" arg) 1))
 
 (define_check (check_foo0) 1)
-(define_check (check_foo1 arg) 1)
 (check_foo0)
-(check_foo1 1)
+(check_foo0 "message")
+(check_compile_exn (check_foo0 "message" "extra"))
 
+(define_check (check_foo1 arg) 1)
+(check_foo1 1)
+(check_foo1 1 "message")
 (check_compile_exn (check_foo1))
+(check_compile_exn (check_foo1 1 "message" "extra"))
 
 
 //==========================================================================

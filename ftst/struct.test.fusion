@@ -36,44 +36,33 @@
   "Functional modification check"
   (let [(s (struct_copy val))]
     (let [(result (apply op s args))]
-      (check_pred is_immutable_struct result
-        "result of " op " should be immutable")
-      (check === expect result
-        "Unexpected result from " op " on immutable " s)
-      (check === val s                                        // s not mutated
-        "Immutable struct was mutated by " op)))
+      (check_pred is_immutable_struct result)
+      (check === expect result "Unexpected result on immutable struct")
+      (check === val s "Immutable struct was mutated")))
   (unless (is_null val)                             // There's no mutable null
     (let [(s (mutable_struct_copy val))]
       (let [(result (apply op s args))]
-        (check_pred is_mutable_struct result
-          "result of " op " should be mutable")
-        (check === expect result
-          "Unexpected result from " op " on mutable " s)
+        (check_pred is_mutable_struct result)
+        (check === expect result "Unexpected result on mutable struct")
         (check === val s)
         // If the result === the input, it's probably the same instance
         (unless (=== result val)
           (put_m result "mod" "mod")
-          (check_void (. s "mod")
-            "Unexpected mutation of original"))))))
+          (check_void (. s "mod") "Unexpected mutation of original"))))))
 
 
 (define_check (check_mod_m op val args expect)
   "Mutating modification check"
   (let [(s (struct_copy val))]
     (let [(result (apply op s args))]
-      (check_pred is_immutable_struct result
-        "result of " op " should be immutable")
-      (check === expect result
-        "Unexpected result from " op " on immutable " s)
-      (check === val s                                        // s not mutated
-        "Immutable struct was mutated by " op)))
+      (check_pred is_immutable_struct result)
+      (check === expect result "Unexpected result on immutable struct")
+      (check === val s "Immutable struct was mutated")))
   (unless (is_null val)                             // There's no mutable null
     (let [(s (mutable_struct_copy val))]
       (let [(result (apply op s args))]
-        (check_pred is_mutable_struct result
-          "result of " op " should be mutable")
-        (check === expect result
-          "Unexpected result from " op " on mutable " s)
+        (check_pred is_mutable_struct result)
+        (check === expect result "Unexpected result on mutable struct")
         (check == s expect)))))                                // s IS mutated
 
 
@@ -285,14 +274,11 @@
     (let [(result (struct_merge s o))]
       (put_m result "mod" "mod")
       (unless (= 0 (size o))
-        (check_void (. s "mod")
-          "Unexpected mutation of 1st arg in (struct_merge " val " " other ")"))
-      (check_void (. o "mod")
-        "Unexpected mutation of 2nd arg in (struct_merge " s " " other ")"))
+        (check_void (. s "mod") "Unexpected mutation of 1st arg"))
+      (check_void (. o "mod")   "Unexpected mutation of 2nd arg"))
     (let [(result (struct_merge_m s o))]
       (put_m result "mod" "mod")
-      (check_void (. o "mod")
-        "Unexpected mutation of 2nd arg in (struct_merge_m " s " " other ")"))))
+      (check_void (. o "mod")   "Unexpected mutation of 2nd arg"))))
 
 
 (check_merge null.struct null.struct null.struct)
@@ -358,14 +344,11 @@
     (let [(result (struct_merge1 s o))]
       (put_m result "mod" "mod")
       (unless (= 0 (size o))
-        (check_void (. s "mod")
-          "Unexpected mutation of 1st arg in (struct_merge1 " val " " other ")"))
-      (check_void (. o "mod")
-        "Unexpected mutation of 2nd arg in (struct_merge1 " s " " other ")"))
+        (check_void (. s "mod") "Unexpected mutation of 1st arg"))
+      (check_void (. o "mod")   "Unexpected mutation of 2nd arg"))
     (let [(result (struct_merge1_m s o))]
       (put_m result "mod" "mod")
-      (check_void (. o "mod")
-        "Unexpected mutation of 2nd arg in (struct_merge_m " s " " other ")"))))
+      (check_void (. o "mod")   "Unexpected mutation of 2nd arg"))))
 
 
 (check_merge1 null.struct null.struct null.struct)

@@ -35,10 +35,8 @@
   "Functional modification check"
   (let [(v (sexp_copy val))]
     (let [(result (apply op v args))]
-      (check === expect result
-        "Unexpected result from " op " on immutable arg")
-      (check === val v                                        // v not mutated
-        "Immutable arg was mutated by " op))))
+      (check === expect result "Unexpected result on immutable arg")
+      (check === val v "Immutable arg was mutated"))))
 
 
 //==========================================================================

@@ -33,32 +33,23 @@
   "Functional modification check"
   (let [(v (list_copy val))]
     (let [(result (apply op v args))]
-      (check_pred is_immutable_list result
-        "result of " op " should be immutable")
-      (check === expect result
-        "Unexpected result from " op " on immutable arg")
-      (check === val v                                 // v not mutated
-        "Immutable arg was mutated by " op)))
+      (check_pred is_immutable_list result "result should be immutable")
+      (check === expect result "Unexpected result on immutable arg")
+      (check === val v "Immutable arg was mutated")))
   (unless (is_null val)                             // There's no mutable null
     (let [(v (mutable_list_copy val))]
       (let [(result (apply op v args))]
-        (check_pred is_mutable_list result
-          "result of " op " should be mutable")
-        (check === expect result
-          "Unexpected result from " op " on mutable " v)
-        (check === val v                               // v not mutated
-          "Mutable arg was mutated by " op)
+        (check_pred is_mutable_list result)
+        (check === expect result "Unexpected result on mutable arg")
+        (check === val v "Mutable arg was mutated")
         (unless (is_empty val)
           (list_set result 0 "mod")
           (check === val v "Unexpected mutation of original"))))
     (let [(v (stretchy_list_copy val))]
       (let [(result (apply op v args))]
-        (check_pred is_stretchy_list result
-          "result of " op " should be stretchy")
-        (check === expect result
-          "Unexpected result from " op " on stretchy " v)
-        (check === val v                               // v not mutated
-          "Stretchy arg was mutated by " op)
+        (check_pred is_stretchy_list result)
+        (check === expect result "Unexpected result on stretchy list")
+        (check === val v "Stretchy arg was mutated")
         (add_m result "stretch")
         (check === val v "Unexpected mutation of original")
         (unless (is_empty val)
@@ -358,7 +349,7 @@
     (check_predicates v1 mutable stretchy)
     (if stretchy
       (check === [1] v0 "v0 should be modified")
-      (check === []  v0  "v0 not modified"))
+      (check === []  v0 "v0 not modified"))
     (check === [1] v1 "v1")
     (let [(v2 (append_m v1 (stretchy_list 2 3) (mutable_list 4)))]
       (check_predicates v2 mutable stretchy)
