@@ -1,133 +1,111 @@
 // Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
+  "/fusion/experimental/check"
   "/fusion/for")
 
 
-(check ===
-  (for_list () 73)
-  [73])
+(check === [73]
+  (for_list () 73))
 
-(check ===
-  (fors_list [] 84)
-  [84])
+(check === [84]
+  (fors_list [] 84))
 
-(check ===
-  (for_list ((e [])) 73)
-  [])
+(check === []
+  (for_list ((e [])) 73))
 
-(check ===
-  (fors_list ((e [])) 84)
-  [])
+(check === []
+  (fors_list ((e [])) 84))
 
-(check ===
-  (for_list ((e [1])) 73)
-  [73])
+(check === [73]
+  (for_list ((e [1])) 73))
 
-(check ===
-  (fors_list ((e [2])) 84)
-  [84])
+(check === [84]
+  (fors_list ((e [2])) 84))
 
-(check ===
-  (for_list ((e [1])) e)
-  [1])
+(check === [1]
+  (for_list ((e [1])) e))
 
-(check ===
-  (fors_list ((e [2])) e)
-  [2])
+(check === [2]
+  (fors_list ((e [2])) e))
 
-(check ===
+(check === [11, 22, 33]
   (for_list ((e [1, 2, 3])
              (f [10, 20, 30]))
-    (+ e f))
-  [11, 22, 33])
+    (+ e f)))
 
-(check ===
+(check === [11, 21, 31, 12, 22, 32, 13, 23, 33]
   (fors_list ((e [1, 2, 3])
               (f [10, 20, 30]))
-    (+ e f))
-  [11, 21, 31, 12, 22, 32, 13, 23, 33])
+    (+ e f)))
 
-(check ===
+(check === [11, 22]
   (for_list ((e [1, 2, 3])
              (f [10, 20]))
-    (+ e f))
-  [11, 22])
+    (+ e f)))
 
-(check ===
+(check === [11, 21, 12, 22, 13, 23]
   (fors_list ((e [1, 2, 3])
               (f [10, 20]))
-    (+ e f))
-  [11, 21, 12, 22, 13, 23])
+    (+ e f)))
 
 // Sexp works too
-(check ===
+(check === [11, 22]
   (for_list ((e (quote (1 2)))
              (f [10, 20, 30]))
-    (+ e f))
-  [11, 22])
+    (+ e f)))
 
-(check ===
+(check === [11, 21, 31, 12, 22, 32]
   (fors_list ((e (quote (1 2)))
               (f [10, 20, 30]))
-    (+ e f))
-  [11, 21, 31, 12, 22, 32])
+    (+ e f)))
 
 // Macro in bound-value position
-(check ===
-  (for_list ((e (let ((list [1])) list))) (+ e 73))
-  [74])
+(check === [74]
+  (for_list ((e (let ((list [1])) list))) (+ e 73)))
 
-(check ===
-  (fors_list ((e (let ((list [1])) list))) (+ e 84))
-  [85])
+(check === [85]
+  (fors_list ((e (let ((list [1])) list))) (+ e 84)))
 
 // Macro in body position
-(check ===
-  (for_list ((e [1])) (let ((v 73)) (+ e v)))
-  [74])
+(check === [74]
+  (for_list ((e [1])) (let ((v 73)) (+ e v))))
 
-(check ===
-  (fors_list ((e [1])) (let ((v 84)) (+ e v)))
-  [85])
+(check === [85]
+  (fors_list ((e [1])) (let ((v 84)) (+ e v))))
 
 // This tests two things:
 //  1) non-Ion types in the result; here, closures.
 //  2) use of new locations for the bound variables each iteration.
 //     The thunks are applied after iteration completes, each one should have
 //     its own location for variable `e`.
-(check ===
+(check === [2, 4, 6]
   (map (lambda (thunk) (thunk))
     (for_list ((e [1, 2, 3]))
-      (lambda () (* 2 e))))
-  [2, 4, 6])
+      (lambda () (* 2 e)))))
 
-(check ===
+(check === [3, 6, 9]
   (map (lambda (thunk) (thunk))
     (fors_list ((e [1, 2, 3]))
-      (lambda () (* 3 e))))
-  [3, 6, 9])
+      (lambda () (* 3 e)))))
 
 // Check access to variables in surrounding scopes.
 (lets [(data         [{ amountPosted:{ amount:-39.99 }},
                       { amountPosted:{ amount:-49.99 }} ]),
        (amountPosted "amountPosted"),
        (amount       "amount")]
-  (check ===
+  (check === [-39.99, -49.99]
     (for_list [(x data)]
-      (. x  amountPosted   amount))
-     [-39.99, -49.99]))
+      (. x  amountPosted   amount))))
 
 (lets [(data         [{ amountsPosted:[ { amount:-39.99 }, { amount:-29.99 } ]},
                       { amountsPosted:[ { amount:-49.99 }, { amount:-59.99 } ]} ]),
        (amountsPosted "amountsPosted"),
        (amount        "amount")]
-  (check ===
+  (check === [-39.99, -29.99, -49.99, -59.99]
     (fors_list [(x data),
                 (y (. x amountsPosted))]
-      (. y amount))
-     [-39.99, -29.99, -49.99, -59.99]))
+      (. y amount))))
 
 (check_compile_exn (for_list))
 (check_compile_exn (fors_list))
@@ -159,11 +137,9 @@
 
 // Duplicate fors_list binding names are allowed because they shadow
 // each other in order, the last of which is still meaningful.
-(check ===
-  (fors_list [(name []), (name [])] 14)
-  [])
-(check ===
-  (fors_list [(name [1,2]), (name [3,4])] name)
-  [3,4,3,4])
+(check === []
+  (fors_list [(name []), (name [])] 14))
+(check === [3,4,3,4]
+  (fors_list [(name [1,2]), (name [3,4])] name))
 
 "PASSED" // Helpful output if you run this stand-alone

@@ -1,6 +1,6 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
-(require "/check")
+(require "/fusion/experimental/check")
 
 
 (check_compile_exn
@@ -21,10 +21,10 @@
 
 
 (define free "bird")
-(check = "bird" (free_ref))
+(check === "bird" (free_ref))
 
 (define free "ball")
-(check = "ball" (free_ref))
+(check === "ball" (free_ref))
 
 (module M "/fusion"
   (define free "money")
@@ -32,12 +32,12 @@
 
 (require "M")
 
-(check = "money" free)
-(check = "ball" (free_ref))
+(check === "money" free)
+(check === "ball" (free_ref))
 
 (define free "beer")
-(check = "beer" free)
-(check = "beer" (free_ref))
+(check === "beer" free)
+(check === "beer" (free_ref))
 
 
 // Body of the definition uses the existing binding
@@ -46,7 +46,7 @@
 
 (define num 1)
 (define num (+ 3 num))
-(check = 104 num)
+(check === 104 num)
 
 
 "SUCCESS"

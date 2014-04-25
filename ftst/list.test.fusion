@@ -1,10 +1,11 @@
 // Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
+  "/fusion/experimental/check"
   "/fusion/list"
   "/fusion/private/builtins"  // annotate
-  "/fusion/unsafe/list")
+  "/fusion/unsafe/list"
+  "/testutils")
 
 
 (define _list_copy
@@ -28,110 +29,106 @@
     (_list_copy stretchy_list v)))
 
 
-(define_check (check_mod_f msg op val args expect)
+(define_check (check_mod_f op val args expect)
   "Functional modification check"
   (let [(v (list_copy val))]
     (let [(result (apply op v args))]
       (check_pred is_immutable_list result
         "result of " op " should be immutable")
-      (check === result expect
+      (check === expect result
         "Unexpected result from " op " on immutable arg")
-      (check === v val                                 // v not mutated
+      (check === val v                                 // v not mutated
         "Immutable arg was mutated by " op)))
   (unless (is_null val)                             // There's no mutable null
     (let [(v (mutable_list_copy val))]
       (let [(result (apply op v args))]
         (check_pred is_mutable_list result
           "result of " op " should be mutable")
-        (check === result expect
+        (check === expect result
           "Unexpected result from " op " on mutable " v)
-        (check === v val                               // v not mutated
+        (check === val v                               // v not mutated
           "Mutable arg was mutated by " op)
         (unless (is_empty val)
           (list_set result 0 "mod")
-          (check === v val "Unexpected mutation of original"))))
+          (check === val v "Unexpected mutation of original"))))
     (let [(v (stretchy_list_copy val))]
       (let [(result (apply op v args))]
         (check_pred is_stretchy_list result
           "result of " op " should be stretchy")
-        (check === result expect
+        (check === expect result
           "Unexpected result from " op " on stretchy " v)
-        (check === v val                               // v not mutated
+        (check === val v                               // v not mutated
           "Stretchy arg was mutated by " op)
         (add_m result "stretch")
-        (check === v val "Unexpected mutation of original")
+        (check === val v "Unexpected mutation of original")
         (unless (is_empty val)
           (list_set result 0 "mod")
-          (check === v val "Unexpected mutation of original"))))))
+          (check === val v "Unexpected mutation of original"))))))
 
 
 
 //==========================================================================
 // Literals
 
-(check_true (is_null  null.list))
-(check_true (is_empty null.list))
-(check_true (is_null  (quote null.list)))
-(check_true (is_empty (quote null.list)))
-(check_true (is_null  (quote a::null.list)))
-(check_true (is_empty (quote a::null.list)))
+(check_pred is_null  null.list)
+(check_pred is_empty null.list)
+(check_pred is_null  (quote null.list))
+(check_pred is_empty (quote null.list))
+(check_pred is_null  (quote a::null.list))
+(check_pred is_empty (quote a::null.list))
 
 (check_false (is_null []))
 (check_false (is_null (quote [])))
 (check_false (is_null (quote a::[])))
 
 
-(check_annotations (quote []) (quote []))
-(check_annotations (quote a::[]) (quote ["a"]))
-(check_annotations (quote a::b::[]) (quote ["a","b"]))
-(check_annotations (quote a::b::a::[]) (quote ["a","b","a"]))
+(check_annotations []            (quote []))
+(check_annotations ["a"]         (quote a::[]))
+(check_annotations ["a","b"]     (quote a::b::[]))
+(check_annotations ["a","b","a"] (quote a::b::a::[]))
 
-(assert (not (is_list           (quote ()))))
-(assert (not (is_mutable_list   (quote ()))))
-(assert (not (is_immutable_list (quote ()))))
-(assert (not (is_stretchy_list  (quote ()))))
+(check_false (is_list           (quote ())))
+(check_false (is_mutable_list   (quote ())))
+(check_false (is_immutable_list (quote ())))
+(check_false (is_stretchy_list  (quote ())))
 
 
 //==========================================================================
 // Constructors and Predicates
 
-(define test_predicates
-  (lambda (list mutable stretchy)
-    (assert (is_list list))
-    (check_pred is_collection list)
-    (check_pred is_sequence list)
-    (check = (is_mutable_list   list) mutable)
-    (check = (is_immutable_list list) (not mutable))
-    (check = (is_stretchy_list  list) stretchy)))
+(define_check (check_predicates list mutable stretchy)
+  (check_pred is_list list)
+  (check_pred is_collection list)
+  (check_pred is_sequence list)
+  (check === mutable       (is_mutable_list   list))
+  (check === (not mutable) (is_immutable_list list))
+  (check === stretchy      (is_stretchy_list  list)))
 
 
 // Construction via literals
 
 (define x "anything")
 
-(test_predicates []     false false)
-(test_predicates [0]    false false)
-(test_predicates [0, T] false false)
+(check_predicates []     false false)
+(check_predicates [0]    false false)
+(check_predicates [0, T] false false)
 
-(test_predicates (quote [])     false false)
-(test_predicates (quote [0])    false false)
-(test_predicates (quote [0, T]) false false)
+(check_predicates (quote [])     false false)
+(check_predicates (quote [0])    false false)
+(check_predicates (quote [0, T]) false false)
 
 
 // Construction via procedures
 
-(define test_makers
-  (lambda (maker mutable stretchy)
-    (test_predicates (apply maker (quote ())) mutable stretchy)
-    (test_predicates (apply maker (quote (0))) mutable stretchy)
-    (check === (apply maker (quote ()))
-      [])
-    (check === (apply maker (quote (0 1)))
-      [0, 1])))
+(define_check (check_makers maker mutable stretchy)
+  (check_predicates (apply maker (quote ())) mutable stretchy)
+  (check_predicates (apply maker (quote (0))) mutable stretchy)
+  (check === []     (apply maker (quote ())))
+  (check === [0, 1] (apply maker (quote (0 1)))))
 
-(test_makers list false false)
-(test_makers mutable_list true false)
-(test_makers stretchy_list true true)
+(check_makers list          false false)
+(check_makers mutable_list  true  false)
+(check_makers stretchy_list true  true)
 
 
 //==========================================================================
@@ -186,17 +183,17 @@
 (define str2 (stretchy_list 0 [1]))
 
 
-(check === (size imm0) 0)
-(check === (size mut0) 0)
-(check === (size str0) 0)
+(check === 0 (size imm0))
+(check === 0 (size mut0))
+(check === 0 (size str0))
 
-(check === (size imm1) 1)
-(check === (size mut1) 1)
-(check === (size str1) 1)
+(check === 1 (size imm1))
+(check === 1 (size mut1))
+(check === 1 (size str1))
 
-(check === (unsafe_list_size imm2) 2)
-(check === (unsafe_list_size mut2) 2)
-(check === (unsafe_list_size str2) 2)
+(check === 2 (unsafe_list_size imm2))
+(check === 2 (unsafe_list_size mut2))
+(check === 2 (unsafe_list_size str2))
 
 
 //==========================================================================
@@ -233,27 +230,23 @@
 //==========================================================================
 // list_element
 
-(define test_ref
-  (lambda (vec2)
-    (check = (list_element vec2 0) 0)
-    (check = (unsafe_list_element vec2 0) 0)
-    (check === (list_element vec2 1)
-      [1])
-    (check === (list_element vec2 1)
-      [1])
-    (check === (unsafe_list_element vec2 1)
-      [1])))
+(define_check (check_ref vec2)
+  (check === 0   (list_element vec2 0))
+  (check === 0   (unsafe_list_element vec2 0))
+  (check === [1] (list_element vec2 1))
+  (check === [1] (list_element vec2 1))
+  (check === [1] (unsafe_list_element vec2 1)))
 
-(test_ref imm2)
-(test_ref mut2)
-(test_ref str2)
+(check_ref imm2)
+(check_ref mut2)
+(check_ref str2)
 
 
 // Lists can hold any type!
 
-(assert ((list_element [F, T] 1)))
-(assert ((list_element (mutable_list F T) 1)))
-(assert ((list_element (stretchy_list F T) 1)))
+(check_true ((list_element [F, T] 1)))
+(check_true ((list_element (mutable_list F T) 1)))
+(check_true ((list_element (stretchy_list F T) 1)))
 
 // Bad arguments
 (check_arg_exn (list_element [1,2] null.int))
@@ -262,85 +255,82 @@
 //==========================================================================
 // list_set
 
-(check === (let [(v (mutable_list 0))]
-             (list_set v 0 1)
-             v)
-  [1])
+(check === [1]
+  (let [(v (mutable_list 0))]
+    (list_set v 0 1)
+    v))
 
-(check === (let [(v (stretchy_list 0))]
-             (list_set v 0 1)
-             v)
-  [1])
+(check === [1]
+ (let [(v (stretchy_list 0))]
+   (list_set v 0 1)
+   v))
 
 
 //==========================================================================
 // add, add_m
 
-(define test_add
-  (lambda (add_proc v0)
-    (check_arity_exn (add_proc))
-    (check_arity_exn (add_proc []))
-    (let [(mutable (is_mutable_list v0)),
-          (stretchy (is_stretchy_list v0)),
-          (v1 (add_proc v0 1))]
-      (test_predicates v1 mutable stretchy)
-      (check === v0 [] "v0 not modified")
-      (check === v1 [1])
-      (let ((v2 (add_proc v1 2)))
-        (test_predicates v2 mutable stretchy)
-        (check === v0 []      "v0 not modified")
-        (check === v1 [1]     "v1 not modified")
-        (check === v2 [1, 2])))))
+(define_check (check_add add_proc v0)
+  (check_arity_exn (add_proc))
+  (check_arity_exn (add_proc []))
+  (let [(mutable (is_mutable_list v0)),
+        (stretchy (is_stretchy_list v0)),
+        (v1 (add_proc v0 1))]
+    (check_predicates v1 mutable stretchy)
+    (check === []  v0 "v0 not modified")
+    (check === [1] v1)
+    (let [(v2 (add_proc v1 2))]
+      (check_predicates v2 mutable stretchy)
+      (check === []     v0 "v0 not modified")
+      (check === [1]    v1 "v1 not modified")
+      (check === [1, 2] v2))))
 
-(test_add add [])
-(test_add add (list))
-(test_add add (mutable_list))
-(test_add add (stretchy_list))
+(check_add add [])
+(check_add add (list))
+(check_add add (mutable_list))
+(check_add add (stretchy_list))
 
-(test_add unsafe_list_add [])
-(test_add unsafe_list_add (list))
-(test_add unsafe_list_add (mutable_list))
-(test_add unsafe_list_add (stretchy_list))
+(check_add unsafe_list_add [])
+(check_add unsafe_list_add (list))
+(check_add unsafe_list_add (mutable_list))
+(check_add unsafe_list_add (stretchy_list))
 
 
-(define test_add_m
-  (lambda (add_m_proc add_proc v0)
-    (check_arity_exn (add_m_proc))
-    (let [(mutable (is_mutable_list v0)),
-          (stretchy (is_stretchy_list v0)),
-          (v1 (add_m_proc v0 1))]
-      (test_predicates v1 mutable stretchy)
+(define_check (check_add_m add_m_proc add_proc v0)
+  (check_arity_exn (add_m_proc))
+  (let [(mutable (is_mutable_list v0)),
+        (stretchy (is_stretchy_list v0)),
+        (v1 (add_m_proc v0 1))]
+    (check_predicates v1 mutable stretchy)
+    (if stretchy
+      (check === [1] v0 "v0 should be modified")
+      (check === []  v0 "v0 not modified"))
+    (check === [1] v1)
+    (let [(v2 (add_m_proc v1 2))]
+      (check_predicates v2 mutable stretchy)
       (if stretchy
-        (check === v0 [1] "v0 should be modified")
-        (check === v0 []  "v0 not modified"))
-      (check === v1 [1] "v1")
-      (let ((v2 (add_m_proc v1 2)))
-        (test_predicates v2 mutable stretchy)
-        (if stretchy
-          (begin
-            (check === v0 [1, 2] "v0 should be modified")
-            (check === v1 [1, 2] "v1 should be modified")
-            )
-          (begin
-            (check === v0 []  "v0 not modified")
-            (check === v1 [1] "v1 not modified")))
-        (check === v2 [1, 2])
+        (begin
+          (check === [1, 2] v0 "v0 should be modified")
+          (check === [1, 2] v1 "v1 should be modified"))
+        (begin
+          (check === []  v0 "v0 not modified")
+          (check === [1] v1 "v1 not modified")))
+      (check === [1, 2] v2)
 
-        // Test that we use the right size when its less than capacity
-        (let ((v3 (add_m_proc v2 3)))
-          (let ((v4 (add_proc v3 4)))  // NOT add_m!
-            (check === v4 [1,2,3,4])))))))
+      // Test that we use the right size when its less than capacity
+      (lets [(v3 (add_m_proc v2 3)),
+             (v4 (add_proc v3 4))]  // NOT add_m!
+        (check === [1,2,3,4] v4)))))
 
 
-(test_add_m add_m add [])
-(test_add_m add_m add (list))
-(test_add_m add_m add (mutable_list))
-(test_add_m add_m add (stretchy_list))
+(check_add_m add_m add [])
+(check_add_m add_m add (list))
+(check_add_m add_m add (mutable_list))
+(check_add_m add_m add (stretchy_list))
 
-(test_add_m unsafe_list_add_m unsafe_list_add [])
-(test_add_m unsafe_list_add_m unsafe_list_add (list))
-(test_add_m unsafe_list_add_m unsafe_list_add (mutable_list))
-(test_add_m unsafe_list_add_m unsafe_list_add (stretchy_list))
+(check_add_m unsafe_list_add_m unsafe_list_add [])
+(check_add_m unsafe_list_add_m unsafe_list_add (list))
+(check_add_m unsafe_list_add_m unsafe_list_add (mutable_list))
+(check_add_m unsafe_list_add_m unsafe_list_add (stretchy_list))
 
 
 (check_arg_exn (add_m NULL_SEXP 2))
@@ -354,55 +344,51 @@
 //==========================================================================
 // Iteration
 
-(check === (list_from_iterator (list_iterator str))
-  [1,2,3])
+(check === [1,2,3]
+  (list_from_iterator (list_iterator str)))
 
 
 //==========================================================================
 // append_m
 
-(define test_append_m
-  (lambda (v0)
-    (let [(mutable (is_mutable_list v0)),
-          (stretchy (is_stretchy_list v0)),
-          (v1 (append_m v0 [1]))]
-      (test_predicates v1 mutable stretchy)
+(define_check (check_append_m v0)
+  (let [(mutable (is_mutable_list v0)),
+        (stretchy (is_stretchy_list v0)),
+        (v1 (append_m v0 [1]))]
+    (check_predicates v1 mutable stretchy)
+    (if stretchy
+      (check === [1] v0 "v0 should be modified")
+      (check === []  v0  "v0 not modified"))
+    (check === [1] v1 "v1")
+    (let [(v2 (append_m v1 (stretchy_list 2 3) (mutable_list 4)))]
+      (check_predicates v2 mutable stretchy)
       (if stretchy
-        (check === v0 [1] "v0 should be modified")
-        (check === v0 []  "v0 not modified"))
-      (check === v1 [1] "v1")
-      (let ((v2 (append_m v1 (stretchy_list 2 3) (mutable_list 4))))
-        (test_predicates v2 mutable stretchy)
-        (if stretchy
-          (begin
-            (check === v0 [1, 2, 3, 4] "v0 should be modified")
-            (check === v1 [1, 2, 3, 4] "v1 should be modified")
-            )
-          (begin
-            (check === v0 []  "v0 not modified")
-            (check === v1 [1] "v1 not modified")))
-        (check === v2 [1, 2, 3, 4])))))
+        (begin
+          (check === [1, 2, 3, 4] v0 "v0 should be modified")
+          (check === [1, 2, 3, 4] v1 "v1 should be modified"))
+        (begin
+          (check === []  v0 "v0 not modified")
+          (check === [1] v1 "v1 not modified")))
+      (check === [1, 2, 3, 4] v2))))
 
-(test_append_m [])
-(test_append_m (list))
-(test_append_m (mutable_list))
-(test_append_m (stretchy_list))
+(check_append_m [])
+(check_append_m (list))
+(check_append_m (mutable_list))
+(check_append_m (stretchy_list))
 
-(check === (append_m null.list [1] null.list)
-  [1])
-(check === (append_m [1] null.list)
-  [1])
+(check === [1] (append_m null.list [1] null.list))
+(check === [1] (append_m [1] null.list))
 
 
-(check === (append_m (quote a::null.list))
-  (quote a::null.list))
-(check === (append_m (quote a::null.list) (quote b::[c::2]))
-  (quote a::[c::2]))
+(check === (quote a::null.list)
+  (append_m (quote a::null.list)))
+(check === (quote a::[c::2])
+  (append_m (quote a::null.list) (quote b::[c::2])))
 
-(check === (append_m (quote a::[1]))
-  (quote a::[1]))
-(check === (append_m (quote a::[1]) (quote b::[c::2]))
-  (quote a::[1,c::2]))
+(check === (quote a::[1])
+  (append_m (quote a::[1])))
+(check === (quote a::[1,c::2])
+  (append_m (quote a::[1]) (quote b::[c::2])))
 
 // TODO test annotations on mutable/stretchy lists
 
@@ -413,8 +399,8 @@
 (check_arity_exn (first))
 (check_arity_exn (first [1] 2))
 
-(check = (first [1])    1)
-(check = (first [1, 2]) 1)
+(check === 1 (first [1]))
+(check === 1 (first [1, 2]))
 
 (check_arg_exn (first null.list))
 (check_arg_exn (first []))
@@ -428,8 +414,8 @@
 (check_arity_exn (last [1] 2))
 
 
-(check = (last [1])    1)
-(check = (last [1, 2]) 2)
+(check === 1 (last [1]))
+(check === 2 (last [1, 2]))
 
 (check_arg_exn (last []))
 (check_arg_exn (last "boeing"))
@@ -438,12 +424,12 @@
 //==========================================================================
 // find
 
-(assert (is_void (find F null.list)))
-(assert (is_void (find F [])))
-(assert (is_void (find F [1, 2])))
-(check = (find T [1, 2]) 1)
+(check_void (find F null.list))
+(check_void (find F []))
+(check_void (find F [1, 2]))
+(check === 1 (find T [1, 2]))
 
-(check === (find (lambda (e) (= e "hi")) ["oh", "hi"]) "hi")
+(check === "hi" (find (lambda (e) (= e "hi")) ["oh", "hi"]))
 
 
 //==========================================================================
@@ -458,10 +444,10 @@
 (check_false (any (lambda (e) (= e "ho")) ["oh", "hi"]))
 
 // Check that it returns the truthy predicate result, not the selected element
-(check = 408
+(check === 408
   (any (lambda (e) (when (= e 204) (* e 2)))
     [123, 204, 567]))
-(check = 1134
+(check === 1134
   (any (lambda (e) (when (= e 567) (* e 2)))
     [123, 204, 567]))
 
@@ -497,7 +483,7 @@
     [123, 456, 678]))
 
 // Check that `every` returns the last predicate result if all are truthy
-(check = 1134
+(check === 1134
   (every (lambda (e) (when (or (= e 123) (= e 567)) (* e 2)))
     [123, 123, 567]))
 
@@ -505,27 +491,28 @@
 //==========================================================================
 // map
 
-(check === (map + null.list) [])
-(check === (map + []) [])
-(check === (map + [1, 2]) [1, 2])
-(check === (map (lambda (n) (+ 3 n)) [1, 2]) [4, 5])
+(check === []     (map + null.list))
+(check === []     (map + []))
+(check === [1, 2] (map + [1, 2]))
+(check === [4, 5] (map (lambda (n) (+ 3 n)) [1, 2]))
 
-(check === (choose T null.list) [])
-(check === (choose F null.list) [])
-(check === (choose T []) [])
-(check === (choose F []) [])
-(check === (choose T [1, 2]) [1, 2])
-(check === (choose F [1, 2]) [])
+(check === []    (choose T null.list))
+(check === []    (choose F null.list))
+(check === []    (choose T []))
+(check === []    (choose F []))
+(check === [1,2] (choose T [1, 2]))
+(check === []    (choose F [1, 2]))
 
-(check === (choose (lambda (n) (< 10 n)) [1, 11, 10, 12]) [11, 12])
+(check === [11, 12]
+  (choose (lambda (n) (< 10 n)) [1, 11, 10, 12]))
 
 
 //==========================================================================
 // do
 
-(check === (do identity null.list) VOID)
-(check === (do (lambda (x) (+ 1 x)) [2, 3]) VOID)
+(check_void (do identity null.list))
+(check_void (do (lambda (x) (+ 1 x)) [2, 3]))
 
 (let [(v (stretchy_list))]
   (do (lambda (x) (add_m v (+ 1 x))) [2, 3])
-  (check === v [3, 4]))
+  (check === [3, 4] v))

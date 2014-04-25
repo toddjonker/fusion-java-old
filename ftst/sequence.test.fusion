@@ -1,9 +1,10 @@
 // Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
+  "/fusion/experimental/check"
   "/fusion/list"
-  "/fusion/sequence")
+  "/fusion/sequence"
+  "/testutils")
 
 
 //==========================================================================
@@ -27,15 +28,16 @@
 //==========================================================================
 // subseq
 
-(define_check (check_subseq msg orig from to expect)
-  (check === (subseq orig from to) expect)
+(define_check (check_subseq orig from to expect)
+  (check === expect (subseq orig from to))
   (let [(s (subseq (apply mutable_list orig) from to))]
-    (check === s expect)
+    (check === expect s)
     (check_pred is_mutable_list s))
   (let [(s (subseq (apply stretchy_list orig) from to))]
-    (check === s expect)
+    (check === expect s)
     (check_pred is_stretchy_list s))
-  (check === (subseq (apply sexp orig) from to) (apply sexp expect)))
+  (check === (apply sexp expect)
+    (subseq (apply sexp orig) from to)))
 
 
 (check_subseq []      0 0 [])
@@ -70,41 +72,39 @@
 //==========================================================================
 // fold_left
 
-(check === (fold_left + 0) 0)
-(check === (fold_left + 0 NULL_SEXP) 0)
-(check === (fold_left + 0 EMPTY_SEXP) 0)
-(check === (fold_left + 0 null.list) 0)
-(check === (fold_left + 0 []) 0)
-(check === (fold_left + 1 (sexp 2 3 4)) 10)
-(check === (fold_left + 1 [2, 3, 4]) 10)
-(check === (fold_left + 1 (sexp 2 3) [4, 5] [6, 7] (sexp 8 9)) 45)
-(check === (fold_left + 1 (sexp 2 3 4) (sexp 5 6 7 8)) 28)
-(check === (fold_left + 1 (sexp 2 3 4 8) (sexp 5 6 7)) 28)
-(check === (fold_left + 1 [2, 3, 4] [5, 6, 7, 8]) 28)
-(check === (fold_left + 1 [2, 3, 4, 8] [5, 6, 7]) 28)
-(check === (fold_left + 1 [2, 3, 4] (sexp 5 6 7 8)) 28)
-(check === (fold_left + 1 [2, 3, 4, 8] (sexp 5 6 7)) 28)
-(check === (fold_left + 1 (sexp 2 3) [4, 5] EMPTY_SEXP [6, 7] (sexp 8 9)) 1)
-(check === (fold_left + 1 (sexp 2 3) [4, 5] [] [6, 7] (sexp 8 9)) 1)
-(check === (fold_left + 1 (sexp 2 3) [4, 5] NULL_SEXP [6, 7] (sexp 8 9)) 1)
-(check === (fold_left + 1 (sexp 2 3) [4, 5] null.list [6, 7] (sexp 8 9)) 1)
+(check ===  0 (fold_left + 0))
+(check ===  0 (fold_left + 0 NULL_SEXP))
+(check ===  0 (fold_left + 0 EMPTY_SEXP))
+(check ===  0 (fold_left + 0 null.list))
+(check ===  0 (fold_left + 0 []))
+(check === 10 (fold_left + 1 (sexp 2 3 4)))
+(check === 10 (fold_left + 1 [2, 3, 4]))
+(check === 45 (fold_left + 1 (sexp 2 3) [4, 5] [6, 7] (sexp 8 9)))
+(check === 28 (fold_left + 1 (sexp 2 3 4) (sexp 5 6 7 8)))
+(check === 28 (fold_left + 1 (sexp 2 3 4 8) (sexp 5 6 7)))
+(check === 28 (fold_left + 1 [2, 3, 4] [5, 6, 7, 8]))
+(check === 28 (fold_left + 1 [2, 3, 4, 8] [5, 6, 7]))
+(check === 28 (fold_left + 1 [2, 3, 4] (sexp 5 6 7 8)))
+(check === 28 (fold_left + 1 [2, 3, 4, 8] (sexp 5 6 7)))
+(check ===  1 (fold_left + 1 (sexp 2 3) [4, 5] EMPTY_SEXP [6, 7] (sexp 8 9)))
+(check ===  1 (fold_left + 1 (sexp 2 3) [4, 5] [] [6, 7] (sexp 8 9)))
+(check ===  1 (fold_left + 1 (sexp 2 3) [4, 5] NULL_SEXP [6, 7] (sexp 8 9)))
+(check ===  1 (fold_left + 1 (sexp 2 3) [4, 5] null.list [6, 7] (sexp 8 9)))
 (let [(v (stretchy_list))]
-  (check ===
+  (check === 28
     (fold_left (lambda (result a b) (add_m v (sexp result a b)) (+ result a b))
-      1 (sexp 2 3 4) [5, 6, 7, 8])
-    28)
+      1 (sexp 2 3 4) [5, 6, 7, 8]))
   // Check visit order
-  (check === v [(sexp 1 2 5), (sexp 8 3 6), (sexp 17 4 7)]))
-(check ===
+  (check === [(sexp 1 2 5), (sexp 8 3 6), (sexp 17 4 7)] v))
+(check === (sexp 5 4 3 2 1)
   (fold_left (lambda (accum e) (pair e accum)) EMPTY_SEXP (sexp 1 2 3 4 5))
-  (sexp 5 4 3 2 1)
   "fold_left reverse sexp")
-(check ===
+(check === {a:1,b:2,c:3}
   (fold_left
     (lambda (accum s) (struct_merge accum s))
     {}
-    [{a:1}, {b:2}, {c:3}])
-  {a:1,b:2,c:3})
+    [{a:1}, {b:2}, {c:3}]))
+
 (check_arity_exn (fold_left +))
 (check_arg_exn (fold_left + 0 {}))
 (check_arg_exn (fold_left + 0 (sexp 2 3 4) {}))

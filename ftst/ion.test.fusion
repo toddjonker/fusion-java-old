@@ -1,9 +1,11 @@
 // Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
+  "/fusion/experimental/check"
   "/fusion/experimental/syntax"
-  "/fusion/private/builtins")  // annotate
+  "/fusion/private/builtins"    // annotate
+  "/testutils"
+  )
 
 
 //==========================================================================
@@ -15,7 +17,7 @@
 
 (define (checked_annotate datum annotations)
   (let [(annotated_datum (apply annotate datum annotations))]
-    (check_annotations annotated_datum annotations)
+    (check_annotations annotations annotated_datum)
     annotated_datum))
 
 
@@ -30,17 +32,17 @@
       (quasisyntax
         (begin
           (check ===
-            (annotate (quote (unsyntax orig_datum_stx)))
-            (quote (unsyntax datum_stx)))
+            (quote (unsyntax datum_stx))
+            (annotate (quote (unsyntax orig_datum_stx))))
           (check ===
-            (annotate (quote (unsyntax orig_datum_stx)) "a")
-            (quote (unsyntax a_datum_stx)))
+            (quote (unsyntax a_datum_stx))
+            (annotate (quote (unsyntax orig_datum_stx)) "a"))
           (check ===
-            (annotate (quote (unsyntax orig_datum_stx)) "a" "a")
-            (quote (unsyntax a_a_datum_stx)))
+            (quote (unsyntax a_a_datum_stx))
+            (annotate (quote (unsyntax orig_datum_stx)) "a" "a"))
           (check ===
-            (annotate (quote (unsyntax orig_datum_stx)) "a" "b")
-            (quote (unsyntax a_b_datum_stx))))))))
+            (quote (unsyntax a_b_datum_stx))
+            (annotate (quote (unsyntax orig_datum_stx)) "a" "b")))))))
 
 (define_syntax check_annotate
   (lambda (stx)
@@ -51,7 +53,7 @@
            (a_b_datum_stx (datum_to_syntax (checked_annotate datum ["a", "b"])))]
       (quasisyntax
         (begin
-          (check === (type_annotations (quote (unsyntax datum_stx))) [])
+          (check_annotations [] (quote (unsyntax datum_stx)))
           (check_annotate1 (unsyntax     datum_stx))
           (check_annotate1 (unsyntax   a_datum_stx))
           (check_annotate1 (unsyntax a_a_datum_stx))
@@ -67,8 +69,8 @@
 //==========================================================================
 // is_null_null
 
-(check_true (is_null_null null.null))
-(check_true (is_null_null (quote ann::null.null)))
+(check_pred is_null_null null.null)
+(check_pred is_null_null (quote ann::null.null))
 
 (check_false (is_null_null (void)))
 (check_false (is_null_null null.struct))

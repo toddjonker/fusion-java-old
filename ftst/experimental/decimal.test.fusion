@@ -1,68 +1,71 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
+  "/fusion/experimental/check"
   "/fusion/experimental/decimal")
 
 
-(check = (decimal_scale    0.)  0)
-(check = (decimal_scale    0.0) 1)
-(check = (decimal_scale    1.)  0)
-(check = (decimal_scale    1.0) 1)
-(check = (decimal_scale 1234.0) 1)
+(check === 0 (decimal_scale    0. ))
+(check === 1 (decimal_scale    0.0))
+(check === 0 (decimal_scale    1. ))
+(check === 1 (decimal_scale    1.0))
+(check === 1 (decimal_scale 1234.0))
 
-(check = (decimal_scale 1234.56789   ) 5)
-(check = (decimal_scale 1234.56789d-1) 6)
-(check = (decimal_scale 1234.56789d5)  0)
-(check = (decimal_scale 1234.56789d8)  -3)
-
-
-
-(check = (decimal_divide 1. 3.)
-  0.3333333333333333333333333333333333)
-
-(check = (decimal_divide 2. 3.)
-  0.6666666666666666666666666666666667)
+(check ===  5 (decimal_scale 1234.56789   ))
+(check ===  6 (decimal_scale 1234.56789d-1))
+(check ===  0 (decimal_scale 1234.56789d5))
+(check === -3 (decimal_scale 1234.56789d8))
 
 
-(check = (decimal_rescale 1.2345 2) 1.23)
-(check = (decimal_rescale 1.2345 3) 1.234)
-(check = (decimal_rescale 1.2335 3) 1.234)
-(check = (decimal_rescale 1.2346 3) 1.235)
+(check === 0.3333333333333333333333333333333333
+  (decimal_divide 1. 3.))
 
-(check = (decimal_rescale (decimal_divide 2. 3.) 2) 0.67)
+(check === 0.6666666666666666666666666666666667
+  (decimal_divide 2. 3.))
+
+
+(check === 1.23  (decimal_rescale 1.2345 2))
+(check === 1.234 (decimal_rescale 1.2345 3))
+(check === 1.234 (decimal_rescale 1.2335 3))
+(check === 1.235 (decimal_rescale 1.2346 3))
+
+(check === 0.67  (decimal_rescale (decimal_divide 2. 3.) 2))
 
 // Highlight difference caused by rounding only once.
 (define long 19.9499999999999999999999999999999999)
-(check = (decimal_divide long 10.)
-  1.995)
-(check = (decimal_rescale (decimal_divide long 10.) 2)
-  2.00)
-(check = (decimal_divide_rescale long 10. 2)
-  1.99)
 
-(check = (decimal_scale (decimal_divide_rescale 1. 2. 2)) 2)
+// TODO Precision here needs to be checked, there's a lot of zeros.
+(check ==   1.995
+  (decimal_divide long 10.))
+(check === 2.00
+  (decimal_rescale (decimal_divide long 10.) 2))
+(check === 1.99
+  (decimal_divide_rescale long 10. 2))
 
-(check = (decimal_divide_rescale 1. 2. 2) 0.50)
-(check = (decimal_divide_rescale 2. 3. 2) 0.67)
+(check === 2 (decimal_scale (decimal_divide_rescale 1. 2. 2)))
+
+(check === 0.50 (decimal_divide_rescale 1. 2. 2))
+(check === 0.67 (decimal_divide_rescale 2. 3. 2))
+
 
 //============================================================================
 // decimal_to_string
 
-(check === (decimal_to_string null.decimal) null.string)
+(check === null.string
+  (decimal_to_string null.decimal))
 
 // TODO FUSION-247 re-enable these. They are disable to keep this working
 //      when built against IonJava-mainline.
-//(check === (decimal_to_string 0.0) "0d-1")
-//(check === (decimal_to_string 0.10) "1.0d-1")
-//(check === (decimal_to_string 0.000) "0d-3")
-//(check === (decimal_to_string -0.0) "-0d-1")
-(check === (decimal_to_string 15.00) "15.00")
-(check === (decimal_to_string 1.234) "1.234")
-(check === (decimal_to_string -99.9) "-99.9")
+//(check === "0d-1"   (decimal_to_string 0.0))
+//(check === "1.0d-1" (decimal_to_string 0.10))
+//(check === "0d-3"   (decimal_to_string 0.000))
+//(check === "-0d-1"  (decimal_to_string -0.0))
+(check === "15.00" (decimal_to_string 15.00))
+(check === "1.234" (decimal_to_string 1.234))
+(check === "-99.9" (decimal_to_string -99.9))
 
-(check === (decimal_to_string -1.23456789012345678901234567890)
-                             "-1.23456789012345678901234567890")
+(check ===          "-1.23456789012345678901234567890"
+  (decimal_to_string -1.23456789012345678901234567890))
 
 (check_arg_exn (decimal_to_string 1))
 (check_arg_exn (decimal_to_string "1"))
@@ -70,12 +73,12 @@
 //============================================================================
 // string_to_decimal
 
-(check === (string_to_decimal null.string) null.decimal)
+(check === null.decimal (string_to_decimal null.string))
 
-(check === (string_to_decimal "0.0") 0.0)
-(check === (string_to_decimal "1.234") 1.234)
-(check === (string_to_decimal "-99.9") -99.9)
-(check === (string_to_decimal "-0.0") -0.0)
+(check === 0.0   (string_to_decimal "0.0"))
+(check === 1.234 (string_to_decimal "1.234"))
+(check === -99.9 (string_to_decimal "-99.9"))
+(check === -0.0  (string_to_decimal "-0.0"))
 
 // Note: The following test will not pass, which is one of the primary reasons that
 // string_to_decimal / decimal_to_string is located within /experimental. They
@@ -89,13 +92,13 @@
 // IonString <-> IonDecimal conversions. This is one of the main reasons why these
 // conversions are located within /experimental at this time. The exponent notation
 // shown to work below are not part of the IonDecimal spec.
-      (check === (string_to_decimal "1.234E1") 12.34)
-      (check === (string_to_decimal "1.234e1") 12.34)
-      (check === (string_to_decimal "1.234E+1") 12.34)
-      (check === (string_to_decimal "1.234E-1") 0.1234)
+      (check === 12.34  (string_to_decimal "1.234E1"))
+      (check === 12.34  (string_to_decimal "1.234e1"))
+      (check === 12.34  (string_to_decimal "1.234E+1"))
+      (check === 0.1234 (string_to_decimal "1.234E-1"))
 
-(check === (string_to_decimal "-1.23456789012345678901234567890")
-                               -1.23456789012345678901234567890)
+(check ===            -1.23456789012345678901234567890
+  (string_to_decimal "-1.23456789012345678901234567890"))
 
 (check_arg_exn (string_to_decimal ""))
 (check_arg_exn (string_to_decimal " 0.0"))

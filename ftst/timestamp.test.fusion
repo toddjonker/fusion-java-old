@@ -1,7 +1,7 @@
 // Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
+  "/fusion/experimental/check"
 )
 
 
@@ -16,7 +16,7 @@
 //============================================================================
 // Comparisons
 
-(define_check (check_comparisons msg lo hi)                 // msg is rest arg
+(define_check (check_comparisons lo hi)
   (check <  lo hi)
   (check <= lo hi)
   (check =  lo lo)
@@ -35,14 +35,14 @@
 // timestamp_to_epoch_millis, epoch_millis_to_timestamp
 
 // Note that it always returns a decimal
-(check === (timestamp_to_epoch_millis 1970-01-01                )  0.)
-(check === (timestamp_to_epoch_millis 1970-01-01T00:00:00.001Z  )  1.)
-(check === (timestamp_to_epoch_millis 1970-01-01T00:00:00.00123Z)  1.23)
-(check === (timestamp_to_epoch_millis 1970-01-01T00:00:01Z      )  1000.)
-(check === (timestamp_to_epoch_millis 1969-12-31T23:59:59Z      ) -1000.)
+(check ===  0.    (timestamp_to_epoch_millis 1970-01-01                ))
+(check ===  1.    (timestamp_to_epoch_millis 1970-01-01T00:00:00.001Z  ))
+(check ===  1.23  (timestamp_to_epoch_millis 1970-01-01T00:00:00.00123Z))
+(check ===  1000. (timestamp_to_epoch_millis 1970-01-01T00:00:01Z      ))
+(check === -1000. (timestamp_to_epoch_millis 1969-12-31T23:59:59Z      ))
 
-(check === (timestamp_to_epoch_millis 1970-01-01T00:00:00.00123+01:00)
-         (- 1.23 (* 60 /*minutes*/ 60 /*seconds*/ 1000 /*millis*/)))
+(check === (- 1.23 (* 60 /*minutes*/ 60 /*seconds*/ 1000 /*millis*/))
+  (timestamp_to_epoch_millis 1970-01-01T00:00:00.00123+01:00))
 
 
 (check === 1969-12-31T23:59:59.9990Z   (epoch_millis_to_timestamp -1.0))
@@ -66,13 +66,13 @@
 //============================================================================
 // string_to_timestamp
 
-(check === (string_to_timestamp null.string) null.timestamp)
-(check === (timestamp_to_string null.timestamp) null.string)
+(check === null.timestamp (string_to_timestamp null.string))
+(check === null.string    (timestamp_to_string null.timestamp))
 
 
-(define_check (check_conversion msg string time)
-  (check === (string_to_timestamp string) time)
-  (check === (timestamp_to_string time) string))
+(define_check (check_conversion string time)
+  (check === time   (string_to_timestamp string))
+  (check === string (timestamp_to_string time)))
 
 (check_conversion "2013T"                       2013T)
 (check_conversion "2013-11T"                    2013-11T)

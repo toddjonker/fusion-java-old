@@ -1,44 +1,42 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
+  "/fusion/experimental/check"
   "/fusion/eval")
 
 
 (define my_top "at-top")
-(check = ('#%top' my_top) "at-top")
+(check === "at-top" ('#%top' my_top))
 
 (let [(my_top "shadow")]
-  (check = ('#%top' my_top) "at-top"))
+  (check === "at-top" ('#%top' my_top)))
 
 
 (module T "/fusion"
   (define my_top "in-T")
   (provide my_top))
 (require T)
-(check = ('#%top' my_top) "at-top")
+(check === "at-top" ('#%top' my_top))
 (let [(my_top "shadow")]
-  (check = ('#%top' my_top) "at-top"))
+  (check === "at-top" ('#%top' my_top)))
 
 // Hide the binding from T
 (define my_top "at-top")
 
 
-(check_exn // exn:fail?
-  (lambda ()
-    (eval (quote
-      (module M "/fusion"
-        (define my_top "in-M")
-        (let [(my_top "shadow")]
-          ('#%top' my_top)))))))   // ERROR
+(check_compile_exn // exn:fail?
+  (module M "/fusion"
+    (define my_top "in-M")
+    (let [(my_top "shadow")]
+      ('#%top' my_top))))   // ERROR
 
 
 (module M "/fusion"
-  (require "/check" "/fusion/experimental/syntax")
+  (require "/fusion/experimental/check" "/fusion/experimental/syntax")
   (define dummy "Force my_top here to have different address from top-level")
   (define my_top "in-M")
 
-  (check = ('#%top' my_top) "in-M")
+  (check === "in-M" ('#%top' my_top))
 
   (define_syntax define_accessor
     (lambda (stx)
@@ -64,19 +62,19 @@
 
 (require M)
 (define_accessor a1)
-(check = my_top "at-top")
-(check = ('#%top' my_top) "at-top")
-(check = (a1) "at-top")
+(check === "at-top" my_top)
+(check === "at-top" ('#%top' my_top))
+(check === "at-top" (a1))
 
 (define_accessor2 a2)
-(check = my_top "at-top")
-(check = ('#%top' my_top) "at-top")
-(check = (a1) "at-top")
-(check = (a2) "another one")
+(check === "at-top" my_top)
+(check === "at-top" ('#%top' my_top))
+(check === "at-top" (a1))
+(check === "another one" (a2))
 
 (define_accessor3 a3)
-(check = my_top "at-top")
-(check = ('#%top' my_top) "at-top")
-(check = (a1) "at-top")
-(check = (a2) "another one")
-(check = (a3) "at-top")
+(check === "at-top" my_top)
+(check === "at-top" ('#%top' my_top))
+(check === "at-top" (a1))
+(check === "another one" (a2))
+(check === "at-top" (a3))

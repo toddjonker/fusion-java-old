@@ -1,7 +1,7 @@
 // Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
+  "/fusion/experimental/check"
   "/fusion/experimental/syntax")
 
 
@@ -37,7 +37,7 @@
     (quasisyntax
       (define top (unsyntax (syntax_get stx 1))))))
 (define_top "macro1")
-(check = top "outside")
+(check === "outside" top)
 
 
 // Similar for macro exported from a module
@@ -53,20 +53,20 @@
    (provide define_top))
 (require M2)
 (define_top "macro2" get_top_1)
-(check = top "outside")
-(check = (get_top_1) "macro2")
+(check === "outside" top)
+(check === "macro2" (get_top_1))
 
 
 // Now try using the macro at module level
 (module M3 "/fusion"
-  (require M2 "/check")
+  (require M2 "/fusion/experimental/check")
   (define top "in_M3")
   (define_top "macro_in1" get_top_in1)
-  (check = top "in_M3")
-  (check = (get_top_in1) "macro_in1")
+  (check === "in_M3" top)
+  (check === "macro_in1" (get_top_in1))
   (define_top "macro_in2" get_top_in2)
-  (check = top "in_M3")
-  (check = (get_top_in2) "macro_in2")
+  (check === "in_M3" top)
+  (check === "macro_in2" (get_top_in2))
   )
 (require M3)
 

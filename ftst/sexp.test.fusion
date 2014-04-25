@@ -1,10 +1,12 @@
 // Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
+  "/fusion/experimental/check"
   "/fusion/list"
   "/fusion/private/builtins"  // annotate
-  "/fusion/private/sexp")
+  "/fusion/private/sexp"
+  "/testutils"
+  )
 
 
 (define valNull  (quote null.sexp))
@@ -29,13 +31,13 @@
     (_sexp_copy mutable_sexp v)))
 
 
-(define_check (check_mod_f msg op val args expect)
+(define_check (check_mod_f op val args expect)
   "Functional modification check"
   (let [(v (sexp_copy val))]
     (let [(result (apply op v args))]
-      (check === result expect
+      (check === expect result
         "Unexpected result from " op " on immutable arg")
-      (check === v val                                        // v not mutated
+      (check === val v                                        // v not mutated
         "Immutable arg was mutated by " op))))
 
 
@@ -53,43 +55,40 @@
 (check_false (is_null (quote a::())))
 
 
-(define test_predicates
-  (lambda (sexp empty)
-    (check_pred is_collection sexp)
-    (check_pred is_sequence sexp)
-    (check_pred is_sexp sexp)
-    (check = (is_empty sexp) empty)
-    // TODO ...
-    ))
+(define_check (check_predicates sexp empty)
+  (check_pred is_collection sexp)
+  (check_pred is_sequence sexp)
+  (check_pred is_sexp sexp)
+  (check === empty (is_empty sexp))
+  // TODO ...
+  )
 
 
 // Construction via literals
 
 (define x "anything")
 
-(test_predicates (quote ())    true)
-(test_predicates (quote (0))   false)
-(test_predicates (quote (0 T)) false)
+(check_predicates (quote ())    true)
+(check_predicates (quote (0))   false)
+(check_predicates (quote (0 T)) false)
 
 
 // Construction via procedures
 
-(define test_makers
-  (lambda (maker)
-    (test_predicates (apply maker (quote ())) true)
-    (test_predicates (apply maker (quote (0))) false)
-    (check === (apply maker (quote ())) EMPTY_SEXP)
-    (check === (apply maker (quote (0 1)))
-      (quote (0 1)))))
+(define_check (check_makers maker)
+  (check_predicates (apply maker (quote ())) true)
+  (check_predicates (apply maker (quote (0))) false)
+  (check === EMPTY_SEXP    (apply maker (quote ())))
+  (check === (quote (0 1)) (apply maker (quote (0 1)))))
 
-(test_makers sexp)
+(check_makers sexp)
 // TODO immutable_sexp
 
 
-(check_annotations (quote ()) (quote []))
-(check_annotations (quote a::(c)) (quote ["a"]))
-(check_annotations (quote a::b::(c d)) (quote ["a","b"]))
-(check_annotations (quote a::b::a::(a)) (quote ["a","b","a"]))
+(check_annotations []            (quote ()))
+(check_annotations ["a"]         (quote a::(c)))
+(check_annotations ["a","b"]     (quote a::b::(c d)))
+(check_annotations ["a","b","a"] (quote a::b::a::(a)))
 
 
 //==========================================================================
@@ -106,7 +105,7 @@
   (check_pred is_sexp p)
   (check ident (head p) h)
   (check ident (tail p) t)
-  (check === p (pair [1] [2])))
+  (check ===(pair [1] [2]) p))
 
 
 //==========================================================================
@@ -178,8 +177,8 @@
 //==========================================================================
 // first
 
-(check = (first (quote (1))) 1)
-(check = (first (sexp 1 2)) 1)
+(check === 1 (first (quote (1))))
+(check === 1 (first (sexp 1 2)))
 
 (check_arg_exn (first (quote null.sexp)))
 (check_arg_exn (first (sexp)))
@@ -188,8 +187,8 @@
 //==========================================================================
 // last
 
-(check = (last (quote (1))) 1)
-(check = (last (sexp 1 2)) 2)
+(check === 1 (last (quote (1))))
+(check === 2 (last (sexp 1 2)))
 
 (check_arg_exn (last (quote null.sexp)))
 (check_arg_exn (last (sexp)))
@@ -198,18 +197,18 @@
 //==========================================================================
 // add
 
-(check === (add (sexp 1 2) 3)  (sexp 3 1 2))
-(check === (add (sexp 1 2) [3])  (sexp [3] 1 2))
+(check === (sexp 3 1 2)   (add (sexp 1 2) 3)  )
+(check === (sexp [3] 1 2) (add (sexp 1 2) [3])  )
 
 
 //==========================================================================
 // find
 
-(assert (is_void (find F valNull)))
-(assert (is_void (find F valEmpty)))
-(assert (is_void (find F val12)))
-(check = (find T val12) 1)
-(check = (find (lambda (e) (= e 2)) val12) 2)
+(check_void (find F valNull))
+(check_void (find F valEmpty))
+(check_void (find F val12))
+(check === 1 (find T val12))
+(check === 2 (find (lambda (e) (= e 2)) val12))
 
 
 //==========================================================================
@@ -271,19 +270,20 @@
 //==========================================================================
 // map
 
-(check === (map + NULL_SEXP) EMPTY_SEXP)
-(check === (map + EMPTY_SEXP) EMPTY_SEXP)
-(check === (map + (sexp 1 2)) (sexp 1 2))
-(check === (map (lambda (n) (+ 3 n)) (sexp 1 2)) (sexp 4 5))
+(check === EMPTY_SEXP (map + NULL_SEXP))
+(check === EMPTY_SEXP (map + EMPTY_SEXP))
+(check === (sexp 1 2) (map + (sexp 1 2)))
+(check === (sexp 4 5) (map (lambda (n) (+ 3 n)) (sexp 1 2)))
 
-(check === (choose T EMPTY_SEXP) EMPTY_SEXP)
-(check === (choose F EMPTY_SEXP) EMPTY_SEXP)
-(check === (choose T NULL_SEXP)  EMPTY_SEXP)
-(check === (choose F NULL_SEXP)  EMPTY_SEXP)
-(check === (choose T (sexp 1 2)) (sexp 1 2))
-(check === (choose F (sexp 1 2)) EMPTY_SEXP)
+(check === EMPTY_SEXP (choose T EMPTY_SEXP))
+(check === EMPTY_SEXP (choose F EMPTY_SEXP))
+(check === EMPTY_SEXP (choose T NULL_SEXP))
+(check === EMPTY_SEXP (choose F NULL_SEXP))
+(check === (sexp 1 2) (choose T (sexp 1 2)))
+(check === EMPTY_SEXP (choose F (sexp 1 2)))
 
-(check === (choose (lambda (n) (< 10 n)) (sexp 1 11 10 12)) (sexp 11 12))
+(check === (sexp 11 12)
+  (choose (lambda (n) (< 10 n)) (sexp 1 11 10 12)))
 
 
 //==========================================================================
@@ -293,16 +293,16 @@
 
 (let [(v (stretchy_list))]
   (do (lambda (x) (add_m v (+ 1 x))) (quote (2 3)))
-  (check === v [3, 4] "do side effects"))
+  (check === [3, 4] v))
 
 
 //==========================================================================
 // size
 
-(check === (size (quote ())) 0)
-(check === (size (sexp 1)) 1)
-(check === (size (sexp 1 51)) 2)
-(check === (size (pair 1 (pair 2 (quote ())))) 2)
+(check === 0 (size (quote ())))
+(check === 1 (size (sexp 1)))
+(check === 2 (size (sexp 1 51)))
+(check === 2 (size (pair 1 (pair 2 (quote ())))))
 
 (check_arg_exn (size (pair 1 215)))
 

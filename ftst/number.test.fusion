@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/check"
+  "/fusion/experimental/check"
   "/fusion/number")
 
 
@@ -19,7 +19,7 @@
 // division
 
 // TODO check precision rules
-(check == (/ 4.0 2.0) 2.0)
+(check == 2.0 (/ 4.0 2.0))
 
 // divide by zero
 (check_contract_exn (/ 12. 0.))
@@ -50,15 +50,15 @@
 //============================================================================
 // ceiling
 
-(check === (ceiling -1.1) -1)
-(check === (ceiling -1)   -1)
-(check === (ceiling -0.1)  0)
-(check === (ceiling  0)    0)
-(check === (ceiling  0.)   0)
-(check === (ceiling  0.1)  1)
-(check === (ceiling  0.9)  1)
-(check === (ceiling  1.0)  1)
-(check === (ceiling  1.9)  2)
+(check === -1 (ceiling -1.1))
+(check === -1 (ceiling -1))
+(check ===  0 (ceiling -0.1))
+(check ===  0 (ceiling  0))
+(check ===  0 (ceiling  0.))
+(check ===  1 (ceiling  0.1))
+(check ===  1 (ceiling  0.9))
+(check ===  1 (ceiling  1.0))
+(check ===  2 (ceiling  1.9))
 
 
 (check_arity_exn (ceiling))
@@ -73,15 +73,15 @@
 //============================================================================
 // floor
 
-(check === (floor -1.1) -2)
-(check === (floor -1)   -1)
-(check === (floor -0.1) -1)
-(check === (floor  0)    0)
-(check === (floor  0.)   0)
-(check === (floor  0.1)  0)
-(check === (floor  0.9)  0)
-(check === (floor  1.0)  1)
-(check === (floor  1.9)  1)
+(check === -2 (floor -1.1))
+(check === -1 (floor -1))
+(check === -1 (floor -0.1))
+(check ===  0 (floor  0))
+(check ===  0 (floor  0.))
+(check ===  0 (floor  0.1))
+(check ===  0 (floor  0.9))
+(check ===  1 (floor  1.0))
+(check ===  1 (floor  1.9))
 
 (check_arity_exn (floor))
 (check_arity_exn (floor 0 1))
@@ -95,14 +95,14 @@
 //============================================================================
 // int_to_string
 
-(check === (int_to_string null.int) null.string)
+(check === null.string (int_to_string null.int))
 
-(check === (int_to_string 0) "0")
-(check === (int_to_string 1234) "1234")
-(check === (int_to_string -99) "-99")
+(check === "0"    (int_to_string 0))
+(check === "1234" (int_to_string 1234))
+(check === "-99"  (int_to_string -99))
 
-(check === (int_to_string -123456789012345678901234567890)
-                         "-123456789012345678901234567890")
+(check ===     "-123456789012345678901234567890"
+ (int_to_string -123456789012345678901234567890))
 
 (check_arg_exn (int_to_string 1.))
 (check_arg_exn (int_to_string "1"))
@@ -111,14 +111,14 @@
 //============================================================================
 // string_to_int
 
-(check === (string_to_int null.string) null.int)
+(check === null.int (string_to_int null.string))
 
-(check === (string_to_int "0") 0)
-(check === (string_to_int "1234") 1234)
-(check === (string_to_int "-99") -99)
+(check === 0    (string_to_int "0"))
+(check === 1234 (string_to_int "1234"))
+(check === -99  (string_to_int "-99"))
 
-(check === (string_to_int "-123456789012345678901234567890")
-                           -123456789012345678901234567890)
+(check ===        -123456789012345678901234567890
+  (string_to_int "-123456789012345678901234567890"))
 
 (check_arg_exn (string_to_int ""))
 (check_arg_exn (string_to_int " 0"))

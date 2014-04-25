@@ -1,12 +1,12 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 // Since the design for keywords isn't finalized, check that we can't use
 // symbols of the form _keyword_ anywhere.
 // We can't use them as bound names, nor as variable references.
 
 (require
-  "/check"
   "/fusion/eval"
+  "/fusion/experimental/check"
   "/fusion/experimental/syntax")
 
 // Keywords can't be used as argument names
@@ -42,12 +42,9 @@
 (check_compile_exn
   (define _top_ 1))
 
-// TODO should use check_compile_exn but that gets AssertionError
-(check_exn // exn:fail?
-  (lambda ()
-    (eval (quote
-      (module M "/fusion"
-        (define _top_ 1))))))
+(check_compile_exn // exn:fail?
+  (module M "/fusion"
+    (define _top_ 1)))
 
 
 (check_compile_exn
@@ -61,11 +58,11 @@
   (lambda () ('#%top' _key_)))
 
 // Not sure if this is what we really want long-term, but its current behavior
-(check = (quote _k_) (. (quote [_k_]) 0))
-(check_true (is_symbol (quote _k_)))
-(check = (string_append "a" (quote _k_) "z")
-  "a_k_z")
+(check === (quote _k_) (. (quote [_k_]) 0))
+(check_pred is_symbol (quote _k_))
+(check === "a_k_z"
+  (string_append "a" (quote _k_) "z"))
 
 // I'm even less sure about this.
-(check = (string_append "a" (syntax_to_datum (quote_syntax _k_)) "z")
-  "a_k_z")
+(check === "a_k_z"
+  (string_append "a" (syntax_to_datum (quote_syntax _k_)) "z"))
