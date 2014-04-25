@@ -1,6 +1,23 @@
 // Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
+/*                       *** WARNING ***
+ *
+ * There are customer dependencies on this module!  See FUSION-333
+ */
+
 (module check "/fusion"
+
+  '''
+A lightweight unit testing library.
+
+<!-- FUSION-185 This comment forces FusionDoc to stop the one-liner here. -->
+
+## WARNING
+
+This module contains unstable, experimental features.
+There is **NO SUPPORT** for this module.
+  '''
+
 
   (require
     "/fusion/eval"
@@ -17,6 +34,7 @@
   (define check_stack_param
     (make_parameter null))
 
+  // TODO Not public: the signature is awkward.
   (define fail_check
     '''
     (fail_check meta)
