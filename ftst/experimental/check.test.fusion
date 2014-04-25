@@ -11,3 +11,10 @@
 (check_false false)
 (check_void (void))
 (check_annotations ["a", "b"] (quote a::b::c))
+
+
+//==========================================================================
+// check_arity_exn
+
+(check_arity_exn
+  (raise_arity_error "foo" 1))

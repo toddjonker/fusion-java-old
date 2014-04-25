@@ -162,4 +162,76 @@ unless it is required.  It's also a bit odd to use.
     (unless (= expected (type_annotations value))
       (fail_check {expected:expected, actual:(type_annotations value)})))
 
+
+  //===========================================================================
+
+
+  (define thunk_throws
+    (java_new "com.amazon.fusion.ThunkThrowsProc"))
+
+
+  // TODO this should accept a predicate to check exn type
+  (define_check (check_exn tag thunk)
+    // TODO type-check thunk
+    (let [(e (thunk_throws thunk))]
+      (cond
+        ((== e tag)
+         (void))
+        (e  (fail_check { expected: (string_append tag " exception"),
+                          actual: (string_append e " exception")}))
+        (true (fail_check { expected: (string_append tag " exception")})))))
+
+
+  // This should really be a procedure, but it doesn't work.
+  (define_syntax define_exn_check
+    '''
+    (define_exn_check name tag)
+
+Defines a (public) check form used like `(name EXPR)`.
+    '''
+    (lambda (stx)
+      (let [(ctx (quote_syntax here)),
+            (name_stx (syntax_get stx 1)),
+            (tag (syntax_unwrap (syntax_get stx 2)))]
+        (datum_to_syntax
+          (quasiquote
+            (defpub_syntax (unquote name_stx)  // (name EXPR)
+              (lambda (stx1)
+                // TODO check arity
+                (let [(ctx1 (quote_syntax here1)),
+                      (thunk_stx (syntax_get stx1 1))]
+                  (datum_to_syntax
+                      // (check_exn tag (lambda () THUNK))
+                    (sexp
+                       (quote_syntax check_exn)
+                       (unquote tag)
+                       (sexp (quote_syntax lambda) (quote ())
+                          thunk_stx))
+                    ctx1
+                    stx1)))))
+          ctx
+          stx))))
+
+
+  (define_exn_check check_arg_exn      "arg")
+  (define_exn_check check_arity_exn    "arity")
+  (define_exn_check check_contract_exn "contract")
+  (define_exn_check check_syntax_exn   "syntax")
+
+
+  (defpub_syntax check_compile_exn
+    '''
+    (check_compile_exn top_form)
+     ->
+    (check_exn (lambda () (eval (quote top_form))))
+    '''
+    (lambda (stx)
+      // TODO check arity
+      (let [(top_form (syntax_get stx 1))]
+        (quasisyntax
+          (begin
+            (check_syntax_exn
+              (eval (quote_syntax (unsyntax top_form))))
+            (check_syntax_exn
+              (eval (quote (unsyntax top_form)))))))))
 )
