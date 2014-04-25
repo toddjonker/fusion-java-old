@@ -81,8 +81,10 @@ itself recursively.
            (args      (tail signature)),
            (arg_count (size args)),
            (arity_msg (string_append (syntax_unwrap name_stx)
-                                     " requires at least "
+                                     " requires "
                                      (int_to_string arg_count)
+                                     " or "
+                                     (int_to_string (+ 1 arg_count))
                                      (if (= 1 arg_count) " arg" " args")
                                      "; usage: ("
                                      (apply string_append
@@ -91,7 +93,7 @@ itself recursively.
                                                 (syntax_unwrap i)
                                                 " "))
                                           signature))
-                                     "message ...)")),
+                                     "[message])")),
            (proc_name (datum_to_syntax
                           (string_to_symbol
                             (string_append "_" (syntax_unwrap name_stx)))
@@ -207,33 +209,42 @@ Defines a (public) check form used like `(name EXPR)`.
             (tag (syntax_unwrap (syntax_get stx 2)))]
         (datum_to_syntax
           (quasiquote
-            (defpub_syntax (unquote name_stx)  // (name EXPR)
-              (lambda (stx1)
-                // TODO check arity
-                (let [(ctx1 (quote_syntax here1)),
-                      (thunk_stx (syntax_get stx1 1)),
-                      (meta (struct "name"       (quote (unquote name_stx))
-                                    "expression" (syntax_to_datum stx1)
-                                    "line"       (syntax_line stx1)
-                                    "column"     (syntax_column stx1)))]
-                  (datum_to_syntax
-                      // (parameterize
-                      //   [(check_stack_param META)]
-                      //   (check_exn TAG (lambda () BODY)))
-                    (sexp
-                      (quote_syntax parameterize)
-                      [(sexp (quote_syntax check_stack_param)
-                             (sexp (quote_syntax quote)
-                               (if (== (syntax_size stx1) 2)
-                                   meta
-                                   (struct_merge meta
-                                     { message: (syntax_get stx1 2) }))))]
+            (defpub_syntax (unquote name_stx)  // (name EXPR [message])
+              (let [(ctx1 (quote_syntax here1))]
+                (lambda (stx1)
+                  (lets [(actuals (tail (syntax_unwrap stx1))),
+                         (thunk_stx (if (or (is_empty actuals)
+                                            (> (size actuals) 2))
+                                        (wrong_syntax stx1
+                                          (unquote
+                                            (string_append
+                                              (syntax_unwrap name_stx)
+                                              " requires 1 or 2 args; usage: ("
+                                              (syntax_unwrap name_stx)
+                                              " expr [message])")))
+                                        (head actuals))),
+                         (meta (struct "name"       (quote (unquote name_stx))
+                                       "expression" (syntax_to_datum stx1)
+                                       "line"       (syntax_line stx1)
+                                       "column"     (syntax_column stx1)))]
+                    (datum_to_syntax
+                        // (parameterize
+                        //   [(check_stack_param META)]
+                        //   (check_exn TAG (lambda () BODY)))
                       (sexp
-                        (quote_syntax check_exn)
-                        (unquote tag)
-                        (sexp (quote_syntax lambda) (quote ()) thunk_stx)))
-                    ctx1
-                    stx1)))))
+                        (quote_syntax parameterize)
+                        [(sexp (quote_syntax check_stack_param)
+                               (sexp (quote_syntax quote)
+                                 (if (== (syntax_size stx1) 2)
+                                     meta
+                                     (struct_merge meta
+                                       { message: (syntax_get stx1 2) }))))]
+                        (sexp
+                          (quote_syntax check_exn)
+                          (unquote tag)
+                          (sexp (quote_syntax lambda) (quote ()) thunk_stx)))
+                      ctx1
+                      stx1))))))
           ctx
           stx))))
 

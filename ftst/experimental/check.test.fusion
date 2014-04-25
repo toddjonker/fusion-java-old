@@ -41,5 +41,10 @@
 //==========================================================================
 // check_arity_exn
 
+(check_compile_exn (check_arity_exn))
+(check_compile_exn (check_arity_exn true "message" "extra"))
+
+(check_arity_exn (pair 1))
+
 (check_arity_exn
   (raise_arity_error "foo" 1))
