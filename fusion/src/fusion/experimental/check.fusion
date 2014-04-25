@@ -182,15 +182,15 @@ itself recursively.
     (java_new "com.amazon.fusion.ThunkThrowsProc"))
 
 
-  // TODO this should accept a predicate to check exn type
-  (define_check (check_exn tag thunk)
-    // TODO type-check thunk
+  // Currently not a "real" check macro; that adds noise to error reports
+  // and exposes our tag strings.
+  (define (check_exn tag thunk)
     (let [(e (thunk_throws thunk))]
       (cond
         ((== e tag)
          (void))
-        (e  (fail_check { expected: (string_append tag " exception"),
-                          actual: (string_append e " exception")}))
+        (e    (fail_check { actual:   (string_append e   " exception"),
+                            expected: (string_append tag " exception")}))
         (true (fail_check { expected: (string_append tag " exception")})))))
 
 
@@ -211,14 +211,23 @@ Defines a (public) check form used like `(name EXPR)`.
               (lambda (stx1)
                 // TODO check arity
                 (let [(ctx1 (quote_syntax here1)),
-                      (thunk_stx (syntax_get stx1 1))]
+                      (thunk_stx (syntax_get stx1 1)),
+                      (meta (struct "name"       (quote (unquote name_stx))
+                                    "expression" (syntax_to_datum stx1)
+                                    "line"       (syntax_line stx1)
+                                    "column"     (syntax_column stx1)))]
                   (datum_to_syntax
-                      // (check_exn tag (lambda () THUNK))
+                      // (parameterize
+                      //   [(check_stack_param META)]
+                      //   (check_exn TAG (lambda () BODY)))
                     (sexp
-                       (quote_syntax check_exn)
-                       (unquote tag)
-                       (sexp (quote_syntax lambda) (quote ())
-                          thunk_stx))
+                      (quote_syntax parameterize)
+                      [(sexp (quote_syntax check_stack_param)
+                             (sexp (quote_syntax quote) meta))]
+                      (sexp
+                        (quote_syntax check_exn)
+                        (unquote tag)
+                        (sexp (quote_syntax lambda) (quote ()) thunk_stx)))
                     ctx1
                     stx1)))))
           ctx
