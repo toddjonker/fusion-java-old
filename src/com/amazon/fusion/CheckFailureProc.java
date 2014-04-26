@@ -40,7 +40,7 @@ final class CheckFailureProc
 
 
     @SuppressWarnings("serial")
-    private class CheckFailure
+    class CheckFailure
         extends FusionException
     {
         private final List<Object> myStack;

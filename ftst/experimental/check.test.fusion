@@ -51,6 +51,15 @@
 
 
 //==========================================================================
+// check_contract_exn
+
+(check_contract_exn (raise_arity_error "foo" 1))
+
+(check_contract_exn (pair 1))  // Arity    exn IS-A contract exn
+(check_contract_exn (head 1))  // Argument exn IS-A contract exn
+
+
+//==========================================================================
 // check_compile_exn
 
 (check_compile_exn (check_compile_exn))

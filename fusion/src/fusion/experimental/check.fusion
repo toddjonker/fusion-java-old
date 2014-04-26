@@ -180,20 +180,18 @@ itself recursively.
   //===========================================================================
 
 
-  (define thunk_throws
-    (java_new "com.amazon.fusion.ThunkThrowsProc"))
-
+  (define _check_exn
+    (java_new "com.amazon.fusion.CheckExceptionProc"))
 
   // Currently not a "real" check macro; that adds noise to error reports
   // and exposes our tag strings.
   (define (check_exn tag thunk)
-    (let [(e (thunk_throws thunk))]
-      (cond
-        ((== e tag)
-         (void))
-        (e    (fail_check { actual:   (string_append e   " exception"),
-                            expected: (string_append tag " exception")}))
-        (true (fail_check { expected: (string_append tag " exception")})))))
+    (let [(e (_check_exn tag thunk))]
+      (when (is_string e)
+        (if (== "" e)
+          (fail_check { expected: (string_append tag " exception")})
+          (fail_check { expected: (string_append tag " exception"),
+                        actual:   (string_append e   " exception")})))))
 
 
   // This should really be a procedure, but it doesn't work.
