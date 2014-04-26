@@ -247,6 +247,10 @@ Defines a (public) check form used like `(name EXPR)`.
           stx))))
 
 
+  // New naming convention
+  (define_exn_check expect_check_exn   "check")
+  (define_exn_check expect_result_exn  "result")
+
   (define_exn_check check_arg_exn      "arg")
   (define_exn_check check_arity_exn    "arity")
   (define_exn_check check_contract_exn "contract")

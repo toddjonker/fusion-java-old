@@ -39,6 +39,19 @@
 
 
 //==========================================================================
+// expect_check_exn
+
+(expect_check_exn (check = 1 2))
+(expect_check_exn (expect_check_exn (check = 1 1)))
+
+
+//==========================================================================
+// expect_result_exn
+
+(expect_result_exn (let_values [((x y) 1)] true))
+
+
+//==========================================================================
 // check_arity_exn
 
 (check_compile_exn (check_arity_exn))
@@ -57,6 +70,8 @@
 
 (check_contract_exn (pair 1))  // Arity    exn IS-A contract exn
 (check_contract_exn (head 1))  // Argument exn IS-A contract exn
+
+(expect_result_exn (let_values [((x y) 1)] true)) // Result exn is too
 
 
 //==========================================================================
