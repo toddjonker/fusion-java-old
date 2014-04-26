@@ -257,17 +257,22 @@ Defines a (public) check form used like `(name EXPR)`.
 
   (defpub_syntax check_compile_exn
     '''
-    (check_compile_exn top_form)
-     ->
-    (check_exn (lambda () (eval (quote top_form))))
+    (check_compile_exn top_form [message])
     '''
     (lambda (stx)
-      // TODO check arity
-      (let [(top_form (syntax_get stx 1))]
-        (quasisyntax
-          (begin
-            (check_syntax_exn
-              (eval (quote_syntax (unsyntax top_form))))
-            (check_syntax_exn
-              (eval (quote (unsyntax top_form)))))))))
+      (let [(actuals (tail (syntax_unwrap stx)))]
+        (when (or (is_empty actuals) (> (size actuals) 2))
+          (wrong_syntax stx
+            '''check_compile_exn requires 1 or 2 args; '''
+            '''usage: (check_compile_exn top_form [message])'''))
+        (let [(top_form (head actuals))]
+          (datum_to_syntax
+            // (check_syntax_exn (eval (quote_syntax TOP)) [MESSAGE])
+            (apply sexp
+              (quote_syntax check_syntax_exn)
+              (sexp (quote_syntax eval)
+                (sexp (quote_syntax quote_syntax) top_form))
+              (tail actuals))
+            (quote_syntax here)
+            stx)))))
 )

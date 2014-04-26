@@ -48,3 +48,12 @@
 
 (check_arity_exn
   (raise_arity_error "foo" 1))
+
+
+//==========================================================================
+// check_compile_exn
+
+(check_compile_exn (check_compile_exn))
+(check_compile_exn (check_compile_exn true "message" "extra"))
+
+(check_compile_exn (wrong_syntax (quote_syntax foo) "you are wrong"))
