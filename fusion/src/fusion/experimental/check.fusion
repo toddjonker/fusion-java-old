@@ -10,12 +10,29 @@
   '''
 A lightweight unit testing library.
 
+This module allows applications to build a suite of tests in the form of Fusion
+scripts, where each script uses this module to express a number of _checks_
+that each validate some aspect of the code under test.
+
 <!-- FUSION-185 This comment forces FusionDoc to stop the one-liner here. -->
 
 ## WARNING
 
 This module contains unstable, experimental features.
 There is **NO SUPPORT** for this module.
+
+
+## Checks
+
+_Checks_ are the fundamental components of test scripts.  A check executes some
+logic give some inputs, and either returns void to express success, or throws
+a "check exception" to express failure.
+This library provides a range of primitive checks, and applications can
+compose them into higher-level checks with broader responsibilites.
+
+In order to present helpful output when failures occur, all checks are
+syntactic forms.  Nevertheless, they work like procedures: the arguments are
+treated as expressions and evaluated left-to-right.
   '''
 
 
@@ -47,24 +64,27 @@ Raises a check failure exception, including a stack trace derived from the
         (_raise_check_failure check_stack_param))))
 
 
-  // TODO enable recursive checks?
   (defpub_syntax define_check
-    (let [(ctx   (quote_syntax here)),
-          (wrong (lambda (stx)
-                   (wrong_syntax stx
-                     '''Bad syntax for define_check; usage: '''
-                     '''(define_check (name arg_name ...) body ...)''')))]
-      (lambda (stx)
-        '''
+    '''
     (define_check (name arg ...) body ...)
 
 Defines a new check form that's invoked as:
 
     (name arg_expr ... [message])
 
-The body of the check can use other checks, but (at present) may not use
-itself recursively.
-        '''
+Note that the optional `message` arg is added automatically and is not part of
+the declared signature.
+
+The body is typically composed of several other checks, all of which must pass
+for the new check to succeed.  The body may not use the new check recursively.
+Any results from the body are ignored and the check form always returns void.
+    '''
+    (let [(ctx   (quote_syntax here)),
+          (wrong (lambda (stx)
+                   (wrong_syntax stx
+                     '''Bad syntax for define_check; usage: '''
+                     '''(define_check (name arg_name ...) body ...)''')))]
+      (lambda (stx)
         (when (< (syntax_size stx) 3)
           (wrong stx))
         (lets
@@ -75,7 +95,19 @@ itself recursively.
                                  (every is_identifier s))
                             s
                             (wrong stx)))),
-           (body      (tail orig_args)),
+           (usage     (string_append "("
+                                     (apply string_append
+                                       (map (lambda (i)
+                                              (string_append
+                                                (syntax_unwrap i)
+                                                " "))
+                                          signature))
+                                     "[message])")),
+           (docs      (let [(d (syntax_unwrap (element orig_args 1)))]
+                        (if (is_string d) d null.string))),
+           (body      (if (is_null docs)
+                          (tail orig_args)
+                          (tail (tail orig_args)))),
            (name_stx  (head signature)),
            // TODO check for duplicate arg names
            (args      (tail signature)),
@@ -86,14 +118,8 @@ itself recursively.
                                      " or "
                                      (int_to_string (+ 1 arg_count))
                                      (if (= 1 arg_count) " arg" " args")
-                                     "; usage: ("
-                                     (apply string_append
-                                       (map (lambda (i)
-                                              (string_append
-                                                (syntax_unwrap i)
-                                                " "))
-                                          signature))
-                                     "[message])")),
+                                     "; usage: "
+                                     usage)),
            (proc_name (datum_to_syntax
                           (string_to_symbol
                             (string_append "_" (syntax_unwrap name_stx)))
@@ -120,9 +146,11 @@ itself recursively.
                         (apply (lambda (unquote args)
                                  (unquote (pair (quote begin) body)))
                           named_args)
-                        // All checks should return void.
+                        // All checks return void.
                         (void)))))
                 (define_syntax (unquote name_stx)
+                  (unquote (string_append "\n    " usage "\n"
+                             (or docs "")))
                   (let [(ctx1 (quote_syntax here1))]
                     (lambda (stx1)
                       (let [(actuals (tail (syntax_unwrap stx1)))]
@@ -147,32 +175,67 @@ itself recursively.
 
   (provide check)
   (define_check (check op val1 val2)
+    '''
+Checks that the result of `(op val1 val2)` is truthy.
+    '''
     (unless (op val1 val2)
       (fail_check {})))
 
+
   (provide check_pred)
   (define_check (check_pred pred val)
+    '''
+Checks that the result of `(pred val)` is truthy.
+    '''
     (unless (pred val)
       (fail_check {})))
 
+
   (provide check_true)
   (define_check (check_true val)
+    '''
+Checks that `val` is `true` (as opposed to truthy).
+Annotations are ignored.
+    '''
     (unless (= true val)
       (fail_check {actual:val})))
 
+
   (provide check_false)
   (define_check (check_false val)
+    '''
+Checks that `val` is `false` (as opposed to untruthy).
+Annotations are ignored.
+    '''
     (unless (= false val)
       (fail_check {actual:val})))
 
+
   (provide check_void)
   (define_check (check_void val)
+    '''
+Checks that `val` is void.
+    '''
     (unless (is_void val)
       (fail_check {actual:val})))
 
 
   (provide check_annotations)
   (define_check (check_annotations expected value)
+    '''
+Checks that the `value` has the `expected` annotations.  `expected` must be a
+sequence of strings or symbols.
+
+For example, these checks succeed:
+
+    (check_annotations [] null)
+    (check_annotations ["a"] (quote a::null))
+    (check_annotations (quote (a b)) (quote a::b::null))
+
+This one fails because the order of annotions does not match:
+
+    (check_annotations ["b", "a"] (quote a::b::null))
+    '''
     (unless (= expected (type_annotations value))
       (fail_check {expected:expected, actual:(type_annotations value)})))
 
@@ -202,12 +265,19 @@ itself recursively.
 Defines a (public) check form used like `(name EXPR)`.
     '''
     (lambda (stx)
-      (let [(ctx (quote_syntax here)),
-            (name_stx (syntax_get stx 1)),
-            (tag (syntax_unwrap (syntax_get stx 2)))]
+      (lets [(ctx (quote_syntax here)),
+             (name_stx (syntax_get stx 1)),
+             (tag (syntax_unwrap (syntax_get stx 2))),
+             (docs (string_append '''
+    (''' (syntax_unwrap name_stx) ''' expr [message])
+
+Evaluates `expr` and checks that it throws an exception like that thrown by
+`''' (syntax_unwrap (syntax_get stx 3)) '''`.  If no exception is thrown, or if
+another kind of exception is thrown, then the check fails.'''))]
         (datum_to_syntax
           (quasiquote
             (defpub_syntax (unquote name_stx)  // (name EXPR [message])
+              (unquote docs)
               (let [(ctx1 (quote_syntax here1))]
                 (lambda (stx1)
                   (lets [(actuals (tail (syntax_unwrap stx1))),
@@ -248,18 +318,21 @@ Defines a (public) check form used like `(name EXPR)`.
 
 
   // New naming convention
-  (define_exn_check expect_check_exn   "check")
-  (define_exn_check expect_result_exn  "result")
+  (define_exn_check expect_check_exn   "check" "fail_check")
+  (define_exn_check expect_result_exn  "result" "raise_result_error")
 
-  (define_exn_check check_arg_exn      "arg")
-  (define_exn_check check_arity_exn    "arity")
-  (define_exn_check check_contract_exn "contract")
-  (define_exn_check check_syntax_exn   "syntax")
+  (define_exn_check check_arg_exn      "arg" "raise_argument_error")
+  (define_exn_check check_arity_exn    "arity" "raise_arity_error")
+  (define_exn_check check_contract_exn "contract" "(no public API)")
+  (define_exn_check check_syntax_exn   "syntax" "wrong_syntax")
 
 
   (defpub_syntax check_compile_exn
     '''
     (check_compile_exn top_form [message])
+
+Passes the given top-level form to `eval` and checks that it throws an
+exception like that thrown by `wrong_syntax`.
     '''
     (lambda (stx)
       (let [(actuals (tail (syntax_unwrap stx)))]

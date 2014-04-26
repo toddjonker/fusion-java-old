@@ -7,11 +7,47 @@
 
 (check = 1 1)
 (check_pred is_truthy 12)
-(check_true true)
-(check_false false)
-(check_void (void))
-(check_annotations ["a", "b"] (quote a::b::c))
 
+
+//==========================================================================
+// check_true, check_false
+
+(check_true true)
+(check_true (quote a::true))
+
+(expect_check_exn (check_true false))
+(expect_check_exn (check_true 1))      // truthy but not true
+
+(check_false false)
+(check_false (quote a::false))
+
+(expect_check_exn (check_false true))
+(expect_check_exn (check_false null))      // untruthy but not false
+
+
+//==========================================================================
+// check_void
+
+(check_void (void))
+(expect_check_exn (check_void null))
+
+
+//==========================================================================
+// check_annotations
+
+(check_annotations [] null)
+(check_annotations (sexp) null)
+
+(check_annotations ["a"] (quote a::null))
+
+(check_annotations ["a", "b"]    (quote a::b::c))
+(check_annotations (quote (a b)) (quote a::b::null))
+
+(expect_check_exn
+  (check_annotations ["b", "a"] (quote a::b::null)))
+
+(check_compile_exn
+  (check_annotations 2))
 
 
 //==========================================================================
@@ -36,6 +72,10 @@
 (check_foo1 1 "message")
 (check_compile_exn (check_foo1))
 (check_compile_exn (check_foo1 1 "message" "extra"))
+
+
+(define_check (check_doc) "documentation" true)
+(check_doc)
 
 
 //==========================================================================
