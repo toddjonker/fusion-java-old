@@ -96,7 +96,7 @@ final class FusionCollection
                                      String    expectation,
                                      int       argNum,
                                      Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         Object arg = args[argNum];
         if (arg instanceof BaseCollection)
@@ -115,7 +115,7 @@ final class FusionCollection
                                              Procedure who,
                                              int       argNum,
                                              Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "nullable collection";
         return checkCollectionArg(eval, who, expectation, argNum, args);

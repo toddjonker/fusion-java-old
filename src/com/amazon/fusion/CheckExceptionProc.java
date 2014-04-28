@@ -22,7 +22,7 @@ final class CheckExceptionProc
     {
         switch (tag)
         {
-            case "arg":      return ArgTypeFailure.class;
+            case "argument": return ArgumentException.class;
             case "arity":    return ArityFailure.class;
             case "check":    return CheckFailure.class;
             case "contract": return ContractException.class;

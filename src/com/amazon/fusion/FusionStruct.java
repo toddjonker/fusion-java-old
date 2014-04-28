@@ -1647,7 +1647,7 @@ final class FusionStruct
                                  String    expectation,
                                  int       argNum,
                                  Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         Object arg = args[argNum];
         if (arg instanceof BaseStruct)
@@ -1666,7 +1666,7 @@ final class FusionStruct
                                          Procedure who,
                                          int       argNum,
                                          Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "nullable struct";
         return checkStructArg(eval, who, expectation, argNum, args);
@@ -2137,7 +2137,7 @@ final class FusionStruct
                 {
                     String expectation =
                         "sequence of non-empty strings or symbols";
-                    throw new ArgTypeFailure(identify(), expectation, 0, args);
+                    throw new ArgumentException(this, expectation, 0, args);
                 }
 
                 Object valueObj = valueIterator.next();

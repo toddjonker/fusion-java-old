@@ -102,10 +102,10 @@ final class Syntax
         {
             if (whosCalling == null) whosCalling = "datum_to_syntax";
 
-            throw new ArgTypeFailure(whosCalling,
-                                     "syntax object or ionizable data",
-                                     -1,
-                                     datum);
+            throw new ArgumentException(whosCalling,
+                                        "syntax object or ionizable data",
+                                        -1,
+                                        datum);
         }
 
         return stx;

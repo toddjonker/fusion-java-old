@@ -31,7 +31,7 @@ final class StringToDecimalProc
 
 
     BigDecimal parse(String text, Object[] args)
-        throws ArgTypeFailure
+        throws ArgumentException
     {
         // Note: This implementation is experimental! It relies on java's BigDecimal
         // API to perform string -> decimal parsing. This means it will NOT handle the

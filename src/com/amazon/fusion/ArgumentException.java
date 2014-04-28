@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,7 +10,7 @@ import java.io.IOException;
  * Indicates a failure applying a procedure with the wrong type of argument.
  */
 @SuppressWarnings("serial")
-final class ArgTypeFailure
+final class ArgumentException
     extends ContractException
 {
     private final String   myName;
@@ -24,8 +24,8 @@ final class ArgTypeFailure
      *   -1 means a specific position isn't implicated.
      * @param actuals must not be null or zero-length.
      */
-    ArgTypeFailure(String name, String expectation,
-                   int badPos, Object... actuals)
+    ArgumentException(String name, String expectation,
+                      int badPos, Object... actuals)
     {
         super("arg type failure");
         assert name != null && actuals.length != 0;
@@ -42,8 +42,8 @@ final class ArgTypeFailure
      *   -1 means a specific position isn't implicated.
      * @param actual must not be null.
      */
-    ArgTypeFailure(String name, String expectation,
-                   int badPos, Object actual)
+    ArgumentException(String name, String expectation,
+                      int badPos, Object actual)
     {
         this(name, expectation, badPos, new Object[] { actual });
     }
@@ -53,8 +53,8 @@ final class ArgTypeFailure
      *   -1 means a specific position isn't implicated.
      * @param actuals must not be null or zero-length.
      */
-    ArgTypeFailure(NamedValue name, String expectation,
-                   int badPos, Object... actuals)
+    ArgumentException(NamedValue name, String expectation,
+                      int badPos, Object... actuals)
     {
         this(name.identify(), expectation, badPos, actuals);
     }
@@ -64,15 +64,11 @@ final class ArgTypeFailure
      *   -1 means a specific arg isn't implicated.
      * @param actual must not be null.
      */
-    ArgTypeFailure(NamedValue name, String expectation,
-                   int badPos, Object actual)
+    ArgumentException(NamedValue name, String expectation,
+                      int badPos, Object actual)
     {
-        super("arg type failure");
-        assert name != null && actual != null;
-        myName = name.identify();
-        myExpectation = expectation;
-        myBadPos = badPos;
-        myActuals = new Object[]{ actual };
+        this(name.identify(), expectation, badPos, new Object[]{ actual });
+        assert actual != null;
     }
 
 

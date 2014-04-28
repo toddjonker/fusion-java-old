@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -19,7 +19,7 @@ class FusionIterator
     extends BaseValue
 {
     static FusionIterator checkArg(Procedure who, int argNum, Object... args)
-        throws ArgTypeFailure
+        throws ArgumentException
     {
         return who.checkArg(FusionIterator.class, "iterator", argNum, args);
     }
@@ -46,7 +46,7 @@ class FusionIterator
             return unsafeSexpIterator(eval, value);
         }
 
-        throw new ArgTypeFailure("iterate", "iterable", 0, value);
+        throw new ArgumentException("iterate", "iterable", 0, value);
     }
 
 

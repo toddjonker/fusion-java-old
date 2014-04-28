@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -26,7 +26,7 @@ final class SyntaxAppendProc
             seq = seq.makeAppended(eval, next);
             if (seq == null)
             {
-                throw new ArgTypeFailure(this, "proper sequence", i-1, args);
+                throw new ArgumentException(this, "proper sequence", i-1, args);
             }
         }
         return seq;

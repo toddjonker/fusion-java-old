@@ -424,7 +424,7 @@ public final class FusionString
                                  String    expectation,
                                  int       argNum,
                                  Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         Object arg = args[argNum];
         if (arg instanceof BaseString)
@@ -443,7 +443,7 @@ public final class FusionString
                                          Procedure who,
                                          int       argNum,
                                          Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "nullable string";
         return checkStringArg(eval, who, expectation, argNum, args);
@@ -457,7 +457,7 @@ public final class FusionString
                                          Procedure who,
                                          int       argNum,
                                          Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "non-null string";
         String result = checkStringArg(eval, who, expectation, argNum, args);
@@ -476,7 +476,7 @@ public final class FusionString
                                          Procedure who,
                                          int       argNum,
                                          Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "non-empty string";
         String result = checkStringArg(eval, who, expectation, argNum, args);

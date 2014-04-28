@@ -47,6 +47,6 @@ final class RaiseArgumentErrorProc
             badPos = -1;
         }
 
-        throw new ArgTypeFailure(name, expected, badPos, actuals);
+        throw new ArgumentException(name, expected, badPos, actuals);
     }
 }

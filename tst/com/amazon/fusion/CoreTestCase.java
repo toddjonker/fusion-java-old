@@ -536,7 +536,7 @@ public class CoreTestCase
     void expectArgTypeFailure(String expr, int badArgNum)
         throws Exception
     {
-        ArgTypeFailure e = expectFailure(ArgTypeFailure.class, expr);
+        ArgumentException e = expectFailure(ArgumentException.class, expr);
         assertEquals("argument #", badArgNum, e.getBadPos());
     }
 

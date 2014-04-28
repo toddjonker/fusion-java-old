@@ -539,7 +539,7 @@ final class FusionSexp
                 return size;
             }
 
-            throw new ArgTypeFailure("size", "proper sexp", 0, this);
+            throw new ArgumentException("size", "proper sexp", 0, this);
         }
 
         @Override
@@ -969,8 +969,8 @@ final class FusionSexp
             }
             catch (ClassCastException e)
             {
-                throw new ArgTypeFailure("iterator_next", "proper sexp",
-                                         0, this);
+                throw new ArgumentException("iterator_next", "proper sexp",
+                                            0, this);
             }
         }
     }

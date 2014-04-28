@@ -107,7 +107,7 @@ final class FusionText
                                String    expectation,
                                int       argNum,
                                Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         Object arg = args[argNum];
         if (arg instanceof BaseText)
@@ -125,7 +125,7 @@ final class FusionText
                                        Procedure who,
                                        int       argNum,
                                        Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "non-null string or symbol";
         String result = checkTextArg(eval, who, expectation, argNum, args);
@@ -144,7 +144,7 @@ final class FusionText
                                        Procedure who,
                                        int       argNum,
                                        Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "non-empty string or symbol";
         String result = checkTextArg(eval, who, expectation, argNum, args);

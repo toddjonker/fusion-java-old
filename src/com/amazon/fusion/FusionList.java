@@ -1166,7 +1166,7 @@ final class FusionList
                                String    expectation,
                                int       argNum,
                                Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         Object arg = args[argNum];
         if (arg instanceof BaseList)
@@ -1185,7 +1185,7 @@ final class FusionList
                                        Procedure who,
                                        int       argNum,
                                        Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "nullable list";
         return checkListArg(eval, who, expectation, argNum, args);
@@ -1199,7 +1199,7 @@ final class FusionList
                                      Procedure who,
                                      int       argNum,
                                      Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "non-null list";
         Object result = checkListArg(eval, who, expectation, argNum, args);

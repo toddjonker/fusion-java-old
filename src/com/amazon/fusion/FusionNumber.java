@@ -1786,7 +1786,7 @@ final class FusionNumber
                                     Procedure who,
                                     int       argNum,
                                     Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         Object arg = args[argNum];
         if (arg instanceof LongInt)
@@ -1810,7 +1810,7 @@ final class FusionNumber
                                       Procedure who,
                                       int       argNum,
                                       Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         Object arg = args[argNum];
         if (arg instanceof LongInt)
@@ -1835,7 +1835,7 @@ final class FusionNumber
                                   String    expectation,
                                   int       argNum,
                                   Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         Object arg = args[argNum];
         if (arg instanceof BaseInt)
@@ -1854,7 +1854,7 @@ final class FusionNumber
                                           Procedure who,
                                           int argNum,
                                           Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "nullable int";
         return checkIntArg(eval, who, expectation, argNum, args);
@@ -1868,7 +1868,7 @@ final class FusionNumber
                                           Procedure who,
                                           int       argNum,
                                           Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "non-null int";
         BigInteger result = checkIntArg(eval, who, expectation, argNum, args);
@@ -1893,7 +1893,7 @@ final class FusionNumber
                                       String    expectation,
                                       int       argNum,
                                       Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         Object arg = args[argNum];
         if (arg instanceof BaseDecimal)
@@ -1908,7 +1908,7 @@ final class FusionNumber
                                               Procedure who,
                                               int       argNum,
                                               Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "nullable decimal";
         BigDecimal result = checkDecimalArg(eval, who, expectation, argNum, args);
@@ -1923,7 +1923,7 @@ final class FusionNumber
                                               Procedure who,
                                               int       argNum,
                                               Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "non-null decimal";
         BigDecimal result =
@@ -1949,7 +1949,7 @@ final class FusionNumber
                                    String    expectation,
                                    int       argNum,
                                    Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         Object arg = args[argNum];
         if (arg instanceof BaseFloat)
@@ -1965,7 +1965,7 @@ final class FusionNumber
                                         Procedure who,
                                         int       argNum,
                                         Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "nullable float";
         BaseFloat f = checkFloatArg(eval, who, expectation, argNum, args);
@@ -1980,7 +1980,7 @@ final class FusionNumber
                                         Procedure who,
                                         int       argNum,
                                         Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "non-null float";
 
@@ -2305,7 +2305,7 @@ final class FusionNumber
                 }
             }
 
-            throw new ArgTypeFailure(this, "non-null int or decimal", 0, arg0);
+            throw new ArgumentException(this, "non-null int or decimal", 0, arg0);
         }
     }
 
@@ -2341,7 +2341,7 @@ final class FusionNumber
                 }
             }
 
-            throw new ArgTypeFailure(this, "non-null int or decimal", 0, arg0);
+            throw new ArgumentException(this, "non-null int or decimal", 0, arg0);
         }
     }
 }

@@ -400,7 +400,7 @@ final class FusionSymbol
                                  String    expectation,
                                  int       argNum,
                                  Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         Object arg = args[argNum];
         if (arg instanceof BaseSymbol)
@@ -419,7 +419,7 @@ final class FusionSymbol
                                          Procedure who,
                                          int       argNum,
                                          Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "nullable symbol";
         return checkSymbolArg(eval, who, expectation, argNum, args);
@@ -433,7 +433,7 @@ final class FusionSymbol
                                          Procedure who,
                                          int       argNum,
                                          Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "non-null symbol";
         String result = checkSymbolArg(eval, who, expectation, argNum, args);
@@ -451,7 +451,7 @@ final class FusionSymbol
      */
     @Deprecated
     static String checkNullableArg(Procedure who, int argNum, Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         return checkNullableSymbolArg(null, who, argNum, args);
     }
@@ -462,7 +462,7 @@ final class FusionSymbol
      */
     @Deprecated
     static String checkRequiredArg(Procedure who, int argNum, Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         return checkRequiredSymbolArg(null, who, argNum, args);
     }

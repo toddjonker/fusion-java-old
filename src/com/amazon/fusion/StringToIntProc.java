@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -34,7 +34,7 @@ final class StringToIntProc
 
 
     BigInteger parse(String text, Object[] args)
-        throws ArgTypeFailure
+        throws ArgumentException
     {
         try
         {

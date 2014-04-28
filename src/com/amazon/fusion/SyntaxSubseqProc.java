@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -30,7 +30,7 @@ final class SyntaxSubseqProc
         sequence = sequence.makeSubseq(eval, from);
         if (sequence == null)
         {
-            throw new ArgTypeFailure(this, "proper sequence", 0, args);
+            throw new ArgumentException(this, "proper sequence", 0, args);
         }
         return sequence;
     }

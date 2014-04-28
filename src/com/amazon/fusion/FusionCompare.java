@@ -90,7 +90,7 @@ final class FusionCompare
 
         FusionException failure(Object[] args)
         {
-            return new ArgTypeFailure(this, "comparable types", -1, args);
+            return new ArgumentException(this, "comparable types", -1, args);
         }
 
 

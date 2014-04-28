@@ -206,8 +206,8 @@ final class StandardTopLevel
                 String expected =
                     "injectable Java type but received " +
                         value.getClass().getName();
-                throw new ArgTypeFailure("TopLevel.define", expected,
-                                         -1, value);
+                throw new ArgumentException("TopLevel.define", expected,
+                                            -1, value);
             }
 
             myNamespace.bind(name, fv);
@@ -279,9 +279,9 @@ final class StandardTopLevel
                     String expected =
                         "injectable Java type but received " +
                             arg.getClass().getName();
-                    throw new ArgTypeFailure("TopLevel.call",
-                                             expected,
-                                             i, arguments);
+                    throw new ArgumentException("TopLevel.call",
+                                                expected,
+                                                i, arguments);
                 }
                 arguments[i] = fv;
             }

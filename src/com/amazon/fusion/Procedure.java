@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -149,14 +149,14 @@ abstract class Procedure
      *
      * @return a new exception.
      */
-    ArgTypeFailure argFailure(String expectation, int badPos, Object... actuals)
+    ArgumentException argFailure(String expectation, int badPos, Object... actuals)
     {
-        return new ArgTypeFailure(this, expectation, badPos, actuals);
+        return new ArgumentException(this, expectation, badPos, actuals);
     }
 
 
     <T> T checkArg(Class<T> klass, String desc, int argNum, Object... args)
-        throws ArgTypeFailure
+        throws ArgumentException
     {
         try
         {
@@ -165,7 +165,7 @@ abstract class Procedure
         }
         catch (ClassCastException e) {}
 
-        throw new ArgTypeFailure(this, desc, argNum, args);
+        throw new ArgumentException(this, desc, argNum, args);
     }
 
 
@@ -177,7 +177,7 @@ abstract class Procedure
      */
     @Deprecated
     int checkIntArg(int argNum, Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         return checkIntArgToJavaInt(/*eval*/ null,           // NOT SUPPORTED!
                                     this, argNum, args);
@@ -191,7 +191,7 @@ abstract class Procedure
      */
     @Deprecated
     long checkLongArg(int argNum, Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         return checkIntArgToJavaLong(/*eval*/ null,          // NOT SUPPORTED!
                                      this, argNum, args);
@@ -205,7 +205,7 @@ abstract class Procedure
      */
     @Deprecated
     BigInteger checkBigIntArg(int argNum, Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         return checkRequiredIntArg(/*eval*/ null,            // NOT SUPPORTED!
                                    this, argNum, args);
@@ -218,7 +218,7 @@ abstract class Procedure
      */
     @Deprecated
     BigInteger checkBigIntArg(Evaluator eval, int argNum, Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         return checkNullableIntArg(eval, this, argNum, args);
     }
@@ -232,7 +232,7 @@ abstract class Procedure
      */
     @Deprecated
     Object checkCollectionArg(Evaluator eval, int argNum, Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         return checkNullableCollectionArg(eval, this, argNum, args);
     }
@@ -246,7 +246,7 @@ abstract class Procedure
      */
     @Deprecated
     Object checkSequenceArg(Evaluator eval, int argNum, Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         return checkNullableSequenceArg(eval, this, argNum, args);
     }
@@ -259,7 +259,7 @@ abstract class Procedure
      */
     @Deprecated
     Object checkListArg(Evaluator eval, int argNum, Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         return checkNullableListArg(eval, this, argNum, args);
     }
@@ -273,14 +273,14 @@ abstract class Procedure
      */
     @Deprecated
     Object checkStructArg(Evaluator eval, int argNum, Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         return checkNullableStructArg(eval, this, argNum, args);
     }
 
 
     SyntaxValue checkSyntaxArg(int argNum, Object... args)
-        throws ArgTypeFailure
+        throws ArgumentException
     {
         try
         {
@@ -288,13 +288,13 @@ abstract class Procedure
         }
         catch (ClassCastException e) {}
 
-        throw new ArgTypeFailure(this, "Syntax value", argNum, args);
+        throw new ArgumentException(this, "Syntax value", argNum, args);
     }
 
     <T extends SyntaxValue> T checkSyntaxArg(Class<T> klass, String typeName,
                                              boolean nullable,
                                              int argNum, Object... args)
-        throws ArgTypeFailure
+        throws ArgumentException
     {
         Object arg = args[argNum];
 
@@ -308,12 +308,12 @@ abstract class Procedure
         }
         catch (ClassCastException e) {}
 
-        throw new ArgTypeFailure(this, typeName, argNum, args);
+        throw new ArgumentException(this, typeName, argNum, args);
     }
 
 
     SyntaxSymbol checkSyntaxSymbolArg(int argNum, Object... args)
-        throws ArgTypeFailure
+        throws ArgumentException
     {
         return checkSyntaxArg(SyntaxSymbol.class, "syntax symbol",
                               true /* nullable */, argNum, args);
@@ -321,7 +321,7 @@ abstract class Procedure
 
 
     SyntaxContainer checkSyntaxContainerArg(int argNum, Object... args)
-        throws ArgTypeFailure
+        throws ArgumentException
     {
         return checkSyntaxArg(SyntaxContainer.class,
                               "syntax_list, sexp, or struct",
@@ -331,7 +331,7 @@ abstract class Procedure
 
 
     SyntaxSequence checkSyntaxSequenceArg(int argNum, Object... args)
-        throws ArgTypeFailure
+        throws ArgumentException
     {
         return checkSyntaxArg(SyntaxSequence.class,
                               "syntax_list or syntax_sexp",
@@ -340,7 +340,7 @@ abstract class Procedure
 
     /** Ensures that an argument is a {@link Procedure}. */
     Procedure checkProcArg(int argNum, Object... args)
-        throws ArgTypeFailure
+        throws ArgumentException
     {
         try
         {
@@ -348,7 +348,7 @@ abstract class Procedure
         }
         catch (ClassCastException e) {}
 
-        throw new ArgTypeFailure(this, "procedure", argNum, args);
+        throw new ArgumentException(this, "procedure", argNum, args);
     }
 
 }

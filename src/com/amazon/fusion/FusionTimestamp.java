@@ -407,7 +407,7 @@ final class FusionTimestamp
                                        String    expectation,
                                        int       argNum,
                                        Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         Object arg = args[argNum];
         if (arg instanceof BaseTimestamp)
@@ -423,7 +423,7 @@ final class FusionTimestamp
                                                Procedure who,
                                                int argNum,
                                                Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "nullable timestamp";
         return checkTimestampArg(eval, who, expectation, argNum, args);
@@ -433,7 +433,7 @@ final class FusionTimestamp
     @Deprecated
     static Timestamp checkNullableArg(Procedure who, int argNum,
                                       Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         return checkNullableTimestampArg(null, who, argNum, args);
     }
@@ -446,7 +446,7 @@ final class FusionTimestamp
                                                Procedure who,
                                                int       argNum,
                                                Object... args)
-        throws FusionException, ArgTypeFailure
+        throws FusionException, ArgumentException
     {
         String expectation = "non-null timestamp";
         Timestamp result =
