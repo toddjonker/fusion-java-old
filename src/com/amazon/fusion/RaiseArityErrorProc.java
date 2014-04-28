@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -17,7 +17,9 @@ final class RaiseArityErrorProc
               "of arguments.\n" +
               "The `name` text (string or symbol) identifies the calling procedure. The\n" +
               "`arity` is an int indicating the expected arity. The `actual_arg`s are the\n" +
-              "arguments passed to the procedure.",
+              "arguments passed to the procedure.\n" +
+              "\n" +
+              "Note that an arity exception IS-A contract exception.",
               "name", "arity", "actual_arg", DOTDOTDOT);
     }
 

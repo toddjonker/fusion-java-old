@@ -106,7 +106,7 @@
 //==========================================================================
 // expect_contract_exn
 
-(expect_contract_exn (raise_arity_error "foo" 1))
+(expect_contract_exn (raise_contract_error "proc" "something went wrong"))
 
 (expect_contract_exn (pair 1))  // Arity    exn IS-A contract exn
 (expect_contract_exn (head 1))  // Argument exn IS-A contract exn

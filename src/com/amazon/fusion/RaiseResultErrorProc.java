@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -16,7 +16,9 @@ final class RaiseResultErrorProc
         super("Raises a contract failure due to a procedure returning an unacceptable value.\n" +
               "The `name` text (string or symbol) identifies the calling procedure.  The\n" +
               "`expected` string describes the relevant contract.  The `value` is the faulty\n" +
-              "result.",
+              "result.\n" +
+              "\n" +
+              "Note that a result exception IS-A contract exception.",
               "name", "expected", "value");
     }
 

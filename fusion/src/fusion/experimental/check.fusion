@@ -317,7 +317,7 @@ another kind of exception is thrown, then the check fails.'''))]
           stx))))
 
 
-  (define_exn_check expect_contract_exn "contract" "(no public API)")
+  (define_exn_check expect_contract_exn "contract" "raise_contract_error")
   (define_exn_check expect_argument_exn "arg"      "raise_argument_error")
   (define_exn_check expect_arity_exn    "arity"    "raise_arity_error")
   (define_exn_check expect_check_exn    "check"    "fail_check")

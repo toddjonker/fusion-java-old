@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -19,7 +19,9 @@ final class RaiseArgumentErrorProc
               "The `expected` string describes the relevant contract.  `bad_pos` is the\n" +
               "zero-based position of the bad argument; a negative value means that a specific\n" +
               "argument is not implicated.  The `value`s are the arguments passed to the\n" +
-              "procedure.",
+              "procedure.\n" +
+              "\n" +
+              "Note that an argument exception IS-A contract exception.",
               "name", "expected", "bad_pos", "value", DOTDOTDOTPLUS);
     }
 

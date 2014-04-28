@@ -22,6 +22,10 @@ custom exception types.
   (define raise_arity_error
     (java_new "com.amazon.fusion.RaiseArityErrorProc"))
 
+  (provide raise_contract_error)
+  (define raise_contract_error
+    (java_new "com.amazon.fusion.RaiseContractErrorProc"))
+
   (provide raise_result_error)
   (define raise_result_error
     (java_new "com.amazon.fusion.RaiseResultErrorProc"))
