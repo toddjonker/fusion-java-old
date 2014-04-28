@@ -254,7 +254,7 @@ This one fails because the order of annotions does not match:
         (if (== "" e)
           (fail_check { expected: (string_append tag " exception")})
           (fail_check { expected: (string_append tag " exception"),
-                        actual:   (string_append e   " exception")})))))
+                        actual:   e })))))
 
 
   // This should really be a procedure, but it doesn't work.

@@ -18,6 +18,7 @@ final class CheckExceptionProc
               "tag", "thunk");
     }
 
+
     Class<? extends Exception> classFor(String tag)
     {
         switch (tag)
@@ -31,6 +32,30 @@ final class CheckExceptionProc
             default:         return null;
         }
     }
+
+
+    String descriptionFor(Exception e)
+    {
+        if (e instanceof FusionException)
+        {
+            if (e instanceof ContractException)
+            {
+                if (e instanceof ArgumentException) return "argument exception";
+                if (e instanceof ArityFailure)      return "arity exception";
+                if (e instanceof ResultFailure)     return "result exception";
+
+                return "contract exception";
+            }
+
+            if (e instanceof CheckFailure)    return "check exception";
+            if (e instanceof SyntaxException) return "syntax exception";
+
+            return "other Fusion exception";
+        }
+
+        return e.getClass().getName();
+    }
+
 
     @Override
     Object doApply(Evaluator eval, Object tag, Object thunk)
@@ -52,7 +77,7 @@ final class CheckExceptionProc
                 return voidValue(eval);
             }
 
-            return makeString(eval, e.getClass().getName());
+            return makeString(eval, descriptionFor(e));
         }
 
         return makeString(eval, "");
