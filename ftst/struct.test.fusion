@@ -142,11 +142,11 @@
 (check_mod annotate (quote x::{f:1}) ["a", "b"] (quote a::b::{f:1}))
 
 
-(check_arg_exn (annotate null.struct null))
-(check_arg_exn (annotate null.struct ""))
-(check_arg_exn (annotate null.struct null.string))
-(check_arg_exn (annotate null.struct (quote null.symbol)))
-(check_arg_exn (annotate null.struct 12))
+(expect_argument_exn (annotate null.struct null))
+(expect_argument_exn (annotate null.struct ""))
+(expect_argument_exn (annotate null.struct null.string))
+(expect_argument_exn (annotate null.struct (quote null.symbol)))
+(expect_argument_exn (annotate null.struct 12))
 
 
 //==========================================================================
@@ -198,8 +198,8 @@
 (check_has_key (quote (a (void))) "a"         true)
 
 
-(check_arity_exn (has_key))
-(check_arity_exn (has_key {}))
+(expect_arity_exn (has_key))
+(expect_arity_exn (has_key {}))
 
 
 //==========================================================================
@@ -239,21 +239,21 @@
   (check === 2 (size s)))
 
 
-(check_arity_exn (put))
-(check_arity_exn (put   {}))
-(check_arity_exn (put   {} "f"))
+(expect_arity_exn (put))
+(expect_arity_exn (put   {}))
+(expect_arity_exn (put   {} "f"))
 
-(check_arity_exn (put_m))
-(check_arity_exn (put_m {}))
-(check_arity_exn (put_m {} "f"))
+(expect_arity_exn (put_m))
+(expect_arity_exn (put_m {}))
+(expect_arity_exn (put_m {} "f"))
 
-(check_arg_exn (put   [] "f" 1))
-(check_arg_exn (put   {} null.string 1))
-(check_arg_exn (put   {} (quote null.symbol) 1))
+(expect_argument_exn (put   [] "f" 1))
+(expect_argument_exn (put   {} null.string 1))
+(expect_argument_exn (put   {} (quote null.symbol) 1))
 
-(check_arg_exn (put_m [] "f" 1))
-(check_arg_exn (put_m {} null.string 1))
-(check_arg_exn (put_m {} (quote null.symbol) 1))
+(expect_argument_exn (put_m [] "f" 1))
+(expect_argument_exn (put_m {} null.string 1))
+(expect_argument_exn (put_m {} (quote null.symbol) 1))
 
 
 //==========================================================================
@@ -450,19 +450,19 @@
 (check_zip ["A","B"] [3] {A:3})
 
 
-(check_arity_exn (        struct_zip))
-(check_arity_exn (mutable_struct_zip))
-(check_arity_exn (        struct_zip ["f"]))
-(check_arity_exn (mutable_struct_zip ["f"]))
+(expect_arity_exn (        struct_zip))
+(expect_arity_exn (mutable_struct_zip))
+(expect_arity_exn (        struct_zip ["f"]))
+(expect_arity_exn (mutable_struct_zip ["f"]))
 
-(check_arg_exn (        struct_zip  "f"  [3]))
-(check_arg_exn (mutable_struct_zip  "f"  [3]))
-(check_arg_exn (        struct_zip ["f"]  3 ))
-(check_arg_exn (mutable_struct_zip ["f"]  3 ))
+(expect_argument_exn (        struct_zip  "f"  [3]))
+(expect_argument_exn (mutable_struct_zip  "f"  [3]))
+(expect_argument_exn (        struct_zip ["f"]  3 ))
+(expect_argument_exn (mutable_struct_zip ["f"]  3 ))
 
-(check_arg_exn (struct_zip [""] [0]))
-(check_arg_exn (struct_zip [null.string] [0]))
-(check_arg_exn (struct_zip (quote [null.symbol]) [0]))
+(expect_argument_exn (struct_zip [""] [0]))
+(expect_argument_exn (struct_zip [null.string] [0]))
+(expect_argument_exn (struct_zip (quote [null.symbol]) [0]))
 // TODO FUSION-204 test struct_zip with empty symbol
 
 

@@ -46,32 +46,32 @@
 (expect_check_exn
   (check_annotations ["b", "a"] (quote a::b::null)))
 
-(check_compile_exn
+(expect_compile_exn
   (check_annotations 2))
 
 
 //==========================================================================
 // define_check
 
-(check_compile_exn (define_check))
-(check_compile_exn (define_check () 1))
-(check_compile_exn (define_check [check_foo] 1))
-(check_compile_exn (define_check ("check_foo") 1))
-(check_compile_exn (define_check ((check_foo)) 1))
-(check_compile_exn (define_check (check_foo "arg") 1))
-(check_compile_exn (define_check (check_foo "arg" arg) 1))
-(check_compile_exn (define_check (check_foo arg "arg" arg) 1))
+(expect_compile_exn (define_check))
+(expect_compile_exn (define_check () 1))
+(expect_compile_exn (define_check [check_foo] 1))
+(expect_compile_exn (define_check ("check_foo") 1))
+(expect_compile_exn (define_check ((check_foo)) 1))
+(expect_compile_exn (define_check (check_foo "arg") 1))
+(expect_compile_exn (define_check (check_foo "arg" arg) 1))
+(expect_compile_exn (define_check (check_foo arg "arg" arg) 1))
 
 (define_check (check_foo0) 1)
 (check_foo0)
 (check_foo0 "message")
-(check_compile_exn (check_foo0 "message" "extra"))
+(expect_compile_exn (check_foo0 "message" "extra"))
 
 (define_check (check_foo1 arg) 1)
 (check_foo1 1)
 (check_foo1 1 "message")
-(check_compile_exn (check_foo1))
-(check_compile_exn (check_foo1 1 "message" "extra"))
+(expect_compile_exn (check_foo1))
+(expect_compile_exn (check_foo1 1 "message" "extra"))
 
 
 (define_check (check_doc) "documentation" true)
@@ -92,32 +92,32 @@
 
 
 //==========================================================================
-// check_arity_exn
+// expect_arity_exn
 
-(check_compile_exn (check_arity_exn))
-(check_compile_exn (check_arity_exn true "message" "extra"))
+(expect_compile_exn (expect_arity_exn))
+(expect_compile_exn (expect_arity_exn true "message" "extra"))
 
-(check_arity_exn (pair 1))
+(expect_arity_exn (pair 1))
 
-(check_arity_exn
+(expect_arity_exn
   (raise_arity_error "foo" 1))
 
 
 //==========================================================================
-// check_contract_exn
+// expect_contract_exn
 
-(check_contract_exn (raise_arity_error "foo" 1))
+(expect_contract_exn (raise_arity_error "foo" 1))
 
-(check_contract_exn (pair 1))  // Arity    exn IS-A contract exn
-(check_contract_exn (head 1))  // Argument exn IS-A contract exn
+(expect_contract_exn (pair 1))  // Arity    exn IS-A contract exn
+(expect_contract_exn (head 1))  // Argument exn IS-A contract exn
 
-(expect_result_exn (let_values [((x y) 1)] true)) // Result exn is too
+(expect_contract_exn (let_values [((x y) 1)] true)) // Result exn is too
 
 
 //==========================================================================
-// check_compile_exn
+// expect_compile_exn
 
-(check_compile_exn (check_compile_exn))
-(check_compile_exn (check_compile_exn true "message" "extra"))
+(expect_compile_exn (expect_compile_exn))
+(expect_compile_exn (expect_compile_exn true "message" "extra"))
 
-(check_compile_exn (wrong_syntax (quote_syntax foo) "you are wrong"))
+(expect_compile_exn (wrong_syntax (quote_syntax foo) "you are wrong"))

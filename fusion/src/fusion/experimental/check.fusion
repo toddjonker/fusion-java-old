@@ -317,19 +317,17 @@ another kind of exception is thrown, then the check fails.'''))]
           stx))))
 
 
-  // New naming convention
-  (define_exn_check expect_check_exn   "check" "fail_check")
-  (define_exn_check expect_result_exn  "result" "raise_result_error")
-
-  (define_exn_check check_arg_exn      "arg" "raise_argument_error")
-  (define_exn_check check_arity_exn    "arity" "raise_arity_error")
-  (define_exn_check check_contract_exn "contract" "(no public API)")
-  (define_exn_check check_syntax_exn   "syntax" "wrong_syntax")
+  (define_exn_check expect_contract_exn "contract" "(no public API)")
+  (define_exn_check expect_argument_exn "arg"      "raise_argument_error")
+  (define_exn_check expect_arity_exn    "arity"    "raise_arity_error")
+  (define_exn_check expect_check_exn    "check"    "fail_check")
+  (define_exn_check expect_result_exn   "result"   "raise_result_error")
+  (define_exn_check expect_syntax_exn   "syntax"   "wrong_syntax")
 
 
-  (defpub_syntax check_compile_exn
+  (defpub_syntax expect_compile_exn
     '''
-    (check_compile_exn top_form [message])
+    (expect_compile_exn top_form [message])
 
 Passes the given top-level form to `eval` and checks that it throws an
 exception like that thrown by `wrong_syntax`.
@@ -338,13 +336,13 @@ exception like that thrown by `wrong_syntax`.
       (let [(actuals (tail (syntax_unwrap stx)))]
         (when (or (is_empty actuals) (> (size actuals) 2))
           (wrong_syntax stx
-            '''check_compile_exn requires 1 or 2 args; '''
-            '''usage: (check_compile_exn top_form [message])'''))
+            '''expect_compile_exn requires 1 or 2 args; '''
+            '''usage: (expect_compile_exn top_form [message])'''))
         (let [(top_form (head actuals))]
           (datum_to_syntax
-            // (check_syntax_exn (eval (quote_syntax TOP)) [MESSAGE])
+            // (expect_syntax_exn (eval (quote_syntax TOP)) [MESSAGE])
             (apply sexp
-              (quote_syntax check_syntax_exn)
+              (quote_syntax expect_syntax_exn)
               (sexp (quote_syntax eval)
                 (sexp (quote_syntax quote_syntax) top_form))
               (tail actuals))

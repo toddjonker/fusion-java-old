@@ -9,11 +9,11 @@
 //============================================================================
 // Check use at module context
 
-(check_compile_exn // TODO check that it raises exn:fail?
+(expect_compile_exn // TODO check that it raises exn:fail?
   (provide eval))   // ERROR: not at module level
 
 
-(check_compile_exn
+(expect_compile_exn
   (module M "/fusion"
     (if true
       (provide if)  // ERROR: not at module level
@@ -86,7 +86,7 @@
 
 
 // Check failure exporting two bindings w/same name
-(check_compile_exn // exn:fail?
+(expect_compile_exn // exn:fail?
   (module M5 "/fusion"
     (require M2)
     (define top "M5")

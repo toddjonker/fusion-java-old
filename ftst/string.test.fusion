@@ -92,7 +92,7 @@
 (check === (quote text)        (string_to_symbol "text"))
 
 // TODO FUSION-204 support empty symbol
-(check_arg_exn (string_to_symbol ""))
+(expect_argument_exn (string_to_symbol ""))
 
 
 //============================================================================

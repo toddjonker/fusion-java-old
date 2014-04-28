@@ -24,7 +24,7 @@
 (define my_top "at-top")
 
 
-(check_compile_exn // exn:fail?
+(expect_compile_exn // exn:fail?
   (module M "/fusion"
     (define my_top "in-M")
     (let [(my_top "shadow")]

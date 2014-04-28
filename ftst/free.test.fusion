@@ -3,20 +3,20 @@
 (require "/fusion/experimental/check")
 
 
-(check_compile_exn
+(expect_compile_exn
   free)
 
 (define (free_ref)
   free)
 
-(check_compile_exn
+(expect_compile_exn
   (free_ref))
 
-(check_compile_exn
+(expect_compile_exn
   (define free free))
 
 // Still not defined
-(check_compile_exn
+(expect_compile_exn
   free)
 
 

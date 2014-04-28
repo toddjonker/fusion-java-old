@@ -9,14 +9,14 @@
 //==========================================================================
 // raise_arity_error
 
-(check_arity_exn
+(expect_arity_exn
   (raise_arity_error /* missing name */ /* missing arity */))
 
-(check_arity_exn
+(expect_arity_exn
   (raise_arity_error "proc" /* missing arity */))
 
-(check_arg_exn
+(expect_argument_exn
   (raise_arity_error /* wrong: */ 0 0))
 
-(check_arg_exn
+(expect_argument_exn
   (raise_arity_error "proc" /* wrong: */ "0"))

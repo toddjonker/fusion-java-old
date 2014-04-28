@@ -91,7 +91,7 @@
   mib)
 
 // This doesn't work:
-(check_compile_exn
+(expect_compile_exn
   (module Test2 "/mib_language" // Language
     (require HasMacro)
     (reference-mib)))

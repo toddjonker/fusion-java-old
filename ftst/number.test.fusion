@@ -22,10 +22,10 @@
 (check == 2.0 (/ 4.0 2.0))
 
 // divide by zero
-(check_contract_exn (/ 12. 0.))
+(expect_contract_exn (/ 12. 0.))
 
 // inexact result
-(check_contract_exn (/ 12. 7.))
+(expect_contract_exn (/ 12. 7.))
 
 
 //============================================================================
@@ -61,13 +61,13 @@
 (check ===  2 (ceiling  1.9))
 
 
-(check_arity_exn (ceiling))
-(check_arity_exn (ceiling 0 1))
+(expect_arity_exn (ceiling))
+(expect_arity_exn (ceiling 0 1))
 
-(check_arg_exn (ceiling null.int))
-(check_arg_exn (ceiling null.decimal))
-(check_arg_exn (ceiling 1e0))
-(check_arg_exn (ceiling "1"))
+(expect_argument_exn (ceiling null.int))
+(expect_argument_exn (ceiling null.decimal))
+(expect_argument_exn (ceiling 1e0))
+(expect_argument_exn (ceiling "1"))
 
 
 //============================================================================
@@ -83,13 +83,13 @@
 (check ===  1 (floor  1.0))
 (check ===  1 (floor  1.9))
 
-(check_arity_exn (floor))
-(check_arity_exn (floor 0 1))
+(expect_arity_exn (floor))
+(expect_arity_exn (floor 0 1))
 
-(check_arg_exn (floor null.int))
-(check_arg_exn (floor null.decimal))
-(check_arg_exn (floor 1e0))
-(check_arg_exn (floor "1"))
+(expect_argument_exn (floor null.int))
+(expect_argument_exn (floor null.decimal))
+(expect_argument_exn (floor 1e0))
+(expect_argument_exn (floor "1"))
 
 
 //============================================================================
@@ -104,8 +104,8 @@
 (check ===     "-123456789012345678901234567890"
  (int_to_string -123456789012345678901234567890))
 
-(check_arg_exn (int_to_string 1.))
-(check_arg_exn (int_to_string "1"))
+(expect_argument_exn (int_to_string 1.))
+(expect_argument_exn (int_to_string "1"))
 
 
 //============================================================================
@@ -120,14 +120,14 @@
 (check ===        -123456789012345678901234567890
   (string_to_int "-123456789012345678901234567890"))
 
-(check_arg_exn (string_to_int ""))
-(check_arg_exn (string_to_int " 0"))
-(check_arg_exn (string_to_int "0 "))
-(check_arg_exn (string_to_int " 0 "))
-(check_arg_exn (string_to_int "0-"))
-(check_arg_exn (string_to_int "0,"))
-(check_arg_exn (string_to_int "+1"))
-(check_arg_exn (string_to_int "--1"))
+(expect_argument_exn (string_to_int ""))
+(expect_argument_exn (string_to_int " 0"))
+(expect_argument_exn (string_to_int "0 "))
+(expect_argument_exn (string_to_int " 0 "))
+(expect_argument_exn (string_to_int "0-"))
+(expect_argument_exn (string_to_int "0,"))
+(expect_argument_exn (string_to_int "+1"))
+(expect_argument_exn (string_to_int "--1"))
 
-(check_arg_exn (string_to_int "1."))
-(check_arg_exn (string_to_int "1.0"))
+(expect_argument_exn (string_to_int "1."))
+(expect_argument_exn (string_to_int "1.0"))

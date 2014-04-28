@@ -135,11 +135,11 @@
 (check_mod_f annotate (quote x::(1)) ["a", "b"] (quote a::b::(1)))
 
 
-(check_arg_exn (annotate NULL_SEXP null))
-(check_arg_exn (annotate NULL_SEXP ""))
-(check_arg_exn (annotate NULL_SEXP null.string))
-(check_arg_exn (annotate NULL_SEXP (quote null.symbol)))
-(check_arg_exn (annotate NULL_SEXP 12))
+(expect_argument_exn (annotate NULL_SEXP null))
+(expect_argument_exn (annotate NULL_SEXP ""))
+(expect_argument_exn (annotate NULL_SEXP null.string))
+(expect_argument_exn (annotate NULL_SEXP (quote null.symbol)))
+(expect_argument_exn (annotate NULL_SEXP 12))
 
 
 //==========================================================================
@@ -168,8 +168,8 @@
 (check_true (has_key (sexp false)  0))
 (check_true (has_key (sexp (void)) 0))
 
-(check_arity_exn (has_key))
-(check_arity_exn (has_key []))
+(expect_arity_exn (has_key))
+(expect_arity_exn (has_key []))
 
 
 //==========================================================================
@@ -178,8 +178,8 @@
 (check === 1 (first (quote (1))))
 (check === 1 (first (sexp 1 2)))
 
-(check_arg_exn (first (quote null.sexp)))
-(check_arg_exn (first (sexp)))
+(expect_argument_exn (first (quote null.sexp)))
+(expect_argument_exn (first (sexp)))
 
 
 //==========================================================================
@@ -188,8 +188,8 @@
 (check === 1 (last (quote (1))))
 (check === 2 (last (sexp 1 2)))
 
-(check_arg_exn (last (quote null.sexp)))
-(check_arg_exn (last (sexp)))
+(expect_argument_exn (last (quote null.sexp)))
+(expect_argument_exn (last (sexp)))
 
 
 //==========================================================================
@@ -302,7 +302,7 @@
 (check === 2 (size (sexp 1 51)))
 (check === 2 (size (pair 1 (pair 2 (quote ())))))
 
-(check_arg_exn (size (pair 1 215)))
+(expect_argument_exn (size (pair 1 215)))
 
 
 //==========================================================================

@@ -36,7 +36,7 @@
   (eval (quote (. {f:2} "f")) ns))
 
 
-(check_contract_exn
+(expect_contract_exn
   (eval (void)))
 
 (eval (quote (define top 17220)) ns)
