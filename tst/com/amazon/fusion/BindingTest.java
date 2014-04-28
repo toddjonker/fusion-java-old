@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,33 +10,33 @@ import org.junit.Test;
 public class BindingTest
     extends CoreTestCase
 {
-    @Test(expected = UnboundIdentifierException.class)
+    @Test
     public void testNoBindingAtTop()
         throws Exception
     {
-        eval("g");
+        expectUnboundIdentifierExn("g");
     }
 
 
-    @Test(expected = UnboundIdentifierException.class)
+    @Test
     public void testNoProcBindingAtTop()
         throws Exception
     {
-        eval("(g)");
+        expectUnboundIdentifierExn("(g)");
     }
 
-    @Test(expected = UnboundIdentifierException.class)
+    @Test
     public void testNoArgBindingAtTop()
         throws Exception
     {
-        eval("(is_int g)");
+        expectUnboundIdentifierExn("(is_int g)");
     }
 
-    @Test(expected = UnboundIdentifierException.class)
+    @Test
     public void testNoBindingInProcedureBody()
         throws Exception
     {
-        eval("((lambda () g))");
+        expectUnboundIdentifierExn("((lambda () g))");
     }
 
 
@@ -76,19 +76,19 @@ public class BindingTest
     public void testLetSyntax()
         throws Exception
     {
-        expectSyntaxFailure("(let)");
-        expectSyntaxFailure("(let ((x 1)))");
-        expectSyntaxFailure("(let 12 13)");
-        expectSyntaxFailure("(let null.sexp 13)");
-        expectSyntaxFailure("(let (12) 13)");
-        expectSyntaxFailure("(let (1 2) 13)");
-        expectSyntaxFailure("(let (()) 13)");
-        expectSyntaxFailure("(let ((n 1 2)) 13)");
-        expectSyntaxFailure("(let ((12)) 13)");
-        expectSyntaxFailure("(let ((1 2)) 13)");
-        expectSyntaxFailure("(let ((name)) 13)");
-        expectSyntaxFailure("(let ((name 1) ()) 13)");
-        expectSyntaxFailure("(let ((name 1) (name2)) 13)");
+        expectSyntaxExn("(let)");
+        expectSyntaxExn("(let ((x 1)))");
+        expectSyntaxExn("(let 12 13)");
+        expectSyntaxExn("(let null.sexp 13)");
+        expectSyntaxExn("(let (12) 13)");
+        expectSyntaxExn("(let (1 2) 13)");
+        expectSyntaxExn("(let (()) 13)");
+        expectSyntaxExn("(let ((n 1 2)) 13)");
+        expectSyntaxExn("(let ((12)) 13)");
+        expectSyntaxExn("(let ((1 2)) 13)");
+        expectSyntaxExn("(let ((name)) 13)");
+        expectSyntaxExn("(let ((name 1) ()) 13)");
+        expectSyntaxExn("(let ((name 1) (name2)) 13)");
     }
 
 
@@ -108,7 +108,7 @@ public class BindingTest
     public void testNamedLetSyntax()
         throws Exception
     {
-        expectSyntaxFailure("(let null.symbol ((n 1)) 2)");
+        expectSyntaxExn("(let null.symbol ((n 1)) 2)");
     }
 
 
@@ -135,18 +135,18 @@ public class BindingTest
     public void testLetrecSyntax()
         throws Exception
     {
-        expectSyntaxFailure("(letrec)");
-        expectSyntaxFailure("(letrec ((x 1)))");
-        expectSyntaxFailure("(letrec 12 13)");
-        expectSyntaxFailure("(letrec null.sexp 13)");
-        expectSyntaxFailure("(letrec (12) 13)");
-        expectSyntaxFailure("(letrec (1 2) 13)");
-        expectSyntaxFailure("(letrec (()) 13)");
-        expectSyntaxFailure("(letrec ((12)) 13)");
-        expectSyntaxFailure("(letrec ((1 2)) 13)");
-        expectSyntaxFailure("(letrec ((name)) 13)");
-        expectSyntaxFailure("(letrec ((name 1 2)) 13)");
-        expectSyntaxFailure("(letrec ((name 1) ()) 13)");
-        expectSyntaxFailure("(letrec ((name 1) (name2)) 13)");
+        expectSyntaxExn("(letrec)");
+        expectSyntaxExn("(letrec ((x 1)))");
+        expectSyntaxExn("(letrec 12 13)");
+        expectSyntaxExn("(letrec null.sexp 13)");
+        expectSyntaxExn("(letrec (12) 13)");
+        expectSyntaxExn("(letrec (1 2) 13)");
+        expectSyntaxExn("(letrec (()) 13)");
+        expectSyntaxExn("(letrec ((12)) 13)");
+        expectSyntaxExn("(letrec ((1 2)) 13)");
+        expectSyntaxExn("(letrec ((name)) 13)");
+        expectSyntaxExn("(letrec ((name 1 2)) 13)");
+        expectSyntaxExn("(letrec ((name 1) ()) 13)");
+        expectSyntaxExn("(letrec ((name 1) (name2)) 13)");
     }
 }

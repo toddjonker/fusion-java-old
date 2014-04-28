@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -58,7 +58,7 @@ public class JavaFfiTest
     public void testJavaNewBadArgs()
         throws Exception
     {
-        expectContractFailure("(define foo (java_new '''no such class'''))");
-        expectContractFailure("(define foo (java_new " + name(Uninstantiable.class) + "))");
+        expectContractExn("(define foo (java_new '''no such class'''))");
+        expectContractExn("(define foo (java_new " + name(Uninstantiable.class) + "))");
    }
 }

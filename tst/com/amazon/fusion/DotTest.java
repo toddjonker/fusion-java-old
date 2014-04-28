@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -12,7 +12,7 @@ public class DotTest
     public void testDotArity()
         throws Exception
     {
-        expectArityFailure("(.)");
+        expectArityExn("(.)");
     }
 
     @Test
@@ -28,7 +28,7 @@ public class DotTest
     public void testNonContainerMidway()
         throws Exception
     {
-        expectContractFailure("(. [true] 0 1)");
-        expectContractFailure("(. [{f:null}] 0 \"f\" 0)");
+        expectContractExn("(. [true] 0 1)");
+        expectContractExn("(. [{f:null}] 0 \"f\" 0)");
     }
 }

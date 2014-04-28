@@ -44,7 +44,7 @@ public class StructTest
     public void testRemoveKeysArity()
         throws Exception
     {
-        expectArityFailure("(remove_keys)");
+        expectArityExn("(remove_keys)");
     }
 
     @Test
@@ -54,10 +54,10 @@ public class StructTest
         for (String form : nonStructExpressions())
         {
             String expr = "(remove_keys " + form + ")";
-            expectArgTypeFailure(expr, 0);
+            expectArgumentExn(expr, 0);
 
             expr = "(remove_keys " + form + " \"f\")";
-            expectArgTypeFailure(expr, 0);
+            expectArgumentExn(expr, 0);
         }
     }
 
@@ -68,10 +68,10 @@ public class StructTest
         for (String form : nonTextExpressions())
         {
             String expr = "(remove_keys {} " + form + ")";
-            expectArgTypeFailure(expr, 1);
+            expectArgumentExn(expr, 1);
 
             expr = "(remove_keys {} \"f\" " + form + " \"f\")";
-            expectArgTypeFailure(expr, 2);
+            expectArgumentExn(expr, 2);
         }
     }
 
@@ -80,9 +80,9 @@ public class StructTest
     public void retainKeyFail()
         throws Exception
     {
-        expectArityFailure("(retain_keys)");
+        expectArityExn("(retain_keys)");
 
-        expectContractFailure("(retain_keys [\"a\"] \"a\")");
+        expectContractExn("(retain_keys [\"a\"] \"a\")");
     }
 
     //========================================================================
@@ -104,9 +104,9 @@ public class StructTest
         throws Exception
     {
         eval("(define add_name (lambda (name value) (add value name)))");
-        expectArityFailure("(struct_for_each)");
-        expectArityFailure("(struct_for_each add_name)");
-        expectArityFailure("(struct_for_each add_name {} 3)");
+        expectArityExn("(struct_for_each)");
+        expectArityExn("(struct_for_each add_name)");
+        expectArityExn("(struct_for_each add_name {} 3)");
     }
 
     @Test
@@ -118,13 +118,13 @@ public class StructTest
         for (String form : allIonExpressions())
         {
             String expr = "(struct_for_each " + form + " {})";
-            expectArgTypeFailure(expr, 0);
+            expectArgumentExn(expr, 0);
         }
 
         for (String form : nonStructExpressions())
         {
             String expr = "(struct_for_each add_name " + form + ")";
-            expectArgTypeFailure(expr, 1);
+            expectArgumentExn(expr, 1);
         }
     }
 
@@ -152,10 +152,10 @@ public class StructTest
     public void makeStructFail()
         throws Exception
     {
-        expectContractFailure("(struct \"hello\")");
-        expectContractFailure("(struct \"hello\" 13 \"world\")");
+        expectContractExn("(struct \"hello\")");
+        expectContractExn("(struct \"hello\" 13 \"world\")");
 
-        expectArgTypeFailure("(struct 15 14)",0);
+        expectArgumentExn("(struct 15 14)",0);
     }
 
 
@@ -164,11 +164,11 @@ public class StructTest
         throws Exception
     {
         eval("(define elemList [1,2,3])");
-        expectArityFailure("(struct_zip)");
-        expectArityFailure("(struct_zip elemList)");
-        expectArityFailure("(struct_zip elemList elemList elemList)");
+        expectArityExn("(struct_zip)");
+        expectArityExn("(struct_zip elemList)");
+        expectArityExn("(struct_zip elemList elemList elemList)");
 
-        expectContractFailure("(struct_zip [\"hello\",2,\"world\"] elemList)");
+        expectContractExn("(struct_zip [\"hello\",2,\"world\"] elemList)");
     }
 
 
@@ -176,10 +176,10 @@ public class StructTest
     public void structMergeFail()
         throws Exception
     {
-        expectArityFailure("(struct_merge)");
-        expectArityFailure("(struct_merge {f:3})");
+        expectArityExn("(struct_merge)");
+        expectArityExn("(struct_merge {f:3})");
 
-        expectArgTypeFailure("(struct_merge {f:3} 4)",1);
+        expectArgumentExn("(struct_merge {f:3} 4)",1);
     }
 
 

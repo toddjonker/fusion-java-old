@@ -500,44 +500,44 @@ public class CoreTestCase
         }
     }
 
-    void expectFusionException(String expr)
+    void expectFusionExn(String expr)
         throws Exception
     {
         expectFailure(FusionException.class, expr);
     }
 
-    void expectSyntaxFailure(String expr)
+    void expectSyntaxExn(String expr)
         throws Exception
     {
         expectFailure(SyntaxException.class, expr);
     }
 
 
-    void expectUnboundIdentifierException(String expr)
+    void expectUnboundIdentifierExn(String expr)
         throws Exception
     {
         expectFailure(UnboundIdentifierException.class, expr);
     }
 
 
-    void expectContractFailure(String expr)
+    void expectContractExn(String expr)
         throws Exception
     {
         expectFailure(ContractException.class, expr);
     }
 
 
-    void expectArityFailure(String expr)
+    void expectArityExn(String expr)
         throws Exception
     {
         expectFailure(ArityFailure.class, expr);
     }
 
-    void expectArgTypeFailure(String expr, int badArgNum)
+
+    void expectArgumentExn(String expr, int badArgNum)
         throws Exception
     {
         ArgumentException e = expectFailure(ArgumentException.class, expr);
         assertEquals("argument #", badArgNum, e.getBadPos());
     }
-
 }

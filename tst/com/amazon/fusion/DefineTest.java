@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -26,10 +26,10 @@ public class DefineTest
     public void badDefineSyntax()
         throws Exception
     {
-        expectSyntaxFailure("(define)");
-        expectSyntaxFailure("(define x)");
-        expectSyntaxFailure("(define x 2 3)");
-        expectSyntaxFailure("(define 1 2)");
-        expectSyntaxFailure("(define null.symbol 2)");
+        expectSyntaxExn("(define)");
+        expectSyntaxExn("(define x)");
+        expectSyntaxExn("(define x 2 3)");
+        expectSyntaxExn("(define 1 2)");
+        expectSyntaxExn("(define null.symbol 2)");
     }
 }

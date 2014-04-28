@@ -120,10 +120,10 @@ public class BooleanTest
     public void testIfArity()
         throws Exception
     {
-        expectSyntaxFailure("(if)");
-        expectSyntaxFailure("(if true)");
-        expectSyntaxFailure("(if true 1)");
-        expectSyntaxFailure("(if true 1 2 3)");
+        expectSyntaxExn("(if)");
+        expectSyntaxExn("(if true)");
+        expectSyntaxExn("(if true 1)");
+        expectSyntaxExn("(if true 1 2 3)");
     }
 
 
@@ -152,8 +152,8 @@ public class BooleanTest
     public void testNotArity()
         throws Exception
     {
-        expectArityFailure("(not)");
-        expectArityFailure("(not true false)");
+        expectArityExn("(not)");
+        expectArityExn("(not true false)");
     }
 
 
@@ -315,45 +315,45 @@ public class BooleanTest
 
         for (int i = 0; i < ops.length; i++)
         {
-            expectContractFailure("("+ops[i]+" 1 true)");
-            expectContractFailure("("+ops[i]+" 1 \"hello\")");
-            expectContractFailure("("+ops[i]+" 1 2008-08-28)");
-            expectContractFailure("("+ops[i]+" 1 2007-08-28T16:37:24.0000Z)");
-            expectContractFailure("("+ops[i]+" 1 (void))");
+            expectContractExn("("+ops[i]+" 1 true)");
+            expectContractExn("("+ops[i]+" 1 \"hello\")");
+            expectContractExn("("+ops[i]+" 1 2008-08-28)");
+            expectContractExn("("+ops[i]+" 1 2007-08-28T16:37:24.0000Z)");
+            expectContractExn("("+ops[i]+" 1 (void))");
 
-            expectContractFailure("("+ops[i]+" true 1)");
-            expectContractFailure("("+ops[i]+" true \"hello\")");
-            expectContractFailure("("+ops[i]+" true 2008-08-28)");
-            expectContractFailure("("+ops[i]+" true 2007-08-28T16:37:24.0000Z)");
-            expectContractFailure("("+ops[i]+" true (void))");
-            expectContractFailure("("+ops[i]+" true 1.667)");
-            expectContractFailure("("+ops[i]+" true "+reallyBigNumber+")");
-            expectContractFailure("("+ops[i]+" true "+reallyBigDec+")");
+            expectContractExn("("+ops[i]+" true 1)");
+            expectContractExn("("+ops[i]+" true \"hello\")");
+            expectContractExn("("+ops[i]+" true 2008-08-28)");
+            expectContractExn("("+ops[i]+" true 2007-08-28T16:37:24.0000Z)");
+            expectContractExn("("+ops[i]+" true (void))");
+            expectContractExn("("+ops[i]+" true 1.667)");
+            expectContractExn("("+ops[i]+" true "+reallyBigNumber+")");
+            expectContractExn("("+ops[i]+" true "+reallyBigDec+")");
 
-            expectContractFailure("("+ops[i]+" \"hello\" 1)");
-            expectContractFailure("("+ops[i]+" \"hello\" true)");
-            expectContractFailure("("+ops[i]+" \"hello\" 2008-08-28)");
-            expectContractFailure("("+ops[i]+" \"hello\" 2007-08-28T16:37:24.0000Z)");
-            expectContractFailure("("+ops[i]+" \"hello\" (void))");
-            expectContractFailure("("+ops[i]+" \"hello\" 1.667)");
-            expectContractFailure("("+ops[i]+" \"hello\" "+reallyBigNumber+")");
-            expectContractFailure("("+ops[i]+" \"hello\" "+reallyBigDec+")");
+            expectContractExn("("+ops[i]+" \"hello\" 1)");
+            expectContractExn("("+ops[i]+" \"hello\" true)");
+            expectContractExn("("+ops[i]+" \"hello\" 2008-08-28)");
+            expectContractExn("("+ops[i]+" \"hello\" 2007-08-28T16:37:24.0000Z)");
+            expectContractExn("("+ops[i]+" \"hello\" (void))");
+            expectContractExn("("+ops[i]+" \"hello\" 1.667)");
+            expectContractExn("("+ops[i]+" \"hello\" "+reallyBigNumber+")");
+            expectContractExn("("+ops[i]+" \"hello\" "+reallyBigDec+")");
 
-            expectContractFailure("("+ops[i]+" 2008-08-28 1)");
-            expectContractFailure("("+ops[i]+" 2008-08-28 \"hello\")");
-            expectContractFailure("("+ops[i]+" 2008-08-28 true)");
-            expectContractFailure("("+ops[i]+" 2008-08-28 (void))");
-            expectContractFailure("("+ops[i]+" 2008-08-28 1.667)");
-            expectContractFailure("("+ops[i]+" 2008-08-28 "+reallyBigNumber+")");
-            expectContractFailure("("+ops[i]+" 2008-08-28 "+reallyBigDec+")");
+            expectContractExn("("+ops[i]+" 2008-08-28 1)");
+            expectContractExn("("+ops[i]+" 2008-08-28 \"hello\")");
+            expectContractExn("("+ops[i]+" 2008-08-28 true)");
+            expectContractExn("("+ops[i]+" 2008-08-28 (void))");
+            expectContractExn("("+ops[i]+" 2008-08-28 1.667)");
+            expectContractExn("("+ops[i]+" 2008-08-28 "+reallyBigNumber+")");
+            expectContractExn("("+ops[i]+" 2008-08-28 "+reallyBigDec+")");
 
-            expectContractFailure("("+ops[i]+" 2007-08-28T16:37:24.0000Z true)");
-            expectContractFailure("("+ops[i]+" 2007-08-28T16:37:24.0000Z 1)");
-            expectContractFailure("("+ops[i]+" 2007-08-28T16:37:24.0000Z \"hello\")");
-            expectContractFailure("("+ops[i]+" 2008-08-28T16:37:24.0000Z (void))");
-            expectContractFailure("("+ops[i]+" 2008-08-28T16:37:24.0000Z 1.667)");
-            expectContractFailure("("+ops[i]+" 2008-08-28T16:37:24.0000Z "+reallyBigNumber+")");
-            expectContractFailure("("+ops[i]+" 2008-08-28T16:37:24.0000Z "+reallyBigDec+")");
+            expectContractExn("("+ops[i]+" 2007-08-28T16:37:24.0000Z true)");
+            expectContractExn("("+ops[i]+" 2007-08-28T16:37:24.0000Z 1)");
+            expectContractExn("("+ops[i]+" 2007-08-28T16:37:24.0000Z \"hello\")");
+            expectContractExn("("+ops[i]+" 2008-08-28T16:37:24.0000Z (void))");
+            expectContractExn("("+ops[i]+" 2008-08-28T16:37:24.0000Z 1.667)");
+            expectContractExn("("+ops[i]+" 2008-08-28T16:37:24.0000Z "+reallyBigNumber+")");
+            expectContractExn("("+ops[i]+" 2008-08-28T16:37:24.0000Z "+reallyBigDec+")");
         }
     }
 }

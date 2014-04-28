@@ -41,7 +41,7 @@ public class RuntimeTest
         FusionRuntimeBuilder b = runtimeBuilder();
         b.setDefaultLanguage("/fusion/base");
         assertEquals("/fusion/base", runtime().getDefaultLanguage());
-        expectUnboundIdentifierException("always");
+        expectUnboundIdentifierExn("always");
 
         assertEquals("/fusion/base", b.getDefaultLanguage());
         assertEquals("/fusion/base", b.copy().getDefaultLanguage());

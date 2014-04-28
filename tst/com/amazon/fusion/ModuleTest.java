@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -27,11 +27,11 @@ public class ModuleTest
         eval("(module m '/no_such_module' (define x 1))");
     }
 
-    @Test(expected = SyntaxException.class)
+    @Test
     public void testBadQuotedLanguageSymbolInTopLevelModule()
         throws Exception
     {
-        eval("(module m (quote 'no_such_module') (define x 1))");
+        expectSyntaxExn("(module m (quote 'no_such_module') (define x 1))");
     }
 
     @Test(expected = ModuleNotFoundException.class)
@@ -83,12 +83,12 @@ public class ModuleTest
     }
 
 
-    @Test(expected = UnboundIdentifierException.class)
+    @Test
     public void testUseModuleWithNoProvides()
         throws Exception
     {
         eval("(require '/NoProvides')");
-        eval("X");
+        expectUnboundIdentifierExn("X");
     }
 
 
@@ -121,11 +121,11 @@ public class ModuleTest
     }
 
 
-    @Test(expected = UnboundIdentifierException.class)
+    @Test
     public void testIntialModuleImportsWithNoProvides()
         throws Exception
     {
-        eval("(module M '/NoProvides' X)");
+        expectUnboundIdentifierExn("(module M '/NoProvides' X)");
     }
 
 
@@ -133,11 +133,11 @@ public class ModuleTest
     public void testBadRequireSyntax()
         throws Exception
     {
-        expectSyntaxFailure("(require)");
-        expectSyntaxFailure("(require {})");
-        expectSyntaxFailure("(require ())");
-        expectSyntaxFailure("(require (lib))");
-        expectSyntaxFailure("(require (lib \"/fusion/list\"))");
+        expectSyntaxExn("(require)");
+        expectSyntaxExn("(require {})");
+        expectSyntaxExn("(require ())");
+        expectSyntaxExn("(require (lib))");
+        expectSyntaxExn("(require (lib \"/fusion/list\"))");
     }
 
     @Test(expected = FusionException.class)
@@ -154,7 +154,7 @@ public class ModuleTest
         String code =
             "(module m '/fusion'" +
             "  (if true (require '/fusion/list') false))";
-        expectSyntaxFailure(code);
+        expectSyntaxExn(code);
     }
 
     /** Traps an infinite-loop bug in partial expansion. */
@@ -174,7 +174,7 @@ public class ModuleTest
              "  (define M 1054)" +
             "   (define N (lambda () (+ 1 M)))" +
              "  (provide M N))");
-        expectSyntaxFailure("M");
+        expectSyntaxExn("M");
 
         eval("(require mod)");
         assertEval(1054, "M");
@@ -184,14 +184,14 @@ public class ModuleTest
      * We shouldn't fail `provide` at expand-time, since that may hide the
      * compile-time errors that caused provide to fail.
      */
-    @Test(expected=UnboundIdentifierException.class)
+    @Test
     public void testProvideFailsLate()
         throws Exception
     {
-        eval("(module x '/fusion'" +
-             "  (require '/fusion/experimental/syntax')" +
-             "  (define_syntax broken (lambda (s) x))" +
-             "  (provide broken))");
+        expectUnboundIdentifierExn("(module x '/fusion'" +
+                                   "  (require '/fusion/experimental/syntax')" +
+                                   "  (define_syntax broken (lambda (s) x))" +
+                                   "  (provide broken))");
     }
 
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -34,23 +34,23 @@ public class ApplyTest
     public void testApplyArity()
         throws Exception
     {
-        expectArityFailure("(apply)");
-        expectArityFailure("(apply +)");
+        expectArityExn("(apply)");
+        expectArityExn("(apply +)");
     }
 
     @Test
     public void testApplyBadProc()
         throws Exception
     {
-        expectContractFailure("(apply 12 [])");
+        expectContractExn("(apply 12 [])");
     }
 
     @Test
     public void testApplyBadRest()
         throws Exception
     {
-        expectContractFailure("(apply + 12)");
-        expectContractFailure("(apply + 12 13 {})");
+        expectContractExn("(apply + 12)");
+        expectContractExn("(apply + 12 13 {})");
     }
 
     @Test

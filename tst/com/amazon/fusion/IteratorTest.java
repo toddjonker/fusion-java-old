@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -16,8 +16,8 @@ public class IteratorTest
     public void testIterateValueFailures()
         throws Exception
     {
-        expectArityFailure("(value_iterator)");
-        expectArityFailure("(value_iterator 1 2)");
+        expectArityExn("(value_iterator)");
+        expectArityExn("(value_iterator 1 2)");
     }
 
 
@@ -25,14 +25,14 @@ public class IteratorTest
     public void testIteratorAppendFailures()
         throws Exception
     {
-        expectArityFailure("(iterator_append)");
-        expectArityFailure("(iterator_append empty_iterator)");
-        expectArityFailure("(iterator_append empty_iterator empty_iterator empty_iterator)");
+        expectArityExn("(iterator_append)");
+        expectArityExn("(iterator_append empty_iterator)");
+        expectArityExn("(iterator_append empty_iterator empty_iterator empty_iterator)");
 
-        expectContractFailure("(iterator_append empty_iterator [])");
-        expectContractFailure("(iterator_append [] empty_iterator)");
-        expectContractFailure("(iterator_append empty_iterator null)");
-        expectContractFailure("(iterator_append null empty_iterator)");
+        expectContractExn("(iterator_append empty_iterator [])");
+        expectContractExn("(iterator_append [] empty_iterator)");
+        expectContractExn("(iterator_append empty_iterator null)");
+        expectContractExn("(iterator_append null empty_iterator)");
     }
 
 
@@ -40,13 +40,13 @@ public class IteratorTest
     public void testIteratorFilterFailures()
         throws Exception
     {
-        expectArityFailure("(iterator_choose)");
-        expectArityFailure("(iterator_choose is_null)");
-        expectArityFailure("(iterator_choose is_null empty_iterator 1)");
+        expectArityExn("(iterator_choose)");
+        expectArityExn("(iterator_choose is_null)");
+        expectArityExn("(iterator_choose is_null empty_iterator 1)");
 
         // TODO FUSION-85 need to check type of the proc
 //      expectContractFailure("(iterator_choose 1 empty_iterator)");
-        expectContractFailure("(iterator_choose is_null [])");
+        expectContractExn("(iterator_choose is_null [])");
     }
 
 
@@ -54,14 +54,14 @@ public class IteratorTest
     public void testIteratorMapFailures()
         throws Exception
     {
-        expectArityFailure("(iterator_map +)");
-        expectArityFailure("(iterator_map + empty_iterator empty_iterator)");
+        expectArityExn("(iterator_map +)");
+        expectArityExn("(iterator_map + empty_iterator empty_iterator)");
 
         eval("(define plus1 (lambda (n) (+ 1 n)))");
 
         // TODO FUSION-85 need to check type of the proc
 //      expectContractFailure("(iterator_map 1 empty_iterator)");
-        expectContractFailure("(iterator_map plus1 [])");
+        expectContractExn("(iterator_map plus1 [])");
     }
 
 
@@ -69,12 +69,12 @@ public class IteratorTest
     public void testIteratorMapSplicingFailures()
         throws Exception
     {
-        expectArityFailure("(iterator_map_splicing value_iterator)");
-        expectArityFailure("(iterator_map_splicing value_iterator empty_iterator empty_iterator)");
+        expectArityExn("(iterator_map_splicing value_iterator)");
+        expectArityExn("(iterator_map_splicing value_iterator empty_iterator empty_iterator)");
 
         // TODO FUSION-85 need to check type of the proc
 //      expectContractFailure("(iterator_map_splicing 1 empty_iterator)");
-        expectContractFailure("(iterator_map_splicing value_iterator [])");
+        expectContractExn("(iterator_map_splicing value_iterator [])");
     }
 
 

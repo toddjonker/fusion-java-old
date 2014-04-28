@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -20,8 +20,8 @@ public class SyntaxTest
     public void quoteSyntaxArity()
         throws Exception
     {
-        expectSyntaxFailure("(quote_syntax)");
-        expectSyntaxFailure("(quote_syntax foo bar)");
+        expectSyntaxExn("(quote_syntax)");
+        expectSyntaxExn("(quote_syntax foo bar)");
     }
 
 
@@ -29,7 +29,7 @@ public class SyntaxTest
     public void syntaxAppendArity()
         throws Exception
     {
-        expectArityFailure("(syntax_append)");
+        expectArityExn("(syntax_append)");
     }
 
 
@@ -37,16 +37,16 @@ public class SyntaxTest
     public void syntaxSubseqArity()
         throws Exception
     {
-        expectArityFailure("(syntax_subseq)");
-        expectArityFailure("(syntax_subseq (quasisyntax ()))");
-        expectArityFailure("(syntax_subseq (quasisyntax ()) 1 2)");
+        expectArityExn("(syntax_subseq)");
+        expectArityExn("(syntax_subseq (quasisyntax ()))");
+        expectArityExn("(syntax_subseq (quasisyntax ()) 1 2)");
     }
 
     @Test
     public void syntaxSubseqIndexType()
         throws Exception
     {
-        expectContractFailure("(syntax_subseq (quasisyntax ()) null)");
+        expectContractExn("(syntax_subseq (quasisyntax ()) null)");
     }
 
 
@@ -54,40 +54,40 @@ public class SyntaxTest
     public void quasisyntaxArity()
         throws Exception
     {
-        expectSyntaxFailure("(quasisyntax)");
-        expectSyntaxFailure("(quasisyntax foo bar)");
+        expectSyntaxExn("(quasisyntax)");
+        expectSyntaxExn("(quasisyntax foo bar)");
 
-        expectSyntaxFailure("(quasisyntax (a (quasisyntax)))");
-        expectSyntaxFailure("(quasisyntax (a (quasisyntax foo bar)))");
+        expectSyntaxExn("(quasisyntax (a (quasisyntax)))");
+        expectSyntaxExn("(quasisyntax (a (quasisyntax foo bar)))");
 
-        expectSyntaxFailure("(quasisyntax (a (unsyntax)))");
-        expectSyntaxFailure("(quasisyntax (a (unsyntax foo bar)))");
+        expectSyntaxExn("(quasisyntax (a (unsyntax)))");
+        expectSyntaxExn("(quasisyntax (a (unsyntax foo bar)))");
 
         // deeper unsyntax
-        expectSyntaxFailure("(quasisyntax (a (quasisyntax (b (unsyntax)))))");
-        expectSyntaxFailure("(quasisyntax (a (quasisyntax (b (unsyntax foo bar)))))");
+        expectSyntaxExn("(quasisyntax (a (quasisyntax (b (unsyntax)))))");
+        expectSyntaxExn("(quasisyntax (a (quasisyntax (b (unsyntax foo bar)))))");
     }
 
     @Test
     public void tooManyUnsyntaxes()
         throws Exception
     {
-        expectSyntaxFailure("(quasisyntax (unsyntax (unsyntax bar)))");
+        expectSyntaxExn("(quasisyntax (unsyntax (unsyntax bar)))");
     }
 
     @Test
     public void unsyntaxValueNotSyntax()
         throws Exception
     {
-        expectContractFailure("(quasisyntax (unsyntax 12))");
+        expectContractExn("(quasisyntax (unsyntax 12))");
     }
 
     @Test
     public void unsyntaxOutOfQuasisyntax()
         throws Exception
     {
-        expectSyntaxFailure("(unsyntax)");
-        expectSyntaxFailure("(unsyntax foo)");
+        expectSyntaxExn("(unsyntax)");
+        expectSyntaxExn("(unsyntax foo)");
     }
 
     @Test
@@ -95,6 +95,6 @@ public class SyntaxTest
         throws Exception
     {
         eval("(define_syntax S (lambda (stx) 99))");
-        expectSyntaxFailure("(S)");
+        expectSyntaxExn("(S)");
     }
 }

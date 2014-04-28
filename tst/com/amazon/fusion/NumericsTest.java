@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -71,7 +71,7 @@ public class NumericsTest
     public void testSumArgType()
         throws Exception
     {
-        expectArgTypeFailure("(+ 10 10e-2)",1);
+        expectArgumentExn("(+ 10 10e-2)",1);
     }
 
     @Test
@@ -118,7 +118,7 @@ public class NumericsTest
     public void testProductArgType()
         throws Exception
     {
-        expectArgTypeFailure("(* 10 10e-2)",1);
+        expectArgumentExn("(* 10 10e-2)",1);
     }
 
     @Test
@@ -161,13 +161,13 @@ public class NumericsTest
     public void testDifferenceNoArgs()
         throws Exception
     {
-        expectArityFailure("(-)");
+        expectArityExn("(-)");
     }
 
     @Test
     public void testDifferenceArgType()
         throws Exception
     {
-        expectArgTypeFailure("(- 10 10e-2)",1);
+        expectArgumentExn("(- 10 10e-2)",1);
     }
 }

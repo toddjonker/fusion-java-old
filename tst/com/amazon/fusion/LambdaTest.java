@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -19,8 +19,8 @@ public class LambdaTest
     public void testLambdaArity()
         throws Exception
     {
-        expectSyntaxFailure("(lambda)");
-        expectSyntaxFailure("(lambda (arg))");
+        expectSyntaxExn("(lambda)");
+        expectSyntaxExn("(lambda (arg))");
     }
 
     @Test
@@ -106,22 +106,22 @@ public class LambdaTest
     public void testFormalsSyntaxFailure()
         throws Exception
     {
-        expectSyntaxFailure("(lambda (1) 1)");
-        expectSyntaxFailure("(lambda (a 2) 1)");
-        expectSyntaxFailure("(lambda (a []) 1)");
+        expectSyntaxExn("(lambda (1) 1)");
+        expectSyntaxExn("(lambda (a 2) 1)");
+        expectSyntaxExn("(lambda (a []) 1)");
     }
 
     @Test
     public void testArgSyntaxFailure()
         throws Exception
     {
-        expectSyntaxFailure("((lambda (x) 1) (if 2))");
+        expectSyntaxExn("((lambda (x) 1) (if 2))");
     }
 
-    @Test(expected = ArityFailure.class)
+    @Test
     public void testWrongNumberOfArguments()
         throws Exception
     {
-        assertEval(1, "((lambda (x y) (x y)) (lambda () 1) 2)");
+        expectArityExn("((lambda (x y) (x y)) (lambda () 1) 2)");
     }
 }

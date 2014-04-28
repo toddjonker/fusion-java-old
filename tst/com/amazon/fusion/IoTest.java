@@ -66,10 +66,10 @@ public class IoTest
     public void testBadLoadCalls()
         throws Exception
     {
-        expectArityFailure("(load)");
-        expectArityFailure("(load \"x\" \"y\")");
+        expectArityExn("(load)");
+        expectArityExn("(load \"x\" \"y\")");
 
-        expectContractFailure("(load 12)");
+        expectContractExn("(load 12)");
     }
 
 

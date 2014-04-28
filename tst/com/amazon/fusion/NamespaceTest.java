@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -50,10 +50,10 @@ public class NamespaceTest
     public void testBadLanguage()
         throws Exception
     {
-        expectArgTypeFailure("(make_namespace_with_language 23)", 0);
-        expectArgTypeFailure("(make_namespace_with_language \"\")", 0);
+        expectArgumentExn("(make_namespace_with_language 23)", 0);
+        expectArgumentExn("(make_namespace_with_language \"\")", 0);
 
         // Not absolute module path
-        expectArgTypeFailure("(make_namespace_with_language \"foo\")", 0);
+        expectArgumentExn("(make_namespace_with_language \"foo\")", 0);
     }
 }

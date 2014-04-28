@@ -116,7 +116,7 @@ public class ListTest
         for (String form : nonSequenceExpressions())
         {
             String expr = "(add " + form + " 12)";
-            expectArgTypeFailure(expr, 0);
+            expectArgumentExn(expr, 0);
         }
     }
 
@@ -144,8 +144,8 @@ public class ListTest
     public void testSizeArity()
         throws Exception
     {
-        expectArityFailure("(size)");
-        expectArityFailure("(size [] [])");
+        expectArityExn("(size)");
+        expectArityExn("(size [] [])");
     }
 
     @Test
@@ -155,7 +155,7 @@ public class ListTest
         for (String form : nonContainerExpressions())
         {
             String expr = "(size " + form + ")";
-            expectArgTypeFailure(expr, 0);
+            expectArgumentExn(expr, 0);
         }
     }
 
@@ -250,9 +250,9 @@ public class ListTest
     public void testInvalidIteration()
         throws Exception
     {
-        expectContractFailure("(list_iterator 3)");
-        expectContractFailure("(list_from_iterator 3)");
-        expectContractFailure("(list_from_iterator [2,3])");
+        expectContractExn("(list_iterator 3)");
+        expectContractExn("(list_from_iterator 3)");
+        expectContractExn("(list_from_iterator [2,3])");
     }
 
 
@@ -260,10 +260,10 @@ public class ListTest
     public void testIterationArityCheck()
         throws Exception
     {
-        expectArityFailure("(list_iterator)");
-        expectArityFailure("(list_iterator [] 1)");
+        expectArityExn("(list_iterator)");
+        expectArityExn("(list_iterator [] 1)");
 
-        expectArityFailure("(list_from_iterator)");
-        expectArityFailure("(list_from_iterator empty_iterator 1)");
+        expectArityExn("(list_from_iterator)");
+        expectArityExn("(list_from_iterator empty_iterator 1)");
     }
 }

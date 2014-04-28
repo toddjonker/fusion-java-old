@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -26,27 +26,27 @@ public class LiteralEvalTest
     }
 
 
-    @Test(expected = SyntaxException.class)
+    @Test
     public void testNullSymbol()
         throws Exception
     {
-        eval("null.symbol");
+        expectSyntaxExn("null.symbol");
     }
 
 
-    @Test(expected = SyntaxException.class)
+    @Test
     public void testNullSexp()
         throws Exception
     {
-        eval("null.sexp");
+        expectSyntaxExn("null.sexp");
     }
 
 
-    @Test(expected = SyntaxException.class)
+    @Test
     public void testEmptySexp()
         throws Exception
     {
-        eval("()");
+        expectSyntaxExn("()");
     }
 
 
@@ -117,8 +117,8 @@ public class LiteralEvalTest
     public void testQuoteArity()
         throws Exception
     {
-        expectSyntaxFailure("(quote)");
-        expectSyntaxFailure("(quote quote quote)");
+        expectSyntaxExn("(quote)");
+        expectSyntaxExn("(quote quote quote)");
     }
 
     @Test
@@ -160,8 +160,8 @@ public class LiteralEvalTest
     public void testIsNullArity()
         throws Exception
     {
-        expectArityFailure("(is_null)");
-        expectArityFailure("(is_null null 2)");
+        expectArityExn("(is_null)");
+        expectArityExn("(is_null null 2)");
     }
 
     @Test
@@ -178,7 +178,7 @@ public class LiteralEvalTest
     public void testApplyNonProcedure()
         throws Exception
     {
-        expectFusionException("(1)");
-        expectFusionException("(1 2)");
+        expectFusionExn("(1)");
+        expectFusionExn("(1 2)");
     }
 }

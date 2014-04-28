@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -21,8 +21,8 @@ public class StringTest
     public void testStringAppendInvalid()
         throws Exception
     {
-        expectArgTypeFailure("(string_append 1)",0);
-        expectArgTypeFailure("(string_append true)",0);
+        expectArgumentExn("(string_append 1)",0);
+        expectArgumentExn("(string_append true)",0);
     }
 
 
@@ -34,11 +34,11 @@ public class StringTest
 
         for (String op : ops)
         {
-            expectArityFailure("("+op+")");
-            expectArityFailure("("+op+" \"a\" \"b\")");
+            expectArityExn("("+op+")");
+            expectArityExn("("+op+" \"a\" \"b\")");
 
-            expectContractFailure("("+op+" {})");
-            expectContractFailure("("+op+" null.string)");
+            expectContractExn("("+op+" {})");
+            expectContractExn("("+op+" null.string)");
         }
 
     }
