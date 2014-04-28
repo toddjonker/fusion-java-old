@@ -268,12 +268,14 @@ Defines a (public) check form used like `(name EXPR)`.
       (lets [(ctx (quote_syntax here)),
              (name_stx (syntax_get stx 1)),
              (tag (syntax_unwrap (syntax_get stx 2))),
-             (docs (string_append '''
+             (skip_frame (not (syntax_unwrap (syntax_get stx 3)))),
+             (docs (if skip_frame ""
+                     (string_append '''
     (''' (syntax_unwrap name_stx) ''' expr [message])
 
 Evaluates `expr` and checks that it throws an exception like that thrown by
 `''' (syntax_unwrap (syntax_get stx 3)) '''`.  If no exception is thrown, or if
-another kind of exception is thrown, then the check fails.'''))]
+another kind of exception is thrown, then the check fails.''')))]
         (datum_to_syntax
           (quasiquote
             (define_syntax (unquote name_stx)  // (name EXPR [message])
@@ -291,10 +293,13 @@ another kind of exception is thrown, then the check fails.'''))]
                                               (syntax_unwrap name_stx)
                                               " expr [message])")))
                                         (head actuals))),
-                         (meta (struct "name"       (quote (unquote name_stx))
-                                       "expression" (syntax_to_datum stx1)
-                                       "line"       (syntax_line stx1)
-                                       "column"     (syntax_column stx1)))]
+                         (meta (unquote
+                                 (if skip_frame {}
+                                   (quasiquote
+                                     (struct "name"       (quote (unquote name_stx))
+                                             "expression" (syntax_to_datum stx1)
+                                             "line"       (syntax_line stx1)
+                                             "column"     (syntax_column stx1))))))]
                     (datum_to_syntax
                         // (parameterize
                         //   [(check_stack_param META)]
@@ -328,7 +333,7 @@ another kind of exception is thrown, then the check fails.'''))]
   (define_exn_check expect_result_exn   "result"   "raise_result_error")
 
   // NOT PUBLIC! Only used by the public version below.
-  (define_exn_check _expect_syntax_exn  "syntax"   "wrong_syntax")
+  (define_exn_check _expect_syntax_exn  "syntax"   false /*skip frame*/)
 
   (defpub_syntax expect_syntax_exn
     '''
@@ -343,14 +348,24 @@ exception like that thrown by `wrong_syntax`.
           (wrong_syntax stx
             '''expect_syntax_exn requires 1 or 2 args; '''
             '''usage: (expect_syntax_exn top_form [message])'''))
-        (let [(top_form (head actuals))]
+        (let [(top_form (head actuals)),
+              (meta (struct "name"       (quote expect_syntax_exn)
+                            "expression" (syntax_to_datum stx)
+                            "line"       (syntax_line stx)
+                            "column"     (syntax_column stx)))]
           (datum_to_syntax
-            // (_expect_syntax_exn (eval (quote_syntax TOP)) [MESSAGE])
-            (apply sexp
-              (quote_syntax _expect_syntax_exn)
-              (sexp (quote_syntax eval)
-                (sexp (quote_syntax quote_syntax) top_form))
-              (tail actuals))
+            // (parameterize
+            //   [(check_stack_param (quote META))]
+            //   (_expect_syntax_exn (eval (quote_syntax TOP)) [MESSAGE]))
+            (sexp
+              (quote_syntax parameterize)
+              [(sexp (quote_syntax check_stack_param)
+                     (sexp (quote_syntax quote) meta))]
+              (apply sexp
+                (quote_syntax _expect_syntax_exn)
+                (sexp (quote_syntax eval)
+                  (sexp (quote_syntax quote_syntax) top_form))
+                (tail actuals)))
             (quote_syntax here)
             stx)))))
 )
