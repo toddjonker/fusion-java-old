@@ -46,32 +46,32 @@
 (expect_check_exn
   (check_annotations ["b", "a"] (quote a::b::null)))
 
-(expect_compile_exn
+(expect_syntax_exn
   (check_annotations 2))
 
 
 //==========================================================================
 // define_check
 
-(expect_compile_exn (define_check))
-(expect_compile_exn (define_check () 1))
-(expect_compile_exn (define_check [check_foo] 1))
-(expect_compile_exn (define_check ("check_foo") 1))
-(expect_compile_exn (define_check ((check_foo)) 1))
-(expect_compile_exn (define_check (check_foo "arg") 1))
-(expect_compile_exn (define_check (check_foo "arg" arg) 1))
-(expect_compile_exn (define_check (check_foo arg "arg" arg) 1))
+(expect_syntax_exn (define_check))
+(expect_syntax_exn (define_check () 1))
+(expect_syntax_exn (define_check [check_foo] 1))
+(expect_syntax_exn (define_check ("check_foo") 1))
+(expect_syntax_exn (define_check ((check_foo)) 1))
+(expect_syntax_exn (define_check (check_foo "arg") 1))
+(expect_syntax_exn (define_check (check_foo "arg" arg) 1))
+(expect_syntax_exn (define_check (check_foo arg "arg" arg) 1))
 
 (define_check (check_foo0) 1)
 (check_foo0)
 (check_foo0 "message")
-(expect_compile_exn (check_foo0 "message" "extra"))
+(expect_syntax_exn (check_foo0 "message" "extra"))
 
 (define_check (check_foo1 arg) 1)
 (check_foo1 1)
 (check_foo1 1 "message")
-(expect_compile_exn (check_foo1))
-(expect_compile_exn (check_foo1 1 "message" "extra"))
+(expect_syntax_exn (check_foo1))
+(expect_syntax_exn (check_foo1 1 "message" "extra"))
 
 
 (define_check (check_doc) "documentation" true)
@@ -94,8 +94,8 @@
 //==========================================================================
 // expect_arity_exn
 
-(expect_compile_exn (expect_arity_exn))
-(expect_compile_exn (expect_arity_exn true "message" "extra"))
+(expect_syntax_exn (expect_arity_exn))
+(expect_syntax_exn (expect_arity_exn true "message" "extra"))
 
 (expect_arity_exn (pair 1))
 
@@ -115,9 +115,11 @@
 
 
 //==========================================================================
-// expect_compile_exn
+// expect_syntax_exn
 
-(expect_compile_exn (expect_compile_exn))
-(expect_compile_exn (expect_compile_exn true "message" "extra"))
+(expect_syntax_exn (expect_syntax_exn))
+(expect_syntax_exn (expect_syntax_exn true "message" "extra"))
 
-(expect_compile_exn (wrong_syntax (quote_syntax foo) "you are wrong"))
+(expect_syntax_exn (wrong_syntax (quote_syntax foo) "you are wrong"))
+
+(expect_syntax_exn (lambda))

@@ -276,7 +276,7 @@ Evaluates `expr` and checks that it throws an exception like that thrown by
 another kind of exception is thrown, then the check fails.'''))]
         (datum_to_syntax
           (quasiquote
-            (defpub_syntax (unquote name_stx)  // (name EXPR [message])
+            (define_syntax (unquote name_stx)  // (name EXPR [message])
               (unquote docs)
               (let [(ctx1 (quote_syntax here1))]
                 (lambda (stx1)
@@ -317,17 +317,22 @@ another kind of exception is thrown, then the check fails.'''))]
           stx))))
 
 
-  (define_exn_check expect_contract_exn "contract" "raise_contract_error")
+  (provide
+    expect_argument_exn expect_arity_exn
+    expect_check_exn expect_contract_exn expect_result_exn)
+
   (define_exn_check expect_argument_exn "argument" "raise_argument_error")
   (define_exn_check expect_arity_exn    "arity"    "raise_arity_error")
   (define_exn_check expect_check_exn    "check"    "fail_check")
+  (define_exn_check expect_contract_exn "contract" "raise_contract_error")
   (define_exn_check expect_result_exn   "result"   "raise_result_error")
-  (define_exn_check expect_syntax_exn   "syntax"   "wrong_syntax")
 
+  // NOT PUBLIC! Only used by the public version below.
+  (define_exn_check _expect_syntax_exn  "syntax"   "wrong_syntax")
 
-  (defpub_syntax expect_compile_exn
+  (defpub_syntax expect_syntax_exn
     '''
-    (expect_compile_exn top_form [message])
+    (expect_syntax_exn top_form [message])
 
 Passes the given top-level form to `eval` and checks that it throws an
 exception like that thrown by `wrong_syntax`.
@@ -336,13 +341,13 @@ exception like that thrown by `wrong_syntax`.
       (let [(actuals (tail (syntax_unwrap stx)))]
         (when (or (is_empty actuals) (> (size actuals) 2))
           (wrong_syntax stx
-            '''expect_compile_exn requires 1 or 2 args; '''
-            '''usage: (expect_compile_exn top_form [message])'''))
+            '''expect_syntax_exn requires 1 or 2 args; '''
+            '''usage: (expect_syntax_exn top_form [message])'''))
         (let [(top_form (head actuals))]
           (datum_to_syntax
-            // (expect_syntax_exn (eval (quote_syntax TOP)) [MESSAGE])
+            // (_expect_syntax_exn (eval (quote_syntax TOP)) [MESSAGE])
             (apply sexp
-              (quote_syntax expect_syntax_exn)
+              (quote_syntax _expect_syntax_exn)
               (sexp (quote_syntax eval)
                 (sexp (quote_syntax quote_syntax) top_form))
               (tail actuals))

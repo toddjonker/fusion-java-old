@@ -10,51 +10,51 @@
   "/fusion/experimental/syntax")
 
 // Keywords can't be used as argument names
-(expect_compile_exn
+(expect_syntax_exn
   (lambda (_key_) 0))
-(expect_compile_exn
+(expect_syntax_exn
   (lambda (_key_ arg) 0))
-(expect_compile_exn
+(expect_syntax_exn
   (lambda (arg _key_) 0))
-(expect_compile_exn
+(expect_syntax_exn
   (lambda (arg _key_ arg2) 0))
-(expect_compile_exn
+(expect_syntax_exn
   (lambda _key_ 0))
 
-(expect_compile_exn
+(expect_syntax_exn
   (let [(_v_ 1)] 0))
-(expect_compile_exn
+(expect_syntax_exn
   (let [(x 1), (_v_ 1)] 0))
-(expect_compile_exn
+(expect_syntax_exn
   (let _loop_ [(v 1)] 0))
 
-(expect_compile_exn
+(expect_syntax_exn
   (letrec [(_v_ 1)] 0))
-(expect_compile_exn
+(expect_syntax_exn
   (letrec [(x 1), (_v_ 1)] 0))
 
-(expect_compile_exn
+(expect_syntax_exn
   (let_values [((_v_) 1)] 0))
-(expect_compile_exn
+(expect_syntax_exn
   (let_values [((_v_ w) 1)] 0))
 
 
-(expect_compile_exn
+(expect_syntax_exn
   (define _top_ 1))
 
-(expect_compile_exn // exn:fail?
+(expect_syntax_exn // exn:fail?
   (module M "/fusion"
     (define _top_ 1)))
 
 
-(expect_compile_exn
+(expect_syntax_exn
   _key_)
-(expect_compile_exn
+(expect_syntax_exn
   (begin _key_))
-(expect_compile_exn
+(expect_syntax_exn
   (lambda () _key_))
 
-(expect_compile_exn
+(expect_syntax_exn
   (lambda () ('#%top' _key_)))
 
 // Not sure if this is what we really want long-term, but its current behavior

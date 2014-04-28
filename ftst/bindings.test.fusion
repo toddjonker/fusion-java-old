@@ -21,9 +21,9 @@
 
 
 // Duplicate bound names
-(expect_compile_exn
+(expect_syntax_exn
   (lambda (x x) true))
-(expect_compile_exn
+(expect_syntax_exn
   (lambda (x a b c x) true))
 
 
@@ -54,7 +54,7 @@
 // let
 
 // Duplicate bound names
-(expect_compile_exn
+(expect_syntax_exn
   (let [(x 1), (b 2), (x 3)] true))
 
 
@@ -98,9 +98,9 @@
 
 
 // Duplicate bound names
-(expect_compile_exn
+(expect_syntax_exn
   (let_values [((x) 1), ((x) 2)] 3))
-(expect_compile_exn
+(expect_syntax_exn
   (let_values [((x x) (values 1 2))] 3))
 
 // Result arity mismatch
@@ -128,7 +128,7 @@
 
 
 // Duplicate bound names
-(expect_compile_exn
+(expect_syntax_exn
   (letrec [(x 1), (b 2), (x 3)] true))
 
 
