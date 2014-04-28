@@ -103,18 +103,18 @@
 (expect_compile_exn
   (let_values [((x x) (values 1 2))] 3))
 
-// Arity mismatch
-(expect_contract_exn
+// Result arity mismatch
+(expect_result_exn
   (let_values [(() 1)] 3))
-(expect_contract_exn
+(expect_result_exn
   (let_values [((x) (values))] 3))
-(expect_contract_exn
+(expect_result_exn
   (let_values [((x) (values 1 2 3))] 3))
-(expect_contract_exn
+(expect_result_exn
   (let_values [((x y) (values 1))] 3))
-(expect_contract_exn
+(expect_result_exn
   (let_values [((x y) (values 1 2 3))] 3))
-(expect_contract_exn
+(expect_result_exn
   (let_values [((x) 1), ((y z) (values 1 2 3))] 3))
 
 

@@ -100,10 +100,12 @@ final class Syntax
         SyntaxValue stx = datumToSyntaxMaybe(eval, datum, context, location);
         if (stx == null)
         {
-            String message =
-                (whosCalling == null ? "datum_to_syntax" : whosCalling) +
-                " expects syntax object or ionizable data, given " + datum;
-            throw new ContractException(message);
+            if (whosCalling == null) whosCalling = "datum_to_syntax";
+
+            throw new ArgTypeFailure(whosCalling,
+                                     "syntax object or ionizable data",
+                                     -1,
+                                     datum);
         }
 
         return stx;
