@@ -14,6 +14,10 @@ This module allows applications to build a suite of tests in the form of Fusion
 scripts, where each script uses this module to express a number of _checks_
 that each validate some aspect of the code under test.
 
+These APIs are inspired by those of
+[RackUnit](http://docs.racket-lang.org/rackunit)
+by Noel Welsh and Ryan Culpepper.
+
 <!-- FUSION-185 This comment forces FusionDoc to stop the one-liner here. -->
 
 ## WARNING
@@ -34,12 +38,50 @@ In order to present helpful output when failures occur, all checks are
 syntactic forms.  Nevertheless, they work like procedures: the arguments are
 treated as expressions and evaluated left-to-right.
 
+
 ## Expecting Exceptions
 
 The `expect_*_exn` forms allow verification that certain kinds of exceptions
 are raised by some code under test.  Unlike the `check_*` forms, these do not
 act like procedures: evaluation of the argument is implicitly delayed via
 `thunk` to allow an exception handler to be installed.
+
+For the purposes of these forms, Fusion exceptions can be understood to have
+an inheritance hierarchy along these lines:
+
+  * any
+      * contract
+          * argument
+          * arity
+          * result
+      * syntax
+      * check
+
+So, for example, `expect_contract_exn` will succeed whenever `expect_arity_exn`
+would succeed.
+
+
+## Defining New Checks
+
+You can compose your own checks from those given here by using `define_check`.
+By doing so, failure reports will include the check name, source code location,
+and actual arguments.  The entire active "stack" of checks is reported.
+
+Failure of a check is induced via `fail_check` which raises a check exception
+that displays the current stack of check frames.
+
+Here's some examples from the basic checks:
+
+    (define_check (fail)
+      (fail_check))
+
+    (define_check (check op val1 val2)
+      (unless (op val1 val2)
+        (fail_check)))
+
+    (define_check (check_pred pred val)
+      (unless (pred val)
+        (fail_check)))
   '''
 
 
