@@ -41,16 +41,36 @@
 
 (check_null null)
 (check_null null.int)
+(check_null null.int "msg")
 
 (expect_check_exn (check_null (void)))
+(expect_check_exn (check_null (void) "msg"))
 
 
 //==========================================================================
 // check_void
 
 (check_void (void))
+(check_void (void) "msg")
 
 (expect_check_exn (check_void null))
+(expect_check_exn (check_void null "msg"))
+
+
+//==========================================================================
+// check_same
+
+(check_same 1 1)
+(check_same 1 1 "message")
+
+(expect_check_exn (check_same 1 2))
+(expect_check_exn (check_same 1 2 "msg"))
+
+
+// Malformed uses
+(expect_syntax_exn (check_same))
+(expect_syntax_exn (check_same 1))
+(expect_syntax_exn (check_same 1 2 "msg" "extra"))
 
 
 //==========================================================================
@@ -105,6 +125,46 @@
 (expect_syntax_exn (define_check (check_foo "arg") 1))
 (expect_syntax_exn (define_check (check_foo "arg" arg) 1))
 (expect_syntax_exn (define_check (check_foo arg "arg" arg) 1))
+
+
+//==========================================================================
+// define_simple_check
+
+(define_simple_check (ok) false true)
+(ok)
+
+
+// Malformed uses
+(expect_syntax_exn (define_simple_check))
+(expect_syntax_exn (define_simple_check () 1))
+(expect_syntax_exn (define_simple_check [check_foo] 1))
+(expect_syntax_exn (define_simple_check ("check_foo") 1))
+(expect_syntax_exn (define_simple_check ((check_foo)) 1))
+(expect_syntax_exn (define_simple_check (check_foo "arg") 1))
+(expect_syntax_exn (define_simple_check (check_foo "arg" arg) 1))
+(expect_syntax_exn (define_simple_check (check_foo arg "arg" arg) 1))
+
+
+//==========================================================================
+// define_binary_check
+
+(define_binary_check (?== e a) (== e a))
+(?== 1 1)
+(expect_check_exn (?== 1 2))
+
+
+// Malformed uses
+(expect_syntax_exn (define_binary_check))
+(expect_syntax_exn (define_binary_check () 1))
+(expect_syntax_exn (define_binary_check [check_foo] 1))
+(expect_syntax_exn (define_binary_check ("check_foo") 1))
+(expect_syntax_exn (define_binary_check ((check_foo)) 1))
+(expect_syntax_exn (define_binary_check (check_foo "arg") 1))
+(expect_syntax_exn (define_binary_check (check_foo "arg" arg) 1))
+(expect_syntax_exn (define_binary_check (check_foo arg "arg" arg) 1))
+
+(expect_syntax_exn (define_binary_check expected) 1)
+(expect_syntax_exn (define_binary_check expected actual extra) 1)
 
 
 //==========================================================================

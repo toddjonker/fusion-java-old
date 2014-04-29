@@ -82,6 +82,20 @@ Here's some examples from the basic checks:
     (define_check (check_pred pred val)
       (unless (pred val)
         (fail_check)))
+
+    (define_check (check_same expected actual)
+      (unless (same expected actual)
+        (fail_check)))
+
+For simple cases like these, there's `define_simple_check` and
+`define_binary_check`; the latter improves failure reporting by displaying
+the expected and actual values.
+
+    (define_simple_check (check_pred pred val)
+      (pred val))
+
+    (define_binary_check (check_same expected actual)
+      (same expected actual))
   '''
 
 
@@ -114,7 +128,7 @@ Raises a check failure exception, including a stack trace derived from the
 
   (defpub_syntax define_check
     '''
-    (define_check (name arg ...) body ...)
+    (define_check (name arg ...) expr ...)
 
 Defines a new check form that's invoked as:
 
@@ -131,7 +145,7 @@ Any results from the body are ignored and the check form always returns void.
           (wrong (lambda (stx)
                    (wrong_syntax stx
                      '''Bad syntax for define_check; usage: '''
-                     '''(define_check (name arg_name ...) body ...)''')))]
+                     '''(define_check (name arg ...) expr ...)''')))]
       (lambda (stx)
         (when (< (syntax_size stx) 3)
           (wrong stx))
@@ -171,8 +185,10 @@ Any results from the body are ignored and the check form always returns void.
            (proc_name (datum_to_syntax
                           (string_to_symbol
                             (string_append "_" (syntax_unwrap name_stx)))
-                          // TODO FUSION-329 should use stx directly
-                          (syntax_get stx 0)))]
+                          // TODO FUSION-329 Should use stx as context.
+                          // This isn't always correct since the name could
+                          // be coming from elsewhere.
+                          name_stx))]
           (datum_to_syntax
             (quasiquote
               (begin
@@ -218,6 +234,97 @@ Any results from the body are ignored and the check form always returns void.
             stx)))))
 
 
+  (defpub_syntax define_simple_check
+    '''
+    (define_simple_check (name arg ...) expr ...)
+
+Defines a new check form that's invoked as:
+
+    (name arg_expr ... [message])
+
+Note that the optional `message` arg is added automatically and is not part of
+the declared signature.
+
+The new check succeeds if the result of the `expr`s is truthy.
+The body may not use the new check recursively.
+    '''
+    (let [(ctx (quote_syntax here)),
+          (wrong (lambda (stx)
+                   (wrong_syntax stx
+                     '''Bad syntax for define_simple_check; usage: '''
+                     '''(define_simple_check (name arg ...) expr ...)''')))]
+      (lambda (stx)
+        (when (< (syntax_size stx) 3)
+          (wrong stx))
+        (lets
+          [(orig_args (tail (syntax_unwrap stx))),
+           (signature (let [(s (syntax_unwrap (head orig_args)))]
+                        (if (and (is_sexp s)
+                                 (> (size s) 0)
+                                 (every is_identifier s))
+                            s
+                            (wrong stx)))),
+           (body      (tail orig_args))]
+          (datum_to_syntax
+            (quasiquote
+              (define_check (unquote signature)
+                (if (unquote (pair (quote begin) body))
+                    (void)
+                    (fail_check))))
+            ctx
+            stx)))))
+
+
+  (defpub_syntax define_binary_check
+    '''
+    (define_binary_check (name expected actual) expr ...)
+
+Defines a new check form that's invoked with expected and actual values, and an
+optional message.
+
+Like `define_simple_check`, the new check succeeds if the result of the `expr`s
+is truthy. However, this form automatically adds the `expected` and `actual`
+values to the failure report.
+
+The body may not use the new check recursively.
+
+    (define_binary_check (check_same expected actual)
+      (same expected actual))
+
+    (check_same 1 1)   // Success
+    (check_same 1 2)   // Failure
+    '''
+    (let [(ctx (quote_syntax here)),
+          (wrong (lambda (stx)
+                   (wrong_syntax stx
+                     '''Bad syntax for define_binary_check; usage: '''
+                     '''(define_binary_check (name expected actual) expr ...)''')))]
+      (lambda (stx)
+        (when (< (syntax_size stx) 3)
+          (wrong stx))
+        (lets
+          [(orig_args (tail (syntax_unwrap stx))),
+           (signature (let [(s (syntax_unwrap (head orig_args)))]
+                        (if (and (is_sexp s)
+                                 (=== (size s) 3)
+                                 (every is_identifier s))
+                            s
+                            (wrong stx)))),
+           (body      (tail orig_args))]
+          (datum_to_syntax
+            (quasiquote
+              (define_check (unquote signature)
+                (parameterize
+                  [(check_stack_param
+                      (struct "expected" (unquote (element signature 1))
+                              "actual"   (unquote (element signature 2))))]
+                  (if (unquote (pair (quote begin) body))
+                      (void)
+                      (fail_check)))))
+            ctx
+            stx)))))
+
+
   //===========================================================================
 
   (provide fail)
@@ -229,21 +336,27 @@ A check that fails unconditionally.
 
 
   (provide check)
-  (define_check (check op val1 val2)
+  (define_simple_check (check op val1 val2)
     '''
 Checks that the result of `(op val1 val2)` is truthy.
     '''
-    (unless (op val1 val2)
-      (fail_check)))
+    (op val1 val2))
 
 
   (provide check_pred)
-  (define_check (check_pred pred val)
+  (define_simple_check (check_pred pred val)
     '''
 Checks that the result of `(pred val)` is truthy.
     '''
-    (unless (pred val)
-      (fail_check)))
+    (pred val))
+
+
+  (provide check_same)
+  (define_binary_check (check_same expected actual)
+    '''
+Checks that `(same expected actual)` is truthy.
+    '''
+    (same expected actual))
 
 
   (provide check_true)
@@ -326,7 +439,7 @@ This one fails because the order of annotions does not match:
     '''
     (define_exn_check name tag)
 
-Defines a (public) check form used like `(name EXPR)`.
+Defines a exception-expecting form used like `(name EXPR)`.
     '''
     (lambda (stx)
       (lets [(ctx (quote_syntax here)),
