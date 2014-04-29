@@ -81,6 +81,9 @@
 //==========================================================================
 // expect_check_exn
 
+(expect_check_exn (fail))
+(expect_check_exn (fail "message"))
+(expect_check_exn (fail_check))
 (expect_check_exn (check = 1 2))
 (expect_check_exn (expect_check_exn (check = 1 1)))
 
