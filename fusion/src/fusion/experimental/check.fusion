@@ -224,6 +224,15 @@ Annotations are ignored.
       (_fail_check {actual:val})))
 
 
+  (provide check_null)
+  (define_check (check_null val)
+    '''
+Checks that `val` is any null.
+    '''
+    (unless (is_null val)
+      (_fail_check {actual:val})))
+
+
   (provide check_void)
   (define_check (check_void val)
     '''

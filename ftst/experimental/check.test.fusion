@@ -37,9 +37,19 @@
 
 
 //==========================================================================
+// check_null
+
+(check_null null)
+(check_null null.int)
+
+(expect_check_exn (check_null (void)))
+
+
+//==========================================================================
 // check_void
 
 (check_void (void))
+
 (expect_check_exn (check_void null))
 
 
