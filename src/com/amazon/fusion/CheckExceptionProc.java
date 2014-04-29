@@ -5,7 +5,6 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionString.stringToJavaString;
 import static com.amazon.fusion.FusionVoid.voidValue;
-import com.amazon.fusion.CheckFailureProc.CheckFailure;
 
 
 final class CheckExceptionProc
@@ -25,7 +24,7 @@ final class CheckExceptionProc
         {
             case "argument": return ArgumentException.class;
             case "arity":    return ArityFailure.class;
-            case "check":    return CheckFailure.class;
+            case "check":    return CheckException.class;
             case "contract": return ContractException.class;
             case "result":   return ResultFailure.class;
             case "syntax":   return SyntaxException.class;
@@ -47,7 +46,7 @@ final class CheckExceptionProc
                 return "contract exception";
             }
 
-            if (e instanceof CheckFailure)    return "check exception";
+            if (e instanceof CheckException)  return "check exception";
             if (e instanceof SyntaxException) return "syntax exception";
 
             return "other Fusion exception";
