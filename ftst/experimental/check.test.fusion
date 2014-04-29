@@ -5,6 +5,17 @@
   "/fusion/experimental/check"
 )
 
+(define (bad_argument)
+  (head 1))
+
+(define (bad_arity)
+  (pair 1))
+
+(define (bad_result)
+  (let_values [((x y) 1)] true))
+
+
+
 (check = 1 1)
 (check_pred is_truthy 12)
 
@@ -46,21 +57,13 @@
 (expect_check_exn
   (check_annotations ["b", "a"] (quote a::b::null)))
 
-(expect_syntax_exn
-  (check_annotations 2))
+
+// Malformed uses
+(expect_syntax_exn (check_annotations 2))
 
 
 //==========================================================================
 // define_check
-
-(expect_syntax_exn (define_check))
-(expect_syntax_exn (define_check () 1))
-(expect_syntax_exn (define_check [check_foo] 1))
-(expect_syntax_exn (define_check ("check_foo") 1))
-(expect_syntax_exn (define_check ((check_foo)) 1))
-(expect_syntax_exn (define_check (check_foo "arg") 1))
-(expect_syntax_exn (define_check (check_foo "arg" arg) 1))
-(expect_syntax_exn (define_check (check_foo arg "arg" arg) 1))
 
 (define_check (check_foo0) 1)
 (check_foo0)
@@ -83,6 +86,17 @@
 (expect_any_exn (recur 2))
 
 
+// Malformed uses
+(expect_syntax_exn (define_check))
+(expect_syntax_exn (define_check () 1))
+(expect_syntax_exn (define_check [check_foo] 1))
+(expect_syntax_exn (define_check ("check_foo") 1))
+(expect_syntax_exn (define_check ((check_foo)) 1))
+(expect_syntax_exn (define_check (check_foo "arg") 1))
+(expect_syntax_exn (define_check (check_foo "arg" arg) 1))
+(expect_syntax_exn (define_check (check_foo arg "arg" arg) 1))
+
+
 //==========================================================================
 // expect_check_exn
 
@@ -93,22 +107,49 @@
 (expect_check_exn (expect_check_exn (check = 1 1)))
 
 
-//==========================================================================
-// expect_result_exn
+// Malformed uses
+(expect_syntax_exn (expect_check_exn))
+(expect_syntax_exn (expect_check_exn true "message" "extra"))
 
-(expect_result_exn (let_values [((x y) 1)] true))
+
+//==========================================================================
+// expect_argument_exn
+
+(expect_argument_exn
+  (raise_argument_error "here" "truth and beauty" -1 "ugliness"))
+
+(expect_argument_exn (bad_argument))
+
+
+// Malformed uses
+(expect_syntax_exn (expect_argument_exn))
+(expect_syntax_exn (expect_argument_exn true "message" "extra"))
 
 
 //==========================================================================
 // expect_arity_exn
 
+(expect_arity_exn (raise_arity_error "foo" 1))
+
+(expect_arity_exn (bad_arity))
+
+
+// Malformed uses
 (expect_syntax_exn (expect_arity_exn))
 (expect_syntax_exn (expect_arity_exn true "message" "extra"))
 
-(expect_arity_exn (pair 1))
 
-(expect_arity_exn
-  (raise_arity_error "foo" 1))
+//==========================================================================
+// expect_result_exn
+
+(expect_result_exn (raise_result_error "here" "int" "string"))
+
+(expect_result_exn (bad_result))
+
+
+// Malformed uses
+(expect_syntax_exn (expect_result_exn))
+(expect_syntax_exn (expect_result_exn true "message" "extra"))
 
 
 //==========================================================================
@@ -116,18 +157,43 @@
 
 (expect_contract_exn (raise_contract_error "proc" "something went wrong"))
 
-(expect_contract_exn (pair 1))  // Arity    exn IS-A contract exn
-(expect_contract_exn (head 1))  // Argument exn IS-A contract exn
+(expect_contract_exn (bad_argument))  // Argument exn IS-A contract exn
+(expect_contract_exn (bad_arity))     // Arity    exn IS-A contract exn
+(expect_contract_exn (bad_result))    // Result   exn IS-A contract exn
 
-(expect_contract_exn (let_values [((x y) 1)] true)) // Result exn is too
+
+// Malformed uses
+(expect_syntax_exn (expect_contract_exn))
+(expect_syntax_exn (expect_contract_exn true "message" "extra"))
 
 
 //==========================================================================
 // expect_syntax_exn
 
-(expect_syntax_exn (expect_syntax_exn))
-(expect_syntax_exn (expect_syntax_exn true "message" "extra"))
-
 (expect_syntax_exn (wrong_syntax (quote_syntax foo) "you are wrong"))
 
 (expect_syntax_exn (lambda))
+
+
+// Malformed uses
+(expect_syntax_exn (expect_syntax_exn))
+(expect_syntax_exn (expect_syntax_exn true "message" "extra"))
+
+
+//==========================================================================
+// expect_any_exn
+
+(expect_any_exn (/ 1. 0.))
+
+// Check subtypes
+(expect_any_exn (bad_argument))
+(expect_any_exn (bad_arity))
+(expect_any_exn (bad_result))
+(expect_any_exn (fail))
+(expect_any_exn (raise_contract_error "proc" "oops"))
+(expect_any_exn (wrong_syntax (quote_syntax here) "oops"))
+
+
+// Malformed uses
+(expect_syntax_exn (expect_any_exn))
+(expect_syntax_exn (expect_any_exn true "message" "extra"))
