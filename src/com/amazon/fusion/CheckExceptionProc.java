@@ -22,6 +22,7 @@ final class CheckExceptionProc
     {
         switch (tag)
         {
+            case "any":      return FusionException.class;
             case "argument": return ArgumentException.class;
             case "arity":    return ArityFailure.class;
             case "check":    return CheckException.class;

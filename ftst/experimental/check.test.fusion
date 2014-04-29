@@ -78,6 +78,11 @@
 (check_doc)
 
 
+// Unsupported recursive use of a check form.
+(define_check (recur n) (if (== n 0) true (recur (- n 1))))
+(expect_any_exn (recur 2))
+
+
 //==========================================================================
 // expect_check_exn
 

@@ -287,7 +287,7 @@ Defines a (public) check form used like `(name EXPR)`.
     (''' (syntax_unwrap name_stx) ''' expr [message])
 
 Evaluates `expr` and checks that it throws an exception like that thrown by
-`''' (syntax_unwrap (syntax_get stx 3)) '''`.  If no exception is thrown, or if
+''' (syntax_unwrap (syntax_get stx 3)) '''.  If no exception is thrown, or if
 another kind of exception is thrown, then the check fails.''')))]
         (datum_to_syntax
           (quasiquote
@@ -336,14 +336,15 @@ another kind of exception is thrown, then the check fails.''')))]
 
 
   (provide
-    expect_argument_exn expect_arity_exn
+    expect_any_exn expect_argument_exn expect_arity_exn
     expect_check_exn expect_contract_exn expect_result_exn)
 
-  (define_exn_check expect_argument_exn "argument" "raise_argument_error")
-  (define_exn_check expect_arity_exn    "arity"    "raise_arity_error")
-  (define_exn_check expect_check_exn    "check"    "fail_check")
-  (define_exn_check expect_contract_exn "contract" "raise_contract_error")
-  (define_exn_check expect_result_exn   "result"   "raise_result_error")
+  (define_exn_check expect_any_exn      "any"      "any built-in feature")
+  (define_exn_check expect_argument_exn "argument" "`raise_argument_error`")
+  (define_exn_check expect_arity_exn    "arity"    "`raise_arity_error`")
+  (define_exn_check expect_check_exn    "check"    "`fail_check`")
+  (define_exn_check expect_contract_exn "contract" "`raise_contract_error`")
+  (define_exn_check expect_result_exn   "result"   "`raise_result_error`")
 
   // NOT PUBLIC! Only used by the public version below.
   (define_exn_check _expect_syntax_exn  "syntax"   false /*skip frame*/)
