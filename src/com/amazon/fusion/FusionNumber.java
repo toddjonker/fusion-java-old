@@ -1815,11 +1815,7 @@ final class FusionNumber
         Object arg = args[argNum];
         if (arg instanceof LongInt)
         {
-            long i = ((LongInt) arg).myContent;
-            if (Long.MIN_VALUE <= i && i <= Long.MAX_VALUE)
-            {
-                return (int) i;
-            }
+            return ((LongInt) arg).myContent;
         }
 
         throw who.argFailure("64-bit int", argNum, args);

@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionNumber.checkIntArgToJavaLong;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import org.junit.Before;
@@ -169,5 +170,36 @@ public class NumericsTest
         throws Exception
     {
         expectArgumentExn("(- 10 10e-2)",1);
+    }
+
+
+    //=========================================================================
+
+    private static final class IsMaxLongProc
+        extends Procedure
+    {
+        IsMaxLongProc()
+        {
+            super("doc");
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args) throws FusionException
+        {
+            long l = checkIntArgToJavaLong(eval, this, 0, args);
+            return FusionBool.makeBool(eval, l == Long.MAX_VALUE);
+        }
+    }
+
+    /**
+     * FUSION-319 longs were getting truncated by
+     * {@link FusionNumber#checkIntArgToJavaLong(Evaluator, Procedure, int, Object...)}.
+     */
+    @Test
+    public void testArgToLong()
+        throws Exception
+    {
+        topLevel().define("is_max_long", new IsMaxLongProc());
+        assertEval(true, "(is_max_long " + Long.MAX_VALUE + ")");
     }
 }
