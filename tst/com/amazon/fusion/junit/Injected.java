@@ -1,4 +1,4 @@
-// Copyright (c) 2011 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2011-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.junit;
 
@@ -33,7 +33,7 @@ import org.junit.runners.model.TestClass;
  * <b>This class is forked from IonJava!</b>
  */
 public class Injected
-extends Suite
+    extends Suite
 {
 
     /**
@@ -61,7 +61,7 @@ extends Suite
 
 
     private static class InjectedRunner
-    extends BlockJUnit4ClassRunner
+        extends BlockJUnit4ClassRunner
     {
         private final Dimension[] myDimensions;
         private final int[] myValueIndices;
@@ -74,7 +74,7 @@ extends Suite
         public InjectedRunner(Class<?> klass,
                               Dimension[] dimensions,
                               int... indices)
-        throws InitializationError
+            throws InitializationError
         {
             super(klass);
 
@@ -86,7 +86,7 @@ extends Suite
 
         @Override
         public Object createTest()
-        throws Exception
+            throws Exception
         {
             Object test = getTestClass().getOnlyConstructor().newInstance();
             for (int i = 0; i < myDimensions.length; i++)
@@ -96,8 +96,8 @@ extends Suite
             return test;
         }
 
-        public void inject(Object target, Dimension dimension, int valueIndex)
-        throws Exception
+        private void inject(Object target, Dimension dimension, int valueIndex)
+            throws Exception
         {
             Method method = dimension.descriptor.getWriteMethod();
             Object value  = dimension.values[valueIndex];
@@ -151,7 +151,7 @@ extends Suite
      * Only called reflectively. Do not use programmatically.
      */
     public Injected(Class<?> klass)
-    throws Throwable
+        throws Throwable
     {
         super(klass, new ArrayList<Runner>());
 
@@ -166,7 +166,7 @@ extends Suite
                         Dimension[] dimensions,
                         int[] valueIndices,
                         int dimensionIndex)
-    throws InitializationError
+        throws InitializationError
     {
         assert dimensions.length == valueIndices.length;
 
@@ -191,7 +191,7 @@ extends Suite
 
 
     private Dimension[] findDimensions()
-    throws Throwable
+        throws Throwable
     {
         TestClass testClass = getTestClass();
 
@@ -234,7 +234,7 @@ extends Suite
                                               PropertyDescriptor[] descriptors,
                                               FrameworkField field,
                                               String name)
-    throws Exception
+        throws Exception
     {
         for (PropertyDescriptor d : descriptors)
         {
