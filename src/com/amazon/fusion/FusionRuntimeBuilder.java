@@ -531,6 +531,11 @@ public class FusionRuntimeBuilder
             directory = directory.getAbsoluteFile();
         }
 
+        if (! directory.isDirectory())
+        {
+           String message = "Repository is not a directory: " + directory;
+           throw new IllegalArgumentException(message);
+        }
 
         File src = new File(directory, "src");
         if (! src.isDirectory())
