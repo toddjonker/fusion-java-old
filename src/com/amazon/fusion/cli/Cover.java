@@ -11,7 +11,7 @@ import java.io.File;
 /**
  *
  */
-public class Cover
+class Cover
     extends Load
 {
     //=+===============================================================================
