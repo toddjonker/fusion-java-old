@@ -13,7 +13,7 @@ import java.util.Set;
 
 /**
  * A module that's been instantiated for use by one or more other modules.
- * A module has a unique {@link ModuleIdentity} and a {@link NamespaceStore}
+ * A module has a unique {@link ModuleIdentity} and a {@link ModuleStore}
  * holding its top-level bindings.
  */
 final class ModuleInstance
@@ -31,9 +31,9 @@ final class ModuleInstance
 
 
     private ModuleInstance(ModuleIdentity identity,
-                           String docs,
-                           ModuleStore namespace,
-                           int bindingCount)
+                           String         docs,
+                           ModuleStore    namespace,
+                           int            bindingCount)
         throws FusionException
     {
         myIdentity = identity;

@@ -14,6 +14,9 @@ This module allows applications to build a suite of tests in the form of Fusion
 scripts, where each script uses this module to express a number of _checks_
 that each validate some aspect of the code under test.
 
+For examples of these features in action, peruse
+[Fusion's own test suite](code:trees/mainline/--/ftst).
+
 These APIs are inspired by those of
 [RackUnit](http://docs.racket-lang.org/rackunit)
 by Noel Welsh and Ryan Culpepper.
@@ -29,19 +32,20 @@ There is **NO SUPPORT** for this module.
 ## Checks
 
 _Checks_ are the fundamental components of test scripts.  A check executes some
-logic give some inputs, and either returns void to express success, or throws
+logic, and either returns void to express success, or throws
 a "check exception" to express failure.
 This library provides a range of primitive checks, and applications can
 compose them into higher-level checks with broader responsibilites.
 
 In order to present helpful output when failures occur, all checks are
 syntactic forms.  Nevertheless, they work like procedures: the arguments are
-treated as expressions and evaluated left-to-right.
+treated as expressions and evaluated left-to-right.  (They cannot, however, be
+used like first-class procedures and passed as runtime values.)
 
 
 ## Expecting Exceptions
 
-The `expect_*_exn` forms allow verification that certain kinds of exceptions
+The `expect_*_exn` forms verify that certain kinds of exceptions
 are raised by some code under test.  Unlike the `check_*` forms, these do not
 act like procedures: evaluation of the argument is implicitly delayed via
 `thunk` to allow an exception handler to be installed.
@@ -140,6 +144,16 @@ the declared signature.
 The body is typically composed of several other checks, all of which must pass
 for the new check to succeed.  The body may not use the new check recursively.
 Any results from the body are ignored and the check form always returns void.
+
+For example:
+
+    (define_check (check_comparisons lo hi)
+      (check <  lo hi)
+      (check <= lo hi)
+      (check =  lo lo)
+      (check =  hi hi)
+      (check >= hi lo)
+      (check >  hi lo))
     '''
     (let [(ctx   (quote_syntax here)),
           (wrong (lambda (stx)
@@ -247,6 +261,11 @@ the declared signature.
 
 The new check succeeds if the result of the `expr`s is truthy.
 The body may not use the new check recursively.
+
+For example:
+
+    (define_simple_check (check_pred pred val)
+      (pred val))
     '''
     (let [(ctx (quote_syntax here)),
           (wrong (lambda (stx)
@@ -264,10 +283,15 @@ The body may not use the new check recursively.
                                  (every is_identifier s))
                             s
                             (wrong stx)))),
-           (body      (tail orig_args))]
+           (docs      (let [(d (syntax_unwrap (element orig_args 1)))]
+                        (if (is_string d) d null.string))),
+           (body      (if (is_null docs)
+                          (tail orig_args)
+                          (tail (tail orig_args))))]
           (datum_to_syntax
             (quasiquote
               (define_check (unquote signature)
+                (unquote docs)
                 (if (unquote (pair (quote begin) body))
                     (void)
                     (fail_check))))
@@ -288,11 +312,10 @@ values to the failure report.
 
 The body may not use the new check recursively.
 
+For example:
+
     (define_binary_check (check_same expected actual)
       (same expected actual))
-
-    (check_same 1 1)   // Success
-    (check_same 1 2)   // Failure
     '''
     (let [(ctx (quote_syntax here)),
           (wrong (lambda (stx)
@@ -310,10 +333,15 @@ The body may not use the new check recursively.
                                  (every is_identifier s))
                             s
                             (wrong stx)))),
-           (body      (tail orig_args))]
+           (docs      (let [(d (syntax_unwrap (element orig_args 1)))]
+                        (if (is_string d) d null.string))),
+           (body      (if (is_null docs)
+                          (tail orig_args)
+                          (tail (tail orig_args))))]
           (datum_to_syntax
             (quasiquote
               (define_check (unquote signature)
+                (unquote docs)
                 (parameterize
                   [(check_stack_param
                       (struct "expected" (unquote (element signature 1))
@@ -409,7 +437,8 @@ For example, these checks succeed:
     (check_annotations ["a"] (quote a::null))
     (check_annotations (quote (a b)) (quote a::b::null))
 
-This one fails because the order of annotions does not match:
+This one fails because the expected and actual annotations are not in the same
+order:
 
     (check_annotations ["b", "a"] (quote a::b::null))
     '''
