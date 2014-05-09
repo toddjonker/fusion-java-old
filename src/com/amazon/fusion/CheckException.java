@@ -78,7 +78,7 @@ final class CheckException
 
 
     @Override
-    public void displayMessage(Evaluator eval, Appendable out)
+    void displayMessage(Evaluator eval, Appendable out)
         throws IOException, FusionException
     {
         out.append("Check failure:");

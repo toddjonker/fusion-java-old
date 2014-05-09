@@ -72,7 +72,7 @@ final class ResultFailure
 
 
     @Override
-    public void displayMessage(Evaluator eval, Appendable out)
+    void displayMessage(Evaluator eval, Appendable out)
         throws IOException, FusionException
     {
         int actualsLen = myActuals.length;

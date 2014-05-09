@@ -78,7 +78,7 @@ final class ArgumentException
     }
 
     @Override
-    public void displayMessage(Evaluator eval, Appendable b)
+    void displayMessage(Evaluator eval, Appendable b)
         throws IOException, FusionException
     {
         int actualsLen = myActuals.length;
