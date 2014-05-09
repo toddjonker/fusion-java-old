@@ -25,9 +25,9 @@ final class Syntax
     /**
      * @param context may be null, in which case nothing happens.
      */
-    static SyntaxValue applyContext(Evaluator eval,
-                                            SyntaxSymbol context,
-                                            SyntaxValue datum)
+    static SyntaxValue applyContext(Evaluator    eval,
+                                    SyntaxSymbol context,
+                                    SyntaxValue  datum)
         throws FusionException
     {
         if (context != null)
@@ -39,27 +39,8 @@ final class Syntax
 
 
     /**
-     * TODO FUSION-242 This needs to do cycle detection.
-     *
-     * @return null if something in the datum can't be converted into syntax.
-     */
-    static SyntaxValue datumToStrippedSyntaxMaybe(Evaluator      eval,
-                                                  Object         datum,
-                                                  SourceLocation location)
-        throws FusionException
-    {
-        if (datum instanceof BaseValue)
-        {
-            return ((BaseValue) datum).toStrippedSyntaxMaybe(eval, location);
-        }
-
-        return null;
-    }
-
-
-    /**
      * @param context may be null, in which case no lexical information is
-     * applied (and any existing is stripped).
+     * applied to converted objects.
      *
      * @return null if something in the datum can't be converted into syntax.
      */
@@ -69,14 +50,10 @@ final class Syntax
                                           SourceLocation location)
         throws FusionException
     {
-        if (false && isSyntax(eval, datum))
-        {
-            return (SyntaxValue) datum;
-        }
-
         if (datum instanceof BaseValue)
         {
-            return ((BaseValue) datum).datumToSyntaxMaybe(eval, context, location);
+            return ((BaseValue) datum).datumToSyntaxMaybe(eval, context,
+                                                          location);
         }
 
         return null;
@@ -85,16 +62,16 @@ final class Syntax
 
     /**
      * @param context may be null, in which case no lexical information is
-     * applied (and any existing is stripped).
+     * applied to converted objects.
      * @param whosCalling The form to name for error messages; may be null.
      *
      * @return not null.
      */
-    static SyntaxValue datumToSyntax(Evaluator eval,
-                                     Object datum,
-                                     SyntaxSymbol context,
+    static SyntaxValue datumToSyntax(Evaluator      eval,
+                                     Object         datum,
+                                     SyntaxSymbol   context,
                                      SourceLocation location,
-                                     String whosCalling)
+                                     String         whosCalling)
         throws FusionException
     {
         SyntaxValue stx = datumToSyntaxMaybe(eval, datum, context, location);
@@ -113,31 +90,16 @@ final class Syntax
 
     /**
      * @param context may be null, in which case no lexical information is
-     * applied (and any existing is stripped).
+     * applied to converted objects.
      *
      * @return not null.
      */
-    static SyntaxValue datumToSyntax(Evaluator eval,
-                                     Object datum,
-                                     SyntaxSymbol context,
+    static SyntaxValue datumToSyntax(Evaluator      eval,
+                                     Object         datum,
+                                     SyntaxSymbol   context,
                                      SourceLocation location)
         throws FusionException
     {
         return datumToSyntax(eval, datum, context, location, null);
-    }
-
-
-    /**
-     * @param context may be null, in which case no lexical information is
-     * applied (and any existing is stripped).
-     */
-    static SyntaxValue datumToSyntax(Evaluator eval,
-                                     SyntaxValue datum,
-                                     SyntaxSymbol context)
-        throws FusionException
-    {
-        // TODO FUSION-183 Strip location and properties?
-        datum = datum.stripWraps(eval);
-        return applyContext(eval, context, datum);
     }
 }

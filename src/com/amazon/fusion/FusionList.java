@@ -574,7 +574,8 @@ final class FusionList
                 for (int i = 0; i < size; i++)
                 {
                     Object rawChild = unsafeRef(eval, i);
-                    Object child = Syntax.datumToSyntaxMaybe(eval, rawChild, context, loc);
+                    Object child =
+                        Syntax.datumToSyntaxMaybe(eval, rawChild, context, loc);
                     if (child == null)
                     {
                         // Hit something that's not syntax-able

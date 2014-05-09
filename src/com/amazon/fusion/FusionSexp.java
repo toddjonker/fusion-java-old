@@ -679,13 +679,16 @@ final class FusionSexp
                                              SourceLocation loc)
             throws FusionException
         {
-            SyntaxValue head = Syntax.datumToSyntaxMaybe(eval, myHead, context, loc);
+            SyntaxValue head =
+                Syntax.datumToSyntaxMaybe(eval, myHead, context, loc);
             if (head == null) return null;
 
             Object tail = myTail;
             if (isPair(eval, tail))
             {
-                tail = ((ImmutablePair)tail).toPairOfSyntaxMaybe(eval, context, loc);
+                tail = ((ImmutablePair)tail).toPairOfSyntaxMaybe(eval,
+                                                                 context,
+                                                                 loc);
             }
             else if (! isEmptySexp(eval, tail))
             {

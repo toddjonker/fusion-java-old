@@ -99,7 +99,7 @@ final class FusionNumber
         }
 
         @Override
-        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)
+        SyntaxValue datumToSyntaxMaybe(Evaluator eval, SourceLocation loc)
         {
             return makeSyntax(eval, loc, this);
         }
@@ -944,13 +944,6 @@ final class FusionNumber
         BaseFloat annotate(Evaluator eval, String[] annotations)
         {
             return FusionNumber.annotate(this, annotations);
-        }
-
-        // TODO remove
-        @Override
-        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)
-        {
-            return makeSyntax(eval, loc, this);
         }
     }
 

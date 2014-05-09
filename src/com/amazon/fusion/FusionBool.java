@@ -44,7 +44,7 @@ public final class FusionBool
         }
 
         @Override
-        SyntaxValue toStrippedSyntaxMaybe(Evaluator eval, SourceLocation loc)
+        SyntaxValue datumToSyntaxMaybe(Evaluator eval, SourceLocation loc)
         {
             return makeSyntax(eval, loc, this);
         }
