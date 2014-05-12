@@ -64,7 +64,7 @@ contact us for clarification.
 
   (require "/fusion/collection")
   (provide . any do element elt every find has_key is_collection is_empty
-    size)
+    same_size size)
 
   (require "/fusion/sequence")
   (provide add choose first fold_left is_sequence last map)
