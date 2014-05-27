@@ -1,0 +1,33 @@
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/fusion/experimental/check"
+  "/testutils"
+)
+
+
+//=============================================================================
+// Mutation of procedure arguments
+
+(check === 1
+  ((lambda (x) (set x (+ x 1)) x) 0))
+
+(define counter
+  (let ((c 0))
+    (lambda ()
+      (set c (+ 1 c))
+      c)))
+
+(check === 1 (counter))
+(check === 2 (counter))
+(check === 3 (counter))
+
+
+//=============================================================================
+// Mutation of let-bound variables
+
+(check === 1  (let_values [((x) 0)] (set x (+ x 1)) x))
+(check === 1  (letrec     [( x  0)] (set x (+ x 1)) x))
+(check === 1  (let        [( x  0)] (set x (+ x 1)) x))
+(check === 1  (lets       [( x  0)] (set x (+ x 1)) x))
+

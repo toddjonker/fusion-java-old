@@ -6,50 +6,6 @@
 )
 
 
-(define rester
-  (lambda rest
-    (check_pred is_sexp rest)
-    rest))
-
-(check === (sexp)       (rester))
-(check === (sexp 1)     (rester 1))
-(check === (sexp 1 2 3) (rester 1 2 3))
-
-(check === (sexp)         (apply rester []))
-(check === (sexp 1)       (apply rester [1]))
-(check === (sexp 1 2 3 4) (apply rester 1 2 [3, 4]))
-
-
-// Duplicate bound names
-(expect_syntax_exn
-  (lambda (x x) true))
-(expect_syntax_exn
-  (lambda (x a b c x) true))
-
-
-// These expressions crashed due to FUSION-273:
-((lambda (t) ((lambda () t))) 1)
-(let [(t 1)] ((lambda () t)))
-(let [(t 1)] (let_values [] t))
-
-
-//==========================================================================
-// set
-
-(check === 1
-  ((lambda (x) (set x (+ x 1)) x) 0))
-
-(define counter
-  (let ((c 0))
-    (lambda ()
-      (set c (+ 1 c))
-      c)))
-
-(check === 1 (counter))
-(check === 2 (counter))
-(check === 3 (counter))
-
-
 //==========================================================================
 // let
 

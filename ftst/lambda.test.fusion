@@ -1,0 +1,33 @@
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/fusion/experimental/check"
+  "/testutils"
+)
+
+
+(define rester
+  (lambda rest
+    (check_pred is_sexp rest)
+    rest))
+
+(check === (sexp)       (rester))
+(check === (sexp 1)     (rester 1))
+(check === (sexp 1 2 3) (rester 1 2 3))
+
+(check === (sexp)         (apply rester []))
+(check === (sexp 1)       (apply rester [1]))
+(check === (sexp 1 2 3 4) (apply rester 1 2 [3, 4]))
+
+
+// Duplicate bound names
+(expect_syntax_exn
+  (lambda (x x) true))
+(expect_syntax_exn
+  (lambda (x a b c x) true))
+
+
+// These expressions crashed due to FUSION-273:
+((lambda (t) ((lambda () t))) 1)
+(let [(t 1)] ((lambda () t)))
+(let [(t 1)] (let_values [] t))
