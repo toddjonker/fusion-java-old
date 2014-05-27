@@ -53,6 +53,66 @@
 //==========================================================================
 // let
 
+(check === 1 (let ((x 1)) x))
+(check === 3 (let ((x 1) (y 2))
+               (+ x y)))
+(check === 11 (let ((x 1) (y 2))
+                (let [(x 10), (y x)]
+                  (+ x y))))
+(check === 1 (let ((u (void))) (if (is_void u) 1 2)))
+
+
+// No bindings
+(check === 2 (let () 2))
+
+// Multiple body forms
+(check === 2 (let ((x 1))
+               x
+               (+ x x)))
+
+
+(check === 3628800 (let fac ((n 10))
+                     (if (= 0 n)
+                         1
+                         (* n (fac (- n 1))))))
+
+
+(expect_syntax_exn
+  (let))
+(expect_syntax_exn
+  (let ((x 1))))
+(expect_syntax_exn
+  (let 12 13))
+(expect_syntax_exn
+  (let null.sexp 13))
+
+// Bound name not an identifier
+(expect_syntax_exn (let ((1 1)         ) true))
+(expect_syntax_exn (let ((name 1) (1 1)) true))
+
+// Bad loop name
+(expect_syntax_exn (let null.symbol []      true))
+(expect_syntax_exn (let null.symbol ((n 1)) true))
+
+(expect_syntax_exn
+  (let (12) 13))
+(expect_syntax_exn
+  (let (1 2) 13))
+(expect_syntax_exn
+  (let (()) 13))
+(expect_syntax_exn
+  (let ((n 1 2)) 13))
+(expect_syntax_exn
+  (let ((12)) 13))
+(expect_syntax_exn
+  (let ((1 2)) 13))
+(expect_syntax_exn
+  (let ((name)) 13))
+(expect_syntax_exn
+  (let ((name 1) ()) 13))
+(expect_syntax_exn
+  (let ((name 1) (name2)) 13))
+
 // Duplicate bound names
 (expect_syntax_exn
   (let [(x 1), (b 2), (x 3)] true))
@@ -121,15 +181,43 @@
 //==========================================================================
 // letrec
 
-(check = 1 (letrec [] 1))
+(check === 1 (letrec [] 1))
+
+(check === 5 (letrec ((v 5)) v))
 
 (check ident UNDEF
   (letrec [(a b), (c 3), (b a)] a))
 
+(check_true
+  (letrec ((is_even (lambda (n)
+                      (or (= 0 n)
+                          (is_odd (- n 1)))))
+           (is_odd (lambda (n)
+                     (and (not (= 0 n))
+                          (is_even (- n 1))))))
+    (is_odd 11)))
+
+// Bound name not an identifier
+(expect_syntax_exn (letrec ((1 1)         ) true))
+(expect_syntax_exn (letrec ((name 1) (1 1)) true))
 
 // Duplicate bound names
 (expect_syntax_exn
   (letrec [(x 1), (b 2), (x 3)] true))
+
+
+(expect_syntax_exn (letrec))
+(expect_syntax_exn (letrec ((x 1))))
+(expect_syntax_exn (letrec 12 13))
+(expect_syntax_exn (letrec null.sexp 13))
+(expect_syntax_exn (letrec (12) 13))
+(expect_syntax_exn (letrec (1 2) 13))
+(expect_syntax_exn (letrec (()) 13))
+(expect_syntax_exn (letrec ((12)) 13))
+(expect_syntax_exn (letrec ((name)) 13))
+(expect_syntax_exn (letrec ((name 1 2)) 13))
+(expect_syntax_exn (letrec ((name 1) ()) 13))
+(expect_syntax_exn (letrec ((name 1) (name2)) 13))
 
 
 //==========================================================================
@@ -144,6 +232,40 @@
 
 (check === (+ 19 222)
   (lets [(x 19), (y (+ x 222))] y))
+
+
+(expect_syntax_exn
+  (lets))
+(expect_syntax_exn
+  (lets ((x 1))))
+(expect_syntax_exn
+  (lets ((1 1)) true))            // Bound name not an identifier
+(expect_syntax_exn
+  (lets ((name 1) (1 1)) true))   // Bound name not an identifier
+(expect_syntax_exn
+  (lets 12 13))
+(expect_syntax_exn
+  (lets null.sexp 13))
+(expect_syntax_exn
+  (lets null.symbol [] true))  // Bad loop name
+(expect_syntax_exn
+  (lets (12) 13))
+(expect_syntax_exn
+  (lets (1 2) 13))
+(expect_syntax_exn
+  (lets (()) 13))
+(expect_syntax_exn
+  (lets ((n 1 2)) 13))
+(expect_syntax_exn
+  (lets ((12)) 13))
+(expect_syntax_exn
+  (lets ((1 2)) 13))
+(expect_syntax_exn
+  (lets ((name)) 13))
+(expect_syntax_exn
+  (lets ((name 1) ()) 13))
+(expect_syntax_exn
+  (lets ((name 1) (name2)) 13))
 
 
 //==========================================================================
