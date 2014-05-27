@@ -686,7 +686,7 @@ abstract class Namespace
             if (value instanceof Procedure)
             {
                 Procedure xformProc = (Procedure) value;
-                value = new MacroTransformer(xformProc);
+                value = new MacroForm(xformProc);
             }
             else if (! (value instanceof SyntacticForm))
             {

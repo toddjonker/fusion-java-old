@@ -607,11 +607,11 @@ final class SyntaxSexp
             }
 
             Object resolved = binding.lookup(env);
-            if (resolved instanceof MacroTransformer)
+            if (resolved instanceof MacroForm)
             {
                 // We found a static top-level macro binding!
                 SyntaxValue expanded =
-                    ((MacroTransformer)resolved).expandOnce(expander, this);
+                    ((MacroForm)resolved).expandOnce(expander, this);
                 if (expanded instanceof SyntaxSexp)
                 {
                     // TODO replace recursion with iteration

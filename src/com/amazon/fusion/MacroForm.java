@@ -1,20 +1,24 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionIo.safeWriteToString;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Base class for Fusion macros, performing syntax expansion.
+ * Runtime representation of Fusion macros, performing syntax expansion.
  */
-abstract class MacroForm
+final class MacroForm
     extends SyntacticForm
 {
     private static final AtomicInteger ourMarkCounter = new AtomicInteger();
 
-    MacroForm(String bodyPattern, String doc)
+    private final Procedure myTransformer;
+
+    MacroForm(Procedure transformer)
     {
-        super(bodyPattern, doc);
+        super(null, null); // TODO Get docs from declaration, like procedures?
+        myTransformer = transformer;
     }
 
 
@@ -43,14 +47,41 @@ abstract class MacroForm
     }
 
     /**
-     * PRIVATE! Performs a single "level" of macro expansion.
-     * Not for use outside this hierarchy.
+     * Performs a single "level" of macro expansion.
      *
      * @param stx the input syntax, including the macro identifier.
      * @throws FusionException
      */
-    abstract SyntaxValue doExpandOnce(Expander expander, SyntaxSexp stx)
-        throws FusionException;
+    private SyntaxValue doExpandOnce(Expander expander, SyntaxSexp stx)
+        throws FusionException
+    {
+        Object expanded;
+        try
+        {
+            // TODO FUSION-32 This should set current-namespace
+            // See Racket Reference 1.2.3.2
+            // http://docs.racket-lang.org/reference/syntax-model.html#(part._expand-steps)
+            expanded = expander.getEvaluator().callNonTail(myTransformer, stx);
+        }
+        catch (FusionException e)
+        {
+            e.addContext(stx);
+            throw e;
+        }
+
+        try
+        {
+            return (SyntaxValue) expanded;
+        }
+        catch (ClassCastException e)
+        {
+            String message =
+                "Transformer returned non-syntax result: " +
+                safeWriteToString(expander.getEvaluator(), expanded);
+            throw new SyntaxException(myTransformer.identify(), message,
+                                      stx);
+        }
+    }
 
 
     @Override

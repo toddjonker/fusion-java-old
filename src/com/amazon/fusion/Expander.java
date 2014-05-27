@@ -104,21 +104,11 @@ final class Expander
         SyntaxSymbol maybeMacro = (SyntaxSymbol) first;
 
         SyntacticForm form = maybeMacro.resolveSyntaxMaybe(env);
-        if (form == null || ! (form instanceof MacroTransformer))
+        if (form instanceof MacroForm)
         {
-            // Found a core form or some other kind of binding.
-
-            // TODO FUSION-121 This treats `let` as a core form since
-            // LetForm is the only MacroForm that's not a
-            // MacroTransformer.  But let expands to procedure call,
-            // which no callers of partial expansion care about yet.
-
-            return stx;
+            // We found a static top-level macro binding. Expand it.
+            stx = ((MacroForm)form).expandOnce(this, sexp);
         }
-
-        // We found a static top-level macro binding.
-        // Expand it and try again.
-        stx = ((MacroTransformer)form).expandOnce(this, sexp);
 
         return stx;
     }
