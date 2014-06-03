@@ -513,11 +513,13 @@ another kind of exception is thrown, then the check fails.''')))]
                       (sexp
                         (quote_syntax parameterize)
                         [(sexp (quote_syntax check_stack_param)
-                               (sexp (quote_syntax quote)
-                                 (if (== (syntax_size stx1) 2)
-                                     meta
-                                     (struct_merge meta
-                                       { message: (syntax_get stx1 2) }))))]
+                               (if (== (syntax_size stx1) 2)
+                                 (sexp (quote_syntax quote) meta)
+                                 (quasisyntax
+                                   (struct_merge
+                                     (quote (unsyntax (datum_to_syntax meta)))
+                                     (struct "message"
+                                       (unsyntax (syntax_get stx1 2)))))))]
                         (sexp
                           (quote_syntax check_exn)
                           (unquote tag)
