@@ -6,6 +6,15 @@
 )
 
 
+(expect_arity_exn (read 1))
+
+(expect_arity_exn (write))
+(expect_arity_exn (write 1 2))
+
+(expect_arity_exn (ionize))
+(expect_arity_exn (ionize 1 2))
+
+
 // This assumes that current_directory is at the project root.
 (with_ion_from_file "tst-data/ints.ion"
   (lambda ()
