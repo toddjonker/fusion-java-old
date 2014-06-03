@@ -112,7 +112,7 @@ final class FusionUtils
     static void writeFriendlyIndex(Appendable out, long i)
         throws IOException
     {
-        writeFriendlyOrdinal(out, i++);
+        writeFriendlyOrdinal(out, i + 1);
     }
 
 
