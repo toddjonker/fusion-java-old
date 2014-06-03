@@ -626,7 +626,7 @@ public final class FusionIo
 
 
     static final class IonizeToBlobProc
-        extends Procedure
+        extends Procedure1
     {
         IonizeToBlobProc()
         {
@@ -638,12 +638,12 @@ public final class FusionIo
         }
 
         @Override
-        Object doApply(Evaluator eval, Object[] args)
+        Object doApply(Evaluator eval, Object arg)
             throws FusionException
         {
             try (IonBinaryWriter writer = eval.getSystem().newBinaryWriter())
             {
-                FusionIo.ionize(eval, writer, args[0]);
+                FusionIo.ionize(eval, writer, arg);
                 writer.finish();
                 byte[] bytes = writer.getBytes();
 

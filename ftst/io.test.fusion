@@ -45,3 +45,6 @@
 // Make sure we can read Ion text
 (check === (quote [only_me])
   (with_ion_from_lob {{"[only_me]"}} read))
+
+(expect_arity_exn (ionize_to_blob))
+(expect_arity_exn (ionize_to_blob 1 2))
