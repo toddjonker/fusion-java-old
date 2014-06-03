@@ -48,3 +48,14 @@
 
 (expect_arity_exn (ionize_to_blob))
 (expect_arity_exn (ionize_to_blob 1 2))
+
+
+// ionize_to_string
+
+(check === "1"             (ionize_to_string 1))
+(check === "[1,true]"      (ionize_to_string [1,true]))
+(check === "{f:\"hi\"}"    (ionize_to_string {f:"hi"}))
+(check === "\"\\\"!\\\"\"" (ionize_to_string "\"!\""))
+
+(expect_arity_exn (ionize_to_string))
+(expect_arity_exn (ionize_to_string 1 2))

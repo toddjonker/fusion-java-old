@@ -59,6 +59,7 @@ There are three "styles" of output:
   (defpub_j display "com.amazon.fusion.FusionIo$DisplayProc")
   (defpub_j ionize  "com.amazon.fusion.FusionIo$IonizeProc")
   (defpub_j ionize_to_blob "com.amazon.fusion.FusionIo$IonizeToBlobProc")
+  (defpub_j ionize_to_string "com.amazon.fusion.FusionIo$IonizeToStringProc")
   (defpub_j write   "com.amazon.fusion.FusionIo$WriteProc")
 
   (defpub displayln

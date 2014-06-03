@@ -657,6 +657,43 @@ public final class FusionIo
     }
 
 
+    static final class IonizeToStringProc
+        extends Procedure1
+    {
+        private final IonTextWriterBuilder myBuilder;
+
+        IonizeToStringProc()
+        {
+            //    "                                                                               |
+            super("Encodes an Ion text representation of `value`, throwing an exception if the\n" +
+                  "value contains any non-Ionizable data like closures. The result is a string\n" +
+                  "containing an Ion text document.",
+                  "value");
+
+            myBuilder = IonTextWriterBuilder.minimal().immutable();
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object arg)
+            throws FusionException
+        {
+            StringBuilder buf = new StringBuilder(512);
+
+            try (IonWriter writer = myBuilder.build(buf);)
+            {
+                FusionIo.ionize(eval, writer, arg);
+            }
+            catch (IOException e)
+            {
+                throw new FusionException("I/O Exception", e);
+            }
+
+            String text = buf.toString();
+            return FusionString.makeString(eval, text);
+        }
+    }
+
+
     static final class WriteProc
         extends Procedure
     {

@@ -112,7 +112,9 @@ contact us for clarification.
   // I/O
 
   (require "/fusion/io")
-  (provide display displayln eof ionize ionize_to_blob is_eof read
+  (provide display displayln eof
+    ionize ionize_to_blob ionize_to_string
+    is_eof read
     with_ion_from_file with_ion_from_lob write writeln)
 
 )
