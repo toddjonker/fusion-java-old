@@ -33,6 +33,7 @@ abstract class Procedure
     /**
      * @param argNames are used purely for documentation
      */
+    @Deprecated
     Procedure(String doc, String... argNames)
     {
         assert doc == null || ! doc.endsWith("\n");
@@ -49,11 +50,16 @@ abstract class Procedure
         myDocs = new BindingDoc(null, Kind.PROCEDURE, usage, doc);
     }
 
+    Procedure()
+    {
+        myDocs = null;
+        myArity = -1;
+    }
 
     @Override
     final void nameInferred(String name)
     {
-        myDocs.setName(name);
+        if (myDocs != null) myDocs.setName(name);
     }
 
 
@@ -107,8 +113,12 @@ abstract class Procedure
 
     /**
      * Checks arity against the documented argument names.
+     *
+     * @deprecated
+     * Use {@link #checkArityExact(int, Object[])} instead.
      */
-    void checkArityExact(Object[] args)
+    @Deprecated
+    final void checkArityExact(Object[] args)
         throws ArityFailure
     {
         checkArityExact(myArity, args);
