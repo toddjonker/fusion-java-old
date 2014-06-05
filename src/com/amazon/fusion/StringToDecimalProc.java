@@ -4,18 +4,12 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionNumber.makeDecimal;
 import static com.amazon.fusion.FusionString.checkNullableStringArg;
-import java.math.BigDecimal;
 import com.amazon.ion.Decimal;
+import java.math.BigDecimal;
 
 final class StringToDecimalProc
     extends Procedure
 {
-    StringToDecimalProc()
-    {
-        super("See documentation in /fusion/experimental/decimal.fusion",
-              "decimal");
-    }
-
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException

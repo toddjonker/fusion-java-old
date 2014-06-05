@@ -10,6 +10,11 @@ package com.amazon.fusion;
 abstract class Procedure0
     extends Procedure
 {
+    Procedure0()
+    {
+    }
+
+    @Deprecated
     Procedure0(String doc)
     {
         super(doc);

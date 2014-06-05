@@ -515,12 +515,6 @@ public final class FusionString
     static final class SizeUtf8
         extends Procedure1
     {
-        SizeUtf8()
-        {
-            super("Docs in Fusion",
-                  "string");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException

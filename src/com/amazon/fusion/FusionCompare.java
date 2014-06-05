@@ -82,12 +82,6 @@ final class FusionCompare
     private static abstract class BaseCompareProc
         extends Procedure
     {
-        BaseCompareProc(String doc, String... args)
-        {
-            super(doc, args);
-        }
-
-
         FusionException failure(Object[] args)
         {
             return new ArgumentException(this, "comparable types", -1, args);
@@ -111,7 +105,7 @@ final class FusionCompare
         final Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            checkArityExact(args);
+            checkArityExact(2, args);
 
             Object arg0 = args[0];
             Object arg1 = args[1];
@@ -172,12 +166,6 @@ final class FusionCompare
     static final class LessThanProc
         extends BaseCompareProc
     {
-        LessThanProc()
-        {
-            //    "                                                                               |
-            super("Documented in Fusion source", "a", "b");
-        }
-
         @Override
         <T> boolean compare(Comparable<T> left, T right, Object[] args)
             throws FusionException
@@ -191,12 +179,6 @@ final class FusionCompare
     static final class LessThanOrEqualToProc
         extends BaseCompareProc
     {
-        LessThanOrEqualToProc()
-        {
-            //    "                                                                               |
-            super("Documented in Fusion source", "a", "b");
-        }
-
         @Override
         <T> boolean compare(Comparable<T> left, T right, Object[] args)
             throws FusionException
@@ -210,12 +192,6 @@ final class FusionCompare
     static final class GreaterThanProc
         extends BaseCompareProc
     {
-        GreaterThanProc()
-        {
-            //    "                                                                               |
-            super("Documented in Fusion source", "a", "b");
-        }
-
         @Override
         <T> boolean compare(Comparable<T> left, T right, Object[] args)
             throws FusionException
@@ -229,12 +205,6 @@ final class FusionCompare
     static final class GreaterThanOrEqualToProc
         extends BaseCompareProc
     {
-        GreaterThanOrEqualToProc()
-        {
-            //    "                                                                               |
-            super("Documented in Fusion source", "a", "b");
-        }
-
         @Override
         <T> boolean compare(Comparable<T> left, T right, Object[] args)
             throws FusionException
@@ -248,18 +218,11 @@ final class FusionCompare
     static final class IsIdenticalProc
         extends Procedure
     {
-        IsIdenticalProc()
-        {
-            //    "                                                                               |
-            super("Docs in Fusion source",
-                  "left", "right");
-        }
-
         @Override
         final BaseBool doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            checkArityExact(args);
+            checkArityExact(2, args);
 
             Object arg0 = args[0];
             Object arg1 = args[1];
@@ -272,18 +235,11 @@ final class FusionCompare
     static final class IsSameProc
         extends Procedure
     {
-        IsSameProc()
-        {
-            //    "                                                                               |
-            super("Docs in Fusion source",
-                  "left", "right");
-        }
-
         @Override
         final BaseBool doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            checkArityExact(args);
+            checkArityExact(2, args);
 
             Object arg0 = args[0];
             Object arg1 = args[1];
@@ -296,18 +252,11 @@ final class FusionCompare
     static final class LooseEqualProc
         extends Procedure
     {
-        LooseEqualProc()
-        {
-            //    "                                                                               |
-            super("Docs in Fusion source",
-                  "left", "right");
-        }
-
         @Override
         final BaseBool doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            checkArityExact(args);
+            checkArityExact(2, args);
 
             Object arg0 = args[0];
             Object arg1 = args[1];
@@ -320,18 +269,11 @@ final class FusionCompare
     static final class TightEqualProc
         extends Procedure
     {
-        TightEqualProc()
-        {
-            //    "                                                                               |
-            super("Docs in Fusion source",
-                  "left", "right");
-        }
-
         @Override
         final BaseBool doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            checkArityExact(args);
+            checkArityExact(2, args);
 
             Object arg0 = args[0];
             Object arg1 = args[1];
@@ -344,18 +286,11 @@ final class FusionCompare
     static final class StrictEqualProc
         extends Procedure
     {
-        StrictEqualProc()
-        {
-            //    "                                                                               |
-            super("Docs in Fusion source",
-                  "left", "right");
-        }
-
         @Override
         final BaseBool doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            checkArityExact(args);
+            checkArityExact(2, args);
 
             Object arg0 = args[0];
             Object arg1 = args[1];

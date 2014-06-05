@@ -199,7 +199,7 @@ public class RuntimeTest
         ModuleBuilder builder = runtime().makeModuleBuilder("/tst/dummy");
         builder.instantiate();
 
-        topLevel().define("callback", new Procedure0("callback")
+        topLevel().define("callback", new Procedure0()
         {
             @Override
             Object doApply(Evaluator eval)

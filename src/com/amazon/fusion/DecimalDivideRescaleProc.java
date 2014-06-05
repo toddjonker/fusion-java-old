@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -13,13 +13,6 @@ import java.math.BigDecimal;
 class DecimalDivideRescaleProc
     extends Procedure
 {
-    DecimalDivideRescaleProc()
-    {
-        //    "                                                                               |
-        super("docs in Fusion");
-    }
-
-
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException

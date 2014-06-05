@@ -24,7 +24,7 @@ public class NamespaceTest
     public void testBaseNamespace()
         throws Exception
     {
-        topLevel().define("callback", new Procedure1("callback", "namespace")
+        topLevel().define("callback", new Procedure1()
         {
             @Override
             Object doApply(Evaluator eval, Object arg)

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,6 +10,11 @@ package com.amazon.fusion;
 abstract class Procedure2
     extends Procedure
 {
+    Procedure2()
+    {
+    }
+
+    @Deprecated
     Procedure2(String doc, String arg0Name, String arg1Name)
     {
         super(doc, arg0Name, arg1Name);

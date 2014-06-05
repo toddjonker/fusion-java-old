@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,14 +10,13 @@ import java.util.List;
  *
  */
 class DynamicParameter
-    extends Procedure
+    extends Procedure0
 {
     private final Object myInitialValue;
 
 
     public DynamicParameter(Object initialValue)
     {
-        super(null);
         myInitialValue = initialValue;
     }
 
@@ -55,10 +54,9 @@ class DynamicParameter
 
 
     @Override
-    Object doApply(Evaluator eval, Object[] args)
+    Object doApply(Evaluator eval)
         throws FusionException
     {
-        checkArityExact(args);
         return currentValue(eval);
     }
 }

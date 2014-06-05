@@ -178,11 +178,6 @@ public class NumericsTest
     private static final class IsMaxLongProc
         extends Procedure
     {
-        IsMaxLongProc()
-        {
-            super("doc");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object[] args) throws FusionException
         {

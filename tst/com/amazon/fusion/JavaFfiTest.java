@@ -23,7 +23,6 @@ public class JavaFfiTest
         public Uninstantiable()
             throws Exception
         {
-            super("doc");
             throw new Exception("boom");
         }
 
