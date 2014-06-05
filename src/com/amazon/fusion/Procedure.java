@@ -292,7 +292,8 @@ abstract class Procedure
     }
 
 
-    SyntaxValue checkSyntaxArg(int argNum, Object... args)
+    @Deprecated
+    final SyntaxValue checkSyntaxArg(int argNum, Object... args)
         throws ArgumentException
     {
         try
@@ -306,7 +307,7 @@ abstract class Procedure
 
     private <T extends SyntaxValue> T checkSyntaxArg(Class<T> klass,
                                                      String typeName,
-                                             boolean nullable,
+                                                     boolean nullable,
                                                      int argNum,
                                                      Object... args)
         throws ArgumentException
@@ -327,7 +328,8 @@ abstract class Procedure
     }
 
 
-    SyntaxSymbol checkSyntaxSymbolArg(int argNum, Object... args)
+    @Deprecated
+    final SyntaxSymbol checkSyntaxSymbolArg(int argNum, Object... args)
         throws ArgumentException
     {
         return checkSyntaxArg(SyntaxSymbol.class, "syntax symbol",
@@ -335,7 +337,8 @@ abstract class Procedure
     }
 
 
-    SyntaxContainer checkSyntaxContainerArg(int argNum, Object... args)
+    @Deprecated
+    final SyntaxContainer checkSyntaxContainerArg(int argNum, Object... args)
         throws ArgumentException
     {
         return checkSyntaxArg(SyntaxContainer.class,
@@ -344,8 +347,8 @@ abstract class Procedure
     }
 
 
-
-    SyntaxSequence checkSyntaxSequenceArg(int argNum, Object... args)
+    @Deprecated
+    final SyntaxSequence checkSyntaxSequenceArg(int argNum, Object... args)
         throws ArgumentException
     {
         return checkSyntaxArg(SyntaxSequence.class,
