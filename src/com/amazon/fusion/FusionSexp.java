@@ -34,6 +34,14 @@ final class FusionSexp
     static final NullSexp  NULL_SEXP  = new NullSexp();
 
 
+    /**
+     * Returns an unannotated, immutable {@code null.sexp}.
+     */
+    static NullSexp nullSexp(Evaluator eval)
+    {
+        return NULL_SEXP;
+    }
+
     static NullSexp nullSexp(Evaluator eval, String[] annotations)
     {
         if (annotations.length == 0)
@@ -42,6 +50,14 @@ final class FusionSexp
         }
 
         return new NullSexp(annotations);
+    }
+
+    /**
+     * Returns an unannotated, immutable empty sexp: {@code ()}.
+     */
+    static EmptySexp emptySexp(Evaluator eval)
+    {
+        return EMPTY_SEXP;
     }
 
     static EmptySexp emptySexp(Evaluator eval, String[] annotations)
