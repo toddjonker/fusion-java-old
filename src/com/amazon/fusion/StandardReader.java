@@ -27,6 +27,7 @@ import com.amazon.ion.Timestamp;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -209,19 +210,18 @@ class StandardReader
 
     /**
      * @param source must be positioned on the value to be read, but not
-     * stepped-in.
+     * stepped-in.  Must not be positioned on a null value.
      * @param name may be null.
-     * @return null if the sequence is null (eg, {@code null.list}).
      *
      * @throws IonException if there's a problem reading the source data.
      */
-    private static Object[] readSequence(Evaluator  eval,
-                                         IonReader  source,
-                                         SourceName name,
-                                         boolean    readingSyntax)
+    private static ArrayList<Object> readSequence(Evaluator  eval,
+                                                  IonReader  source,
+                                                  SourceName name,
+                                                  boolean    readingSyntax)
         throws FusionException, IonException
     {
-        if (source.isNullValue()) return null;
+        assert ! source.isNullValue();
 
         ArrayList<Object> children = new ArrayList<>();
 
@@ -233,7 +233,7 @@ class StandardReader
         }
         source.stepOut();
 
-        return children.toArray();
+        return children;
     }
 
 
@@ -254,7 +254,8 @@ class StandardReader
             return nullList(eval, annotations);
         }
 
-        Object[] elements = readSequence(eval, source, name, readingSyntax);
+        ArrayList<Object> elements =
+            readSequence(eval, source, name, readingSyntax);
         return immutableList(eval, annotations, elements);
     }
 
@@ -274,7 +275,8 @@ class StandardReader
             return nullSexp(eval, annotations);
         }
 
-        Object[] elements = readSequence(eval, source, name, readingSyntax);
+        List<Object> elements =
+            readSequence(eval, source, name, readingSyntax);
         return immutableSexp(eval, annotations, elements);
     }
 
