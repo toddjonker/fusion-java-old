@@ -83,7 +83,6 @@ final class FusionList
 
 
     /**
-     * Caller must have injected elements.
      * @param elements must not be null. This method assumes ownership!
      */
     static Object mutableList(Evaluator eval, Object[] elements)
@@ -105,8 +104,7 @@ final class FusionList
 
 
     /**
-     * Caller must have injected elements.
-     * @param elements must not be null
+     * @param elements must not be null. This method assumes ownership!
      */
     static ImmutableList immutableList(Evaluator eval, Object[] elements)
     {
@@ -122,8 +120,7 @@ final class FusionList
 
 
     /**
-     * Caller must have injected elements.
-     * @param elements must not be null
+     * @param elements must not be null. This method assumes ownership!
      */
     static ImmutableList immutableList(Evaluator eval,
                                        String[] annotations,
@@ -141,7 +138,6 @@ final class FusionList
 
 
     /**
-     * Caller must have injected elements.
      * @param elements must not be null
      */
     static <T> ImmutableList immutableList(Evaluator eval, List<T> elements)
@@ -160,8 +156,27 @@ final class FusionList
 
 
     /**
-     * Caller must have injected elements.
-     * @param elements must not be null
+     * @param elements must not be null. This method assumes ownership!
+     */
+    static ImmutableList immutableList(Evaluator eval,
+                                       String[] annotations,
+                                       List<?> elements)
+    {
+        int size = elements.size();
+        if (size == 0 && annotations.length == 0)
+        {
+            return EMPTY_IMMUTABLE_LIST;
+        }
+        else
+        {
+            Object[] elts = elements.toArray(new Object[size]);
+            return new ImmutableList(annotations, elts);
+        }
+    }
+
+
+    /**
+     * @param elements must not be null. This method assumes ownership!
      */
     static Object stretchyList(Evaluator eval, Object[] elements)
     {
@@ -397,23 +412,30 @@ final class FusionList
          */
         Object[] myValues;
 
-        BaseList(Object[] values)
+        /**
+         * @param elements must not be null. This method assumes ownership!
+         */
+        BaseList(Object[] elements)
         {
-            myValues = values;
+            myValues = elements;
         }
 
-        BaseList(String[] annotations, Object[] values)
+        /**
+         * @param elements must not be null. This method assumes ownership!
+         */
+        BaseList(String[] annotations, Object[] elements)
         {
             super(annotations);
-            myValues = values;
+            myValues = elements;
         }
 
 
         /**
          * @param annotations must not be null. This method assumes ownership
          * of the array and it must not be modified later.
+         * @param elements must not be null. This method assumes ownership!
          */
-        abstract BaseList makeSimilar(String[] annotations, Object[] values);
+        abstract BaseList makeSimilar(String[] annotations, Object[] elements);
 
 
         Object[] values(Evaluator eval)
@@ -709,22 +731,34 @@ final class FusionList
     private static class MutableList
         extends BaseList
     {
-        MutableList(Object[] values)
+        /**
+         * @param elements must not be null. This method assumes ownership!
+         */
+        MutableList(Object[] elements)
         {
-            super(values);
+            super(elements);
         }
 
-        MutableList(String[] annotations, Object[] values)
+        /**
+         * @param elements must not be null. This method assumes ownership!
+         */
+        MutableList(String[] annotations, Object[] elements)
         {
-            super(annotations, values);
+            super(annotations, elements);
         }
 
+        /**
+         * @param elements must not be null. This method assumes ownership!
+         */
         @Override
-        BaseList makeSimilar(String[] annotations, Object[] values)
+        BaseList makeSimilar(String[] annotations, Object[] elements)
         {
-            return new MutableList(annotations, values);
+            return new MutableList(annotations, elements);
         }
 
+        /**
+         * Assumes ownership of arguments.
+         */
         @Override
         Object annotate(Evaluator eval, String[] annotations)
         {
@@ -743,20 +777,29 @@ final class FusionList
     private static class ImmutableList
         extends BaseList
     {
-        ImmutableList(Object[] values)
+        /**
+         * @param elements must not be null. This method assumes ownership!
+         */
+        ImmutableList(Object[] elements)
         {
-            super(values);
+            super(elements);
         }
 
-        ImmutableList(String[] annotations, Object[] values)
+        /**
+         * @param elements must not be null. This method assumes ownership!
+         */
+        ImmutableList(String[] annotations, Object[] elements)
         {
-            super(annotations, values);
+            super(annotations, elements);
         }
 
+        /**
+         * @param elements must not be null. This method assumes ownership!
+         */
         @Override
-        BaseList makeSimilar(String[] annotations, Object[] values)
+        BaseList makeSimilar(String[] annotations, Object[] elements)
         {
-            return new ImmutableList(annotations, values);
+            return new ImmutableList(annotations, elements);
         }
 
         @Override
@@ -876,22 +919,31 @@ final class FusionList
     {
         private int mySize;
 
-        StretchyList(Object[] values)
+        /**
+         * @param elements must not be null. This method assumes ownership!
+         */
+        StretchyList(Object[] elements)
         {
-            super(values);
-            mySize = values.length;
+            super(elements);
+            mySize = elements.length;
         }
 
-        StretchyList(String[] annotations, Object[] values)
+        /**
+         * @param elements must not be null. This method assumes ownership!
+         */
+        StretchyList(String[] annotations, Object[] elements)
         {
-            super(annotations, values);
-            mySize = values.length;
+            super(annotations, elements);
+            mySize = elements.length;
         }
 
+        /**
+         * @param elements must not be null. This method assumes ownership!
+         */
         @Override
-        BaseList makeSimilar(String[] annotations, Object[] values)
+        BaseList makeSimilar(String[] annotations, Object[] elements)
         {
-            return new StretchyList(annotations, values);
+            return new StretchyList(annotations, elements);
         }
 
         @Override
@@ -977,10 +1029,13 @@ final class FusionList
     private static final class LazyInjectingList
         extends ImmutableList
     {
-        LazyInjectingList(String[] annotations, Object[] values)
+        /**
+         * @param elements must not be null. This method assumes ownership!
+         */
+        LazyInjectingList(String[] annotations, Object[] elements)
         {
-            super(annotations, values);
-            assert values.length != 0;
+            super(annotations, elements);
+            assert elements.length != 0;
         }
 
         /**
