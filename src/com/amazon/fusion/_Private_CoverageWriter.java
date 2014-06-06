@@ -166,10 +166,10 @@ public final class _Private_CoverageWriter
     }
 
 
-    public void renderMarkedUpSource()
+    public void renderMarkedUpSource(File where)
         throws IOException
     {
-        myHtml = new HtmlWriter(new File("coverage.html"));
+        myHtml = new HtmlWriter(where);
 
         myHtml.renderHeadWithInlineCss("Fusion Code Coverage", CSS);
 

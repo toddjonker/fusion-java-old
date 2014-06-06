@@ -72,7 +72,7 @@ class Cover
             _Private_CoverageWriter renderer =
                 new _Private_CoverageWriter(myCollector, new File(myFileName));
 
-            renderer.renderMarkedUpSource();
+            renderer.renderMarkedUpSource(new File("coverage.html"));
 
             return result;
         }

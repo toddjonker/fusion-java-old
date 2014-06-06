@@ -34,6 +34,11 @@ public class CoverageTest
         {
             covered.add(loc);
         }
+
+        @Override
+        public void flushMetrics()
+        {
+        }
     }
 
 

@@ -37,4 +37,10 @@ public interface _Private_CoverageCollector
      * location.
      */
     void coverLocation(SourceLocation loc);
+
+
+    // TODO Think this through. I'm not really convinced this is correct.
+    //      Perhaps close() would be better?  save()?
+    void flushMetrics()
+        throws FusionException;
 }
