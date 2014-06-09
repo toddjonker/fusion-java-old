@@ -83,6 +83,9 @@ public class FusionRuntimeBuilder
     public static final String PROPERTY_BOOTSTRAP_REPOSITORY =
         "com.amazon.fusion.BootstrapRepository";
 
+    private static final String PROPERTY_CODE_COVERAGE_DIR =
+        "com.amazon.fusion.CodeCoverageDir";
+
     private static final String STANDARD_DEFAULT_LANGUAGE = "/fusion";
 
 
@@ -106,6 +109,7 @@ public class FusionRuntimeBuilder
     private File[]  myRepositoryDirectories;
     private String  myDefaultLanguage = STANDARD_DEFAULT_LANGUAGE;
 
+    private File                       myCoverageDirectory;
     private _Private_CoverageCollector myCollector;
 
     private boolean myDocumenting;
@@ -119,6 +123,7 @@ public class FusionRuntimeBuilder
         this.myBootstrapRepository   = that.myBootstrapRepository;
         this.myRepositoryDirectories = that.myRepositoryDirectories;
         this.myDefaultLanguage       = that.myDefaultLanguage;
+        this.myCoverageDirectory     = that.myCoverageDirectory;
         this.myCollector             = that.myCollector;
         this.myDocumenting           = that.myDocumenting;
     }
@@ -200,6 +205,16 @@ public class FusionRuntimeBuilder
             }
 
             b = b.withBootstrapRepository(f);
+        }
+
+        path = props.getProperty(PROPERTY_CODE_COVERAGE_DIR);
+        if (path != null)
+        {
+            b = b.mutable();
+
+            // TODO validate
+
+            b.setCoverageDirectory(new File(path));
         }
 
         return b;
@@ -597,6 +612,16 @@ public class FusionRuntimeBuilder
 
 
     /** NOT FOR APPLICATION USE */
+    void setCoverageDirectory(File directory)
+    {
+        mutationCheck();
+
+        // TODO check that its a directory
+        myCoverageDirectory = directory;
+    }
+
+
+    /** NOT FOR APPLICATION USE */
     _Private_CoverageCollector getCoverageCollector()
     {
         return myCollector;
@@ -614,6 +639,7 @@ public class FusionRuntimeBuilder
 
 
     private FusionRuntimeBuilder fillDefaults()
+        throws FusionException
     {
         // Ensure that we don't modify the user's builder.
         FusionRuntimeBuilder b = copy();
@@ -654,6 +680,27 @@ public class FusionRuntimeBuilder
                 }
 
                 b.setBootstrapRepository(file);
+            }
+        }
+
+        if (b.getCoverageCollector() == null)
+        {
+            if (b.myCoverageDirectory == null)
+            {
+                String property = PROPERTY_CODE_COVERAGE_DIR;
+                String path = System.getProperty(property);
+                if (path != null)
+                {
+                    b.myCoverageDirectory = new File(path);
+                    // TODO validate
+                }
+            }
+
+            if (b.myCoverageDirectory != null)
+            {
+                _Private_CoverageCollector c =
+                    _Private_CoverageCollectorImpl.fromDirectory(b.myCoverageDirectory);
+                b.setCoverageCollector(c);
             }
         }
 

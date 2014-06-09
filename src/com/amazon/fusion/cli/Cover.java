@@ -2,26 +2,24 @@
 
 package com.amazon.fusion.cli;
 
-import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.fusion._Private_CoverageCollectorImpl;
 import com.amazon.fusion._Private_CoverageWriter;
-import com.amazon.fusion._Private_Trampoline;
 import java.io.File;
 
 /**
  *
  */
 class Cover
-    extends Load
+    extends Command
 {
     //=+===============================================================================
     private static final String HELP_ONE_LINER =
         "EXPERIMENTAL code coverage tool.";
     private static final String HELP_USAGE =
-        "cover FILE";
+        "cover COVERAGE_DIR";
     private static final String HELP_BODY =
-        "Loads and evaluates the Fusion script in the given FILE, then writes a code\n" +
-        "coverage report to coverage.html in the current directory.";
+        "Loads Fusion code-coverage data from the given directory, then writes an HTML\n" +
+        "report to index.html in the same directory.";
 
 
     Cover()
@@ -36,45 +34,45 @@ class Cover
     {
         if (args.length != 1) return null;
 
-        String fileName = args[0];
-        if (fileName.length() == 0) return null;
+        String dataDir = args[0];
+        if (dataDir.length() == 0) return null;
 
-        return new Executor(fileName);
+        return new Executor(dataDir);
     }
 
 
     static class Executor
-        extends Load.Executor
+        implements Command.Executor
     {
-        _Private_CoverageCollectorImpl myCollector =
-            new _Private_CoverageCollectorImpl();
+        private final File myDataDir;
 
         private Executor(String fileName)
         {
-            super(fileName);
+            myDataDir = new File(fileName);
         }
-
-        @Override
-        FusionRuntimeBuilder runtimeBuilder()
-        {
-            FusionRuntimeBuilder builder = super.runtimeBuilder();
-            _Private_Trampoline.setCoverageCollector(builder, myCollector);
-            return builder;
-        }
-
 
         @Override
         public int execute()
             throws Exception
         {
-            int result = super.execute();
+            if (! myDataDir.isDirectory())
+            {
+                throw new IllegalArgumentException("Bad data dir");
+            }
+
+            _Private_CoverageCollectorImpl collector =
+                _Private_CoverageCollectorImpl.fromDirectory(myDataDir);
 
             _Private_CoverageWriter renderer =
-                new _Private_CoverageWriter(myCollector, new File(myFileName));
+                new _Private_CoverageWriter(collector, null);
 
-            renderer.renderMarkedUpSource(new File("coverage.html"));
+            File html = new File(myDataDir, "index.html");
+            renderer.renderMarkedUpSource(html);
 
-            return result;
+            System.out.print("Wrote Fusion coverage report to ");
+            System.out.println(html.getPath());
+
+            return 0;
         }
     }
 }

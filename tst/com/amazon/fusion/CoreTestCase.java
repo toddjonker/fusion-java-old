@@ -82,6 +82,11 @@ public class CoreTestCase
     public void tearDown()
         throws Exception
     {
+        if (myRuntime != null)
+        {
+            _Private_Trampoline.flushMetrics(myRuntime);
+        }
+
         mySystem = null;
         myRuntimeBuilder = null;
         myRuntime = null;

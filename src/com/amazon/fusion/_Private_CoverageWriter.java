@@ -217,7 +217,7 @@ public final class _Private_CoverageWriter
                                                              2,
                                                              RoundingMode.HALF_EVEN);
         myHtml.append(myCoveredExpressions + " expressions observed<br/>");
-        myHtml.append(percentCovered + " % expression coverage");
+        myHtml.append(percentCovered + "% expression coverage");
 
         myHtml.close();
     }
