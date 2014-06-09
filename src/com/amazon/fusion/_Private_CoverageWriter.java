@@ -9,11 +9,14 @@ import com.amazon.ion.IonType;
 import com.amazon.ion.OffsetSpan;
 import com.amazon.ion.Span;
 import com.amazon.ion.SpanProvider;
+import com.amazon.ion.Timestamp;
 import com.amazon.ion.system.IonSystemBuilder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  *
@@ -36,6 +39,9 @@ public final class _Private_CoverageWriter
     private long myIonBytesRead;
     private HtmlWriter myHtml;
     private boolean coverageState;
+
+    private long myCoveredExpressions;
+    private long myUncoveredExpressions;
 
 
     public _Private_CoverageWriter(_Private_CoverageCollectorImpl collector,
@@ -141,6 +147,15 @@ public final class _Private_CoverageWriter
                 setCoverageState(spanProvider, covered);
                 locationIndex++;
 
+                if (covered)
+                {
+                    myCoveredExpressions++;
+                }
+                else
+                {
+                    myUncoveredExpressions++;
+                }
+
                 if (locationIndex == locations.length) break;
             }
 
@@ -173,8 +188,16 @@ public final class _Private_CoverageWriter
 
         myHtml.renderHeadWithInlineCss("Fusion Code Coverage", CSS);
 
-        SourceName mainSourceName = SourceName.forFile(mySourceFile);
-        renderSource(mainSourceName);
+        myHtml.append("<p>Report generated at ");
+        myHtml.append(Timestamp.now().toString());
+        myHtml.append("</p>\n");
+
+        SourceName mainSourceName = null;
+        if (mySourceFile != null)
+        {
+            mainSourceName = SourceName.forFile(mySourceFile);
+            renderSource(mainSourceName);
+        }
 
         for (SourceName name : myCollector.sortedNames())
         {
@@ -185,5 +208,17 @@ public final class _Private_CoverageWriter
                 renderSource(name);
             }
         }
+
+        myHtml.append("<hr/>");
+
+        long total = myCoveredExpressions + myUncoveredExpressions;
+        BigDecimal percentCovered =
+            new BigDecimal(myCoveredExpressions * 100).divide(new BigDecimal(total),
+                                                             2,
+                                                             RoundingMode.HALF_EVEN);
+        myHtml.append(myCoveredExpressions + " expressions observed<br/>");
+        myHtml.append(percentCovered + " % expression coverage");
+
+        myHtml.close();
     }
 }
