@@ -87,12 +87,11 @@ while the field values are iterated.
     "/fusion/list"
     "/fusion/private/struct")
 
-
   // Pass-through bindings from /fusion/private/kernel
   (provide is_struct)
 
   // Pass-through bindings from /fusion/collection
-  (provide . any do element elt every find has_key is_collection is_empty size)
+  (provide . any do element elt every find has_key is_collection is_empty none size)
 
   (defpub_j struct          "com.amazon.fusion.FusionStruct$StructProc")
   (defpub_j mutable_struct  "com.amazon.fusion.FusionStruct$MutableStructProc")

@@ -292,6 +292,15 @@ application of `pred` to the final element of the sequence is in tail position.
       (true
        (raise_argument_error "any" "collection" 0 collection))))
 
+  
+  (defpub (none pred collection)
+    '''
+Applies the one-argument predicate 'pred' to the elements of collection.  
+Returns false if the predicate returns a truthy value for any element, true if 
+none do, and true if the collection is empty. 
+    '''
+    (not (any pred collection)))
+    
 
   // Name per Dylan and SRFI-1.
   (defpub (every pred collection)

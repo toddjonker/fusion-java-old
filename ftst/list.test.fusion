@@ -453,6 +453,19 @@
   (any (lambda (s) (if (is_null s) (void) null))
     [false, null.int, null.list]))
 
+//==========================================================================
+// none
+
+(check_true  (none is_truthy null.list)) 
+(check_true  (none is_truthy [])) 
+(check_true  (none is_truthy [false]))
+(check_true  (none is_truthy [false,null]))
+(check_false (none is_truthy [1, 2])) 
+(check_false (none is_truthy [1,"hello, world",null]))
+
+(check_false (none (lambda (e) (= e "hi")) ["oh", "hi"]))
+(check_true  (none (lambda (e) (= e "ho")) ["oh", "hi"]))
+
 
 //==========================================================================
 // every

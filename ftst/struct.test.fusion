@@ -600,6 +600,17 @@
 
 
 //==========================================================================
+//none
+
+(check_true  (none is_truthy {})) 
+(check_true  (none is_truthy {f:null, g:false})) 
+(check_false (none is_truthy {f:1, g:2}))
+
+(check_false (none (lambda (e) (= e "hi")) {f:"oh", g:"hi"}))
+(check_true  (none (lambda (e) (= e "ho")) {f:"oh", g:"hi"}))
+
+
+//==========================================================================
 // every
 
 (check_true (every T null.struct))

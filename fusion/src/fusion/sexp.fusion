@@ -25,6 +25,6 @@ sexps.
 
   (require "/fusion/sequence")
   (provide . add any choose do element elt every find first fold_left has_key
-    is_collection is_empty is_sequence last map size)
+    is_collection is_empty is_sequence last map none size)
 
 )

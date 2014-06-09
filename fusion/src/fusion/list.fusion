@@ -160,7 +160,7 @@ Other alternative traversal forms include [iterators][] and [comprehensions][].
 
   // Pass-through bindings from /fusion/sequence
   (provide . add any choose do element elt every find first fold_left has_key
-    is_collection is_empty is_sequence last map size subseq)
+    is_collection is_empty is_sequence last map none size subseq)
 
   (defpub_j append_m        "com.amazon.fusion.AppendMProc")
 //  (defpub_j subseq          "com.amazon.fusion.IonSubseqProc")

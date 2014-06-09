@@ -241,6 +241,18 @@
 
 
 //==========================================================================
+// none
+
+(check_true  (none is_truthy valNull)) 
+(check_true  (none is_truthy valEmpty)) 
+(check_true  (none is_truthy (sexp null false))) 
+(check_false (none is_truthy (sexp 1 2)))
+
+(check_false (none (lambda (e) (= e "hi")) (sexp "oh" "hi")))
+(check_true  (none (lambda (e) (= e "ho")) (sexp "oh" "hi")))
+
+
+//==========================================================================
 // every
 
 (check_true (every T valNull))
