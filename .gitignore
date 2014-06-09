@@ -2,5 +2,6 @@
 /compiled
 /demo/compiled
 /eclipse-bin
+cobertura.ser
 junit*.properties
 tmp*
