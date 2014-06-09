@@ -30,11 +30,12 @@ final class GlobalState
     static final String PROVIDE         = "provide";
     static final String REQUIRE         = "require";
 
-    final IonSystem          myIonSystem;
-    final ModuleInstance     myKernelModule;
-    final ModuleNameResolver myModuleNameResolver;
-    final LoadHandler        myLoadHandler;
-    final DynamicParameter   myCurrentNamespaceParam;
+    final IonSystem                  myIonSystem;
+    final ModuleInstance             myKernelModule;
+    final ModuleNameResolver         myModuleNameResolver;
+    final LoadHandler                myLoadHandler;
+    final DynamicParameter           myCurrentNamespaceParam;
+    final _Private_CoverageCollector myCoverageCollector;
 
     final SyntaxSymbol       myKernelBeginIdentifier;
     final SyntaxSymbol       myKernelLambdaIdentifier;
@@ -48,17 +49,19 @@ final class GlobalState
     final Binding myKernelProvideBinding;
     final Binding myKernelRequireBinding;
 
-    private GlobalState(IonSystem          ionSystem,
-                        ModuleInstance     kernel,
-                        ModuleNameResolver resolver,
-                        LoadHandler        loadHandler,
-                        DynamicParameter   currentNamespaceParam)
+    private GlobalState(IonSystem                  ionSystem,
+                        ModuleInstance             kernel,
+                        ModuleNameResolver         resolver,
+                        LoadHandler                loadHandler,
+                        DynamicParameter           currentNamespaceParam,
+                        _Private_CoverageCollector coverageCollector)
     {
         myIonSystem             = ionSystem;
         myKernelModule          = kernel;
         myModuleNameResolver    = resolver;
         myLoadHandler           = loadHandler;
         myCurrentNamespaceParam = currentNamespaceParam;
+        myCoverageCollector     = coverageCollector;
 
         SyntaxWrap wrap = new ModuleRenameWrap(kernel);
 
@@ -148,7 +151,8 @@ final class GlobalState
 
         GlobalState globals =
             new GlobalState(system, kernel, resolver, loadHandler,
-                            currentNamespaceParam);
+                            currentNamespaceParam,
+                            builder.getCoverageCollector());
         return globals;
     }
 

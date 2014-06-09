@@ -27,12 +27,12 @@ final class StandardTopLevel
     StandardTopLevel(GlobalState globalState,
                      Namespace namespace,
                      String initialModulePath,
-                     _Private_CoverageCollector collector,
                      boolean documenting)
         throws FusionInterrupt, FusionException
     {
         assert ModuleIdentity.isValidAbsoluteModulePath(initialModulePath);
 
+        _Private_CoverageCollector collector = globalState.myCoverageCollector;
         Evaluator eval = (collector == null
                             ? new Evaluator(globalState)
                             : new CoverageEvaluator(globalState, collector));
@@ -57,7 +57,6 @@ final class StandardTopLevel
         throws FusionInterrupt, FusionException
     {
         this(globalState, new TopLevelNamespace(registry), initialModulePath,
-             null /* coverage collector */,
              false);
     }
 
