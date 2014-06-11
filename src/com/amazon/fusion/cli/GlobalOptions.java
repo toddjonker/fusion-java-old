@@ -12,6 +12,18 @@ import java.util.StringTokenizer;
  */
 class GlobalOptions
 {
+    static final String HELP =
+        "\n\n"
+        + "Global Options\n"
+        + "==============\n"
+        + "--bootstrapRepository DIR\n"
+        + "  Path to a Fusion bootstrap repository.\n"
+        + "--repositories DIR" + File.pathSeparator + "DIR...\n"
+        + "  Additional user repositories. This option can be given more than once and\n"
+        + "  all DIRs will be used."
+        ;
+
+
     private String          myBootstrapPath;
     private ArrayList<File> myRepositories;
 

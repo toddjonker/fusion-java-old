@@ -19,7 +19,7 @@ class Help
         "for each one.";
 
     private final static String APP_HELP_TEXT_INTRO =
-        "Usage: fusion <command> [ARGS ...]\n" +
+        "Usage: fusion [OPTIONS ...] <command> [ARGS ...]\n" +
         "Type 'fusion help <command>' for help on a specific command.\n\n" +
         "Available commands:";
 
@@ -102,6 +102,8 @@ class Help
             }
 
             table.render(out);
+
+            out.println(GlobalOptions.HELP);
         }
 
 
