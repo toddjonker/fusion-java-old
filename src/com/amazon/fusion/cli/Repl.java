@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -6,8 +6,10 @@ import static com.amazon.fusion.FusionIo.write;
 import static com.amazon.fusion.FusionVoid.isVoid;
 import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
+import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.fusion.TopLevel;
 import com.amazon.fusion._Private_HelpForm;
+import com.amazon.fusion._Private_Trampoline;
 import com.amazon.ion.IonException;
 import java.io.Console;
 import java.io.PrintWriter;
@@ -38,12 +40,14 @@ class Repl
     //=========================================================================
 
     @Override
-    Executor processArguments(String[] args)
+    Executor makeExecutor(GlobalOptions globals,
+                          Object        options,
+                          String[]      args)
     {
         Console console = System.console();
         if ((args.length == 0) && (console != null))
         {
-            return new Executor(console);
+            return new Executor(globals, console);
         }
         return null;
     }
@@ -52,13 +56,14 @@ class Repl
     private static class Executor
         extends FusionExecutor
     {
+        private       TopLevel      myTopLevel;
         private final Console       myConsole;
         private final PrintWriter   myOut;
 
 
-        Executor(Console console)
+        Executor(GlobalOptions globals, Console console)
         {
-            super(/* documenting */ true);
+            super(globals);
 
             myConsole = console;
             myOut     = console.writer();
@@ -66,16 +71,27 @@ class Repl
 
 
         @Override
-        public int execute()
-            throws FusionException
+        FusionRuntimeBuilder runtimeBuilder()
+            throws UsageException
         {
+            FusionRuntimeBuilder builder = super.runtimeBuilder();
+            _Private_Trampoline.setDocumenting(builder, true);
+            return builder;
+        }
+
+        @Override
+        public int execute()
+            throws FusionException, UsageException
+        {
+            // Bootstrap the runtime before printing the welcome banner, so
+            // that we don't do that when there's usage problems.
+            myTopLevel = runtime().getDefaultTopLevel();
+
             welcome();
 
-            TopLevel top = runtime().getDefaultTopLevel();
+            myTopLevel.define("help", new _Private_HelpForm());
 
-            top.define("help", new _Private_HelpForm());
-
-            while (rep(top))
+            while (rep())
             {
                 // loop!
             }
@@ -93,7 +109,7 @@ class Repl
         }
 
 
-        private boolean rep(TopLevel top)
+        private boolean rep()
         {
             blue("$");
             String line = myConsole.readLine(" ");
@@ -108,7 +124,7 @@ class Repl
 
             try
             {
-                Object result = top.eval(line);
+                Object result = myTopLevel.eval(line);
                 print(result);
             }
             catch (ExitException e)
@@ -130,20 +146,18 @@ class Repl
         private void print(Object v)
             throws FusionException
         {
-            TopLevel top = runtime().getDefaultTopLevel();
-
             if (v instanceof Object[])
             {
                 Object[] results = (Object[]) v;
                 for (Object r : results)
                 {
-                    write(top, r, myOut);
+                    write(myTopLevel, r, myOut);
                     myOut.println();
                 }
             }
-            else if (v != null && ! isVoid(top, v))
+            else if (v != null && ! isVoid(myTopLevel, v))
             {
-                write(top, v, myOut);
+                write(myTopLevel, v, myOut);
                 myOut.println();
             }
         }

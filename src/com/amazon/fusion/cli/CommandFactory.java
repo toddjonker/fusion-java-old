@@ -8,8 +8,8 @@ class CommandFactory
 {
     public static final String APP_NAME = "fusion";
 
-    public static final String TYPE_HELP_MSG =
-        "Type '" + APP_NAME + " help' for usage.";
+    private static final int USAGE_ERROR_CODE = 1;
+
 
     public static Command[] getAllCommands()
     {
@@ -45,17 +45,41 @@ class CommandFactory
     }
 
 
+    private static void writeUsage(Command cmd)
+    {
+        if (cmd != null)
+        {
+            System.err.print("Usage: ");
+            System.err.println(cmd.getHelpUsage());
+        }
+
+        System.err.print("Type '" + APP_NAME + " help");
+
+        if (cmd != null)
+        {
+            System.err.print(' ');
+            System.err.print(cmd.getCommand());
+        }
+
+        System.err.println("' for more information.");
+    }
+
+
     /**
+     *
      * @param commandLine must not be <code>null</code>.
      *
-     * @return <code>null</code> if the command-line is unusable.
-     */
-    public static Executor makeCommand(String[] commandLine)
+     * @return the {@link Command} to execute; not null.
+     *
+     * @throws UsageException if there are
+     * command-line errors preventing the command from being used.     */
+    public static Command matchCommand(GlobalOptions globals,
+                                       String[] commandLine)
+        throws Exception
     {
         if (commandLine.length == 0)
         {
-            System.err.println(TYPE_HELP_MSG);
-            return null;
+            throw new UsageException("No command given.");
         }
 
         String command = commandLine[0];
@@ -63,27 +87,35 @@ class CommandFactory
         Command cmd = getMatchingCommand(command);
         if (cmd == null)
         {
-            System.err.println("Unknown command: '" + command + "'");
-            System.err.println(TYPE_HELP_MSG);
-            return null;
+            throw new UsageException("Unknown command: '" + command + "'");
         }
+        return cmd;
+    }
 
+
+    /**
+     * @param commandLine includes the leading command name.
+     *
+     * @return an {@link Executor} to execute the command; not null.
+     *
+     * @throws UsageException if there are
+     * command-line errors preventing the command from being used.
+     */
+    public static Executor makeExecutor(GlobalOptions globals,
+                                        Command  command,
+                                        String[] commandLine)
+        throws Exception
+    {
+        // Strip off the leading command name, leaving the options and argse
         int argCount = commandLine.length - 1;
         String[] args = new String[argCount];
         System.arraycopy(commandLine, 1, args, 0, argCount);
 
-        Executor exec = cmd.prepare(args);
+        Executor exec = command.prepare(globals, args);
         if (exec == null)
         {
-            System.err.print("Usage: ");
-            System.err.println(cmd.getHelpUsage());
-            System.err.print("Type '" + APP_NAME + " help ");
-            System.err.print(command);
-            System.err.println("' for more information.");
-
-            return null;
+            throw new UsageException(command, null);
         }
-
         return exec;
     }
 
@@ -96,45 +128,60 @@ class CommandFactory
     {
         int errorCode = 0;
 
-        int curStartPos = 0;
-        for (int i = 0; i < commandLine.length && errorCode == 0; i++)
-        {
-            if (";".equals(commandLine[i])) {
-                int len = i-curStartPos;
-                if (len > 0) {
-                    errorCode = doExecutePartial(commandLine,
-                                                 curStartPos,
-                                                 len);
-                }
-                curStartPos = i+1;
-            }
-        }
-        int len = commandLine.length-curStartPos;
-        if (errorCode == 0) {
-            errorCode = doExecutePartial(commandLine, curStartPos, len);
-        }
+        GlobalOptions globals = new GlobalOptions();
 
-        return errorCode;
+        try
+        {
+            commandLine = Command.extractOptions(globals, commandLine, true);
+
+            int curStartPos = 0;
+            for (int i = 0; i < commandLine.length && errorCode == 0; i++)
+            {
+                if (";".equals(commandLine[i])) {
+                    int len = i-curStartPos;
+                    if (len > 0) {
+                        errorCode = doExecutePartial(globals,
+                                                     commandLine,
+                                                     curStartPos,
+                                                     len);
+                    }
+                    curStartPos = i+1;
+                }
+            }
+            int len = commandLine.length-curStartPos;
+            if (errorCode == 0) {
+                errorCode = doExecutePartial(globals, commandLine, curStartPos, len);
+            }
+
+            return errorCode;
+        }
+        catch (UsageException e)
+        {
+            String message = e.getMessage();
+            if (message != null) System.err.println(message);
+            writeUsage(e.myCommand);
+            return USAGE_ERROR_CODE;
+        }
     }
 
 
     /**
      * @return an error code, zero meaning success.
      */
-    private static int doExecutePartial(String[] commandLine,
+    private static int doExecutePartial(GlobalOptions globals,
+                                        String[] commandLine,
                                         int start,
                                         int len)
         throws Exception
     {
         String[] partial = new String[len];
         System.arraycopy(commandLine, start, partial, 0, len);
-        Executor cmd = makeCommand(partial);
-        if (cmd != null)
-        {
-            return cmd.execute();
-        }
 
-        return 1;
+        Command command = matchCommand(globals, partial);
+
+        Executor exec = makeExecutor(globals, command, partial);
+
+        return exec.execute();
     }
 
     static class Separator extends Command
@@ -152,7 +199,7 @@ class CommandFactory
         }
 
         @Override
-        public Executor processArguments(String[] arguments)
+        public Executor makeExecutor(String[] arguments)
         {
             return null;
         }

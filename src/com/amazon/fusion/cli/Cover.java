@@ -30,7 +30,7 @@ class Cover
 
 
     @Override
-    Executor processArguments(String[] args)
+    Executor makeExecutor(String[] args)
     {
         if (args.length != 1) return null;
 

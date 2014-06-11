@@ -39,7 +39,7 @@ class Version
 
 
     @Override
-    Executor processArguments(String[] arguments)
+    Executor makeExecutor(String[] arguments)
     {
         return new Executor(arguments);
     }

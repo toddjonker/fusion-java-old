@@ -1,4 +1,4 @@
-// Copyright (c) 2005-2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2005-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -41,7 +41,7 @@ class Help
 
 
     @Override
-    Executor processArguments(String[] arguments)
+    Executor makeExecutor(String[] arguments)
     {
         return new Executor(arguments);
     }

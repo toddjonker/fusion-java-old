@@ -4,6 +4,7 @@ package com.amazon.fusion.cli;
 
 import static com.amazon.fusion._Private_ModuleDocumenter.writeHtmlTree;
 import com.amazon.fusion.FusionRuntimeBuilder;
+import com.amazon.fusion._Private_Trampoline;
 import java.io.File;
 
 
@@ -41,7 +42,9 @@ class Document
 
 
     @Override
-    Executor processArguments(String[] args)
+    Executor makeExecutor(GlobalOptions globals,
+                          Object        options,
+                          String[]      args)
     {
         if (args.length != 2) return null;
 
@@ -69,7 +72,7 @@ class Document
             return null;
         }
 
-        return new Executor(outputDir, repoDir);
+        return new Executor(globals, outputDir, repoDir);
     }
 
 
@@ -79,9 +82,9 @@ class Document
         private final File myOutputDir;
         private final File myRepoDir;
 
-        private Executor(File outputDir, File repoDir)
+        private Executor(GlobalOptions globals, File outputDir, File repoDir)
         {
-            super(/* documenting */ true);
+            super(globals);
 
             myOutputDir = outputDir;
             myRepoDir   = repoDir;
@@ -89,9 +92,11 @@ class Document
 
         @Override
         FusionRuntimeBuilder runtimeBuilder()
+            throws UsageException
         {
             FusionRuntimeBuilder builder = super.runtimeBuilder();
             builder.addRepositoryDirectory(myRepoDir);
+            _Private_Trampoline.setDocumenting(builder, true);
             return builder;
         }
 

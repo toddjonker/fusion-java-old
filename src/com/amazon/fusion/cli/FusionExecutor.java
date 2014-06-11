@@ -5,7 +5,6 @@ package com.amazon.fusion.cli;
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntime;
 import com.amazon.fusion.FusionRuntimeBuilder;
-import com.amazon.fusion._Private_Trampoline;
 import com.amazon.fusion.cli.Command.Executor;
 
 /**
@@ -14,28 +13,25 @@ import com.amazon.fusion.cli.Command.Executor;
 abstract class FusionExecutor
     implements Executor
 {
-    private final boolean isDocumenting;
+    private final GlobalOptions myGlobalOptions;
     private FusionRuntime myRuntime;
 
 
-    FusionExecutor(boolean documenting)
+    FusionExecutor(GlobalOptions globals)
     {
-        isDocumenting = documenting;
+        myGlobalOptions = globals;
     }
 
 
     FusionRuntimeBuilder runtimeBuilder()
+        throws UsageException
     {
-        FusionRuntimeBuilder builder = FusionRuntimeBuilder.standard();
-
-        _Private_Trampoline.setDocumenting(builder, isDocumenting);
-
-        return builder;
+        return myGlobalOptions.runtimeBuilder();
     }
 
 
     FusionRuntime runtime()
-        throws FusionException
+        throws FusionException, UsageException
     {
         if (myRuntime == null)
         {

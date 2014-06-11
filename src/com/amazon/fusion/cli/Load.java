@@ -8,7 +8,6 @@ import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.TopLevel;
 import java.io.File;
-import java.io.IOException;
 
 
 class Load
@@ -23,40 +22,46 @@ class Load
         "Loads and evaluates the Fusion script in the given FILE.  If the result of the\n" +
         "last expression is not void, it is sent to standard output via `write`.";
 
-    Load(String command)
-    {
-        super(command);
-    }
 
     Load()
     {
-        this("load");
+        super("load");
         putHelpText(HELP_ONE_LINER, HELP_USAGE, HELP_BODY);
     }
 
+
     @Override
-    Executor processArguments(String[] args)
+    Executor makeExecutor(GlobalOptions globals,
+                          Object        options,
+                          String[]      args)
+        throws UsageException
     {
-        if (args.length != 1) return null;
+        if (args.length != 1) throw usage();
 
         String fileName = args[0];
-        if (fileName.length() == 0) return null;
+        if (fileName.length() == 0) throw usage();
 
-        return new Executor(fileName);
+        File file = new File(fileName);
+        if (! (file.canRead() && file.isFile()))
+        {
+            throw usage("Not a readable file: " + fileName);
+        }
+
+        return new Executor(globals, file);
     }
 
 
     static class Executor
         extends FusionExecutor
     {
-        final String myFileName;
+        final File myFile;
 
 
-        Executor(String fileName)
+        Executor(GlobalOptions globals, File file)
         {
-            super(/* documenting */ false);
+            super(globals);
 
-            myFileName = fileName;
+            myFile = file;
         }
 
 
@@ -68,7 +73,8 @@ class Load
 
             try
             {
-                Object result = loadFile(top, myFileName);
+                Object result = top.load(myFile);
+
                 if (result instanceof Object[])
                 {
                     Object[] results = (Object[]) result;
@@ -98,18 +104,6 @@ class Load
             }
 
             return 0;
-        }
-
-
-        /**
-         * @return may be null (when no values are returned) or an
-         * {@code Object[]} (when multiple values are returned).
-         */
-        private Object loadFile(TopLevel top, String fileName)
-            throws FusionException, IOException
-        {
-            File file = new File(fileName);
-            return top.load(file);
         }
     }
 }
