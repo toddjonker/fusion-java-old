@@ -62,12 +62,22 @@ containing quoted datum.
   (defpub_j is_bool               "com.amazon.fusion.FusionBool$IsBoolProc")
   (defpub_j is_clob               "com.amazon.fusion.FusionClob$IsClobProc")
   (defpub_j is_null_null          "com.amazon.fusion.FusionNull$IsNullNullProc")
-  (defpub_j is_procedure          "com.amazon.fusion.IsProcedureProc")
   (defpub_j is_symbol             "com.amazon.fusion.FusionSymbol$IsSymbolProc")
   (defpub_j values                "com.amazon.fusion.ValuesProc")
 
 
+  (defpub is_procedure
+    '''
+    (is_procedure value)
+
+Returns `true` when `value` is a procedure, `false` otherwise.
+    '''
+    (java_new "com.amazon.fusion.FusionProcedure$IsProcedureProc"))
+
+
   (defpub_j annotate "com.amazon.fusion.AnnotateProc")
+
+
 
   (defpub_j size "com.amazon.fusion.FusionCollection$SizeProc")
 
