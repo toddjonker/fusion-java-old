@@ -481,7 +481,7 @@ public class FusionRuntimeBuilder
 
             if (! directory.isDirectory())
             {
-                String message = "Argument is not a directory: " + directory;
+                String message = "Not a directory: " + directory;
                 throw new IllegalArgumentException(message);
             }
 
