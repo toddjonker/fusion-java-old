@@ -157,6 +157,7 @@ class CommandFactory
         }
         catch (UsageException e)
         {
+            System.err.println();
             String message = e.getMessage();
             if (message != null) System.err.println(message);
             writeUsage(e.myCommand);

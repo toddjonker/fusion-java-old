@@ -60,63 +60,82 @@ class Help
 
         @Override
         public int execute()
+            throws UsageException
         {
-            PrintWriter out = new PrintWriter(System.out);
-
-            try
+            try (PrintWriter out = new PrintWriter(System.out))
             {
+                out.println();
+
                 if ((myCommands == null) || (myCommands.length == 0))
                 {
-                    out.println(APP_HELP_TEXT_INTRO);
-
-                    TablePrinter table = new TablePrinter();
-                    table.setIndent(2);
-
-                    Command[] allCommands = CommandFactory.getAllCommands();
-                    for (int i = 0; i < allCommands.length; i++)
-                    {
-                        Command command = allCommands[i];
-
-                        String oneLiner = command.getHelpOneLiner();
-                        if (oneLiner != null)
-                        {
-                            String[] row = { command.getCommand(), oneLiner };
-
-                            table.addRow(row);
-                        }
-                    }
-
-                    table.render(out);
+                    renderGeneralHelp(out);
                 }
                 else
                 {
-                    for (int i = 0; i < myCommands.length; i++)
-                    {
-                        if (i != 0)
-                        {
-                            out.print(FULL_HELP_SEPARATOR);
-                        }
-                        String command = myCommands[i];
-
-                        Command commandObj =
-                            CommandFactory.getMatchingCommand(command);
-                        if (commandObj == null)
-                        {
-                            out.println("Unknown command: '" + command + "'");
-                        }
-                        else
-                        {
-                            renderFullHelp(commandObj, out);
-                        }
-                    }
+                    renderCommands(out);
                 }
-            }
-            finally
-            {
-                out.close();
             }
 
             return 0;
+        }
+
+
+        private void renderGeneralHelp(PrintWriter out)
+        {
+            out.println(APP_HELP_TEXT_INTRO);
+
+            TablePrinter table = new TablePrinter();
+            table.setIndent(2);
+
+            Command[] allCommands = CommandFactory.getAllCommands();
+            for (int i = 0; i < allCommands.length; i++)
+            {
+                Command command = allCommands[i];
+
+                String oneLiner = command.getHelpOneLiner();
+                if (oneLiner != null)
+                {
+                    String[] row = { command.getCommand(), oneLiner };
+
+                    table.addRow(row);
+                }
+            }
+
+            table.render(out);
+        }
+
+
+        private void renderCommands(PrintWriter out)
+            throws UsageException
+        {
+            boolean showGeneralUsage = false;
+
+            for (int i = 0; i < myCommands.length; i++)
+            {
+                if (i != 0)
+                {
+                    out.print(FULL_HELP_SEPARATOR);
+                }
+
+                String command = myCommands[i];
+
+                Command commandObj =
+                    CommandFactory.getMatchingCommand(command);
+                if (commandObj == null)
+                {
+                    out.println("Unknown command: '" + command + "'");
+                    showGeneralUsage = true;
+                }
+                else
+                {
+                    renderFullHelp(commandObj, out);
+                }
+            }
+
+            if (showGeneralUsage)
+            {
+                throw new UsageException(null);
+            }
         }
 
 
