@@ -637,7 +637,7 @@ final class SyntaxSexp
         SyntaxValue first = get(eval, 0);
         if (first instanceof SyntaxSymbol)
         {
-            Binding binding = ((SyntaxSymbol) first).getBinding();
+            SyntacticForm form = ((SyntaxSymbol) first).resolveSyntaxMaybe(env);
 
             // NOTE: Failure to get a binding indicates use of a built-in
             // syntactic form that's defined (probably via java_new) in the
@@ -646,16 +646,13 @@ final class SyntaxSexp
             // users unless we open the whole compiler APIs so they can add
             // new "built-in" syntax.
 
-            Object resolved = binding.lookup(env);
-            if (resolved instanceof SyntacticForm)
+            if (form != null)
             {
                 // We found a static top-level syntax binding!
                 // Continue the compilation process.
                 // TODO bounce the tail-call?
 
-                CompiledForm compiled =
-                    ((SyntacticForm)resolved).compile(eval, env, this);
-                return compiled;
+                return form.compile(eval, env, this);
             }
         }
 
