@@ -224,11 +224,12 @@ final class StandardTopLevel
     {
         try
         {
-            SyntaxSymbol id = SyntaxSymbol.make(myEvaluator, name);
-            return FusionEval.eval(myEvaluator, id, myNamespace);
+            return myNamespace.lookup(name);
         }
         catch (FusionInterrupt e)
         {
+            // I don't think this can happen, but I prefer to be consistent
+            // throughout this class to be more resilient to changes.
             throw new FusionInterruptedException(e);
         }
     }
@@ -248,7 +249,7 @@ final class StandardTopLevel
             if (proc == null)
             {
                 throw new FusionException(printQuotedSymbol(procedureName) +
-                    " is not defined");
+                                          " is not defined");
             }
 
             throw new FusionException(printQuotedSymbol(procedureName) +

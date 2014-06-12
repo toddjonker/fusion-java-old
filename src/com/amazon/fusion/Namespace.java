@@ -476,10 +476,19 @@ abstract class Namespace
         return null;
     }
 
+
+    /** Finds definitions and imports. */
     final Object lookup(String name)
     {
         Binding b = resolve(name);
-        return lookup(b);
+        if (b == null)
+        {
+            return b;
+        }
+        else
+        {
+            return b.lookup(this);
+        }
     }
 
 

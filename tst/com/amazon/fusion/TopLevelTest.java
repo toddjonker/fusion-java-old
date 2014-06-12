@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -20,6 +21,14 @@ public class TopLevelTest
         assertTrue(FusionProcedure.isProcedure(top, fv));
     }
 
+    @Test
+    public void testLookupNoBinding()
+        throws Exception
+    {
+        TopLevel top = topLevel();
+        Object fv = top.lookup("no binding!");
+        assertNull(fv);
+    }
 
     @Test
     public void testDefineAndLookup()
