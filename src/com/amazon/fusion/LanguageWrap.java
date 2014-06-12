@@ -45,9 +45,9 @@ final class LanguageWrap
         }
 
         @Override
-        public Object lookup(Environment store)
+        public Object lookup(Namespace ns)
         {
-            return myBinding.lookup(store);
+            return myBinding.lookup(ns);
         }
 
         @Override

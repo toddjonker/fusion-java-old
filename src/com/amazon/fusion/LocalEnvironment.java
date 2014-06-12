@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -42,9 +42,9 @@ final class LocalEnvironment
 
 
         @Override
-        public Object lookup(Environment env)
+        public Object lookup(Namespace ns)
         {
-            return env.lookup(this);
+            return null;  // We're local, not a namespace binding.
         }
 
 
@@ -230,13 +230,6 @@ final class LocalEnvironment
             }
         }
         return null;
-    }
-
-
-    @Override
-    public Object lookup(Binding binding)
-    {
-        return myEnclosure.lookup(binding);
     }
 
 

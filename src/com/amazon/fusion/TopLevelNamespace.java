@@ -70,13 +70,13 @@ final class TopLevelNamespace
         }
 
         @Override
-        public Object lookup(Environment env)
+        public Object lookup(Namespace ns)
         {
             if (myTarget == this)
             {
-                return super.lookup(env);
+                return ns.lookupDefinition(this);
             }
-            return myTarget.lookup(env);
+            return myTarget.lookup(ns);
         }
 
 
@@ -273,9 +273,9 @@ final class TopLevelNamespace
         }
 
         @Override
-        public Object lookup(Environment store)
+        public Object lookup(Namespace ns)
         {
-            return myBinding.lookup(store);
+            return myBinding.lookup(ns);
         }
 
         @Override

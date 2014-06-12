@@ -29,9 +29,8 @@ final class ModuleNamespace
         }
 
         @Override
-        public Object lookup(Environment env)
+        public Object lookup(Namespace localNamespace)
         {
-            Namespace localNamespace = env.namespace();
             if (localNamespace.getModuleId() != myModuleId)
             {
                 // The local context is a different module, so we must ignore
@@ -45,7 +44,9 @@ final class ModuleNamespace
                 return ns.lookup(myAddress);
             }
 
-            return localNamespace.lookup(this);
+            // We can't use our address directly, since we may be compiling
+            // and the binding may not have a location allocated yet.
+            return localNamespace.lookupDefinition(this);
         }
 
         Object lookup(ModuleInstance module)

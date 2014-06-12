@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -329,7 +329,7 @@ final class SyntaxSymbol
 
         if (b != null)
         {
-            Object resolved = b.lookup(env);
+            Object resolved = env.namespace().lookup(b);
             if (resolved instanceof SyntacticForm)
             {
                 myBinding = b;

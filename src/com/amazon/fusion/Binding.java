@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -42,9 +42,12 @@ abstract class Binding
     abstract boolean sameTarget(Binding other);
 
     /**
+     * Don't call directly! Second half of double-dispatch from
+     * {@link Namespace#lookup(Binding)}.
+     *
      * @return null if there's no value associated with the binding.
      */
-    abstract Object lookup(Environment store);
+    abstract Object lookup(Namespace ns);
 
 
     CompiledForm compileDefine(Evaluator eval,

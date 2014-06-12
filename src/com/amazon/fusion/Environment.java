@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -36,14 +36,4 @@ interface Environment
      * @return null if the name is not substituted here.
      */
     Binding substituteFree(String name, Set<Integer> marks);
-
-
-    /**
-     * Finds the value bound to a given name.
-     *
-     * @param binding must not be null.
-     *
-     * @return the bound value, or null if there's no value.
-     */
-    Object lookup(Binding binding);
 }

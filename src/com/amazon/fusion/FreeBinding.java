@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -42,7 +42,7 @@ final class FreeBinding
 
 
     @Override
-    public Object lookup(Environment store)
+    public Object lookup(Namespace ns)
     {
         return null;
     }

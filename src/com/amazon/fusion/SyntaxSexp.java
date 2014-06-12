@@ -606,7 +606,7 @@ final class SyntaxSexp
                 return this;
             }
 
-            Object resolved = binding.lookup(env);
+            Object resolved = maybeMacro.resolveSyntaxMaybe(env);
             if (resolved instanceof MacroForm)
             {
                 // We found a static top-level macro binding!
