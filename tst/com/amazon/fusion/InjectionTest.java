@@ -60,7 +60,7 @@ public class InjectionTest
         assertFalse(isTrue(topLevel(), fv));
 
         topLevel().define("v", true);
-        fv = topLevel().eval("v");
+        fv = topLevel().lookup("v");
         assertTrue(isTrue(topLevel(), fv));
     }
 

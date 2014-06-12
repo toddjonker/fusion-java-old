@@ -177,6 +177,19 @@ public interface TopLevel
 
 
     /**
+     * Finds a top-level binding for a given name and returns any defined
+     * value.
+     *
+     * @param name the binding to lookup and dereference.
+     *
+     * @return the bound value, or null if there's no top-level definition or
+     * imported binding for the name.
+     */
+    public Object lookup(String name)
+        throws FusionException;
+
+
+    /**
      * Calls a Fusion procedure by name,
      * <a href="{@docRoot}/overview-summary.html#inject">injecting</a> Java
      * values.

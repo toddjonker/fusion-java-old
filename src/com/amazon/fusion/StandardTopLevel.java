@@ -218,7 +218,8 @@ final class StandardTopLevel
     }
 
 
-    private Object lookupBinding(String name)
+    @Override
+    public Object lookup(String name)
         throws FusionInterruptedException, FusionException
     {
         try
@@ -238,7 +239,7 @@ final class StandardTopLevel
     {
         try
         {
-            Object proc = lookupBinding(procedureName);
+            Object proc = lookup(procedureName);
             if (proc instanceof Procedure)
             {
                 return (Procedure) proc;
