@@ -48,13 +48,6 @@ public class SyntaxException
 
 
     @Override
-    void addContext(SyntaxValue syntax)
-    {
-        super.addContext(syntax);
-    }
-
-
-    @Override
     void displayMessage(Evaluator eval, Appendable out)
         throws IOException, FusionException
     {
