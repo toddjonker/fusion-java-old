@@ -26,6 +26,14 @@ class SourceLocation
 
 
     /**
+     * @return null if the source name isn't known.
+     */
+    SourceName getSourceName()
+    {
+        return myName;
+    }
+
+    /**
      * Gets the one-based line number.
      * @return zero if the line is unknown.
      */
