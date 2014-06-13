@@ -73,6 +73,12 @@ public class SourceName
     }
 
 
+    ModuleIdentity getModuleIdentity()
+    {
+        return null;
+    }
+
+
     @Override
     public String toString()
     {
@@ -127,16 +133,21 @@ public class SourceName
     private static class ModuleSourceName
         extends SourceName
     {
+        private final ModuleIdentity myId;
         private final File myFile;
 
         ModuleSourceName(ModuleIdentity id, File file)
         {
             super(id + " (at file:" + file + ")");
+            myId   = id;
             myFile = file;
         }
 
         @Override
         File getFile() { return myFile; }
+
+        @Override
+        ModuleIdentity getModuleIdentity() { return myId; }
     }
 
 
