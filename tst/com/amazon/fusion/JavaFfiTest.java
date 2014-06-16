@@ -18,9 +18,35 @@ public class JavaFfiTest
         topLevel().requireModule("/fusion/ffi/java");
     }
 
-    public class Uninstantiable extends Procedure
+    public class NonStatic extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            return null;
+        }
+    }
+
+    public abstract static class Abstract extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            return null;
+        }
+    }
+
+    public static class Uninstantiable extends Procedure
     {
         public Uninstantiable()
+            throws Exception
+        {
+            throw new Exception("boom");
+        }
+
+        public Uninstantiable(Object arg)
             throws Exception
         {
             throw new Exception("boom");
@@ -58,6 +84,9 @@ public class JavaFfiTest
         throws Exception
     {
         expectContractExn("(define foo (java_new '''no such class'''))");
+        expectContractExn("(define foo (java_new " + name(NonStatic.class) + "))");
+        expectContractExn("(define foo (java_new " + name(Abstract.class) + "))");
         expectContractExn("(define foo (java_new " + name(Uninstantiable.class) + "))");
+        expectContractExn("(define foo (java_new " + name(Uninstantiable.class) + " null))");
    }
 }

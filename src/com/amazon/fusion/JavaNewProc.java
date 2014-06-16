@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
 import static java.util.Arrays.copyOfRange;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 /**
@@ -33,20 +34,11 @@ final class JavaNewProc
 
         Class<?> klass = determineClass(className);
 
-        Object result;
-        if (args.length == 1)
-        {
-            result = callNoArgConstructor(klass);
-        }
-        else
-        {
-            Object[] constructorArgs = copyOfRange(args, 1, args.length);
-            Constructor<?> constructor =
-                determineConstructor(klass, constructorArgs);
-            result = callConstructor(constructor, constructorArgs);
-        }
+        Object[] constructorArgs = copyOfRange(args, 1, args.length);
+        Constructor<?> constructor =
+            determineConstructor(klass, constructorArgs);
 
-        return result;
+        return callConstructor(constructor, constructorArgs);
     }
 
 
@@ -64,28 +56,6 @@ final class JavaNewProc
     }
 
 
-    private Object callNoArgConstructor(Class<?> klass)
-        throws FusionException
-    {
-        try
-        {
-            return klass.newInstance();
-        }
-        catch (InstantiationException e)
-        {
-            String message =
-                "Unable to instantiate Java " + klass +
-                "; does it have a no-argument constructor? " +
-                "If an inner class, is it static?";
-            throw contractFailure(message, e);
-        }
-        catch (IllegalAccessException e)
-        {
-            throw contractFailure("Java class isn't accessible: " + klass, e);
-        }
-    }
-
-
     private Constructor<?> determineConstructor(Class<?> klass,
                                                 Object[] args)
         throws FusionException
@@ -95,7 +65,8 @@ final class JavaNewProc
 
         try
         {
-            return klass.getConstructor(parameterTypes);
+            // Class.getConstructor() only returns public constructors
+            return klass.getDeclaredConstructor(parameterTypes);
         }
         catch (SecurityException e)
         {
@@ -105,9 +76,20 @@ final class JavaNewProc
         }
         catch (NoSuchMethodException e)
         {
-            String message =
-                klass + " doesn't have a public constructor accepting " +
-                args.length + " Object args";
+            String message;
+            if (klass.isMemberClass() && ! Modifier.isStatic(klass.getModifiers()))
+            {
+                message = klass + " is a member class but is not static";
+            }
+            else if (args.length == 0)
+            {
+                message = klass + " doesn't have a no-arg constructor";
+            }
+            else
+            {
+                message = klass + " doesn't have a constructor accepting " +
+                          args.length + " Object args";
+            }
             throw contractFailure(message, e);
         }
     }
@@ -133,11 +115,17 @@ final class JavaNewProc
                 e.getMessage();
             throw contractFailure(message, e);
         }
-        catch (InstantiationException | InvocationTargetException e)
+        catch (InstantiationException e)
         {
             String message =
-                "Exception from Java constructor: " + constructor;
+                "Class cannot be instantiated by constructor: " + constructor;
             throw contractFailure(message, e);
+        }
+        catch (InvocationTargetException e)
+        {
+            String message =
+                "Exception thrown from Java constructor: " + constructor;
+            throw contractFailure(message, e.getCause());
         }
     }
 }
