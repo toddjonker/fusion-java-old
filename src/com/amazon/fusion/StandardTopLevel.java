@@ -263,14 +263,11 @@ final class StandardTopLevel
     }
 
 
-    @Override
-    public Object call(String procedureName, Object... arguments)
+    private Object call(Procedure proc, Object... arguments)
         throws FusionInterruptedException, FusionException
     {
         try
         {
-            Procedure proc = lookupProcedure(procedureName);
-
             for (int i = 0; i < arguments.length; i++)
             {
                 Object arg = arguments[i];
@@ -293,5 +290,28 @@ final class StandardTopLevel
         {
             throw new FusionInterruptedException(e);
         }
+    }
+
+
+    @Override
+    public Object call(String procedureName, Object... arguments)
+        throws FusionInterruptedException, FusionException
+    {
+        Procedure proc = lookupProcedure(procedureName);
+
+        return call(proc, arguments);
+    }
+
+
+    @Override
+    public Object call(Object procedure, Object... arguments)
+        throws FusionInterruptedException, FusionException
+    {
+        if (! (procedure instanceof Procedure))
+        {
+            throw new IllegalArgumentException("Not a procedure: " + procedure);
+        }
+
+        return call((Procedure) procedure, arguments);
     }
 }

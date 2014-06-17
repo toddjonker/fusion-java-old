@@ -210,6 +210,25 @@ public interface TopLevel
         throws FusionException;
 
 
+    /**
+     * Calls a Fusion procedure by value,
+     * <a href="{@docRoot}/overview-summary.html#inject">injecting</a> Java
+     * values.
+     *
+     * @param procedure must be a Fusion procedure.
+     * @param arguments the procedure arguments. It is unspecified whether the
+     * arguments will be copied in whole or in part. Values may be mutated by
+     * the procedure.
+     *
+     * @return the resulting Fusion value.
+     * May be null (if no value results) or an {@code Object[]} (if there are
+     * multiple values).
+     * Note that "no value" is not the same as "returns void".
+     */
+    Object call(Object procedure, Object... arguments)
+        throws FusionException;
+
+
     //========================================================================
     // Dynamic module definitions
 

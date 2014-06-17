@@ -44,4 +44,14 @@ public class TopLevelTest
         fv = top.lookup("A questionable name");
         assertTrue(FusionVoid.isVoid(top, fv));
     }
+
+    @Test
+    public void testCallProcByValue()
+        throws Exception
+    {
+        TopLevel top = topLevel();
+        Object plus = top.lookup("+");
+        assertTrue(FusionProcedure.isProcedure(top, plus));
+        checkLong(3, top.call(plus, 1, 2));
+    }
 }
