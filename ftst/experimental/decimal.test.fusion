@@ -54,12 +54,10 @@
 (check === null.string
   (decimal_to_string null.decimal))
 
-// TODO FUSION-247 re-enable these. They are disable to keep this working
-//      when built against IonJava-mainline.
-//(check === "0d-1"   (decimal_to_string 0.0))
-//(check === "1.0d-1" (decimal_to_string 0.10))
-//(check === "0d-3"   (decimal_to_string 0.000))
-//(check === "-0d-1"  (decimal_to_string -0.0))
+(check === "0.0"   (decimal_to_string 0.0))
+(check === "0.10" (decimal_to_string 0.10))
+(check === "0.000"   (decimal_to_string 0.000))
+(check === "-0.0"  (decimal_to_string -0.0))
 (check === "15.00" (decimal_to_string 15.00))
 (check === "1.234" (decimal_to_string 1.234))
 (check === "-99.9" (decimal_to_string -99.9))

@@ -16,6 +16,7 @@ import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
+import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -371,8 +372,6 @@ final class FusionNumber
         void write(Evaluator eval, Appendable out)
             throws IOException, FusionException
         {
-            // TODO WORKAROUND ION-398
-            // TODO FUSION-247 Write output without the intermediate String
             out.append(Long.toString(myContent));
         }
     }
@@ -441,8 +440,6 @@ final class FusionNumber
         void write(Evaluator eval, Appendable out)
             throws IOException, FusionException
         {
-            // TODO WORKAROUND ION-398
-            // TODO FUSION-247 Write output without the intermediate String
             out.append(myContent.toString());
         }
     }
@@ -811,11 +808,7 @@ final class FusionNumber
         void write(Evaluator eval, Appendable out)
             throws IOException, FusionException
         {
-            // TODO WORKAROUND ION-398
-            // TODO FUSION-247 Write output without building an IonWriter.
-            IonWriter iw = WRITER_BUILDER.build(out);
-            iw.writeDecimal(myContent);
-            iw.finish();
+            IonTextUtils.printDecimal(out, myContent);
         }
     }
 
@@ -1218,11 +1211,7 @@ final class FusionNumber
         void write(Evaluator eval, Appendable out)
             throws IOException, FusionException
         {
-            // TODO WORKAROUND ION-398
-            // TODO FUSION-247 Write output without building an IonWriter.
-            IonWriter iw = WRITER_BUILDER.build(out);
-            iw.writeFloat(myContent);
-            iw.finish();
+            IonTextUtils.printFloat(out, myContent);
         }
     }
 

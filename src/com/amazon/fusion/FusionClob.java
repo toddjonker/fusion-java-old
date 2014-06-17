@@ -11,6 +11,7 @@ import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
+import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -142,11 +143,7 @@ public final class FusionClob
         void write(Evaluator eval, Appendable out)
             throws IOException, FusionException
         {
-            // TODO WORKAROUND ION-398
-            // TODO FUSION-247 Write output without building an IonWriter.
-            IonWriter iw = WRITER_BUILDER.build(out);
-            iw.writeClob(myContent);
-            iw.finish();
+            IonTextUtils.printClob(out, myContent);
         }
     }
 

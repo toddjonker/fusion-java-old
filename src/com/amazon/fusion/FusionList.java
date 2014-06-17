@@ -1163,10 +1163,9 @@ final class FusionList
             {
                 if (myValues[0] instanceof IonValue)
                 {
-                    // TODO WORKAROUND ION-398
-                    // TODO FUSION-247 Write output without building an IonWriter.
                     IonWriter iw = WRITER_BUILDER.build(out);
                     ionize(eval, iw);
+                    iw.finish();
                     return;
                 }
             }

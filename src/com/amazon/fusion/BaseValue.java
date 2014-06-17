@@ -169,11 +169,8 @@ abstract class BaseValue
 
 
     /**
-     * Builder for temporary IonWriters needed for {@link #write}ing scalars.
-     * <p>
-     * TODO WORKAROUND ION-398
-     * <p>
-     * TODO FUSION-247 Write output without building an IonWriter.
+     * Builder for temporary IonWriters needed for {@link #write}ing
+     * lazily-injected lists and structs.
      *
      * @deprecated Try to avoid this.
      */
