@@ -339,7 +339,8 @@ final class FusionList
     {
         if (list instanceof NullList)
         {
-            return FusionSexp.nullSexp(eval, null); // TODO annotations
+            String[] annotations = ((NullList)list).myAnnotations;
+            return FusionSexp.nullSexp(eval, annotations);
         }
 
         BaseSexp s = FusionSexp.EMPTY_SEXP;
