@@ -47,8 +47,7 @@
 
 (check === 1969-12-31T23:59:59.9990Z   (epoch_millis_to_timestamp -1.0))
 (check === 1970-01-01T00:00:00.000Z    (epoch_millis_to_timestamp -0.))
-// TODO FUSION-305 Checks not working due to IONJAVA-400
-//(check === 1970-01-01T00:00:00Z        (epoch_millis_to_timestamp 0d3))
+(check === 1970-01-01T00:00:00Z        (epoch_millis_to_timestamp 0d3))
 (check === 1970-01-01T00:00:00.000Z    (epoch_millis_to_timestamp 0.))
 (check === 1970-01-01T00:00:00.0000Z   (epoch_millis_to_timestamp 0.0))
 (check === 1970-01-01T00:00:00.000Z    (epoch_millis_to_timestamp 0.))
@@ -57,7 +56,7 @@
 
 (check === 1969-12-31T23:59:59.999Z    (epoch_millis_to_timestamp -1))
 (check === 1970-01-01T00:00:00.000Z    (epoch_millis_to_timestamp 0))
-//(check === 1970-01-01T00:00:01Z        (epoch_millis_to_timestamp 1d3))
+(check === 1970-01-01T00:00:01Z        (epoch_millis_to_timestamp 1d3))
 (check === 1970-01-01T00:00:01.000Z    (epoch_millis_to_timestamp 1000))
 (check === 1970-01-01T00:00:01.001Z    (epoch_millis_to_timestamp 1001))
 
