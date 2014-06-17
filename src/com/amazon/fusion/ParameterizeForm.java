@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -109,7 +109,7 @@ final class ParameterizeForm
     //========================================================================
 
 
-    private final class CompiledParameterize
+    private static final class CompiledParameterize
         implements CompiledForm
     {
         private final CompiledForm[] myParameterForms;
@@ -146,7 +146,7 @@ final class ParameterizeForm
                     String message =
                         "Parameter expression evaluated to non-parameter: " +
                         safeWriteToString(eval, paramValue);
-                    throw contractFailure(message);
+                    throw new ContractException(message);
                 }
             }
 
@@ -161,8 +161,7 @@ final class ParameterizeForm
             Evaluator bodyEval = eval.markedContinuation(parameters, boundValues);
 
             // TODO TAIL
-            Object result = bodyEval.eval(store, myBody);
-            return result;
+            return bodyEval.eval(store, myBody);
         }
     }
 }

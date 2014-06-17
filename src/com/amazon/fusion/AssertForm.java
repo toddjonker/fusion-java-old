@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -47,7 +47,7 @@ final class AssertForm
     //========================================================================
 
 
-    private final class CompiledAssert
+    private static final class CompiledAssert
         implements CompiledForm
     {
         private final CompiledForm   myTestForm;

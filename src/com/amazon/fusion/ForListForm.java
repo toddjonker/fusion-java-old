@@ -130,7 +130,7 @@ final class ForListForm
     // TODO Optimize for single-series case.
     //      That will make fors_list much more efficient.
 
-    private final class CompiledForList
+    private static final class CompiledForList
         implements CompiledForm
     {
         private final CompiledForm[] myValueForms;

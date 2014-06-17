@@ -240,7 +240,7 @@ final class LambdaForm
     {
     }
 
-    private static class CompiledLambdaN
+    private static final class CompiledLambdaN
         extends CompiledLambdaBase
         implements CompiledLambdaExact
     {

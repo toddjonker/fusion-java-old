@@ -642,7 +642,7 @@ abstract class Namespace
     }
 
 
-    protected static class CompiledTopDefine
+    static class CompiledTopDefine
         implements CompiledForm
     {
         private final String       myName;

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -48,7 +48,7 @@ final class IfForm
     //========================================================================
 
 
-    private final class CompiledIf
+    private static final class CompiledIf
         implements CompiledForm
     {
         private final CompiledForm myTestForm;
