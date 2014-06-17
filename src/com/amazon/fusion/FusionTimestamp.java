@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
+import static com.amazon.fusion.FusionNumber.checkIntArgToJavaInt;
 import static com.amazon.fusion.FusionNumber.isIntOrDecimal;
 import static com.amazon.fusion.FusionNumber.makeDecimal;
 import static com.amazon.fusion.FusionNumber.unsafeNumberToBigDecimal;
@@ -637,4 +638,81 @@ final class FusionTimestamp
             return makeTimestamp(eval, ts);
         }
      }
+
+
+    private abstract static class UnsafeTimestampAddProc
+        extends Procedure2
+    {
+        abstract Timestamp add(Timestamp timestamp, int period);
+
+        @Override
+        final Object doApply(Evaluator eval, Object timestamp, Object period)
+            throws FusionException
+        {
+            Timestamp ts = unsafeTimestampToJavaTimestamp(eval, timestamp);
+            int p = checkIntArgToJavaInt(eval, this, 1, timestamp, period);
+            ts = add(ts, p);
+            return makeTimestamp(eval, ts);
+        }
+    }
+
+    static final class UnsafeTimestampAddYearProc
+        extends UnsafeTimestampAddProc
+    {
+        @Override
+        Timestamp add(Timestamp timestamp, int period)
+        {
+            return timestamp.addYear(period);
+        }
+    }
+
+    static final class UnsafeTimestampAddMonthProc
+        extends UnsafeTimestampAddProc
+    {
+        @Override
+        Timestamp add(Timestamp timestamp, int period)
+        {
+            return timestamp.addMonth(period);
+        }
+    }
+
+    static final class UnsafeTimestampAddDayProc
+        extends UnsafeTimestampAddProc
+    {
+        @Override
+        Timestamp add(Timestamp timestamp, int period)
+        {
+            return timestamp.addDay(period);
+        }
+    }
+
+    static final class UnsafeTimestampAddHourProc
+        extends UnsafeTimestampAddProc
+    {
+        @Override
+        Timestamp add(Timestamp timestamp, int period)
+        {
+            return timestamp.addHour(period);
+        }
+    }
+
+    static final class UnsafeTimestampAddMinuteProc
+        extends UnsafeTimestampAddProc
+    {
+        @Override
+        Timestamp add(Timestamp timestamp, int period)
+        {
+            return timestamp.addMinute(period);
+        }
+    }
+
+    static final class UnsafeTimestampAddSecondProc
+        extends UnsafeTimestampAddProc
+    {
+        @Override
+        Timestamp add(Timestamp timestamp, int period)
+        {
+            return timestamp.addSecond(period);
+        }
+    }
 }
