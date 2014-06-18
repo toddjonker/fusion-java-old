@@ -408,10 +408,15 @@ final class SyntaxSymbol
     {
         String base = toString();
         Set<Integer> marks = this.computeMarks();
-        if (marks.isEmpty()) return base;
-        for (Integer mark : marks)
+        if (! marks.isEmpty())
         {
-            base += "#" + mark;
+            StringBuilder buf = new StringBuilder(base);
+            for (Integer mark : marks)
+            {
+                buf.append('#');
+                buf.append(mark);
+            }
+            base = buf.toString();
         }
         return base;
     }
