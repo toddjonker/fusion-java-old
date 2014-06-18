@@ -2,6 +2,7 @@
 
 package com.amazon.fusion.cli;
 
+import static com.amazon.fusion.FusionRuntimeBuilder.PROPERTY_BOOTSTRAP_REPOSITORY;
 import com.amazon.fusion.FusionRuntimeBuilder;
 import java.io.File;
 import java.util.ArrayList;
@@ -17,7 +18,8 @@ class GlobalOptions
         + "Global Options\n"
         + "==============\n"
         + "--bootstrapRepository DIR\n"
-        + "  Path to a Fusion bootstrap repository.\n"
+        + "  Path to a Fusion bootstrap repository. The JVM system property\n"
+        + "  " + PROPERTY_BOOTSTRAP_REPOSITORY + " has the same effect.\n"
         + "--repositories DIR" + File.pathSeparator + "DIR...\n"
         + "  Additional user repositories. This option can be given more than once and\n"
         + "  all DIRs will be used.\n"
