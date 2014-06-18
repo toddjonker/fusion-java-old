@@ -349,6 +349,11 @@ public final class _Private_CoverageCollectorImpl
                         covered = in.booleanValue();
                         break;
                     }
+                    default:
+                    {
+                        // ignore it
+                        break;
+                    }
                 }
             }
 
@@ -402,6 +407,11 @@ public final class _Private_CoverageCollectorImpl
                         // TODO I'm too lazy to handle out-of-order fields.
                         assert name != null;
                         readLocations(in, name);
+                        break;
+                    }
+                    default:
+                    {
+                        // Ignore it.
                         break;
                     }
                 }
