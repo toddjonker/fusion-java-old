@@ -2,7 +2,7 @@
 
 package com.amazon.fusion.cli;
 
-import java.io.PrintWriter;
+import java.io.IOException;
 
 class Help
     extends Command
@@ -21,7 +21,7 @@ class Help
     private final static String APP_HELP_TEXT_INTRO =
         "Usage: fusion [OPTIONS ...] <command> [ARGS ...]\n" +
         "Type 'fusion help <command>' for help on a specific command.\n\n" +
-        "Available commands:";
+        "Available commands:\n";
 
     private final static String FULL_HELP_SEPARATOR =
         "\n                                *      *      *\n\n";
@@ -60,29 +60,27 @@ class Help
 
         @Override
         public int execute()
-            throws UsageException
+            throws UsageException, IOException
         {
-            try (PrintWriter out = new PrintWriter(System.out))
-            {
-                out.println();
+            System.out.println();
 
-                if ((myCommands == null) || (myCommands.length == 0))
-                {
-                    renderGeneralHelp(out);
-                }
-                else
-                {
-                    renderCommands(out);
-                }
+            if ((myCommands == null) || (myCommands.length == 0))
+            {
+                renderGeneralHelp(System.out);
+            }
+            else
+            {
+                renderCommands(System.out);
             }
 
             return 0;
         }
 
 
-        private void renderGeneralHelp(PrintWriter out)
+        private void renderGeneralHelp(Appendable out)
+            throws IOException
         {
-            out.println(APP_HELP_TEXT_INTRO);
+            out.append(APP_HELP_TEXT_INTRO);
 
             TablePrinter table = new TablePrinter();
             table.setIndent(2);
@@ -103,12 +101,12 @@ class Help
 
             table.render(out);
 
-            out.println(GlobalOptions.HELP);
+            out.append(GlobalOptions.HELP);
         }
 
 
-        private void renderCommands(PrintWriter out)
-            throws UsageException
+        private void renderCommands(Appendable out)
+            throws UsageException, IOException
         {
             boolean showGeneralUsage = false;
 
@@ -116,7 +114,7 @@ class Help
             {
                 if (i != 0)
                 {
-                    out.print(FULL_HELP_SEPARATOR);
+                    out.append(FULL_HELP_SEPARATOR);
                 }
 
                 String command = myCommands[i];
@@ -125,7 +123,9 @@ class Help
                     CommandFactory.getMatchingCommand(command);
                 if (commandObj == null)
                 {
-                    out.println("Unknown command: '" + command + "'");
+                    out.append("Unknown command: '");
+                    out.append(command);
+                    out.append("'\n");
                     showGeneralUsage = true;
                 }
                 else
@@ -141,45 +141,49 @@ class Help
         }
 
 
-        private void renderCommandAndAliases(Command command, PrintWriter out)
+        private void renderCommandAndAliases(Command command, Appendable out)
+            throws IOException
         {
-            out.print(command.getCommand());
+            out.append(command.getCommand());
 
             String[] aliases = command.getAliases();
             int len = aliases.length;
             if (len != 0)
             {
-                out.print(" (");
+                out.append(" (");
                 for (int i = 0; i < len; i++ )
                 {
-                    if (i != 0) out.print(", ");
-                    out.print(aliases[i]);
+                    if (i != 0) out.append(", ");
+                    out.append(aliases[i]);
                 }
-                out.print(")");
+                out.append(")");
             }
         }
 
 
-        private void renderFullHelp(Command command, PrintWriter out)
+        private void renderFullHelp(Command command, Appendable out)
+            throws IOException
         {
             String oneLiner = command.getHelpOneLiner();
             if (oneLiner != null)
             {
                 renderCommandAndAliases(command, out);
-                out.println();
+                out.append('\n');
                 //            out.print(": ");
-                out.print("  ");
-                out.println(oneLiner);
-                out.println();
-                out.print("Usage: ");
-                out.println(command.getHelpUsage());
+                out.append("  ");
+                out.append(oneLiner);
+                out.append("\n\n");
+                out.append("Usage: ");
+                out.append(command.getHelpUsage());
+                out.append('\n');
             }
 
             String helpBody = command.getHelpBody();
             if (helpBody != null)
             {
-                out.println();
-                out.println(helpBody);
+                out.append('\n');
+                out.append(helpBody);
+                out.append('\n');
             }
         }
     }

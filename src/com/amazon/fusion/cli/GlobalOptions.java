@@ -20,7 +20,7 @@ class GlobalOptions
         + "  Path to a Fusion bootstrap repository.\n"
         + "--repositories DIR" + File.pathSeparator + "DIR...\n"
         + "  Additional user repositories. This option can be given more than once and\n"
-        + "  all DIRs will be used."
+        + "  all DIRs will be used.\n"
         ;
 
 

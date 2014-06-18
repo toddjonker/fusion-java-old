@@ -1,8 +1,8 @@
-// Copyright (c) 2005-2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2005-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
-import java.io.PrintWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -36,7 +36,8 @@ class TablePrinter
     //=========================================================================
     // Rendering
 
-    public void render(PrintWriter out)
+    public void render(Appendable out)
+        throws IOException
     {
         int[] columnWidths = computeColumnWidths();
 
@@ -49,7 +50,7 @@ class TablePrinter
             for (int col = 0; col < row.length; col++)
             {
                 String cell = row[col];
-                out.print(cell);
+                out.append(cell);
 
                 // Don't pad after the last column in the row.
                 if (col+1 != row.length)
@@ -64,7 +65,7 @@ class TablePrinter
                 }
             }
 
-            out.println();
+            out.append('\n');
         }
     }
 
@@ -95,7 +96,8 @@ class TablePrinter
         return columnWidths;
     }
 
-    private void renderBlanks(int count, PrintWriter out)
+    private void renderBlanks(int count, Appendable out)
+        throws IOException
     {
         if (count > 0)
         {
@@ -104,7 +106,7 @@ class TablePrinter
                 myBlanks += myBlanks;
             }
 
-            out.write(myBlanks, 0, count);
+            out.append(myBlanks, 0, count);
         }
     }
 }
