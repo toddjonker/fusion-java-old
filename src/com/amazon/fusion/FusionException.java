@@ -2,10 +2,10 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionUtils.safeEquals;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents conditions raised within Fusion code, as opposed to failures
@@ -52,7 +52,7 @@ public class FusionException
         {
             SourceLocation prev =
                 myContinuation.get(myContinuation.size() - 1);
-            if (! safeEquals(prev, location))
+            if (! Objects.equals(prev, location))
             {
                 // Collapse equal adjacent locations
                 myContinuation.add(location);

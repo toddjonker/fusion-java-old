@@ -14,7 +14,6 @@ import static com.amazon.fusion.FusionNumber.makeInt;
 import static com.amazon.fusion.FusionNumber.unsafeTruncateIntToJavaInt;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionText.checkRequiredTextArg;
-import static com.amazon.fusion.FusionUtils.safeEquals;
 import static java.lang.Character.highSurrogate;
 import static java.lang.Character.isSupplementaryCodePoint;
 import static java.lang.Character.lowSurrogate;
@@ -33,6 +32,7 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.util.Arrays;
+import java.util.Objects;
 
 
 /**
@@ -104,7 +104,7 @@ public final class FusionString
             if (o instanceof BaseString)
             {
                 BaseString that = (BaseString) o;
-                return (safeEquals(this.stringValue(), that.stringValue())
+                return (Objects.equals(this.stringValue(), that.stringValue())
                         && Arrays.equals(this.annotationsAsJavaStrings(),
                                          that.annotationsAsJavaStrings()));
             }

@@ -2,12 +2,11 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionUtils.safeEquals;
-import static com.amazon.fusion.FusionUtils.safeHashCode;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.TextSpan;
 import com.amazon.ion.util.Spans;
 import java.io.IOException;
+import java.util.Objects;
 
 
 class SourceLocation
@@ -269,10 +268,11 @@ class SourceLocation
 
     public boolean equals(SourceLocation that)
     {
-        return (that != null
-                && safeEquals(this.myName, that.myName)
-                && this.getLine() == that.getLine()
-                && this.getColumn() == that.getColumn());
+        return (this == that
+                || (that != null
+                    && Objects.equals(this.myName, that.myName)
+                    && this.getLine() == that.getLine()
+                    && this.getColumn() == that.getColumn()));
     }
 
     @Override
@@ -288,7 +288,7 @@ class SourceLocation
     public int hashCode()
     {
         final int prime = 8191;
-        int result = HASH_SEED + safeHashCode(myName);
+        int result = HASH_SEED + Objects.hashCode(myName);
         result ^= (result << 29) ^ (result >> 3);
         result = prime * result + (int) getLine();
         result ^= (result << 29) ^ (result >> 3);

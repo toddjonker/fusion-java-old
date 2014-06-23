@@ -23,20 +23,6 @@ final class FusionUtils
     static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 
-    static boolean safeEquals(Object left, Object right)
-    {
-        return (left == null ? right == null : left.equals(right));
-    }
-
-    /**
-     * The value's hash code, or zero if value is null.
-     */
-    static int safeHashCode(Object value)
-    {
-        return (value == null ? 0 : value.hashCode());
-    }
-
-
     /**
      * @param value must not be null.
      */
