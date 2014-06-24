@@ -4,17 +4,12 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionEval.evalSyntax;
-import static com.amazon.fusion.FusionNumber.makeInt;
-import static com.amazon.fusion.FusionNumber.unsafeTruncateIntToJavaInt;
 import static com.amazon.fusion.FusionString.isString;
-import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionString.stringToJavaString;
-import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.GlobalState.PROVIDE;
 import static com.amazon.fusion.GlobalState.REQUIRE;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
-import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +24,11 @@ import java.util.Map;
 final class ModuleForm
     extends SyntacticForm
 {
+    private static final String STX_PROP_MODULE_IDENTITY   = "module identity";
+    private static final String STX_PROP_LANGUAGE_IDENTITY = "language identity";
+    private static final String STX_PROP_BINDING_COUNT     = "binding count";
+
+
     private final DynamicParameter myCurrentModuleDeclareName;
     private final ModuleNameResolver myModuleNameResolver;
 
@@ -96,8 +96,9 @@ final class ModuleForm
             ex.initCause(e);
             throw ex;
         }
+        source = (SyntaxSexp)
+            source.copyWithProperty(eval, STX_PROP_MODULE_IDENTITY, id);
 
-        ModuleIdentity initialBindingsId;
         ModuleInstance language;
         {
             String path = check.requiredText(eval, "initial module path", 2);
@@ -109,12 +110,13 @@ final class ModuleForm
                 throw new ModuleNotFoundException(message, initialBindingsStx);
             }
 
+            ModuleIdentity languageId;
             try
             {
-                initialBindingsId =
+                languageId =
                     myModuleNameResolver.resolve(eval, id, initialBindingsStx,
                                                  true /*load it*/);
-                language = registry.instantiate(eval, initialBindingsId);
+                language = registry.instantiate(eval, languageId);
                 assert language != null;  // Otherwise resolve should fail
             }
             catch (ModuleNotFoundException e)
@@ -125,13 +127,17 @@ final class ModuleForm
             catch (FusionException e)
             {
                 String message =
-                    "Error installing initial bindings: " + e.getMessage();
+                    "Error installing language bindings: " + e.getMessage();
                 SyntaxException ex =
                     new SyntaxException(getInferredName(), message,
                                         initialBindingsStx);
                 ex.initCause(e);
                 throw ex;
             }
+
+            source = (SyntaxSexp)
+                source.copyWithProperty(eval,
+                                        STX_PROP_LANGUAGE_IDENTITY, languageId);
         }
 
         // The new namespace shares the registry of current-namespace
@@ -244,42 +250,22 @@ final class ModuleForm
             }
         }
 
+        source = (SyntaxSexp)
+            source.copyWithProperty(eval,
+                                    STX_PROP_BINDING_COUNT,
+                                    moduleNamespace.getBindings().size());
+
+
         // Pass 2: Expand the expressions. We also rearrange the forms,
         // but that's not really for any functional reason.
 
         SyntaxValue[] subforms =
-            new SyntaxValue[4 + otherForms.size() + provideForms.size()];
+            new SyntaxValue[3 + otherForms.size() + provideForms.size()];
 
         int i = 0;
         subforms[i++] = source.get(eval, 0); // module
         subforms[i++] = source.get(eval, 1); // name
         subforms[i++] = source.get(eval, 2); // language
-
-        // FIXME a ludicrous hack to communicate this data to the compiler!
-        {
-            BaseValue datum =
-                makeInt(eval, moduleNamespace.getBindings().size());
-            SyntaxValue variableCount =
-                makeSyntax(eval, /*location*/ null, datum);
-
-            SyntaxValue identity =
-                makeString(eval, id.absolutePath())
-                .wrapAsSyntax(eval, null);
-
-            SyntaxValue languageIdentity =
-                makeString(eval, initialBindingsId.absolutePath())
-                .wrapAsSyntax(eval, null);
-
-            Object s =
-                immutableStruct(new String[] { "variable_count",
-                                               "identity",
-                                               "language_identity" },
-                                new SyntaxValue[] { variableCount,
-                                                    identity,
-                                                    languageIdentity },
-                                new String[] { "InjectedMetadata" });
-            subforms[i++] = SyntaxStruct.make(eval, null, s);
-        }
 
         Iterator<Boolean> prepared = preparedFormFlags.iterator();
         for (SyntaxValue stx : otherForms)
@@ -329,21 +315,13 @@ final class ModuleForm
         // See Racket reference 11.9.1
         // http://docs.racket-lang.org/reference/Expanding_Top-Level_Forms.html#%28part._modinfo%29
 
-        SyntaxStruct meta = (SyntaxStruct) stx.get(eval, 3);
-
-        ModuleIdentity id;
-        {
-            Object datum = meta.get(eval, "identity").unwrap(eval);
-            String identity = stringToJavaString(eval, datum);
-            id = ModuleIdentity.reIntern(identity);
-        }
+        ModuleIdentity id = (ModuleIdentity)
+            stx.findProperty(eval, STX_PROP_MODULE_IDENTITY);
 
         Namespace moduleNamespace;
         {
-            Object datum = meta.get(eval, "language_identity").unwrap(eval);
-            String identity = stringToJavaString(eval, datum);
-            ModuleIdentity languageId =
-                ModuleIdentity.forAbsolutePath(identity);
+            ModuleIdentity languageId = (ModuleIdentity)
+                stx.findProperty(eval, STX_PROP_LANGUAGE_IDENTITY);
 
             ModuleRegistry registry =
                 envOutsideModule.namespace().getRegistry();
@@ -352,19 +330,14 @@ final class ModuleForm
             moduleNamespace = new ModuleNamespace(registry, language, id);
         }
 
-        int variableCount;
-        {
-            Object i = meta.get(eval, "variable_count").unwrap(eval);
-            variableCount = unsafeTruncateIntToJavaInt(eval, i);
-        }
 
         ArrayList<CompiledForm> otherForms = new ArrayList<>();
 
-        int bodyPos = 4;
+        int bodyPos = 3;
         String docs = null;
-        if (stx.size() > 5)
+        if (stx.size() > bodyPos + 1)
         {
-            Object maybeDoc = stx.get(eval, 4).unwrap(eval);
+            Object maybeDoc = stx.get(eval, bodyPos).unwrap(eval);
             if (isString(eval, maybeDoc))
             {
                 // We're gonna call this documentation!
@@ -399,10 +372,13 @@ final class ModuleForm
         CompiledForm[] otherFormsArray =
             otherForms.toArray(new CompiledForm[otherForms.size()]);
 
+        int bindingCount = (Integer)
+            stx.findProperty(eval, STX_PROP_BINDING_COUNT);
+
         return new CompiledModule(id,
                                   docs,
                                   moduleNamespace.requiredModuleIds(),
-                                  variableCount,
+                                  bindingCount,
                                   moduleNamespace.extractBindingDocs(),
                                   (String[]) providedIdentifiers[0],
                                   (ModuleBinding[]) providedIdentifiers[1],
