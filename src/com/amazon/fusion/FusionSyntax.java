@@ -138,7 +138,7 @@ final class FusionSyntax
             checkArityRange(2, 3, args);
 
             SyntaxValue stx =
-                checkSyntaxArg(eval, this, "syntax object", 0, args);
+                FusionSyntax.checkSyntaxArg(eval, this, "syntax object", 0, args);
 
             if (args.length == 2)
             {
