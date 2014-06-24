@@ -10,9 +10,9 @@ abstract class SyntaxText
     /**
      * @param datum must not be null.
      */
-    SyntaxText(SourceLocation loc, BaseText datum)
+    SyntaxText(SourceLocation loc, Object[] properties, BaseText datum)
     {
-        super(loc, datum);
+        super(loc, properties, datum);
     }
 
 

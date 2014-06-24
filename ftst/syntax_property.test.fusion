@@ -1,0 +1,56 @@
+// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/fusion/experimental/check"
+  "/fusion/experimental/syntax"
+  "/testutils"
+  )
+
+
+(define key1 "key1")
+(define key2 (quote key2))
+(define key3 (pair 3 3))
+
+(define val (pair 1 2))
+
+(check_void (syntax_property (quote_syntax sym) key1))
+
+
+(check ident val
+  (syntax_property
+    (syntax_property (quote_syntax sym) key1 val)
+    key1))
+
+
+(define stx
+  (syntax_property
+    (syntax_property
+      (syntax_property (quote_syntax sym) key3 3)
+      key1 val)
+    key2 2))
+
+(check ident val (syntax_property stx key1))
+(check same  2   (syntax_property stx key2))
+(check same  3   (syntax_property stx key3))
+
+
+// syntax_property uses `same` to match keys
+(define _key (string_append "k" "ey"))
+(check_false (same _key key1))
+(check_void
+  (syntax_property
+    (syntax_property (quote_syntax sym) _key val)
+    key1))
+
+
+// Writing replaces existing entries.
+(check === 2
+  (syntax_property
+    (syntax_property (syntax_property (quote_syntax sym) key1 1) key1 2)
+    key1))
+
+
+(expect_arity_exn (syntax_property))
+(expect_arity_exn (syntax_property (quote_syntax sym)))
+
+(expect_argument_exn (syntax_property "sym" "key"))

@@ -1,6 +1,8 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc. All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc. All rights reserved.
 
 package com.amazon.fusion;
+
+import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 
 abstract class SyntaxContainer
     extends SyntaxValue
@@ -14,16 +16,16 @@ abstract class SyntaxContainer
      */
     SyntaxWraps myWraps;
 
-    SyntaxContainer(SourceLocation loc)
+    SyntaxContainer(SourceLocation loc, Object[] properties, SyntaxWraps wraps)
     {
-        super(loc);
-        myWraps = null;
+        super(loc, properties);
+        myWraps = wraps;
     }
 
-    SyntaxContainer(SourceLocation loc, SyntaxWraps wraps)
+    SyntaxContainer(SourceLocation loc)
     {
-        super(loc);
-        myWraps = wraps;
+        super(loc, EMPTY_OBJECT_ARRAY);
+        myWraps = null;
     }
 
 

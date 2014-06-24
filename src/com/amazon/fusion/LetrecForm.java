@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -58,14 +58,11 @@ final class LetrecForm
             SyntaxValue boundExpr = binding.get(eval, 1);
             boundExpr = boundExpr.addWrap(localWrap);
             boundExpr = expander.expandExpression(bodyEnv, boundExpr);
-            binding = SyntaxSexp.make(eval, binding.getLocation(),
-                                      name,
-                                      boundExpr);
-            expandedForms[i] = binding;
+            expandedForms[i] =
+                binding.copyReplacingChildren(eval, name, boundExpr);
         }
 
-        bindingForms = SyntaxSexp.make(expander, bindingForms.getLocation(),
-                                       expandedForms);
+        bindingForms = bindingForms.copyReplacingChildren(eval, expandedForms);
 
         expandedForms = new SyntaxValue[letrecExprSize];
         expandedForms[0] = stx.get(eval, 0);
@@ -79,8 +76,7 @@ final class LetrecForm
             expandedForms[i] = expander.expandExpression(bodyEnv, subform);
         }
 
-        stx = SyntaxSexp.make(eval, stx.getLocation(), expandedForms);
-        return stx;
+        return stx.copyReplacingChildren(eval, expandedForms);
     }
 
 
@@ -94,7 +90,7 @@ final class LetrecForm
         // Dummy environment to keep track of depth
         env = new LocalEnvironment(env);
 
-        SyntaxSexp bindingForms = (SyntaxSexp) stx.get(eval, 1);
+        SyntaxSequence bindingForms = (SyntaxSequence) stx.get(eval, 1);
 
         final int numBindings = bindingForms.size();
 

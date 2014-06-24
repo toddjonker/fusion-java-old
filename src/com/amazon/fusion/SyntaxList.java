@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionList.immutableList;
 import static com.amazon.fusion.FusionList.isImmutableList;
+import static com.amazon.fusion.FusionList.nullList;
 import static com.amazon.fusion.FusionList.unsafeListElement;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static java.lang.System.arraycopy;
@@ -26,6 +27,18 @@ final class SyntaxList
     /**
      * @param datum an immutable list of {@link SyntaxValue}s.
      */
+    private SyntaxList(SourceLocation loc,
+                       Object[]       properties,
+                       SyntaxWraps    wraps,
+                       BaseList       datum)
+    {
+        super(loc, properties, wraps);
+        myImmutableList = datum;
+    }
+
+    /**
+     * @param datum an immutable list of {@link SyntaxValue}s.
+     */
     private SyntaxList(Evaluator eval,
                        SourceLocation loc,
                        BaseList datum)
@@ -34,18 +47,6 @@ final class SyntaxList
         assert isImmutableList(eval, datum);
         myImmutableList = datum;
     }
-
-    /**
-     * Copy constructor, shares the enclosed datum and replaces wraps.
-     * The datum will be copied when wraps are pushed but not before.
-     */
-    private SyntaxList(SyntaxList that, SyntaxWraps wraps)
-    {
-        super(that.getLocation(), wraps);
-        assert wraps != null;
-        myImmutableList = that.myImmutableList;
-    }
-
 
 
     /**
@@ -58,6 +59,33 @@ final class SyntaxList
         return new SyntaxList(eval, loc, (BaseList) datum);
     }
 
+
+    @Override
+    SyntaxList copyReplacingChildren(Evaluator      eval,
+                                     SyntaxValue... children)
+    {
+
+        String[] annotations = annotationsAsJavaStrings();
+        BaseList datum = (children == null
+                              ? nullList(eval, annotations)
+                              : immutableList(eval, annotations, children));
+        return new SyntaxList(getLocation(), getProperties(), myWraps, datum);
+    }
+
+
+    @Override
+    SyntaxList copyReplacingProperties(Object[] properties)
+    {
+        return new SyntaxList(getLocation(), properties, myWraps,
+                              myImmutableList);
+    }
+
+    @Override
+    SyntaxList copyReplacingWraps(SyntaxWraps wraps)
+    {
+        return new SyntaxList(getLocation(), getProperties(), wraps,
+                              myImmutableList);
+    }
 
 
     /**
@@ -119,14 +147,7 @@ final class SyntaxList
             immutableList(eval,
                           myImmutableList.annotationsAsJavaStrings(),
                           children);
-        return new SyntaxList(eval, getLocation(), newList);
-    }
-
-
-    @Override
-    SyntaxList copyReplacingWraps(SyntaxWraps wraps)
-    {
-        return new SyntaxList(this, wraps);
+        return new SyntaxList(getLocation(), getProperties(), null, newList);
     }
 
 
@@ -254,19 +275,18 @@ final class SyntaxList
         Object list = unwrap(eval);
 
         boolean same = true;
-        Object[] children = new Object[len];
+        SyntaxValue[] children = new SyntaxValue[len];
         for (int i = 0; i < len; i++)
         {
             SyntaxValue subform = (SyntaxValue) unsafeListElement(eval, list, i);
-            Object expanded = expander.expandExpression(env, subform);
+            SyntaxValue expanded = expander.expandExpression(env, subform);
             same &= (subform == expanded);
             children[i] = expanded;
         }
 
         if (same) return this;
 
-        list = immutableList(eval, annotationsAsJavaStrings(), children);
-        return SyntaxList.make(eval, getLocation(), list);
+        return this.copyReplacingChildren(eval, children);
     }
 
 

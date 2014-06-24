@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -105,8 +105,7 @@ public final class _Private_HelpForm
             children[i] = expander.expandExpression(env, identifier);
         }
 
-        stx = SyntaxSexp.make(eval, stx.getLocation(), children);
-        return stx;
+        return stx.copyReplacingChildren(eval, children);
     }
 
 

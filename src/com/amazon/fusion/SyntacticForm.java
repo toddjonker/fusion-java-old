@@ -49,7 +49,7 @@ abstract class SyntacticForm
             SyntaxValue subform = stx.get(eval, i);
             expandedChildren[i] = expander.expandExpression(env, subform);
         }
-        return SyntaxSexp.make(expander, stx.getLocation(), expandedChildren);
+        return stx.copyReplacingChildren(eval, expandedChildren);
     }
 
 

@@ -50,13 +50,11 @@ final class ParameterizeForm
             SyntaxValue boundExpr = binding.get(eval, 1);
             boundExpr = expander.expandExpression(env, boundExpr);
 
-            binding = SyntaxSexp.make(expander, binding.getLocation(),
-                                      paramExpr, boundExpr);
+            binding = binding.copyReplacingChildren(eval, paramExpr, boundExpr);
             expandedForms[i] = binding;
         }
 
-        bindingForms = SyntaxSexp.make(expander, bindingForms.getLocation(),
-                                       expandedForms);
+        bindingForms = bindingForms.copyReplacingChildren(eval, expandedForms);
 
         // Expand the body expressions
         expandedForms = new SyntaxValue[exprSize];
@@ -70,8 +68,7 @@ final class ParameterizeForm
             expandedForms[i] = expander.expandExpression(env, bodyExpr);
         }
 
-        stx = SyntaxSexp.make(expander, stx.getLocation(), expandedForms);
-        return stx;
+        return stx.copyReplacingChildren(eval, expandedForms);
     }
 
 
@@ -82,7 +79,7 @@ final class ParameterizeForm
     CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxSexp bindingForms = (SyntaxSexp) stx.get(eval, 1);
+        SyntaxSequence bindingForms = (SyntaxSequence) stx.get(eval, 1);
 
         final int numBindings = bindingForms.size();
 

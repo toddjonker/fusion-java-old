@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc. All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc. All rights reserved.
 
 package com.amazon.fusion;
 
@@ -7,14 +7,14 @@ package com.amazon.fusion;
 abstract class SyntaxSequence
     extends SyntaxContainer
 {
+    SyntaxSequence(SourceLocation loc, Object[] properties, SyntaxWraps wraps)
+    {
+        super(loc, properties, wraps);
+    }
+
     SyntaxSequence(SourceLocation loc)
     {
         super(loc);
-    }
-
-    SyntaxSequence(SourceLocation loc, SyntaxWraps wraps)
-    {
-        super(loc, wraps);
     }
 
 
@@ -33,6 +33,14 @@ abstract class SyntaxSequence
      * @return a new array.
      */
     abstract SyntaxValue[] extract(Evaluator eval)
+        throws FusionException;
+
+    /**
+     * Creates a new syntax sequence, using our locatian and properties but
+     * the given children.
+     */
+    abstract SyntaxSequence copyReplacingChildren(Evaluator eval,
+                                                  SyntaxValue... children)
         throws FusionException;
 
 

@@ -305,9 +305,7 @@ final class ModuleForm
             subforms[i++] = stx;
         }
 
-        SyntaxSexp result = SyntaxSexp.make(eval, source.getLocation(),
-                                            subforms);
-        return result;
+        return source.copyReplacingChildren(eval, subforms);
     }
 
     Binding firstBinding(Evaluator eval, SyntaxValue stx)

@@ -96,6 +96,9 @@ final class QuasiSyntaxForm
                 // or unsyntax, which always return syntax.
                 children[i] = (SyntaxValue) child;
             }
+
+            // We don't use copyReplacingChildren because we don't want the
+            // properties to come over.
             return SyntaxSexp.make(eval, myLocation, myAnnotations, children);
         }
     }
@@ -127,6 +130,9 @@ final class QuasiSyntaxForm
             {
                 children[i] = eval.eval(store, myChildForms[i]);
             }
+
+            // We don't use copyReplacingChildren because we don't want the
+            // properties to come over.
             Object list = immutableList(eval, myAnnotations, children);
             return SyntaxList.make(eval, myLocation, list);
         }

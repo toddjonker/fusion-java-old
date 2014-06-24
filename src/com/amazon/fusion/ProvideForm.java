@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -75,10 +75,7 @@ final class ProvideForm
 
         SyntaxValue[] children =
             expanded.toArray(new SyntaxValue[expanded.size()]);
-        return SyntaxSexp.make(eval,
-                               form.getLocation(),
-                               form.annotationsAsJavaStrings(),
-                               children);
+        return form.copyReplacingChildren(eval, children);
     }
 
     private void expandProvideId(Namespace moduleNamespace,

@@ -94,11 +94,15 @@ final class LambdaForm
             args[i] = arg;
         }
 
-        children[1] = (isRest
-                          ? args[0]
-                          : SyntaxSexp.make(expander,
-                                            children[1].getLocation(),
-                                            args));
+        if (isRest)
+        {
+            children[1] = args[0];
+        }
+        else
+        {
+            SyntaxSexp formals = (SyntaxSexp) children[1];
+            children[1] = formals.copyReplacingChildren(eval, args);
+        }
 
         // TODO FUSION-36 Should allow internal definitions
         for (int i = bodyStart; i < children.length; i++)
@@ -112,8 +116,7 @@ final class LambdaForm
             children[i] = bodyForm;
         }
 
-        stx = SyntaxSexp.make(expander, stx.getLocation(), children);
-        return stx;
+        return stx.copyReplacingChildren(eval, children);
     }
 
 

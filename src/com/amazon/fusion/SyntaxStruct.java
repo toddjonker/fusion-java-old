@@ -25,24 +25,22 @@ final class SyntaxStruct
      * @param struct must not be null.
      */
     private SyntaxStruct(SourceLocation  loc,
+                         Object[] properties,
+                         SyntaxWraps wraps,
                          ImmutableStruct struct)
     {
-        super(loc);
+        super(loc, properties, wraps);
         myStruct = struct;
     }
 
     /**
-     * Copy constructor, shares the enclosed datum and replaces wraps.
-     * The datum will be copied when wraps are pushed but not before.
-     *
-     * @param wraps must not be null.
+     * @param struct must not be null.
      */
-    private SyntaxStruct(SyntaxStruct that,
-                         SyntaxWraps  wraps)
+    private SyntaxStruct(SourceLocation  loc,
+                         ImmutableStruct struct)
     {
-        super(that.getLocation(), wraps);
-        assert wraps != null;
-        myStruct = that.myStruct;
+        super(loc);
+        myStruct = struct;
     }
 
 
@@ -82,9 +80,16 @@ final class SyntaxStruct
 
 
     @Override
+    SyntaxStruct copyReplacingProperties(Object[] properties)
+    {
+        return new SyntaxStruct(getLocation(), properties, myWraps, myStruct);
+    }
+
+    @Override
     SyntaxStruct copyReplacingWraps(SyntaxWraps wraps)
     {
-        return new SyntaxStruct(this, wraps);
+        return new SyntaxStruct(getLocation(), getProperties(), wraps,
+                                myStruct);
     }
 
 
@@ -145,7 +150,7 @@ final class SyntaxStruct
 
         ImmutableStruct s =
             immutableStruct(newMap, annotationsAsJavaStrings());
-        return new SyntaxStruct(getLocation(), s);
+        return new SyntaxStruct(getLocation(), getProperties(), null, s);
     }
 
 

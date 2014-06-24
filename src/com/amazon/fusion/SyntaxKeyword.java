@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonWriter;
@@ -13,9 +14,11 @@ final class SyntaxKeyword
     /**
      * @param datum must not be null.
      */
-    private SyntaxKeyword(SourceLocation loc, BaseSymbol datum)
+    private SyntaxKeyword(SourceLocation loc,
+                          Object[]       properties,
+                          BaseSymbol     datum)
     {
-        super(loc, datum);
+        super(loc, properties, datum);
     }
 
 
@@ -23,7 +26,7 @@ final class SyntaxKeyword
                               SourceLocation loc,
                               BaseSymbol     symbol)
     {
-        return new SyntaxKeyword(loc, symbol);
+        return new SyntaxKeyword(loc, EMPTY_OBJECT_ARRAY, symbol);
     }
 
 

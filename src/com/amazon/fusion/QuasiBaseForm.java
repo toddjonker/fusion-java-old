@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionList.immutableList;
 import static com.amazon.fusion.FusionList.unsafeListElement;
 
 /**
@@ -46,9 +45,7 @@ abstract class QuasiBaseForm
         SyntaxValue subform = stx.get(eval, 1);
         subform = expand(expander, env, subform, 0);
 
-        stx = SyntaxSexp.make(expander, stx.getLocation(),
-                              stx.get(eval, 0), subform);
-        return stx;
+        return stx.copyReplacingChildren(eval, stx.get(eval, 0), subform);
     }
 
     private SyntaxValue expand(Expander expander, Environment env,
@@ -99,7 +96,7 @@ abstract class QuasiBaseForm
                     throw check(eval, stx).failure(message);
                 }
 
-                return SyntaxSexp.make(eval, stx.getLocation(), children);
+                return stx.copyReplacingChildren(eval, children);
             }
 
             depth--;
@@ -121,10 +118,7 @@ abstract class QuasiBaseForm
 
         if (same) return stx;
 
-        return SyntaxSexp.make(eval,
-                               stx.getLocation(),
-                               stx.annotationsAsJavaStrings(),
-                               children);
+        return stx.copyReplacingChildren(eval, children);
     }
 
 
@@ -140,7 +134,7 @@ abstract class QuasiBaseForm
         Object list = stx.unwrap(eval);
 
         boolean same = true;
-        Object[] children = new Object[size];
+        SyntaxValue[] children = new SyntaxValue[size];
         for (int i = 0; i < size; i++)
         {
             SyntaxValue subform = (SyntaxValue) unsafeListElement(eval, list, i);
@@ -151,8 +145,7 @@ abstract class QuasiBaseForm
 
         if (same) return stx;
 
-        list = immutableList(eval, stx.annotationsAsJavaStrings(), children);
-        return SyntaxList.make(eval, stx.getLocation(), list);
+        return stx.copyReplacingChildren(eval, children);
     }
 
 

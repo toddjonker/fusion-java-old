@@ -67,16 +67,12 @@ final class ForListForm
         {
             SyntaxSymbol name = boundNames[i].addWrap(localWrap);
             name.resolve();
-            SourceLocation location = bindingForms.get(eval, i).getLocation();
-            expandedForms[i] = SyntaxSexp.make(expander,
-                                               location,
-                                               name,
-                                               boundValues[i]);
+            SyntaxSexp bindingForm = (SyntaxSexp) bindingForms.get(eval, i);
+            expandedForms[i] =
+                bindingForm.copyReplacingChildren(eval, name, boundValues[i]);
         }
 
-        bindingForms = SyntaxSexp.make(expander,
-                                       bindingForms.getLocation(),
-                                       expandedForms);
+        bindingForms = bindingForms.copyReplacingChildren(eval, expandedForms);
 
         // Prepare the body.
         expandedForms = new SyntaxValue[stx.size()];
@@ -91,8 +87,7 @@ final class ForListForm
             expandedForms[i] = expander.expandExpression(bodyEnv, bodyStx);
         }
 
-        stx = SyntaxSexp.make(expander, stx.getLocation(), expandedForms);
-        return stx;
+        return stx.copyReplacingChildren(eval, expandedForms);
     }
 
 

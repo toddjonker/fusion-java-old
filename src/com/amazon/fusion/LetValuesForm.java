@@ -97,20 +97,16 @@ final class LetValuesForm
                 wrappedNames[j] = name;
                 bindingPos++;
             }
-            names = SyntaxSexp.make(eval, names.getLocation(),
-                                    wrappedNames);
+            names = names.copyReplacingChildren(eval, wrappedNames);
 
             SyntaxValue boundExpr = binding.get(eval, 1);
             boundExpr = expander.expandExpression(env, boundExpr);
-            binding = SyntaxSexp.make(eval, binding.getLocation(),
-                                      names,
-                                      boundExpr);
-            expandedForms[i] = binding;
+            expandedForms[i] =
+                binding.copyReplacingChildren(eval, names, boundExpr);
         }
         assert bindingPos == bindingCount;
 
-        bindingForms = SyntaxSexp.make(eval, bindingForms.getLocation(),
-                                       expandedForms);
+        bindingForms = bindingForms.copyReplacingChildren(eval, expandedForms);
 
         expandedForms = new SyntaxValue[letExprSize];
         expandedForms[0] = stx.get(eval, 0);
@@ -127,8 +123,7 @@ final class LetValuesForm
             expandedForms[i] = expander.expandExpression(bodyEnv, subform);
         }
 
-        stx = SyntaxSexp.make(eval, stx.getLocation(), expandedForms);
-        return stx;
+        return stx.copyReplacingChildren(eval, expandedForms);
     }
 
 
@@ -139,7 +134,7 @@ final class LetValuesForm
     CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp expr)
         throws FusionException
     {
-        SyntaxSexp bindingForms = (SyntaxSexp) expr.get(eval, 1);
+        SyntaxSequence bindingForms = (SyntaxSequence) expr.get(eval, 1);
 
         final int numBindingForms = bindingForms.size();
 

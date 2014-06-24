@@ -35,19 +35,25 @@ final class SyntaxSexp
     /**
      * @param sexp must not be null.
      */
-    private SyntaxSexp(SourceLocation loc, BaseSexp sexp)
+    private SyntaxSexp(SourceLocation loc,
+                       Object[]       properties,
+                       SyntaxWraps    wraps,
+                       BaseSexp       sexp)
     {
-        super(loc);
+        super(loc, properties, wraps);
         assert sexp != null;
         mySexp = sexp;
     }
 
 
-    /** Copy constructor shares children and replaces unpushed wraps. */
-    private SyntaxSexp(SyntaxSexp that, SyntaxWraps wraps)
+    /**
+     * @param sexp must not be null.
+     */
+    private SyntaxSexp(SourceLocation loc, BaseSexp sexp)
     {
-        super(that.getLocation(), wraps);
-        mySexp = that.mySexp;
+        super(loc);
+        assert sexp != null;
+        mySexp = sexp;
     }
 
 
@@ -102,36 +108,37 @@ final class SyntaxSexp
         return make(eval, loc, EMPTY_STRING_ARRAY, children);
     }
 
-    /**
-     * Instance will be {@link #isAnyNull()} if children is null.
-
-     * @param children the children of the new sexp.
-     * This method takes ownership of the array; the array and its elements
-     * must not be changed by calling code afterwards!
-     */
-    static SyntaxSexp make(Expander expander, SyntaxValue... children)
-    {
-        return make(expander.getEvaluator(), null,
-                    EMPTY_STRING_ARRAY, children);
-    }
-
-
-    /**
-     * Instance will be {@link #isAnyNull()} if children is null.
-
-     * @param children the children of the new sexp.
-     * This method takes ownership of the array; the array and its elements
-     * must not be changed by calling code afterwards!
-     */
-    static SyntaxSexp make(Expander expander, SourceLocation loc,
-                           SyntaxValue... children)
-    {
-        return make(expander.getEvaluator(), loc,
-                    EMPTY_STRING_ARRAY, children);
-    }
-
 
     //========================================================================
+
+
+    @Override
+    SyntaxSexp copyReplacingChildren(Evaluator      eval,
+                                     SyntaxValue... children)
+    {
+
+        String[] annotations = annotationsAsJavaStrings();
+        BaseSexp datum = (children == null
+                              ? nullSexp(eval, annotations)
+                              : immutableSexp(eval, annotations, children));
+        return new SyntaxSexp(getLocation(), getProperties(), myWraps, datum);
+    }
+
+
+    @Override
+    SyntaxSexp copyReplacingProperties(Object[] properties)
+    {
+        return new SyntaxSexp(getLocation(), properties, myWraps, mySexp);
+    }
+
+
+    @Override
+    SyntaxSexp copyReplacingWraps(SyntaxWraps wraps)
+        throws FusionException
+    {
+        assert ! hasNoChildren() && wraps != null;
+        return new SyntaxSexp(getLocation(), getProperties(), wraps, mySexp);
+    }
 
 
     private static ImmutablePair pushWraps(Evaluator eval,
@@ -262,16 +269,7 @@ final class SyntaxSexp
         if (hasNoChildren()) return this;  // No children, no marks, all okay!
 
         BaseSexp newSexp = stripWraps(eval, (ImmutablePair) mySexp);
-        return new SyntaxSexp(getLocation(), newSexp);
-    }
-
-
-    @Override
-    SyntaxSexp copyReplacingWraps(SyntaxWraps wraps)
-        throws FusionException
-    {
-        assert ! hasNoChildren() && wraps != null;
-        return new SyntaxSexp(this, wraps);
+        return new SyntaxSexp(getLocation(), getProperties(), null, newSexp);
     }
 
 
@@ -517,6 +515,8 @@ final class SyntaxSexp
     SyntaxValue doExpand(Expander expander, Environment env)
         throws FusionException
     {
+        Evaluator eval = expander.getEvaluator();
+
         int len = size();
         if (len == 0)
         {
@@ -525,7 +525,7 @@ final class SyntaxSexp
             throw new SyntaxException(null, message, this);
         }
 
-        SyntaxValue[] children = extract(expander.getEvaluator());
+        SyntaxValue[] children = extract(eval);
 
         SyntaxValue first = children[0];
         if (first instanceof SyntaxSymbol)
@@ -563,8 +563,7 @@ final class SyntaxSexp
             children[i] = expander.expandExpression(env, subform);
         }
 
-        SyntaxSexp result = SyntaxSexp.make(expander, getLocation(), children);
-        return result;
+        return this.copyReplacingChildren(eval, children);
     }
 
 

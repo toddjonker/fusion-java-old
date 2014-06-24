@@ -172,8 +172,7 @@ final class LoadHandler
 
         children[0] = eval.getGlobalState().myKernelModuleIdentifier;
 
-        moduleStx = SyntaxSexp.make(eval, moduleStx.getLocation(), children);
-        return moduleStx;
+        return moduleStx.copyReplacingChildren(eval, children);
     }
 
 

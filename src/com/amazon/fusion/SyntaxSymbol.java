@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
+import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import java.util.Collections;
 import java.util.Set;
@@ -44,9 +45,10 @@ final class SyntaxSymbol
     private SyntaxSymbol(Evaluator      eval,
                          SyntaxWraps    wraps,
                          SourceLocation loc,
+                         Object[]       properties,
                          BaseSymbol     datum)
     {
-        super(loc, datum);
+        super(loc, properties, datum);
         myWraps = wraps;
     }
 
@@ -55,7 +57,7 @@ final class SyntaxSymbol
                              SourceLocation loc,
                              BaseSymbol     symbol)
     {
-        return new SyntaxSymbol(eval, null, loc, symbol);
+        return new SyntaxSymbol(eval, null, loc, EMPTY_OBJECT_ARRAY, symbol);
     }
 
 
@@ -65,7 +67,8 @@ final class SyntaxSymbol
     static SyntaxSymbol make(Evaluator eval, SyntaxWraps wraps, String value)
     {
         BaseSymbol datum = makeSymbol(eval, value);
-        return new SyntaxSymbol(eval, wraps, /*location*/ null, datum);
+        return new SyntaxSymbol(eval, wraps, /*location*/ null,
+                                EMPTY_OBJECT_ARRAY, datum);
     }
 
 
@@ -84,11 +87,19 @@ final class SyntaxSymbol
     static SyntaxSymbol make(Evaluator eval, String value)
     {
         BaseSymbol datum = makeSymbol(eval, value);
-        return new SyntaxSymbol(eval, null, null, datum);
+        return new SyntaxSymbol(eval, null, null, EMPTY_OBJECT_ARRAY, datum);
     }
 
 
     //========================================================================
+
+
+    @Override
+    SyntaxSymbol copyReplacingProperties(Object[] properties)
+    {
+        return new SyntaxSymbol(null, myWraps, getLocation(), properties,
+                                (BaseSymbol) myDatum);
+    }
 
 
     /**
@@ -100,7 +111,8 @@ final class SyntaxSymbol
         // probably different, so the binding may be different.
 
         SyntaxSymbol copy =
-            new SyntaxSymbol(null, wraps, getLocation(), (BaseSymbol) myDatum);
+            new SyntaxSymbol(null, wraps, getLocation(), getProperties(),
+                             (BaseSymbol) myDatum);
         return copy;
     }
 
@@ -108,7 +120,8 @@ final class SyntaxSymbol
     SyntaxSymbol copyReplacingBinding(Binding binding)
     {
         SyntaxSymbol copy =
-            new SyntaxSymbol(null, myWraps, getLocation(), (BaseSymbol) myDatum);
+            new SyntaxSymbol(null, myWraps, getLocation(), getProperties(),
+                             (BaseSymbol) myDatum);
         copy.myBinding = binding;
         return copy;
     }
@@ -367,12 +380,13 @@ final class SyntaxSymbol
 
             if (myBinding instanceof FreeBinding)
             {
-                BaseSymbol topSym =
-                    FusionSymbol.makeSymbol(expander.getEvaluator(), "#%top");
+                Evaluator eval = expander.getEvaluator();
+                BaseSymbol topSym = makeSymbol(eval, "#%top");
                 SyntaxSymbol top =
-                    new SyntaxSymbol(expander.getEvaluator(),
+                    new SyntaxSymbol(eval,
                                      myWraps,
                                      /*location*/ null,
+                                     /*properties*/ EMPTY_OBJECT_ARRAY,
                                      topSym);
                 if (top.resolve() instanceof FreeBinding)
                 {
@@ -380,7 +394,7 @@ final class SyntaxSymbol
                 }
 
                 assert annotationsAsJavaStrings().length == 0;
-                SyntaxSexp topExpr = SyntaxSexp.make(expander, top, this);
+                SyntaxSexp topExpr = SyntaxSexp.make(eval, top, this);
 
                 // TODO FUSION-207 tail expand
                 return expander.expandExpression(env, topExpr);

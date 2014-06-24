@@ -17,6 +17,30 @@ final class FusionSyntax
 
 
     //========================================================================
+    // Procedure Helpers
+
+
+    /**
+     * @param expectation must not be null.
+     */
+    static SyntaxValue checkSyntaxArg(Evaluator eval,
+                                      Procedure who,
+                                      String    expectation,
+                                      int       argNum,
+                                      Object... args)
+        throws ArgumentException
+    {
+        Object arg = args[argNum];
+        if (arg instanceof SyntaxValue)
+        {
+            return (SyntaxValue) arg;
+        }
+
+        throw who.argFailure(expectation, argNum, args);
+    }
+
+
+    //========================================================================
     // Procedures
 
     static final class IsIdentifierProc
@@ -100,6 +124,30 @@ final class FusionSyntax
             checkArityExact(1, args);
             SyntaxValue stx = checkSyntaxArg(0, args);
             return stx.unwrap(eval);
+        }
+    }
+
+
+    static final class PropertyProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityRange(2, 3, args);
+
+            SyntaxValue stx =
+                checkSyntaxArg(eval, this, "syntax object", 0, args);
+
+            if (args.length == 2)
+            {
+                return stx.findProperty(eval, args[1]);
+            }
+            else
+            {
+                return stx.copyWithProperty(eval, args[1], args[2]);
+            }
         }
     }
 }

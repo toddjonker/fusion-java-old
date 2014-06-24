@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -61,7 +61,7 @@ final class BeginForm
             SyntaxValue subform = stx.get(eval, i);
             expandedChildren[i] = expander.expandExpression(env, subform);
         }
-        return SyntaxSexp.make(expander, stx.getLocation(), expandedChildren);
+        return stx.copyReplacingChildren(eval, expandedChildren);
     }
 
 

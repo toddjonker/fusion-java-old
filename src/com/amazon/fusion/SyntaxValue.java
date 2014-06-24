@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonValue;
+import java.util.Arrays;
 
 /**
  * Models Fusion source code, using a custom DOM implementation of Ion.
@@ -17,13 +18,19 @@ abstract class SyntaxValue
 
     private final SourceLocation mySrcLoc;
 
+    /** Not null, to streamline things. */
+    private final Object[] myProperties;
+
+
     /**
-     *
-     * @param loc may be null;
+     * @param loc may be null.
+     * @param properties must not be null.
      */
-    SyntaxValue(SourceLocation loc)
+    SyntaxValue(SourceLocation loc, Object[] properties)
     {
+        assert properties != null;
         mySrcLoc = loc;
+        myProperties = properties;
     }
 
 
@@ -41,6 +48,50 @@ abstract class SyntaxValue
     SourceLocation getLocation()
     {
         return mySrcLoc;
+    }
+
+
+    Object[] getProperties()
+    {
+        return myProperties;
+    }
+
+    Object findProperty(Evaluator eval, Object key)
+        throws FusionException
+    {
+        for (int i = 0; i < myProperties.length; i += 2)
+        {
+            if (FusionCompare.isSame(eval, key, myProperties[i]).isTrue())
+            {
+                return myProperties[i + 1];
+            }
+        }
+        return FusionVoid.voidValue(eval);
+    }
+
+
+    abstract SyntaxValue copyReplacingProperties(Object[] properties);
+
+
+    SyntaxValue copyWithProperty(Evaluator eval, Object key, Object value)
+        throws FusionException
+    {
+        // Determine whether the property already exists so we can replace it.
+        int length = myProperties.length;
+        for (int i = 0; i < length; i += 2)
+        {
+            if (FusionCompare.isSame(eval, key, myProperties[i]).isTrue())
+            {
+                Object[] newProperties = Arrays.copyOf(myProperties, length);
+                newProperties[i + 1] = value;
+                return copyReplacingProperties(newProperties);
+            }
+        }
+
+        Object[] newProperties = Arrays.copyOf(myProperties, length + 2);
+        newProperties[length    ] = key;
+        newProperties[length + 1] = value;
+        return copyReplacingProperties(newProperties);
     }
 
 

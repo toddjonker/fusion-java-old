@@ -59,12 +59,11 @@ final class DefineForm
             SyntaxSymbol identifier =
                 sigCheck.requiredIdentifier("procedure name", 0);
 
-            SyntaxValue[] sig = ((SyntaxSexp) first).extract(eval);
-            sig[0] = ns.predefine(identifier, formForErrors);
-            children[1] = SyntaxSexp.make(eval,
-                                          first.getLocation(),
-                                          first.annotationsAsJavaStrings(),
-                                          sig);
+            SyntaxSexp signature = (SyntaxSexp) first;
+            SyntaxValue[] sigChildren = signature.extract(eval);
+            sigChildren[0] = ns.predefine(identifier, formForErrors);
+
+            children[1] = signature.copyReplacingChildren(eval, sigChildren);
         }
         else
         {
@@ -72,10 +71,7 @@ final class DefineForm
             children[1] = ns.predefine(identifier, formForErrors);
         }
 
-        return SyntaxSexp.make(eval,
-                               defineStx.getLocation(),
-                               defineStx.annotationsAsJavaStrings(),
-                               children);
+        return defineStx.copyReplacingChildren(eval, children);
     }
 
     // (define (p f ...) d? b ...+) => (define p d? (lambda (f ...) b ...))
@@ -118,7 +114,7 @@ final class DefineForm
 
         SyntaxValue[] lambda = new SyntaxValue[2 + bodyLen];
         lambda[0] = expander.getGlobalState().myKernelLambdaIdentifier;
-        lambda[1] = SyntaxSexp.make(expander, procFormals);
+        lambda[1] = SyntaxSexp.make(eval, procFormals);
         for (int p = 2, i = bodyStart; i < defineArity; p++, i++)
         {
             lambda[p] = origDefineElts[i];
@@ -143,10 +139,9 @@ final class DefineForm
 
             newDefineElts[2] = docStx;
         }
-        newDefineElts[2 + docOffset] =
-            SyntaxSexp.make(expander, lambda);
+        newDefineElts[2 + docOffset] = SyntaxSexp.make(eval, lambda);
 
-        return SyntaxSexp.make(expander, stx.getLocation(), newDefineElts);
+        return stx.copyReplacingChildren(eval, newDefineElts);
     }
 
 
@@ -196,8 +191,7 @@ final class DefineForm
         SyntaxValue valueStx = stx.get(eval, bodyPos);
         children[bodyPos] = expander.expandExpression(env, valueStx);
 
-        stx = SyntaxSexp.make(expander, stx.getLocation(), children);
-        return stx;
+        return stx.copyReplacingChildren(eval, children);
     }
 
 

@@ -194,7 +194,7 @@ final class FusionEval
                 {
                     SyntaxValue[] children = maybeModule.extract(eval);
                     children[0] = maybeKeyword;
-                    return SyntaxSexp.make(eval, children);
+                    return maybeModule.copyReplacingChildren(eval, children);
                 }
             }
         }
