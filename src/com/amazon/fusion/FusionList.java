@@ -568,9 +568,9 @@ final class FusionList
         }
 
         @Override
-        SyntaxValue wrapAsSyntax(Evaluator eval, SourceLocation loc)
+        SyntaxValue makeOriginalSyntax(Evaluator eval, SourceLocation loc)
         {
-            return SyntaxList.make(eval, loc, this);
+            return SyntaxList.makeOriginal(eval, loc, this);
         }
 
         /**

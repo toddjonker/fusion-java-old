@@ -44,6 +44,15 @@ final class SyntaxStruct
     }
 
 
+
+    static SyntaxStruct makeOriginal(Evaluator       eval,
+                                     SourceLocation  loc,
+                                     ImmutableStruct struct)
+    {
+        return new SyntaxStruct(loc, ORIGINAL_STX_PROPS, null, struct);
+    }
+
+
     /**
      * @param datum must be an immutable struct
      */

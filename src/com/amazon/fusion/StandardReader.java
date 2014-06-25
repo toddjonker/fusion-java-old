@@ -17,6 +17,8 @@ import static com.amazon.fusion.FusionStruct.structImplAdd;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionTimestamp.makeTimestamp;
 import static com.amazon.fusion.SourceLocation.forCurrentSpan;
+import static com.amazon.fusion.SyntaxValue.STX_PROPERTY_ORIGINAL;
+import static java.lang.Boolean.TRUE;
 import com.amazon.fusion.FusionList.BaseList;
 import com.amazon.fusion.FusionSexp.BaseSexp;
 import com.amazon.ion.Decimal;
@@ -200,7 +202,9 @@ class StandardReader
 
         if (readingSyntax)
         {
-            return datum.wrapAsSyntax(eval, loc);
+            SyntaxValue stx = datum.makeOriginalSyntax(eval, loc);
+            assert stx.findProperty(eval, STX_PROPERTY_ORIGINAL) == TRUE;
+            return stx;
         }
 
         return datum;

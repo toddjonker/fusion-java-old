@@ -52,6 +52,16 @@ final class SyntaxList
     /**
      * @param datum an immutable list of {@link SyntaxValue}s.
      */
+    static SyntaxList makeOriginal(Evaluator      eval,
+                                   SourceLocation loc,
+                                   BaseList       datum)
+    {
+        return new SyntaxList(loc, ORIGINAL_STX_PROPS, null, datum);
+    }
+
+    /**
+     * @param datum an immutable list of {@link SyntaxValue}s.
+     */
     static SyntaxList make(Evaluator      eval,
                            SourceLocation loc,
                            Object         datum)

@@ -83,6 +83,16 @@ final class FusionSyntax
 
 
     //========================================================================
+    // Predicates
+
+    static boolean unsafeSyntaxIsOriginal(Evaluator eval, Object stx)
+        throws FusionException
+    {
+        return ((SyntaxValue) stx).isOriginal(eval);
+    }
+
+
+    //========================================================================
     // Procedure Helpers
 
 
@@ -271,6 +281,24 @@ final class FusionSyntax
                 FusionSyntax.checkSyntaxArg(eval, this, "syntax object", 0, args);
 
             return stx.findProperty(eval, STX_PROPERTY_ORIGIN);
+        }
+    }
+
+
+    static final class IsOriginalProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(1, args);
+
+            SyntaxValue stx =
+                FusionSyntax.checkSyntaxArg(eval, this, "syntax object", 0, args);
+
+            boolean o = stx.isOriginal(eval);
+            return FusionBool.makeBool(eval, o);
         }
     }
 }

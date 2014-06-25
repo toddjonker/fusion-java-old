@@ -83,9 +83,9 @@ abstract class BaseValue
     }
 
 
-    SyntaxValue wrapAsSyntax(Evaluator eval, SourceLocation loc)
+    SyntaxValue makeOriginalSyntax(Evaluator eval, SourceLocation loc)
     {
-        return SimpleSyntaxValue.makeSyntax(eval, loc, this);
+        return SimpleSyntaxValue.makeOriginalSyntax(eval, loc, this);
     }
 
 

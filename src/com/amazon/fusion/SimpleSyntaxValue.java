@@ -43,6 +43,17 @@ class SimpleSyntaxValue
      * @param loc may be null.
      * @param datum must not be null and must not be a {@link SyntaxValue}.
      */
+    static SyntaxValue makeOriginalSyntax(Evaluator      eval,
+                                          SourceLocation loc,
+                                          BaseValue      datum)
+    {
+        return new SimpleSyntaxValue(loc, ORIGINAL_STX_PROPS, datum);
+    }
+
+    /**
+     * @param loc may be null.
+     * @param datum must not be null and must not be a {@link SyntaxValue}.
+     */
     static SyntaxValue makeSyntax(Evaluator      eval,
                                   SourceLocation loc,
                                   BaseValue      datum)

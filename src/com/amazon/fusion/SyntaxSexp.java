@@ -57,6 +57,13 @@ final class SyntaxSexp
     }
 
 
+    static SyntaxSexp makeOriginal(Evaluator      eval,
+                                   SourceLocation loc,
+                                   BaseSexp       sexp)
+    {
+        return new SyntaxSexp(loc, ORIGINAL_STX_PROPS, null, sexp);
+    }
+
     static SyntaxSexp make(Evaluator eval, SourceLocation loc, BaseSexp sexp)
     {
         return new SyntaxSexp(loc, sexp);

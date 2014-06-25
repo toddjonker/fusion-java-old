@@ -28,7 +28,7 @@
   (check === (quote new) (syntax_unwrap stx))
   (check === 1 (size o))
   (check_same SYM1 (head o))
-  (check_same UNSET (syntax_property stx KEY1)))
+  (check_same UNSET_STX_PROP_VALUE (syntax_property stx KEY1)))
 
 
 (lets ((stx (syntax_track_origin (quote_syntax new)

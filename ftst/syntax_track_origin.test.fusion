@@ -4,6 +4,7 @@
   "/fusion/eval"
   "/fusion/experimental/check"
   "/fusion/experimental/syntax"
+  "/racket"
   )
 
 
@@ -14,6 +15,5 @@
 (expect_argument_exn
   (syntax_track_origin "sym" (quote_syntax sym) (quote_syntax sym)))
 
-(define UNSET (void))
 
 (load "ftst/syntax_track_origin.rkt.fusion")

@@ -71,6 +71,11 @@ the `origin` identifier.
     (java_new "com.amazon.fusion.FusionSyntax$OriginProc"))
 
 
+  (provide syntax_is_original)
+  (define syntax_is_original
+    (java_new "com.amazon.fusion.FusionSyntax$IsOriginalProc"))
+
+
   // '_q' suffix intended to denote that the car is quoted by the syntax form.
   // Otherwise this would be a procedure.
   (define_syntax syntax_cons_q

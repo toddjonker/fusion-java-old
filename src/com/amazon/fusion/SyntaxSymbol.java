@@ -53,6 +53,14 @@ final class SyntaxSymbol
     }
 
 
+
+    static SyntaxSymbol makeOriginal(Evaluator      eval,
+                                     SourceLocation loc,
+                                     BaseSymbol     symbol)
+    {
+        return new SyntaxSymbol(eval, null, loc, ORIGINAL_STX_PROPS, symbol);
+    }
+
     static SyntaxSymbol make(Evaluator      eval,
                              SourceLocation loc,
                              BaseSymbol     symbol)
@@ -187,6 +195,13 @@ final class SyntaxSymbol
     {
         if (myWraps == null) return Collections.emptySet();
         return myWraps.computeMarks();
+    }
+
+
+    @Override
+    boolean hasMarks(Evaluator eval)
+    {
+        return (myWraps == null ? false : myWraps.hasMarks(eval));
     }
 
 

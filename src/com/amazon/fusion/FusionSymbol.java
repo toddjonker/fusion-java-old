@@ -53,24 +53,33 @@ final class FusionSymbol
             return falseBool(eval);
         }
 
-        @Override
-        SyntaxValue wrapAsSyntax(Evaluator eval, SourceLocation loc)
+        private boolean isKeyword()
         {
             String value = stringValue();
-            if (value != null &&
-                value.startsWith("_") &&
-                value.endsWith("_"))
+            return (value != null
+                    && value.startsWith("_")
+                    && value.endsWith("_"));
+        }
+
+        @Override
+        SyntaxValue makeOriginalSyntax(Evaluator eval, SourceLocation loc)
+        {
+            if (isKeyword())
             {
-                return SyntaxKeyword.make(eval, loc, this);
+                return SyntaxKeyword.makeOriginal(eval, loc, this);
             }
-            return SyntaxSymbol.make(eval, loc, this);
+            return SyntaxSymbol.makeOriginal(eval, loc, this);
         }
 
         @Override
         SyntaxValue datumToSyntaxMaybe(Evaluator eval, SourceLocation loc)
             throws FusionException
         {
-            return wrapAsSyntax(eval, loc);
+            if (isKeyword())
+            {
+                return SyntaxKeyword.make(eval, loc, this);
+            }
+            return SyntaxSymbol.make(eval, loc, this);
         }
     }
 
@@ -109,7 +118,15 @@ final class FusionSymbol
         }
 
         @Override
-        SyntaxValue wrapAsSyntax(Evaluator eval, SourceLocation loc)
+        SyntaxValue makeOriginalSyntax(Evaluator eval, SourceLocation loc)
+        {
+            // No need to check for keywords.
+            return SyntaxSymbol.makeOriginal(eval, loc, this);
+        }
+
+        @Override
+        SyntaxValue datumToSyntaxMaybe(Evaluator eval, SourceLocation loc)
+            throws FusionException
         {
             // No need to check for keywords.
             return SyntaxSymbol.make(eval, loc, this);

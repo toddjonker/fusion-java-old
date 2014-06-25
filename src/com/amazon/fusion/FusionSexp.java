@@ -389,9 +389,9 @@ final class FusionSexp
         }
 
         @Override
-        SyntaxValue wrapAsSyntax(Evaluator eval, SourceLocation loc)
+        SyntaxValue makeOriginalSyntax(Evaluator eval, SourceLocation loc)
         {
-            return SyntaxSexp.make(eval, loc, this);
+            return SyntaxSexp.makeOriginal(eval, loc, this);
         }
 
         @Override

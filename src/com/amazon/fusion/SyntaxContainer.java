@@ -84,4 +84,11 @@ abstract class SyntaxContainer
         }
         return copyReplacingWraps(newWraps);
     }
+
+
+    @Override
+    boolean hasMarks(Evaluator eval)
+    {
+        return (myWraps == null ? false : myWraps.hasMarks(eval));
+    }
 }

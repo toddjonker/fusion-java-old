@@ -22,6 +22,14 @@ final class SyntaxKeyword
     }
 
 
+    static SyntaxKeyword makeOriginal(Evaluator      eval,
+                                      SourceLocation loc,
+                                      BaseSymbol     symbol)
+    {
+        return new SyntaxKeyword(loc, ORIGINAL_STX_PROPS, symbol);
+    }
+
+
     static SyntaxKeyword make(Evaluator      eval,
                               SourceLocation loc,
                               BaseSymbol     symbol)

@@ -91,11 +91,6 @@ public final class FusionString
             return SimpleSyntaxValue.makeSyntax(eval, loc, this);
         }
 
-        @Override
-        SyntaxValue wrapAsSyntax(Evaluator eval, SourceLocation loc)
-        {
-            return SimpleSyntaxValue.makeSyntax(eval, loc, this);
-        }
 
         @Override
         public boolean equals(Object o)

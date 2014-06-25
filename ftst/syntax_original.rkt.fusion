@@ -1,0 +1,57 @@
+"Copyright (c) 2014 Amazon.com, Inc.  All rights reserved."
+
+
+(define SYM0 (quote_syntax sym0))
+
+(define KEY1 1)
+(define VAL1 21106)
+(define SYM1 (syntax_property (quote_syntax sym1) KEY1 VAL1))
+
+
+(check_true (syntax_is_original (quote_syntax ())))
+(check_true (syntax_is_original SYM1))
+(check_true (syntax_is_original (quote_syntax 23)))
+
+(lets ((stx (expand (quote_syntax (if1head3))))
+       (expr (syntax_unwrap stx)))
+  (when RACKET
+    "TODO FUSION-329"
+    (check_false (syntax_is_original stx)))
+  (check_false (syntax_is_original (head expr)))                      "if"
+  (check_true  (syntax_is_original (head (tail expr))))               "1"
+  (check_false (syntax_is_original (head (tail (tail expr)))))        "head"
+  (check_true  (syntax_is_original (head (tail (tail (tail expr)))))) "3"
+  )
+
+
+
+(let ((stx (syntax_track_origin (datum_to_syntax
+                                  (quote not_orig)
+                                  (quote_syntax here))
+                                (quote_syntax orig)
+                                SYM0)))
+  (check === (quote not_orig) (syntax_unwrap stx))
+  (check_false (syntax_is_original stx)))
+
+
+(let ((stx (syntax_track_origin (quote_syntax orig)
+                                (datum_to_syntax
+                                  (quote not_orig)
+                                  (quote_syntax here))
+                                SYM0)))
+  (check === (quote orig) (syntax_unwrap stx))
+  (check_true (syntax_is_original stx)))
+
+
+(let ((stx (syntax_track_origin (quote_syntax orig)
+                                (quote_syntax orig2)
+                                SYM0)))
+  (check === (quote orig) (syntax_unwrap stx))
+  (check_true (syntax_is_original stx)))
+
+
+(let ((stx (syntax_track_origin (quote_syntax orig)
+                                SYM1
+                                SYM0)))
+  (check === (quote orig) (syntax_unwrap stx))
+  (check_true (syntax_is_original stx)))

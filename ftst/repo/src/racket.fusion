@@ -1,0 +1,11 @@
+// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+
+(module racket "/fusion/base"
+
+  (require "/fusion/experimental/defines")
+
+  (defpub RACKET false)
+
+  (defpub UNSET_STX_PROP_VALUE (void))
+
+)

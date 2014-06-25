@@ -96,6 +96,14 @@ final class SyntaxWraps
     }
 
 
+    final boolean hasMarks(Evaluator eval)
+    {
+        // We have to walk all wraps to match up cancelling pairs of marks.
+        Set<Integer> marks = computeMarks();
+        return ! marks.isEmpty();
+    }
+
+
     /**
      * @return null is equivalent to a {@link FreeBinding}.
      */

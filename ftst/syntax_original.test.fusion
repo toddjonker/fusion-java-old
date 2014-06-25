@@ -1,0 +1,16 @@
+// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/fusion/eval"
+  "/fusion/experimental/check"
+  "/fusion/experimental/syntax"
+  "/racket"
+  )
+
+
+(define_syntax if1head3
+  (lambda (stx)
+    (quote_syntax (if 1 head 3))))
+
+
+(load "ftst/syntax_original.rkt.fusion")
