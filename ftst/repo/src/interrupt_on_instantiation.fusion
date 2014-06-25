@@ -1,0 +1,9 @@
+// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+
+(module interrupt "/fusion/base"
+  (require "/interrupt")
+
+  (ready_for_interrupt)
+
+  (let loop [] (loop))
+)
