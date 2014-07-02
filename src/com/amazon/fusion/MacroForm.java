@@ -32,7 +32,14 @@ final class MacroForm
 
         SyntaxValue expanded = doExpandOnce(expander, stx);
 
-        return expanded.addOrRemoveMark(mark);
+        expanded = expanded.addOrRemoveMark(mark);
+
+        // http://docs.racket-lang.org/reference/stxprops.html
+        Evaluator eval = expander.getEvaluator();
+        SyntaxSymbol origin = (SyntaxSymbol) stx.get(eval, 0);
+        expanded = expanded.trackOrigin(eval, stx, origin);
+
+        return expanded;
     }
 
     @Override

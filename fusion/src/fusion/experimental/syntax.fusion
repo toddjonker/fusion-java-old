@@ -31,7 +31,7 @@ There is **NO SUPPORT** for this module.
     quasisyntax quote_syntax
     syntax_append syntax_column syntax_cons_q syntax_get syntax_line
     syntax_property syntax_size syntax_subseq
-    syntax_to_datum syntax_unwrap unsyntax wrong_syntax)
+    syntax_to_datum syntax_track_origin syntax_unwrap unsyntax wrong_syntax)
 
 
   (define datum_to_syntax (java_new "com.amazon.fusion.DatumToSyntaxProc"))
@@ -52,6 +52,23 @@ There is **NO SUPPORT** for this module.
 
   (define syntax_property
     (java_new "com.amazon.fusion.FusionSyntax$PropertyProc"))
+
+
+  (provide syntax_track_origin)
+  (define syntax_track_origin
+    '''
+    (syntax_track_origin new_stx orig_stx origin)
+
+Copies properties from `orig_stx` to `new_stx` and extending origin data with
+the `origin` identifier.
+    '''
+    (java_new "com.amazon.fusion.FusionSyntax$TrackOriginProc"))
+
+
+  // TODO WORKAROUND FUSION-47 Should use interned symbol and remove this.
+  (provide syntax_origin)
+  (define syntax_origin
+    (java_new "com.amazon.fusion.FusionSyntax$OriginProc"))
 
 
   // '_q' suffix intended to denote that the car is quoted by the syntax form.

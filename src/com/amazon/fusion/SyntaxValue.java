@@ -2,6 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionCompare.isSame;
+import static com.amazon.fusion.FusionSexp.emptySexp;
+import static com.amazon.fusion.FusionSexp.pair;
 import com.amazon.ion.IonValue;
 import java.util.Arrays;
 
@@ -15,6 +18,10 @@ abstract class SyntaxValue
 {
     /** A zero-length array. */
     final static SyntaxValue[] EMPTY_ARRAY = new SyntaxValue[0];
+
+    // TODO WORKAROUND FUSION-47 Should use interned symbol
+    // We use 'new String' to ensure uniqueness of the object identity.
+    static final Object STX_PROPERTY_ORIGIN = new String("origin");
 
     private final SourceLocation mySrcLoc;
 
@@ -65,7 +72,7 @@ abstract class SyntaxValue
     {
         for (int i = 0; i < myProperties.length; i += 2)
         {
-            if (FusionCompare.isSame(eval, key, myProperties[i]).isTrue())
+            if (isSame(eval, key, myProperties[i]).isTrue())
             {
                 return myProperties[i + 1];
             }
@@ -84,7 +91,7 @@ abstract class SyntaxValue
         int length = myProperties.length;
         for (int i = 0; i < length; i += 2)
         {
-            if (FusionCompare.isSame(eval, key, myProperties[i]).isTrue())
+            if (isSame(eval, key, myProperties[i]).isTrue())
             {
                 Object[] newProperties = Arrays.copyOf(myProperties, length);
                 newProperties[i + 1] = value;
@@ -96,6 +103,96 @@ abstract class SyntaxValue
         newProperties[length    ] = key;
         newProperties[length + 1] = value;
         return copyReplacingProperties(newProperties);
+    }
+
+
+    final SyntaxValue trackOrigin(Evaluator    eval,
+                                  SyntaxValue  origStx,
+                                  SyntaxSymbol origin)
+        throws FusionException
+    {
+        Object[] oProps = origStx.myProperties;
+
+        // Reserve space for origin, in case either list has it yet.
+        int maxLen = oProps.length + myProperties.length + 2;
+        Object[] merged = new Object[maxLen];
+        int m = 0;
+
+        for (int i = 0; i < myProperties.length; i += 2)
+        {
+            Object k = myProperties[i];
+            Object v = myProperties[i + 1];
+
+            for (int j = 0; j < oProps.length; j += 2)
+            {
+                if (isSame(eval, k, oProps[j]).isTrue())
+                {
+                    Object o = oProps[j + 1];
+                    if (k == STX_PROPERTY_ORIGIN)
+                    {
+                        assert origin != null;
+                        o = pair(eval, origin, o);
+                        origin = null;
+                    }
+                    v = pair(eval, v, o);
+                    break;
+                }
+            }
+
+            if (origin != null && k == STX_PROPERTY_ORIGIN)
+            {
+                Object o = emptySexp(eval);
+                o = pair(eval, origin, o);
+                v = pair(eval, v, o);
+                origin = null;
+            }
+
+            merged[m++] = k;
+            merged[m++] = v;
+        }
+
+        // Copy what remains from the original properties.
+        pass2:
+        for (int i = 0; i < oProps.length; i += 2)
+        {
+            Object k = oProps[i];
+            Object v = oProps[i + 1];
+
+            for (int j = 0; j < myProperties.length; j += 2)
+            {
+                if (isSame(eval, k, myProperties[j]).isTrue())
+                {
+                    continue pass2;
+                }
+            }
+
+            if (origin != null && k == STX_PROPERTY_ORIGIN)
+            {
+                v = pair(eval, origin, v);
+                origin = null;
+            }
+
+            merged[m++] = k;
+            merged[m++] = v;
+        }
+
+        // We haven't found origin in either list, so add it.
+        if (origin != null)
+        {
+            Object v = emptySexp(eval);
+            v = pair(eval, origin, v);
+
+            merged[m++] = STX_PROPERTY_ORIGIN;
+            merged[m++] = v;
+        }
+
+        // Remove empty space at the end.
+        if (merged.length != m)
+        {
+            merged = Arrays.copyOf(merged, m);
+        }
+
+        return copyReplacingProperties(merged);
     }
 
 

@@ -1,0 +1,19 @@
+// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/fusion/eval"
+  "/fusion/experimental/check"
+  "/fusion/experimental/syntax"
+  )
+
+
+(expect_arity_exn (syntax_track_origin))
+(expect_arity_exn (syntax_track_origin (quote_syntax sym)))
+(expect_arity_exn (syntax_track_origin (quote_syntax sym) (quote_syntax sym)))
+
+(expect_argument_exn
+  (syntax_track_origin "sym" (quote_syntax sym) (quote_syntax sym)))
+
+(define UNSET (void))
+
+(load "ftst/syntax_track_origin.rkt.fusion")

@@ -1,0 +1,63 @@
+"Copyright (c) 2014 Amazon.com, Inc.  All rights reserved."
+
+
+(define SYM0 (quote_syntax sym0))
+
+(define KEY1 1)
+(define VAL1 21106)
+(define SYM1 (syntax_property (quote_syntax sym1) KEY1 VAL1))
+
+(define KEY2 2)
+(define VAL2 211062)
+(define SYM2 (syntax_property (syntax_property (quote_syntax sym2) KEY1 VAL2)
+                              KEY2 VAL2))
+
+
+(lets ((stx (syntax_track_origin (quote_syntax new)
+                                 (quote_syntax orig)
+                                 SYM0))
+       (o (syntax_origin stx)))
+  (check === (quote new) (syntax_unwrap stx))
+  (check === 1 (size o))
+  (check_same SYM0 (head o)))
+
+(lets ((stx (syntax_track_origin (quote_syntax new)
+                                 SYM0
+                                 SYM1))
+       (o (syntax_origin stx)))
+  (check === (quote new) (syntax_unwrap stx))
+  (check === 1 (size o))
+  (check_same SYM1 (head o))
+  (check_same UNSET (syntax_property stx KEY1)))
+
+
+(lets ((stx (syntax_track_origin (quote_syntax new)
+                                 SYM1
+                                 SYM0))
+       (o (syntax_origin stx)))
+  (check === (quote new) (syntax_unwrap stx))
+  (check === 1 (size o))
+  (check_same SYM0 (head o))
+  (check === VAL1 (syntax_property stx KEY1)))
+
+
+(lets ((stx (syntax_track_origin SYM1
+                                 SYM1
+                                 SYM0))
+       (o (syntax_origin stx)))
+  (check === (quote sym1) (syntax_unwrap stx))
+  (check === 1 (size o))
+  (check_same SYM0 (head o))
+  (check === (pair VAL1 VAL1) (syntax_property stx KEY1)))
+
+
+(lets ((stx (syntax_track_origin SYM2
+                                 (syntax_track_origin SYM1 SYM0 SYM1)
+                                 SYM0))
+       (o (syntax_origin stx)))
+  (check === (quote sym2) (syntax_unwrap stx))
+  (check === 2 (size o))
+  (check_same SYM0 (head o))
+  (check_same SYM1 (head (tail o)))
+  (check === (pair VAL2 VAL1) (syntax_property stx KEY1))
+  (check === VAL2 (syntax_property stx KEY2)))

@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.SyntaxValue.STX_PROPERTY_ORIGIN;
 
 
 /**
@@ -61,6 +62,26 @@ final class FusionSyntax
     }
 
 
+    /**
+     * @return void if the origin property isn't set.
+     */
+    static Object syntaxOrigin(Evaluator eval, SyntaxValue stx)
+        throws FusionException
+    {
+        return stx.findProperty(eval, STX_PROPERTY_ORIGIN);
+    }
+
+
+    static SyntaxValue syntaxTrackOrigin(Evaluator eval,
+                                         SyntaxValue newStx,
+                                         SyntaxValue origStx,
+                                         SyntaxSymbol origin)
+        throws FusionException
+    {
+        return newStx.trackOrigin(eval, origStx, origin);
+    }
+
+
     //========================================================================
     // Procedure Helpers
 
@@ -79,6 +100,26 @@ final class FusionSyntax
         if (arg instanceof SyntaxValue)
         {
             return (SyntaxValue) arg;
+        }
+
+        throw who.argFailure(expectation, argNum, args);
+    }
+
+
+    /**
+     * @param expectation must not be null.
+     */
+    static SyntaxSymbol checkIdentifierArg(Evaluator eval,
+                                           Procedure who,
+                                           String    expectation,
+                                           int       argNum,
+                                           Object... args)
+        throws ArgumentException
+    {
+        Object arg = args[argNum];
+        if (arg instanceof SyntaxSymbol)
+        {
+            return (SyntaxSymbol) arg;
         }
 
         throw who.argFailure(expectation, argNum, args);
@@ -193,6 +234,43 @@ final class FusionSyntax
             {
                 return stx.copyWithProperty(eval, args[1], args[2]);
             }
+        }
+    }
+
+
+    static final class TrackOriginProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(3, args);
+
+            SyntaxValue newStx =
+                FusionSyntax.checkSyntaxArg(eval, this, "syntax object", 0, args);
+            SyntaxValue origStx =
+                FusionSyntax.checkSyntaxArg(eval, this, "syntax object", 1, args);
+            SyntaxSymbol origin =
+                checkIdentifierArg(eval, this, "syntax identifier", 2, args);
+
+            return newStx.trackOrigin(eval, origStx, origin);
+        }
+    }
+
+
+    static final class OriginProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args) throws FusionException
+        {
+            checkArityExact(1, args);
+
+            SyntaxValue stx =
+                FusionSyntax.checkSyntaxArg(eval, this, "syntax object", 0, args);
+
+            return stx.findProperty(eval, STX_PROPERTY_ORIGIN);
         }
     }
 }
