@@ -10,11 +10,13 @@ final class Syntax
 {
     private Syntax() {}
 
+    @Deprecated
     static boolean isSyntax(Evaluator eval, Object value)
     {
         return (value instanceof SyntaxValue);
     }
 
+    @Deprecated
     static boolean isIdentifier(Evaluator eval, Object value)
     {
         return (value instanceof SyntaxSymbol);

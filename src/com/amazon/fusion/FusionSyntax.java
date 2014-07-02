@@ -5,14 +5,59 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionBool.makeBool;
 
 
+/**
+ * Utilities for working with syntax objects.
+ */
 final class FusionSyntax
 {
     private FusionSyntax() {}
 
 
+    /**
+     * Determines whether a Fusion value is a syntax object.
+     */
+    static boolean isSyntax(Evaluator eval, Object value)
+    {
+        return (value instanceof SyntaxValue);
+    }
+
+
+    /**
+     * Determines whether a Fusion value is an identifier; that is, a syntax
+     * object wrapping a symbol.
+     */
+    static boolean isIdentifier(Evaluator eval, Object value)
+    {
+        return (value instanceof SyntaxSymbol);
+    }
+
+
     static SourceLocation unsafeSyntaxLocation(Evaluator eval, Object stx)
     {
         return ((SyntaxValue) stx).getLocation();
+    }
+
+
+    /**
+     * @param stx must be a syntax object.
+     * @param key must not be null.
+     * @return void if no value is associated with the key.
+     */
+    static Object unsafeSyntaxGetProperty(Evaluator eval,
+                                          Object    stx,
+                                          Object    key)
+        throws FusionException
+    {
+        return ((SyntaxValue) stx).findProperty(eval, key);
+    }
+
+
+    static boolean unsafeFreeIdentifierEqual(Evaluator eval,
+                                             Object    id1,
+                                             Object    id2)
+        throws FusionException
+    {
+        return ((SyntaxSymbol) id1).freeIdentifierEqual((SyntaxSymbol) id2);
     }
 
 
@@ -58,7 +103,7 @@ final class FusionSyntax
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
         {
-            boolean result = Syntax.isIdentifier(eval, arg);
+            boolean result = isIdentifier(eval, arg);
             return makeBool(eval, result);
         }
     }
@@ -78,7 +123,7 @@ final class FusionSyntax
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
         {
-            boolean result = Syntax.isSyntax(eval, arg);
+            boolean result = isSyntax(eval, arg);
             return makeBool(eval, result);
         }
     }

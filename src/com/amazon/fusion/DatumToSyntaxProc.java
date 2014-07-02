@@ -2,9 +2,10 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSyntax.isIdentifier;
+import static com.amazon.fusion.FusionSyntax.isSyntax;
 import static com.amazon.fusion.FusionSyntax.unsafeSyntaxLocation;
 import static com.amazon.fusion.Syntax.datumToSyntax;
-import static com.amazon.fusion.Syntax.isIdentifier;
 
 
 class DatumToSyntaxProc
@@ -44,7 +45,7 @@ class DatumToSyntaxProc
 
             if (args.length > 2)
             {
-                if (! Syntax.isSyntax(eval, args[2]))
+                if (! isSyntax(eval, args[2]))
                 {
                     throw argFailure("syntax object", 2, args);
                 }

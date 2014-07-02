@@ -56,6 +56,10 @@ abstract class SyntaxValue
         return myProperties;
     }
 
+    /**
+     * @param key must not be null.
+     * @return void if no value is associated with the key.
+     */
     Object findProperty(Evaluator eval, Object key)
         throws FusionException
     {

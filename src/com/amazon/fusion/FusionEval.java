@@ -2,9 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSyntax.isSyntax;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.Syntax.datumToSyntax;
-import static com.amazon.fusion.Syntax.isSyntax;
 import java.util.LinkedList;
 
 
