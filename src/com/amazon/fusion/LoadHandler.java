@@ -11,6 +11,7 @@ import com.amazon.ion.IonException;
 import com.amazon.ion.IonReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -50,6 +51,8 @@ final class LoadHandler
         File file = resolvePath(eval, myCurrentDirectory, path);
         File parent = file.getParentFile();
 
+        // TODO this shouldn't be done in the standard load handler.
+        // It should done in `load` (etc) before calling here.
         eval = eval.markedContinuation(myCurrentLoadRelativeDirectory,
                                        makeString(eval, parent.getAbsolutePath()));
 
@@ -76,6 +79,11 @@ final class LoadHandler
             {
                 in.close();
             }
+        }
+        catch (FileNotFoundException e)
+        {
+            String message = "Error loading " + e.getMessage();
+            throw new FusionException(message, e);
         }
         catch (IOException | IonException e)
         {
