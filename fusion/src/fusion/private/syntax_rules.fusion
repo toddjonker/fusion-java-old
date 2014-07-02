@@ -1,0 +1,168 @@
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+
+(module syntax_rules "/fusion"
+  (require "/fusion/experimental/syntax" "/fusion/list")
+  
+  (define (check_syntax_rule_validity rule_stx literals)
+    (lets [(pattern_pieces_stx (syntax_get rule_stx 0)),
+           (pattern_pieces (syntax_to_datum pattern_pieces_stx))]
+      (when
+        (< (size pattern_pieces) 2)
+        (wrong_syntax pattern_pieces_stx "Expecting at least two pieces in pattern"))
+      (when
+        (any
+          (lambda (pattern_piece)
+            (not
+              (is_symbol pattern_piece))) 
+          pattern_pieces)
+        (wrong_syntax pattern_pieces_stx "Expecting all pattern pieces to be symbols"))
+      (when
+        (let [(non_literals
+                (choose
+                  (lambda (pattern_piece)
+                    (not
+                      (any (curry_left = pattern_piece) literals)))
+                        pattern_pieces))]
+          (any
+            (lambda (x)
+              (>=
+                (size
+                  (choose
+                    (lambda (y)
+                      (= x y))
+                    non_literals))
+                  2))
+              non_literals))
+        (wrong_syntax pattern_pieces_stx "Expecting no duplicates among non-literals in the pattern but found some"))
+      (when
+        (find
+          (curry_left = (quote ...))
+          (subseq pattern_pieces
+            0
+            (-
+              (size pattern_pieces)
+              1)))
+        (wrong_syntax pattern_pieces_stx "Ellipsis currently only supported in final position"))))
+
+  (define (matches_syntax_rule_pattern literals rule_stx candidate_stx)
+    (lets [(pattern_stx    (syntax_get rule_stx 0)),
+           (pattern_name   (syntax_to_datum (syntax_get pattern_stx 0))),
+           (candidate_name (syntax_to_datum (syntax_get candidate_stx 0))),
+           (pattern_args   (syntax_to_datum (syntax_subseq pattern_stx 1))),
+           (candidate_args (syntax_to_datum (syntax_subseq candidate_stx 1)))]
+      (and
+        // Same name check
+        (= pattern_name candidate_name)
+        // Same length-ish check
+        (if
+          (=
+            (quote ...)
+            (last pattern_args))
+          (>=
+            (size candidate_args)
+            (- (size pattern_args) 1))
+          (=
+            (size candidate_args)
+            (size pattern_args)))
+        // Alignment on literals check
+        (every is_truthy
+          (for_list [(pattern_arg pattern_args), (candidate_arg candidate_args)]
+            (or
+              (= (quote ...) pattern_arg)
+              (not (any (curry_left = pattern_arg) literals))
+              (and
+                (is_symbol candidate_arg)
+                (= candidate_arg pattern_arg))))))))
+
+  (define (symbol_to_syntax_sequence_substitution_map literals pattern_args pre_substitution_args_stx)
+    (lets [(pattern_args_ends_in_ellipsis
+             (=
+               (last pattern_args)
+               (quote ...))),
+           (pattern_args_without_ellipsis
+             (if
+               pattern_args_ends_in_ellipsis
+               (subseq
+                 pattern_args
+                 0
+                 (-
+                   (size pattern_args)
+                   1))
+               pattern_args)),
+           (potential_kleene_star_substitution_syntax_pair
+             (if
+               pattern_args_ends_in_ellipsis
+               [
+                 (quote ...),
+                 (syntax_subseq
+                   pre_substitution_args_stx
+                  (-
+                    (size pattern_args)
+                    1))]
+               []))]
+      // TODO: struct_from_pairs_collection helper
+      (apply
+        struct
+        (apply
+          append_m
+          (append_m // Double append_m can cause double take: inner one unions 2 lists of pairs, outer one "flattens" those pairs
+            (for_list [(pattern_arg pattern_args_without_ellipsis),
+                       (pre_sub_syntax_arg_stx (syntax_unwrap pre_substitution_args_stx))]
+              (if
+                (any (curry_left = pattern_arg) literals)
+                []
+                [
+                  pattern_arg,
+                  (quasisyntax
+                    [ // As syntax list vs. sexp doesn't matter since it'll be a 2nd arg in syntax_append (1st arg type retained)
+                      (unsyntax
+                        (let [(pre_sub_syntax_arg (syntax_unwrap pre_sub_syntax_arg_stx))]
+                          (if
+                            (and
+                              (any
+                                (curry_left = (quote convert_symbols_to_strings))
+                                (type_annotations
+                                  pattern_arg))
+                              (is_symbol pre_sub_syntax_arg)
+                              (not
+                                (or
+                                  (any
+                                    (curry_left = pre_sub_syntax_arg) 
+                                    literals)
+                                  (any
+                                    (curry_left = pre_sub_syntax_arg) 
+                                    pattern_args))))
+                            (datum_to_syntax
+                              (symbol_to_string pre_sub_syntax_arg))
+                            pre_sub_syntax_arg_stx)))])]))
+            [potential_kleene_star_substitution_syntax_pair])))))
+
+  (define (deep_substitute_syntax_sequence_substitutions template_stx substitution_map)
+    (let [(unwrapped_template_stx (syntax_unwrap template_stx))]
+      (when (not (is_sequence unwrapped_template_stx))
+        (wrong_syntax template_stx "Expected unwrapped template_stx to be a sequence"))
+      (fold_left
+        (lambda (accumulated_stx current_stx_piece)
+          (syntax_append
+            accumulated_stx
+            (let [(unwrapped_current_stx_piece (syntax_unwrap current_stx_piece))]
+              (if
+                (and
+                  (is_symbol unwrapped_current_stx_piece)
+                  (has_key substitution_map unwrapped_current_stx_piece))
+                (element substitution_map unwrapped_current_stx_piece)
+                (quasisyntax
+                  [ // Note: syntax list vs. syntax sexp doesn't matter  here -- retains initial syntax sequence type
+                    (unsyntax
+                      (if
+                        (is_sequence unwrapped_current_stx_piece)
+                        (deep_substitute_syntax_sequence_substitutions current_stx_piece substitution_map)
+                        current_stx_piece))])))))
+        (if
+          (is_sexp unwrapped_template_stx)
+          (quote_syntax ())
+          (quote_syntax []))
+        unwrapped_template_stx)))
+  
+  (provide (all_defined_out))
+)
