@@ -24,14 +24,13 @@
 (define (datum_to_syntax datum (ctx #f) (loc #f))
   (datum->syntax ctx datum loc))
 
-(define syntax_is_original syntax-original?)
+(define-syntax define_syntax  (make-rename-transformer #'define-syntax))
+(define-syntax quote_syntax   (make-rename-transformer #'quote-syntax))
 
-(define-syntax define_syntax       (make-rename-transformer #'define-syntax))
-(define-syntax syntax_unwrap       (make-rename-transformer #'syntax-e))
-(define-syntax quote_syntax        (make-rename-transformer #'quote-syntax))
-(define-syntax syntax_property     (make-rename-transformer #'syntax-property))
-
-(define-syntax syntax_track_origin (make-rename-transformer #'syntax-track-origin))
+(define syntax_is_original   syntax-original?)
+(define syntax_property      syntax-property)
+(define syntax_track_origin  syntax-track-origin)
+(define syntax_unwrap        syntax-e)
 
 ;; TODO WORKAROUND FUSION-47 Should use interned symbol and remove this.
 (define (syntax_origin stx)
