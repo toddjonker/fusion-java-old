@@ -5,7 +5,9 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
+import static com.amazon.fusion.FusionNumber.isFloat;
 import static com.amazon.fusion.FusionNumber.isIntOrDecimal;
+import static com.amazon.fusion.FusionNumber.unsafeFloatToDouble;
 import static com.amazon.fusion.FusionNumber.unsafeNumberToBigDecimal;
 import static com.amazon.fusion.FusionString.isString;
 import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
@@ -93,6 +95,9 @@ final class FusionCompare
                                      Object[]      args)
             throws FusionException;
 
+        abstract boolean compare(double left, double right)
+            throws FusionException;
+
 
         boolean compareStrings(String left, String right, Object[] args)
             throws FusionException
@@ -118,6 +123,19 @@ final class FusionCompare
                 if (left != null && right != null)
                 {
                     boolean r = compare(left, right, args);
+                    return makeBool(eval, r);
+                }
+            }
+
+            if (isFloat(eval, arg0) && isFloat(eval, arg1))
+            {
+                if (isAnyNull(eval, arg0).isFalse() &&
+                    isAnyNull(eval, arg1).isFalse())
+                {
+                    double left  = unsafeFloatToDouble(eval, arg0);
+                    double right = unsafeFloatToDouble(eval, arg1);
+
+                    boolean r = compare(left, right);
                     return makeBool(eval, r);
                 }
             }
@@ -173,6 +191,13 @@ final class FusionCompare
             int r = left.compareTo(right);
             return (r < 0);
         }
+
+        @Override
+        boolean compare(double left, double right)
+            throws FusionException
+        {
+            return (left < right);
+        }
     }
 
 
@@ -185,6 +210,13 @@ final class FusionCompare
         {
             int r = left.compareTo(right);
             return (r <= 0);
+        }
+
+        @Override
+        boolean compare(double left, double right)
+            throws FusionException
+        {
+            return (left <= right);
         }
     }
 
@@ -199,6 +231,13 @@ final class FusionCompare
             int r = left.compareTo(right);
             return (r > 0);
         }
+
+        @Override
+        boolean compare(double left, double right)
+            throws FusionException
+        {
+            return (left > right);
+        }
     }
 
 
@@ -211,6 +250,13 @@ final class FusionCompare
         {
             int r = left.compareTo(right);
             return (r >= 0);
+        }
+
+        @Override
+        boolean compare(double left, double right)
+            throws FusionException
+        {
+            return (left >= right);
         }
     }
 

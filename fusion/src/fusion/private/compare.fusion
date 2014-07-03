@@ -11,8 +11,9 @@
     '''
     (< a b)
 Returns true if `a` is less than `b`.  Int and decimal values may be mixed and
-are compared without regard to precision.  Timestamps are compared to each
-other without regard to precision.  Annotations are ignored.
+are compared without regard to precision.  Floats are compared to each other
+without regard to precision.  Timestamps are compared to each other without
+regard to precision.  Annotations are ignored.
     '''
     (java_new "com.amazon.fusion.FusionCompare$LessThanProc"))
 
@@ -22,8 +23,9 @@ other without regard to precision.  Annotations are ignored.
     '''
     (> a b)
 Returns true if `a` is greater than `b`.  Int and decimal values may be mixed
-and are compared without regard to precision.  Timestamps are compared to each
-other without regard to precision.  Annotations are ignored.
+and are compared without regard to precision.  Floats are compared to each
+other without regard to precision.  Timestamps are compared to each other
+without regard to precision.  Annotations are ignored.
     '''
     (java_new "com.amazon.fusion.FusionCompare$GreaterThanProc"))
 
@@ -33,8 +35,9 @@ other without regard to precision.  Annotations are ignored.
     '''
     (<= a b)
 Returns true if `a` is less than or equal to `b`.  Int and decimal values may
-be mixed and are compared without regard to precision.  Timestamps are compared
-to each other without regard to precision.  Annotations are ignored.
+be mixed and are compared without regard to precision.  Floats are compared to
+each other without regard to precision.  Timestamps are compared to each other
+without regard to precision.  Annotations are ignored.
     '''
     (java_new "com.amazon.fusion.FusionCompare$LessThanOrEqualToProc"))
 
@@ -44,8 +47,9 @@ to each other without regard to precision.  Annotations are ignored.
     '''
     (>= a b)
 Returns true if `a` is greater than or equal to `b`.  Int and decimal values
-may be mixed and are compared without regard to precision.  Timestamps are
-compared to each other without regard to precision.  Annotations are ignored.
+may be mixed and are compared without regard to precision.  Floats are
+compared to each other without regard to precision.  Timestamps are compared
+to each other without regard to precision.  Annotations are ignored.
     '''
     (java_new "com.amazon.fusion.FusionCompare$GreaterThanOrEqualToProc"))
 

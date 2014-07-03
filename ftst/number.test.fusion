@@ -31,20 +31,46 @@
 //============================================================================
 // comparisons
 
-(check_true (< 1   2  ))
-(check_true (< 1   2.0))
-(check_true (< 1.0 2  ))
-(check_true (< 1.0 2.0))
+// Equality is also tested in equality.test.fusion
 
-(check_false (< 2   1  ))
-(check_false (< 2   1.0))
-(check_false (< 2.0 1  ))
-(check_false (< 2.0 1.0))
+(define_check (check_order small large)
+  (check_true  (<  small large))
+  (check_true  (<= small large))
+  (check_false (=  small large))
+  (check_false (>= small large))
+  (check_false (>  small large))
 
-(check_false (< 1   1  ))
-(check_false (< 1   1.0))
-(check_false (< 1.0 1  ))
-(check_false (< 1.0 1.0))
+  (check_false (<  large small))
+  (check_false (<= large small))
+  (check_false (=  large small))
+  (check_true  (>= large small))
+  (check_true  (>  large small)))
+
+(define_check (check_equiv a b)
+  (check_false (<  a b))
+  (check_true  (<= a b))
+  (check_true  (=  a b))
+  (check_true  (>= a b))
+  (check_false (>  a b))
+
+  (check_false (<  b a))
+  (check_true  (<= b a))
+  (check_true  (=  b a))
+  (check_true  (>= b a))
+  (check_false (>  b a)))
+
+
+(check_order 1   2  )
+(check_order 1   2.0)
+(check_order 1.0 2  )
+(check_order 1.0 2.0)
+(check_order 1e0 2e0)
+
+(check_equiv 1   1  )
+(check_equiv 1   1.0)
+(check_equiv 1.0 1.0)
+(check_equiv 1e0 1e0)
+(check_equiv 0.12e1 1200e-3)
 
 
 //============================================================================
