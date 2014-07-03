@@ -10,10 +10,15 @@
   (define <
     '''
     (< a b)
-Returns true if `a` is less than `b`.  Int and decimal values may be mixed and
-are compared without regard to precision.  Floats are compared to each other
-without regard to precision.  Timestamps are compared to each other without
-regard to precision.  Annotations are ignored.
+Returns true if `a` is less than `b`.
+Numbers are compared without regard to precision or negative zeros; if the
+values have different concrete types they are both coerced to decimal.
+Timestamps are compared to each other without regard to precision or local
+offset.  Annotations are ignored.
+
+**Warning:** The behavior of this procedure is undefined for values `+inf`,
+`-inf`, and `nan`.
+See [FUSION-249](issue:FUSION-249).
     '''
     (java_new "com.amazon.fusion.FusionCompare$LessThanProc"))
 
@@ -22,10 +27,15 @@ regard to precision.  Annotations are ignored.
   (define >
     '''
     (> a b)
-Returns true if `a` is greater than `b`.  Int and decimal values may be mixed
-and are compared without regard to precision.  Floats are compared to each
-other without regard to precision.  Timestamps are compared to each other
-without regard to precision.  Annotations are ignored.
+Returns true if `a` is greater than `b`.
+Numbers are compared without regard to precision or negative zeros; if the
+values have different concrete types they are both coerced to decimal.
+Timestamps are compared to each other without regard to precision or local
+offset.  Annotations are ignored.
+
+**Warning:** The behavior of this procedure is undefined for values `+inf`,
+`-inf`, and `nan`.
+See [FUSION-249](issue:FUSION-249).
     '''
     (java_new "com.amazon.fusion.FusionCompare$GreaterThanProc"))
 
@@ -34,10 +44,15 @@ without regard to precision.  Annotations are ignored.
   (define <=
     '''
     (<= a b)
-Returns true if `a` is less than or equal to `b`.  Int and decimal values may
-be mixed and are compared without regard to precision.  Floats are compared to
-each other without regard to precision.  Timestamps are compared to each other
-without regard to precision.  Annotations are ignored.
+Returns true if `a` is less than or equal to `b`.
+Numbers are compared without regard to precision or negative zeros; if the
+values have different concrete types they are both coerced to decimal.
+Timestamps are compared to each other without regard to precision or local
+offset.  Annotations are ignored.
+
+**Warning:** The behavior of this procedure is undefined for values `+inf`,
+`-inf`, and `nan`.
+See [FUSION-249](issue:FUSION-249).
     '''
     (java_new "com.amazon.fusion.FusionCompare$LessThanOrEqualToProc"))
 
@@ -46,10 +61,15 @@ without regard to precision.  Annotations are ignored.
   (define >=
     '''
     (>= a b)
-Returns true if `a` is greater than or equal to `b`.  Int and decimal values
-may be mixed and are compared without regard to precision.  Floats are
-compared to each other without regard to precision.  Timestamps are compared
-to each other without regard to precision.  Annotations are ignored.
+Returns true if `a` is greater than or equal to `b`.
+Numbers are compared without regard to precision or negative zeros; if the
+values have different concrete types they are both coerced to decimal.
+Timestamps are compared to each other without regard to precision or local
+offset.  Annotations are ignored.
+
+**Warning:** The behavior of this procedure is undefined for values `+inf`,
+`-inf`, and `nan`.
+See [FUSION-249](issue:FUSION-249).
     '''
     (java_new "com.amazon.fusion.FusionCompare$GreaterThanOrEqualToProc"))
 

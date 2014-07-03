@@ -6,7 +6,7 @@ import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionNumber.isFloat;
-import static com.amazon.fusion.FusionNumber.isIntOrDecimal;
+import static com.amazon.fusion.FusionNumber.isNumber;
 import static com.amazon.fusion.FusionNumber.unsafeFloatToDouble;
 import static com.amazon.fusion.FusionNumber.unsafeNumberToBigDecimal;
 import static com.amazon.fusion.FusionString.isString;
@@ -115,18 +115,7 @@ final class FusionCompare
             Object arg0 = args[0];
             Object arg1 = args[1];
 
-            if (isIntOrDecimal(eval, arg0) && isIntOrDecimal(eval, arg1))
-            {
-                BigDecimal left  = unsafeNumberToBigDecimal(eval, arg0);
-                BigDecimal right = unsafeNumberToBigDecimal(eval, arg1);
-
-                if (left != null && right != null)
-                {
-                    boolean r = compare(left, right, args);
-                    return makeBool(eval, r);
-                }
-            }
-
+            // Try to avoid conversion to BigDecimal.
             if (isFloat(eval, arg0) && isFloat(eval, arg1))
             {
                 if (isAnyNull(eval, arg0).isFalse() &&
@@ -136,6 +125,18 @@ final class FusionCompare
                     double right = unsafeFloatToDouble(eval, arg1);
 
                     boolean r = compare(left, right);
+                    return makeBool(eval, r);
+                }
+            }
+
+            if (isNumber(eval, arg0) && isNumber(eval, arg1))
+            {
+                BigDecimal left  = unsafeNumberToBigDecimal(eval, arg0);
+                BigDecimal right = unsafeNumberToBigDecimal(eval, arg1);
+
+                if (left != null && right != null)
+                {
+                    boolean r = compare(left, right, args);
                     return makeBool(eval, r);
                 }
             }
