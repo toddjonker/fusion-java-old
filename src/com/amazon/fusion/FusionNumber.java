@@ -1078,7 +1078,7 @@ final class FusionNumber
         @Override
         BigDecimal toBigDecimal()
         {
-            return new BigDecimal(myContent);
+            return Decimal.valueOf(myContent);
         }
 
         @Override
