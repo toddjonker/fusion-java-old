@@ -834,6 +834,7 @@ final class FusionStruct
 
         private MapBasedStruct(String[] annotations, int size)
         {
+            super(annotations);
             myMap = new HashMap<>();
             mySize = size;
         }

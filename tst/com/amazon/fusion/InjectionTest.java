@@ -191,6 +191,11 @@ public class InjectionTest
             fv = eval("(element c 0)");
             assertEquals(iv.isNullValue(), isAnyNull(top, fv));
             fv.toString();
+
+            c = c.clone();
+            c.setTypeAnnotations("ann");
+            top.define("c", c);
+            assertEval("[ann]", "(type_annotations c)");
         }
 
         {
@@ -217,6 +222,11 @@ public class InjectionTest
             fv = eval("(element c 0)");
             assertEquals(iv.isNullValue(), isAnyNull(top, fv));
             fv.toString();
+
+            c = c.clone();
+            c.setTypeAnnotations("ann");
+            top.define("c", c);
+            assertEval("[ann]", "(type_annotations c)");
         }
 
         {
@@ -245,6 +255,11 @@ public class InjectionTest
             fv = eval("(element c '''f''')");
             assertEquals(iv.isNullValue(), isAnyNull(top, fv));
             fv.toString();
+
+            c = c.clone();
+            c.setTypeAnnotations("ann");
+            top.define("c", c);
+            assertEval("[ann]", "(type_annotations c)");
         }
     }
 
