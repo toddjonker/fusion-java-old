@@ -1,0 +1,69 @@
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/fusion/experimental/check"
+  "/fusion/number")
+
+// Equality is also tested in equality.test.fusion
+
+(define_check (check_order small large)
+  (check_true  (<  small large))
+  (check_true  (<= small large))
+  (check_false (=  small large))
+  (check_false (>= small large))
+  (check_false (>  small large))
+
+  (check_false (<  large small))
+  (check_false (<= large small))
+  (check_false (=  large small))
+  (check_true  (>= large small))
+  (check_true  (>  large small))
+
+  (check = small small)
+  (check = large large))
+
+
+(define_check (check_equiv a b)
+  (check_false (<  a b))
+  (check_true  (<= a b))
+  (check_true  (=  a b))
+  (check_true  (>= a b))
+  (check_false (>  a b))
+
+  (check_false (<  b a))
+  (check_true  (<= b a))
+  (check_true  (=  b a))
+  (check_true  (>= b a))
+  (check_false (>  b a)))
+
+
+(check_order 1   2  )
+(check_order 1   2.0)
+(check_order 1   2e0)
+(check_order 1.0 2  )
+(check_order 1.0 2.0)
+(check_order 1.0 2e0)
+(check_order 1e0 2  )
+(check_order 1e0 2.0)
+(check_order 1e0 2e0)
+
+(check_equiv 1   1  )
+(check_equiv 1   1.0)
+(check_equiv 1   1.0e0)
+(check_equiv 1.0 1.0)
+(check_equiv 1.0 1e0)
+(check_equiv 1e0 1e0)
+(check_equiv 0.12e1 1200e-3)
+(check_equiv 2e24 2d24)
+
+
+// Timestamps
+
+(check_order 1980T 1981T)
+(check_order 0001T 0001-02T)
+
+(check_order (quote f::1980T   ) (quote e::1981T))
+(check_order (quote f::1980-02T) (quote e::1980-03T))
+
+(check_equiv 1980T    1980-01T)
+(check_equiv 1980-01T 1980-01-01T)

@@ -15,22 +15,7 @@
   ])
 
 
-//============================================================================
-// Comparisons
-
-(define_check (check_comparisons lo hi)
-  (check <  lo hi)
-  (check <= lo hi)
-  (check =  lo lo)
-  (check =  hi hi)
-  (check >= hi lo)
-  (check >  hi lo))
-
-(check_comparisons 1980T 1981T)
-(check_comparisons 0001T 0001-02T)
-
-(check_comparisons (quote f::1980T   ) (quote e::1981T))
-(check_comparisons (quote f::1980-02T) (quote e::1980-03T))
+// Comparisons are tested in compare.test.fusion
 
 
 //============================================================================
