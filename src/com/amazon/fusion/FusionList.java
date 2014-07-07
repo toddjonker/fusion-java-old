@@ -71,6 +71,12 @@ final class FusionList
     }
 
 
+    static NullList nullList(Evaluator eval)
+    {
+        return NULL_LIST;
+    }
+
+
     static NullList nullList(Evaluator eval, String[] annotations)
     {
         if (annotations.length == 0)
