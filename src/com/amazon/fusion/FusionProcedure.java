@@ -24,6 +24,18 @@ public final class FusionProcedure
     }
 
 
+    /**
+     * Determines whether the given Fusion value is a procedure.
+     *
+     * @param eval must not be null.
+     */
+    static boolean isProcedure(Evaluator eval, Object value)
+        throws FusionException
+    {
+        return (value instanceof Procedure);
+    }
+
+
     static final class IsProcedureProc
         extends Procedure1
     {
