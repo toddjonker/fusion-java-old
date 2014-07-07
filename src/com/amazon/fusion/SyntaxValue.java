@@ -246,11 +246,13 @@ abstract class SyntaxValue
     }
 
 
-    final SyntaxValue addOrRemoveMark(int mark)
+    final SyntaxValue addOrRemoveMark(MarkWrap mark)
         throws FusionException
     {
-        SyntaxWrap wrap = new MarkWrap(mark);
-        return addWrap(wrap);
+        // TODO FUSION-39 Optimize this. Perhaps remove a matching mark?
+        // 2014-07-03 Only 32/906 (3.5%) of marks matched the first wrap.
+        //            Eliminating those didn't increase that count.
+        return addWrap(mark);
     }
 
     boolean hasMarks(Evaluator eval)

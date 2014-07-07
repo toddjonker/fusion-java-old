@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.safeWriteToString;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Runtime representation of Fusion macros, performing syntax expansion.
@@ -11,8 +10,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 final class MacroForm
     extends SyntacticForm
 {
-    private static final AtomicInteger ourMarkCounter = new AtomicInteger();
-
     private final Procedure myTransformer;
 
     MacroForm(Procedure transformer)
@@ -26,13 +23,13 @@ final class MacroForm
         throws FusionException
     {
         // TODO FUSION-39 we create two MarkWrap instances here
-        final int mark = ourMarkCounter.incrementAndGet();
+        MarkWrap markWrap = new MarkWrap();
 
-        stx = (SyntaxSexp) stx.addOrRemoveMark(mark);
+        stx = (SyntaxSexp) stx.addOrRemoveMark(markWrap);
 
         SyntaxValue expanded = doExpandOnce(expander, stx);
 
-        expanded = expanded.addOrRemoveMark(mark);
+        expanded = expanded.addOrRemoveMark(markWrap);
 
         // http://docs.racket-lang.org/reference/stxprops.html
         Evaluator eval = expander.getEvaluator();

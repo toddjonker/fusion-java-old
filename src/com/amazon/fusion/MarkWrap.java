@@ -1,9 +1,10 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Syntax wrap holding marks applied by the macro expander.
@@ -11,11 +12,13 @@ import java.util.Set;
 class MarkWrap
     extends SyntaxWrap
 {
+    private static final AtomicInteger ourMarkCounter = new AtomicInteger();
+
     private final int myMark;
 
-    MarkWrap(int mark)
+    MarkWrap()
     {
-        myMark = mark;
+        myMark = ourMarkCounter.incrementAndGet();
     }
 
     int getMark()
