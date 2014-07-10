@@ -23,4 +23,12 @@ related operations on sexps.
   (define unsafe_pair_tail
     (java_new "com.amazon.fusion.FusionSexp$UnsafePairTailProc"))
 
+  (provide unsafe_sexp_iterator)
+  (define  unsafe_sexp_iterator
+    '''
+    (unsafe_sexp_iterator sexp)
+
+Returns an iterator over the content of `sexp`.
+    '''
+    (java_new "com.amazon.fusion.FusionSexp$UnsafeSexpIteratorProc"))
 )

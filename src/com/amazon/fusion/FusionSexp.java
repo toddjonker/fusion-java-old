@@ -1042,4 +1042,16 @@ final class FusionSexp
             }
         }
     }
+
+
+    static final class UnsafeSexpIteratorProc
+        extends Procedure1
+    {
+        @Override
+        Object doApply(Evaluator eval, Object list)
+            throws FusionException
+        {
+            return unsafeSexpIterator(eval, list);
+        }
+    }
 }
