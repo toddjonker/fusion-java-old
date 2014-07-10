@@ -70,13 +70,25 @@
         bindings_sexp
         (wrong_syntax stx "bad sequence of bindings: " bindings))))
 
-  (define (split_content stx content)
+  (defpub (split_content stx content)
+
+    '''
+    -> (values sexp-of-bindings sexp-of-body)
+
+Splits the bindings and body forms of a `let`-style form, after checking the
+binding pairs for validity.
+    '''
+
     (let_values [((bindings) (syntax_unwrap (unsafe_pair_head content))),
                  ((body)     (unsafe_pair_tail content))]
       (values (check_bindings stx bindings) body)))
 
-  (define (unzip_bindings stx bindings)
-    " -> (values sexp-of-names sexp-of-exprs)"
+  (defpub (unzip_bindings stx bindings)
+    '''
+    -> (values sexp-of-names sexp-of-exprs)
+
+The `bindings` are assumed to be a sexp containing valid id/expr pairings.
+    '''
     (if (not (is_pair bindings))
       (values (quote ()) (quote ()))
       (let_values [((name expr)
