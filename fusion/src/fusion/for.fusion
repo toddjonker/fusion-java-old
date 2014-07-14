@@ -75,13 +75,15 @@ If there are no `id`s declared, then the body is executed once.
         (when (< (size content) 2)
           (wrong_syntax stx "expecting bindings and body"))
         (let_values [((bindings body) (split_content stx content))]
-          (let [(body (pair (quote_syntax begin) body)),
+          (let [(begin_body_stx (datum_to_syntax
+                                  (pair (quote begin) body)
+                                  ctx)),
                 (iters_id (quote_syntax iters))]
             (if (== 0 (size bindings))
               /* Base case -- no bindings */
               (datum_to_syntax
-                (sexp (quote_syntax stretchy_list)   // (stretchy_list
-                      body)                          //   (begin BODY...))
+                (sexp (quote stretchy_list)          // (stretchy_list
+                      begin_body_stx)                //   (begin BODY...))
                 ctx
                 stx)
               (let_values [((ids series) (unzip_bindings stx bindings))]
@@ -112,7 +114,7 @@ If there are no `id`s declared, then the body is executed once.
                         (let loop []
                           (if (every iterator_has_next (unsyntax iters_id))
                             (let (unsyntax (datum_to_syntax ident_rebinds ctx))
-                              (add_m result (unsyntax (datum_to_syntax body ctx)))
+                              (add_m result (unsyntax begin_body_stx))
                               (loop))
                             result))))
                     ctx
@@ -148,41 +150,33 @@ for list comprehension.
       (let [(content (unsafe_pair_tail (syntax_unwrap stx)))]
         (when (< (size content) 2)
           (wrong_syntax stx "expecting bindings and body"))
-        (let [(bindings (syntax_unwrap (unsafe_pair_head content))),
-              (body (unsafe_pair_tail content))]
-          (unless (and (is_sequence bindings) (not (is_null bindings)))
-            (wrong_syntax stx "bindings must be a non-null sequence"))
+        (let_values [((bindings body) (split_content stx content))]
           (if (== 0 (size bindings))
             /* Base case -- no bindings */
             (datum_to_syntax
-              (pair (quote_syntax for_list)   // (for_list
-                    (pair []                  //    []
-                          body))              //    BODY...)
+              (sexp (quote stretchy_list)          // (stretchy_list
+                    (pair (quote begin) body))     //   (begin BODY...))
               ctx
               stx)
-            (let [(binding (syntax_unwrap (element bindings 0))),
-                  (others  (subseq bindings 1 (size bindings)))]
-              (when (or (not (is_sequence binding))
-                        (not (= 2 (size binding))))
-                (wrong_syntax stx "expecting 2 forms in in each binding pair"))
-              (if (== 0 (size others))
+            (let [(others (unsafe_pair_tail bindings))]
+              (if (is_empty others)
                 /* Base case -- single binding */
                 (datum_to_syntax
-                  (pair (quote_syntax for_list)   // (for_list
-                        (pair bindings            //    BINDINGS
-                              body))              //    BODY...)
+                  (pair (quote_syntax for_list)          // (for_list
+                        (pair bindings                   //    BINDINGS
+                              body))                     //    BODY...)
                   ctx
                   stx)
                 /* Recursive case */
                 (datum_to_syntax
-                  (sexp (quote_syntax apply)         // (apply
-                    (quote_syntax append_m)          //   append_m
-                    []                               //   []
-                    (sexp (quote_syntax for_list)    //   (for_list
-                      (sexp (element bindings 0))    //     (BINDING)
-                      (pair (quote_syntax fors_list) //     (fors_list
-                        (pair others                 //       (OTHERS...)
-                              body))))               //       BODY...)))
+                  (sexp (quote apply)                    // (apply
+                    (quote append_m)                     //   append_m
+                    []                                   //   []
+                    (sexp (quote_syntax for_list)        //   (for_list
+                      (sexp (unsafe_pair_head bindings)) //     (BINDING)
+                      (pair (quote_syntax fors_list)     //     (fors_list
+                        (pair others                     //       (OTHERS...)
+                              body))))                   //       BODY...)))
                   ctx
                   stx))))))))
 )
