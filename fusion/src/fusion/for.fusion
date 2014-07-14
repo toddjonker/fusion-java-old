@@ -75,50 +75,38 @@ If there are no `id`s declared, then the body is executed once.
         (when (< (size content) 2)
           (wrong_syntax stx "expecting bindings and body"))
         (let_values [((bindings body) (split_content stx content))]
-          (let [(begin_body_stx (datum_to_syntax
-                                  (pair (quote begin) body)
-                                  ctx)),
-                (iters_id (quote_syntax iters))]
-            (if (== 0 (size bindings))
-              /* Base case -- no bindings */
-              (datum_to_syntax
+          (let [(begin_body (pair (quote begin) body))]
+            (datum_to_syntax
+              (if (== 0 (size bindings))
+                /* Base case -- no bindings */
                 (sexp (quote stretchy_list)          // (stretchy_list
-                      begin_body_stx)                //   (begin BODY...))
-                ctx
-                stx)
-              (let_values [((ids series) (unzip_bindings stx bindings))]
-                (let
-                  [(ident_rebinds
-                    (let loop [(rebinds (sexp)),
-                               (ids ids),
-                               (i 0)]
-                      (if (is_empty ids)
-                        rebinds
-                        (loop (pair (sexp (head ids)
-                                      (sexp (quote iterator_next)
-                                        (sexp (quote element) iters_id i)))
-                                    rebinds)
-                              (tail ids)
-                              (+ 1 i)))))]
-                  (datum_to_syntax
-                    (sexp
-                      (quote let)
-                      (quasisyntax
-                        [((unsyntax iters_id)
-                          (map iterate (unsyntax
-                                         (datum_to_syntax
-                                            (pair (quote list) series)
-                                            ctx)))),
-                         (result (stretchy_list))])
-                      (quasisyntax
+                      begin_body)                    //   (begin BODY...))
+                (let_values [((ids series) (unzip_bindings stx bindings))]
+                  (let
+                    [(ident_rebinds
+                      (let loop [(rebinds (sexp)),
+                                 (ids ids),
+                                 (i 0)]
+                        (if (is_empty ids)
+                          rebinds
+                          (loop (pair (sexp (head ids)
+                                        (sexp (quote iterator_next)
+                                          (sexp (quote element) (quote iters) i)))
+                                      rebinds)
+                                (tail ids)
+                                (+ 1 i)))))]
+                    (quasiquote
+                      (let [(iters (map iterate
+                                     (unquote (pair (quote list) series)))),
+                            (result (stretchy_list))]
                         (let loop []
-                          (if (every iterator_has_next (unsyntax iters_id))
-                            (let (unsyntax (datum_to_syntax ident_rebinds ctx))
-                              (add_m result (unsyntax begin_body_stx))
+                          (if (every iterator_has_next iters)
+                            (let (unquote ident_rebinds)
+                              (add_m result (unquote begin_body))
                               (loop))
-                            result))))
-                    ctx
-                    stx)))))))))
+                            result)))))))
+              ctx
+              stx))))))
 
 
 
@@ -151,24 +139,18 @@ for list comprehension.
         (when (< (size content) 2)
           (wrong_syntax stx "expecting bindings and body"))
         (let_values [((bindings body) (split_content stx content))]
-          (if (== 0 (size bindings))
-            /* Base case -- no bindings */
-            (datum_to_syntax
+          (datum_to_syntax
+            (if (== 0 (size bindings))
+              /* Base case -- no bindings */
               (sexp (quote stretchy_list)          // (stretchy_list
                     (pair (quote begin) body))     //   (begin BODY...))
-              ctx
-              stx)
-            (let [(others (unsafe_pair_tail bindings))]
-              (if (is_empty others)
-                /* Base case -- single binding */
-                (datum_to_syntax
+              (let [(others (unsafe_pair_tail bindings))]
+                (if (is_empty others)
+                  /* Base case -- single binding */
                   (pair (quote_syntax for_list)          // (for_list
                         (pair bindings                   //    BINDINGS
                               body))                     //    BODY...)
-                  ctx
-                  stx)
-                /* Recursive case */
-                (datum_to_syntax
+                  /* Recursive case */
                   (sexp (quote apply)                    // (apply
                     (quote append_m)                     //   append_m
                     []                                   //   []
@@ -176,7 +158,7 @@ for list comprehension.
                       (sexp (unsafe_pair_head bindings)) //     (BINDING)
                       (pair (quote_syntax fors_list)     //     (fors_list
                         (pair others                     //       (OTHERS...)
-                              body))))                   //       BODY...)))
-                  ctx
-                  stx))))))))
+                              body)))))))                //       BODY...)))
+            ctx
+            stx)))))
 )
