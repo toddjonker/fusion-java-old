@@ -153,7 +153,7 @@ for list comprehension.
                   /* Recursive case */
                   (sexp (quote apply)                    // (apply
                     (quote append_m)                     //   append_m
-                    []                                   //   []
+                    (quote (stretchy_list))              //   []
                     (sexp (quote_syntax for_list)        //   (for_list
                       (sexp (unsafe_pair_head bindings)) //     (BINDING)
                       (pair (quote_syntax fors_list)     //     (fors_list

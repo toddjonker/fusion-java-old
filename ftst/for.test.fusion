@@ -2,76 +2,80 @@
 
 (require
   "/fusion/experimental/check"
-  "/fusion/for")
+  "/fusion/for"
+  "/fusion/list")
 
+(define_check (check_fl expected actual)
+  (check_pred is_stretchy_list actual)
+  (check === expected actual))
 
-(check === [73]
+(check_fl [73]
   (for_list () 73))
 
-(check === [84]
+(check_fl [84]
   (fors_list [] 84))
 
-(check === []
+(check_fl []
   (for_list ((e [])) 73))
 
-(check === []
+(check_fl []
   (fors_list ((e [])) 84))
 
-(check === [73]
+(check_fl [73]
   (for_list ((e [1])) 73))
 
-(check === [84]
+(check_fl [84]
   (fors_list ((e [2])) 84))
 
-(check === [1]
+(check_fl [1]
   (for_list ((e [1])) e))
 
-(check === [2]
+(check_fl [2]
   (fors_list ((e [2])) e))
 
-(check === [11, 22, 33]
+(check_fl [11, 22, 33]
   (for_list ((e [1, 2, 3])
              (f [10, 20, 30]))
     (+ e f)))
 
-(check === [11, 21, 31, 12, 22, 32, 13, 23, 33]
+(check_fl [11, 21, 31, 12, 22, 32, 13, 23, 33]
   (fors_list ((e [1, 2, 3])
               (f [10, 20, 30]))
     (+ e f)))
 
-(check === [11, 22]
+(check_fl [11, 22]
   (for_list ((e [1, 2, 3])
              (f [10, 20]))
     (+ e f)))
 
-(check === [11, 21, 12, 22, 13, 23]
+(check_fl [11, 21, 12, 22, 13, 23]
   (fors_list ((e [1, 2, 3])
               (f [10, 20]))
     (+ e f)))
 
 // Sexp works too
-(check === [11, 22]
+(check_fl [11, 22]
   (for_list ((e (quote (1 2)))
              (f [10, 20, 30]))
     (+ e f)))
 
-(check === [11, 21, 31, 12, 22, 32]
+(check_fl [11, 21, 31, 12, 22, 32]
   (fors_list ((e (quote (1 2)))
               (f [10, 20, 30]))
     (+ e f)))
 
 // Macro in bound-value position
-(check === [74]
+(check_fl [74]
   (for_list ((e (let ((list [1])) list))) (+ e 73)))
 
-(check === [85]
+(check_fl [85]
   (fors_list ((e (let ((list [1])) list))) (+ e 84)))
 
 // Macro in body position
-(check === [74]
+(check_fl [74]
   (for_list ((e [1])) (let ((v 73)) (+ e v))))
 
-(check === [85]
+(check_fl [85]
   (fors_list ((e [1])) (let ((v 84)) (+ e v))))
 
 // This tests two things:
@@ -94,7 +98,7 @@
                       { amountPosted:{ amount:-49.99 }} ]),
        (amountPosted "amountPosted"),
        (amount       "amount")]
-  (check === [-39.99, -49.99]
+  (check_fl [-39.99, -49.99]
     (for_list [(x data)]
       (. x  amountPosted   amount))))
 
@@ -102,7 +106,7 @@
                       { amountsPosted:[ { amount:-49.99 }, { amount:-59.99 } ]} ]),
        (amountsPosted "amountsPosted"),
        (amount        "amount")]
-  (check === [-39.99, -29.99, -49.99, -59.99]
+  (check_fl [-39.99, -29.99, -49.99, -59.99]
     (fors_list [(x data),
                 (y (. x amountsPosted))]
       (. y amount))))
@@ -137,9 +141,9 @@
 
 // Duplicate fors_list binding names are allowed because they shadow
 // each other in order, the last of which is still meaningful.
-(check === []
+(check_fl []
   (fors_list [(name []), (name [])] 14))
-(check === [3,4,3,4]
+(check_fl [3,4,3,4]
   (fors_list [(name [1,2]), (name [3,4])] name))
 
 "PASSED" // Helpful output if you run this stand-alone
