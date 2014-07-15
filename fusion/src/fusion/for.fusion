@@ -144,21 +144,23 @@ for list comprehension.
               /* Base case -- no bindings */
               (sexp (quote stretchy_list)          // (stretchy_list
                     (pair (quote begin) body))     //   (begin BODY...))
-              (let [(others (unsafe_pair_tail bindings))]
+              (let [(binding (unsafe_pair_head bindings)),
+                    (others  (unsafe_pair_tail bindings))]
                 (if (is_empty others)
                   /* Base case -- single binding */
                   (pair (quote_syntax for_list)          // (for_list
                         (pair bindings                   //    BINDINGS
                               body))                     //    BODY...)
                   /* Recursive case */
-                  (sexp (quote apply)                    // (apply
-                    (quote append_m)                     //   append_m
-                    (quote (stretchy_list))              //   []
-                    (sexp (quote_syntax for_list)        //   (for_list
-                      (sexp (unsafe_pair_head bindings)) //     (BINDING)
-                      (pair (quote_syntax fors_list)     //     (fors_list
-                        (pair others                     //       (OTHERS...)
-                              body)))))))                //       BODY...)))
+                  (quasiquote
+                    (apply append_m                      // (apply append_m
+                      (stretchy_list)                    //   (stretchy_list)
+                      ((unquote (quote_syntax for_list)) //   (for_list
+                         [(unquote binding)]             //     [BINDING]
+                         (unquote
+                           (pair (quote_syntax fors_list)//     (fors_list
+                                 (pair others            //       (OTHERS...)
+                                       body)))))))))     //       BODY...)))
             ctx
             stx)))))
 )
