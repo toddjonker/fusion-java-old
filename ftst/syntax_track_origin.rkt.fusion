@@ -61,3 +61,8 @@
   (check_same SYM1 (head (tail o)))
   (check === (pair VAL2 VAL1) (syntax_property stx KEY1))
   (check === VAL2 (syntax_property stx KEY2)))
+
+(lets ((orig (quote_syntax (let ((a 1)) (+ a 1))))
+       (stx (expand orig))
+       (o (syntax_origin stx)))
+  (check free_identifier_equal (quote_syntax let) (head o)))

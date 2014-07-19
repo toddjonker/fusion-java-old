@@ -27,6 +27,7 @@
 (define-syntax define_syntax  (make-rename-transformer #'define-syntax))
 (define-syntax quote_syntax   (make-rename-transformer #'quote-syntax))
 
+(define free_identifier_equal free-identifier=?)
 (define syntax_is_original   syntax-original?)
 (define syntax_property      syntax-property)
 (define syntax_track_origin  syntax-track-origin)
