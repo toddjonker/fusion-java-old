@@ -33,6 +33,12 @@ final class FusionSyntax
     }
 
 
+    static Object unsafeSyntaxUnwrap(Evaluator eval, Object stx)
+        throws FusionException
+    {
+        return ((SyntaxValue) stx).unwrap(eval);
+    }
+
     static SourceLocation unsafeSyntaxLocation(Evaluator eval, Object stx)
     {
         return ((SyntaxValue) stx).getLocation();
