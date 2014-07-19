@@ -14,6 +14,26 @@ final class FusionEval
 
 
     /**
+     * If the given syntax is a kernel {@code begin} form, return it;
+     * otherwise return null.
+     */
+    private static SyntaxSexp asBeginForm(Evaluator eval, SyntaxValue stx)
+        throws FusionException
+    {
+        if (stx instanceof SyntaxSexp)
+        {
+            SyntaxSexp sexp = (SyntaxSexp) stx;
+            Binding binding = sexp.firstBinding(eval);
+            if (binding == eval.getGlobalState().myKernelBeginBinding)
+            {
+                return sexp;
+            }
+        }
+        return null;
+    }
+
+
+    /**
      * Turns a given form (datum or syntax) into a top-level syntax object,
      * and optionally enriching it.
      *
@@ -78,23 +98,17 @@ final class FusionEval
             {
                 stx = expander.partialExpand(ns, forms.pop());
 
-                if (stx instanceof SyntaxSexp)
+                SyntaxSexp beginStx = asBeginForm(eval, stx);
+                if (beginStx != null)
                 {
-                    SyntaxSexp sexp = (SyntaxSexp) stx;
-                    Binding binding = sexp.firstBinding(eval);
-                    if (binding == eval.getGlobalState().myKernelBeginBinding)
+                    // Splice 'begin' elements into the top-level sequence.
+                    for (int i = beginStx.size() - 1; i != 0;  i--)
                     {
-                        // Splice 'begin' into the top-level sequence
-                        int last = sexp.size() - 1;
-                        for (int i = last; i != 0;  i--)
-                        {
-                            forms.push(sexp.get(eval, i));
-                        }
-                        stx = null;
+                        forms.push(beginStx.get(eval, i));
                     }
+                    stx = null;
                 }
-
-                if (stx != null)
+                else
                 {
                     // We've partial-expanded, now full-expand.
                     stx = expander.expand(ns, stx);
