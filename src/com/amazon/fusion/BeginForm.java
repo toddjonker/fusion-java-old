@@ -8,29 +8,6 @@ package com.amazon.fusion;
 final class BeginForm
     extends SyntacticForm
 {
-    static SyntaxSexp makeSyntax(Evaluator eval, SyntaxSequence seq, int from)
-        throws FusionException
-    {
-        SyntaxValue begin = eval.getGlobalState().myKernelBeginIdentifier;
-        int size = seq.size();
-        if (size <= from)
-        {
-            return SyntaxSexp.make(eval, begin);
-        }
-
-        SyntaxValue[] subforms = new SyntaxValue[size - from + 1];
-        subforms[0] = begin;
-
-        for (int i = from; i < size; i++)
-        {
-            SyntaxValue bodyForm = seq.get(eval, i);
-            subforms[i - from + 1] = bodyForm;
-        }
-
-        return SyntaxSexp.make(eval, subforms);
-    }
-
-
     BeginForm()
     {
         //    "                                                                               |

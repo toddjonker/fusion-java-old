@@ -37,9 +37,7 @@ final class GlobalState
     final DynamicParameter           myCurrentNamespaceParam;
     final _Private_CoverageCollector myCoverageCollector;
 
-    final SyntaxSymbol       myKernelBeginIdentifier;
     final SyntaxSymbol       myKernelLambdaIdentifier;
-    final SyntaxSymbol       myKernelLetrecIdentifier;
     final SyntaxSymbol       myKernelModuleIdentifier;
 
     final Binding myKernelAllDefinedOutBinding;
@@ -67,9 +65,7 @@ final class GlobalState
 
         // WARNING: We pass null evaluator because we know its not used.
         //          That is NOT SUPPORTED for user code!
-        myKernelBeginIdentifier  = SyntaxSymbol.make(null, wrap, BEGIN);
         myKernelLambdaIdentifier = SyntaxSymbol.make(null, wrap, LAMBDA);
-        myKernelLetrecIdentifier = SyntaxSymbol.make(null, wrap, LETREC);
         myKernelModuleIdentifier = SyntaxSymbol.make(null, wrap, MODULE);
 
         myKernelAllDefinedOutBinding = kernelBinding(ALL_DEFINED_OUT);
