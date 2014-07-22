@@ -59,6 +59,10 @@ final class FusionSyntax
     }
 
 
+    /**
+     * @param id1 must be an identifier.
+     * @param id2 must be an identifier.
+     */
     static boolean unsafeFreeIdentifierEqual(Evaluator eval,
                                              Object    id1,
                                              Object    id2)

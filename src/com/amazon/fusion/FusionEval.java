@@ -323,6 +323,8 @@ final class FusionEval
             public Object doApply(Evaluator eval, Object arg)
                 throws FusionException
             {
+                if (FusionIo.isEof(eval, arg)) return arg;
+
                 SyntaxValue stx = (SyntaxValue) arg;
 
                 stx = enrich(eval, stx);
