@@ -36,7 +36,7 @@ abstract class SyntaxSequence
         throws FusionException;
 
     /**
-     * Creates a new syntax sequence, using our locatian and properties but
+     * Creates a new syntax sequence, using our location and properties but
      * the given children.
      */
     abstract SyntaxSequence copyReplacingChildren(Evaluator eval,
