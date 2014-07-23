@@ -89,9 +89,10 @@ Returns an element within a collection.  The `collection` must be a non-null,
 non-empty list, sexp, or struct.  The `key` must have a type appropriate for
 the collection: an int for lists or sexps, a string or symbol for structs.
 
-    (element [0, 1] 0)       =>  0
-    (element (sexp 0 1) 1)   =>  1
-    (element {f:2} "f")      =>  2
+    (element [0, 1] 0)         =>  0
+    (element (sexp 0 1) 1)     =>  1
+    (element {f:2} "f")        =>  2
+    (element {f:3} (quote f))  =>  3
 
 Since `element` is a procedure, field names must be quoted or else they will
 be evaluated as a variable reference:
@@ -149,9 +150,10 @@ Returns an element within a collection, being lenient.  The `collection` must
 be a list, sexp, struct, or void.  The `key` must have a type appropriate for
 the collection: an int for lists or sexps, a string or symbol for structs.
 
-    (elt [0, 1] 0)       =>  0
-    (elt (sexp 0 1) 1)   =>  1
-    (elt {f:2} "f")      =>  2
+    (elt [0, 1] 0)         =>  0
+    (elt (sexp 0 1) 1)     =>  1
+    (elt {f:2} "f")        =>  2
+    (elt {f:3} (quote f))  =>  3
 
 If the `collection` is empty, null, or void, the result is void.  If the `key`
 isn't appropriate for the collection, or if the `key` doesn't identify an
@@ -211,9 +213,10 @@ argument; the procedure is applied to the current value, and the result becomes
 the value for the next key.  Otherwise, the `key` and value are passed to `elt`
 to get the next value.
 
-    (. [0, 1] 0)       =>  0
-    (. (sexp 0 1) 1)   =>  1
-    (. {f:2} "f")      =>  2
+    (. [0, 1] 0)         =>  0
+    (. (sexp 0 1) 1)     =>  1
+    (. {f:2} "f")        =>  2
+    (. {f:3} (quote f))  =>  3
 
     (. [0, 1, 2, 3] size)               =>  4
     (. (sexp 0 1 2 3) head)             =>  0
@@ -292,15 +295,15 @@ application of `pred` to the final element of the sequence is in tail position.
       (true
        (raise_argument_error "any" "collection" 0 collection))))
 
-  
+
   (defpub (none pred collection)
     '''
-Applies the one-argument predicate 'pred' to the elements of collection.  
-Returns false if the predicate returns a truthy value for any element, true if 
-none do, and true if the collection is empty. 
+Applies the one-argument predicate 'pred' to the elements of collection.
+Returns false if the predicate returns a truthy value for any element, true if
+none do, and true if the collection is empty.
     '''
     (not (any pred collection)))
-    
+
 
   // Name per Dylan and SRFI-1.
   (defpub (every pred collection)
