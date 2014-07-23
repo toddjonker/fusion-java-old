@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionLob.isLob;
 import static com.amazon.fusion.FusionLob.unsafeLobBytesNoCopy;
 import static com.amazon.fusion.FusionString.checkNonEmptyStringArg;
+import static com.amazon.fusion.FusionString.checkRequiredStringArg;
 import static com.amazon.fusion.FusionUtils.resolvePath;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonBinaryWriter;
@@ -755,6 +756,25 @@ public final class FusionIo
                 // TODO improve error message
                 throw new FusionException(e);
             }
+        }
+    }
+
+
+    static final class WithIonFromStringProc
+        extends AbstractWithIonFromProc
+    {
+        public WithIonFromStringProc(Object currentIonReaderParam)
+        {
+            super(currentIonReaderParam);
+        }
+
+        @Override
+        IonReader makeReader(Evaluator eval, Object[] args)
+            throws FusionException, IOException
+        {
+            String string = checkRequiredStringArg(eval, this, 0, args);
+
+            return eval.getSystem().newReader(string);
         }
     }
 

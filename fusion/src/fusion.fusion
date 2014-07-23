@@ -115,6 +115,7 @@ contact us for clarification.
   (provide display displayln eof
     ionize ionize_to_blob ionize_to_string
     is_eof read
-    with_ion_from_file with_ion_from_lob write writeln)
+    with_ion_from_file with_ion_from_lob with_ion_from_string
+    write writeln)
 
 )

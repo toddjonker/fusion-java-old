@@ -14,6 +14,9 @@
 (expect_arity_exn (ionize))
 (expect_arity_exn (ionize 1 2))
 
+(expect_arity_exn (with_ion_from_string))
+(expect_arity_exn (with_ion_from_string ""))
+(expect_arity_exn (with_ion_from_string "" read 1))
 
 (expect_arity_exn (with_ion_from_lob))
 (expect_arity_exn (with_ion_from_lob {{""}}))
@@ -22,6 +25,19 @@
 (expect_arity_exn (with_ion_from_file))
 (expect_arity_exn (with_ion_from_file "tst-data-ints.ion"))
 (expect_arity_exn (with_ion_from_file "tst-data-ints.ion" read 1))
+
+
+(with_ion_from_string "0 1 2 3"
+  (lambda ()
+    (check === 0 (read))
+    (check === 1 (read))
+    (with_ion_from_string " \"hello\" "
+      (lambda ()
+        (check = "hello" (read))
+        (check_true (is_eof (read)))))
+    (check === 2 (read))
+    (check === 3 (read))
+    (check_true (is_eof (read)))))
 
 
 // This assumes that current_directory is at the project root.
