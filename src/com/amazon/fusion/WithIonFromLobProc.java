@@ -18,21 +18,6 @@ final class WithIonFromLobProc
 
     public WithIonFromLobProc(Object currentIonReaderParam)
     {
-        //    "                                                                               |
-        super("Uses the content of `lob` (a blob or clob) as the current Ion input stream\n" +
-              "while applying the `thunk`.\n" +
-              "\n" +
-              "The `lob` must be non-null and may contain Ion text or binary data.\n" +
-              "The `thunk` must be a procedure that accepts zero arguments.\n" +
-              "\n" +
-              "A common use of this procedure is to read a single Ion value from the data:\n" +
-              "\n" +
-              "    (with_ion_from_lob {{\"[only_me]\"}} read)   --> [only_me]\n" +
-              "\n" +
-              "This leverages the fact that `read` accepts zero arguments and consumes the\n" +
-              "current Ion input stream.",
-              "lob", "thunk");
-
         myCurrentIonReaderParam = (DynamicParameter) currentIonReaderParam;
     }
 

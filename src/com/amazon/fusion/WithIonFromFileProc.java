@@ -22,23 +22,6 @@ final class WithIonFromFileProc
     public WithIonFromFileProc(Object currentDirectoryParam,
                                Object currentIonReaderParam)
     {
-        //    "                                                                               |
-        super("Opens the file at `path` and uses it as the current Ion input stream while\n" +
-              "applying the `thunk`.  The file is closed when the thunk returns (normally or\n" +
-              "abnormally).\n" +
-              "\n" +
-              "The `path` must be a non-empty string denoting the file to read.  If the path\n" +
-              "is relative, it is resolved against `current_directory`.  The `thunk` must be a\n" +
-              "procedure that accepts zero arguments.\n" +
-              "\n" +
-              "A common use of this procedure is to read a single Ion value from a file:\n" +
-              "\n" +
-              "    (with_ion_from_file \"path/to/file.ion\" read)\n" +
-              "\n" +
-              "This leverages the fact that `read` accepts zero arguments and consumes the\n" +
-              "current Ion input stream.",
-              "path", "thunk");
-
         myCurrentDirectoryParam = (DynamicParameter) currentDirectoryParam;
         myCurrentIonReaderParam = (DynamicParameter) currentIonReaderParam;
     }

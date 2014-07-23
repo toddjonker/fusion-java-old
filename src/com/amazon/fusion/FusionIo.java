@@ -62,14 +62,6 @@ public final class FusionIo
     static final class IsEofProc
         extends Procedure1
     {
-        IsEofProc()
-        {
-            //    "                                                                               |
-            super("Determines whether a `value` is the Fusion end-of-file value.  This value is\n"
-                + "bound to the name `eof`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
         {
@@ -571,10 +563,6 @@ public final class FusionIo
 
         public ReadProc(Object currentIonReaderParam)
         {
-            //    "                                                                               |
-            super("Reads an Ion value from the current Ion input stream.  Returns `eof` when\n" +
-                  "there's no more data.");
-
             myCurrentIonReaderParam = (DynamicParameter) currentIonReaderParam;
         }
 
@@ -596,11 +584,6 @@ public final class FusionIo
 
         IonizeProc()
         {
-            //    "                                                                               |
-            super("Outputs an Ion text representation of `value`, throwing an exception if the\n" +
-                  "value contains any non-Ionizable data like closures.",
-                  "value");
-
             myBuilder = IonTextWriterBuilder.pretty().immutable();
         }
 
@@ -630,15 +613,6 @@ public final class FusionIo
     static final class IonizeToBlobProc
         extends Procedure1
     {
-        IonizeToBlobProc()
-        {
-            //    "                                                                               |
-            super("Encodes an Ion binary representation of `value`, throwing an exception if the\n" +
-                  "value contains any non-Ionizable data like closures. The result is a blob\n" +
-                  "containing an Ion binary document.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
@@ -666,12 +640,6 @@ public final class FusionIo
 
         IonizeToStringProc()
         {
-            //    "                                                                               |
-            super("Encodes an Ion text representation of `value`, throwing an exception if the\n" +
-                  "value contains any non-Ionizable data like closures. The result is a string\n" +
-                  "containing an Ion text document.",
-                  "value");
-
             myBuilder = IonTextWriterBuilder.minimal().immutable();
         }
 
@@ -699,15 +667,6 @@ public final class FusionIo
     static final class WriteProc
         extends Procedure1
     {
-        WriteProc()
-        {
-            //    "                                                                               |
-            super("Outputs a text representation of `value`, following Ion syntax where possible.\n" +
-                  "The result will be unreadable (by the Fusion and Ion readers) if the value\n" +
-                  "contains any non-Ionizable data like closures.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
@@ -722,15 +681,6 @@ public final class FusionIo
     static final class DisplayProc
         extends Procedure
     {
-        DisplayProc()
-        {
-            //    "                                                                               |
-            super("Outputs a text representation of the `value`s, writing character data as-is but\n" +
-                  "otherwise following Ion syntax where possible.  In general, the result will be\n" +
-                  "unreadable by the Fusion and Ion readers.",
-                  "value", DOTDOTDOT);
-        }
-
         @Override
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException

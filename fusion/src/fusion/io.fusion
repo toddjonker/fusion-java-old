@@ -44,23 +44,125 @@ There are three "styles" of output:
   // Note that we don't currently provide current_ion_reader since the name and
   // semantics are still a bit shady.
 
+
   (defpub with_ion_from_file
+    '''
+    (with_ion_from_file path thunk)
+
+Opens the file at `path` and uses it as the current Ion input stream while
+applying the `thunk`.  The file is closed when the thunk returns (normally or
+abnormally).
+
+The `path` must be a non-empty string denoting the file to read.  If the path
+is relative, it is resolved against `current_directory`.  The `thunk` must be a
+procedure that accepts zero arguments.
+
+A common use of this procedure is to read a single Ion value from a file:
+
+    (with_ion_from_file "path/to/file.ion" read)
+
+This leverages the fact that `read` accepts zero arguments and consumes the
+current Ion input stream.
+    '''
     (java_new "com.amazon.fusion.WithIonFromFileProc"
       current_directory current_ion_reader))
+
+
   (defpub with_ion_from_lob
+    '''
+    (with_ion_from_lob lob thunk)
+
+Uses the content of `lob` (a blob or clob) as the current Ion input stream
+while applying the `thunk`.
+
+The `lob` must be non-null and may contain Ion text or binary data.
+The `thunk` must be a procedure that accepts zero arguments.
+
+A common use of this procedure is to read a single Ion value from the data:
+
+    (with_ion_from_lob {{"[only_me]"}} read)   --> [only_me]
+
+This leverages the fact that `read` accepts zero arguments and consumes the
+current Ion input stream.
+    '''
     (java_new "com.amazon.fusion.WithIonFromLobProc"
       current_ion_reader))
 
+
   (defpub read
+    '''
+    (read)
+
+Reads an Ion value from the current Ion input stream.  Returns `eof` when
+there's no more data.
+    '''
     (java_new "com.amazon.fusion.FusionIo$ReadProc" current_ion_reader))
 
-  (defpub_j is_eof  "com.amazon.fusion.FusionIo$IsEofProc")
 
-  (defpub_j display "com.amazon.fusion.FusionIo$DisplayProc")
-  (defpub_j ionize  "com.amazon.fusion.FusionIo$IonizeProc")
-  (defpub_j ionize_to_blob "com.amazon.fusion.FusionIo$IonizeToBlobProc")
-  (defpub_j ionize_to_string "com.amazon.fusion.FusionIo$IonizeToStringProc")
-  (defpub_j write   "com.amazon.fusion.FusionIo$WriteProc")
+  (defpub is_eof
+    '''
+    (is_eof value)
+
+Determines whether a `value` is the Fusion end-of-file value.  This value is
+bound to the name `eof`.
+    '''
+    (java_new "com.amazon.fusion.FusionIo$IsEofProc"))
+
+
+
+  (defpub ionize
+    '''
+    (ionize value)
+
+Outputs an Ion text representation of `value`, throwing an exception if the
+value contains any non-Ionizable data like closures.
+    '''
+    (java_new "com.amazon.fusion.FusionIo$IonizeProc"))
+
+
+  (defpub ionize_to_blob
+    '''
+    (ionize_to_blob value)
+
+Encodes an Ion binary representation of `value`, throwing an exception if the
+value contains any non-Ionizable data like closures. The result is a blob
+containing an Ion binary document.
+    '''
+    (java_new "com.amazon.fusion.FusionIo$IonizeToBlobProc"))
+
+
+  (defpub ionize_to_string
+    '''
+    (ionize_to_string value)
+
+Encodes an Ion text representation of `value`, throwing an exception if the
+value contains any non-Ionizable data like closures. The result is a string
+containing an Ion text document.
+    '''
+    (java_new "com.amazon.fusion.FusionIo$IonizeToStringProc"))
+
+
+  (defpub write
+    '''
+    (write value)
+
+Outputs a text representation of `value`, following Ion syntax where possible.
+The result will be unreadable (by the Fusion and Ion readers) if the value
+contains any non-Ionizable data like closures.
+    '''
+    (java_new "com.amazon.fusion.FusionIo$WriteProc"))
+
+
+  (defpub display
+    '''
+    (display value ...)
+
+Outputs a text representation of the `value`s, writing character data as-is but
+otherwise following Ion syntax where possible.  In general, the result will be
+unreadable by the Fusion and Ion readers.
+    '''
+    (java_new "com.amazon.fusion.FusionIo$DisplayProc"))
+
 
   (defpub displayln
     '''
