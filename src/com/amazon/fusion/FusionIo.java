@@ -3,6 +3,10 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionLob.isLob;
+import static com.amazon.fusion.FusionLob.unsafeLobBytesNoCopy;
+import static com.amazon.fusion.FusionString.checkNonEmptyStringArg;
+import static com.amazon.fusion.FusionUtils.resolvePath;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonBinaryWriter;
 import com.amazon.ion.IonException;
@@ -10,6 +14,8 @@ import com.amazon.ion.IonReader;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.system.IonTextWriterBuilder;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -706,6 +712,109 @@ public final class FusionIo
             }
 
             return voidValue(eval);
+        }
+    }
+
+
+    //========================================================================
+
+
+    private abstract static class AbstractWithIonFromProc
+        extends Procedure
+    {
+        private final DynamicParameter myCurrentIonReaderParam;
+
+        public AbstractWithIonFromProc(Object currentIonReaderParam)
+        {
+            myCurrentIonReaderParam = (DynamicParameter) currentIonReaderParam;
+        }
+
+        abstract IonReader makeReader(Evaluator eval, Object[] args)
+            throws FusionException, IOException;
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(2, args);
+
+            Procedure thunk = checkProcArg(1, args);
+            // TODO FUSION-85 check thunk arity
+
+            try (IonReader reader = makeReader(eval, args))
+            {
+                Evaluator parameterized =
+                    eval.markedContinuation(myCurrentIonReaderParam, reader);
+
+                // We cannot use a tail call here, since we must not close the
+                // stream until after the call returns.
+                return parameterized.callNonTail(thunk);
+            }
+            catch (IOException | IonException e)
+            {
+                // TODO improve error message
+                throw new FusionException(e);
+            }
+        }
+    }
+
+
+    static final class WithIonFromLobProc
+        extends AbstractWithIonFromProc
+    {
+        public WithIonFromLobProc(Object currentIonReaderParam)
+        {
+            super(currentIonReaderParam);
+        }
+
+        @Override
+        IonReader makeReader(Evaluator eval, Object[] args)
+            throws FusionException, IOException
+        {
+            Object lob = args[0];
+            if (! isLob(eval, lob) || isAnyNull(eval, lob).isTrue())
+            {
+                throw argFailure("non-null blob or clob", 0, args);
+            }
+
+            byte[] bytes = unsafeLobBytesNoCopy(eval, lob);
+
+            return eval.getSystem().newReader(bytes);
+        }
+    }
+
+
+    static final class WithIonFromFileProc
+        extends AbstractWithIonFromProc
+    {
+        private final DynamicParameter myCurrentDirectoryParam;
+
+        public WithIonFromFileProc(Object currentDirectoryParam,
+                                   Object currentIonReaderParam)
+        {
+            super(currentIonReaderParam);
+
+            myCurrentDirectoryParam = (DynamicParameter) currentDirectoryParam;
+        }
+
+        @Override
+        IonReader makeReader(Evaluator eval, Object[] args)
+            throws FusionException, IOException
+        {
+            String path = checkNonEmptyStringArg(eval, this, 0, args);
+
+            File inFile = resolvePath(eval, myCurrentDirectoryParam, path);
+
+            FileInputStream in = new FileInputStream(inFile);
+            try
+            {
+                return eval.getSystem().newReader(in);
+            }
+            catch (IonException e)
+            {
+                in.close();
+                throw e;
+            }
         }
     }
 }
