@@ -41,7 +41,7 @@ final class WithIonFromLobProc
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
-        checkArityExact(args);
+        checkArityExact(2, args);
 
         Object lob = args[0];
         if (! isLob(eval, lob) || isAnyNull(eval, lob).isTrue())

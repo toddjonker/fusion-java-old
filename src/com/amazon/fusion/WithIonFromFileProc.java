@@ -48,6 +48,8 @@ final class WithIonFromFileProc
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
+        checkArityExact(2, args);
+
         String path = checkNonEmptyStringArg(eval, this, 0, args);
 
         Procedure thunk = checkProcArg(1, args);

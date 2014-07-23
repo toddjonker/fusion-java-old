@@ -15,6 +15,15 @@
 (expect_arity_exn (ionize 1 2))
 
 
+(expect_arity_exn (with_ion_from_lob))
+(expect_arity_exn (with_ion_from_lob {{""}}))
+(expect_arity_exn (with_ion_from_lob {{""}} read 1))
+
+(expect_arity_exn (with_ion_from_file))
+(expect_arity_exn (with_ion_from_file "tst-data-ints.ion"))
+(expect_arity_exn (with_ion_from_file "tst-data-ints.ion" read 1))
+
+
 // This assumes that current_directory is at the project root.
 (with_ion_from_file "tst-data/ints.ion"
   (lambda ()
