@@ -162,7 +162,6 @@ Other alternative traversal forms include [iterators][] and [comprehensions][].
   (provide . add any choose do element elt every find first fold_left has_key
     is_collection is_empty is_sequence last map none size subseq)
 
-  (defpub_j append_m        "com.amazon.fusion.AppendMProc")
 //  (defpub_j subseq          "com.amazon.fusion.IonSubseqProc")
 
 
@@ -226,6 +225,29 @@ particular sequence types may do so.
     (if (is_list list)
       (unsafe_list_add_m list element)
       (raise_argument_error "add_m" "list" 0 list element)))
+
+
+  (defpub append
+    '''
+    (append list ...+)
+
+Returns a list with the concatenation of all the elements of the `list`s.
+The result list is of same type as the first `list`.
+Any argument that is `null.list` is treated as if it's `[]`.
+    '''
+    (java_new "com.amazon.fusion.FusionList$AppendProc"))
+
+
+  (defpub append_m
+    '''
+    (append_m list ...+)
+
+Returns a list with the concatenation of all the elements of the `list`s,
+mutating the first argument when possible.  If the first argument cannot be
+stretched, a fresh list is made, of same type.
+Any argument that is `null.list` is treated as if it's `[]`.
+    '''
+    (java_new "com.amazon.fusion.AppendMProc"))
 
 
   //==========================================================================

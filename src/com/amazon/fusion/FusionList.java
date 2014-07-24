@@ -668,7 +668,8 @@ final class FusionList
             return add(eval, value);
         }
 
-        BaseList appendM(Evaluator eval, Object[] args)
+
+        BaseList append(Evaluator eval, Object[] args)
         {
             int myLen = myValues.length;
             int newLen = myLen;
@@ -693,6 +694,11 @@ final class FusionList
             assert pos == newLen;
 
             return makeSimilar(myAnnotations, copy);
+        }
+
+        BaseList appendM(Evaluator eval, Object[] args)
+        {
+            return append(eval, args);
         }
 
 
@@ -1149,6 +1155,13 @@ final class FusionList
         }
 
         @Override
+        BaseList append(Evaluator eval, Object[] args)
+        {
+            injectElements(eval);
+            return super.append(eval, args);
+        }
+
+        @Override
         BaseList appendM(Evaluator eval, Object[] args)
         {
             injectElements(eval);
@@ -1546,6 +1559,32 @@ final class FusionList
             throws FusionException
         {
             return unsafeListAddM(eval, list, value);
+        }
+    }
+
+
+    static final class AppendProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityAtLeast(1, args);
+            int arity = args.length;
+
+            Object first = checkNullableListArg(eval, this, 0, args);
+
+            if (arity == 1) return first;
+
+            Object[] listArgs = new Object[arity - 1];
+
+            for (int i = 1; i < arity; i++)
+            {
+                listArgs[i - 1] = checkNullableListArg(eval, this, i, args);
+            }
+
+            return ((BaseList) first).append(eval, listArgs);
         }
     }
 
