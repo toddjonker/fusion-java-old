@@ -202,6 +202,58 @@ public class ListTest
     //========================================================================
     // Append
 
+
+    private void testAppending(String  appender,
+                               String  listMaker,
+                               IonList iList)
+        throws Exception
+    {
+        TopLevel top = topLevel();
+
+        Object empty = top.call(listMaker);
+
+        Object result = top.call(appender, iList, empty);
+        Object str = top.call("element", result, 0);
+        checkString("a", str);
+
+        result = top.call(appender, empty, iList);
+        str = top.call("element", result, 0);
+        checkString("a", str);
+
+        result = top.call(appender, iList, iList);
+        str = top.call("element", result, 0);
+        checkString("a", str);
+        str = top.call("element", result, 1);
+        checkString("a", str);
+    }
+
+    private void testAppending(String listMaker, IonList iList)
+        throws Exception
+    {
+        testAppending("append",   listMaker, iList);
+        testAppending("append_m", listMaker, iList);
+    }
+
+    /** Trap for FUSION-362 */
+    @Test
+    public void testAppendingLazyList()
+        throws Exception
+    {
+        TopLevel top = topLevel();
+        top.requireModule("/fusion/list");
+
+        IonList iList = (IonList) system().singleValue("['''a''']");
+
+        testAppending("list",          iList);
+        testAppending("mutable_list",  iList);
+        testAppending("stretchy_list", iList);
+
+        // Make sure we haven't accidentally mutated the list.
+        assertEquals(1, iList.size());
+        assertEquals(system().newString("a"), iList.get(0));
+    }
+
+
     /** Tests interaction with IonValues. */
     @Test
     public void testAppendM()
@@ -213,8 +265,7 @@ public class ListTest
         assertSame(fList, result);
         assertEquals(4, unsafeListSize(null, result));
 
-        // Elements should be lazily fusion-ized
-        assertSame(iList.get(1), topLevel().call("list_element", result, 2));
+        checkIon(iList.get(1), topLevel().call("list_element", result, 2));
 
         // Now mutate the IonValue
         fList = eval("(stretchy_list 4)");

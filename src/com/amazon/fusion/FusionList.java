@@ -989,22 +989,29 @@ final class FusionList
                 newLen += ((BaseList) arg).size();
             }
 
-            if (myValues.length < newLen)
+            // Note that mySize <= myValues.length
+            if (mySize < newLen)
             {
-                myValues = Arrays.copyOf(myValues, newLen);
-            }
+                Object[] newValues =
+                    (myValues.length < newLen
+                        ? Arrays.copyOf(myValues, newLen)
+                        : myValues);
 
-            int pos = mySize;
-            for (Object arg : args)
-            {
-                BaseList v = (BaseList) arg;
-                int argLen = v.size();
+                int pos = mySize;
+                for (Object arg : args)
+                {
+                    BaseList v = (BaseList) arg;
+                    int argLen = v.size();
 
-                System.arraycopy(v.myValues, 0, myValues, pos, argLen);
-                pos += argLen;
+                    v.unsafeCopy(eval, 0, newValues, pos, argLen);
+                    pos += argLen;
+                }
+                assert pos == newLen;
+
+                // Be careful not to mutate this until the copies succeed.
+                myValues = newValues;
+                mySize   = pos;
             }
-            assert pos == newLen;
-            mySize = pos;
 
             return this;
         }
