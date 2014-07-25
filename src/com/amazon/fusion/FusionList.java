@@ -472,11 +472,13 @@ final class FusionList
         }
 
 
+        @Override
         void unsafeCopy(Evaluator eval, int srcPos, Object[] dest, int destPos,
                         int length)
         {
             System.arraycopy(myValues, srcPos, dest, destPos, length);
         }
+
 
         Object[] extract(Evaluator eval)
         {

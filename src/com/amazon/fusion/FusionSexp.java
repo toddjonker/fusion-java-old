@@ -374,6 +374,14 @@ final class FusionSexp
             throw new IndexOutOfBoundsException(message);
         }
 
+        @Override
+        void unsafeCopy(Evaluator eval, int srcPos, Object[] dest,
+                        int destPos, int length)
+            throws FusionException
+        {
+            assert length == 0;
+        }
+
         /**
          * @return null if this is not a proper sexp.
          */
@@ -640,6 +648,30 @@ final class FusionSexp
             String message =
                 "No index " + i + " in sequence " + this;
             throw new IndexOutOfBoundsException(message);
+        }
+
+        /**
+         * Assumes that this is a proper sexp!
+         */
+        @Override
+        void unsafeCopy(Evaluator eval, int srcPos, Object[] dest,
+                        int destPos, int length)
+            throws FusionException
+        {
+            if (length != 0)
+            {
+                BaseSexp tail = (BaseSexp) myTail;
+                if (srcPos == 0)
+                {
+                    dest[destPos] = myHead;
+
+                    tail.unsafeCopy(eval, srcPos, dest, destPos+1, length-1);
+                }
+                else
+                {
+                    tail.unsafeCopy(eval, srcPos-1, dest, destPos, length);
+                }
+            }
         }
 
         @Override
