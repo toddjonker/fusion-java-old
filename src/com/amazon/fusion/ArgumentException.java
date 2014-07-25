@@ -29,7 +29,9 @@ final class ArgumentException
     {
         super("arg type failure");
         assert name != null && actuals.length != 0;
-        assert badPos < actuals.length;
+
+        // We allow badPos to be anything if there's only one actual provided.
+//      assert badPos < actuals.length;
 
         myName = name;
         myExpectation = expectation;
