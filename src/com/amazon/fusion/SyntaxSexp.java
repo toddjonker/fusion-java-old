@@ -388,28 +388,6 @@ final class SyntaxSexp
     // Helpers for syntax_append and syntax_subseq
 
 
-    private static BaseSexp append(Evaluator eval, Object front, BaseSexp back)
-        throws FusionException
-    {
-        if (isPair(eval, front))
-        {
-            Object tail = unsafePairTail(eval, front);
-            tail = append(eval, tail, back);
-            if (tail != null)
-            {
-                Object head = unsafePairHead(eval, front);
-                return FusionSexp.pair(eval, head, tail);
-            }
-        }
-        else if (isEmptySexp(eval, front))
-        {
-            return back;
-        }
-
-        return null;
-    }
-
-
     @Override
     SyntaxSequence makeAppended(Evaluator eval, SyntaxSequence that)
         throws FusionException
@@ -428,7 +406,7 @@ final class SyntaxSexp
 
         pushWraps(eval);
 
-        BaseSexp appended = append(eval, mySexp, backSexp);
+        BaseSexp appended = mySexp.append(eval, backSexp);
         if (appended == null)
         {
             return null;

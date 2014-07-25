@@ -374,6 +374,15 @@ final class FusionSexp
             throw new IndexOutOfBoundsException(message);
         }
 
+        /**
+         * @return null if this is not a proper sexp.
+         */
+        BaseSexp append(Evaluator eval, BaseSexp back)
+            throws FusionException
+        {
+            return back;
+        }
+
         @Override
         BaseBool looseEquals(Evaluator eval, Object right)
             throws FusionException
@@ -633,6 +642,20 @@ final class FusionSexp
             throw new IndexOutOfBoundsException(message);
         }
 
+        @Override
+        BaseSexp append(Evaluator eval, BaseSexp back)
+            throws FusionException
+        {
+            if (myTail instanceof BaseSexp)
+            {
+                Object tail = ((BaseSexp) myTail).append(eval, back);
+                if (tail != null)
+                {
+                    return pair(eval, myHead, tail);
+                }
+            }
+            return null;
+        }
 
         private static BaseBool actualPairEqual(Evaluator     eval,
                                                 EqualityTier  tier,
