@@ -476,7 +476,8 @@ final class FusionList
         void unsafeCopy(Evaluator eval, int srcPos, Object[] dest, int destPos,
                         int length)
         {
-            System.arraycopy(myValues, srcPos, dest, destPos, length);
+            Object[] values = values(eval);
+            System.arraycopy(values, srcPos, dest, destPos, length);
         }
 
 
@@ -660,7 +661,7 @@ final class FusionList
         BaseList add(Evaluator eval, Object value)
         {
             int len = size();
-            Object[] copy = Arrays.copyOf(myValues, len + 1);
+            Object[] copy = Arrays.copyOf(values(eval), len + 1);
             copy[len] = value;
             return makeSimilar(myAnnotations, copy);
         }
@@ -682,7 +683,7 @@ final class FusionList
 
             if (newLen == myLen) return this; // Nothing to append
 
-            Object[] copy = Arrays.copyOf(myValues, newLen);
+            Object[] copy = Arrays.copyOf(values(eval), newLen);
 
             int pos = myLen;
             for (Object arg : args)
@@ -706,7 +707,8 @@ final class FusionList
 
         Iterator<?> javaIterate(Evaluator eval)
         {
-            return Arrays.asList(myValues).iterator();
+            Object[] values = values(eval);
+            return Arrays.asList(values).iterator();
         }
 
         @Override
@@ -1117,30 +1119,6 @@ final class FusionList
         }
 
         @Override
-        void unsafeCopy(Evaluator eval, int srcPos, Object[] dest, int destPos,
-                        int length)
-        {
-            injectElements(eval);
-            System.arraycopy(myValues, srcPos, dest, destPos, length);
-        }
-
-        @Override
-        BaseBool looseEquals(Evaluator eval, Object right)
-            throws FusionException
-        {
-            injectElements(eval);
-            return super.looseEquals(eval, right);
-        }
-
-        @Override
-        BaseBool looseEquals2(Evaluator eval, BaseList left)
-            throws FusionException
-        {
-            injectElements(eval);
-            return super.looseEquals2(eval, left);
-        }
-
-        @Override
         IonList copyToIonValue(ValueFactory factory,
                                boolean throwOnConversionFailure)
             throws FusionException
@@ -1165,34 +1143,6 @@ final class FusionList
             // else our elements have already been injected, copy as normal.
 
             return super.copyToIonValue(factory, throwOnConversionFailure);
-        }
-
-        @Override
-        BaseList add(Evaluator eval, Object value)
-        {
-            injectElements(eval);
-            return super.add(eval, value);
-        }
-
-        @Override
-        BaseList append(Evaluator eval, Object[] args)
-        {
-            injectElements(eval);
-            return super.append(eval, args);
-        }
-
-        @Override
-        BaseList appendM(Evaluator eval, Object[] args)
-        {
-            injectElements(eval);
-            return super.appendM(eval, args);
-        }
-
-        @Override
-        Iterator<?> javaIterate(Evaluator eval)
-        {
-            injectElements(eval);
-            return super.javaIterate(eval);
         }
 
         @Override
