@@ -365,7 +365,7 @@
 (check === [1] (append [1] null.list))
 
 
-(check === (quote a::null.list)
+(check === (quote a::[])
   (append (quote a::null.list)))
 (check === (quote a::[c::2])
   (append (quote a::null.list) (quote b::[c::2])))
@@ -410,7 +410,7 @@
 (check === [1] (append_m [1] null.list))
 
 
-(check === (quote a::null.list)
+(check === (quote a::[])
   (append_m (quote a::null.list)))
 (check === (quote a::[c::2])
   (append_m (quote a::null.list) (quote b::[c::2])))

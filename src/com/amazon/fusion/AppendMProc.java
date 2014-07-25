@@ -18,8 +18,6 @@ final class AppendMProc
 
         Object first = checkNullableListArg(eval, this, 0, args);
 
-        if (arity == 1) return first;
-
         Object[] listArgs = new Object[arity - 1];
 
         for (int i = 1; i < arity; i++)

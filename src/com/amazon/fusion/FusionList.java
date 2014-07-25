@@ -858,6 +858,17 @@ final class FusionList
         }
 
         @Override
+        BaseList append(Evaluator eval, Object[] args)
+        {
+            BaseList empty =
+                (myAnnotations.length == 0
+                    ? EMPTY_IMMUTABLE_LIST
+                    : immutableList(eval, myAnnotations, EMPTY_OBJECT_ARRAY));
+
+            return empty.append(eval, args);
+        }
+
+        @Override
         Object[] extract(Evaluator eval)
         {
             return null;
@@ -1583,8 +1594,6 @@ final class FusionList
             int arity = args.length;
 
             Object first = checkNullableListArg(eval, this, 0, args);
-
-            if (arity == 1) return first;
 
             Object[] listArgs = new Object[arity - 1];
 
