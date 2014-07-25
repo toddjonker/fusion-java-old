@@ -38,78 +38,136 @@
   (check === (is_stretchy_list  seqA) (is_stretchy_list  seqB)))
 
 
-(define_check (check_append1_result ctorA seqA allVals)
-  (let [(result (append seqA))]
-    (check_same_type seqA result)
-    (check === (apply ctorA allVals) result))
-  (let [(result (append (annotate seqA "a")))]
-    (check_same_type seqA result)
-    (check === (annotate (apply ctorA allVals) "a") result)))
-
-(define_check (check_append2_result ctorA seqA seqB allVals)
-  (let [(result (append seqA seqB))]
-    (check_same_type seqA result)
-    (check === (apply ctorA allVals) result))
-  (let [(result (append (annotate seqA "a") seqB))]
-    (check_same_type seqA result)
-    (check === (annotate (apply ctorA allVals) "a") result))
-  (let [(result (append seqA (annotate seqB "b")))]
-    (check_same_type seqA result)
-    (check === (apply ctorA allVals) result))
-  (let [(result (append (annotate seqA "a") (annotate seqB "b")))]
-    (check_same_type seqA result)
-    (check === (annotate (apply ctorA allVals) "a") result)))
+(define_check (check_append_result seqR sequences)
+  (lets [(arg0 (element sequences 0)),
+         (expected (apply annotate seqR (type_annotations arg0))),
+         (result (apply append sequences))]
+//    (displayln "sequences: " sequences)
+//    (displayln "expected:" expected)
+    (check_same_type arg0 result)
+    // Note that we use == rather than === since resulting sexps may have
+    // annotations on some of the intermediate pairs.
+    (check == expected result)))
 
 
-(define_check (check_append_ctors2 ctorA nullA ctorB nullB aVals bVals allVals)
-  (let [(seqA (apply ctorA aVals)),
-        (seqB (apply ctorB bVals))]
-    (check_append2_result ctorA seqA seqB allVals)
-    (check_append2_result ctorA seqA (annotate seqB "b") allVals)
-    (when (is_empty aVals)
-      (check_append2_result ctorA nullA seqB allVals))
-    (when (is_empty bVals)
-      (check_append2_result ctorA seqA nullB allVals))
-    (when (and (is_empty aVals) (is_empty bVals))
-      (check_append2_result ctorA nullA nullB allVals))))
+(define_check (check_append_n seqR sequences)
+  (let [(fanout  // sexp of sexp of sequences
+          (let loop [(i 0), (sequences sequences)]
+            (if (is_empty sequences)
+              (quote (()))
+              (let [(arg (head sequences)),
+                    (ann (int_to_string i))]
+                (fold_left
+                  (lambda (res seq)
+                    (pair (pair arg seq)
+                      (pair (pair (annotate arg ann) seq)
+                        (if (is_empty arg)
+                          (let [(the_null (if (is_sexp arg)
+                                            (quote null.sexp)
+                                            null.list))]
+                            (pair (pair the_null seq)
+                              (pair (pair (annotate the_null ann) seq)
+                                res)))
+                          res))))
+                  (sexp)
+                  (loop (+ i 1) (tail sequences)))))))]
+    (map (lambda (args) (check_append_result seqR args)) fanout)))
 
 
-(define_check (check_append_ctors ctorA nullA ctorB nullB)
-  (check_append_ctors2 ctorA nullA ctorB nullB [] [] [])
-  (check_append_ctors2 ctorA nullA ctorB nullB [] [1] [1])
-  (check_append_ctors2 ctorA nullA ctorB nullB [] [1, 2] [1, 2])
-  (check_append_ctors2 ctorA nullA ctorB nullB [1] [] [1])
-  (check_append_ctors2 ctorA nullA ctorB nullB [1] [2] [1, 2])
-  (check_append_ctors2 ctorA nullA ctorB nullB [1] [2, 3] [1, 2, 3])
-  (check_append_ctors2 ctorA nullA ctorB nullB [1, 2] [] [1, 2])
-  (check_append_ctors2 ctorA nullA ctorB nullB [1, 2] [3] [1, 2, 3])
-  (check_append_ctors2 ctorA nullA ctorB nullB [1, 2] [3, 4] [1, 2, 3, 4]))
+(define do_check_append_n
+  (lambda rest
+    (let [(seqR (head rest)), (sequences (tail rest))]
+      (check_append_n seqR sequences))))
 
 
-(define_check (check_append1 ctorA nullA)
-  (check_append1_result ctorA nullA       [])
-  (check_append1_result ctorA (ctorA)     [])
-  (check_append1_result ctorA (ctorA 1)   [1])
-  (check_append1_result ctorA (ctorA 1 2) [1, 2]))
+(define_check (check_append1 ctorA)
+//  (displayln "CHECK2: " ctorA)
+  (do_check_append_n (ctorA)     (ctorA))
+  (do_check_append_n (ctorA 1)   (ctorA 1))
+  (do_check_append_n (ctorA 1 2) (ctorA 1 2)))
 
 
-(define seqCtors (sexp        sexp      list mutable_list stretchy_list))
-(define seqNulls (quote (null.sexp null.list    null.list     null.list)))
+(define_check (check_append2 ctorA ctorB)
+//  (displayln "CHECK2: " ctorA " " ctorB)
+  (do_check_append_n (ctorA)         (ctorA)     (ctorB)     )
+  (do_check_append_n (ctorA 3)       (ctorA)     (ctorB 3)   )
+  (do_check_append_n (ctorA 3 4)     (ctorA)     (ctorB 3 4) )
+  (do_check_append_n (ctorA 1)       (ctorA 1)   (ctorB)     )
+  (do_check_append_n (ctorA 1 3)     (ctorA 1)   (ctorB 3)   )
+  (do_check_append_n (ctorA 1 3 4)   (ctorA 1)   (ctorB 3 4) )
+  (do_check_append_n (ctorA 1 2)     (ctorA 1 2) (ctorB)     )
+  (do_check_append_n (ctorA 1 2 3)   (ctorA 1 2) (ctorB 3)   )
+  (do_check_append_n (ctorA 1 2 3 4) (ctorA 1 2) (ctorB 3 4) ))
 
-(let loopA [(ctors seqCtors), (nulls seqNulls)]
+(define_check (check_append3 ctorA ctorB ctorC)
+//  (displayln "CHECK3: " ctorA " " ctorB " " ctorC)
+  (do_check_append_n (ctorA)             (ctorA)     (ctorB)     (ctorC)     )
+  (do_check_append_n (ctorA 5)           (ctorA)     (ctorB)     (ctorC 5)   )
+  (do_check_append_n (ctorA 5 6)         (ctorA)     (ctorB)     (ctorC 5 6) )
+  (do_check_append_n (ctorA 3)           (ctorA)     (ctorB 3)   (ctorC)     )
+  (do_check_append_n (ctorA 3 5)         (ctorA)     (ctorB 3)   (ctorC 5)   )
+  (do_check_append_n (ctorA 3 5 6)       (ctorA)     (ctorB 3)   (ctorC 5 6) )
+  (do_check_append_n (ctorA 3 4)         (ctorA)     (ctorB 3 4) (ctorC)     )
+  (do_check_append_n (ctorA 3 4 5)       (ctorA)     (ctorB 3 4) (ctorC 5)   )
+  (do_check_append_n (ctorA 3 4 5 6)     (ctorA)     (ctorB 3 4) (ctorC 5 6) )
+  (do_check_append_n (ctorA 1)           (ctorA 1)   (ctorB)     (ctorC)     )
+  (do_check_append_n (ctorA 1 5)         (ctorA 1)   (ctorB)     (ctorC 5)   )
+  (do_check_append_n (ctorA 1 5 6)       (ctorA 1)   (ctorB)     (ctorC 5 6) )
+  (do_check_append_n (ctorA 1 3)         (ctorA 1)   (ctorB 3)   (ctorC)     )
+  (do_check_append_n (ctorA 1 3 5)       (ctorA 1)   (ctorB 3)   (ctorC 5)   )
+  (do_check_append_n (ctorA 1 3 5 6)     (ctorA 1)   (ctorB 3)   (ctorC 5 6) )
+  (do_check_append_n (ctorA 1 3 4)       (ctorA 1)   (ctorB 3 4) (ctorC)     )
+  (do_check_append_n (ctorA 1 3 4 5)     (ctorA 1)   (ctorB 3 4) (ctorC 5)   )
+  (do_check_append_n (ctorA 1 3 4 5 6)   (ctorA 1)   (ctorB 3 4) (ctorC 5 6) )
+  (do_check_append_n (ctorA 1 2)         (ctorA 1 2) (ctorB)     (ctorC)     )
+  (do_check_append_n (ctorA 1 2 5)       (ctorA 1 2) (ctorB)     (ctorC 5)   )
+  (do_check_append_n (ctorA 1 2 5 6)     (ctorA 1 2) (ctorB)     (ctorC 5 6) )
+  (do_check_append_n (ctorA 1 2 3)       (ctorA 1 2) (ctorB 3)   (ctorC)     )
+  (do_check_append_n (ctorA 1 2 3 5)     (ctorA 1 2) (ctorB 3)   (ctorC 5)   )
+  (do_check_append_n (ctorA 1 2 3 5 6)   (ctorA 1 2) (ctorB 3)   (ctorC 5 6) )
+  (do_check_append_n (ctorA 1 2 3 4)     (ctorA 1 2) (ctorB 3 4) (ctorC)     )
+  (do_check_append_n (ctorA 1 2 3 4 5)   (ctorA 1 2) (ctorB 3 4) (ctorC 5)   )
+  (do_check_append_n (ctorA 1 2 3 4 5 6) (ctorA 1 2) (ctorB 3 4) (ctorC 5 6) ))
+
+
+(define seqCtors
+  (sexp
+    sexp list mutable_list stretchy_list))
+
+
+(let loopA [(ctors seqCtors)]
   (unless (is_empty ctors)
-    (let [(ctorA (head ctors)),
-          (nullA (head nulls))]
-      (check_append1 ctorA nullA)
-      (check_append_ctors ctorA nullA ctorA nullA)
-      (let loopB [(ctors ctors), (nulls nulls)]
-        (unless (is_empty ctors)
-          (let [(ctorB (head ctors)),
-                (nullB (head nulls))]
-            (check_append_ctors ctorA nullA ctorB nullB)
-            (check_append_ctors ctorB nullB ctorA nullA))
-          (loopB (tail ctors) (tail nulls)))))
-    (loopA (tail ctors) (tail nulls))))
+    (let [(ctorA  (head ctors)),
+          (others (tail ctors))]
+      (check_append1 ctorA)
+      (check_append2 ctorA ctorA)
+      (check_append3 ctorA ctorA ctorA)
+      (unless (is_empty others)
+        (let loopB [(ctors others)]
+          (unless (is_empty ctors)
+            (let [(ctorB  (head ctors)),
+                  (others (tail ctors))]
+              (check_append2 ctorA ctorB)
+              (check_append2 ctorB ctorA)
+              (check_append3 ctorA ctorA ctorB)
+              (check_append3 ctorA ctorB ctorA)
+              (check_append3 ctorA ctorB ctorB)
+              (check_append3 ctorB ctorA ctorA)
+              (check_append3 ctorB ctorA ctorB)
+              (check_append3 ctorB ctorB ctorA)
+              (unless (is_empty others)
+                (let loopC [(ctors others)]
+                (unless (is_empty ctors)
+                  (let [(ctorC (head ctors))]
+                    (check_append3 ctorA ctorB ctorC)
+                    (check_append3 ctorA ctorC ctorB)
+                    (check_append3 ctorB ctorA ctorC)
+                    (check_append3 ctorB ctorC ctorA)
+                    (check_append3 ctorC ctorA ctorB)
+                    (check_append3 ctorC ctorB ctorA))
+                  (loopC (tail ctors))))))
+            (loopB (tail ctors))))))
+    (loopA (tail ctors))))
 
 
 (expect_arity_exn (append))
