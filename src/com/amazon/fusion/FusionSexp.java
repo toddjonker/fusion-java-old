@@ -385,10 +385,38 @@ final class FusionSexp
         /**
          * @return null if this is not a proper sexp.
          */
-        BaseSexp append(Evaluator eval, BaseSexp back)
+        @Override
+        BaseSexp sexpAppend(Evaluator eval, BaseSexp back)
             throws FusionException
         {
-            return back;
+            return (BaseSexp) back.annotate(eval, myAnnotations);
+        }
+
+        @Override
+        BaseSexp append(Evaluator eval, Object[] sequences)
+            throws FusionException
+        {
+            int len = sequences.length;
+            if (len == 0) return this;
+
+            BaseSexp back = EMPTY_SEXP;
+            for (int i = len - 1 ; i >= 0; i--)
+            {
+                back = ((BaseSequence) sequences[i]).sexpAppend(eval, back);
+                if (back == null)
+                {
+                    throw new ArgumentException("append", "proper sequence",
+                                                i+1, sequences[i]);
+                }
+            }
+
+            BaseSexp result = sexpAppend(eval, back);
+            if (result == null)
+            {
+                throw new ArgumentException("append", "proper sequence",
+                                            0, this);
+            }
+            return result;
         }
 
         @Override
@@ -451,6 +479,14 @@ final class FusionSexp
             throws FusionException
         {
             return new NullSexp(annotations);
+        }
+
+        @Override
+        BaseSexp append(Evaluator eval, Object[] sequences)
+            throws FusionException
+        {
+            BaseSexp empty = emptySexp(eval, myAnnotations);
+            return empty.append(eval, sequences);
         }
 
         @Override
@@ -675,15 +711,15 @@ final class FusionSexp
         }
 
         @Override
-        BaseSexp append(Evaluator eval, BaseSexp back)
+        BaseSexp sexpAppend(Evaluator eval, BaseSexp back)
             throws FusionException
         {
             if (myTail instanceof BaseSexp)
             {
-                Object tail = ((BaseSexp) myTail).append(eval, back);
+                Object tail = ((BaseSexp) myTail).sexpAppend(eval, back);
                 if (tail != null)
                 {
-                    return pair(eval, myHead, tail);
+                    return pair(eval, myAnnotations, myHead, tail);
                 }
             }
             return null;

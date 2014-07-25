@@ -36,6 +36,23 @@ final class FusionSequence
             throws FusionException;
 
         /**
+         * Append a number of sequences to this one.
+         *
+         * @param sequences may be empty.
+         * @return a sequence of the same type as this one.
+         */
+        abstract Object append(Evaluator eval, Object[] sequences)
+            throws FusionException;
+
+        /**
+         * Append an sexp to this sequence, returning an sexp.
+         *
+         * @return null if this is an improper sexp.
+         */
+        abstract BaseSexp sexpAppend(Evaluator eval, BaseSexp back)
+            throws FusionException;
+
+        /**
          * Second part of double-dispatch from {@link #looseEquals}.
          * @param left is not a null value.
          */
@@ -124,5 +141,33 @@ final class FusionSequence
     {
         String expectation = "nullable sequence";
         return checkSequenceArg(eval, who, expectation, argNum, args);
+    }
+
+
+    //========================================================================
+    // Procedures
+
+
+    static final class AppendProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityAtLeast(1, args);
+            int arity = args.length;
+
+            Object first = checkNullableSequenceArg(eval, this, 0, args);
+
+            Object[] seqArgs = new Object[arity - 1];
+
+            for (int i = 1; i < arity; i++)
+            {
+                seqArgs[i - 1] = checkNullableSequenceArg(eval, this, i, args);
+            }
+
+            return ((BaseSequence) first).append(eval, seqArgs);
+        }
     }
 }

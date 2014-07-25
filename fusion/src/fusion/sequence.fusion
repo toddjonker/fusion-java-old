@@ -17,6 +17,7 @@ The built-in sequence types are [list](fusion/list.html) and
     "/fusion/equality"
     "/fusion/exception"
     "/fusion/experimental/defines"
+    "/fusion/ffi/java"
     "/fusion/number"
     "/fusion/private/bind"
     "/fusion/private/builtins"   // Some basic list ops
@@ -62,6 +63,18 @@ elements.
         (if (= 0 s)
           (raise_argument_error "last" "non-empty sequence" 0 sequence)
           (element sequence (- s 1))))))
+
+
+  (defpub append
+    '''
+    (append sequence ...+)
+
+Returns a list with the concatenation of all the elements of the `sequence`s.
+The result has same type and annotations as the first `sequence`.
+Any argument that is `null.list` (or `null.sexp`) is treated as if it were an
+empty list (or empty sexp).
+    '''
+    (java_new "com.amazon.fusion.FusionSequence$AppendProc"))
 
 
   (defpub subseq

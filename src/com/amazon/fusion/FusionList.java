@@ -335,6 +335,7 @@ final class FusionList
 
 
     static Object unsafeListAppendM(Evaluator eval, Object list, Object[] args)
+        throws FusionException
     {
         return ((BaseList) list).appendM(eval, args);
     }
@@ -471,6 +472,23 @@ final class FusionList
             return myValues[pos];
         }
 
+
+        @Override
+        final BaseSexp sexpAppend(Evaluator eval, BaseSexp back)
+            throws FusionException
+        {
+            int size = size();
+            if (size != 0)
+            {
+                Object[] values = values(eval);
+                for (int i = size - 1; i >= 0; i--)
+                {
+                    back = FusionSexp.pair(eval, values[i], back);
+                }
+            }
+
+            return back;
+        }
 
         @Override
         void unsafeCopy(Evaluator eval, int srcPos, Object[] dest, int destPos,
@@ -672,13 +690,15 @@ final class FusionList
         }
 
 
+        @Override
         BaseList append(Evaluator eval, Object[] args)
+            throws FusionException
         {
             int myLen = size();
             int newLen = myLen;
             for (int i = 0; i < args.length; i++)
             {
-                newLen += ((BaseList) args[i]).size();
+                newLen += ((BaseSequence) args[i]).size();
             }
 
             if (newLen == myLen) return this; // Nothing to append
@@ -688,7 +708,7 @@ final class FusionList
             int pos = myLen;
             for (Object arg : args)
             {
-                BaseList v = (BaseList) arg;
+                BaseSequence v = (BaseSequence) arg;
                 int argLen = v.size();
 
                 v.unsafeCopy(eval, 0, copy, pos, argLen);
@@ -700,6 +720,7 @@ final class FusionList
         }
 
         BaseList appendM(Evaluator eval, Object[] args)
+            throws FusionException
         {
             return append(eval, args);
         }
@@ -861,6 +882,7 @@ final class FusionList
 
         @Override
         BaseList append(Evaluator eval, Object[] args)
+            throws FusionException
         {
             BaseList empty =
                 (myAnnotations.length == 0
@@ -1529,30 +1551,6 @@ final class FusionList
             throws FusionException
         {
             return unsafeListAddM(eval, list, value);
-        }
-    }
-
-
-    static final class AppendProc
-        extends Procedure
-    {
-        @Override
-        Object doApply(Evaluator eval, Object[] args)
-            throws FusionException
-        {
-            checkArityAtLeast(1, args);
-            int arity = args.length;
-
-            Object first = checkNullableListArg(eval, this, 0, args);
-
-            Object[] listArgs = new Object[arity - 1];
-
-            for (int i = 1; i < arity; i++)
-            {
-                listArgs[i - 1] = checkNullableListArg(eval, this, i, args);
-            }
-
-            return ((BaseList) first).append(eval, listArgs);
         }
     }
 

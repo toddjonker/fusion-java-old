@@ -367,23 +367,6 @@
    (append (add_m (stretchy_list 1 2) 3) [4]))
 
 
-(check === [1] (append null.list [1] null.list))
-(check === [1] (append [1] null.list))
-
-
-(check === (quote a::[])
-  (append (quote a::null.list)))
-(check === (quote a::[c::2])
-  (append (quote a::null.list) (quote b::[c::2])))
-
-(check === (quote a::[1])
-  (append (quote a::[1])))
-(check === (quote a::[1,c::2])
-  (append (quote a::[1]) (quote b::[c::2])))
-
-// TODO test annotations on mutable/stretchy lists
-
-
 //==========================================================================
 // append_m
 

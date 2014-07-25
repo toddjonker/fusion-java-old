@@ -262,7 +262,7 @@ final class SyntaxList
         }
         else
         {
-            // TODO will crash is from is beyond the end of the list
+            // TODO will crash if `from` is beyond the end of the list
             int len = myImmutableList.size();
             Object[] children = new Object[len - from];
             myImmutableList.unsafeCopy(eval, from, children, 0, children.length);

@@ -3,6 +3,7 @@
 (require
   "/fusion/experimental/check"
   "/fusion/list"
+  "/fusion/private/builtins"  // For `annotate`
   "/fusion/sequence"
   "/testutils")
 
@@ -24,6 +25,102 @@
 (check_false (is_sequence 1d-1))
 (check_false (is_sequence 1e-1))
 (check_false (is_sequence 1970-01-01))
+
+
+//==========================================================================
+// append
+
+(define_check (check_same_type seqA seqB)
+  (check === (is_sexp seqA) (is_sexp seqB))
+  (check === (is_list seqA) (is_list seqB))
+  (check === (is_immutable_list seqA) (is_immutable_list seqB))
+  (check === (is_mutable_list   seqA) (is_mutable_list   seqB))
+  (check === (is_stretchy_list  seqA) (is_stretchy_list  seqB)))
+
+
+(define_check (check_append1_result ctorA seqA allVals)
+  (let [(result (append seqA))]
+    (check_same_type seqA result)
+    (check === (apply ctorA allVals) result))
+  (let [(result (append (annotate seqA "a")))]
+    (check_same_type seqA result)
+    (check === (annotate (apply ctorA allVals) "a") result)))
+
+(define_check (check_append2_result ctorA seqA seqB allVals)
+  (let [(result (append seqA seqB))]
+    (check_same_type seqA result)
+    (check === (apply ctorA allVals) result))
+  (let [(result (append (annotate seqA "a") seqB))]
+    (check_same_type seqA result)
+    (check === (annotate (apply ctorA allVals) "a") result))
+  (let [(result (append seqA (annotate seqB "b")))]
+    (check_same_type seqA result)
+    (check === (apply ctorA allVals) result))
+  (let [(result (append (annotate seqA "a") (annotate seqB "b")))]
+    (check_same_type seqA result)
+    (check === (annotate (apply ctorA allVals) "a") result)))
+
+
+(define_check (check_append_ctors2 ctorA nullA ctorB nullB aVals bVals allVals)
+  (let [(seqA (apply ctorA aVals)),
+        (seqB (apply ctorB bVals))]
+    (check_append2_result ctorA seqA seqB allVals)
+    (check_append2_result ctorA seqA (annotate seqB "b") allVals)
+    (when (is_empty aVals)
+      (check_append2_result ctorA nullA seqB allVals))
+    (when (is_empty bVals)
+      (check_append2_result ctorA seqA nullB allVals))
+    (when (and (is_empty aVals) (is_empty bVals))
+      (check_append2_result ctorA nullA nullB allVals))))
+
+
+(define_check (check_append_ctors ctorA nullA ctorB nullB)
+  (check_append_ctors2 ctorA nullA ctorB nullB [] [] [])
+  (check_append_ctors2 ctorA nullA ctorB nullB [] [1] [1])
+  (check_append_ctors2 ctorA nullA ctorB nullB [] [1, 2] [1, 2])
+  (check_append_ctors2 ctorA nullA ctorB nullB [1] [] [1])
+  (check_append_ctors2 ctorA nullA ctorB nullB [1] [2] [1, 2])
+  (check_append_ctors2 ctorA nullA ctorB nullB [1] [2, 3] [1, 2, 3])
+  (check_append_ctors2 ctorA nullA ctorB nullB [1, 2] [] [1, 2])
+  (check_append_ctors2 ctorA nullA ctorB nullB [1, 2] [3] [1, 2, 3])
+  (check_append_ctors2 ctorA nullA ctorB nullB [1, 2] [3, 4] [1, 2, 3, 4]))
+
+
+(define_check (check_append1 ctorA nullA)
+  (check_append1_result ctorA nullA       [])
+  (check_append1_result ctorA (ctorA)     [])
+  (check_append1_result ctorA (ctorA 1)   [1])
+  (check_append1_result ctorA (ctorA 1 2) [1, 2]))
+
+
+(define seqCtors (sexp        sexp      list mutable_list stretchy_list))
+(define seqNulls (quote (null.sexp null.list    null.list     null.list)))
+
+(let loopA [(ctors seqCtors), (nulls seqNulls)]
+  (unless (is_empty ctors)
+    (let [(ctorA (head ctors)),
+          (nullA (head nulls))]
+      (check_append1 ctorA nullA)
+      (check_append_ctors ctorA nullA ctorA nullA)
+      (let loopB [(ctors ctors), (nulls nulls)]
+        (unless (is_empty ctors)
+          (let [(ctorB (head ctors)),
+                (nullB (head nulls))]
+            (check_append_ctors ctorA nullA ctorB nullB)
+            (check_append_ctors ctorB nullB ctorA nullA))
+          (loopB (tail ctors) (tail nulls)))))
+    (loopA (tail ctors) (tail nulls))))
+
+
+(expect_arity_exn (append))
+
+(expect_argument_exn (append 1))
+(expect_argument_exn (append [] 1))
+(expect_argument_exn (append [] 1 []))
+
+(expect_argument_exn (append (list) (pair 1 2) []))  // Improper sexp
+(expect_argument_exn (append (sexp) (pair 1 2) []))  // Improper sexp
+
 
 //==========================================================================
 // subseq

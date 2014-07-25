@@ -406,7 +406,7 @@ final class SyntaxSexp
 
         pushWraps(eval);
 
-        BaseSexp appended = mySexp.append(eval, backSexp);
+        BaseSexp appended = mySexp.sexpAppend(eval, backSexp);
         if (appended == null)
         {
             return null;
