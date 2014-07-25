@@ -361,6 +361,12 @@
 (check_append (mutable_list))
 (check_append (stretchy_list))
 
+
+// Check appending to stretchy list with available capacity.
+(check === [1,2,3,4]
+   (append (add_m (stretchy_list 1 2) 3) [4]))
+
+
 (check === [1] (append null.list [1] null.list))
 (check === [1] (append [1] null.list))
 
@@ -405,6 +411,12 @@
 (check_append_m (list))
 (check_append_m (mutable_list))
 (check_append_m (stretchy_list))
+
+
+// Check appending to stretchy list with available capacity.
+(check === [1,2,3,4]
+   (append_m (add_m (stretchy_list 1 2) 3) [4]))
+
 
 (check === [1] (append_m null.list [1] null.list))
 (check === [1] (append_m [1] null.list))

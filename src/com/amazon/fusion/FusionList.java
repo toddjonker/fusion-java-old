@@ -673,7 +673,7 @@ final class FusionList
 
         BaseList append(Evaluator eval, Object[] args)
         {
-            int myLen = myValues.length;
+            int myLen = size();
             int newLen = myLen;
             for (int i = 0; i < args.length; i++)
             {
