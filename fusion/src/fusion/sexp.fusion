@@ -24,7 +24,8 @@ sexps.
   (provide head is_pair is_sexp pair sexp tail)
 
   (require "/fusion/sequence")
-  (provide . add any choose do element elt every find first fold_left has_key
+  (provide . add any append choose do element elt every
+    find first fold_left has_key
     is_collection is_empty is_sequence last map none size)
 
 )
