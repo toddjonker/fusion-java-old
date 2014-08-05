@@ -67,10 +67,10 @@ contact us for clarification.
     none same_size size)
 
   (require "/fusion/sequence")
-  (provide add append choose first fold_left is_sequence last map)
+  (provide add append choose first fold_left is_sequence last map subseq)
 
   (require "/fusion/list")
-  (provide is_list list list_element list_iterator list_from_iterator subseq)
+  (provide is_list list list_element list_iterator list_from_iterator)
 
   (require "/fusion/sexp")
   (provide head is_pair is_sexp pair sexp tail)
