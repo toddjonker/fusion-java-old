@@ -45,6 +45,17 @@
     (true s)))
 
 
+(define adds
+  "Like `add` but accepts more than one element to add."
+  (lambda rest
+    (let [(seq  (head rest)),
+          (elts (tail rest))]
+      (let loop [(elts elts)]
+        (if (is_empty elts)
+          seq
+          (add (loop (tail elts)) (head elts)))))))
+
+
 (define_check (check_append_result seqR sequences)
   (lets [(arg0 (element sequences 0)),
          (expected (apply annotate seqR (type_annotations arg0))),
@@ -65,29 +76,39 @@
         (check === arg0 arg0_m)))))
 
 
-(define_check (check_append_n seqR sequences)
-  (let [(fanout  // sexp of sexp of sequences
-          (let loop [(i 0), (sequences sequences)]
-            (if (is_empty sequences)
-              (quote (()))
-              (let [(arg (head sequences)),
-                    (ann (int_to_string i))]
-                (fold_left
-                  (lambda (res seq)
-                    (pair (pair arg seq)
-                      (pair (pair (annotate arg ann) seq)
-                        (if (is_empty arg)
-                          (let [(the_null (if (is_sexp arg)
-                                            (quote null.sexp)
-                                            null.list))]
-                            (pair (pair the_null seq)
-                              (pair (pair (annotate the_null ann) seq)
-                                res)))
-                          res))))
-                  (sexp)
-                  (loop (+ i 1) (tail sequences)))))))]
-    (map (lambda (args) (check_append_result seqR args)) fanout)))
+(define (fanout sequences)
+  '''
+Returns sexp of argument-sexps each of which is a sexp of sequences (the
+arguments).
+  '''
+  (let loop [(i 0), (sequences sequences)]
+    (if (is_empty sequences)
+      (quote (()))
+      (let [(arg (head sequences)),
+            (ann (int_to_string i))]
+        (fold_left
+          (lambda (res seq)
+            (adds
+              (if (is_empty arg)
+                // If the argument is empty, add variants
+                // that use null instead.
+                (let [(the_null (if (is_sexp arg)
+                                  (quote null.sexp)
+                                  null.list))]
+                  (adds res
+                    (pair (annotate the_null ann) seq)
+                    (pair the_null seq)))
+                res)
+              (pair (annotate arg ann) seq)
+              (pair arg seq)))
+          (sexp)
+          (loop (+ i 1) (tail sequences)))))))
 
+(define_check (check_append_n seqR sequences)
+  (map
+    (lambda (args)
+      (check_append_result seqR args))
+    (fanout sequences)))
 
 (define do_check_append_n
   (lambda rest
