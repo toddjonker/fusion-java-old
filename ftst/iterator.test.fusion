@@ -22,6 +22,7 @@
 
 (check_iter [] empty_iterator)
 
+(check_iter []              (list_iterator null.list))
 (check_iter []              (list_iterator [])     )
 (check_iter [1]             (list_iterator [1])    )
 (check_iter [1, 2]          (list_iterator [1, 2]))
@@ -66,3 +67,21 @@
   (iterator_map_splicing value_iterator (list_iterator [1,2,3,4])))
 (check_iter [1,2,3,4]
   (iterator_map_splicing list_iterator (list_iterator [[1],[2,3],[],[4]])))
+
+
+//==========================================================================
+// sexp_iterator
+
+(expect_arity_exn (sexp_iterator))
+(expect_arity_exn (sexp_iterator (sexp) 1))
+
+(expect_argument_exn (sexp_iterator null))
+(expect_argument_exn (sexp_iterator null.list))
+(expect_argument_exn (sexp_iterator []))
+
+(check_iter [] (sexp_iterator (quote null.sexp)))
+(check_iter [] (sexp_iterator (sexp)))
+(check_iter [1]             (sexp_iterator (sexp 1))    )
+(check_iter [1, 2]          (sexp_iterator (sexp 1 2)))
+(check_iter ["a", true]     (sexp_iterator (sexp "a" true)))
+(check_iter [["a"], [true]] (sexp_iterator (sexp ["a"] [true])) )

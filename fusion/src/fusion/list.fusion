@@ -163,8 +163,6 @@ Other alternative traversal forms include [iterators][] and [comprehensions][].
     find first fold_left has_key
     is_collection is_empty is_sequence last map none size subseq)
 
-//  (defpub_j subseq          "com.amazon.fusion.IonSubseqProc")
-
 
   //==========================================================================
   // Basic element access
@@ -232,10 +230,10 @@ particular sequence types may do so.
   // Iteration
 
   (defpub (list_iterator list)
-    "Returns an iterator over the content of `list`."
-    (unless (is_list list)
-      (raise_argument_error "list_iterator" "list" 0 list))
-    (unsafe_list_iterator list))
+    "Returns an iterator over the elements of `list`."
+    (if (is_list list)
+      (unsafe_list_iterator list)
+      (raise_argument_error "list_iterator" "list" 0 list)))
 
 
   (defpub (list_from_iterator iterator)

@@ -28,4 +28,14 @@ sexps.
     find first fold_left has_key
     is_collection is_empty is_sequence last map none size subseq)
 
+
+  (require "/fusion/unsafe/sexp" "/fusion/exception")
+
+  (provide sexp_iterator)
+  (define (sexp_iterator sexp)
+    "Returns an iterator over the elements of `sexp`."
+    (if (is_sexp sexp)
+      (unsafe_sexp_iterator sexp)
+      (raise_argument_error "sexp" "sexp" 0 sexp)))
+
 )

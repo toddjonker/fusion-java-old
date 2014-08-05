@@ -1,6 +1,6 @@
 // Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
 
-(module unsafe_struct '/fusion/private/kernel'
+(module unsafe_sexp '/fusion/private/kernel'
 
   '''
 Unsafe (but fast) operations on sexps.
@@ -28,7 +28,7 @@ related operations on sexps.
     '''
     (unsafe_sexp_iterator sexp)
 
-Returns an iterator over the content of `sexp`.
+Returns an iterator over the elements of `sexp`.
     '''
     (java_new "com.amazon.fusion.FusionSexp$UnsafeSexpIteratorProc"))
 )

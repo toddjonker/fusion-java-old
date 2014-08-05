@@ -73,7 +73,7 @@ contact us for clarification.
   (provide is_list list list_element list_iterator list_from_iterator)
 
   (require "/fusion/sexp")
-  (provide head is_pair is_sexp pair sexp tail)
+  (provide head is_pair is_sexp pair sexp sexp_iterator tail)
 
   (require "/fusion/struct")
   (provide is_struct put remove_keys retain_keys struct struct_do
