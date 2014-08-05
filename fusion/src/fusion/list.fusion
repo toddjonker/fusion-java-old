@@ -159,7 +159,7 @@ Other alternative traversal forms include [iterators][] and [comprehensions][].
   (provide list mutable_list stretchy_list)
 
   // Pass-through bindings from /fusion/sequence
-  (provide . add any append choose do element elt every
+  (provide . add any append append_m choose do element elt every
     find first fold_left has_key
     is_collection is_empty is_sequence last map none size subseq)
 
@@ -226,18 +226,6 @@ particular sequence types may do so.
     (if (is_list list)
       (unsafe_list_add_m list element)
       (raise_argument_error "add_m" "list" 0 list element)))
-
-
-  (defpub append_m
-    '''
-    (append_m list ...+)
-
-Returns a list with the concatenation of all the elements of the `list`s,
-mutating the first argument when possible.  If the first argument cannot be
-stretched, a fresh list is made, of same type.
-Any argument that is `null.list` is treated as if it's `[]`.
-    '''
-    (java_new "com.amazon.fusion.AppendMProc"))
 
 
   //==========================================================================

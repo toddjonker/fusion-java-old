@@ -41,8 +41,21 @@ final class FusionSequence
          * @param sequences may be empty.
          * @return a sequence of the same type as this one.
          */
-        abstract Object append(Evaluator eval, Object[] sequences)
+        abstract BaseSequence append(Evaluator eval, Object[] sequences)
             throws FusionException;
+
+        /**
+         * Append a number of sequences to this one, stretching this instance
+         * if possible.
+         *
+         * @param sequences may be empty.
+         * @return a sequence of the same type as this one.
+         */
+        BaseSequence appendM(Evaluator eval, Object[] sequences)
+            throws FusionException
+        {
+            return append(eval, sequences);
+        }
 
         /**
          * Append an sexp to this sequence, returning an sexp.
@@ -168,6 +181,29 @@ final class FusionSequence
             }
 
             return ((BaseSequence) first).append(eval, seqArgs);
+        }
+    }
+
+    static final class AppendMProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityAtLeast(1, args);
+            int arity = args.length;
+
+            Object first = checkNullableSequenceArg(eval, this, 0, args);
+
+            Object[] seqArgs = new Object[arity - 1];
+
+            for (int i = 1; i < arity; i++)
+            {
+                seqArgs[i - 1] = checkNullableSequenceArg(eval, this, i, args);
+            }
+
+            return ((BaseSequence) first).appendM(eval, seqArgs);
         }
     }
 }

@@ -719,12 +719,6 @@ final class FusionList
             return makeSimilar(myAnnotations, copy);
         }
 
-        BaseList appendM(Evaluator eval, Object[] args)
-            throws FusionException
-        {
-            return append(eval, args);
-        }
-
 
         Iterator<?> javaIterate(Evaluator eval)
         {
@@ -1019,11 +1013,12 @@ final class FusionList
 
         @Override
         BaseList appendM(Evaluator eval, Object[] args)
+            throws FusionException
         {
             int newLen = mySize;
             for (Object arg : args)
             {
-                newLen += ((BaseList) arg).size();
+                newLen += ((BaseSequence) arg).size();
             }
 
             // Note that mySize <= myValues.length
@@ -1037,7 +1032,7 @@ final class FusionList
                 int pos = mySize;
                 for (Object arg : args)
                 {
-                    BaseList v = (BaseList) arg;
+                    BaseSequence v = (BaseSequence) arg;
                     int argLen = v.size();
 
                     v.unsafeCopy(eval, 0, newValues, pos, argLen);

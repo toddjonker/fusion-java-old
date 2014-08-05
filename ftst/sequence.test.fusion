@@ -38,6 +38,13 @@
   (check === (is_stretchy_list  seqA) (is_stretchy_list  seqB)))
 
 
+(define (copy_if_mutable s)
+  (cond
+    ((is_stretchy_list s) (apply annotate (apply stretchy_list s) (type_annotations s)))
+    ((is_mutable_list  s) (apply annotate (apply mutable_list  s) (type_annotations s)))
+    (true s)))
+
+
 (define_check (check_append_result seqR sequences)
   (lets [(arg0 (element sequences 0)),
          (expected (apply annotate seqR (type_annotations arg0))),
@@ -47,7 +54,15 @@
     (check_same_type arg0 result)
     // Note that we use == rather than === since resulting sexps may have
     // annotations on some of the intermediate pairs.
-    (check == expected result)))
+    (check == expected result)
+
+    // Before calling append_m make sure we don't mutate the original.
+    (lets [(arg0_m (copy_if_mutable arg0)),
+           (result (apply append_m arg0_m (tail sequences)))]
+      (check_same_type arg0 result)
+      (check == expected result)
+      (unless (is_stretchy_list arg0)
+        (check === arg0 arg0_m)))))
 
 
 (define_check (check_append_n seqR sequences)

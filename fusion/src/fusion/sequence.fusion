@@ -69,12 +69,25 @@ elements.
     '''
     (append sequence ...+)
 
-Returns a list with the concatenation of all the elements of the `sequence`s.
+Returns a sequence with the concatenation of all the elements of the `sequence`s.
 The result has same type and annotations as the first `sequence`.
 Any argument that is `null.list` (or `null.sexp`) is treated as if it were an
 empty list (or empty sexp).
     '''
     (java_new "com.amazon.fusion.FusionSequence$AppendProc"))
+
+
+  (defpub append_m
+    '''
+    (append_m sequence ...+)
+
+Returns a sequence with the concatenation of all the elements of the `sequence`s,
+mutating the first argument when possible.
+The result has same type and annotations as the first `sequence`.
+Any argument that is `null.list` (or `null.sexp`) is treated as if it were an
+empty list (or empty sexp).
+    '''
+    (java_new "com.amazon.fusion.FusionSequence$AppendMProc"))
 
 
   (defpub subseq
