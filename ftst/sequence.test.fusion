@@ -39,8 +39,8 @@
 
 (define (copy_if_mutable s)
   (cond
-    ((is_stretchy_list s) (apply annotate (apply stretchy_list s) (type_annotations s)))
-    ((is_mutable_list  s) (apply annotate (apply mutable_list  s) (type_annotations s)))
+    ((is_stretchy_list s) (apply annotate (apply stretchy_list s) (annotations s)))
+    ((is_mutable_list  s) (apply annotate (apply mutable_list  s) (annotations s)))
     (true s)))
 
 
@@ -57,7 +57,7 @@
 
 (define_check (check_append_result seqR sequences)
   (lets [(arg0 (element sequences 0)),
-         (expected (apply annotate seqR (type_annotations arg0))),
+         (expected (apply annotate seqR (annotations arg0))),
          (result (apply append sequences))]
 //    (displayln "sequences: " sequences)
 //    (displayln "expected:" expected)

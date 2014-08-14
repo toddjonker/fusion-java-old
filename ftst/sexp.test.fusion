@@ -19,7 +19,7 @@
       (if (is_null v)
         v
         (apply ctor v))
-      (type_annotations v))))
+      (annotations v))))
 
 (define sexp_copy
   (lambda (v)

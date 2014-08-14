@@ -442,8 +442,8 @@ order:
 
     (check_annotations ["b", "a"] (quote a::b::null))
     '''
-    (unless (= expected (type_annotations value))
-      (_fail_check {expected:expected, actual:(type_annotations value)})))
+    (unless (= expected (annotations value))
+      (_fail_check {expected:expected, actual:(annotations value)})))
 
 
   //===========================================================================

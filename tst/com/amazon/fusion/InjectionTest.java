@@ -195,7 +195,7 @@ public class InjectionTest
             c = c.clone();
             c.setTypeAnnotations("ann");
             top.define("c", c);
-            assertEval("[ann]", "(type_annotations c)");
+            assertEval("[ann]", "(annotations c)");
         }
 
         {
@@ -226,7 +226,7 @@ public class InjectionTest
             c = c.clone();
             c.setTypeAnnotations("ann");
             top.define("c", c);
-            assertEval("[ann]", "(type_annotations c)");
+            assertEval("[ann]", "(annotations c)");
         }
 
         {
@@ -259,7 +259,7 @@ public class InjectionTest
             c = c.clone();
             c.setTypeAnnotations("ann");
             top.define("c", c);
-            assertEval("[ann]", "(type_annotations c)");
+            assertEval("[ann]", "(annotations c)");
         }
     }
 

@@ -48,9 +48,7 @@
     '''
     (check_xforms1 datum annotations)
     =>
-    (begin (check ===
-             (type_annotations (quote DATUM))
-             (quote ANNOTATIONS))
+    (begin (check_annotations (quote ANNOTATIONS) (quote DATUM))
            (check ===
              (syntax_to_datum (quote_syntax DATUM))
              (quote DATUM))

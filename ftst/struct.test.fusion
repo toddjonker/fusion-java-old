@@ -20,7 +20,7 @@
               (add_m args value))
             s)
           (apply ctor args)))
-      (type_annotations s))))
+      (annotations s))))
 
 (define struct_copy
   (lambda (s)

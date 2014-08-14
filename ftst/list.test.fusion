@@ -13,7 +13,7 @@
       (if (is_null v)
         v
         (apply ctor v))
-      (type_annotations v))))
+      (annotations v))))
 
 (define list_copy
   (lambda (v)

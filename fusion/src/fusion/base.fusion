@@ -68,8 +68,24 @@ necessary to avoid mutating it.
 
 The `value` must be annotatable; that is, it must be one of the Ion types.
 The `text` arguments must be non-null, non-empty strings or symbols.
+
+To extract annotations from a value, use
+[`annotations`](fusion.html#annotations).
     '''
     (java_new "com.amazon.fusion.AnnotateProc"))
+
+
+  (provide annotations)
+  (define annotations
+    '''
+    (annotations value)
+
+Returns a non-null immutable list of symbols containing the user type
+annotations on the `value`.
+
+To put annotations onto a value, use [`annotate`](fusion.html#annotate).
+    '''
+    (java_new "com.amazon.fusion.TypeAnnotationsProc"))
 
 
   (provide type_annotations)
@@ -77,8 +93,8 @@ The `text` arguments must be non-null, non-empty strings or symbols.
     '''
     (type_annotations value)
 
-Returns a non-null immutable list of symbols containing the user type
-annotations on the `value`.
+*DEPRECATED* as of Fusion R20; renamed to
+[`annotations`](fusion.html#annotations).
     '''
     (java_new "com.amazon.fusion.TypeAnnotationsProc"))
 )
