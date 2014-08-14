@@ -3,7 +3,6 @@
 (require
   "/fusion/experimental/check"
   "/fusion/list"
-  "/fusion/private/builtins"  // annotate
   "/fusion/private/sexp"
   "/testutils"
   )
@@ -243,9 +242,9 @@
 //==========================================================================
 // none
 
-(check_true  (none is_truthy valNull)) 
-(check_true  (none is_truthy valEmpty)) 
-(check_true  (none is_truthy (sexp null false))) 
+(check_true  (none is_truthy valNull))
+(check_true  (none is_truthy valEmpty))
+(check_true  (none is_truthy (sexp null false)))
 (check_false (none is_truthy (sexp 1 2)))
 
 (check_false (none (lambda (e) (= e "hi")) (sexp "oh" "hi")))

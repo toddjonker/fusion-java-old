@@ -56,7 +56,29 @@ To use this dialect for your module, declare it as follows:
   (provide is_void void)
 
 
-  (require "/fusion/experimental/defines")
+  (require "/fusion/ffi/java")
 
-  (defpub_j type_annotations  "com.amazon.fusion.TypeAnnotationsProc")
+  (provide annotate)
+  (define annotate
+    '''
+    (annotate value text ...)
+
+Applies the given annotations to a `value`, returning a (shallow) copy if
+necessary to avoid mutating it.
+
+The `value` must be annotatable; that is, it must be one of the Ion types.
+The `text` arguments must be non-null, non-empty strings or symbols.
+    '''
+    (java_new "com.amazon.fusion.AnnotateProc"))
+
+
+  (provide type_annotations)
+  (define type_annotations
+    '''
+    (type_annotations value)
+
+Returns a non-null immutable list of symbols containing the user type
+annotations on the `value`.
+    '''
+    (java_new "com.amazon.fusion.TypeAnnotationsProc"))
 )

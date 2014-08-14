@@ -3,7 +3,6 @@
 (require
   "/fusion/experimental/check"
   "/fusion/list"
-  "/fusion/private/builtins"  // annotate
   "/fusion/unsafe/list"
   "/testutils")
 

@@ -3,7 +3,6 @@
 (require
   "/fusion/experimental/check"
   "/fusion/experimental/syntax"
-  "/fusion/private/builtins"    // annotate
   "/testutils"
   )
 

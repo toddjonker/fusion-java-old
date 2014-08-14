@@ -4,7 +4,6 @@
   "/fusion/experimental/altlambda"
   "/fusion/experimental/check"
   "/fusion/list"
-  "/fusion/private/builtins"       // for `annotate`
   "/fusion/struct"
   "/testutils"
   )

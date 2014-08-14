@@ -8,12 +8,6 @@ import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
 final class AnnotateProc
     extends Procedure
 {
-    AnnotateProc()
-    {
-        super("... doesn't mutate the value ...",
-              "value", "symbol", DOTDOTDOT);
-    }
-
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException

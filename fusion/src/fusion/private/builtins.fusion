@@ -75,10 +75,6 @@ Returns `true` when `value` is a procedure, `false` otherwise.
     (java_new "com.amazon.fusion.FusionProcedure$IsProcedureProc"))
 
 
-  (defpub_j annotate "com.amazon.fusion.AnnotateProc")
-
-
-
   (defpub_j size "com.amazon.fusion.FusionCollection$SizeProc")
 
   (defpub_j is_immutable_list
