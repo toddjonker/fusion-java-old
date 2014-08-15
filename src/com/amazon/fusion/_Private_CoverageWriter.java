@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -25,8 +27,23 @@ public final class _Private_CoverageWriter
 {
     private final static String CSS =
         "body { color:black }" +
-        ".covered { color:green }";
-
+        ".covered { color:green }" +
+        "table.percentgraph { border: 0px;font-size: 130%;margin: 0px;margin-left: auto; margin-right: 0px;" +
+        "padding: 0px; cellpadding=\"0px\" cellspacing=\"0px\"}" +
+        "table.percentgraph tr.percentgraph { border: 0px;margin: 0px;padding: 0px;}" +
+        "table.percentgraph td.percentgraph { border: 0px;margin: 0px;padding: 0px;padding-left: 4px;}" +
+        "table.percentgraph td.percentgraphright { align=\"right\"; border: 0px;margin: 0px;padding: 0px;padding-left: 4px; width=\"40\"}" +
+        "div.percentgraph { background-color: #f02020;border: #808080 1px solid;height: 1.3em;margin: 0px;padding: 0px;width: 100px;}" +
+        "div.percentgraph div.greenbar { background-color: #00f000;height: 1.3em;margin: 0px;padding: 0px;}" +
+        "div.percentgraph div.na { background-color: #eaeaea;height: 1.3em;margin: 0px;padding: 0px;}" +
+        "div.percentgraph span.text { display: block;position: absolute;text-align: center;width: 100px;}" +
+        "table.report { border-collapse: collapse;width: 100%;}" +
+        "table.report td { border: #d0d0d0 1px solid;}" +
+        "table.report td.heading {background: #dcecff;font-weight: bold;text-align: center;}" +
+        "table.report td.value { text-align: right;}" +
+        "table tr td, table tr th {font-size: 68%;}" +
+        "td.value table tr td {font-size: 11px;}" +
+        "div.separator {height: 10px;}";
 
     private final IonSystem mySystem = IonSystemBuilder.standard().build();
     private final _Private_CoverageCollectorImpl myCollector;
@@ -36,22 +53,31 @@ public final class _Private_CoverageWriter
     private final byte[] myCopyBuffer = new byte[BUFFER_SIZE];
 
     private long myIonBytesRead;
-    private HtmlWriter myHtml;
+    private HtmlWriter myIndexHtml;
     private boolean coverageState;
 
     private long myCoveredExpressions;
     private long myUncoveredExpressions;
 
+    private final Map<SourceName, CoverageInfoPair> fileCoverages;
+
+    private class CoverageInfoPair
+    {
+        public long coveredExpressions;
+        public long uncoveredExpressions;
+        public CoverageInfoPair() { coveredExpressions = 0; uncoveredExpressions = 0;}
+    }
 
     public _Private_CoverageWriter(_Private_CoverageCollectorImpl collector,
                                    File sourceFile)
     {
         myCollector  = collector;
         mySourceFile = sourceFile;
+        fileCoverages = new HashMap<SourceName, CoverageInfoPair>();
     }
 
 
-    private void copySourceThroughOffset(InputStream source, long offset)
+    private void copySourceThroughOffset(InputStream source, final HtmlWriter htmlWriter, long offset )
         throws IOException
     {
         long bytesToCopy = offset - myIonBytesRead;
@@ -65,7 +91,7 @@ public final class _Private_CoverageWriter
 
             if (bytesRead < 0) break; // EOF
 
-            myHtml.write(myCopyBuffer, 0, bytesRead);
+            htmlWriter.write(myCopyBuffer, 0, bytesRead);
             bytesCopied += bytesRead;
         }
 
@@ -74,50 +100,59 @@ public final class _Private_CoverageWriter
 
 
     private void copySourceThroughCurrentOffset(InputStream source,
-                                                SpanProvider spanProvider)
+                                                SpanProvider spanProvider, HtmlWriter htmlWriter)
         throws IOException
     {
         Span span = spanProvider.currentSpan();
         OffsetSpan offsetSpan = span.asFacet(OffsetSpan.class);
         long offset = offsetSpan.getStartOffset();
-        copySourceThroughOffset(source, offset);
+        copySourceThroughOffset(source, htmlWriter, offset);
     }
 
 
     private void setCoverageState(InputStream source,
                                   SpanProvider spanProvider,
-                                  boolean covered)
+                                  boolean covered, HtmlWriter htmlWriter)
         throws IOException
     {
         if (covered != coverageState)
         {
-            copySourceThroughCurrentOffset(source, spanProvider);
+            copySourceThroughCurrentOffset(source, spanProvider, htmlWriter);
 
-            myHtml.append("</span><span class='");
+            htmlWriter.append("</span><span class='");
             if (! covered)
             {
-                myHtml.append("un");
+                htmlWriter.append("un");
             }
-            myHtml.append("covered'>");
+            htmlWriter.append("covered'>");
         }
 
         coverageState = covered;
     }
 
 
-    private void renderSource(SourceName name)
+    private void renderSource(final SourceName name, final File outputDirectory)
         throws IOException
     {
-        myHtml.append("<h1>");
-        myHtml.append(name.display());
-        myHtml.append("</h1>\n");
+        String relativeName = name.getFile().getPath().replaceAll("/", "_");
+        relativeName = relativeName + ".html";
+        final File where = new File(outputDirectory, relativeName);
+        final HtmlWriter sourceHtml = new HtmlWriter(where);
+        myIndexHtml.append("<tr><td><a href=\"" + relativeName + "\">");
+        myIndexHtml.append(name.display());
+        myIndexHtml.append("</a></td>");
+        sourceHtml.renderHeadWithInlineCss("Fusion Code Coverage", CSS);
+        sourceHtml.append("<h1>");
+        sourceHtml.append(name.display());
+        sourceHtml.append("</h1>\n");
 
         SourceLocation[] locations = myCollector.sortedLocations(name);
         assert locations.length != 0;
 
         int locationIndex = 0;
+        final CoverageInfoPair coverageInfoPair = new CoverageInfoPair();
 
-        myHtml.append("<pre>");
+        sourceHtml.append("<pre>");
 
         try (InputStream myIonBytes = new FileInputStream(name.getFile()))
         {
@@ -132,7 +167,7 @@ public final class _Private_CoverageWriter
                 // We always start with a span so we can always end with one,
                 // regardless of the data in between.
                 coverageState = false;
-                myHtml.append("<span class='uncovered'>");
+                sourceHtml.append("<span class='uncovered'>");
 
                 for (IonType t = ionReader.next(); t != null; )
                 {
@@ -149,15 +184,17 @@ public final class _Private_CoverageWriter
                     {
                         boolean covered =
                             myCollector.locationCovered(coverageLoc);
-                        setCoverageState(myIonBytes, spanProvider, covered);
+                        setCoverageState(myIonBytes, spanProvider, covered, sourceHtml);
                         locationIndex++;
 
                         if (covered)
                         {
+                            coverageInfoPair.coveredExpressions++;
                             myCoveredExpressions++;
                         }
                         else
                         {
+                            coverageInfoPair.uncoveredExpressions++;
                             myUncoveredExpressions++;
                         }
 
@@ -177,53 +214,86 @@ public final class _Private_CoverageWriter
                 }
 
                 // Copy the rest of the Ion source.
-                copySourceThroughOffset(myIonBytes, Long.MAX_VALUE);
+                copySourceThroughOffset(myIonBytes, sourceHtml, Long.MAX_VALUE);
             }
         }
 
-        myHtml.append("</span>\n");
-        myHtml.append("</pre>\n");
+        sourceHtml.append("</span>\n");
+        renderCoveragePercentage(sourceHtml, coverageInfoPair.coveredExpressions, coverageInfoPair.uncoveredExpressions);
+        fileCoverages.put(name, coverageInfoPair);
+        sourceHtml.append("</pre>\n");
+        sourceHtml.append("<hr/>");
+        sourceHtml.close();
     }
 
+    private BigDecimal getPercent(final long covered, final long uncovered)
+    {
+        final long total = covered + uncovered;
+        final BigDecimal percentCovered =
+            new BigDecimal(covered * 100).divide(new BigDecimal(total), 2, RoundingMode.HALF_EVEN);
+        return percentCovered;
+    }
+
+    private void renderCoveragePercentage(final HtmlWriter htmlWriter, final long covered, final long uncovered)
+        throws IOException
+    {
+        final BigDecimal percentCovered = getPercent(covered, uncovered);
+        htmlWriter.append(covered + " expressions observed<br/>");
+        htmlWriter.append(percentCovered + "% expression coverage");
+    }
+
+    private void renderPercentageGraph(final long covered, final long uncovered)
+        throws IOException
+    {
+        final BigDecimal percent = getPercent(covered,uncovered);
+        final int percentIntVal = percent.intValue();
+
+        final String tableFormat =
+            "<table class=\"percentgraph\"><tr class=\"percentgraph\">" +
+            "<td class=\"percentgraphright\">%d</td><td class=\"percentgraph\">" +
+            "<div class=\"percentgraph\"><div class=\"greenbar\" style=\"width:%dpx\">" +
+            "<span class=\"text\">%d/%d</span></div></div></td></tr></table>";
+        final String percentGraph = String.format(tableFormat, percentIntVal, percentIntVal, covered, covered + uncovered);
+
+        myIndexHtml.append(percentGraph);
+    }
 
     public void renderMarkedUpSource(File where)
         throws IOException
     {
-        myHtml = new HtmlWriter(where);
+        final File outputDirectory = where.getParentFile();
+        myIndexHtml = new HtmlWriter(where);
 
-        myHtml.renderHeadWithInlineCss("Fusion Code Coverage", CSS);
+        myIndexHtml.renderHeadWithInlineCss("Fusion Code Coverage", CSS);
+        myIndexHtml.append("<p>Report generated at ");
+        myIndexHtml.append(Timestamp.now().toString());
+        myIndexHtml.append("</p>\n");
 
-        myHtml.append("<p>Report generated at ");
-        myHtml.append(Timestamp.now().toString());
-        myHtml.append("</p>\n");
-
+        final String tableHeading =
+            "<table class=\"report\"><thead><tr><td class=\"heading\">File</td>" +
+            "<td class=\"heading\">Expression Coverage %</td></tr></thead>";
+        myIndexHtml.append(tableHeading);
         SourceName mainSourceName = null;
         if (mySourceFile != null)
         {
             mainSourceName = SourceName.forFile(mySourceFile);
-            renderSource(mainSourceName);
+            renderSource(mainSourceName, outputDirectory);
         }
 
         for (SourceName name : myCollector.sortedNames())
         {
             if (! name.equals(mainSourceName) && name.getFile() != null)
             {
-                myHtml.append("<hr/>");
-
-                renderSource(name);
+                renderSource(name,outputDirectory);
+                CoverageInfoPair pair = fileCoverages.get(name);
+                myIndexHtml.append("<td>");
+                renderPercentageGraph(pair.coveredExpressions, pair.uncoveredExpressions);
+                myIndexHtml.append("\n</td></tr>");
             }
         }
-
-        myHtml.append("<hr/>");
-
-        long total = myCoveredExpressions + myUncoveredExpressions;
-        BigDecimal percentCovered =
-            new BigDecimal(myCoveredExpressions * 100).divide(new BigDecimal(total),
-                                                             2,
-                                                             RoundingMode.HALF_EVEN);
-        myHtml.append(myCoveredExpressions + " expressions observed<br/>");
-        myHtml.append(percentCovered + "% expression coverage");
-
-        myHtml.close();
+        myIndexHtml.append("</table>");
+        myIndexHtml.append("<hr/>");
+        renderCoveragePercentage(myIndexHtml, myCoveredExpressions, myUncoveredExpressions);
+        myIndexHtml.close();
     }
 }
