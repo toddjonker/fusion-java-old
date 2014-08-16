@@ -30,6 +30,8 @@
     (check === 1 (t))
     (check === 1 x)))
 
+(expect_syntax_exn (thunk))
+
 
 //==========================================================================
 // compose
@@ -97,6 +99,10 @@
 (check === [5,6,7,1,2,3] (prepend567 [1] [2,3]))
 
 
+(expect_arity_exn    (curry_left append_m))
+(expect_argument_exn (curry_left (void) 1))
+
+
 //==========================================================================
 // curry_right
 
@@ -109,3 +115,6 @@
 (check === [5,6,7] (append567))
 (check === [1,5,6,7] (append567 [1]))
 (check === [1,2,3,5,6,7] (append567 [1] [2,3]))
+
+(expect_arity_exn    (curry_right append_m))
+(expect_argument_exn (curry_right (void) 1))

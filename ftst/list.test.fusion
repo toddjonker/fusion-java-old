@@ -239,7 +239,9 @@
 (check_true ((list_element (stretchy_list F T) 1)))
 
 // Bad arguments
+(expect_argument_exn (list_element (sexp 1) 0))
 (expect_argument_exn (list_element [1,2] null.int))
+(expect_argument_exn (list_element [1,2] 3))
 
 
 //==========================================================================
@@ -254,6 +256,12 @@
  (let [(v (stretchy_list 0))]
    (list_set v 0 1)
    v))
+
+
+(expect_argument_exn (list_set (sexp 1) 0 null))
+(expect_argument_exn (list_set [0] 0 null))       // list not mutable
+(expect_argument_exn (list_set (mutable_list 1) "0" null))  // non-int pos
+(expect_argument_exn (list_set (mutable_list 1) 2 null))    // out of range
 
 
 //==========================================================================

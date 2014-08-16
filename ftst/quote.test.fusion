@@ -5,8 +5,10 @@
 )
 
 
+
+
 //==========================================================================
-// quasisyntax
+// quasiquote
 
 (check === (quasiquote null.sexp) (quote null.sexp))
 (check === (quasiquote null.list) (quote null.list))
@@ -35,3 +37,6 @@
                             (unquote mid)
                             inner))])
   (quote [im_out, mid, (quasiquote ((unquote im_out) (unquote mid) inner))]))
+
+
+(expect_syntax_exn (unquote true))

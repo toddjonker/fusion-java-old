@@ -11,8 +11,6 @@
   (provide is_sexp)
 
 
-  // TODO FUSION-102 mutable_sexp
-
   (provide sexp)
   (define sexp
     (java_new "com.amazon.fusion.FusionSexp$SexpProc"))

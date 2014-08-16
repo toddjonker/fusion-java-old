@@ -79,7 +79,6 @@
   (check === (quote (0 1)) (apply maker (quote (0 1)))))
 
 (check_makers sexp)
-// TODO immutable_sexp
 
 
 (check_annotations []            (quote ()))
@@ -89,7 +88,7 @@
 
 
 //==========================================================================
-// pair
+// pair, head, tail
 
 
 // TODO FUSION-268 is_sexp/is_collection accept any pair, not just proper sexp
@@ -102,7 +101,26 @@
   (check_pred is_sexp p)
   (check ident (head p) h)
   (check ident (tail p) t)
-  (check ===(pair [1] [2]) p))
+  (check === (pair [1] [2]) p))
+
+(check_void (head NULL_SEXP))
+(check_void (tail NULL_SEXP))
+
+(check_void (head EMPTY_SEXP))
+(check_void (tail EMPTY_SEXP))
+
+
+(expect_arity_exn (pair))
+(expect_arity_exn (pair 1))
+(expect_arity_exn (pair 1 2 3))
+
+(expect_arity_exn (head))
+(expect_arity_exn (head (pair 1 2) 3))
+(expect_arity_exn (tail))
+(expect_arity_exn (tail (pair 1 2) 3))
+
+(expect_argument_exn (head VOID))
+(expect_argument_exn (tail VOID))
 
 
 //==========================================================================
@@ -350,6 +368,8 @@
 (check === (sexp 1 2)
   (sexp_append (sexp 1) (sexp 2)))
 
+(expect_argument_exn (sexp_append (sexp) (list)))
+(expect_argument_exn (sexp_append (list) (sexp)))
 
 // TODO test annotations
 

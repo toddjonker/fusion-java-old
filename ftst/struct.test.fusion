@@ -422,6 +422,9 @@
 (check_unzip {a:1,b:2} (quote [b,a]) [2,1])   // TODO shady test assumes order
 
 
+(expect_argument_exn (struct_unzip []))
+
+
 //==========================================================================
 // struct_zip and mutable_struct_zip
 
@@ -599,7 +602,7 @@
 
 
 //==========================================================================
-//none
+// none
 
 (check_true  (none is_truthy {}))
 (check_true  (none is_truthy {f:null, g:false}))
@@ -681,3 +684,5 @@
 (check_iter (struct_iterator {a:1}) (quote [[a,1]]))
 (check_iter (struct_iterator {a:1,a:2}) (quote [[a,1],[a,2]]))
 (check_iter (struct_iterator {a:1,b:3,a:2}) (quote [[b,3],[a,1],[a,2]]))
+
+(expect_argument_exn (struct_iterator []))
