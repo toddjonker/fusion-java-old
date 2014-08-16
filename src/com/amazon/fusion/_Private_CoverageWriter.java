@@ -66,6 +66,11 @@ public final class _Private_CoverageWriter
         public long coveredExpressions;
         public long uncoveredExpressions;
         public CoverageInfoPair() { coveredExpressions = 0; uncoveredExpressions = 0;}
+
+        public long total()
+        {
+            return coveredExpressions + uncoveredExpressions;
+        }
     }
 
     public _Private_CoverageWriter(_Private_CoverageCollectorImpl collector,
@@ -213,6 +218,11 @@ public final class _Private_CoverageWriter
                     }
                 }
 
+                assert locationIndex == locations.length
+                    : "Not all locations were found in the source";
+                assert locationIndex == coverageInfoPair.total()
+                    : "Not all locations were counted";
+
                 // Copy the rest of the Ion source.
                 copySourceThroughOffset(myIonBytes, sourceHtml, Long.MAX_VALUE);
             }
@@ -238,7 +248,7 @@ public final class _Private_CoverageWriter
         throws IOException
     {
         final BigDecimal percentCovered = getPercent(covered, uncovered);
-        htmlWriter.append(covered + " expressions observed<br/>");
+        htmlWriter.append((covered + uncovered) + " expressions observed<br/>");
         htmlWriter.append(percentCovered + "% expression coverage");
     }
 
