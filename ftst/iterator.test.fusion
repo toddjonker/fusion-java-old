@@ -24,6 +24,13 @@
 
 (check_iter [] empty_iterator)
 
+(check_iter [[]]  (value_iterator []))
+(check_iter [509] (value_iterator 509))
+
+
+//==========================================================================
+// list_iterator, list_from_iterator
+
 (check_iter []              (list_iterator null.list))
 (check_iter []              (list_iterator [])     )
 (check_iter [1]             (list_iterator [1])    )
@@ -31,44 +38,11 @@
 (check_iter ["a", true]     (list_iterator ["a", true]))
 (check_iter [["a"], [true]] (list_iterator [["a"], [true]]) )
 
-(check_iter [[]]  (value_iterator []))
-(check_iter [509] (value_iterator 509))
-
 (define plus1 (lambda (n) (+ 1 n)))
-
-(check_iter []     (iterator_map plus1 empty_iterator))
-(check_iter [2, 8] (iterator_map plus1 (list_iterator [1, 7])))
-
-
-(check_iter []    (iterator_choose is_int empty_iterator))
-(check_iter []    (iterator_choose is_int (value_iterator true)))
-(check_iter [614] (iterator_choose is_int (value_iterator 614)))
-(check_iter [1,2,3]
-  (iterator_choose is_int (list_iterator [true, 1, 2, false, 3])))
-
-
-(check_void (iterator_find (lambda (e) true) empty_iterator))
-(check = 6 (iterator_find is_int (list_iterator [true, "", 6])))
-(check = 2 (iterator_find plus1 (list_iterator [2, 6])))
-
-
-(check_iter [] (iterator_append empty_iterator empty_iterator))
-(check_iter [601] (iterator_append empty_iterator (value_iterator 601)))
-(check_iter [616] (iterator_append (value_iterator 616) empty_iterator))
-(check_iter [1,2] (iterator_append (value_iterator 1) (value_iterator 2)))
-(check_iter [1,2,3,4,5]
-  (iterator_append (list_iterator [1,2,3]) (list_iterator [4,5])))
 
 (check === []    (list_from_iterator empty_iterator))
 (check === [1]   (list_from_iterator (list_iterator [1])))
 (check === [1,2] (list_from_iterator (list_iterator [1,2])))
-
-(check_iter []
-  (iterator_map_splicing list_iterator empty_iterator))
-(check_iter [1,2,3,4]
-  (iterator_map_splicing value_iterator (list_iterator [1,2,3,4])))
-(check_iter [1,2,3,4]
-  (iterator_map_splicing list_iterator (list_iterator [[1],[2,3],[],[4]])))
 
 
 //==========================================================================
@@ -87,3 +61,51 @@
 (check_iter [1, 2]          (sexp_iterator (sexp 1 2)))
 (check_iter ["a", true]     (sexp_iterator (sexp "a" true)))
 (check_iter [["a"], [true]] (sexp_iterator (sexp ["a"] [true])))
+
+
+//==========================================================================
+// iterator_append
+
+(check_iter [] (iterator_append empty_iterator empty_iterator))
+(check_iter [601] (iterator_append empty_iterator (value_iterator 601)))
+(check_iter [616] (iterator_append (value_iterator 616) empty_iterator))
+(check_iter [1,2] (iterator_append (value_iterator 1) (value_iterator 2)))
+(check_iter [1,2,3,4,5]
+  (iterator_append (list_iterator [1,2,3]) (list_iterator [4,5])))
+
+
+//==========================================================================
+// iterator_choose
+
+(check_iter []    (iterator_choose is_int empty_iterator))
+(check_iter []    (iterator_choose is_int (value_iterator true)))
+(check_iter [614] (iterator_choose is_int (value_iterator 614)))
+(check_iter [1,2,3]
+  (iterator_choose is_int (list_iterator [true, 1, 2, false, 3])))
+
+
+//==========================================================================
+// iterator_find
+
+(check_void (iterator_find (lambda (e) true) empty_iterator))
+(check = 6 (iterator_find is_int (list_iterator [true, "", 6])))
+(check = 2 (iterator_find plus1 (list_iterator [2, 6])))
+
+
+//==========================================================================
+// iterator_map
+
+(check_iter []     (iterator_map plus1 empty_iterator))
+(check_iter [2, 8] (iterator_map plus1 (list_iterator [1, 7])))
+
+
+//==========================================================================
+// iterator_map_splicing
+
+(check_iter []
+  (iterator_map_splicing list_iterator empty_iterator))
+(check_iter [1,2,3,4]
+  (iterator_map_splicing value_iterator (list_iterator [1,2,3,4])))
+(check_iter [1,2,3,4]
+  (iterator_map_splicing list_iterator (list_iterator [[1],[2,3],[],[4]])))
+
