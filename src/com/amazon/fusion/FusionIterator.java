@@ -12,6 +12,7 @@ import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import com.amazon.ion.IonValue;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 // TODO Add abstract class so subclasses don't have blank procs?
 
@@ -222,7 +223,14 @@ class FusionIterator
         public Object next(Evaluator eval)
             throws FusionException
         {
-            return myIterator.next();
+            try
+            {
+                return myIterator.next();
+            }
+            catch (NoSuchElementException e)
+            {
+                throw new ContractException("iterator_next: no such element");
+            }
         }
     }
 

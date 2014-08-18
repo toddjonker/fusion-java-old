@@ -10,8 +10,8 @@ based on two procedures:
 
   * `(iterator_has_next i)` returns true or false to indicate whether iterator
     `i` has another value to retrieve.
-  * `(iterator_next i)` returns the next value from the iterator, throwing an
-    exception if there's no next value.
+  * `(iterator_next i)` returns the next value from the iterator, throwing a
+    contract exception if there's no next value.
   '''
 
   (require
@@ -27,7 +27,7 @@ based on two procedures:
 
   (define BAD_NEXT
     (lambda ()
-      (assert false "no such element")))
+      (raise_contract_error "iterator_next" "no such element")))
 
 
   (defpub_j is_iterator       "com.amazon.fusion.FusionIterator$IsIteratorProc")

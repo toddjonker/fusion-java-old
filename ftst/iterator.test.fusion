@@ -12,7 +12,9 @@
   (let [(len (size values))]
     (let loop [(i 0)]
       (if (= i len)
-        (check_false (iterator_has_next iter) "iterator should be empty")
+        (begin
+          (check_false (iterator_has_next iter) "iterator should be empty")
+          (expect_contract_exn (iterator_next iter)))
         (begin
           (check_pred iterator_has_next iter "iterator should have next")
           (let [(actual   (iterator_next iter)),
@@ -79,9 +81,9 @@
 (expect_argument_exn (sexp_iterator null.list))
 (expect_argument_exn (sexp_iterator []))
 
-(check_iter [] (sexp_iterator (quote null.sexp)))
-(check_iter [] (sexp_iterator (sexp)))
-(check_iter [1]             (sexp_iterator (sexp 1))    )
+(check_iter []              (sexp_iterator (quote null.sexp)))
+(check_iter []              (sexp_iterator (sexp)))
+(check_iter [1]             (sexp_iterator (sexp 1)))
 (check_iter [1, 2]          (sexp_iterator (sexp 1 2)))
 (check_iter ["a", true]     (sexp_iterator (sexp "a" true)))
-(check_iter [["a"], [true]] (sexp_iterator (sexp ["a"] [true])) )
+(check_iter [["a"], [true]] (sexp_iterator (sexp ["a"] [true])))
