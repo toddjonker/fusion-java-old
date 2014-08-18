@@ -74,7 +74,8 @@ Returns an iterator that produces `value` as its only element.
 Returns an iterator whose elements are the results of applying `proc` to the
 corresponding elements of `iter`.
       '''
-      // TODO type-check proc
+      (unless (is_procedure proc)
+        (raise_argument_error "iterator_map" "procedure" 0 proc iter))
       (unless (is_iterator iter)
         (raise_argument_error "iterator_map" "iterator" 1 proc iter))
       (make_iterator
@@ -87,9 +88,10 @@ corresponding elements of `iter`.
     (lambda (proc iter)
       '''
 Returns an iterator that applies an iterator-making `proc` to each element of
-`iter`, splicing the inner sequences into a single outer sequence.
+`iter`, splicing the inner iterators into a single outer iterator.
       '''
-      // TODO type-check proc
+      (unless (is_procedure proc)
+        (raise_argument_error "iterator_map_splicing" "procedure" 0 proc iter))
       (unless (is_iterator iter)
         (raise_argument_error "iterator_map_splicing" "iterator" 1 proc iter))
       (letrec [(find_next
@@ -133,7 +135,8 @@ Returns an iterator that applies an iterator-making `proc` to each element of
 Returns an iterator whose elements are those provided by `iter` that satisfy
 predicate `pred`.
       '''
-      // TODO type-check pred
+      (unless (is_procedure pred)
+        (raise_argument_error "iterator_choose" "predicate" 0 pred iter))
       (unless (is_iterator iter)
         (raise_argument_error "iterator_choose" "iterator" 1 pred iter))
       (letrec [(find_next

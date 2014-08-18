@@ -83,6 +83,11 @@
 (check_iter [1,2,3]
   (iterator_choose is_int (list_iterator [true, 1, 2, false, 3])))
 
+(expect_argument_exn
+  (iterator_choose true empty_iterator))     // 1st arg not a proc
+(expect_argument_exn
+  (iterator_choose identity []))             // 2nd arg not an iterator
+
 
 //==========================================================================
 // iterator_find
@@ -98,6 +103,11 @@
 (check_iter []     (iterator_map plus1 empty_iterator))
 (check_iter [2, 8] (iterator_map plus1 (list_iterator [1, 7])))
 
+(expect_argument_exn
+  (iterator_map true empty_iterator))     // 1st arg not a proc
+(expect_argument_exn
+  (iterator_map identity []))             // 2nd arg not an iterator
+
 
 //==========================================================================
 // iterator_map_splicing
@@ -109,3 +119,7 @@
 (check_iter [1,2,3,4]
   (iterator_map_splicing list_iterator (list_iterator [[1],[2,3],[],[4]])))
 
+(expect_argument_exn
+  (iterator_map_splicing true empty_iterator))     // 1st arg not a proc
+(expect_argument_exn
+  (iterator_map_splicing identity []))             // 2nd arg not an iterator
