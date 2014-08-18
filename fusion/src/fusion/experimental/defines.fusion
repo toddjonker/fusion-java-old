@@ -18,7 +18,7 @@
 
 
   (provide defpub)
-  (define_syntax defpub  // WARNING: Doc syntax isn't supported yet.
+  (define_syntax defpub
     '''
     (defpub name value)
 
@@ -45,7 +45,7 @@ Defines and provides a procedure named ID with the BODY.
 
 
   (provide defpub_j)
-  (define_syntax defpub_j  // WARNING: Doc syntax isn't supported yet.
+  (define_syntax defpub_j
     '''
     (defpub_j id fqcn)
 
@@ -73,7 +73,7 @@ fully-qualified class name string FQCN.
 
 
   (provide defpub_syntax)
-  (define_syntax defpub_syntax  // WARNING: Doc syntax isn't supported yet.
+  (define_syntax defpub_syntax
     '''
     (defpub_syntax name value)
 
@@ -91,7 +91,7 @@ generally be a transform procedure).
 
 
   (provide defpub_j_syntax)
-  (define_syntax defpub_j_syntax  // WARNING: Doc syntax isn't supported yet.
+  (define_syntax defpub_j_syntax
     '''
     (defpub_j_syntax id fqcn)
 
