@@ -1,0 +1,15 @@
+// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/fusion/experimental/check"
+  "/fusion/experimental/defines"
+  )
+
+(expect_syntax_exn (defpub))
+(expect_syntax_exn (defpub foo))
+(expect_syntax_exn (defpub (foo)))
+
+// TODO these fail poorly
+//(expect_syntax_exn (defpub_j))
+//(expect_syntax_exn (defpub_j foo))
+(expect_syntax_exn (defpub_j foo 'bad docstring' "java.lang.String"))

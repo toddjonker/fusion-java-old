@@ -73,6 +73,12 @@
 (check_iter [1,2,3,4,5]
   (iterator_append (list_iterator [1,2,3]) (list_iterator [4,5])))
 
+// Make sure we can call `next` without `has_next`
+(let [(i (iterator_append (value_iterator 1) (value_iterator 2)))]
+  (check === 1 (iterator_next i))
+  (check === 2 (iterator_next i))
+  (expect_contract_exn (iterator_next i)))
+
 
 //==========================================================================
 // iterator_choose
@@ -82,6 +88,12 @@
 (check_iter [614] (iterator_choose is_int (value_iterator 614)))
 (check_iter [1,2,3]
   (iterator_choose is_int (list_iterator [true, 1, 2, false, 3])))
+
+// Make sure we can call `next` without `has_next`
+(let [(i (iterator_choose is_int (list_iterator [true, 1, 2, false])))]
+  (check === 1 (iterator_next i))
+  (check === 2 (iterator_next i))
+  (expect_contract_exn (iterator_next i)))
 
 (expect_argument_exn
   (iterator_choose true empty_iterator))     // 1st arg not a proc
@@ -119,7 +131,19 @@
 (check_iter [1,2,3,4]
   (iterator_map_splicing list_iterator (list_iterator [[1],[2,3],[],[4]])))
 
+// Make sure we can call `next` without `has_next`
+(let [(i (iterator_map_splicing list_iterator (list_iterator [[1],[2,3],[]])))]
+  (check === 1 (iterator_next i))
+  (check === 2 (iterator_next i))
+  (check === 3 (iterator_next i))
+  (expect_contract_exn (iterator_next i)))
+
 (expect_argument_exn
   (iterator_map_splicing true empty_iterator))     // 1st arg not a proc
 (expect_argument_exn
   (iterator_map_splicing identity []))             // 2nd arg not an iterator
+
+// Proc doesn't return an iterator
+(expect_result_exn
+  (let [(i (iterator_map_splicing identity (list_iterator [1])))]
+    (iterator_has_next i)))
