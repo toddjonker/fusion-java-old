@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion._Private_CoverageCollectorImpl.SRCLOC_COMPARE;
+import static java.math.RoundingMode.HALF_EVEN;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonType;
@@ -16,7 +17,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,33 +55,92 @@ public final class _Private_CoverageWriter
     private long myIonBytesRead;
     private boolean coverageState;
 
-    private long myCoveredExpressions;
-    private long myUncoveredExpressions;
 
-    private final Map<SourceName, CoverageInfoPair> fileCoverages;
 
     private class CoverageInfoPair
     {
         public long coveredExpressions;
         public long uncoveredExpressions;
+
         public CoverageInfoPair()
         {
             coveredExpressions   = 0;
             uncoveredExpressions = 0;
         }
 
+        void foundExpression(boolean covered)
+        {
+            if (covered)
+            {
+                coveredExpressions++;
+            }
+            else
+            {
+                uncoveredExpressions++;
+            }
+        }
+
         public long total()
         {
             return coveredExpressions + uncoveredExpressions;
         }
+
+        BigDecimal percentCovered()
+        {
+            final long total = total();
+
+            if (total == 0) return BigDecimal.ZERO;
+
+            BigDecimal numerator = new BigDecimal(coveredExpressions * 100);
+
+            final BigDecimal percentCovered =
+                numerator.divide(new BigDecimal(total), 2, HALF_EVEN);
+
+            return percentCovered;
+        }
+
+        void renderCoveragePercentage(HtmlWriter htmlWriter)
+            throws IOException
+        {
+            htmlWriter.append(total() + " expressions observed<br/>");
+            htmlWriter.append(percentCovered() + "% expression coverage");
+        }
+
+        void renderPercentageGraph(HtmlWriter html)
+            throws IOException
+        {
+            final BigDecimal percent = percentCovered();
+            final int percentIntVal = percent.intValue();
+
+            html.append("<table class='percentgraph'>"
+                          + "<tr class='percentgraph'>"
+                          + "<td class='percentgraphright'>");
+            html.append(Integer.toString(percentIntVal));
+            html.append("%</td>");
+            html.append("<td class='percentgraph'>"
+                          + "<div class='percentgraph'>"
+                          + "<div class='greenbar' style='width:");
+            html.append(Integer.toString(percentIntVal));
+            html.append("px'><span class='text'>");
+            html.append(Long.toString(coveredExpressions));
+            html.append("/");
+            html.append(Long.toString(total()));
+            html.append("</span></div></div></td></tr></table>");
+        }
     }
+
+
+    private final CoverageInfoPair myGlobalCoverage = new CoverageInfoPair();
+
+    private final Map<SourceName, CoverageInfoPair> myFileCoverages;
+
 
     public _Private_CoverageWriter(_Private_CoverageCollectorImpl collector,
                                    File sourceFile)
     {
         myCollector  = collector;
         mySourceFile = sourceFile;
-        fileCoverages = new HashMap<SourceName, CoverageInfoPair>();
+        myFileCoverages = new HashMap<SourceName, CoverageInfoPair>();
     }
 
 
@@ -143,21 +202,10 @@ public final class _Private_CoverageWriter
     }
 
 
-    private void renderSource(File       outputDirectory,
-                              HtmlWriter indexHtml,
+    private void renderSource(HtmlWriter sourceHtml,
                               SourceName name)
         throws IOException
     {
-        String relativeName = name.getFile().getPath().replaceAll("/", "_");
-        relativeName = relativeName + ".html";
-
-        indexHtml.append("<tr><td><a href=\"" + relativeName + "\">");
-        indexHtml.append(name.display());
-        indexHtml.append("</a></td>");
-
-        final File where = new File(outputDirectory, relativeName);
-        final HtmlWriter sourceHtml = new HtmlWriter(where);
-
         sourceHtml.renderHeadWithInlineCss("Fusion Code Coverage", CSS);
         sourceHtml.append("<h1>");
         sourceHtml.append(name.display());
@@ -205,16 +253,8 @@ public final class _Private_CoverageWriter
                                          covered);
                         locationIndex++;
 
-                        if (covered)
-                        {
-                            coverageInfoPair.coveredExpressions++;
-                            myCoveredExpressions++;
-                        }
-                        else
-                        {
-                            coverageInfoPair.uncoveredExpressions++;
-                            myUncoveredExpressions++;
-                        }
+                        coverageInfoPair.foundExpression(covered);
+                        myGlobalCoverage.foundExpression(covered);
 
                         if (locationIndex == locations.length) break;
                     }
@@ -238,59 +278,39 @@ public final class _Private_CoverageWriter
 
                 // Copy the rest of the Ion source.
                 copySourceThroughOffset(sourceHtml, myIonBytes, Long.MAX_VALUE);
+
+                sourceHtml.append("</span>\n");
             }
         }
 
-        sourceHtml.append("</span>\n");
-        renderCoveragePercentage(sourceHtml,
-                                 coverageInfoPair.coveredExpressions,
-                                 coverageInfoPair.uncoveredExpressions);
-        fileCoverages.put(name, coverageInfoPair);
         sourceHtml.append("</pre>\n");
         sourceHtml.append("<hr/>");
-        sourceHtml.close();
+        coverageInfoPair.renderCoveragePercentage(sourceHtml);
+
+        myFileCoverages.put(name, coverageInfoPair);
     }
 
-    private BigDecimal getPercent(final long covered, final long uncovered)
-    {
-        final long total = covered + uncovered;
 
-        if (total == 0) return BigDecimal.ZERO;
-
-        final BigDecimal percentCovered =
-            new BigDecimal(covered * 100).divide(new BigDecimal(total),
-                                                 2,
-                                                 RoundingMode.HALF_EVEN);
-        return percentCovered;
-    }
-
-    private void renderCoveragePercentage(HtmlWriter htmlWriter,
-                                          long       covered,
-                                          long       uncovered)
+    private void renderSource(File       outputDirectory,
+                              HtmlWriter indexHtml,
+                              SourceName name)
         throws IOException
     {
-        final BigDecimal percentCovered = getPercent(covered, uncovered);
-        htmlWriter.append((covered + uncovered) + " expressions observed<br/>");
-        htmlWriter.append(percentCovered + "% expression coverage");
+        String relativeName = name.getFile().getPath().replaceAll("/", "_");
+        relativeName = relativeName + ".html";
+
+        indexHtml.append("<tr><td><a href=\"" + relativeName + "\">");
+        indexHtml.append(name.display());
+        indexHtml.append("</a></td>");
+
+        final File where = new File(outputDirectory, relativeName);
+
+        try (HtmlWriter sourceHtml = new HtmlWriter(where))
+        {
+            renderSource(sourceHtml, name);
+        }
     }
 
-    private void renderPercentageGraph(HtmlWriter html,
-                                       long       covered,
-                                       long       uncovered)
-        throws IOException
-    {
-        final BigDecimal percent = getPercent(covered,uncovered);
-        final int percentIntVal = percent.intValue();
-
-        final String tableFormat =
-            "<table class=\"percentgraph\"><tr class=\"percentgraph\">" +
-            "<td class=\"percentgraphright\">%d</td><td class=\"percentgraph\">" +
-            "<div class=\"percentgraph\"><div class=\"greenbar\" style=\"width:%dpx\">" +
-            "<span class=\"text\">%d/%d</span></div></div></td></tr></table>";
-        final String percentGraph = String.format(tableFormat, percentIntVal, percentIntVal, covered, covered + uncovered);
-
-        html.append(percentGraph);
-    }
 
     public void renderFullReport(File where)
         throws IOException
@@ -305,7 +325,7 @@ public final class _Private_CoverageWriter
 
         String tableHeading =
             "<table class=\"report\"><thead><tr><td class=\"heading\">File</td>" +
-            "<td class=\"heading\">Expression Coverage %</td></tr></thead>";
+            "<td class=\"heading\">Expression Coverage</td></tr></thead>\n";
         indexHtml.append(tableHeading);
         SourceName mainSourceName = null;
         if (mySourceFile != null)
@@ -319,19 +339,16 @@ public final class _Private_CoverageWriter
             if (! name.equals(mainSourceName) && name.getFile() != null)
             {
                 renderSource(outputDirectory, indexHtml, name);
-                CoverageInfoPair pair = fileCoverages.get(name);
+                CoverageInfoPair pair = myFileCoverages.get(name);
                 indexHtml.append("<td>");
-                renderPercentageGraph(indexHtml,
-                                      pair.coveredExpressions,
-                                      pair.uncoveredExpressions);
-                indexHtml.append("\n</td></tr>");
+                pair.renderPercentageGraph(indexHtml);
+                indexHtml.append("</td></tr>\n");
             }
         }
-        indexHtml.append("</table>");
-        indexHtml.append("<hr/>");
-        renderCoveragePercentage(indexHtml,
-                                 myCoveredExpressions,
-                                 myUncoveredExpressions);
+        indexHtml.append("</table>\n<br/>\n");
+
+        myGlobalCoverage.renderCoveragePercentage(indexHtml);
+
         indexHtml.close();
     }
 }
