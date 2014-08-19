@@ -203,10 +203,29 @@ public final class _Private_CoverageWriter
                               SourceName name)
         throws IOException
     {
+        File sourceFile = name.getFile();
+
         sourceHtml.renderHeadWithInlineCss("Fusion Code Coverage", CSS);
-        sourceHtml.append("<h1>");
-        sourceHtml.append(name.display());
-        sourceHtml.append("</h1>\n");
+        {
+            sourceHtml.append("<h1>");
+            ModuleIdentity id = name.getModuleIdentity();
+            if (id != null)
+            {
+                sourceHtml.append("Module ");
+                sourceHtml.append(id.absolutePath());
+                sourceHtml.append("</h1>\n");
+
+                String path = sourceFile.getAbsolutePath();
+                sourceHtml.append("at ");
+                sourceHtml.append(sourceHtml.escapeString(path));
+            }
+            else
+            {
+                sourceHtml.append("File ");
+                sourceHtml.append(name.display());
+                sourceHtml.append("</h1>\n");
+            }
+        }
 
         SourceLocation[] locations = myCollector.sortedLocations(name);
         assert locations.length != 0;
@@ -214,14 +233,15 @@ public final class _Private_CoverageWriter
         int locationIndex = 0;
         final CoverageInfoPair coverageInfoPair = new CoverageInfoPair();
 
+        sourceHtml.append("\n<hr/>\n");
         sourceHtml.append("<pre>");
 
-        try (InputStream myIonBytes = new FileInputStream(name.getFile()))
+        try (InputStream myIonBytes = new FileInputStream(sourceFile))
         {
             myIonBytesRead = 0;
 
             try (IonReader ionReader =
-                    mySystem.newReader(new FileInputStream(name.getFile())))
+                    mySystem.newReader(new FileInputStream(sourceFile)))
             {
                 SpanProvider spanProvider =
                     ionReader.asFacet(SpanProvider.class);
@@ -276,7 +296,7 @@ public final class _Private_CoverageWriter
                 // Copy the rest of the Ion source.
                 copySourceThroughOffset(sourceHtml, myIonBytes, Long.MAX_VALUE);
 
-                sourceHtml.append("</span>\n");
+                sourceHtml.append("</span>");
             }
         }
 
@@ -297,7 +317,17 @@ public final class _Private_CoverageWriter
         relativeName = relativeName + ".html";
 
         indexHtml.append("<tr><td><a href=\"" + relativeName + "\">");
-        indexHtml.append(name.display());
+
+        ModuleIdentity id = name.getModuleIdentity();
+        if (id != null)
+        {
+            indexHtml.append(id.absolutePath());
+        }
+        else
+        {
+            indexHtml.append(name.display());
+        }
+
         indexHtml.append("</a></td>");
 
         final File where = new File(outputDirectory, relativeName);
@@ -306,6 +336,15 @@ public final class _Private_CoverageWriter
         {
             renderSource(sourceHtml, name);
         }
+    }
+
+
+    private void renderTableHeading(HtmlWriter html, String category)
+        throws IOException
+    {
+        html.append("<thead><tr><td class='heading'>");
+        html.append(category);
+        html.append("</td><td class='heading'>Expression Coverage</td></tr></thead>\n");
     }
 
 
@@ -320,14 +359,14 @@ public final class _Private_CoverageWriter
         indexHtml.append(Timestamp.now().toString());
         indexHtml.append("</p>\n");
 
-        String tableHeading =
-            "<table class=\"report\"><thead><tr><td class=\"heading\">File</td>" +
-            "<td class=\"heading\">Expression Coverage</td></tr></thead>\n";
-        indexHtml.append(tableHeading);
+        SourceName[] sortedSourceNames = myCollector.sortedNames();
 
-        for (SourceName name : myCollector.sortedNames())
+        indexHtml.append("<table class='report'>\n");
+
+        renderTableHeading(indexHtml, "Module");
+        for (SourceName name : sortedSourceNames)
         {
-            if (name.getFile() != null)
+            if (name.getModuleIdentity() != null)
             {
                 renderSource(outputDirectory, indexHtml, name);
                 CoverageInfoPair pair = myFileCoverages.get(name);
@@ -336,6 +375,20 @@ public final class _Private_CoverageWriter
                 indexHtml.append("</td></tr>\n");
             }
         }
+
+        renderTableHeading(indexHtml, "File");
+        for (SourceName name : sortedSourceNames)
+        {
+            if (name.getModuleIdentity() == null && name.getFile() != null)
+            {
+                renderSource(outputDirectory, indexHtml, name);
+                CoverageInfoPair pair = myFileCoverages.get(name);
+                indexHtml.append("<td>");
+                pair.renderPercentageGraph(indexHtml);
+                indexHtml.append("</td></tr>\n");
+            }
+        }
+
         indexHtml.append("</table>\n<br/>\n");
 
         myGlobalCoverage.renderCoveragePercentage(indexHtml);
