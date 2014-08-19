@@ -6,8 +6,12 @@ import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.system.IonTextWriterBuilder;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
+import java.net.URL;
+import java.util.Properties;
 
 /**
  *
@@ -187,5 +191,54 @@ final class FusionUtils
         }
 
         return buf.toString();
+    }
+
+
+    //=========================================================================
+
+
+    /**
+     * Reads properties from a URL.
+     *
+     * @throws FusionException if there's a problem reading the resource.
+     */
+    public static Properties readProperties(URL resource)
+        throws FusionException
+    {
+        try (InputStream stream = resource.openStream())
+        {
+            Properties props = new Properties();
+            props.load(stream);
+            return props;
+        }
+        catch (IOException e)
+        {
+            String message =
+                "Error reading properties from resource " + resource;
+            throw new FusionException(message, e);
+        }
+    }
+
+
+    /**
+     * Reads properties from a file.
+     *
+     * @throws FusionException if there's a problem reading the file.
+     */
+    public static Properties readProperties(File file)
+        throws FusionException
+    {
+        try (InputStream stream = new FileInputStream(file))
+        {
+            Properties props = new Properties();
+            props.load(stream);
+            return props;
+        }
+        catch (IOException e)
+        {
+            String message =
+                "Error reading properties from file " + file;
+            throw new FusionException(message, e);
+        }
     }
 }

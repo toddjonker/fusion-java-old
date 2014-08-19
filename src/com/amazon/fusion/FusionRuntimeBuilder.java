@@ -4,8 +4,6 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -243,21 +241,8 @@ public class FusionRuntimeBuilder
     {
         if (resource == null) return this;
 
-        try (InputStream stream = resource.openStream())
-        {
-            if (stream == null) return this;
-
-            Properties props = new Properties();
-            props.load(stream);
-
-            return withConfigProperties(props);
-        }
-        catch (IOException e)
-        {
-            String message =
-                "Error reading properties from resource " + resource;
-            throw new FusionException(message, e);
-        }
+        Properties props = FusionUtils.readProperties(resource);
+        return withConfigProperties(props);
     }
 
 
