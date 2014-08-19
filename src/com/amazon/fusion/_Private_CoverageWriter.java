@@ -239,6 +239,9 @@ public final class _Private_CoverageWriter
     private BigDecimal getPercent(final long covered, final long uncovered)
     {
         final long total = covered + uncovered;
+
+        if (total == 0) return BigDecimal.ZERO;
+
         final BigDecimal percentCovered =
             new BigDecimal(covered * 100).divide(new BigDecimal(total), 2, RoundingMode.HALF_EVEN);
         return percentCovered;
