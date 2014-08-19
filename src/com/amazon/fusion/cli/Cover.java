@@ -67,7 +67,7 @@ class Cover
                 new _Private_CoverageWriter(collector, null);
 
             File html = new File(myDataDir, "index.html");
-            renderer.renderMarkedUpSource(html);
+            renderer.renderFullReport(html);
 
             System.out.print("Wrote Fusion coverage report to ");
             System.out.println(html.getPath());
