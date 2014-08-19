@@ -64,7 +64,7 @@ class Cover
                 _Private_CoverageCollectorImpl.fromDirectory(myDataDir);
 
             _Private_CoverageWriter renderer =
-                new _Private_CoverageWriter(collector, null);
+                new _Private_CoverageWriter(collector);
 
             File html = new File(myDataDir, "index.html");
             renderer.renderFullReport(html);

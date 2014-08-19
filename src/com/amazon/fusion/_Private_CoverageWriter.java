@@ -47,7 +47,6 @@ public final class _Private_CoverageWriter
 
     private final IonSystem mySystem = IonSystemBuilder.standard().build();
     private final _Private_CoverageCollectorImpl myCollector;
-    private final File mySourceFile;
 
     private final int BUFFER_SIZE = 2048;
     private final byte[] myCopyBuffer = new byte[BUFFER_SIZE];
@@ -135,11 +134,9 @@ public final class _Private_CoverageWriter
     private final Map<SourceName, CoverageInfoPair> myFileCoverages;
 
 
-    public _Private_CoverageWriter(_Private_CoverageCollectorImpl collector,
-                                   File sourceFile)
+    public _Private_CoverageWriter(_Private_CoverageCollectorImpl collector)
     {
-        myCollector  = collector;
-        mySourceFile = sourceFile;
+        myCollector     = collector;
         myFileCoverages = new HashMap<SourceName, CoverageInfoPair>();
     }
 
@@ -327,16 +324,10 @@ public final class _Private_CoverageWriter
             "<table class=\"report\"><thead><tr><td class=\"heading\">File</td>" +
             "<td class=\"heading\">Expression Coverage</td></tr></thead>\n";
         indexHtml.append(tableHeading);
-        SourceName mainSourceName = null;
-        if (mySourceFile != null)
-        {
-            mainSourceName = SourceName.forFile(mySourceFile);
-            renderSource(outputDirectory, indexHtml, mainSourceName);
-        }
 
         for (SourceName name : myCollector.sortedNames())
         {
-            if (! name.equals(mainSourceName) && name.getFile() != null)
+            if (name.getFile() != null)
             {
                 renderSource(outputDirectory, indexHtml, name);
                 CoverageInfoPair pair = myFileCoverages.get(name);
