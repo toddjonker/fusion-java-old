@@ -82,7 +82,7 @@ public class FusionRuntimeBuilder
         "com.amazon.fusion.BootstrapRepository";
 
     private static final String PROPERTY_CODE_COVERAGE_DIR =
-        "com.amazon.fusion.CodeCoverageDir";
+        "com.amazon.fusion.coverage.DataDir";
 
     private static final String STANDARD_DEFAULT_LANGUAGE = "/fusion";
 
