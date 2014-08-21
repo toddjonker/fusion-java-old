@@ -45,13 +45,20 @@ import java.util.Set;
  * <h2>Coverage Filtering</h2>
  *
  * The collector can be configured to select what Fusion code is instrumented.
- * Coverage filtering is based on two configuration properties:
+ * Coverage filtering is based on three configuration properties:
  * <ul>
  *   <li>{@value #PROPERTY_INCLUDED_MODULES} holds a list of absolute module
  *       paths, separated by ':'.
- *       Any repository-loaded module at or under a given path is instrumented.
- *       If not provided, all repository-loadd modules are instrumented.
+ *       Any repository-loaded module at or under a given path is instrumented
+ *       (unless excluded).
+ *       If not provided, all repository-loaded modules are included.
  *       If empty, then no repository-loaded modules are instrumented.
+ *   <li>{@value #PROPERTY_EXCLUDED_MODULES} holds a list of absolute module
+ *       paths, separated by ':'.
+ *       Any repository-loaded module, included with respect to
+ *       {@value #PROPERTY_INCLUDED_MODULES}, that is at or under a given path
+ *       is <em>not</em> instrumented.
+ *       If empty or not provided, all included modules are instrumented.
  *   <li>{@value #PROPERTY_INCLUDED_SOURCES} holds a list of directory paths,
  *       separated by the platform path separator.
  *       All code read from files under a given directory is instrumented.
@@ -65,6 +72,7 @@ public final class _Private_CoverageCollectorImpl
 
     private static final String CONFIG_FILE_NAME          = "config.properties";
     private static final String PROPERTY_INCLUDED_MODULES = "IncludedModules";
+    private static final String PROPERTY_EXCLUDED_MODULES = "ExcludedModules";
     private static final String PROPERTY_INCLUDED_SOURCES = "IncludedSources";
 
 
@@ -77,11 +85,48 @@ public final class _Private_CoverageCollectorImpl
     private Set<String> myIncludedModules;
 
     /**
+     * All elements must be absolute module paths.
+     */
+    private Set<String> myExcludedModules;
+
+    /**
      * All elements must be absolute paths.
      */
     private Set<String> myIncludedSources;
 
     private final Map<SourceLocation,Boolean> myLocations = new HashMap<>();
+
+
+    private Set<String> readModuleSet(File       configFile,
+                                      Properties props,
+                                      String     propertyName)
+        throws FusionException
+    {
+        String mods = props.getProperty(propertyName);
+        if (mods == null) return null;
+
+        Set<String> modules = new HashSet<>();
+
+        for (String mod : mods.split(":"))
+        {
+            if (mod.isEmpty()) continue;
+
+            if (isValidAbsoluteModulePath(mod))
+            {
+                modules.add(mod);
+            }
+            else
+            {
+                String message =
+                    "Configuration error in " + configFile
+                    + ": " + propertyName
+                    + " contains an invalid absolute module path: " + mod;
+                throw new FusionException(message);
+            }
+        }
+
+        return modules;
+    }
 
 
     private _Private_CoverageCollectorImpl(File dataDir)
@@ -95,30 +140,10 @@ public final class _Private_CoverageCollectorImpl
         {
             Properties props = FusionUtils.readProperties(myConfigFile);
 
-            String mods = props.getProperty(PROPERTY_INCLUDED_MODULES);
-            if (mods != null)
-            {
-                myIncludedModules = new HashSet<>();
-
-                for (String mod : mods.split(":"))
-                {
-                    if (mod.isEmpty()) continue;
-
-                    if (isValidAbsoluteModulePath(mod))
-                    {
-                        myIncludedModules.add(mod);
-                    }
-                    else
-                    {
-                        String message =
-                            "Configuration error in " + myConfigFile
-                            + ": " + PROPERTY_INCLUDED_MODULES
-                            + " contains an invalid absolute module path: "
-                            + mod;
-                        throw new FusionException(message);
-                    }
-                }
-            }
+            myIncludedModules =
+                readModuleSet(myConfigFile, props, PROPERTY_INCLUDED_MODULES);
+            myExcludedModules =
+                readModuleSet(myConfigFile, props, PROPERTY_EXCLUDED_MODULES);
 
             String sources = props.getProperty(PROPERTY_INCLUDED_SOURCES);
             if (sources != null)
@@ -182,26 +207,39 @@ public final class _Private_CoverageCollectorImpl
     // Managing the coverage data
 
 
-    private boolean moduleIsCoverable(ModuleIdentity id)
+    private boolean setContainsModule(Set<String> set, String path)
     {
-        if (id != null)
+        for (String coverable : set)
         {
-            // By default, all modules are included.
-            if (myIncludedModules == null) return true;
-
-            String path = id.absolutePath();
-
-            for (String coverable : myIncludedModules)
+            if (path.equals(coverable) || path.startsWith(coverable + '/'))
             {
-                if (path.equals(coverable)) return true;
-
-                coverable = coverable + '/';
-
-                if (path.startsWith(coverable)) return true;
+                return true;
             }
         }
 
         return false;
+    }
+
+
+    private boolean moduleIsCoverable(ModuleIdentity id)
+    {
+        // If no module identity, we must match a requested source directory.
+        if (id == null) return false;
+
+        String path = id.absolutePath();
+
+        // By default, all modules are included.
+        if (myIncludedModules != null)
+        {
+            if (! setContainsModule(myIncludedModules, path)) return false;
+        }
+
+        if (myExcludedModules != null)
+        {
+            if (setContainsModule(myExcludedModules, path)) return false;
+        }
+
+        return true;
     }
 
 
