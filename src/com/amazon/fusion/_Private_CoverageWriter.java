@@ -360,11 +360,16 @@ public final class _Private_CoverageWriter
 
         indexHtml.append("<table class='report'>\n");
 
-        renderTableHeading(indexHtml, "Module");
+        boolean first = true;
         for (SourceName name : sortedSourceNames)
         {
             if (name.getModuleIdentity() != null)
             {
+                if (first)
+                {
+                    renderTableHeading(indexHtml, "Module");
+                    first = false;
+                }
                 renderSource(outputDir, indexHtml, name);
                 CoverageInfoPair pair = myFileCoverages.get(name);
                 indexHtml.append("<td>");
@@ -373,11 +378,16 @@ public final class _Private_CoverageWriter
             }
         }
 
-        renderTableHeading(indexHtml, "File");
+        first = true;
         for (SourceName name : sortedSourceNames)
         {
             if (name.getModuleIdentity() == null && name.getFile() != null)
             {
+                if (first)
+                {
+                    renderTableHeading(indexHtml, "File");
+                    first = false;
+                }
                 renderSource(outputDir, indexHtml, name);
                 CoverageInfoPair pair = myFileCoverages.get(name);
                 indexHtml.append("<td>");
