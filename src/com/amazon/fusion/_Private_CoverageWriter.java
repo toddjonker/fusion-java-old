@@ -308,7 +308,7 @@ public final class _Private_CoverageWriter
     }
 
 
-    private void renderSource(File       outputDirectory,
+    private void renderSource(File       outputDir,
                               HtmlWriter indexHtml,
                               SourceName name)
         throws IOException
@@ -330,9 +330,7 @@ public final class _Private_CoverageWriter
 
         indexHtml.append("</a></td>");
 
-        final File where = new File(outputDirectory, relativeName);
-
-        try (HtmlWriter sourceHtml = new HtmlWriter(where))
+        try (HtmlWriter sourceHtml = new HtmlWriter(outputDir, relativeName))
         {
             renderSource(sourceHtml, name);
         }
@@ -348,11 +346,10 @@ public final class _Private_CoverageWriter
     }
 
 
-    public void renderFullReport(File where)
+    public void renderFullReport(File outputDir)
         throws IOException
     {
-        File outputDirectory = where.getParentFile();
-        HtmlWriter indexHtml = new HtmlWriter(where);
+        HtmlWriter indexHtml = new HtmlWriter(outputDir, "index.html");
 
         indexHtml.renderHeadWithInlineCss("Fusion Code Coverage", CSS);
         indexHtml.append("<p>Report generated at ");
@@ -368,7 +365,7 @@ public final class _Private_CoverageWriter
         {
             if (name.getModuleIdentity() != null)
             {
-                renderSource(outputDirectory, indexHtml, name);
+                renderSource(outputDir, indexHtml, name);
                 CoverageInfoPair pair = myFileCoverages.get(name);
                 indexHtml.append("<td>");
                 pair.renderPercentageGraph(indexHtml);
@@ -381,7 +378,7 @@ public final class _Private_CoverageWriter
         {
             if (name.getModuleIdentity() == null && name.getFile() != null)
             {
-                renderSource(outputDirectory, indexHtml, name);
+                renderSource(outputDir, indexHtml, name);
                 CoverageInfoPair pair = myFileCoverages.get(name);
                 indexHtml.append("<td>");
                 pair.renderPercentageGraph(indexHtml);

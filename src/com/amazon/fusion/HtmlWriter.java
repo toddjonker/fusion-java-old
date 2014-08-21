@@ -27,6 +27,12 @@ class HtmlWriter
         myOut = new BufferedWriter(new OutputStreamWriter(myOutStream, UTF8));
     }
 
+    HtmlWriter(File outputDir, String fileName)
+        throws IOException
+    {
+        this(new File(outputDir, fileName));
+    }
+
     @Override
     public void close()
         throws IOException

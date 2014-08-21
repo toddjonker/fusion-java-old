@@ -14,12 +14,12 @@ class Cover
 {
     //=+===============================================================================
     private static final String HELP_ONE_LINER =
-        "EXPERIMENTAL code coverage tool.";
+        "EXPERIMENTAL code coverage report generator.";
     private static final String HELP_USAGE =
-        "cover COVERAGE_DIR";
+        "cover COVERAGE_DATA_DIR REPORT_DIR";
     private static final String HELP_BODY =
-        "Loads Fusion code-coverage data from the given directory, then writes an HTML\n" +
-        "report to index.html in the same directory.";
+        "Loads Fusion code-coverage data from the COVERAGE_DATA_DIR, then writes an\n" +
+        "HTML report to the REPORT_DIR.";
 
 
     Cover()
@@ -31,13 +31,33 @@ class Cover
 
     @Override
     Executor makeExecutor(String[] args)
+        throws UsageException
     {
-        if (args.length != 1) return null;
+        if (args.length != 2) return null;
 
-        String dataDir = args[0];
-        if (dataDir.length() == 0) return null;
+        String dataPath = args[0];
+        if (dataPath.isEmpty()) return null;
 
-        return new Executor(dataDir);
+        File dataDir = new File(dataPath);
+        if (! dataDir.isDirectory())
+        {
+            String message =
+                "Coverage data directory isn't a directory: " + dataPath;
+            throw new UsageException(this, message);
+        }
+
+        String reportPath = args[1];
+        if (reportPath.isEmpty()) return null;
+
+        File reportDir = new File(reportPath);
+        if (reportDir.exists() && ! reportDir.isDirectory())
+        {
+            String message =
+                "Report directory isn't a directory: " + reportPath;
+            throw new UsageException(this, message);
+        }
+
+        return new Executor(dataDir, reportDir);
     }
 
 
@@ -45,32 +65,28 @@ class Cover
         implements Command.Executor
     {
         private final File myDataDir;
+        private final File myReportDir;
 
-        private Executor(String fileName)
+        private Executor(File dataDir, File reportDir)
         {
-            myDataDir = new File(fileName);
+            myDataDir   = dataDir;
+            myReportDir = reportDir;
         }
 
         @Override
         public int execute()
             throws Exception
         {
-            if (! myDataDir.isDirectory())
-            {
-                throw new IllegalArgumentException("Bad data dir");
-            }
-
             _Private_CoverageCollectorImpl collector =
                 _Private_CoverageCollectorImpl.fromDirectory(myDataDir);
 
             _Private_CoverageWriter renderer =
                 new _Private_CoverageWriter(collector);
 
-            File html = new File(myDataDir, "index.html");
-            renderer.renderFullReport(html);
+            renderer.renderFullReport(myReportDir);
 
             System.out.print("Wrote Fusion coverage report to ");
-            System.out.println(html.getPath());
+            System.out.println(myReportDir.getPath());
 
             return 0;
         }

@@ -159,7 +159,11 @@ class CommandFactory
         {
             System.err.println();
             String message = e.getMessage();
-            if (message != null) System.err.println(message);
+            if (message != null)
+            {
+                System.err.println(message);
+                System.err.println();
+            }
             writeUsage(e.myCommand);
             return USAGE_ERROR_CODE;
         }
