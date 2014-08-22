@@ -27,7 +27,7 @@ public final class _Private_CoverageWriter
 {
     private final static String CSS =
         "body { color:black }" +
-        ".covered { color:green }" +
+        ".uncovered { color:red }" +
         "table.percentgraph { border: 0px;font-size: 130%;margin: 0px;margin-left: auto; margin-right: 0px;" +
         "padding: 0px; cellpadding=\"0px\" cellspacing=\"0px\"}" +
         "table.percentgraph tr.percentgraph { border: 0px;margin: 0px;padding: 0px;}" +
