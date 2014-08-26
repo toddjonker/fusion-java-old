@@ -16,12 +16,6 @@ public class _Private_Trampoline
         rb.setDocumenting(documenting);
     }
 
-    public static void setCoverageCollector(FusionRuntimeBuilder rb,
-                                            _Private_CoverageCollector collector)
-    {
-        rb.setCoverageCollector(collector);
-    }
-
     public static FusionException newFusionException(String message,
                                                      Throwable cause)
     {

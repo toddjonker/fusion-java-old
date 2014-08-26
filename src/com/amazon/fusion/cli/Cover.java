@@ -14,17 +14,17 @@ class Cover
 {
     //=+===============================================================================
     private static final String HELP_ONE_LINER =
-        "EXPERIMENTAL code coverage report generator.";
+        "Generate a code coverage report.";
     private static final String HELP_USAGE =
-        "cover COVERAGE_DATA_DIR REPORT_DIR";
+        "report_coverage COVERAGE_DATA_DIR REPORT_DIR";
     private static final String HELP_BODY =
-        "Loads Fusion code-coverage data from the COVERAGE_DATA_DIR, then writes an\n" +
+        "Reads Fusion code-coverage data from the COVERAGE_DATA_DIR, then writes an\n" +
         "HTML report to the REPORT_DIR.";
 
 
     Cover()
     {
-        super("cover");
+        super("report_coverage");
         putHelpText(HELP_ONE_LINER, HELP_USAGE, HELP_BODY);
     }
 
