@@ -562,10 +562,12 @@ final class TopLevelNamespace
                             throw new UnboundIdentifierException(myId);
                         }
 
-                        myAddress = address = binding.myAddress;
+                        myAddress = binding.myAddress;
                         myId = null;
                     }
                 }
+
+                address = myAddress;
             }
 
             Object result = ns.lookup(address);
