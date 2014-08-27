@@ -275,18 +275,21 @@ public final class _Private_CoverageCollectorImpl
 
 
     @Override
-    public synchronized boolean coverableLocation(SourceLocation loc)
+    public boolean coverableLocation(SourceLocation loc)
     {
         boolean coverable = isIncluded(loc);
 
         if (coverable)
         {
-            Boolean prev = myLocations.put(loc, Boolean.FALSE);
-
-            // If already covered, don't un-cover it!
-            if (prev != null)
+            synchronized (this)
             {
-                myLocations.put(loc, prev);
+                Boolean prev = myLocations.put(loc, Boolean.FALSE);
+
+                // If already covered, don't un-cover it!
+                if (prev != null && prev)
+                {
+                    myLocations.put(loc, prev);
+                }
             }
         }
 
