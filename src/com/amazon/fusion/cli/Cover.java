@@ -2,7 +2,6 @@
 
 package com.amazon.fusion.cli;
 
-import com.amazon.fusion._Private_CoverageCollectorImpl;
 import com.amazon.fusion._Private_CoverageWriter;
 import java.io.File;
 
@@ -77,11 +76,8 @@ class Cover
         public int execute()
             throws Exception
         {
-            _Private_CoverageCollectorImpl collector =
-                _Private_CoverageCollectorImpl.fromDirectory(myDataDir);
-
             _Private_CoverageWriter renderer =
-                new _Private_CoverageWriter(collector);
+                new _Private_CoverageWriter(myDataDir);
 
             renderer.renderFullReport(myReportDir);
 

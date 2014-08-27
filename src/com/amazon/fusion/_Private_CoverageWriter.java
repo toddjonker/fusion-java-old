@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion._Private_CoverageCollectorImpl.SRCLOC_COMPARE;
+import static com.amazon.fusion.CoverageDatabase.SRCLOC_COMPARE;
 import static java.math.RoundingMode.HALF_EVEN;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
@@ -46,7 +46,7 @@ public final class _Private_CoverageWriter
         "div.separator {height: 10px;}";
 
     private final IonSystem mySystem = IonSystemBuilder.standard().build();
-    private final _Private_CoverageCollectorImpl myCollector;
+    private final CoverageDatabase myDatabase;
 
     private final int BUFFER_SIZE = 2048;
     private final byte[] myCopyBuffer = new byte[BUFFER_SIZE];
@@ -134,9 +134,10 @@ public final class _Private_CoverageWriter
     private final Map<SourceName, CoverageInfoPair> myFileCoverages;
 
 
-    public _Private_CoverageWriter(_Private_CoverageCollectorImpl collector)
+    public _Private_CoverageWriter(File dataDir)
+        throws IOException
     {
-        myCollector     = collector;
+        myDatabase      = new CoverageDatabase(dataDir);
         myFileCoverages = new HashMap<SourceName, CoverageInfoPair>();
     }
 
@@ -227,7 +228,7 @@ public final class _Private_CoverageWriter
             }
         }
 
-        SourceLocation[] locations = myCollector.sortedLocations(name);
+        SourceLocation[] locations = myDatabase.sortedLocations(name);
         assert locations.length != 0;
 
         int locationIndex = 0;
@@ -265,7 +266,7 @@ public final class _Private_CoverageWriter
                     if (SRCLOC_COMPARE.compare(currentLoc, coverageLoc) == 0)
                     {
                         boolean covered =
-                            myCollector.locationCovered(coverageLoc);
+                            myDatabase.locationCovered(coverageLoc);
                         setCoverageState(sourceHtml, myIonBytes, spanProvider,
                                          covered);
                         locationIndex++;
@@ -356,7 +357,7 @@ public final class _Private_CoverageWriter
         indexHtml.append(Timestamp.now().toString());
         indexHtml.append("</p>\n");
 
-        SourceName[] sortedSourceNames = myCollector.sortedNames();
+        SourceName[] sortedSourceNames = myDatabase.sortedNames();
 
         indexHtml.append("<table class='report'>\n");
 
