@@ -5,7 +5,6 @@ package com.amazon.fusion.junit;
 import com.amazon.fusion.FusionRuntime;
 import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.fusion.TopLevel;
-import com.amazon.fusion._Private_Trampoline;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,8 +53,6 @@ public class SimpleScriptRunner
             FusionRuntime r = myRunner.myRuntimeBuilder.build();
             TopLevel t = r.getDefaultTopLevel();
             t.load(myScript);
-
-            _Private_Trampoline.flushMetrics(r);
         }
     }
 
