@@ -154,6 +154,12 @@ class CoverageDatabase
     }
 
 
+    synchronized Set<SourceLocation> locations()
+    {
+        return myLocations.keySet();
+    }
+
+
     synchronized SourceLocation[] sortedLocations(SourceName name)
     {
         ArrayList<SourceLocation> locsList = new ArrayList<>();
