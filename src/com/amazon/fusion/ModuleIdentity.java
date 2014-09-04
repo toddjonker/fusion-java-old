@@ -121,6 +121,23 @@ class ModuleIdentity
 
 
     /**
+     * Returns an identity for a child module.
+     *
+     * @param parent may be null, in which case the result will be a root
+     * module path.
+     * @param name must be a valid module name (not a general path).
+     */
+    static ModuleIdentity forChild(ModuleIdentity parent, String name)
+    {
+        assert isValidLocalName(name);
+        String path = (parent != null
+                           ? parent.absolutePath() + '/' + name
+                           : '/' + name);
+        return doIntern(path);
+    }
+
+
+    /**
      * @param baseModule must not be null if the path is relative.
      * @param path may be absolute or relative.
      */
