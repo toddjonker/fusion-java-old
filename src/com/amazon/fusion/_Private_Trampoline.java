@@ -21,16 +21,4 @@ public class _Private_Trampoline
     {
         return new FusionException(message, cause);
     }
-
-
-    public static void flushMetrics(FusionRuntime r)
-        throws FusionException
-    {
-        StandardRuntime sr = (StandardRuntime) r;
-        _Private_CoverageCollector c = sr.getGlobalState().myCoverageCollector;
-        if (c != null)
-        {
-            c.flushMetrics();
-        }
-    }
 }
