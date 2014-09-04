@@ -316,6 +316,12 @@ public final class _Private_CoverageCollectorImpl
     // Managing the coverage data
 
 
+    void noteRepository(File repoDir)
+    {
+        myDatabase.noteRepository(repoDir);
+    }
+
+
     @Override
     public boolean coverableLocation(SourceLocation loc)
     {

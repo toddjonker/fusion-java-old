@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
+import static com.amazon.fusion._Private_CoverageCollectorImpl.fromDirectory;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -788,8 +789,18 @@ public class FusionRuntimeBuilder
 
             if (b.myCoverageDataDirectory != null)
             {
-                _Private_CoverageCollector c =
-                    _Private_CoverageCollectorImpl.fromDirectory(b.myCoverageDataDirectory);
+                _Private_CoverageCollectorImpl c =
+                    fromDirectory(b.myCoverageDataDirectory);
+
+                c.noteRepository(b.getBootstrapRepository());
+                if (b.myRepositoryDirectories != null)
+                {
+                    for (File f : b.myRepositoryDirectories)
+                    {
+                        c.noteRepository(f);
+                    }
+                }
+
                 b.setCoverageCollector(c);
             }
         }

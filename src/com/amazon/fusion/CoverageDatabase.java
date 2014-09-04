@@ -3,9 +3,11 @@
 package com.amazon.fusion;
 
 import static com.amazon.ion.IonType.LIST;
+import static com.amazon.ion.IonType.STRING;
 import static com.amazon.ion.IonType.STRUCT;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
+import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.system.IonSystemBuilder;
 import com.amazon.ion.system.IonTextWriterBuilder;
@@ -67,6 +69,8 @@ class CoverageDatabase
 
     private final File myCoverageFile;
 
+    private final Set<File> myRepositories = new HashSet<>();
+
     private final Map<SourceLocation,Boolean> myLocations = new HashMap<>();
 
 
@@ -79,6 +83,18 @@ class CoverageDatabase
         {
             read();
         }
+    }
+
+
+    synchronized void noteRepository(File repoDir)
+    {
+        myRepositories.add(repoDir);
+    }
+
+
+    synchronized Set<File> getRepositories()
+    {
+        return myRepositories;
     }
 
 
@@ -164,6 +180,21 @@ class CoverageDatabase
     //=====================================================================
 
 
+    private void writeRepositories(IonWriter iw)
+        throws IOException
+    {
+        iw.stepIn(IonType.LIST);
+        {
+            for (File f : myRepositories)
+            {
+                String path = f.getAbsolutePath();
+                iw.writeString(path);
+            }
+        }
+        iw.stepOut();
+    }
+
+
     private void writeSourceName(IonWriter iw, SourceName name)
         throws IOException
     {
@@ -246,6 +277,8 @@ class CoverageDatabase
         {
             try (IonWriter iw = IonTextWriterBuilder.minimal().build(out))
             {
+                writeRepositories(iw);
+
                 for (SourceName name : sourceNames())
                 {
                     if (name.getFile() != null)
@@ -259,6 +292,22 @@ class CoverageDatabase
 
 
     //=====================================================================
+
+
+    private void readRepositories(IonReader in)
+    {
+         in.next();
+         assert in.getType() == LIST;
+         in.stepIn();
+         {
+             while (in.next() == STRING)
+             {
+                 String path = in.stringValue();
+                 myRepositories.add(new File(path));
+             }
+         }
+         in.stepOut();
+    }
 
 
     private SourceName readSourceName(IonReader in)
@@ -423,6 +472,8 @@ class CoverageDatabase
         {
             try (IonReader ir = system.newReader(is))
             {
+                readRepositories(ir);
+
                 while (ir.next() != null)
                 {
                     readSource(ir);
