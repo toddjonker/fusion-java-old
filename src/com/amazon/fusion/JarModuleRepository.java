@@ -52,4 +52,13 @@ final class JarModuleRepository
 
         return null;
     }
+
+
+    @Override
+    void collectModules(Predicate<ModuleIdentity> selector,
+                        Consumer<ModuleIdentity>  results)
+        throws FusionException
+    {
+        // Nothing to do. We can't introspect the classloader.
+    }
 }
