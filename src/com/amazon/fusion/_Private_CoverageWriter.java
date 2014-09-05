@@ -221,10 +221,14 @@ public final class _Private_CoverageWriter
             repo.collectModules(myConfig.myModuleSelector, consumer);
         }
 
-        for (String s : myConfig.getIncludedSourceDirs())
+        Set<String> includedSourceDirs = myConfig.getIncludedSourceDirs();
+        if (includedSourceDirs != null)
         {
-            File dir = new File(s);
-            collectSourceFiles(dir);
+            for (String s : includedSourceDirs)
+            {
+                File dir = new File(s);
+                collectSourceFiles(dir);
+            }
         }
 
         for (SourceLocation loc : myDatabase.locations())

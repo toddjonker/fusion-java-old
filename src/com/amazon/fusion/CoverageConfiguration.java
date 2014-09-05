@@ -138,6 +138,9 @@ final class CoverageConfiguration
     //=========================================================================
 
 
+    /**
+     * @return may be null.
+     */
     Set<String> getIncludedSourceDirs()
     {
         return myIncludedSources;

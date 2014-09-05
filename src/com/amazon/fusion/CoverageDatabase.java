@@ -142,7 +142,7 @@ class CoverageDatabase
     }
 
 
-    SourceName[] sortedNames()  // TODO dead?
+    SourceName[] sortedNames()
     {
         Set<SourceName> sourceSet = sourceNames();
 
@@ -154,6 +154,9 @@ class CoverageDatabase
     }
 
 
+    /**
+     * @return not null.
+     */
     synchronized Set<SourceLocation> locations()
     {
         return myLocations.keySet();
