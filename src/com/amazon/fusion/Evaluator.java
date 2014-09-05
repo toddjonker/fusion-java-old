@@ -16,6 +16,7 @@ import static com.amazon.fusion.FusionTimestamp.makeTimestamp;
 import static com.amazon.fusion.FusionUtils.friendlyIndex;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonBool;
+import com.amazon.ion.IonDatagram;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonFloat;
 import com.amazon.ion.IonInt;
@@ -205,6 +206,11 @@ class Evaluator
             case STRUCT:
             {
                 return structFromIonStruct(this, (IonStruct) value);
+            }
+            case DATAGRAM:
+            {
+                IonDatagram dg = (IonDatagram) value;
+                return listFromIonSequence(this, dg);
             }
         }
         return value;

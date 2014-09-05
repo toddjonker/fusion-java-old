@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2013 Amazon.com, Inc.  All rights reserved. -->
+<!-- Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved. -->
 <html>
 <body>
 FusionJava is the reference implementation of the
@@ -175,7 +175,12 @@ The following Java types may be injected into the Fusion runtime:
     which is the equivalent generic "no-value value".
   </li>
   <li>
-    {@link com.amazon.ion.IonValue} instances are converted to equivalent
+    {@link com.amazon.ion.IonDatagram} instances are converted to Fusion
+    {@code list}s that contain the <em>user values</em> in the datagram.
+    System values (version markers and local symbol tables) are not included.
+  </li>
+  <li>
+    Other {@link com.amazon.ion.IonValue} instances are converted to equivalent
     Fusion values, retaining all annotations and precision.
   </li>
   <li>

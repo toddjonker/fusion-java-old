@@ -13,6 +13,7 @@ import com.amazon.ion.Decimal;
 import com.amazon.ion.IonBlob;
 import com.amazon.ion.IonBool;
 import com.amazon.ion.IonClob;
+import com.amazon.ion.IonDatagram;
 import com.amazon.ion.IonDecimal;
 import com.amazon.ion.IonFloat;
 import com.amazon.ion.IonInt;
@@ -425,5 +426,37 @@ public class InjectionTest
 
         iv = system().newEmptyStruct();
         testIonValueInjection(iv, "is_struct");
+    }
+
+
+    /**
+     * Sadly we can't reuse {@link #testIonValueInjection(IonValue, String)}
+     * because the results don't round-trip.
+     */
+    @Test
+    public void testIonDatagramInjection()
+        throws Exception
+    {
+        TopLevel top = topLevel();
+
+        IonDatagram dg = system().newDatagram();
+        IonList list   = system().newEmptyList();
+
+        top.define("v", dg);
+        Object fv = eval("v");
+        checkIon(list, fv);
+        assertEval(true, "(is_list v)");
+        fv.toString();                // Ensure that toString() doesn't throw.
+
+        // App must not modify an injected object!
+        dg = system().newDatagram();
+        dg.add().newInt(1113);
+        dg.add().newEmptyList().add().newString("hero");
+
+        // The datagram includes a leading IVM which isn't injected.
+        assertEquals(3, dg.systemSize());
+
+        top.define("v", dg);
+        assertEval(true, "(=== v [1113,['''hero''']])");
     }
 }
