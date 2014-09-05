@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.CoverageDatabase.SRCLOC_COMPARE;
+import static com.amazon.fusion.GlobalState.FUSION_SOURCE_EXTENSION;
 import static java.math.RoundingMode.HALF_EVEN;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
@@ -152,7 +153,9 @@ public final class _Private_CoverageWriter
     private final CoverageInfoPair myGlobalCoverage = new CoverageInfoPair();
 
     private final Set<ModuleIdentity>               myModules;
+    private final Set<File>                         mySourceFiles;
     private final Map<ModuleIdentity, SourceName>   myNamesForModules;
+    private final Map<File, SourceName>             myNamesForFiles;
     private final Map<SourceName, CoverageInfoPair> myFileCoverages;
 
 
@@ -163,13 +166,37 @@ public final class _Private_CoverageWriter
         myConfig   = new CoverageConfiguration(dataDir);
 
         myModules         = new HashSet<>();
+        mySourceFiles     = new HashSet<>();
         myNamesForModules = new HashMap<>();
+        myNamesForFiles   = new HashMap<>();
         myFileCoverages   = new HashMap<>();
     }
 
 
     //=========================================================================
     // Metrics Analysis
+
+
+    private void collectSourceFiles(File dir)
+    {
+        String[] fileNames = dir.list();
+
+        for (String fileName : fileNames)
+        {
+            File file = new File(dir, fileName);
+            if (file.isDirectory())
+            {
+                collectSourceFiles(file);
+            }
+            else if (fileName.endsWith(FUSION_SOURCE_EXTENSION))
+            {
+                if (myConfig.fileIsSelected(file))
+                {
+                    mySourceFiles.add(file);
+                }
+            }
+        }
+    }
 
 
     private void analyze()
@@ -192,6 +219,12 @@ public final class _Private_CoverageWriter
             repo.collectModules(myConfig.myModuleSelector, consumer);
         }
 
+        for (String s : myConfig.getIncludedSourceDirs())
+        {
+            File dir = new File(s);
+            collectSourceFiles(dir);
+        }
+
         for (SourceLocation loc : myDatabase.locations())
         {
             if (loc.myName != null)
@@ -203,6 +236,17 @@ public final class _Private_CoverageWriter
 
                     SourceName prior = myNamesForModules.put(id, loc.myName);
                     assert prior == null || prior == loc.myName;
+                }
+                else
+                {
+                    File f = loc.myName.getFile();
+                    if (f != null)
+                    {
+                        mySourceFiles.add(f);
+
+                        SourceName prior = myNamesForFiles.put(f, loc.myName);
+                        assert prior == null || prior == loc.myName;
+                    }
                 }
             }
         }
@@ -216,6 +260,12 @@ public final class _Private_CoverageWriter
         return modules;
     }
 
+    private File[] sortedFiles()
+    {
+        File[] result = mySourceFiles.toArray(new File[0]);
+        Arrays.sort(result);
+        return result;
+    }
 
 
     //=========================================================================
@@ -388,28 +438,18 @@ public final class _Private_CoverageWriter
     }
 
 
-    private void renderSource(File       outputDir,
-                              HtmlWriter indexHtml,
-                              SourceName name)
-        throws IOException
+    private String relativeName(SourceName name)
     {
         String relativeName = name.getFile().getPath().replaceAll("/", "_");
         relativeName = relativeName + ".html";
+        return relativeName;
+    }
 
-        indexHtml.append("<a href=\"" + relativeName + "\">");
-
-        ModuleIdentity id = name.getModuleIdentity();
-        if (id != null)
-        {
-            indexHtml.append(id.absolutePath());
-        }
-        else
-        {
-            indexHtml.append(name.display());
-        }
-
-        indexHtml.append("</a>");
-
+    private void renderSource(File       outputDir,
+                              SourceName name)
+        throws IOException
+    {
+        String relativeName = relativeName(name);
         try (HtmlWriter sourceHtml = new HtmlWriter(outputDir, relativeName))
         {
             renderSource(sourceHtml, name);
@@ -439,8 +479,6 @@ public final class _Private_CoverageWriter
         indexHtml.append(Timestamp.now().toString());
         indexHtml.append("</p>\n");
 
-        SourceName[] sortedSourceNames = myDatabase.sortedNames();
-
         indexHtml.append("<table class='report'>\n");
 
         boolean first = true;
@@ -457,7 +495,11 @@ public final class _Private_CoverageWriter
             SourceName name = myNamesForModules.get(id);
             if (name != null)
             {
-                renderSource(outputDir, indexHtml, name);
+                indexHtml.append("<a href=\"" + relativeName(name) + "\">");
+                indexHtml.append(id.absolutePath());
+                indexHtml.append("</a>");
+
+                renderSource(outputDir, name);
                 pair = myFileCoverages.get(name);
             }
             else // The module was never loaded!
@@ -480,23 +522,43 @@ public final class _Private_CoverageWriter
         }
 
         first = true;
-        for (SourceName name : sortedSourceNames)
+        for (File f : sortedFiles())
         {
-            if (name.getModuleIdentity() == null && name.getFile() != null)
+            if (first)
             {
-                if (first)
-                {
-                    renderTableHeading(indexHtml, "File");
-                    first = false;
-                }
-
-                indexHtml.append("<tr><td>");
-                renderSource(outputDir, indexHtml, name);
-                CoverageInfoPair pair = myFileCoverages.get(name);
-                indexHtml.append("</td><td>");
-                pair.renderPercentageGraph(indexHtml);
-                indexHtml.append("</td></tr>\n");
+                renderTableHeading(indexHtml, "File");
+                first = false;
             }
+
+            indexHtml.append("<tr><td>");
+            CoverageInfoPair pair;
+            SourceName name = myNamesForFiles.get(f);
+            if (name != null)
+            {
+                indexHtml.append("<a href=\"" + relativeName(name) + "\">");
+                indexHtml.append(f.getPath());
+                indexHtml.append("</a>");
+
+                renderSource(outputDir, name);
+                pair = myFileCoverages.get(name);
+            }
+            else
+            {
+                indexHtml.append(f.getPath());
+
+                pair = new EstimatedCoverageInfoPair();
+
+                // We don't know the size of the unloaded file, so make
+                // something up.
+                int estimatedSize = 500;              // TODO Use median size?
+
+                pair.uncoveredExpressions = estimatedSize;
+                myGlobalCoverage.uncoveredExpressions += estimatedSize;
+            }
+
+            indexHtml.append("</td><td>");
+            pair.renderPercentageGraph(indexHtml);
+            indexHtml.append("</td></tr>\n");
         }
 
         indexHtml.append("</table>\n<br/>\n");

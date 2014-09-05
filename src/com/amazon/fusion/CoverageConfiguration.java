@@ -138,6 +138,12 @@ final class CoverageConfiguration
     //=========================================================================
 
 
+    Set<String> getIncludedSourceDirs()
+    {
+        return myIncludedSources;
+    }
+
+
     private boolean moduleIsSelected(ModuleIdentity id)
     {
         // If no module identity, we must match a requested source directory.
@@ -147,7 +153,7 @@ final class CoverageConfiguration
     }
 
 
-    private boolean fileIsSelected(File file)
+    boolean fileIsSelected(File file)
     {
         if (file != null)
         {
