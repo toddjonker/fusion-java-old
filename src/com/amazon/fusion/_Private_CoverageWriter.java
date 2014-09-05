@@ -49,17 +49,6 @@ public final class _Private_CoverageWriter
         "td.value table tr td {font-size: 11px;}" +
         "div.separator {height: 10px;}";
 
-    private final IonSystem mySystem = IonSystemBuilder.standard().build();
-    private final CoverageDatabase myDatabase;
-    private final CoverageConfiguration myConfig;
-
-    private static final int BUFFER_SIZE = 2048;
-    private final byte[] myCopyBuffer = new byte[BUFFER_SIZE];
-
-    private long myIonBytesRead;
-    private boolean coverageState;
-
-
 
     private static class CoverageInfoPair
     {
@@ -106,8 +95,10 @@ public final class _Private_CoverageWriter
         void renderCoveragePercentage(HtmlWriter htmlWriter)
             throws IOException
         {
-            htmlWriter.append(total() + " expressions observed<br/>");
-            htmlWriter.append(percentCovered() + "% expression coverage");
+            htmlWriter.append(percentCovered().toString());
+            htmlWriter.append("% expression coverage of ");
+            htmlWriter.append(Long.toString(total()));
+            htmlWriter.append(" expressions observed");
         }
 
         void renderTotal(HtmlWriter html)
@@ -150,13 +141,24 @@ public final class _Private_CoverageWriter
         }
     }
 
-    private final CoverageInfoPair myGlobalCoverage = new CoverageInfoPair();
 
+    private final CoverageDatabase                  myDatabase;
+    private final CoverageConfiguration             myConfig;
     private final Set<ModuleIdentity>               myModules;
     private final Set<File>                         mySourceFiles;
     private final Map<ModuleIdentity, SourceName>   myNamesForModules;
     private final Map<File, SourceName>             myNamesForFiles;
     private final Map<SourceName, CoverageInfoPair> myFileCoverages;
+
+    private final CoverageInfoPair myGlobalCoverage = new CoverageInfoPair();
+    private       int              myUnloadedEntries;
+
+    // For rendering highlighted source files
+    private final IonSystem mySystem = IonSystemBuilder.standard().build();
+    private static final int BUFFER_SIZE = 2048;
+    private final byte[] myCopyBuffer = new byte[BUFFER_SIZE];
+    private long myIonBytesRead;
+    private boolean coverageState;
 
 
     public _Private_CoverageWriter(File dataDir)
@@ -445,24 +447,112 @@ public final class _Private_CoverageWriter
         return relativeName;
     }
 
-    private void renderSource(File       outputDir,
-                              SourceName name)
+
+    private void renderSourceFiles(File outputDir)
         throws IOException
     {
-        String relativeName = relativeName(name);
-        try (HtmlWriter sourceHtml = new HtmlWriter(outputDir, relativeName))
+        for (SourceName name : myDatabase.sourceNames())
         {
-            renderSource(sourceHtml, name);
+            String relativeName = relativeName(name);
+            try (HtmlWriter sourceHtml = new HtmlWriter(outputDir, relativeName))
+            {
+                renderSource(sourceHtml, name);
+            }
         }
     }
 
 
-    private void renderTableHeading(HtmlWriter html, String category)
+    private <T> void renderRows(HtmlWriter         indexHtml,
+                                String             category,
+                                T[]                keys,
+                                Map<T, SourceName> keyToNames)
         throws IOException
     {
-        html.append("<thead><tr><td class='heading'>");
-        html.append(category);
-        html.append("</td><td class='heading'>Expression Coverage</td></tr></thead>\n");
+        int totalExpressions = 0;
+        int unloadedCount = 0;
+
+        boolean first = true;
+        for (T key : keys)
+        {
+            if (first)
+            {
+                indexHtml.append("<thead><tr><td class='heading'>");
+                indexHtml.append(category);
+                indexHtml.append("</td>");
+                indexHtml.append("<td class='heading'>Expression Coverage</td>");
+                indexHtml.append("</tr></thead>\n");
+                first = false;
+            }
+
+            indexHtml.append("<tr><td>");
+            CoverageInfoPair pair;
+            SourceName name = keyToNames.get(key);
+            if (name != null)
+            {
+                indexHtml.append("<a href=\"" + relativeName(name) + "\">");
+                indexHtml.append(key.toString());
+                indexHtml.append("</a>");
+
+                pair = myFileCoverages.get(name);
+
+                totalExpressions += pair.total();
+            }
+            else // The module was never loaded!
+            {
+                indexHtml.append(key.toString());
+
+                pair = new EstimatedCoverageInfoPair();
+
+                unloadedCount++;
+            }
+
+            indexHtml.append("</td><td>");
+            pair.renderPercentageGraph(indexHtml);
+            indexHtml.append("</td></tr>\n");
+        }
+
+        if (unloadedCount != 0)
+        {
+            int loadedCount = keys.length - unloadedCount;
+            int average = (loadedCount == 0
+                               ? 500                        // Totally made up
+                               : totalExpressions / loadedCount);
+
+            myGlobalCoverage.uncoveredExpressions += (unloadedCount * average);
+
+            myUnloadedEntries += unloadedCount;
+        }
+    }
+
+
+    private void renderIndex(File outputDir)
+        throws IOException
+    {
+        try (HtmlWriter indexHtml = new HtmlWriter(outputDir, "index.html"))
+        {
+            indexHtml.renderHeadWithInlineCss("Fusion Code Coverage", CSS);
+
+            indexHtml.append("<p>Report generated at ");
+            indexHtml.append(Timestamp.now().toString());
+            indexHtml.append("</p>\n");
+
+            indexHtml.append("<table class='report'>\n");
+
+            renderRows(indexHtml, "Module", sortedModules(), myNamesForModules);
+            renderRows(indexHtml, "File",   sortedFiles(),   myNamesForFiles);
+
+            indexHtml.append("</table>\n<br/>\n");
+
+            // We can't render this earlier since the result is affected by
+            // unloaded rows.
+            myGlobalCoverage.renderCoveragePercentage(indexHtml);
+            if (myUnloadedEntries != 0)
+            {
+                indexHtml.append(" (estimate since ");
+                indexHtml.append(Integer.toString(myUnloadedEntries));
+                indexHtml.append(" files were not loaded)");
+            }
+        }
     }
 
 
@@ -471,100 +561,7 @@ public final class _Private_CoverageWriter
     {
         analyze();
 
-
-        HtmlWriter indexHtml = new HtmlWriter(outputDir, "index.html");
-
-        indexHtml.renderHeadWithInlineCss("Fusion Code Coverage", CSS);
-        indexHtml.append("<p>Report generated at ");
-        indexHtml.append(Timestamp.now().toString());
-        indexHtml.append("</p>\n");
-
-        indexHtml.append("<table class='report'>\n");
-
-        boolean first = true;
-        for (ModuleIdentity id : sortedModules())
-        {
-            if (first)
-            {
-                renderTableHeading(indexHtml, "Module");
-                first = false;
-            }
-
-            indexHtml.append("<tr><td>");
-            CoverageInfoPair pair;
-            SourceName name = myNamesForModules.get(id);
-            if (name != null)
-            {
-                indexHtml.append("<a href=\"" + relativeName(name) + "\">");
-                indexHtml.append(id.absolutePath());
-                indexHtml.append("</a>");
-
-                renderSource(outputDir, name);
-                pair = myFileCoverages.get(name);
-            }
-            else // The module was never loaded!
-            {
-                indexHtml.append(id.absolutePath());
-
-                pair = new EstimatedCoverageInfoPair();
-
-                // We don't know the size of the unloaded file, so make
-                // something up.
-                int estimatedSize = 500;              // TODO Use median size?
-
-                pair.uncoveredExpressions = estimatedSize;
-                myGlobalCoverage.uncoveredExpressions += estimatedSize;
-            }
-
-            indexHtml.append("</td><td>");
-            pair.renderPercentageGraph(indexHtml);
-            indexHtml.append("</td></tr>\n");
-        }
-
-        first = true;
-        for (File f : sortedFiles())
-        {
-            if (first)
-            {
-                renderTableHeading(indexHtml, "File");
-                first = false;
-            }
-
-            indexHtml.append("<tr><td>");
-            CoverageInfoPair pair;
-            SourceName name = myNamesForFiles.get(f);
-            if (name != null)
-            {
-                indexHtml.append("<a href=\"" + relativeName(name) + "\">");
-                indexHtml.append(f.getPath());
-                indexHtml.append("</a>");
-
-                renderSource(outputDir, name);
-                pair = myFileCoverages.get(name);
-            }
-            else
-            {
-                indexHtml.append(f.getPath());
-
-                pair = new EstimatedCoverageInfoPair();
-
-                // We don't know the size of the unloaded file, so make
-                // something up.
-                int estimatedSize = 500;              // TODO Use median size?
-
-                pair.uncoveredExpressions = estimatedSize;
-                myGlobalCoverage.uncoveredExpressions += estimatedSize;
-            }
-
-            indexHtml.append("</td><td>");
-            pair.renderPercentageGraph(indexHtml);
-            indexHtml.append("</td></tr>\n");
-        }
-
-        indexHtml.append("</table>\n<br/>\n");
-
-        myGlobalCoverage.renderCoveragePercentage(indexHtml);
-
-        indexHtml.close();
+        renderSourceFiles(outputDir);
+        renderIndex(outputDir);
     }
 }

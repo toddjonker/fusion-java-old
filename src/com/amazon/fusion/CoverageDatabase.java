@@ -124,7 +124,7 @@ class CoverageDatabase
     }
 
 
-    private synchronized Set<SourceName> sourceNames()
+    synchronized Set<SourceName> sourceNames()
     {
         Set<SourceName> names = new HashSet<>();
 
@@ -142,7 +142,7 @@ class CoverageDatabase
     }
 
 
-    SourceName[] sortedNames()
+    SourceName[] sortedNames()  // TODO dead?
     {
         Set<SourceName> sourceSet = sourceNames();
 
