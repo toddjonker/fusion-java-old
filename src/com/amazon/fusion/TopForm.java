@@ -68,6 +68,7 @@ final class TopForm
             Binding binding = id.resolve();
             if (ns.ownsBinding(binding))
             {
+                // TODO FUSION-376 Record disappeared use
                 return id;
             }
             else if (binding instanceof FreeBinding)

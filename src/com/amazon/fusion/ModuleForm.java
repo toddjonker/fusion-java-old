@@ -233,6 +233,7 @@ final class ModuleForm
                 else if (binding == globals.myKernelBeginBinding)
                 {
                     // Splice 'begin' into the module-begin sequence
+                    // TODO FUSION-376 Record disappeared use
                     int last = sexp.size() - 1;
                     for (int i = last; i != 0;  i--)
                     {

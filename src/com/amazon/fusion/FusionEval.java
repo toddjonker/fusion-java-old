@@ -105,6 +105,7 @@ final class FusionEval
                 if (beginStx != null)
                 {
                     // Splice 'begin' elements into the top-level sequence.
+                    // TODO FUSION-376 Record disappeared use
                     for (int i = beginStx.size() - 1; i != 0;  i--)
                     {
                         forms.push(beginStx.get(eval, i));
