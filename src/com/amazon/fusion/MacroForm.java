@@ -22,6 +22,11 @@ final class MacroForm
     final SyntaxValue expandOnce(Expander expander, SyntaxSexp stx)
         throws FusionException
     {
+        Evaluator eval = expander.getEvaluator();
+
+        // Must grab the origin identifier before a mark is applied.
+        SyntaxSymbol origin = (SyntaxSymbol) stx.get(eval, 0);
+
         // TODO FUSION-39 we create two MarkWrap instances here
         MarkWrap markWrap = new MarkWrap();
 
@@ -32,8 +37,6 @@ final class MacroForm
         expanded = expanded.addOrRemoveMark(markWrap);
 
         // http://docs.racket-lang.org/reference/stxprops.html
-        Evaluator eval = expander.getEvaluator();
-        SyntaxSymbol origin = (SyntaxSymbol) stx.get(eval, 0);
         expanded = expanded.trackOrigin(eval, stx, origin);
 
         return expanded;

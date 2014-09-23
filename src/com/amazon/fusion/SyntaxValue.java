@@ -182,6 +182,7 @@ abstract class SyntaxValue
                 {
                     if (isSame(eval, k, myProperties[j]).isTrue())
                     {
+                        // We already merged this property in pass 1 above.
                         continue pass2;
                     }
                 }
