@@ -157,7 +157,7 @@ final class ModuleForm
 
         ArrayList<SyntaxSexp>  provideForms      = new ArrayList<>();
         ArrayList<SyntaxValue> otherForms        = new ArrayList<>();
-        ArrayList<Boolean>     preparedFormFlags = new ArrayList<>();
+        ArrayList<Boolean>     expandedFormFlags = new ArrayList<>();
 
         LinkedList<SyntaxValue> forms = new LinkedList<>();
         source.extract(eval, forms, 3);
@@ -177,7 +177,7 @@ final class ModuleForm
                 formsAlreadyWrapped--;
             }
 
-            boolean formIsPrepared = false;
+            boolean formIsExpanded = false;
 
             SyntaxValue expanded =
                 expander.partialExpand(moduleNamespace, form);
@@ -207,7 +207,7 @@ final class ModuleForm
                         e.addContext(form);
                         throw e;
                     }
-                    formIsPrepared = true;
+                    formIsExpanded = true;
                 }
                 else if (binding == globals.myKernelRequireBinding)
                 {
@@ -223,7 +223,7 @@ final class ModuleForm
                         ex.initCause(e);
                         throw ex;
                     }
-                    expanded = null;
+                    formIsExpanded = true;
                 }
                 else if (binding == globals.myKernelProvideBinding)
                 {
@@ -246,7 +246,7 @@ final class ModuleForm
             if (expanded != null)
             {
                 otherForms.add(expanded);
-                preparedFormFlags.add(formIsPrepared);
+                expandedFormFlags.add(formIsExpanded);
             }
         }
 
@@ -267,10 +267,10 @@ final class ModuleForm
         subforms[i++] = source.get(eval, 1); // name
         subforms[i++] = source.get(eval, 2); // language
 
-        Iterator<Boolean> prepared = preparedFormFlags.iterator();
+        Iterator<Boolean> expanded = expandedFormFlags.iterator();
         for (SyntaxValue stx : otherForms)
         {
-            if (! prepared.next())
+            if (! expanded.next())
             {
                 if (firstBinding(eval, stx) == globals.myKernelDefineBinding)
                 {
@@ -350,6 +350,8 @@ final class ModuleForm
         }
 
 
+        final Binding kernelRequireBinding =
+            eval.getGlobalState().myKernelRequireBinding;
         final Binding kernelProvideBinding =
             eval.getGlobalState().myKernelProvideBinding;
 
@@ -357,7 +359,16 @@ final class ModuleForm
         for (i = bodyPos; i < stx.size(); i++)
         {
             SyntaxValue form = stx.get(eval, i);
-            if (firstBinding(eval, form) == kernelProvideBinding)
+
+            Binding firstBinding = firstBinding(eval, form);
+            if (firstBinding == kernelRequireBinding)
+            {
+                // All require forms have already been evaluated.
+                // We preserve them through macro expansion so that the are
+                // retained by `expand` and similar operations.
+                continue;
+            }
+            if (firstBinding == kernelProvideBinding)
             {
                 break;
             }
