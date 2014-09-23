@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.ion.IonReader;
+import com.amazon.ion.OffsetSpan;
 import com.amazon.ion.TextSpan;
 import com.amazon.ion.util.Spans;
 import java.io.IOException;
@@ -51,17 +52,30 @@ class SourceLocation
     }
 
 
+    /**
+     * Gets the zero-based starting offset.
+     * @return -1 if the offset is unknown.
+     */
+    long getStartOffset()
+    {
+        return -1;
+    }
+
+
     private static final class Shorts
         extends SourceLocation
     {
         private final short myLine;
         private final short myColumn;
+        private final short myStartOffset;
 
-        private Shorts(SourceName name, short line, short column)
+        private Shorts(SourceName name, short line, short column,
+                       short startOffset)
         {
             super(name);
             myLine = line;
             myColumn = column;
+            myStartOffset = startOffset;
         }
 
         @Override
@@ -74,6 +88,12 @@ class SourceLocation
         long getColumn()
         {
             return myColumn;
+        }
+
+        @Override
+        long getStartOffset()
+        {
+            return myStartOffset;
         }
     }
 
@@ -83,12 +103,14 @@ class SourceLocation
     {
         private final int myLine;
         private final int myColumn;
+        private final int myStartOffset;
 
-        private Ints(SourceName name, int line, int column)
+        private Ints(SourceName name, int line, int column, int startOffset)
         {
             super(name);
             myLine = line;
             myColumn = column;
+            myStartOffset = startOffset;
         }
 
         @Override
@@ -101,6 +123,12 @@ class SourceLocation
         long getColumn()
         {
             return myColumn;
+        }
+
+        @Override
+        long getStartOffset()
+        {
+            return myStartOffset;
         }
     }
 
@@ -110,12 +138,14 @@ class SourceLocation
     {
         private final long myLine;
         private final long myColumn;
+        private final long myStartOffset;
 
-        private Longs(SourceName name, long line, long column)
+        private Longs(SourceName name, long line, long column, long startOffset)
         {
             super(name);
             myLine = line;
             myColumn = column;
+            myStartOffset = startOffset;
         }
 
         @Override
@@ -128,6 +158,12 @@ class SourceLocation
         long getColumn()
         {
             return myColumn;
+        }
+
+        @Override
+        long getStartOffset()
+        {
+            return myStartOffset;
         }
     }
 
@@ -149,15 +185,15 @@ class SourceLocation
 
         if (line <= Short.MAX_VALUE && column <= Short.MAX_VALUE)
         {
-            return new Shorts(name, (short) line, (short) column);
+            return new Shorts(name, (short) line, (short) column, (short) -1);
         }
 
         if (line <= Integer.MAX_VALUE && column <= Integer.MAX_VALUE)
         {
-            return new Ints(name, (int) line, (int) column);
+            return new Ints(name, (int) line, (int) column, -1);
         }
 
-        return new Longs(name, line, column);
+        return new Longs(name, line, column, -1);
     }
 
 
@@ -183,23 +219,31 @@ class SourceLocation
      */
     static SourceLocation forCurrentSpan(IonReader source, SourceName name)
     {
-        TextSpan ts = Spans.currentSpan(TextSpan.class, source);
+        TextSpan ts   = Spans.currentSpan(TextSpan.class,   source);
+        OffsetSpan os = Spans.currentSpan(OffsetSpan.class, source);
+
         if (ts != null)
         {
             long line   = ts.getStartLine  ();
             long column = ts.getStartColumn();
+            long offset = os.getStartOffset();
 
-            if (line <= Short.MAX_VALUE && column <= Short.MAX_VALUE)
+            if (line   <= Short.MAX_VALUE &&
+                column <= Short.MAX_VALUE &&
+                offset <= Short.MAX_VALUE)
             {
-                return new Shorts(name, (short) line, (short) column);
+                return new Shorts(name, (short) line, (short) column,
+                                  (short) offset);
             }
 
-            if (line <= Integer.MAX_VALUE && column <= Integer.MAX_VALUE)
+            if (line   <= Integer.MAX_VALUE &&
+                column <= Integer.MAX_VALUE &&
+                offset <= Integer.MAX_VALUE)
             {
-                return new Ints(name, (int) line, (int) column);
+                return new Ints(name, (int) line, (int) column, (int) offset);
             }
 
-            return new Longs(name, line, column);
+            return new Longs(name, line, column, offset);
         }
 
         if (name != null)
@@ -271,8 +315,9 @@ class SourceLocation
         return (this == that
                 || (that != null
                     && Objects.equals(this.myName, that.myName)
-                    && this.getLine() == that.getLine()
-                    && this.getColumn() == that.getColumn()));
+                    && this.getLine()        == that.getLine()
+                    && this.getColumn()      == that.getColumn()
+                    && this.getStartOffset() == that.getStartOffset()));
     }
 
     @Override
@@ -293,6 +338,8 @@ class SourceLocation
         result = prime * result + (int) getLine();
         result ^= (result << 29) ^ (result >> 3);
         result = prime * result + (int) getColumn();
+        result ^= (result << 29) ^ (result >> 3);
+        result = prime * result + (int) getStartOffset();
         result ^= (result << 29) ^ (result >> 3);
         return result;
     }

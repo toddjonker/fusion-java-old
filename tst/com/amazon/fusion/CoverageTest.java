@@ -25,14 +25,25 @@ public class CoverageTest
         @Override
         public boolean coverableLocation(SourceLocation loc)
         {
-            coverable.add(loc);
+            // For simplicity we'll ignore the offset.
+            SourceLocation loc2 =
+                SourceLocation.forLineColumn(loc.getSourceName(),
+                                             loc.getLine(),
+                                             loc.getColumn());
+            coverable.add(loc2);
+
             return (coverOnlyLineOne ? loc.getLine() == 1 : true);
         }
 
         @Override
         public void coverLocation(SourceLocation loc)
         {
-            covered.add(loc);
+            // For simplicity we'll ignore the offset.
+            SourceLocation loc2 =
+                SourceLocation.forLineColumn(loc.getSourceName(),
+                                             loc.getLine(),
+                                             loc.getColumn());
+            covered.add(loc2);
         }
 
         @Override
