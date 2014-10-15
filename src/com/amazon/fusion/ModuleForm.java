@@ -10,6 +10,7 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.GlobalState.PROVIDE;
 import static com.amazon.fusion.GlobalState.REQUIRE;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
+import static com.amazon.fusion.ModuleIdentity.isValidModulePath;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -109,6 +110,11 @@ final class ModuleForm
             String path = check.requiredText(eval, "initial module path", 2);
             SyntaxValue initialBindingsStx = source.get(eval, 2);
 
+            if (! isValidModulePath(path))
+            {
+                String message = "Invalid module path for language";
+                throw new ModuleNotFoundException(message, initialBindingsStx);
+            }
             if (! isValidAbsoluteModulePath(path))
             {
                 String message = "Module path for language must be absolute";
