@@ -20,6 +20,21 @@ public class ModuleTest
         useTstRepo();
     }
 
+    @Test
+    public void testBadModuleSyntax()
+        throws Exception
+    {
+        expectSyntaxExn("(module)");
+        expectSyntaxExn("(module foo)");
+        expectSyntaxExn("(module foo 12)");
+        expectSyntaxExn("(module foo \"/fusion\")");  // No body
+
+        expectSyntaxExn("(module \"foo\" \"/fusion\" true)");  // Bad name
+        expectSyntaxExn("(module 1       \"/fusion\" true)");  // Bad name
+    }
+
+
+
     @Test(expected = ModuleNotFoundException.class)
     public void testBadLanguageSymbolInTopLevelModule()
         throws Exception
@@ -53,7 +68,7 @@ public class ModuleTest
     public void testTopLevelLanguageInTopLevelModule()
         throws Exception
     {
-        eval("(module lang '/fusion/base')");
+        eval("(module lang '/fusion/base' true)");
 
         // TODO FUSION-151 this isn't well-defined yet and should be rejected.
         eval("(module m \"lang\" (define x 1))");

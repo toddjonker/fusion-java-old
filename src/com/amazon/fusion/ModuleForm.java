@@ -75,7 +75,12 @@ final class ModuleForm
             throw check.failure("`module` declaration not at top-level");
         }
 
-
+        // Ensure there's a name and language. We check for a body below, but
+        // want a different error message for that situation.
+        if (source.size() < 3)
+        {
+            throw check.failure("Malformed module declaration");
+        }
 
         SyntaxSymbol moduleNameSymbol =
             check.requiredIdentifier("module name", 1);
@@ -138,6 +143,12 @@ final class ModuleForm
             source = (SyntaxSexp)
                 source.copyWithProperty(eval,
                                         STX_PROP_LANGUAGE_IDENTITY, languageId);
+        }
+
+
+        if (source.size() < 4)
+        {
+            throw check.failure("Module has no body");
         }
 
         // The new namespace shares the registry of current-namespace
