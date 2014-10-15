@@ -105,8 +105,13 @@ final class SyntaxSymbol
     @Override
     SyntaxSymbol copyReplacingProperties(Object[] properties)
     {
-        return new SyntaxSymbol(null, myWraps, getLocation(), properties,
-                                (BaseSymbol) myDatum);
+        SyntaxSymbol id = new SyntaxSymbol(null,
+                                           myWraps,
+                                           getLocation(),
+                                           properties,
+                                           (BaseSymbol) myDatum);
+        id.myBinding = myBinding;
+        return id;
     }
 
 

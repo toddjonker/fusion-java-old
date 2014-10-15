@@ -65,10 +65,12 @@ final class TopForm
             // (#%top id) inside module expands to id, but it must be defined
             // at the module level.
 
+            SyntaxSymbol topId = (SyntaxSymbol) children[0];
+
             Binding binding = id.resolve();
             if (ns.ownsBinding(binding))
             {
-                // TODO FUSION-376 Record disappeared use
+                id = (SyntaxSymbol) id.trackOrigin(eval, stx, topId);
                 return id;
             }
             else if (binding instanceof FreeBinding)
@@ -78,6 +80,7 @@ final class TopForm
                 binding = ns.localResolve(id);
                 if (binding != null)
                 {
+                    id = (SyntaxSymbol) id.trackOrigin(eval, stx, topId);
                     return id.copyReplacingBinding(binding);
                 }
             }

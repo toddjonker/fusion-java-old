@@ -233,11 +233,13 @@ final class ModuleForm
                 else if (binding == globals.myKernelBeginBinding)
                 {
                     // Splice 'begin' into the module-begin sequence
-                    // TODO FUSION-376 Record disappeared use
+                    SyntaxSymbol beginId = (SyntaxSymbol) sexp.get(eval, 0);
                     int last = sexp.size() - 1;
                     for (int i = last; i != 0;  i--)
                     {
-                        forms.push(sexp.get(eval, i));
+                        SyntaxValue expr = sexp.get(eval, i);
+                        expr = expr.trackOrigin(eval, expanded, beginId);
+                        forms.push(expr);
                     }
                     formsAlreadyWrapped += last;
                     expanded = null;
