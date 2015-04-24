@@ -367,6 +367,10 @@ the first time `pred` returns a truthy value that element is returned.
 If no such element is found, the result is void.
 
 When `collection` is a sequence, the elements are visited in order.
+
+When `collection` is a struct, the "elements" of the collection are its
+values (as opposed to its key-value pairs): the predicate will be applied on
+each value, and the result is either one of those values or void.
     '''
     (cond
       ((is_struct collection)
