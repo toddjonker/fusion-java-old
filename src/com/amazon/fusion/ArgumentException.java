@@ -74,6 +74,16 @@ final class ArgumentException
     }
 
 
+    public String getName()
+    {
+        return myName;
+    }
+
+    public String getExpectation()
+    {
+        return myExpectation;
+    }
+
     public int getBadPos()
     {
         return myBadPos;
