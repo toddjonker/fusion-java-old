@@ -89,6 +89,11 @@ final class ArgumentException
         return myBadPos;
     }
 
+    public long getActualsLength()
+    {
+        return myActuals.length;
+    }
+
     @Override
     void displayMessage(Evaluator eval, Appendable b)
         throws IOException, FusionException
