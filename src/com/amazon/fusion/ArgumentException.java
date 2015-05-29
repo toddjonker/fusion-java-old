@@ -1,10 +1,12 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.safeWrite;
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
+
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Indicates a failure applying a procedure with the wrong type of argument.
@@ -13,6 +15,23 @@ import java.io.IOException;
 final class ArgumentException
     extends ContractException
 {
+    private static final BaseValue REDACTED_VALUE =
+        new BaseValue()
+        {
+            @Override
+            void write(Evaluator eval, Appendable out) throws IOException
+            {
+                out.append("{{{REDACTED}}}");
+            }
+        };
+
+    static ArgumentException makeSanitizedException(ArgumentException e) {
+        Object[] values = new Object[e.myActuals.length];
+        Arrays.fill(values, REDACTED_VALUE);
+        return new ArgumentException(
+            e.getName(), e.getExpectation(), e.getBadPos(), values);
+    }
+
     private final String   myName;
     private final String   myExpectation;
     private final int      myBadPos;
@@ -73,23 +92,22 @@ final class ArgumentException
         assert actual != null;
     }
 
-
-    public String getName()
+    String getName()
     {
         return myName;
     }
 
-    public String getExpectation()
+    String getExpectation()
     {
         return myExpectation;
     }
 
-    public int getBadPos()
+    int getBadPos()
     {
         return myBadPos;
     }
 
-    public long getActualsLength()
+    int getActualsLength()
     {
         return myActuals.length;
     }
