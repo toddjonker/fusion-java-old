@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -12,6 +12,7 @@ import static com.amazon.fusion.FusionSyntax.isSyntax;
 import static com.amazon.fusion.FusionSyntax.unsafeFreeIdentifierEqual;
 import static com.amazon.fusion.FusionSyntax.unsafeSyntaxUnwrap;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -23,6 +24,7 @@ public class ExpandProgramTest
     private static final class CoreFormCollector
         extends Procedure1
     {
+        boolean receivedEof;
         Object lambdaId;
         Object moduleId;
 
@@ -30,8 +32,15 @@ public class ExpandProgramTest
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
         {
-            if (! isEof(eval, arg))
+            if (isEof(eval, arg))
             {
+                receivedEof = true;
+            }
+            else
+            {
+                // Once you go EOF, you can't go back.
+                assertFalse(receivedEof);
+
                 assertTrue(isSyntax(eval, arg));
                 Object sexp = unsafeSyntaxUnwrap(eval, arg);
                 assertTrue(isSexp(eval, sexp));
@@ -79,6 +88,7 @@ public class ExpandProgramTest
             "(module M '/fusion' 1)";
 
         FusionEval.expandProgram(this.topLevel(), source, null, collector);
+        assertTrue(collector.receivedEof);
 
         assertNotNull(collector.moduleId);
 

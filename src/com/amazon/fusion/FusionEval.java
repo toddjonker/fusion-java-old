@@ -1,7 +1,8 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionIo.isEof;
 import static com.amazon.fusion.FusionSyntax.isSyntax;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.StandardReader.readSyntax;
@@ -323,15 +324,16 @@ final class FusionEval
             public Object doApply(Evaluator eval, Object arg)
                 throws FusionException
             {
-                if (FusionIo.isEof(eval, arg)) return arg;
+                if (! isEof(eval, arg))
+                {
+                    SyntaxValue stx = (SyntaxValue) arg;
 
-                SyntaxValue stx = (SyntaxValue) arg;
+                    stx = enrich(eval, stx);
 
-                stx = enrich(eval, stx);
+                    arg = expandSyntaxTopLevelWithCompileTimeEvals(eval, stx);
+                }
 
-                stx = expandSyntaxTopLevelWithCompileTimeEvals(eval, stx);
-
-                return eval.bounceTailCall(receiver, stx);
+                return eval.bounceTailCall(receiver, arg);
             }
         };
 
