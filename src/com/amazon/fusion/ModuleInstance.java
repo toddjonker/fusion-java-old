@@ -1,7 +1,8 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import com.amazon.fusion.Namespace.NsBinding;
 import java.io.IOException;
@@ -55,7 +56,7 @@ final class ModuleInstance
 
         for (NsBinding binding : bindings)
         {
-            String name = binding.getName();
+            String name = binding.getName().stringValue();
 
             myProvidedBindings.put(name, (ModuleBinding) binding);
         }
@@ -110,6 +111,14 @@ final class ModuleInstance
     ModuleBinding resolveProvidedName(String name)
     {
         return myProvidedBindings.get(name);
+    }
+
+    /**
+     * @return null if the name isn't provided by this module.
+     */
+    ModuleBinding resolveProvidedName(BaseSymbol name)
+    {
+        return resolveProvidedName(name.stringValue());
     }
 
 

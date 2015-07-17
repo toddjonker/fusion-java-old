@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -161,7 +161,7 @@ final class LambdaForm
         {
             SyntaxSymbol identifier = (SyntaxSymbol) formalsDecl.get(eval, i);
             Binding binding = identifier.resolve();
-            args[i] = binding.getName();
+            args[i] = binding.getName().stringValue();
         }
         return args;
     }
@@ -199,7 +199,8 @@ final class LambdaForm
         {
             SyntaxSymbol identifier = (SyntaxSymbol) formalsDecl;
             Binding binding = identifier.getBinding();
-            return new CompiledLambdaRest(doc, binding.getName(), body);
+            String name = binding.getName().stringValue();
+            return new CompiledLambdaRest(doc, name, body);
         }
         else
         {

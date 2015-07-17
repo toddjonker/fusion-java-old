@@ -3,8 +3,8 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.safeWriteToString;
-import static com.amazon.fusion.FusionSymbol.internString;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
 import java.util.ArrayList;
@@ -37,9 +37,9 @@ abstract class Namespace
         }
 
         @Override
-        public final String getName()
+        public final BaseSymbol getName()
         {
-            return myIdentifier.stringValue();
+            return myIdentifier.getName();
         }
 
         final SyntaxSymbol getIdentifier()
@@ -78,7 +78,7 @@ abstract class Namespace
                                          Environment env,
                                          CompiledForm valueForm)
         {
-            String name = getName();
+            String name = getName().stringValue();
             return new CompiledTopDefineSyntax(name, myAddress, valueForm);
         }
 
@@ -226,7 +226,7 @@ abstract class Namespace
     }
 
     @Override
-    public final NsBinding substituteFree(String name, Set<Integer> marks)
+    public final NsBinding substituteFree(BaseSymbol name, Set<Integer> marks)
     {
         for (NsBinding b : myBindings)
         {
@@ -248,22 +248,31 @@ abstract class Namespace
         Set<Integer> marks = identifier.computeMarks();
         if (resolvedRequestedId instanceof FreeBinding)
         {
-            return substituteFree(identifier.stringValue(), marks);
+            return substituteFree(identifier.getName(), marks);
         }
         return localSubstitute(resolvedRequestedId, marks);
     }
 
 
     /**
-     * @param name must be non-empty, and does not need to be interned.
+     * @param name must be non-empty.
+     *
+     * @return null is equivalent to a {@link FreeBinding}.
+     */
+    final Binding resolve(BaseSymbol name)
+    {
+        return myWraps.resolve(name);
+    }
+
+    /**
+     * @param name must be non-empty.
      *
      * @return null is equivalent to a {@link FreeBinding}.
      */
     final Binding resolve(String name)
     {
-        name = internString(name);
-
-        return myWraps.resolve(name);
+        BaseSymbol symbol = FusionSymbol.makeSymbol(null, name);
+        return resolve(symbol);
     }
 
 
@@ -303,7 +312,7 @@ abstract class Namespace
 
         if (value instanceof NamedValue)
         {
-            String inferredName = binding.getName();
+            String inferredName = binding.getName().stringValue();
             if (inferredName != null)
             {
                 ((NamedValue)value).inferName(inferredName);

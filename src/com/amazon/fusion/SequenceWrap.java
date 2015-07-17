@@ -1,7 +1,8 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
@@ -35,7 +36,7 @@ class SequenceWrap
 
 
     @Override
-    Binding resolve(String name,
+    Binding resolve(BaseSymbol name,
                     Iterator<SyntaxWrap> moreWraps,
                     Set<Integer> returnMarks)
     {

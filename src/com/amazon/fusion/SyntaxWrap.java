@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -12,21 +13,17 @@ import java.util.Set;
 abstract class SyntaxWrap
 {
     /**
-     * @param name must be interned.
      * @param returnMarks <em>returns</em> the marks from this wrap and those
      * deeper. Must be mutable and not null.
      *
      * @return null indicates a free variable.
      */
-    abstract Binding resolve(String name,
+    abstract Binding resolve(BaseSymbol name,
                              Iterator<SyntaxWrap> moreWraps,
                              Set<Integer> returnMarks);
 
 
-    /**
-     * @param name must be interned.
-     */
-    Binding resolveTop(String name,
+    Binding resolveTop(BaseSymbol name,
                        Iterator<SyntaxWrap> moreWraps,
                        Set<Integer> returnMarks)
     {

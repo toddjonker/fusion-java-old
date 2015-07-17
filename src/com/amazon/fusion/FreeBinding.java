@@ -1,29 +1,31 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
+
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 
 
 final class FreeBinding
     extends Binding
 {
-    private final String myName;
+    private final BaseSymbol myName;
 
-    FreeBinding(String name)
+    FreeBinding(BaseSymbol name)
     {
         myName = name;
     }
 
     @Override
-    public String getName()
+    public BaseSymbol getName()
     {
         return myName;
     }
 
 
     @Override
-    public boolean isFree(String name)
+    public boolean isFree(BaseSymbol name)
     {
-        // This works due to symbol text interning.
+        // This works due to symbol interning.
         return myName == name;
     }
 

@@ -56,6 +56,12 @@ final class FusionSymbol
             return falseBool(eval);
         }
 
+        boolean isNonEmpty()
+        {
+            String value = stringValue();
+            return (value != null && value.length() != 0);
+        }
+
         private boolean isKeyword()
         {
             String value = stringValue();
@@ -404,14 +410,6 @@ final class FusionSymbol
     static BaseSymbol internSymbol(String name)
     {
         return makeSymbol(null, name);
-    }
-
-    /**
-     * NOT FOR APPLICATION USE!
-     */
-    static String internString(String name)
-    {
-        return internSymbol(name).stringValue();
     }
 
     private static BaseSymbol annotate(BaseSymbol unannotated,

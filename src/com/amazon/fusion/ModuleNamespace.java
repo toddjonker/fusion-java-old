@@ -1,7 +1,8 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.LanguageWrap.LanguageBinding;
 import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
 import java.util.Iterator;
@@ -124,7 +125,7 @@ final class ModuleNamespace
         }
 
         @Override
-        Binding resolveTop(String name,
+        Binding resolveTop(BaseSymbol name,
                            Iterator<SyntaxWrap> moreWraps,
                            Set<Integer> returnMarks)
         {
@@ -296,7 +297,7 @@ final class ModuleNamespace
                                CompiledForm valueForm)
         throws FusionException
     {
-        String name = binding.getName();
+        String name = binding.getName().stringValue();
         return new CompiledTopDefine(name, binding.myAddress, valueForm);
 
     }

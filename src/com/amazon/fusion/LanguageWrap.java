@@ -1,7 +1,8 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import java.util.Iterator;
 import java.util.Set;
@@ -27,7 +28,7 @@ final class LanguageWrap
         }
 
         @Override
-        public final String getName()
+        public final BaseSymbol getName()
         {
             return myBinding.getName();
         }
@@ -101,7 +102,7 @@ final class LanguageWrap
 
 
     @Override
-    Binding resolve(String name,
+    Binding resolve(BaseSymbol name,
                     Iterator<SyntaxWrap> moreWraps,
                     Set<Integer> returnMarks)
     {

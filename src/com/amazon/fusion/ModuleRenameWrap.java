@@ -1,7 +1,8 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import java.util.Iterator;
 import java.util.Set;
@@ -20,13 +21,13 @@ class ModuleRenameWrap
         myModule = module;
     }
 
-    ModuleBinding localResolveMaybe(String name)
+    ModuleBinding localResolveMaybe(BaseSymbol name)
     {
         return myModule.resolveProvidedName(name);
     }
 
     @Override
-    Binding resolve(String name,
+    Binding resolve(BaseSymbol name,
                     Iterator<SyntaxWrap> moreWraps,
                     Set<Integer> returnMarks)
     {

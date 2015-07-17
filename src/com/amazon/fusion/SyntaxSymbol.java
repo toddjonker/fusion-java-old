@@ -109,7 +109,7 @@ final class SyntaxSymbol
                                            myWraps,
                                            getLocation(),
                                            properties,
-                                           (BaseSymbol) myDatum);
+                                           getName());
         id.myBinding = myBinding;
         return id;
     }
@@ -125,7 +125,7 @@ final class SyntaxSymbol
 
         SyntaxSymbol copy =
             new SyntaxSymbol(null, wraps, getLocation(), getProperties(),
-                             (BaseSymbol) myDatum);
+                             getName());
         return copy;
     }
 
@@ -134,7 +134,7 @@ final class SyntaxSymbol
     {
         SyntaxSymbol copy =
             new SyntaxSymbol(null, myWraps, getLocation(), getProperties(),
-                             (BaseSymbol) myDatum);
+                             getName());
         copy.myBinding = binding;
         return copy;
     }
@@ -142,6 +142,10 @@ final class SyntaxSymbol
 
     //========================================================================
 
+    BaseSymbol getName()
+    {
+        return (BaseSymbol) myDatum;
+    }
 
     @Override
     SyntaxSymbol addWrap(SyntaxWrap wrap)
@@ -227,8 +231,8 @@ final class SyntaxSymbol
     {
         if (myBinding == null)
         {
-            String name = stringValue();
-            assert (name != null && name.length() != 0);
+            BaseSymbol name = getName();
+            assert name.isNonEmpty();
 
             if (myWraps == null)
             {
@@ -253,7 +257,7 @@ final class SyntaxSymbol
     Binding uncachedResolve()
     {
         if (myBinding != null) return myBinding;
-        String name = stringValue();
+        BaseSymbol name = getName();
         if (myWraps != null)
         {
             Binding b = myWraps.resolve(name);
@@ -273,8 +277,7 @@ final class SyntaxSymbol
     {
         if (myBinding != null) return myBinding;
         if (myWraps   == null) return null;
-        String name = stringValue();
-        return myWraps.resolve(name);
+        return myWraps.resolve(getName());
     }
 
 
@@ -287,12 +290,11 @@ final class SyntaxSymbol
         Binding b = null;
         if (myWraps != null)
         {
-            String name = stringValue();
-            b = myWraps.resolveTop(name);
+            b = myWraps.resolveTop(getName());
         }
         if (b == null)
         {
-            b = new FreeBinding(stringValue());
+            b = new FreeBinding(getName());
         }
 
         return copyReplacingBinding(b);
@@ -305,7 +307,7 @@ final class SyntaxSymbol
      *
      * @param name must be interned.
      */
-    boolean resolvesFree(String name, Set<Integer> marks)
+    boolean resolvesFree(BaseSymbol name, Set<Integer> marks)
     {
         Binding resolvedBoundId = resolve();
         if (resolvedBoundId.isFree(name))
@@ -358,7 +360,7 @@ final class SyntaxSymbol
             String name = stringValue();
             if (name != null && name.length() != 0)
             {
-                b = myWraps.resolve(name);
+                b = myWraps.resolve(getName());
             }
         }
 

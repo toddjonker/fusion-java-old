@@ -1,8 +1,9 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.voidValue;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import java.util.Iterator;
 import java.util.Set;
@@ -152,9 +153,9 @@ final class TopLevelNamespace
 
 
         @Override
-        Binding resolveTop(String name,
+        Binding resolveTop(BaseSymbol           name,
                            Iterator<SyntaxWrap> moreWraps,
-                           Set<Integer> returnMarks)
+                           Set<Integer>         returnMarks)
         {
             if (moreWraps.hasNext())
             {
@@ -165,9 +166,9 @@ final class TopLevelNamespace
         }
 
         @Override
-        TopLevelBinding resolve(String name,
-                        Iterator<SyntaxWrap> moreWraps,
-                        Set<Integer>         returnMarks)
+        TopLevelBinding resolve(BaseSymbol           name,
+                                Iterator<SyntaxWrap> moreWraps,
+                                Set<Integer>         returnMarks)
         {
             // Check our environment directly. This will handle identifiers
             // that have top-level definitions, but not those that only map to
@@ -255,7 +256,7 @@ final class TopLevelNamespace
         }
 
         @Override
-        public final String getName()
+        public final BaseSymbol getName()
         {
             return myBinding.getName();
         }
@@ -336,7 +337,7 @@ final class TopLevelNamespace
         }
 
         @Override
-        Binding resolve(String name,
+        Binding resolve(BaseSymbol name,
                         Iterator<SyntaxWrap> moreWraps,
                         Set<Integer> returnMarks)
         {

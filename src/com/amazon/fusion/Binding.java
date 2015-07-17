@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
+
 /**
  * Bindings are used during expansion and compilation to identify a specific
  * binding site.
@@ -9,7 +11,7 @@ package com.amazon.fusion;
  */
 abstract class Binding
 {
-    abstract String getName();
+    abstract BaseSymbol getName();
 
     /**
      * Determines whether this is a {@link FreeBinding} with the given name.
@@ -17,7 +19,7 @@ abstract class Binding
      *
      * @param name must be interned.
      */
-    boolean isFree(String name)
+    boolean isFree(BaseSymbol name)
     {
         return false;
     }

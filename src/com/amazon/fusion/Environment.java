@@ -1,7 +1,8 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import java.util.Set;
 
 /**
@@ -35,5 +36,5 @@ interface Environment
      *
      * @return null if the name is not substituted here.
      */
-    Binding substituteFree(String name, Set<Integer> marks);
+    Binding substituteFree(BaseSymbol name, Set<Integer> marks);
 }

@@ -1,12 +1,12 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionSexp.isSexp;
 import static com.amazon.fusion.FusionSymbol.isSymbol;
-import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.Syntax.datumToSyntax;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.Namespace.NsBinding;
 import java.util.ArrayList;
 
@@ -102,14 +102,14 @@ final class ProvideForm
             throw check.failure(message);
         }
 
-        String freeName = b.getName();
-        if (! publicName.equals(freeName))
+        BaseSymbol freeName = b.getName();
+        if (freeName != identifier.getName())
         {
             String message =
                 "cannot export binding since symbolic name " +
                 printQuotedSymbol(publicName) +
                 " differs from resolved name " +
-                printQuotedSymbol(freeName);
+                printQuotedSymbol(freeName.stringValue());
             throw check.failure(message);
         }
 
@@ -141,7 +141,7 @@ final class ProvideForm
                 // it has been pushed down to children.
                 SyntaxSymbol localized = (SyntaxSymbol)
                     datumToSyntax(eval,
-                                  makeSymbol(eval, binding.getName()),
+                                  binding.getName(),
                                   tag,
                                   null);
                 localized = localized.copyAndResolveTop();

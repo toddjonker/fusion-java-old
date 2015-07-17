@@ -1,9 +1,10 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import java.util.Set;
 
 final class LocalEnvironment
@@ -27,9 +28,9 @@ final class LocalEnvironment
         }
 
         @Override
-        public String getName()
+        public BaseSymbol getName()
         {
-            return myIdentifier.stringValue();
+            return myIdentifier.getName();
         }
 
         @Override
@@ -220,7 +221,7 @@ final class LocalEnvironment
     }
 
     @Override
-    public Binding substituteFree(String name, Set<Integer> marks)
+    public Binding substituteFree(BaseSymbol name, Set<Integer> marks)
     {
         for (LocalBinding b : myBindings)
         {

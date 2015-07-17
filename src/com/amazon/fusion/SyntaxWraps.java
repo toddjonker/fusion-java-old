@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -105,11 +106,9 @@ final class SyntaxWraps
 
 
     /**
-     * @param name must be interned.
-     *
      * @return null is equivalent to a {@link FreeBinding}.
      */
-    Binding resolve(String name)
+    Binding resolve(BaseSymbol name)
     {
         Iterator<SyntaxWrap> i =
             new SplicingIterator(Arrays.asList(myWraps).iterator());
@@ -129,7 +128,7 @@ final class SyntaxWraps
      *
      * @return null is equivalent to a {@link FreeBinding}.
      */
-    Binding resolveTop(String name)
+    Binding resolveTop(BaseSymbol name)
     {
         Iterator<SyntaxWrap> i =
             new SplicingIterator(Arrays.asList(myWraps).iterator());
