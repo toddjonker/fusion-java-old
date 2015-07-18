@@ -1,11 +1,14 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static org.hamcrest.core.Is.isA;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 /**
  *
@@ -13,6 +16,9 @@ import org.junit.Test;
 public class ModuleTest
     extends CoreTestCase
 {
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     @Before
     public void requires()
         throws FusionException
@@ -121,10 +127,13 @@ public class ModuleTest
         eval("(require \"/module/duplicate_imported_name\")");
     }
 
-    @Test(expected = FusionException.class)
+    @Test
     public void testDefineImportedName()
         throws Exception
     {
+        thrown.expect(FusionException.class);
+        thrown.expectCause(isA(AmbiguousBindingFailure.class));
+
         eval("(require '/module/define_imported_name')");
     }
 
