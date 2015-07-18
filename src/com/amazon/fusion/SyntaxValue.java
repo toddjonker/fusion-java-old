@@ -1,10 +1,11 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionCompare.isSame;
 import static com.amazon.fusion.FusionSexp.emptySexp;
 import static com.amazon.fusion.FusionSexp.pair;
+import static com.amazon.fusion.FusionSymbol.internSymbol;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static java.lang.Boolean.TRUE;
 import com.amazon.ion.IonValue;
@@ -21,9 +22,13 @@ abstract class SyntaxValue
     /** A zero-length array. */
     static final SyntaxValue[] EMPTY_ARRAY = new SyntaxValue[0];
 
-    // TODO WORKAROUND FUSION-47 Should use interned symbol
-    // We use 'new String' to ensure uniqueness of the object identity.
-    static final Object STX_PROPERTY_ORIGIN   = new String("origin");
+    static final Object STX_PROPERTY_ORIGIN   = internSymbol("origin");
+
+    /**
+     * Private key used to identify syntax objects constructed by the reader.
+     * We don't use a normal symbol here, because the property key must be
+     * kept private: a symbol would be interned and therefore reproducible.
+     */
     static final Object STX_PROPERTY_ORIGINAL = new String("is_original");
 
     /**

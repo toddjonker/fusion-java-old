@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -12,6 +12,7 @@ import java.util.Set;
 abstract class SyntaxWrap
 {
     /**
+     * @param name must be interned.
      * @param returnMarks <em>returns</em> the marks from this wrap and those
      * deeper. Must be mutable and not null.
      *
@@ -22,6 +23,9 @@ abstract class SyntaxWrap
                              Set<Integer> returnMarks);
 
 
+    /**
+     * @param name must be interned.
+     */
     Binding resolveTop(String name,
                        Iterator<SyntaxWrap> moreWraps,
                        Set<Integer> returnMarks)

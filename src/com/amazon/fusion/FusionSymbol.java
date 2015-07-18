@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -15,6 +15,9 @@ import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.Arrays;
+import java.util.WeakHashMap;
 
 
 final class FusionSymbol
@@ -156,6 +159,9 @@ final class FusionSymbol
     }
 
 
+    /**
+     * An interned, unannotated, non-null symbol.
+     */
     private static class ActualSymbol
         extends BaseSymbol
     {
@@ -165,6 +171,18 @@ final class FusionSymbol
         {
             assert content != null;
             myContent = content;
+        }
+
+        @Override
+        public boolean equals(Object other)
+        {
+            return this == other;  // Due to interning.
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return myContent.hashCode();
         }
 
         @Override
@@ -204,7 +222,7 @@ final class FusionSymbol
     }
 
 
-    private static class AnnotatedSymbol
+    private static final class AnnotatedSymbol
         extends BaseSymbol
         implements Annotated
     {
@@ -219,6 +237,30 @@ final class FusionSymbol
             assert annotations.length != 0;
             myAnnotations = annotations;
             myValue = value;
+        }
+
+        @Override
+        public boolean equals(Object other)
+        {
+            if (this == other) return true;
+            if (other instanceof AnnotatedSymbol)
+            {
+                AnnotatedSymbol that = (AnnotatedSymbol) other;
+                if (this.myValue == that.myValue)
+                {
+                    return Arrays.equals(myAnnotations, that.myAnnotations);
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode()
+        {
+            int result = 1;
+            result = 31 * result + myValue.hashCode();
+            result = 31 * result + Arrays.hashCode(myAnnotations);
+            return result;
         }
 
         @Override
@@ -291,6 +333,33 @@ final class FusionSymbol
 
     private static final BaseSymbol NULL_SYMBOL  = new NullSymbol();
 
+    /**
+     * Interning table for unannotated, non-null symbols.
+     * <p>
+     * The keys are the same string instances contained by the symbols, so the
+     * entry will be retained at least as long as the symbol is reachable.
+     * Using a weak reference to the symbol allows it to be reclaimed when it
+     * is otherwise unused. After the symbol is GCed then the hash entry will
+     * be removed.
+     * <p>
+     * This approach allows us to avoid creating an {@code ActualSymbol} in the
+     * common case that the symbol is already interned.
+     */
+    private static final
+    WeakHashMap<String, WeakReference<ActualSymbol>>
+        ourActualSymbols = new WeakHashMap<>(256);
+
+    /**
+     * Interning table for annotated symbols.
+     * <p>
+     * Here we use the {@code AnnotatedSymbol} as the key because it needs to
+     * capture the base symbol and the annotations, so there's no shortcut like
+     * there is with the {@code ActualSymbol} table.
+     */
+    private static final
+    WeakHashMap<AnnotatedSymbol, WeakReference<AnnotatedSymbol>>
+        ourAnnotatedSymbols = new WeakHashMap<>(256);
+
 
     /**
      * @param value must not be empty but may be null to make
@@ -307,9 +376,43 @@ final class FusionSymbol
             throw new IllegalArgumentException("Cannot make an empty symbol");
         }
 
-        return new ActualSymbol(value);
+        // Prevent other threads from touching the intern table.
+        // This doesn't prevent the GC from removing entries!
+        synchronized (ourActualSymbols)
+        {
+            WeakReference<ActualSymbol> ref = ourActualSymbols.get(value);
+            if (ref != null)
+            {
+                // There's a chance that the entry for a string will exist but
+                // the weak reference has been cleared.
+                ActualSymbol interned = ref.get();
+                if (interned != null) return interned;
+            }
+
+            // We don't have an interned symbol, so make one.
+            ActualSymbol sym = new ActualSymbol(value);
+            ref = new WeakReference<>(sym);
+            ourActualSymbols.put(value, ref);
+
+            return sym;
+        }
     }
 
+    /**
+     * NOT FOR APPLICATION USE!
+     */
+    static BaseSymbol internSymbol(String name)
+    {
+        return makeSymbol(null, name);
+    }
+
+    /**
+     * NOT FOR APPLICATION USE!
+     */
+    static String internString(String name)
+    {
+        return internSymbol(name).stringValue();
+    }
 
     private static BaseSymbol annotate(BaseSymbol unannotated,
                                        String[] annotations)
@@ -318,7 +421,25 @@ final class FusionSymbol
 
         if (annotations.length == 0) return unannotated;
 
-        return new AnnotatedSymbol(annotations, unannotated);
+        AnnotatedSymbol sym = new AnnotatedSymbol(annotations, unannotated);
+
+        synchronized (ourAnnotatedSymbols)
+        {
+            WeakReference<AnnotatedSymbol> ref = ourAnnotatedSymbols.get(sym);
+            if (ref != null)
+            {
+                // There's a chance that the entry for a string will exist but
+                // the weak reference has been cleared.
+                AnnotatedSymbol interned = ref.get();
+                if (interned != null) return interned;
+            }
+
+            // We don't have an interned symbol, so intern the one we've made.
+            ref = new WeakReference<>(sym);
+            ourAnnotatedSymbols.put(sym, ref);
+        }
+
+        return sym;
     }
 
 

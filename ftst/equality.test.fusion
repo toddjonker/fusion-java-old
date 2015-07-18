@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 (require
+  "/ftst/symbol"
   "/fusion/experimental/altlambda"
   "/fusion/experimental/check"
   "/fusion/list"
@@ -18,7 +19,8 @@
 (define !==  (|a b| (not (==  a b))))
 (define !=== (|a b| (not (=== a b))))
 
-(define not_same (|a b| (not (same a b))))
+(define not_same  (|a b| (not (same  a b))))
+(define not_ident (|a b| (not (ident a b))))
 
 (define (is_annotatable val)
   (not (or (is_void val) (is_eof val) (ident val UNDEF))))
@@ -304,6 +306,25 @@ orders, including each value paired with itself.
       (sexp (quote a::92233720368547758070))
       (sexp (quote a::19.e0))
       (sexp "str")
-      (sexp (quote str))              // TODO FUSION-47 intern symbols
+      (sexp (quote str))
       (sexp (quote a::str))
+)))
+
+(test_equivalence [ident, same, '===', '==', '='] not_ident
+  (append
+    // Nulls are their own equivalence sets
+    (map sexp all_nulls)
+    (list
+      (sexp "str")
+      (sexp (quote a::"str"))
+      (sexp
+        (quote sym) (quote sym)
+        SYMBOL_sym                // Symbol from another module is ident
+        (string_to_symbol "sym")
+        (string_to_symbol (symbol_to_string SYMBOL_sym))
+      )
+      (sexp (quote a::sym) (quote a::sym)
+        (annotate (quote sym) "a")
+        (annotate SYMBOL_sym SYMBOL_a)
+      )
 )))

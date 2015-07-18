@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -14,6 +14,8 @@ abstract class Binding
     /**
      * Determines whether this is a {@link FreeBinding} with the given name.
      * This implementation returns false.
+     *
+     * @param name must be interned.
      */
     boolean isFree(String name)
     {

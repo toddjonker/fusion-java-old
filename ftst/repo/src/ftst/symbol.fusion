@@ -1,0 +1,11 @@
+// Copyright (c) 2015 Amazon.com, Inc.  All rights reserved.
+
+(module symbol "/fusion"
+
+  (provide SYMBOL_a)
+  (define  SYMBOL_a (quote a))
+
+  (provide SYMBOL_sym)
+  (define  SYMBOL_sym (quote sym))
+
+)

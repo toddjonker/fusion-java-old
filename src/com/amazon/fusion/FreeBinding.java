@@ -23,8 +23,8 @@ final class FreeBinding
     @Override
     public boolean isFree(String name)
     {
-        // TODO FUSION-47 intern symbol names and use ==
-        return myName.equals(name);
+        // This works due to symbol text interning.
+        return myName == name;
     }
 
 
@@ -36,8 +36,8 @@ final class FreeBinding
 
         FreeBinding that = (FreeBinding) other;
 
-        // TODO FUSION-47 intern symbol names and use ==
-        return this.myName.equals(that.myName);
+        // This works due to symbol text interning.
+        return this.myName == that.myName;
     }
 
 

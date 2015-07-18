@@ -1,8 +1,9 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.safeWriteToString;
+import static com.amazon.fusion.FusionSymbol.internString;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
@@ -254,11 +255,14 @@ abstract class Namespace
 
 
     /**
-     * @param name must be non-empty.
+     * @param name must be non-empty, and does not need to be interned.
+     *
      * @return null is equivalent to a {@link FreeBinding}.
      */
     final Binding resolve(String name)
     {
+        name = internString(name);
+
         return myWraps.resolve(name);
     }
 

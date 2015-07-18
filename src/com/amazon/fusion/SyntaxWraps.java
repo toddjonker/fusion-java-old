@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -105,6 +105,8 @@ final class SyntaxWraps
 
 
     /**
+     * @param name must be interned.
+     *
      * @return null is equivalent to a {@link FreeBinding}.
      */
     Binding resolve(String name)
@@ -123,6 +125,8 @@ final class SyntaxWraps
     }
 
     /**
+     * @param name must be interned.
+     *
      * @return null is equivalent to a {@link FreeBinding}.
      */
     Binding resolveTop(String name)

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -74,7 +74,10 @@ final class FusionSyntax
 
     /**
      * @return void if the origin property isn't set.
+     *
+     * @deprecated No longer necessary. Used by the Eclipse plugin.
      */
+    @Deprecated
     static Object syntaxOrigin(Evaluator eval, SyntaxValue stx)
         throws FusionException
     {
@@ -275,22 +278,6 @@ final class FusionSyntax
                 checkIdentifierArg(eval, this, "syntax identifier", 2, args);
 
             return newStx.trackOrigin(eval, origStx, origin);
-        }
-    }
-
-
-    static final class OriginProc
-        extends Procedure
-    {
-        @Override
-        Object doApply(Evaluator eval, Object[] args) throws FusionException
-        {
-            checkArityExact(1, args);
-
-            SyntaxValue stx =
-                FusionSyntax.checkSyntaxArg(eval, this, "syntax object", 0, args);
-
-            return stx.findProperty(eval, STX_PROPERTY_ORIGIN);
         }
     }
 

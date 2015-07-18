@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 /*                       *** WARNING ***
  *
@@ -65,10 +65,11 @@ the `origin` identifier.
     (java_new "com.amazon.fusion.FusionSyntax$TrackOriginProc"))
 
 
-  // TODO WORKAROUND FUSION-47 Should use interned symbol and remove this.
+  // TODO Should probably remove; it's unnecessary.  Racket doesn't have it.
   (provide syntax_origin)
-  (define syntax_origin
-    (java_new "com.amazon.fusion.FusionSyntax$OriginProc"))
+  (define (syntax_origin stx)
+    "DEPRECATED as of FusionJava R23"
+    (syntax_property stx (quote origin)))
 
 
   (provide syntax_is_original)

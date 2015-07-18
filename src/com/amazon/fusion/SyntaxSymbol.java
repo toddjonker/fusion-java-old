@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -302,6 +302,8 @@ final class SyntaxSymbol
     /**
      * Determines whether this identifier resolves to a {@link FreeBinding}
      * with the given name and marks.
+     *
+     * @param name must be interned.
      */
     boolean resolvesFree(String name, Set<Integer> marks)
     {

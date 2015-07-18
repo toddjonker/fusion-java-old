@@ -1,0 +1,46 @@
+// Copyright (c) 2015 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/fusion/experimental/check"
+  )
+
+
+
+//============================================================================
+// Comparisons
+
+(define_check (check_ident s1 s2)
+  (check =     s1 s2)
+  (check ==    s1 s2)
+  (check ===   s1 s2)
+  (check same  s1 s2)
+  (check ident s1 s2)
+)
+
+(define_check (check_comparisons lo hi)
+//  (check <  lo hi)  TODO FUSION-243 string ordering
+//  (check <= lo hi)
+  (check_ident lo lo)
+  (check_ident hi hi)
+//  (check >= hi lo)
+//  (check >  hi lo)
+)
+
+// TODO 204 support empty symbol
+//(check_comparisons (quote '') (quote a))
+(check_comparisons (quote a) (quote b))
+
+// TODO 204 support empty symbol
+//(check_comparisons (quote f::'') (quote e::a))
+(check_comparisons (quote f::a) (quote e::b))
+
+
+// Symbol interning
+(check_ident (quote null.symbol) (quote null.symbol))
+(check_ident (quote null.symbol) (string_to_symbol null.string))
+
+(check_ident (quote a) (quote a))
+(check_ident (quote a) (string_to_symbol "a"))
+
+(check_ident (quote a::a) (annotate (string_to_symbol "a") "a"))
+(check_ident (quote a) (first (annotations (quote a::a))))
