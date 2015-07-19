@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/altlambda"
@@ -128,9 +128,9 @@ orders, including each value paired with itself.
 
 (test_equivalence ['==', '='] !==
   (map add_annotations
-    (append_m
+    (append
       // Nulls are their own equivalence sets
-      (apply mutable_list (map sexp all_nulls))
+      (map sexp all_nulls)
       (list
         (sexp VOID)
         (sexp UNDEF)
@@ -204,9 +204,9 @@ orders, including each value paired with itself.
               accum)
             (pair eqSet accum))))
       (sexp)
-      (append_m
+      (append
         // Nulls are their own equivalence sets
-        (apply mutable_list (map sexp all_nulls))
+        (map sexp all_nulls)
         (list
           (sexp VOID)
           (sexp UNDEF)
@@ -287,9 +287,9 @@ orders, including each value paired with itself.
 
 
 (test_equivalence [same, '===', '==', '='] not_same
-  (append_m
+  (append
     // Nulls are their own equivalence sets
-    (apply mutable_list (map sexp all_nulls))
+    (map sexp all_nulls)
     (list
       (sexp 19  19  (+ 9 10 ) (quote 19))
       (sexp    92233720368547758070   // Larger than 64-bit long
