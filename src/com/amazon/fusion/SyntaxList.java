@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -73,9 +73,10 @@ final class SyntaxList
     @Override
     SyntaxList copyReplacingChildren(Evaluator      eval,
                                      SyntaxValue... children)
+        throws FusionException
     {
-
-        String[] annotations = annotationsAsJavaStrings();
+        String[] annotations =
+            FusionValue.annotationsAsJavaStrings(eval, myImmutableList);
         BaseList datum = (children == null
                               ? nullList(eval, annotations)
                               : immutableList(eval, annotations, children));
@@ -122,8 +123,10 @@ final class SyntaxList
 
             if (changed) // Keep sharing when we can
             {
+                String[] annotations =
+                    FusionValue.annotationsAsJavaStrings(eval, myImmutableList);
                 myImmutableList =
-                    immutableList(eval, annotationsAsJavaStrings(), children);
+                    immutableList(eval, annotations, children);
             }
 
             myWraps = null;
@@ -158,13 +161,6 @@ final class SyntaxList
                           myImmutableList.annotationsAsJavaStrings(),
                           children);
         return new SyntaxList(getLocation(), getProperties(), null, newList);
-    }
-
-
-    @Override
-    String[] annotationsAsJavaStrings()
-    {
-        return myImmutableList.annotationsAsJavaStrings();
     }
 
 
@@ -237,8 +233,9 @@ final class SyntaxList
             arraycopy(c, 0, children, thisLength, thatLength);
         }
 
-        BaseList list =
-            immutableList(eval, annotationsAsJavaStrings(), children);
+        String[] anns =
+            FusionValue.annotationsAsJavaStrings(eval, myImmutableList);
+        BaseList list = immutableList(eval, anns, children);
         return new SyntaxList(eval, null, list);
     }
 
@@ -342,7 +339,9 @@ final class SyntaxList
             children[i] = child.syntaxToDatum(eval);
         }
 
-        return immutableList(eval, annotationsAsJavaStrings(), children);
+        String[] annotations =
+            FusionValue.annotationsAsJavaStrings(eval, unwrap(eval));
+        return immutableList(eval, annotations, children);
     }
 
 

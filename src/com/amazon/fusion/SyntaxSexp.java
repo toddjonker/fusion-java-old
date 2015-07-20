@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -122,9 +122,10 @@ final class SyntaxSexp
     @Override
     SyntaxSexp copyReplacingChildren(Evaluator      eval,
                                      SyntaxValue... children)
+        throws FusionException
     {
-
-        String[] annotations = annotationsAsJavaStrings();
+        String[] annotations =
+            FusionValue.annotationsAsJavaStrings(eval, mySexp);
         BaseSexp datum = (children == null
                               ? nullSexp(eval, annotations)
                               : immutableSexp(eval, annotations, children));
@@ -277,13 +278,6 @@ final class SyntaxSexp
 
         BaseSexp newSexp = stripWraps(eval, (ImmutablePair) mySexp);
         return new SyntaxSexp(getLocation(), getProperties(), null, newSexp);
-    }
-
-
-    @Override
-    String[] annotationsAsJavaStrings()
-    {
-        return mySexp.annotationsAsJavaStrings();
     }
 
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -45,7 +45,9 @@ final class QuasiSyntaxForm
         throws FusionException
     {
         SourceLocation location    = originalStx.getLocation();
-        String[]       annotations = originalStx.annotationsAsJavaStrings();
+        String[] annotations =
+            FusionValue.annotationsAsJavaStrings(eval,
+                                                 originalStx.unwrap(eval));
         return new CompiledQuasiSyntaxSexp(location, annotations, children);
     }
 
@@ -57,7 +59,9 @@ final class QuasiSyntaxForm
         throws FusionException
     {
         SourceLocation location    = originalStx.getLocation();
-        String[] annotations = originalStx.annotationsAsJavaStrings();
+        String[] annotations =
+            FusionValue.annotationsAsJavaStrings(eval,
+                                                 originalStx.unwrap(eval));
         return new CompiledQuasiSyntaxList(location, annotations, children);
     }
 

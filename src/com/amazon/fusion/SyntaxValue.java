@@ -7,6 +7,7 @@ import static com.amazon.fusion.FusionSexp.emptySexp;
 import static com.amazon.fusion.FusionSexp.pair;
 import static com.amazon.fusion.FusionSymbol.internSymbol;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
+import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static java.lang.Boolean.TRUE;
 import com.amazon.ion.IonValue;
 import java.util.Arrays;
@@ -56,6 +57,14 @@ abstract class SyntaxValue
         myProperties = properties;
     }
 
+
+    // This final override isn't semantically necessary, but it exists to
+    // ensure that we don't return annotations from any syntax object.
+    @Override
+    final String[] annotationsAsJavaStrings()
+    {
+        return EMPTY_STRING_ARRAY;
+    }
 
     /**
      * Determines whether the wrapped datum is a null value.

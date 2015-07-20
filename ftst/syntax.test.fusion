@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -251,3 +251,22 @@
 (check === []
   (syntax_to_datum (syntax_subseq (quote_syntax [1, 2]) 5)))
 
+
+// Annotations shouldn't be exposed "through" a syntax object.
+(do
+  (lambda (stx)
+    (check_annotations [] stx)
+    (check_annotations ["a"] (syntax_unwrap stx))
+    (check_annotations ["a"] (syntax_to_datum stx)))
+  (list
+    (quote_syntax a::null)
+    (quote_syntax a::true)
+    (quote_syntax a::1)
+    (quote_syntax a::1.0)
+    (quote_syntax a::1e1)
+    (quote_syntax a::"str")
+    (quote_syntax a::sym)
+    (quote_syntax a::[true])
+    (quote_syntax a::(true))
+    (quote_syntax a::{f:true})
+    ))

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -125,16 +125,15 @@ final class DefineForm
         newDefineElts[1] = procName;
         if (hasDoc)
         {
-            String doc = unsafeStringToJavaString(eval, docStx.unwrap(eval));
+            Object docStr = docStx.unwrap(eval);
+            String doc = unsafeStringToJavaString(eval, docStr);
             if (! (doc.startsWith("    ") || doc.startsWith("\n    ")))
             {
                 String newDoc = "\n    " + origDefineElts[1] + "\n" + doc;
-                docStx =
-                    makeSyntax(eval,
-                               docStx.getLocation(),
-                               makeString(eval,
-                                          docStx.annotationsAsJavaStrings(),
-                                          newDoc));
+                String[] annotations =
+                    FusionValue.annotationsAsJavaStrings(eval, docStr);
+                docStr = makeString(eval, annotations, newDoc);
+                docStx = makeSyntax(eval, docStx.getLocation(), docStr);
             }
 
             newDefineElts[2] = docStx;

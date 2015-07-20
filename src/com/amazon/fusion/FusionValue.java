@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -108,6 +108,21 @@ public final class FusionValue
         }
 
         return falseBool(eval);
+    }
+
+
+    /**
+     * Determines whether a Fusion value has any annotations.
+     */
+    static boolean isAnnotated(Evaluator eval, Object value)
+        throws FusionException
+    {
+        if (value instanceof Annotated)
+        {
+            // TODO inefficient
+            return ((Annotated) value).annotationsAsJavaStrings().length != 0;
+        }
+        return false;
     }
 
 

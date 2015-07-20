@@ -1,6 +1,8 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
+
+import static com.amazon.fusion.FusionValue.isAnnotated;
 
 /**
  * "Registers" used during macro expansion
@@ -66,7 +68,8 @@ final class Expander
     SyntaxValue expand(Environment env, SyntaxValue stx)
         throws FusionException
     {
-        if (stx.annotationsAsJavaStrings().length != 0)
+        Object datum = stx.unwrap(myEval);
+        if (isAnnotated(myEval, datum))
         {
             String message =
                 "Annotations not supported in raw syntax. You probably " +

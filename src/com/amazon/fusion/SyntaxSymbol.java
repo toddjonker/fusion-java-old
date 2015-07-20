@@ -417,7 +417,7 @@ final class SyntaxSymbol
                     throw new UnboundIdentifierException(this);
                 }
 
-                assert annotationsAsJavaStrings().length == 0;
+                assert ! FusionValue.isAnnotated(eval, myDatum);
                 SyntaxSexp topExpr = SyntaxSexp.make(eval, top, this);
 
                 // TODO FUSION-207 tail expand

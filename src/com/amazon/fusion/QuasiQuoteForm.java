@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -43,7 +43,9 @@ final class QuasiQuoteForm
                            CompiledForm[] children)
         throws FusionException
     {
-        String[] annotations = originalStx.annotationsAsJavaStrings();
+        String[] annotations =
+            FusionValue.annotationsAsJavaStrings(eval,
+                                                 originalStx.unwrap(eval));
         return new CompiledQuasiQuoteSexp(annotations, children);
     }
 
@@ -54,7 +56,9 @@ final class QuasiQuoteForm
                            CompiledForm[] children)
         throws FusionException
     {
-        String[] annotations = originalStx.annotationsAsJavaStrings();
+        String[] annotations =
+            FusionValue.annotationsAsJavaStrings(eval,
+                                                 originalStx.unwrap(eval));
         return new CompiledQuasiQuoteList(annotations, children);
     }
 

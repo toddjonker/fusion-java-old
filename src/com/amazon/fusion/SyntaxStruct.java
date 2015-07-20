@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -65,13 +65,6 @@ final class SyntaxStruct
 
 
     //========================================================================
-
-
-    @Override
-    String[] annotationsAsJavaStrings()
-    {
-        return myStruct.annotationsAsJavaStrings();
-    }
 
 
     @Override
@@ -157,8 +150,9 @@ final class SyntaxStruct
 
         if (! mustReplace) return this;
 
-        ImmutableStruct s =
-            immutableStruct(newMap, annotationsAsJavaStrings());
+        String[] annotations =
+            FusionValue.annotationsAsJavaStrings(eval, myStruct);
+        ImmutableStruct s = immutableStruct(newMap, annotations);
         return new SyntaxStruct(getLocation(), getProperties(), null, s);
     }
 
@@ -218,7 +212,9 @@ final class SyntaxStruct
             }
         }
 
-        myStruct = immutableStruct(newMap, annotationsAsJavaStrings());
+        String[] annotations =
+            FusionValue.annotationsAsJavaStrings(eval, myStruct);
+        myStruct = immutableStruct(newMap, annotations);
         myWraps = null;
 
         return myStruct;
@@ -268,7 +264,9 @@ final class SyntaxStruct
             }
         }
 
-        return immutableStruct(newMap, annotationsAsJavaStrings());
+        String[] annotations =
+            FusionValue.annotationsAsJavaStrings(eval, myStruct);
+        return immutableStruct(newMap, annotations);
     }
 
 
@@ -283,8 +281,9 @@ final class SyntaxStruct
 
         // Make a copy of the map, then mutate it to replace children
         // as necessary.
+        Evaluator eval = expander.getEvaluator();
         Map<String, Object> newMap =
-            ((NonNullImmutableStruct) myStruct).copyMap(expander.getEvaluator());
+            ((NonNullImmutableStruct) myStruct).copyMap(eval);
 
         for (Map.Entry<String, Object> entry : newMap.entrySet())
         {
@@ -320,8 +319,9 @@ final class SyntaxStruct
 
 
         // Wraps have been pushed down so the copy doesn't need them.
-        ImmutableStruct s =
-            immutableStruct(newMap, annotationsAsJavaStrings());
+        String[] annotations =
+            FusionValue.annotationsAsJavaStrings(eval, myStruct);
+        ImmutableStruct s = immutableStruct(newMap, annotations);
         return new SyntaxStruct(getLocation(), s);
     }
 
