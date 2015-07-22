@@ -314,7 +314,11 @@ abstract class BaseValue
      * Gets the annotations on a Fusion value as Java strings.
      *
      * @return not null, but possibly empty.
+     *
+     * @deprecated
+     * Use {@link FusionValue#annotationsAsJavaStrings(Evaluator, Object)}.
      */
+    @Deprecated
     static String[] annotationsAsJavaStrings(Evaluator eval, Object value)
         throws FusionException
     {
