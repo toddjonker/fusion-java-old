@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc. All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc. All rights reserved.
 
 package com.amazon.fusion;
 
@@ -7,6 +7,7 @@ import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
+import static com.amazon.fusion.FusionValue.sameAnnotations;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonValue;
@@ -15,7 +16,6 @@ import com.amazon.ion.ValueFactory;
 import com.amazon.ion.system.IonTextWriterBuilder;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * Root class for most (if not all) Fusion values.
@@ -297,15 +297,12 @@ abstract class BaseValue
         if (left instanceof BaseValue)
         {
             BaseValue lv = (BaseValue) left;
+            // TODO check annotations first, to fail faster.
             BaseBool b = lv.strictEquals(eval, right);
             if (b.isTrue())
             {
-                BaseValue rv = (BaseValue) right;
-
-                String[] lAnn = lv.annotationsAsJavaStrings();
-                String[] rAnn = rv.annotationsAsJavaStrings();
-
-                if (Arrays.equals(lAnn, rAnn)) return b;
+                boolean result = sameAnnotations(eval, left, right);
+                return makeBool(eval, result);
             }
         }
 

@@ -153,6 +153,28 @@ public final class FusionValue
 
 
     /**
+     * Determines whether two Fusion values have the same annotations in the
+     * same order.
+     */
+    static boolean sameAnnotations(Evaluator eval, Object left, Object right)
+        throws FusionException
+    {
+        Object[] thisAnn = annotations(eval, left);
+        Object[] thatAnn = annotations(eval, right);
+
+        int len = thisAnn.length;
+        if (thatAnn.length != len) return false;
+
+        for (int i = 0; i < len; i++)
+        {
+            // Annotations are interned symbols.
+            if (thisAnn[i] != thatAnn[i]) return false;
+        }
+        return true;
+    }
+
+
+    /**
      * Gets the annotations on a Fusion value as Java strings.
      *
      * @return not null, but possibly empty.

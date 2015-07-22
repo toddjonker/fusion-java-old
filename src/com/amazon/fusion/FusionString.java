@@ -99,9 +99,19 @@ public final class FusionString
             if (o instanceof BaseString)
             {
                 BaseString that = (BaseString) o;
-                return (Objects.equals(this.stringValue(), that.stringValue())
-                        && Arrays.equals(this.annotationsAsJavaStrings(),
-                                         that.annotationsAsJavaStrings()));
+                if (Objects.equals(this.stringValue(), that.stringValue()))
+                {
+                    try
+                    {
+                        // TODO Unsupported null Evaluator!
+                        return FusionValue.sameAnnotations(null, this, that);
+                    }
+                    catch (FusionException e)
+                    {
+                        throw new AssertionError("Should not happen", e);
+                    }
+                }
+
             }
             return false;
         }
