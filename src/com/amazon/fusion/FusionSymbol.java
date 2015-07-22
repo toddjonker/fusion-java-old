@@ -28,7 +28,64 @@ final class FusionSymbol
     abstract static class BaseSymbol
         extends BaseText
     {
+        static final BaseSymbol[] EMPTY_ARRAY = new BaseSymbol[0];
+
         private BaseSymbol() {}
+
+
+        /**
+         * NOT FOR APPLICATION USE!
+         *
+         * @param value must not be empty but may be null to make
+         * {@code null.symbol}.
+         */
+        static BaseSymbol internSymbol(String value)
+        {
+            if (value == null) return NULL_SYMBOL;
+
+            if (value.isEmpty())
+            {
+                throw new IllegalArgumentException("Cannot make an empty symbol");
+            }
+
+            // Prevent other threads from touching the intern table.
+            // This doesn't prevent the GC from removing entries!
+            synchronized (ourActualSymbols)
+            {
+                WeakReference<ActualSymbol> ref = ourActualSymbols.get(value);
+                if (ref != null)
+                {
+                    // There's a chance that the entry for a string will exist but
+                    // the weak reference has been cleared.
+                    ActualSymbol interned = ref.get();
+                    if (interned != null) return interned;
+                }
+
+                // We don't have an interned symbol, so make one.
+                ActualSymbol sym = new ActualSymbol(value);
+                ref = new WeakReference<>(sym);
+                ourActualSymbols.put(value, ref);
+
+                return sym;
+            }
+        }
+
+        /**
+         * NOT FOR APPLICATION USE!
+         */
+        static BaseSymbol[] internSymbols(String[] names)
+        {
+            int len = names.length;
+            if (len == 0) return EMPTY_ARRAY;
+
+            BaseSymbol[] syms = new BaseSymbol[len];
+            for (int i = 0; i < len; i++)
+            {
+                syms[i] = internSymbol(names[i]);
+            }
+            return syms;
+        }
+
 
         @Override
         BaseSymbol annotate(Evaluator eval, String[] annotations)
@@ -375,42 +432,9 @@ final class FusionSymbol
      */
     static BaseSymbol makeSymbol(Evaluator eval, String value)
     {
-        if (value == null) return NULL_SYMBOL;
-
-        if (value.isEmpty())
-        {
-            throw new IllegalArgumentException("Cannot make an empty symbol");
-        }
-
-        // Prevent other threads from touching the intern table.
-        // This doesn't prevent the GC from removing entries!
-        synchronized (ourActualSymbols)
-        {
-            WeakReference<ActualSymbol> ref = ourActualSymbols.get(value);
-            if (ref != null)
-            {
-                // There's a chance that the entry for a string will exist but
-                // the weak reference has been cleared.
-                ActualSymbol interned = ref.get();
-                if (interned != null) return interned;
-            }
-
-            // We don't have an interned symbol, so make one.
-            ActualSymbol sym = new ActualSymbol(value);
-            ref = new WeakReference<>(sym);
-            ourActualSymbols.put(value, ref);
-
-            return sym;
-        }
+        return BaseSymbol.internSymbol(value);
     }
 
-    /**
-     * NOT FOR APPLICATION USE!
-     */
-    static BaseSymbol internSymbol(String name)
-    {
-        return makeSymbol(null, name);
-    }
 
     private static BaseSymbol annotate(BaseSymbol unannotated,
                                        String[] annotations)

@@ -5,7 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionCompare.isSame;
 import static com.amazon.fusion.FusionSexp.emptySexp;
 import static com.amazon.fusion.FusionSexp.pair;
-import static com.amazon.fusion.FusionSymbol.internSymbol;
+import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbol;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static java.lang.Boolean.TRUE;
