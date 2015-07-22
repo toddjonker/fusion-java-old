@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import com.amazon.fusion.FusionBool.BaseBool;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
@@ -123,6 +124,31 @@ public final class FusionValue
             return ((Annotated) value).annotationsAsJavaStrings().length != 0;
         }
         return false;
+    }
+
+
+    /**
+     * Gets the annotations on a Fusion value as Fusion symbols.
+     *
+     * @return not null, but possibly empty, array of Fusion symbols.
+     */
+    static Object[] annotations(Evaluator eval, Object value)
+        throws FusionException
+    {
+        BaseSymbol[] anns;
+
+        if (value instanceof Annotated)
+        {
+            // TODO inefficient
+            String[] strs = ((Annotated) value).annotationsAsJavaStrings();
+            anns = BaseSymbol.internSymbols(strs);
+        }
+        else
+        {
+            anns = BaseSymbol.EMPTY_ARRAY;
+        }
+
+        return anns;
     }
 
 
