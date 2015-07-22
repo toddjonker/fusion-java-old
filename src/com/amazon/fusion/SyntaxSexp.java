@@ -282,13 +282,6 @@ final class SyntaxSexp
 
 
     @Override
-    boolean isAnyNull()
-    {
-        return mySexp.isAnyNull();
-    }
-
-
-    @Override
     boolean hasNoChildren()
         throws FusionException
     {

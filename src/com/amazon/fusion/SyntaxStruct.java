@@ -68,13 +68,6 @@ final class SyntaxStruct
 
 
     @Override
-    boolean isAnyNull()
-    {
-        return ((BaseValue)myStruct).isAnyNull();
-    }
-
-
-    @Override
     boolean hasNoChildren()
     {
         return myStruct.size() == 0;
@@ -350,7 +343,7 @@ final class SyntaxStruct
     {
         assert myWraps == null;
 
-        if (isAnyNull())
+        if (((BaseValue)myStruct).isAnyNull())
         {
             return new CompiledConstant(NULL_STRUCT);
         }

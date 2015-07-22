@@ -66,11 +66,13 @@ abstract class SyntaxValue
         return EMPTY_STRING_ARRAY;
     }
 
-    /**
-     * Determines whether the wrapped datum is a null value.
-     */
+    // This final override isn't semantically necessary, but it exists to
+    // ensure that a syntax object is never considered null.
     @Override
-    abstract boolean isAnyNull();
+    final boolean isAnyNull()
+    {
+        return false;
+    }
 
 
     /**

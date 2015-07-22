@@ -252,6 +252,28 @@
   (syntax_to_datum (syntax_subseq (quote_syntax [1, 2]) 5)))
 
 
+// Syntax objects are never null
+(do
+  (lambda (stx)
+    (check_pred is_syntax stx) // sanity
+    (check_pred (negate is_null) stx)
+    (check_pred is_null (syntax_unwrap stx)))
+  (list
+    (quote_syntax null)
+    (quote_syntax null.bool)
+    (quote_syntax null.int)
+    (quote_syntax null.float)
+    (quote_syntax null.decimal)
+    (quote_syntax null.timestamp)
+    (quote_syntax null.symbol)
+    (quote_syntax null.string)
+    (quote_syntax null.clob)
+    (quote_syntax null.blob)
+    (quote_syntax null.list)
+    (quote_syntax null.sexp)
+    (quote_syntax null.struct)))
+
+
 // Annotations shouldn't be exposed "through" a syntax object.
 (do
   (lambda (stx)

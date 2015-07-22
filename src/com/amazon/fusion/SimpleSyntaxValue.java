@@ -101,12 +101,6 @@ class SimpleSyntaxValue
     }
 
     @Override
-    boolean isAnyNull()
-    {
-        return myDatum.isAnyNull();
-    }
-
-    @Override
     void ionize(Evaluator eval, IonWriter writer)
         throws IOException, IonException, FusionException, IonizeFailure
     {

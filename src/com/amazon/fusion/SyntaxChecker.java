@@ -1,6 +1,8 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
+
+import static com.amazon.fusion.FusionValue.isAnyNull;
 
 
 /**
@@ -152,11 +154,11 @@ class SyntaxChecker
                                                String expectation,
                                                boolean nullable,
                                                SyntaxValue form)
-        throws SyntaxException
+        throws FusionException
     {
         try
         {
-            if (nullable || ! form.isAnyNull())
+            if (nullable || ! isAnyNull(myEvaluator, form.unwrap(myEvaluator)))
             {
                 return klass.cast(form);
             }
