@@ -380,9 +380,16 @@ final class TopLevelNamespace
      */
     TopLevelNamespace(ModuleRegistry registry)
     {
-        super(registry, ModuleIdentity.forTopLevel(), new SyntaxWrap[0]);
+        super(registry, ModuleIdentity.forTopLevel(),
+              new Function<Namespace, SyntaxWraps>()
+              {
+                  @Override
+                  public SyntaxWraps apply(Namespace _this) {
+                      TopLevelNamespace __this = (TopLevelNamespace) _this;
+                      return SyntaxWraps.make(new TopLevelWrap(__this));
+                  }
+              });
         myRequiredModuleWraps = SyntaxWraps.make();
-        addWrap(new TopLevelWrap(this));
     }
 
 

@@ -104,28 +104,26 @@ abstract class Namespace
     private final ArrayList<ModuleStore> myRequiredModuleStores =
         new ArrayList<>();
 
-    private SyntaxWraps myWraps;
+    private final SyntaxWraps          myWraps;
     private final ArrayList<NsBinding> myBindings = new ArrayList<>();
     private final ArrayList<Object>    myValues   = new ArrayList<>();
     private ArrayList<BindingDoc> myBindingDocs;
 
 
-    Namespace(ModuleRegistry registry, ModuleIdentity id)
+    /**
+     * @param registry must not be null.
+     * @param id must not be null.
+     * @param wraps generates the {@link SyntaxWraps} for this namespace, given
+     *   a reference to {@code this}.
+     */
+    Namespace(ModuleRegistry                   registry,
+              ModuleIdentity                   id,
+              Function<Namespace, SyntaxWraps> wraps)
     {
         myRegistry = registry;
         myModuleId = id;
-
-        SyntaxWrap wrap = new EnvironmentRenameWrap(this);
-        myWraps = SyntaxWraps.make(wrap);
+        myWraps    = wraps.apply(this);
     }
-
-    Namespace(ModuleRegistry registry, ModuleIdentity id, SyntaxWrap... wraps)
-    {
-        myRegistry = registry;
-        myModuleId = id;
-        myWraps = SyntaxWraps.make(wraps);
-    }
-
 
     @Override
     public final ModuleRegistry getRegistry()
@@ -407,10 +405,6 @@ abstract class Namespace
     abstract void require(ModuleInstance module)
         throws FusionException;
 
-    final void addWrap(SyntaxWrap wrap)
-    {
-        myWraps = myWraps.addWrap(wrap);
-    }
 
 
     final boolean ownsBinding(NsBinding binding)

@@ -150,8 +150,8 @@ final class ModuleNamespace
 
     /**
      * The wraps for our used modules, then our language.  This allows us to
-     * add imported bindings (via mutation of this sequence) after the wraps
-     * have been propagated to existing symbols.  Which in turn means that
+     * add imported bindings (via mutation of this sequence) after the sequence
+     * has been propagated to existing identifiers.  Which in turn means that
      * imports cover the entire module body, not just code after the import.
      */
     private final SequenceWrap myUsedModuleWraps;
@@ -160,23 +160,45 @@ final class ModuleNamespace
     /**
      * Obnoxious helper constructor lets us allocate the sequence and retain a
      * reference to it.
+     * <p>
+     * Note that we don't add this module to the base sequence: as we encounter
+     * require forms, new entries will be added to {@link #myUsedModuleWraps},
+     * and all required modules need to fall after this module in the overall
+     * sequence of wraps on the namespace. That ensures that bindings in this
+     * module have precedence over bindings imported from other modules.
      */
     private ModuleNamespace(ModuleRegistry registry, ModuleIdentity moduleId,
-                            SequenceWrap wrap)
+                            final SequenceWrap usedModuleWraps)
     {
-        super(registry, moduleId, wrap);
-        myUsedModuleWraps = wrap;
+        super(registry, moduleId,
+              new Function<Namespace, SyntaxWraps>()
+              {
+                  @Override
+                  public SyntaxWraps apply(Namespace _this) {
+                      ModuleNamespace __this = (ModuleNamespace) _this;
+                      return SyntaxWraps.make(new ModuleWrap(__this),
+                                              usedModuleWraps);
+                  }
+              });
+        myUsedModuleWraps = usedModuleWraps;
     }
 
     /**
-     * Constructs a module with no language. Any bindings will need to be
-     * {@code require}d or {@code define}d.
+     * Constructs a module that uses no other module. Any bindings will need to
+     * be created via {@link #bind(String, Object)}.
      *
      * @param moduleId identifies this module.
      */
     ModuleNamespace(ModuleRegistry registry, ModuleIdentity moduleId)
     {
-        super(registry, moduleId);
+        super(registry, moduleId,
+              new Function<Namespace, SyntaxWraps>()
+              {
+                  @Override
+                  public SyntaxWraps apply(Namespace _this) {
+                      return SyntaxWraps.make(new EnvironmentRenameWrap(_this));
+                  }
+              });
         myUsedModuleWraps = null;
     }
 
@@ -191,12 +213,6 @@ final class ModuleNamespace
     {
         this(registry, moduleId,
              new SequenceWrap(new LanguageWrap(language)));
-
-        // Note that we don't add this module to the base sequence.
-        // That's because it breaks {@link SyntaxWraps#stripImmediateEnvWrap}.
-        // Also, this structure lets up lookup bindings in the module first
-        // before proceeding on to imports and the language.
-        addWrap(new ModuleWrap(this));
     }
 
 
