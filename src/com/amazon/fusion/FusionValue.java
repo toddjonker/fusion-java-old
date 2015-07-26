@@ -112,6 +112,47 @@ public final class FusionValue
     }
 
 
+    //========================================================================
+    // Annotations
+
+
+    /**
+     * Replaces or removes annotations on a Fusion value, generally making a
+     * (shallow) copy of the value while doing so.
+     *
+     * @param value must be an annotatable Fusion value.
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty.
+     *
+     * @return a Fusion value.
+     * @throws FusionException
+     */
+    static Object annotate(Evaluator eval, Object value, String[] annotations)
+        throws FusionException
+    {
+        return ((BaseValue) value).annotate(eval, annotations);
+    }
+
+    /**
+     * Replaces or removes annotations on a Fusion value, generally making a
+     * (shallow) copy of the value while doing so.
+     *
+     * @param value must be an annotatable Fusion value.
+     * @param annotations must not be null and must not contain elements
+     * that are null or empty.
+     *
+     * @return a Fusion value.
+     * @throws FusionException
+     */
+    public static Object annotate(TopLevel top, Object value,
+                                  String[] annotations)
+        throws FusionException
+    {
+        Evaluator eval = StandardTopLevel.toEvaluator(top);
+        return annotate(eval, value, annotations);
+    }
+
+
     /**
      * Determines whether a Fusion value has any annotations.
      */

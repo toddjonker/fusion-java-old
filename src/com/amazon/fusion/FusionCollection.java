@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -46,20 +46,6 @@ final class FusionCollection
 
     //========================================================================
     // Constructors
-
-    /**
-     * @param collection must be a collection.
-     * @param annotations must not be null and must not contain elements
-     * that are null or empty. This method assumes ownership of the array
-     * and it must not be modified later.
-     */
-    static Object unsafeCollectionAnnotate(Evaluator eval,
-                                           Object collection,
-                                           String[] annotations)
-        throws FusionException
-    {
-        return ((BaseCollection) collection).annotate(eval, annotations);
-    }
 
 
     //========================================================================

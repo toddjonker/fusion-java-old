@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -69,17 +69,6 @@ public final class FusionLob
 
     //========================================================================
     // Constructors
-
-
-    static Object unsafeLobAnnotate(TopLevel top,
-                                    Object fusionLob,
-                                    String[] annotations)
-        throws FusionException
-    {
-        Evaluator eval = StandardTopLevel.toEvaluator(top);
-        BaseLob base = (BaseLob) fusionLob;
-        return base.annotate(eval, annotations);
-    }
 
 
     //========================================================================

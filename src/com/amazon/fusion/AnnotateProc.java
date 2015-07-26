@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -24,11 +24,8 @@ final class AnnotateProc
 
         Object target = args[0];
 
-        if (target instanceof BaseValue)
-        {
-            Object r = ((BaseValue) target).annotate(eval, annotations);
-            if (r != null) return r;
-        }
+        Object r = FusionValue.annotate(eval, target, annotations);
+        if (r != null) return r;
 
         throw argFailure("annotatable type", 0, args);
     }

@@ -1,12 +1,12 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionLob.unsafeLobAnnotate;
 import static com.amazon.fusion.FusionLob.unsafeLobBytesCopy;
 import static com.amazon.fusion.FusionLob.unsafeLobBytesNoCopy;
 import static com.amazon.fusion.FusionUtils.EMPTY_BYTE_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
+import static com.amazon.fusion.FusionValue.annotate;
 import static com.amazon.fusion.FusionValue.isAnyNull;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
@@ -44,10 +44,10 @@ public abstract class LobTestCase
         assertNull(unsafeLobBytesCopy(top, lob));
         assertNull(unsafeLobBytesNoCopy(top, lob));
 
-        Object annotated = unsafeLobAnnotate(top, lob, EMPTY_STRING_ARRAY);
+        Object annotated = annotate(top, lob, EMPTY_STRING_ARRAY);
         assertSame(lob, annotated);
 
-        annotated = unsafeLobAnnotate(top, lob, new String[]{ "ann" });
+        annotated = annotate(top, lob, new String[]{ "ann" });
         assertNotSame(lob, annotated);
         checkLobType(lob);
         assertTrue(isAnyNull(top, annotated));
@@ -68,10 +68,10 @@ public abstract class LobTestCase
         assertArrayEquals(EMPTY_BYTE_ARRAY, unsafeLobBytesCopy(top, lob));
         assertArrayEquals(EMPTY_BYTE_ARRAY, unsafeLobBytesNoCopy(top, lob));
 
-        Object annotated = unsafeLobAnnotate(top, lob, EMPTY_STRING_ARRAY);
+        Object annotated = annotate(top, lob, EMPTY_STRING_ARRAY);
         assertSame(lob, annotated);
 
-        annotated = unsafeLobAnnotate(top, lob, new String[]{ "ann" });
+        annotated = annotate(top, lob, new String[]{ "ann" });
         assertNotSame(lob, annotated);
         checkLobType(lob);
         assertFalse(isAnyNull(top, annotated));
@@ -100,10 +100,10 @@ public abstract class LobTestCase
         bytes[0] = 5;
         assertArrayEquals(new byte[]{ 0, 1, 2 }, unsafeLobBytesNoCopy(top, lob));
 
-        Object annotated = unsafeLobAnnotate(top, lob, EMPTY_STRING_ARRAY);
+        Object annotated = annotate(top, lob, EMPTY_STRING_ARRAY);
         assertSame(lob, annotated);
 
-        annotated = unsafeLobAnnotate(top, lob, new String[]{ "ann" });
+        annotated = annotate(top, lob, new String[]{ "ann" });
         checkLobType(annotated);
         bytes = unsafeLobBytesCopy(top, lob);
         assertArrayEquals(new byte[]{ 0, 1, 2 }, bytes);
