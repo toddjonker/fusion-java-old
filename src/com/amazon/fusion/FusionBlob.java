@@ -1,11 +1,13 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionLob.BaseLob;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
@@ -33,9 +35,10 @@ public final class FusionBlob
         private BaseBlob() {}
 
         @Override
-        BaseBlob annotate(Evaluator eval, String[] annotations)
+        BaseBlob annotate(Evaluator eval, BaseSymbol[] annotations)
         {
-            return FusionBlob.annotate(this, annotations);
+            if (annotations.length == 0) return this;
+            return new AnnotatedBlob(annotations, this);
         }
     }
 
@@ -150,15 +153,14 @@ public final class FusionBlob
 
     private static class AnnotatedBlob
         extends BaseBlob
-        implements Annotated
     {
         /** Not null or empty */
-        final String[] myAnnotations;
+        final BaseSymbol[] myAnnotations;
 
-        /** Not null, and not AnnotatedBool */
+        /** Not null, and not AnnotatedBlob */
         final BaseBlob  myValue;
 
-        private AnnotatedBlob(String[] annotations, BaseBlob value)
+        private AnnotatedBlob(BaseSymbol[] annotations, BaseBlob value)
         {
             assert annotations.length != 0;
             myAnnotations = annotations;
@@ -166,15 +168,21 @@ public final class FusionBlob
         }
 
         @Override
-        public String[] annotationsAsJavaStrings()
+        boolean isAnnotated()
+        {
+            return true;
+        }
+
+        @Override
+        BaseSymbol[] getAnnotations()
         {
             return myAnnotations;
         }
 
         @Override
-        BaseBlob annotate(Evaluator eval, String[] annotations)
+        BaseBlob annotate(Evaluator eval, BaseSymbol[] annotations)
         {
-            return FusionBlob.annotate(myValue, annotations);
+            return myValue.annotate(eval, annotations);
         }
 
         @Override
@@ -216,7 +224,7 @@ public final class FusionBlob
         {
             IonValue iv = myValue.copyToIonValue(factory,
                                                  throwOnConversionFailure);
-            iv.setTypeAnnotations(myAnnotations);
+            iv.setTypeAnnotations(getAnnotationsAsJavaStrings());
             return iv;
         }
 
@@ -224,7 +232,7 @@ public final class FusionBlob
         void ionize(Evaluator eval, IonWriter out)
             throws IOException, IonException, FusionException, IonizeFailure
         {
-            out.setTypeAnnotations(myAnnotations);
+            out.setTypeAnnotations(getAnnotationsAsJavaStrings());
             myValue.ionize(eval, out);
         }
 
@@ -277,17 +285,6 @@ public final class FusionBlob
     }
 
 
-    private static BaseBlob annotate(BaseBlob unannotated,
-                                     String[] annotations)
-    {
-        assert ! (unannotated instanceof AnnotatedBlob);
-
-        if (annotations.length == 0) return unannotated;
-
-        return new AnnotatedBlob(annotations, unannotated);
-    }
-
-
     /**
      * @param annotations must not be null and must not contain elements
      * that are null or empty. This method assumes ownership of the array
@@ -303,7 +300,7 @@ public final class FusionBlob
                                    byte[]    value)
     {
         BaseBlob base = forBytesNoCopy(eval, value);
-        return annotate(base, annotations);
+        return base.annotate(eval, internSymbols(annotations));
     }
 
 
@@ -320,7 +317,7 @@ public final class FusionBlob
                                        String[] annotations)
     {
         BaseBlob base = (BaseBlob) fusionBlob;
-        return base.annotate(eval, annotations);
+        return base.annotate(eval, internSymbols(annotations));
     }
 
     static BaseBlob unsafeBlobAnnotate(TopLevel top,

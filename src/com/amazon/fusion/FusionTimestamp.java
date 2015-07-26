@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -11,10 +11,12 @@ import static com.amazon.fusion.FusionNumber.makeDecimal;
 import static com.amazon.fusion.FusionNumber.unsafeNumberToBigDecimal;
 import static com.amazon.fusion.FusionString.checkNullableStringArg;
 import static com.amazon.fusion.FusionString.makeString;
+import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import static com.amazon.ion.Timestamp.UTC_OFFSET;
 import static com.amazon.ion.util.IonTextUtils.isDigit;
 import com.amazon.fusion.FusionBool.BaseBool;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
@@ -43,9 +45,16 @@ final class FusionTimestamp
         abstract Timestamp timestampValue();
 
         @Override
-        BaseTimestamp annotate(Evaluator eval, String[] annotations)
+        final boolean isAnnotatable()
         {
-            return FusionTimestamp.annotate(this, annotations);
+            return true;
+        }
+
+        @Override
+        BaseTimestamp annotate(Evaluator eval, BaseSymbol[] annotations)
+        {
+            if (annotations.length == 0) return this;
+            return new AnnotatedTimestamp(annotations, this);
         }
 
         @Override
@@ -195,15 +204,15 @@ final class FusionTimestamp
 
     private static class AnnotatedTimestamp
         extends BaseTimestamp
-        implements Annotated
     {
         /** Not null or empty */
-        final String[] myAnnotations;
+        final BaseSymbol[] myAnnotations;
 
-        /** Not null, and not AnnotatedBool */
+        /** Not null, and not AnnotatedTimestamp */
         final BaseTimestamp  myValue;
 
-        private AnnotatedTimestamp(String[] annotations, BaseTimestamp value)
+        private AnnotatedTimestamp(BaseSymbol[] annotations,
+                                   BaseTimestamp value)
         {
             assert annotations.length != 0;
             myAnnotations = annotations;
@@ -211,15 +220,21 @@ final class FusionTimestamp
         }
 
         @Override
-        public String[] annotationsAsJavaStrings()
+        final boolean isAnnotated()
+        {
+            return true;
+        }
+
+        @Override
+        BaseSymbol[] getAnnotations()
         {
             return myAnnotations;
         }
 
         @Override
-        BaseTimestamp annotate(Evaluator eval, String[] annotations)
+        BaseTimestamp annotate(Evaluator eval, BaseSymbol[] annotations)
         {
-            return FusionTimestamp.annotate(myValue, annotations);
+            return myValue.annotate(eval, annotations);
         }
 
         @Override
@@ -259,7 +274,7 @@ final class FusionTimestamp
         {
             IonValue iv = myValue.copyToIonValue(factory,
                                                  throwOnConversionFailure);
-            iv.setTypeAnnotations(myAnnotations);
+            iv.setTypeAnnotations(getAnnotationsAsJavaStrings());
             return iv;
         }
 
@@ -267,7 +282,7 @@ final class FusionTimestamp
         void ionize(Evaluator eval, IonWriter out)
             throws IOException, IonException, FusionException, IonizeFailure
         {
-            out.setTypeAnnotations(myAnnotations);
+            out.setTypeAnnotations(getAnnotationsAsJavaStrings());
             myValue.ionize(eval, out);
         }
 
@@ -300,17 +315,6 @@ final class FusionTimestamp
     }
 
 
-    private static BaseTimestamp annotate(BaseTimestamp unannotated,
-                                          String[] annotations)
-    {
-        assert ! (unannotated instanceof AnnotatedTimestamp);
-
-        if (annotations.length == 0) return unannotated;
-
-        return new AnnotatedTimestamp(annotations, unannotated);
-    }
-
-
     /**
      * @param annotations must not be null and must not contain elements
      * that are null or empty. This method assumes ownership of the array
@@ -324,7 +328,7 @@ final class FusionTimestamp
                                        Timestamp value)
     {
         BaseTimestamp base = makeTimestamp(eval, value);
-        return annotate(base, annotations);
+        return base.annotate(eval, internSymbols(annotations));
     }
 
 
@@ -341,7 +345,7 @@ final class FusionTimestamp
                                                  String[]  annotations)
     {
         BaseTimestamp base = (BaseTimestamp) fusionTimestamp;
-        return base.annotate(eval, annotations);
+        return base.annotate(eval, internSymbols(annotations));
     }
 
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -14,6 +14,7 @@ import static com.amazon.fusion.FusionIterator.iterate;
 import static com.amazon.fusion.FusionList.checkNullableListArg;
 import static com.amazon.fusion.FusionList.unsafeJavaIterate;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
+import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
 import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
 import static com.amazon.fusion.FusionText.textToJavaString;
 import static com.amazon.fusion.FusionText.unsafeTextToJavaString;
@@ -25,6 +26,7 @@ import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionCollection.BaseCollection;
 import com.amazon.fusion.FusionCompare.EqualityTier;
 import com.amazon.fusion.FusionIterator.AbstractIterator;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonType;
@@ -49,15 +51,15 @@ final class FusionStruct
 
     static final NullStruct      NULL_STRUCT  = new NullStruct();
     static final NonNullImmutableStruct EMPTY_STRUCT =
-        new NonNullImmutableStruct(EMPTY_MAP, EMPTY_STRING_ARRAY);
+        new NonNullImmutableStruct(EMPTY_MAP, BaseSymbol.EMPTY_ARRAY);
 
     //========================================================================
     // Constructors
 
     static Object structFromIonStruct(Evaluator eval, IonStruct struct)
     {
-        String[] annotations = struct.getTypeAnnotations();
-        // TODO FUSION-47 intern annotation text
+        String[] annStrings = struct.getTypeAnnotations();
+        BaseSymbol[] annotations = internSymbols(annStrings);
 
         // There's no benefit to being lazy injecting null.struct or {}.
         if (struct.isNullValue())
@@ -81,30 +83,28 @@ final class FusionStruct
     }
 
 
+    static NullStruct nullStruct(Evaluator eval, BaseSymbol[] annotations)
+    {
+        if (annotations.length == 0) return NULL_STRUCT;
+        return new NullStruct(annotations);
+    }
+
     static NullStruct nullStruct(Evaluator eval, String[] annotations)
     {
-        if (annotations.length == 0)
-        {
-            return NULL_STRUCT;
-        }
-
-        return new NullStruct(annotations);
+        if (annotations.length == 0) return NULL_STRUCT;
+        return new NullStruct(internSymbols(annotations));
     }
 
 
     static NonNullImmutableStruct immutableStruct(Map<String, Object> map)
     {
-        if (map.size() == 0)
-        {
-            return EMPTY_STRUCT;
-        }
-
-        return new NonNullImmutableStruct(map, EMPTY_STRING_ARRAY);
+        if (map.size() == 0) return EMPTY_STRUCT;
+        return new NonNullImmutableStruct(map, BaseSymbol.EMPTY_ARRAY);
     }
 
 
     static NonNullImmutableStruct immutableStruct(Map<String, Object> map,
-                                                  String[] anns)
+                                                  BaseSymbol[] anns)
     {
         if (map.size() == 0)
         {
@@ -119,10 +119,16 @@ final class FusionStruct
         return new NonNullImmutableStruct(map, anns);
     }
 
+    static NonNullImmutableStruct immutableStruct(Map<String, Object> map,
+                                                  String[] anns)
+    {
+        return immutableStruct(map, internSymbols(anns));
+    }
+
 
     static NonNullImmutableStruct immutableStruct(String[] names,
                                                   Object[] values,
-                                                  String[] anns)
+                                                  BaseSymbol[] anns)
     {
         Map<String, Object> map;
         if (names.length == 0)
@@ -147,6 +153,13 @@ final class FusionStruct
         }
 
         return new NonNullImmutableStruct(map, anns);
+    }
+
+    static NonNullImmutableStruct immutableStruct(String[] names,
+                                                  Object[] values,
+                                                  String[] anns)
+    {
+        return immutableStruct(names, values, internSymbols(anns));
     }
 
 
@@ -177,12 +190,12 @@ final class FusionStruct
         throws FusionException
     {
         return new MutableStruct(new HashMap<String, Object>(),
-                                 EMPTY_STRING_ARRAY);
+                                 BaseSymbol.EMPTY_ARRAY);
     }
 
     static MutableStruct mutableStruct(Map<String, Object> map)
     {
-        return new MutableStruct(map, EMPTY_STRING_ARRAY);
+        return new MutableStruct(map, BaseSymbol.EMPTY_ARRAY);
     }
 
 
@@ -207,7 +220,7 @@ final class FusionStruct
             }
         }
 
-        return new MutableStruct(map, anns);
+        return new MutableStruct(map, internSymbols(anns));
     }
 
 
@@ -509,7 +522,7 @@ final class FusionStruct
 
     static interface BaseStruct
     {
-        String[] annotationsAsJavaStrings();
+        BaseSymbol[] getAnnotations();
 
         void ionize(Evaluator eval, IonWriter out)
             throws IOException, IonException, FusionException, IonizeFailure;
@@ -593,7 +606,7 @@ final class FusionStruct
     {
         NullStruct() {}
 
-        NullStruct(String[] annotations)
+        NullStruct(BaseSymbol[] annotations)
         {
             super(annotations);
         }
@@ -639,7 +652,7 @@ final class FusionStruct
         }
 
         @Override
-        Object annotate(Evaluator eval, String[] annotations)
+        Object annotate(Evaluator eval, BaseSymbol[] annotations)
             throws FusionException
         {
             return new NullStruct(annotations);
@@ -783,7 +796,7 @@ final class FusionStruct
         public void ionize(Evaluator eval, IonWriter out)
             throws IOException, FusionException
         {
-            out.setTypeAnnotations(myAnnotations);
+            out.setTypeAnnotations(getAnnotationsAsJavaStrings());
             out.writeNull(IonType.STRUCT);
         }
 
@@ -793,7 +806,7 @@ final class FusionStruct
             throws FusionException
         {
             IonStruct is = factory.newNullStruct();
-            is.setTypeAnnotations(myAnnotations);
+            is.setTypeAnnotations(getAnnotationsAsJavaStrings());
             return is;
         }
     }
@@ -823,7 +836,7 @@ final class FusionStruct
          * @param map must not be null. It is not copied; a reference is
          * retained.
          */
-        private MapBasedStruct(Map<String, Object> map, String[] anns)
+        private MapBasedStruct(Map<String, Object> map, BaseSymbol[] anns)
         {
             super(anns);
             assert map != null;
@@ -832,7 +845,7 @@ final class FusionStruct
             updateSize();
         }
 
-        private MapBasedStruct(String[] annotations, int size)
+        private MapBasedStruct(BaseSymbol[] annotations, int size)
         {
             super(annotations);
             myMap = new HashMap<>();
@@ -866,7 +879,7 @@ final class FusionStruct
         }
 
         abstract MapBasedStruct makeSimilar(Map<String, Object> map,
-                                            String[] annotations);
+                                            BaseSymbol[] annotations);
 
         MapBasedStruct makeSimilar(Map<String, Object> map)
         {
@@ -1312,7 +1325,7 @@ final class FusionStruct
         public void ionize(Evaluator eval, IonWriter out)
             throws IOException, FusionException
         {
-            out.setTypeAnnotations(myAnnotations);
+            out.setTypeAnnotations(getAnnotationsAsJavaStrings());
 
             out.stepIn(IonType.STRUCT);
             for (Map.Entry<String, Object> entry : myMap.entrySet())
@@ -1349,7 +1362,7 @@ final class FusionStruct
             throws FusionException
         {
             IonStruct is = factory.newEmptyStruct();
-            is.setTypeAnnotations(myAnnotations);
+            is.setTypeAnnotations(getAnnotationsAsJavaStrings());
 
             for (Map.Entry<String, Object> entry : myMap.entrySet())
             {
@@ -1391,12 +1404,12 @@ final class FusionStruct
          * @param annotations
          */
         public NonNullImmutableStruct(Map<String, Object> map,
-                                      String[] annotations)
+                                      BaseSymbol[] annotations)
         {
             super(map, annotations);
         }
 
-        private NonNullImmutableStruct(String[] annotations, int size)
+        private NonNullImmutableStruct(BaseSymbol[] annotations, int size)
         {
             super(annotations, size);
         }
@@ -1409,13 +1422,13 @@ final class FusionStruct
 
         @Override
         MapBasedStruct makeSimilar(Map<String, Object> map,
-                                   String[] annotations)
+                                   BaseSymbol[] annotations)
         {
             return immutableStruct(map, annotations);
         }
 
         @Override
-        Object annotate(Evaluator eval, String[] annotations)
+        Object annotate(Evaluator eval, BaseSymbol[] annotations)
             throws FusionException
         {
             return makeSimilar(getMap(eval), annotations);
@@ -1463,7 +1476,7 @@ final class FusionStruct
     {
         private IonStruct myIonStruct;
 
-        public LazyInjectingStruct(String[] annotations, IonStruct struct)
+        public LazyInjectingStruct(BaseSymbol[] annotations, IonStruct struct)
         {
             super(annotations, struct.size());
             myIonStruct = struct;
@@ -1551,20 +1564,20 @@ final class FusionStruct
         extends MapBasedStruct
     {
         public MutableStruct(Map<String, Object> map,
-                             String[] annotations)
+                             BaseSymbol[] annotations)
         {
             super(map, annotations);
         }
 
         @Override
         MapBasedStruct makeSimilar(Map<String, Object> map,
-                                   String[] annotations)
+                                   BaseSymbol[] annotations)
         {
             return new MutableStruct(map, annotations);
         }
 
         @Override
-        Object annotate(Evaluator eval, String[] annotations)
+        Object annotate(Evaluator eval, BaseSymbol[] annotations)
             throws FusionException
         {
             return makeSimilar(copyMap(eval), annotations);

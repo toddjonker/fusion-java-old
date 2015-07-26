@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,12 +10,14 @@ import static com.amazon.fusion.FusionCompare.EqualityTier.STRICT_EQUAL;
 import static com.amazon.fusion.FusionCompare.EqualityTier.TIGHT_EQUAL;
 import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
+import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionCompare.EqualityTier;
 import com.amazon.fusion.FusionIterator.AbstractIterator;
 import com.amazon.fusion.FusionList.BaseList;
 import com.amazon.fusion.FusionSequence.BaseSequence;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonSexp;
 import com.amazon.ion.IonType;
@@ -43,14 +45,16 @@ final class FusionSexp
         return NULL_SEXP;
     }
 
+    static NullSexp nullSexp(Evaluator eval, BaseSymbol[] annotations)
+    {
+        if (annotations.length == 0) return NULL_SEXP;
+        return new NullSexp(annotations);
+    }
+
     static NullSexp nullSexp(Evaluator eval, String[] annotations)
     {
-        if (annotations.length == 0)
-        {
-            return NULL_SEXP;
-        }
-
-        return new NullSexp(annotations);
+        if (annotations.length == 0) return NULL_SEXP;
+        return new NullSexp(internSymbols(annotations));
     }
 
     /**
@@ -61,14 +65,16 @@ final class FusionSexp
         return EMPTY_SEXP;
     }
 
+    static EmptySexp emptySexp(Evaluator eval, BaseSymbol[] annotations)
+    {
+        if (annotations.length == 0) return EMPTY_SEXP;
+        return new EmptySexp(annotations);
+    }
+
     static EmptySexp emptySexp(Evaluator eval, String[] annotations)
     {
-        if (annotations.length == 0)
-        {
-            return EMPTY_SEXP;
-        }
-
-        return new EmptySexp(annotations);
+        if (annotations.length == 0) return EMPTY_SEXP;
+        return new EmptySexp(internSymbols(annotations));
     }
 
 
@@ -113,9 +119,9 @@ final class FusionSexp
      * @param annotations must not be null.
      * @param elements must not be null.
      */
-    static BaseSexp immutableSexp(Evaluator eval,
-                                  String[]  annotations,
-                                  Object[]  elements)
+    static BaseSexp immutableSexp(Evaluator    eval,
+                                  BaseSymbol[] annotations,
+                                  Object[]     elements)
     {
         if (elements.length == 0)
         {
@@ -135,7 +141,6 @@ final class FusionSexp
         return c;
     }
 
-
     /**
      * Caller must have injected children.
      *
@@ -144,7 +149,21 @@ final class FusionSexp
      */
     static BaseSexp immutableSexp(Evaluator eval,
                                   String[]  annotations,
-                                  List<?>   elements)
+                                  Object[]  elements)
+    {
+        return immutableSexp(eval, internSymbols(annotations), elements);
+    }
+
+
+    /**
+     * Caller must have injected children.
+     *
+     * @param annotations must not be null.
+     * @param elements must not be null.
+     */
+    static BaseSexp immutableSexp(Evaluator    eval,
+                                  BaseSymbol[] annotations,
+                                  List<?>      elements)
     {
         int size = elements.size();
         if (size == 0)
@@ -165,6 +184,19 @@ final class FusionSexp
         return c;
     }
 
+    /**
+     * Caller must have injected children.
+     *
+     * @param annotations must not be null.
+     * @param elements must not be null.
+     */
+    static BaseSexp immutableSexp(Evaluator eval,
+                                  String[]  annotations,
+                                  List<?>   elements)
+    {
+        return immutableSexp(eval, internSymbols(annotations), elements);
+    }
+
 
     static ImmutablePair pair(Evaluator eval, Object head, Object tail)
     {
@@ -172,10 +204,16 @@ final class FusionSexp
     }
 
 
-    static ImmutablePair pair(Evaluator eval, String[] annotations,
+    static ImmutablePair pair(Evaluator eval, BaseSymbol[] annotations,
                               Object head, Object tail)
     {
         return new ImmutablePair(annotations, head, tail);
+    }
+
+    static ImmutablePair pair(Evaluator eval, String[] annotations,
+                              Object head, Object tail)
+    {
+        return pair(eval, internSymbols(annotations), head, tail);
     }
 
 
@@ -350,7 +388,7 @@ final class FusionSexp
     {
         BaseSexp() {}
 
-        BaseSexp(String[] annotations)
+        BaseSexp(BaseSymbol[] annotations)
         {
             super(annotations);
         }
@@ -463,7 +501,7 @@ final class FusionSexp
     {
         private NullSexp() {}
 
-        NullSexp(String[] annotations)
+        NullSexp(BaseSymbol[] annotations)
         {
             super(annotations);
         }
@@ -475,7 +513,7 @@ final class FusionSexp
         }
 
         @Override
-        Object annotate(Evaluator eval, String[] annotations)
+        Object annotate(Evaluator eval, BaseSymbol[] annotations)
             throws FusionException
         {
             return new NullSexp(annotations);
@@ -523,7 +561,7 @@ final class FusionSexp
             throws FusionException
         {
             IonSexp sexp = factory.newNullSexp();
-            sexp.setTypeAnnotations(myAnnotations);
+            sexp.setTypeAnnotations(getAnnotationsAsJavaStrings());
             return sexp;
         }
 
@@ -538,7 +576,7 @@ final class FusionSexp
         void ionize(Evaluator eval, IonWriter out)
             throws IOException, FusionException
         {
-            out.setTypeAnnotations(myAnnotations);
+            out.setTypeAnnotations(getAnnotationsAsJavaStrings());
             out.writeNull(IonType.SEXP);
         }
     }
@@ -549,13 +587,13 @@ final class FusionSexp
     {
         private EmptySexp() {}
 
-        EmptySexp(String[] annotations)
+        EmptySexp(BaseSymbol[] annotations)
         {
             super(annotations);
         }
 
         @Override
-        Object annotate(Evaluator eval, String[] annotations)
+        Object annotate(Evaluator eval, BaseSymbol[] annotations)
             throws FusionException
         {
             return new EmptySexp(annotations);
@@ -588,7 +626,7 @@ final class FusionSexp
             throws FusionException
         {
             IonSexp sexp = factory.newEmptySexp();
-            sexp.setTypeAnnotations(myAnnotations);
+            sexp.setTypeAnnotations(getAnnotationsAsJavaStrings());
             return sexp;
         }
 
@@ -603,7 +641,7 @@ final class FusionSexp
         public void ionize(Evaluator eval, IonWriter out)
             throws IOException, FusionException
         {
-            out.setTypeAnnotations(myAnnotations);
+            out.setTypeAnnotations(getAnnotationsAsJavaStrings());
             out.stepIn(IonType.SEXP);
             out.stepOut();
         }
@@ -622,7 +660,8 @@ final class FusionSexp
             myTail = tail;
         }
 
-        private ImmutablePair(String[] annotations, Object head, Object tail)
+        private ImmutablePair(BaseSymbol[] annotations,
+                              Object head, Object tail)
         {
             super(annotations);
             myHead = head;
@@ -631,7 +670,7 @@ final class FusionSexp
 
 
         @Override
-        Object annotate(Evaluator eval, String[] annotations)
+        Object annotate(Evaluator eval, BaseSymbol[] annotations)
             throws FusionException
         {
             return new ImmutablePair(annotations, myHead, myTail);
@@ -884,7 +923,7 @@ final class FusionSexp
             throws FusionException
         {
             IonSexp is = factory.newEmptySexp();
-            is.setTypeAnnotations(myAnnotations);
+            is.setTypeAnnotations(getAnnotationsAsJavaStrings());
 
             ImmutablePair pair = this;
             while (true)
@@ -953,7 +992,7 @@ final class FusionSexp
         void ionize(Evaluator eval, IonWriter out)
             throws IOException, FusionException
         {
-            out.setTypeAnnotations(myAnnotations);
+            out.setTypeAnnotations(getAnnotationsAsJavaStrings());
             out.stepIn(IonType.SEXP);
 
             ImmutablePair pair = this;

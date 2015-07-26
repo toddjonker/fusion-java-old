@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionNumber.makeInt;
-import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 
 
 final class FusionCollection
@@ -17,24 +17,35 @@ final class FusionCollection
 
     abstract static class BaseCollection
         extends BaseValue
-        implements Annotated
     {
         /** Not null */
-        final String[] myAnnotations;
+        final BaseSymbol[] myAnnotations;
 
         BaseCollection()
         {
-            myAnnotations = EMPTY_STRING_ARRAY;
+            myAnnotations = BaseSymbol.EMPTY_ARRAY;
         }
 
-        BaseCollection(String[] annotations)
+        BaseCollection(BaseSymbol[] annotations)
         {
             assert annotations != null;
             myAnnotations = annotations;
         }
 
         @Override
-        public String[] annotationsAsJavaStrings()
+        final boolean isAnnotatable()
+        {
+            return true;
+        }
+
+        @Override
+        final boolean isAnnotated()
+        {
+            return myAnnotations.length != 0;
+        }
+
+        @Override
+        final public BaseSymbol[] getAnnotations()
         {
             return myAnnotations;
         }

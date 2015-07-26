@@ -1,11 +1,13 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionLob.BaseLob;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
@@ -33,9 +35,10 @@ public final class FusionClob
         private BaseClob() {}
 
         @Override
-        BaseClob annotate(Evaluator eval, String[] annotations)
+        BaseClob annotate(Evaluator eval, BaseSymbol[] annotations)
         {
-            return FusionClob.annotate(this, annotations);
+            if (annotations.length == 0) return this;
+            return new AnnotatedClob(annotations, this);
         }
     }
 
@@ -150,15 +153,14 @@ public final class FusionClob
 
     private static class AnnotatedClob
         extends BaseClob
-        implements Annotated
     {
         /** Not null or empty */
-        final String[] myAnnotations;
+        final BaseSymbol[] myAnnotations;
 
-        /** Not null, and not AnnotatedBool */
+        /** Not null, and not AnnotatedClob */
         final BaseClob  myValue;
 
-        private AnnotatedClob(String[] annotations, BaseClob value)
+        private AnnotatedClob(BaseSymbol[] annotations, BaseClob value)
         {
             assert annotations.length != 0;
             myAnnotations = annotations;
@@ -166,15 +168,21 @@ public final class FusionClob
         }
 
         @Override
-        public String[] annotationsAsJavaStrings()
+        boolean isAnnotated()
+        {
+            return true;
+        }
+
+        @Override
+        public BaseSymbol[] getAnnotations()
         {
             return myAnnotations;
         }
 
         @Override
-        BaseClob annotate(Evaluator eval, String[] annotations)
+        BaseClob annotate(Evaluator eval, BaseSymbol[] annotations)
         {
-            return FusionClob.annotate(myValue, annotations);
+            return myValue.annotate(eval, annotations);
         }
 
         @Override
@@ -216,7 +224,7 @@ public final class FusionClob
         {
             IonValue iv = myValue.copyToIonValue(factory,
                                                  throwOnConversionFailure);
-            iv.setTypeAnnotations(myAnnotations);
+            iv.setTypeAnnotations(getAnnotationsAsJavaStrings());
             return iv;
         }
 
@@ -224,7 +232,7 @@ public final class FusionClob
         void ionize(Evaluator eval, IonWriter out)
             throws IOException, IonException, FusionException, IonizeFailure
         {
-            out.setTypeAnnotations(myAnnotations);
+            out.setTypeAnnotations(getAnnotationsAsJavaStrings());
             myValue.ionize(eval, out);
         }
 
@@ -277,17 +285,6 @@ public final class FusionClob
     }
 
 
-    private static BaseClob annotate(BaseClob unannotated,
-                                     String[] annotations)
-    {
-        assert ! (unannotated instanceof AnnotatedClob);
-
-        if (annotations.length == 0) return unannotated;
-
-        return new AnnotatedClob(annotations, unannotated);
-    }
-
-
     /**
      * @param annotations must not be null and must not contain elements
      * that are null or empty. This method assumes ownership of the array
@@ -303,7 +300,7 @@ public final class FusionClob
                                    byte[]    value)
     {
         BaseClob base = forBytesNoCopy(eval, value);
-        return annotate(base, annotations);
+        return base.annotate(eval, internSymbols(annotations));
     }
 
 
@@ -320,7 +317,7 @@ public final class FusionClob
                                        String[] annotations)
     {
         BaseClob base = (BaseClob) fusionClob;
-        return base.annotate(eval, annotations);
+        return base.annotate(eval, internSymbols(annotations));
     }
 
 

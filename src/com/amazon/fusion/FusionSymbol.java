@@ -8,7 +8,6 @@ import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import com.amazon.fusion.FusionBool.BaseBool;
-import com.amazon.fusion.FusionText.BaseText;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
@@ -27,7 +26,8 @@ final class FusionSymbol
 
 
     abstract static class BaseSymbol
-        extends BaseText
+        // WORKAROUND: Static import causes compile failure on jdk1.7.0_80
+        extends FusionText.BaseText
     {
         static final BaseSymbol[] EMPTY_ARRAY = new BaseSymbol[0];
 
@@ -88,6 +88,23 @@ final class FusionSymbol
         }
 
 
+        /**
+         * Returns an equivalent symbol, stripped of any annotations.
+         */
+        BaseSymbol strip()
+        {
+            return this;
+        }
+
+        static void stripSymbolsInPlace(BaseSymbol[] symbols)
+        {
+            for (int i = 0; i < symbols.length; i++)
+            {
+                symbols[i] = symbols[i].strip();
+            }
+        }
+
+
         static String[] unsafeSymbolsToJavaStrings(Object[] fusionSymbols)
         {
             int len = fusionSymbols.length;
@@ -103,7 +120,7 @@ final class FusionSymbol
 
 
         @Override
-        BaseSymbol annotate(Evaluator eval, String[] annotations)
+        BaseSymbol annotate(Evaluator eval, BaseSymbol[] annotations)
         {
             return FusionSymbol.annotate(this, annotations);
         }
@@ -302,15 +319,14 @@ final class FusionSymbol
 
     private static final class AnnotatedSymbol
         extends BaseSymbol
-        implements Annotated
     {
         /** Not null or empty */
-        final String[] myAnnotations;
+        final BaseSymbol[] myAnnotations;
 
-        /** Not null, and not AnnotatedBool */
+        /** Not null, and not AnnotatedSymbol */
         final BaseSymbol  myValue;
 
-        private AnnotatedSymbol(String[] annotations, BaseSymbol value)
+        private AnnotatedSymbol(BaseSymbol[] annotations, BaseSymbol value)
         {
             assert annotations.length != 0;
             myAnnotations = annotations;
@@ -342,15 +358,21 @@ final class FusionSymbol
         }
 
         @Override
-        public String[] annotationsAsJavaStrings()
+        boolean isAnnotated()
+        {
+            return true;
+        }
+
+        @Override
+        BaseSymbol[] getAnnotations()
         {
             return myAnnotations;
         }
 
         @Override
-        BaseSymbol annotate(Evaluator eval, String[] annotations)
+        BaseSymbol annotate(Evaluator eval, BaseSymbol[] annotations)
         {
-            return FusionSymbol.annotate(myValue, annotations);
+            return myValue.annotate(eval, annotations);
         }
 
         @Override
@@ -383,7 +405,7 @@ final class FusionSymbol
         {
             IonValue iv = myValue.copyToIonValue(factory,
                                                  throwOnConversionFailure);
-            iv.setTypeAnnotations(myAnnotations);
+            iv.setTypeAnnotations(getAnnotationsAsJavaStrings());
             return iv;
         }
 
@@ -391,7 +413,7 @@ final class FusionSymbol
         void ionize(Evaluator eval, IonWriter out)
             throws IOException, IonException, FusionException, IonizeFailure
         {
-            out.setTypeAnnotations(myAnnotations);
+            out.setTypeAnnotations(getAnnotationsAsJavaStrings());
             myValue.ionize(eval, out);
         }
 
@@ -452,7 +474,7 @@ final class FusionSymbol
 
 
     private static BaseSymbol annotate(BaseSymbol unannotated,
-                                       String[] annotations)
+                                       BaseSymbol[] annotations)
     {
         assert ! (unannotated instanceof AnnotatedSymbol);
 
@@ -493,7 +515,7 @@ final class FusionSymbol
                                  String    value)
     {
         BaseSymbol base = makeSymbol(eval, value);
-        return annotate(base, annotations);
+        return annotate(base, BaseSymbol.internSymbols(annotations));
     }
 
 
@@ -510,7 +532,7 @@ final class FusionSymbol
                                            String[] annotations)
     {
         BaseSymbol base = (BaseSymbol) fusionSymbol;
-        return base.annotate(eval, annotations);
+        return base.annotate(eval, BaseSymbol.internSymbols(annotations));
     }
 
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -13,11 +13,13 @@ import static com.amazon.fusion.FusionNumber.isInt;
 import static com.amazon.fusion.FusionNumber.makeInt;
 import static com.amazon.fusion.FusionNumber.unsafeTruncateIntToJavaInt;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
+import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
 import static com.amazon.fusion.FusionText.checkRequiredTextArg;
 import static java.lang.Character.highSurrogate;
 import static java.lang.Character.isSupplementaryCodePoint;
 import static java.lang.Character.lowSurrogate;
 import com.amazon.fusion.FusionBool.BaseBool;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.FusionText.BaseText;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
@@ -60,9 +62,10 @@ public final class FusionString
         private BaseString() {}
 
         @Override
-        BaseString annotate(Evaluator eval, String[] annotations)
+        BaseString annotate(Evaluator eval, BaseSymbol[] annotations)
         {
-            return FusionString.annotate(this, annotations);
+            if (annotations.length == 0) return this;
+            return new AnnotatedString(annotations, this);
         }
 
         @Override
@@ -225,15 +228,14 @@ public final class FusionString
 
     private static class AnnotatedString
         extends BaseString
-        implements Annotated
     {
         /** Not null or empty */
-        final String[] myAnnotations;
+        final BaseSymbol[] myAnnotations;
 
-        /** Not null, and not AnnotatedBool */
+        /** Not null, and not AnnotatedString */
         final BaseString  myValue;
 
-        private AnnotatedString(String[] annotations, BaseString value)
+        private AnnotatedString(BaseSymbol[] annotations, BaseString value)
         {
             assert annotations.length != 0;
             myAnnotations = annotations;
@@ -241,15 +243,21 @@ public final class FusionString
         }
 
         @Override
-        public String[] annotationsAsJavaStrings()
+        boolean isAnnotated()
+        {
+            return true;
+        }
+
+        @Override
+        public BaseSymbol[] getAnnotations()
         {
             return myAnnotations;
         }
 
         @Override
-        BaseString annotate(Evaluator eval, String[] annotations)
+        BaseString annotate(Evaluator eval, BaseSymbol[] annotations)
         {
-            return FusionString.annotate(myValue, annotations);
+            return myValue.annotate(eval, annotations);
         }
 
         @Override
@@ -282,7 +290,7 @@ public final class FusionString
         {
             IonValue iv = myValue.copyToIonValue(factory,
                                                  throwOnConversionFailure);
-            iv.setTypeAnnotations(myAnnotations);
+            iv.setTypeAnnotations(getAnnotationsAsJavaStrings());
             return iv;
         }
 
@@ -290,7 +298,7 @@ public final class FusionString
         void ionize(Evaluator eval, IonWriter out)
             throws IOException, IonException, FusionException, IonizeFailure
         {
-            out.setTypeAnnotations(myAnnotations);
+            out.setTypeAnnotations(getAnnotationsAsJavaStrings());
             myValue.ionize(eval, out);
         }
 
@@ -322,17 +330,6 @@ public final class FusionString
     }
 
 
-    private static BaseString annotate(BaseString unannotated,
-                                       String[] annotations)
-    {
-        assert ! (unannotated instanceof AnnotatedString);
-
-        if (annotations.length == 0) return unannotated;
-
-        return new AnnotatedString(annotations, unannotated);
-    }
-
-
     /**
      * @param annotations must not be null and must not contain elements
      * that are null or empty. This method assumes ownership of the array
@@ -346,7 +343,7 @@ public final class FusionString
                                  String    value)
     {
         BaseString base = makeString(eval, value);
-        return annotate(base, annotations);
+        return base.annotate(eval, internSymbols(annotations));
     }
 
 
@@ -363,7 +360,7 @@ public final class FusionString
                                            String[] annotations)
     {
         BaseString base = (BaseString) fusionString;
-        return base.annotate(eval, annotations);
+        return base.annotate(eval, internSymbols(annotations));
     }
 
 

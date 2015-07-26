@@ -1,10 +1,12 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
@@ -38,9 +40,16 @@ public final class FusionBool
         abstract Boolean asJavaBoolean();
 
         @Override
-        BaseBool annotate(Evaluator eval, String[] annotations)
+        final boolean isAnnotatable()
         {
-            return FusionBool.annotate(this, annotations);
+            return true;
+        }
+
+        @Override
+        BaseBool annotate(Evaluator eval, BaseSymbol[] annotations)
+        {
+            if (annotations.length == 0) return this;
+            return new AnnotatedBool(annotations, this);
         }
 
         @Override
@@ -241,15 +250,14 @@ public final class FusionBool
 
     private static final class AnnotatedBool
         extends BaseBool
-        implements Annotated
     {
         /** Not null or empty */
-        final String[] myAnnotations;
+        final BaseSymbol[] myAnnotations;
 
         /** Not null, and not AnnotatedBool */
         final BaseBool  myValue;
 
-        private AnnotatedBool(String[] annotations, BaseBool value)
+        private AnnotatedBool(BaseSymbol[] annotations, BaseBool value)
         {
             assert annotations.length != 0;
             myAnnotations = annotations;
@@ -257,15 +265,21 @@ public final class FusionBool
         }
 
         @Override
-        public String[] annotationsAsJavaStrings()
+        boolean isAnnotated()
+        {
+            return true;
+        }
+
+        @Override
+        BaseSymbol[] getAnnotations()
         {
             return myAnnotations;
         }
 
         @Override
-        BaseBool annotate(Evaluator eval, String[] annotations)
+        BaseBool annotate(Evaluator eval, BaseSymbol[] annotations)
         {
-            return FusionBool.annotate(myValue, annotations);
+            return myValue.annotate(eval, annotations);
         }
 
         @Override
@@ -307,7 +321,7 @@ public final class FusionBool
         {
             IonValue iv = myValue.copyToIonValue(factory,
                                                  throwOnConversionFailure);
-            iv.setTypeAnnotations(myAnnotations);
+            iv.setTypeAnnotations(getAnnotationsAsJavaStrings());
             return iv;
         }
 
@@ -315,7 +329,7 @@ public final class FusionBool
         void ionize(Evaluator eval, IonWriter out)
             throws IOException, IonException, FusionException, IonizeFailure
         {
-            out.setTypeAnnotations(myAnnotations);
+            out.setTypeAnnotations(getAnnotationsAsJavaStrings());
             myValue.ionize(eval, out);
         }
 
@@ -366,17 +380,6 @@ public final class FusionBool
     }
 
 
-    private static BaseBool annotate(BaseBool unannotated,
-                                     String[] annotations)
-    {
-        assert ! (unannotated instanceof AnnotatedBool);
-
-        if (annotations.length == 0) return unannotated;
-
-        return new AnnotatedBool(annotations, unannotated);
-    }
-
-
     /**
      * @param annotations must not be null and must not contain elements
      * that are null or empty. This method assumes ownership of the array
@@ -389,7 +392,7 @@ public final class FusionBool
                              boolean   value)
     {
         BaseBool base = makeBool(eval, value);
-        return annotate(base, annotations);
+        return base.annotate(eval, internSymbols(annotations));
     }
 
 
@@ -406,7 +409,7 @@ public final class FusionBool
                              Boolean   value)
     {
         BaseBool base = makeBool(eval, value);
-        return annotate(base, annotations);
+        return base.annotate(eval, internSymbols(annotations));
     }
 
 
@@ -423,7 +426,7 @@ public final class FusionBool
                                        String[]  annotations)
     {
         BaseBool base = (BaseBool) fusionBool;
-        return base.annotate(eval, annotations);
+        return base.annotate(eval, internSymbols(annotations));
     }
 
 

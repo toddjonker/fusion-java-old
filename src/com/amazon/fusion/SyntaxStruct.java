@@ -9,6 +9,7 @@ import static com.amazon.fusion.FusionStruct.structImplAdd;
 import com.amazon.fusion.FusionStruct.ImmutableStruct;
 import com.amazon.fusion.FusionStruct.NonNullImmutableStruct;
 import com.amazon.fusion.FusionStruct.StructFieldVisitor;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
@@ -312,8 +313,7 @@ final class SyntaxStruct
 
 
         // Wraps have been pushed down so the copy doesn't need them.
-        String[] annotations =
-            FusionValue.annotationsAsJavaStrings(eval, myStruct);
+        BaseSymbol[] annotations = myStruct.getAnnotations();
         ImmutableStruct s = immutableStruct(newMap, annotations);
         return new SyntaxStruct(getLocation(), s);
     }

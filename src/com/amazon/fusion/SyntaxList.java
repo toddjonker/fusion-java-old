@@ -9,6 +9,7 @@ import static com.amazon.fusion.FusionList.unsafeListElement;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static java.lang.System.arraycopy;
 import com.amazon.fusion.FusionList.BaseList;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
@@ -75,8 +76,7 @@ final class SyntaxList
                                      SyntaxValue... children)
         throws FusionException
     {
-        String[] annotations =
-            FusionValue.annotationsAsJavaStrings(eval, myImmutableList);
+        BaseSymbol[] annotations = myImmutableList.getAnnotations();
         BaseList datum = (children == null
                               ? nullList(eval, annotations)
                               : immutableList(eval, annotations, children));
@@ -156,10 +156,8 @@ final class SyntaxList
 
         if (! mustCopy) return this;
 
-        BaseList newList =
-            immutableList(eval,
-                          myImmutableList.annotationsAsJavaStrings(),
-                          children);
+        BaseSymbol[] annotations = myImmutableList.getAnnotations();
+        BaseList newList = immutableList(eval, annotations, children);
         return new SyntaxList(getLocation(), getProperties(), null, newList);
     }
 
@@ -238,7 +236,7 @@ final class SyntaxList
         throws FusionException
     {
         if ((myImmutableList.size() == 0 || from == 0)
-            && myImmutableList.annotationsAsJavaStrings().length == 0)
+            && ! myImmutableList.isAnnotated())
         {
             return this;
         }

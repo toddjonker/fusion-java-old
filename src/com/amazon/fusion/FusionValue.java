@@ -3,9 +3,10 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.falseBool;
+import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
+import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import com.amazon.fusion.FusionBool.BaseBool;
-import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
@@ -116,6 +117,17 @@ public final class FusionValue
     // Annotations
 
 
+    static boolean isAnnotatable(Evaluator eval, Object value)
+        throws FusionException
+    {
+        if (value instanceof BaseValue)
+        {
+            return ((BaseValue) value).isAnnotatable();
+        }
+        return false;
+    }
+
+
     /**
      * Replaces or removes annotations on a Fusion value, generally making a
      * (shallow) copy of the value while doing so.
@@ -130,7 +142,7 @@ public final class FusionValue
     static Object annotate(Evaluator eval, Object value, String[] annotations)
         throws FusionException
     {
-        return ((BaseValue) value).annotate(eval, annotations);
+        return ((BaseValue) value).annotate(eval, internSymbols(annotations));
     }
 
     /**
@@ -159,10 +171,9 @@ public final class FusionValue
     static boolean isAnnotated(Evaluator eval, Object value)
         throws FusionException
     {
-        if (value instanceof Annotated)
+        if (value instanceof BaseValue)
         {
-            // TODO inefficient
-            return ((Annotated) value).annotationsAsJavaStrings().length != 0;
+            return ((BaseValue) value).isAnnotated();
         }
         return false;
     }
@@ -172,24 +183,16 @@ public final class FusionValue
      * Gets the annotations on a Fusion value as Fusion symbols.
      *
      * @return not null, but possibly empty, array of Fusion symbols.
+     * <b>Must not be modified by the caller!</b>
      */
     static Object[] annotations(Evaluator eval, Object value)
         throws FusionException
     {
-        BaseSymbol[] anns;
-
-        if (value instanceof Annotated)
+        if (value instanceof BaseValue)
         {
-            // TODO inefficient
-            String[] strs = ((Annotated) value).annotationsAsJavaStrings();
-            anns = BaseSymbol.internSymbols(strs);
+            return ((BaseValue) value).getAnnotations();
         }
-        else
-        {
-            anns = BaseSymbol.EMPTY_ARRAY;
-        }
-
-        return anns;
+        return EMPTY_OBJECT_ARRAY;
     }
 
 
@@ -223,18 +226,11 @@ public final class FusionValue
     static String[] annotationsAsJavaStrings(Evaluator eval, Object value)
         throws FusionException
     {
-        String[] anns;
-
-        if (value instanceof Annotated)
+        if (value instanceof BaseValue)
         {
-            anns = ((Annotated) value).annotationsAsJavaStrings();
+            return ((BaseValue) value).getAnnotationsAsJavaStrings();
         }
-        else
-        {
-            anns = EMPTY_STRING_ARRAY;
-        }
-
-        return anns;
+        return EMPTY_STRING_ARRAY;
     }
 
 

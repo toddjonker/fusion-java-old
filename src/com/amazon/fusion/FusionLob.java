@@ -28,6 +28,12 @@ public final class FusionLob
     {
         BaseLob() {}
 
+        @Override
+        final boolean isAnnotatable()
+        {
+            return true;
+        }
+
         byte[] bytesNoCopy()
         {
             return null;

@@ -7,8 +7,8 @@ import static com.amazon.fusion.FusionSexp.emptySexp;
 import static com.amazon.fusion.FusionSexp.pair;
 import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbol;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
-import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static java.lang.Boolean.TRUE;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonValue;
 import java.util.Arrays;
 
@@ -61,9 +61,9 @@ abstract class SyntaxValue
     // This final override isn't semantically necessary, but it exists to
     // ensure that we don't return annotations from any syntax object.
     @Override
-    final String[] annotationsAsJavaStrings()
+    final BaseSymbol[] getAnnotations()
     {
-        return EMPTY_STRING_ARRAY;
+        return BaseSymbol.EMPTY_ARRAY;
     }
 
     // This final override isn't semantically necessary, but it exists to

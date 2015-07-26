@@ -1,10 +1,12 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import com.amazon.fusion.FusionBool.BaseBool;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
@@ -34,9 +36,17 @@ public final class FusionNull
         }
 
         @Override
-        NullNull annotate(Evaluator eval, String[] annotations)
+        final boolean isAnnotatable()
+            throws FusionException
         {
-            return makeNullNull(eval, annotations);
+            return true;
+        }
+
+        @Override
+        NullNull annotate(Evaluator eval, BaseSymbol[] annotations)
+        {
+            if (annotations.length == 0) return NULL_NULL;
+            return new AnnotatedNullNull(annotations);
         }
 
         @Override
@@ -85,19 +95,24 @@ public final class FusionNull
 
     private static final class AnnotatedNullNull
         extends NullNull
-        implements Annotated
     {
         /** Not null or empty */
-        final String[] myAnnotations;
+        final BaseSymbol[] myAnnotations;
 
-        AnnotatedNullNull(String[] annotations)
+        AnnotatedNullNull(BaseSymbol[] annotations)
         {
             assert annotations.length != 0;
             myAnnotations = annotations;
         }
 
         @Override
-        public String[] annotationsAsJavaStrings()
+        boolean isAnnotated()
+        {
+            return true;
+        }
+
+        @Override
+        BaseSymbol[] getAnnotations()
         {
             return myAnnotations;
         }
@@ -108,7 +123,7 @@ public final class FusionNull
             throws FusionException, IonizeFailure
         {
             IonValue iv = factory.newNull();
-            iv.setTypeAnnotations(myAnnotations);
+            iv.setTypeAnnotations(getAnnotationsAsJavaStrings());
             return iv;
         }
 
@@ -116,7 +131,7 @@ public final class FusionNull
         void ionize(Evaluator eval, IonWriter out)
             throws IOException, IonException, FusionException, IonizeFailure
         {
-            out.setTypeAnnotations(myAnnotations);
+            out.setTypeAnnotations(getAnnotationsAsJavaStrings());
             out.writeNull();
         }
 
@@ -157,7 +172,7 @@ public final class FusionNull
             return NULL_NULL;
         }
 
-        return new AnnotatedNullNull(annotations);
+        return new AnnotatedNullNull(internSymbols(annotations));
     }
 
 

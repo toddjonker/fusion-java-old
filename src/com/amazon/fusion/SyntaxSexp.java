@@ -19,6 +19,7 @@ import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.LetValuesForm.compilePlainLet;
 import com.amazon.fusion.FusionSexp.BaseSexp;
 import com.amazon.fusion.FusionSexp.ImmutablePair;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.LambdaForm.CompiledLambdaBase;
 import com.amazon.fusion.LambdaForm.CompiledLambdaExact;
 import com.amazon.ion.IonWriter;
@@ -124,8 +125,7 @@ final class SyntaxSexp
                                      SyntaxValue... children)
         throws FusionException
     {
-        String[] annotations =
-            FusionValue.annotationsAsJavaStrings(eval, mySexp);
+        BaseSymbol[] annotations = mySexp.getAnnotations();
         BaseSexp datum = (children == null
                               ? nullSexp(eval, annotations)
                               : immutableSexp(eval, annotations, children));

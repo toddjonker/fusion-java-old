@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -12,13 +12,14 @@ import static com.amazon.fusion.FusionIo.dispatchIonize;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionNumber.makeInt;
 import static com.amazon.fusion.FusionNumber.unsafeTruncateIntToJavaInt;
+import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
-import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionCompare.EqualityTier;
 import com.amazon.fusion.FusionSequence.BaseSequence;
 import com.amazon.fusion.FusionSexp.BaseSexp;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonType;
@@ -50,8 +51,7 @@ final class FusionList
      */
     static BaseList listFromIonSequence(Evaluator eval, IonSequence seq)
     {
-        String[] annotations = seq.getTypeAnnotations();
-        // TODO FUSION-47 intern annotation text
+        BaseSymbol[] annotations = internSymbols(seq.getTypeAnnotations());
 
         if (seq.isNullValue())
         {
@@ -77,14 +77,16 @@ final class FusionList
     }
 
 
+    static NullList nullList(Evaluator eval, BaseSymbol[] annotations)
+    {
+        if (annotations.length == 0) return NULL_LIST;
+        return new NullList(annotations);
+    }
+
     static NullList nullList(Evaluator eval, String[] annotations)
     {
-        if (annotations.length == 0)
-        {
-            return NULL_LIST;
-        }
-
-        return new NullList(annotations);
+        if (annotations.length == 0) return NULL_LIST;
+        return new NullList(internSymbols(annotations));
     }
 
 
@@ -129,7 +131,7 @@ final class FusionList
      * @param elements must not be null. This method assumes ownership!
      */
     static ImmutableList immutableList(Evaluator eval,
-                                       String[] annotations,
+                                       BaseSymbol[] annotations,
                                        Object[] elements)
     {
         if (elements.length == 0 && annotations.length == 0)
@@ -141,6 +143,17 @@ final class FusionList
             return new ImmutableList(annotations, elements);
         }
     }
+
+    /**
+     * @param elements must not be null. This method assumes ownership!
+     */
+    static ImmutableList immutableList(Evaluator eval,
+                                       String[] annotations,
+                                       Object[] elements)
+    {
+        return immutableList(eval, internSymbols(annotations), elements);
+    }
+
 
 
     /**
@@ -165,7 +178,7 @@ final class FusionList
      * @param elements must not be null. This method assumes ownership!
      */
     static ImmutableList immutableList(Evaluator eval,
-                                       String[] annotations,
+                                       BaseSymbol[] annotations,
                                        List<?> elements)
     {
         int size = elements.size();
@@ -178,6 +191,16 @@ final class FusionList
             Object[] elts = elements.toArray(new Object[size]);
             return new ImmutableList(annotations, elts);
         }
+    }
+
+    /**
+     * @param elements must not be null. This method assumes ownership!
+     */
+    static ImmutableList immutableList(Evaluator eval,
+                                       String[] annotations,
+                                       List<?> elements)
+    {
+        return immutableList(eval, internSymbols(annotations), elements);
     }
 
 
@@ -223,13 +246,6 @@ final class FusionList
     //========================================================================
     // Accessors
 
-    /**
-     * @return not null.
-     */
-    static String[] unsafeListAnnotationStrings(Evaluator eval, Object list)
-    {
-        return ((BaseList) list).myAnnotations;
-    }
 
     static int unsafeListSize(Evaluator eval, Object list)
     {
@@ -330,7 +346,7 @@ final class FusionList
             unsafeListCopy(eval, list, srcPos, copy, 0, length);
         }
 
-        return lst.makeSimilar(EMPTY_STRING_ARRAY, copy);
+        return lst.makeSimilar(BaseSymbol.EMPTY_ARRAY, copy);
     }
 
 
@@ -346,7 +362,7 @@ final class FusionList
     {
         if (list instanceof NullList)
         {
-            String[] annotations = ((NullList)list).myAnnotations;
+            BaseSymbol[] annotations = ((NullList)list).myAnnotations;
             return FusionSexp.nullSexp(eval, annotations);
         }
 
@@ -431,7 +447,7 @@ final class FusionList
         /**
          * @param elements must not be null. This method assumes ownership!
          */
-        BaseList(String[] annotations, Object[] elements)
+        BaseList(BaseSymbol[] annotations, Object[] elements)
         {
             super(annotations);
             myValues = elements;
@@ -443,7 +459,8 @@ final class FusionList
          * of the array and it must not be modified later.
          * @param elements must not be null. This method assumes ownership!
          */
-        abstract BaseList makeSimilar(String[] annotations, Object[] elements);
+        abstract BaseList makeSimilar(BaseSymbol[] annotations,
+                                      Object[] elements);
 
 
         Object[] values(Evaluator eval)
@@ -634,7 +651,7 @@ final class FusionList
                     children[i] = child;
                 }
 
-                String[] anns = annotationsAsJavaStrings();
+                BaseSymbol[] anns = getAnnotations();
                 Object list = immutableList(eval, anns, children);
                 stx = SyntaxList.make(eval, loc, list);
             }
@@ -672,7 +689,7 @@ final class FusionList
             }
 
             IonList list = factory.newList(ions);
-            list.setTypeAnnotations(myAnnotations);
+            list.setTypeAnnotations(getAnnotationsAsJavaStrings());
             return list;
         }
 
@@ -749,7 +766,7 @@ final class FusionList
         void ionize(Evaluator eval, IonWriter out)
             throws IOException, FusionException
         {
-            out.setTypeAnnotations(myAnnotations);
+            out.setTypeAnnotations(getAnnotationsAsJavaStrings());
             out.stepIn(IonType.LIST);
             for (int i = 0; i < size(); i++)
             {
@@ -774,7 +791,7 @@ final class FusionList
         /**
          * @param elements must not be null. This method assumes ownership!
          */
-        MutableList(String[] annotations, Object[] elements)
+        MutableList(BaseSymbol[] annotations, Object[] elements)
         {
             super(annotations, elements);
         }
@@ -783,7 +800,7 @@ final class FusionList
          * @param elements must not be null. This method assumes ownership!
          */
         @Override
-        BaseList makeSimilar(String[] annotations, Object[] elements)
+        BaseList makeSimilar(BaseSymbol[] annotations, Object[] elements)
         {
             return new MutableList(annotations, elements);
         }
@@ -792,7 +809,7 @@ final class FusionList
          * Assumes ownership of arguments.
          */
         @Override
-        Object annotate(Evaluator eval, String[] annotations)
+        Object annotate(Evaluator eval, BaseSymbol[] annotations)
         {
             // Since this instance is mutable, we cannot share the array.
             Object[] values = Arrays.copyOf(myValues, size());
@@ -820,7 +837,7 @@ final class FusionList
         /**
          * @param elements must not be null. This method assumes ownership!
          */
-        ImmutableList(String[] annotations, Object[] elements)
+        ImmutableList(BaseSymbol[] annotations, Object[] elements)
         {
             super(annotations, elements);
         }
@@ -829,13 +846,13 @@ final class FusionList
          * @param elements must not be null. This method assumes ownership!
          */
         @Override
-        BaseList makeSimilar(String[] annotations, Object[] elements)
+        BaseList makeSimilar(BaseSymbol[] annotations, Object[] elements)
         {
             return new ImmutableList(annotations, elements);
         }
 
         @Override
-        Object annotate(Evaluator eval, String[] annotations)
+        Object annotate(Evaluator eval, BaseSymbol[] annotations)
         {
             // Since this instance is immutable, we can share the array.
             return makeSimilar(annotations, myValues);
@@ -851,7 +868,7 @@ final class FusionList
             super(EMPTY_OBJECT_ARRAY);
         }
 
-        NullList(String[] annotations)
+        NullList(BaseSymbol[] annotations)
         {
             super(annotations, EMPTY_OBJECT_ARRAY);
         }
@@ -869,7 +886,7 @@ final class FusionList
         }
 
         @Override
-        Object annotate(Evaluator eval, String[] annotations)
+        Object annotate(Evaluator eval, BaseSymbol[] annotations)
         {
             return new NullList(annotations);
         }
@@ -881,7 +898,7 @@ final class FusionList
             BaseList empty =
                 (myAnnotations.length == 0
                     ? EMPTY_IMMUTABLE_LIST
-                    : immutableList(eval, myAnnotations, EMPTY_OBJECT_ARRAY));
+                    : new ImmutableList(myAnnotations, EMPTY_OBJECT_ARRAY));
 
             return empty.append(eval, args);
         }
@@ -935,7 +952,7 @@ final class FusionList
             throws FusionException
         {
             IonList list = factory.newNullList();
-            list.setTypeAnnotations(myAnnotations);
+            list.setTypeAnnotations(getAnnotationsAsJavaStrings());
             return list;
         }
 
@@ -952,7 +969,7 @@ final class FusionList
         void ionize(Evaluator eval, IonWriter out)
             throws IOException, FusionException
         {
-            out.setTypeAnnotations(myAnnotations);
+            out.setTypeAnnotations(getAnnotationsAsJavaStrings());
             out.writeNull(IonType.LIST);
         }
     }
@@ -975,7 +992,7 @@ final class FusionList
         /**
          * @param elements must not be null. This method assumes ownership!
          */
-        StretchyList(String[] annotations, Object[] elements)
+        StretchyList(BaseSymbol[] annotations, Object[] elements)
         {
             super(annotations, elements);
             mySize = elements.length;
@@ -985,7 +1002,7 @@ final class FusionList
          * @param elements must not be null. This method assumes ownership!
          */
         @Override
-        BaseList makeSimilar(String[] annotations, Object[] elements)
+        BaseList makeSimilar(BaseSymbol[] annotations, Object[] elements)
         {
             return new StretchyList(annotations, elements);
         }
@@ -1084,7 +1101,7 @@ final class FusionList
         /**
          * @param elements must not be null. This method assumes ownership!
          */
-        LazyInjectingList(String[] annotations, Object[] elements)
+        LazyInjectingList(BaseSymbol[] annotations, Object[] elements)
         {
             super(annotations, elements);
             assert elements.length != 0;
@@ -1112,7 +1129,7 @@ final class FusionList
         }
 
         @Override
-        Object annotate(Evaluator eval, String[] annotations)
+        Object annotate(Evaluator eval, BaseSymbol[] annotations)
         {
             // Since this instance is immutable, we can share the array AFTER
             // we inject the children.
@@ -1153,7 +1170,7 @@ final class FusionList
                     }
 
                     IonList list = factory.newList(ions);
-                    list.setTypeAnnotations(myAnnotations);
+                    list.setTypeAnnotations(getAnnotationsAsJavaStrings());
                     return list;
                 }
             }
@@ -1194,7 +1211,7 @@ final class FusionList
             {
                 if (myValues[0] instanceof IonValue)
                 {
-                    out.setTypeAnnotations(myAnnotations);
+                    out.setTypeAnnotations(getAnnotationsAsJavaStrings());
                     out.stepIn(IonType.LIST);
                     {
                         int len = myValues.length;

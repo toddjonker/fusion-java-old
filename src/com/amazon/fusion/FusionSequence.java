@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,6 +6,7 @@ import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionCollection.BaseCollection;
 import com.amazon.fusion.FusionList.BaseList;
 import com.amazon.fusion.FusionSexp.BaseSexp;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 
 
 final class FusionSequence
@@ -22,7 +23,7 @@ final class FusionSequence
     {
         BaseSequence() {}
 
-        BaseSequence(String[] annotations)
+        BaseSequence(BaseSymbol[] annotations)
         {
             super(annotations);
         }

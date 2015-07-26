@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -19,6 +19,12 @@ final class FusionText
         extends BaseValue
     {
         BaseText() {}
+
+        @Override
+        final boolean isAnnotatable()
+        {
+            return true;
+        }
 
         abstract String stringValue();
 

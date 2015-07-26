@@ -6,7 +6,9 @@ import static com.amazon.fusion.FusionSexp.isEmptySexp;
 import static com.amazon.fusion.FusionSexp.isSexp;
 import static com.amazon.fusion.FusionSexp.unsafePairHead;
 import static com.amazon.fusion.FusionSexp.unsafePairTail;
+import static com.amazon.fusion.FusionValue.annotationsAsJavaStrings;
 import static com.amazon.fusion.FusionValue.isAnnotated;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -62,6 +64,10 @@ public class FusionValueTest
 
             value = top.call("annotate", value, "ann");
             assertTrue(value.toString(), isAnnotated(eval, value));
+
+            String[] anns = annotationsAsJavaStrings(eval, value);
+            assertArrayEquals("annotations on " + value,
+                              new String[]{ "ann" }, anns);
 
             values = unsafePairTail(eval, values);
         }
