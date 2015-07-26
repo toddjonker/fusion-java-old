@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionString.makeString;
+import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionText.BaseText;
 import com.amazon.ion.IonException;
@@ -84,6 +85,20 @@ final class FusionSymbol
                 syms[i] = internSymbol(names[i]);
             }
             return syms;
+        }
+
+
+        static String[] unsafeSymbolsToJavaStrings(Object[] fusionSymbols)
+        {
+            int len = fusionSymbols.length;
+            if (len == 0) return EMPTY_STRING_ARRAY;
+
+            String[] strs = new String[len];
+            for (int i = 0; i < len; i++)
+            {
+                strs[i] = ((BaseSymbol) fusionSymbols[i]).stringValue();
+            }
+            return strs;
         }
 
 
@@ -545,6 +560,15 @@ final class FusionSymbol
             return unsafeSymbolToJavaString(eval, value);
         }
         return null;
+    }
+
+
+    static String[] unsafeSymbolsToJavaStrings(Evaluator eval,
+                                               Object[]  fusionSymbols)
+        throws FusionException
+
+    {
+        return BaseSymbol.unsafeSymbolsToJavaStrings(fusionSymbols);
     }
 
 
