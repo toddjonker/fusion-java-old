@@ -144,8 +144,7 @@ final class SyntaxStruct
 
         if (! mustReplace) return this;
 
-        String[] annotations =
-            FusionValue.annotationsAsJavaStrings(eval, myStruct);
+        BaseSymbol[] annotations = myStruct.getAnnotations();
         ImmutableStruct s = immutableStruct(newMap, annotations);
         return new SyntaxStruct(getLocation(), getProperties(), null, s);
     }
@@ -206,8 +205,7 @@ final class SyntaxStruct
             }
         }
 
-        String[] annotations =
-            FusionValue.annotationsAsJavaStrings(eval, myStruct);
+        BaseSymbol[] annotations = myStruct.getAnnotations();
         myStruct = immutableStruct(newMap, annotations);
         myWraps = null;
 
@@ -258,8 +256,7 @@ final class SyntaxStruct
             }
         }
 
-        String[] annotations =
-            FusionValue.annotationsAsJavaStrings(eval, myStruct);
+        BaseSymbol[] annotations = myStruct.getAnnotations();
         return immutableStruct(newMap, annotations);
     }
 

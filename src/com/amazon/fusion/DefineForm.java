@@ -10,6 +10,8 @@ import static com.amazon.fusion.FusionString.stringToJavaString;
 import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
 import static com.amazon.fusion.GlobalState.DEFINE;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
+import com.amazon.fusion.FusionString.BaseString;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.Namespace.NsBinding;
 
 final class DefineForm
@@ -125,14 +127,14 @@ final class DefineForm
         newDefineElts[1] = procName;
         if (hasDoc)
         {
-            Object docStr = docStx.unwrap(eval);
+            // Prefix the documentation string with the procedure signature.
+            BaseString docStr = (BaseString) docStx.unwrap(eval);
             String doc = unsafeStringToJavaString(eval, docStr);
             if (! (doc.startsWith("    ") || doc.startsWith("\n    ")))
             {
                 String newDoc = "\n    " + origDefineElts[1] + "\n" + doc;
-                String[] annotations =
-                    FusionValue.annotationsAsJavaStrings(eval, docStr);
-                docStr = makeString(eval, annotations, newDoc);
+                BaseSymbol[] annotations = docStr.getAnnotations();
+                docStr = makeString(eval, newDoc).annotate(eval, annotations);
                 docStx = makeSyntax(eval, docStx.getLocation(), docStr);
             }
 

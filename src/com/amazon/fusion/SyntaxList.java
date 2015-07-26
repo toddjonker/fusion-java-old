@@ -123,10 +123,8 @@ final class SyntaxList
 
             if (changed) // Keep sharing when we can
             {
-                String[] annotations =
-                    FusionValue.annotationsAsJavaStrings(eval, myImmutableList);
-                myImmutableList =
-                    immutableList(eval, annotations, children);
+                BaseSymbol[] annotations = myImmutableList.getAnnotations();
+                myImmutableList = immutableList(eval, annotations, children);
             }
 
             myWraps = null;
@@ -224,8 +222,7 @@ final class SyntaxList
             arraycopy(c, 0, children, thisLength, thatLength);
         }
 
-        String[] anns =
-            FusionValue.annotationsAsJavaStrings(eval, myImmutableList);
+        BaseSymbol[] anns = myImmutableList.getAnnotations();
         BaseList list = immutableList(eval, anns, children);
         return new SyntaxList(eval, null, list);
     }
@@ -330,8 +327,7 @@ final class SyntaxList
             children[i] = child.syntaxToDatum(eval);
         }
 
-        String[] annotations =
-            FusionValue.annotationsAsJavaStrings(eval, unwrap(eval));
+        BaseSymbol[] annotations = myImmutableList.getAnnotations();
         return immutableList(eval, annotations, children);
     }
 

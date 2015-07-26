@@ -15,7 +15,6 @@ import static com.amazon.fusion.FusionSexp.unsafePairDot;
 import static com.amazon.fusion.FusionSexp.unsafePairHead;
 import static com.amazon.fusion.FusionSexp.unsafePairTail;
 import static com.amazon.fusion.FusionSexp.unsafeSexpSize;
-import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.LetValuesForm.compilePlainLet;
 import com.amazon.fusion.FusionSexp.BaseSexp;
 import com.amazon.fusion.FusionSexp.ImmutablePair;
@@ -82,7 +81,7 @@ final class SyntaxSexp
      */
     static SyntaxSexp make(Evaluator eval,
                            SourceLocation loc,
-                           String[] anns,
+                           BaseSymbol[] anns,
                            SyntaxValue[] children)
     {
         BaseSexp datum = (children == null
@@ -100,7 +99,7 @@ final class SyntaxSexp
      */
     static SyntaxSexp make(Evaluator eval, SyntaxValue... children)
     {
-        return make(eval, null, EMPTY_STRING_ARRAY, children);
+        return make(eval, null, BaseSymbol.EMPTY_ARRAY, children);
     }
 
     /**
@@ -113,7 +112,7 @@ final class SyntaxSexp
     static SyntaxSexp make(Evaluator eval, SourceLocation loc,
                            SyntaxValue... children)
     {
-        return make(eval, loc, EMPTY_STRING_ARRAY, children);
+        return make(eval, loc, BaseSymbol.EMPTY_ARRAY, children);
     }
 
 
