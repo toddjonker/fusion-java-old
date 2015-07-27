@@ -1392,13 +1392,6 @@ final class FusionList
     static final class UnsafeListSizeProc
         extends Procedure1
     {
-        UnsafeListSizeProc()
-        {
-            //    "                                                                               |
-            super("Returns the number of elements in `list`.",
-                  "list");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object list)
             throws FusionException
@@ -1410,23 +1403,15 @@ final class FusionList
 
 
     static final class UnsafeListElementProc
-        extends Procedure
+        extends Procedure2
     {
-        UnsafeListElementProc()
-        {
-            //    "                                                                               |
-            super("Returns the element of `list` at (zero-based) position `pos`. The `pos` must\n"
-                + "be a non-null int with a valid value.",
-                  "list", "pos");
-        }
-
         @Override
-        Object doApply(Evaluator eval, Object[] args)
+        Object doApply(Evaluator eval, Object list, Object p)
             throws FusionException
         {
-            int pos = unsafeTruncateIntToJavaInt(eval, args[1]);
+            int pos = unsafeTruncateIntToJavaInt(eval, p);
 
-            return unsafeListElement(eval, args[0], pos);
+            return unsafeListElement(eval, list, pos);
         }
     }
 
@@ -1434,18 +1419,6 @@ final class FusionList
     static final class UnsafeListSubseqProc
         extends Procedure
     {
-        UnsafeListSubseqProc()
-        {
-            //    "                                                                               |
-            super("Returns a list holding the elements from `list` between positions\n" +
-                  "`from` and `to`.  The following precondition applies:\n" +
-                  "\n" +
-                  "    0 <= from <= to <= (size list)\n" +
-                  "\n" +
-                  "The result may share structure with `list`.",
-                  "list", "from", "to");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
@@ -1462,14 +1435,6 @@ final class FusionList
     static final class UnsafeListSetProc
         extends Procedure
     {
-        UnsafeListSetProc()
-        {
-            //    "                                                                               |
-            super("Changes the element of `list` at (zero-based) position `pos`. This assumes\n" +
-                  "that the `list` is mutable and that the `pos` is valid.",
-                  "list", "pos", "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
@@ -1486,13 +1451,6 @@ final class FusionList
     static final class UnsafeListAddProc
         extends Procedure2
     {
-        UnsafeListAddProc()
-        {
-            //    "                                                                               |
-            super("Returns a list similar to `list` with the `value` added to the end.",
-                  "list", "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object list, Object value)
             throws FusionException
@@ -1505,17 +1463,6 @@ final class FusionList
     static final class UnsafeListAddMProc
         extends Procedure2
     {
-        UnsafeListAddMProc()
-        {
-            //    "                                                                               |
-            super("Returns a list similar to `list` with the `value` added to the end.  The\n" +
-                  "result may share structure with the list, which may also be mutated.\n" +
-                  "\n" +
-                  "In particular, when given a stretchy list, the input is expanded to contain\n" +
-                  "the given value, and the result is the `list` argument.",
-                  "list", "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object list, Object value)
             throws FusionException
@@ -1528,13 +1475,6 @@ final class FusionList
     static final class UnsafeListIterateProc
         extends Procedure1
     {
-        UnsafeListIterateProc()
-        {
-            //    "                                                                               |
-            super("Returns an iterator over the content of `list`.",
-                  "list");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object list)
             throws FusionException
