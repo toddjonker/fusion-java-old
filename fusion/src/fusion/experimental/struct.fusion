@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 (module experimental_struct "/fusion"
 
@@ -8,8 +8,25 @@
 
 
   (defpub_j struct_merge1
+    '''
+    (struct_merge1 struct1 struct2)
+
+Functionally merges the mappings of `struct1` and `struct2`, removing repeated
+fields. Mappings from `struct2` will replace those from `struct1` with the
+same key. If there are repeated fields, one is selected arbitrarily.
+The result has the same type as the first argument.
+    '''
     "com.amazon.fusion.FusionStruct$StructMerge1Proc")
 
   (defpub_j struct_merge1_m
+    '''
+    (struct_merge1_m struct1 struct2)
+
+Merges the mappings of `struct1` and `struct2`, removing repeated fields and
+mutating the first argument when possible. Mappings from `struct2` will
+replace those from `struct1` with the same key.  If there are repeated fields,
+one is selected arbitrarily. The result has the same type as the first
+argument.
+    '''
     "com.amazon.fusion.FusionStruct$StructMerge1MProc")
 )
