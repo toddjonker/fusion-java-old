@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2015 Amazon.com, Inc.  All rights reserved.
 
 /*                       *** WARNING ***
  *
@@ -39,7 +39,19 @@ from UTF-16 (Java's native String representation) to UTF-8.
 
   // TODO See TODOs in the implementation before finalizing these procedures.
   (defpub_j string_explode
+    '''
+    (string_explode string)
+
+Returns a stretchy list of the Unicode scalar values (code points) in the given
+non-null string.
+    '''
     "com.amazon.fusion.FusionString$ExplodeProc")
+
   (defpub_j string_implode
+    '''
+    (string_implode list)
+
+Returns a string filled by the given list of Unicode scalar values.
+    '''
     "com.amazon.fusion.FusionString$ImplodeProc")
 )

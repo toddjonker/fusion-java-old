@@ -543,14 +543,6 @@ public final class FusionString
     static final class AppendProc
         extends Procedure
     {
-        AppendProc()
-        {
-            //    "                                                                               |
-            super("Concatenates the `text` values (strings or symbols), returning a string.  If no\n" +
-                  "arguments are supplied, the result is `\"\"`.",
-                  "text", DOTDOTDOT);
-        }
-
         @Override
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
@@ -570,21 +562,13 @@ public final class FusionString
 
 
     static final class ToLowerProc
-        extends Procedure
+        extends Procedure1
     {
-        ToLowerProc()
-        {
-            super("Converts all the characters in a `string` to lower-case letters.",
-                  "string");
-        }
-
         @Override
-        Object doApply(Evaluator eval, Object[] args)
+        Object doApply(Evaluator eval, Object arg)
             throws FusionException
         {
-            checkArityExact(args);
-
-            String input = checkRequiredStringArg(eval, this, 0, args);
+            String input = checkRequiredStringArg(eval, this, 0, arg);
             return makeString(eval, input.toLowerCase());
         }
     }
@@ -592,21 +576,13 @@ public final class FusionString
 
 
     static final class ToUpperProc
-        extends Procedure
+        extends Procedure1
     {
-        ToUpperProc()
-        {
-            super("Converts all the characters in a `string` to upper-case letters.",
-                  "string");
-        }
-
         @Override
-        Object doApply(Evaluator eval, Object[] args)
+        Object doApply(Evaluator eval, Object arg)
             throws FusionException
         {
-            checkArityExact(args);
-
-            String input = checkRequiredStringArg(eval, this, 0, args);
+            String input = checkRequiredStringArg(eval, this, 0, arg);
             return makeString(eval, input.toUpperCase());
         }
     }
@@ -614,27 +590,17 @@ public final class FusionString
 
 
     static final class ToSymbolProc
-        extends Procedure
+        extends Procedure1
     {
-        ToSymbolProc()
-        {
-            //    "                                                                               |
-            super("Converts a `string` to a symbol with the same text.  Returns `null.symbol` when\n"
-                + "given `null.string`.  Raises an exception when given an empty string.",
-                  "string");
-        }
-
         @Override
-        Object doApply(Evaluator eval, Object[] args)
+        Object doApply(Evaluator eval, Object arg)
             throws FusionException
         {
-            checkArityExact(args);
-
-            String input = checkNullableStringArg(eval, this, 0, args);
+            String input = checkNullableStringArg(eval, this, 0, arg);
 
             if (input != null && input.isEmpty())
             {
-                throw argFailure("non-empty string", 0, args);
+                throw argFailure("non-empty string", 0, arg);
             }
 
             return makeSymbol(eval, input);
@@ -650,24 +616,14 @@ public final class FusionString
      * edit the data before imploding it back into a string.
      */
     static final class ExplodeProc
-        extends Procedure
+        extends Procedure1
     {
-       public ExplodeProc()
-       {
-           //    "                                                                               |
-          super("Returns a stretchy list of the Unicode scalar values (code points) in the given\n" +
-                "non-null string.",
-                "string");
-       }
-
        @Override
-       Object doApply(Evaluator eval, Object[] args)
+       Object doApply(Evaluator eval, Object arg)
            throws FusionException
        {
-          checkArityExact(args);
-
           // TODO what about annotations?
-          String string = checkRequiredStringArg(eval, this, 0, args);
+          String string = checkRequiredStringArg(eval, this, 0, arg);
 
           int charSize   = string.length();
           int scalarSize = string.codePointCount(0, charSize);
@@ -691,23 +647,14 @@ public final class FusionString
 
 
     static final class ImplodeProc
-        extends Procedure
+        extends Procedure1
     {
-        public ImplodeProc()
-        {
-            //    "                                                                               |
-           super("Returns a string filled by the given list of Unicode scalar values.",
-                 "list");
-        }
-
         @Override
-        Object doApply(Evaluator eval, Object[] args)
+        Object doApply(Evaluator eval, Object arg)
             throws FusionException
         {
-            checkArityExact(args);
-
             // TODO what about annotations?
-            Object list = checkActualListArg(eval, this, 0, args);
+            Object list = checkActualListArg(eval, this, 0, arg);
 
             final int scalarSize = unsafeListSize(eval, list);
             int charSize = scalarSize;
