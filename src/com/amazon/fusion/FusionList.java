@@ -1317,13 +1317,6 @@ final class FusionList
     static final class IsImmutableListProc
         extends Procedure1
     {
-        IsImmutableListProc()
-        {
-            //    "                                                                               |
-            super("Determines whether `value` is an immutable list, returning `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object value)
             throws FusionException
@@ -1337,13 +1330,6 @@ final class FusionList
     static final class IsMutableListProc
         extends Procedure1
     {
-        IsMutableListProc()
-        {
-            //    "                                                                               |
-            super("Determines whether `value` is a mutable list, returning `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object value)
             throws FusionException
@@ -1357,13 +1343,6 @@ final class FusionList
     static final class IsStretchyListProc
         extends Procedure1
     {
-        IsStretchyListProc()
-        {
-            //    "                                                                               |
-            super("Determines whether `value` is a stretchy list, returning `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object value)
             throws FusionException
@@ -1377,13 +1356,6 @@ final class FusionList
     static final class ImmutableListProc
         extends Procedure
     {
-        ImmutableListProc()
-        {
-            //    "                                                                               |
-            super("Makes a fresh, immutable list containing the given `value`s.",
-                  "value", DOTDOTDOT);
-        }
-
         @Override
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
@@ -1396,13 +1368,6 @@ final class FusionList
     static final class MutableListProc
         extends Procedure
     {
-        MutableListProc()
-        {
-            //    "                                                                               |
-            super("Makes a fresh, mutable list containing the given `value`s.",
-                  "value", DOTDOTDOT);
-        }
-
         @Override
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
@@ -1415,13 +1380,6 @@ final class FusionList
     static final class StretchyListProc
         extends Procedure
     {
-        StretchyListProc()
-        {
-            //    "                                                                               |
-            super("Makes a fresh, stretchy list containing the given `value`s.",
-                  "value", DOTDOTDOT);
-        }
-
         @Override
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException

@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -11,18 +11,6 @@ import com.amazon.fusion.Namespace.NsBinding;
 final class TopForm
     extends SyntacticForm
 {
-    TopForm()
-    {
-        //    "                                                                               |
-        super("('#%top' id)",
-              "References a top-level definition for symbol `id`, skipping over any\n" +
-              "surrounding local bindings.  Within a module, `id` must be defined within the\n" +
-              "module and not locally.\n" +
-              "\n" +
-              "As suggested by the awkward name, this form is rarely needed by application\n" +
-              "code and is primarily an artifact of the macro-expansion process.");
-    }
-
     @Override
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException

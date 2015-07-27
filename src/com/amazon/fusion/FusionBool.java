@@ -591,13 +591,6 @@ public final class FusionBool
     static final class IsBoolProc
         extends Procedure1
     {
-        IsBoolProc()
-        {
-            //    "                                                                               |
-            super("Determines whether a `value` is of type `bool`, returning `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException

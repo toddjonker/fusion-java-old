@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -13,6 +13,11 @@ abstract class SyntacticForm
     extends NamedValue
 {
     private final BindingDoc myDocs;
+
+    public SyntacticForm()
+    {
+        this("XXX", "XXX");
+    }
 
     SyntacticForm(String bodyPattern, String doc)
     {

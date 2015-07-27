@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -8,16 +8,10 @@ package com.amazon.fusion;
  * to exit its evaluation.
  */
 final class ExitProc
-    extends Procedure
+    extends Procedure0
 {
-    ExitProc()
-    {
-        //    "                                                                               |
-        super("Exits the running Fusion program.");
-    }
-
     @Override
-    Object doApply(Evaluator eval, Object[] arg)
+    Object doApply(Evaluator eval)
         throws ExitException
     {
         throw new ExitException();

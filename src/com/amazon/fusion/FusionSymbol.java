@@ -682,13 +682,6 @@ final class FusionSymbol
     static final class IsSymbolProc
         extends Procedure1
     {
-        IsSymbolProc()
-        {
-            //    "                                                                               |
-            super("Determines whether a `value` is of type `symbol`, returning `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
