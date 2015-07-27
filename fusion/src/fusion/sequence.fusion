@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 (module sequence '/fusion/private/builtins'
 
@@ -31,7 +31,22 @@ The built-in sequence types are [list](fusion/list.html) and
   (provide . any do element elt every find has_key is_collection is_empty none size)
 
 
-  (defpub_j add    "com.amazon.fusion.AddProc")
+  (defpub_j add
+    '''
+    (add sequence element)
+
+Returns a sequence with all the elements of `sequence` and the `element`.  The
+result sequence is similar to the input, its size is one greater, and it may
+share structure with other sequences.
+
+In general, the position of `element` within the result is not specified, but
+particular sequence types may do so.
+
+  * For lists, the `element` becomes the last element of the result.
+  * For sexps, the `element` becomes the head of the result.
+    '''
+    "com.amazon.fusion.AddProc")
+
 
   (defpub is_sequence
     '''
@@ -42,27 +57,25 @@ Determines whether `value` is a sequence, returning `true` or `false`.
     (disjoin is_list is_sexp))
 
 
-  (defpub first
-    (lambda (sequence)
-      '''
+  (defpub (first sequence)
+    '''
 Returns the first element in the `sequence`. Fails if the sequence has no
 elements.
-      '''
-      (if (= 0 (size sequence))
-        (raise_argument_error "first" "non-empty sequence" 0 sequence)
-        (element sequence 0))))
+    '''
+    (if (= 0 (size sequence))
+      (raise_argument_error "first" "non-empty sequence" 0 sequence)
+      (element sequence 0)))
 
 
-  (defpub last
-    (lambda (sequence)
-      '''
+  (defpub (last sequence)
+    '''
 Returns the last element in the `sequence`. Fails if the sequence has no
 elements.
-      '''
-      (let [(s (size sequence))]
-        (if (= 0 s)
-          (raise_argument_error "last" "non-empty sequence" 0 sequence)
-          (element sequence (- s 1))))))
+    '''
+    (let [(s (size sequence))]
+      (if (= 0 s)
+        (raise_argument_error "last" "non-empty sequence" 0 sequence)
+        (element sequence (- s 1)))))
 
 
   (defpub append
@@ -90,49 +103,48 @@ empty list (or empty sexp).
     (java_new "com.amazon.fusion.FusionSequence$AppendMProc"))
 
 
-  (defpub subseq
-    (lambda (seq from to)
-      '''
+  (defpub (subseq seq from to)
+    '''
 Returns a sequence holding the elements of the non-null sequence `seq` between
 positions `from` and `to`.  The following precondition applies:
 
     0 <= from <= to <= (size seq)
 
 The result may share structure with `seq` and has the same type as `seq`.
-      '''
-      (unless (and (is_int from) (<= 0 from))
-        (raise_argument_error "subseq" "non-negative int" 1 seq from to))
-      (unless (is_int to)  // Non-negativity is checked in the next clause.
-        (raise_argument_error "subseq" "non-negative int" 2 seq from to))
-      (unless (<= from to)
-        (raise_argument_error "subseq" "'from' less than 'to'"
-          1 seq from to))
-      (when (is_null seq)
-        (raise_argument_error "subseq" "non-null sequence" 0 seq from to))
-      (cond
-        ((is_list seq)
-         (let [(size (unsafe_list_size seq))]
-           (if (< size to)
+    '''
+    (unless (and (is_int from) (<= 0 from))
+      (raise_argument_error "subseq" "non-negative int" 1 seq from to))
+    (unless (is_int to)  // Non-negativity is checked in the next clause.
+      (raise_argument_error "subseq" "non-negative int" 2 seq from to))
+    (unless (<= from to)
+      (raise_argument_error "subseq" "'from' less than 'to'"
+        1 seq from to))
+    (when (is_null seq)
+      (raise_argument_error "subseq" "non-null sequence" 0 seq from to))
+    (cond
+      ((is_list seq)
+       (let [(size (unsafe_list_size seq))]
+         (if (< size to)
+           (raise_argument_error "subseq" "'to' less than (size seq)"
+             2 seq from to)
+           (unsafe_list_subseq seq from to))))
+      ((is_sexp seq)
+       (let find_head [(s seq), (f from), (t to)]
+         (if (= 0 f)
+           (let prefix [(s s), (t t)]
+             (if (= 0 t)
+               (quote ())
+               (if (is_pair s)
+                 (pair (head s) (prefix (tail s) (- t 1)))
+                 (raise_argument_error "subseq"
+                   "'to' less than (size seq)"
+                   2 seq from to))))
+           (if (is_pair s)
+             (find_head (tail s) (- f 1) (- t 1))
              (raise_argument_error "subseq" "'to' less than (size seq)"
-               2 seq from to)
-             (unsafe_list_subseq seq from to))))
-        ((is_sexp seq)
-         (let find_head [(s seq), (f from), (t to)]
-           (if (= 0 f)
-             (let prefix [(s s), (t t)]
-               (if (= 0 t)
-                 (quote ())
-                 (if (is_pair s)
-                   (pair (head s) (prefix (tail s) (- t 1)))
-                   (raise_argument_error "subseq"
-                     "'to' less than (size seq)"
-                     2 seq from to))))
-             (if (is_pair s)
-               (find_head (tail s) (- f 1) (- t 1))
-               (raise_argument_error "subseq" "'to' less than (size seq)"
-                 2 seq from to)))))
-        (true (raise_argument_error "subseq" "non-null sequence"
-                0 seq from to)))))
+               2 seq from to)))))
+      (true (raise_argument_error "subseq" "non-null sequence"
+              0 seq from to))))
 
 
   //==========================================================================
@@ -140,66 +152,64 @@ The result may share structure with `seq` and has the same type as `seq`.
 
   // Name per Dylan.  I prefer `choose` over `filter` because the latter is
   // ambiguous whether you're filtering "in" or "out".
-  (defpub choose
-    (lambda (pred sequence)
-      '''
+  (defpub (choose pred sequence)
+    '''
 Applies the one-parameter predicate `pred` to each element of `sequence`,
 returning a new sequence of the same type, containing the elements (in order)
 for which `pred` returns truthy.
-      '''
-      (cond
-        ((is_list sequence)
-          (let [(len (size sequence))]
-            (let loop [(i 0),
-                       (result (stretchy_list))]
-              (if (= i len)
-                result
-                (let [(elt (. sequence i))]
-                  (loop
-                    (+ 1 i)
-                    (if (pred elt)
-                      (unsafe_list_add_m result elt)
-                      result)))))))
-        ((is_sexp sequence)
-          (let loop [(ptr sequence)]
-            (if (is_empty ptr)
-              (quote ())
-              (let [(v (unsafe_pair_head ptr))]
-                (if (pred v)
-                  (pair v (loop (unsafe_pair_tail ptr)))
-                  (loop (unsafe_pair_tail ptr)))))))
-        (true
-          (raise_argument_error "choose" "sequence" 1 pred sequence)))))
+    '''
+    (cond
+      ((is_list sequence)
+        (let [(len (size sequence))]
+          (let loop [(i 0),
+                     (result (stretchy_list))]
+            (if (= i len)
+              result
+              (let [(elt (. sequence i))]
+                (loop
+                  (+ 1 i)
+                  (if (pred elt)
+                    (unsafe_list_add_m result elt)
+                    result)))))))
+      ((is_sexp sequence)
+        (let loop [(ptr sequence)]
+          (if (is_empty ptr)
+            (quote ())
+            (let [(v (unsafe_pair_head ptr))]
+              (if (pred v)
+                (pair v (loop (unsafe_pair_tail ptr)))
+                (loop (unsafe_pair_tail ptr)))))))
+      (true
+        (raise_argument_error "choose" "sequence" 1 pred sequence))))
 
 
 
   // Name per Dylan and SRFI-1. Dylan allows mapping over multiple key-value
   // collections but that's a bit crazy and it's unclear how useful that is.
-  (defpub map
-    (lambda (proc sequence)
-      '''
+  (defpub (map proc sequence)
+    '''
 Applies the one-parameter procedure `proc` to each element of `sequence`,
 returning a new sequence of the same type, containing the results in order.
-      '''
-      (cond
-        ((is_list sequence)
-          (let [(len (size sequence))]
-            (let loop [(i 0),
-                       (result (stretchy_list))]
-              (if (= i len)
-                result
-                (loop
-                  (+ 1 i)
-                  (unsafe_list_add_m result (proc (. sequence i))))))))
-        ((is_sexp sequence)
-          (let loop [(ptr sequence)]
-            (if (is_empty ptr)
-              (quote ())
-              (pair
-                (proc (unsafe_pair_head ptr))
-                (loop (unsafe_pair_tail ptr))))))
-        (true
-          (raise_argument_error "map" "sequence" 1 proc sequence)))))
+    '''
+    (cond
+      ((is_list sequence)
+        (let [(len (size sequence))]
+          (let loop [(i 0),
+                     (result (stretchy_list))]
+            (if (= i len)
+              result
+              (loop
+                (+ 1 i)
+                (unsafe_list_add_m result (proc (. sequence i))))))))
+      ((is_sexp sequence)
+        (let loop [(ptr sequence)]
+          (if (is_empty ptr)
+            (quote ())
+            (pair
+              (proc (unsafe_pair_head ptr))
+              (loop (unsafe_pair_tail ptr))))))
+      (true
+        (raise_argument_error "map" "sequence" 1 proc sequence))))
 
   (defpub fold_left
     '''

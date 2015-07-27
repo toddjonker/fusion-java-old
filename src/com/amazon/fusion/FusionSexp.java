@@ -1025,13 +1025,6 @@ final class FusionSexp
     static final class SexpProc
         extends Procedure
     {
-        SexpProc()
-        {
-            //    "                                                                               |
-            super("Makes a fresh, immutable sexp containing the given `value`s.",
-                  "value", DOTDOTDOT);
-        }
-
         @Override
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
@@ -1064,13 +1057,6 @@ final class FusionSexp
     static final class PairProc
         extends Procedure2
     {
-        PairProc()
-        {
-            //    "                                                                               |
-            super("Makes a fresh, immutable pair containing the given `head` and `tail`.",
-                  "head", "tail");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object head, Object tail)
             throws FusionException
@@ -1083,13 +1069,6 @@ final class FusionSexp
     static final class IsPairProc
         extends Procedure1
     {
-        IsPairProc()
-        {
-            //    "                                                                               |
-            super("Determines whether `value` is a pair, returning `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object value)
             throws FusionException
@@ -1103,13 +1082,6 @@ final class FusionSexp
     static final class UnsafePairHeadProc
         extends Procedure1
     {
-        UnsafePairHeadProc()
-        {
-            //    "                                                                               |
-            super("Returns the head of `pair`.",
-                  "pair");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object pair)
             throws FusionException
@@ -1122,13 +1094,6 @@ final class FusionSexp
     static final class UnsafePairTailProc
         extends Procedure1
     {
-        UnsafePairTailProc()
-        {
-            //    "                                                                               |
-            super("Returns the tail of `pair`.",
-                  "pair");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object pair)
             throws FusionException
