@@ -472,13 +472,6 @@ final class FusionTimestamp
     static final class IsTimestampProc
         extends Procedure1
     {
-        IsTimestampProc()
-        {
-            //    "                                                                               |
-            super("Determines whether a `value` is of type `timestamp`, returning `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
@@ -490,27 +483,13 @@ final class FusionTimestamp
 
 
     static final class StringToTimestampProc
-        extends Procedure
+        extends Procedure1
     {
-        StringToTimestampProc()
-        {
-            //    "                                                                               |
-            super("Converts a `string` to a timestamp, recognizing (only) Ion formatted data.\n" +
-                  "Returns `null.timestamp` when given `null.string`.\n" +
-                  "\n" +
-                  "    (string_to_timestamp null.string)        ==> null.timestamp\n" +
-                  "    (string_to_timestamp \"2013-11-13T\")      ==> 2013-11-13\n" +
-                  "    (string_to_timestamp \"null.timestamp\")   ==> ERROR",
-                  "string");
-        }
-
         @Override
-        Object doApply(Evaluator eval, Object[] args)
+        Object doApply(Evaluator eval, Object arg)
             throws FusionException
         {
-            checkArityExact(args);
-
-            String input = checkNullableStringArg(eval, this, 0, args);
+            String input = checkNullableStringArg(eval, this, 0, arg);
 
             Timestamp result;
             if (input == null)
@@ -526,19 +505,19 @@ final class FusionTimestamp
                     // Don't accept input "null.timestamp". That's shady.
                     if (result == null)
                     {
-                        throw argFailure("timestamp-formatted string", 0, args);
+                        throw argFailure("timestamp-formatted string", 0, arg);
                     }
 
                     // Hack around Timestamp.valueOf() accepting stoppers.
                     char last = input.charAt(input.length() - 1);
                     if (! (last == 'Z' || last == 'T' || isDigit(last, 10)))
                     {
-                        throw argFailure("timestamp-formatted string", 0, args);
+                        throw argFailure("timestamp-formatted string", 0, arg);
                     }
                 }
                 catch (IllegalArgumentException e)
                 {
-                    throw argFailure("timestamp-formatted string", 0, args);
+                    throw argFailure("timestamp-formatted string", 0, arg);
                 }
             }
 
@@ -548,26 +527,13 @@ final class FusionTimestamp
 
 
     static final class TimestampToStringProc
-        extends Procedure
+        extends Procedure1
     {
-        TimestampToStringProc()
-        {
-            //    "                                                                               |
-            super("Converts a `timestamp` to a string in Ion format.\n" +
-                  "Returns `null.string` when given `null.timestamp`.\n" +
-                  "\n" +
-                  "    (timestamp_to_string null.timestamp)   ==> null.string\n" +
-                  "    (timestamp_to_string 2013-11-13T)      ==> \"2013-11-13\"",
-                  "timestamp");
-        }
-
         @Override
-        Object doApply(Evaluator eval, Object[] args)
+        Object doApply(Evaluator eval, Object arg)
             throws FusionException
         {
-            checkArityExact(args);
-
-            Timestamp input = checkNullableTimestampArg(eval, this, 0, args);
+            Timestamp input = checkNullableTimestampArg(eval, this, 0, arg);
 
             String result = (input == null ? null : input.toString());
             return makeString(eval, result);
@@ -578,13 +544,6 @@ final class FusionTimestamp
     static final class TimestampNowProc
         extends Procedure0
     {
-        TimestampNowProc()
-        {
-            //    "                                                                               |
-            super("Returns a timestamp representing \"now\".  At present the local offset is\n" +
-                  "unspecified, but that may change in the future.");
-        }
-
         @Override
         Object doApply(Evaluator eval)
             throws FusionException
@@ -598,14 +557,6 @@ final class FusionTimestamp
     static final class TimestampToEpochMillisProc
         extends Procedure1
     {
-        TimestampToEpochMillisProc()
-        {
-            //    "                                                                               |
-            super("Given a non-null timestamp, returns the same point in time represented as the\n" +
-                  "number of milliseconds since 1970-01-01T00:00Z.  The result is a decimal.",
-                  "timestamp");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
@@ -620,14 +571,6 @@ final class FusionTimestamp
     static final class EpochMillisToTimestampProc
         extends Procedure1
     {
-        public EpochMillisToTimestampProc()
-        {
-            //    "                                                                               |
-           super("Returns a timestamp for the point in time given as the number of milliseconds\n" +
-                 "since 1970-01-01T00:00Z. The `epoch_millis` may be a decimal or int.",
-                 "epoch_millis");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
