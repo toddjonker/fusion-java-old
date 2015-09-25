@@ -1,0 +1,39 @@
+// Copyright (c) 2015 Amazon.com, Inc.  All rights reserved.
+
+(module kernel2 "/fusion/private/kernel"
+
+  (define if
+    (java_new "com.amazon.fusion.IfForm"))
+
+  (define is_list
+    (java_new "com.amazon.fusion.FusionList$IsListProc"))
+
+  (define is_null
+     (java_new "com.amazon.fusion.IsNullProc"))
+
+  (define is_sexp
+    (java_new "com.amazon.fusion.FusionSexp$IsSexpProc"))
+
+  (define is_string
+    (java_new "com.amazon.fusion.FusionString$IsStringProc"))
+
+  (define is_struct
+    (java_new "com.amazon.fusion.FusionStruct$IsStructProc"))
+
+  (define let_values
+    (java_new "com.amazon.fusion.LetValuesForm"))
+
+  (define letrec
+    (java_new "com.amazon.fusion.LetrecForm"))
+
+  (define not
+    (java_new "com.amazon.fusion.NotProc"))
+
+  (define quote
+    (java_new "com.amazon.fusion.QuoteForm"))
+
+  (define quote_syntax
+    (java_new "com.amazon.fusion.QuoteSyntaxForm"))
+
+  (provide (all_defined_out))
+)

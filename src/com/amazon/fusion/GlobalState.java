@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -24,8 +24,6 @@ final class GlobalState
     static final String DEFINE_SYNTAX   = "define_syntax";
     static final String EOF             = "eof";
     static final String LAMBDA          = "lambda";
-    static final String LET_VALUES      = "let_values";
-    static final String LETREC          = "letrec";
     static final String MODULE          = "module";
     static final String PROVIDE         = "provide";
     static final String REQUIRE         = "require";
@@ -109,7 +107,7 @@ final class GlobalState
             new ModuleBuilderImpl(resolver, registry, KERNEL_MODULE_IDENTITY);
 
         ns.define(ALL_DEFINED_OUT, new ProvideForm.AllDefinedOutForm());
-        ns.define(BEGIN, new BeginForm());    // Needed by hard-coded macro
+        ns.define(BEGIN, new BeginForm());
 
         ns.define("current_directory", currentDirectory,
                   "A [parameter](fusion/parameter.html) holding the thread-local working directory.");
@@ -122,24 +120,13 @@ final class GlobalState
         ns.define(DEFINE_SYNTAX, new DefineSyntaxForm());
         ns.define(EOF, FusionIo.eof(null),
                   "A unique value that denotes an end-of-file condition.");
-        ns.define("if", new IfForm());          // Needed by hard-coded macro
         ns.define("java_new", new JavaNewProc());
-        ns.define(LAMBDA, new LambdaForm());    // Needed by hard-coded macro
-        ns.define(LET_VALUES, new LetValuesForm());
-        ns.define(LETREC, new LetrecForm());    // Needed by hard-coded macro
+        ns.define(LAMBDA, new LambdaForm());
         ns.define("load", new LoadProc(loadHandler));
         ns.define(MODULE, new ModuleForm(resolver, currentModuleDeclareName));
-        ns.define("not", new NotProc());
         ns.define(PROVIDE, new ProvideForm());
-        ns.define("quote", new QuoteForm());
-        ns.define("quote_syntax", new QuoteSyntaxForm()); // For fusion/syntax
         ns.define(REQUIRE, new RequireForm(resolver));
 
-        ns.define("is_list",   new FusionList.IsListProc());
-        ns.define("is_null",   new IsNullProc());
-        ns.define("is_sexp",   new FusionSexp.IsSexpProc());
-        ns.define("is_string", new FusionString.IsStringProc());
-        ns.define("is_struct", new FusionStruct.IsStructProc());
 
         ns.instantiate();
 
