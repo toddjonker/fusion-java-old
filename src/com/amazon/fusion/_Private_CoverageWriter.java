@@ -18,9 +18,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -149,6 +153,7 @@ public final class _Private_CoverageWriter
     private final Map<ModuleIdentity, SourceName>   myNamesForModules;
     private final Map<File, SourceName>             myNamesForFiles;
     private final Map<SourceName, CoverageInfoPair> myFileCoverages;
+    private final Map<SourceName, String>           myRelativeNamesForSources;
 
     private final CoverageInfoPair myGlobalCoverage = new CoverageInfoPair();
     private       int              myUnloadedEntries;
@@ -167,11 +172,12 @@ public final class _Private_CoverageWriter
         myDatabase = new CoverageDatabase(dataDir);
         myConfig   = new CoverageConfiguration(dataDir);
 
-        myModules         = new HashSet<>();
-        mySourceFiles     = new HashSet<>();
-        myNamesForModules = new HashMap<>();
-        myNamesForFiles   = new HashMap<>();
-        myFileCoverages   = new HashMap<>();
+        myModules                 = new HashSet<>();
+        mySourceFiles             = new HashSet<>();
+        myNamesForModules         = new HashMap<>();
+        myNamesForFiles           = new HashMap<>();
+        myFileCoverages           = new HashMap<>();
+        myRelativeNamesForSources = new HashMap<>();
     }
 
 
@@ -201,8 +207,77 @@ public final class _Private_CoverageWriter
     }
 
 
+    private int firstNonMatchingIndex(List<Path> sourceFilesPath, int minNameCount)
+    {
+        int matchingIndex = -1;
+        boolean foundNonMatchingIndex = false;
+        for (int i = 0; !foundNonMatchingIndex && i < minNameCount - 1; i++)
+        {
+            String nameAtIndex = sourceFilesPath.get(0).getName(i).toString();
+            for (Path path : sourceFilesPath)
+            {
+                if (!nameAtIndex.equals(path.getName(i).toString()))
+                {
+                    foundNonMatchingIndex = true;
+                    break;
+                }
+            }
+            if (foundNonMatchingIndex)
+            {
+                break;
+            }
+            else
+            {
+                matchingIndex = i;
+            }
+        }
+        return matchingIndex + 1;
+    }
+
+
+    private void populateRelativeNameForSources(int firstNonMatchingIndex) throws IOException
+    {
+        System.out.println("1st non matching index is " + firstNonMatchingIndex);
+        for (SourceName sourceName : myDatabase.sourceNames())
+        {
+            Path path = sourceName.getFile().getCanonicalFile().toPath();
+            Path shorterPath = path.subpath(firstNonMatchingIndex, path.getNameCount());
+            Iterator<Path> iterator = shorterPath.iterator();
+            StringBuilder sb = new StringBuilder();
+            while (iterator.hasNext())
+            {
+                sb.append("_" + iterator.next().toString());
+            }
+            myRelativeNamesForSources.put(sourceName, sb.substring(1));
+        }
+    }
+
+
+    private void prepareRelativeNames() throws IOException
+    {
+        List<Path> sourceFilesPath = new ArrayList<>();
+        int minNameCount = Integer.MAX_VALUE;
+        for (SourceName sourceName : myDatabase.sourceNames())
+        {
+            Path path = sourceName.getFile().getCanonicalFile().toPath();
+            sourceFilesPath.add(path);
+            int nameCount = path.getNameCount();
+            if (nameCount < minNameCount)
+            {
+                minNameCount = nameCount;
+            }
+        }
+        if (!sourceFilesPath.isEmpty())
+        {
+            int firstNonMatchingIndex =
+                firstNonMatchingIndex(sourceFilesPath, minNameCount);
+            populateRelativeNameForSources(firstNonMatchingIndex);
+        }
+    }
+
+
     private void analyze()
-        throws FusionException
+        throws FusionException, IOException
     {
         Consumer<ModuleIdentity> consumer = new Consumer<ModuleIdentity>()
         {
@@ -256,8 +331,9 @@ public final class _Private_CoverageWriter
                 }
             }
         }
-    }
 
+        prepareRelativeNames();
+    }
 
     private ModuleIdentity[] sortedModules()
     {
@@ -446,9 +522,7 @@ public final class _Private_CoverageWriter
 
     private String relativeName(SourceName name)
     {
-        String relativeName = name.getFile().getPath().replaceAll("/", "_");
-        relativeName = relativeName + ".html";
-        return relativeName;
+        return myRelativeNamesForSources.get(name) + ".html";
     }
 
 
