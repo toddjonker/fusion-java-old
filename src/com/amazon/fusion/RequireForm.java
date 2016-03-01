@@ -8,12 +8,12 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 /**
  * A note on the design for {@code require}: unlike Racket, Fusion allows
  * imported names to shadow those declared by a module's language. The intent
- * of this change is to make user's source code more resiliant to additions
- * to the language.  In particular, this allows a user-owned module to proved
+ * of this change is to make user's source code more resilient to additions
+ * to the language.  In particular, this allows a user-owned module to provide
  * an alternate binding for a language feature, and then import that module
  * into many others.
  * <p>
- * Note that there is still a resiliancy problem with respect to multiple
+ * Note that there is still a resiliency problem with respect to multiple
  * imports: if a library module adds a binding thats already used by a user
  * module, there can be a conflict introduced by a new release of the library.
  * The same problem exists with Java code using {@code import *}, and the
