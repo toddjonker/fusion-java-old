@@ -17,6 +17,46 @@ Experimental operators for macros and syntax manipulation.
 
 This module contains unstable, experimental features.
 There is **NO SUPPORT** for this module.
+
+## Overview
+
+Fusion’s macro system is intended to be operationally identical to that of
+Racket, so we strongly recommend taking advantage of the extensive
+documentation Racket provides.
+
+Fusion does not yet implemented Racket's higher-level macro facilities like
+`define-syntax-rule` so one has to work with more primitive tools.
+
+Fusion’s current feature-set generally aligns with the content of these parts
+of the [Racket Guide](http://docs.racket-lang.org/guide/index.html):
+
+  * [Lexical Scope](http://docs.racket-lang.org/guide/pattern-macros.html#%28part._.Lexical_.Scope%29)
+  * [Macro Transformer Procedures](http://docs.racket-lang.org/guide/macro-transformers.html)
+  * [Syntax Objects](http://docs.racket-lang.org/guide/stx-obj.html)
+
+To write low-level macros you'll want to be familiar with these parts of the
+[Racket Reference](http://docs.racket-lang.org/reference/index.html):
+
+  * [Syntax Model](http://docs.racket-lang.org/reference/syntax-model.html)
+  * [Syntax Objects](http://docs.racket-lang.org/reference/stxops.html),
+    especially `datum->syntax` and `syntax-e` (which Fusion calls `syntax_unwrap`).
+  * [Syntax Quoting](http://docs.racket-lang.org/reference/Syntax_Quoting__quote-syntax.html)
+  * [Expanding_Top-Level_Forms](http://docs.racket-lang.org/reference/Expanding_Top-Level_Forms.html)
+
+## Limitations
+
+Here’s some notable things missing from Fusion’s current macro system compared
+to Racket:
+  * There’s only one [expansion phase](http://docs.racket-lang.org/reference/syntax-model.html#%28part._mod-parse%29),
+    which primarily means one must generally import a macro from another module
+    before using it.
+  * Not all [expansion contexts](http://docs.racket-lang.org/reference/syntax-model.html#%28part._expand-context-model%29)
+    are implemented. There’s no internal definitions yet; see [FUSION-36](issue:FUSION-36).
+  * Tamper status (aka [tainting](http://docs.racket-lang.org/reference/stxcerts.html))
+    is not implemented.
+
+These are the primary reasons this module is “experimental”. Of particular
+concerned is that extant code may break when phases are introduced.
   '''
 
 
