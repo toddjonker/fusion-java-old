@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -61,7 +61,7 @@ final class GlobalState
         myCurrentNamespaceParam = currentNamespaceParam;
         myCoverageCollector     = coverageCollector;
 
-        SyntaxWrap wrap = new ModuleRenameWrap(kernel);
+        SyntaxWrap wrap = new RequireWrap(kernel);
 
         // WARNING: We pass null evaluator because we know its not used.
         //          That is NOT SUPPORTED for user code!

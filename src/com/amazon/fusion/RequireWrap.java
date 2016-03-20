@@ -9,14 +9,14 @@ import java.util.Set;
 
 /**
  * Syntax wrap that adds all exported bindings from a specific module.
- * It's added to syntax following a {@code require} form.
+ * It's added to syntax in the scope of a {@code require} form.
  */
-class ModuleRenameWrap
+class RequireWrap
     extends SyntaxWrap
 {
     private final ModuleInstance myModule;
 
-    ModuleRenameWrap(ModuleInstance module)
+    RequireWrap(ModuleInstance module)
     {
         assert module != null;
         myModule = module;
@@ -57,6 +57,6 @@ class ModuleRenameWrap
     public String toString()
     {
         String id = myModule.getIdentity().absolutePath();
-        return "{{{Module renames for " + id + "}}}";
+        return "{{{Required module " + id + "}}}";
     }
 }

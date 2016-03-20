@@ -288,7 +288,7 @@ final class ModuleNamespace
             }
         }
 
-        myUsedModuleWraps.addWrap(new ModuleRenameWrap(module));
+        myUsedModuleWraps.addWrap(new RequireWrap(module));
     }
 
 

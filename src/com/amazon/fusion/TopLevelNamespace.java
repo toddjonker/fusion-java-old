@@ -335,7 +335,7 @@ final class TopLevelNamespace
      * annotates bindings accordingly.
      */
     private static final class TopLevelRequireWrap
-        extends ModuleRenameWrap
+        extends RequireWrap
     {
         private final int myPrecedence;
 
