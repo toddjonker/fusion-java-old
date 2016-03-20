@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -25,10 +25,11 @@ abstract class Binding
     }
 
     /**
-     * Gets the original binding this represents.
-     * If this is a free, lexical, or namespace-level binding, return this.
-     * If this is an exported module binding, return the internal
-     * namespace-level binding.
+     * Gets the original binding to which this binding refers.
+     * Free, local, and module-level bindings are always themselves original.
+     * For imported bindings, the original is the target module-level binding.
+     * The original of a top-level binding can be either its local definition
+     * or an imported module-level binding (and it can change over time).
      *
      * @return not null.
      */

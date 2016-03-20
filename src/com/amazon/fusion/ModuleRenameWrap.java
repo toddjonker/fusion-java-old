@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -9,6 +9,7 @@ import java.util.Set;
 
 /**
  * Syntax wrap that adds all exported bindings from a specific module.
+ * It's added to syntax following a {@code require} form.
  */
 class ModuleRenameWrap
     extends SyntaxWrap

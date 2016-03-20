@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,14 +10,15 @@ import java.util.Set;
 
 
 /**
- * Extended prepare-time {@link Namespace} that knows it's a top-level.
+ * Extended prepare-time {@link Namespace} that knows it's a top-level, and not
+ * a {@linkplain ModuleNamespace module}.
  * <p>
  * The tricky part here is getting the precedence correct between imports and
  * top-level definitions.  The rule is that the last occurrence wins.  To
  * implement this we keep a counter of the number of times that
- * {@link #require(ModuleInstance)} has been called, record that on bindings when
- * they are defined or redefined, and compare those numbers to determine which
- * binding has precedence.
+ * {@link #require(ModuleInstance)} has been called, record that on bindings
+ * when they are defined or redefined, and compare those numbers to determine
+ * which binding has precedence.
  */
 final class TopLevelNamespace
     extends Namespace
@@ -35,11 +36,15 @@ final class TopLevelNamespace
          * Reference to the active binding for my identifier, either this
          * instance (when the top-level definition is active) or a binding
          * from an import.
+         * This member is mutated whenever the identifier's meaning changes due
+         * to a {@code define} overriding a {@code require}, or vice versa.
          */
         private NsBinding myTarget;
 
         /**
          * The precedence of the top-level definition (stored at my address).
+         * This member is mutated whenever the identifier's meaning changes due
+         * to a {@code define} overriding a {@code require}, or vice versa.
          */
         private int myPrecedence;
 
@@ -241,6 +246,10 @@ final class TopLevelNamespace
     }
 
 
+    /**
+     * Denotes a module-level binding imported into a top-level namespace via
+     * {@code require}.
+     */
     static final class TopLevelRequireBinding
         extends Binding
     {
@@ -262,7 +271,7 @@ final class TopLevelNamespace
         }
 
         @Override
-        public Binding originalBinding()
+        public ModuleBinding originalBinding()
         {
             return myBinding;
         }

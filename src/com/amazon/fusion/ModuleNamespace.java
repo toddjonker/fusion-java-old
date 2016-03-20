@@ -1,10 +1,11 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.LanguageWrap.LanguageBinding;
 import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
+import com.amazon.fusion.TopLevelNamespace.TopLevelRequireBinding;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -17,6 +18,15 @@ import java.util.Set;
 final class ModuleNamespace
     extends Namespace
 {
+    /**
+     * Denotes a module-level binding. Instances are one-to-one with each
+     * {@code define} at module-level.
+     * <p>
+     * Unlike top-level bindings, module-level bindings are immutable.
+     * <p>
+     * When imported into another namespace, a {@code ModuleBinding} is wrapped
+     * by either a {@link LanguageBinding} or a {@link TopLevelRequireBinding}.
+     */
     static final class ModuleBinding
         extends NsBinding
     {

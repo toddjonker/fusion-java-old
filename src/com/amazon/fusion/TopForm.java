@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,7 +6,8 @@ import com.amazon.fusion.Namespace.NsBinding;
 
 
 /**
- * Implementation of {@code #%top}.
+ * Implementation of {@code #%top}, which is introduced when identifiers are
+ * macro-expanded in a scope where the identifier is not bound.
  */
 final class TopForm
     extends SyntacticForm

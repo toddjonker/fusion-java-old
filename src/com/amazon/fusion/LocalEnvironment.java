@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,6 +10,10 @@ import java.util.Set;
 final class LocalEnvironment
     implements Environment
 {
+    /**
+     * Denotes a binding at some local scope, for example {@code lambda} and
+     * {@code letrec} expressions.
+     */
     static final class LocalBinding
         extends Binding
     {
@@ -36,8 +40,9 @@ final class LocalEnvironment
         @Override
         public boolean sameTarget(Binding other)
         {
-            // Don't need to call other.originalBinding() since locals are
-            // never renamed or wrapped.
+            // Don't need to call other.originalBinding() since local bindings
+            // are never renamed or wrapped (in the sense, for examples, that a
+            // LanguageBinding wraps a ModuleBinding).
             return this == other;
         }
 

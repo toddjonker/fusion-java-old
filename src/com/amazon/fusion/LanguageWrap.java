@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -16,6 +16,10 @@ import java.util.Set;
 final class LanguageWrap
     extends SyntaxWrap
 {
+    /**
+     * Denotes a binding imported into a module via the language declared at
+     * its creation.
+     */
     static final class LanguageBinding
         extends Binding
     {

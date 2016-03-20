@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -442,6 +442,10 @@ final class SyntaxSymbol
     }
 
 
+    /**
+     * Give a debugging representation: the symbol name and all its marks.
+     * For example, {@code "symbol_name#26#12"}.
+     */
     String debugString()
     {
         String base = toString();

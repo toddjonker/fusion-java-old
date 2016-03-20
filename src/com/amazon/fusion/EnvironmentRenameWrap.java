@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -40,6 +40,8 @@ class EnvironmentRenameWrap
             }
         }
 
+        // The identifier doesn't have a binding outside of this environment,
+        // so look for one here.
         Binding subst = myEnvironment.substituteFree(name, returnMarks);
         return subst;
     }

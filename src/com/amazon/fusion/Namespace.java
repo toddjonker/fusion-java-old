@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -24,6 +24,12 @@ import java.util.Set;
 abstract class Namespace
     implements Environment, NamespaceStore
 {
+    /**
+     * Denotes a namespace-level binding, either top-level or module-level.
+     *
+     * @see TopLevelBinding
+     * @see ModuleBinding
+     */
     abstract static class NsBinding
         extends Binding
     {
