@@ -49,11 +49,13 @@ final class FusionSymbol
                 throw new IllegalArgumentException("Cannot make an empty symbol");
             }
 
+            ActualSymbol sym = new ActualSymbol(value);
+
             // Prevent other threads from touching the intern table.
             // This doesn't prevent the GC from removing entries!
             synchronized (ourActualSymbols)
             {
-                WeakReference<ActualSymbol> ref = ourActualSymbols.get(value);
+                WeakReference<ActualSymbol> ref = ourActualSymbols.get(sym);
                 if (ref != null)
                 {
                     // There's a chance that the entry for a string will exist but
@@ -62,10 +64,8 @@ final class FusionSymbol
                     if (interned != null) return interned;
                 }
 
-                // We don't have an interned symbol, so make one.
-                ActualSymbol sym = new ActualSymbol(value);
                 ref = new WeakReference<>(sym);
-                ourActualSymbols.put(value, ref);
+                ourActualSymbols.put(sym, ref);
 
                 return sym;
             }
@@ -257,7 +257,7 @@ final class FusionSymbol
     /**
      * An interned, unannotated, non-null symbol.
      */
-    private static class ActualSymbol
+    private static final class ActualSymbol
         extends BaseSymbol
     {
         private final String myContent;
@@ -271,7 +271,16 @@ final class FusionSymbol
         @Override
         public boolean equals(Object other)
         {
-            return this == other;  // Due to interning.
+            // We can't optimize this to == "due to interning", since
+            // WeakHashMap uses equals() to look for an interned instance.
+
+            if (this == other) return true;
+            if (other instanceof ActualSymbol)
+            {
+                ActualSymbol that = (ActualSymbol) other;
+                return myContent.equals(that.myContent);
+            }
+            return false;
         }
 
         @Override
@@ -340,8 +349,9 @@ final class FusionSymbol
             if (other instanceof AnnotatedSymbol)
             {
                 AnnotatedSymbol that = (AnnotatedSymbol) other;
-                if (this.myValue == that.myValue)
+                if (this.myValue == that.myValue) // Since they are interned
                 {
+                    // TODO optimize to use identity equality on the symbols
                     return Arrays.equals(myAnnotations, that.myAnnotations);
                 }
             }
@@ -436,29 +446,27 @@ final class FusionSymbol
     /**
      * Interning table for unannotated, non-null symbols.
      * <p>
-     * The keys are the same string instances contained by the symbols, so the
-     * entry will be retained at least as long as the symbol is reachable.
-     * Using a weak reference to the symbol allows it to be reclaimed when it
-     * is otherwise unused. After the symbol is GCed then the hash entry will
-     * be removed.
-     * <p>
-     * This approach allows us to avoid creating an {@code ActualSymbol} in the
-     * common case that the symbol is already interned.
+     * Each entry's key is the same instance as the referrent of the
+     * {@link WeakReference}, so the entry will be retained at least as long as
+     * the symbol is reachable.
      */
     private static final
-    WeakHashMap<String, WeakReference<ActualSymbol>>
+    WeakHashMap<ActualSymbol, WeakReference<ActualSymbol>>
         ourActualSymbols = new WeakHashMap<>(256);
 
     /**
      * Interning table for annotated symbols.
-     * <p>
-     * Here we use the {@code AnnotatedSymbol} as the key because it needs to
-     * capture the base symbol and the annotations, so there's no shortcut like
-     * there is with the {@code ActualSymbol} table.
      */
     private static final
     WeakHashMap<AnnotatedSymbol, WeakReference<AnnotatedSymbol>>
         ourAnnotatedSymbols = new WeakHashMap<>(256);
+
+    // TODO Perhaps add expungeStaleEntries() to force GC of intern tables.
+    // Because WeakHashMap only purges entries on access, we could end up with
+    // a bunch of garbage in there after code compilation is done, and unless
+    // new symbols are instantiated there won't be any access to the map and no
+    // garbage released. Perhaps it's worth expunging the map (via size())
+    // after significant processing events like compiling code.
 
 
     /**
