@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -43,7 +43,7 @@ final class LetrecForm
         }
 
         Environment bodyEnv = new LocalEnvironment(env, boundNames, stx);
-        SyntaxWrap localWrap = new EnvironmentRenameWrap(bodyEnv);
+        SyntaxWrap localWrap = new EnvironmentWrap(bodyEnv);
 
         // Expand the bound-value expressions
         SyntaxValue[] expandedForms = new SyntaxValue[numBindings];

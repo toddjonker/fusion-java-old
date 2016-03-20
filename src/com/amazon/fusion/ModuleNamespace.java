@@ -127,7 +127,7 @@ final class ModuleNamespace
 
 
     private static final class ModuleWrap
-        extends EnvironmentRenameWrap
+        extends EnvironmentWrap
     {
         ModuleWrap(ModuleNamespace ns)
         {
@@ -206,7 +206,7 @@ final class ModuleNamespace
               {
                   @Override
                   public SyntaxWraps apply(Namespace _this) {
-                      return SyntaxWraps.make(new EnvironmentRenameWrap(_this));
+                      return SyntaxWraps.make(new EnvironmentWrap(_this));
                   }
               });
         myUsedModuleWraps = null;

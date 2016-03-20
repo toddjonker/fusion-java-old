@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -73,7 +73,7 @@ final class LetValuesForm
             boundNames =
                 boundNameList.toArray(new SyntaxSymbol[bindingCount]);
             bodyEnv = new LocalEnvironment(env, boundNames, stx);
-            localWrap = new EnvironmentRenameWrap(bodyEnv);
+            localWrap = new EnvironmentWrap(bodyEnv);
         }
 
         // Expand the bound-value expressions

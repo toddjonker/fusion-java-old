@@ -9,12 +9,12 @@ import java.util.Set;
 /**
  * Syntax wrap that adds all bindings from a specific environment.
  */
-class EnvironmentRenameWrap
+class EnvironmentWrap
     extends SyntaxWrap
 {
     private final Environment myEnvironment;
 
-    EnvironmentRenameWrap(Environment environment)
+    EnvironmentWrap(Environment environment)
     {
         myEnvironment = environment;
     }

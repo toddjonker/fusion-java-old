@@ -146,7 +146,7 @@ final class TopLevelNamespace
 
 
     private static final class TopLevelWrap
-        extends EnvironmentRenameWrap
+        extends EnvironmentWrap
     {
         private final TopLevelNamespace myTopNs;
 
