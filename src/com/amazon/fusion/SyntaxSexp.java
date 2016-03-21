@@ -440,31 +440,13 @@ final class SyntaxSexp
     //========================================================================
 
     /**
-     * Finds the binding for the leading symbol in the sexp, or null if the
-     * sexp doesn't start with a symbol.
+     * Finds the {@linkplain Binding#target() target binding} for the leading
+     * identifier in this sexp.
+     *
+     * @return null if this sexp doesn't start with an identifier.
+     * Null is also equivalent to a {@link FreeBinding} on a lead identifier.
      */
-    Binding firstBinding(Evaluator eval)
-        throws FusionException
-    {
-        if (isPair(eval, mySexp))
-        {
-            pushWraps(eval);
-
-            Object first = unsafePairHead(eval, mySexp);
-            if (first instanceof SyntaxSymbol)
-            {
-                Binding binding = ((SyntaxSymbol)first).uncachedResolve();
-                return binding.target();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Finds the binding for the leading symbol in the sexp, or null if the
-     * sexp doesn't start with a symbol with a binding.
-     */
-    Binding firstBindingMaybe(Evaluator eval)
+    Binding firstTargetBinding(Evaluator eval)
         throws FusionException
     {
         if (isPair(eval, mySexp))
@@ -475,7 +457,7 @@ final class SyntaxSexp
             if (first instanceof SyntaxSymbol)
             {
                 Binding binding = ((SyntaxSymbol)first).uncachedResolveMaybe();
-                return (binding == null ? null : binding.target());
+                if (binding != null) return binding.target();
             }
         }
         return null;

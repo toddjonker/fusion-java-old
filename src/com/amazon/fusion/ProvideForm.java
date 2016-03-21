@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -123,7 +123,7 @@ final class ProvideForm
                                    ArrayList<SyntaxValue> expanded)
         throws FusionException
     {
-        Binding b = specForm.firstBinding(eval);
+        Binding b = specForm.firstTargetBinding(eval);
         if (b == eval.getGlobalState().myKernelAllDefinedOutBinding)
         {
             check.arityExact(1);

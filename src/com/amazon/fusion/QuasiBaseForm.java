@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -78,7 +78,7 @@ abstract class QuasiBaseForm
 
         SyntaxValue[] children = stx.extract(eval);
 
-        Binding binding = stx.firstBindingMaybe(eval);
+        Binding binding = stx.firstTargetBinding(eval);
         if (myUBinding == binding)
         {
             check(eval, stx).arityExact(2);
@@ -217,7 +217,7 @@ abstract class QuasiBaseForm
         // Look for an (unquote ...) or (unsyntax ...) form
         if (size == 2)
         {
-            Binding binding = stx.firstBindingMaybe(eval);
+            Binding binding = stx.firstTargetBinding(eval);
             if (myUBinding == binding)
             {
                 if (depth == 0)

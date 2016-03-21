@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -27,7 +27,7 @@ final class FusionEval
         if (stx instanceof SyntaxSexp)
         {
             SyntaxSexp sexp = (SyntaxSexp) stx;
-            Binding binding = sexp.firstBinding(eval);
+            Binding binding = sexp.firstTargetBinding(eval);
             if (binding == eval.getGlobalState().myKernelBeginBinding)
             {
                 return sexp;

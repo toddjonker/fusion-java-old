@@ -202,7 +202,7 @@ final class ModuleForm
             if (expanded instanceof SyntaxSexp)
             {
                 SyntaxSexp sexp = (SyntaxSexp)expanded;
-                Binding binding = sexp.firstBinding(eval);
+                Binding binding = sexp.firstTargetBinding(eval);
 
                 if (binding == globals.myKernelDefineBinding)
                 {
@@ -292,7 +292,8 @@ final class ModuleForm
         {
             if (! expanded.next())
             {
-                if (firstBinding(eval, stx) == globals.myKernelDefineBinding)
+                Binding firstBinding = firstTargetBindingOfSexp(eval, stx);
+                if (firstBinding == globals.myKernelDefineBinding)
                 {
                     assert expander.isModuleContext();
                     stx = expander.expand(moduleNamespace, stx);
@@ -314,12 +315,17 @@ final class ModuleForm
         return source.copyReplacingChildren(eval, subforms);
     }
 
-    Binding firstBinding(Evaluator eval, SyntaxValue stx)
+    /**
+     * @return null if stx isn't a sexp or doesn't start with an identifier.
+     * Null is also equivalent to a {@link FreeBinding} on a lead identifier.
+     */
+    private static Binding firstTargetBindingOfSexp(Evaluator eval,
+                                                    SyntaxValue stx)
         throws FusionException
     {
         if (stx instanceof SyntaxSexp)
         {
-            return ((SyntaxSexp) stx).firstBinding(eval);
+            return ((SyntaxSexp) stx).firstTargetBinding(eval);
         }
         return null;
     }
@@ -380,7 +386,7 @@ final class ModuleForm
         {
             SyntaxValue form = stx.get(eval, i);
 
-            Binding firstBinding = firstBinding(eval, form);
+            Binding firstBinding = firstTargetBindingOfSexp(eval, form);
             if (firstBinding == kernelRequireBinding)
             {
                 // All require forms have already been evaluated.
