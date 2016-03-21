@@ -26,27 +26,32 @@ abstract class Binding
 
     /**
      * Gets the original binding to which this binding refers.
-     * Free, local, and module-level bindings are always themselves original.
-     * For imported bindings, the original is the target module-level binding.
-     * The original of a top-level binding can be either its local definition
+     * <p>
+     * Free, local, and module-level bindings are always their own target.
+     * For imported bindings, the target is a module-level binding.
+     * The target of a top-level binding can be either its local definition
      * or an imported module-level binding (and it can change over time).
+     * <p>
+     * Non-free target bindings are "physical" in that they denote storage
+     * locations in a one-to-one manner. Therefore it is safe to use object
+     * identity to compare them.
      *
      * @return not null.
      */
-    Binding originalBinding()
+    Binding target()
     {
         return this;
     }
 
     /**
-     * Determines whether two bindings refer to the same
-     * {@link #originalBinding()}, despite any renames on import or export.
+     * Determines whether two bindings refer to the same {@link #target()},
+     * despite any renames on import or export.
      *
      * @param other must not be null.
      */
     boolean sameTarget(Binding other)
     {
-        return originalBinding() == other.originalBinding();
+        return target() == other.target();
     }
 
     /**

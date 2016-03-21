@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -488,7 +488,7 @@ final class ModuleForm
                     throw check.failure(message, id);
                 }
                 names.add(name);
-                bindings.add((ModuleBinding) binding.originalBinding());
+                bindings.add((ModuleBinding) binding.target());
             }
         }
 

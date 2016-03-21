@@ -23,37 +23,37 @@ final class LanguageWrap
     static final class LanguageBinding
         extends Binding
     {
-        private final ModuleBinding myBinding;
+        private final ModuleBinding myTarget;
 
-        private LanguageBinding(ModuleBinding original)
+        private LanguageBinding(ModuleBinding target)
         {
-            assert original.originalBinding() == original;
-            myBinding = original;
+            assert target.target() == target;
+            myTarget = target;
         }
 
         @Override
         public final BaseSymbol getName()
         {
-            return myBinding.getName();
+            return myTarget.getName();
         }
 
         @Override
-        public Binding originalBinding()
+        public Binding target()
         {
-            return myBinding;
+            return myTarget;
         }
 
         @Override
         public Object lookup(Namespace ns)
         {
-            return myBinding.lookup(ns);
+            return myTarget.lookup(ns);
         }
 
         @Override
         public CompiledForm compileReference(Evaluator eval, Environment env)
             throws FusionException
         {
-            return myBinding.compileReference(eval, env);
+            return myTarget.compileReference(eval, env);
         }
 
         @Override
@@ -72,7 +72,7 @@ final class LanguageWrap
                                        CompiledForm valueForm)
             throws FusionException
         {
-            return myBinding.compileSet(eval, env, valueForm);
+            return myTarget.compileSet(eval, env, valueForm);
         }
 
         @Override
@@ -84,7 +84,7 @@ final class LanguageWrap
         @Override
         public String toString()
         {
-            return "{{{LanguageBinding " + myBinding.myModuleId.absolutePath()
+            return "{{{LanguageBinding " + myTarget.myModuleId.absolutePath()
                  + ' ' + getName() + "}}}";
         }
     }

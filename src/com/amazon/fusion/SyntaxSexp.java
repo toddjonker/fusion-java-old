@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -454,7 +454,7 @@ final class SyntaxSexp
             if (first instanceof SyntaxSymbol)
             {
                 Binding binding = ((SyntaxSymbol)first).uncachedResolve();
-                return binding.originalBinding();
+                return binding.target();
             }
         }
         return null;
@@ -475,7 +475,7 @@ final class SyntaxSexp
             if (first instanceof SyntaxSymbol)
             {
                 Binding binding = ((SyntaxSymbol)first).uncachedResolveMaybe();
-                return (binding == null ? null : binding.originalBinding());
+                return (binding == null ? null : binding.target());
             }
         }
         return null;

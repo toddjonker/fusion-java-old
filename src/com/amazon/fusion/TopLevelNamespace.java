@@ -58,13 +58,13 @@ final class TopLevelNamespace
 
         private TopLevelBinding(TopLevelRequireBinding required)
         {
-            super(required.myBinding.getIdentifier(), REQUIRED_FROM_ELSEWHERE);
-            myTarget = required.myBinding;
+            super(required.myTarget.getIdentifier(), REQUIRED_FROM_ELSEWHERE);
+            myTarget = required.myTarget;
             myPrecedence = REQUIRED_FROM_ELSEWHERE;
         }
 
         @Override
-        public Binding originalBinding()
+        public Binding target()
         {
             return myTarget;
         }
@@ -216,11 +216,11 @@ final class TopLevelNamespace
             }
 
             assert definedBinding.getIdentifier()
-                .freeIdentifierEqual(requiredBinding.myBinding.getIdentifier());
+                .freeIdentifierEqual(requiredBinding.myTarget.getIdentifier());
 
             if (definedBinding.myPrecedence <= requiredBinding.myPrecedence)
             {
-                definedBinding.myTarget = requiredBinding.myBinding;
+                definedBinding.myTarget = requiredBinding.myTarget;
             }
 
             return definedBinding;
@@ -248,39 +248,38 @@ final class TopLevelNamespace
         extends Binding
     {
         private final int myPrecedence;
-        private final ModuleBinding myBinding;
+        private final ModuleBinding myTarget;
 
-        private TopLevelRequireBinding(int precedence,
-                                       ModuleBinding original)
+        private TopLevelRequireBinding(int precedence, ModuleBinding target)
         {
-            assert original.originalBinding() == original;
+            assert target.target() == target;
             myPrecedence = precedence;
-            myBinding = original;
+            myTarget = target;
         }
 
         @Override
         public final BaseSymbol getName()
         {
-            return myBinding.getName();
+            return myTarget.getName();
         }
 
         @Override
-        public ModuleBinding originalBinding()
+        public ModuleBinding target()
         {
-            return myBinding;
+            return myTarget;
         }
 
         @Override
         public Object lookup(Namespace ns)
         {
-            return myBinding.lookup(ns);
+            return myTarget.lookup(ns);
         }
 
         @Override
         public CompiledForm compileReference(Evaluator eval, Environment env)
             throws FusionException
         {
-            return myBinding.compileReference(eval, env);
+            return myTarget.compileReference(eval, env);
         }
 
         @Override
@@ -299,7 +298,7 @@ final class TopLevelNamespace
                                        CompiledForm valueForm)
             throws FusionException
         {
-            return myBinding.compileSet(eval, env, valueForm);
+            return myTarget.compileSet(eval, env, valueForm);
         }
 
         @Override
@@ -312,7 +311,7 @@ final class TopLevelNamespace
         public String toString()
         {
             return "{{{TopLevelRequireBinding "
-                 + myBinding.myModuleId.absolutePath()
+                 + myTarget.myModuleId.absolutePath()
                  + ' ' + getName() + "}}}";
         }
     }

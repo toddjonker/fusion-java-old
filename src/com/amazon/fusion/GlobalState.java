@@ -153,11 +153,14 @@ final class GlobalState
     }
 
 
-    /** Helper to ensure we have a real binding. */
+    /**
+     * Ensure we have a {@linkplain Binding#target target binding} that can be
+     * compared with {@code ==}.
+     */
     private Binding kernelBinding(String name)
     {
-        Binding b = myKernelModule.resolveProvidedName(name).originalBinding();
-        assert b != null;
+        Binding b = myKernelModule.resolveProvidedName(name).target();
+        assert b != null && ! (b instanceof FreeBinding);
         return b;
     }
 }
