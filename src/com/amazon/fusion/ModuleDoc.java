@@ -1,9 +1,10 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.GlobalState.FUSION_SOURCE_EXTENSION;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import java.io.File;
 import java.io.IOException;
 import java.text.BreakIterator;
@@ -135,15 +136,16 @@ final class ModuleDoc
 
     private void addBindings(ModuleInstance module)
     {
-        Set<String> names = module.providedNames();
+        Set<BaseSymbol> names = module.providedNames();
         if (names.size() == 0) return;
 
         myBindings = new HashMap<String,BindingDoc>(names.size());
 
-        for (String name : names)
+        for (BaseSymbol name : names)
         {
-            BindingDoc doc = module.documentProvidedName(name);
-            myBindings.put(name, doc);
+            String text = name.stringValue();
+            BindingDoc doc = module.documentProvidedName(text);
+            myBindings.put(text, doc);
         }
     }
 

@@ -276,7 +276,7 @@ final class ModuleNamespace
         throws FusionException
     {
         // Validate that we aren't importing a duplicate name.
-        for (String name : module.providedNames())
+        for (BaseSymbol name : module.providedNames())
         {
             Binding oldBinding = resolve(name);
             if (oldBinding != null
@@ -284,7 +284,8 @@ final class ModuleNamespace
                 && ! (oldBinding instanceof LanguageBinding)
                 && ! oldBinding.sameTarget(module.resolveProvidedName(name)))
             {
-                throw new AmbiguousBindingFailure(GlobalState.REQUIRE, name);
+                throw new AmbiguousBindingFailure(GlobalState.REQUIRE,
+                                                  name.stringValue());
             }
         }
 

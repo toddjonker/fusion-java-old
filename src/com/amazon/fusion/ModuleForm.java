@@ -11,9 +11,10 @@ import static com.amazon.fusion.GlobalState.PROVIDE;
 import static com.amazon.fusion.GlobalState.REQUIRE;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import static com.amazon.fusion.ModuleIdentity.isValidModulePath;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
@@ -306,6 +307,7 @@ final class ModuleForm
             subforms[i++] = stx;
         }
 
+        // Push all the `provide` forms to the end of the module.
         for (SyntaxValue stx : provideForms)
         {
             stx = expander.expand(moduleNamespace, stx);
@@ -394,8 +396,11 @@ final class ModuleForm
                 // retained by `expand` and similar operations.
                 continue;
             }
+
             if (firstBinding == kernelProvideBinding)
             {
+                // Expansion pushes all `provide` forms to the end of the
+                // module, so when we hit one we know we're done compiling.
                 break;
             }
 
@@ -403,8 +408,8 @@ final class ModuleForm
             otherForms.add(compiled);
         }
 
-        Object[] providedIdentifiers =
-            providedSymbols(eval, moduleNamespace, stx, i);
+        ProvidedBindings providedBindings =
+            providedBindings(eval, moduleNamespace, stx, i);
 
         CompiledForm[] otherFormsArray =
             otherForms.toArray(new CompiledForm[otherForms.size()]);
@@ -417,8 +422,7 @@ final class ModuleForm
                                   moduleNamespace.requiredModuleIds(),
                                   bindingCount,
                                   moduleNamespace.extractBindingDocs(),
-                                  (String[]) providedIdentifiers[0],
-                                  (ModuleBinding[]) providedIdentifiers[1],
+                                  providedBindings,
                                   otherFormsArray);
     }
 
@@ -450,17 +454,26 @@ final class ModuleForm
     //========================================================================
 
 
-    /**
-     * @return [String[] names, ModuleBinding[] bindings]
-     */
-    private Object[] providedSymbols(Evaluator  eval,
-                                     Namespace  ns,
-                                     SyntaxSexp moduleStx,
-                                     int        firstProvidePos)
+    private static final class ProvidedBindings
+    {
+        final BaseSymbol[]    names;
+        final ModuleBinding[] bindings;
+
+        ProvidedBindings(BaseSymbol[] names, ModuleBinding[] bindings)
+        {
+            this.names = names;
+            this.bindings = bindings;
+        }
+    }
+
+    private ProvidedBindings providedBindings(Evaluator  eval,
+                                              Namespace  ns,
+                                              SyntaxSexp moduleStx,
+                                              int        firstProvidePos)
         throws FusionException
     {
-        Map<String,Binding>      bound    = new HashMap<>();
-        ArrayList<String>        names    = new ArrayList<>();
+        Map<BaseSymbol,Binding>  bound    = new IdentityHashMap<>();
+        ArrayList<BaseSymbol>    names    = new ArrayList<>();
         ArrayList<ModuleBinding> bindings = new ArrayList<>();
 
         for (int p = firstProvidePos; p < moduleStx.size(); p++)
@@ -484,7 +497,7 @@ final class ModuleForm
                 }
 
                 Binding binding = id.getBinding();
-                String name = id.stringValue();
+                BaseSymbol name = id.getName();
                 Binding prior = bound.put(name, binding);
                 if (prior != null && ! binding.sameTarget(prior))
                 {
@@ -498,10 +511,8 @@ final class ModuleForm
             }
         }
 
-        int count = names.size();
-        Object[] result = { names.toArray(new String[count]),
-                            bindings.toArray(new ModuleBinding[count]) };
-        return result;
+        return new ProvidedBindings(names.toArray(new BaseSymbol[0]),
+                                    bindings.toArray(new ModuleBinding[0]));
     }
 
 
@@ -511,12 +522,15 @@ final class ModuleForm
     static final class CompiledModule
         implements CompiledForm
     {
+        // We use arrays to hold the provided bindings, rather than a map
+        // from names to bindings, because we want compiled forms to be flat
+        // and compact.
         private final ModuleIdentity   myId;
         private final String           myDocs;
         private final ModuleIdentity[] myRequiredModules;
         private final int              myVariableCount;
         private final BindingDoc[]     myBindingDocs;
-        private final String[]         myProvidedNames;
+        private final BaseSymbol[]     myProvidedNames;
         private final ModuleBinding[]  myProvidedBindings;
         private final CompiledForm[]   myBody;
 
@@ -525,8 +539,7 @@ final class ModuleForm
                                ModuleIdentity[] requiredModules,
                                int              variableCount,
                                BindingDoc[]     bindingDocs,
-                               String[]         providedNames,
-                               ModuleBinding[]  providedBindings,
+                               ProvidedBindings providedBindings,
                                CompiledForm[]   body)
         {
             myId                  = id;
@@ -534,8 +547,8 @@ final class ModuleForm
             myRequiredModules     = requiredModules;
             myVariableCount       = variableCount;
             myBindingDocs         = bindingDocs;
-            myProvidedNames       = providedNames;
-            myProvidedBindings    = providedBindings;
+            myProvidedNames       = providedBindings.names;
+            myProvidedBindings    = providedBindings.bindings;
             myBody                = body;
         }
 

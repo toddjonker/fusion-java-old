@@ -326,7 +326,7 @@ abstract class Namespace
         {
             list.set(address, value);
         }
-        else // We need to grow myValues. Annoying lack of API to do this.
+        else // We need to grow the list. Annoying lack of API to do this.
         {
             list.ensureCapacity(myBindings.size()); // Grow all at once
             for (int i = size; i < address; i++)

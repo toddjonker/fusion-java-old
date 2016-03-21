@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -8,7 +8,7 @@ import com.amazon.fusion.Namespace.NsBinding;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,7 +28,7 @@ final class ModuleInstance
      * Not all of these bindings are for this module; names that are imported
      * and exported have their bindings passed through.
      */
-    private final Map<String,ModuleBinding> myProvidedBindings;
+    private final Map<BaseSymbol,ModuleBinding> myProvidedBindings;
 
 
     private ModuleInstance(ModuleIdentity identity,
@@ -40,7 +40,9 @@ final class ModuleInstance
         myIdentity = identity;
         myDocs     = docs;
         myNamespace = namespace;
-        myProvidedBindings = new HashMap<String,ModuleBinding>(bindingCount);
+
+        // Use object identity since symbols are interned.
+        myProvidedBindings = new IdentityHashMap<>(bindingCount);
 
         inferName(identity.toString());
     }
@@ -56,19 +58,22 @@ final class ModuleInstance
 
         for (NsBinding binding : bindings)
         {
-            String name = binding.getName().stringValue();
-
+            BaseSymbol name = binding.getName();
             myProvidedBindings.put(name, (ModuleBinding) binding);
         }
     }
 
     /**
      * Creates a module that {@code provide}s the given bindings.
+     * <p>
+     * Note that the {@code providedNames} don't necessarily match the names of
+     * the {@code providedBindings}, since the targets may have been renamed
+     * by a {@code provide} form.
      */
     ModuleInstance(ModuleIdentity  identity,
                    String          docs,
                    ModuleStore     namespace,
-                   String[]        providedNames,
+                   BaseSymbol[]    providedNames,
                    ModuleBinding[] providedBindings)
         throws FusionException
     {
@@ -99,7 +104,7 @@ final class ModuleInstance
 
     //========================================================================
 
-    Set<String> providedNames()
+    Set<BaseSymbol> providedNames()
     {
         return Collections.unmodifiableSet(myProvidedBindings.keySet());
     }
@@ -110,7 +115,7 @@ final class ModuleInstance
      */
     ModuleBinding resolveProvidedName(String name)
     {
-        return myProvidedBindings.get(name);
+        return resolveProvidedName(BaseSymbol.internSymbol(name));
     }
 
     /**
@@ -118,7 +123,7 @@ final class ModuleInstance
      */
     ModuleBinding resolveProvidedName(BaseSymbol name)
     {
-        return resolveProvidedName(name.stringValue());
+        return myProvidedBindings.get(name);
     }
 
 
