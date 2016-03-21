@@ -30,7 +30,7 @@ class RequireWrap
     @Override
     Binding resolve(BaseSymbol name,
                     Iterator<SyntaxWrap> moreWraps,
-                    Set<Integer> returnMarks)
+                    Set<MarkWrap> returnMarks)
     {
         // TODO FUSION-117 Resolve the whole identifier, including marks.
         Binding local = myModule.resolveProvidedName(name);

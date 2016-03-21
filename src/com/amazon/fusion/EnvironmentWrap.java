@@ -27,7 +27,7 @@ class EnvironmentWrap
     @Override
     Binding resolve(BaseSymbol name,
                     Iterator<SyntaxWrap> moreWraps,
-                    Set<Integer> returnMarks)
+                    Set<MarkWrap> returnMarks)
     {
         Binding b;
         if (moreWraps.hasNext())

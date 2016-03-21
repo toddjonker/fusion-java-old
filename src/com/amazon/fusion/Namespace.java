@@ -203,7 +203,7 @@ abstract class Namespace
      *
      * @return null if identifier isn't bound here.
      */
-    final NsBinding localSubstitute(Binding binding, Set<Integer> marks)
+    final NsBinding localSubstitute(Binding binding, Set<MarkWrap> marks)
     {
         for (NsBinding b : myBindings)
         {
@@ -216,7 +216,7 @@ abstract class Namespace
     }
 
     @Override
-    public final Binding substitute(Binding binding, Set<Integer> marks)
+    public final Binding substitute(Binding binding, Set<MarkWrap> marks)
     {
         Binding subst = localSubstitute(binding, marks);
         if (subst == null) subst = binding;
@@ -224,7 +224,7 @@ abstract class Namespace
     }
 
     @Override
-    public final NsBinding substituteFree(BaseSymbol name, Set<Integer> marks)
+    public final NsBinding substituteFree(BaseSymbol name, Set<MarkWrap> marks)
     {
         for (NsBinding b : myBindings)
         {
@@ -243,7 +243,7 @@ abstract class Namespace
     final NsBinding localResolve(SyntaxSymbol identifier)
     {
         Binding resolvedRequestedId = identifier.resolve();
-        Set<Integer> marks = identifier.computeMarks();
+        Set<MarkWrap> marks = identifier.computeMarks();
         if (resolvedRequestedId instanceof FreeBinding)
         {
             return substituteFree(identifier.getName(), marks);

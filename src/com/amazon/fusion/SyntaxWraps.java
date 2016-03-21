@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -70,19 +70,19 @@ final class SyntaxWraps
     /**
      * @return not null.
      */
-    public Set<Integer> computeMarks()
+    public Set<MarkWrap> computeMarks()
     {
-        Set<Integer> marks = null;
+        Set<MarkWrap> marks = null;
 
         for (SyntaxWrap wrap : myWraps)
         {
             if (wrap instanceof MarkWrap)
             {
-                int mark = ((MarkWrap)wrap).getMark();
+                MarkWrap mark = (MarkWrap) wrap;
 
                 if (marks == null)
                 {
-                    marks = new HashSet<Integer>();
+                    marks = new HashSet<>();
                     marks.add(mark);
                 }
                 else if (! marks.remove(mark))
@@ -100,8 +100,7 @@ final class SyntaxWraps
     final boolean hasMarks(Evaluator eval)
     {
         // We have to walk all wraps to match up cancelling pairs of marks.
-        Set<Integer> marks = computeMarks();
-        return ! marks.isEmpty();
+        return ! computeMarks().isEmpty();
     }
 
 
@@ -112,7 +111,7 @@ final class SyntaxWraps
     {
         Iterator<SyntaxWrap> i =
             new SplicingIterator(Arrays.asList(myWraps).iterator());
-        Set<Integer> marks = new HashSet<Integer>();
+        Set<MarkWrap> marks = new HashSet<>();
 
         if (i.hasNext())
         {
@@ -132,7 +131,7 @@ final class SyntaxWraps
     {
         Iterator<SyntaxWrap> i =
             new SplicingIterator(Arrays.asList(myWraps).iterator());
-        Set<Integer> marks = new HashSet<Integer>();
+        Set<MarkWrap> marks = new HashSet<>();
 
         if (i.hasNext())
         {

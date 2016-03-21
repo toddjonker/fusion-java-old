@@ -137,7 +137,7 @@ final class ModuleNamespace
         @Override
         Binding resolveTop(BaseSymbol name,
                            Iterator<SyntaxWrap> moreWraps,
-                           Set<Integer> returnMarks)
+                           Set<MarkWrap> returnMarks)
         {
             if (moreWraps.hasNext())
             {

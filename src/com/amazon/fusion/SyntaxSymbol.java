@@ -200,7 +200,7 @@ final class SyntaxSymbol
     /**
      * @return not null.
      */
-    Set<Integer> computeMarks()
+    Set<MarkWrap> computeMarks()
     {
         if (myWraps == null) return Collections.emptySet();
         return myWraps.computeMarks();
@@ -307,12 +307,12 @@ final class SyntaxSymbol
      *
      * @param name must be interned.
      */
-    boolean resolvesFree(BaseSymbol name, Set<Integer> marks)
+    boolean resolvesFree(BaseSymbol name, Set<MarkWrap> marks)
     {
         Binding resolvedBoundId = resolve();
         if (resolvedBoundId.isFree(name))
         {
-            Set<Integer> boundMarks = computeMarks();
+            Set<MarkWrap> boundMarks = computeMarks();
             if (marks.equals(boundMarks))
             {
                 return true;
@@ -326,12 +326,12 @@ final class SyntaxSymbol
      * Determines whether this identifier resolves to a given binding and has
      * the given marks.
      */
-    boolean resolvesBound(Binding binding, Set<Integer> marks)
+    boolean resolvesBound(Binding binding, Set<MarkWrap> marks)
     {
         Binding resolvedBoundId = resolve();
         if (resolvedBoundId.sameTarget(binding))
         {
-            Set<Integer> boundMarks = computeMarks();
+            Set<MarkWrap> boundMarks = computeMarks();
             if (marks.equals(boundMarks))
             {
                 return true;
@@ -449,14 +449,14 @@ final class SyntaxSymbol
     String debugString()
     {
         String base = toString();
-        Set<Integer> marks = this.computeMarks();
+        Set<MarkWrap> marks = this.computeMarks();
         if (! marks.isEmpty())
         {
             StringBuilder buf = new StringBuilder(base);
-            for (Integer mark : marks)
+            for (MarkWrap mark : marks)
             {
                 buf.append('#');
-                buf.append(mark);
+                buf.append(mark.getMark());
             }
             base = buf.toString();
         }

@@ -154,7 +154,7 @@ final class TopLevelNamespace
         @Override
         Binding resolveTop(BaseSymbol           name,
                            Iterator<SyntaxWrap> moreWraps,
-                           Set<Integer>         returnMarks)
+                           Set<MarkWrap>         returnMarks)
         {
             if (moreWraps.hasNext())
             {
@@ -167,7 +167,7 @@ final class TopLevelNamespace
         @Override
         TopLevelBinding resolve(BaseSymbol           name,
                                 Iterator<SyntaxWrap> moreWraps,
-                                Set<Integer>         returnMarks)
+                                Set<MarkWrap>         returnMarks)
         {
             // Check our environment directly. This will handle identifiers
             // that have top-level definitions, but not those that only map to
@@ -336,7 +336,7 @@ final class TopLevelNamespace
         @Override
         Binding resolve(BaseSymbol name,
                         Iterator<SyntaxWrap> moreWraps,
-                        Set<Integer> returnMarks)
+                        Set<MarkWrap> returnMarks)
         {
             // TODO FUSION-117 Resolve the whole identifier, including marks???
             ModuleBinding local = localResolveMaybe(name);

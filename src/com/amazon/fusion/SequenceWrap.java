@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * Syntax wrap thats an ordered, mutable sequence of other wraps.
+ * Syntax wrap that's an ordered, mutable sequence of other wraps.
  */
 class SequenceWrap
     extends SyntaxWrap
@@ -38,7 +38,7 @@ class SequenceWrap
     @Override
     Binding resolve(BaseSymbol name,
                     Iterator<SyntaxWrap> moreWraps,
-                    Set<Integer> returnMarks)
+                    Set<MarkWrap> returnMarks)
     {
         throw new IllegalStateException();
     }

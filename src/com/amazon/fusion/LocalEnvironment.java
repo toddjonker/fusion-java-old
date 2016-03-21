@@ -213,7 +213,7 @@ final class LocalEnvironment
 
 
     @Override
-    public Binding substitute(Binding binding, Set<Integer> marks)
+    public Binding substitute(Binding binding, Set<MarkWrap> marks)
     {
         for (LocalBinding b : myBindings)
         {
@@ -226,7 +226,7 @@ final class LocalEnvironment
     }
 
     @Override
-    public Binding substituteFree(BaseSymbol name, Set<Integer> marks)
+    public Binding substituteFree(BaseSymbol name, Set<MarkWrap> marks)
     {
         for (LocalBinding b : myBindings)
         {

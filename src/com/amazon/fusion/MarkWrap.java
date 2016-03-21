@@ -31,7 +31,7 @@ class MarkWrap
     @Override
     Binding resolve(BaseSymbol name,
                     Iterator<SyntaxWrap> moreWraps,
-                    Set<Integer> returnMarks)
+                    Set<MarkWrap> returnMarks)
     {
         Binding b = null;
         if (moreWraps.hasNext())
@@ -40,9 +40,9 @@ class MarkWrap
             b = nextWrap.resolve(name, moreWraps, returnMarks);
         }
 
-        if (! returnMarks.add(myMark))
+        if (! returnMarks.add(this))
         {
-            returnMarks.remove(myMark);
+            returnMarks.remove(this);
         }
 
         return b;

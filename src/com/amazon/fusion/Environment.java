@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -26,7 +26,7 @@ interface Environment
      *
      * @return given binding if not substituted here; not null.
      */
-    Binding substitute(Binding binding, Set<Integer> marks);
+    Binding substitute(Binding binding, Set<MarkWrap> marks);
 
 
     /**
@@ -36,5 +36,5 @@ interface Environment
      *
      * @return null if the name is not substituted here.
      */
-    Binding substituteFree(BaseSymbol name, Set<Integer> marks);
+    Binding substituteFree(BaseSymbol name, Set<MarkWrap> marks);
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -20,12 +20,12 @@ abstract class SyntaxWrap
      */
     abstract Binding resolve(BaseSymbol name,
                              Iterator<SyntaxWrap> moreWraps,
-                             Set<Integer> returnMarks);
+                             Set<MarkWrap> returnMarks);
 
 
     Binding resolveTop(BaseSymbol name,
                        Iterator<SyntaxWrap> moreWraps,
-                       Set<Integer> returnMarks)
+                       Set<MarkWrap> returnMarks)
     {
         if (moreWraps.hasNext())
         {
