@@ -44,7 +44,10 @@ abstract class Binding
      *
      * @param other must not be null.
      */
-    abstract boolean sameTarget(Binding other);
+    boolean sameTarget(Binding other)
+    {
+        return originalBinding() == other.originalBinding();
+    }
 
     /**
      * Don't call directly! Second half of double-dispatch from

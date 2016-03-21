@@ -53,12 +53,6 @@ abstract class Namespace
             return myIdentifier;
         }
 
-        @Override
-        public boolean sameTarget(Binding other)
-        {
-            return this == other.originalBinding();
-        }
-
         final CompiledForm compileLocalTopReference(Evaluator   eval,
                                                     Environment env)
             throws FusionException

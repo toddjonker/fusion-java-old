@@ -44,12 +44,6 @@ final class LanguageWrap
         }
 
         @Override
-        public boolean sameTarget(Binding other)
-        {
-            return myBinding == other.originalBinding();
-        }
-
-        @Override
         public Object lookup(Namespace ns)
         {
             return myBinding.lookup(ns);

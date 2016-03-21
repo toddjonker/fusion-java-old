@@ -70,12 +70,6 @@ final class TopLevelNamespace
         }
 
         @Override
-        public boolean sameTarget(Binding other)
-        {
-            return myTarget == other.originalBinding();  // XXX == ???
-        }
-
-        @Override
         public Object lookup(Namespace ns)
         {
             if (myTarget == this)
@@ -274,12 +268,6 @@ final class TopLevelNamespace
         public ModuleBinding originalBinding()
         {
             return myBinding;
-        }
-
-        @Override
-        public boolean sameTarget(Binding other)
-        {
-            return myBinding == other.originalBinding();
         }
 
         @Override

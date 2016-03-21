@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -34,12 +34,7 @@ final class FreeBinding
     public boolean sameTarget(Binding other)
     {
         if (this == other) return true;
-        if (! (other instanceof FreeBinding)) return false;
-
-        FreeBinding that = (FreeBinding) other;
-
-        // This works due to symbol text interning.
-        return this.myName == that.myName;
+        return other.isFree(myName);
     }
 
 
