@@ -266,6 +266,7 @@ final class ModuleNamespace
         throws FusionException
     {
         // Validate that we aren't importing a duplicate name.
+        // We assume that a module doesn't export a duplicate name.
         for (String name : module.providedNames())
         {
             Binding oldBinding = resolve(name);

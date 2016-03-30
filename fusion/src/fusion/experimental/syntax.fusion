@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 /*                       *** WARNING ***
  *
@@ -24,7 +24,7 @@ Fusion’s macro system is intended to be operationally identical to that of
 Racket, so we strongly recommend taking advantage of the extensive
 documentation Racket provides.
 
-Fusion does not yet implemented Racket's higher-level macro facilities like
+Fusion does not yet implement Racket's higher-level macro facilities like
 `define-syntax-rule` so one has to work with more primitive tools.
 
 Fusion’s current feature-set generally aligns with the content of these parts
