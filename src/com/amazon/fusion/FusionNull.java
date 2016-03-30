@@ -204,13 +204,6 @@ public final class FusionNull
     static final class IsNullNullProc
         extends Procedure1
     {
-        IsNullNullProc()
-        {
-            //    "                                                                               |
-            super("Returns `true` when `value` is `null.null`, `false` otherwise.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException

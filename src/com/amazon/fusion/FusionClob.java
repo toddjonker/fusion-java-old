@@ -360,13 +360,6 @@ public final class FusionClob
     static final class IsClobProc
         extends Procedure1
     {
-        IsClobProc()
-        {
-            //    "                                                                               |
-            super("Determines whether a `value` is of type `Clob`, returning `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException

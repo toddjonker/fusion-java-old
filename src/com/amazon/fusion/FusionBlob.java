@@ -369,13 +369,6 @@ public final class FusionBlob
     static final class IsBlobProc
         extends Procedure1
     {
-        IsBlobProc()
-        {
-            //    "                                                                               |
-            super("Determines whether a `value` is of type `blob`, returning `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -14,6 +14,13 @@ abstract class SyntacticForm
 {
     private final BindingDoc myDocs;
 
+    public SyntacticForm()
+    {
+        myDocs = null;
+
+    }
+
+    @Deprecated
     SyntacticForm(String bodyPattern, String doc)
     {
         myDocs = new BindingDoc(null, Kind.SYNTAX, bodyPattern, doc);
@@ -23,7 +30,7 @@ abstract class SyntacticForm
     @Override
     final void nameInferred(String name)
     {
-        myDocs.setName(name);
+        if (myDocs != null) myDocs.setName(name);
     }
 
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 (module string '/fusion/private/builtins'
 
@@ -12,10 +12,46 @@ Operations for strings.
   (require "/fusion/experimental/defines")
 
 
-  (defpub_j string_append      "com.amazon.fusion.FusionString$AppendProc")
-  (defpub_j string_to_lower    "com.amazon.fusion.FusionString$ToLowerProc")
-  (defpub_j string_to_upper    "com.amazon.fusion.FusionString$ToUpperProc")
+  (defpub_j string_append
+    '''
+    (string_append text ...)
 
-  (defpub_j string_to_symbol   "com.amazon.fusion.FusionString$ToSymbolProc")
-  (defpub_j symbol_to_string   "com.amazon.fusion.FusionSymbol$ToStringProc")
+Concatenates the `text` values (strings or symbols), returning a string.  If no
+arguments are supplied, the result is `""`.
+    '''
+    "com.amazon.fusion.FusionString$AppendProc")
+
+  (defpub_j string_to_lower
+    '''
+    (string_to_lower string)
+
+Converts all the characters in a `string` to lower-case letters.
+    '''
+    "com.amazon.fusion.FusionString$ToLowerProc")
+
+  (defpub_j string_to_upper
+    '''
+    (string_to_upper string)
+
+Converts all the characters in a `string` to upper-case letters.
+    '''
+    "com.amazon.fusion.FusionString$ToUpperProc")
+
+  (defpub_j string_to_symbol
+    '''
+    (string_to_symbol string)
+
+Converts a `string` to a symbol with the same text.  Returns `null.symbol` when
+given `null.string`.  Raises an exception when given an empty string.
+    '''
+    "com.amazon.fusion.FusionString$ToSymbolProc")
+
+  (defpub_j symbol_to_string
+    '''
+    (symbol_to_string symbol)
+
+Converts a `symbol` to a string with the same text. Returns `null.string` when
+given `null.symbol`.
+    '''
+    "com.amazon.fusion.FusionSymbol$ToStringProc")
 )

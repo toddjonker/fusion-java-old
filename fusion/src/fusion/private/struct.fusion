@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 (module struct "/fusion/private/builtins"
 
@@ -7,19 +7,45 @@
     "/fusion/private/control")
 
   (defpub_j unsafe_struct_has_key
+    '''
+    (unsafe_struct_has_key struct name)
+
+UNSUPPORTED.  `name` must be text.
+    '''
     "com.amazon.fusion.FusionStruct$UnsafeStructHasKeyProc")
 
   (defpub_j unsafe_struct_ref
+    '''
+    (unsafe_struct_ref struct name default)
+
+Returns the value associated with `name` in `struct`. The `name` must be a
+non-null string or symbol.  If no field exists with the name, the `default` is
+used: if it is a procedure, it's applied to no arguments and the result is
+returned, otherwise the `default` is returned as-is.
+    '''
     "com.amazon.fusion.FusionStruct$UnsafeStructRefProc")
 
   (defpub_j unsafe_struct_put
-     "com.amazon.fusion.FusionStruct$UnsafeStructPutProc")
+    '''
+    (unsafe_struct_put struct key value)
+    '''
+    "com.amazon.fusion.FusionStruct$UnsafeStructPutProc")
 
   (defpub_j unsafe_struct_put_m
-     "com.amazon.fusion.FusionStruct$UnsafeStructPutMProc")
+    '''
+    (unsafe_struct_put_m struct key value)
+    '''
+    "com.amazon.fusion.FusionStruct$UnsafeStructPutMProc")
 
   (defpub_j unsafe_struct_iterator
-     "com.amazon.fusion.FusionStruct$UnsafeStructIteratorProc")
+    '''
+    (unsafe_struct_iterator struct)
+
+Returns an iterator over the content of `struct`. Calls to `iterator_next` will
+return two results representing a single field: the field's name (as a symbol)
+and the field's value.
+    '''
+    "com.amazon.fusion.FusionStruct$UnsafeStructIteratorProc")
 
 
   (defpub is_struct_field_name

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 (module timestamp '/fusion/private/kernel'
 
@@ -12,23 +12,72 @@ Fusion timestamp values are identical to Ion timestamps.
     "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/number"
-    "/fusion/private/control")
+    "/fusion/private/control"
+    "/fusion/private/kernel2")
 
 
   (require "/fusion/private/compare")
   (provide < <= = >= >)
 
   (defpub_j is_timestamp
+    '''
+    (is_timestamp value)
+
+Determines whether a `value` is of type `timestamp`, returning `true` or
+`false`.
+    '''
     "com.amazon.fusion.FusionTimestamp$IsTimestampProc")
+
   (defpub_j string_to_timestamp
+    '''
+    (string_to_timestamp string)
+
+Converts a `string` to a timestamp, recognizing (only) Ion formatted data.
+Returns `null.timestamp` when given `null.string`.
+
+    (string_to_timestamp null.string)        ==> null.timestamp
+    (string_to_timestamp "2013-11-13T")      ==> 2013-11-13
+    (string_to_timestamp "null.timestamp")   ==> ERROR
+    '''
     "com.amazon.fusion.FusionTimestamp$StringToTimestampProc")
+
   (defpub_j timestamp_now
+    '''
+    (timestamp_now)
+
+Returns a timestamp representing "now".  At present the local offset is
+unspecified, but that may change in the future.
+    '''
     "com.amazon.fusion.FusionTimestamp$TimestampNowProc")
+
   (defpub_j epoch_millis_to_timestamp
+    '''
+    (epoch_millis_to_timestamp epoch_millis)
+
+Returns a timestamp for the point in time given as the number of milliseconds
+since 1970-01-01T00:00Z. The `epoch_millis` may be a decimal or int.
+    '''
     "com.amazon.fusion.FusionTimestamp$EpochMillisToTimestampProc")
+
   (defpub_j timestamp_to_epoch_millis
+    '''
+    (timestamp_to_epoch_millis timestamp)
+
+Given a non-null timestamp, returns the same point in time represented as the
+number of milliseconds since 1970-01-01T00:00Z.  The result is a decimal.
+    '''
     "com.amazon.fusion.FusionTimestamp$TimestampToEpochMillisProc")
+
   (defpub_j timestamp_to_string
+    '''
+    (timestamp_to_string timestamp)
+
+Converts a `timestamp` to a string in Ion format.
+Returns `null.string` when given `null.timestamp`.
+
+    (timestamp_to_string null.timestamp)   ==> null.string
+    (timestamp_to_string 2013-11-13T)      ==> "2013-11-13"
+    '''
     "com.amazon.fusion.FusionTimestamp$TimestampToStringProc")
 
 

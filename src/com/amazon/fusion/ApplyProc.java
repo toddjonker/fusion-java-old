@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -15,17 +15,6 @@ import static com.amazon.fusion.FusionSexp.unsafeSexpSize;
 final class ApplyProc
     extends Procedure
 {
-    ApplyProc()
-    {
-        //    "                                                                               |
-        super("Calls the given `proc` with arguments that are the (optional) `arg`s prepended\n" +
-              "to the elements of `sequence`.  The `proc` is called in tail position.\n" +
-              "\n" +
-              "    (apply + [1, 2])             =>  3\n" +
-              "    (apply + 10 11 (sexp 1 2))   =>  24",
-              "proc", "arg", DOTDOTDOT, "sequence");
-    }
-
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException

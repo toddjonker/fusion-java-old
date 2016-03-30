@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
 
 (module struct '/fusion/base'
 
@@ -93,32 +93,143 @@ while the field values are iterated.
   // Pass-through bindings from /fusion/collection
   (provide . any do element elt every find has_key is_collection is_empty none size)
 
-  (defpub_j struct          "com.amazon.fusion.FusionStruct$StructProc")
-  (defpub_j mutable_struct  "com.amazon.fusion.FusionStruct$MutableStructProc")
+  (defpub_j struct
+    '''
+    (struct name value ... ...)
+
+Constructs an immutable, non-null struct from alternating strings and values.
+Each `name` is a non-empty string or symbol denoting a field name, and the
+following `value` is the field's value.  Names may be repeated to produce
+repeated (multi-mapped) fields.
+    '''
+    "com.amazon.fusion.FusionStruct$StructProc")
+
+  (defpub_j mutable_struct
+    '''
+    (mutable_struct name value ... ...)
+
+Constructs a mutable, non-null struct from alternating strings and values.
+Each `name` is a non-empty string or symbol denoting a field name, and the
+following `value` is the field's value.  Names may be repeated to produce
+repeated (multi-mapped) fields.
+    '''
+    "com.amazon.fusion.FusionStruct$MutableStructProc")
 
   (defpub_j struct_zip
+    '''
+    (struct_zip names values)
+
+Constructs an immutable struct from a list of field names and a list of values.
+If the lists have unequal lengths, only the first _n_ elements will be used
+where _n_ is the shorter length.
+
+The names must be non-empty strings or symbols.
+
+    (struct_zip ["f", "g"] [1, 2])  => {f:1,g:2}
+    (struct_zip ["f", "f"] [1, 2])  => {f:1,f:2}
+    (struct_zip ["f"] [1, 2])       => {f:1}
+    '''
     "com.amazon.fusion.FusionStruct$StructZipProc")
+
   (defpub_j mutable_struct_zip
+    '''
+    (mutable_struct_zip names values)
+
+Constructs a mutable struct from a list of field names and a list of values.
+If the lists have unequal lengths, only the first _n_ elements will be used
+where _n_ is the shorter length.
+
+The names must be non-empty strings or symbols.
+
+    (struct_zip ["f", "g"] [1, 2])  => {f:1,g:2}
+    (struct_zip ["f", "f"] [1, 2])  => {f:1,f:2}
+    (struct_zip ["f"] [1, 2])       => {f:1}
+    '''
     "com.amazon.fusion.FusionStruct$MutableStructZipProc")
 
   (defpub_j is_immutable_struct
+    '''
+    (is_immutable_struct value)
+
+Determines whether `value` is an immutable struct, returning `true` or `false`.
+    '''
     "com.amazon.fusion.FusionStruct$IsImmutableStructProc")
+    
   (defpub_j is_mutable_struct
+    '''
+    (is_mutable_struct value)
+
+Determines whether `value` is a mutable struct, returning `true` or `false`.
+    '''
     "com.amazon.fusion.FusionStruct$IsMutableStructProc")
 
-  (defpub_j remove_keys       "com.amazon.fusion.FusionStruct$RemoveKeysProc")
-  (defpub_j remove_keys_m     "com.amazon.fusion.FusionStruct$RemoveKeysMProc")
-  (defpub_j retain_keys       "com.amazon.fusion.FusionStruct$RetainKeysProc")
-  (defpub_j retain_keys_m     "com.amazon.fusion.FusionStruct$RetainKeysMProc")
-  (defpub_j struct_merge      "com.amazon.fusion.FusionStruct$StructMergeProc")
-  (defpub_j struct_merge_m    "com.amazon.fusion.FusionStruct$StructMergeMProc")
+  (defpub_j remove_keys
+    '''
+    (remove_keys struct name ...)
+
+Returns a struct derived from `struct` without fields with the given `name`s.
+If the input is `null.struct` then the result is `null.struct`.  The result
+will have the same annotations as `struct`.
+    '''
+    "com.amazon.fusion.FusionStruct$RemoveKeysProc")
+
+  (defpub_j remove_keys_m
+    '''
+    (remove_keys_m struct name ...)
+
+Returns a struct similar to `struct` without fields with the given `name`s.
+The result may share structure with the input, which may be mutated.
+If the input is `null.struct` then the result is `null.struct`.  The result
+will have the same annotations as `struct`.
+    '''
+    "com.amazon.fusion.FusionStruct$RemoveKeysMProc")
+
+  (defpub_j retain_keys
+    '''
+    (retain_keys struct name ...)
+
+Returns a struct derived from `struct` with _only_ fields with the given
+`name`s.  If the input is `null.struct` then the result is `null.struct`.  The
+result will have the same annotations as `struct`.
+    '''
+    "com.amazon.fusion.FusionStruct$RetainKeysProc")
+
+  (defpub_j retain_keys_m
+    '''
+    (retain_keys_m struct name ...)
+
+Returns a struct similar to `struct` with _only_ fields with the given
+`name`s. The result may share structure with the input, which may be mutated.
+If the input is `null.struct` then the result is `null.struct`. The result
+will have the same annotations as `struct`.
+    '''
+    "com.amazon.fusion.FusionStruct$RetainKeysMProc")
+
+  (defpub_j struct_merge
+    '''
+    (struct_merge struct1 struct2)
+
+Returns a struct that has all the name-value elements of both arguments.  This
+will result in repeated fields if the names overlap or if one of the arguments
+has repeats. The result has the same type as the first argument.
+    '''
+    "com.amazon.fusion.FusionStruct$StructMergeProc")
+
+  (defpub_j struct_merge_m
+    '''
+    (struct_merge_m struct1 struct2)
+
+Returns a struct that has all the name-value elements of both arguments,
+mutating the first argument when possible. This will result in repeated fields
+if the names overlap or if one of the arguments has repeats.  The result has
+the same type as the first argument.
+    '''
+    "com.amazon.fusion.FusionStruct$StructMergeMProc")
 
 
 
-
-  (defpub put
-    (lambda (struct key value)
-      '''
+  (defpub (put struct key value)
+    '''
 Functionally modifies a field of a `struct`, returning a new struct of the same
 type. Any existing fields (including repeats) named by the `key` are replaced
 by a single field with the `value`.
@@ -129,17 +240,16 @@ by a single field with the `value`.
     (put s "b" 5)    ==> {b:5,a:1}
     (put s "c" 6)    ==> {b:2,b:3,c:6,a:1}
     s                ==> {b:2,b:3,a:1}
-      '''
-      (unless (is_struct struct)
-        (raise_argument_error "put" "struct" 0 struct key value))
-      (unless (is_struct_field_name key)
-        (raise_argument_error "put" "field name" 1 struct key value))
-      (unsafe_struct_put struct key value)))
+    '''
+    (unless (is_struct struct)
+      (raise_argument_error "put" "struct" 0 struct key value))
+    (unless (is_struct_field_name key)
+      (raise_argument_error "put" "field name" 1 struct key value))
+    (unsafe_struct_put struct key value))
 
 
-  (defpub put_m
-    (lambda (struct key value)
-      '''
+  (defpub (put_m struct key value)
+    '''
 Modifies a field of a `struct`, mutating the `struct` when possible and
 returning a struct of the same type. Any existing fields (including repeats)
 named by the `key` are replaced by a single field with the `value`.
@@ -162,17 +272,16 @@ When given a mutable struct, the struct is mutated:
     (put_m s "b" 5)  ==> {b:5,a:4}
     (put_m s "c" 6)  ==> {b:5,c:6,a:4}
     s                ==> {b:5,c:6,a:4}
-      '''
-      (unless (is_struct struct)
-        (raise_argument_error "put_m" "struct" 0 struct key value))
-      (unless (is_struct_field_name key)
-        (raise_argument_error "put_m" "field name" 1 struct key value))
-      (unsafe_struct_put_m struct key value)))
+    '''
+    (unless (is_struct struct)
+      (raise_argument_error "put_m" "struct" 0 struct key value))
+    (unless (is_struct_field_name key)
+      (raise_argument_error "put_m" "field name" 1 struct key value))
+    (unsafe_struct_put_m struct key value))
 
 
-  (defpub struct_iterator
-    (lambda (struct)
-      '''
+  (defpub (struct_iterator struct)
+    '''
 Returns an [iterator][] over the content of `struct`. Calls to `iterator_next`
 will return two results representing a single field: the field's name (as a
 symbol) and the field's value.
@@ -193,35 +302,34 @@ This code displays:
     yes --> false
     hello --> goodbye
     foo --> bar
-      '''
-      (unless (is_struct struct)
-        (raise_argument_error "struct_iterator" "struct" 0 struct))
-      (unsafe_struct_iterator struct)))
+    '''
+    (unless (is_struct struct)
+      (raise_argument_error "struct_iterator" "struct" 0 struct))
+    (unsafe_struct_iterator struct))
 
 
   // Name per Dylan.  Equivalent to SRFI-1 `for_each` but I don't want this to
   // be confused with the `for` syntax from Racket (which I intend to provide).
-  (defpub struct_do
-    (lambda (proc struct)
-      '''
+  (defpub (struct_do proc struct)
+    '''
 Iterates the fields of `struct` for side-effects, applying `proc` to each
 name/value field.  Returns `struct`.  The `proc` must accept two arguments, a
 field name symbol and a value; any results from applying the procedure are
 ignored.
 
 See also: [`do`](fusion/collection.html#do)
-      '''
-      (unless (is_procedure proc)
-        (raise_argument_error "struct_do" "procedure" 0 proc struct))
-      (unless (is_struct struct)
-        (raise_argument_error "struct_do" "struct" 1 proc struct))
-      (let [(iter (unsafe_struct_iterator struct))]
-        (let loop []
-          (if (iterator_has_next iter)
-            (let_values [((k v) (iterator_next iter))]
-              (proc k v)
-              (loop))
-            struct)))))
+    '''
+    (unless (is_procedure proc)
+      (raise_argument_error "struct_do" "procedure" 0 proc struct))
+    (unless (is_struct struct)
+      (raise_argument_error "struct_do" "struct" 1 proc struct))
+    (let [(iter (unsafe_struct_iterator struct))]
+      (let loop []
+        (if (iterator_has_next iter)
+          (let_values [((k v) (iterator_next iter))]
+            (proc k v)
+            (loop))
+          struct))))
 
   (defpub struct_for_each
     '''
@@ -237,9 +345,8 @@ cannot migrate in time.
 
 
 
-  (defpub struct_unzip
-    (lambda (struct)
-      '''
+  (defpub (struct_unzip struct)
+    '''
 Deconstructs a `struct` and returns two values: a list of field names (as
 symbols) and a list of associated values. This is the inverse of
 [`struct_zip`](fusion/struct.html#struct_zip).
@@ -253,15 +360,15 @@ This procedure returns [multiple results](fusion/procedure.html#results), not
 a pair or sequence, so it must be called from a context that expects that, like
 a [`let_values`](fusion/procedure.html#let_values) clause with two bound
 identifiers.
-      '''
-      (unless (is_struct struct)
-        (raise_argument_error "struct_unzip" "struct" 0 struct))
-      (let [(iter (unsafe_struct_iterator struct))]
-        // TODO FUSION-226 Allocated these lists with the correct size
-        (let loop [(keys (stretchy_list)),
-                   (vals (stretchy_list))]
-          (if (iterator_has_next iter)
-            (let_values [((k v) (iterator_next iter))]
-              (loop (add_m keys k) (add_m vals v)))
-            (values (apply list keys) (apply list vals)))))))
+    '''
+    (unless (is_struct struct)
+      (raise_argument_error "struct_unzip" "struct" 0 struct))
+    (let [(iter (unsafe_struct_iterator struct))]
+      // TODO FUSION-226 Allocated these lists with the correct size
+      (let loop [(keys (stretchy_list)),
+                 (vals (stretchy_list))]
+        (if (iterator_has_next iter)
+          (let_values [((k v) (iterator_next iter))]
+            (loop (add_m keys k) (add_m vals v)))
+          (values (apply list keys) (apply list vals))))))
 )

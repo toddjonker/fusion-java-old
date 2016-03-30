@@ -126,15 +126,6 @@ final class FusionCollection
     static final class SizeProc
         extends Procedure1
     {
-        SizeProc()
-        {
-            //    "                                                                               |
-            super("Returns the number of elements in the `collection`.\n" +
-                  "The size of `null.list` (_etc._) is zero.  If `collection` is an improper sexp,\n" +
-                  "an exception is thrown.",
-                  "collection");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException

@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,15 +6,6 @@ package com.amazon.fusion;
 final class ValuesProc
     extends Procedure
 {
-    ValuesProc()
-    {
-        //    "                                                                               |
-        super("Produces [multiple results](fusion/procedure.html#results), returning the zero\n" +
-              "or more `value`s. Usually used in conjuction with `let_values` to bind the\n" +
-              "results to names.",
-              "value", DOTDOTDOT);
-    }
-
     @Override
     Object doApply(Evaluator eval, Object[] args) throws FusionException
     {

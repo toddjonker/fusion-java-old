@@ -690,13 +690,6 @@ final class FusionSymbol
     static final class IsSymbolProc
         extends Procedure1
     {
-        IsSymbolProc()
-        {
-            //    "                                                                               |
-            super("Determines whether a `value` is of type `symbol`, returning `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
@@ -708,23 +701,13 @@ final class FusionSymbol
 
 
     static final class ToStringProc
-        extends Procedure
+        extends Procedure1
     {
-        ToStringProc()
-        {
-            //    "                                                                               |
-            super("Converts a `symbol` to a string with the same text. Returns `null.string` when\n"
-                + "given `null.symbol`.",
-                  "symbol");
-        }
-
         @Override
-        Object doApply(Evaluator eval, Object[] args)
+        Object doApply(Evaluator eval, Object arg)
             throws FusionException
         {
-            checkArityExact(args);
-
-            String input = checkNullableArg(this, 0, args);
+            String input = checkNullableSymbolArg(eval, this, 0, arg);
             return makeString(eval, input);
         }
     }
