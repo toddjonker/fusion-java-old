@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2016 Amazon.com, Inc.  All rights reserved.
 
 (module equality "/fusion/private/kernel"
 
@@ -98,6 +98,16 @@ At the implementation level, `ident` is a trivial pointer comparison.
 As such, it exposes some implementation details that may change over time or
 across platforms.
 
+Since Fusion symbols are interned, those with the same text and annotations are
+always `ident`:
+
+    (ident (string_to_symbol "barn")
+           (quote barn))                     --> true
+    (ident (string_to_symbol "barn")
+           (string_to_symbol
+             (string_append "ba" "rn")))     --> true
+    (ident (quote a::barn) (quote barn))     --> false
+
 Fusion allows implementation optimizations that copy and/or intern numeric
 values as needed. Therefore there's no promise of
 stable object identity for numbers, and this operator may behave in unexpected
@@ -106,9 +116,9 @@ and implementation-defined ways when applied to them.
     (ident 2 (+ 1 1))                        --> // unspecified
     (let [(v 2)] (ident v v))                --> // unspecified
 
-It is not specified whether literals or `quote`d data are interned, so there's
-no promise of identity across two different syntactic instances of the same
-value:
+Other than symbols, it is not specified whether literals or `quote`d data are
+interned, so there's no promise of identity across two different syntactic
+instances of the same value:
 
     (ident 10600439 10600439)                --> // unspecified
     (ident "hi" "hi")                        --> // unspecified
