@@ -1,4 +1,4 @@
-;; Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+;; Copyright (c) 2014-2016 Amazon.com, Inc.  All rights reserved.
 
 #lang racket
 
@@ -33,11 +33,11 @@
 (define syntax_track_origin  syntax-track-origin)
 (define syntax_unwrap        syntax-e)
 
-;; TODO WORKAROUND FUSION-47 Should use interned symbol and remove this.
+;; Deprecated as of R23
 (define (syntax_origin stx)
   (syntax-property stx 'origin))
 
-(define UNSET_STX_PROP_VALUE #f)
+(define UNSET_STX_PROP_VALUE #f) ; Fusion uses void for unset properties.
 
 
 ;; Testing

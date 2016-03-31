@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2016 Amazon.com, Inc.  All rights reserved.
 
 (module racket "/fusion/base"
 
@@ -6,6 +6,6 @@
 
   (defpub RACKET false)
 
-  (defpub UNSET_STX_PROP_VALUE (void))
+  (defpub UNSET_STX_PROP_VALUE (void)) // Racket uses #f for unset properties.
 
 )

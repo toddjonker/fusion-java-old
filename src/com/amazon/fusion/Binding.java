@@ -15,9 +15,7 @@ abstract class Binding
 
     /**
      * Determines whether this is a {@link FreeBinding} with the given name.
-     * This implementation returns false.
-     *
-     * @param name must be interned.
+     * The default implementation returns false.
      */
     boolean isFree(BaseSymbol name)
     {

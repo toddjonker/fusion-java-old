@@ -123,8 +123,6 @@ final class SyntaxWraps
     }
 
     /**
-     * @param name must be interned.
-     *
      * @return null is equivalent to a {@link FreeBinding}.
      */
     Binding resolveTop(BaseSymbol name)

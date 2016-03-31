@@ -304,8 +304,6 @@ final class SyntaxSymbol
     /**
      * Determines whether this identifier resolves to a {@link FreeBinding}
      * with the given name and marks.
-     *
-     * @param name must be interned.
      */
     boolean resolvesFree(BaseSymbol name, Set<MarkWrap> marks)
     {
