@@ -11,6 +11,7 @@ import static com.amazon.fusion.GlobalState.PROVIDE;
 import static com.amazon.fusion.GlobalState.REQUIRE;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import static com.amazon.fusion.ModuleIdentity.isValidModulePath;
+import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
 import java.util.ArrayList;
@@ -503,7 +504,23 @@ final class ModuleForm
                 }
                 else
                 {
-                    throw check.failure("invalid provide-spec");
+                    SyntaxSexp sexp = (SyntaxSexp) spec;
+                    SyntaxSymbol formName = sexp.firstIdentifier(eval);
+                    switch (formName.getName().stringValue())
+                    {
+                        case "rename":
+                        {
+                            SyntaxSymbol localId = (SyntaxSymbol)
+                                sexp.get(eval, 1);
+                            exportId = (SyntaxSymbol) sexp.get(eval, 2);
+                            binding = localId.getBinding();
+                            break;
+                        }
+                        default:
+                        {
+                            throw check.failure("invalid provide-spec");
+                        }
+                    }
                 }
 
                 BaseSymbol name = exportId.getName();
@@ -511,8 +528,9 @@ final class ModuleForm
                 if (prior != null && ! binding.sameTarget(prior))
                 {
                     String message =
-                        "identifier already provided with a different" +
-                        " binding";
+                        "the identifier " +
+                        printQuotedSymbol(name.stringValue()) +
+                        " is being exported with multiple bindings";
                     throw check.failure(message, exportId);
                 }
                 names.add(name);

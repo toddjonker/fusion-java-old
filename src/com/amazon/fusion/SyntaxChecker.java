@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -18,6 +18,20 @@ class SyntaxChecker
     {
         myEvaluator = eval;
         myFormName = formName;
+        myForm = form;
+    }
+
+
+    /**
+     * The form name for messages is derived from the sexp's leading identifer.
+     */
+    SyntaxChecker(Evaluator eval, SyntaxSexp form)
+        throws FusionException
+    {
+        SyntaxSymbol id = form.firstIdentifier(eval);
+
+        myEvaluator = eval;
+        myFormName = (id == null ? null : id.getName().stringValue());
         myForm = form;
     }
 
@@ -151,9 +165,9 @@ class SyntaxChecker
 
 
     final <T extends SyntaxValue> T checkSyntax(Class<T> klass,
-                                               String expectation,
-                                               boolean nullable,
-                                               SyntaxValue form)
+                                                String expectation,
+                                                boolean nullable,
+                                                SyntaxValue form)
         throws FusionException
     {
         try
@@ -170,6 +184,14 @@ class SyntaxChecker
 
     //========================================================================
 
+    /**
+     * Checks that this form has an element at the given index that's an sexp.
+     *
+     * @param description
+     * @param index
+     * @return a checker wrapping the requested element.
+     * @throws FusionException
+     */
     SyntaxChecker subformSexp(String description, int index)
         throws FusionException
     {
