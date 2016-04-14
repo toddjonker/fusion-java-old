@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 (module list '/fusion/base'
 
@@ -236,9 +236,14 @@ particular sequence types may do so.
       (raise_argument_error "list_iterator" "list" 0 list)))
 
 
+  // TODO This should be usable with iterators that return multiple results.
+  // That requires a variant of `let_values` that can accept an arbitrary
+  // number of results.
   (defpub (list_from_iterator iterator)
     '''
 Creates a stretchy list with the elements of `iterator`, in the same order.
+
+At present, this procedure will fail if the iterator returns multiple results.
     '''
     (unless (is_iterator iterator)
       (raise_argument_error "list_from_iterator" "iterator" 0 iterator))

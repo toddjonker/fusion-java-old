@@ -1,9 +1,10 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
   "/fusion/list"
   "/fusion/struct"
+  "/fusion/unsafe/list"
   "/testutils"
   )
 
@@ -405,10 +406,26 @@
 //==========================================================================
 // struct_unzip
 
+(define (remove_first pred sequence)
+  (choose (let [(looking true)]
+            (lambda (e)
+              (if (and looking (pred e))
+                (begin (set looking false) false)
+                true)))
+     sequence))
+
+(define (bag_equal equal list1 list2)
+  (let loop [(i 0), (list2 list2)]
+    (if (== i (size list1))
+      (== 0 (size list2))
+      (let ((value (element list1 i)))
+        (loop (+ i 1)
+          (remove_first (lambda (e) (equal value e)) list2))))))
+
 (define_check (check_unzip struct keys vals)
   (let_values [((k v) (struct_unzip struct))]
-    (check === keys k)
-    (check === vals v)
+    (check_true (bag_equal === keys k))
+    (check_true (bag_equal === vals v))
     (unless (is_null struct)
       (check === struct (struct_zip k v)))))
 
@@ -419,7 +436,7 @@
 (check_unzip {a:1}     (quote [a]  ) [1])
 (check_unzip {a:1,a:1} (quote [a,a]) [1,1])
 (check_unzip {a:1,a:2} (quote [a,a]) [1,2])
-(check_unzip {a:1,b:2} (quote [b,a]) [2,1])   // TODO shady test assumes order
+(check_unzip {a:1,b:2} (quote [b,a]) [2,1])
 
 
 (expect_argument_exn (struct_unzip []))
@@ -663,26 +680,22 @@
 //==========================================================================
 // Iteration
 
-(define check_iter
-  (lambda (iter values)
-    "Checks that the ITER produces the VALUES (given as a list)"
-    (check_pred is_iterator iter)
-    (let [(len (size values))]
-      (let loop [(i 0)]
-        (if (= i len)
-          (check_false (iterator_has_next iter) "iterator should be empty")
-          (begin
-            (check_pred iterator_has_next iter)
-            (let_values [((key value) (iterator_next iter))]
-              (let [(actual   [key, value]),
-                    (expected (. values i))]
-              (check === expected actual "iterator element")
-              (loop (+ 1 i))))))))))
+(define (list_from_iterator2 iterator)
+  "Fork of list_from_iterator that handles 2-result iterators."
+  (let loop [(result (stretchy_list))]
+    (if (iterator_has_next iterator)
+      (let_values [((k v) (iterator_next iterator))]
+        (loop (unsafe_list_add_m result [k, v])))
+      result)))
 
-(check_iter (struct_iterator null.struct) [])
-(check_iter (struct_iterator {}) [])
-(check_iter (struct_iterator {a:1}) (quote [[a,1]]))
-(check_iter (struct_iterator {a:1,a:2}) (quote [[a,1],[a,2]]))
-(check_iter (struct_iterator {a:1,b:3,a:2}) (quote [[b,3],[a,1],[a,2]]))
+(define_check (check_iter struct elements)
+  (let [(actual (list_from_iterator2 (struct_iterator struct)))]
+    (check_true (bag_equal === actual elements))))
+
+(check_iter null.struct   (quote []))
+(check_iter {}            (quote []))
+(check_iter {a:1}         (quote [[a,1]]))
+(check_iter {a:1,a:2}     (quote [[a,1],[a,2]]))
+(check_iter {a:1,b:3,a:2} (quote [[b,3],[a,1],[a,2]]))
 
 (expect_argument_exn (struct_iterator []))
