@@ -12,6 +12,12 @@ import java.util.Set;
  * We use special bindings so that we can distinguish from those that are
  * introduced via regular imports, since these bindings can be shadowed by
  * such imports and by module-level definitions.
+ * <p>
+ * In addition, a language wrap doesn't look for bindings in pre-existing wraps
+ * since no other bindings should "leak" through. This is meaningful for
+ * modules declared in scripts and for nested modules, but may need to be
+ * changed in order to implement {@code module*}, which can be used to view the
+ * enclosing module's binding.
  */
 final class LanguageWrap
     extends SyntaxWrap
@@ -104,25 +110,22 @@ final class LanguageWrap
                     Iterator<SyntaxWrap> moreWraps,
                     Set<MarkWrap> returnMarks)
     {
-        Binding b = null;
         if (moreWraps.hasNext())
         {
             SyntaxWrap nextWrap = moreWraps.next();
-            b = nextWrap.resolve(name, moreWraps, returnMarks);
+            // Prior bindings never "leak through" a language, so we ignore
+            // this binding.  We still want to collect the marks though.
+            nextWrap.resolve(name, moreWraps, returnMarks);
         }
 
         // Language-provided bindings never have marks!
-        // We should not match unbound macro-introduced identifiers.
-        if (b == null && returnMarks.isEmpty())
+        ModuleBinding local = myModule.resolveProvidedName(name);
+        if (local != null)
         {
-            ModuleBinding local = myModule.resolveProvidedName(name);
-            if (local != null)
-            {
-                return new LanguageBinding(local);
-            }
+            return new LanguageBinding(local);
         }
 
-        return b;
+        return null;
     }
 
 

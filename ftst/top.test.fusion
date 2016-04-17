@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -10,6 +10,12 @@
 
 (let [(my_top "shadow")]
   (check === "at-top" ('#%top' my_top)))
+
+
+// Top-level bindings shouldn't leak into modules
+(expect_syntax_exn
+  (module Bad "/fusion"
+    my_top))              // ERROR: unbound
 
 
 (module T "/fusion"

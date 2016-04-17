@@ -21,7 +21,9 @@ class SequenceWrap
         myWraps = wraps;
     }
 
-
+    /**
+     * Adds a new wrap to the front of this sequence.
+     */
     void addWrap(SyntaxWrap wrap)
     {
         int suffixLen =  myWraps.length;
