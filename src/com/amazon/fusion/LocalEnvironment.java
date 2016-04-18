@@ -162,8 +162,10 @@ final class LocalEnvironment
                             "duplicate binding: " +
                             printQuotedSymbol(idJ.stringValue());
 
-                        throw new SyntaxException(null, message,
-                                                  formForErrors);
+                        SyntaxException ex =
+                            new SyntaxException(null, message, idJ);
+                        ex.addContext(formForErrors);
+                        throw ex;
                     }
                 }
             }
