@@ -3,7 +3,9 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
+import com.amazon.fusion.ModuleNamespace.ImportedProvidedBinding;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
+import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -29,37 +31,42 @@ final class LanguageWrap
     static final class LanguageBinding
         extends Binding
     {
-        private final ModuleBinding myTarget;
+        private final ProvidedBinding myImport;
 
-        private LanguageBinding(ModuleBinding target)
+        private LanguageBinding(ProvidedBinding target)
         {
-            assert target.target() == target;
-            myTarget = target;
+            myImport = target;
         }
 
         @Override
         public final BaseSymbol getName()
         {
-            return myTarget.getName();
+            return myImport.getName();
         }
 
         @Override
-        public Binding target()
+        public ModuleBinding target()
         {
-            return myTarget;
+            return myImport.target();
+        }
+
+        @Override
+        ProvidedBinding provideAs(SyntaxSymbol exportedId)
+        {
+            return new ImportedProvidedBinding(exportedId, myImport);
         }
 
         @Override
         public Object lookup(Namespace ns)
         {
-            return myTarget.lookup(ns);
+            return myImport.lookup(ns);
         }
 
         @Override
         public CompiledForm compileReference(Evaluator eval, Environment env)
             throws FusionException
         {
-            return myTarget.compileReference(eval, env);
+            return myImport.compileReference(eval, env);
         }
 
         @Override
@@ -78,7 +85,7 @@ final class LanguageWrap
                                        CompiledForm valueForm)
             throws FusionException
         {
-            return myTarget.compileSet(eval, env, valueForm);
+            return myImport.compileSet(eval, env, valueForm);
         }
 
         @Override
@@ -90,7 +97,8 @@ final class LanguageWrap
         @Override
         public String toString()
         {
-            return "{{{LanguageBinding " + myTarget.myModuleId.absolutePath()
+            // FIXME handle rename
+            return "{{{LanguageBinding " + myImport.getTargetModule().absolutePath()
                  + ' ' + getName() + "}}}";
         }
     }
@@ -119,7 +127,7 @@ final class LanguageWrap
         }
 
         // Language-provided bindings never have marks!
-        ModuleBinding local = myModule.resolveProvidedName(name);
+        ProvidedBinding local = myModule.resolveProvidedName(name);
         if (local != null)
         {
             return new LanguageBinding(local);

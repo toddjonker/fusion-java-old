@@ -12,11 +12,12 @@ import static com.amazon.fusion.GlobalState.REQUIRE;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import static com.amazon.fusion.ModuleIdentity.isValidModulePath;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
-import com.amazon.fusion.ModuleNamespace.ModuleBinding;
+import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -456,25 +457,32 @@ final class ModuleForm
 
     private static final class ProvidedBindings
     {
-        final BaseSymbol[]    names;
-        final ModuleBinding[] bindings;
+        final BaseSymbol[]      names;
+        final ProvidedBinding[] bindings;
 
-        ProvidedBindings(BaseSymbol[] names, ModuleBinding[] bindings)
+        ProvidedBindings(BaseSymbol[] names, ProvidedBinding[] bindings)
         {
             this.names = names;
             this.bindings = bindings;
         }
     }
 
+    /**
+     * Process all the provide-forms, which macro-expansion has grouped
+     * together at the end of the module.
+     *
+     * @param firstProvidePos the index within {@code moduleStx} of the first
+     * provide-form. All elements from that position onward are provide-forms.
+     */
     private ProvidedBindings providedBindings(Evaluator  eval,
                                               Namespace  ns,
                                               SyntaxSexp moduleStx,
                                               int        firstProvidePos)
         throws FusionException
     {
-        Map<BaseSymbol,Binding>  bound    = new IdentityHashMap<>();
-        ArrayList<BaseSymbol>    names    = new ArrayList<>();
-        ArrayList<ModuleBinding> bindings = new ArrayList<>();
+        Map<BaseSymbol,Binding> bound    = new IdentityHashMap<>();
+        List<BaseSymbol>        names    = new ArrayList<>();
+        List<ProvidedBinding>   bindings = new ArrayList<>();
 
         for (int p = firstProvidePos; p < moduleStx.size(); p++)
         {
@@ -484,35 +492,37 @@ final class ModuleForm
             int size = form.size();
             for (int i = 1; i < size; i++)
             {
-                SyntaxValue spec = form.get(eval, i);
+                SyntaxSymbol exportId;
+                Binding binding;
 
-                SyntaxSymbol id;
-                try
+                SyntaxValue spec = form.get(eval, i);
+                if (spec instanceof SyntaxSymbol)
                 {
-                    id = (SyntaxSymbol) spec;
+                    exportId = (SyntaxSymbol) spec;
+                    binding = exportId.getBinding();
                 }
-                catch (ClassCastException e)
+                else
                 {
                     throw check.failure("invalid provide-spec");
                 }
 
-                Binding binding = id.getBinding();
-                BaseSymbol name = id.getName();
+                BaseSymbol name = exportId.getName();
                 Binding prior = bound.put(name, binding);
                 if (prior != null && ! binding.sameTarget(prior))
                 {
                     String message =
                         "identifier already provided with a different" +
                         " binding";
-                    throw check.failure(message, id);
+                    throw check.failure(message, exportId);
                 }
                 names.add(name);
-                bindings.add((ModuleBinding) binding.target());
+
+                bindings.add(binding.provideAs(exportId));
             }
         }
 
         return new ProvidedBindings(names.toArray(new BaseSymbol[0]),
-                                    bindings.toArray(new ModuleBinding[0]));
+                                    bindings.toArray(new ProvidedBinding[0]));
     }
 
 
@@ -525,14 +535,14 @@ final class ModuleForm
         // We use arrays to hold the provided bindings, rather than a map
         // from names to bindings, because we want compiled forms to be flat
         // and compact.
-        private final ModuleIdentity   myId;
-        private final String           myDocs;
-        private final ModuleIdentity[] myRequiredModules;
-        private final int              myVariableCount;
-        private final BindingDoc[]     myBindingDocs;
-        private final BaseSymbol[]     myProvidedNames;
-        private final ModuleBinding[]  myProvidedBindings;
-        private final CompiledForm[]   myBody;
+        private final ModuleIdentity    myId;
+        private final String            myDocs;
+        private final ModuleIdentity[]  myRequiredModules;
+        private final int               myVariableCount;
+        private final BindingDoc[]      myBindingDocs;
+        private final BaseSymbol[]      myProvidedNames;
+        private final ProvidedBinding[] myProvidedBindings;
+        private final CompiledForm[]    myBody;
 
         private CompiledModule(ModuleIdentity   id,
                                String           docs,

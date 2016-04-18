@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
+import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -59,7 +60,7 @@ final class TopLevelNamespace
         private TopLevelBinding(TopLevelRequireBinding required)
         {
             super(required.myTarget.getIdentifier(), REQUIRED_FROM_ELSEWHERE);
-            myTarget = required.myTarget;
+            myTarget = required.target();
             myPrecedence = REQUIRED_FROM_ELSEWHERE;
         }
 
@@ -215,12 +216,9 @@ final class TopLevelNamespace
                 // That doesn't work after namespace-syntax-introduce
             }
 
-            assert definedBinding.getIdentifier()
-                .freeIdentifierEqual(requiredBinding.myTarget.getIdentifier());
-
             if (definedBinding.myPrecedence <= requiredBinding.myPrecedence)
             {
-                definedBinding.myTarget = requiredBinding.myTarget;
+                definedBinding.myTarget = requiredBinding.target();
             }
 
             return definedBinding;
@@ -248,11 +246,10 @@ final class TopLevelNamespace
         extends Binding
     {
         private final int myPrecedence;
-        private final ModuleBinding myTarget;
+        private final ProvidedBinding myTarget;
 
-        private TopLevelRequireBinding(int precedence, ModuleBinding target)
+        private TopLevelRequireBinding(int precedence, ProvidedBinding target)
         {
-            assert target.target() == target;
             myPrecedence = precedence;
             myTarget = target;
         }
@@ -263,10 +260,15 @@ final class TopLevelNamespace
             return myTarget.getName();
         }
 
+        SyntaxSymbol getIdentifier()
+        {
+            return myTarget.getIdentifier();
+        }
+
         @Override
         public ModuleBinding target()
         {
-            return myTarget;
+            return myTarget.target();
         }
 
         @Override
@@ -311,7 +313,7 @@ final class TopLevelNamespace
         public String toString()
         {
             return "{{{TopLevelRequireBinding "
-                 + myTarget.myModuleId.absolutePath()
+                 + target().myModuleId.absolutePath()
                  + ' ' + getName() + "}}}";
         }
     }
@@ -338,7 +340,7 @@ final class TopLevelNamespace
                         Set<MarkWrap> returnMarks)
         {
             // TODO FUSION-117 Resolve the whole identifier, including marks???
-            ModuleBinding local = localResolveMaybe(name);
+            ProvidedBinding local = localResolveMaybe(name);
             if (local != null)
             {
                 // TODO cache these?

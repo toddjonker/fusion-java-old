@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
+import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
 
 /**
  * Bindings are used during expansion and compilation to identify a specific
@@ -50,6 +51,11 @@ abstract class Binding
     boolean sameTarget(Binding other)
     {
         return target() == other.target();
+    }
+
+    ProvidedBinding provideAs(SyntaxSymbol exportedId)
+    {
+        throw new IllegalStateException("This kind of binding can't be exported");
     }
 
     /**

@@ -18,6 +18,130 @@ import java.util.Set;
 final class ModuleNamespace
     extends Namespace
 {
+    static abstract class ProvidedBinding
+        extends NsBinding
+    {
+        ProvidedBinding(SyntaxSymbol exportedId, int address)
+        {
+            super(exportedId, address);
+        }
+
+        @Override
+        abstract ModuleBinding  target();
+        abstract ModuleIdentity getTargetModule();
+
+        @Override
+        final Object lookup(Namespace ns)
+        {
+            return target().lookup(ns);
+        }
+
+        @Override
+        final CompiledForm compileReference(Evaluator eval, Environment env)
+            throws FusionException
+        {
+            return target().compileReference(eval, env);
+        }
+
+        @Override
+        final CompiledForm compileTopReference(Evaluator eval, Environment env,
+                                               SyntaxSymbol id)
+            throws FusionException
+        {
+            return target().compileLocalTopReference(eval, env);
+        }
+    }
+
+    /**
+     * A provided binding that was defined in the providing module.
+     */
+    static final class DefinedProvidedBinding
+        extends ProvidedBinding
+    {
+        private final ModuleBinding myDefinition;
+
+        DefinedProvidedBinding(SyntaxSymbol exportedId, ModuleBinding binding)
+        {
+            super(exportedId, binding.myAddress);
+
+            assert binding.target() == binding;
+            myDefinition = binding;
+        }
+
+        DefinedProvidedBinding(ModuleBinding binding)
+        {
+            this(binding.getIdentifier(), binding);
+        }
+
+        @Override
+        ModuleBinding target()
+        {
+            return myDefinition;
+        }
+
+        @Override
+        ModuleIdentity getTargetModule()
+        {
+            return myDefinition.myModuleId;
+        }
+
+        @Override
+        ProvidedBinding provideAs(SyntaxSymbol exportedId)
+        {
+            return new ImportedProvidedBinding(exportedId, this);
+        }
+
+        @Override
+        public String toString()
+        {
+            return "{{{DefinedProvidedBinding "
+                + getIdentifier().debugString()
+                + " -> "  + myDefinition + "}}}";
+        }
+    }
+
+    /**
+     * A provided binding that was imported into the providing module.
+     */
+    static final class ImportedProvidedBinding
+        extends ProvidedBinding
+    {
+        private final ProvidedBinding myImport;
+
+        ImportedProvidedBinding(SyntaxSymbol exportedId, ProvidedBinding imported)
+        {
+            super(exportedId, imported.myAddress);
+            myImport = imported;
+        }
+
+        @Override
+        ModuleBinding target()
+        {
+            return myImport.target();
+        }
+
+        @Override
+        ModuleIdentity getTargetModule()
+        {
+            return myImport.getTargetModule();
+        }
+
+        @Override
+        ProvidedBinding provideAs(SyntaxSymbol exportedId)
+        {
+            return new ImportedProvidedBinding(exportedId, this);
+        }
+
+        @Override
+        public String toString()
+        {
+            return "{{{ImportedProvidedBinding "
+                + getIdentifier().debugString()
+                + " -> "  + myImport + "}}}";
+        }
+    }
+
+
     /**
      * Denotes a module-level binding. Instances are one-to-one with each
      * {@code define} at module-level.
@@ -37,6 +161,12 @@ final class ModuleNamespace
         {
             super(identifier, address);
             myModuleId = moduleId;
+        }
+
+        @Override
+        ProvidedBinding provideAs(SyntaxSymbol exportedId)
+        {
+            return new DefinedProvidedBinding(exportedId, this);
         }
 
         @Override

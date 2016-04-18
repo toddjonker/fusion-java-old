@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
-import com.amazon.fusion.ModuleNamespace.ModuleBinding;
+import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -22,7 +22,7 @@ class RequireWrap
         myModule = module;
     }
 
-    ModuleBinding localResolveMaybe(BaseSymbol name)
+    ProvidedBinding localResolveMaybe(BaseSymbol name)
     {
         return myModule.resolveProvidedName(name);
     }
