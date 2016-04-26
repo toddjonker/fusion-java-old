@@ -62,7 +62,7 @@ final class TopLevelNamespace
 
         private TopLevelBinding(TopLevelRequireBinding required)
         {
-            super(required.myTarget.getIdentifier(), REQUIRED_FROM_ELSEWHERE);
+            super(required.getIdentifier(), REQUIRED_FROM_ELSEWHERE);
             myTarget = required.target();
             myPrecedence = REQUIRED_FROM_ELSEWHERE;
         }

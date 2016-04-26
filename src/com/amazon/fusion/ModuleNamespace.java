@@ -19,11 +19,22 @@ final class ModuleNamespace
     extends Namespace
 {
     static abstract class ProvidedBinding
-        extends NsBinding
+        extends Binding
     {
-        ProvidedBinding(SyntaxSymbol exportedId, int address)
+        private final BaseSymbol myName;
+
+        ProvidedBinding(SyntaxSymbol exportedId)
         {
-            super(exportedId, address);
+            myName = exportedId.getName();
+        }
+
+        @Override
+        final BaseSymbol getName() { return myName; }
+
+        @Override
+        final ProvidedBinding provideAs(SyntaxSymbol exportedId)
+        {
+            return new ImportedProvidedBinding(exportedId, this);
         }
 
         @Override
@@ -50,6 +61,16 @@ final class ModuleNamespace
         {
             return target().compileLocalTopReference(eval, env);
         }
+
+        @Override
+        final public CompiledForm compileSet(Evaluator eval, Environment env,
+                                             CompiledForm valueForm)
+            throws FusionException
+        {
+            // This isn't currently reachable, but it's an easy safeguard.
+            String message = "Mutation of imported binding is not allowed";
+            throw new ContractException(message);
+        }
     }
 
     /**
@@ -62,7 +83,7 @@ final class ModuleNamespace
 
         DefinedProvidedBinding(SyntaxSymbol exportedId, ModuleBinding binding)
         {
-            super(exportedId, binding.myAddress);
+            super(exportedId);
 
             assert binding.target() == binding;
             myDefinition = binding;
@@ -86,16 +107,9 @@ final class ModuleNamespace
         }
 
         @Override
-        ProvidedBinding provideAs(SyntaxSymbol exportedId)
-        {
-            return new ImportedProvidedBinding(exportedId, this);
-        }
-
-        @Override
         public String toString()
         {
-            return "{{{DefinedProvidedBinding "
-                + getIdentifier().debugString()
+            return "{{{DefinedProvidedBinding " + getName()
                 + " -> "  + myDefinition + "}}}";
         }
     }
@@ -110,7 +124,7 @@ final class ModuleNamespace
 
         ImportedProvidedBinding(SyntaxSymbol exportedId, ProvidedBinding imported)
         {
-            super(exportedId, imported.myAddress);
+            super(exportedId);
             myImport = imported;
         }
 
@@ -127,16 +141,9 @@ final class ModuleNamespace
         }
 
         @Override
-        ProvidedBinding provideAs(SyntaxSymbol exportedId)
-        {
-            return new ImportedProvidedBinding(exportedId, this);
-        }
-
-        @Override
         public String toString()
         {
-            return "{{{ImportedProvidedBinding "
-                + getIdentifier().debugString()
+            return "{{{ImportedProvidedBinding " + getName()
                 + " -> "  + myImport + "}}}";
         }
     }
