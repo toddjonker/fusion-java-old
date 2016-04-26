@@ -170,16 +170,19 @@ final class TopLevelNamespace
                                 Iterator<SyntaxWrap> moreWraps,
                                 Set<MarkWrap>         returnMarks)
         {
+            if (moreWraps.hasNext())
+            {
+                SyntaxWrap nextWrap = moreWraps.next();
+                // Prior bindings never "leak through" a top-level, so we ignore
+                // this binding.  We still want to collect the marks though.
+                nextWrap.resolve(name, moreWraps, returnMarks);
+            }
+
             // Check our environment directly. This will handle identifiers
             // that have top-level definitions, but not those that only map to
             // module bindings.
-
-            // TODO FUSION-117 If the source has had namespace-syntax-introduce
-            // then this binding may be from an earlier wrap, and may be from
-            // a different top-level!
-
             TopLevelBinding definedBinding = (TopLevelBinding)
-                super.resolve(name, moreWraps, returnMarks);
+                getEnvironment().substituteFree(name, returnMarks);
 
             // NOTE: Adding static import for REQUIRED_FROM_ELSEWHERE caused
             //       bogus compiler errors in JDK 1.7u25
