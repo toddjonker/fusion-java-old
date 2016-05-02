@@ -103,6 +103,11 @@ final class ModuleInstance
 
     //========================================================================
 
+    Collection<ProvidedBinding> providedBindings()
+    {
+        return Collections.unmodifiableCollection(myProvidedBindings.values());
+    }
+
     Set<BaseSymbol> providedNames()
     {
         return Collections.unmodifiableSet(myProvidedBindings.keySet());

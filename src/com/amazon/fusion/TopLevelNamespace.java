@@ -6,7 +6,10 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
+import java.util.Arrays;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -166,9 +169,9 @@ final class TopLevelNamespace
         }
 
         @Override
-        TopLevelBinding resolve(BaseSymbol           name,
-                                Iterator<SyntaxWrap> moreWraps,
-                                Set<MarkWrap>         returnMarks)
+        Binding resolve(BaseSymbol           name,
+                        Iterator<SyntaxWrap> moreWraps,
+                        Set<MarkWrap>        returnMarks)
         {
             if (moreWraps.hasNext())
             {
@@ -191,19 +194,13 @@ final class TopLevelNamespace
                     || myTopNs.ownsBinding(definedBinding));
 
             // Look for an imported binding, then decide which one wins.
+            // We lookup required bindings as if they were free, since top-level
+            // and free bindings are equivalent.  Otherwise we'd have problems
+            // since we may not have found a TopLevelBinding here, but one
+            // is created later.
+            TopLevelRequireBinding requiredBinding =
+                myTopNs.substituteFreeImport(name, returnMarks);
 
-            // TODO Perhaps all this should happen at import-time, so we only
-            // have to search our environment.  That saves repeated work when
-            // resolving identifiers, at the cost of forcing TopLevelBindings
-            // to be created for every imported binding, and at the cost of
-            // having a much larger namespace lookup table.
-
-            // TODO FUSION-63 The resolve() is broken if we have a module
-            // binding with a name that has a foreign lexical context, since
-            // this only looks by name.
-
-            TopLevelRequireBinding requiredBinding = (TopLevelRequireBinding)
-                myTopNs.myRequiredModuleWraps.resolve(name);
             if (requiredBinding == null)
             {
                 // No matching import, so use any top-level definition.
@@ -249,23 +246,27 @@ final class TopLevelNamespace
         extends Binding
     {
         private final int myPrecedence;
+        private final SyntaxSymbol myIdentifier;
         private final ProvidedBinding myTarget;
 
-        private TopLevelRequireBinding(int precedence, ProvidedBinding target)
+        private TopLevelRequireBinding(int precedence,
+                                       SyntaxSymbol identifier,
+                                       ProvidedBinding target)
         {
             myPrecedence = precedence;
+            myIdentifier = identifier;
             myTarget = target;
         }
 
         @Override
         public final BaseSymbol getName()
         {
-            return myTarget.getName();
+            return myIdentifier.getName();
         }
 
         SyntaxSymbol getIdentifier()
         {
-            return myTarget.getIdentifier();
+            return myIdentifier;
         }
 
         @Override
@@ -322,50 +323,14 @@ final class TopLevelNamespace
     }
 
 
-    /**
-     * Wrap for top-level {@code require}s that keeps track of precedence and
-     * annotates bindings accordingly.
-     */
-    private static final class TopLevelRequireWrap
-        extends RequireWrap
-    {
-        private final int myPrecedence;
-
-        TopLevelRequireWrap(ModuleInstance module, int precedence)
-        {
-            super(module);
-            myPrecedence = precedence;
-        }
-
-        @Override
-        Binding resolve(BaseSymbol name,
-                        Iterator<SyntaxWrap> moreWraps,
-                        Set<MarkWrap> returnMarks)
-        {
-            // TODO FUSION-117 Resolve the whole identifier, including marks???
-            ProvidedBinding local = localResolveMaybe(name);
-            if (local != null)
-            {
-                // TODO cache these?
-                return new TopLevelRequireBinding(myPrecedence, local);
-            }
-
-            if (moreWraps.hasNext())
-            {
-                SyntaxWrap nextWrap = moreWraps.next();
-                return nextWrap.resolve(name, moreWraps, returnMarks);
-            }
-
-            return null;
-        }
-    }
-
 
     /**
-     * A sequence of {@link TopLevelRequireWrap}s for our required modules.
-     * This variable is updated after each `require`.
+     * Maps each top-level name to the bindings associated with it.
+     * There may be multiple variants since the same name may occur with
+     * different marks.
      */
-    private SyntaxWraps myRequiredModuleWraps;
+    private final Map<BaseSymbol,TopLevelRequireBinding[]> myRequiredBindings =
+        new IdentityHashMap<>();
 
     /**
      * Every `require` gets its own precedence level, starting at zero (which
@@ -390,7 +355,6 @@ final class TopLevelNamespace
                       return SyntaxWraps.make(new TopLevelWrap(__this));
                   }
               });
-        myRequiredModuleWraps = SyntaxWraps.make();
     }
 
 
@@ -432,9 +396,73 @@ final class TopLevelNamespace
     void require(Evaluator eval, ModuleInstance module)
         throws FusionException
     {
-        SyntaxWrap wrap = new TopLevelRequireWrap(module, myCurrentPrecedence);
-        myRequiredModuleWraps = myRequiredModuleWraps.addWrap(wrap);
-        myCurrentPrecedence++;
+        int precedence = myCurrentPrecedence++;
+
+        // We assume that a module doesn't export a duplicate name.
+        for (ProvidedBinding binding : module.providedBindings())
+        {
+            SyntaxSymbol id = SyntaxSymbol.make(eval, null, binding.getName());
+            installRequiredBinding(precedence, id, binding);
+        }
+    }
+
+    private void installRequiredBinding(int             precedence,
+                                        SyntaxSymbol    localId,
+                                        ProvidedBinding binding)
+    {
+        BaseSymbol name = binding.getName();
+
+        TopLevelRequireBinding topBinding =
+            new TopLevelRequireBinding(precedence, localId, binding);
+
+        TopLevelRequireBinding[] variants = myRequiredBindings.get(name);
+        if (variants == null)
+        {
+            variants = new TopLevelRequireBinding[] { topBinding };
+        }
+        else
+        {
+            // Do we already have a required binding that matches?
+            boolean matched = false;
+
+            int len = variants.length;
+            for (int i = 0; i < len; i++)
+            {
+                TopLevelRequireBinding b = variants[i];
+                if (localId.freeIdentifierEqual(b.myIdentifier))
+                {
+                    variants[i] = topBinding;
+                    matched = true;
+                    break;
+                }
+            }
+
+            if (! matched)
+            {
+                variants = Arrays.copyOf(variants, len + 1);
+                variants[len] = topBinding;
+            }
+        }
+        myRequiredBindings.put(name, variants);
+    }
+
+
+    private final TopLevelRequireBinding substituteFreeImport(BaseSymbol name,
+                                                              Set<MarkWrap> marks)
+    {
+        TopLevelRequireBinding[] variants = myRequiredBindings.get(name);
+        if (variants != null)
+        {
+            for (TopLevelRequireBinding b : variants)
+            {
+                assert name == b.myIdentifier.getName();
+                if (b.myIdentifier.resolvesFree(name, marks))
+                {
+                    return b;
+                }
+            }
+        }
+        return null;
     }
 
 
