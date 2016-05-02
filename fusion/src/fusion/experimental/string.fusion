@@ -54,4 +54,20 @@ non-null string.
 Returns a string filled by the given list of Unicode scalar values.
     '''
     "com.amazon.fusion.FusionString$ImplodeProc")
+
+  (defpub_j string_index_of
+    '''
+    (string_index_of string substring)
+
+Returns the index (number of code units) within `string` of the first occurrence of `substring`.
+    '''
+    "com.amazon.fusion.FusionString$IndexOfProc")
+
+  (defpub_j string_size_codepoints
+    '''
+    (string_size_codepoints string)
+
+Returns the number of code points in `string`.
+    '''
+    "com.amazon.fusion.FusionString$LengthProc")
 )

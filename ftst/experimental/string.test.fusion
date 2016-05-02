@@ -1,0 +1,37 @@
+(require
+  "/fusion/experimental/check"
+  "/fusion/experimental/string"
+  "/fusion/string")
+
+
+
+//============================================================================
+// string_index_of
+(expect_argument_exn (string_index_of (void) "a"))
+(expect_argument_exn (string_index_of "a" (void)))
+(expect_argument_exn (string_index_of null "a"))
+(expect_argument_exn (string_index_of "a" null))
+(expect_argument_exn (string_index_of null.string "a"))
+(expect_argument_exn (string_index_of "a" null.string))
+(expect_argument_exn (string_index_of null.string null.string))
+(check === 0 (string_index_of "" ""))
+(check_void (string_index_of "" "a"))
+(check === 0 (string_index_of "aabaabaa" "a"))
+(check === 2 (string_index_of "aabaabaa" "b"))
+(check === 1 (string_index_of "aabaabaa" "ab"))
+(check === 0 (string_index_of "aabaabaa" ""))
+(check === 3 (string_index_of "\uD835\uDFCB\u006B\uD835\uDF9E" "\uD835\uDF9E"))
+(check === 2 (string_index_of "\uD835\uDFCB\u006B\uD835\uDF9E" "\u006B"))
+
+
+//============================================================================
+// string_length
+(expect_argument_exn (string_size_codepoints (void)))
+(expect_argument_exn (string_size_codepoints null))
+(expect_argument_exn (string_size_codepoints null.string))
+(check === 0 (string_size_codepoints ""))
+(check === 1 (string_size_codepoints "1"))
+(check === 10 (string_size_codepoints "1234567890"))
+(check === 2 (string_size_codepoints "\u0394\u0394"))
+(check === 5 (string_size_codepoints "A\u0394B\u0394C"))
+(check === 3 (string_size_codepoints "\uD835\uDFCB\u006B\uD835\uDF9E"))

@@ -33,7 +33,9 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -491,6 +493,58 @@ public final class FusionString
 
 
     //========================================================================
+    // Java String utilities
+
+
+    static int numberOfCodePoints(final String string)
+    {
+        return string.codePointCount(0, string.length());
+    }
+
+    enum CHAR_TYPES {
+        LOWERCASE
+        {
+            @Override
+            boolean isType(int codePoint) {
+                return Character.isLowerCase(codePoint);
+            }
+        },
+        UPPERCASE
+        {
+            @Override
+            boolean isType(int codePoint) {
+                return Character.isUpperCase(codePoint);
+            }
+        };
+
+        abstract boolean isType(int codePoint);
+    };
+
+    static boolean everyCodePointIsType(final String string, CHAR_TYPES charType)
+    {
+        if (isEmptyJavaString(string))
+        {
+            return false;
+        }
+        for (int i = 0; i < string.length();)
+        {
+            int codePoint = string.codePointAt(i);
+            if (!charType.isType(codePoint))
+            {
+                return false;
+            }
+            i += Character.charCount(codePoint);
+        }
+        return true;
+    }
+
+    static boolean isEmptyJavaString(String string)
+    {
+        return string == null || string.length() == 0;
+    }
+
+
+    //========================================================================
     // Procedures
 
 
@@ -700,4 +754,162 @@ public final class FusionString
             return makeString(eval, string);
         }
     }
+
+    static final class ContainsProc
+            extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object...args)
+                throws FusionException
+        {
+            checkArityExact(2, args);
+            String string = FusionString.checkRequiredStringArg(eval, this, 0, args);
+            String values = FusionString.checkRequiredStringArg(eval, this, 1, args);
+            return FusionBool.makeBool(eval, string.contains(values));
+        }
+    }
+
+
+    static final class EndsWithProc
+            extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object...args)
+                throws FusionException
+        {
+            checkArityExact(2, args);
+            String string = FusionString.checkRequiredStringArg(eval, this, 0, args);
+            String suffix = FusionString.checkRequiredStringArg(eval, this, 1, args);
+            return FusionBool.makeBool(eval, string.endsWith(suffix));
+        }
+    }
+
+
+    static final class IndexOfProc
+            extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object...args)
+                throws FusionException
+        {
+            checkArityExact(2, args);
+            String string = FusionString.checkRequiredStringArg(eval, this, 0, args);
+            String substring = FusionString.checkRequiredStringArg(eval, this, 1, args);
+            int indexOf = string.indexOf(substring);
+            if (indexOf == -1)
+            {
+                return FusionVoid.voidValue(eval);
+            }
+            else
+            {
+                return FusionNumber.makeInt(eval, indexOf);
+            }
+        }
+    }
+
+
+    static final class IsLowerCaseProc
+            extends Procedure1
+    {
+        @Override
+        Object doApply(Evaluator eval, Object stringArg)
+                throws FusionException
+        {
+            String string = FusionString.checkRequiredStringArg(eval, this, 0, stringArg);
+            return FusionBool.makeBool(eval, everyCodePointIsType(string, CHAR_TYPES.LOWERCASE));
+        }
+    }
+
+
+    static final class IsUpperCaseProc
+            extends Procedure1
+    {
+        @Override
+        Object doApply(Evaluator eval, Object stringArg)
+                throws FusionException
+        {
+            String string = FusionString.checkRequiredStringArg(eval, this, 0, stringArg);
+            return FusionBool.makeBool(eval, everyCodePointIsType(string, CHAR_TYPES.UPPERCASE));
+        }
+    }
+
+
+    static final class JoinProc
+            extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object...args)
+                throws FusionException
+        {
+            checkArityAtLeast(2, args);
+            String separator = FusionString.checkRequiredStringArg(eval, this, 0, args);
+
+            StringBuilder resultBuilder = new StringBuilder();
+
+            for (int i = 1; i < args.length; i++)
+            {
+                String v = checkRequiredTextArg(eval, this, i, args);
+                resultBuilder.append(v);
+                if (i + 1 < args.length)
+                {
+                    resultBuilder.append(separator);
+                }
+            }
+
+            return FusionString.makeString(eval, resultBuilder.toString());
+        }
+    }
+
+
+    static final class LengthProc
+            extends Procedure1
+    {
+        @Override
+        Object doApply(Evaluator eval, Object stringArg)
+                throws FusionException
+        {
+            String string = FusionString.checkRequiredStringArg(eval, this, 0, stringArg);
+            return FusionNumber.makeInt(eval, numberOfCodePoints(string));
+        }
+    }
+
+
+    static final class SplitProc
+            extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object...args)
+                throws FusionException
+        {
+            checkArityExact(2, args);
+            String string = FusionString.checkRequiredStringArg(eval, this, 0, args);
+            String separator = FusionString.checkRequiredStringArg(eval, this, 1, args);
+            String[] splitResult = string.split(separator);
+            List<Object> fusionStrings = new ArrayList<>();
+            for (int i = 0; i < splitResult.length; i++)
+            {
+                if (!(i == 0 && "".equals(splitResult[i])))
+                {
+                    fusionStrings.add(FusionString.makeString(eval, splitResult[i]));
+                }
+            }
+            return FusionList.immutableList(eval, fusionStrings);
+        }
+    }
+
+
+    static final class StartsWithProc
+            extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object...args)
+                throws FusionException
+        {
+            checkArityExact(2, args);
+            String string = FusionString.checkRequiredStringArg(eval, this, 0, args);
+            String prefix = FusionString.checkRequiredStringArg(eval, this, 1, args);
+            return FusionBool.makeBool(eval, string.startsWith(prefix));
+        }
+    }
+
 }

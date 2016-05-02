@@ -102,3 +102,162 @@
 (check === "text"      (symbol_to_string (quote text)))
 
 // TODO FUSION-204 support empty symbol
+
+
+//============================================================================
+// string_contains
+(expect_argument_exn (string_contains (void) "anything"))
+(expect_argument_exn (string_contains null "anything"))
+(expect_argument_exn (string_contains null.string "anything"))
+(expect_argument_exn (string_contains "anything" (void)))
+(expect_argument_exn (string_contains "anything" null))
+(expect_argument_exn (string_contains "anything" null.string))
+(expect_argument_exn (string_contains null.string null.string))
+(check_true (string_contains "" ""))
+(check_true (string_contains "abc" ""))
+(check_true (string_contains "abc" "a"))
+(check_true (string_contains "abcd" "bc"))
+(check_false (string_contains "abc" "z"))
+(check_false (string_contains "abcd" "bcz"))
+
+
+//============================================================================
+// string_ends_with
+(expect_argument_exn (string_ends_with (void) (void)))
+(expect_argument_exn (string_ends_with (void) "def"))
+(expect_argument_exn (string_ends_with "abcdef" (void)))
+(expect_argument_exn (string_ends_with null null))
+(expect_argument_exn (string_ends_with null "def"))
+(expect_argument_exn (string_ends_with "abcdef" null))
+(expect_argument_exn (string_ends_with null.string null.string))
+(expect_argument_exn (string_ends_with null.string "def"))
+(expect_argument_exn (string_ends_with "abcdef" null.string))
+(check_false (string_ends_with "" "abcdef"))
+(check_true (string_ends_with "abcdef" ""))
+(check_true (string_ends_with "abcdef" "def"))
+(check_false (string_ends_with "ABCDEF" "def"))
+(check_false (string_ends_with "ABCDEF" "cde"))
+
+
+//============================================================================
+// string_is_lower
+(expect_argument_exn (string_is_lower (void)))
+(expect_argument_exn (string_is_lower null))
+(expect_argument_exn (string_is_lower null.string))
+(check_false (string_is_lower ""))
+(check_false (string_is_lower "  "))
+(check_true (string_is_lower "abc"))
+(check_false (string_is_lower "abC"))
+(check_false (string_is_lower "ab c"))
+(check_false (string_is_lower "ab1c"))
+(check_false (string_is_lower "ab/c"))
+// http://www.fileformat.info/info/unicode/char/006b/index.htm
+(check_true (string_is_lower "\u006B"))
+(check_true (string_is_lower "a\u006B"))
+(check_true (string_is_lower "a\u006Ba"))
+(check_false (string_is_lower "a\u006BA"))
+// http://www.fileformat.info/info/unicode/char/1d7cb/index.htm
+(check_true (string_is_lower "\uD835\uDFCB"))
+(check_true (string_is_lower "a\uD835\uDFCB"))
+(check_true (string_is_lower "a\uD835\uDFCBa"))
+(check_false (string_is_lower "a\uD835\uDFCBA"))
+// http://www.fileformat.info/info/unicode/char/1d7cb/index.htm
+// http://www.fileformat.info/info/unicode/char/006b/index.htm
+(check_true (string_is_lower "\uD835\uDFCB\u006B"))
+(check_true (string_is_lower "a\uD835\uDFCB\u006B"))
+(check_true (string_is_lower "a\uD835\uDFCB\u006Ba"))
+(check_false (string_is_lower "a\uD835\uDFCB\u006BA"))
+// http://www.fileformat.info/info/unicode/char/1d7cb/index.htm
+// http://www.fileformat.info/info/unicode/char/006b/index.htm
+// http://www.fileformat.info/info/unicode/char/0150/index.htm
+(check_false (string_is_lower "\uD835\uDFCB\u006B\uD835\uDF9E"))
+
+
+//============================================================================
+// string_is_upper
+(expect_argument_exn (string_is_upper (void)))
+(expect_argument_exn (string_is_upper null))
+(expect_argument_exn (string_is_upper null.string))
+(check_false (string_is_upper ""))
+(check_false (string_is_upper "  "))
+(check_true (string_is_upper "ABC"))
+(check_false (string_is_upper "aBC"))
+(check_false (string_is_upper "A C"))
+(check_false (string_is_upper "A1C"))
+(check_false (string_is_upper "A/C"))
+// http://www.fileformat.info/info/unicode/char/0150/index.htm
+(check_true (string_is_upper "\u0150"))
+(check_true (string_is_upper "A\u0150"))
+(check_true (string_is_upper "A\u0150A"))
+(check_false (string_is_upper "A\u0150a"))
+// http://www.fileformat.info/info/unicode/char/1d79e/index.htm
+(check_true (string_is_upper "\uD835\uDF9E"))
+(check_true (string_is_upper "A\uD835\uDF9E"))
+(check_true (string_is_upper "A\uD835\uDF9EA"))
+(check_false (string_is_upper "A\uD835\uDF9Ea"))
+// http://www.fileformat.info/info/unicode/char/1d79e/index.htm
+// http://www.fileformat.info/info/unicode/char/0150/index.htm
+(check_true (string_is_upper "\uD835\uDF9E\u0150"))
+(check_true (string_is_upper "A\uD835\uDF9E\u0150"))
+(check_true (string_is_upper "A\uD835\uDF9E\u0150A"))
+(check_false (string_is_upper "A\uD835\uDF9E\u0150a"))
+// http://www.fileformat.info/info/unicode/char/1d79e/index.htm
+// http://www.fileformat.info/info/unicode/char/0150/index.htm
+// http://www.fileformat.info/info/unicode/char/1d7cb/index.htm
+(check_false (string_is_upper "A\uD835\uDF9E\uD835\uDFCB"))
+
+
+//============================================================================
+// string_join
+(expect_arity_exn (string_join (void)))
+(expect_arity_exn (string_join null.string))
+(expect_arity_exn (string_join ""))
+(expect_argument_exn (string_join " " (void)))
+(expect_argument_exn (string_join " " null))
+(expect_argument_exn (string_join (void) null.list))
+(expect_argument_exn (string_join " " "1" 2 "3"))
+(expect_argument_exn (string_join (void) (void)))
+(expect_argument_exn (string_join null.string "1" "2" "3"))
+(expect_argument_exn (string_join "a" "1" "2" null.string))
+(expect_argument_exn (string_join "a" null.string))
+(check === "" (string_join "a" ""))
+(check === "1;2;3" (string_join ";" "1" "2" "3"))
+(check === "123" (string_join "" "1" "2" "3"))
+(check === "abc_def_ghijklm" (string_join  "_" "abc" "def" "ghijklm"))
+(check === "aZZZbZZZc" (string_join "ZZZ" "a" "b" "c"))
+
+
+//============================================================================
+// string_split
+(expect_arity_exn (string_split (void)))
+(expect_arity_exn (string_split null.string))
+(expect_arity_exn (string_split ""))
+(expect_argument_exn (string_split (void) " "))
+(expect_argument_exn (string_split null " "))
+(expect_argument_exn (string_split null.string " "))
+(expect_argument_exn (string_split "abc def" null))
+(expect_argument_exn (string_split "abc def" null.string))
+(check === [] (string_split "" " "))
+(check === ["a", "b", "c", " ", "d", "e", "f"] (string_split "abc def" ""))
+(check === ["abc", "def"] (string_split "abc def" " "))
+(check === ["abc", "", "def"] (string_split "abc  def" " "))
+(check === ["ab", "cd", "ef"] (string_split "ab:cd:ef" ":"))
+(check === ["abc"] (string_split " abc " " "))
+(check === ["ab", "cd", "ef"] (string_split "abZZZcdZZZef" "ZZZ"))
+
+
+//============================================================================
+// string_starts_with
+(expect_argument_exn (string_starts_with (void) (void)))
+(expect_argument_exn (string_starts_with null null))
+(expect_argument_exn (string_starts_with null.string null.string))
+(expect_argument_exn (string_starts_with (void) "abc"))
+(expect_argument_exn (string_starts_with "abcdef" (void)))
+(expect_argument_exn (string_starts_with null "abc"))
+(expect_argument_exn (string_starts_with "abcdef" null))
+(expect_argument_exn (string_starts_with null.string "abc"))
+(expect_argument_exn (string_starts_with "abcdef" null.string))
+(check_false (string_starts_with "" "abcdef"))
+(check_true (string_starts_with "abcdef" ""))
+(check_true (string_starts_with "abcdef" "abc"))
+(check_false (string_starts_with "ABCDEF" "abc"))

@@ -54,4 +54,67 @@ Converts a `symbol` to a string with the same text. Returns `null.string` when
 given `null.symbol`.
     '''
     "com.amazon.fusion.FusionSymbol$ToStringProc")
+
+  (defpub_j string_contains
+    '''
+    (string_contains string values)
+
+Returns true if and only if `string` contains `values`.
+    '''
+    "com.amazon.fusion.FusionString$ContainsProc")
+
+  (defpub_j string_ends_with
+    '''
+    (string_ends_with string suffix)
+
+Returns true if and only if `string` ends with `suffix`.
+    '''
+    "com.amazon.fusion.FusionString$EndsWithProc")
+
+  (defpub_j string_is_lower
+    '''
+    (string_is_lower string)
+
+Returns whether `string` contains only lower-case code points.
+
+A list of lower-case code points can be found [online](http://www.fileformat.info/info/unicode/category/Ll/list.htm).
+    '''
+    "com.amazon.fusion.FusionString$IsLowerCaseProc")
+
+  (defpub_j string_is_upper
+    '''
+    (string_is_upper string)
+
+Returns whether `string` contains only upper-case code points.
+
+A list of upper-case code points can be found [online](http://www.fileformat.info/info/unicode/category/Lu/list.htm).
+    '''
+    "com.amazon.fusion.FusionString$IsUpperCaseProc")
+
+  (defpub_j string_join
+    '''
+    (string_join separator string ...)
+
+Joins the arguments after `separator` into a single string separated by `separator`.
+
+No `separator` is added before or after the list.
+    '''
+    "com.amazon.fusion.FusionString$JoinProc")
+
+  (defpub_j string_split
+    '''
+    (string_split string separator)
+
+Splits `string` into a list of strings using `separator`.
+Returns an empty list when `string` is an empty string.
+    '''
+    "com.amazon.fusion.FusionString$SplitProc")
+
+  (defpub_j string_starts_with
+    '''
+    (string_starts_with string prefix)
+
+Returns true if and only if `string` begins with `prefix`.
+    '''
+    "com.amazon.fusion.FusionString$StartsWithProc")
 )
