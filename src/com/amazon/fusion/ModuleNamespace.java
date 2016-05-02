@@ -357,7 +357,7 @@ final class ModuleNamespace
 
 
     @Override
-    NsBinding newBinding(SyntaxSymbol identifier, int address)
+    NsBinding newDefinedBinding(SyntaxSymbol identifier, int address)
     {
         return new ModuleBinding(identifier, address, getModuleId());
     }
@@ -396,13 +396,13 @@ final class ModuleNamespace
             throw new AmbiguousBindingFailure(null, name, formForErrors);
         }
 
-        NsBinding b = addBinding(identifier);
+        NsBinding b = addDefinedBinding(identifier);
         return identifier.copyReplacingBinding(b);
     }
 
 
     @Override
-    void require(ModuleInstance module)
+    void require(Evaluator eval, ModuleInstance module)
         throws FusionException
     {
         // Validate that we aren't importing a duplicate name.

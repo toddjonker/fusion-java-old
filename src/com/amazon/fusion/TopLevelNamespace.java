@@ -17,7 +17,7 @@ import java.util.Set;
  * The tricky part here is getting the precedence correct between imports and
  * top-level definitions.  The rule is that the last occurrence wins.  To
  * implement this we keep a counter of the number of times that
- * {@link #require(ModuleInstance)} has been called, record that on bindings
+ * {@link #require} has been called, record that on bindings
  * when they are defined or redefined, and compare those numbers to determine
  * which binding has precedence.
  */
@@ -395,7 +395,7 @@ final class TopLevelNamespace
 
 
     @Override
-    NsBinding newBinding(SyntaxSymbol identifier, int address)
+    NsBinding newDefinedBinding(SyntaxSymbol identifier, int address)
     {
         return new TopLevelBinding(identifier, address, myCurrentPrecedence);
     }
@@ -410,7 +410,7 @@ final class TopLevelNamespace
         Binding binding = localResolve(identifier);
         if (binding == null)
         {
-            binding = addBinding(identifier);
+            binding = addDefinedBinding(identifier);
         }
         else
         {
@@ -429,7 +429,7 @@ final class TopLevelNamespace
 
 
     @Override
-    void require(ModuleInstance module)
+    void require(Evaluator eval, ModuleInstance module)
         throws FusionException
     {
         SyntaxWrap wrap = new TopLevelRequireWrap(module, myCurrentPrecedence);
