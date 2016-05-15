@@ -8,6 +8,32 @@
 
 
 //============================================================================
+// string_size_codepoints
+
+(expect_argument_exn (string_size_codepoints (void)))
+(expect_argument_exn (string_size_codepoints null))
+(expect_argument_exn (string_size_codepoints null.string))
+(check === 0 (string_size_codepoints ""))
+(check === 1 (string_size_codepoints "1"))
+(check === 10 (string_size_codepoints "1234567890"))
+(check === 2 (string_size_codepoints "\u0394\u0394"))
+(check === 5 (string_size_codepoints "A\u0394B\u0394C"))
+(check === 3 (string_size_codepoints "\uD835\uDFCB\u006B\uD835\uDF9E"))
+
+
+//============================================================================
+// string_size_utf8
+
+(check === 0  (string_size_utf8 null.string))
+(check === 0  (string_size_utf8 ""))
+(check === 1  (string_size_utf8 "a"))
+(check === 5  (string_size_utf8 "hello"))
+(check === 7  (string_size_utf8 "hello\x80"))
+(check === 9  (string_size_utf8 "hello\x80\u07ff"))
+(check === 12 (string_size_utf8 "hello\x80\u07ff\uffff"))
+(check === 16 (string_size_utf8 "hello\x80\u07ff\uffff\U000ffff1"))
+
+//============================================================================
 // string_utf16_index_of
 
 (expect_argument_exn (string_utf16_index_of (void) "a"))
@@ -29,14 +55,20 @@
 
 
 //============================================================================
-// string_length
+// string_explode, string_implode
 
-(expect_argument_exn (string_size_codepoints (void)))
-(expect_argument_exn (string_size_codepoints null))
-(expect_argument_exn (string_size_codepoints null.string))
-(check === 0 (string_size_codepoints ""))
-(check === 1 (string_size_codepoints "1"))
-(check === 10 (string_size_codepoints "1234567890"))
-(check === 2 (string_size_codepoints "\u0394\u0394"))
-(check === 5 (string_size_codepoints "A\u0394B\u0394C"))
-(check === 3 (string_size_codepoints "\uD835\uDFCB\u006B\uD835\uDF9E"))
+(define_check (check_explode str scalars)
+  (check === scalars (string_explode str))
+  (check === str     (string_implode scalars))
+  (check === str     (string_implode (string_explode str)))
+  (check === scalars (string_explode (string_implode scalars))))
+
+(check_explode ""                     [])
+(check_explode "\0"                   [0])
+(check_explode "a B"                  [97, 32, 66])
+(check_explode "\u1234"               [0x1234])
+(check_explode "\U00100000\U0010FFFF" [0x100000, 0x10FFFF])
+
+// Start with ASCII then switch to supplementary plane.
+(check_explode "abc\U00100000"        [97, 98, 99, 0x100000])
+
