@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -838,11 +838,11 @@ public final class FusionString
             extends Procedure
     {
         @Override
-        Object doApply(Evaluator eval, Object...args)
+        Object doApply(Evaluator eval, Object[] args)
                 throws FusionException
         {
             checkArityAtLeast(2, args);
-            String separator = FusionString.checkRequiredStringArg(eval, this, 0, args);
+            String separator = checkRequiredTextArg(eval, this, 0, args);
 
             StringBuilder resultBuilder = new StringBuilder();
 
@@ -856,7 +856,7 @@ public final class FusionString
                 }
             }
 
-            return FusionString.makeString(eval, resultBuilder.toString());
+            return makeString(eval, resultBuilder.toString());
         }
     }
 

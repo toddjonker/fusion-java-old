@@ -111,7 +111,7 @@ A list of upper-case code points can be found [online](http://www.fileformat.inf
     (string_join separator string ...)
 
 Joins the arguments after `separator` into a single string separated by `separator`.
-All arguments must be actual strings.
+All arguments must be actual strings or symbols.
 
 No `separator` is added before or after the list.
     '''

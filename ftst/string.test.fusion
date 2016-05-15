@@ -242,11 +242,14 @@
 (expect_argument_exn (string_join null.string "1" "2" "3"))
 (expect_argument_exn (string_join "a" "1" "2" null.string))
 (expect_argument_exn (string_join "a" null.string))
+
 (check === "" (string_join "a" ""))
 (check === "1;2;3" (string_join ";" "1" "2" "3"))
 (check === "123" (string_join "" "1" "2" "3"))
 (check === "abc_def_ghijklm" (string_join  "_" "abc" "def" "ghijklm"))
 (check === "aZZZbZZZc" (string_join "ZZZ" "a" "b" "c"))
+
+(check === "a;b;c" (string_join (quote ';') (quote a) "b" (quote c)))
 
 
 //============================================================================
