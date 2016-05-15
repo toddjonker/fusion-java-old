@@ -6,12 +6,15 @@ import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionList.checkActualListArg;
+import static com.amazon.fusion.FusionList.immutableList;
 import static com.amazon.fusion.FusionList.stretchyList;
 import static com.amazon.fusion.FusionList.unsafeListElement;
 import static com.amazon.fusion.FusionList.unsafeListSize;
 import static com.amazon.fusion.FusionNumber.isInt;
 import static com.amazon.fusion.FusionNumber.makeInt;
 import static com.amazon.fusion.FusionNumber.unsafeTruncateIntToJavaInt;
+import static com.amazon.fusion.FusionString.CHAR_TYPES.LOWERCASE;
+import static com.amazon.fusion.FusionString.CHAR_TYPES.UPPERCASE;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
 import static com.amazon.fusion.FusionText.checkRequiredTextArg;
@@ -518,7 +521,7 @@ public final class FusionString
         };
 
         abstract boolean isType(int codePoint);
-    };
+    }
 
     static boolean everyCodePointIsType(final String string, CHAR_TYPES charType)
     {
@@ -773,13 +776,13 @@ public final class FusionString
             extends Procedure
     {
         @Override
-        Object doApply(Evaluator eval, Object...args)
+        Object doApply(Evaluator eval, Object[] args)
                 throws FusionException
         {
             checkArityExact(2, args);
-            String string = FusionString.checkRequiredStringArg(eval, this, 0, args);
-            String values = FusionString.checkRequiredStringArg(eval, this, 1, args);
-            return FusionBool.makeBool(eval, string.contains(values));
+            String string = checkRequiredStringArg(eval, this, 0, args);
+            String values = checkRequiredStringArg(eval, this, 1, args);
+            return makeBool(eval, string.contains(values));
         }
     }
 
@@ -788,13 +791,13 @@ public final class FusionString
             extends Procedure
     {
         @Override
-        Object doApply(Evaluator eval, Object...args)
+        Object doApply(Evaluator eval, Object[] args)
                 throws FusionException
         {
             checkArityExact(2, args);
-            String string = FusionString.checkRequiredStringArg(eval, this, 0, args);
-            String suffix = FusionString.checkRequiredStringArg(eval, this, 1, args);
-            return FusionBool.makeBool(eval, string.endsWith(suffix));
+            String string = checkRequiredStringArg(eval, this, 0, args);
+            String suffix = checkRequiredStringArg(eval, this, 1, args);
+            return makeBool(eval, string.endsWith(suffix));
         }
     }
 
@@ -803,12 +806,12 @@ public final class FusionString
             extends Procedure
     {
         @Override
-        Object doApply(Evaluator eval, Object...args)
+        Object doApply(Evaluator eval, Object[] args)
                 throws FusionException
         {
             checkArityExact(2, args);
-            String string = FusionString.checkRequiredStringArg(eval, this, 0, args);
-            String substring = FusionString.checkRequiredStringArg(eval, this, 1, args);
+            String string    = checkRequiredStringArg(eval, this, 0, args);
+            String substring = checkRequiredStringArg(eval, this, 1, args);
             int indexOf = string.indexOf(substring);
             if (indexOf == -1)
             {
@@ -829,8 +832,8 @@ public final class FusionString
         Object doApply(Evaluator eval, Object stringArg)
                 throws FusionException
         {
-            String string = FusionString.checkRequiredStringArg(eval, this, 0, stringArg);
-            return FusionBool.makeBool(eval, everyCodePointIsType(string, CHAR_TYPES.LOWERCASE));
+            String string = checkRequiredStringArg(eval, this, 0, stringArg);
+            return makeBool(eval, everyCodePointIsType(string, LOWERCASE));
         }
     }
 
@@ -842,8 +845,8 @@ public final class FusionString
         Object doApply(Evaluator eval, Object stringArg)
                 throws FusionException
         {
-            String string = FusionString.checkRequiredStringArg(eval, this, 0, stringArg);
-            return FusionBool.makeBool(eval, everyCodePointIsType(string, CHAR_TYPES.UPPERCASE));
+            String string = checkRequiredStringArg(eval, this, 0, stringArg);
+            return makeBool(eval, everyCodePointIsType(string, UPPERCASE));
         }
     }
 
@@ -879,22 +882,22 @@ public final class FusionString
             extends Procedure
     {
         @Override
-        Object doApply(Evaluator eval, Object...args)
+        Object doApply(Evaluator eval, Object[] args)
                 throws FusionException
         {
             checkArityExact(2, args);
-            String string = FusionString.checkRequiredStringArg(eval, this, 0, args);
-            String separator = FusionString.checkRequiredStringArg(eval, this, 1, args);
+            String string    = checkRequiredStringArg(eval, this, 0, args);
+            String separator = checkRequiredStringArg(eval, this, 1, args);
             String[] splitResult = string.split(separator);
             List<Object> fusionStrings = new ArrayList<>();
             for (int i = 0; i < splitResult.length; i++)
             {
                 if (!(i == 0 && "".equals(splitResult[i])))
                 {
-                    fusionStrings.add(FusionString.makeString(eval, splitResult[i]));
+                    fusionStrings.add(makeString(eval, splitResult[i]));
                 }
             }
-            return FusionList.immutableList(eval, fusionStrings);
+            return immutableList(eval, fusionStrings);
         }
     }
 
@@ -903,13 +906,13 @@ public final class FusionString
             extends Procedure
     {
         @Override
-        Object doApply(Evaluator eval, Object...args)
+        Object doApply(Evaluator eval, Object[] args)
                 throws FusionException
         {
             checkArityExact(2, args);
-            String string = FusionString.checkRequiredStringArg(eval, this, 0, args);
-            String prefix = FusionString.checkRequiredStringArg(eval, this, 1, args);
-            return FusionBool.makeBool(eval, string.startsWith(prefix));
+            String string = checkRequiredStringArg(eval, this, 0, args);
+            String prefix = checkRequiredStringArg(eval, this, 1, args);
+            return makeBool(eval, string.startsWith(prefix));
         }
     }
 
