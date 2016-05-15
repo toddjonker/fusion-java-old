@@ -23,6 +23,17 @@ There is **NO SUPPORT** for this module.
     "/fusion/experimental/defines")
 
 
+  (defpub_j string_size_codepoints
+    '''
+    (string_size_codepoints string)
+
+Returns the number of code points in `string`.
+
+Since Fusion doesn't define a specific implementation of strings, this procedure
+is not guaranteed to have better than O(_n_) time.
+    '''
+    "com.amazon.fusion.FusionString$SizeCodePointsProc")
+
   (defpub_j string_size_utf8
     '''
     (string_size_utf8 string)
@@ -31,10 +42,10 @@ Returns the size of a string in UTF-8 bytes. Throws an exception if the
 argument contains invalid Unicode data (such as mismatched surrogates).
 Given `null.string` the result is zero.
 
-Note that this is an inefficient operation since it requires a transcoding
-from UTF-16 (Java's native String representation) to UTF-8.
+Since Fusion doesn't define a specific implementation of strings, this procedure
+is not guaranteed to have better than O(_n_) time.
     '''
-    "com.amazon.fusion.FusionString$SizeUtf8")
+    "com.amazon.fusion.FusionString$SizeUtf8Proc")
 
 
   // TODO See TODOs in the implementation before finalizing these procedures.
@@ -55,20 +66,14 @@ Returns a string filled by the given list of Unicode scalar values.
     '''
     "com.amazon.fusion.FusionString$ImplodeProc")
 
-  (defpub_j string_index_of
+  (defpub_j string_utf16_index_of
     '''
-    (string_index_of string substring)
+    (string_utf16_index_of string substring)
 
-Returns the index (number of code units) within `string` of the first occurrence of `substring`.
-Returns void if the substring doesn't occur within the string.'
-    '''
-    "com.amazon.fusion.FusionString$IndexOfProc")
+Returns the number of UTF-16 code units within `string` of the first occurrence
+of `substring`.
 
-  (defpub_j string_size_codepoints
+Returns void if the substring doesn't occur within the string.
     '''
-    (string_size_codepoints string)
-
-Returns the number of code points in `string`.
-    '''
-    "com.amazon.fusion.FusionString$LengthProc")
+    "com.amazon.fusion.FusionString$Utf16IndexOfProc")
 )

@@ -568,13 +568,27 @@ public final class FusionString
     }
 
 
-    static final class SizeUtf8
+    static final class SizeCodePointsProc
+            extends Procedure1
+    {
+        @Override
+        Object doApply(Evaluator eval, Object stringArg)
+                throws FusionException
+        {
+            String string = checkRequiredStringArg(eval, this, 0, stringArg);
+            return makeInt(eval, numberOfCodePoints(string));
+        }
+    }
+
+
+    static final class SizeUtf8Proc
         extends Procedure1
     {
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
         {
+            // TODO size_codepoint requires its string, but this does not.
             String s = checkNullableStringArg(eval, this, 0, arg);
 
             if (s == null || s.isEmpty()) return FusionNumber.ZERO_INT;
@@ -785,7 +799,7 @@ public final class FusionString
     }
 
 
-    static final class IndexOfProc
+    static final class Utf16IndexOfProc // counts code units!
             extends Procedure
     {
         @Override
@@ -857,19 +871,6 @@ public final class FusionString
             }
 
             return makeString(eval, resultBuilder.toString());
-        }
-    }
-
-
-    static final class LengthProc
-            extends Procedure1
-    {
-        @Override
-        Object doApply(Evaluator eval, Object stringArg)
-                throws FusionException
-        {
-            String string = FusionString.checkRequiredStringArg(eval, this, 0, stringArg);
-            return FusionNumber.makeInt(eval, numberOfCodePoints(string));
         }
     }
 
