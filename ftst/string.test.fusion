@@ -1,8 +1,9 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
   "/fusion/experimental/string"
+  "/fusion/list"
   "/fusion/string")
 
 
@@ -44,6 +45,22 @@
 (check === "aBc"  (string_append (quote aB) "c"))
 (check === "aBcd" (string_append (quote aB) "c" (quote d)))
 
+
+(expect_argument_exn (string_append (void)))
+(expect_argument_exn (string_append null))
+(expect_argument_exn (string_append null.string))
+
+(expect_argument_exn (string_append (void) "anything"))
+(expect_argument_exn (string_append null "anything"))
+(expect_argument_exn (string_append null.string "anything"))
+
+(expect_argument_exn (string_append "anything" (void)))
+(expect_argument_exn (string_append "anything" null))
+(expect_argument_exn (string_append "anything" null.string))
+
+
+//============================================================================
+// string_to_lower, string_to_upper
 
 (check === ""    (string_to_lower ""))
 (check === "abc" (string_to_lower "AbC"))
@@ -106,6 +123,7 @@
 
 //============================================================================
 // string_contains
+
 (expect_argument_exn (string_contains (void) "anything"))
 (expect_argument_exn (string_contains null "anything"))
 (expect_argument_exn (string_contains null.string "anything"))
@@ -123,6 +141,7 @@
 
 //============================================================================
 // string_ends_with
+
 (expect_argument_exn (string_ends_with (void) (void)))
 (expect_argument_exn (string_ends_with (void) "def"))
 (expect_argument_exn (string_ends_with "abcdef" (void)))
@@ -141,6 +160,7 @@
 
 //============================================================================
 // string_is_lower
+
 (expect_argument_exn (string_is_lower (void)))
 (expect_argument_exn (string_is_lower null))
 (expect_argument_exn (string_is_lower null.string))
@@ -175,6 +195,7 @@
 
 //============================================================================
 // string_is_upper
+
 (expect_argument_exn (string_is_upper (void)))
 (expect_argument_exn (string_is_upper null))
 (expect_argument_exn (string_is_upper null.string))
@@ -209,6 +230,7 @@
 
 //============================================================================
 // string_join
+
 (expect_arity_exn (string_join (void)))
 (expect_arity_exn (string_join null.string))
 (expect_arity_exn (string_join ""))
@@ -229,6 +251,7 @@
 
 //============================================================================
 // string_split
+
 (expect_arity_exn (string_split (void)))
 (expect_arity_exn (string_split null.string))
 (expect_arity_exn (string_split ""))
@@ -237,6 +260,7 @@
 (expect_argument_exn (string_split null.string " "))
 (expect_argument_exn (string_split "abc def" null))
 (expect_argument_exn (string_split "abc def" null.string))
+
 (check === [] (string_split "" " "))
 (check === ["a", "b", "c", " ", "d", "e", "f"] (string_split "abc def" ""))
 (check === ["abc", "def"] (string_split "abc def" " "))
@@ -245,9 +269,14 @@
 (check === ["abc"] (string_split " abc " " "))
 (check === ["ab", "cd", "ef"] (string_split "abZZZcdZZZef" "ZZZ"))
 
+(check_pred is_immutable_list (string_split "" ""))
+(check_pred is_immutable_list (string_split "a-b" "-"))
+(check_pred is_immutable_list (string_split "ab" ""))
+
 
 //============================================================================
 // string_starts_with
+
 (expect_argument_exn (string_starts_with (void) (void)))
 (expect_argument_exn (string_starts_with null null))
 (expect_argument_exn (string_starts_with null.string null.string))

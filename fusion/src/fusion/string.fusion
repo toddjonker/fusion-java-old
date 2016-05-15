@@ -1,9 +1,20 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 (module string '/fusion/private/builtins'
 
   '''
 Operations for strings.
+
+Mirroring Ion, a Fusion string is a _[Unicode coded character sequence][CCS]_.
+
+At this time, the core libraries do not treat `string` as one of the
+[`sequence`](sequence.html) types, to avoid surprising performance complexity
+when addressing elements of the sequence.
+Specifically, indexed access to a selected character in a string takes O(_n_)
+time, since the implementation is unlikely to use the inefficient UTF-32
+representation required for constant-time access.
+
+[CCS]: http://www.unicode.org/glossary/#coded_character_sequence
   '''
 
   // Pass-through bindings from kernel
@@ -16,8 +27,10 @@ Operations for strings.
     '''
     (string_append text ...)
 
-Concatenates the `text` values (strings or symbols), returning a string.  If no
-arguments are supplied, the result is `""`.
+Concatenates the `text` values (strings or symbols), returning a string.
+All arguments must be actual strings.
+
+If no arguments are supplied, the result is `""`.
     '''
     "com.amazon.fusion.FusionString$AppendProc")
 
@@ -57,9 +70,10 @@ given `null.symbol`.
 
   (defpub_j string_contains
     '''
-    (string_contains string values)
+    (string_contains string substring)
 
-Returns true if and only if `string` contains `values`.
+Returns true if and only if `string` contains the `substring`.
+Both arguments must be actual strings.
     '''
     "com.amazon.fusion.FusionString$ContainsProc")
 
@@ -68,6 +82,7 @@ Returns true if and only if `string` contains `values`.
     (string_ends_with string suffix)
 
 Returns true if and only if `string` ends with `suffix`.
+Both arguments must be actual strings.
     '''
     "com.amazon.fusion.FusionString$EndsWithProc")
 
@@ -96,6 +111,7 @@ A list of upper-case code points can be found [online](http://www.fileformat.inf
     (string_join separator string ...)
 
 Joins the arguments after `separator` into a single string separated by `separator`.
+All arguments must be actual strings.
 
 No `separator` is added before or after the list.
     '''
@@ -105,7 +121,9 @@ No `separator` is added before or after the list.
     '''
     (string_split string separator)
 
-Splits `string` into a list of strings using `separator`.
+Splits `string` into an immutable list of strings using `separator`.
+Both arguments must be actual strings.
+
 Returns an empty list when `string` is an empty string.
     '''
     "com.amazon.fusion.FusionString$SplitProc")
@@ -115,6 +133,7 @@ Returns an empty list when `string` is an empty string.
     (string_starts_with string prefix)
 
 Returns true if and only if `string` begins with `prefix`.
+Both arguments must be actual strings.
     '''
     "com.amazon.fusion.FusionString$StartsWithProc")
 )
