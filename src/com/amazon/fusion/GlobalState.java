@@ -26,6 +26,7 @@ final class GlobalState
     static final String LAMBDA          = "lambda";
     static final String MODULE          = "module";
     static final String PROVIDE         = "provide";
+    static final String RENAME_OUT      = "rename_out";
     static final String REQUIRE         = "require";
 
     final IonSystem                  myIonSystem;
@@ -43,6 +44,7 @@ final class GlobalState
     final Binding myKernelDefineBinding;
     final Binding myKernelDefineSyntaxBinding;
     final Binding myKernelProvideBinding;
+    final Binding myKernelRenameOutBinding;
     final Binding myKernelRequireBinding;
 
     private GlobalState(IonSystem                  ionSystem,
@@ -72,6 +74,7 @@ final class GlobalState
         myKernelDefineSyntaxBinding  = kernelBinding(DEFINE_SYNTAX);
         myKernelProvideBinding       = kernelBinding(PROVIDE);
         myKernelRequireBinding       = kernelBinding(REQUIRE);
+        myKernelRenameOutBinding     = kernelBinding(RENAME_OUT);
     }
 
 
@@ -126,6 +129,7 @@ final class GlobalState
         ns.define(MODULE, new ModuleForm(resolver, currentModuleDeclareName));
         ns.define(PROVIDE, new ProvideForm());
         ns.define(REQUIRE, new RequireForm(resolver));
+        ns.define(RENAME_OUT, new ProvideForm.RenameOutForm());
 
 
         ns.instantiate();

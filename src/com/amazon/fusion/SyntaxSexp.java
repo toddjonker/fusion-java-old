@@ -440,13 +440,11 @@ final class SyntaxSexp
     //========================================================================
 
     /**
-     * Finds the {@linkplain Binding#target() target binding} for the leading
-     * identifier in this sexp.
+     * Finds the leading identifier in this sexp.
      *
      * @return null if this sexp doesn't start with an identifier.
-     * Null is also equivalent to a {@link FreeBinding} on a lead identifier.
      */
-    Binding firstTargetBinding(Evaluator eval)
+    SyntaxSymbol firstIdentifier(Evaluator eval)
         throws FusionException
     {
         if (isPair(eval, mySexp))
@@ -456,9 +454,27 @@ final class SyntaxSexp
             Object first = unsafePairHead(eval, mySexp);
             if (first instanceof SyntaxSymbol)
             {
-                Binding binding = ((SyntaxSymbol)first).uncachedResolveMaybe();
-                if (binding != null) return binding.target();
+                return (SyntaxSymbol) first;
             }
+        }
+        return null;
+    }
+
+    /**
+     * Finds the {@linkplain Binding#target() target binding} for the leading
+     * identifier in this sexp.
+     *
+     * @return null if this sexp doesn't start with an identifier.
+     * Null is also equivalent to a {@link FreeBinding} on a lead identifier.
+     */
+    Binding firstTargetBinding(Evaluator eval)
+        throws FusionException
+    {
+        SyntaxSymbol first = firstIdentifier(eval);
+        if (first != null)
+        {
+            Binding binding = first.uncachedResolveMaybe();
+            if (binding != null) return binding.target();
         }
         return null;
     }

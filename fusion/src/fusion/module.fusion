@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
 
 (module module "/fusion/private/kernel"
 
@@ -10,5 +10,5 @@ See [Modules and Scripts](/module.html) for an overview.
 
   (require "/fusion/experimental/defines")
 
-  (provide all_defined_out module provide require)
+  (provide all_defined_out module provide rename_out require)
 )

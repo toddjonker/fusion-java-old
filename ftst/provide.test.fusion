@@ -1,8 +1,9 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/eval"
   "/fusion/experimental/check"
+  "/fusion/experimental/syntax"
   )
 
 
@@ -18,6 +19,10 @@
     (if true
       (provide if)  // ERROR: not at module level
       true)))
+
+// The base case: no provide clauses.
+(module NothingOut "/fusion"
+  (provide))
 
 
 //============================================================================
@@ -43,6 +48,11 @@
 (require M1)
 (check === 1 m1)
 (check === 2 m2)
+
+
+(expect_syntax_exn
+  (module Bad "/fusion"
+    (provide (all_defined_out id))))  // ERROR: superfluous id
 
 
 //============================================================================
@@ -92,3 +102,65 @@
     (define top "M5")
     (provide top)
     (defpubtop "macro M5")))
+
+
+//============================================================================
+// Check simple rename_out
+
+(module M6 "/fusion"
+  (provide (rename_out)))
+(require M6)
+
+(module M7 "/fusion"
+  (define counter 508)
+  (provide (rename_out (counter m7_counter)
+                       (counter m7_counter2))))
+(require M7)
+(check === 508 m7_counter)
+(check === 508 m7_counter2)
+(check free_identifier_equal (quote_syntax m7_counter) (quote_syntax m7_counter2))
+
+(module M8 "/fusion"
+  (require M7)
+  (provide m7_counter (rename_out (m7_counter2 m8_counter2))))
+(require M8)
+(check === 508 m7_counter)   // Renamed then passed through
+(check === 508 m8_counter2)  // Renamed twice
+(check free_identifier_equal (quote_syntax m7_counter) (quote_syntax m7_counter2))
+(check free_identifier_equal (quote_syntax m7_counter) (quote_syntax m8_counter2))
+
+
+(expect_syntax_exn
+  (module Bad "/fusion"
+    (provide (rename_out id id2))))  // ERROR: not a rename pair
+
+(expect_syntax_exn
+  (module Bad "/fusion"
+    (provide (rename_out ()))))  // ERROR: Malformed rename pair
+
+(expect_syntax_exn
+  (module Bad "/fusion"
+    (provide (rename_out (+ out out2)))))  // ERROR: Malformed rename pair
+
+(expect_syntax_exn
+  (module Bad "/fusion"
+    (provide (rename_out (12 id)))))  // ERROR: local is not an identifier
+
+(expect_syntax_exn
+  (module Bad "/fusion"
+    (provide (rename_out (+ 12)))))  // ERROR: exported is not an identifier
+
+(expect_syntax_exn
+  (module Bad "/fusion"
+    (provide (rename_out (unbound out)))))  // ERROR: unbound identifier
+
+(expect_syntax_exn
+  (module Bad "/fusion"
+    (provide (rename_out (+ out) (- out)))))  // ERROR: duplicate name
+
+(expect_syntax_exn
+  (module Bad "/fusion"
+    (define one 1)
+    (define two 2)
+    (provide (all_defined_out))
+    (provide (rename_out (one two)))))  // ERROR: duplicate name

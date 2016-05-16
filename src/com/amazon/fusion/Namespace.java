@@ -274,14 +274,14 @@ abstract class Namespace
     }
 
 
-    abstract NsBinding newBinding(SyntaxSymbol identifier, int address);
+    abstract NsBinding newDefinedBinding(SyntaxSymbol identifier, int address);
 
 
-    final NsBinding addBinding(SyntaxSymbol identifier)
+    final NsBinding addDefinedBinding(SyntaxSymbol identifier)
         throws FusionException
     {
         int address = myBindings.size();
-        NsBinding binding = newBinding(identifier, address);
+        NsBinding binding = newDefinedBinding(identifier, address);
         myBindings.add(binding);
         return binding;
     }
@@ -399,10 +399,10 @@ abstract class Namespace
         throws FusionException
     {
         ModuleInstance module = myRegistry.instantiate(eval, id);
-        require(module);
+        require(eval, module);
     }
 
-    abstract void require(ModuleInstance module)
+    abstract void require(Evaluator eval, ModuleInstance module)
         throws FusionException;
 
 
