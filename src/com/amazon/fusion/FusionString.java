@@ -18,6 +18,7 @@ import static com.amazon.fusion.FusionString.CHAR_TYPES.UPPERCASE;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
 import static com.amazon.fusion.FusionText.checkRequiredTextArg;
+import static com.amazon.fusion.FusionVoid.voidValue;
 import static java.lang.Character.highSurrogate;
 import static java.lang.Character.isSupplementaryCodePoint;
 import static java.lang.Character.lowSurrogate;
@@ -802,7 +803,7 @@ public final class FusionString
     }
 
 
-    static final class Utf16IndexOfProc // counts code units!
+    static final class IndexCodePointsProc
             extends Procedure
     {
         @Override
@@ -815,11 +816,11 @@ public final class FusionString
             int indexOf = string.indexOf(substring);
             if (indexOf == -1)
             {
-                return FusionVoid.voidValue(eval);
+                return voidValue(eval);
             }
             else
             {
-                return FusionNumber.makeInt(eval, indexOf);
+                return makeInt(eval, string.codePointCount(0, indexOf));
             }
         }
     }

@@ -34,24 +34,24 @@
 (check === 16 (string_size_utf8 "hello\x80\u07ff\uffff\U000ffff1"))
 
 //============================================================================
-// string_utf16_index_of
+// string_index_codepoints
 
-(expect_argument_exn (string_utf16_index_of (void) "a"))
-(expect_argument_exn (string_utf16_index_of "a" (void)))
-(expect_argument_exn (string_utf16_index_of null "a"))
-(expect_argument_exn (string_utf16_index_of "a" null))
-(expect_argument_exn (string_utf16_index_of null.string "a"))
-(expect_argument_exn (string_utf16_index_of "a" null.string))
-(expect_argument_exn (string_utf16_index_of null.string null.string))
+(expect_argument_exn (string_index_codepoints (void) "a"))
+(expect_argument_exn (string_index_codepoints "a" (void)))
+(expect_argument_exn (string_index_codepoints null "a"))
+(expect_argument_exn (string_index_codepoints "a" null))
+(expect_argument_exn (string_index_codepoints null.string "a"))
+(expect_argument_exn (string_index_codepoints "a" null.string))
+(expect_argument_exn (string_index_codepoints null.string null.string))
 
-(check === 0 (string_utf16_index_of "" ""))
-(check_void (string_utf16_index_of "" "a"))
-(check === 0 (string_utf16_index_of "aabaabaa" "a"))
-(check === 2 (string_utf16_index_of "aabaabaa" "b"))
-(check === 1 (string_utf16_index_of "aabaabaa" "ab"))
-(check === 0 (string_utf16_index_of "aabaabaa" ""))
-(check === 3 (string_utf16_index_of "\uD835\uDFCB\u006B\uD835\uDF9E" "\uD835\uDF9E"))
-(check === 2 (string_utf16_index_of "\uD835\uDFCB\u006B\uD835\uDF9E" "\u006B"))
+(check === 0 (string_index_codepoints "" ""))
+(check_void (string_index_codepoints "" "a"))
+(check === 0 (string_index_codepoints "aabaabaa" "a"))
+(check === 2 (string_index_codepoints "aabaabaa" "b"))
+(check === 1 (string_index_codepoints "aabaabaa" "ab"))
+(check === 0 (string_index_codepoints "aabaabaa" ""))
+(check === 2 (string_index_codepoints "\uD835\uDFCB\u006B\uD835\uDF9E" "\uD835\uDF9E"))
+(check === 1 (string_index_codepoints "\uD835\uDFCB\u006B\uD835\uDF9E" "\u006B"))
 
 
 //============================================================================
