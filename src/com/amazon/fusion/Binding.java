@@ -66,6 +66,16 @@ abstract class Binding
      */
     abstract Object lookup(Namespace ns);
 
+    /**
+     * Checks whether this binding can be mutated.
+     *
+     * @return null if the binding can be mutated, else a syntax error message.
+     */
+    String mutationSyntaxErrorMessage()
+    {
+        return null;
+    }
+
 
     CompiledForm compileDefine(Evaluator eval,
                                Environment env,

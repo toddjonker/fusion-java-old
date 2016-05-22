@@ -69,9 +69,7 @@ abstract class Namespace
                                        CompiledForm valueForm)
             throws FusionException
         {
-            String message =
-                "Mutation of top-level variables is not supported";
-            throw new ContractException(message);
+            throw new IllegalStateException("Mutation should have been rejected");
         }
 
         CompiledForm compileDefineSyntax(Evaluator eval,

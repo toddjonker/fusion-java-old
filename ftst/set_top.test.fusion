@@ -1,0 +1,22 @@
+"Copyright (c) 2016 Amazon.com, Inc.  All rights reserved."
+
+(require "/fusion/experimental/check")
+
+
+// TODO Mutating an undefined top-level binding should throw contract exn at
+//      runtime, not a syntax error at compile-time.
+(expect_syntax_exn
+  (set unbound "outside"))
+
+
+"============================================================================="
+"Attempted mutation of imported bindings"
+
+(module M1 "/fusion"
+  (define m1_bound "in M1")
+  (provide m1_bound))
+(require M1)
+
+(expect_syntax_exn
+  (set m1_bound "outside"))
+(check === "in M1" m1_bound)

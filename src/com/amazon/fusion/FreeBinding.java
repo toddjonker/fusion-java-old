@@ -44,6 +44,14 @@ final class FreeBinding
         return null;
     }
 
+
+    @Override
+    public String mutationSyntaxErrorMessage()
+    {
+         return "identifier has no binding";
+    }
+
+
     @Override
     CompiledForm compileDefine(Evaluator eval,
                                Environment env,

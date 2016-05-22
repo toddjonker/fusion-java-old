@@ -16,9 +16,11 @@ final class SetForm
 
         SyntaxSymbol id = check.requiredIdentifier("variable identifier", 1);
         Binding binding = id.resolve();
-        if (binding instanceof FreeBinding)
+
+        String message = binding.mutationSyntaxErrorMessage();
+        if (message != null)
         {
-            throw check.failure("variable has no binding", id);
+            throw check.failure(message, id);
         }
 
         SyntaxValue[] children = stx.extract(eval);

@@ -60,6 +60,10 @@ final class TopLevelNamespace
             myPrecedence = precedence;
         }
 
+        /**
+         * Creates a temporary binding for a top-level identifier that's
+         * required, but not (currently) defined in the namespace.
+         */
         private TopLevelBinding(TopLevelRequireBinding required)
         {
             super(required.getIdentifier(), REQUIRED_FROM_ELSEWHERE);
@@ -81,6 +85,18 @@ final class TopLevelNamespace
                 return ns.lookupDefinition(this);
             }
             return myTarget.lookup(ns);
+        }
+
+
+        @Override
+        public String mutationSyntaxErrorMessage()
+        {
+            boolean required =
+                (myPrecedence == REQUIRED_FROM_ELSEWHERE || myTarget != this);
+
+             return required
+                 ? "cannot mutate imported binding"
+                 : "mutation of top-level variables is not yet supported";
         }
 
 
@@ -210,6 +226,8 @@ final class TopLevelNamespace
             {
                 // We have an import, but no top-level definition.
                 // TODO this is too common to throw away binding instance?
+                //    Perhaps, but this binding doesn't have a local address
+                //    and we may need to assign one later.
                 return new TopLevelBinding(requiredBinding);
 
                 // TODO FUSION-117 Just return requiredBinding.myBinding?

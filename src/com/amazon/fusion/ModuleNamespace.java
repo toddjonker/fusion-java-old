@@ -212,6 +212,12 @@ final class ModuleNamespace
         }
 
         @Override
+        public String mutationSyntaxErrorMessage()
+        {
+             return "mutation of module-level bindings is not yet supported";
+        }
+
+        @Override
         CompiledForm compileDefine(Evaluator eval,
                                    Environment env,
                                    SyntaxSymbol id,
