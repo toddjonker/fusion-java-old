@@ -410,7 +410,7 @@ final class ModuleForm
             otherForms.add(compiled);
         }
 
-        ProvidedBindings providedBindings =
+        ProvidedBinding[] providedBindings =
             providedBindings(eval, moduleNamespace, stx, i);
 
         CompiledForm[] otherFormsArray =
@@ -456,18 +456,6 @@ final class ModuleForm
     //========================================================================
 
 
-    private static final class ProvidedBindings
-    {
-        final BaseSymbol[]      names;
-        final ProvidedBinding[] bindings;
-
-        ProvidedBindings(BaseSymbol[] names, ProvidedBinding[] bindings)
-        {
-            this.names = names;
-            this.bindings = bindings;
-        }
-    }
-
     /**
      * Process all the provide-forms, which macro-expansion has grouped
      * together at the end of the module.
@@ -475,14 +463,13 @@ final class ModuleForm
      * @param firstProvidePos the index within {@code moduleStx} of the first
      * provide-form. All elements from that position onward are provide-forms.
      */
-    private ProvidedBindings providedBindings(Evaluator  eval,
-                                              Namespace  ns,
-                                              SyntaxSexp moduleStx,
-                                              int        firstProvidePos)
+    private ProvidedBinding[] providedBindings(Evaluator  eval,
+                                               Namespace  ns,
+                                               SyntaxSexp moduleStx,
+                                               int        firstProvidePos)
         throws FusionException
     {
         Map<BaseSymbol,Binding> bound    = new IdentityHashMap<>();
-        List<BaseSymbol>        names    = new ArrayList<>();
         List<ProvidedBinding>   bindings = new ArrayList<>();
 
         for (int p = firstProvidePos; p < moduleStx.size(); p++)
@@ -533,14 +520,15 @@ final class ModuleForm
                         " is being exported with multiple bindings";
                     throw check.failure(message, exportId);
                 }
-                names.add(name);
 
-                bindings.add(binding.provideAs(exportId));
+                ProvidedBinding provided = binding.provideAs(exportId);
+                assert name == provided.getName();
+
+                bindings.add(provided);
             }
         }
 
-        return new ProvidedBindings(names.toArray(new BaseSymbol[0]),
-                                    bindings.toArray(new ProvidedBinding[0]));
+        return bindings.toArray(new ProvidedBinding[0]);
     }
 
 
@@ -558,25 +546,23 @@ final class ModuleForm
         private final ModuleIdentity[]  myRequiredModules;
         private final int               myVariableCount;
         private final BindingDoc[]      myBindingDocs;
-        private final BaseSymbol[]      myProvidedNames;
         private final ProvidedBinding[] myProvidedBindings;
         private final CompiledForm[]    myBody;
 
-        private CompiledModule(ModuleIdentity   id,
-                               String           docs,
-                               ModuleIdentity[] requiredModules,
-                               int              variableCount,
-                               BindingDoc[]     bindingDocs,
-                               ProvidedBindings providedBindings,
-                               CompiledForm[]   body)
+        private CompiledModule(ModuleIdentity    id,
+                               String            docs,
+                               ModuleIdentity[]  requiredModules,
+                               int               variableCount,
+                               BindingDoc[]      bindingDocs,
+                               ProvidedBinding[] providedBindings,
+                               CompiledForm[]    body)
         {
             myId                  = id;
             myDocs                = docs;
             myRequiredModules     = requiredModules;
             myVariableCount       = variableCount;
             myBindingDocs         = bindingDocs;
-            myProvidedNames       = providedBindings.names;
-            myProvidedBindings    = providedBindings.bindings;
+            myProvidedBindings    = providedBindings;
             myBody                = body;
         }
 
@@ -610,8 +596,7 @@ final class ModuleForm
                                 myVariableCount, myBindingDocs);
 
             ModuleInstance module =
-                new ModuleInstance(myId, myDocs, store, myProvidedNames,
-                                   myProvidedBindings);
+                new ModuleInstance(myId, myDocs, store, myProvidedBindings);
 
             for (CompiledForm form : myBody)
             {

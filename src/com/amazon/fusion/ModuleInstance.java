@@ -69,23 +69,18 @@ final class ModuleInstance
 
     /**
      * Creates a module that {@code provide}s the given bindings.
-     * <p>
-     * Note that the {@code providedNames} don't necessarily match the names of
-     * the {@code providedBindings}, since the targets may have been renamed
-     * by a {@code provide} form.
      */
     ModuleInstance(ModuleIdentity    identity,
                    String            docs,
                    ModuleStore       namespace,
-                   BaseSymbol[]      providedNames,
                    ProvidedBinding[] providedBindings)
         throws FusionException
     {
-        this(identity, docs, namespace, providedNames.length);
+        this(identity, docs, namespace, providedBindings.length);
 
-        for (int i = 0; i < providedNames.length; i++)
+        for (ProvidedBinding binding : providedBindings)
         {
-            myProvidedBindings.put(providedNames[i], providedBindings[i]);
+            myProvidedBindings.put(binding.getName(), binding);
         }
     }
 
