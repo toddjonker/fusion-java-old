@@ -70,8 +70,7 @@ final class LetValuesForm
         }
         else
         {
-            boundNames =
-                boundNameList.toArray(new SyntaxSymbol[bindingCount]);
+            boundNames = boundNameList.toArray(SyntaxSymbol.EMPTY_ARRAY);
             bodyEnv = new LocalEnvironment(env, boundNames, stx);
             localWrap = new EnvironmentWrap(bodyEnv);
         }

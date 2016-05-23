@@ -519,9 +519,7 @@ abstract class Namespace
 
     final Object[] extractValues()
     {
-        Object[] values = new Object[myValues.size()];
-        myValues.toArray(values);
-        return values;
+        return myValues.toArray();
     }
 
 
@@ -614,8 +612,7 @@ abstract class Namespace
     {
         if (myBindingDocs == null) return BindingDoc.EMPTY_ARRAY;
 
-        BindingDoc[] docs = new BindingDoc[myBindingDocs.size()];
-        myBindingDocs.toArray(docs);
+        BindingDoc[] docs = myBindingDocs.toArray(BindingDoc.EMPTY_ARRAY);
         myBindingDocs = null;
         return docs;
     }

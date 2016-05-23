@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -177,8 +177,7 @@ class CoverageDatabase
             }
         }
 
-        SourceLocation[] locsArray =
-            locsList.toArray(new SourceLocation[locsList.size()]);
+        SourceLocation[] locsArray = locsList.toArray(new SourceLocation[0]);
 
         Arrays.sort(locsArray, SRCLOC_COMPARE);
 

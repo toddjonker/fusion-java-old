@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -58,15 +58,13 @@ final class FusionList
             return nullList(eval, annotations);
         }
 
-        int size = seq.size();
-        if (size == 0)
+        if (seq.isEmpty())
         {
             return immutableList(eval, annotations, EMPTY_OBJECT_ARRAY);
         }
         else
         {
-            Object[] elts = seq.toArray(new Object[size]);
-            return new LazyInjectingList(annotations, elts);
+            return new LazyInjectingList(annotations, seq.toArray());
         }
     }
 
@@ -103,11 +101,9 @@ final class FusionList
      * Creates a mutable list containing the elements.
      * @param elements must be injected.
      */
-    static <T> MutableList mutableList(Evaluator eval, List<T> elements)
+    static MutableList mutableList(Evaluator eval, List<?> elements)
     {
-        Object[] v = new Object[elements.size()];
-        elements.toArray(v);
-        return new MutableList(v);
+        return new MutableList(elements.toArray());
     }
 
 
@@ -159,17 +155,15 @@ final class FusionList
     /**
      * @param elements must not be null
      */
-    static <T> ImmutableList immutableList(Evaluator eval, List<T> elements)
+    static ImmutableList immutableList(Evaluator eval, List<?> elements)
     {
-        int size = elements.size();
-        if (size == 0)
+        if (elements.isEmpty())
         {
             return EMPTY_IMMUTABLE_LIST;
         }
         else
         {
-            Object[] elts = elements.toArray(new Object[size]);
-            return new ImmutableList(elts);
+            return new ImmutableList(elements.toArray());
         }
     }
 
@@ -181,15 +175,13 @@ final class FusionList
                                        BaseSymbol[] annotations,
                                        List<?> elements)
     {
-        int size = elements.size();
-        if (size == 0 && annotations.length == 0)
+        if (elements.isEmpty() && annotations.length == 0)
         {
             return EMPTY_IMMUTABLE_LIST;
         }
         else
         {
-            Object[] elts = elements.toArray(new Object[size]);
-            return new ImmutableList(annotations, elts);
+            return new ImmutableList(annotations, elements.toArray());
         }
     }
 

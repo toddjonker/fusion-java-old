@@ -78,8 +78,7 @@ final class ProvideForm
             }
         }
 
-        SyntaxValue[] children =
-            expanded.toArray(new SyntaxValue[expanded.size()]);
+        SyntaxValue[] children = expanded.toArray(SyntaxValue.EMPTY_ARRAY);
         return form.copyReplacingChildren(eval, children);
     }
 

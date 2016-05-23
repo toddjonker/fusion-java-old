@@ -1,4 +1,4 @@
-// Copyright (c) 2005-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2005-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -222,9 +222,7 @@ abstract class Command
             }
         }
 
-        String[] arrayResult = new String[result.size()];
-        result.toArray(arrayResult);
-        return arrayResult;
+        return result.toArray(new String[0]);
     }
 
 

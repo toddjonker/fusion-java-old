@@ -414,7 +414,7 @@ final class ModuleForm
             providedBindings(eval, moduleNamespace, stx, i);
 
         CompiledForm[] otherFormsArray =
-            otherForms.toArray(new CompiledForm[otherForms.size()]);
+            otherForms.toArray(CompiledForm.EMPTY_ARRAY);
 
         int bindingCount = (Integer)
             stx.findProperty(eval, STX_PROP_BINDING_COUNT);

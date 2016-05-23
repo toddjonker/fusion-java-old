@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -876,13 +876,12 @@ public class FusionRuntimeBuilder
             }
         }
 
-        int size = repos.size();
-        if (size == 0)
+        if (repos.isEmpty())
         {
             throw new IllegalStateException("No repositories have been declared");
         }
 
-        return repos.toArray(new ModuleRepository[size]);
+        return repos.toArray(new ModuleRepository[0]);
     }
 
 

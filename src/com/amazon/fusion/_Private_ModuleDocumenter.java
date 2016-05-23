@@ -1,8 +1,9 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.DocIndex.buildDocIndex;
+import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.ModuleDoc.buildDocTree;
 import static com.amazon.ion.system.IonTextWriterBuilder.UTF8;
 import com.amazon.fusion.ModuleDoc.Filter;
@@ -283,7 +284,7 @@ public final class _Private_ModuleDocumenter
 
             renderHeader2("Submodules");
 
-            String[] names = submodules.keySet().toArray(new String[0]);
+            String[] names = submodules.keySet().toArray(EMPTY_STRING_ARRAY);
             Arrays.sort(names);
 
             append("<ul class='submodules'>");
