@@ -64,7 +64,8 @@ final class FusionList
         }
         else
         {
-            return new LazyInjectingList(annotations, seq.toArray());
+            return new LazyInjectingList(annotations,
+                                         seq.toArray(EMPTY_OBJECT_ARRAY));
         }
     }
 
