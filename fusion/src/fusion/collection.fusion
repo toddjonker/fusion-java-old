@@ -398,7 +398,7 @@ each value, and the result is either one of those values or void.
                elt
                (loop (tail s)))))))
       (true
-       (raise_argument_error "any" "collection" 0 collection))))
+       (raise_argument_error "find" "collection" 0 collection))))
 
   // Name per Dylan.  Equivalent to SRFI-1 `for_each` but I don't want this to
   // be confused with the `for` syntax from Racket (which I intend to provide).
@@ -438,7 +438,7 @@ See also: [`struct_do`](fusion/struct.html#struct_do)
              (proc (head s))
              (loop (tail s))))))
       (true
-       (raise_argument_error "any" "collection" 0 collection))))
+       (raise_argument_error "do" "collection" 0 collection))))
 
 
   (defpub (same_size collection1 collection2)
