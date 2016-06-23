@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 (module procedure "/fusion/private/builtins"
 
@@ -91,10 +91,52 @@ of bound identifiers:
     "/fusion/private/compare"
     "/fusion/private/control"
     "/fusion/private/sexp"
+    "/fusion/unsafe/list"
     "/fusion/unsafe/sexp")
 
 
   (provide apply is_procedure lambda let_values values)
+
+
+  (defpub_syntax |
+    '''
+    (| arg ... | body ...+)
+
+A more concise alternative to [`lambda`](fusion/procedure.html#lambda).
+The `|` (pipe) identifier is followed by zero or more argument identifiers,
+then another pipe, then the body of the procedure.
+
+The translation from `|` to `lambda` is straightforward:
+
+    (| x ... | body ...) -> (lambda (x ...) body ...)
+    (| | body ...) -> (lambda () body ...)
+
+Note that `(| | body)` and `(|| body)` generate identical code, but they are
+technically not the same syntactic form.  The Ion grammar specifies that `||`
+is a single, two-character symbol, so the latter expression uses the form named
+[`||`](fusion/procedure.html#||), which creates a no-argument procedure.
+    '''
+    (lambda (stx)
+      (let [(pipe (unsafe_pair_head (syntax_unwrap stx)))]
+        (let loop [(args (stretchy_list)),
+                   (rest (unsafe_pair_tail (syntax_unwrap stx)))]
+          (unless (is_pair rest)
+            (wrong_syntax stx "Didn't find closing `|`"))
+          (let [(rest_head (unsafe_pair_head rest)),
+                (rest_tail (unsafe_pair_tail rest))]
+            (unless (is_identifier rest_head)
+              (wrong_syntax stx "Expected identifier, found " rest_head))
+            (if (free_identifier_equal rest_head pipe)
+              (let [(body (unsafe_pair_tail rest))]
+                (unless (is_pair body)
+                  (wrong_syntax stx "Expected at least one body form after closing `|`"))
+                (datum_to_syntax
+                  (apply sexp (quote_syntax lambda) (apply sexp args) body)
+                  (quote_syntax context)
+                  stx))
+              (loop
+                (unsafe_list_add_m args rest_head)
+                rest_tail)))))))
 
 
   (defpub identity
@@ -114,11 +156,13 @@ always returns `v`.
       (lambda rest v)))
 
 
+
   (defpub_syntax thunk
     '''
     (thunk body ...+)
 
 Returns a zero-argument procedure that evaluates the `body` forms.
+Equivalent to `(lambda () body ...)`.
     '''
     (lambda (stx)
       (let [(body (unsafe_pair_tail (syntax_unwrap stx)))]
@@ -131,6 +175,17 @@ Returns a zero-argument procedure that evaluates the `body` forms.
             (quote_syntax context)
             stx)))))
 
+// TODO This should use (provide (rename_out (thunk ||)))
+// but the documentation is wrong.
+  (defpub ||
+    '''
+    (|| body ...+)
+
+Returns a zero-argument procedure that evaluates the `body` forms.
+Equivalent to `(lambda () body ...)`.
+
+See also [`|`](fusion/procedure.html#|).
+    ''' thunk)
 
   (defpub compose
     (lambda (p1 p2)

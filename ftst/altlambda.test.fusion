@@ -1,13 +1,28 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 (require
-  "/fusion/experimental/altlambda"
+  "/fusion/procedure"
   "/fusion/experimental/check"
   "/fusion/experimental/syntax")
+
+(expect_syntax_exn (|))
+(expect_syntax_exn (|2))
+(expect_syntax_exn (| a 2))
+(expect_syntax_exn (| a |))
+(expect_syntax_exn (| |))
+(expect_syntax_exn (||))
 
 (define sub1
   (|x| (- x 1)))
 (check === 1 (sub1 2))
+
+(check === 3 ((|a b| (+ a b)) 1 2))
+
+(check === 500 ((| | (+ 499 1))))
+
+(define a_thunk (|| 456))
+(check === 456 (a_thunk))
+
 
 (define_syntax dont_capture_pipe
   (lambda (stx)

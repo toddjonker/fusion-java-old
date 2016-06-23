@@ -1,10 +1,25 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 // Alternative syntaxes for lambda
 
 (module altlambda '/fusion/base'
 
-  (require "/fusion/experimental/syntax")
+  '''
+**DEPRECATED** as of Fusion R23 (July 2016), and subject to removal after
+July 2017.
+
+<!-- FUSION-185 This comment forces FusionDoc to stop the one-liner here. -->
+
+This module's bindings are no longer experimental and have been migrated to
+[/fusion/procedure](fusion/procedure.html) and [/fusion](fusion.html).
+The functionality is identical in all providing modules.
+
+**Customers must update their code appropriately** before the removal deadline
+above.  In most cases, all that will be needed is removal of any `require`
+clause importing this module.
+  '''
+
+  (require "/fusion/procedure")
 
   //  (| x ... | body ...)  ->  (lambda (x ...) body ...)
 
@@ -15,16 +30,4 @@
   //  (define |>>| curry_right)
 
   (provide |)
-  (define_syntax |
-    (lambda (stx)
-      (let loop ((parms (quasisyntax ()))
-                 (rest  (syntax_subseq stx 1)))
-        (if (free_identifier_equal (syntax_get rest 0) (quote_syntax |))
-            (let ((body (syntax_subseq rest 1)))
-              (quasisyntax
-                (lambda (unsyntax parms)
-                  (unsyntax (syntax_cons_q begin body)))))
-            (loop
-              (syntax_append parms (quasisyntax ((unsyntax (syntax_get rest 0)))))
-              (syntax_subseq rest 1))))))
 )
