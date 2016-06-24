@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -18,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -149,6 +150,7 @@ public final class _Private_CoverageWriter
     private final Map<ModuleIdentity, SourceName>   myNamesForModules;
     private final Map<File, SourceName>             myNamesForFiles;
     private final Map<SourceName, CoverageInfoPair> myFileCoverages;
+    private final Map<SourceName, String>           myRelativeNamesForSources;
 
     private final CoverageInfoPair myGlobalCoverage = new CoverageInfoPair();
     private       int              myUnloadedEntries;
@@ -167,11 +169,12 @@ public final class _Private_CoverageWriter
         myDatabase = new CoverageDatabase(dataDir);
         myConfig   = new CoverageConfiguration(dataDir);
 
-        myModules         = new HashSet<>();
-        mySourceFiles     = new HashSet<>();
-        myNamesForModules = new HashMap<>();
-        myNamesForFiles   = new HashMap<>();
-        myFileCoverages   = new HashMap<>();
+        myModules                 = new HashSet<>();
+        mySourceFiles             = new HashSet<>();
+        myNamesForModules         = new HashMap<>();
+        myNamesForFiles           = new HashMap<>();
+        myFileCoverages           = new HashMap<>();
+        myRelativeNamesForSources = new HashMap<>();
     }
 
 
@@ -197,6 +200,53 @@ public final class _Private_CoverageWriter
                     mySourceFiles.add(file);
                 }
             }
+        }
+    }
+
+
+    private Path commonPrefix(Path a, Path b)
+    {
+        int maxLen = Math.min(a.getNameCount(), b.getNameCount());
+        for (int i = 0; i < maxLen; i++)
+        {
+            if (! a.getName(i).equals(b.getName(i)))
+            {
+                maxLen = i;
+            }
+        }
+        return a.subpath(0, maxLen);
+    }
+
+    private int commonPrefixLen(Set<SourceName> sourceNames)
+        throws IOException
+    {
+        Path prefix = null;
+        for (SourceName sourceName : sourceNames)
+        {
+            Path path = sourceName.getFile().getCanonicalFile().toPath();
+            Path parent = path.getParent();
+            if (prefix == null)
+            {
+                prefix = parent;
+            }
+            else {
+                prefix = commonPrefix(prefix, parent);
+            }
+        }
+        return prefix.getNameCount();
+    }
+
+    private void prepareRelativeNames()
+        throws IOException
+    {
+        Set<SourceName> sourceNames = myDatabase.sourceNames();
+        int prefixLen = commonPrefixLen(sourceNames);
+
+        for (SourceName sourceName : sourceNames)
+        {
+            Path path = sourceName.getFile().getCanonicalFile().toPath();
+            Path shorterPath = path.subpath(prefixLen, path.getNameCount());
+            myRelativeNamesForSources.put(sourceName, shorterPath.toString());
         }
     }
 
@@ -446,9 +496,7 @@ public final class _Private_CoverageWriter
 
     private String relativeName(SourceName name)
     {
-        String relativeName = name.getFile().getPath().replaceAll("/", "_");
-        relativeName = relativeName + ".html";
-        return relativeName;
+        return myRelativeNamesForSources.get(name) + ".html";
     }
 
 
@@ -564,6 +612,8 @@ public final class _Private_CoverageWriter
         throws FusionException, IOException
     {
         analyze();
+
+        prepareRelativeNames();
 
         renderSourceFiles(outputDir);
         renderIndex(outputDir);
