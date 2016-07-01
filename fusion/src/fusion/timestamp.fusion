@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 (module timestamp '/fusion/private/kernel'
 
@@ -13,8 +13,9 @@ Fusion timestamp values are identical to Ion timestamps.
     "/fusion/experimental/defines"
     "/fusion/number"
     "/fusion/private/control"
-    "/fusion/private/kernel2")
-
+    "/fusion/private/kernel2"
+    "/fusion/void")
+ 
 
   (require "/fusion/private/compare")
   (provide < <= = >= >)
@@ -79,8 +80,154 @@ Returns `null.string` when given `null.timestamp`.
     (timestamp_to_string 2013-11-13T)      ==> "2013-11-13"
     '''
     "com.amazon.fusion.FusionTimestamp$TimestampToStringProc")
+    
+    
+  (defpub_j timestamp
+    '''
+    (timestamp year month? day? hour? minute? second? offset?)
+    
+Creates and returns a timestamp with `year` and remaining optional fields (ordered by increasing precision), including offset.
+The returned timestamp's offset will be equal to `offset` minutes, if provided (or void otherwise).
+The returned timestamp will have precision of the last supplied time field (year, month, ...).
+If `hour` is supplied, `minute` is required to be supplied as well.
+`offset` should only be supplied if `hour`, `minute`, and `second` are present (`second` may be void to achieve minute precision with offset).
+
+    i.e. to create 2016-07-01T09:05-07:00, execute:
+      (timestamp 2016 7 1 9 5 (void) -420)
+    '''
+    "com.amazon.fusion.FusionTimestamp$TimestampProc")
+    
+
+  (defpub_j timestamp_year
+    '''
+    (timestamp_year ts)
+    
+Returns the year of `ts` in its local time.
+    '''
+    "com.amazon.fusion.FusionTimestamp$TimestampYearProc")
 
 
+  (defpub_j timestamp_month
+    '''
+    (timestamp_month ts)
+    
+Returns the month of `ts` in its local time if its precision is `MONTH` or finer, returns void otherwise.
+    '''
+    "com.amazon.fusion.FusionTimestamp$TimestampMonthProc")
+
+
+  (defpub_j timestamp_day
+    '''
+    (timestamp_day ts)
+    
+Returns the day of `ts` in its local time if its precision is `DAY` or finer, returns void otherwise.
+    '''
+    "com.amazon.fusion.FusionTimestamp$TimestampDayProc")
+
+
+  (defpub_j timestamp_hour
+    '''
+    (timestamp_hour ts)
+    
+Returns the hour in the day of `ts` in its local time if its precision is `MINUTE` or finer, returns void otherwise.
+    '''
+    "com.amazon.fusion.FusionTimestamp$TimestampHourProc")
+
+
+  (defpub_j timestamp_minute
+    '''
+    (timestamp_minute ts)
+    
+Returns the number of minutes past the hour of `ts` in its local time if its precision is `MINUTE` or finer, returns void otherwise.
+    '''
+    "com.amazon.fusion.FusionTimestamp$TimestampMinuteProc")
+
+
+  (defpub_j timestamp_second
+    '''
+    (timestamp_second ts)
+    
+Returns the number of seconds past the minute in `ts` in its local time if its precision is `SECOND`, returns void otherwise.
+    '''
+    "com.amazon.fusion.FusionTimestamp$TimestampSecondProc")
+
+
+  (defpub_j timestamp_offset
+    '''
+    (timestamp_offset ts)
+    
+Returns the local offset of `ts` as an integer in minutes if its offset is known, returns void otherwise.
+    '''
+    "com.amazon.fusion.FusionTimestamp$TimestampOffsetProc")
+    
+  
+  (defpub timestamp_at_year
+    (lambda (ts)
+      '''
+Returns a timestamp that represents the same point-in-time as `ts`, with precision `YEAR`.
+      '''
+      (timestamp (timestamp_year ts))))
+    
+  
+  (defpub timestamp_at_month
+    (lambda (ts)
+      '''
+Returns a timestamp that represents the same point-in-time as `ts`, with precision `MONTH`.
+      '''
+      (timestamp (timestamp_year ts)
+                 (or (timestamp_month ts) 1))))
+    
+  
+  (defpub timestamp_at_day
+    (lambda (ts)
+      '''
+Returns a timestamp that represents the same point-in-time as `ts`, with precision `DAY`.
+      '''
+      (timestamp (timestamp_year ts) 
+                 (or (timestamp_month ts) 1)
+                 (or (timestamp_day ts) 1))))
+    
+  
+  (defpub timestamp_at_minute
+    (lambda (ts)
+      '''
+Returns a timestamp that represents the same point-in-time as `ts`, with precision `MINUTE`.
+Local offset is preserved.
+      '''
+      (timestamp (timestamp_year ts) 
+                 (or (timestamp_month ts) 1)
+                 (or (timestamp_day ts) 1)
+                 (or (timestamp_hour ts) 0)
+                 (or (timestamp_minute ts) 0)
+                 (void)
+                 (timestamp_offset ts))))
+    
+  
+  (defpub timestamp_at_second
+    (lambda (ts)
+      '''
+Returns a timestamp that represents the same point-in-time as `ts`, with precision `SECOND`.
+Local offset is preserved.
+      '''
+      (timestamp (timestamp_year ts)
+                 (or (timestamp_month ts) 1)
+                 (or (timestamp_day ts) 1)
+                 (or (timestamp_hour ts) 0)
+                 (or (timestamp_minute ts) 0)
+                 (or (timestamp_second ts) 0)
+                 (timestamp_offset ts))))
+
+
+  (defpub_j timestamp_with_offset
+    '''
+    (timestamp_with_offset ts offset)
+    
+Returns a timestamp at the same point-in-time as `ts`, but with local offset equal to `offset` minutes.
+The returned timestamp may have different time fields to maintain the same point-in-time.
+Expects `ts` to have precision `MINUTE` or finer.
+    '''
+    "com.amazon.fusion.FusionTimestamp$TimestampWithOffsetProc")
+    
   (define unsafe_adjust_year
     (java_new "com.amazon.fusion.FusionTimestamp$UnsafeTimestampAddYearProc"))
   (define unsafe_adjust_month
@@ -170,7 +317,25 @@ The result will have the same precision and local offset.
 to the 32-bit range).
     '''
     (safe_add "adjust_second" unsafe_adjust_second ts period))
-
-
-  // TODO FUSION-106 timestamp slot accessors
+    
+    
+  (defpub (timestamp_put_offset ts offset)
+    '''
+Returns a timestamp that has the same time fields (year, month, ...) as `ts`, with local offset equal to `offset` minutes.
+The result may represent a point-in-time different from `ts`.
+`offset` must have magnitude less than 1440 (24 hours).
+    '''
+    (unless (and ts (is_timestamp ts))
+      (raise_argument_error "timestamp_put_offset" "non-null timestamp" 0 ts offset))
+    (if (is_void offset)
+      (timestamp_with_offset (timestamp_put_offset ts 0)
+                             offset)
+      (if (or (is_null offset)
+              (>= offset 1440)
+              (<= offset -1440))
+        (raise_argument_error "timestamp_put_offset" "non-null integer between -1440 and 1440 (exclusive)" 1 ts offset)
+        (timestamp_with_offset (adjust_minute ts
+                                              (- (or (timestamp_offset ts) 0) 
+                                                 offset))
+                               offset))))
 )

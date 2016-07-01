@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -8,20 +8,29 @@ import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionNumber.checkIntArgToJavaInt;
 import static com.amazon.fusion.FusionNumber.isIntOrDecimal;
 import static com.amazon.fusion.FusionNumber.makeDecimal;
+import static com.amazon.fusion.FusionNumber.makeInt;
 import static com.amazon.fusion.FusionNumber.unsafeNumberToBigDecimal;
 import static com.amazon.fusion.FusionString.checkNullableStringArg;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
+import static com.amazon.fusion.FusionVoid.isVoid;
+import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import static com.amazon.ion.Timestamp.UTC_OFFSET;
+import static com.amazon.ion.Timestamp.createFromUtcFields;
+import static com.amazon.ion.Timestamp.forDay;
+import static com.amazon.ion.Timestamp.forMinute;
+import static com.amazon.ion.Timestamp.forSecond;
 import static com.amazon.ion.util.IonTextUtils.isDigit;
 import com.amazon.fusion.FusionBool.BaseBool;
+import com.amazon.fusion.FusionNumber.BaseDecimal;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.Timestamp;
+import com.amazon.ion.Timestamp.Precision;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -464,6 +473,146 @@ final class FusionTimestamp
     }
 
 
+    private static Timestamp makeIonTimestamp(Procedure who, Evaluator eval, Object[] args, Integer offset, int nonVoidArity)
+        throws FusionException
+    {
+
+        int year = 1, month = 1, day = 1, hour = 0, minute = 0, second = 0;
+        BigDecimal fractionalSecond = null;
+        Timestamp ionTimestamp = null;
+
+        switch (nonVoidArity)
+        {
+            case 4:
+                throw who.argFailure("minute field if given hour field", -1, args);
+
+            case 6:
+                if (args[5] instanceof BaseDecimal)
+                {
+                    fractionalSecond = ((BaseDecimal) args[5]).toBigDecimal();
+
+                    if (fractionalSecond.compareTo(BigDecimal.ZERO) < 0 ||
+                        fractionalSecond.compareTo(new BigDecimal(60)) >= 0)
+                    {
+                        throw who.argFailure("non-negative second value less than 60", 5, args);
+                    }
+                }
+                else
+                {
+                    second = checkIntArgToJavaInt(eval, who, 5, args);
+
+                    if (second < 0 || second >= 60)
+                    {
+                        throw who.argFailure("non-negative second value less than 60", 5, args);
+                    }
+                }
+
+            case 5:
+                minute = checkIntArgToJavaInt(eval, who, 4, args);
+
+                if (minute < 0 || minute > 59)
+                {
+                    throw who.argFailure("minute field between 0 and 59 (inclusive)", 4, args);
+                }
+
+                hour = checkIntArgToJavaInt(eval, who, 3, args);
+
+                if (hour < 0 || hour > 23)
+                {
+                    throw who.argFailure("hour field between 0 and 23 (inclusive)", 3, args);
+                }
+
+            case 3:
+                day = checkIntArgToJavaInt(eval, who, 2, args);
+
+            case 2:
+                month = checkIntArgToJavaInt(eval, who, 1, args);
+
+                if (month < 1 || month > 12)
+                {
+                    throw who.argFailure("month field between 1 and 12 (inclusive)", 1, args);
+                }
+
+            case 1:
+                year = checkIntArgToJavaInt(eval, who, 0, args);
+
+                if (year < 1 || year > 9999)
+                {
+                    throw who.argFailure("year field between 1 and 9999 (inclusive)", 0, args);
+                }
+        }
+
+        try
+        {
+            switch (nonVoidArity)
+            {
+            case 6:
+                if (args[5] instanceof BaseDecimal)
+                {
+                    ionTimestamp = forSecond(year, month, day, hour, minute, fractionalSecond, offset);
+                }
+                else
+                {
+                    ionTimestamp = forSecond(year, month, day, hour, minute, second, offset);
+                }
+                break;
+
+            case 5:
+                ionTimestamp = forMinute(year, month, day, hour, minute, offset);
+                break;
+
+            case 3:
+                ionTimestamp = forDay(year, month, day);
+                break;
+
+            case 2:
+                // TODO: replace deprecated method with forMonth() when available
+                // forMonth(year, month);
+
+                ionTimestamp = createFromUtcFields(Precision.MONTH, year, month, 1, 0, 0, 0, BigDecimal.ZERO, null);
+
+                break;
+
+            case 1:
+                // TODO: replace deprecated method with forYear() when available
+                // forYear(year);
+
+                ionTimestamp = createFromUtcFields(Precision.YEAR, year, 1, 1, 0, 0, 0, BigDecimal.ZERO, null);
+
+                break;
+            }
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw who.argFailure("valid day field for the given month", 2, args);
+        }
+
+        return ionTimestamp;
+    }
+
+
+    private static int getNumArgs(Evaluator eval, Procedure proc, int arity, Object[] args)
+        throws ArgumentException
+    {
+        int argNum = 0;
+        while (argNum < arity && !isVoid(eval, args[argNum]))
+        {
+            argNum++;
+        }
+
+        int nonVoidArgs = argNum;
+        while (argNum < arity)
+        {
+            if (!isVoid(eval, args[argNum]))
+            {
+                throw proc.argFailure("all void arguments following first void value", -1, args);
+            }
+            argNum++;
+        }
+
+        return nonVoidArgs;
+    }
+
 
     //========================================================================
     // Procedures
@@ -537,6 +686,202 @@ final class FusionTimestamp
 
             String result = (input == null ? null : input.toString());
             return makeString(eval, result);
+        }
+    }
+
+
+    static final class TimestampProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityRange(1, 7, args);
+
+            Integer offset = null;
+            int arity = args.length;
+            if (arity == 7) {
+                arity = 6;
+
+                if (!isVoid(eval, args[6]))
+                {
+                    offset = checkIntArgToJavaInt(eval, this, 6, args);
+                }
+            }
+
+            int nonVoidArity = getNumArgs(eval, this, arity, args);
+
+            if (nonVoidArity < 1)
+            {
+                throw argFailure("at least one non-void argument", -1, args);
+            }
+
+            Timestamp ionTimestamp = makeIonTimestamp(this, eval, args, offset, nonVoidArity);
+            return makeTimestamp(eval, ionTimestamp);
+        }
+    }
+
+
+    static final class TimestampYearProc
+        extends Procedure1
+    {
+        @Override
+        Object doApply(Evaluator eval, Object arg)
+            throws FusionException
+        {
+            Timestamp input = checkRequiredTimestampArg(eval, this, 0, arg);
+            int year = input.getYear();
+
+            return makeInt(eval, year);
+        }
+    }
+
+
+    static final class TimestampMonthProc
+        extends Procedure1
+    {
+        @Override
+        Object doApply(Evaluator eval, Object arg)
+            throws FusionException
+        {
+            Timestamp input = checkRequiredTimestampArg(eval, this, 0, arg);
+
+            if (input.getPrecision().ordinal() <= Precision.YEAR.ordinal())
+            {
+                return voidValue(eval);
+            }
+
+            int month = input.getMonth();
+
+            return makeInt(eval, month);
+        }
+    }
+
+
+    static final class TimestampDayProc
+        extends Procedure1
+    {
+        @Override
+        Object doApply(Evaluator eval, Object arg)
+            throws FusionException
+        {
+            Timestamp input = checkRequiredTimestampArg(eval, this, 0, arg);
+
+            if (input.getPrecision().ordinal() <= Precision.MONTH.ordinal())
+            {
+                return voidValue(eval);
+            }
+
+            int day = input.getDay();
+
+            return makeInt(eval, day);
+        }
+    }
+
+
+    static final class TimestampHourProc
+        extends Procedure1
+    {
+        @Override
+        Object doApply(Evaluator eval, Object arg)
+            throws FusionException
+        {
+            Timestamp input = checkRequiredTimestampArg(eval, this, 0, arg);
+
+            if (input.getPrecision().ordinal() <= Precision.DAY.ordinal())
+            {
+                return voidValue(eval);
+            }
+
+            int hours = input.getHour();
+
+            return makeInt(eval, hours);
+        }
+    }
+
+
+    static final class TimestampMinuteProc
+        extends Procedure1
+    {
+        @Override
+        Object doApply(Evaluator eval, Object arg)
+            throws FusionException
+        {
+            Timestamp input = checkRequiredTimestampArg(eval, this, 0, arg);
+
+            if (input.getPrecision().ordinal() <= Precision.DAY.ordinal())
+            {
+                return voidValue(eval);
+            }
+
+            int minutes = input.getMinute();
+
+            return makeInt(eval, minutes);
+        }
+    }
+
+
+    static final class TimestampSecondProc
+        extends Procedure1
+    {
+        @Override
+        Object doApply(Evaluator eval, Object arg)
+            throws FusionException
+        {
+            Timestamp input = checkRequiredTimestampArg(eval, this, 0, arg);
+
+            if (input.getPrecision().ordinal() <= Precision.MINUTE.ordinal())
+            {
+                return voidValue(eval);
+            }
+
+            int seconds = input.getSecond();
+
+            return makeInt(eval, seconds);
+        }
+    }
+
+
+    static final class TimestampWithOffsetProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object args[])
+            throws FusionException
+        {
+            checkArityExact(2, args);
+
+            Timestamp base = checkRequiredTimestampArg(eval, this, 0, args);
+            if (base.getPrecision().ordinal() <= Precision.DAY.ordinal())
+            {
+                throw argFailure("timestamp with precision MINUTE or finer", 0, args);
+            }
+
+            Integer offset = isVoid(eval, args[1]) ? null : checkIntArgToJavaInt(eval, this, 1, args);
+
+            if (offset != null && (offset <= -1440 || offset >= 1440))
+            {
+                throw argFailure("offset between -1440 and 1440 (exclusive)", 1, args);
+            }
+
+            return makeTimestamp(eval, base.withLocalOffset(offset));
+        }
+    }
+
+
+    static final class TimestampOffsetProc
+        extends Procedure1
+    {
+        @Override
+        Object doApply(Evaluator eval, Object arg)
+            throws FusionException
+        {
+            Timestamp input = checkRequiredTimestampArg(eval, this, 0, arg);
+
+            Integer offset = input.getLocalOffset();
+
+            return (offset == null) ? voidValue(eval) : makeInt(eval, offset);
         }
     }
 
