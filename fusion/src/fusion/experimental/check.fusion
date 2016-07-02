@@ -550,6 +550,20 @@ another kind of exception is thrown, then the check fails.''')))]
 
 Passes the given top-level form to `eval` and checks that it throws an
 exception like that thrown by `wrong_syntax`.
+
+This form currently doesn't work as expected within a module: the evaluation
+context is not the module's namespace, because `current_namespace` isn't
+changed when compiling a module's body.  To test for syntax errors in a module,
+wrap the module with this form. So don't do this:
+
+    (module test "/fusion"
+      (expect_syntax_exn <something>))
+
+but do this instead:
+
+    (expect_syntax_exn
+      (module test "/fusion"
+        <something>))
     '''
     (lambda (stx)
       (let [(actuals (tail (syntax_unwrap stx)))]
