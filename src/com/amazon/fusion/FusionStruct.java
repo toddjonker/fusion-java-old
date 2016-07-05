@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -522,6 +522,12 @@ final class FusionStruct
 
     static interface BaseStruct
     {
+        boolean isAnnotated()
+            throws FusionException;
+
+        boolean isAnnotatable()
+            throws FusionException;
+
         BaseSymbol[] getAnnotations();
 
         void ionize(Evaluator eval, IonWriter out)

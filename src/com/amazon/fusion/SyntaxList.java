@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -339,12 +339,15 @@ final class SyntaxList
     CompiledForm doCompile(Evaluator eval, Environment env)
         throws FusionException
     {
-        // We don't have to worry about annotations, since that's not valid
-        // syntax.
+        // Annotations on this form are not handled here.
+        assert ! myImmutableList.isAnnotated();
+
         if (myImmutableList.isAnyNull())
         {
             return new CompiledConstant(myImmutableList);
         }
+
+        boolean allConstant = true;
 
         int len = size();
         CompiledForm[] children = new CompiledForm[len];
@@ -353,8 +356,24 @@ final class SyntaxList
             SyntaxValue elementExpr = get(eval, i);
             CompiledForm child = eval.compile(env, elementExpr);
             children[i] = child;
+
+            allConstant &= (child instanceof CompiledConstant);
         }
-        return new CompiledList(children);
+
+        if (allConstant)
+        {
+            Object[] constChildren = new Object[len];
+            for (int i = 0; i < len; i++)
+            {
+                constChildren[i] = ((CompiledConstant) children[i]).getValue();
+            }
+
+            return new CompiledConstant(immutableList(eval, constChildren));
+        }
+        else
+        {
+            return new CompiledList(children);
+        }
 
     }
 

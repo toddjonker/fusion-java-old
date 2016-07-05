@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -11,6 +11,11 @@ final class CompiledConstant
     CompiledConstant(Object value)
     {
         myValue = value;
+    }
+
+    Object getValue()
+    {
+        return myValue;
     }
 
     @Override

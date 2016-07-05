@@ -650,11 +650,6 @@
   (every (lambda (e) (if (= e 123) e null))
     {f:123, f:456, f:678}))
 
-// Check that `every` returns the last predicate result if all are truthy
-(check === 1134
-  (every (lambda (e) (when (or (= e 123) (= e 567)) (* e 2)))
-    {f:123, g:123, h:567}))
-
 
 //==========================================================================
 // do

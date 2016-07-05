@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -33,19 +33,19 @@ final class FusionCollection
         }
 
         @Override
-        final boolean isAnnotatable()
+        public final boolean isAnnotatable()
         {
             return true;
         }
 
         @Override
-        final boolean isAnnotated()
+        public final boolean isAnnotated()
         {
             return myAnnotations.length != 0;
         }
 
         @Override
-        final public BaseSymbol[] getAnnotations()
+        public final BaseSymbol[] getAnnotations()
         {
             return myAnnotations;
         }
