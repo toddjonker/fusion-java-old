@@ -115,3 +115,30 @@
 
 (expect_argument_exn (string_to_int "1."))
 (expect_argument_exn (string_to_int "1.0"))
+
+
+//============================================================================
+// decimal
+
+(check === null.decimal (decimal null.float))
+(check === null.decimal (decimal null.int))
+(check === null.decimal (decimal null.decimal))
+(check === 12.34 (decimal 12.34))
+(check === 12.34 (decimal 1234e-2))
+
+(check === null.decimal (decimal null.float 42))
+(check === null.decimal (decimal null.int 23))
+(check === null.decimal (decimal null.decimal 42))
+(check === 12.1 (decimal 1.21e1 0))
+(check === 12.34 (decimal 1234 -2))
+(check === 42. (decimal 4.2 1))
+(check === -12.1 (decimal -1.21e1 0))
+(check === -12.34 (decimal -1234 -2))
+(check === 0.  (decimal 0.0e0 1))
+(check === 0.  (decimal -0.0e0 1))
+
+(expect_argument_exn (decimal 2.05e0 null.int))
+(expect_argument_exn (decimal null.blob))
+(expect_argument_exn (decimal nan))
+(expect_argument_exn (decimal +inf))
+(expect_argument_exn (decimal -inf))

@@ -42,7 +42,7 @@ contact us for clarification.
   (provide is_bool is_false is_true is_truthy is_untruthy not)
 
   (require "/fusion/number")
-  (provide + - * / int_to_string is_decimal is_float is_int string_to_int)
+  (provide + - * / decimal int_to_string is_decimal is_float is_int string_to_int)
 
   (require "/fusion/string")
   (provide is_string string_append string_to_symbol symbol_to_string)
