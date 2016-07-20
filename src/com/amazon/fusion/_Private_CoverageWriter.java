@@ -214,7 +214,11 @@ public final class _Private_CoverageWriter
                 maxLen = i;
             }
         }
-        return a.subpath(0, maxLen);
+
+        // Path.subpath(0, 0) is illegal
+        return (maxLen != 0
+                    ? a.subpath(0, maxLen)
+                    : a.getFileSystem().getPath(""));
     }
 
     private int commonPrefixLen(Set<SourceName> sourceNames)
@@ -233,7 +237,7 @@ public final class _Private_CoverageWriter
                 prefix = commonPrefix(prefix, parent);
             }
         }
-        return prefix.getNameCount();
+        return prefix == null ? 0 : prefix.getNameCount();
     }
 
     private void prepareRelativeNames()
