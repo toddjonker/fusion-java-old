@@ -211,6 +211,7 @@
 (expect_argument_exn (string_join "a" "1" "2" null.string))
 (expect_argument_exn (string_join "a" null.string))
 
+(check === "" (string_join "a"))
 (check === "" (string_join "a" ""))
 (check === "1;2;3" (string_join ";" "1" "2" "3"))
 (check === "123" (string_join "" "1" "2" "3"))
