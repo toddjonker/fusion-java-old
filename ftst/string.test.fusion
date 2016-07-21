@@ -199,9 +199,9 @@
 //============================================================================
 // string_join
 
-(expect_arity_exn (string_join (void)))
-(expect_arity_exn (string_join null.string))
-(expect_arity_exn (string_join ""))
+(expect_arity_exn (string_join))
+(expect_argument_exn (string_join (void)))
+(expect_argument_exn (string_join null.string))
 (expect_argument_exn (string_join " " (void)))
 (expect_argument_exn (string_join " " null))
 (expect_argument_exn (string_join (void) null.list))

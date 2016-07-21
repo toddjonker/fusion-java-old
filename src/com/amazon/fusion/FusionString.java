@@ -859,7 +859,7 @@ public final class FusionString
         Object doApply(Evaluator eval, Object[] args)
                 throws FusionException
         {
-            checkArityAtLeast(2, args);
+            checkArityAtLeast(1, args);
             String separator = checkRequiredTextArg(eval, this, 0, args);
 
             StringBuilder resultBuilder = new StringBuilder();
