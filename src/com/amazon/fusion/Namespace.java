@@ -8,9 +8,11 @@ import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -89,6 +91,86 @@ abstract class Namespace
         @Override
         public abstract String toString(); // Force subclasses to implement
     }
+
+
+    /**
+     * A binding added to a namepace via {@code require} or a language
+     * declaration.
+     */
+    abstract static class RequiredBinding
+        extends Binding
+    {
+        abstract SyntaxSymbol getIdentifier();
+    }
+
+
+    final static class RequiredBindingMap<B extends RequiredBinding>
+    {
+        /**
+         * Maps each imported name to the bindings associated with it.
+         * There may be multiple variants since the same name may occur with
+         * different marks.
+         */
+        private final Map<BaseSymbol, RequiredBinding[]> myBindings =
+            new IdentityHashMap<>();
+
+        void put(SyntaxSymbol localId, B binding)
+        {
+            BaseSymbol name = localId.getName();
+
+            RequiredBinding[] variants = myBindings.get(name);
+            if (variants == null)
+            {
+                variants = new RequiredBinding[] { binding };
+            }
+            else
+            {
+                // Do we already have a required binding that matches?
+                boolean matched = false;
+
+                int len = variants.length;
+                for (int i = 0; i < len; i++)
+                {
+                    RequiredBinding b = variants[i];
+                    if (localId.freeIdentifierEqual(b.getIdentifier()))
+                    {
+                        // TODO this always replaces an equivalent binding,
+                        //   that's wrong for modules.
+                        variants[i] = binding;
+                        matched = true;
+                        break;
+                    }
+                }
+
+                if (! matched)
+                {
+                    variants = Arrays.copyOf(variants, len + 1);
+                    variants[len] = binding;
+                }
+            }
+            myBindings.put(name, variants);
+        }
+
+        @SuppressWarnings("unchecked")
+        B get(BaseSymbol name, Set<MarkWrap> marks)
+        {
+            RequiredBinding[] variants = myBindings.get(name);
+            if (variants != null)
+            {
+                for (RequiredBinding b : variants)
+                {
+                    SyntaxSymbol id = b.getIdentifier();
+                    assert id.getName() == name;
+                    if (id.resolvesFree(name, marks))
+                    {
+                        return (B) b;
+                    }
+                }
+            }
+            return null;
+        }
+    }
+
 
     private final ModuleRegistry myRegistry;
     private final ModuleIdentity myModuleId;

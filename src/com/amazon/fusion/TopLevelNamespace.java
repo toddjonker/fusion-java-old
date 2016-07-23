@@ -6,10 +6,7 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
-import java.util.Arrays;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 
@@ -261,7 +258,7 @@ final class TopLevelNamespace
      * {@code require}.
      */
     static final class TopLevelRequireBinding
-        extends Binding
+        extends RequiredBinding
     {
         private final int myPrecedence;
         private final SyntaxSymbol myIdentifier;
@@ -282,6 +279,7 @@ final class TopLevelNamespace
             return myIdentifier.getName();
         }
 
+        @Override
         SyntaxSymbol getIdentifier()
         {
             return myIdentifier;
@@ -343,12 +341,10 @@ final class TopLevelNamespace
 
 
     /**
-     * Maps each top-level name to the bindings associated with it.
-     * There may be multiple variants since the same name may occur with
-     * different marks.
+     * Maps each imported identifier to its binding.
      */
-    private final Map<BaseSymbol,TopLevelRequireBinding[]> myRequiredBindings =
-        new IdentityHashMap<>();
+    private final RequiredBindingMap<TopLevelRequireBinding> myRequiredBindings =
+        new RequiredBindingMap<>();
 
     /**
      * Every `require` gets its own precedence level, starting at zero (which
@@ -428,59 +424,17 @@ final class TopLevelNamespace
                                         SyntaxSymbol    localId,
                                         ProvidedBinding binding)
     {
-        BaseSymbol name = binding.getName();
-
         TopLevelRequireBinding topBinding =
             new TopLevelRequireBinding(precedence, localId, binding);
 
-        TopLevelRequireBinding[] variants = myRequiredBindings.get(name);
-        if (variants == null)
-        {
-            variants = new TopLevelRequireBinding[] { topBinding };
-        }
-        else
-        {
-            // Do we already have a required binding that matches?
-            boolean matched = false;
-
-            int len = variants.length;
-            for (int i = 0; i < len; i++)
-            {
-                TopLevelRequireBinding b = variants[i];
-                if (localId.freeIdentifierEqual(b.myIdentifier))
-                {
-                    variants[i] = topBinding;
-                    matched = true;
-                    break;
-                }
-            }
-
-            if (! matched)
-            {
-                variants = Arrays.copyOf(variants, len + 1);
-                variants[len] = topBinding;
-            }
-        }
-        myRequiredBindings.put(name, variants);
+        myRequiredBindings.put(localId, topBinding);
     }
 
 
     private final TopLevelRequireBinding substituteFreeImport(BaseSymbol name,
                                                               Set<MarkWrap> marks)
     {
-        TopLevelRequireBinding[] variants = myRequiredBindings.get(name);
-        if (variants != null)
-        {
-            for (TopLevelRequireBinding b : variants)
-            {
-                assert name == b.myIdentifier.getName();
-                if (b.myIdentifier.resolvesFree(name, marks))
-                {
-                    return b;
-                }
-            }
-        }
-        return null;
+        return myRequiredBindings.get(name, marks);
     }
 
 
