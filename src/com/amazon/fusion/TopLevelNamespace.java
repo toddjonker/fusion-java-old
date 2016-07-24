@@ -261,47 +261,14 @@ final class TopLevelNamespace
         extends RequiredBinding
     {
         private final int myPrecedence;
-        private final SyntaxSymbol myIdentifier;
-        private final ProvidedBinding myTarget;
 
         private TopLevelRequireBinding(int precedence,
                                        SyntaxSymbol identifier,
                                        ProvidedBinding target)
         {
+            super(identifier, target);
+
             myPrecedence = precedence;
-            myIdentifier = identifier;
-            myTarget = target;
-        }
-
-        @Override
-        public final BaseSymbol getName()
-        {
-            return myIdentifier.getName();
-        }
-
-        @Override
-        SyntaxSymbol getIdentifier()
-        {
-            return myIdentifier;
-        }
-
-        @Override
-        public ModuleBinding target()
-        {
-            return myTarget.target();
-        }
-
-        @Override
-        public Object lookup(Namespace ns)
-        {
-            return myTarget.lookup(ns);
-        }
-
-        @Override
-        public CompiledForm compileReference(Evaluator eval, Environment env)
-            throws FusionException
-        {
-            return myTarget.compileReference(eval, env);
         }
 
         @Override
@@ -313,14 +280,6 @@ final class TopLevelNamespace
             String message =
                 "#%top not implemented for top-require binding: " + this;
             throw new IllegalStateException(message);
-        }
-
-        @Override
-        public CompiledForm compileSet(Evaluator eval, Environment env,
-                                       CompiledForm valueForm)
-            throws FusionException
-        {
-            return myTarget.compileSet(eval, env, valueForm);
         }
 
         @Override

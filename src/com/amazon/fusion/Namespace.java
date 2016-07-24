@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ModuleBinding;
+import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
 import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,7 +101,54 @@ abstract class Namespace
     abstract static class RequiredBinding
         extends Binding
     {
-        abstract SyntaxSymbol getIdentifier();
+        final SyntaxSymbol    myIdentifier;
+        final ProvidedBinding myTarget;
+
+        RequiredBinding(SyntaxSymbol identifier, ProvidedBinding target)
+        {
+            myIdentifier = identifier;
+            myTarget = target;
+        }
+
+        @Override
+        public final BaseSymbol getName()
+        {
+            return myIdentifier.getName();
+        }
+
+        protected SyntaxSymbol getIdentifier()
+        {
+            return myIdentifier;
+        }
+
+        @Override
+        public ModuleBinding target()
+        {
+            return myTarget.target();
+        }
+
+        @Override
+        public Object lookup(Namespace ns)
+        {
+            return myTarget.lookup(ns);
+        }
+
+        @Override
+        public CompiledForm compileReference(Evaluator eval, Environment env)
+            throws FusionException
+        {
+            return myTarget.compileReference(eval, env);
+        }
+
+        @Override
+        final public CompiledForm compileSet(Evaluator eval, Environment env,
+                                             CompiledForm valueForm)
+            throws FusionException
+        {
+            // This isn't currently reachable, but it's an easy safeguard.
+            String message = "Mutation of imported binding is not allowed";
+            throw new ContractException(message);
+        }
     }
 
 
