@@ -1,0 +1,17 @@
+// Copyright (c) 2016 Amazon.com, Inc.  All rights reserved.
+
+(module local1 "/fusion"
+  (define ambiguous 123)
+  (provide ambiguous))
+
+(module local2 "/fusion"
+  (define ambiguous 123)
+  (provide ambiguous))
+
+(require "/fusion/experimental/check")
+
+(expect_syntax_exn
+  (module fails "/fusion"
+    (require local1)
+    (require local2) // Fails because `ambiguous` is ambiguous
+    ))
