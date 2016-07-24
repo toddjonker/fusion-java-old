@@ -386,7 +386,14 @@ final class TopLevelNamespace
         TopLevelRequiredBinding topBinding =
             new TopLevelRequiredBinding(precedence, localId, binding);
 
-        myRequiredBindings.put(localId, topBinding);
+        try
+        {
+            myRequiredBindings.put(localId, topBinding);
+        }
+        catch (AmbiguousBindingFailure e)
+        {
+            throw new IllegalStateException("Should not be possible", e);
+        }
     }
 
 

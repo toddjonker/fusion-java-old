@@ -152,7 +152,7 @@ abstract class Namespace
     }
 
 
-    final static class RequiredBindingMap<B extends RequiredBinding>
+    static class RequiredBindingMap<B extends RequiredBinding>
     {
         /**
          * Maps each imported name to the bindings associated with it.
@@ -163,6 +163,7 @@ abstract class Namespace
             new IdentityHashMap<>();
 
         void put(SyntaxSymbol localId, B binding)
+            throws AmbiguousBindingFailure
         {
             BaseSymbol name = localId.getName();
 
@@ -179,11 +180,12 @@ abstract class Namespace
                 int len = variants.length;
                 for (int i = 0; i < len; i++)
                 {
-                    RequiredBinding b = variants[i];
-                    if (localId.freeIdentifierEqual(b.getIdentifier()))
+                    @SuppressWarnings("unchecked")
+                    B current = (B) variants[i];
+
+                    if (localId.freeIdentifierEqual(current.getIdentifier()))
                     {
-                        // TODO this always replaces an equivalent binding,
-                        //   that's wrong for modules.
+                        checkReplacement(current, binding);
                         variants[i] = binding;
                         matched = true;
                         break;
@@ -197,6 +199,12 @@ abstract class Namespace
                 }
             }
             myBindings.put(name, variants);
+        }
+
+        /** Throws an exception if we can't replace a binding. */
+        void checkReplacement(B current, B replacement)
+            throws AmbiguousBindingFailure
+        {
         }
 
         @SuppressWarnings("unchecked")

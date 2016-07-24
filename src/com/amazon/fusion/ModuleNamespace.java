@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.LanguageWrap.LanguageBinding;
 import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -147,6 +148,95 @@ final class ModuleNamespace
                 + " -> "  + myImport + "}}}";
         }
     }
+
+
+    /**
+     * Denotes a module-level binding imported into a module via
+     * {@code require}.
+     *
+     * @see LanguageBinding
+     */
+    static final class ModuleRequiredBinding
+        extends RequiredBinding
+    {
+        private ModuleRequiredBinding(SyntaxSymbol identifier,
+                                      ProvidedBinding target)
+        {
+            super(identifier, target);
+        }
+
+        @Override
+        ProvidedBinding provideAs(SyntaxSymbol exportedId)
+        {
+            return new ImportedProvidedBinding(exportedId, myTarget);
+        }
+
+        @Override
+        public CompiledForm compileTopReference(Evaluator eval,
+                                                Environment env,
+                                                SyntaxSymbol id)
+            throws FusionException
+        {
+            String message =
+                "#%top not implemented for top-require binding: " + this;
+            throw new IllegalStateException(message);
+        }
+
+        @Override
+        public boolean equals(Object other)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String toString()
+        {
+            return "{{{ModuleRequiredBinding "
+                 + target().myModuleId.absolutePath()
+                 + ' ' + getName() + "}}}";
+        }
+    }
+
+
+    /**
+     * Exposes the bindings required at module-level.
+     * The "next wrap" is always a {@link LanguageWrap}.
+     */
+    private final class ModuleRequiresWrap
+        extends SyntaxWrap
+    {
+        @Override
+        Binding resolve(BaseSymbol           name,
+                        Iterator<SyntaxWrap> moreWraps,
+                        Set<MarkWrap>        returnMarks)
+        {
+            assert moreWraps.hasNext() : "Missing language wrap";
+
+            Binding langBinding =
+                moreWraps.next().resolve(name, moreWraps, returnMarks);
+
+            // Look for an imported binding.
+            // TODO FUSION-117 Resolve the whole identifier, including marks.
+            ModuleRequiredBinding requiredBinding =
+                myRequiredBindings.get(name, Collections.<MarkWrap>emptySet());
+
+            return (requiredBinding != null ? requiredBinding : langBinding);
+        }
+
+        @Override
+        Iterator<SyntaxWrap> iterator()
+        {
+            return null;
+        }
+
+        @Override
+        public String toString()
+        {
+            ModuleIdentity id = getModuleId();
+            return "{{{ModuleRequiresWrap for " + id.absolutePath() + "}}}";
+        }
+    }
+
 
 
     /**
@@ -306,26 +396,35 @@ final class ModuleNamespace
 
 
     /**
-     * The wraps for our used modules, then our language.  This allows us to
-     * add imported bindings (via mutation of this sequence) after the sequence
-     * has been propagated to existing identifiers.  Which in turn means that
-     * imports cover the entire module body, not just code after the import.
+     * Maps each imported identifier to its binding. Doesn't include language
+     * bindings.
      */
-    private final SequenceWrap myUsedModuleWraps;
+    private final RequiredBindingMap<ModuleRequiredBinding> myRequiredBindings =
+        new RequiredBindingMap<ModuleRequiredBinding>() {
+            @Override
+            void checkReplacement(ModuleRequiredBinding current,
+                                  ModuleRequiredBinding replacement)
+                throws AmbiguousBindingFailure
+            {
+                if (! current.sameTarget(replacement))
+                {
+                    String name = current.getIdentifier().stringValue();
+                    throw new AmbiguousBindingFailure(GlobalState.REQUIRE,
+                                                      name);
+                }
+            }
+        };
 
 
     /**
-     * Obnoxious helper constructor lets us allocate the sequence and retain a
-     * reference to it.
-     * <p>
-     * Note that we don't add this module to the base sequence: as we encounter
-     * require forms, new entries will be added to {@link #myUsedModuleWraps},
-     * and all required modules need to fall after this module in the overall
-     * sequence of wraps on the namespace. That ensures that bindings in this
-     * module have precedence over bindings imported from other modules.
+     * Constructs a module with a given language.  Bindings provided by the
+     * language can be shadowed by {@code require} or {@code define}.
+     *
+     * @param moduleId identifies this module.
      */
-    private ModuleNamespace(ModuleRegistry registry, ModuleIdentity moduleId,
-                            final SequenceWrap usedModuleWraps)
+    ModuleNamespace(ModuleRegistry registry,
+                    final ModuleInstance language,
+                    ModuleIdentity moduleId)
     {
         super(registry, moduleId,
               new Function<Namespace, SyntaxWraps>()
@@ -334,10 +433,10 @@ final class ModuleNamespace
                   public SyntaxWraps apply(Namespace _this) {
                       ModuleNamespace __this = (ModuleNamespace) _this;
                       return SyntaxWraps.make(new ModuleDefinesWrap(__this),
-                                              usedModuleWraps);
+                                              __this.new ModuleRequiresWrap(),
+                                              new LanguageWrap(language));
                   }
               });
-        myUsedModuleWraps = usedModuleWraps;
     }
 
     /**
@@ -356,20 +455,6 @@ final class ModuleNamespace
                       return SyntaxWraps.make(new EnvironmentWrap(_this));
                   }
               });
-        myUsedModuleWraps = null;
-    }
-
-    /**
-     * Constructs a module with a given language.  Bindings provided by the
-     * language can be shadowed by {@code require} or {@code define}.
-     *
-     * @param moduleId identifies this module.
-     */
-    ModuleNamespace(ModuleRegistry registry, ModuleInstance language,
-                    ModuleIdentity moduleId)
-    {
-        this(registry, moduleId,
-             new SequenceWrap(new LanguageWrap(language)));
     }
 
 
@@ -422,22 +507,16 @@ final class ModuleNamespace
     void require(Evaluator eval, ModuleInstance module)
         throws FusionException
     {
-        // Validate that we aren't importing a duplicate name.
-        // We assume that a module doesn't export a duplicate name.
-        for (BaseSymbol name : module.providedNames())
+        for (ProvidedBinding provided : module.providedBindings())
         {
-            Binding oldBinding = resolve(name);
-            if (oldBinding != null
-                && ! (oldBinding instanceof FreeBinding)
-                && ! (oldBinding instanceof LanguageBinding)
-                && ! oldBinding.sameTarget(module.resolveProvidedName(name)))
-            {
-                throw new AmbiguousBindingFailure(GlobalState.REQUIRE,
-                                                  name.stringValue());
-            }
-        }
+            // TODO FUSION-117 Not sure this is the right lexical context.
+            // The identifier is free, but references will have context
+            // including the language.
+            SyntaxSymbol id = SyntaxSymbol.make(eval, null, provided.getName());
 
-        myUsedModuleWraps.addWrap(new RequireWrap(module));
+            ModuleRequiredBinding b = new ModuleRequiredBinding(id, provided);
+            myRequiredBindings.put(id, b);
+        }
     }
 
 
