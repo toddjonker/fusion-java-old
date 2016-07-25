@@ -4,7 +4,7 @@ package com.amazon.fusion;
 
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.DefinedProvidedBinding;
-import com.amazon.fusion.ModuleNamespace.ModuleBinding;
+import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
 import com.amazon.fusion.Namespace.NsBinding;
 import java.io.IOException;
@@ -62,7 +62,7 @@ final class ModuleInstance
         {
             BaseSymbol name = binding.getName();
             ProvidedBinding out =
-                new DefinedProvidedBinding((ModuleBinding) binding);
+                new DefinedProvidedBinding((ModuleDefinedBinding) binding);
             myProvidedBindings.put(name, out);
         }
     }
@@ -138,7 +138,7 @@ final class ModuleInstance
     {
         BindingDoc doc = null;
 
-        ModuleBinding binding = resolveProvidedName(name).target();
+        ModuleDefinedBinding binding = resolveProvidedName(name).target();
 
         doc = documentProvidedName(binding);
         if (doc == null)
@@ -174,7 +174,7 @@ final class ModuleInstance
         return doc;
     }
 
-    BindingDoc documentProvidedName(ModuleBinding binding)
+    BindingDoc documentProvidedName(ModuleDefinedBinding binding)
     {
         BindingDoc doc;
 

@@ -42,7 +42,7 @@ final class LocalEnvironment
         {
             // Don't need to call other.originalBinding() since local bindings
             // are never renamed or wrapped (in the sense, for examples, that a
-            // LanguageBinding wraps a ModuleBinding).
+            // LanguageBinding wraps a ModuleDefinedBinding).
             return this == other;
         }
 

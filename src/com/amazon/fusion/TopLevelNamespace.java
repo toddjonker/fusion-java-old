@@ -4,7 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
-import com.amazon.fusion.ModuleNamespace.ModuleBinding;
+import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
 import java.util.Iterator;
 import java.util.Set;
@@ -61,7 +61,7 @@ final class TopLevelNamespace
          * Creates a temporary binding for a top-level identifier that's
          * required, but not (currently) defined in the namespace.
          */
-        private TopLevelBinding(TopLevelRequireBinding required)
+        private TopLevelBinding(TopLevelRequiredBinding required)
         {
             super(required.getIdentifier(), REQUIRED_FROM_ELSEWHERE);
             myTarget = required.target();
@@ -211,7 +211,7 @@ final class TopLevelNamespace
             // and free bindings are equivalent.  Otherwise we'd have problems
             // since we may not have found a TopLevelBinding here, but one
             // is created later.
-            TopLevelRequireBinding requiredBinding =
+            TopLevelRequiredBinding requiredBinding =
                 myTopNs.substituteFreeImport(name, returnMarks);
 
             if (requiredBinding == null)
@@ -257,14 +257,14 @@ final class TopLevelNamespace
      * Denotes a module-level binding imported into a top-level namespace via
      * {@code require}.
      */
-    static final class TopLevelRequireBinding
+    private static final class TopLevelRequiredBinding
         extends RequiredBinding
     {
         private final int myPrecedence;
 
-        private TopLevelRequireBinding(int precedence,
-                                       SyntaxSymbol identifier,
-                                       ProvidedBinding target)
+        private TopLevelRequiredBinding(int precedence,
+                                        SyntaxSymbol identifier,
+                                        ProvidedBinding target)
         {
             super(identifier, target);
 
@@ -291,7 +291,7 @@ final class TopLevelNamespace
         @Override
         public String toString()
         {
-            return "{{{TopLevelRequireBinding "
+            return "{{{TopLevelRequiredBinding "
                  + target().myModuleId.absolutePath()
                  + ' ' + getName() + "}}}";
         }
@@ -302,7 +302,7 @@ final class TopLevelNamespace
     /**
      * Maps each imported identifier to its binding.
      */
-    private final RequiredBindingMap<TopLevelRequireBinding> myRequiredBindings =
+    private final RequiredBindingMap<TopLevelRequiredBinding> myRequiredBindings =
         new RequiredBindingMap<>();
 
     /**
@@ -383,15 +383,16 @@ final class TopLevelNamespace
                                         SyntaxSymbol    localId,
                                         ProvidedBinding binding)
     {
-        TopLevelRequireBinding topBinding =
-            new TopLevelRequireBinding(precedence, localId, binding);
+        TopLevelRequiredBinding topBinding =
+            new TopLevelRequiredBinding(precedence, localId, binding);
 
         myRequiredBindings.put(localId, topBinding);
     }
 
 
-    private final TopLevelRequireBinding substituteFreeImport(BaseSymbol name,
-                                                              Set<MarkWrap> marks)
+    private final
+    TopLevelRequiredBinding substituteFreeImport(BaseSymbol name,
+                                                 Set<MarkWrap> marks)
     {
         return myRequiredBindings.get(name, marks);
     }
@@ -423,7 +424,7 @@ final class TopLevelNamespace
 
     @Override
     CompiledForm compileDefine(Evaluator eval,
-                               ModuleBinding binding,
+                               ModuleDefinedBinding binding,
                                SyntaxSymbol id,
                                CompiledForm valueForm)
         throws FusionException

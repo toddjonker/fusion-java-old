@@ -4,7 +4,7 @@ package com.amazon.fusion;
 
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ImportedProvidedBinding;
-import com.amazon.fusion.ModuleNamespace.ModuleBinding;
+import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
 import java.util.Iterator;
 import java.util.Set;
@@ -45,7 +45,7 @@ final class LanguageWrap
         }
 
         @Override
-        public ModuleBinding target()
+        public ModuleDefinedBinding target()
         {
             return myImport.target();
         }

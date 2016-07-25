@@ -5,7 +5,6 @@ package com.amazon.fusion;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.LanguageWrap.LanguageBinding;
 import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
-import com.amazon.fusion.TopLevelNamespace.TopLevelRequireBinding;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -38,7 +37,7 @@ final class ModuleNamespace
         }
 
         @Override
-        abstract ModuleBinding  target();
+        abstract ModuleDefinedBinding target();
         abstract ModuleIdentity getTargetModule();
 
         @Override
@@ -79,9 +78,10 @@ final class ModuleNamespace
     static final class DefinedProvidedBinding
         extends ProvidedBinding
     {
-        private final ModuleBinding myDefinition;
+        private final ModuleDefinedBinding myDefinition;
 
-        DefinedProvidedBinding(SyntaxSymbol exportedId, ModuleBinding binding)
+        DefinedProvidedBinding(SyntaxSymbol exportedId,
+                               ModuleDefinedBinding binding)
         {
             super(exportedId);
 
@@ -89,13 +89,13 @@ final class ModuleNamespace
             myDefinition = binding;
         }
 
-        DefinedProvidedBinding(ModuleBinding binding)
+        DefinedProvidedBinding(ModuleDefinedBinding binding)
         {
             this(binding.getIdentifier(), binding);
         }
 
         @Override
-        ModuleBinding target()
+        ModuleDefinedBinding target()
         {
             return myDefinition;
         }
@@ -129,7 +129,7 @@ final class ModuleNamespace
         }
 
         @Override
-        ModuleBinding target()
+        ModuleDefinedBinding target()
         {
             return myImport.target();
         }
@@ -150,21 +150,22 @@ final class ModuleNamespace
 
 
     /**
-     * Denotes a module-level binding. Instances are one-to-one with each
-     * {@code define} at module-level.
+     * Denotes a binding defined (not imported) at module-level.
+     * Instances are one-to-one with each {@code define} at module-level.
      * <p>
      * Unlike top-level bindings, module-level bindings are immutable.
      * <p>
-     * When imported into another namespace, a {@code ModuleBinding} is wrapped
-     * by either a {@link LanguageBinding} or a {@link TopLevelRequireBinding}.
+     * When imported into another namespace, a {@code ModuleDefinedBinding} is
+     * wrapped by either a {@link LanguageBinding} or a
+     * {@link Namespace.RequiredBinding}.
      */
-    static final class ModuleBinding
+    static final class ModuleDefinedBinding
         extends NsBinding
     {
         final ModuleIdentity myModuleId;
 
-        private ModuleBinding(SyntaxSymbol identifier, int address,
-                              ModuleIdentity moduleId)
+        private ModuleDefinedBinding(SyntaxSymbol identifier, int address,
+                                     ModuleIdentity moduleId)
         {
             super(identifier, address);
             myModuleId = moduleId;
@@ -263,16 +264,19 @@ final class ModuleNamespace
         @Override
         public String toString()
         {
-            return "{{{ModuleBinding " + myModuleId.absolutePath()
+            return "{{{ModuleDefinedBinding " + myModuleId.absolutePath()
                 + ' ' + getIdentifier().debugString() + "}}}";
         }
     }
 
 
-    private static final class ModuleWrap
+    /**
+     * Exposes the bindings defined at module-level.
+     */
+    private static final class ModuleDefinesWrap
         extends EnvironmentWrap
     {
-        ModuleWrap(ModuleNamespace ns)
+        ModuleDefinesWrap(ModuleNamespace ns)
         {
             super(ns);
         }
@@ -295,7 +299,7 @@ final class ModuleNamespace
         {
             ModuleIdentity id =
                 ((ModuleNamespace) getEnvironment()).getModuleId();
-            return "{{{ModuleWrap " + id.absolutePath() + "}}}";
+            return "{{{ModuleDefinesWrap " + id.absolutePath() + "}}}";
         }
     }
 
@@ -329,7 +333,7 @@ final class ModuleNamespace
                   @Override
                   public SyntaxWraps apply(Namespace _this) {
                       ModuleNamespace __this = (ModuleNamespace) _this;
-                      return SyntaxWraps.make(new ModuleWrap(__this),
+                      return SyntaxWraps.make(new ModuleDefinesWrap(__this),
                                               usedModuleWraps);
                   }
               });
@@ -372,7 +376,7 @@ final class ModuleNamespace
     @Override
     NsBinding newDefinedBinding(SyntaxSymbol identifier, int address)
     {
-        return new ModuleBinding(identifier, address, getModuleId());
+        return new ModuleDefinedBinding(identifier, address, getModuleId());
     }
 
     @Override
@@ -463,7 +467,7 @@ final class ModuleNamespace
 
     @Override
     CompiledForm compileDefine(Evaluator eval,
-                               ModuleBinding binding,
+                               ModuleDefinedBinding binding,
                                SyntaxSymbol id,
                                CompiledForm valueForm)
         throws FusionException

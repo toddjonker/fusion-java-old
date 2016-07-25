@@ -5,7 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
-import com.amazon.fusion.ModuleNamespace.ModuleBinding;
+import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
 import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ abstract class Namespace
      * Denotes a namespace-level binding, either top-level or module-level.
      *
      * @see TopLevelBinding
-     * @see ModuleBinding
+     * @see ModuleDefinedBinding
      */
     abstract static class NsBinding
         extends Binding
@@ -122,7 +122,7 @@ abstract class Namespace
         }
 
         @Override
-        public ModuleBinding target()
+        public ModuleDefinedBinding target()
         {
             return myTarget.target();
         }
@@ -566,7 +566,7 @@ abstract class Namespace
         throws FusionException;
 
     abstract CompiledForm compileDefine(Evaluator eval,
-                                        ModuleBinding binding,
+                                        ModuleDefinedBinding binding,
                                         SyntaxSymbol id,
                                         CompiledForm valueForm)
         throws FusionException;
