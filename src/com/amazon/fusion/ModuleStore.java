@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -15,13 +15,13 @@ final class ModuleStore
 
 
     ModuleStore(ModuleRegistry registry,
-                ModuleStore[] requiredModules,
-                int topLevelVariableCount,
-                BindingDoc[] bindingDocs)
+                ModuleStore[]  requiredModules,
+                int            variableCount,
+                BindingDoc[]   bindingDocs)
     {
         myRegistry = registry;
         myRequiredModules = requiredModules;
-        myValues = new Object[topLevelVariableCount];
+        myValues = new Object[variableCount];
         myBindingDocs = bindingDocs;
     }
 

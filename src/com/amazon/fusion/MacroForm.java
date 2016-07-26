@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -27,7 +27,6 @@ final class MacroForm
         // Must grab the origin identifier before a mark is applied.
         SyntaxSymbol origin = (SyntaxSymbol) stx.get(eval, 0);
 
-        // TODO FUSION-39 we create two MarkWrap instances here
         MarkWrap markWrap = new MarkWrap();
 
         stx = (SyntaxSexp) stx.addOrRemoveMark(markWrap);

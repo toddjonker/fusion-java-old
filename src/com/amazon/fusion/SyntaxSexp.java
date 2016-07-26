@@ -503,12 +503,12 @@ final class SyntaxSexp
             // since this scope may override #%app or #%variable-reference.
             // Thus we cannot call expand on the symbol and must not cache the
             // results of the binding resolution unless it resolves to syntax.
-            SyntacticForm xform =
+            SyntacticForm form =
                 ((SyntaxSymbol) first).resolveSyntaxMaybe(env);
-            if (xform != null)
+            if (form != null)
             {
-                // We found a static top-level binding to a built-in form or
-                // to a macro. Continue the expansion process.
+                // We found a static top-level binding to a built-in form or a
+                // macro. Continue the expansion process.
 
                 // TODO FUSION-31 identifier macros entail extra work here.
                 assert expander.expand(env, first) == first;
@@ -518,8 +518,7 @@ final class SyntaxSexp
 
                 // We use the same expansion context as we already have.
                 // Don't need to replace the sexp since we haven't changed it.
-                SyntaxValue expandedExpr =
-                    expander.expand(env, xform, this);
+                SyntaxValue expandedExpr = expander.expand(env, form, this);
                 return expandedExpr;
             }
         }

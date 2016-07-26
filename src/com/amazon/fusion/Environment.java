@@ -15,7 +15,7 @@ interface Environment
     Namespace namespace();
 
 
-    /** What's the lexical depth?  0 == top-level */
+    /** What's the lexical depth?  0 == namespace-level */
     int getDepth();
 
 

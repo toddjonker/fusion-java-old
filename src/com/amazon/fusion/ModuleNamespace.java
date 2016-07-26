@@ -570,7 +570,7 @@ final class ModuleNamespace
 
 
     /**
-     * A reference to a top-level variable in a namespace that is not the one
+     * A reference to a module-level binding in a namespace that is not the one
      * in our lexical context.
      */
     static final class CompiledImportedVariableReference
