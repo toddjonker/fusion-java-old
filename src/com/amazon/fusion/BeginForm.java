@@ -1,6 +1,8 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
+
+import static com.amazon.fusion.FusionVoid.voidValue;
 
 /**
  * The {@code begin} syntactic form.
@@ -59,7 +61,7 @@ final class BeginForm
     {
         int size = to - from;
 
-        if (size == 0) return CompiledVoid.SINGLETON;
+        if (size == 0) return new CompiledConstant(voidValue(eval));
 
         if (size == 1) return eval.compile(env, stx.get(eval, from));
 
