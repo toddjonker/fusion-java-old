@@ -1972,6 +1972,62 @@ final class FusionNumber
 
 
     //========================================================================
+    // Number Procedure Helpers - Can be Decimal, Float or Int.
+
+
+    /**
+     * @param expectation must not be null.
+     * @return may be null
+     */
+    static BigDecimal checkNumberArgToJavaBigDecimal(Evaluator eval,
+                                      Procedure who,
+                                      String    expectation,
+                                      int       argNum,
+                                      Object... args)
+        throws FusionException, ArgumentException
+    {
+        Object arg = args[argNum];
+        if (arg instanceof BaseNumber)
+        {
+            return ((BaseNumber) arg).toBigDecimal();
+        }
+
+        throw who.argFailure(expectation, argNum, args);
+    }
+
+    static BigDecimal checkNullableNumberArgToJavaBigDecimal(Evaluator eval,
+                                              Procedure who,
+                                              int       argNum,
+                                              Object... args)
+        throws FusionException, ArgumentException
+    {
+        String expectation = "nullable number";
+        BigDecimal result = checkNumberArgToJavaBigDecimal(eval, who, expectation, argNum, args);
+        return result;
+    }
+
+
+    /**
+     * @return not null
+     */
+    static BigDecimal checkActualNumberArgToJavaBigDecimal(Evaluator eval,
+                                              Procedure who,
+                                              int       argNum,
+                                              Object... args)
+        throws FusionException, ArgumentException
+    {
+        String expectation = "non-null number";
+        BigDecimal result =
+           checkNumberArgToJavaBigDecimal(eval, who, expectation, argNum, args);
+        if (result == null)
+        {
+            throw who.argFailure(expectation, argNum, args);
+        }
+        return result;
+    }
+
+
+    //========================================================================
     // Procedures
 
 
