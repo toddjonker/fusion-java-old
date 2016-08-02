@@ -1,8 +1,12 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSexp.isSexp;
+import static com.amazon.fusion.FusionText.isText;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.ion.util.IonTextUtils.printString;
+import java.util.ArrayList;
 
 
 /**
@@ -74,19 +78,69 @@ final class RequireForm
 
         int arity = check.arityAtLeast(2);
 
+        ArrayList<SyntaxValue> expanded = new ArrayList<>(stx.size());
+        expanded.add(stx.get(eval, 0));
+
         for (int i = 1; i < arity; i++)
         {
-            String path = check.requiredText(eval, "module path", i);
-            if (! ModuleIdentity.isValidModulePath(path))
+            SyntaxValue spec = stx.get(eval, i);
+            Object datum = spec.unwrap(eval);
+            if (isText(eval, datum))
             {
-                String message =
-                    "not a valid module path: " + stx.get(eval, i);
-                throw check.failure(message);
+                expandRequireModule(eval, check, spec, datum, expanded);
+            }
+            else if (isSexp(eval, datum))
+            {
+                expandRequireSexp(eval, check, (SyntaxSexp) spec, expanded);
+            }
+            else
+            {
+                throw check.failure("invalid require-spec", spec);
             }
         }
 
-        return stx;
+        SyntaxValue[] children = expanded.toArray(SyntaxValue.EMPTY_ARRAY);
+        return stx.copyReplacingChildren(eval, children);
     }
+
+    private void expandRequireModule(Evaluator eval,
+                                     SyntaxChecker requireCheck,
+                                     SyntaxValue spec,
+                                     Object textDatum,
+                                     ArrayList<SyntaxValue> expandedSpecs)
+        throws FusionException
+    {
+        String path = FusionText.textToJavaString(eval, textDatum);
+        checkValidModulePath(eval, requireCheck, path);
+
+        expandedSpecs.add(spec);
+    }
+
+    private void expandRequireSexp(Evaluator eval,
+                                   SyntaxChecker requireCheck,
+                                   SyntaxSexp spec,
+                                   ArrayList<SyntaxValue> expandedSpecs)
+        throws FusionException
+    {
+        SyntaxChecker check = new SyntaxChecker(eval, spec);
+
+        throw check.failure("invalid require-spec");
+    }
+
+    private void checkValidModulePath(Evaluator     eval,
+                                      SyntaxChecker check,
+                                      String        path)
+        throws SyntaxException
+    {
+        if (! ModuleIdentity.isValidModulePath(path))
+        {
+            String message = "invalid module path: " + printString(path);
+            throw check.failure(message);
+        }
+    }
+
+
+    //========================================================================
 
 
     @Override
@@ -103,16 +157,23 @@ final class RequireForm
 
         for (int i = 1; i < arity; i++)
         {
-            SyntaxValue moduleSpec = stx.get(eval, i);
+            SyntaxValue spec = stx.get(eval, i);
 
             try
             {
-                ids[i-1] = myModuleNameResolver.resolve(eval, baseModule,
-                                                        moduleSpec, true);
+                if (spec instanceof SyntaxSexp)
+                {
+                    assert false : "Require-spec sexps not implemented";
+                }
+                else // It's a (string or symbol) module path.
+                {
+                    ids[i-1] = myModuleNameResolver.resolve(eval, baseModule,
+                                                            spec, true);
+                }
             }
             catch (FusionException e)
             {
-                e.addContext(moduleSpec);
+                e.addContext(spec);
                 throw e;
             }
         }
