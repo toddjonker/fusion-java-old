@@ -40,8 +40,9 @@ public final class FusionValue
 
 
     /**
-     * Determines whether a Fusion value is a null of an type; that is, is it
+     * Determines whether a Fusion value is a null of any type; that is, is it
      * {@code null.null}, {@code null.bool}, {@code null.int}, <em>etc.</em>?
+     * This is equivalent to the Fusion procedure {@code is_null}.
      *
      * @see FusionNull#isNullNull(Evaluator, Object)
      */

@@ -1741,6 +1741,19 @@ final class FusionNumber
     }
 
 
+    /**
+     * Converts a number to it's equivalent decimal value.
+     *
+     * @param top the top-level that was the source of the value.
+     * @param fusionNumber must be a Fusion int, decimal, or float.
+     *   <b>Any other type of value will cause a crash.</b>
+     * @return {@code null} when given {@code null.int}, {@code null.decimal},
+     *   or {@code null.float}.
+     * @throws NumberFormatException if {@code fusionNumber} is a special
+     *   float ({@code NaN}, {@code +inf}, or {@code -inf}).
+     *   <b>This is a crash of the Fusion runtime and indicates a defect in the
+     *   calling code.</b>
+     */
     static BigDecimal unsafeNumberToBigDecimal(TopLevel top,
                                                Object   fusionNumber)
         throws FusionException

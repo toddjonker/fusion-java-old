@@ -531,6 +531,10 @@ abstract class Namespace
         require(eval, id);
     }
 
+    /**
+     * Imports all exported bindings from a module.
+     * This is used by {@code (require module_path)}.
+     */
     final void require(Evaluator eval, ModuleIdentity id)
         throws FusionException
     {

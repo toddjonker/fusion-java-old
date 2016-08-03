@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -62,8 +62,8 @@ final class ModuleNameResolver
 
 
     /**
-     * Locates and loads a module, dispatching on the concrete syntax of the
-     * request.
+     * Locates and (optionally) loads a module, dispatching on the concrete
+     * syntax of the request. The module is not instantiated.
      *
      * @param baseModule the starting point for relative references; not null.
      *
@@ -107,7 +107,8 @@ final class ModuleNameResolver
 
 
     /**
-     * Locates and loads a module from the registered repositories.
+     * Locates and (optionally) loads a module from the registered repositories.
+     * The module is not instantiated.
      *
      * @param eval the evaluation context.
      * @param baseModule the starting point for relative references; not null.
@@ -195,7 +196,7 @@ final class ModuleNameResolver
 
     /**
      * Loads a module from a known location into the current namespace's
-     * registry.
+     * registry. The module is not instantiated.
      * <p>
      * This method is awkwardly placed in this class, and might make more sense
      * in {@link LoadHandler}.  However, Racket gives this component the task
