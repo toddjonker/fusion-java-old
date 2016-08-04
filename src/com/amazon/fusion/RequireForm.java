@@ -7,7 +7,9 @@ import static com.amazon.fusion.FusionText.isText;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.GlobalState.REQUIRE;
 import static com.amazon.ion.util.IonTextUtils.printString;
+import com.amazon.fusion.Namespace.RequireRenameMapping;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 /**
@@ -197,6 +199,7 @@ final class RequireForm
         }
     }
 
+
     //========================================================================
 
 
@@ -253,6 +256,28 @@ final class RequireForm
             throws FusionException
         {
             namespace.require(eval, myUsedModuleId);
+        }
+    }
+
+
+    private static final class CompiledPartialRequire
+        extends CompiledRequireSpec
+    {
+        private final RequireRenameMapping[] myMappings;
+
+        private CompiledPartialRequire(ModuleIdentity usedModuleId,
+                                       RequireRenameMapping[] mappings)
+        {
+            super(usedModuleId);
+            myMappings = mappings;
+        }
+
+        @Override
+        public void eval(Evaluator eval, Namespace namespace)
+            throws FusionException
+        {
+            namespace.require(eval, myUsedModuleId,
+                              Arrays.asList(myMappings).iterator());
         }
     }
 }

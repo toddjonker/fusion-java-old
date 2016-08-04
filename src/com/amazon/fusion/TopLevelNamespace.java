@@ -373,6 +373,17 @@ final class TopLevelNamespace
         myCurrentPrecedence++;
     }
 
+
+    @Override
+    void require(Evaluator eval, ModuleInstance module,
+                 Iterator<RequireRenameMapping> mappings)
+        throws FusionException
+    {
+        super.require(eval, module, mappings);
+        myCurrentPrecedence++;
+    }
+
+
     @Override
     void installRequiredBinding(SyntaxSymbol    localId,
                                 ProvidedBinding target)

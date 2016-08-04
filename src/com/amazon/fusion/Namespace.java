@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -514,6 +515,27 @@ abstract class Namespace
     }
 
 
+    //========================================================================
+    //  Require
+
+    /**
+     * Denotes a new binding created by {@code require}, possibly renaming the
+     * exported symbol along the way.
+     */
+    static final class RequireRenameMapping
+    {
+        final SyntaxSymbol myLocalIdentifier;
+        final BaseSymbol   myExportedIdentifier;
+
+        RequireRenameMapping(SyntaxSymbol localIdentifier,
+                             BaseSymbol exportedIdentifier)
+        {
+            myLocalIdentifier = localIdentifier;
+            myExportedIdentifier = exportedIdentifier;
+        }
+    }
+
+
     /**
      * @param modulePath is an absolute or relative module path.
      */
@@ -555,10 +577,35 @@ abstract class Namespace
         }
     }
 
+
+    final void require(Evaluator eval, ModuleIdentity id,
+                       Iterator<RequireRenameMapping> mappings)
+        throws FusionException
+    {
+        ModuleInstance module = myRegistry.instantiate(eval, id);
+        require(eval, module, mappings);
+    }
+
+    void require(Evaluator eval, ModuleInstance module,
+                 Iterator<RequireRenameMapping> mappings)
+        throws FusionException
+    {
+        while (mappings.hasNext())
+        {
+            RequireRenameMapping mapping = mappings.next();
+            BaseSymbol exportedId = mapping.myExportedIdentifier;
+            ProvidedBinding provided = module.resolveProvidedName(exportedId);
+            installRequiredBinding(mapping.myLocalIdentifier, provided);
+        }
+    }
+
+
     abstract void installRequiredBinding(SyntaxSymbol    localId,
                                          ProvidedBinding target)
         throws AmbiguousBindingFailure;
 
+
+    //========================================================================
 
 
     final boolean ownsBinding(NsBinding binding)
