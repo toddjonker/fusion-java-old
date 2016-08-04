@@ -513,10 +513,16 @@ final class ModuleNamespace
             // The identifier is free, but references will have context
             // including the language.
             SyntaxSymbol id = SyntaxSymbol.make(eval, null, provided.getName());
-
-            ModuleRequiredBinding b = new ModuleRequiredBinding(id, provided);
-            myRequiredBindings.put(id, b);
+            installRequiredBinding(id, provided);
         }
+    }
+
+    private void installRequiredBinding(SyntaxSymbol    localId,
+                                        ProvidedBinding target)
+        throws AmbiguousBindingFailure
+    {
+        ModuleRequiredBinding b = new ModuleRequiredBinding(localId, target);
+        myRequiredBindings.put(localId, b);
     }
 
 
