@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionSexp.isSexp;
 import static com.amazon.fusion.FusionText.isText;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.fusion.GlobalState.REQUIRE;
 import static com.amazon.ion.util.IonTextUtils.printString;
 import java.util.ArrayList;
 
@@ -153,7 +154,11 @@ final class RequireForm
 
         ModuleIdentity baseModule = env.namespace().getModuleId();
         int arity = stx.size();
-        ModuleIdentity[] ids = new ModuleIdentity[arity - 1];
+
+        SyntaxChecker check = new SyntaxChecker(eval, REQUIRE, stx);
+
+        CompiledRequireSpec[] compiledSpecs =
+            new CompiledRequireSpec[arity - 1];
 
         for (int i = 1; i < arity; i++)
         {
@@ -161,15 +166,8 @@ final class RequireForm
 
             try
             {
-                if (spec instanceof SyntaxSexp)
-                {
-                    assert false : "Require-spec sexps not implemented";
-                }
-                else // It's a (string or symbol) module path.
-                {
-                    ids[i-1] = myModuleNameResolver.resolve(eval, baseModule,
-                                                            spec, true);
-                }
+                compiledSpecs[i - 1] =
+                    compileSpec(eval, baseModule, check, spec);
             }
             catch (FusionException e)
             {
@@ -178,9 +176,26 @@ final class RequireForm
             }
         }
 
-        return new CompiledRequire(ids);
+        return new CompiledRequire(compiledSpecs);
     }
 
+    private CompiledRequireSpec compileSpec(Evaluator eval,
+                                            ModuleIdentity baseModule,
+                                            SyntaxChecker requireCheck,
+                                            SyntaxValue spec)
+        throws FusionException
+    {
+        if (spec instanceof SyntaxSexp)
+        {
+            throw requireCheck.failure("invalid require-spec");
+        }
+        else // It's a (string or symbol) module path.
+        {
+            ModuleIdentity moduleId =
+                myModuleNameResolver.resolve(eval, baseModule, spec, true);
+            return new CompiledFullRequire(moduleId);
+        }
+    }
 
     //========================================================================
 
@@ -188,11 +203,11 @@ final class RequireForm
     private static final class CompiledRequire
         implements CompiledForm
     {
-        private final ModuleIdentity[] myUsedModuleIds;
+        private final CompiledRequireSpec[] mySpecs;
 
-        private CompiledRequire(ModuleIdentity[] usedModuleIds)
+        private CompiledRequire(CompiledRequireSpec[] specs)
         {
-            myUsedModuleIds = usedModuleIds;
+            mySpecs = specs;
         }
 
         @Override
@@ -202,11 +217,42 @@ final class RequireForm
             // These forms are evaluated during expansion of a module.
             // So it's never entered with a "real" Store.
             Namespace namespace = (Namespace) store.namespace();
-            for (ModuleIdentity id : myUsedModuleIds)
+
+            for (CompiledRequireSpec spec : mySpecs)
             {
-                namespace.require(eval, id);
+                spec.eval(eval, namespace);
             }
             return voidValue(eval);
+        }
+    }
+
+    private abstract static class CompiledRequireSpec
+    {
+        protected final ModuleIdentity myUsedModuleId;
+
+        private CompiledRequireSpec(ModuleIdentity usedModuleId)
+        {
+            myUsedModuleId = usedModuleId;
+        }
+
+        abstract void eval(Evaluator eval, Namespace namespace)
+            throws FusionException;
+    }
+
+
+    private static final class CompiledFullRequire
+        extends CompiledRequireSpec
+    {
+        private CompiledFullRequire(ModuleIdentity usedModuleId)
+        {
+            super(usedModuleId);
+        }
+
+        @Override
+        public void eval(Evaluator eval, Namespace namespace)
+            throws FusionException
+        {
+            namespace.require(eval, myUsedModuleId);
         }
     }
 }
