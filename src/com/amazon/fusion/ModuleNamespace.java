@@ -504,21 +504,8 @@ final class ModuleNamespace
 
 
     @Override
-    void require(Evaluator eval, ModuleInstance module)
-        throws FusionException
-    {
-        for (ProvidedBinding provided : module.providedBindings())
-        {
-            // TODO FUSION-117 Not sure this is the right lexical context.
-            // The identifier is free, but references will have context
-            // including the language.
-            SyntaxSymbol id = SyntaxSymbol.make(eval, null, provided.getName());
-            installRequiredBinding(id, provided);
-        }
-    }
-
-    private void installRequiredBinding(SyntaxSymbol    localId,
-                                        ProvidedBinding target)
+    void installRequiredBinding(SyntaxSymbol    localId,
+                                ProvidedBinding target)
         throws AmbiguousBindingFailure
     {
         ModuleRequiredBinding b = new ModuleRequiredBinding(localId, target);

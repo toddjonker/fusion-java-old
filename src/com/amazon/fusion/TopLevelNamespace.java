@@ -369,17 +369,13 @@ final class TopLevelNamespace
     void require(Evaluator eval, ModuleInstance module)
         throws FusionException
     {
-        // We assume that a module doesn't export a duplicate name.
-        for (ProvidedBinding binding : module.providedBindings())
-        {
-            SyntaxSymbol id = SyntaxSymbol.make(eval, null, binding.getName());
-            installRequiredBinding(id, binding);
-        }
+        super.require(eval, module);
         myCurrentPrecedence++;
     }
 
-    private void installRequiredBinding(SyntaxSymbol    localId,
-                                        ProvidedBinding target)
+    @Override
+    void installRequiredBinding(SyntaxSymbol    localId,
+                                ProvidedBinding target)
     {
         TopLevelRequiredBinding topBinding =
             new TopLevelRequiredBinding(myCurrentPrecedence, localId, target);
