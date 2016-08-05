@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
-import static com.amazon.fusion.FusionEval.evalSyntax;
 import static com.amazon.fusion.FusionString.isString;
 import static com.amazon.fusion.FusionString.stringToJavaString;
 import static com.amazon.fusion.FusionVoid.voidValue;
@@ -233,7 +232,10 @@ final class ModuleForm
                 {
                     try
                     {
-                        evalSyntax(eval, expanded, moduleNamespace);
+                        expanded = expander.expand(moduleNamespace, expanded);
+                        CompiledForm compiled =
+                            eval.compile(moduleNamespace, expanded);
+                        eval.eval(moduleNamespace, compiled);
                     }
                     catch (FusionException e)
                     {
