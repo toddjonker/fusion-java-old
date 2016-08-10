@@ -533,6 +533,13 @@ abstract class Namespace
             myLocalIdentifier = localIdentifier;
             myExportedIdentifier = exportedIdentifier;
         }
+
+        @Override
+        public String toString()
+        {
+            return "RequireRenameMapping::{local:" + myLocalIdentifier
+                + ",exported:" + myExportedIdentifier + '}';
+        }
     }
 
 

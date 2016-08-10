@@ -149,9 +149,9 @@ final class TopLevelNamespace
         @Override
         public String toString()
         {
-            return "{{{TopLevelBinding " +
-                (myTarget == this ? getIdentifier().debugString() : myTarget) +
-                "}}}";
+            return "{{{TopLevelBinding " + getIdentifier().debugString()
+                + (myTarget == this ? "" : " -> " + myTarget)
+                + "}}}";
         }
     }
 

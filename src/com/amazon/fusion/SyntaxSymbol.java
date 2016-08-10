@@ -271,7 +271,8 @@ final class SyntaxSymbol
      * Resolves this identifier, but doesn't cache the result if it has not
      * been previously resolved.
      *
-     * @return null is equivalent to a {@link FreeBinding}.
+     * @return null is equivalent to a {@link FreeBinding}, and either may be
+     * returned.
      */
     Binding uncachedResolveMaybe()
     {
