@@ -29,7 +29,7 @@ final class ModuleForm
 {
     private static final String STX_PROP_MODULE_IDENTITY   = "module identity";
     private static final String STX_PROP_LANGUAGE_IDENTITY = "language identity";
-    private static final String STX_PROP_BINDING_COUNT     = "binding count";
+    private static final String STX_PROP_DEFINITION_COUNT  = "definition count";
 
 
     private final DynamicParameter myCurrentModuleDeclareName;
@@ -277,8 +277,8 @@ final class ModuleForm
 
         source = (SyntaxSexp)
             source.copyWithProperty(eval,
-                                    STX_PROP_BINDING_COUNT,
-                                    moduleNamespace.getBindings().size());
+                                    STX_PROP_DEFINITION_COUNT,
+                                    moduleNamespace.definitionCount());
 
 
         // Pass 2: Expand the expressions. We also rearrange the forms,
@@ -419,7 +419,7 @@ final class ModuleForm
             otherForms.toArray(CompiledForm.EMPTY_ARRAY);
 
         int bindingCount = (Integer)
-            stx.findProperty(eval, STX_PROP_BINDING_COUNT);
+            stx.findProperty(eval, STX_PROP_DEFINITION_COUNT);
 
         return new CompiledModule(id,
                                   docs,

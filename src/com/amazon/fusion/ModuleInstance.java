@@ -6,7 +6,7 @@ import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.DefinedProvidedBinding;
 import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
-import com.amazon.fusion.Namespace.NsBinding;
+import com.amazon.fusion.Namespace.NsDefinedBinding;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -53,12 +53,12 @@ final class ModuleInstance
      * Creates a module that {@code provide}s the given bindings.
      */
     ModuleInstance(ModuleIdentity identity, ModuleStore namespace,
-                   Collection<NsBinding> bindings)
+                   Collection<NsDefinedBinding> bindings)
         throws FusionException
     {
         this(identity, /* docs */ null, namespace, bindings.size());
 
-        for (NsBinding binding : bindings)
+        for (NsDefinedBinding binding : bindings)
         {
             BaseSymbol name = binding.getName();
             ProvidedBinding out =

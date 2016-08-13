@@ -8,7 +8,7 @@ import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.Syntax.datumToSyntax;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
-import com.amazon.fusion.Namespace.NsBinding;
+import com.amazon.fusion.Namespace.NsDefinedBinding;
 import java.util.ArrayList;
 
 
@@ -154,7 +154,7 @@ final class ProvideForm
             // Filter by lexical context: we shouldn't export identifiers
             // introduced by macros unless this form was also introduced
             // at the same time.
-            for (NsBinding binding : moduleNamespace.getBindings())
+            for (NsDefinedBinding binding : moduleNamespace.getDefinedBindings())
             {
                 // TODO FUSION-329 the datum->syntax context should be the sexp
                 // form `(all_defined_out)` not just `all_defined_out` but
@@ -166,7 +166,7 @@ final class ProvideForm
                                   tag,
                                   null);
                 localized = localized.copyAndResolveTop();
-                Binding localBinding = moduleNamespace.localResolve(localized);
+                Binding localBinding = moduleNamespace.resolveDefinition(localized);
                 if (localBinding != null && binding.sameTarget(localBinding))
                 {
                     localized = localized.copyReplacingBinding(binding);

@@ -28,7 +28,7 @@ final class TopLevelNamespace
      * Maps from top-level names to definitions and/or module bindings.
      */
     static final class TopLevelBinding
-        extends NsBinding
+        extends NsDefinedBinding
     {
         // Value is arbitrary and (hopefully) unique to aid in debugging.
         static final int REQUIRED_FROM_ELSEWHERE = -20130802;
@@ -40,7 +40,7 @@ final class TopLevelNamespace
          * This member is mutated whenever the identifier's meaning changes due
          * to a {@code define} overriding a {@code require}, or vice versa.
          */
-        private NsBinding myTarget;
+        private NsDefinedBinding myTarget;
 
         /**
          * The precedence of the top-level definition (stored at my address).
@@ -332,7 +332,7 @@ final class TopLevelNamespace
 
 
     @Override
-    NsBinding newDefinedBinding(SyntaxSymbol identifier, int address)
+    NsDefinedBinding newDefinedBinding(SyntaxSymbol identifier, int address)
     {
         return new TopLevelBinding(identifier, address, myCurrentPrecedence);
     }
@@ -344,7 +344,7 @@ final class TopLevelNamespace
     {
         identifier = identifier.copyAndResolveTop();
 
-        Binding binding = localResolve(identifier);
+        Binding binding = resolveDefinition(identifier);
         if (binding == null)
         {
             binding = addDefinedBinding(identifier);
@@ -537,7 +537,7 @@ final class TopLevelNamespace
                     {
                         SyntaxSymbol topId = myId.copyAndResolveTop();
 
-                        NsBinding binding = ns.localResolve(topId);
+                        NsDefinedBinding binding = ns.resolveDefinition(topId);
                         if (binding == null)
                         {
                             throw new UnboundIdentifierException(myId);

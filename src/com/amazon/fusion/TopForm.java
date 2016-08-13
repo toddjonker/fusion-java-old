@@ -2,8 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.Namespace.NsBinding;
-
 
 /**
  * Implementation of {@code #%top}, which is introduced when identifiers are
@@ -31,16 +29,16 @@ final class TopForm
             // This allows top-levels shadowed by local to work
             SyntaxSymbol topId = id.copyAndResolveTop();
 
-            NsBinding binding = ns.localResolve(topId);
+            Binding binding = ns.resolveDefinition(topId);
             if (binding == null)
             {
-                // There's no top-level binding with the same marks, so just
+                // There's no top-level definition with the same marks, so just
                 // lookup by name.
 
                 SyntaxSymbol stripped = id.stripWraps(eval);
                 assert stripped.resolve() instanceof FreeBinding;
 
-                binding = ns.localResolve(stripped);
+                binding = ns.resolveDefinition(stripped);
                 // This may still be free, but don't fail until eval-time.
                 // We'd like things like (expand (#%top foo)) to succeed.
             }
@@ -66,7 +64,7 @@ final class TopForm
             {
                 // The identifier may be from a different lexical context.
                 // Let's look it up as-is.
-                binding = ns.localResolve(id);
+                binding = ns.resolveDefinition(id);
                 if (binding != null)
                 {
                     id = (SyntaxSymbol) id.trackOrigin(eval, stx, topId);

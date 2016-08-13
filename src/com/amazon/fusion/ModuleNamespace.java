@@ -250,7 +250,7 @@ final class ModuleNamespace
      * {@link Namespace.RequiredBinding}.
      */
     static final class ModuleDefinedBinding
-        extends NsBinding
+        extends NsDefinedBinding
     {
         final ModuleIdentity myModuleId;
 
@@ -459,7 +459,7 @@ final class ModuleNamespace
 
 
     @Override
-    NsBinding newDefinedBinding(SyntaxSymbol identifier, int address)
+    NsDefinedBinding newDefinedBinding(SyntaxSymbol identifier, int address)
     {
         return new ModuleDefinedBinding(identifier, address, getModuleId());
     }
@@ -498,7 +498,7 @@ final class ModuleNamespace
             throw new AmbiguousBindingFailure(null, name, formForErrors);
         }
 
-        NsBinding b = addDefinedBinding(identifier);
+        NsDefinedBinding b = addDefinedBinding(identifier);
         return identifier.copyReplacingBinding(b);
     }
 

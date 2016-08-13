@@ -12,7 +12,7 @@ import static com.amazon.fusion.GlobalState.DEFINE;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import com.amazon.fusion.FusionString.BaseString;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
-import com.amazon.fusion.Namespace.NsBinding;
+import com.amazon.fusion.Namespace.NsDefinedBinding;
 
 final class DefineForm
     extends SyntacticForm
@@ -213,7 +213,7 @@ final class DefineForm
             binding.compileDefine(eval, env, identifier, valueForm);
 
         if (arity != 3
-            && binding instanceof NsBinding
+            && binding instanceof NsDefinedBinding
             && eval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
         {
             // We have documentation. Sort of.
@@ -222,7 +222,7 @@ final class DefineForm
                                             null, // kind
                                             null, // usage
                                             stringToJavaString(eval, docString));
-            int address = ((NsBinding) binding).myAddress;
+            int address = ((NsDefinedBinding) binding).myAddress;
             env.namespace().setDoc(address, doc);
         }
 

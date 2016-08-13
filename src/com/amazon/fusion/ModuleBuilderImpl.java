@@ -1,9 +1,9 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import com.amazon.fusion.BindingDoc.Kind;
-import com.amazon.fusion.Namespace.NsBinding;
+import com.amazon.fusion.Namespace.NsDefinedBinding;
 import java.util.Collection;
 
 
@@ -60,7 +60,7 @@ final class ModuleBuilderImpl
         ModuleStore store = new ModuleStore(myRegistry,
                                             myNamespace.extractValues(),
                                             myNamespace.extractBindingDocs());
-        Collection<NsBinding> bindings = myNamespace.getBindings();
+        Collection<NsDefinedBinding> bindings = myNamespace.getDefinedBindings();
 
         ModuleIdentity id = myNamespace.getModuleId();
 

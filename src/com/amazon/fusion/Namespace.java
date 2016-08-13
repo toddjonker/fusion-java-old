@@ -34,13 +34,13 @@ abstract class Namespace
      * @see TopLevelBinding
      * @see ModuleDefinedBinding
      */
-    abstract static class NsBinding
+    abstract static class NsDefinedBinding
         extends Binding
     {
         private final SyntaxSymbol myIdentifier;
         final int myAddress;
 
-        NsBinding(SyntaxSymbol identifier, int address)
+        NsDefinedBinding(SyntaxSymbol identifier, int address)
         {
             myIdentifier = identifier;
             myAddress = address;
@@ -242,7 +242,7 @@ abstract class Namespace
         new ArrayList<>();
 
     private final SyntaxWraps          myWraps;
-    private final ArrayList<NsBinding> myBindings = new ArrayList<>();
+    private final ArrayList<NsDefinedBinding> myDefinedBindings = new ArrayList<>();
     private final ArrayList<Object>    myValues   = new ArrayList<>();
     private ArrayList<BindingDoc> myBindingDocs;
 
@@ -306,16 +306,24 @@ abstract class Namespace
         return myModuleId;
     }
 
+    /**
+     * How many namspace-level definitions do we have?
+     * This doesn't count imports.
+     */
+    final int definitionCount()
+    {
+        return myDefinedBindings.size();
+    }
 
     /**
-     * Collects the bindings defined in this module; does not include imported
+     * Collects the bindings defined in this namespace; does not include imported
      * bindings.
      *
      * @return not null.
      */
-    final Collection<NsBinding> getBindings()
+    final Collection<NsDefinedBinding> getDefinedBindings()
     {
-        return Collections.unmodifiableCollection(myBindings);
+        return Collections.unmodifiableCollection(myDefinedBindings);
     }
 
     //========================================================================
@@ -340,9 +348,10 @@ abstract class Namespace
      *
      * @return null if identifier isn't bound here.
      */
-    final NsBinding localSubstitute(Binding binding, Set<MarkWrap> marks)
+    final NsDefinedBinding substituteDefinition(Binding       binding,
+                                                Set<MarkWrap> marks)
     {
-        for (NsBinding b : myBindings)
+        for (NsDefinedBinding b : myDefinedBindings)
         {
             if (b.myIdentifier.resolvesBound(binding, marks))
             {
@@ -355,15 +364,16 @@ abstract class Namespace
     @Override
     public final Binding substitute(Binding binding, Set<MarkWrap> marks)
     {
-        Binding subst = localSubstitute(binding, marks);
+        Binding subst = substituteDefinition(binding, marks);
         if (subst == null) subst = binding;
         return subst;
     }
 
     @Override
-    public final NsBinding substituteFree(BaseSymbol name, Set<MarkWrap> marks)
+    public final NsDefinedBinding substituteFree(BaseSymbol    name,
+                                                 Set<MarkWrap> marks)
     {
-        for (NsBinding b : myBindings)
+        for (NsDefinedBinding b : myDefinedBindings)
         {
             if (b.myIdentifier.resolvesFree(name, marks))
             {
@@ -375,9 +385,11 @@ abstract class Namespace
 
 
     /**
-     * @return null if identifier isn't bound here.
+     * Resolves an identifier to a namespace-level definition (not an import).
+     *
+     * @return null if identifier isn't defined here.
      */
-    final NsBinding localResolve(SyntaxSymbol identifier)
+    final NsDefinedBinding resolveDefinition(SyntaxSymbol identifier)
     {
         Binding resolvedRequestedId = identifier.resolve();
         Set<MarkWrap> marks = identifier.computeMarks();
@@ -385,7 +397,7 @@ abstract class Namespace
         {
             return substituteFree(identifier.getName(), marks);
         }
-        return localSubstitute(resolvedRequestedId, marks);
+        return substituteDefinition(resolvedRequestedId, marks);
     }
 
 
@@ -411,15 +423,15 @@ abstract class Namespace
     }
 
 
-    abstract NsBinding newDefinedBinding(SyntaxSymbol identifier, int address);
+    abstract NsDefinedBinding newDefinedBinding(SyntaxSymbol identifier, int address);
 
 
-    final NsBinding addDefinedBinding(SyntaxSymbol identifier)
+    final NsDefinedBinding addDefinedBinding(SyntaxSymbol identifier)
         throws FusionException
     {
-        int address = myBindings.size();
-        NsBinding binding = newDefinedBinding(identifier, address);
-        myBindings.add(binding);
+        int address = myDefinedBindings.size();
+        NsDefinedBinding binding = newDefinedBinding(identifier, address);
+        myDefinedBindings.add(binding);
         return binding;
     }
 
@@ -441,7 +453,7 @@ abstract class Namespace
      *
      * @param value must not be null
      */
-    final void bind(NsBinding binding, Object value)
+    final void bind(NsDefinedBinding binding, Object value)
     {
         set(binding.myAddress, value);
 
@@ -465,7 +477,7 @@ abstract class Namespace
         }
         else // We need to grow the list. Annoying lack of API to do this.
         {
-            list.ensureCapacity(myBindings.size()); // Grow all at once
+            list.ensureCapacity(myDefinedBindings.size()); // Grow all at once
             for (int i = size; i < address; i++)
             {
                 list.add(null);
@@ -510,7 +522,7 @@ abstract class Namespace
         SyntaxSymbol identifier = SyntaxSymbol.make(null, name);
 
         identifier = predefine(identifier, null);
-        NsBinding binding = (NsBinding) identifier.getBinding();
+        NsDefinedBinding binding = (NsDefinedBinding) identifier.getBinding();
         bind(binding, value);
     }
 
@@ -615,18 +627,18 @@ abstract class Namespace
     //========================================================================
 
 
-    final boolean ownsBinding(NsBinding binding)
+    final boolean ownsBinding(NsDefinedBinding binding)
     {
         int address = binding.myAddress;
-        return (address < myBindings.size()
-                && binding == myBindings.get(address));
+        return (address < myDefinedBindings.size()
+                && binding == myDefinedBindings.get(address));
     }
 
     final boolean ownsBinding(Binding binding)
     {
-        if (binding instanceof NsBinding)
+        if (binding instanceof NsDefinedBinding)
         {
-            return ownsBinding((NsBinding) binding);
+            return ownsBinding((NsDefinedBinding) binding);
         }
         return false;
     }
@@ -665,12 +677,12 @@ abstract class Namespace
      *
      * @return the binding's value, or null if there is none.
      */
-    final Object lookupDefinition(NsBinding binding)
+    final Object lookupDefinition(NsDefinedBinding binding)
     {
         int address = binding.myAddress;
         if (address < myValues.size())              // for prepare-time lookup
         {
-            NsBinding localBinding = myBindings.get(address);
+            NsDefinedBinding localBinding = myDefinedBindings.get(address);
             if (binding == localBinding)
             {
                 return myValues.get(address);
@@ -791,7 +803,7 @@ abstract class Namespace
 
     final void setDoc(String name, BindingDoc doc)
     {
-        NsBinding binding = (NsBinding) resolve(name);
+        NsDefinedBinding binding = (NsDefinedBinding) resolve(name);
         setDoc(binding.myAddress, doc);
     }
 

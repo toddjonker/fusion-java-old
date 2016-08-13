@@ -6,7 +6,7 @@ import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionString.isString;
 import static com.amazon.fusion.FusionString.stringToJavaString;
 import com.amazon.fusion.BindingDoc.Kind;
-import com.amazon.fusion.Namespace.NsBinding;
+import com.amazon.fusion.Namespace.NsDefinedBinding;
 
 final class DefineSyntaxForm
     extends SyntacticForm
@@ -81,7 +81,7 @@ final class DefineSyntaxForm
         CompiledForm valueForm = eval.compile(env, valueSource);
 
         SyntaxSymbol identifier = (SyntaxSymbol) stx.get(eval, 1);
-        NsBinding binding = (NsBinding) identifier.getBinding();
+        NsDefinedBinding binding = (NsDefinedBinding) identifier.getBinding();
         CompiledForm compiled =
             binding.compileDefineSyntax(eval, env, valueForm);
 
