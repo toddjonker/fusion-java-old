@@ -32,7 +32,7 @@ abstract class SyntaxWrap
             SyntaxWrap nextWrap = moreWraps.next();
             return nextWrap.resolveTop(name, moreWraps, returnMarks);
         }
-        return resolve(name, moreWraps, returnMarks);
+        return null;
     }
 
     /**

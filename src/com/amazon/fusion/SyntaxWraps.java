@@ -105,7 +105,8 @@ final class SyntaxWraps
 
 
     /**
-     * @return null is equivalent to a {@link FreeBinding}.
+     * @return null is equivalent to a {@link FreeBinding}, and either may be
+     * returned.
      */
     Binding resolve(BaseSymbol name)
     {
@@ -123,7 +124,8 @@ final class SyntaxWraps
     }
 
     /**
-     * @return null is equivalent to a {@link FreeBinding}.
+     * @return null is equivalent to a {@link FreeBinding}, and either may be
+     * returned.
      */
     Binding resolveTop(BaseSymbol name)
     {
