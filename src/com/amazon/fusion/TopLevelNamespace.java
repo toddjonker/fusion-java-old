@@ -3,11 +3,8 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.voidValue;
-import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
-import java.util.Iterator;
-import java.util.Set;
 
 
 /**
@@ -16,84 +13,52 @@ import java.util.Set;
  * <p>
  * The tricky part here is getting the precedence correct between imports and
  * top-level definitions.  The rule is that the last occurrence wins.  To
- * implement this we keep a counter of the number of times that
- * {@link #require} has been called, record that on bindings
- * when they are defined or redefined, and compare those numbers to determine
- * which binding has precedence.
+ * implement this, we allow the {@link Namespace.NsBinding} to swing between
+ * definitions ({@link TopLevelDefinedBinding}) and imports
+ * ({@link TopLevelRequiredBinding}).
  */
 final class TopLevelNamespace
     extends Namespace
 {
     /**
-     * Maps from top-level names to definitions and/or module bindings.
+     * Denotes a binding added into a top-level namespace via {@code define}.
      */
-    static final class TopLevelBinding
+    final class TopLevelDefinedBinding
         extends NsDefinedBinding
     {
-        // Value is arbitrary and (hopefully) unique to aid in debugging.
-        static final int REQUIRED_FROM_ELSEWHERE = -20130802;
-
-        /**
-         * Reference to the active binding for my identifier, either this
-         * instance (when the top-level definition is active) or a binding
-         * from an import.
-         * This member is mutated whenever the identifier's meaning changes due
-         * to a {@code define} overriding a {@code require}, or vice versa.
-         */
-        private NsDefinedBinding myTarget;
-
-        /**
-         * The precedence of the top-level definition (stored at my address).
-         * This member is mutated whenever the identifier's meaning changes due
-         * to a {@code define} overriding a {@code require}, or vice versa.
-         */
-        private int myPrecedence;
-
-        private TopLevelBinding(SyntaxSymbol identifier, int address,
-                                int precedence)
+        private TopLevelDefinedBinding(SyntaxSymbol identifier, int address)
         {
             super(identifier, address);
-            myTarget = this;
-            myPrecedence = precedence;
-        }
-
-        /**
-         * Creates a temporary binding for a top-level identifier that's
-         * required, but not (currently) defined in the namespace.
-         */
-        private TopLevelBinding(TopLevelRequiredBinding required)
-        {
-            super(required.getIdentifier(), REQUIRED_FROM_ELSEWHERE);
-            myTarget = required.target();
-            myPrecedence = REQUIRED_FROM_ELSEWHERE;
-        }
-
-        @Override
-        public Binding target()
-        {
-            return myTarget;
         }
 
         @Override
         public Object lookup(Namespace ns)
         {
-            if (myTarget == this)
-            {
-                return ns.lookupDefinition(this);
-            }
-            return myTarget.lookup(ns);
+            return ns.lookupDefinition(this);
         }
 
+        @Override
+        NsDefinedBinding redefine(SyntaxSymbol identifier,
+                                  SyntaxValue formForErrors)
+        {
+            // Redefinition of an active top-level variable has no effect.
+            return this;
+        }
+
+        @Override
+        RequiredBinding require(SyntaxSymbol localId,
+                                ProvidedBinding provided,
+                                SyntaxValue formForErrors)
+        {
+            // Require atop define swing the the import, remembering this
+            // defined variable in case it is redefined later.
+            return new TopLevelRequiredBinding(localId, this, provided);
+        }
 
         @Override
         public String mutationSyntaxErrorMessage()
         {
-            boolean required =
-                (myPrecedence == REQUIRED_FROM_ELSEWHERE || myTarget != this);
-
-             return required
-                 ? "cannot mutate imported binding"
-                 : "mutation of top-level variables is not yet supported";
+            return "mutation of top-level variables is not yet supported";
         }
 
 
@@ -101,13 +66,9 @@ final class TopLevelNamespace
         public CompiledForm compileReference(Evaluator eval, Environment env)
             throws FusionException
         {
-            if (myTarget == this)
-            {
-                // TODO FUSION-117 This should be pushed down but it fails there.
-                assert (env.namespace().ownsBinding(this));
-                return compileLocalTopReference(eval, env);
-            }
-            return myTarget.compileReference(eval, env);
+            // TODO FUSION-117 This should be pushed down but it fails there.
+            assert this.isOwnedBy(env.namespace());
+            return compileLocalTopReference(eval, env);
         }
 
         @Override
@@ -126,14 +87,7 @@ final class TopLevelNamespace
                                    CompiledForm valueForm)
             throws FusionException
         {
-            if (myTarget == this)
-            {
-                return env.namespace().compileDefine(eval, this,
-                                                     id, valueForm);
-            }
-
-            // Override of visible module binding.
-            return myTarget.compileDefine(eval, env, id, valueForm);
+            return env.namespace().compileDefine(eval, this, id, valueForm);
         }
 
         @Override
@@ -142,133 +96,83 @@ final class TopLevelNamespace
                                          CompiledForm valueForm)
         {
             // TODO FUSION-192 This should bind after evaluation, as 'define'.
-            assert myTarget == this;
             return super.compileDefineSyntax(eval, env, valueForm);
         }
 
         @Override
         public String toString()
         {
-            return "{{{TopLevelBinding " + getIdentifier().debugString()
-                + (myTarget == this ? "" : " -> " + myTarget)
+            return "{{{TopLevelDefinedBinding " + getIdentifier().debugString()
                 + "}}}";
         }
     }
 
 
+    /**
+     * Exposes the bindings visible at top-level.
+     */
     private static final class TopLevelWrap
         extends EnvironmentWrap
     {
-        private final TopLevelNamespace myTopNs;
-
         TopLevelWrap(TopLevelNamespace ns)
         {
             super(ns);
-            myTopNs = ns;
         }
 
-
-        @Override
-        Binding resolveTop(BaseSymbol           name,
-                           Iterator<SyntaxWrap> moreWraps,
-                           Set<MarkWrap>         returnMarks)
-        {
-            if (moreWraps.hasNext())
-            {
-                SyntaxWrap nextWrap = moreWraps.next();
-                return nextWrap.resolve(name, moreWraps, returnMarks);
-            }
-            return null;
-        }
-
-        @Override
-        Binding resolve(BaseSymbol           name,
-                        Iterator<SyntaxWrap> moreWraps,
-                        Set<MarkWrap>        returnMarks)
-        {
-            if (moreWraps.hasNext())
-            {
-                SyntaxWrap nextWrap = moreWraps.next();
-                // Prior bindings never "leak through" a top-level, so we ignore
-                // this binding.  We still want to collect the marks though.
-                nextWrap.resolve(name, moreWraps, returnMarks);
-            }
-
-            // Check our environment directly. This will handle identifiers
-            // that have top-level definitions, but not those that only map to
-            // module bindings.
-            TopLevelBinding definedBinding = (TopLevelBinding)
-                getEnvironment().substituteFree(name, returnMarks);
-
-            // NOTE: Adding static import for REQUIRED_FROM_ELSEWHERE caused
-            //       bogus compiler errors in JDK 1.7u25
-            assert (definedBinding == null
-                    || definedBinding.myAddress == TopLevelBinding.REQUIRED_FROM_ELSEWHERE
-                    || myTopNs.ownsBinding(definedBinding));
-
-            // Look for an imported binding, then decide which one wins.
-            // We lookup required bindings as if they were free, since top-level
-            // and free bindings are equivalent.  Otherwise we'd have problems
-            // since we may not have found a TopLevelBinding here, but one
-            // is created later.
-            TopLevelRequiredBinding requiredBinding =
-                myTopNs.substituteFreeImport(name, returnMarks);
-
-            if (requiredBinding == null)
-            {
-                // No matching import, so use any top-level definition.
-                return definedBinding;
-            }
-            if (definedBinding == null)
-            {
-                // We have an import, but no top-level definition.
-                // TODO this is too common to throw away binding instance?
-                //    Perhaps, but this binding doesn't have a local address
-                //    and we may need to assign one later.
-                return new TopLevelBinding(requiredBinding);
-
-                // TODO FUSION-117 Just return requiredBinding.myBinding?
-                // That doesn't work after namespace-syntax-introduce
-            }
-
-            if (definedBinding.myPrecedence <= requiredBinding.myPrecedence)
-            {
-                definedBinding.myTarget = requiredBinding.target();
-            }
-
-            return definedBinding;
-        }
-
-        @Override
-        Iterator<SyntaxWrap> iterator()
-        {
-            return null;
-        }
-
-        @Override
-        public String toString()
-        {
-            return "{{{TopLevelWrap}}}";
-        }
+        // TODO how do we avoid overriding resolve() to prevent leakage?
+        //   That's done in ModuleWrap but not here.  Hm.
     }
 
 
     /**
-     * Denotes a module-level binding imported into a top-level namespace via
-     * {@code require}.
+     * Denotes a binding imported into a top-level namespace via
+     * {@code require}, or via the namespace's language.
+     * <p>
+     * Because the top-level mapping for an identifier can swing between
+     * definitions and bindings, this class remembers the pre-existing
+     * defined-binding (if any) and swings back to it when the name is
+     * redefined.  In other words, we re-use the same location for the
+     * redefinition.
      */
     private static final class TopLevelRequiredBinding
         extends RequiredBinding
     {
-        private final int myPrecedence;
+        private final NsDefinedBinding myPriorDefinition;
 
-        private TopLevelRequiredBinding(int precedence,
-                                        SyntaxSymbol identifier,
+        private TopLevelRequiredBinding(SyntaxSymbol identifier,
+                                        NsDefinedBinding priorDefinition,
                                         ProvidedBinding target)
         {
             super(identifier, target);
+            myPriorDefinition = priorDefinition;
+        }
 
-            myPrecedence = precedence;
+        @Override
+        NsDefinedBinding redefine(SyntaxSymbol identifier,
+                                  SyntaxValue formForErrors)
+        {
+            return myPriorDefinition;
+        }
+
+        @Override
+        RequiredBinding require(SyntaxSymbol localId,
+                                ProvidedBinding provided,
+                                SyntaxValue formForErrors)
+        {
+            return new TopLevelRequiredBinding(localId, myPriorDefinition,
+                                               provided);
+        }
+
+        @Override
+        NsDefinedBinding definition()
+        {
+            return myPriorDefinition;
+        }
+
+        @Override
+        public String mutationSyntaxErrorMessage()
+        {
+             return "cannot mutate an imported binding";
         }
 
         @Override
@@ -278,14 +182,8 @@ final class TopLevelNamespace
             throws FusionException
         {
             String message =
-                "#%top not implemented for top-require binding: " + this;
+                "#%top not implemented for required binding: " + this;
             throw new IllegalStateException(message);
-        }
-
-        @Override
-        public boolean equals(Object other)
-        {
-            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -296,21 +194,6 @@ final class TopLevelNamespace
                  + ' ' + getName() + "}}}";
         }
     }
-
-
-
-    /**
-     * Maps each imported identifier to its binding.
-     */
-    private final RequiredBindingMap<TopLevelRequiredBinding> myRequiredBindings =
-        new RequiredBindingMap<>();
-
-    /**
-     * Every `require` gets its own precedence level, starting at zero (which
-     * is usually the language). Imports win over definitions at the same
-     * precedence.
-     */
-    private int myCurrentPrecedence = 0;
 
 
     /**
@@ -334,79 +217,15 @@ final class TopLevelNamespace
     @Override
     NsDefinedBinding newDefinedBinding(SyntaxSymbol identifier, int address)
     {
-        return new TopLevelBinding(identifier, address, myCurrentPrecedence);
+        return new TopLevelDefinedBinding(identifier, address);
     }
 
 
     @Override
-    SyntaxSymbol predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
-        throws FusionException
+    RequiredBinding newRequiredBinding(SyntaxSymbol    localId,
+                                       ProvidedBinding target)
     {
-        identifier = identifier.copyAndResolveTop();
-
-        Binding binding = resolveDefinition(identifier);
-        if (binding == null)
-        {
-            binding = addDefinedBinding(identifier);
-        }
-        else
-        {
-            TopLevelBinding topBinding = (TopLevelBinding) binding;
-
-            // Give this pre-existing binding precedence over any imports that
-            // may have happened since the last time it was defined.
-            topBinding.myPrecedence = myCurrentPrecedence;
-
-            // Swing the namespace mapping back to this definition
-            topBinding.myTarget = topBinding;
-        }
-
-        return identifier.copyReplacingBinding(binding);
-    }
-
-
-    @Override
-    void require(Evaluator eval, ModuleInstance module)
-        throws FusionException
-    {
-        super.require(eval, module);
-        myCurrentPrecedence++;
-    }
-
-
-    @Override
-    void require(Evaluator eval, ModuleInstance module,
-                 Iterator<RequireRenameMapping> mappings)
-        throws FusionException
-    {
-        super.require(eval, module, mappings);
-        myCurrentPrecedence++;
-    }
-
-
-    @Override
-    void installRequiredBinding(SyntaxSymbol    localId,
-                                ProvidedBinding target)
-    {
-        TopLevelRequiredBinding topBinding =
-            new TopLevelRequiredBinding(myCurrentPrecedence, localId, target);
-
-        try
-        {
-            myRequiredBindings.put(localId, topBinding);
-        }
-        catch (AmbiguousBindingFailure e)
-        {
-            throw new IllegalStateException("Should not be possible", e);
-        }
-    }
-
-
-    private final
-    TopLevelRequiredBinding substituteFreeImport(BaseSymbol name,
-                                                 Set<MarkWrap> marks)
-    {
-        return myRequiredBindings.get(name, marks);
+        return new TopLevelRequiredBinding(localId, null, target);
     }
 
 
@@ -423,7 +242,7 @@ final class TopLevelNamespace
 
     @Override
     CompiledForm compileDefine(Evaluator eval,
-                               TopLevelBinding binding,
+                               TopLevelDefinedBinding binding,
                                SyntaxSymbol id,
                                CompiledForm valueForm)
         throws FusionException
@@ -479,7 +298,7 @@ final class TopLevelNamespace
 
             TopLevelNamespace ns = (TopLevelNamespace) store.namespace();
             SyntaxSymbol boundId = ns.predefine(myId, myId);
-            TopLevelBinding binding = (TopLevelBinding) boundId.getBinding();
+            TopLevelDefinedBinding binding = (TopLevelDefinedBinding) boundId.getBinding();
 
             ns.set(binding.myAddress, value);
 
@@ -535,9 +354,7 @@ final class TopLevelNamespace
                 {
                     if (myAddress < 0)
                     {
-                        SyntaxSymbol topId = myId.copyAndResolveTop();
-
-                        NsDefinedBinding binding = ns.resolveDefinition(topId);
+                        NsDefinedBinding binding = ns.resolveDefinition(myId);
                         if (binding == null)
                         {
                             throw new UnboundIdentifierException(myId);

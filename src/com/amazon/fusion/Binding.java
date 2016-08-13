@@ -5,9 +5,9 @@ package com.amazon.fusion;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.LocalEnvironment.LocalBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
+import com.amazon.fusion.Namespace.NsBinding;
 import com.amazon.fusion.Namespace.NsDefinedBinding;
 import com.amazon.fusion.Namespace.RequiredBinding;
-import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
 
 /**
  * Bindings are used during expansion and compilation to identify a specific
@@ -42,7 +42,7 @@ import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
  *       </li>
  *       <li>{@link RequiredBinding}s refer to provided bindings.
  *       </li>
- *       <li>{@link TopLevelBinding}s refer to either a required binding or a
+ *       <li>{@link NsBinding}s refer to either a required binding or a
  *         namespace-level defined binding. For top-level namespaces, that
  *         reference can change over time.
  *     </ul>

@@ -2,10 +2,10 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.GlobalState.DEFINE;
+import static com.amazon.fusion.GlobalState.REQUIRE;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
-import com.amazon.fusion.LanguageWrap.LanguageBinding;
-import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
-import java.util.Collections;
+import com.amazon.fusion.TopLevelNamespace.TopLevelDefinedBinding;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -45,6 +45,14 @@ final class ModuleNamespace
         final Object lookup(Namespace ns)
         {
             return target().lookup(ns);
+        }
+
+        @Override
+        CompiledForm compileDefine(Evaluator eval, Environment env,
+                                   SyntaxSymbol id, CompiledForm valueForm)
+            throws FusionException
+        {
+            return target().compileDefine(eval, env, id, valueForm);
         }
 
         @Override
@@ -156,13 +164,40 @@ final class ModuleNamespace
      *
      * @see LanguageBinding
      */
-    static final class ModuleRequiredBinding
+    static class ModuleRequiredBinding
         extends RequiredBinding
     {
         private ModuleRequiredBinding(SyntaxSymbol identifier,
                                       ProvidedBinding target)
         {
             super(identifier, target);
+        }
+
+        @Override
+        NsDefinedBinding redefine(SyntaxSymbol identifier,
+                                  SyntaxValue formForErrors)
+            throws AmbiguousBindingFailure
+        {
+            String name = identifier.stringValue();
+            throw new AmbiguousBindingFailure(DEFINE, name, formForErrors);
+        }
+
+        @Override
+        RequiredBinding require(SyntaxSymbol localId,
+                                ProvidedBinding provided,
+                                SyntaxValue formForErrors)
+            throws AmbiguousBindingFailure
+        {
+            if (this.sameTarget(provided)) return this;
+
+            String name = localId.stringValue();
+            throw new AmbiguousBindingFailure(REQUIRE, name, formForErrors);
+        }
+
+        @Override
+        NsDefinedBinding definition()
+        {
+            return null;
         }
 
         @Override
@@ -178,65 +213,76 @@ final class ModuleNamespace
             throws FusionException
         {
             String message =
-                "#%top not implemented for top-require binding: " + this;
+                "#%top not implemented for required binding: " + this;
             throw new IllegalStateException(message);
-        }
-
-        @Override
-        public boolean equals(Object other)
-        {
-            throw new UnsupportedOperationException();
         }
 
         @Override
         public String toString()
         {
             return "{{{ModuleRequiredBinding "
-                 + target().myModuleId.absolutePath()
-                 + ' ' + getName() + "}}}";
+                 + myIdentifier
+                 + " -> " + target().myModuleId.absolutePath()
+                 + '#' + getName() + "}}}";
         }
     }
 
 
     /**
-     * Exposes the bindings required at module-level.
-     * The "next wrap" is always a {@link LanguageWrap}.
+     * Denotes a binding imported into a module via the language declared at
+     * its creation. This is a special kind of required-binding that can be
+     * overwritten by a require or a module-level definition.
      */
-    private final class ModuleRequiresWrap
-        extends SyntaxWrap
+    static final class LanguageBinding
+        extends ModuleRequiredBinding
     {
-        @Override
-        Binding resolve(BaseSymbol           name,
-                        Iterator<SyntaxWrap> moreWraps,
-                        Set<MarkWrap>        returnMarks)
+        private LanguageBinding(SyntaxSymbol identifier,
+                                ProvidedBinding target)
         {
-            assert moreWraps.hasNext() : "Missing language wrap";
-
-            Binding langBinding =
-                moreWraps.next().resolve(name, moreWraps, returnMarks);
-
-            // Look for an imported binding.
-            // TODO FUSION-117 Resolve the whole identifier, including marks.
-            ModuleRequiredBinding requiredBinding =
-                myRequiredBindings.get(name, Collections.<MarkWrap>emptySet());
-
-            return (requiredBinding != null ? requiredBinding : langBinding);
+            super(identifier, target);
         }
 
         @Override
-        Iterator<SyntaxWrap> iterator()
+        NsDefinedBinding redefine(SyntaxSymbol identifier,
+                                  SyntaxValue formForErrors)
         {
+            // We can redefine an id that came from our language.
             return null;
+        }
+
+        @Override
+        RequiredBinding require(SyntaxSymbol localId,
+                                ProvidedBinding provided,
+                                SyntaxValue formForErrors)
+        {
+            // If we require an id that matches an existing language binding,
+            // we can preserve the language binding.
+            if (this.sameTarget(provided)) return this;
+
+            // Otherwise, replace the langauge binding with the required one.
+            return new ModuleRequiredBinding(localId, provided);
+        }
+
+        @Override
+        public CompiledForm compileTopReference(Evaluator eval,
+                                                Environment env,
+                                                SyntaxSymbol id)
+            throws FusionException
+        {
+            String message =
+                "#%top not implemented for language binding: " + this;
+            throw new SyntaxException("#%top", message, id);
         }
 
         @Override
         public String toString()
         {
-            ModuleIdentity id = getModuleId();
-            return "{{{ModuleRequiresWrap for " + id.absolutePath() + "}}}";
+            return "{{{LanguageBinding "
+                 + myIdentifier
+                 + " -> " + target().myModuleId.absolutePath()
+                 + '#' + getName() + "}}}";
         }
     }
-
 
 
     /**
@@ -249,7 +295,7 @@ final class ModuleNamespace
      * wrapped by either a {@link LanguageBinding} or a
      * {@link Namespace.RequiredBinding}.
      */
-    static final class ModuleDefinedBinding
+    final class ModuleDefinedBinding
         extends NsDefinedBinding
     {
         final ModuleIdentity myModuleId;
@@ -259,6 +305,27 @@ final class ModuleNamespace
         {
             super(identifier, address);
             myModuleId = moduleId;
+        }
+
+        @Override
+        NsDefinedBinding redefine(SyntaxSymbol identifier,
+                                  SyntaxValue formForErrors)
+            throws AmbiguousBindingFailure
+        {
+            // A definition already exists, we can't redefine.
+            String name = identifier.stringValue();
+            throw new AmbiguousBindingFailure(null, name, formForErrors);
+        }
+
+        @Override
+        RequiredBinding require(SyntaxSymbol localId,
+                                ProvidedBinding provided,
+                                SyntaxValue formForErrors)
+            throws AmbiguousBindingFailure
+        {
+            // A definition already exists, we can't require the same id.
+            String name = localId.stringValue();
+            throw new AmbiguousBindingFailure(null, name, formForErrors);
         }
 
         @Override
@@ -361,59 +428,36 @@ final class ModuleNamespace
 
 
     /**
-     * Exposes the bindings defined at module-level.
+     * Exposes the bindings visible at module-level.
      */
-    private static final class ModuleDefinesWrap
-        extends EnvironmentWrap
+    private static final class ModuleWrap
+        extends NamespaceWrap
     {
-        ModuleDefinesWrap(ModuleNamespace ns)
+        ModuleWrap(ModuleNamespace ns)
         {
             super(ns);
         }
 
         @Override
-        Binding resolveTop(BaseSymbol name,
-                           Iterator<SyntaxWrap> moreWraps,
-                           Set<MarkWrap> returnMarks)
+        Binding resolve(BaseSymbol name,
+                        Iterator<SyntaxWrap> moreWraps,
+                        Set<MarkWrap> returnMarks)
         {
             if (moreWraps.hasNext())
             {
                 SyntaxWrap nextWrap = moreWraps.next();
-                return nextWrap.resolve(name, moreWraps, returnMarks);
-            }
-            return null;
-        }
-
-        @Override
-        public String toString()
-        {
-            ModuleIdentity id =
-                ((ModuleNamespace) getEnvironment()).getModuleId();
-            return "{{{ModuleDefinesWrap " + id.absolutePath() + "}}}";
-        }
-    }
-
-
-
-    /**
-     * Maps each imported identifier to its binding. Doesn't include language
-     * bindings.
-     */
-    private final RequiredBindingMap<ModuleRequiredBinding> myRequiredBindings =
-        new RequiredBindingMap<ModuleRequiredBinding>() {
-            @Override
-            void checkReplacement(ModuleRequiredBinding current,
-                                  ModuleRequiredBinding replacement)
-                throws AmbiguousBindingFailure
-            {
-                if (! current.sameTarget(replacement))
+                // Prior bindings never "leak through" a module, so we ignore
+                // this binding.  We still want to collect the marks though.
+                Binding b = nextWrap.resolve(name, moreWraps, returnMarks);
+                if (b != null)
                 {
-                    String name = current.getIdentifier().stringValue();
-                    throw new AmbiguousBindingFailure(GlobalState.REQUIRE,
-                                                      name);
+                    return ((Namespace)getEnvironment()).resolve(b, returnMarks);
                 }
             }
-        };
+
+            return getEnvironment().substituteFree(name, returnMarks);
+        }
+    }
 
 
     /**
@@ -422,9 +466,12 @@ final class ModuleNamespace
      *
      * @param moduleId identifies this module.
      */
-    ModuleNamespace(ModuleRegistry registry,
+    ModuleNamespace(Evaluator eval,
+                    ModuleRegistry registry,
+                    SyntaxSymbol lexicalContext,
                     final ModuleInstance language,
                     ModuleIdentity moduleId)
+        throws FusionException
     {
         super(registry, moduleId,
               new Function<Namespace, SyntaxWraps>()
@@ -432,11 +479,21 @@ final class ModuleNamespace
                   @Override
                   public SyntaxWraps apply(Namespace _this) {
                       ModuleNamespace __this = (ModuleNamespace) _this;
-                      return SyntaxWraps.make(new ModuleDefinesWrap(__this),
-                                              __this.new ModuleRequiresWrap(),
-                                              new LanguageWrap(language));
+                      return SyntaxWraps.make(new ModuleWrap(__this));
                   }
               });
+
+        for (ProvidedBinding provided : language.providedBindings())
+        {
+            BaseSymbol name = provided.getName();
+            SyntaxSymbol id =
+                (SyntaxSymbol) name.datumToSyntaxMaybe(eval, lexicalContext, null);
+            id.resolve(); // This needs to resolve "outside" this module.
+
+            // We assume that there are no duplicate names, so we can skip the
+            // check for existing entries.
+            installNewBinding(id, new LanguageBinding(id, provided));
+        }
     }
 
     /**
@@ -473,43 +530,12 @@ final class ModuleNamespace
     }
 
 
-    @Override
-    SyntaxSymbol predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
-        throws FusionException
-    {
-        // Don't cache the binding! The symbol instance may also be in use as
-        // a reference to this binding (due to a macro expansion), in which
-        // case this result is not correct for that reference.
-        Binding oldBinding = identifier.uncachedResolveMaybe();
-        if (oldBinding == null ||
-            oldBinding instanceof FreeBinding)
-        {
-            identifier = identifier.copyAndResolveTop();
-        }
-        else if (oldBinding instanceof LanguageBinding)
-        {
-            // Visible binding is from our language, we can shadow it.
-            // Again, be careful not to cache a binding in the original id.
-            identifier = identifier.copyReplacingBinding(oldBinding);
-        }
-        else // there's an imported binding
-        {
-            String name = identifier.stringValue();
-            throw new AmbiguousBindingFailure(null, name, formForErrors);
-        }
-
-        NsDefinedBinding b = addDefinedBinding(identifier);
-        return identifier.copyReplacingBinding(b);
-    }
-
 
     @Override
-    void installRequiredBinding(SyntaxSymbol    localId,
-                                ProvidedBinding target)
-        throws AmbiguousBindingFailure
+    RequiredBinding newRequiredBinding(SyntaxSymbol    localId,
+                                       ProvidedBinding target)
     {
-        ModuleRequiredBinding b = new ModuleRequiredBinding(localId, target);
-        myRequiredBindings.put(localId, b);
+        return new ModuleRequiredBinding(localId, target);
     }
 
 
@@ -527,7 +553,7 @@ final class ModuleNamespace
 
     @Override
     CompiledForm compileDefine(Evaluator eval,
-                               TopLevelBinding binding,
+                               TopLevelDefinedBinding binding,
                                SyntaxSymbol id,
                                CompiledForm valueForm)
         throws FusionException

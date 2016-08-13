@@ -324,6 +324,9 @@ final class SyntaxSymbol
     /**
      * Determines whether this identifier resolves to a given binding and has
      * the given marks.
+     *
+     * @param binding must not be null.
+     * @param marks must not be null.
      */
     boolean resolvesBound(Binding binding, Set<MarkWrap> marks)
     {

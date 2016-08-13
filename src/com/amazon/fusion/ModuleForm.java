@@ -159,9 +159,15 @@ final class ModuleForm
             throw check.failure("Module has no body");
         }
 
-        // The new namespace shares the registry of current-namespace
+        // The new namespace shares the registry of current-namespace.
+        // We use the module-name symbol as lexical context for bindings
+        // introduced by the language, so they "match" references in the body
+        // of the module. The leading 'module' symbol is enriched differently
+        // when this is called via `eval` and top-level evaluation.
         ModuleNamespace moduleNamespace =
-            new ModuleNamespace(registry, language, id);
+            new ModuleNamespace(eval, registry,
+                                (SyntaxSymbol) source.get(eval, 1),
+                                language, id);
 
         // TODO handle #%module-begin and #%plain-module-begin
         expander = expander.enterModuleContext();
@@ -359,7 +365,9 @@ final class ModuleForm
                 envOutsideModule.namespace().getRegistry();
             ModuleInstance language = registry.instantiate(eval, languageId);
 
-            moduleNamespace = new ModuleNamespace(registry, language, id);
+            moduleNamespace = new ModuleNamespace(eval, registry,
+                                                  (SyntaxSymbol) stx.get(eval, 0),
+                                                  language, id);
         }
 
 

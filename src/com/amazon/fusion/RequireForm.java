@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionSexp.isSexp;
+import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionText.isText;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.GlobalState.REQUIRE;
@@ -158,6 +159,7 @@ final class RequireForm
         int arity = stx.size();
 
         SyntaxChecker check = new SyntaxChecker(eval, REQUIRE, stx);
+        SyntaxSymbol requireSym = (SyntaxSymbol) stx.get(eval, 0);
 
         CompiledRequireSpec[] compiledSpecs =
             new CompiledRequireSpec[arity - 1];
@@ -169,7 +171,7 @@ final class RequireForm
             try
             {
                 compiledSpecs[i - 1] =
-                    compileSpec(eval, baseModule, check, spec);
+                    compileSpec(eval, baseModule, check, requireSym, spec);
             }
             catch (FusionException e)
             {
@@ -184,6 +186,7 @@ final class RequireForm
     private CompiledRequireSpec compileSpec(Evaluator eval,
                                             ModuleIdentity baseModule,
                                             SyntaxChecker requireCheck,
+                                            SyntaxSymbol lexicalContext,
                                             SyntaxValue spec)
         throws FusionException
     {
@@ -195,7 +198,7 @@ final class RequireForm
         {
             ModuleIdentity moduleId =
                 myModuleNameResolver.resolve(eval, baseModule, spec, true);
-            return new CompiledFullRequire(moduleId);
+            return new CompiledFullRequire(moduleId, lexicalContext);
         }
     }
 
@@ -246,16 +249,20 @@ final class RequireForm
     private static final class CompiledFullRequire
         extends CompiledRequireSpec
     {
-        private CompiledFullRequire(ModuleIdentity usedModuleId)
+        private final SyntaxSymbol myLexicalContext;
+
+        private CompiledFullRequire(ModuleIdentity usedModuleId,
+                                    SyntaxSymbol lexicalContext)
         {
             super(usedModuleId);
+            myLexicalContext = lexicalContext;
         }
 
         @Override
         public void eval(Evaluator eval, Namespace namespace)
             throws FusionException
         {
-            namespace.require(eval, myUsedModuleId);
+            namespace.require(eval, myLexicalContext, myUsedModuleId);
         }
     }
 

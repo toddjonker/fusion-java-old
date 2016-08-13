@@ -40,9 +40,8 @@ final class LocalEnvironment
         @Override
         boolean sameTarget(Binding other)
         {
-            // Don't need to call other.originalBinding() since local bindings
-            // are never renamed or wrapped (in the sense, for examples, that a
-            // LanguageBinding wraps a ModuleDefinedBinding).
+            // Don't need to call other.target() since local bindings are
+            // original and unique.
             return this == other;
         }
 

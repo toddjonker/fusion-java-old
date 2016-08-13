@@ -31,10 +31,7 @@ final class TopForm
             //   In a top-level context, (#%top . id) always refers to a
             //   top-level variable, even if id is unbound or otherwise bound.
 
-            // This allows top-levels shadowed by local to work
-            SyntaxSymbol topId = id.copyAndResolveTop();
-
-            Binding binding = ns.resolveDefinition(topId);
+            Binding binding = ns.resolveDefinition(id);
             if (binding == null)
             {
                 // There's no top-level definition with the same marks, so just
@@ -46,6 +43,11 @@ final class TopForm
                 binding = ns.resolveDefinition(stripped);
                 // This may still be free, but don't fail until eval-time.
                 // We'd like things like (expand (#%top foo)) to succeed.
+
+                if (binding == null)
+                {
+                    binding = stripped.getBinding();
+                }
             }
 
             id = id.copyReplacingBinding(binding);
@@ -60,7 +62,7 @@ final class TopForm
             SyntaxSymbol topId = (SyntaxSymbol) children[0];
 
             Binding binding = id.resolve();
-            if (ns.ownsBinding(binding))
+            if (ns.ownsDefinedBinding(binding))
             {
                 id = (SyntaxSymbol) id.trackOrigin(eval, stx, topId);
                 return id;

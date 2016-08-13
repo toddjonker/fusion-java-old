@@ -165,7 +165,6 @@ final class ProvideForm
                                   binding.getName(),
                                   tag,
                                   null);
-                localized = localized.copyAndResolveTop();
                 Binding localBinding = moduleNamespace.resolveDefinition(localized);
                 if (localBinding != null && binding.sameTarget(localBinding))
                 {

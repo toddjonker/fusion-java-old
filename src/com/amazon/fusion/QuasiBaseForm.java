@@ -22,10 +22,10 @@ abstract class QuasiBaseForm
         super("template", "...");
 
         SyntaxSymbol id = (SyntaxSymbol) qIdentifier;
-        myQBinding = id.resolve();
+        myQBinding = id.resolve().target();
 
         id = (SyntaxSymbol) uIdentifier;
-        myUBinding = id.resolve();
+        myUBinding = id.resolve().target();
     }
 
 

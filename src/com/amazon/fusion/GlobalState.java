@@ -43,6 +43,7 @@ final class GlobalState
     final Binding myKernelBeginBinding;
     final Binding myKernelDefineBinding;
     final Binding myKernelDefineSyntaxBinding;
+    final Binding myKernelModuleBinding;
     final Binding myKernelProvideBinding;
     final Binding myKernelRenameOutBinding;
     final Binding myKernelRequireBinding;
@@ -72,6 +73,7 @@ final class GlobalState
         myKernelBeginBinding         = kernelBinding(BEGIN);
         myKernelDefineBinding        = kernelBinding(DEFINE);
         myKernelDefineSyntaxBinding  = kernelBinding(DEFINE_SYNTAX);
+        myKernelModuleBinding        = kernelBinding(MODULE);
         myKernelProvideBinding       = kernelBinding(PROVIDE);
         myKernelRequireBinding       = kernelBinding(REQUIRE);
         myKernelRenameOutBinding     = kernelBinding(RENAME_OUT);

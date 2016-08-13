@@ -7,13 +7,10 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
-import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
+import com.amazon.fusion.TopLevelNamespace.TopLevelDefinedBinding;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -24,18 +21,152 @@ import java.util.Set;
  * <p>
  * Since top-levels and modules have different behavior around imports and
  * defines, that responsibility is delegated to subclasses.
+ *
+ * @see TopLevelNamespace
+ * @see ModuleNamespace
  */
 abstract class Namespace
     implements Environment, NamespaceStore
 {
     /**
-     * Denotes a namespace-level binding, either top-level or module-level.
+     * Denotes all bindings resolved to namespace-level.
+     * The binding can swing between free, definition, and required targets.
+     */
+    static final class NsBinding
+        extends Binding
+    {
+        private EffectiveNsBinding myEffectiveBinding;
+
+        NsBinding(EffectiveNsBinding binding)
+        {
+            myEffectiveBinding = binding;
+        }
+
+        @Override
+        public String toString()
+        {
+            return "NsBinding::{active:" + myEffectiveBinding + "}";
+        }
+
+        void setEffectiveBinding(EffectiveNsBinding binding)
+        {
+            assert myEffectiveBinding.getName() == binding.getName();
+            myEffectiveBinding = binding;
+        }
+
+        @Override
+        BaseSymbol getName()
+        {
+            return myEffectiveBinding.getName();
+        }
+
+        @Override
+        Binding target()
+        {
+            return myEffectiveBinding.target();
+        }
+
+        @Override
+        ProvidedBinding provideAs(SyntaxSymbol exportedId)
+        {
+            return myEffectiveBinding.provideAs(exportedId);
+        }
+
+        @Override
+        Object lookup(Namespace ns)
+        {
+            return myEffectiveBinding.lookup(ns);
+        }
+
+        @Override
+        String mutationSyntaxErrorMessage()
+        {
+            return myEffectiveBinding.mutationSyntaxErrorMessage();
+        }
+
+        @Override
+        CompiledForm compileDefine(Evaluator eval,
+                                   Environment env,
+                                   SyntaxSymbol id,
+                                   CompiledForm valueForm)
+            throws FusionException
+        {
+            return myEffectiveBinding.compileDefine(eval, env, id, valueForm);
+        }
+
+        @Override
+        CompiledForm compileReference(Evaluator eval, Environment env)
+            throws FusionException
+        {
+            return myEffectiveBinding.compileReference(eval, env);
+        }
+
+        @Override
+        CompiledForm compileTopReference(Evaluator eval, Environment env,
+                                         SyntaxSymbol id)
+            throws FusionException
+        {
+            return myEffectiveBinding.compileTopReference(eval, env, id);
+        }
+
+        @Override
+        CompiledForm compileSet(Evaluator eval, Environment env,
+                                CompiledForm valueForm) throws FusionException
+        {
+            return myEffectiveBinding.compileSet(eval, env, valueForm);
+        }
+    }
+
+
+    abstract static class EffectiveNsBinding
+        extends Binding
+    {
+        /**
+         * Attempts to bind a definition atop this effective binding.
+         *
+         * @return the definition to use.  Null indicates that a new definition
+         * is to be installed.
+         *
+         * @throws AmbiguousBindingFailure if this binding cannot be replaced
+         *   with a definition.
+         */
+        abstract NsDefinedBinding redefine(SyntaxSymbol identifier,
+                                           SyntaxValue formForErrors)
+            throws AmbiguousBindingFailure;
+
+        /**
+         * Attempts to bind an import atop this effective binding.
+         *
+         * @return the binding to use.
+         *
+         * @throws AmbiguousBindingFailure if this binding cannot be replaced
+         *   with an import.
+         */
+        abstract RequiredBinding require(SyntaxSymbol localId,
+                                         ProvidedBinding provided,
+                                         SyntaxValue formForErrors)
+            throws AmbiguousBindingFailure;
+
+        /**
+         * Returns the namespace-level definition that this binding <em>is</em>
+         * or <em>shadows</em>.
+         *
+         * @return null if there's no namespace-level definition.
+         */
+        abstract NsDefinedBinding definition();
+    }
+
+
+
+    /**
+     * Denotes a namespace-level definition binding, either top-level or
+     * module-level.
      *
-     * @see TopLevelBinding
+     * @see TopLevelDefinedBinding
      * @see ModuleDefinedBinding
      */
-    abstract static class NsDefinedBinding
-        extends Binding
+    abstract class NsDefinedBinding
+        extends EffectiveNsBinding
     {
         private final SyntaxSymbol myIdentifier;
         final int myAddress;
@@ -55,6 +186,17 @@ abstract class Namespace
         final SyntaxSymbol getIdentifier()
         {
             return myIdentifier;
+        }
+
+        @Override
+        final NsDefinedBinding definition()
+        {
+            return this;
+        }
+
+        final boolean isOwnedBy(Namespace ns)
+        {
+            return Namespace.this == ns;
         }
 
         final CompiledForm compileLocalTopReference(Evaluator   eval,
@@ -106,13 +248,14 @@ abstract class Namespace
      * declaration.
      */
     abstract static class RequiredBinding
-        extends Binding
+        extends EffectiveNsBinding
     {
         final SyntaxSymbol    myIdentifier;
         final ProvidedBinding myTarget;
 
         RequiredBinding(SyntaxSymbol identifier, ProvidedBinding target)
         {
+            assert target != null;
             myIdentifier = identifier;
             myTarget = target;
         }
@@ -123,6 +266,7 @@ abstract class Namespace
             return myIdentifier.getName();
         }
 
+        // TODO remove this, only used by RequiredBindingMap
         final SyntaxSymbol getIdentifier()
         {
             return myIdentifier;
@@ -141,6 +285,14 @@ abstract class Namespace
         }
 
         @Override
+        final CompiledForm compileDefine(Evaluator eval, Environment env,
+                                         SyntaxSymbol id, CompiledForm valueForm)
+            throws FusionException
+        {
+            return myTarget.compileDefine(eval, env, id, valueForm);
+        }
+
+        @Override
         final CompiledForm compileReference(Evaluator eval, Environment env)
             throws FusionException
         {
@@ -156,81 +308,45 @@ abstract class Namespace
             String message = "Mutation of imported binding is not allowed";
             throw new ContractException(message);
         }
+
+        @Override
+        public final boolean equals(Object other)
+        {
+            throw new UnsupportedOperationException();
+        }
     }
 
 
-    static class RequiredBindingMap<B extends RequiredBinding>
+    /**
+     * Exposes the bindings visible at namespace-level.
+     */
+    static abstract class NamespaceWrap
+        extends EnvironmentWrap
     {
-        /**
-         * Maps each imported name to the bindings associated with it.
-         * There may be multiple variants since the same name may occur with
-         * different marks.
-         */
-        private final Map<BaseSymbol, RequiredBinding[]> myBindings =
-            new IdentityHashMap<>();
-
-        void put(SyntaxSymbol localId, B binding)
-            throws AmbiguousBindingFailure
+        NamespaceWrap(Namespace ns)
         {
-            BaseSymbol name = localId.getName();
-
-            RequiredBinding[] variants = myBindings.get(name);
-            if (variants == null)
-            {
-                variants = new RequiredBinding[] { binding };
-            }
-            else
-            {
-                // Do we already have a required binding that matches?
-                boolean matched = false;
-
-                int len = variants.length;
-                for (int i = 0; i < len; i++)
-                {
-                    @SuppressWarnings("unchecked")
-                    B current = (B) variants[i];
-
-                    if (localId.freeIdentifierEqual(current.getIdentifier()))
-                    {
-                        checkReplacement(current, binding);
-                        variants[i] = binding;
-                        matched = true;
-                        break;
-                    }
-                }
-
-                if (! matched)
-                {
-                    variants = Arrays.copyOf(variants, len + 1);
-                    variants[len] = binding;
-                }
-            }
-            myBindings.put(name, variants);
+            super(ns);
         }
 
-        /** Throws an exception if we can't replace a binding. */
-        void checkReplacement(B current, B replacement)
-            throws AmbiguousBindingFailure
+        @Override
+        Binding resolveTop(BaseSymbol           name,
+                           Iterator<SyntaxWrap> moreWraps,
+                           Set<MarkWrap>        returnMarks)
         {
-        }
-
-        @SuppressWarnings("unchecked")
-        B get(BaseSymbol name, Set<MarkWrap> marks)
-        {
-            RequiredBinding[] variants = myBindings.get(name);
-            if (variants != null)
+            if (moreWraps.hasNext())
             {
-                for (RequiredBinding b : variants)
-                {
-                    SyntaxSymbol id = b.getIdentifier();
-                    assert id.getName() == name;
-                    if (id.resolvesFree(name, marks))
-                    {
-                        return (B) b;
-                    }
-                }
+                SyntaxWrap nextWrap = moreWraps.next();
+                return nextWrap.resolve(name, moreWraps, returnMarks);
             }
             return null;
+        }
+
+        @Override
+        public String toString()
+        {
+            ModuleIdentity id =
+                ((Namespace) getEnvironment()).getModuleId();
+            return "{{{NS " + id.absolutePath() + "}}}";
         }
     }
 
@@ -248,7 +364,8 @@ abstract class Namespace
         new ArrayList<>();
 
     private final SyntaxWraps          myWraps;
-    private final ArrayList<NsDefinedBinding> myDefinedBindings = new ArrayList<>();
+    private final BoundIdMap<NsBinding> myBindings = new BoundIdMap<>();
+    private       int                   myDefinitionCount;
     private final ArrayList<Object>    myValues   = new ArrayList<>();
     private ArrayList<BindingDoc> myBindingDocs;
 
@@ -318,7 +435,7 @@ abstract class Namespace
      */
     final int definitionCount()
     {
-        return myDefinedBindings.size();
+        return myDefinitionCount;
     }
 
     /**
@@ -329,7 +446,20 @@ abstract class Namespace
      */
     final Collection<NsDefinedBinding> getDefinedBindings()
     {
-        return Collections.unmodifiableCollection(myDefinedBindings);
+        ArrayList<NsDefinedBinding> definitions =
+            new ArrayList<>(definitionCount());
+
+        for (NsBinding b : myBindings.values())
+        {
+            NsDefinedBinding def = b.myEffectiveBinding.definition();
+            if (def != null)
+            {
+                definitions.add(def);
+            }
+        }
+
+        assert definitions.size() == definitionCount();
+        return definitions;
     }
 
     //========================================================================
@@ -349,46 +479,51 @@ abstract class Namespace
     }
 
 
+    final void installNewBinding(SyntaxSymbol boundIdentifier,
+                                 EffectiveNsBinding effective)
+    {
+        NsBinding nsBinding = new NsBinding(effective);
+        NsBinding prior = myBindings.put(boundIdentifier, nsBinding);
+        assert prior == null;
+    }
+
     /**
-     * @param marks not null.
+     * Resolve as with {@code bound_identifier_equal}.
+     *
+     * @return null if there's no binding in this namespace.
+     */
+    private final NsBinding resolveBound(SyntaxSymbol identifier)
+    {
+        Binding binding = identifier.resolve();
+        Set<MarkWrap> marks = identifier.computeMarks();
+        return myBindings.get(binding, marks);
+    }
+
+    /**
+     * @param binding must not be null.
+     * @param marks must not be null.
      *
      * @return null if identifier isn't bound here.
      */
-    final NsDefinedBinding substituteDefinition(Binding       binding,
-                                                Set<MarkWrap> marks)
+    final NsBinding resolve(Binding binding, Set<MarkWrap> marks)
     {
-        for (NsDefinedBinding b : myDefinedBindings)
-        {
-            if (b.myIdentifier.resolvesBound(binding, marks))
-            {
-                return b;
-            }
-        }
-        return null;
+        return myBindings.get(binding, marks);
+    }
+
+    @Override
+    public final NsBinding substituteFree(BaseSymbol name, Set<MarkWrap> marks)
+    {
+        Binding b = new FreeBinding(name);
+        return resolve(b, marks);
     }
 
     @Override
     public final Binding substitute(Binding binding, Set<MarkWrap> marks)
     {
-        Binding subst = substituteDefinition(binding, marks);
+        Binding subst = resolve(binding, marks);
         if (subst == null) subst = binding;
         return subst;
     }
-
-    @Override
-    public final NsDefinedBinding substituteFree(BaseSymbol    name,
-                                                 Set<MarkWrap> marks)
-    {
-        for (NsDefinedBinding b : myDefinedBindings)
-        {
-            if (b.myIdentifier.resolvesFree(name, marks))
-            {
-                return b;
-            }
-        }
-        return null;
-    }
-
 
     /**
      * Resolves an identifier to a namespace-level definition (not an import).
@@ -397,13 +532,9 @@ abstract class Namespace
      */
     final NsDefinedBinding resolveDefinition(SyntaxSymbol identifier)
     {
-        Binding resolvedRequestedId = identifier.resolve();
-        Set<MarkWrap> marks = identifier.computeMarks();
-        if (resolvedRequestedId instanceof FreeBinding)
-        {
-            return substituteFree(identifier.getName(), marks);
-        }
-        return substituteDefinition(resolvedRequestedId, marks);
+        identifier = identifier.copyAndResolveTop();
+        NsBinding nsb = resolveBound(identifier);
+        return (nsb == null ? null : nsb.myEffectiveBinding.definition());
     }
 
 
@@ -429,29 +560,48 @@ abstract class Namespace
     }
 
 
-    abstract NsDefinedBinding newDefinedBinding(SyntaxSymbol identifier, int address);
-
-
-    final NsDefinedBinding addDefinedBinding(SyntaxSymbol identifier)
-        throws FusionException
-    {
-        int address = myDefinedBindings.size();
-        NsDefinedBinding binding = newDefinedBinding(identifier, address);
-        myDefinedBindings.add(binding);
-        return binding;
-    }
+    abstract NsDefinedBinding newDefinedBinding(SyntaxSymbol identifier,
+                                                int          address);
 
 
     /**
-     * Creates a binding, but no value, for a name.
+     * Creates a definition binding, but no value, for a name.
      * Used during expansion phase, before evaluating the right-hand side.
      *
      * @return a copy of the identifier that has the new binding attached.
      */
-    abstract SyntaxSymbol predefine(SyntaxSymbol identifier,
-                                    SyntaxValue formForErrors)
-        throws FusionException;
+    SyntaxSymbol predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
+        throws FusionException
+    {
+        NsDefinedBinding newDefinition;
 
+        identifier = identifier.copyAndResolveTop();
+
+        NsBinding entry = resolveBound(identifier);
+        if (entry == null)
+        {
+            newDefinition = newDefinedBinding(identifier, myDefinitionCount);
+            myDefinitionCount++;
+
+            installNewBinding(identifier, newDefinition);
+        }
+        else
+        {
+            EffectiveNsBinding effective = entry.myEffectiveBinding;
+
+            newDefinition = effective.redefine(identifier, formForErrors);
+
+            if (newDefinition == null)
+            {
+                newDefinition = newDefinedBinding(identifier, myDefinitionCount);
+                myDefinitionCount++;
+            }
+
+            entry.setEffectiveBinding(newDefinition);
+        }
+
+        return identifier.copyReplacingBinding(newDefinition);
+    }
 
     /**
      * Creates or updates a namespace-level binding.
@@ -483,7 +633,7 @@ abstract class Namespace
         }
         else // We need to grow the list. Annoying lack of API to do this.
         {
-            list.ensureCapacity(myDefinedBindings.size()); // Grow all at once
+            list.ensureCapacity(myDefinitionCount);        // Grow all at once
             for (int i = size; i < address; i++)
             {
                 list.add(null);
@@ -575,76 +725,104 @@ abstract class Namespace
                                        modulePath,
                                        true /* load */,
                                        null /* stxForErrors */);
-        require(eval, id);
+        require(eval, null /* lexical context */, id);
     }
 
     /**
      * Imports all exported bindings from a module.
      * This is used by {@code (require module_path)}.
      */
-    final void require(Evaluator eval, ModuleIdentity id)
+    final void require(Evaluator      eval,
+                       SyntaxSymbol   context,
+                       ModuleIdentity maduleId)
         throws FusionException
     {
-        ModuleInstance module = myRegistry.instantiate(eval, id);
-        require(eval, module);
-    }
+        ModuleInstance module = myRegistry.instantiate(eval, maduleId);
 
-    void require(Evaluator eval, ModuleInstance module)
-        throws FusionException
-    {
         for (ProvidedBinding provided : module.providedBindings())
         {
-            // TODO FUSION-117 Not sure this is the right lexical context.
-            // The identifier is free, but references will have context
-            // including the language.
             SyntaxSymbol id = SyntaxSymbol.make(eval, null, provided.getName());
-            installRequiredBinding(id, provided);
+            id = (SyntaxSymbol) Syntax.applyContext(eval, context, id);
+            installRequiredBinding(eval, id, provided);
         }
     }
 
 
-    final void require(Evaluator eval, ModuleIdentity id,
+    final void require(Evaluator eval, ModuleIdentity moduleId,
                        Iterator<RequireRenameMapping> mappings)
         throws FusionException
     {
-        ModuleInstance module = myRegistry.instantiate(eval, id);
-        require(eval, module, mappings);
-    }
+        ModuleInstance module = myRegistry.instantiate(eval, moduleId);
 
-    void require(Evaluator eval, ModuleInstance module,
-                 Iterator<RequireRenameMapping> mappings)
-        throws FusionException
-    {
         while (mappings.hasNext())
         {
             RequireRenameMapping mapping = mappings.next();
             BaseSymbol exportedId = mapping.myExportedIdentifier;
             ProvidedBinding provided = module.resolveProvidedName(exportedId);
-            installRequiredBinding(mapping.myLocalIdentifier, provided);
+
+            // TODO this is horribly hacky. Ideally we'd raise a syntax exn on
+            //   the original require spec
+            if (provided == null)
+            {
+                // TODO Error reporting is bad here, it's lost the location of
+                //   the unbound id so it reports the entire require form (when
+                //   this gets wrapped.
+                SyntaxSymbol sym = SyntaxSymbol.make(eval, null, exportedId);
+                throw new UnboundIdentifierException(sym);
+            }
+
+            installRequiredBinding(eval, mapping.myLocalIdentifier, provided);
         }
     }
 
+    /**
+     * @param eval must not be null.
+     * @param localId will be re-resolved to the outside edge of this namespace.
+     * @param provided the binding to import.
+     * @throws AmbiguousBindingFailure
+     */
+    final void installRequiredBinding(Evaluator       eval,
+                                      SyntaxSymbol    localId,
+                                      ProvidedBinding provided)
+        throws AmbiguousBindingFailure
+    {
+        localId = localId.copyAndResolveTop();
 
-    abstract void installRequiredBinding(SyntaxSymbol    localId,
-                                         ProvidedBinding target)
-        throws AmbiguousBindingFailure;
+        NsBinding entry = resolveBound(localId);
+        if (entry == null)
+        {
+            RequiredBinding required = newRequiredBinding(localId, provided);
+            installNewBinding(localId, required);
+        }
+        else
+        {
+            EffectiveNsBinding effective = entry.myEffectiveBinding;
+
+            RequiredBinding required = effective.require(localId, provided, null);
+
+            entry.setEffectiveBinding(required);
+        }
+    }
+
+    /**
+     * Creates a binding for a require that has no prior binding.
+     */
+    abstract RequiredBinding newRequiredBinding(SyntaxSymbol    localId,
+                                                ProvidedBinding target);
 
 
     //========================================================================
 
 
-    final boolean ownsBinding(NsDefinedBinding binding)
+    final boolean ownsDefinedBinding(Binding binding)
     {
-        int address = binding.myAddress;
-        return (address < myDefinedBindings.size()
-                && binding == myDefinedBindings.get(address));
-    }
-
-    final boolean ownsBinding(Binding binding)
-    {
+        if (binding instanceof NsBinding)
+        {
+            binding = ((NsBinding) binding).myEffectiveBinding;
+        }
         if (binding instanceof NsDefinedBinding)
         {
-            return ownsBinding((NsDefinedBinding) binding);
+            return ((NsDefinedBinding) binding).isOwnedBy(this);
         }
         return false;
     }
@@ -658,7 +836,7 @@ abstract class Namespace
         throws FusionException;
 
     abstract CompiledForm compileDefine(Evaluator eval,
-                                        TopLevelBinding binding,
+                                        TopLevelDefinedBinding binding,
                                         SyntaxSymbol id,
                                         CompiledForm valueForm)
         throws FusionException;
@@ -685,11 +863,10 @@ abstract class Namespace
      */
     final Object lookupDefinition(NsDefinedBinding binding)
     {
-        int address = binding.myAddress;
-        if (address < myValues.size())              // for prepare-time lookup
+        if (binding.isOwnedBy(this))
         {
-            NsDefinedBinding localBinding = myDefinedBindings.get(address);
-            if (binding == localBinding)
+            int address = binding.myAddress;
+            if (address < myValues.size())         // for prepare-time lookup
             {
                 return myValues.get(address);
             }
@@ -809,7 +986,8 @@ abstract class Namespace
 
     final void setDoc(String name, BindingDoc doc)
     {
-        NsDefinedBinding binding = (NsDefinedBinding) resolve(name);
+        NsBinding top = (NsBinding) resolve(name);
+        NsDefinedBinding binding = (NsDefinedBinding) top.myEffectiveBinding;
         setDoc(binding.myAddress, doc);
     }
 
@@ -872,6 +1050,7 @@ abstract class Namespace
     }
 
 
+    // TODO rename CompiledNsDefine
     static class CompiledTopDefine
         implements CompiledForm
     {

@@ -176,9 +176,11 @@ final class LoadHandler
         SyntaxValue[] children = moduleStx.extract(eval);
 
         // We already verified this type-safety
-        assert ((SyntaxSymbol) children[0]).stringValue().equals(MODULE);
+        SyntaxSymbol moduleSym = (SyntaxSymbol) children[0];
+        assert moduleSym.stringValue().equals(MODULE);
 
-        children[0] = eval.getGlobalState().myKernelModuleIdentifier;
+        children[0] =
+            moduleSym.copyReplacingBinding(eval.getGlobalState().myKernelModuleBinding);
 
         return moduleStx.copyReplacingChildren(eval, children);
     }
