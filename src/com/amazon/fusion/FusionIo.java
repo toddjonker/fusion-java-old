@@ -9,12 +9,12 @@ import static com.amazon.fusion.FusionString.checkNonEmptyStringArg;
 import static com.amazon.fusion.FusionString.checkRequiredStringArg;
 import static com.amazon.fusion.FusionUtils.resolvePath;
 import static com.amazon.fusion.FusionVoid.voidValue;
-import com.amazon.ion.IonBinaryWriter;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.system.IonTextWriterBuilder;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -624,11 +624,12 @@ public final class FusionIo
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
         {
-            try (IonBinaryWriter writer = eval.getSystem().newBinaryWriter())
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            try (IonWriter writer = eval.getSystem().newBinaryWriter(buffer))
             {
                 FusionIo.ionize(eval, writer, arg);
                 writer.finish();
-                byte[] bytes = writer.getBytes();
+                byte[] bytes = buffer.toByteArray();
 
                 return FusionBlob.forBytesNoCopy(eval, bytes);
             }
