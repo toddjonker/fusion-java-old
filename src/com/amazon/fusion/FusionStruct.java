@@ -1005,7 +1005,7 @@ final class FusionStruct
         }
 
         @SuppressWarnings("serial")
-        private static final class StripFailure extends RuntimeException
+        private static final class VisitFailure extends RuntimeException
         {
         }
 
@@ -1026,24 +1026,23 @@ final class FusionStruct
                 public Object visit(String name, Object value)
                     throws FusionException
                 {
-                    SyntaxValue stripped =
+                    SyntaxValue converted =
                         Syntax.datumToSyntaxMaybe(eval, value, context, loc);
-                    if (stripped == null)
+                    if (converted == null)
                     {
                         // Hit something that's not syntax-able
-                        throw new StripFailure();
+                        throw new VisitFailure();
                     }
-                    return stripped;
+                    return converted;
                 }
             };
 
             try
             {
                 ImmutableStruct datum = transformFields(eval, visitor);
-                SyntaxValue stx = SyntaxStruct.make(eval, loc, datum);
-                return Syntax.applyContext(eval, context, stx);
+                return SyntaxStruct.make(eval, loc, datum);
             }
-            catch (StripFailure e)  // This is crazy.
+            catch (VisitFailure e)  // This is crazy.
             {
                 return null;
             }
