@@ -28,18 +28,16 @@
 (define_syntax make_module
   (lambda (stx)
     (lets ((args (tail (syntax_unwrap stx)))
-           (expr (head args))
-           (expected (head (tail args))))
+           (expr (head args)))
       (quasisyntax
         (module made racket
-          (require rackunit "fusion.rkt")
-          (check === (unsyntax expected) (+ 1 (unsyntax expr))))))))
+          (unsyntax expr))))))
 
-"The * in the generated module gets the binding visible in the module, not the"
-"binding from the macro invocation."
-(define * +)
-(make_module (* 2 4) 9)
-(require 'made)
+"An identifier brought into a generated module cannot be used within it."
+(check-exn exn:fail?
+  (lambda ()
+    (eval '(make_module (* 3 7)))))
+
 
 
 "============================================================================"
