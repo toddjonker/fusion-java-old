@@ -11,7 +11,21 @@ fi
 
 cd $(dirname "$0")/..
 
+failed=''
+
 for script in $(cd rkt && ls *.rkt); do
     echo "Loading $script"
-    "$RACKET_HOME"/bin/racket --load "rkt/$script"
+    if ! "$RACKET_HOME"/bin/racket --load "rkt/$script"
+    then
+        echo "  FAILED"
+        failed="$failed
+     $script"
+    fi
 done
+
+if [ -n "$failed" ]
+then
+    echo
+    echo "FAILURES:$failed"
+    exit 1
+fi
