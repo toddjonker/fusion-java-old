@@ -172,6 +172,13 @@ final class DefineForm
         // correctly refer to the original syntax.
         check.requiredIdentifier(1);
 
+        // https://docs.racket-lang.org/reference/define.html says:
+        //   At the top level, the top-level binding for id is created after
+        //   evaluating expr, if it does not exist already, and the top-level
+        //   mapping of id (in the namespace linked with the compiled
+        //   definition) is set to the binding at the same time.
+        // This works differently from our predefine(), used at module level.
+
         int bodyPos;
         SyntaxValue maybeDoc = children[2];
         if (isString(eval, maybeDoc.unwrap(eval)) && arity > 3)

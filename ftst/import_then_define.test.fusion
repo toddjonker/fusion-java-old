@@ -19,7 +19,7 @@
 (check === 1 (d1))
 (check === 2 (d2))
 
-(define dupe 4)
+(define dupe 4)     // define atop require
 (check === 4 dupe)
 (check === 1 (d1))
 (check === 2 (d2))

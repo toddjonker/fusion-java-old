@@ -31,6 +31,15 @@ final class MacroForm
 
         stx = (SyntaxSexp) stx.addOrRemoveMark(markWrap);
 
+        // TODO http://docs.racket-lang.org/reference/syntax-model.html
+        // In addition, if the use of a transformer is in the same definition
+        // context as its binding, the use-site syntax object is extended with
+        // an additional fresh use-site scope that is not flipped in the
+        // transformer’s result, so that only use-site syntax objects have the
+        // use-site scope.
+        //
+        // TVJ: That may not be needed until implementing sets-of-scopes.
+
         SyntaxValue expanded = doExpandOnce(expander, stx);
 
         expanded = expanded.addOrRemoveMark(markWrap);
@@ -67,6 +76,7 @@ final class MacroForm
             // TODO FUSION-32 This should set current-namespace
             // See Racket Reference 1.2.3.2
             // http://docs.racket-lang.org/reference/syntax-model.html#(part._expand-steps)
+            // But BEWARE: this is called during partial expansion!
             expanded = expander.getEvaluator().callNonTail(myTransformer, stx);
         }
         catch (FusionException e)

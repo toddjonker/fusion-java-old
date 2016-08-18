@@ -26,6 +26,11 @@ final class TopForm
         Namespace ns = env.namespace();
         if (ns instanceof TopLevelNamespace)
         {
+            // https://docs.racket-lang.org/reference/__top.html says:
+            //
+            //   In a top-level context, (#%top . id) always refers to a
+            //   top-level variable, even if id is unbound or otherwise bound.
+
             // This allows top-levels shadowed by local to work
             SyntaxSymbol topId = id.copyAndResolveTop();
 
