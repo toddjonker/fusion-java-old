@@ -25,7 +25,7 @@ contact us for clarification.
   (provide begin define)
 
   // Module Forms
-  (provide all_defined_out module provide rename_out require)
+  (provide all_defined_out module only_in provide rename_out require)
 
   // Misc core forms
   (provide annotate annotations quasiquote quote

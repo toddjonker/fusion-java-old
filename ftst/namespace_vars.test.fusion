@@ -59,10 +59,21 @@
   (quote (define * +))
   other_namespace)
 
-(check === 21
+(check === 10 // TODO Racket returns 21
   (eval
     (quote_syntax (* 7 3))
     other_namespace))
+
+
+"Test a binding that's required here, but not bound there"
+(module M "/fusion"
+  (define splort "M splort")
+  (provide splort))
+(require M)
+(check === "M splort" splort)
+(expect_syntax_exn
+  (eval (quote_syntax splort) other_namespace))
+
 
 (eval
   (quote (define mul *))

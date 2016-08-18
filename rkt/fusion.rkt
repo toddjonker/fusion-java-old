@@ -9,6 +9,8 @@
 
 (define RACKET #t)
 
+(define-syntax only_in (make-rename-transformer #'only-in))
+
 (define-syntax set (make-rename-transformer #'set!))
 
 (define === equal?)

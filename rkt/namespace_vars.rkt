@@ -59,6 +59,17 @@
     (quote_syntax (* 7 3))
     other_namespace))
 
+
+"Test a binding that's required here, but not bound there"
+(module M racket
+  (define splort "M splort")
+  (provide splort))
+(require 'M)
+(check === "M splort" splort)
+(expect_syntax_exn
+  (eval (quote_syntax splort) other_namespace))
+
+
 (eval
   (quote (define mul *))
   other_namespace)

@@ -2,7 +2,10 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSexp.isPair;
 import static com.amazon.fusion.FusionSexp.isSexp;
+import static com.amazon.fusion.FusionSexp.unsafePairHead;
+import static com.amazon.fusion.FusionSexp.unsafePairTail;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionText.isText;
 import static com.amazon.fusion.FusionVoid.voidValue;
@@ -95,7 +98,8 @@ final class RequireForm
             }
             else if (isSexp(eval, datum))
             {
-                expandRequireSexp(eval, check, (SyntaxSexp) spec, expanded);
+                expandRequireSexp(expander, eval, check,
+                                  (SyntaxSexp) spec, expanded);
             }
             else
             {
@@ -120,7 +124,8 @@ final class RequireForm
         expandedSpecs.add(spec);
     }
 
-    private void expandRequireSexp(Evaluator eval,
+    private void expandRequireSexp(Expander expander,
+                                   Evaluator eval,
                                    SyntaxChecker requireCheck,
                                    SyntaxSexp spec,
                                    ArrayList<SyntaxValue> expandedSpecs)
@@ -128,7 +133,41 @@ final class RequireForm
     {
         SyntaxChecker check = new SyntaxChecker(eval, spec);
 
-        throw check.failure("invalid require-spec");
+        GlobalState globalState = eval.getGlobalState();
+
+        Binding b = spec.firstTargetBinding(eval);
+        if (b == globalState.myKernelOnlyInBinding)
+        {
+            int arity = check.arityAtLeast(2);
+
+            SyntaxValue[] children = spec.extract(eval);
+            children[0] = SyntaxSymbol.make(eval, children[0].getLocation(),
+                                            makeSymbol(eval, "only"));
+
+            // TODO This should visit the module (run its phase-1 code)
+            //      but not instantiate it.
+            String path = check.requiredText(eval, "module path", 1);
+            checkValidModulePath(eval, check, path);
+
+            for (int i = 2; i < arity; i++)
+            {
+                // "The lexical context of the raw-require-spec determines the
+                // context of introduced identifiers.  The exception is the
+                // rename sub-form, where the lexical context of the local-id
+                // is preserved."
+                // https://docs.racket-lang.org/reference/require.html
+                //
+                // But: Racket expands only_in to rename!
+
+                check.requiredIdentifier(i);
+            }
+
+            expandedSpecs.add(SyntaxSexp.make(eval, children));
+        }
+        else
+        {
+            throw requireCheck.failure("invalid require-spec");
+        }
     }
 
     private void checkValidModulePath(Evaluator     eval,
@@ -164,13 +203,16 @@ final class RequireForm
         CompiledRequireSpec[] compiledSpecs =
             new CompiledRequireSpec[arity - 1];
 
-        for (int i = 1; i < arity; i++)
+        int i = 0;
+        for (Object p = unsafePairTail(eval, stx.unwrap(eval));
+             isPair(eval, p);
+             p = unsafePairTail(eval, p), i++)
         {
-            SyntaxValue spec = stx.get(eval, i);
+            SyntaxValue spec = (SyntaxValue) unsafePairHead(eval, p);
 
             try
             {
-                compiledSpecs[i - 1] =
+                compiledSpecs[i] =
                     compileSpec(eval, baseModule, check, requireSym, spec);
             }
             catch (FusionException e)
@@ -192,13 +234,82 @@ final class RequireForm
     {
         if (spec instanceof SyntaxSexp)
         {
-            throw requireCheck.failure("invalid require-spec");
+            SyntaxSexp sexp = (SyntaxSexp) spec;
+            switch (sexp.firstIdentifier(eval).getName().stringValue())
+            {
+                case "only":
+                {
+                    ModuleIdentity moduleId =
+                        myModuleNameResolver.resolve(eval, baseModule,
+                                                     sexp.get(eval, 1), true);
+
+                    int idCount = sexp.size() - 2;
+                    RequireRenameMapping[] mappings =
+                        new RequireRenameMapping[idCount];
+                    for (int i = 0; i < idCount; i++)
+                    {
+                        SyntaxSymbol id = (SyntaxSymbol) sexp.get(eval, i + 2);
+                        mappings[i] =
+                            new RequireRenameMapping(id, id.getName());
+                    }
+
+                    return new CompiledPartialRequire(moduleId, mappings);
+                }
+                default:
+                {
+                    throw requireCheck.failure("invalid provide-spec");
+                }
+            }
         }
         else // It's a (string or symbol) module path.
         {
             ModuleIdentity moduleId =
                 myModuleNameResolver.resolve(eval, baseModule, spec, true);
             return new CompiledFullRequire(moduleId, lexicalContext);
+        }
+    }
+
+
+    /**
+     * This class primarily provides syntax to bind to require-clauses so that
+     * {@link RequireForm} can compare bindings, not symbolic names.  This is
+     * as specified by Racket.
+     */
+    private abstract static class AbstractRequireClauseForm
+        extends SyntacticForm
+    {
+        AbstractRequireClauseForm(String bodyPattern, String doc)
+        {
+            super(bodyPattern, doc);
+        }
+
+        @Override
+        SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
+            throws FusionException
+        {
+            throw check(expander, stx).failure("must be used inside `require`");
+        }
+
+        @Override
+        CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+            throws FusionException
+        {
+            throw new IllegalStateException("Shouldn't be compiled");
+        }
+    }
+
+
+    static final class OnlyInForm
+        extends AbstractRequireClauseForm
+    {
+        OnlyInForm()
+        {
+            //    "                                                                               |
+            super("module_path id ...",
+                  "A `require` clause that imports only the given `id`s from a module.\n" +
+                  "If an `id` is not provided by the module, a syntax error is reported.\n" +
+                  "\n" +
+                  "This form can only appear within `require`.");
         }
     }
 

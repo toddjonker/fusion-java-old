@@ -25,6 +25,7 @@ final class GlobalState
     static final String EOF             = "eof";
     static final String LAMBDA          = "lambda";
     static final String MODULE          = "module";
+    static final String ONLY_IN         = "only_in";
     static final String PROVIDE         = "provide";
     static final String RENAME_OUT      = "rename_out";
     static final String REQUIRE         = "require";
@@ -43,6 +44,7 @@ final class GlobalState
     final Binding myKernelBeginBinding;
     final Binding myKernelDefineBinding;
     final Binding myKernelDefineSyntaxBinding;
+    final Binding myKernelOnlyInBinding;
     final Binding myKernelModuleBinding;
     final Binding myKernelProvideBinding;
     final Binding myKernelRenameOutBinding;
@@ -74,6 +76,7 @@ final class GlobalState
         myKernelDefineBinding        = kernelBinding(DEFINE);
         myKernelDefineSyntaxBinding  = kernelBinding(DEFINE_SYNTAX);
         myKernelModuleBinding        = kernelBinding(MODULE);
+        myKernelOnlyInBinding        = kernelBinding(ONLY_IN);
         myKernelProvideBinding       = kernelBinding(PROVIDE);
         myKernelRequireBinding       = kernelBinding(REQUIRE);
         myKernelRenameOutBinding     = kernelBinding(RENAME_OUT);
@@ -129,6 +132,7 @@ final class GlobalState
         ns.define(LAMBDA, new LambdaForm());
         ns.define("load", new LoadProc(loadHandler));
         ns.define(MODULE, new ModuleForm(resolver, currentModuleDeclareName));
+        ns.define(ONLY_IN, new RequireForm.OnlyInForm());
         ns.define(PROVIDE, new ProvideForm());
         ns.define(REQUIRE, new RequireForm(resolver));
         ns.define(RENAME_OUT, new ProvideForm.RenameOutForm());

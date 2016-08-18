@@ -654,10 +654,10 @@ abstract class Namespace
      */
     final void require(Evaluator      eval,
                        SyntaxSymbol   context,
-                       ModuleIdentity maduleId)
+                       ModuleIdentity moduleId)
         throws FusionException
     {
-        ModuleInstance module = myRegistry.instantiate(eval, maduleId);
+        ModuleInstance module = myRegistry.instantiate(eval, moduleId);
 
         for (ProvidedBinding provided : module.providedBindings())
         {

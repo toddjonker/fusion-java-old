@@ -130,18 +130,7 @@ final class TopLevelNamespace
             if (moreWraps.hasNext())
             {
                 SyntaxWrap nextWrap = moreWraps.next();
-                Binding b = nextWrap.resolve(name, moreWraps, returnMarks);
-                if (b != null)
-                {
-                    Binding b2 =
-                        ((Namespace)getEnvironment()).resolve(b, returnMarks);
-
-                    // This is probably a hack, but it allows us to replicate
-                    // the way Racket shifts top-level bindings between
-                    // top-levels.
-                    if (b2 != null) return b2;
-                    if (b instanceof TopLevelRequiredBinding) return b;
-                }
+                nextWrap.resolve(name, moreWraps, returnMarks);
             }
 
             return getEnvironment().substituteFree(name, returnMarks);
