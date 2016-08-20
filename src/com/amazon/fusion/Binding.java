@@ -3,12 +3,55 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
+import com.amazon.fusion.LocalEnvironment.LocalBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
+import com.amazon.fusion.Namespace.NsDefinedBinding;
+import com.amazon.fusion.Namespace.RequiredBinding;
+import com.amazon.fusion.TopLevelNamespace.TopLevelBinding;
 
 /**
  * Bindings are used during expansion and compilation to identify a specific
  * binding site.
  * They are compiled away and are not used at eval-time.
+ * <p>
+ * The types of bindings are as follows:
+ * <ul>
+ *   <li><em>Original</em> bindings represent the base cases for bindings.
+ *     <ul>
+ *       <li><em>Physical</em> bindings denote variables and map to storage
+ *         locations.
+ *         <ul>
+ *           <li>{@link NsDefinedBinding}s denote namespace-level variables.
+ *           </li>
+ *           <li>{@link LocalBinding}s denote variables at other levels, like
+ *             the arguments to procedures and the local variables declared by
+ *             {@code let}, {@code letrec}, <i>etc.</i>
+ *           </li>
+ *         </ul>
+ *       </li>
+ *       <li><em>Free</em> bindings do not map to anything, they are essentially
+ *         unbound variables.
+ *       </li>
+ *     </ul>
+ *   </li>
+ *   <li><em>Indirect</em> bindings refer to an original binding indirectly,
+ *     perhaps renaming the variable along the way.
+ *     <ul>
+ *       <li>{@link ProvidedBinding}s refer to module-level defined
+ *         bindings.
+ *       </li>
+ *       <li>{@link RequiredBinding}s refer to provided bindings.
+ *       </li>
+ *       <li>{@link TopLevelBinding}s refer to either a required binding or a
+ *         namespace-level defined binding. For top-level namespaces, that
+ *         reference can change over time.
+ *     </ul>
+ *   </li>
+ * </ul>
+ *
+ * Every binding has a <em>target</em> binding, which is the original binding
+ * to which it refers, perhaps through multiple indirections.
+ * A binding is its own target if and only if the binding is original.
  */
 abstract class Binding
 {
@@ -25,15 +68,7 @@ abstract class Binding
 
     /**
      * Gets the original binding to which this binding refers.
-     * <p>
-     * Free, local, and module-level bindings are always their own target.
-     * For imported bindings, the target is a module-level binding.
-     * The target of a top-level binding can be either its local definition
-     * or an imported module-level binding (and it can change over time).
-     * <p>
-     * Non-free target bindings are "physical" in that they denote storage
-     * locations in a one-to-one manner. Therefore it is safe to use object
-     * identity to compare them.
+     * Returns itself, if and only if this binding is original.
      *
      * @return not null.
      */

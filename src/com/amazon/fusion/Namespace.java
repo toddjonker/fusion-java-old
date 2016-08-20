@@ -47,7 +47,7 @@ abstract class Namespace
         }
 
         @Override
-        public final BaseSymbol getName()
+        final BaseSymbol getName()
         {
             return myIdentifier.getName();
         }
@@ -69,8 +69,8 @@ abstract class Namespace
         }
 
         @Override
-        public CompiledForm compileSet(Evaluator eval, Environment env,
-                                       CompiledForm valueForm)
+        final CompiledForm compileSet(Evaluator eval, Environment env,
+                                      CompiledForm valueForm)
             throws FusionException
         {
             throw new IllegalStateException("Mutation should have been rejected");
@@ -88,6 +88,12 @@ abstract class Namespace
         public boolean equals(Object other)
         {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public final int hashCode()
+        {
+            return System.identityHashCode(this);
         }
 
         @Override
@@ -112,38 +118,38 @@ abstract class Namespace
         }
 
         @Override
-        public final BaseSymbol getName()
+        final BaseSymbol getName()
         {
             return myIdentifier.getName();
         }
 
-        protected SyntaxSymbol getIdentifier()
+        final SyntaxSymbol getIdentifier()
         {
             return myIdentifier;
         }
 
         @Override
-        public ModuleDefinedBinding target()
+        final ModuleDefinedBinding target()
         {
             return myTarget.target();
         }
 
         @Override
-        public Object lookup(Namespace ns)
+        final Object lookup(Namespace ns)
         {
             return myTarget.lookup(ns);
         }
 
         @Override
-        public CompiledForm compileReference(Evaluator eval, Environment env)
+        final CompiledForm compileReference(Evaluator eval, Environment env)
             throws FusionException
         {
             return myTarget.compileReference(eval, env);
         }
 
         @Override
-        final public CompiledForm compileSet(Evaluator eval, Environment env,
-                                             CompiledForm valueForm)
+        final CompiledForm compileSet(Evaluator eval, Environment env,
+                                      CompiledForm valueForm)
             throws FusionException
         {
             // This isn't currently reachable, but it's an easy safeguard.

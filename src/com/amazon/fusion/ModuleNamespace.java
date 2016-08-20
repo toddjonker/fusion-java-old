@@ -63,8 +63,8 @@ final class ModuleNamespace
         }
 
         @Override
-        final public CompiledForm compileSet(Evaluator eval, Environment env,
-                                             CompiledForm valueForm)
+        final CompiledForm compileSet(Evaluator eval, Environment env,
+                                      CompiledForm valueForm)
             throws FusionException
         {
             // This isn't currently reachable, but it's an easy safeguard.
@@ -172,9 +172,9 @@ final class ModuleNamespace
         }
 
         @Override
-        public CompiledForm compileTopReference(Evaluator eval,
-                                                Environment env,
-                                                SyntaxSymbol id)
+        CompiledForm compileTopReference(Evaluator eval,
+                                         Environment env,
+                                         SyntaxSymbol id)
             throws FusionException
         {
             String message =
@@ -268,7 +268,7 @@ final class ModuleNamespace
         }
 
         @Override
-        public Object lookup(Namespace localNamespace)
+        Object lookup(Namespace localNamespace)
         {
             if (localNamespace.getModuleId() != myModuleId)
             {
@@ -303,7 +303,7 @@ final class ModuleNamespace
         }
 
         @Override
-        public String mutationSyntaxErrorMessage()
+        String mutationSyntaxErrorMessage()
         {
              return "mutation of module-level bindings is not yet supported";
         }
@@ -319,9 +319,9 @@ final class ModuleNamespace
         }
 
         @Override
-        public CompiledForm compileTopReference(Evaluator eval,
-                                                Environment env,
-                                                SyntaxSymbol id)
+        CompiledForm compileTopReference(Evaluator eval,
+                                         Environment env,
+                                         SyntaxSymbol id)
             throws FusionException
         {
             // We should never get here.
@@ -331,7 +331,7 @@ final class ModuleNamespace
         }
 
         @Override
-        public CompiledForm compileReference(Evaluator eval, Environment env)
+        CompiledForm compileReference(Evaluator eval, Environment env)
             throws FusionException
         {
             Namespace localNamespace = env.namespace();

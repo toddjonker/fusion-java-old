@@ -32,13 +32,13 @@ final class LocalEnvironment
         }
 
         @Override
-        public BaseSymbol getName()
+        BaseSymbol getName()
         {
             return myIdentifier.getName();
         }
 
         @Override
-        public boolean sameTarget(Binding other)
+        boolean sameTarget(Binding other)
         {
             // Don't need to call other.originalBinding() since local bindings
             // are never renamed or wrapped (in the sense, for examples, that a
@@ -48,14 +48,14 @@ final class LocalEnvironment
 
 
         @Override
-        public Object lookup(Namespace ns)
+        Object lookup(Namespace ns)
         {
             return null;  // We're local, not a namespace binding.
         }
 
 
         @Override
-        public CompiledForm compileReference(Evaluator eval, Environment env)
+        CompiledForm compileReference(Evaluator eval, Environment env)
             throws FusionException
         {
             int rib = env.getDepth() - myDepth;
@@ -67,9 +67,9 @@ final class LocalEnvironment
         }
 
         @Override
-        public CompiledForm compileTopReference(Evaluator eval,
-                                                Environment env,
-                                                SyntaxSymbol id)
+        CompiledForm compileTopReference(Evaluator eval,
+                                         Environment env,
+                                         SyntaxSymbol id)
             throws FusionException
         {
             String message =
@@ -78,8 +78,8 @@ final class LocalEnvironment
         }
 
         @Override
-        public CompiledForm compileSet(Evaluator eval, Environment env,
-                                       CompiledForm valueForm)
+        CompiledForm compileSet(Evaluator eval, Environment env,
+                                CompiledForm valueForm)
             throws FusionException
         {
             int rib = env.getDepth() - myDepth;
@@ -95,6 +95,12 @@ final class LocalEnvironment
         public boolean equals(Object other)
         {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return System.identityHashCode(this);
         }
 
         @Override

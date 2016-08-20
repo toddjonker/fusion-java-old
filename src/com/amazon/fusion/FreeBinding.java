@@ -96,6 +96,11 @@ final class FreeBinding
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public int hashCode()
+    {
+        return myName.hashCode();
+    }
 
     @Override
     public String toString()
