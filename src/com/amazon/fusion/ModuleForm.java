@@ -531,7 +531,7 @@ final class ModuleForm
                     throw check.failure(message, exportId);
                 }
 
-                ProvidedBinding provided = binding.provideAs(exportId);
+                ProvidedBinding provided = binding.provideAs(name);
                 assert name == provided.getName();
 
                 bindings.add(provided);

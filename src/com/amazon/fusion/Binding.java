@@ -88,7 +88,7 @@ abstract class Binding
         return target() == other.target();
     }
 
-    ProvidedBinding provideAs(SyntaxSymbol exportedId)
+    ProvidedBinding provideAs(BaseSymbol name)
     {
         throw new IllegalStateException("This kind of binding can't be exported");
     }

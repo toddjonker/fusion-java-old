@@ -102,8 +102,7 @@ final class TopLevelNamespace
         @Override
         public String toString()
         {
-            return "{{{TopLevelDefinedBinding " + getIdentifier().debugString()
-                + "}}}";
+            return "{{{TopLevelDefinedBinding " + getDebugName() + "}}}";
         }
     }
 

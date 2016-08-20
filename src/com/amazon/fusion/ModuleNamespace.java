@@ -23,18 +23,18 @@ final class ModuleNamespace
     {
         private final BaseSymbol myName;
 
-        ProvidedBinding(SyntaxSymbol exportedId)
+        ProvidedBinding(BaseSymbol name)
         {
-            myName = exportedId.getName();
+            myName = name;
         }
 
         @Override
         final BaseSymbol getName() { return myName; }
 
         @Override
-        final ProvidedBinding provideAs(SyntaxSymbol exportedId)
+        final ProvidedBinding provideAs(BaseSymbol name)
         {
-            return new ImportedProvidedBinding(exportedId, this);
+            return new ImportedProvidedBinding(name, this);
         }
 
         @Override
@@ -89,10 +89,10 @@ final class ModuleNamespace
     {
         private final ModuleDefinedBinding myDefinition;
 
-        DefinedProvidedBinding(SyntaxSymbol exportedId,
+        DefinedProvidedBinding(BaseSymbol name,
                                ModuleDefinedBinding binding)
         {
-            super(exportedId);
+            super(name);
 
             assert binding.target() == binding;
             myDefinition = binding;
@@ -100,7 +100,7 @@ final class ModuleNamespace
 
         DefinedProvidedBinding(ModuleDefinedBinding binding)
         {
-            this(binding.getIdentifier(), binding);
+            this(binding.getName(), binding);
         }
 
         @Override
@@ -131,9 +131,9 @@ final class ModuleNamespace
     {
         private final ProvidedBinding myImport;
 
-        ImportedProvidedBinding(SyntaxSymbol exportedId, ProvidedBinding imported)
+        ImportedProvidedBinding(BaseSymbol name, ProvidedBinding imported)
         {
-            super(exportedId);
+            super(name);
             myImport = imported;
         }
 
@@ -201,9 +201,9 @@ final class ModuleNamespace
         }
 
         @Override
-        ProvidedBinding provideAs(SyntaxSymbol exportedId)
+        ProvidedBinding provideAs(BaseSymbol name)
         {
-            return new ImportedProvidedBinding(exportedId, myTarget);
+            return new ImportedProvidedBinding(name, myTarget);
         }
 
         @Override
@@ -220,8 +220,7 @@ final class ModuleNamespace
         @Override
         public String toString()
         {
-            return "{{{ModuleRequiredBinding "
-                 + myIdentifier
+            return "{{{ModuleRequiredBinding " + getDebugName()
                  + " -> " + target().myModuleId.absolutePath()
                  + '#' + getName() + "}}}";
         }
@@ -277,8 +276,7 @@ final class ModuleNamespace
         @Override
         public String toString()
         {
-            return "{{{LanguageBinding "
-                 + myIdentifier
+            return "{{{LanguageBinding " + getDebugName()
                  + " -> " + target().myModuleId.absolutePath()
                  + '#' + getName() + "}}}";
         }
@@ -329,9 +327,9 @@ final class ModuleNamespace
         }
 
         @Override
-        ProvidedBinding provideAs(SyntaxSymbol exportedId)
+        ProvidedBinding provideAs(BaseSymbol name)
         {
-            return new DefinedProvidedBinding(exportedId, this);
+            return new DefinedProvidedBinding(name, this);
         }
 
         @Override
@@ -422,7 +420,7 @@ final class ModuleNamespace
         public String toString()
         {
             return "{{{ModuleDefinedBinding " + myModuleId.absolutePath()
-                + ' ' + getIdentifier().debugString() + "}}}";
+                + ' ' + getDebugName() + "}}}";
         }
     }
 

@@ -67,9 +67,9 @@ abstract class Namespace
         }
 
         @Override
-        ProvidedBinding provideAs(SyntaxSymbol exportedId)
+        ProvidedBinding provideAs(BaseSymbol name)
         {
-            return myEffectiveBinding.provideAs(exportedId);
+            return myEffectiveBinding.provideAs(name);
         }
 
         @Override
@@ -168,24 +168,26 @@ abstract class Namespace
     abstract class NsDefinedBinding
         extends EffectiveNsBinding
     {
-        private final SyntaxSymbol myIdentifier;
+        private final BaseSymbol myName;
+        private final String     myDebugName;
         final int myAddress;
 
         NsDefinedBinding(SyntaxSymbol identifier, int address)
         {
-            myIdentifier = identifier;
-            myAddress = address;
+            myName      = identifier.getName();
+            myDebugName = identifier.debugString();
+            myAddress   = address;
         }
 
         @Override
         final BaseSymbol getName()
         {
-            return myIdentifier.getName();
+            return myName;
         }
 
-        final SyntaxSymbol getIdentifier()
+        final String getDebugName()
         {
-            return myIdentifier;
+            return myDebugName;
         }
 
         @Override
@@ -250,26 +252,27 @@ abstract class Namespace
     abstract static class RequiredBinding
         extends EffectiveNsBinding
     {
-        final SyntaxSymbol    myIdentifier;
+        private final BaseSymbol myName;
+        private final String     myDebugName;
         final ProvidedBinding myTarget;
 
         RequiredBinding(SyntaxSymbol identifier, ProvidedBinding target)
         {
             assert target != null;
-            myIdentifier = identifier;
+            myName      = identifier.getName();
+            myDebugName = identifier.debugString();
             myTarget = target;
         }
 
         @Override
         final BaseSymbol getName()
         {
-            return myIdentifier.getName();
+            return myName;
         }
 
-        // TODO remove this, only used by RequiredBindingMap
-        final SyntaxSymbol getIdentifier()
+        final String getDebugName()
         {
-            return myIdentifier;
+            return myDebugName;
         }
 
         @Override
