@@ -29,96 +29,9 @@ abstract class Namespace
     implements Environment, NamespaceStore
 {
     /**
-     * Denotes all bindings resolved to namespace-level.
-     * The binding can swing between free, definition, and required targets.
+     * Denotes a binding installed at namespace-level.
      */
-    static final class NsBinding
-        extends Binding
-    {
-        private EffectiveNsBinding myEffectiveBinding;
-
-        NsBinding(EffectiveNsBinding binding)
-        {
-            myEffectiveBinding = binding;
-        }
-
-        @Override
-        public String toString()
-        {
-            return "NsBinding::{active:" + myEffectiveBinding + "}";
-        }
-
-        void setEffectiveBinding(EffectiveNsBinding binding)
-        {
-            assert myEffectiveBinding.getName() == binding.getName();
-            myEffectiveBinding = binding;
-        }
-
-        @Override
-        BaseSymbol getName()
-        {
-            return myEffectiveBinding.getName();
-        }
-
-        @Override
-        Binding target()
-        {
-            return myEffectiveBinding.target();
-        }
-
-        @Override
-        ProvidedBinding provideAs(BaseSymbol name)
-        {
-            return myEffectiveBinding.provideAs(name);
-        }
-
-        @Override
-        Object lookup(Namespace ns)
-        {
-            return myEffectiveBinding.lookup(ns);
-        }
-
-        @Override
-        String mutationSyntaxErrorMessage()
-        {
-            return myEffectiveBinding.mutationSyntaxErrorMessage();
-        }
-
-        @Override
-        CompiledForm compileDefine(Evaluator eval,
-                                   Environment env,
-                                   SyntaxSymbol id,
-                                   CompiledForm valueForm)
-            throws FusionException
-        {
-            return myEffectiveBinding.compileDefine(eval, env, id, valueForm);
-        }
-
-        @Override
-        CompiledForm compileReference(Evaluator eval, Environment env)
-            throws FusionException
-        {
-            return myEffectiveBinding.compileReference(eval, env);
-        }
-
-        @Override
-        CompiledForm compileTopReference(Evaluator eval, Environment env,
-                                         SyntaxSymbol id)
-            throws FusionException
-        {
-            return myEffectiveBinding.compileTopReference(eval, env, id);
-        }
-
-        @Override
-        CompiledForm compileSet(Evaluator eval, Environment env,
-                                CompiledForm valueForm) throws FusionException
-        {
-            return myEffectiveBinding.compileSet(eval, env, valueForm);
-        }
-    }
-
-
-    abstract static class EffectiveNsBinding
+    abstract static class NsBinding
         extends Binding
     {
         /**
@@ -166,7 +79,7 @@ abstract class Namespace
      * @see ModuleDefinedBinding
      */
     abstract class NsDefinedBinding
-        extends EffectiveNsBinding
+        extends NsBinding
     {
         private final BaseSymbol myName;
         private final String     myDebugName;
@@ -250,7 +163,7 @@ abstract class Namespace
      * declaration.
      */
     abstract static class RequiredBinding
-        extends EffectiveNsBinding
+        extends NsBinding
     {
         private final BaseSymbol myName;
         private final String     myDebugName;
@@ -454,7 +367,7 @@ abstract class Namespace
 
         for (NsBinding b : myBindings.values())
         {
-            NsDefinedBinding def = b.myEffectiveBinding.definition();
+            NsDefinedBinding def = b.definition();
             if (def != null)
             {
                 definitions.add(def);
@@ -482,12 +395,10 @@ abstract class Namespace
     }
 
 
-    final void installNewBinding(SyntaxSymbol boundIdentifier,
-                                 EffectiveNsBinding effective)
+    final NsBinding installBinding(SyntaxSymbol boundIdentifier,
+                                   NsBinding    binding)
     {
-        NsBinding nsBinding = new NsBinding(effective);
-        NsBinding prior = myBindings.put(boundIdentifier, nsBinding);
-        assert prior == null;
+        return myBindings.put(boundIdentifier, binding);
     }
 
     /**
@@ -537,7 +448,7 @@ abstract class Namespace
     {
         identifier = identifier.copyAndResolveTop();
         NsBinding nsb = resolveBound(identifier);
-        return (nsb == null ? null : nsb.myEffectiveBinding.definition());
+        return (nsb == null ? null : nsb.definition());
     }
 
 
@@ -576,32 +487,22 @@ abstract class Namespace
     SyntaxSymbol predefine(SyntaxSymbol identifier, SyntaxValue formForErrors)
         throws FusionException
     {
-        NsDefinedBinding newDefinition;
+        NsDefinedBinding newDefinition = null;
 
         identifier = identifier.copyAndResolveTop();
 
         NsBinding entry = resolveBound(identifier);
-        if (entry == null)
+        if (entry != null)
+        {
+            newDefinition = entry.redefine(identifier, formForErrors);
+        }
+        if (newDefinition == null)
         {
             newDefinition = newDefinedBinding(identifier, myDefinitionCount);
             myDefinitionCount++;
-
-            installNewBinding(identifier, newDefinition);
         }
-        else
-        {
-            EffectiveNsBinding effective = entry.myEffectiveBinding;
 
-            newDefinition = effective.redefine(identifier, formForErrors);
-
-            if (newDefinition == null)
-            {
-                newDefinition = newDefinedBinding(identifier, myDefinitionCount);
-                myDefinitionCount++;
-            }
-
-            entry.setEffectiveBinding(newDefinition);
-        }
+        installBinding(identifier, newDefinition);
 
         return identifier.copyReplacingBinding(newDefinition);
     }
@@ -791,20 +692,18 @@ abstract class Namespace
     {
         localId = localId.copyAndResolveTop();
 
+        RequiredBinding required;
         NsBinding entry = resolveBound(localId);
         if (entry == null)
         {
-            RequiredBinding required = newRequiredBinding(localId, provided);
-            installNewBinding(localId, required);
+            required = newRequiredBinding(localId, provided);
         }
         else
         {
-            EffectiveNsBinding effective = entry.myEffectiveBinding;
-
-            RequiredBinding required = effective.require(localId, provided, null);
-
-            entry.setEffectiveBinding(required);
+            required = entry.require(localId, provided, null);
         }
+
+        installBinding(localId, required);
     }
 
     /**
@@ -819,10 +718,6 @@ abstract class Namespace
 
     final boolean ownsDefinedBinding(Binding binding)
     {
-        if (binding instanceof NsBinding)
-        {
-            binding = ((NsBinding) binding).myEffectiveBinding;
-        }
         if (binding instanceof NsDefinedBinding)
         {
             return ((NsDefinedBinding) binding).isOwnedBy(this);
@@ -989,8 +884,7 @@ abstract class Namespace
 
     final void setDoc(String name, BindingDoc doc)
     {
-        NsBinding top = (NsBinding) resolve(name);
-        NsDefinedBinding binding = (NsDefinedBinding) top.myEffectiveBinding;
+        NsDefinedBinding binding = (NsDefinedBinding) resolve(name);
         setDoc(binding.myAddress, doc);
     }
 

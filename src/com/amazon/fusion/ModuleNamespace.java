@@ -488,9 +488,8 @@ final class ModuleNamespace
                 (SyntaxSymbol) name.datumToSyntaxMaybe(eval, lexicalContext, null);
             id.resolve(); // This needs to resolve "outside" this module.
 
-            // We assume that there are no duplicate names, so we can skip the
-            // check for existing entries.
-            installNewBinding(id, new LanguageBinding(id, provided));
+            NsBinding prior = installBinding(id, new LanguageBinding(id, provided));
+            assert prior == null;
         }
     }
 
