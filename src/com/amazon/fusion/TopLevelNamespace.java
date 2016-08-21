@@ -169,12 +169,6 @@ final class TopLevelNamespace
         }
 
         @Override
-        public String mutationSyntaxErrorMessage()
-        {
-             return "cannot mutate an imported binding";
-        }
-
-        @Override
         public CompiledForm compileTopReference(Evaluator eval,
                                                 Environment env,
                                                 SyntaxSymbol id)

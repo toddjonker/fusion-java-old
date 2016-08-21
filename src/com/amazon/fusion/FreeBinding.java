@@ -48,7 +48,7 @@ final class FreeBinding
     @Override
     public String mutationSyntaxErrorMessage()
     {
-         return "identifier has no binding";
+         return "unbound variable";
     }
 
 

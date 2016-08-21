@@ -20,6 +20,8 @@
 (define head car)
 (define tail cdr)
 
+(define is_procedure procedure?)
+
 
 ;; Syntax
 
@@ -47,3 +49,9 @@
 (define-syntax check_true  (make-rename-transformer #'check-true))
 (define-syntax check_false (make-rename-transformer #'check-false))
 (define-syntax check_same  (make-rename-transformer #'check-eq?))
+(define-syntax check_pred  (make-rename-transformer #'check-pred))
+
+(define-syntax-rule (expect_syntax_exn expr)
+  (check-exn exn:fail:syntax?
+    (lambda ()
+      (eval (quote expr)))))

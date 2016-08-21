@@ -201,6 +201,12 @@ abstract class Namespace
         }
 
         @Override
+        final String mutationSyntaxErrorMessage()
+        {
+             return "cannot mutate an imported variable";
+        }
+
+        @Override
         final CompiledForm compileDefine(Evaluator eval, Environment env,
                                          SyntaxSymbol id, CompiledForm valueForm)
             throws FusionException

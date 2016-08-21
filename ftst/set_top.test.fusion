@@ -5,8 +5,29 @@
 
 // TODO Mutating an undefined top-level binding should throw contract exn at
 //      runtime, not a syntax error at compile-time.
+//      But it doesn't matter until we implement top-level mutation.
 (expect_syntax_exn
   (set unbound "outside"))
+
+
+"============================================================================="
+"Attempted mutation of language bindings"
+
+"Check our assumption that we have a language binding"
+(check_pred is_procedure size)
+(define our_size size)
+
+
+(expect_syntax_exn
+  (set size "fail"))
+
+(expect_syntax_exn
+  (module Fail "/fusion"
+    (set size "fail")))
+
+
+"Value hasn't changed"
+(check === size our_size)
 
 
 "============================================================================="
@@ -20,3 +41,8 @@
 (expect_syntax_exn
   (set m1_bound "outside"))
 (check === "in M1" m1_bound)
+
+(expect_syntax_exn
+  (module Fail "/fusion"
+    (require M1)
+    (set m1_bound "fail")))

@@ -370,7 +370,7 @@ final class ModuleNamespace
         @Override
         String mutationSyntaxErrorMessage()
         {
-             return "mutation of module-level bindings is not yet supported";
+             return "mutation of module-level variables is not yet supported";
         }
 
         @Override
