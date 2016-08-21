@@ -41,3 +41,12 @@
   (define (bad x x) true))
 (expect_syntax_exn
   (define (bad x a b c x) true))
+
+
+// A top-level binding is created after the expr is evaluated.
+(expect_syntax_exn
+  (define barley barley))
+
+(require "/grain")
+(define barley barley)
+(check === "soup" barley)
