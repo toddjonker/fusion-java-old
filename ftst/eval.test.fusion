@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/eval"
@@ -40,13 +40,10 @@
 
 (eval (quote (define top 17220)) ns)
 
-// Check that source enrichment observes existing top-level bindings.
 (define top 17110)
 
-// TODO FUSION-117 CRASH! Looks like 'top' is being read from the wrong store.
-//      See parallel Racket test case.
-//(check == (eval (quote_syntax (+ top 2)) ns) 17112)
-//(check == (eval (sexp (quote +) (quote_syntax top) 2) ns) 17222)
+(check == (eval (quote_syntax (+ top 2)) ns) 17222)
+(check == (eval (sexp (quote +) (quote_syntax top) 2) ns) 17222)
 
 
 

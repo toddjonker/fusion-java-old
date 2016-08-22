@@ -25,20 +25,6 @@
 (define_d)
 
 
-"Check handling of macro-introduced identifiers inside a module."
-(define_syntax make_module
-  (lambda (stx)
-    (lets ((args (tail (syntax_unwrap stx)))
-           (expr (head args)))
-      (quasisyntax
-        (module made "/fusion"
-          (unsyntax expr))))))
-
-"An identifier brought into a generated module cannot be used within it."
-(expect_syntax_exn
-  (make_module (* 3 7)))
-
-
 "============================================================================"
 
 
@@ -111,4 +97,4 @@
 (expect_syntax_exn
   (module Test2 "/mib_language" // Language
     (require HasMacro)
-    (reference-mib)))
+    (reference_mib)))

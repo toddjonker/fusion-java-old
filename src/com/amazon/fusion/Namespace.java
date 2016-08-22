@@ -111,17 +111,20 @@ abstract class Namespace
 
         final boolean isOwnedBy(Namespace ns)
         {
-            return Namespace.this == ns;
+            // Would prefer to compare the Namespaces, but different instances
+            // are used during compilation.
+            return Namespace.this.myModuleId == ns.myModuleId;
         }
 
         final CompiledForm compileLocalTopReference(Evaluator   eval,
                                                     Environment env)
             throws FusionException
         {
-            // TODO This fails when a macro references a prior local defn
-            // since the defn isn't installed yet.  I think the code is bad
-            // and mixes phases of macro processing.
-//          assert (env.namespace().ownsBinding(this));
+            assert this.isOwnedBy(env.namespace())
+                : "NsDefn for " + getDebugName() + " is in "
+                    + Namespace.this
+                    + " but the compilation environment is under "
+                    + env.namespace();
             return new CompiledTopVariableReference(myAddress);
         }
 
@@ -258,6 +261,7 @@ abstract class Namespace
             if (moreWraps.hasNext())
             {
                 SyntaxWrap nextWrap = moreWraps.next();
+                // The base implementation calls resolveTop here.
                 return nextWrap.resolve(name, moreWraps, returnMarks);
             }
             return null;
@@ -305,6 +309,12 @@ abstract class Namespace
         myRegistry = registry;
         myModuleId = id;
         myWraps    = wraps.apply(this);
+    }
+
+    @Override
+    public String toString()
+    {
+        return myModuleId.toString();
     }
 
     @Override

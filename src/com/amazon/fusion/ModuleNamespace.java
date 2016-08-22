@@ -444,8 +444,8 @@ final class ModuleNamespace
             if (moreWraps.hasNext())
             {
                 SyntaxWrap nextWrap = moreWraps.next();
-                // Prior bindings never "leak through" a module, so we ignore
-                // this binding.  We still want to collect the marks though.
+                // Prior bindings never "leak through" a module, so we won't
+                // return this binding.
                 Binding b = nextWrap.resolve(name, moreWraps, returnMarks);
                 if (b != null)
                 {

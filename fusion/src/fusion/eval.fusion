@@ -5,7 +5,7 @@
   '''
 Loading and evaluating Fusion code.
 
-See [dynamic evaluation](../eval.html) for more information.
+See [dynamic evaluation](eval.html) for more information.
   '''
 
   (require "/fusion/experimental/defines")

@@ -19,7 +19,8 @@ final class TopForm
         SyntaxChecker check = check(eval, stx);
         check.arityExact(2);
 
-        SyntaxSymbol id = check.requiredIdentifier("top-level variable", 1);
+        SyntaxSymbol id =
+            check.requiredIdentifier("namespace-level variable", 1);
 
         SyntaxValue[] children = stx.extract(eval);
 

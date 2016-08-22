@@ -24,22 +24,6 @@
 (define_d)
 
 
-"Check handling of macro-introduced identifiers inside a module."
-(define_syntax make_module
-  (lambda (stx)
-    (lets ((args (tail (syntax_unwrap stx)))
-           (expr (head args)))
-      (quasisyntax
-        (module made racket
-          (unsyntax expr))))))
-
-"An identifier brought into a generated module cannot be used within it."
-(check-exn exn:fail?
-  (lambda ()
-    (eval '(make_module (* 3 7)))))
-
-
-
 "============================================================================"
 
 
@@ -109,8 +93,7 @@
   mib)
 
 "This doesn't work:"
-(check-exn exn:fail?
-  (lambda ()
-    (eval '(module Test2 'Language
-             (require 'HasMacro)
-             (reference_mib)))))
+(expect_syntax_exn
+  (module Test2 'Language
+    (require 'HasMacro)
+    (reference_mib)))

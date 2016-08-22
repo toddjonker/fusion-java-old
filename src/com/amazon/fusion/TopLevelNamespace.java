@@ -3,8 +3,11 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.voidValue;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
+import java.util.Iterator;
+import java.util.Set;
 
 
 /**
@@ -66,8 +69,6 @@ final class TopLevelNamespace
         public CompiledForm compileReference(Evaluator eval, Environment env)
             throws FusionException
         {
-            // TODO FUSION-117 This should be pushed down but it fails there.
-            assert this.isOwnedBy(env.namespace());
             return compileLocalTopReference(eval, env);
         }
 
@@ -111,15 +112,40 @@ final class TopLevelNamespace
      * Exposes the bindings visible at top-level.
      */
     private static final class TopLevelWrap
-        extends EnvironmentWrap
+        extends NamespaceWrap
     {
+        // TODO Unit tests passed when this extended EnvironmentWrap, but that
+        //   has the wrong variant of resolveTop. What tests are missing?
+
         TopLevelWrap(TopLevelNamespace ns)
         {
             super(ns);
         }
 
-        // TODO how do we avoid overriding resolve() to prevent leakage?
-        //   That's done in ModuleWrap but not here.  Hm.
+        @Override
+        Binding resolve(BaseSymbol name,
+                        Iterator<SyntaxWrap> moreWraps,
+                        Set<MarkWrap> returnMarks)
+        {
+            if (moreWraps.hasNext())
+            {
+                SyntaxWrap nextWrap = moreWraps.next();
+                Binding b = nextWrap.resolve(name, moreWraps, returnMarks);
+                if (b != null)
+                {
+                    Binding b2 =
+                        ((Namespace)getEnvironment()).resolve(b, returnMarks);
+
+                    // This is probably a hack, but it allows us to replicate
+                    // the way Racket shifts top-level bindings between
+                    // top-levels.
+                    if (b2 != null) return b2;
+                    if (b instanceof TopLevelRequiredBinding) return b;
+                }
+            }
+
+            return getEnvironment().substituteFree(name, returnMarks);
+        }
     }
 
 
