@@ -114,12 +114,14 @@ final class ModuleForm
 
             if (! isValidModulePath(path))
             {
-                String message = "Invalid module path for language";
+                String message = "Invalid module path for language: "
+                    + initialBindingsStx.toString();
                 throw new ModuleNotFoundException(message, initialBindingsStx);
             }
             if (! isValidAbsoluteModulePath(path))
             {
-                String message = "Module path for language must be absolute";
+                String message = "Module path for language must be absolute: "
+                    + initialBindingsStx.toString();
                 throw new ModuleNotFoundException(message, initialBindingsStx);
             }
 
