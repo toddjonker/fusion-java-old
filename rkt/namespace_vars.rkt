@@ -20,6 +20,7 @@
   (make_module (times7 3)))
 
 "An imported variable brought into a generated module cannot be used within it."
+"  This succeeds in Racket < 6.3"
 (expect_syntax_exn
   (make_module (* 7 3)))
 
@@ -28,11 +29,10 @@
 (define other_namespace
   (make-base-namespace))
 
-(check-exn exn:fail:contract:variable? (lambda ()
+(expect_variable_exn
   (eval
     (quote_syntax (times7 3))
     other_namespace))
-)
 
 (eval
   (quote (define (times7 n) (* n 9)))

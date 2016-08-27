@@ -55,3 +55,8 @@
   (check-exn exn:fail:syntax?
     (lambda ()
       (eval (quote expr)))))
+
+(define-syntax-rule (expect_variable_exn expr)
+  (check-exn exn:fail:contract:variable?
+    (lambda ()
+      (eval (quote expr)))))

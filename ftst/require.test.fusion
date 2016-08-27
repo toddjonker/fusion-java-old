@@ -1,10 +1,34 @@
-// Copyright (c) 2016 Amazon.com, Inc.  All rights reserved.
+"Copyright (c) 2016 Amazon.com, Inc.  All rights reserved."
 
-(require "/fusion/experimental/check")
+(require
+  "/fusion/eval"
+  "/fusion/experimental/check"
+  "/fusion/experimental/syntax"
+)
 
-(expect_syntax_exn (require))
+(expect_syntax_exn (require))    // TODO this works in Racket
 (expect_syntax_exn (require 23))
 
 (expect_syntax_exn (require null.string))
 (expect_syntax_exn (require ""))
 (expect_syntax_exn (require " module"))
+
+(module M1 "/fusion"
+  (define one 1)
+  (provide one))
+(module M2 "/fusion"
+  (define one 2)
+  (provide one))
+
+"Interesting that this works at top-level"
+(require M1 M2)
+(check === 2 one)
+
+(expect_syntax_exn
+  (module Fail "/fusion"
+    (require M1 M2)))
+
+(expect_syntax_exn
+  (expand
+    (quote_syntax (module Fail "/fusion"
+                    (require M1 M2)))))

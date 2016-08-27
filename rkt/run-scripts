@@ -7,7 +7,7 @@ then
     echo '$RACKET_HOME is not defined'
     exit 1
 fi
-
+echo RACKET_HOME=$RACKET_HOME
 
 cd $(dirname "$0")/..
 
