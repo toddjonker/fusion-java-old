@@ -37,9 +37,6 @@ final class GlobalState
     final DynamicParameter           myCurrentNamespaceParam;
     final _Private_CoverageCollector myCoverageCollector;
 
-    final SyntaxSymbol       myKernelLambdaIdentifier;
-    final SyntaxSymbol       myKernelModuleIdentifier;
-
     final Binding myKernelAllDefinedOutBinding;
     final Binding myKernelBeginBinding;
     final Binding myKernelDefineBinding;
@@ -63,13 +60,6 @@ final class GlobalState
         myLoadHandler           = loadHandler;
         myCurrentNamespaceParam = currentNamespaceParam;
         myCoverageCollector     = coverageCollector;
-
-        SyntaxWrap wrap = new RequireWrap(kernel);
-
-        // WARNING: We pass null evaluator because we know its not used.
-        //          That is NOT SUPPORTED for user code!
-        myKernelLambdaIdentifier = SyntaxSymbol.make(null, wrap, LAMBDA);
-        myKernelModuleIdentifier = SyntaxSymbol.make(null, wrap, MODULE);
 
         myKernelAllDefinedOutBinding = kernelBinding(ALL_DEFINED_OUT);
         myKernelBeginBinding         = kernelBinding(BEGIN);
@@ -159,5 +149,18 @@ final class GlobalState
         Binding b = myKernelModule.resolveProvidedName(name).target();
         assert b != null && ! (b instanceof FreeBinding);
         return b;
+    }
+
+    /**
+     * Creates a new identifier that's bound in this kernel.
+     *
+     * @param eval not null.
+     * @param name must be defined by this kernel!
+     */
+    SyntaxSymbol kernelBoundIdentifier(Evaluator eval, String name)
+    {
+        SyntaxSymbol sym = SyntaxSymbol.make(eval, name);
+        sym = sym.copyReplacingBinding(kernelBinding(name));
+        return sym;
     }
 }

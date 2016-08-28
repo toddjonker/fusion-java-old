@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -271,8 +271,9 @@ final class FusionSymbol
         @Override
         public boolean equals(Object other)
         {
-            // We can't optimize this to == "due to interning", since
-            // WeakHashMap uses equals() to look for an interned instance.
+            // We can't optimize this to be a trivial == comparison, since
+            // equal instances will exist during symbol creation while we
+            // search the intern table for an extant instance.
 
             if (this == other) return true;
             if (other instanceof ActualSymbol)

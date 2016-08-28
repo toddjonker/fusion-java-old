@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionIo.isEof;
 import static com.amazon.fusion.FusionSyntax.isSyntax;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.fusion.GlobalState.MODULE;
 import static com.amazon.fusion.StandardReader.readSyntax;
 import static com.amazon.fusion.Syntax.datumToSyntax;
 import com.amazon.ion.IonReader;
@@ -207,7 +208,7 @@ final class FusionEval
                     maybeModule.get(eval, 0);
                 maybeKeyword = (SyntaxSymbol) ns.syntaxIntroduce(maybeKeyword);
                 SyntaxSymbol moduleKeyword =
-                    eval.getGlobalState().myKernelModuleIdentifier;
+                    eval.getGlobalState().kernelBoundIdentifier(eval, MODULE);
                 if (maybeKeyword.freeIdentifierEqual(moduleKeyword))
                 {
                     SyntaxValue[] children = maybeModule.extract(eval);

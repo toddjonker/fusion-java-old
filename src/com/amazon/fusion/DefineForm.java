@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -9,6 +9,7 @@ import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionString.stringToJavaString;
 import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
 import static com.amazon.fusion.GlobalState.DEFINE;
+import static com.amazon.fusion.GlobalState.LAMBDA;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import com.amazon.fusion.FusionString.BaseString;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
@@ -115,7 +116,7 @@ final class DefineForm
         assert bodyLen > 0;
 
         SyntaxValue[] lambda = new SyntaxValue[2 + bodyLen];
-        lambda[0] = expander.getGlobalState().myKernelLambdaIdentifier;
+        lambda[0] = eval.getGlobalState().kernelBoundIdentifier(eval, LAMBDA);
         lambda[1] = SyntaxSexp.make(eval, procFormals);
         for (int p = 2, i = bodyStart; i < defineArity; p++, i++)
         {

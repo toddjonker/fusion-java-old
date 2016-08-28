@@ -399,6 +399,8 @@ abstract class Namespace
     /**
      * Adds wraps to the syntax object to give it the bindings of this
      * namespace and of required modules.
+     *
+     * @return a copy of the given syntax value, with the additional context.
      */
     final SyntaxValue syntaxIntroduce(SyntaxValue source)
         throws FusionException

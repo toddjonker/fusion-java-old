@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -12,12 +12,18 @@ import static com.amazon.fusion.FusionSyntax.isSyntax;
 import static com.amazon.fusion.FusionSyntax.unsafeFreeIdentifierEqual;
 import static com.amazon.fusion.FusionSyntax.unsafeSyntaxUnwrap;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.fusion.GlobalState.LAMBDA;
+import static com.amazon.fusion.GlobalState.MODULE;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 
+/**
+ * Tests features used by the Eclipse plugin to traverse an expanded program.
+ * In particular, it uses free_identifier_equal to compare bindings while
+ * walking the expanded syntax tree.
+ */
 public class ExpandProgramTest
     extends CoreTestCase
 {
@@ -81,23 +87,26 @@ public class ExpandProgramTest
     public void testFindingCoreForms()
         throws Exception
     {
+        Evaluator eval = evaluator();
+        GlobalState globals = eval.getGlobalState();
+
+        Object kernelLambdaId = globals.kernelBoundIdentifier(eval, LAMBDA);
+        Object kernelModuleId = globals.kernelBoundIdentifier(eval, MODULE);
+
         CoreFormCollector collector = new CoreFormCollector();
 
         String source =
             "(lambda () 1) " +
             "(module M '/fusion' 1)";
 
-        FusionEval.expandProgram(this.topLevel(), source, null, collector);
+        FusionEval.expandProgram(topLevel(), source, null, collector);
         assertTrue(collector.receivedEof);
 
-        assertNotNull(collector.moduleId);
-
-        GlobalState globals = evaluator().getGlobalState();
-        assertTrue(unsafeFreeIdentifierEqual(evaluator(),
+        assertTrue(unsafeFreeIdentifierEqual(eval,
                                              collector.lambdaId,
-                                             globals.myKernelLambdaIdentifier));
-        assertTrue(unsafeFreeIdentifierEqual(evaluator(),
+                                             kernelLambdaId));
+        assertTrue(unsafeFreeIdentifierEqual(eval,
                                              collector.moduleId,
-                                             globals.myKernelModuleIdentifier));
+                                             kernelModuleId));
     }
 }
