@@ -11,6 +11,7 @@ import java.util.Set;
 
 final class SyntaxWraps
 {
+    /** Not null. */
     private final SyntaxWrap[] myWraps;
 
     static SyntaxWraps make(SyntaxWrap initialWrap)
@@ -85,9 +86,9 @@ final class SyntaxWraps
                     marks = new HashSet<>();
                     marks.add(mark);
                 }
-                else if (! marks.remove(mark))
+                else if (! marks.add(mark))
                 {
-                    marks.add(mark);
+                    marks.remove(mark);
                 }
             }
         }
@@ -110,17 +111,14 @@ final class SyntaxWraps
      */
     Binding resolve(BaseSymbol name)
     {
+        if (myWraps.length == 0) return null;
+
         Iterator<SyntaxWrap> i =
             new SplicingIterator(Arrays.asList(myWraps).iterator());
+
+        SyntaxWrap wrap = i.next();
         Set<MarkWrap> marks = new HashSet<>();
-
-        if (i.hasNext())
-        {
-            SyntaxWrap wrap = i.next();
-            return wrap.resolve(name, i, marks);
-        }
-
-        return null;
+        return wrap.resolve(name, i, marks);
     }
 
     /**
@@ -129,17 +127,14 @@ final class SyntaxWraps
      */
     Binding resolveTop(BaseSymbol name)
     {
+        if (myWraps.length == 0) return null;
+
         Iterator<SyntaxWrap> i =
             new SplicingIterator(Arrays.asList(myWraps).iterator());
+
+        SyntaxWrap wrap = i.next();
         Set<MarkWrap> marks = new HashSet<>();
-
-        if (i.hasNext())
-        {
-            SyntaxWrap wrap = i.next();
-            return wrap.resolveTop(name, i, marks);
-        }
-
-        return null;
+        return wrap.resolveTop(name, i, marks);
     }
 
     private static final class SplicingIterator
