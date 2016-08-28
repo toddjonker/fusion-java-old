@@ -69,16 +69,22 @@ public final class FusionVoid
     //========================================================================
     // Predicates
 
-    public static boolean isVoid(TopLevel top, Object v)
+    /**
+     * Determines whether a Fusion value is void.
+     *
+     * @param top the top-level that was the source of the value.
+     * @param value the value to test.
+     */
+    public static boolean isVoid(TopLevel top, Object value)
     {
         assert top != null;
-        return (v == VOID);
+        return (value == VOID);
     }
 
-    static boolean isVoid(Evaluator eval, Object v)
+    static boolean isVoid(Evaluator eval, Object value)
     {
         assert eval != null;
-        return (v == VOID);
+        return (value == VOID);
     }
 
 

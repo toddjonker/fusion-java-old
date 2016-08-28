@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -25,9 +25,11 @@ import java.math.BigInteger;
 import java.math.MathContext;
 
 /**
+ * Utilities for working with Fusion numbers.
  *
+ * @see FusionValue
  */
-final class FusionNumber
+public final class FusionNumber
 {
     private FusionNumber() {}
 
@@ -1636,6 +1638,20 @@ final class FusionNumber
     // Predicates
 
 
+    /**
+     * Determines whether a Fusion value is an int, decimal, or float.
+     *
+     * @param top the top-level that was the source of the value.
+     * @param value the value to test.
+     *
+     * @throws FusionException
+     */
+    public static boolean isNumber(TopLevel top, Object value)
+        throws FusionException
+    {
+        return (value instanceof BaseNumber);
+    }
+
     static boolean isNumber(Evaluator eval, Object value)
         throws FusionException
     {
@@ -1643,6 +1659,14 @@ final class FusionNumber
     }
 
 
+    /**
+     * Determines whether a Fusion value is an int.
+     *
+     * @param top the top-level that was the source of the value.
+     * @param value the value to test.
+     *
+     * @throws FusionException
+     */
     public static boolean isInt(TopLevel top, Object value)
         throws FusionException
     {
@@ -1656,6 +1680,14 @@ final class FusionNumber
     }
 
 
+    /**
+     * Determines whether a Fusion value is a decimal.
+     *
+     * @param top the top-level that was the source of the value.
+     * @param value the value to test.
+     *
+     * @throws FusionException
+     */
     public static boolean isDecimal(TopLevel top, Object value)
         throws FusionException
     {
@@ -1669,6 +1701,20 @@ final class FusionNumber
     }
 
 
+    /**
+     * Determines whether a Fusion value is an int or decimal.
+     *
+     * @param top the top-level that was the source of the value.
+     * @param value the value to test.
+     *
+     * @throws FusionException
+     */
+    public static boolean isIntOrDecimal(TopLevel top, Object value)
+        throws FusionException
+    {
+        return (value instanceof BaseInt || value instanceof BaseDecimal);
+    }
+
     static boolean isIntOrDecimal(Evaluator eval, Object value)
         throws FusionException
     {
@@ -1676,6 +1722,14 @@ final class FusionNumber
     }
 
 
+    /**
+     * Determines whether a Fusion value is a float.
+     *
+     * @param top the top-level that was the source of the value.
+     * @param value the value to test.
+     *
+     * @throws FusionException
+     */
     public static boolean isFloat(TopLevel top, Object value)
         throws FusionException
     {
@@ -1694,6 +1748,9 @@ final class FusionNumber
 
 
     /**
+     * Converts a Fusion int to its equivalent Java {@code int} representation,
+     * trucating the value if necessary.
+     *
      * @param fusionInt must be a non-null int.
      */
     static int unsafeTruncateIntToJavaInt(Evaluator eval, Object fusionInt)
@@ -1713,8 +1770,16 @@ final class FusionNumber
     }
 
 
-    static BigInteger unsafeIntToJavaBigInteger(TopLevel top,
-                                                Object   fusionInt)
+    /**
+     * Converts a Fusion int to its equivalent {@link BigInteger} value.
+     *
+     * @param top the top-level that was the source of the value.
+     * @param fusionInt must be a Fusion int.
+     *   <b>Any other type of value will cause a crash.</b>
+     * @return {@code null} when given {@code null.int}.
+     */
+    public static BigInteger unsafeIntToJavaBigInteger(TopLevel top,
+                                                       Object   fusionInt)
         throws FusionException
     {
         return ((BaseInt) fusionInt).truncateToBigInteger();
@@ -1728,7 +1793,15 @@ final class FusionNumber
     }
 
 
-    static double unsafeFloatToDouble(TopLevel top, Object fusionFloat)
+    /**
+     * Converts a Fusion float to its equivalent Java {@code double} value.
+     *
+     * @param top the top-level that was the source of the value.
+     * @param fusionFloat must be a non-null Fusion float.
+     *   <b>Any other type of value will cause a crash.</b>
+     */
+    public static double unsafeFloatToJavaDouble(TopLevel top,
+                                                 Object   fusionFloat)
         throws FusionException
     {
         return ((BaseFloat) fusionFloat).primitiveDoubleValue();
@@ -1742,7 +1815,8 @@ final class FusionNumber
 
 
     /**
-     * Converts a number to it's equivalent decimal value.
+     * Converts a Fusion number to its equivalent Java {@link BigDecimal}
+     * value.
      *
      * @param top the top-level that was the source of the value.
      * @param fusionNumber must be a Fusion int, decimal, or float.
@@ -1754,8 +1828,8 @@ final class FusionNumber
      *   <b>This is a crash of the Fusion runtime and indicates a defect in the
      *   calling code.</b>
      */
-    static BigDecimal unsafeNumberToBigDecimal(TopLevel top,
-                                               Object   fusionNumber)
+    public static BigDecimal unsafeNumberToJavaBigDecimal(TopLevel top,
+                                                          Object   fusionNumber)
         throws FusionException
     {
         return ((BaseNumber) fusionNumber).toBigDecimal();

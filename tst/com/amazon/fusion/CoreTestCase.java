@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,7 +6,7 @@ import static com.amazon.fusion.FusionNumber.isDecimal;
 import static com.amazon.fusion.FusionNumber.isFloat;
 import static com.amazon.fusion.FusionNumber.isInt;
 import static com.amazon.fusion.FusionNumber.unsafeIntToJavaBigInteger;
-import static com.amazon.fusion.FusionNumber.unsafeNumberToBigDecimal;
+import static com.amazon.fusion.FusionNumber.unsafeNumberToJavaBigDecimal;
 import static com.amazon.fusion.FusionString.stringToJavaString;
 import static com.amazon.fusion.FusionValue.isAnyNull;
 import static com.amazon.fusion.FusionVoid.isVoid;
@@ -332,7 +332,7 @@ public class CoreTestCase
         TopLevel top = topLevel();
         if (isDecimal(top, actual))
         {
-            BigDecimal actualDec = unsafeNumberToBigDecimal(top, actual);
+            BigDecimal actualDec = unsafeNumberToJavaBigDecimal(top, actual);
             if (actualDec != null)
             {
                 assertEquals(expected, actualDec);
@@ -349,7 +349,7 @@ public class CoreTestCase
         TopLevel top = topLevel();
         if (isFloat(top, actual) && ! isAnyNull(top, actual))
         {
-            double d = FusionNumber.unsafeFloatToDouble(top, actual);
+            double d = FusionNumber.unsafeFloatToJavaDouble(top, actual);
             assertEquals(expected, d, 0);
             return;
         }

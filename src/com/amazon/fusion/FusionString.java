@@ -373,7 +373,14 @@ public final class FusionString
     //========================================================================
     // Predicates
 
-
+    /**
+     * Determines whether a given Fusion value is a string.
+     *
+     * @param top the top-level that was the source of the value.
+     * @param value the value to test.
+     *
+     * @throws FusionException
+     */
     public static boolean isString(TopLevel top, Object value)
         throws FusionException
     {
