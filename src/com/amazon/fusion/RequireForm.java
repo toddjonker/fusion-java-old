@@ -17,21 +17,13 @@ import java.util.Arrays;
 
 
 /**
- * A note on the design for {@code require}: unlike Racket, Fusion allows
- * imported names to shadow those declared by a module's language. The intent
- * of this change is to make user's source code more resilient to additions
- * to the language.  In particular, this allows a user-owned module to provide
- * an alternate binding for a language feature, and then import that module
- * into many others.
- * <p>
- * Note that there is still a resiliency problem with respect to multiple
+ * Note that there is a resiliency problem with respect to multiple
  * imports: if a library module adds a binding thats already used by a user
  * module, there can be a conflict introduced by a new release of the library.
  * The same problem exists with Java code using {@code import *}, and the
  * recommended preventative measure is the same: robust modules should declare
- * their imported names explicitly, rather than using the default "import
- * everything behavior".  (Unfortunately, explicit imports are not yet
- * implemented in Fusion; see FUSION-63).
+ * their imported names explicitly using {@code only_in}, rather than using the
+ * default "import everything" behavior.
  */
 final class RequireForm
     extends SyntacticForm
@@ -45,26 +37,27 @@ final class RequireForm
               "Declares bindings to be imported into the enclosing namespace. This form may\n" +
               "only appear at module level or top level.\n" +
               "\n" +
-              "The `require_clause`s denote the bindings to be imported. At present the only\n" +
-              "kind of clause allowed is a string or symbol containing a [module path][]; all\n" +
-              "bindings `provide`d by the referenced module are imported.\n" +
+              "Each `require_clause` denotes some bindings to be imported. The following clause\n" +
+              "forms are allowed:\n" +
+              "\n" +
+              "  * A string or symbol containing a [module path][]; all names `provide`d by\n" +
+              "    the referenced module are imported.\n" +
+              "  * [`only_in`][only_in] enumerates a set of names to import.\n" +
               "\n" +
               "Within a module, `require` declarations are processed before other forms,\n" +
               "regardless of their order within the module source, and imported bindings are\n" +
               "scoped across the entire module. No identifier may be imported multiple times,\n" +
-              "unless all such bindings refer to the same originating declaration. Furthermore,\n" +
+              "unless all such bindings refer to the same originating definition. Furthermore,\n" +
               "no identifier may have both an import and a module-level definition.\n" +
-              "\n" +
               "In other words: module-level bindings introduced by `require` or `define` must\n" +
               "not conflict, although either may shadow same-named bindings introduced by the\n" +
               "module's language declaration.\n" +
               "\n" +
-              "At top level, a single `require` declaration may not introduce the same name\n" +
-              "twice with different bindings, but successive `require`s may shadow any existing\n" +
-              "top-level binding, regardless of whether it was introduced by a previous\n" +
-              "`require` or `define`.\n" +
+              "At top level, `require` will replace an existing import, and may shadow an\n" +
+              "existing top-level definition.\n" +
               "\n" +
-              "[module path]: module.html#ref");
+              "[module path]: module.html#ref\n" +
+              "[only_in]:     fusion/module.html#only_in\n");
         myModuleNameResolver = moduleNameResolver;
     }
 

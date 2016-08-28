@@ -8,7 +8,5 @@ The basic organizational component of Fusion code.
 See [Modules and Scripts](/module.html) for an overview.
   '''
 
-  (require "/fusion/experimental/defines")
-
-  (provide all_defined_out module provide rename_out require)
+  (provide all_defined_out module only_in provide rename_out require)
 )

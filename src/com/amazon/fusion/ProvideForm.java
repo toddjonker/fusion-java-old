@@ -22,13 +22,19 @@ final class ProvideForm
               "Declares bindings to be exported from the enclosing module.  This form may only\n" +
               "appear at module level.\n" +
               "\n" +
-              "The clauses denote the bindings to be exported.  Within a module, a single\n" +
-              "`provide` form with multiple clauses behaves identically to multiple `provide`\n" +
-              "forms with single clauses.\n" +
+              "Each `provide_clause` denotes some names to be exported. The following clause\n" +
+              "forms are allowed:\n" +
               "\n" +
-              "The basic provide-clause is an identifier bound at module-level, either via\n" +
-              "definition or import.  At present, the only other `provide_clause` forms are\n" +
-              "`all_defined_out` and `rename_out`.");
+              "  * An identifier defined at module-level or imported from another module.\n" +
+              "  * [`all_defined_out`][all_defined_out] exports all module-level definitions.\n" +
+              "  * [`rename_out`][rename_out] exports selected bindings, giving them new names\n" +
+              "    on the way out.\n" +
+              "\n" +
+              "Within a module, a single `provide` form with multiple clauses behaves\n" +
+              " identically to multiple `provide` forms with single clauses.\n" +
+              "\n" +
+              "[all_defined_out]: fusion/module.html#all_defined_out\n" +
+              "[rename_out]:      fusion/module.html#rename_out\n");
     }
 
 
