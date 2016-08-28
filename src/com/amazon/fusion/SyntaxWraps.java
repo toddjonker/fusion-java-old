@@ -113,8 +113,7 @@ final class SyntaxWraps
     {
         if (myWraps.length == 0) return null;
 
-        Iterator<SyntaxWrap> i =
-            new SplicingIterator(Arrays.asList(myWraps).iterator());
+        Iterator<SyntaxWrap> i = Arrays.asList(myWraps).iterator();
 
         SyntaxWrap wrap = i.next();
         Set<MarkWrap> marks = new HashSet<>();
@@ -129,68 +128,10 @@ final class SyntaxWraps
     {
         if (myWraps.length == 0) return null;
 
-        Iterator<SyntaxWrap> i =
-            new SplicingIterator(Arrays.asList(myWraps).iterator());
+        Iterator<SyntaxWrap> i = Arrays.asList(myWraps).iterator();
 
         SyntaxWrap wrap = i.next();
         Set<MarkWrap> marks = new HashSet<>();
         return wrap.resolveTop(name, i, marks);
-    }
-
-    private static final class SplicingIterator
-        implements Iterator<SyntaxWrap>
-    {
-        private final Iterator<SyntaxWrap> myOuterWraps;
-        private Iterator<SyntaxWrap> mySplicedWraps;
-
-        private SplicingIterator(Iterator<SyntaxWrap> outerWraps)
-        {
-            myOuterWraps = outerWraps;
-        }
-
-        @Override
-        public boolean hasNext()
-        {
-            if (mySplicedWraps != null)
-            {
-                boolean hasNext = mySplicedWraps.hasNext();
-                if (hasNext) return true;
-                mySplicedWraps = null;
-            }
-
-            // This assumes the final outer-wrap isn't an empty composite!
-            // See below for more.
-            return myOuterWraps.hasNext();
-        }
-
-        @Override
-        public SyntaxWrap next()
-        {
-            SyntaxWrap next;
-            if (mySplicedWraps == null)
-            {
-                next = myOuterWraps.next();
-                Iterator<SyntaxWrap> spliced = next.iterator();
-                if (spliced == null)
-                {
-                    return next;
-                }
-
-                // If this isn't true, then hasNext above is wrong!
-                assert spliced.hasNext();
-                mySplicedWraps = spliced;
-            }
-
-            next = mySplicedWraps.next();
-            assert next.iterator() == null;
-
-            return next;
-        }
-
-        @Override
-        public void remove()
-        {
-            throw new UnsupportedOperationException();
-        }
     }
 }

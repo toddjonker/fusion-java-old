@@ -7,8 +7,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * Linked-list of lexical information wrapped around a {@link SyntaxValue}
- * hierarchy.
+ * A unit of lexical information wrapped around a {@link SyntaxValue}.
  */
 abstract class SyntaxWrap
 {
@@ -34,12 +33,4 @@ abstract class SyntaxWrap
         }
         return null;
     }
-
-    /**
-     * Returns an iterator over sub-wraps, if this is a composite, or null
-     * otherwise.
-     *
-     * @return a non-empty iterator, or null.
-     */
-    abstract Iterator<SyntaxWrap> iterator();
 }

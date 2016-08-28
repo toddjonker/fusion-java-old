@@ -50,13 +50,6 @@ class MarkWrap
 
 
     @Override
-    Iterator<SyntaxWrap> iterator()
-    {
-        return null;
-    }
-
-
-    @Override
     public String toString()
     {
         return "{{{Mark " + myMark + "}}}";

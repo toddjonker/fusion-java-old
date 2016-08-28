@@ -46,14 +46,6 @@ class EnvironmentWrap
         return subst;
     }
 
-
-    @Override
-    Iterator<SyntaxWrap> iterator()
-    {
-        return null;
-    }
-
-
     @Override
     public String toString()
     {

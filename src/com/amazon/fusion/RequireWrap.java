@@ -47,13 +47,6 @@ class RequireWrap
 
 
     @Override
-    Iterator<SyntaxWrap> iterator()
-    {
-        return null;
-    }
-
-
-    @Override
     public String toString()
     {
         String id = myModule.getIdentity().absolutePath();
