@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2016 Amazon.com, Inc.  All rights reserved.
 
 (module equality "/fusion/private/kernel"
 
