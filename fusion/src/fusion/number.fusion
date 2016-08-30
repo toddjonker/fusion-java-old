@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 (module number '/fusion/private/builtins'
 
@@ -26,7 +26,7 @@ Operations on numbers (int, decimal, and float).
 
   (defpub_j int_to_string "com.amazon.fusion.IntToStringProc")
   (defpub_j string_to_int "com.amazon.fusion.StringToIntProc")
-  
+
 
   (defpub_j decimal
     '''
@@ -34,17 +34,18 @@ Operations on numbers (int, decimal, and float).
     (decimal coefficient exponent)
 
 Returns the decimal value from the coefficient and optional exponent.
-The coefficient must be a number.  The exponent must be a non-null int.
+The coefficient must be a number.
+The exponent, if supplied, must be a non-null int.
 Returns `null.decimal` when coefficient is null.
 
-The exponent, if supplied, cannot be null.
-
 Examples:
+```
     (decimal null.float) // null.decimal
     (decimal 1234e-2) // 12.34
     (decimal 1.21e1 0) // 12.1
     (decimal 4.2 1) // 42.
     (decimal 1234 -2) // 12.34
+```
     '''
     "com.amazon.fusion.DecimalProc")
 )
