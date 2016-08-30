@@ -45,11 +45,52 @@ contact us for clarification.
   (provide + - * / decimal int_to_string is_decimal is_float is_int string_to_int)
 
   (require "/fusion/string")
-  (provide is_string string_append string_to_symbol symbol_to_string)
+  (provide
+    is_string
+    string_append
+    string_contains
+    string_ends_with
+    string_is_lower
+    string_is_upper
+    string_join
+    string_split
+    string_starts_with
+    string_to_lower
+    string_to_symbol
+    string_to_upper
+    symbol_to_string
+  )
 
   (require "/fusion/timestamp")
-  (provide epoch_millis_to_timestamp is_timestamp string_to_timestamp
-    timestamp_now timestamp_to_epoch_millis timestamp_to_string)
+  (provide
+    adjust_day
+    adjust_hour
+    adjust_minute
+    adjust_month
+    adjust_second
+    adjust_year
+    epoch_millis_to_timestamp
+    is_timestamp
+    string_to_timestamp
+    timestamp
+    timestamp_at_day
+    timestamp_at_minute
+    timestamp_at_month
+    timestamp_at_second
+    timestamp_at_year
+    timestamp_day
+    timestamp_hour
+    timestamp_minute
+    timestamp_month
+    timestamp_second
+    timestamp_year
+    timestamp_now
+    timestamp_offset
+    timestamp_put_offset
+    timestamp_to_epoch_millis
+    timestamp_to_string
+    timestamp_with_offset
+  )
 
   (require "/fusion/void")
   (provide is_void void)
