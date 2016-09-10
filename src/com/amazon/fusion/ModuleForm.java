@@ -3,8 +3,13 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
+import static com.amazon.fusion.FusionSexp.isPair;
+import static com.amazon.fusion.FusionSexp.unsafePairHead;
+import static com.amazon.fusion.FusionSexp.unsafePairTail;
+import static com.amazon.fusion.FusionSexp.unsafePairTailN;
 import static com.amazon.fusion.FusionString.isString;
-import static com.amazon.fusion.FusionString.stringToJavaString;
+import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
+import static com.amazon.fusion.FusionSyntax.unsafeSyntaxUnwrap;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.GlobalState.PROVIDE;
 import static com.amazon.fusion.GlobalState.REQUIRE;
@@ -347,46 +352,52 @@ final class ModuleForm
 
     @Override
     CompiledForm compile(Evaluator eval, Environment envOutsideModule,
-                         SyntaxSexp stx)
+                         SyntaxSexp moduleStx)
         throws FusionException
     {
+        Object moduleDatum = moduleStx.unwrap(eval);
+
         // TODO We repeat work here that was done during expansion.
         // Racket stashes the necessary data in syntax properties.
         // See Racket reference 11.9.1
         // http://docs.racket-lang.org/reference/Expanding_Top-Level_Forms.html#%28part._modinfo%29
 
         ModuleIdentity id = (ModuleIdentity)
-            stx.findProperty(eval, STX_PROP_MODULE_IDENTITY);
+            moduleStx.findProperty(eval, STX_PROP_MODULE_IDENTITY);
 
         Namespace moduleNamespace;
         {
             ModuleIdentity languageId = (ModuleIdentity)
-                stx.findProperty(eval, STX_PROP_LANGUAGE_IDENTITY);
+                moduleStx.findProperty(eval, STX_PROP_LANGUAGE_IDENTITY);
 
             ModuleRegistry registry =
                 envOutsideModule.namespace().getRegistry();
             ModuleInstance language = registry.instantiate(eval, languageId);
 
+            SyntaxSymbol moduleKeyword = (SyntaxSymbol)
+                unsafePairHead(eval, moduleDatum);
             moduleNamespace = new ModuleNamespace(eval, registry,
-                                                  (SyntaxSymbol) stx.get(eval, 0),
+                                                  moduleKeyword,
                                                   language, id);
         }
 
+        // Skip `module` name language
+        moduleDatum = unsafePairTailN(eval, moduleDatum, 3);
 
         ArrayList<CompiledForm> otherForms = new ArrayList<>();
 
-        int bodyPos = 3;
         String docs = null;
-        if (stx.size() > bodyPos + 1)
+        if (isPair(eval, moduleDatum))
         {
-            Object maybeDoc = stx.get(eval, bodyPos).unwrap(eval);
+            Object maybeDoc =
+                unsafeSyntaxUnwrap(eval, unsafePairHead(eval, moduleDatum));
             if (isString(eval, maybeDoc))
             {
                 // We're gonna call this documentation!
-                bodyPos++;
+                moduleDatum = unsafePairTail(eval, moduleDatum);
                 if (eval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
                 {
-                    docs = stringToJavaString(eval, maybeDoc);
+                    docs = unsafeStringToJavaString(eval, maybeDoc);
                 }
             }
         }
@@ -397,10 +408,11 @@ final class ModuleForm
         final Binding kernelProvideBinding =
             eval.getGlobalState().myKernelProvideBinding;
 
-        int i;
-        for (i = bodyPos; i < stx.size(); i++)
+        for (;
+             isPair(eval, moduleDatum);
+             moduleDatum = unsafePairTail(eval, moduleDatum))
         {
-            SyntaxValue form = stx.get(eval, i);
+            SyntaxValue form = (SyntaxValue) unsafePairHead(eval, moduleDatum);
 
             Binding firstBinding = firstTargetBindingOfSexp(eval, form);
             if (firstBinding == kernelRequireBinding)
@@ -423,13 +435,13 @@ final class ModuleForm
         }
 
         ProvidedBinding[] providedBindings =
-            providedBindings(eval, moduleNamespace, stx, i);
+            providedBindings(eval, moduleNamespace, moduleDatum);
 
         CompiledForm[] otherFormsArray =
             otherForms.toArray(CompiledForm.EMPTY_ARRAY);
 
         int bindingCount = (Integer)
-            stx.findProperty(eval, STX_PROP_DEFINITION_COUNT);
+            moduleStx.findProperty(eval, STX_PROP_DEFINITION_COUNT);
 
         return new CompiledModule(id,
                                   docs,
@@ -501,24 +513,26 @@ final class ModuleForm
             return myBindings.toArray(new ProvidedBinding[0]);
         }
 
-        void compileProvide(Evaluator eval, SyntaxSexp form)
+        void compileProvide(Evaluator eval, SyntaxSexp formStx)
             throws FusionException
         {
-            SyntaxChecker check = new SyntaxChecker(eval, PROVIDE, form);
+            SyntaxChecker check = new SyntaxChecker(eval, PROVIDE, formStx);
 
-            int size = form.size();
-            for (int i = 1; i < size; i++)
+            // Skip the leading `provide` keyword.
+            for (Object formDatum = unsafePairTail(eval, formStx.unwrap(eval));
+                 isPair(eval, formDatum);
+                 formDatum = unsafePairTail(eval, formDatum))
             {
-                SyntaxValue spec = form.get(eval, i);
-                if (spec instanceof SyntaxSymbol)
+                Object clauseObj = unsafePairHead(eval, formDatum);
+                if (clauseObj instanceof SyntaxSymbol)
                 {
-                    SyntaxSymbol localId = (SyntaxSymbol) spec;
+                    SyntaxSymbol localId = (SyntaxSymbol) clauseObj;
                     addBinding(check, localId, localId.getBinding());
                 }
                 else
                 {
-                    SyntaxSexp sexp = (SyntaxSexp) spec;
-                    SyntaxSymbol formName = sexp.firstIdentifier(eval);
+                    SyntaxSexp clauseStx = (SyntaxSexp) clauseObj;
+                    SyntaxSymbol formName = clauseStx.firstIdentifier(eval);
                     switch (formName.getName().stringValue())
                     {
                         case "all_defined":
@@ -528,9 +542,9 @@ final class ModuleForm
                         case "rename":
                         {
                             SyntaxSymbol localId = (SyntaxSymbol)
-                                sexp.get(eval, 1);
+                                clauseStx.get(eval, 1);
                             addBinding(check,
-                                       (SyntaxSymbol) sexp.get(eval, 2),
+                                       (SyntaxSymbol) clauseStx.get(eval, 2),
                                        localId.getBinding());
                             break;
                         }
@@ -548,22 +562,20 @@ final class ModuleForm
     /**
      * Process all the provide-forms, which macro-expansion has grouped
      * together at the end of the module.
-     *
-     * @param firstProvidePos the index within {@code moduleStx} of the first
-     * provide-form. All elements from that position onward are provide-forms.
      */
-    private ProvidedBinding[] providedBindings(Evaluator  eval,
-                                               Namespace  ns,
-                                               SyntaxSexp moduleStx,
-                                               int        firstProvidePos)
+    private ProvidedBinding[] providedBindings(Evaluator eval,
+                                               Namespace ns,
+                                               Object    moduleDatum)
         throws FusionException
     {
         ProvideCompiler compiler = new ProvideCompiler();
 
-        for (int p = firstProvidePos; p < moduleStx.size(); p++)
+        while (isPair(eval, moduleDatum))
         {
-            SyntaxSexp form = (SyntaxSexp) moduleStx.get(eval, p);
+            SyntaxSexp form = (SyntaxSexp) unsafePairHead(eval, moduleDatum);
             compiler.compileProvide(eval, form);
+
+            moduleDatum = unsafePairTail(eval, moduleDatum);
         }
 
         return compiler.compiledBindings();

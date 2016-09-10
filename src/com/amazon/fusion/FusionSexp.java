@@ -319,6 +319,20 @@ final class FusionSexp
         return ((ImmutablePair) pair).myTail;
     }
 
+    /**
+     * Performs <em>n</em> tail operations.
+     * That is, traverse <em>n</em> elements from the front of a sexp.
+     */
+    static Object unsafePairTailN(Evaluator eval, Object pair, int n)
+        throws FusionException
+    {
+        while (n-- != 0)
+        {
+            pair = unsafePairTail(eval, pair);
+        }
+        return pair;
+    }
+
 
     static Object unsafeSexpAdd(Evaluator eval, Object sexp, Object value)
     {
