@@ -5,6 +5,7 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionSexp.isSexp;
 import static com.amazon.fusion.FusionSymbol.isSymbol;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
+import static com.amazon.fusion.FusionSyntax.syntaxTrackOrigin;
 import static com.amazon.fusion.Syntax.datumToSyntax;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
@@ -148,6 +149,7 @@ final class ProvideForm
 
         GlobalState globalState = eval.getGlobalState();
 
+        SyntaxSymbol specId = specForm.firstIdentifier(eval);
         Binding b = specForm.firstTargetBinding(eval);
         if (b == globalState.myKernelAllDefinedOutBinding)
         {
@@ -155,7 +157,14 @@ final class ProvideForm
 
             check.arityExact(1);
 
-            SyntaxSymbol tag = (SyntaxSymbol) specForm.get(eval, 0);
+            // Add an all_defined form that is ignored during compilation,
+            // but is needed for syntax analysis and origin tracking.
+            SyntaxSymbol allDefinedSym =
+                syntaxTrackOrigin(eval,
+                                  SyntaxSymbol.make(eval, specId.getLocation(),
+                                                    makeSymbol(eval, "all_defined")),
+                                  specForm, specId);
+            expanded.add(specForm.copyReplacingChildren(eval, allDefinedSym));
 
             // Filter by lexical context: we shouldn't export identifiers
             // introduced by macros unless this form was also introduced
@@ -169,7 +178,7 @@ final class ProvideForm
                 SyntaxSymbol localized = (SyntaxSymbol)
                     datumToSyntax(eval,
                                   binding.getName(),
-                                  tag,
+                                  specId,
                                   null);
                 Binding localBinding = moduleNamespace.resolveDefinition(localized);
                 if (localBinding != null && binding.sameTarget(localBinding))
@@ -185,8 +194,11 @@ final class ProvideForm
         {
             // Expanded form is a sequence of (rename local exported) triples.
 
-            SyntaxSymbol renameSym = SyntaxSymbol.make(eval, null /*location*/,
-                                                       makeSymbol(eval, "rename"));
+            SyntaxSymbol renameSym =
+                syntaxTrackOrigin(eval,
+                                  SyntaxSymbol.make(eval, specId.getLocation(),
+                                                    makeSymbol(eval, "rename")),
+                                  specForm, specId);
 
             int arity = check.arityAtLeast(1);
             for (int i = 1; i < arity; i++)

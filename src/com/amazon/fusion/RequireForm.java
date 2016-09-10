@@ -7,6 +7,7 @@ import static com.amazon.fusion.FusionSexp.isSexp;
 import static com.amazon.fusion.FusionSexp.unsafePairHead;
 import static com.amazon.fusion.FusionSexp.unsafePairTail;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
+import static com.amazon.fusion.FusionSyntax.syntaxTrackOrigin;
 import static com.amazon.fusion.FusionText.isText;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.GlobalState.REQUIRE;
@@ -128,14 +129,18 @@ final class RequireForm
 
         GlobalState globalState = eval.getGlobalState();
 
+        SyntaxSymbol specId = spec.firstIdentifier(eval);
         Binding b = spec.firstTargetBinding(eval);
         if (b == globalState.myKernelOnlyInBinding)
         {
             int arity = check.arityAtLeast(2);
 
             SyntaxValue[] children = spec.extract(eval);
-            children[0] = SyntaxSymbol.make(eval, children[0].getLocation(),
-                                            makeSymbol(eval, "only"));
+            children[0] =
+                syntaxTrackOrigin(eval,
+                                  SyntaxSymbol.make(eval, specId.getLocation(),
+                                                    makeSymbol(eval, "only")),
+                                  spec, specId);
 
             // TODO This should visit the module (run its phase-1 code)
             //      but not instantiate it.

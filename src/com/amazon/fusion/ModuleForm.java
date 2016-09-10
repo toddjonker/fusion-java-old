@@ -507,6 +507,12 @@ final class ModuleForm
                     SyntaxSymbol formName = sexp.firstIdentifier(eval);
                     switch (formName.getName().stringValue())
                     {
+                        case "all_defined":
+                        {
+                            exportId = null;
+                            binding = null;
+                            break;
+                        }
                         case "rename":
                         {
                             SyntaxSymbol localId = (SyntaxSymbol)
@@ -522,21 +528,24 @@ final class ModuleForm
                     }
                 }
 
-                BaseSymbol name = exportId.getName();
-                Binding prior = bound.put(name, binding);
-                if (prior != null && ! binding.sameTarget(prior))
+                if (exportId != null)
                 {
-                    String message =
-                        "the identifier " +
-                        printQuotedSymbol(name.stringValue()) +
-                        " is being exported with multiple bindings";
-                    throw check.failure(message, exportId);
+                    BaseSymbol name = exportId.getName();
+                    Binding prior = bound.put(name, binding);
+                    if (prior != null && ! binding.sameTarget(prior))
+                    {
+                        String message =
+                            "the identifier " +
+                                printQuotedSymbol(name.stringValue()) +
+                                " is being exported with multiple bindings";
+                        throw check.failure(message, exportId);
+                    }
+
+                    ProvidedBinding provided = binding.provideAs(name);
+                    assert name == provided.getName();
+
+                    bindings.add(provided);
                 }
-
-                ProvidedBinding provided = binding.provideAs(name);
-                assert name == provided.getName();
-
-                bindings.add(provided);
             }
         }
 
