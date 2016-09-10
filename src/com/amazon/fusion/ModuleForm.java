@@ -468,6 +468,83 @@ final class ModuleForm
     //========================================================================
 
 
+    private static final class ProvideCompiler
+    {
+        private final Map<BaseSymbol,Binding> myExportedNames = new IdentityHashMap<>();
+        private final List<ProvidedBinding>   myBindings      = new ArrayList<>();
+
+
+        private void addBinding(SyntaxChecker check,
+                                SyntaxSymbol  exportId,
+                                Binding       binding)
+            throws FusionException
+        {
+            BaseSymbol name = exportId.getName();
+            Binding prior = myExportedNames.put(name, binding);
+            if (prior != null && ! binding.sameTarget(prior))
+            {
+                String message =
+                    "the identifier " +
+                        printQuotedSymbol(name.stringValue()) +
+                        " is being exported with multiple bindings";
+                throw check.failure(message, exportId);
+            }
+
+            ProvidedBinding provided = binding.provideAs(name);
+            assert name == provided.getName();
+
+            myBindings.add(provided);
+        }
+
+        ProvidedBinding[] compiledBindings()
+        {
+            return myBindings.toArray(new ProvidedBinding[0]);
+        }
+
+        void compileProvide(Evaluator eval, SyntaxSexp form)
+            throws FusionException
+        {
+            SyntaxChecker check = new SyntaxChecker(eval, PROVIDE, form);
+
+            int size = form.size();
+            for (int i = 1; i < size; i++)
+            {
+                SyntaxValue spec = form.get(eval, i);
+                if (spec instanceof SyntaxSymbol)
+                {
+                    SyntaxSymbol localId = (SyntaxSymbol) spec;
+                    addBinding(check, localId, localId.getBinding());
+                }
+                else
+                {
+                    SyntaxSexp sexp = (SyntaxSexp) spec;
+                    SyntaxSymbol formName = sexp.firstIdentifier(eval);
+                    switch (formName.getName().stringValue())
+                    {
+                        case "all_defined":
+                        {
+                            break;
+                        }
+                        case "rename":
+                        {
+                            SyntaxSymbol localId = (SyntaxSymbol)
+                                sexp.get(eval, 1);
+                            addBinding(check,
+                                       (SyntaxSymbol) sexp.get(eval, 2),
+                                       localId.getBinding());
+                            break;
+                        }
+                        default:
+                        {
+                            throw check.failure("invalid provide-spec");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
     /**
      * Process all the provide-forms, which macro-expansion has grouped
      * together at the end of the module.
@@ -481,75 +558,15 @@ final class ModuleForm
                                                int        firstProvidePos)
         throws FusionException
     {
-        Map<BaseSymbol,Binding> bound    = new IdentityHashMap<>();
-        List<ProvidedBinding>   bindings = new ArrayList<>();
+        ProvideCompiler compiler = new ProvideCompiler();
 
         for (int p = firstProvidePos; p < moduleStx.size(); p++)
         {
             SyntaxSexp form = (SyntaxSexp) moduleStx.get(eval, p);
-            SyntaxChecker check = new SyntaxChecker(eval, PROVIDE, form);
-
-            int size = form.size();
-            for (int i = 1; i < size; i++)
-            {
-                SyntaxSymbol exportId;
-                Binding binding;
-
-                SyntaxValue spec = form.get(eval, i);
-                if (spec instanceof SyntaxSymbol)
-                {
-                    exportId = (SyntaxSymbol) spec;
-                    binding = exportId.getBinding();
-                }
-                else
-                {
-                    SyntaxSexp sexp = (SyntaxSexp) spec;
-                    SyntaxSymbol formName = sexp.firstIdentifier(eval);
-                    switch (formName.getName().stringValue())
-                    {
-                        case "all_defined":
-                        {
-                            exportId = null;
-                            binding = null;
-                            break;
-                        }
-                        case "rename":
-                        {
-                            SyntaxSymbol localId = (SyntaxSymbol)
-                                sexp.get(eval, 1);
-                            exportId = (SyntaxSymbol) sexp.get(eval, 2);
-                            binding = localId.getBinding();
-                            break;
-                        }
-                        default:
-                        {
-                            throw check.failure("invalid provide-spec");
-                        }
-                    }
-                }
-
-                if (exportId != null)
-                {
-                    BaseSymbol name = exportId.getName();
-                    Binding prior = bound.put(name, binding);
-                    if (prior != null && ! binding.sameTarget(prior))
-                    {
-                        String message =
-                            "the identifier " +
-                                printQuotedSymbol(name.stringValue()) +
-                                " is being exported with multiple bindings";
-                        throw check.failure(message, exportId);
-                    }
-
-                    ProvidedBinding provided = binding.provideAs(name);
-                    assert name == provided.getName();
-
-                    bindings.add(provided);
-                }
-            }
+            compiler.compileProvide(eval, form);
         }
 
-        return bindings.toArray(new ProvidedBinding[0]);
+        return compiler.compiledBindings();
     }
 
 
