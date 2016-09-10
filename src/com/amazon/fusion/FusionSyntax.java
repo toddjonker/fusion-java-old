@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -85,13 +85,13 @@ final class FusionSyntax
     }
 
 
-    static SyntaxValue syntaxTrackOrigin(Evaluator eval,
-                                         SyntaxValue newStx,
-                                         SyntaxValue origStx,
-                                         SyntaxSymbol origin)
+    static <T extends SyntaxValue> T syntaxTrackOrigin(Evaluator    eval,
+                                                       T            newStx,
+                                                       SyntaxValue  origStx,
+                                                       SyntaxSymbol origin)
         throws FusionException
     {
-        return newStx.trackOrigin(eval, origStx, origin);
+        return (T) newStx.trackOrigin(eval, origStx, origin);
     }
 
 
