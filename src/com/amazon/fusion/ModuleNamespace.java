@@ -254,11 +254,9 @@ final class ModuleNamespace
                                 ProvidedBinding provided,
                                 SyntaxValue formForErrors)
         {
-            // If we require an id that matches an existing language binding,
-            // we can preserve the language binding.
-            if (this.sameTarget(provided)) return this;
-
-            // Otherwise, replace the langauge binding with the required one.
+            // Replace the language binding with the required one. We must do
+            // this even if it leads to the same target, since a language
+            // binding can be redefined, but a required binding cannot.
             return new ModuleRequiredBinding(localId, provided);
         }
 

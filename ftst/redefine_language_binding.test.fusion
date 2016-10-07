@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
 
 // A module can `define` a name that's bound by the module's language.
 // Unlike binding introduced via `require`, language bindings can be
@@ -10,6 +10,15 @@
 // Make sure `apply` has a language binding, otherwise we're not checking what
 // we want to test.
 (check === 3 (apply + 1 [2]))
+
+
+(module export_fusion_apply "/fusion"
+  (provide apply))
+
+(module export_unique_apply "/fusion"
+  (define apply 990)
+  (provide apply))
+
 
 
 (module local "/fusion"
@@ -26,12 +35,8 @@
 
 // Module-level `require` can also shadow a language binding.
 
-(module local2 "/fusion"
-  (define apply 990)
-  (provide apply))
-
 (module local3 "/fusion"
-  (require local2)
+  (require export_unique_apply)
   (define result (+ apply 1))
   (provide result))
 
@@ -40,3 +45,19 @@
 
 // Make sure `apply` still has the language binding.
 (check === 3 (apply + 1 [2]))
+
+
+// In a module, you cannot redefine a binding that's required, even if the same
+// binding is also in the language.
+
+(expect_syntax_exn
+  (module redefine_unique_require "/fusion"
+    // This imports a different `apply` than the language provides.
+    (require (only_in local2 apply))
+    (define apply 404)))
+
+(expect_syntax_exn
+  (module redefine_required_language_binding "/fusion"
+    // This imports the same `apply` that the language provides.
+    (require (only_in export_fusion_apply apply))
+    (define apply 404)))
