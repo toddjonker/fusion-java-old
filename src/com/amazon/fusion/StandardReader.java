@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -18,10 +18,12 @@ import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionTimestamp.makeTimestamp;
 import static com.amazon.fusion.SourceLocation.forCurrentSpan;
 import static com.amazon.fusion.SyntaxValue.STX_PROPERTY_ORIGINAL;
+import static com.amazon.ion.IntegerSize.BIG_INTEGER;
 import static java.lang.Boolean.TRUE;
 import com.amazon.fusion.FusionList.BaseList;
 import com.amazon.fusion.FusionSexp.BaseSexp;
 import com.amazon.ion.Decimal;
+import com.amazon.ion.IntegerSize;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonType;
@@ -124,8 +126,30 @@ class StandardReader
             }
             case INT:
             {
-                BigInteger value = source.bigIntegerValue();
-                datum = makeInt(eval, anns, value);
+                IntegerSize size = source.getIntegerSize();
+                if (size == null) size = BIG_INTEGER;
+                switch (size)
+                {
+                    case INT:
+                    {
+                        int value = source.intValue();
+                        datum = makeInt(eval, anns, value);
+                        break;
+                    }
+                    case LONG:
+                    {
+                        long value = source.longValue();
+                        datum = makeInt(eval, anns, value);
+                        break;
+                    }
+                    case BIG_INTEGER:
+                    default:
+                    {
+                        BigInteger value = source.bigIntegerValue();
+                        datum = makeInt(eval, anns, value);
+                        break;
+                    }
+                }
                 break;
             }
             case DECIMAL:
