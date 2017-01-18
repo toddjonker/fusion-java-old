@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -302,6 +302,16 @@ abstract class SyntaxValue
     /** Don't call directly! Go through the evaluator. */
     abstract CompiledForm doCompile(Evaluator eval, Environment env)
         throws FusionException;
+
+
+    /**
+     * This object must be fully-expanded top-level syntax.
+     * Don't call directly! Go through the evaluator.
+     */
+    void evalCompileTimePart(Evaluator eval, TopLevelNamespace topNs)
+        throws FusionException
+    {
+    }
 
 
     /**

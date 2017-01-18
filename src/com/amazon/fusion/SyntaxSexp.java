@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -514,12 +514,11 @@ final class SyntaxSexp
                 assert expander.expand(env, first) == first;
                 // else the next stmt must change
 
-                // TODO FUSION-207 tail expand
-
                 // We use the same expansion context as we already have.
                 // Don't need to replace the sexp since we haven't changed it.
                 SyntaxValue expandedExpr = expander.expand(env, form, this);
                 return expandedExpr;
+                // TODO FUSION-207 Needs tail-call optimization.
             }
         }
 
@@ -598,6 +597,23 @@ final class SyntaxSexp
 
 
     @Override
+    void evalCompileTimePart(Evaluator eval, TopLevelNamespace topNs)
+        throws FusionException
+    {
+        SyntaxValue first = get(eval, 0);
+        if (first instanceof SyntaxSymbol)
+        {
+            SyntacticForm form = ((SyntaxSymbol) first).resolveSyntaxMaybe(topNs);
+            if (form != null)
+            {
+                // TODO FUSION-207 Needs tail-call optimization.
+                form.evalCompileTimePart(eval, topNs, this);
+            }
+        }
+    }
+
+
+    @Override
     CompiledForm doCompile(Evaluator eval, Environment env)
         throws FusionException
     {
@@ -617,8 +633,8 @@ final class SyntaxSexp
             {
                 // We found a static top-level syntax binding!
                 // Continue the compilation process.
-                // TODO bounce the tail-call?
 
+                // TODO FUSION-207 Needs tail-call optimization.
                 return form.compile(eval, env, this);
             }
         }

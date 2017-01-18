@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -248,6 +248,7 @@ final class ModuleForm
                         expanded = expander.expand(moduleNamespace, expanded);
                         CompiledForm compiled =
                             eval.compile(moduleNamespace, expanded);
+                        // TODO This needs to visit, not instantiate, modules.
                         eval.eval(moduleNamespace, compiled);
                     }
                     catch (FusionException e)
@@ -348,6 +349,26 @@ final class ModuleForm
         }
         return null;
     }
+
+
+    //========================================================================
+
+
+    @Override
+    void evalCompileTimePart(Evaluator eval,
+                             TopLevelNamespace topNs,
+                             SyntaxSexp topStx)
+        throws FusionException
+    {
+        CompiledForm compiledForm = compile(eval, topNs, topStx);
+
+        // Evaluation of `module` simply registers it. We don't want to visit
+        // or instantiate the module here; a later `require` would visit it.
+        eval.eval(topNs, compiledForm);
+    }
+
+
+    //========================================================================
 
 
     @Override

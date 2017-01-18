@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -63,6 +63,15 @@ abstract class SyntacticForm
     abstract CompiledForm compile(Evaluator eval, Environment env,
                                   SyntaxSexp stx)
         throws FusionException;
+
+
+    void evalCompileTimePart(Evaluator eval,
+                             TopLevelNamespace topNs,
+                             SyntaxSexp topStx)
+        throws FusionException
+    {
+        // Most forms have nothing to do.
+    }
 
 
     @Override

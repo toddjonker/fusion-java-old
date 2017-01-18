@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -118,7 +118,8 @@ final class Expander
 
 
     /**
-     * Partially-expands the syntax until a core syntactic form is exposed.
+     * Partially-expands the syntax until the outermost core syntactic form is
+     * exposed.
      *
      * @param stx is not enriched before expansion.
      */

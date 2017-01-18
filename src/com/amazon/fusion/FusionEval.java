@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -278,7 +278,7 @@ final class FusionEval
         throws FusionException
     {
         Expander expander = new Expander(eval);
-        Namespace ns = eval.findCurrentNamespace();
+        TopLevelNamespace ns = (TopLevelNamespace) eval.findCurrentNamespace();
 
         stx = expander.partialExpand(ns, stx);
 
@@ -297,9 +297,7 @@ final class FusionEval
         else
         {
             stx = expander.expand(ns, stx);
-
-            // TODO this isn't correct
-            eval.compile(ns, stx);
+            evalCompileTimePartOfTopLevel(eval, ns, stx);
         }
 
         return stx;
@@ -341,6 +339,23 @@ final class FusionEval
         traverseProgram(eval, source, name, r2);
     }
 
+
+    /**
+     * Evaluates the expansion-time code of a top-level form.
+     *
+     * @param topStx must be a fully-expanded top-level form, excluding
+     * {@code begin}.
+     *
+     * @see <a href="http://docs.racket-lang.org/syntax/toplevel.html#%28def._%28%28lib._syntax%2Ftoplevel..rkt%29._expand-syntax-top-level-with-compile-time-evals%29%29">
+     *   eval-compile-time-part-of-top-level</a>
+     */
+    private static void evalCompileTimePartOfTopLevel(Evaluator eval,
+                                                      TopLevelNamespace topNs,
+                                                      SyntaxValue topStx)
+        throws FusionException
+    {
+        eval.evalCompileTimePart(topNs, topStx);
+    }
 
 
     //========================================================================

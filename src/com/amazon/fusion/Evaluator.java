@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -601,6 +601,13 @@ class Evaluator
         throws FusionException
     {
         return compile(env, source, from, source.size());
+    }
+
+
+    void evalCompileTimePart(TopLevelNamespace topNs, SyntaxValue topStx)
+        throws FusionException
+    {
+        topStx.evalCompileTimePart(this, topNs);
     }
 
 

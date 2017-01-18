@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -178,6 +178,22 @@ final class RequireForm
             String message = "invalid module path: " + printString(path);
             throw check.failure(message);
         }
+    }
+
+
+    //========================================================================
+
+
+    @Override
+    void evalCompileTimePart(Evaluator eval,
+                             TopLevelNamespace topNs,
+                             SyntaxSexp topStx)
+        throws FusionException
+    {
+        CompiledForm compiledForm = compile(eval, topNs, topStx);
+
+        // TODO This needs to visit, not instantiate, modules.
+        eval.eval(topNs, compiledForm);
     }
 
 

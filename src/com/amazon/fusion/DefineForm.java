@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -201,6 +201,20 @@ final class DefineForm
         children[bodyPos] = expander.expandExpression(env, valueStx);
 
         return stx.copyReplacingChildren(eval, children);
+    }
+
+
+    //========================================================================
+
+
+    @Override
+    void evalCompileTimePart(Evaluator eval,
+                             TopLevelNamespace topNs,
+                             SyntaxSexp topStx)
+        throws FusionException
+    {
+        SyntaxSymbol identifier = (SyntaxSymbol) topStx.get(eval, 1);
+        topNs.predefine(identifier, identifier);
     }
 
 
