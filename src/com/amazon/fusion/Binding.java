@@ -56,6 +56,11 @@ abstract class Binding
     abstract BaseSymbol getName();
 
     /**
+     * @return null if {@link FreeBinding}.
+     */
+    abstract BindingInformation getBindingInformation();
+
+    /**
      * Determines whether this is a {@link FreeBinding} with the given name.
      * The default implementation returns false.
      */
@@ -86,7 +91,7 @@ abstract class Binding
         return target() == other.target();
     }
 
-    ProvidedBinding provideAs(BaseSymbol name)
+    ProvidedBinding provideAs(BaseSymbol name, SourceLocation sourceLocation)
     {
         throw new IllegalStateException("This kind of binding can't be exported");
     }

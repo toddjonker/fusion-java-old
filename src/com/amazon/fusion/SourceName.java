@@ -67,7 +67,7 @@ public class SourceName
     }
 
 
-    File getFile()
+    public File getFile()
     {
         return null;
     }
@@ -123,7 +123,7 @@ public class SourceName
         }
 
         @Override
-        File getFile() { return myFile; }
+        public File getFile() { return myFile; }
     }
 
 
@@ -144,7 +144,7 @@ public class SourceName
         }
 
         @Override
-        File getFile() { return myFile; }
+        public File getFile() { return myFile; }
 
         @Override
         ModuleIdentity getModuleIdentity() { return myId; }

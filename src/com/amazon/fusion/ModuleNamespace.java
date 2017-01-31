@@ -20,20 +20,36 @@ final class ModuleNamespace
     static abstract class ProvidedBinding
         extends Binding
     {
-        private final BaseSymbol myName;
+        private final BaseSymbol     myName;
+        private final SourceLocation myLoc;
+        private BindingInformation   myInfo;
 
-        ProvidedBinding(BaseSymbol name)
+        ProvidedBinding(BaseSymbol name, SourceLocation sourceLocation)
         {
             myName = name;
+            myLoc  = sourceLocation;
         }
 
         @Override
         final BaseSymbol getName() { return myName; }
 
         @Override
-        final ProvidedBinding provideAs(BaseSymbol name)
+        BindingInformation getBindingInformation()
         {
-            return new ImportedProvidedBinding(name, this);
+            if (myInfo == null)
+            {
+                myInfo = BindingInformation.makeBindingInfo(
+                             myLoc,
+                             target().getBindingInformation());
+            }
+            return myInfo;
+        }
+
+        @Override
+        final ProvidedBinding provideAs(BaseSymbol name,
+                                        SourceLocation sourceLocation)
+        {
+            return new ImportedProvidedBinding(name, sourceLocation, this);
         }
 
         @Override
@@ -56,9 +72,10 @@ final class ModuleNamespace
         private final ModuleDefinedBinding myDefinition;
 
         DefinedProvidedBinding(BaseSymbol name,
+                               SourceLocation sourceLocation,
                                ModuleDefinedBinding binding)
         {
-            super(name);
+            super(name, sourceLocation);
 
             assert binding.target() == binding;
             myDefinition = binding;
@@ -66,7 +83,9 @@ final class ModuleNamespace
 
         DefinedProvidedBinding(ModuleDefinedBinding binding)
         {
-            this(binding.getName(), binding);
+            this(binding.getName(),
+                 binding.getBindingInformation().getSourceLocation(),
+                 binding);
         }
 
         @Override
@@ -103,9 +122,11 @@ final class ModuleNamespace
     {
         private final ProvidedBinding myImport;
 
-        ImportedProvidedBinding(BaseSymbol name, ProvidedBinding imported)
+        ImportedProvidedBinding(BaseSymbol name,
+                                SourceLocation sourceLocation,
+                                ProvidedBinding imported)
         {
-            super(name);
+            super(name, sourceLocation);
             myImport = imported;
         }
 
@@ -179,9 +200,10 @@ final class ModuleNamespace
         }
 
         @Override
-        ProvidedBinding provideAs(BaseSymbol name)
+        ProvidedBinding provideAs(BaseSymbol name,
+                                  SourceLocation sourceLocation)
         {
-            return new ImportedProvidedBinding(name, myTarget);
+            return new ImportedProvidedBinding(name, sourceLocation, myTarget);
         }
 
         @Override
@@ -293,9 +315,9 @@ final class ModuleNamespace
         }
 
         @Override
-        ProvidedBinding provideAs(BaseSymbol name)
+        ProvidedBinding provideAs(BaseSymbol name, SourceLocation sourceLocation)
         {
-            return new DefinedProvidedBinding(name, this);
+            return new DefinedProvidedBinding(name, sourceLocation, this);
         }
 
         @Override

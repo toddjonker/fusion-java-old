@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -69,6 +69,20 @@ final class FusionSyntax
         throws FusionException
     {
         return ((SyntaxSymbol) id1).freeIdentifierEqual((SyntaxSymbol) id2);
+    }
+
+
+    /**
+     * Works under assumption that the Identifier has been expanded, compiled, and evaluated!
+     * See http://docs.racket-lang.org/reference/stxcmp.html?q=member#%28def._%28%28quote._~23~25kernel%29._identifier-binding%29%29
+     *
+     * @param id must be an identifier
+     */
+    static BindingInformation unsafeIdentifierBinding(Evaluator eval,
+                                                      Object id)
+        throws FusionException
+    {
+        return ((SyntaxSymbol) id).uncachedResolve().getBindingInformation();
     }
 
 

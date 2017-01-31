@@ -23,6 +23,13 @@ final class FreeBinding
 
 
     @Override
+    BindingInformation getBindingInformation()
+    {
+        return null;
+    }
+
+
+    @Override
     public boolean isFree(BaseSymbol name)
     {
         // This works due to symbol interning.

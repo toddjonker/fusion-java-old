@@ -19,9 +19,10 @@ final class LocalEnvironment
     {
         static final LocalBinding[] EMPTY_ARRAY = new LocalBinding[0];
 
-        private final SyntaxSymbol myIdentifier;
-                final int          myDepth;
-                final int          myAddress;
+        private final SyntaxSymbol       myIdentifier;
+                final int                myDepth;
+                final int                myAddress;
+        private final BindingInformation myInfo;
 
         private LocalBinding(SyntaxSymbol identifier, int depth, int address)
         {
@@ -29,12 +30,21 @@ final class LocalEnvironment
             myIdentifier = identifier;
             myDepth      = depth;
             myAddress    = address;
+            myInfo       = BindingInformation.makeBindingInfo(
+                               identifier.getLocation(),
+                               null);
         }
 
         @Override
         BaseSymbol getName()
         {
             return myIdentifier.getName();
+        }
+
+        @Override
+        BindingInformation getBindingInformation()
+        {
+            return myInfo;
         }
 
         @Override

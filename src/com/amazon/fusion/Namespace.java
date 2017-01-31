@@ -81,14 +81,18 @@ abstract class Namespace
     abstract class NsDefinedBinding
         extends NsBinding
     {
-        private final BaseSymbol myName;
-        private final String     myDebugName;
+        private final BaseSymbol         myName;
+        private final String             myDebugName;
+        private final BindingInformation myInfo;
         final int myAddress;
 
         NsDefinedBinding(SyntaxSymbol identifier, int address)
         {
             myName      = identifier.getName();
             myDebugName = identifier.debugString();
+            myInfo      = BindingInformation.makeBindingInfo(
+                              identifier.getLocation(),
+                              null);
             myAddress   = address;
         }
 
@@ -96,6 +100,12 @@ abstract class Namespace
         final BaseSymbol getName()
         {
             return myName;
+        }
+
+        @Override
+        BindingInformation getBindingInformation()
+        {
+            return myInfo;
         }
 
         final String getDebugName()
@@ -140,22 +150,38 @@ abstract class Namespace
     abstract static class RequiredBinding
         extends NsBinding
     {
-        private final BaseSymbol myName;
-        private final String     myDebugName;
-        final ProvidedBinding myTarget;  // TODO rename
+        private final BaseSymbol     myName;
+        private final String         myDebugName;
+        private final SourceLocation myLoc;
+        final ProvidedBinding        myTarget;  // TODO rename
+        private BindingInformation   myInfo;
 
         RequiredBinding(SyntaxSymbol identifier, ProvidedBinding target)
         {
             assert target != null;
             myName      = identifier.getName();
             myDebugName = identifier.debugString();
-            myTarget = target;
+            myLoc       = identifier.getLocation();
+            myTarget    = target;
         }
 
         @Override
         final BaseSymbol getName()
         {
             return myName;
+        }
+
+        @Override
+        BindingInformation getBindingInformation()
+        {
+            if (myInfo == null)
+            {
+                myInfo = BindingInformation.makeRequiredBindingInfo(
+                             myLoc,
+                             myTarget.getBindingInformation(),
+                             target().getBindingInformation());
+            }
+            return myInfo;
         }
 
         final String getDebugName()

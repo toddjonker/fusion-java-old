@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 
-class SourceLocation
+public class SourceLocation
 {
     /** May be null. */
     final SourceName myName;
@@ -28,7 +28,7 @@ class SourceLocation
     /**
      * @return null if the source name isn't known.
      */
-    SourceName getSourceName()
+    public SourceName getSourceName()
     {
         return myName;
     }
@@ -56,7 +56,7 @@ class SourceLocation
      * Gets the zero-based starting offset.
      * @return -1 if the offset is unknown.
      */
-    long getStartOffset()
+    public long getStartOffset()
     {
         return -1;
     }
@@ -91,7 +91,7 @@ class SourceLocation
         }
 
         @Override
-        long getStartOffset()
+        public long getStartOffset()
         {
             return myStartOffset;
         }
@@ -126,7 +126,7 @@ class SourceLocation
         }
 
         @Override
-        long getStartOffset()
+        public long getStartOffset()
         {
             return myStartOffset;
         }
@@ -161,7 +161,7 @@ class SourceLocation
         }
 
         @Override
-        long getStartOffset()
+        public long getStartOffset()
         {
             return myStartOffset;
         }
