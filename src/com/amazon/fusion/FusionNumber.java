@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,10 +6,13 @@ import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionIo.safeWriteToString;
+import static com.amazon.fusion.FusionString.checkNullableStringArg;
+import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import static java.math.RoundingMode.CEILING;
 import static java.math.RoundingMode.FLOOR;
+import static java.math.RoundingMode.HALF_EVEN;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.Decimal;
@@ -23,6 +26,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.math.RoundingMode;
 
 /**
  * Utilities for working with Fusion numbers.
@@ -2380,6 +2384,45 @@ public final class FusionNumber
         }
     }
 
+    static final class DecimalProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityRange(1, 2, args);
+
+            final int exponent;
+            if (args.length == 2)
+            {
+                exponent = checkRequiredIntArg(eval, this, 1, args).intValue();
+            }
+            else
+            {
+                exponent = 0;
+            }
+
+            final BigDecimal coefficient;
+            try
+            {
+                coefficient = checkNullableNumberArgToJavaBigDecimal(eval, this, 0, args);
+
+                if (coefficient == null)
+                {
+                    return makeDecimal(eval, null);
+                }
+            }
+            catch (final NumberFormatException exception)
+            {
+                final Object rawCoefficient = args[0];
+                assert isFloat(eval, rawCoefficient);
+                throw argFailure("unable to convert non-number float in coefficient", 0, args);
+            }
+
+            return makeDecimal(eval, coefficient.scaleByPowerOfTen(exponent));
+        }
+    }
 
     /** EXPERIMENTAL **/
     static final class DecimalDivideProc
@@ -2391,6 +2434,132 @@ public final class FusionNumber
             throws FusionException
         {
             return dividend.divide(divisor, MathContext.DECIMAL128);
+        }
+    }
+
+
+    /** EXPERIMENTAL **/
+    static final class DecimalDivideRescaleProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(3, args);
+
+            BigDecimal dividend = checkRequiredDecimalArg(eval, this, 0, args);
+            BigDecimal divisor  = checkRequiredDecimalArg(eval, this, 1, args);
+            int        scale    = checkIntArgToJavaInt   (eval, this, 2, args);
+
+            BigDecimal result = dividend.divide(divisor, scale, HALF_EVEN);
+            return makeDecimal(eval, result);
+        }
+    }
+
+
+    /** EXPERIMENTAL **/
+    static final class DecimalRescaleProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(2, args);
+
+            BigDecimal value = checkRequiredDecimalArg(eval, this, 0, args);
+            int        scale = checkIntArgToJavaInt   (eval, this, 1, args);
+
+            BigDecimal result = value.setScale(scale, RoundingMode.HALF_EVEN);
+            return makeDecimal(eval, result);
+        }
+    }
+
+
+    /** EXPERIMENTAL **/
+    static final class DecimalScaleProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(1, args);
+
+            BigDecimal value = checkRequiredDecimalArg(eval, this, 0, args);
+
+            int result = value.scale();
+            return makeInt(eval, result);
+        }
+    }
+
+
+    /** EXPERIMENTAL **/
+    static final class DecimalToStringProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(1, args);
+
+            BigDecimal val = checkNullableDecimalArg(eval, this, 0, args);
+            String text = null;
+            if (val != null)
+            {
+                text = IonTextUtils.printDecimal(val);
+            }
+            return makeString(eval, text);
+        }
+    }
+
+
+    /**
+     * EXPERIMENTAL!
+     *
+     * This implementation relies on Java's {@link BigDecimal} API to parse
+     * decimals. This means it will NOT correctly handle the decimal notation
+     * defined by the Ion spec. It also WILL (incorrectly) accept the exponent
+     * notation defined for {@code BigDecimal}.
+     *
+     * @see <a href="https://amazon-ion.github.io/ion-docs/docs/spec.html#real-numbers">Ion specification</a>
+     * @see <a href="http://download.java.net/jdk7/archive/b123/docs/api/java/math/BigDecimal.html#BigDecimal%28java.lang.String%29">
+     *   BigDecimal API reference</a>
+     *
+     **/
+    static final class StringToDecimalProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(1, args);
+
+            String val = checkNullableStringArg(eval, this, 0, args);
+
+            BigDecimal bigDecimal = (val != null ? parse(val, args) : null);
+
+            return makeDecimal(eval, bigDecimal);
+        }
+
+        BigDecimal parse(String text, Object[] args)
+            throws ArgumentException
+        {
+            try
+            {
+                // Work-around behavior of BigDecimal constructor, which
+                // accepts leading '+' (which we don't want).
+                if (! text.startsWith("+"))
+                {
+                    return Decimal.valueOf(text);
+                }
+            }
+            catch (NumberFormatException e) { }
+
+            throw argFailure("valid decimal content", 0, args);
         }
     }
 

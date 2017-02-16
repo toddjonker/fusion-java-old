@@ -46,5 +46,5 @@ Examples:
     (decimal 4.2 1)      // 42.
     (decimal 1234 -2)    // 12.34
     '''
-    "com.amazon.fusion.DecimalProc")
+    "com.amazon.fusion.FusionNumber$DecimalProc")
 )
