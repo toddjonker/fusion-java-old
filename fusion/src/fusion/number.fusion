@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 (module number '/fusion/private/builtins'
 
@@ -39,13 +39,12 @@ The exponent, if supplied, must be a non-null int.
 Returns `null.decimal` when coefficient is null.
 
 Examples:
-```
+
     (decimal null.float) // null.decimal
-    (decimal 1234e-2) // 12.34
-    (decimal 1.21e1 0) // 12.1
-    (decimal 4.2 1) // 42.
-    (decimal 1234 -2) // 12.34
-```
+    (decimal 1234e-2)    // 12.34
+    (decimal 1.21e1 0)   // 12.1
+    (decimal 4.2 1)      // 42.
+    (decimal 1234 -2)    // 12.34
     '''
     "com.amazon.fusion.DecimalProc")
 )
