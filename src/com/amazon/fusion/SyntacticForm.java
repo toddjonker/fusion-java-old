@@ -60,12 +60,24 @@ abstract class SyntacticForm
     }
 
 
-    abstract CompiledForm compile(Evaluator eval, Environment env,
+    @Deprecated
+    CompiledForm compile(Evaluator eval, Environment env,
                                   SyntaxSexp stx)
-        throws FusionException;
+        throws FusionException
+    {
+        throw new RuntimeException("missed something in " + this.getClass());
+    }
+
+    CompiledForm compile(Compiler comp, Environment env,
+                                  SyntaxSexp stx)
+        throws FusionException
+    {
+        // TODO Remove this transition method after refactoring.
+        return compile(comp.getEvaluator(), env, stx);
+    }
 
 
-    void evalCompileTimePart(Evaluator eval,
+    void evalCompileTimePart(Compiler comp,
                              TopLevelNamespace topNs,
                              SyntaxSexp topStx)
         throws FusionException

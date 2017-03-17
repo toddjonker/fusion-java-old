@@ -73,11 +73,12 @@ final class DefineSyntaxForm
 
 
     @Override
-    void evalCompileTimePart(Evaluator eval,
+    void evalCompileTimePart(Compiler comp,
                              TopLevelNamespace topNs,
                              SyntaxSexp topStx)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
         CompiledForm compiledForm = compile(eval, topNs, topStx);
         eval.eval(topNs, compiledForm);
     }

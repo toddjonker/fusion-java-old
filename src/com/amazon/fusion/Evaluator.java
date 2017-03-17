@@ -566,16 +566,23 @@ class Evaluator
     }
 
 
+    Compiler makeCompiler()
+    {
+        return new Compiler(this);
+    }
 
+    /** replace with Compiler.compileExpression */
+    @Deprecated
     CompiledForm compile(Environment env, SyntaxValue source)
         throws FusionException
     {
-        return source.doCompile(this, env);
+        return source.doCompile(makeCompiler(), env);
     }
 
     /**
      * @return not null, but perhaps {@link CompiledForm#EMPTY_ARRAY}.
      */
+    @Deprecated
     CompiledForm[] compile(Environment env, SyntaxSequence source,
                            int from, int to)
         throws FusionException
@@ -597,6 +604,7 @@ class Evaluator
     /**
      * @return not null, but perhaps {@link CompiledForm#EMPTY_ARRAY}.
      */
+    @Deprecated
     CompiledForm[] compile(Environment env, SyntaxSequence source, int from)
         throws FusionException
     {
@@ -607,7 +615,7 @@ class Evaluator
     void evalCompileTimePart(TopLevelNamespace topNs, SyntaxValue topStx)
         throws FusionException
     {
-        topStx.evalCompileTimePart(this, topNs);
+        topStx.evalCompileTimePart(makeCompiler(), topNs);
     }
 
 

@@ -355,11 +355,12 @@ final class ModuleForm
 
 
     @Override
-    void evalCompileTimePart(Evaluator eval,
+    void evalCompileTimePart(Compiler comp,
                              TopLevelNamespace topNs,
                              SyntaxSexp topStx)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
         CompiledForm compiledForm = compile(eval, topNs, topStx);
 
         // Evaluation of `module` simply registers it. We don't want to visit

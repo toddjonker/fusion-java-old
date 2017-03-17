@@ -208,11 +208,12 @@ final class DefineForm
 
 
     @Override
-    void evalCompileTimePart(Evaluator eval,
+    void evalCompileTimePart(Compiler comp,
                              TopLevelNamespace topNs,
                              SyntaxSexp topStx)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
         SyntaxSymbol identifier = (SyntaxSymbol) topStx.get(eval, 1);
         topNs.predefine(identifier, identifier);
     }

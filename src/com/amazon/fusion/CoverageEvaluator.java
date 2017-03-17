@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -48,6 +48,12 @@ final class CoverageEvaluator
 
 
     @Override
+    Compiler makeCompiler()
+    {
+        return new CoverageCompiler();
+    }
+
+    @Override // TODO REMOVE
     CompiledForm compile(Environment env, SyntaxValue source)
         throws FusionException
     {
@@ -66,8 +72,36 @@ final class CoverageEvaluator
     }
 
 
+    private final class CoverageCompiler
+        extends Compiler
+    {
+        CoverageCompiler()
+        {
+            super(CoverageEvaluator.this);
+        }
+
+        @Override
+        CompiledForm compileExpression(Environment env, SyntaxValue source)
+            throws FusionException
+        {
+            CompiledForm form = super.compileExpression(env, source);
+
+            SourceLocation loc = source.getLocation();
+            if (loc != null)
+            {
+                if (myCollector.coverableLocation(loc))
+                {
+                    form = new CoverageCompiledForm(loc, form);
+                }
+            }
+
+            return form;
+        }
+    }
+
+
     /**
-     * Decorator that notifes the {@link _Private_CoverageCollector} when a
+     * Decorator that notifies the {@link _Private_CoverageCollector} when a
      * form has been evaluated.
      */
     private static final class CoverageCompiledForm

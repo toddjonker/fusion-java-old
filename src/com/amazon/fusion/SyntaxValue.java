@@ -300,15 +300,27 @@ abstract class SyntaxValue
 
 
     /** Don't call directly! Go through the evaluator. */
-    abstract CompiledForm doCompile(Evaluator eval, Environment env)
-        throws FusionException;
+    @Deprecated
+    CompiledForm doCompile(Evaluator eval, Environment env)
+        throws FusionException
+    {
+        throw new RuntimeException("missed something");
+    }
+
+    /** Don't call directly! Go through the Compiler. */
+    CompiledForm doCompile(Compiler comp, Environment env)
+        throws FusionException
+    {
+        // TODO Remove this transition method after refactoring.
+        return doCompile(comp.getEvaluator(), env);
+    }
 
 
     /**
      * This object must be fully-expanded top-level syntax.
      * Don't call directly! Go through the evaluator.
      */
-    void evalCompileTimePart(Evaluator eval, TopLevelNamespace topNs)
+    void evalCompileTimePart(Compiler comp, TopLevelNamespace topNs)
         throws FusionException
     {
     }
