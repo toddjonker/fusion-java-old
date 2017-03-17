@@ -1,8 +1,6 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
-
-import static com.amazon.fusion.FusionVoid.voidValue;
 
 /**
  * The {@code begin} syntactic form.
@@ -48,62 +46,9 @@ final class BeginForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        return compile(eval, env, stx, 1, stx.size());
-    }
-
-
-    static CompiledForm compile(Evaluator eval, Environment env,
-                                SyntaxSexp stx, int from, int to)
-        throws FusionException
-    {
-        int size = to - from;
-
-        if (size == 0) return new CompiledConstant(voidValue(eval));
-
-        if (size == 1) return eval.compile(env, stx.get(eval, from));
-
-        CompiledForm[] subforms = eval.compile(env, stx, from, to);
-        return new CompiledBegin(subforms);
-    }
-
-
-    static CompiledForm compile(Evaluator eval, Environment env,
-                                SyntaxSexp stx, int from)
-        throws FusionException
-    {
-        return compile(eval, env, stx, from, stx.size());
-    }
-
-
-    //========================================================================
-
-
-    private static final class CompiledBegin
-        implements CompiledForm
-    {
-        final CompiledForm[] myBody;
-
-        CompiledBegin(CompiledForm[] body)
-        {
-            myBody = body;
-        }
-
-        @Override
-        public Object doEval(Evaluator eval, Store store)
-            throws FusionException
-        {
-            final int last = myBody.length - 1;
-            for (int i = 0; i < last; i++)
-            {
-                CompiledForm form = myBody[i];
-                eval.eval(store, form);
-            }
-
-            CompiledForm form = myBody[last];
-            return eval.bounceTailForm(store, form);
-        }
+        return comp.compileBegin(env, stx, 1, stx.size());
     }
 }

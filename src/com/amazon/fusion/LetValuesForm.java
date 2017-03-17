@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -130,9 +130,11 @@ final class LetValuesForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp expr)
+    CompiledForm compile(Compiler comp, Environment env, SyntaxSexp expr)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
+
         SyntaxSequence bindingForms = (SyntaxSequence) expr.get(eval, 1);
 
         final int numBindingForms = bindingForms.size();
@@ -154,7 +156,7 @@ final class LetValuesForm
             allSingles &= (size == 1);
 
             SyntaxValue boundExpr = binding.get(eval, 1);
-            valueForms[i] = eval.compile(env, boundExpr);
+            valueForms[i] = comp.compileExpression(env, boundExpr);
         }
 
         if (bindingCount != 0)
@@ -163,7 +165,7 @@ final class LetValuesForm
             env = new LocalEnvironment(env);
         }
 
-        CompiledForm body = BeginForm.compile(eval, env, expr, 2);
+        CompiledForm body = comp.compileBegin(env, expr, 2);
 
         if (allSingles)
         {

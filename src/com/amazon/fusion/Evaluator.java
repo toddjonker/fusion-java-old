@@ -579,38 +579,6 @@ class Evaluator
         return source.doCompile(makeCompiler(), env);
     }
 
-    /**
-     * @return not null, but perhaps {@link CompiledForm#EMPTY_ARRAY}.
-     */
-    @Deprecated
-    CompiledForm[] compile(Environment env, SyntaxSequence source,
-                           int from, int to)
-        throws FusionException
-    {
-        int size = to - from;
-
-        if (size == 0) return CompiledForm.EMPTY_ARRAY;
-
-        CompiledForm[] forms = new CompiledForm[size];
-        for (int i = from; i < to; i++)
-        {
-            SyntaxValue form = source.get(this, i);
-            forms[i - from] = compile(env, form);
-        }
-
-        return forms;
-    }
-
-    /**
-     * @return not null, but perhaps {@link CompiledForm#EMPTY_ARRAY}.
-     */
-    @Deprecated
-    CompiledForm[] compile(Environment env, SyntaxSequence source, int from)
-        throws FusionException
-    {
-        return compile(env, source, from, source.size());
-    }
-
 
     void evalCompileTimePart(TopLevelNamespace topNs, SyntaxValue topStx)
         throws FusionException

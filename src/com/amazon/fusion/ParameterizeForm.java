@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -76,9 +76,11 @@ final class ParameterizeForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
+
         SyntaxSequence bindingForms = (SyntaxSequence) stx.get(eval, 1);
 
         final int numBindings = bindingForms.size();
@@ -91,13 +93,13 @@ final class ParameterizeForm
             SyntaxSexp binding = (SyntaxSexp) bindingForms.get(eval, i);
 
             SyntaxValue paramExpr = binding.get(eval, 0);
-            parameterForms[i] = eval.compile(env, paramExpr);
+            parameterForms[i] = comp.compileExpression(env, paramExpr);
 
             SyntaxValue valueExpr = binding.get(eval, 1);
-            valueForms[i] = eval.compile(env, valueExpr);
+            valueForms[i] = comp.compileExpression(env, valueExpr);
         }
 
-        CompiledForm body = BeginForm.compile(eval, env, stx, 2);
+        CompiledForm body = comp.compileBegin(env, stx, 2);
 
         return new CompiledParameterize(parameterForms, valueForms, body);
     }

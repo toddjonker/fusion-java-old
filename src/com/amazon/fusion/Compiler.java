@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.safeWrite;
+import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.LetValuesForm.compilePlainLet;
 import com.amazon.fusion.LambdaForm.CompiledLambdaBase;
 import com.amazon.fusion.LambdaForm.CompiledLambdaExact;
@@ -90,6 +91,30 @@ class Compiler
     }
 
 
+    /**
+     * Compiles a sequence of expressions as if in a {@code begin} expression.
+     */
+    final CompiledForm compileBegin(Environment env, SyntaxSexp stx,
+                                    int from, int to)
+        throws FusionException
+    {
+        int size = to - from;
+
+        if (size == 0) return new CompiledConstant(voidValue(myEval));
+
+        if (size == 1) return compileExpression(env, stx.get(myEval, from));
+
+        CompiledForm[] subforms = compileExpressions(env, stx, from, to);
+        return new CompiledBegin(subforms);
+    }
+
+    CompiledForm compileBegin(Environment env, SyntaxSexp stx, int from)
+        throws FusionException
+    {
+        return compileBegin(env, stx, from, stx.size());
+    }
+
+
     CompiledForm compileProcedureApplication(Environment env,
                                              SyntaxSexp stx,
                                              SyntaxValue procExpr)
@@ -119,6 +144,33 @@ class Compiler
 
 
     //========================================================================
+
+
+    private static final class CompiledBegin
+        implements CompiledForm
+    {
+        final CompiledForm[] myBody;
+
+        CompiledBegin(CompiledForm[] body)
+        {
+            myBody = body;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            final int last = myBody.length - 1;
+            for (int i = 0; i < last; i++)
+            {
+                CompiledForm form = myBody[i];
+                eval.eval(store, form);
+            }
+
+            CompiledForm form = myBody[last];
+            return eval.bounceTailForm(store, form);
+        }
+    }
 
 
     private static final class CompiledPlainApp

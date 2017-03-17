@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -168,9 +168,11 @@ final class LambdaForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
+
         String doc = null;
         int bodyStart = 2;
 
@@ -192,7 +194,7 @@ final class LambdaForm
             env = new LocalEnvironment(env);
         }
 
-        CompiledForm body = BeginForm.compile(eval, env, stx, bodyStart);
+        CompiledForm body = comp.compileBegin(env, stx, bodyStart);
 
         boolean isRest = (formalsDecl instanceof SyntaxSymbol);
         if (isRest)

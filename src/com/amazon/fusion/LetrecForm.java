@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -84,9 +84,11 @@ final class LetrecForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
+
         // Dummy environment to keep track of depth
         env = new LocalEnvironment(env);
 
@@ -99,10 +101,10 @@ final class LetrecForm
         {
             SyntaxSexp binding = (SyntaxSexp) bindingForms.get(eval, i);
             SyntaxValue boundExpr = binding.get(eval, 1);
-            valueForms[i] = eval.compile(env, boundExpr);
+            valueForms[i] = comp.compileExpression(env, boundExpr);
         }
 
-        CompiledForm body = BeginForm.compile(eval, env, stx, 2);
+        CompiledForm body = comp.compileBegin(env, stx, 2);
 
         switch (valueForms.length)
         {

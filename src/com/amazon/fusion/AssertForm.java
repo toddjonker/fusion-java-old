@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -28,13 +28,14 @@ final class AssertForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
         SyntaxValue testFormSyntax = stx.get(eval, 1);
-        CompiledForm testForm = eval.compile(env, testFormSyntax);
+        CompiledForm testForm = comp.compileExpression(env, testFormSyntax);
 
-        CompiledForm[] messageForms = eval.compile(env, stx, 2);
+        CompiledForm[] messageForms = comp.compileExpressions(env, stx, 2);
 
         SourceLocation location = testFormSyntax.getLocation();
         String expression = safeWriteToString(eval, testFormSyntax);
