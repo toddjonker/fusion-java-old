@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -470,7 +470,7 @@ final class SyntaxSymbol
 
 
     @Override
-    CompiledForm doCompile(Evaluator eval, Environment env)
+    CompiledForm doCompile(Compiler comp, Environment env)
         throws FusionException
     {
         assert myBinding != null : "No binding for " + this;
@@ -480,6 +480,6 @@ final class SyntaxSymbol
             throw new UnboundIdentifierException(this);
         }
 
-        return myBinding.compileReference(eval, env);
+        return myBinding.compileReference(comp.getEvaluator(), env);
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -80,7 +80,7 @@ class SimpleSyntaxValue
     }
 
     @Override
-    CompiledForm doCompile(Evaluator eval, Environment env)
+    CompiledForm doCompile(Compiler comp, Environment env)
         throws FusionException
     {
         return new CompiledConstant(myDatum);

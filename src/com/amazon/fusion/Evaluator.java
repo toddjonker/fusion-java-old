@@ -571,13 +571,14 @@ class Evaluator
         return new Compiler(this);
     }
 
-    CompiledForm compile(Environment env, SyntaxValue source)
+    final CompiledForm compile(Environment env, SyntaxValue source)
         throws FusionException
     {
-        return source.doCompile(makeCompiler(), env);
+        Compiler comp = makeCompiler();
+        return comp.compileExpression(env, source);
     }
 
-    Object evalExpandedStx(Namespace ns, SyntaxValue expanded)
+    final Object evalExpandedStx(Namespace ns, SyntaxValue expanded)
         throws FusionException
     {
         CompiledForm compiled = compile(ns, expanded);

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -72,7 +72,7 @@ final class SyntaxKeyword
 
 
     @Override
-    CompiledForm doCompile(Evaluator eval, Environment env)
+    CompiledForm doCompile(Compiler comp, Environment env)
         throws FusionException
     {
         throw new IllegalStateException("Should not get here");

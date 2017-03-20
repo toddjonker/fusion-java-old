@@ -53,25 +53,10 @@ final class CoverageEvaluator
         return new CoverageCompiler();
     }
 
-    @Override // TODO REMOVE
-    CompiledForm compile(Environment env, SyntaxValue source)
-        throws FusionException
-    {
-        CompiledForm form = super.compile(env, source);
 
-        SourceLocation loc = source.getLocation();
-        if (loc != null)
-        {
-            if (myCollector.coverableLocation(loc))
-            {
-                form = new CoverageCompiledForm(loc, form);
-            }
-        }
-
-        return form;
-    }
-
-
+    /**
+     * An extended {@link Compiler} that generates instrumented code.
+     */
     private final class CoverageCompiler
         extends Compiler
     {
