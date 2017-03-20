@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -335,7 +335,7 @@ final class SyntaxStruct
 
 
     @Override
-    CompiledForm doCompile(final Evaluator eval, final Environment env)
+    CompiledForm doCompile(final Compiler comp, final Environment env)
         throws FusionException
     {
         // Annotations on this form are not handled here.
@@ -369,7 +369,7 @@ final class SyntaxStruct
                 throws FusionException
             {
                 SyntaxValue child = (SyntaxValue) value;
-                CompiledForm form = eval.compile(env, child);
+                CompiledForm form = comp.compileExpression(env, child);
 
                 fieldNames[i] = name;
                 fieldForms[i] = form;
@@ -382,7 +382,7 @@ final class SyntaxStruct
             }
         };
 
-        myStruct.visitFields(eval, visitor);
+        myStruct.visitFields(comp.getEvaluator(), visitor);
 
         boolean allConstant = true;
         for (int i = 0; i < size; i++)

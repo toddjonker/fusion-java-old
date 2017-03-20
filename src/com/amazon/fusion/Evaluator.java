@@ -571,14 +571,18 @@ class Evaluator
         return new Compiler(this);
     }
 
-    /** replace with Compiler.compileExpression */
-    @Deprecated
     CompiledForm compile(Environment env, SyntaxValue source)
         throws FusionException
     {
         return source.doCompile(makeCompiler(), env);
     }
 
+    Object evalExpandedStx(Namespace ns, SyntaxValue expanded)
+        throws FusionException
+    {
+        CompiledForm compiled = compile(ns, expanded);
+        return eval(ns, compiled);
+    }
 
     void evalCompileTimePart(TopLevelNamespace topNs, SyntaxValue topStx)
         throws FusionException

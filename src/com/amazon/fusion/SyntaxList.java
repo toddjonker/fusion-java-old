@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -336,7 +336,7 @@ final class SyntaxList
 
 
     @Override
-    CompiledForm doCompile(Evaluator eval, Environment env)
+    CompiledForm doCompile(Compiler comp, Environment env)
         throws FusionException
     {
         // Annotations on this form are not handled here.
@@ -349,12 +349,14 @@ final class SyntaxList
 
         boolean allConstant = true;
 
+        Evaluator eval = comp.getEvaluator();
+
         int len = size();
         CompiledForm[] children = new CompiledForm[len];
         for (int i = 0; i < len; i++)
         {
             SyntaxValue elementExpr = get(eval, i);
-            CompiledForm child = eval.compile(env, elementExpr);
+            CompiledForm child = comp.compileExpression(env, elementExpr);
             children[i] = child;
 
             allConstant &= (child instanceof CompiledConstant);

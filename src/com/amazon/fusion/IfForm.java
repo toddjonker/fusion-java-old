@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -34,12 +34,13 @@ final class IfForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        CompiledForm testForm = eval.compile(env, stx.get(eval, 1));
-        CompiledForm thenForm = eval.compile(env, stx.get(eval, 2));
-        CompiledForm elseForm = eval.compile(env, stx.get(eval, 3));
+        Evaluator eval = comp.getEvaluator();
+        CompiledForm testForm = comp.compileExpression(env, stx.get(eval, 1));
+        CompiledForm thenForm = comp.compileExpression(env, stx.get(eval, 2));
+        CompiledForm elseForm = comp.compileExpression(env, stx.get(eval, 3));
 
         return new CompiledIf(testForm, thenForm, elseForm);
     }

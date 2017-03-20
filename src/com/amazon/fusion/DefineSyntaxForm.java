@@ -78,9 +78,8 @@ final class DefineSyntaxForm
                              SyntaxSexp topStx)
         throws FusionException
     {
-        Evaluator eval = comp.getEvaluator();
-        CompiledForm compiledForm = compile(eval, topNs, topStx);
-        eval.eval(topNs, compiledForm);
+        CompiledForm compiledForm = compile(comp, topNs, topStx);
+        comp.getEvaluator().eval(topNs, compiledForm);
     }
 
 
@@ -88,12 +87,14 @@ final class DefineSyntaxForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
+
         int arity = stx.size();
         SyntaxValue valueSource = stx.get(eval, arity-1);
-        CompiledForm valueForm = eval.compile(env, valueSource);
+        CompiledForm valueForm = comp.compileExpression(env, valueSource);
 
         SyntaxSymbol identifier = (SyntaxSymbol) stx.get(eval, 1);
         NsDefinedBinding binding = (NsDefinedBinding) identifier.getBinding();

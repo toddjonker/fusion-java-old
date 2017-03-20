@@ -223,12 +223,14 @@ final class DefineForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
+
         int arity = stx.size();
         SyntaxValue valueSource = stx.get(eval, arity-1);
-        CompiledForm valueForm = eval.compile(env, valueSource);
+        CompiledForm valueForm = comp.compileExpression(env, valueSource);
 
         SyntaxSymbol identifier = (SyntaxSymbol) stx.get(eval, 1);
         Binding binding = identifier.resolve();

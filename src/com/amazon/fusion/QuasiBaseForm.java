@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -179,38 +179,41 @@ abstract class QuasiBaseForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
         SyntaxValue node = stx.get(eval, 1);
-        return compile(eval, env, node, 0);
+        return compile(comp, env, node, 0);
     }
 
 
-    private CompiledForm compile(Evaluator eval, Environment env,
+    private CompiledForm compile(Compiler comp, Environment env,
                                  SyntaxValue stx, int depth)
         throws FusionException
     {
         // TODO FUSION-225 handle unquote/unsyntax inside structs
         if (stx instanceof SyntaxSexp)
         {
-            return compile(eval, env, (SyntaxSexp) stx, depth);
+            return compile(comp, env, (SyntaxSexp) stx, depth);
         }
         else if (stx instanceof SyntaxList)
         {
-            return compile(eval, env, (SyntaxList) stx, depth);
+            return compile(comp, env, (SyntaxList) stx, depth);
         }
         else
         {
-            return constant(eval, stx);
+            return constant(comp.getEvaluator(), stx);
         }
     }
 
 
-    private CompiledForm compile(Evaluator eval, Environment env,
+    private CompiledForm compile(Compiler comp, Environment env,
                                  SyntaxSexp stx, int depth)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
+
         int size = stx.size();
         if (size == 0) return constant(eval, stx);
 
@@ -225,7 +228,7 @@ abstract class QuasiBaseForm
                     assert ! FusionValue.isAnnotated(eval, stx.unwrap(eval));
                     SyntaxValue unquotedSyntax = stx.get(eval, 1);
                     CompiledForm unquotedForm =
-                        eval.compile(env, unquotedSyntax);
+                        comp.compileExpression(env, unquotedSyntax);
 
                     return unquote(eval, unquotedSyntax, unquotedForm);
                 }
@@ -242,7 +245,7 @@ abstract class QuasiBaseForm
         for (int i = 0; i < size; i++)
         {
             SyntaxValue orig = stx.get(eval, i);
-            children[i] = compile(eval, env, orig, depth);
+            children[i] = compile(comp, env, orig, depth);
             same &= (children[i] instanceof CompiledConstant);
         }
 
@@ -256,10 +259,11 @@ abstract class QuasiBaseForm
     }
 
 
-    private CompiledForm compile(Evaluator eval, Environment env,
+    private CompiledForm compile(Compiler comp, Environment env,
                                  SyntaxList stx, int depth)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
         int size = stx.size();
         if (size == 0) return constant(eval, stx);
 
@@ -268,7 +272,7 @@ abstract class QuasiBaseForm
         for (int i = 0; i < size; i++)
         {
             SyntaxValue orig = stx.get(eval, i);
-            children[i] = compile(eval, env, orig, depth);
+            children[i] = compile(comp, env, orig, depth);
             same &= (children[i] instanceof CompiledConstant);
         }
 

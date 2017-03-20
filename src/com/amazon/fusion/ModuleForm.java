@@ -230,9 +230,7 @@ final class ModuleForm
                     {
                         expanded = expander.expand(moduleNamespace, expanded);
                         // TODO this is getting compiled twice
-                        CompiledForm compiled =
-                            eval.compile(moduleNamespace, expanded);
-                        eval.eval(moduleNamespace, compiled);
+                        eval.evalExpandedStx(moduleNamespace, expanded);
                     }
                     catch (FusionException e)
                     {
@@ -246,10 +244,9 @@ final class ModuleForm
                     try
                     {
                         expanded = expander.expand(moduleNamespace, expanded);
-                        CompiledForm compiled =
-                            eval.compile(moduleNamespace, expanded);
                         // TODO This needs to visit, not instantiate, modules.
-                        eval.eval(moduleNamespace, compiled);
+                        // TODO this is getting compiled twice
+                        eval.evalExpandedStx(moduleNamespace, expanded);
                     }
                     catch (FusionException e)
                     {
@@ -360,12 +357,11 @@ final class ModuleForm
                              SyntaxSexp topStx)
         throws FusionException
     {
-        Evaluator eval = comp.getEvaluator();
-        CompiledForm compiledForm = compile(eval, topNs, topStx);
+        CompiledForm compiledForm = compile(comp, topNs, topStx);
 
         // Evaluation of `module` simply registers it. We don't want to visit
         // or instantiate the module here; a later `require` would visit it.
-        eval.eval(topNs, compiledForm);
+        comp.getEvaluator().eval(topNs, compiledForm);
     }
 
 
@@ -373,10 +369,12 @@ final class ModuleForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment envOutsideModule,
+    CompiledForm compile(Compiler comp, Environment envOutsideModule,
                          SyntaxSexp moduleStx)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
+
         Object moduleDatum = moduleStx.unwrap(eval);
 
         // TODO We repeat work here that was done during expansion.
@@ -452,7 +450,8 @@ final class ModuleForm
                 break;
             }
 
-            CompiledForm compiled = eval.compile(moduleNamespace, form);
+            CompiledForm compiled =
+                comp.compileExpression(moduleNamespace, form);
             otherForms.add(compiled);
         }
 
