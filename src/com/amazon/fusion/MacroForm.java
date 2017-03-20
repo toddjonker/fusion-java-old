@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -101,7 +101,7 @@ final class MacroForm
 
 
     @Override
-    final CompiledForm compile(Evaluator eval, Environment env,
+    final CompiledForm compile(Compiler comp, Environment env,
                                SyntaxSexp stx)
         throws FusionException
     {

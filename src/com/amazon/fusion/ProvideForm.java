@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -227,7 +227,7 @@ final class ProvideForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
         throw new IllegalStateException("Provide shouldn't be compiled");
@@ -258,10 +258,10 @@ final class ProvideForm
         }
 
         @Override
-        CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+        CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
             throws FusionException
         {
-            throw new IllegalStateException("Shouldn't be compiled");
+            throw new IllegalStateException("`provide` shouldn't be compiled");
         }
     }
 

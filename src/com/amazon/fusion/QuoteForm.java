@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -30,9 +30,10 @@ final class QuoteForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
         SyntaxValue quotedSource = stx.get(eval, 1);
         Object result = quotedSource.syntaxToDatum(eval);
         return new CompiledConstant(result);

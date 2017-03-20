@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -88,9 +88,11 @@ final class TopForm
     }
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
+
         SyntaxSymbol id = (SyntaxSymbol) stx.get(eval, 1);
 
         return id.resolve().compileTopReference(eval, env, id);

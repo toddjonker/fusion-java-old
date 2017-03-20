@@ -22,7 +22,7 @@ import java.util.Arrays;
  * imports: if a library module adds a binding thats already used by a user
  * module, there can be a conflict introduced by a new release of the library.
  * The same problem exists with Java code using {@code import *}, and the
- * recommended preventative measure is the same: robust modules should declare
+ * recommended preventive measure is the same: robust modules should declare
  * their imported names explicitly using {@code only_in}, rather than using the
  * default "import everything" behavior.
  */
@@ -190,11 +190,10 @@ final class RequireForm
                              SyntaxSexp topStx)
         throws FusionException
     {
-        Evaluator eval = comp.getEvaluator();
-        CompiledForm compiledForm = compile(eval, topNs, topStx);
+        CompiledForm compiledForm = compile(comp, topNs, topStx);
 
         // TODO This needs to visit, not instantiate, modules.
-        eval.eval(topNs, compiledForm);
+        comp.getEvaluator().eval(topNs, compiledForm);
     }
 
 
@@ -202,9 +201,11 @@ final class RequireForm
 
 
     @Override
-    CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+    CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
+        Evaluator eval = comp.getEvaluator();
+
         // We resolve the name at compile-time, noting that for `require`
         // the form is immediately evaluated. I don't want to think about what
         // would happen if resolving at runtime gave a different result.
@@ -306,7 +307,7 @@ final class RequireForm
         }
 
         @Override
-        CompiledForm compile(Evaluator eval, Environment env, SyntaxSexp stx)
+        CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
             throws FusionException
         {
             throw new IllegalStateException("Shouldn't be compiled");
