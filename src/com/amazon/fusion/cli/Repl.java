@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -43,13 +43,20 @@ class Repl
     Executor makeExecutor(GlobalOptions globals,
                           Object        options,
                           String[]      args)
+        throws UsageException
     {
-        Console console = System.console();
-        if ((args.length == 0) && (console != null))
+        if (args.length != 0)
         {
-            return new Executor(globals, console);
+            return null;  // Evokes a general usage exception
         }
-        return null;
+
+        Console console = System.console();
+        if (console == null)
+        {
+            throw new UsageException("There is no console available for the REPL.");
+        }
+
+        return new Executor(globals, console);
     }
 
 
