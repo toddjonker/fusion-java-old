@@ -113,14 +113,7 @@ public final class _Private_HelpForm
     CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        int arity = stx.size();
-
-        CompiledForm[] children = new CompiledForm[arity - 1];
-        for (int i = 1; i < arity; i++)
-        {
-            SyntaxValue expr = stx.get(comp.getEvaluator(), i);
-            children[i-1] = comp.compileExpression(env, expr);
-        }
+        CompiledForm[] children = comp.compileExpressions(env, stx, 1);
         return new CompiledHelp(children);
     }
 
