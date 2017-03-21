@@ -53,16 +53,6 @@ final class FreeBinding
 
 
     @Override
-    public CompiledForm compileSet(Evaluator eval, Environment env,
-                                   CompiledForm valueForm)
-        throws FusionException
-    {
-        String message =
-            "Free binding shouldn't make it to compilation: " + this;
-        throw new IllegalStateException(message);
-    }
-
-    @Override
     Object visit(Visitor v) throws FusionException
     {
         return v.visit(this);

@@ -116,26 +116,6 @@ abstract class Namespace
             return Namespace.this.myModuleId == ns.myModuleId;
         }
 
-        final CompiledForm compileLocalTopReference(Evaluator   eval,
-                                                    Environment env)
-            throws FusionException
-        {
-            assert this.isOwnedBy(env.namespace())
-                : "NsDefn for " + getDebugName() + " is in "
-                    + Namespace.this
-                    + " but the compilation environment is under "
-                    + env.namespace();
-            return new CompiledTopVariableReference(myAddress);
-        }
-
-        @Override
-        final CompiledForm compileSet(Evaluator eval, Environment env,
-                                      CompiledForm valueForm)
-            throws FusionException
-        {
-            throw new IllegalStateException("Mutation should have been rejected");
-        }
-
         @Override
         public boolean equals(Object other)
         {
@@ -205,16 +185,6 @@ abstract class Namespace
         final String mutationSyntaxErrorMessage()
         {
              return "cannot mutate an imported variable";
-        }
-
-        @Override
-        final CompiledForm compileSet(Evaluator eval, Environment env,
-                                      CompiledForm valueForm)
-            throws FusionException
-        {
-            // This isn't currently reachable, but it's an easy safeguard.
-            String message = "Mutation of imported binding is not allowed";
-            throw new ContractException(message);
         }
 
         @Override

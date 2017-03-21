@@ -110,13 +110,6 @@ abstract class Binding
     }
 
 
-    /** Compile a mutation of the variable denoted by this binding. */
-    abstract CompiledForm compileSet(Evaluator eval,
-                                     Environment env,
-                                     CompiledForm valueForm)
-        throws FusionException;
-
-
     abstract Object visit(Visitor v) throws FusionException;
 
     static abstract class Visitor

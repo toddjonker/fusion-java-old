@@ -46,16 +46,6 @@ final class ModuleNamespace
         {
             return target().lookup(ns);
         }
-
-        @Override
-        final CompiledForm compileSet(Evaluator eval, Environment env,
-                                      CompiledForm valueForm)
-            throws FusionException
-        {
-            // This isn't currently reachable, but it's an easy safeguard.
-            String message = "Mutation of imported binding is not allowed";
-            throw new ContractException(message);
-        }
     }
 
     /**

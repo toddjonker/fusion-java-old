@@ -35,13 +35,6 @@ final class SetForm
     CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        Evaluator eval = comp.getEvaluator();
-
-        CompiledForm valueForm = comp.compileExpression(env, stx.get(eval, 2));
-
-        SyntaxSymbol id = (SyntaxSymbol) stx.get(eval, 1);
-        Binding binding = id.getBinding();
-
-        return binding.compileSet(eval, env, valueForm);
+        return comp.compileSet(env, stx);
     }
 }

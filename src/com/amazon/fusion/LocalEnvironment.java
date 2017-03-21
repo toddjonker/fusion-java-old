@@ -54,19 +54,6 @@ final class LocalEnvironment
 
 
         @Override
-        CompiledForm compileSet(Evaluator eval, Environment env,
-                                CompiledForm valueForm)
-            throws FusionException
-        {
-            int rib = env.getDepth() - myDepth;
-            if (rib == 0)
-            {
-                return new CompiledImmediateVariableSet(myAddress, valueForm);
-            }
-            return new CompiledLocalVariableSet(rib, myAddress, valueForm);
-        }
-
-        @Override
         Object visit(Visitor v) throws FusionException
         {
             return v.visit(this);
@@ -295,7 +282,7 @@ final class LocalEnvironment
     }
 
 
-    private static final class CompiledImmediateVariableSet
+    static final class CompiledImmediateVariableSet
         implements CompiledForm
     {
         private final int          myAddress;
@@ -318,7 +305,7 @@ final class LocalEnvironment
     }
 
 
-    private static final class CompiledLocalVariableSet
+    static final class CompiledLocalVariableSet
         implements CompiledForm
     {
         private final int          myRib;

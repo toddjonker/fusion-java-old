@@ -11,7 +11,9 @@ import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.fusion.LambdaForm.CompiledLambdaBase;
 import com.amazon.fusion.LambdaForm.CompiledLambdaExact;
 import com.amazon.fusion.LocalEnvironment.CompiledImmediateVariableReference;
+import com.amazon.fusion.LocalEnvironment.CompiledImmediateVariableSet;
 import com.amazon.fusion.LocalEnvironment.CompiledLocalVariableReference;
+import com.amazon.fusion.LocalEnvironment.CompiledLocalVariableSet;
 import com.amazon.fusion.LocalEnvironment.LocalBinding;
 import com.amazon.fusion.ModuleNamespace.CompiledImportedVariableReference;
 import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
@@ -408,6 +410,42 @@ class Compiler
 
         // TODO Binding should already be resolved so we can use getBinding().
         Binding binding = id.resolve();
+        return (CompiledForm) binding.visit(v);
+    }
+
+
+    CompiledForm compileSet(final Environment env, SyntaxSexp stx)
+        throws FusionException
+    {
+        final CompiledForm valueForm =
+            compileExpression(env, stx.get(myEval, 2));
+
+        Binding.Visitor v = new Binding.Visitor()
+        {
+            @Override
+            Object visit(Binding b) throws FusionException
+            {
+                String msg =
+                    "Unexpected binding type " + b.getClass() + " for `set`.";
+                throw new IllegalStateException(msg);
+            }
+
+            @Override
+            Object visit(LocalBinding b) throws FusionException
+            {
+                int rib = env.getDepth() - b.myDepth;
+                if (rib == 0)
+                {
+                    return new CompiledImmediateVariableSet(b.myAddress,
+                                                            valueForm);
+                }
+                return new CompiledLocalVariableSet(rib, b.myAddress,
+                                                    valueForm);
+            }
+        };
+
+        SyntaxSymbol id = (SyntaxSymbol) stx.get(myEval, 1);
+        Binding binding = id.getBinding();
         return (CompiledForm) binding.visit(v);
     }
 
