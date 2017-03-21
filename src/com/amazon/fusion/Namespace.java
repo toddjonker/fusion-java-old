@@ -902,6 +902,33 @@ abstract class Namespace
 
 
     //========================================================================
+    // Visitation
+
+
+    abstract Object visit(Visitor v) throws FusionException;
+
+
+    static abstract class Visitor
+    {
+        Object accept(Namespace ns) throws FusionException
+        {
+            String msg = "Visitor doesn't accept " + getClass();
+            throw new IllegalStateException(msg);
+        }
+
+        Object accept(TopLevelNamespace ns) throws FusionException
+        {
+            return accept((Namespace) ns);
+        }
+
+        Object accept(ModuleNamespace ns) throws FusionException
+        {
+            return accept((Namespace) ns);
+        }
+    }
+
+
+    //========================================================================
 
 
     /**

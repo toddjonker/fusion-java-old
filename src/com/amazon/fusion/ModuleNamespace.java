@@ -443,6 +443,13 @@ final class ModuleNamespace
 
 
     @Override
+    Object visit(Visitor v) throws FusionException
+    {
+        return v.accept(this);
+    }
+
+
+    @Override
     NsDefinedBinding newDefinedBinding(SyntaxSymbol identifier, int address)
     {
         return new ModuleDefinedBinding(identifier, address, getModuleId());
