@@ -110,16 +110,6 @@ abstract class Binding
     }
 
 
-    CompiledForm compileDefine(Evaluator eval,
-                               Environment env,
-                               SyntaxSymbol id,
-                               CompiledForm valueForm)
-        throws FusionException
-    {
-        throw new IllegalStateException("Unexpected `define` context.");
-    }
-
-
     /** Compile a reference to the variable denoted by this binding. */
     abstract CompiledForm compileReference(Evaluator eval,
                                            Environment env)

@@ -82,16 +82,6 @@ final class TopLevelNamespace
         }
 
         @Override
-        CompiledForm compileDefine(Evaluator eval,
-                                   Environment env,
-                                   SyntaxSymbol id,
-                                   CompiledForm valueForm)
-            throws FusionException
-        {
-            return env.namespace().compileDefine(eval, this, id, valueForm);
-        }
-
-        @Override
         CompiledForm compileDefineSyntax(Evaluator eval,
                                          Environment env,
                                          CompiledForm valueForm)

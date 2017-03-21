@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -170,7 +170,7 @@ abstract class Namespace
     {
         private final BaseSymbol myName;
         private final String     myDebugName;
-        final ProvidedBinding myTarget;
+        final ProvidedBinding myTarget;  // TODO rename
 
         RequiredBinding(SyntaxSymbol identifier, ProvidedBinding target)
         {
@@ -191,6 +191,12 @@ abstract class Namespace
             return myDebugName;
         }
 
+        /** Gets the binding that was {@code provide}d. */
+        final ProvidedBinding getProvided()
+        {
+            return myTarget;
+        }
+
         @Override
         final ModuleDefinedBinding target()
         {
@@ -207,14 +213,6 @@ abstract class Namespace
         final String mutationSyntaxErrorMessage()
         {
              return "cannot mutate an imported variable";
-        }
-
-        @Override
-        final CompiledForm compileDefine(Evaluator eval, Environment env,
-                                         SyntaxSymbol id, CompiledForm valueForm)
-            throws FusionException
-        {
-            return myTarget.compileDefine(eval, env, id, valueForm);
         }
 
         @Override

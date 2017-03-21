@@ -2,11 +2,18 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionIo.safeWrite;
+import static com.amazon.fusion.FusionString.stringToJavaString;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.LetValuesForm.compilePlainLet;
 import com.amazon.fusion.LambdaForm.CompiledLambdaBase;
 import com.amazon.fusion.LambdaForm.CompiledLambdaExact;
+import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
+import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
+import com.amazon.fusion.Namespace.NsDefinedBinding;
+import com.amazon.fusion.Namespace.RequiredBinding;
+import com.amazon.fusion.TopLevelNamespace.TopLevelDefinedBinding;
 
 /**
  * "Registers" used during compilation.
@@ -140,6 +147,79 @@ class Compiler
         }
 
         return new CompiledPlainApp(stx.getLocation(), procForm, argForms);
+    }
+
+
+    CompiledForm compileDefine(final Environment env, SyntaxSexp stx)
+        throws FusionException
+    {
+        int arity = stx.size();
+        SyntaxValue valueSource = stx.get(myEval, arity-1);
+        final CompiledForm valueForm = compileExpression(env, valueSource);
+
+        final SyntaxSymbol identifier = (SyntaxSymbol) stx.get(myEval, 1);
+        Binding binding = identifier.resolve();
+
+        Binding.Visitor v = new Binding.Visitor()
+        {
+            @Override
+            Object visit(Binding b) throws FusionException
+            {
+                String msg = "Unexpected binding type for `define`.";
+                throw new IllegalStateException(msg);
+            }
+
+            @Override
+            public Object visit(FreeBinding b) throws FusionException
+            {
+                return env.namespace().compileDefine(myEval, b, identifier,
+                                                     valueForm);
+            }
+
+            @Override
+            public Object visit(TopLevelDefinedBinding b) throws FusionException
+            {
+                return env.namespace().compileDefine(myEval, b, identifier,
+                                                     valueForm);
+            }
+
+            @Override
+            public Object visit(ModuleDefinedBinding b) throws FusionException
+            {
+                return env.namespace().compileDefine(myEval, b, identifier,
+                                                     valueForm);
+            }
+
+            @Override
+            Object visit(ProvidedBinding b) throws FusionException
+            {
+                return b.target().visit(this);
+            }
+
+            @Override
+            Object visit(RequiredBinding b) throws FusionException
+            {
+                return b.getProvided().visit(this);
+            }
+        };
+
+        CompiledForm compiled = (CompiledForm) binding.visit(v);
+
+        if (arity != 3
+            && binding instanceof NsDefinedBinding
+            && myEval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
+        {
+            // We have documentation. Sort of.
+            Object docString = stx.get(myEval, 2).unwrap(myEval);
+            BindingDoc doc = new BindingDoc(identifier.stringValue(),
+                                            null, // kind
+                                            null, // usage
+                                            stringToJavaString(myEval, docString));
+            int address = ((NsDefinedBinding) binding).myAddress;
+            env.namespace().setDoc(address, doc);
+        }
+
+        return compiled;
     }
 
 

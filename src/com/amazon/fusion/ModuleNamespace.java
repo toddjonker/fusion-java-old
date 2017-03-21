@@ -48,14 +48,6 @@ final class ModuleNamespace
         }
 
         @Override
-        CompiledForm compileDefine(Evaluator eval, Environment env,
-                                   SyntaxSymbol id, CompiledForm valueForm)
-            throws FusionException
-        {
-            return target().compileDefine(eval, env, id, valueForm);
-        }
-
-        @Override
         final CompiledForm compileReference(Evaluator eval, Environment env)
             throws FusionException
         {
@@ -393,16 +385,6 @@ final class ModuleNamespace
         String mutationSyntaxErrorMessage()
         {
              return "mutation of module-level variables is not yet supported";
-        }
-
-        @Override
-        CompiledForm compileDefine(Evaluator eval,
-                                   Environment env,
-                                   SyntaxSymbol id,
-                                   CompiledForm valueForm)
-            throws FusionException
-        {
-            return env.namespace().compileDefine(eval, this, id, valueForm);
         }
 
         @Override
