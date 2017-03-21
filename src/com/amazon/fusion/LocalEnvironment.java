@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -89,6 +89,11 @@ final class LocalEnvironment
             return new CompiledLocalVariableSet(rib, myAddress, valueForm);
         }
 
+        @Override
+        Object visit(Visitor v) throws FusionException
+        {
+            return v.visit(this);
+        }
 
         @Override
         public boolean equals(Object other)

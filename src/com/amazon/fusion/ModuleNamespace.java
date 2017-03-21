@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -116,6 +116,12 @@ final class ModuleNamespace
         }
 
         @Override
+        Object visit(Visitor v) throws FusionException
+        {
+            return v.visit(this);
+        }
+
+        @Override
         public String toString()
         {
             return "{{{DefinedProvidedBinding " + getName()
@@ -147,6 +153,12 @@ final class ModuleNamespace
         ModuleIdentity getTargetModule()
         {
             return myImport.getTargetModule();
+        }
+
+        @Override
+        Object visit(Visitor v) throws FusionException
+        {
+            return v.visit(this);
         }
 
         @Override
@@ -218,6 +230,12 @@ final class ModuleNamespace
         }
 
         @Override
+        Object visit(Visitor v) throws FusionException
+        {
+            return v.visit(this);
+        }
+
+        @Override
         public String toString()
         {
             return "{{{ModuleRequiredBinding " + getDebugName()
@@ -269,6 +287,12 @@ final class ModuleNamespace
             String message =
                 "#%top not implemented for language binding: " + this;
             throw new SyntaxException("#%top", message, id);
+        }
+
+        @Override
+        Object visit(Visitor v) throws FusionException
+        {
+            return v.visit(this);
         }
 
         @Override
@@ -412,6 +436,12 @@ final class ModuleNamespace
             }
 
             return compileLocalTopReference(eval, env);
+        }
+
+        @Override
+        Object visit(Visitor v) throws FusionException
+        {
+            return v.visit(this);
         }
 
         @Override

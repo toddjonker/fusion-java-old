@@ -1,12 +1,14 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.LocalEnvironment.LocalBinding;
+import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
 import com.amazon.fusion.Namespace.NsDefinedBinding;
 import com.amazon.fusion.Namespace.RequiredBinding;
+import com.amazon.fusion.TopLevelNamespace.TopLevelDefinedBinding;
 
 /**
  * Bindings are used during expansion and compilation to identify a specific
@@ -134,4 +136,40 @@ abstract class Binding
                                      Environment env,
                                      CompiledForm valueForm)
         throws FusionException;
+
+
+    abstract Object visit(Visitor v) throws FusionException;
+
+    static abstract class Visitor
+    {
+        Object visit(Binding b) throws FusionException
+        {
+            throw new IllegalStateException("No visitor for " + getClass());
+        }
+
+        Object visit(FreeBinding b) throws FusionException
+        {
+            return visit((Binding) b);
+        }
+
+        Object visit(TopLevelDefinedBinding b) throws FusionException
+        {
+            return visit((Binding) b);
+        }
+
+        Object visit(ModuleDefinedBinding b) throws FusionException
+        {
+            return visit((Binding) b);
+        }
+
+        Object visit(ProvidedBinding b) throws FusionException
+        {
+            return visit((Binding) b);
+        }
+
+        Object visit(RequiredBinding b) throws FusionException
+        {
+            return visit((Binding) b);
+        }
+    }
 }

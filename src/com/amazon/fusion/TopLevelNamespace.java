@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -101,6 +101,12 @@ final class TopLevelNamespace
         }
 
         @Override
+        Object visit(Visitor v) throws FusionException
+        {
+            return v.visit(this);
+        }
+
+        @Override
         public String toString()
         {
             return "{{{TopLevelDefinedBinding " + getDebugName() + "}}}";
@@ -192,6 +198,12 @@ final class TopLevelNamespace
             String message =
                 "#%top not implemented for required binding: " + this;
             throw new IllegalStateException(message);
+        }
+
+        @Override
+        Object visit(Visitor v) throws FusionException
+        {
+            return v.visit(this);
         }
 
         @Override
