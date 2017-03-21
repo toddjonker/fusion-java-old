@@ -48,14 +48,6 @@ final class ModuleNamespace
         }
 
         @Override
-        final CompiledForm compileTopReference(Evaluator eval, Environment env,
-                                               SyntaxSymbol id)
-            throws FusionException
-        {
-            return target().compileLocalTopReference(eval, env);
-        }
-
-        @Override
         final CompiledForm compileSet(Evaluator eval, Environment env,
                                       CompiledForm valueForm)
             throws FusionException
@@ -204,17 +196,6 @@ final class ModuleNamespace
         }
 
         @Override
-        CompiledForm compileTopReference(Evaluator eval,
-                                         Environment env,
-                                         SyntaxSymbol id)
-            throws FusionException
-        {
-            String message =
-                "#%top not implemented for required binding: " + this;
-            throw new IllegalStateException(message);
-        }
-
-        @Override
         Object visit(Visitor v) throws FusionException
         {
             return v.visit(this);
@@ -261,17 +242,6 @@ final class ModuleNamespace
             // this even if it leads to the same target, since a language
             // binding can be redefined, but a required binding cannot.
             return new ModuleRequiredBinding(localId, provided);
-        }
-
-        @Override
-        public CompiledForm compileTopReference(Evaluator eval,
-                                                Environment env,
-                                                SyntaxSymbol id)
-            throws FusionException
-        {
-            String message =
-                "#%top not implemented for language binding: " + this;
-            throw new SyntaxException("#%top", message, id);
         }
 
         @Override
@@ -378,18 +348,6 @@ final class ModuleNamespace
         String mutationSyntaxErrorMessage()
         {
              return "mutation of module-level variables is not yet supported";
-        }
-
-        @Override
-        CompiledForm compileTopReference(Evaluator eval,
-                                         Environment env,
-                                         SyntaxSymbol id)
-            throws FusionException
-        {
-            // We should never get here.
-            String message =
-                "#%top not implemented for module binding: " + this;
-            throw new SyntaxException("#%top", message, id);
         }
 
         @Override

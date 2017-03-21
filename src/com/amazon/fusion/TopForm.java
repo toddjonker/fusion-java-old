@@ -91,10 +91,6 @@ final class TopForm
     CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        Evaluator eval = comp.getEvaluator();
-
-        SyntaxSymbol id = (SyntaxSymbol) stx.get(eval, 1);
-
-        return id.resolve().compileTopReference(eval, env, id);
+        return comp.compileTopReference(env, stx);
     }
 }

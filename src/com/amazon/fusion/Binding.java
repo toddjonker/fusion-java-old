@@ -110,12 +110,6 @@ abstract class Binding
     }
 
 
-    /** Compile a #%top reference. */
-    abstract CompiledForm compileTopReference(Evaluator eval,
-                                              Environment env,
-                                              SyntaxSymbol id)
-        throws FusionException;
-
     /** Compile a mutation of the variable denoted by this binding. */
     abstract CompiledForm compileSet(Evaluator eval,
                                      Environment env,

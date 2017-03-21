@@ -358,6 +358,60 @@ class Compiler
     }
 
 
+    CompiledForm compileTopReference(final Environment env, SyntaxSexp stx)
+        throws FusionException
+    {
+        final SyntaxSymbol id = (SyntaxSymbol) stx.get(myEval, 1);
+
+        Binding.Visitor v = new Binding.Visitor()
+        {
+            @Override
+            Object visit(Binding b) throws FusionException
+            {
+                String msg = "Unexpected binding type " + getClass() + " for #%top reference.";
+                throw new IllegalStateException(msg);
+            }
+
+            @Override
+            Object visit(FreeBinding b) throws FusionException
+            {
+                return env.namespace().compileFreeTopReference(id);
+            }
+
+            @Override
+            Object visit(LocalBinding b) throws FusionException
+            {
+                String message = "#%top not implemented for local binding.";
+                throw new SyntaxException("#%top", message, id);
+            }
+
+            @Override
+            Object visit(TopLevelDefinedBinding b) throws FusionException
+            {
+                return new CompiledTopVariableReference(b.myAddress);
+            }
+
+            @Override
+            Object visit(ModuleDefinedBinding b) throws FusionException
+            {
+                String message = "#%top not implemented for module binding.";
+                throw new SyntaxException("#%top", message, id);
+            }
+
+            @Override
+            Object visit(RequiredBinding b) throws FusionException
+            {
+                String message = "#%top not implemented for imported binding.";
+                throw new SyntaxException("#%top", message, id);
+            }
+        };
+
+        // TODO Binding should already be resolved so we can use getBinding().
+        Binding binding = id.resolve();
+        return (CompiledForm) binding.visit(v);
+    }
+
+
     //========================================================================
 
 

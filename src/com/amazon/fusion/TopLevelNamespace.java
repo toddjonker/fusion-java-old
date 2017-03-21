@@ -66,15 +66,6 @@ final class TopLevelNamespace
 
 
         @Override
-        public CompiledForm compileTopReference(Evaluator eval,
-                                                Environment env,
-                                                SyntaxSymbol id)
-            throws FusionException
-        {
-            return new CompiledTopVariableReference(myAddress);
-        }
-
-        @Override
         Object visit(Visitor v) throws FusionException
         {
             return v.visit(this);
@@ -161,17 +152,6 @@ final class TopLevelNamespace
         NsDefinedBinding definition()
         {
             return myPriorDefinition;
-        }
-
-        @Override
-        public CompiledForm compileTopReference(Evaluator eval,
-                                                Environment env,
-                                                SyntaxSymbol id)
-            throws FusionException
-        {
-            String message =
-                "#%top not implemented for required binding: " + this;
-            throw new IllegalStateException(message);
         }
 
         @Override
