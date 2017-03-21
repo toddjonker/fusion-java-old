@@ -136,14 +136,6 @@ abstract class Namespace
             throw new IllegalStateException("Mutation should have been rejected");
         }
 
-        CompiledForm compileDefineSyntax(Evaluator eval,
-                                         Environment env,
-                                         CompiledForm valueForm)
-        {
-            String name = getName().stringValue();
-            return new CompiledTopDefineSyntax(name, myAddress, valueForm);
-        }
-
         @Override
         public boolean equals(Object other)
         {
@@ -162,7 +154,7 @@ abstract class Namespace
 
 
     /**
-     * A binding added to a namepace via {@code require} or a language
+     * A binding added to a namespace via {@code require} or a language
      * declaration.
      */
     abstract static class RequiredBinding
@@ -760,6 +752,17 @@ abstract class Namespace
                                         SyntaxSymbol id,
                                         CompiledForm valueForm)
         throws FusionException;
+
+
+    CompiledForm compileDefineSyntax(Evaluator eval,
+                                     NsDefinedBinding binding,
+                                     SyntaxSymbol id,
+                                     CompiledForm valueForm)
+        throws FusionException
+    {
+        String name = binding.getName().stringValue();
+        return new CompiledTopDefineSyntax(name, binding.myAddress, valueForm);
+    }
 
 
     /**

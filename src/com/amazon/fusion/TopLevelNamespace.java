@@ -82,15 +82,6 @@ final class TopLevelNamespace
         }
 
         @Override
-        CompiledForm compileDefineSyntax(Evaluator eval,
-                                         Environment env,
-                                         CompiledForm valueForm)
-        {
-            // TODO FUSION-192 This should bind after evaluation, as 'define'.
-            return super.compileDefineSyntax(eval, env, valueForm);
-        }
-
-        @Override
         Object visit(Visitor v) throws FusionException
         {
             return v.visit(this);

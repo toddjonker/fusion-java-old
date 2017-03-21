@@ -2,11 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionString.isString;
-import static com.amazon.fusion.FusionString.stringToJavaString;
-import com.amazon.fusion.BindingDoc.Kind;
-import com.amazon.fusion.Namespace.NsDefinedBinding;
 
 final class DefineSyntaxForm
     extends SyntacticForm
@@ -90,29 +86,6 @@ final class DefineSyntaxForm
     CompiledForm compile(Compiler comp, Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        Evaluator eval = comp.getEvaluator();
-
-        int arity = stx.size();
-        SyntaxValue valueSource = stx.get(eval, arity-1);
-        CompiledForm valueForm = comp.compileExpression(env, valueSource);
-
-        SyntaxSymbol identifier = (SyntaxSymbol) stx.get(eval, 1);
-        NsDefinedBinding binding = (NsDefinedBinding) identifier.getBinding();
-        CompiledForm compiled =
-            binding.compileDefineSyntax(eval, env, valueForm);
-
-        if (arity != 3
-            && eval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
-        {
-            // We have documentation. Sort of.
-            Object docString = stx.get(eval, 2).unwrap(eval);
-            BindingDoc doc = new BindingDoc(identifier.stringValue(),
-                                            Kind.SYNTAX,
-                                            null, // usage
-                                            stringToJavaString(eval, docString));
-            env.namespace().setDoc(binding.myAddress, doc);
-        }
-
-        return compiled;
+        return comp.compileDefineSyntax(env, stx);
     }
 }

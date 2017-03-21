@@ -142,14 +142,19 @@ abstract class Binding
             return visit((Binding) b);
         }
 
-        Object visit(TopLevelDefinedBinding b) throws FusionException
+        Object visit(NsDefinedBinding b) throws FusionException
         {
             return visit((Binding) b);
         }
 
+        Object visit(TopLevelDefinedBinding b) throws FusionException
+        {
+            return visit((NsDefinedBinding) b);
+        }
+
         Object visit(ModuleDefinedBinding b) throws FusionException
         {
-            return visit((Binding) b);
+            return visit((NsDefinedBinding) b);
         }
 
         Object visit(ProvidedBinding b) throws FusionException

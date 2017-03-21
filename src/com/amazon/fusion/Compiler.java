@@ -7,6 +7,7 @@ import static com.amazon.fusion.FusionIo.safeWrite;
 import static com.amazon.fusion.FusionString.stringToJavaString;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.LetValuesForm.compilePlainLet;
+import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.fusion.LambdaForm.CompiledLambdaBase;
 import com.amazon.fusion.LambdaForm.CompiledLambdaExact;
 import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
@@ -221,6 +222,62 @@ class Compiler
 
         return compiled;
     }
+
+
+    CompiledForm compileDefineSyntax(final Environment env, SyntaxSexp stx)
+        throws FusionException
+    {
+        int arity = stx.size();
+        SyntaxValue valueSource = stx.get(myEval, arity-1);
+        final CompiledForm valueForm = compileExpression(env, valueSource);
+
+        final SyntaxSymbol identifier = (SyntaxSymbol) stx.get(myEval, 1);
+        Binding binding = identifier.resolve();
+
+        Binding.Visitor v = new Binding.Visitor()
+        {
+            @Override
+            Object visit(Binding b) throws FusionException
+            {
+                String msg = "Unexpected binding type for `define_syntax`.";
+                throw new IllegalStateException(msg);
+            }
+
+            @Override
+            public Object visit(NsDefinedBinding b) throws FusionException
+            {
+                return env.namespace().compileDefineSyntax(myEval, b,
+                                                           identifier,
+                                                           valueForm);
+            }
+
+            @Override
+            public Object visit(TopLevelDefinedBinding b) throws FusionException
+            {
+                // TODO FUSION-192 This should bind after evaluation, as 'define'.
+                return visit((NsDefinedBinding) b);
+            }
+        };
+
+        CompiledForm compiled = (CompiledForm) binding.visit(v);
+
+        if (arity != 3
+            && myEval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
+        {
+            // We have documentation. Sort of.
+            Object docString = stx.get(myEval, 2).unwrap(myEval);
+            BindingDoc doc = new BindingDoc(identifier.stringValue(),
+                                            Kind.SYNTAX,
+                                            null, // usage
+                                            stringToJavaString(myEval, docString));
+            int address = ((NsDefinedBinding) binding).myAddress;
+            env.namespace().setDoc(address, doc);
+        }
+
+        return compiled;
+    }
+
+
 
 
     //========================================================================
