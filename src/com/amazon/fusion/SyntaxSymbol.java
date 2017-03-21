@@ -474,12 +474,6 @@ final class SyntaxSymbol
         throws FusionException
     {
         assert myBinding != null : "No binding for " + this;
-
-        if (myBinding instanceof FreeBinding)
-        {
-            throw new UnboundIdentifierException(this);
-        }
-
-        return myBinding.compileReference(comp.getEvaluator(), env);
+        return comp.compileReference(env, this);
     }
 }

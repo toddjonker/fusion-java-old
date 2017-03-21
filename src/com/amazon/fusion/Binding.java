@@ -110,11 +110,6 @@ abstract class Binding
     }
 
 
-    /** Compile a reference to the variable denoted by this binding. */
-    abstract CompiledForm compileReference(Evaluator eval,
-                                           Environment env)
-        throws FusionException;
-
     /** Compile a #%top reference. */
     abstract CompiledForm compileTopReference(Evaluator eval,
                                               Environment env,
@@ -138,6 +133,11 @@ abstract class Binding
         }
 
         Object visit(FreeBinding b) throws FusionException
+        {
+            return visit((Binding) b);
+        }
+
+        Object visit(LocalBinding b) throws FusionException
         {
             return visit((Binding) b);
         }

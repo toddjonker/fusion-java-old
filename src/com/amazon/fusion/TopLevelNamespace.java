@@ -66,13 +66,6 @@ final class TopLevelNamespace
 
 
         @Override
-        public CompiledForm compileReference(Evaluator eval, Environment env)
-            throws FusionException
-        {
-            return compileLocalTopReference(eval, env);
-        }
-
-        @Override
         public CompiledForm compileTopReference(Evaluator eval,
                                                 Environment env,
                                                 SyntaxSymbol id)

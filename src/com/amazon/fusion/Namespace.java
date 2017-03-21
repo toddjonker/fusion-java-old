@@ -208,13 +208,6 @@ abstract class Namespace
         }
 
         @Override
-        final CompiledForm compileReference(Evaluator eval, Environment env)
-            throws FusionException
-        {
-            return myTarget.compileReference(eval, env);
-        }
-
-        @Override
         final CompiledForm compileSet(Evaluator eval, Environment env,
                                       CompiledForm valueForm)
             throws FusionException

@@ -48,13 +48,6 @@ final class ModuleNamespace
         }
 
         @Override
-        final CompiledForm compileReference(Evaluator eval, Environment env)
-            throws FusionException
-        {
-            return target().compileReference(eval, env);
-        }
-
-        @Override
         final CompiledForm compileTopReference(Evaluator eval, Environment env,
                                                SyntaxSymbol id)
             throws FusionException
@@ -397,27 +390,6 @@ final class ModuleNamespace
             String message =
                 "#%top not implemented for module binding: " + this;
             throw new SyntaxException("#%top", message, id);
-        }
-
-        @Override
-        CompiledForm compileReference(Evaluator eval, Environment env)
-            throws FusionException
-        {
-            Namespace localNamespace = env.namespace();
-            if (localNamespace.getModuleId() != myModuleId)
-            {
-                // We have a reference to a binding from another module!
-                // Compiled form must include address of the module since it
-                // won't be the top of the runtime environment chain.
-
-                int moduleAddress =
-                    localNamespace.requiredModuleAddress(myModuleId);
-
-                return new CompiledImportedVariableReference(moduleAddress,
-                                                             myAddress);
-            }
-
-            return compileLocalTopReference(eval, env);
         }
 
         @Override

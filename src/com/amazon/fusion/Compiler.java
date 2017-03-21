@@ -10,8 +10,13 @@ import static com.amazon.fusion.LetValuesForm.compilePlainLet;
 import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.fusion.LambdaForm.CompiledLambdaBase;
 import com.amazon.fusion.LambdaForm.CompiledLambdaExact;
+import com.amazon.fusion.LocalEnvironment.CompiledImmediateVariableReference;
+import com.amazon.fusion.LocalEnvironment.CompiledLocalVariableReference;
+import com.amazon.fusion.LocalEnvironment.LocalBinding;
+import com.amazon.fusion.ModuleNamespace.CompiledImportedVariableReference;
 import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
+import com.amazon.fusion.Namespace.CompiledTopVariableReference;
 import com.amazon.fusion.Namespace.NsDefinedBinding;
 import com.amazon.fusion.Namespace.RequiredBinding;
 import com.amazon.fusion.TopLevelNamespace.TopLevelDefinedBinding;
@@ -278,6 +283,79 @@ class Compiler
     }
 
 
+    CompiledForm compileReference(final Environment  env,
+                                  final SyntaxSymbol identifier)
+        throws FusionException
+    {
+        Binding.Visitor v = new Binding.Visitor()
+        {
+            @Override
+            Object visit(Binding b) throws FusionException
+            {
+                String msg = "Unexpected binding type for variable reference.";
+                throw new IllegalStateException(msg);
+            }
+
+            @Override
+            Object visit(FreeBinding b) throws FusionException
+            {
+                throw new UnboundIdentifierException(identifier);
+            }
+
+            @Override
+            Object visit(LocalBinding b) throws FusionException
+            {
+                int rib = env.getDepth() - b.myDepth;
+                if (rib == 0)
+                {
+                    return new CompiledImmediateVariableReference(b.myAddress);
+                }
+                return new CompiledLocalVariableReference(rib, b.myAddress);
+            }
+
+            @Override
+            Object visit(TopLevelDefinedBinding b) throws FusionException
+            {
+                assert b.isOwnedBy(env.namespace());
+                return new CompiledTopVariableReference(b.myAddress);
+            }
+
+            @Override
+            Object visit(ModuleDefinedBinding b) throws FusionException
+            {
+                Namespace localNamespace = env.namespace();
+                if (localNamespace.getModuleId() != b.myModuleId)
+                {
+                    // We have a reference to a binding from another module!
+                    // Compiled form must include address of the module since it
+                    // won't be the top of the runtime environment chain.
+
+                    int moduleAddress =
+                        localNamespace.requiredModuleAddress(b.myModuleId);
+
+                    return new CompiledImportedVariableReference(moduleAddress,
+                                                                 b.myAddress);
+                }
+
+                return new CompiledTopVariableReference(b.myAddress);
+            }
+
+            @Override
+            Object visit(ProvidedBinding b) throws FusionException
+            {
+                return b.target().visit(this);
+            }
+
+            @Override
+            Object visit(RequiredBinding b) throws FusionException
+            {
+                return b.getProvided().visit(this);
+            }
+        };
+
+        Binding binding = identifier.getBinding();
+        return (CompiledForm) binding.visit(v);
+    }
 
 
     //========================================================================

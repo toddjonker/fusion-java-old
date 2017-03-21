@@ -20,8 +20,8 @@ final class LocalEnvironment
         static final LocalBinding[] EMPTY_ARRAY = new LocalBinding[0];
 
         private final SyntaxSymbol myIdentifier;
-        private final int          myDepth;
-        private final int          myAddress;
+                final int          myDepth;
+                final int          myAddress;
 
         private LocalBinding(SyntaxSymbol identifier, int depth, int address)
         {
@@ -52,18 +52,6 @@ final class LocalEnvironment
             return null;  // We're local, not a namespace binding.
         }
 
-
-        @Override
-        CompiledForm compileReference(Evaluator eval, Environment env)
-            throws FusionException
-        {
-            int rib = env.getDepth() - myDepth;
-            if (rib == 0)
-            {
-                return new CompiledImmediateVariableReference(myAddress);
-            }
-            return new CompiledLocalVariableReference(rib, myAddress);
-        }
 
         @Override
         CompiledForm compileTopReference(Evaluator eval,
@@ -271,7 +259,7 @@ final class LocalEnvironment
 
 
     /** Reference to a var in the immediately-enclosing environment. */
-    private static final class CompiledImmediateVariableReference
+    static final class CompiledImmediateVariableReference
         implements CompiledForm
     {
         private final int myAddress;
@@ -293,7 +281,7 @@ final class LocalEnvironment
     }
 
 
-    private static final class CompiledLocalVariableReference
+    static final class CompiledLocalVariableReference
         implements CompiledForm
     {
         private final int myRib;

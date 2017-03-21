@@ -53,15 +53,6 @@ final class FreeBinding
 
 
     @Override
-    public CompiledForm compileReference(Evaluator eval, Environment env)
-        throws FusionException
-    {
-        String message =
-            "Free binding shouldn't make it to compilation: " + this;
-        throw new IllegalStateException(message);
-    }
-
-    @Override
     public CompiledForm compileTopReference(Evaluator eval, Environment env,
                                             SyntaxSymbol id)
         throws FusionException
