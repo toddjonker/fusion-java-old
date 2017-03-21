@@ -697,45 +697,6 @@ abstract class Namespace
     }
 
 
-
-    abstract CompiledForm compileDefine(Evaluator eval,
-                                        FreeBinding binding,
-                                        SyntaxSymbol id,
-                                        CompiledForm valueForm)
-        throws FusionException;
-
-    abstract CompiledForm compileDefine(Evaluator eval,
-                                        TopLevelDefinedBinding binding,
-                                        SyntaxSymbol id,
-                                        CompiledForm valueForm)
-        throws FusionException;
-
-    abstract CompiledForm compileDefine(Evaluator eval,
-                                        ModuleDefinedBinding binding,
-                                        SyntaxSymbol id,
-                                        CompiledForm valueForm)
-        throws FusionException;
-
-
-    CompiledForm compileDefineSyntax(Evaluator eval,
-                                     NsDefinedBinding binding,
-                                     SyntaxSymbol id,
-                                     CompiledForm valueForm)
-        throws FusionException
-    {
-        String name = binding.getName().stringValue();
-        return new CompiledTopDefineSyntax(name, binding.myAddress, valueForm);
-    }
-
-
-    /**
-     * Compile a free variable reference.  These are allowed at top-level but
-     * not within a module.
-     */
-    abstract CompiledForm compileFreeTopReference(SyntaxSymbol identifier)
-        throws FusionException;
-
-
     /**
      * Looks for a definition's value in this namespace, ignoring imports.
      *
@@ -999,11 +960,11 @@ abstract class Namespace
     }
 
 
-    private static final class CompiledTopDefineSyntax
+    static final class CompiledTopDefineSyntax
         extends CompiledTopDefine
     {
-        private CompiledTopDefineSyntax(String name, int address,
-                                        CompiledForm valueForm)
+        CompiledTopDefineSyntax(String name, int address,
+                                CompiledForm valueForm)
         {
             super(name, address, valueForm);
         }

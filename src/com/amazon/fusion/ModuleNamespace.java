@@ -5,7 +5,6 @@ package com.amazon.fusion;
 import static com.amazon.fusion.GlobalState.DEFINE;
 import static com.amazon.fusion.GlobalState.REQUIRE;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
-import com.amazon.fusion.TopLevelNamespace.TopLevelDefinedBinding;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -470,52 +469,6 @@ final class ModuleNamespace
                                        ProvidedBinding target)
     {
         return new ModuleRequiredBinding(localId, target);
-    }
-
-
-    @Override
-    CompiledForm compileDefine(Evaluator eval,
-                               FreeBinding binding,
-                               SyntaxSymbol id,
-                               CompiledForm valueForm)
-        throws FusionException
-    {
-        throw new IllegalStateException("Unexpected define in module: "
-                                        + binding);
-    }
-
-
-    @Override
-    CompiledForm compileDefine(Evaluator eval,
-                               TopLevelDefinedBinding binding,
-                               SyntaxSymbol id,
-                               CompiledForm valueForm)
-        throws FusionException
-    {
-        throw new IllegalStateException("Unexpected define in module: "
-                                        + binding);
-    }
-
-
-    @Override
-    CompiledForm compileDefine(Evaluator eval,
-                               ModuleDefinedBinding binding,
-                               SyntaxSymbol id,
-                               CompiledForm valueForm)
-        throws FusionException
-    {
-        String name = binding.getName().stringValue();
-        return new CompiledTopDefine(name, binding.myAddress, valueForm);
-
-    }
-
-
-    @Override
-    CompiledForm compileFreeTopReference(SyntaxSymbol identifier)
-        throws FusionException
-    {
-        throw new IllegalStateException("Unexpected #%top in module: "
-                                        + identifier);
     }
 
 

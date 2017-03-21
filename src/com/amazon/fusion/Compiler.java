@@ -18,9 +18,13 @@ import com.amazon.fusion.LocalEnvironment.LocalBinding;
 import com.amazon.fusion.ModuleNamespace.CompiledImportedVariableReference;
 import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
+import com.amazon.fusion.Namespace.CompiledTopDefine;
+import com.amazon.fusion.Namespace.CompiledTopDefineSyntax;
 import com.amazon.fusion.Namespace.CompiledTopVariableReference;
 import com.amazon.fusion.Namespace.NsDefinedBinding;
 import com.amazon.fusion.Namespace.RequiredBinding;
+import com.amazon.fusion.TopLevelNamespace.CompiledFreeDefine;
+import com.amazon.fusion.TopLevelNamespace.CompiledFreeVariableReference;
 import com.amazon.fusion.TopLevelNamespace.TopLevelDefinedBinding;
 
 /**
@@ -178,24 +182,78 @@ class Compiler
             }
 
             @Override
-            public Object visit(FreeBinding b) throws FusionException
+            public Object visit(final FreeBinding b) throws FusionException
             {
-                return env.namespace().compileDefine(myEval, b, identifier,
-                                                     valueForm);
+                Namespace.Visitor nv = new Namespace.Visitor()
+                {
+                    @Override
+                    Object accept(TopLevelNamespace ns) throws FusionException
+                    {
+                        return new CompiledFreeDefine(identifier, valueForm);
+                    }
+
+                    @Override
+                    Object accept(ModuleNamespace ns) throws FusionException
+                    {
+                        String msg = "Unexpected define in module: " + b;
+                        throw new IllegalStateException(msg);
+                    }
+                };
+
+                return env.namespace().visit(nv);
             }
 
             @Override
-            public Object visit(TopLevelDefinedBinding b) throws FusionException
+            public Object visit(final TopLevelDefinedBinding b)
+                throws FusionException
             {
-                return env.namespace().compileDefine(myEval, b, identifier,
-                                                     valueForm);
+                Namespace.Visitor nv = new Namespace.Visitor()
+                {
+                    @Override
+                    Object accept(TopLevelNamespace ns) throws FusionException
+                    {
+                        // We can't trust the identifier in the binding, since
+                        // it may have resolved to an id with a different set
+                        // of marks.
+                        return new CompiledFreeDefine(identifier, valueForm);
+                    }
+
+                    @Override
+                    Object accept(ModuleNamespace ns) throws FusionException
+                    {
+                        String msg = "Unexpected define in module: " + b;
+                        throw new IllegalStateException(msg);
+                    }
+                };
+
+                return env.namespace().visit(nv);
             }
 
             @Override
-            public Object visit(ModuleDefinedBinding b) throws FusionException
+            public Object visit(final ModuleDefinedBinding b)
+                throws FusionException
             {
-                return env.namespace().compileDefine(myEval, b, identifier,
+                Namespace.Visitor nv = new Namespace.Visitor()
+                {
+                    @Override
+                    Object accept(TopLevelNamespace ns) throws FusionException
+                    {
+                        // The lexical context of the bound identifier resolves
+                        // to some module. We'll use a top-level binding
+                        // instead.
+                        return new CompiledFreeDefine(identifier, valueForm);
+                    }
+
+                    @Override
+                    Object accept(ModuleNamespace ns) throws FusionException
+                    {
+                        String name = b.getName().stringValue();
+                        return new CompiledTopDefine(name, b.myAddress,
                                                      valueForm);
+                    }
+                };
+
+                return env.namespace().visit(nv);
             }
 
             @Override
@@ -253,9 +311,8 @@ class Compiler
             @Override
             public Object visit(NsDefinedBinding b) throws FusionException
             {
-                return env.namespace().compileDefineSyntax(myEval, b,
-                                                           identifier,
-                                                           valueForm);
+                String name = b.getName().stringValue();
+                return new CompiledTopDefineSyntax(name, b.myAddress, valueForm);
             }
 
             @Override
@@ -360,6 +417,10 @@ class Compiler
     }
 
 
+    /**
+     * Compile a free variable reference.  These are allowed at top-level but
+     * not within a module.
+     */
     CompiledForm compileTopReference(final Environment env, SyntaxSexp stx)
         throws FusionException
     {
@@ -377,7 +438,23 @@ class Compiler
             @Override
             Object visit(FreeBinding b) throws FusionException
             {
-                return env.namespace().compileFreeTopReference(id);
+                Namespace.Visitor nv = new Namespace.Visitor()
+                {
+                    @Override
+                    Object accept(TopLevelNamespace ns) throws FusionException
+                    {
+                        return new CompiledFreeVariableReference(id);
+                    }
+
+                    @Override
+                    Object accept(ModuleNamespace ns) throws FusionException
+                    {
+                        String msg = "Unexpected #%top in module: " + id;
+                        throw new IllegalStateException(msg);
+                    }
+                };
+
+                return env.namespace().visit(nv);
             }
 
             @Override
