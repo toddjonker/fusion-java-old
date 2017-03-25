@@ -345,4 +345,31 @@ abstract class SyntaxValue
     {
         throw new IllegalStateException("Cannot wrap syntax as syntax");
     }
+
+
+    //========================================================================
+    // Visitation
+
+
+    abstract Object visit(Visitor v) throws FusionException;
+
+
+    static abstract class Visitor
+    {
+        Object accept(SyntaxValue stx) throws FusionException
+        {
+            String msg = "Visitor doesn't accept " + getClass();
+            throw new IllegalStateException(msg);
+        }
+
+        Object accept(SimpleSyntaxValue stx) throws FusionException
+        {
+            return accept((SyntaxValue) stx);
+        }
+
+        Object accept(SyntaxContainer stx) throws FusionException
+        {
+            return accept((SyntaxValue) stx);
+        }
+    }
 }

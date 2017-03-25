@@ -53,6 +53,13 @@ final class SyntaxSexp
     }
 
 
+    @Override
+    Object visit(Visitor v) throws FusionException
+    {
+        return v.accept(this);
+    }
+
+
     static SyntaxSexp makeOriginal(Evaluator      eval,
                                    SourceLocation loc,
                                    BaseSexp       sexp)

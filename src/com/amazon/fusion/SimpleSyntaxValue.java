@@ -73,6 +73,16 @@ class SimpleSyntaxValue
     }
 
 
+    //========================================================================
+
+
+    @Override
+    Object visit(Visitor v) throws FusionException
+    {
+        return v.accept(this);
+    }
+
+
     @Override
     SyntaxValue copyReplacingProperties(Object[] properties)
     {

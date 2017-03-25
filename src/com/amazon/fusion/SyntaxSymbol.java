@@ -103,6 +103,13 @@ final class SyntaxSymbol
 
 
     @Override
+    Object visit(Visitor v) throws FusionException
+    {
+        return v.accept(this);
+    }
+
+
+    @Override
     SyntaxSymbol copyReplacingProperties(Object[] properties)
     {
         SyntaxSymbol id = new SyntaxSymbol(null,

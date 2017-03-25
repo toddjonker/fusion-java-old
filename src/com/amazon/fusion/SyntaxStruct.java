@@ -69,6 +69,13 @@ final class SyntaxStruct
 
 
     @Override
+    Object visit(Visitor v) throws FusionException
+    {
+        return v.accept(this);
+    }
+
+
+    @Override
     boolean hasNoChildren()
     {
         return myStruct.size() == 0;

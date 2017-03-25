@@ -42,6 +42,13 @@ final class SyntaxKeyword
 
 
     @Override
+    Object visit(Visitor v) throws FusionException
+    {
+        return v.accept(this);
+    }
+
+
+    @Override
     SyntaxValue doExpand(Expander eval, Environment env)
         throws SyntaxException
     {
