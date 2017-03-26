@@ -89,12 +89,6 @@ class SimpleSyntaxValue
         return new SimpleSyntaxValue(getLocation(), properties, myDatum);
     }
 
-    @Override
-    CompiledForm doCompile(Compiler comp, Environment env)
-        throws FusionException
-    {
-        return new CompiledConstant(myDatum);
-    }
 
     @Override
     Object unwrap(Evaluator eval)

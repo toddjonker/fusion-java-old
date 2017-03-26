@@ -299,21 +299,6 @@ abstract class SyntaxValue
     }
 
 
-    /** Don't call directly! Go through the Compiler. */
-    abstract CompiledForm doCompile(Compiler comp, Environment env)
-        throws FusionException;
-
-
-    /**
-     * This object must be fully-expanded top-level syntax.
-     * Don't call directly! Go through the evaluator.
-     */
-    void evalCompileTimePart(Compiler comp, TopLevelNamespace topNs)
-        throws FusionException
-    {
-    }
-
-
     /**
      * Unwraps syntax, returning plain values. Only one layer is unwrapped, so
      * if this is a container, the result will contain syntax objects.
@@ -367,9 +352,34 @@ abstract class SyntaxValue
             return accept((SyntaxValue) stx);
         }
 
+        Object accept(SyntaxSymbol stx) throws FusionException
+        {
+            return accept((SyntaxText) stx);
+        }
+
+        Object accept(SyntaxKeyword stx) throws FusionException
+        {
+            return accept((SyntaxText) stx);
+        }
+
         Object accept(SyntaxContainer stx) throws FusionException
         {
             return accept((SyntaxValue) stx);
+        }
+
+        Object accept(SyntaxList stx) throws FusionException
+        {
+            return accept((SyntaxSequence) stx);
+        }
+
+        Object accept(SyntaxSexp stx) throws FusionException
+        {
+            return accept((SyntaxSequence) stx);
+        }
+
+        Object accept(SyntaxStruct stx) throws FusionException
+        {
+            return accept((SyntaxContainer) stx);
         }
     }
 }

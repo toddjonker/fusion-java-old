@@ -73,15 +73,4 @@ final class SyntaxKeyword
         // TODO __ ??
         super.ionize(eval, writer);
     }
-
-
-    //========================================================================
-
-
-    @Override
-    CompiledForm doCompile(Compiler comp, Environment env)
-        throws FusionException
-    {
-        throw new IllegalStateException("Should not get here");
-    }
 }

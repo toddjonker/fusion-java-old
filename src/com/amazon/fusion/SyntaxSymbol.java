@@ -471,16 +471,4 @@ final class SyntaxSymbol
         }
         return base;
     }
-
-
-    //========================================================================
-
-
-    @Override
-    CompiledForm doCompile(Compiler comp, Environment env)
-        throws FusionException
-    {
-        assert myBinding != null : "No binding for " + this;
-        return comp.compileReference(env, this);
-    }
 }

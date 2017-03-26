@@ -4,10 +4,20 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionIo.safeWrite;
+import static com.amazon.fusion.FusionList.immutableList;
+import static com.amazon.fusion.FusionList.unsafeListElement;
 import static com.amazon.fusion.FusionString.stringToJavaString;
+import static com.amazon.fusion.FusionStruct.EMPTY_STRUCT;
+import static com.amazon.fusion.FusionStruct.NULL_STRUCT;
+import static com.amazon.fusion.FusionStruct.immutableStruct;
+import static com.amazon.fusion.FusionStruct.structImplAdd;
+import static com.amazon.fusion.FusionValue.isAnnotated;
+import static com.amazon.fusion.FusionValue.isAnyNull;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.LetValuesForm.compilePlainLet;
 import com.amazon.fusion.BindingDoc.Kind;
+import com.amazon.fusion.FusionStruct.StructFieldVisitor;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.LambdaForm.CompiledLambdaBase;
 import com.amazon.fusion.LambdaForm.CompiledLambdaExact;
 import com.amazon.fusion.LocalEnvironment.CompiledImmediateVariableReference;
@@ -26,6 +36,7 @@ import com.amazon.fusion.Namespace.RequiredBinding;
 import com.amazon.fusion.TopLevelNamespace.CompiledFreeDefine;
 import com.amazon.fusion.TopLevelNamespace.CompiledFreeVariableReference;
 import com.amazon.fusion.TopLevelNamespace.TopLevelDefinedBinding;
+import java.util.HashMap;
 
 /**
  * "Registers" used during compilation.
@@ -56,13 +67,116 @@ class Compiler
     }
 
 
+    void evalCompileTimePart(final TopLevelNamespace topNs,
+                             final SyntaxValue       stx)
+        throws FusionException
+    {
+        SyntaxValue.Visitor v = new SyntaxValue.Visitor()
+        {
+            @Override
+            Object accept(SyntaxValue stx) throws FusionException
+            {
+                return null;
+            }
+
+            @Override
+            Object accept(SyntaxSexp stx) throws FusionException
+            {
+                SyntaxValue first = stx.get(myEval, 0);
+                if (first instanceof SyntaxSymbol)
+                {
+                    SyntacticForm form =
+                        ((SyntaxSymbol) first).resolveSyntaxMaybe(topNs);
+                    if (form != null)
+                    {
+                        // TODO FUSION-207 Needs tail-call optimization.
+                        form.evalCompileTimePart(Compiler.this, topNs, stx);
+                    }
+                }
+                return null;
+            }
+        };
+
+        stx.visit(v);
+    }
+
+
     /**
      * Compiles a single fully-expanded core syntax form.
      */
-    CompiledForm compileExpression(Environment env, SyntaxValue source)
+    CompiledForm compileExpression(final Environment env, SyntaxValue stx)
         throws FusionException
     {
-        return source.doCompile(this, env);
+        SyntaxValue.Visitor v = new SyntaxValue.Visitor()
+        {
+            @Override
+            Object accept(SimpleSyntaxValue stx) throws FusionException
+            {
+                return new CompiledConstant(stx.unwrap(myEval));
+            }
+
+            @Override
+            Object accept(SyntaxSymbol stx) throws FusionException
+            {
+                assert stx.getBinding() != null : "No binding for " + stx;
+                return compileReference(env, stx);
+            }
+
+            @Override
+            Object accept(SyntaxKeyword stx) throws FusionException
+            {
+                throw new IllegalStateException("Should not get here");
+            }
+
+            @Override
+            Object accept(SyntaxList stx) throws FusionException
+            {
+                return compileListSemiliteral(env, stx);
+            }
+
+            @Override
+            Object accept(SyntaxSexp stx) throws FusionException
+            {
+                return compileExpression(env, stx);
+            }
+
+            @Override
+            Object accept(SyntaxStruct stx) throws FusionException
+            {
+                return compileStructSemiliteral(env, stx);
+            }
+        };
+
+        return (CompiledForm) stx.visit(v);
+    }
+
+
+    CompiledForm compileExpression(Environment env, SyntaxSexp stx)
+        throws FusionException
+    {
+        SyntaxValue first = stx.get(myEval, 0);
+        if (first instanceof SyntaxSymbol)
+        {
+            SyntacticForm form = ((SyntaxSymbol) first).resolveSyntaxMaybe(env);
+
+            // NOTE: Failure to get a binding indicates use of a built-in
+            // syntactic form that's defined (probably via java_new) in the
+            // same module. That's not supported! Such modules need to be
+            // broken apart to meet this requirement.  This won't affect
+            // users unless we open the whole compiler APIs so they can add
+            // new "built-in" syntax.
+
+            if (form != null)
+            {
+                // We found a static top-level syntax binding!
+                // Continue the compilation process.
+                // TODO bounce the tail-call?
+
+                return form.compile(this, env, stx);
+            }
+        }
+
+        return compileProcedureApplication(env, stx, first);
     }
 
 
@@ -103,13 +217,6 @@ class Compiler
     }
 
 
-    CompiledForm compile(Environment env, SyntacticForm form, SyntaxSexp stx)
-        throws FusionException
-    {
-        return form.compile(this, env, stx);
-    }
-
-
     /**
      * Compiles a sequence of expressions as if in a {@code begin} expression.
      */
@@ -134,9 +241,9 @@ class Compiler
     }
 
 
-    CompiledForm compileProcedureApplication(Environment env,
-                                             SyntaxSexp stx,
-                                             SyntaxValue procExpr)
+    private CompiledForm compileProcedureApplication(Environment env,
+                                                     SyntaxSexp  stx,
+                                                     SyntaxValue procExpr)
         throws FusionException
     {
         CompiledForm procForm = compileExpression(env, procExpr);
@@ -342,8 +449,8 @@ class Compiler
     }
 
 
-    CompiledForm compileReference(final Environment  env,
-                                  final SyntaxSymbol identifier)
+    private CompiledForm compileReference(final Environment  env,
+                                          final SyntaxSymbol identifier)
         throws FusionException
     {
         Binding.Visitor v = new Binding.Visitor()
@@ -527,6 +634,120 @@ class Compiler
     }
 
 
+    private CompiledForm compileListSemiliteral(Environment env,
+                                                SyntaxList  stx)
+        throws FusionException
+    {
+        Object list = stx.unwrap(myEval);
+
+        // Annotations on this form are not handled here.
+        assert ! isAnnotated(myEval, list);
+
+        if (isAnyNull(myEval, list))
+        {
+            return new CompiledConstant(list);
+        }
+
+        boolean allConstant = true;
+
+        int len = stx.size();
+        CompiledForm[] children = new CompiledForm[len];
+        for (int i = 0; i < len; i++)
+        {
+            SyntaxValue elementExpr = (SyntaxValue)
+                unsafeListElement(myEval, list, i);
+            CompiledForm child = compileExpression(env, elementExpr);
+            children[i] = child;
+
+            allConstant &= (child instanceof CompiledConstant);
+        }
+
+        if (allConstant)
+        {
+            Object[] constChildren = new Object[len];
+            for (int i = 0; i < len; i++)
+            {
+                constChildren[i] = ((CompiledConstant) children[i]).getValue();
+            }
+
+            return new CompiledConstant(immutableList(myEval, constChildren));
+        }
+        else
+        {
+            return new CompiledList(children);
+        }
+    }
+
+
+    private CompiledForm compileStructSemiliteral(final Environment  env,
+                                                  final SyntaxStruct stx)
+        throws FusionException
+    {
+        Object struct = stx.unwrap(myEval);
+
+        // Annotations on this form are not handled here.
+        assert ! FusionValue.isAnnotated(myEval, struct);
+
+        if (isAnyNull(myEval, struct))
+        {
+            return new CompiledConstant(NULL_STRUCT);
+        }
+
+        int size = FusionStruct.unsafeStructSize(myEval, struct);
+        if (size == 0)
+        {
+            return new CompiledConstant(EMPTY_STRUCT);
+        }
+
+        final String[]       fieldNames = new String[size];
+        final CompiledForm[] fieldForms = new CompiledForm[size];
+
+        final Object[]       constFields = new Object[size];
+        final Object    notConstSentinel = new Object();
+
+        StructFieldVisitor visitor = new StructFieldVisitor()
+        {
+            int i = 0;
+
+            @Override
+            public Object visit(String name, Object value)
+                throws FusionException
+            {
+                SyntaxValue child = (SyntaxValue) value;
+                CompiledForm form = compileExpression(env, child);
+
+                fieldNames[i] = name;
+                fieldForms[i] = form;
+
+                constFields[i] = (form instanceof CompiledConstant
+                                    ? ((CompiledConstant) form).getValue()
+                                    : notConstSentinel);
+                i++;
+                return null;
+            }
+        };
+
+        FusionStruct.unsafeStructFieldVisit(myEval, struct, visitor);
+
+        boolean allConstant = true;
+        for (int i = 0; i < size; i++)
+        {
+            allConstant &= (constFields[i] != notConstSentinel);
+        }
+
+        if (allConstant)
+        {
+            return new CompiledConstant(immutableStruct(fieldNames,
+                                                        constFields,
+                                                        BaseSymbol.EMPTY_ARRAY));
+        }
+        else
+        {
+            return new CompiledStruct(fieldNames, fieldForms);
+        }
+    }
+
+
     //========================================================================
 
 
@@ -625,6 +846,68 @@ class Compiler
             }
 
             return eval.bounceTailCall(myLocation, p, args);
+        }
+    }
+
+
+    //========================================================================
+
+
+    private static final class CompiledList
+        implements CompiledForm
+    {
+        private final CompiledForm[] myChildForms;
+
+        CompiledList(CompiledForm[] childForms)
+        {
+            myChildForms = childForms;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            int len = myChildForms.length;
+            Object[] children = new Object[len];
+            for (int i = 0; i < len; i++)
+            {
+                children[i] = eval.eval(store, myChildForms[i]);
+            }
+
+            return immutableList(eval, children);
+        }
+    }
+
+
+    private static final class CompiledStruct
+        implements CompiledForm
+    {
+        private final String[]       myFieldNames;
+        private final CompiledForm[] myFieldForms;
+
+        CompiledStruct(String[] fieldNames, CompiledForm[] fieldForms)
+        {
+            myFieldNames = fieldNames;
+            myFieldForms = fieldForms;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            HashMap<String, Object> map = new HashMap<String, Object>();
+
+            for (int i = 0; i < myFieldNames.length; i++)
+            {
+                CompiledForm form = myFieldForms[i];
+                Object value = eval.eval(store, form);
+
+                String fieldName = myFieldNames[i];
+
+                structImplAdd(map, fieldName, value);
+            }
+
+            return immutableStruct(map);
         }
     }
 }

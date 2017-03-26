@@ -588,7 +588,8 @@ class Evaluator
     void evalCompileTimePart(TopLevelNamespace topNs, SyntaxValue topStx)
         throws FusionException
     {
-        topStx.evalCompileTimePart(makeCompiler(), topNs);
+        Compiler comp = makeCompiler();
+        comp.evalCompileTimePart(topNs, topStx);
     }
 
 
