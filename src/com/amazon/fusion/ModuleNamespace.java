@@ -310,8 +310,8 @@ final class ModuleNamespace
                     localNamespace.getRegistry().lookup(myModuleId);
                 assert module != null : "Module not found: " + myModuleId;
 
-                ModuleStore ns = module.getNamespace();
-                return ns.lookup(myAddress);
+                ModuleStore store = module.getStore();
+                return store.lookup(myAddress);
             }
 
             // We can't use our address directly, since we may be compiling
@@ -321,16 +321,16 @@ final class ModuleNamespace
 
         Object lookup(ModuleInstance module)
         {
-            ModuleStore ns = module.getNamespace();
+            ModuleStore store = module.getStore();
 
             if (module.getIdentity() != myModuleId)
             {
-                module = ns.getRegistry().lookup(myModuleId);
+                module = store.getRegistry().lookup(myModuleId);
                 assert module != null : "Module not found: " + myModuleId;
-                ns = module.getNamespace();
+                store = module.getStore();
             }
 
-            return ns.lookup(myAddress);
+            return store.lookup(myAddress);
         }
 
         @Override

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -24,7 +24,7 @@ final class ModuleInstance
 {
     private final ModuleIdentity myIdentity;
     private final String         myDocs;
-    private final ModuleStore    myNamespace;
+    private final ModuleStore    myStore;
 
     /**
      * Not all of these bindings are for this module; names that are imported
@@ -35,13 +35,13 @@ final class ModuleInstance
 
     private ModuleInstance(ModuleIdentity identity,
                            String         docs,
-                           ModuleStore    namespace,
+                           ModuleStore    store,
                            int            bindingCount)
         throws FusionException
     {
         myIdentity = identity;
         myDocs     = docs;
-        myNamespace = namespace;
+        myStore = store;
 
         // Use object identity since symbols are interned.
         myProvidedBindings = new IdentityHashMap<>(bindingCount);
@@ -91,9 +91,9 @@ final class ModuleInstance
     }
 
 
-    ModuleStore getNamespace()
+    ModuleStore getStore()
     {
-        return myNamespace;
+        return myStore;
     }
 
     String getDocs()
@@ -180,15 +180,15 @@ final class ModuleInstance
 
         if (binding.myModuleId == myIdentity)
         {
-            doc = myNamespace.document(binding.myAddress);
+            doc = myStore.document(binding.myAddress);
         }
         else
         {
             ModuleInstance module =
-                myNamespace.getRegistry().lookup(binding.myModuleId);
+                myStore.getRegistry().lookup(binding.myModuleId);
             assert module != null
                 : "Module not found: " + binding.myModuleId;
-            doc = module.myNamespace.document(binding.myAddress);
+            doc = module.myStore.document(binding.myAddress);
         }
 
         if (doc != null)

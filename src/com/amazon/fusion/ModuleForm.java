@@ -689,7 +689,7 @@ final class ModuleForm
             {
                 ModuleInstance module =
                     registry.instantiate(eval, myRequiredModules[i]);
-                stores[i] = module.getNamespace();
+                stores[i] = module.getStore();
             }
 
             return stores;

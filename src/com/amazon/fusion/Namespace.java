@@ -789,7 +789,7 @@ abstract class Namespace
 
             id = myRequiredModules.size();
             myRequiredModules.put(moduleId, id);
-            myRequiredModuleStores.add(module.getNamespace());
+            myRequiredModuleStores.add(module.getStore());
         }
         return id;
     }
