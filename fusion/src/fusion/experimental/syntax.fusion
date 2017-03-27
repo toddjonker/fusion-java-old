@@ -47,6 +47,7 @@ To write low-level macros you'll want to be familiar with these parts of the
 
 Here’s some notable things missing from Fusion’s current macro system compared
 to Racket:
+
   * There’s only one [expansion phase](http://docs.racket-lang.org/reference/syntax-model.html#%28part._mod-parse%29),
     which primarily means one must generally import a macro from another module
     before using it.
@@ -57,6 +58,26 @@ to Racket:
 
 These are the primary reasons this module is “experimental”. Of particular
 concerned is that extant code may break when phases are introduced.
+
+## Internals
+
+Fusion implements the lexical-context algorithms used by Racket 6.2 and earlier,
+which is best described by Matthew Flatt's paper,
+[_Composable and Compilable Macros_](https://www.cs.utah.edu/plt/publications/macromod.pdf).
+
+Racket 6.3 introduced a new mechanism for tracking lexical context. Quoting the
+[Racket Blog](http://blog.racket-lang.org/2015/11/racket-v63.html):
+
+> Racket’s macro expander uses a new representation of binding called “set of
+> scopes”. The new binding model provides a simpler explanation of how macros
+> preserve binding, especially across module boundaries and in hygiene-bending
+> expansions. The new expander is mostly compatible with existing Racket
+> macros, but there are some incompatibilities. For the formally inclined, a
+> research paper on this macro system will appear at POPL next year:
+> http://www.cs.utah.edu/plt/scope-sets/
+
+We intend for Fusion to migrate to this algorithm, too, since it is
+significantly simpler to implement and easier to understand.
   '''
 
 
