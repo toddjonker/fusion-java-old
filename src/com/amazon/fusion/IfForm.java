@@ -9,21 +9,6 @@ package com.amazon.fusion;
 final class IfForm
     extends SyntacticForm
 {
-    IfForm()
-    {
-        //    "                                                                               |
-        super("test then else",
-              "Evaluates the `test` expression first.  If the result is truthy, evaluates the\n" +
-              "`then` expression and returns its value.  Otherwise, evaluates the `else`\n" +
-              "expression and returns its value.\n" +
-              "\n" +
-              "All values are \"truthy\" except for false, void, and any variant of null.\n" +
-              "\n" +
-              "Note that only one of `then` or `else` is evaluated, and both are in tail\n" +
-              "position.");
-    }
-
-
     @Override
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException

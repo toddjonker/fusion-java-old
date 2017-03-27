@@ -364,19 +364,6 @@ final class FusionEval
     static final class ExpandProc
         extends Procedure1
     {
-        ExpandProc()
-        {
-            //    "                                                                               |
-            super("Expands a top-level form to core syntax, using the bindings of the current\n" +
-                  "namespace.\n" +
-                  "\n" +
-                  "The `top_level_form` may be a syntax object or another datum.",
-                  "top_level_form");
-        }
-
-        /**
-         * @see FusionEval#eval(Evaluator, Object, Namespace)
-         */
         @Override
         Object doApply(Evaluator eval, Object arg0)
             throws FusionException
@@ -396,16 +383,6 @@ final class FusionEval
     static final class ExpandOnceProc
         extends Procedure1
     {
-        ExpandOnceProc()
-        {
-            //    "                                                                               |
-            super("Expands a top-level form through one step of macro expansion, using the\n" +
-                  "bindings of the current namespace.\n" +
-                  "\n" +
-                  "The `top_level_form` may be a syntax object or another datum.",
-                  "top_level_form");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg0)
             throws FusionException
@@ -425,20 +402,6 @@ final class FusionEval
     static final class EvalProc
         extends Procedure
     {
-        EvalProc()
-        {
-            //    "                                                                               |
-            super("Evaluates a `top_level_form` within a `namespace`.  If `namespace` is absent\n" +
-                  "then the [`current_namespace`](fusion/namespace.html#current_namespace) parameter is\n" +
-                  "used.\n" +
-                  "\n" +
-                  "The `top_level_form` must be a valid top-level syntactic form with respect to\n" +
-                  "the bindings visible in the namespace.  The form is expanded, compiled, and\n" +
-                  "evaluated, and its result is returned.  Any side effects made to the namespace\n" +
-                  "will be visible to later evaluations.",
-                  "top_level_form", "[namespace]");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException

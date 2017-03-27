@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 (module eval '/fusion/private/kernel'
 
@@ -15,7 +15,30 @@ See [dynamic evaluation](eval.html) for more information.
   (provide load)
 
 
-  (defpub_j eval   "com.amazon.fusion.FusionEval$EvalProc")
-  (defpub_j expand "com.amazon.fusion.FusionEval$ExpandProc")
+  (defpub_j eval
+    '''
+    (eval top_level_form [namespace])
+
+Evaluates a `top_level_form` within a `namespace`.  If `namespace` is absent
+then the [`current_namespace`](fusion/namespace.html#current_namespace)
+parameter is used.
+
+The `top_level_form` must be a valid top-level syntactic form with respect to
+the bindings visible in the namespace.  The form is expanded, compiled, and
+evaluated, and its result is returned.  Any side effects made to the namespace
+will be visible to later evaluations.
+    '''
+    "com.amazon.fusion.FusionEval$EvalProc")
+
+  (defpub_j expand
+    '''
+    (expand top_level_form)
+
+Expands a top-level form to core syntax, using the bindings of the current
+namespace.
+
+The `top_level_form` may be a syntax object or another datum.
+    '''
+    "com.amazon.fusion.FusionEval$ExpandProc")
 
 )

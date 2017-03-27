@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -1050,13 +1050,6 @@ final class FusionSexp
     static final class IsSexpProc
         extends Procedure1
     {
-        IsSexpProc()
-        {
-            //    "                                                                               |
-            super("Determines whether a `value` is a sexp, returning `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException

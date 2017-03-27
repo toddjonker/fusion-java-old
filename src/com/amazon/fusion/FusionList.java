@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -1290,13 +1290,6 @@ final class FusionList
     static final class IsListProc
         extends Procedure1
     {
-        IsListProc()
-        {
-            //    "                                                                               |
-            super("Determines whether `value` is a list, returning `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object value)
             throws FusionException

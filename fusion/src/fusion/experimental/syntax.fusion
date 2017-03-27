@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 /*                       *** WARNING ***
  *
@@ -99,7 +99,18 @@ significantly simpler to implement and easier to understand.
 
 
   (define datum_to_syntax (java_new "com.amazon.fusion.DatumToSyntaxProc"))
-  (define expand_once     (java_new "com.amazon.fusion.FusionEval$ExpandOnceProc"))
+
+  (define expand_once
+    '''
+    (expand_once top_level_form)
+
+Expands a top-level form through one step of macro expansion, using the
+bindings of the current namespace.
+
+The `top_level_form` may be a syntax object or another datum.
+    '''
+    (java_new "com.amazon.fusion.FusionEval$ExpandOnceProc"))
+
   (define is_identifier   (java_new "com.amazon.fusion.FusionSyntax$IsIdentifierProc"))
   (define is_syntax       (java_new "com.amazon.fusion.FusionSyntax$IsSyntaxProc"))
   (define syntax_append   (java_new "com.amazon.fusion.SyntaxAppendProc"))

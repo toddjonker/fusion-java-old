@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -562,13 +562,6 @@ public final class FusionString
     static final class IsStringProc
         extends Procedure1
     {
-        IsStringProc()
-        {
-            //    "                                                                               |
-            super("Determines whether a `value` is of type `string`, returning `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
