@@ -1,4 +1,4 @@
-;; Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+;; Copyright (c) 2013-2017 Amazon.com, Inc.  All rights reserved.
 
 (require rackunit)
 
@@ -53,14 +53,14 @@
          (define my_top "another one")
          (define (name)
            (#%top . my_top)))]))
-  
+
     (define-syntax define_accessor3
     (syntax-rules ()
       [(_ name)
        (begin
          (define my_top "yet another")
          (define_accessor name))]))
-  
+
   (provide define_accessor define_accessor2 define_accessor3))
 
 (require 'M)

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 (module struct '/fusion/base'
 
@@ -154,7 +154,7 @@ The names must be non-empty strings or symbols.
 Determines whether `value` is an immutable struct, returning `true` or `false`.
     '''
     "com.amazon.fusion.FusionStruct$IsImmutableStructProc")
-    
+
   (defpub_j is_mutable_struct
     '''
     (is_mutable_struct value)

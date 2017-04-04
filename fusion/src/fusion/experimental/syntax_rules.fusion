@@ -1,3 +1,5 @@
+// Copyright (c) 2014-2017 Amazon.com, Inc.  All rights reserved.
+
 (module syntax_rules "/fusion"
   '''
 Like [Racket's pattern macros](http://docs.racket-lang.org/guide/pattern-macros.html).
@@ -5,10 +7,10 @@ Like [Racket's pattern macros](http://docs.racket-lang.org/guide/pattern-macros.
 Known notable differences (beyond stylistic - vs. _ separators):
   * define_syntax_rules does not have a Racket-based equivalent
   * (syntax_rules and define_syntax_rule do have Racket-based precedents)
-  * Racket's syntax_rules seems to have restriction that the variable before 
+  * Racket's syntax_rules seems to have restriction that the variable before
     ... in the pattern must also come before it in the template.  Not here.
   * Racket's define_syntax_alias -- define-type -- likely not rule-based
-  
+
 Also of note is that the ... (aka ellipsis or syntax Kleene star) can only
 occur at the end of a pattern, but can occur 0+ times anywhere in the template,
 even in the beginning or middle of a piece of the template.
@@ -17,7 +19,7 @@ For convenience -- like for shorthand accessing structs, symbols can be
 interpreted as strings instead (i.e. not evaluated in default Fusion context
 of binding/variable) by adding convert_symbols_to_strings:: annotation to
 applicable parts of the rule pattern.
-  
+
 The syntax rules procedures give nearly as much power/simplicity as a grammar.
 The ease of expressing re-write/transforms comes at performance cost though.
 This performance gap however may be substantially narrowed over time.
@@ -28,7 +30,7 @@ Of note that Racket has `variable ...` whereas these syntax rules do just `...`
 This was an unnoticed interface difference that will eventually be remedied.
   '''
   (require
-    "/fusion/private/syntax_rules" 
+    "/fusion/private/syntax_rules"
     "/fusion/experimental/syntax"
     "/fusion/list"
     "/fusion/collection")
@@ -57,7 +59,7 @@ This was an unnoticed interface difference that will eventually be remedied.
                       (unsyntax
                         (datum_to_syntax literals)))),
                    (matching_rule (find
-                                    (lambda (rule_stx) 
+                                    (lambda (rule_stx)
                                       (matches_syntax_rule_pattern
                                         literals_inner_copy
                                         rule_stx
@@ -99,7 +101,7 @@ This was an unnoticed interface difference that will eventually be remedied.
               (unsyntax
                 rules_stx)))))))
 
-  (define_syntax define_syntax_rule 
+  (define_syntax define_syntax_rule
     (lambda (stx)
       (let [(pattern_stx  (syntax_get stx 1)),
             (template_stx (syntax_get stx 2))]
@@ -109,7 +111,7 @@ This was an unnoticed interface difference that will eventually be remedied.
               ()
               [
                 (
-                  (unsyntax pattern_stx)  
+                  (unsyntax pattern_stx)
                   (unsyntax template_stx))]))))))
 
   (provide (all_defined_out))

@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2017 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -14,7 +14,7 @@
     timestamp_now, timestamp_to_epoch_millis, timestamp_to_string,
     timestamp_at_year, timestamp_at_month, timestamp_at_day,
     timestamp_at_minute, timestamp_at_second,
-    timestamp_year, timestamp_month, timestamp_day, 
+    timestamp_year, timestamp_month, timestamp_day,
     timestamp_hour, timestamp_minute, timestamp_second,
     timestamp_with_offset, timestamp_offset
   ])

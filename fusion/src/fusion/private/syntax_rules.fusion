@@ -1,8 +1,8 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2017 Amazon.com, Inc.  All rights reserved.
 
 (module syntax_rules "/fusion"
   (require "/fusion/experimental/syntax" "/fusion/list")
-  
+
   (define (check_syntax_rule_validity rule_stx literals)
     (lets [(pattern_pieces_stx (syntax_get rule_stx 0)),
            (pattern_pieces (syntax_to_datum pattern_pieces_stx))]
@@ -13,7 +13,7 @@
         (any
           (lambda (pattern_piece)
             (not
-              (is_symbol pattern_piece))) 
+              (is_symbol pattern_piece)))
           pattern_pieces)
         (wrong_syntax pattern_pieces_stx "Expecting all pattern pieces to be symbols"))
       (when
@@ -127,10 +127,10 @@
                               (not
                                 (or
                                   (any
-                                    (curry_left = pre_sub_syntax_arg) 
+                                    (curry_left = pre_sub_syntax_arg)
                                     literals)
                                   (any
-                                    (curry_left = pre_sub_syntax_arg) 
+                                    (curry_left = pre_sub_syntax_arg)
                                     pattern_args))))
                             (datum_to_syntax
                               (symbol_to_string pre_sub_syntax_arg))
@@ -163,6 +163,6 @@
           (quote_syntax ())
           (quote_syntax []))
         unwrapped_template_stx)))
-  
+
   (provide (all_defined_out))
 )
