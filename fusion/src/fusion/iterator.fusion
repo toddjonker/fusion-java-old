@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 (module iterator "/fusion/private/builtins"
 
@@ -35,13 +35,12 @@ based on two procedures:
   (defpub_j iterator_next     "com.amazon.fusion.FusionIterator$NextProc")
 
 
-  (defpub make_iterator
-    (lambda (has_next_proc next_proc)
-      '''
+  (defpub (make_iterator has_next_proc next_proc)
+    '''
 Returns an iterator that delegates `iterator_has_next` and `iterator_next` to
 the given procedures, which are usually closures with shared state.
-      '''
-       (java_new "com.amazon.fusion.FusionIterator" has_next_proc next_proc)))
+    '''
+    (java_new "com.amazon.fusion.FusionIterator" has_next_proc next_proc))
 
 
   (defpub empty_iterator
@@ -53,158 +52,152 @@ exception.
     (make_iterator FALSE BAD_NEXT))
 
 
-  (defpub value_iterator
-    (lambda (value)
-      '''
+  (defpub (value_iterator value)
+    '''
 Returns an iterator that produces `value` as its only element.
-      '''
-      (letrec ((has_next TRUE)
-               (next (lambda ()
-                       (set has_next FALSE)
-                       (set next BAD_NEXT)
-                       value)))
-        (make_iterator
-          (lambda () (has_next))
-          (lambda () (next))))))
+    '''
+    (letrec [(has_next TRUE),
+             (next (lambda ()
+                     (set has_next FALSE)
+                     (set next BAD_NEXT)
+                     value))]
+      (make_iterator
+        (lambda () (has_next))
+        (lambda () (next)))))
 
 
-  (defpub iterator_map
-    (lambda (proc iter)
-      '''
+  (defpub (iterator_map proc iter)
+    '''
 Returns an iterator whose elements are the results of applying `proc` to the
 corresponding elements of `iter`.
-      '''
-      (unless (is_procedure proc)
-        (raise_argument_error "iterator_map" "procedure" 0 proc iter))
-      (unless (is_iterator iter)
-        (raise_argument_error "iterator_map" "iterator" 1 proc iter))
-      (make_iterator
-        (lambda () (iterator_has_next iter))
-        (lambda () (proc (iterator_next iter))))))
+    '''
+    (unless (is_procedure proc)
+      (raise_argument_error "iterator_map" "procedure" 0 proc iter))
+    (unless (is_iterator iter)
+      (raise_argument_error "iterator_map" "iterator" 1 proc iter))
+    (make_iterator
+      (lambda () (iterator_has_next iter))
+      (lambda () (proc (iterator_next iter)))))
 
 
   // AKA cross-apply
-  (defpub iterator_map_splicing
-    (lambda (proc iter)
-      '''
+  (defpub (iterator_map_splicing proc iter)
+    '''
 Returns an iterator that applies an iterator-making `proc` to each element of
 `iter`, splicing the inner iterators into a single outer iterator.
-      '''
-      (unless (is_procedure proc)
-        (raise_argument_error "iterator_map_splicing" "procedure" 0 proc iter))
-      (unless (is_iterator iter)
-        (raise_argument_error "iterator_map_splicing" "iterator" 1 proc iter))
+    '''
+    (unless (is_procedure proc)
+      (raise_argument_error "iterator_map_splicing" "procedure" 0 proc iter))
+    (unless (is_iterator iter)
+      (raise_argument_error "iterator_map_splicing" "iterator" 1 proc iter))
       (letrec [(find_next
-                 (lambda ()
-                   (if (iterator_has_next iter)
-                     (let [(inner_iter (proc (iterator_next iter)))]
-                       (unless (is_iterator inner_iter)
-                         (raise_result_error "iterator_map_splicing"
-                            "iterator from mapping procedure"
-                            inner_iter))
-                       (letrec [(inner_find_next
-                                  (lambda ()
-                                    (if (iterator_has_next inner_iter)
-                                      (begin
-                                        (set has_next TRUE)
-                                        (set next
-                                          (lambda ()
-                                            (set has_next (lambda ()
-                                                            (inner_find_next)
-                                                            (has_next)))
-                                            (set next     (lambda ()
-                                                            (inner_find_next)
-                                                            (next)))
-                                            (iterator_next inner_iter))))
-                                      (find_next))))]
-                         (inner_find_next)))
-                     (begin
-                       (set has_next FALSE)
-                       (set next BAD_NEXT))))),
-               (has_next (lambda () (find_next) (has_next))),
-               (next     (lambda () (find_next) (next)))]
-        (make_iterator
-          (lambda () (has_next))
-          (lambda () (next))))))
+               (lambda ()
+                 (if (iterator_has_next iter)
+                   (let [(inner_iter (proc (iterator_next iter)))]
+                     (unless (is_iterator inner_iter)
+                       (raise_result_error "iterator_map_splicing"
+                          "iterator from mapping procedure"
+                          inner_iter))
+                     (letrec [(inner_find_next
+                                (lambda ()
+                                  (if (iterator_has_next inner_iter)
+                                    (begin
+                                      (set has_next TRUE)
+                                      (set next
+                                        (lambda ()
+                                          (set has_next (lambda ()
+                                                          (inner_find_next)
+                                                          (has_next)))
+                                          (set next     (lambda ()
+                                                          (inner_find_next)
+                                                          (next)))
+                                          (iterator_next inner_iter))))
+                                    (find_next))))]
+                       (inner_find_next)))
+                   (begin
+                     (set has_next FALSE)
+                     (set next BAD_NEXT))))),
+             (has_next (lambda () (find_next) (has_next))),
+             (next     (lambda () (find_next) (next)))]
+      (make_iterator
+        (lambda () (has_next))
+        (lambda () (next)))))
 
 
 
-  (defpub iterator_choose
-    (lambda (pred iter)
-      '''
+  (defpub (iterator_choose pred iter)
+    '''
 Returns an iterator whose elements are those provided by `iter` that satisfy
 predicate `pred`.
-      '''
-      (unless (is_procedure pred)
-        (raise_argument_error "iterator_choose" "predicate" 0 pred iter))
-      (unless (is_iterator iter)
-        (raise_argument_error "iterator_choose" "iterator" 1 pred iter))
-      (letrec [(find_next
-                 (lambda ()
-                   (if (iterator_has_next iter)
-                     (let [(v (iterator_next iter))]
-                       (if (pred v)
-                         (begin
-                           (set has_next TRUE)
-                           (set next
-                             (lambda ()
-                               (set has_next init_has_next)
-                               (set next     init_next)
-                               v)))
-                         (find_next)))
-                     (begin
-                       (set has_next FALSE)
-                       (set next BAD_NEXT))))),
-               (init_has_next (lambda () (find_next) (has_next))),
-               (init_next     (lambda () (find_next) (next))),
-               (has_next init_has_next),
-               (next     init_next)]
-        (make_iterator
-          (lambda () (has_next))
-          (lambda () (next))))))
+    '''
+    (unless (is_procedure pred)
+      (raise_argument_error "iterator_choose" "predicate" 0 pred iter))
+    (unless (is_iterator iter)
+      (raise_argument_error "iterator_choose" "iterator" 1 pred iter))
+    (letrec [(find_next
+               (lambda ()
+                 (if (iterator_has_next iter)
+                   (let [(v (iterator_next iter))]
+                     (if (pred v)
+                       (begin
+                         (set has_next TRUE)
+                         (set next
+                           (lambda ()
+                             (set has_next init_has_next)
+                             (set next     init_next)
+                             v)))
+                       (find_next)))
+                   (begin
+                     (set has_next FALSE)
+                     (set next BAD_NEXT))))),
+             (init_has_next (lambda () (find_next) (has_next))),
+             (init_next     (lambda () (find_next) (next))),
+             (has_next init_has_next),
+             (next     init_next)]
+      (make_iterator
+        (lambda () (has_next))
+        (lambda () (next)))))
 
 
-(defpub iterator_find
-  (lambda (pred iter)
-      '''
+  (defpub (iterator_find pred iter)
+    '''
 Returns the first element of `iter` that satisfies predicate `pred`.  If no
 element satisfies the predicate, the result is void.
-      '''
+    '''
     (let [(filtered (iterator_choose pred iter))]
       (if (iterator_has_next filtered)
         (iterator_next filtered)
-        (void)))))
+        (void))))
 
 
-  (defpub iterator_append
-    (lambda (iter1 iter2)
-      '''
+  (defpub (iterator_append iter1 iter2)
+    '''
 Returns an iterator that provides all the elements of `iter1` and then all the
 elements of `iter2`.
-      '''
-      (unless (is_iterator iter1)
-        (raise_argument_error "iterator_append" "iterator" 0 iter1 iter2))
-      (unless (is_iterator iter2)
-        (raise_argument_error "iterator_append" "iterator" 1 iter1 iter2))
-      (letrec [(find_next
-                 (lambda ()
-                   (if (iterator_has_next iter1)
-                     (begin
-                       (set has_next TRUE)
-                       (set next
-                         (lambda ()
-                           (set has_next init_has_next)
-                           (set next     init_next)
-                           (iterator_next iter1))))
-                     (begin
-                       (set has_next (lambda () (iterator_has_next iter2)))
-                       (set next     (lambda () (iterator_next     iter2))))))),
-               (init_has_next (lambda () (find_next) (has_next))),
-               (init_next     (lambda () (find_next) (next))),
-               (has_next init_has_next),
-               (next     init_next)]
-        (make_iterator
-          (lambda () (has_next))
-          (lambda () (next))))))
+    '''
+    (unless (is_iterator iter1)
+      (raise_argument_error "iterator_append" "iterator" 0 iter1 iter2))
+    (unless (is_iterator iter2)
+      (raise_argument_error "iterator_append" "iterator" 1 iter1 iter2))
+    (letrec [(find_next
+               (lambda ()
+                 (if (iterator_has_next iter1)
+                   (begin
+                     (set has_next TRUE)
+                     (set next
+                       (lambda ()
+                         (set has_next init_has_next)
+                         (set next     init_next)
+                         (iterator_next iter1))))
+                   (begin
+                     (set has_next (lambda () (iterator_has_next iter2)))
+                     (set next     (lambda () (iterator_next     iter2))))))),
+             (init_has_next (lambda () (find_next) (has_next))),
+             (init_next     (lambda () (find_next) (next))),
+             (has_next init_has_next),
+             (next     init_next)]
+      (make_iterator
+        (lambda () (has_next))
+        (lambda () (next)))))
 
 )

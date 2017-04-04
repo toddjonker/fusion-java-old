@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 (module procedure "/fusion/private/builtins"
 
@@ -139,21 +139,19 @@ is a single, two-character symbol, so the latter expression uses the form named
                 rest_tail)))))))
 
 
-  (defpub identity
-    (lambda (v)
-      '''
+  (defpub (identity v)
+    '''
 Returns `v`.
-      '''
-      v))
+    '''
+    v)
 
 
-  (defpub always
-    (lambda (v)
-      '''
+  (defpub (always v)
+    '''
 Returns a procedure that accepts (and ignores) any number of arguments and
 always returns `v`.
-      '''
-      (lambda rest v)))
+    '''
+    (lambda rest v))
 
 
 
@@ -187,58 +185,54 @@ Equivalent to `(lambda () body ...)`.
 See also [`|`](fusion/procedure.html#|).
     ''' thunk)
 
-  (defpub compose
-    (lambda (p1 p2)
-      '''
+  (defpub (compose p1 p2)
+    '''
 Returns a procedure that first applies `p2` to its (single) argument, and then
 applies `p1` to the (single) result.
-      '''
-      (lambda (x)
-        (p1 (p2 x)))))
+    '''
+    (lambda (x)
+      (p1 (p2 x))))
 
   //==========================================================================
 
   // Name comes from Dylan.
-  (defpub conjoin
-   (lambda (p1 p2)
-     '''
+  (defpub (conjoin p1 p2)
+    '''
 Returns a single-argument predicate that is the conjunction of the
 single-argument predicates `p1` and `p2` as with `and`, applying them left to
 right until one returns an untruthy value.
 
 In other words, the result is similar to using `and` to compose calls to the
 predicates.
-      '''
-      (lambda (x)
-        (and (p1 x) (p2 x)))))
+    '''
+    (lambda (x)
+      (and (p1 x) (p2 x))))
 
   //==========================================================================
 
   // Name comes from Dylan.
-  (defpub disjoin
-   (lambda (p1 p2)
-      '''
+  (defpub (disjoin p1 p2)
+    '''
 Returns a single-argument predicate that is the disjunction of the
 single-argument predicates `p1` and `p2` as with `or`, applying them left to
 right until one returns a truthy value.
 
 In other words, the result is similar to using `or` to compose calls to the
 predicates.
-      '''
-      (lambda (x)
-        (or (p1 x) (p2 x)))))
+    '''
+    (lambda (x)
+      (or (p1 x) (p2 x))))
 
   //==========================================================================
 
   // Name comes from Racket; Dylan calls this `complement`.
-  (defpub negate
-   (lambda (p)
-      '''
+  (defpub (negate p)
+    '''
 Returns a single-argument procedure that applies `not` to the result of the
 single-argument procedure `p`.
-      '''
-      (lambda (x)
-        (not (p x)))))
+    '''
+    (lambda (x)
+      (not (p x))))
 
   //==========================================================================
 

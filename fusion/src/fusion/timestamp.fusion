@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 (module timestamp '/fusion/private/kernel'
 
@@ -161,61 +161,56 @@ Returns the local offset of `ts` as an integer in minutes if its offset is known
     "com.amazon.fusion.FusionTimestamp$TimestampOffsetProc")
 
 
-  (defpub timestamp_at_year
-    (lambda (ts)
-      '''
+  (defpub (timestamp_at_year ts)
+    '''
 Returns a timestamp that represents the same point-in-time as `ts`, with precision `YEAR`.
-      '''
-      (timestamp (timestamp_year ts))))
+    '''
+    (timestamp (timestamp_year ts)))
 
 
-  (defpub timestamp_at_month
-    (lambda (ts)
-      '''
+  (defpub (timestamp_at_month ts)
+    '''
 Returns a timestamp that represents the same point-in-time as `ts`, with precision `MONTH`.
-      '''
-      (timestamp (timestamp_year ts)
-                 (or (timestamp_month ts) 1))))
+    '''
+    (timestamp (timestamp_year ts)
+               (or (timestamp_month ts) 1)))
 
 
-  (defpub timestamp_at_day
-    (lambda (ts)
-      '''
+  (defpub (timestamp_at_day ts)
+    '''
 Returns a timestamp that represents the same point-in-time as `ts`, with precision `DAY`.
-      '''
-      (timestamp (timestamp_year ts)
-                 (or (timestamp_month ts) 1)
-                 (or (timestamp_day ts) 1))))
+    '''
+    (timestamp (timestamp_year ts)
+               (or (timestamp_month ts) 1)
+               (or (timestamp_day ts) 1)))
 
 
-  (defpub timestamp_at_minute
-    (lambda (ts)
-      '''
+  (defpub (timestamp_at_minute ts)
+    '''
 Returns a timestamp that represents the same point-in-time as `ts`, with precision `MINUTE`.
 Local offset is preserved.
-      '''
-      (timestamp (timestamp_year ts)
-                 (or (timestamp_month ts) 1)
-                 (or (timestamp_day ts) 1)
-                 (or (timestamp_hour ts) 0)
-                 (or (timestamp_minute ts) 0)
-                 (void)
-                 (timestamp_offset ts))))
+    '''
+    (timestamp (timestamp_year ts)
+               (or (timestamp_month ts) 1)
+               (or (timestamp_day ts) 1)
+               (or (timestamp_hour ts) 0)
+               (or (timestamp_minute ts) 0)
+               (void)
+               (timestamp_offset ts)))
 
 
-  (defpub timestamp_at_second
-    (lambda (ts)
-      '''
+  (defpub (timestamp_at_second ts)
+    '''
 Returns a timestamp that represents the same point-in-time as `ts`, with precision `SECOND`.
 Local offset is preserved.
-      '''
-      (timestamp (timestamp_year ts)
-                 (or (timestamp_month ts) 1)
-                 (or (timestamp_day ts) 1)
-                 (or (timestamp_hour ts) 0)
-                 (or (timestamp_minute ts) 0)
-                 (or (timestamp_second ts) 0)
-                 (timestamp_offset ts))))
+    '''
+    (timestamp (timestamp_year ts)
+               (or (timestamp_month ts) 1)
+               (or (timestamp_day ts) 1)
+               (or (timestamp_hour ts) 0)
+               (or (timestamp_minute ts) 0)
+               (or (timestamp_second ts) 0)
+               (timestamp_offset ts)))
 
 
   (defpub_j timestamp_with_offset
