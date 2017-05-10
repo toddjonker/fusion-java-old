@@ -1,0 +1,109 @@
+"Copyright (c) 2017 Amazon.com, Inc.  All rights reserved."
+
+(require "/fusion/experimental/check")
+(require "/fusion/experimental/syntax")
+
+
+// ============================================================================
+// Top-level using prefix_in
+
+
+(module M1 "/fusion"
+  (define m1_binding "from M1")
+  (provide m1_binding))
+
+
+(require (prefix_in M1_symbol_prefix_in__ M1))
+(check === "from M1" M1_symbol_prefix_in__m1_binding)
+
+(expect_syntax_exn m1_binding)
+
+
+// ============================================================================
+// Module using prefix_in
+
+
+(module M2 "/fusion"
+  (require "/fusion/experimental/check")
+  (require (prefix_in M2_prefix_in__ M1))
+
+  (check === "from M1" M2_prefix_in__m1_binding))
+
+
+// ============================================================================
+// Module using prefix_in cannot refer to un-prefixed bindings
+
+
+(expect_syntax_exn
+  (module M3 "/fusion"
+    (require "/fusion/experimental/check")
+    (require (prefix_in M3_prefix_in__ M1))
+
+    m1_binding))
+
+// ============================================================================
+// Module using prefix_in and providing prefixed binding
+
+
+(module M4 "/fusion"
+  (require "/fusion/experimental/check")
+  (require (prefix_in M4_prefix_in__ M1))
+
+  (provide M4_prefix_in__m1_binding))
+
+(require M4)
+
+(check === "from M1" M4_prefix_in__m1_binding)
+
+(require (prefix_in another_M4_prefix_in__ M4))
+
+(check free_identifier_equal
+  (quote_syntax M4_prefix_in__m1_binding)
+  (quote_syntax another_M4_prefix_in__M4_prefix_in__m1_binding))
+
+
+// ============================================================================
+// prefix_in works with rename_out
+
+
+(module M5 "/fusion"
+  (require M1)
+  (provide (rename_out (m1_binding m5_binding))))
+
+(require (prefix_in M5_prefix_in__ M5))
+
+(check === "from M1" M5_prefix_in__m5_binding)
+
+
+// ============================================================================
+// prefix_in doesn't allow introducing binding collisions
+
+
+(module M6 "/fusion"
+  (define bar 6)
+  (provide bar))
+
+(module M7 "/fusion"
+  (define foo_bar 7)
+  (provide foo_bar))
+
+(expect_syntax_exn
+  (module M8 "/fusion"
+    (require (prefix_in foo_ M6))
+    (require M7)))
+
+(expect_syntax_exn
+  (module M9 "/fusion"
+    (require M7)
+    (require (prefix_in foo_ M6))))
+
+
+// ============================================================================
+// Module fails to export an imported module's exported binding if it has been prefixed
+
+
+(expect_syntax_exn
+  (module M10 "/fusion"
+    (require (prefix_in M10_prefix_in__ M1))
+
+    (provide m1_binding)))

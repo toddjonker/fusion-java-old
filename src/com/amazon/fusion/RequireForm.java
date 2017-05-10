@@ -44,6 +44,7 @@ final class RequireForm
               "  * A string or symbol containing a [module path][]; all names `provide`d by\n" +
               "    the referenced module are imported.\n" +
               "  * [`only_in`][only_in] enumerates a set of names to import.\n" +
+              "  * [`prefix_in`][prefix_in] provides a prefix to imported bindings.\n" +
               "\n" +
               "Within a module, `require` declarations are processed before other forms,\n" +
               "regardless of their order within the module source, and imported bindings are\n" +
@@ -58,7 +59,8 @@ final class RequireForm
               "existing top-level definition.\n" +
               "\n" +
               "[module path]: module.html#ref\n" +
-              "[only_in]:     fusion/module.html#only_in\n");
+              "[only_in]:     fusion/module.html#only_in\n" +
+              "[prefix_in]:   fusion/module.html#prefix_in\n");
         myModuleNameResolver = moduleNameResolver;
     }
 
@@ -129,18 +131,13 @@ final class RequireForm
 
         GlobalState globalState = eval.getGlobalState();
 
-        SyntaxSymbol specId = spec.firstIdentifier(eval);
         Binding b = spec.firstTargetBinding(eval);
         if (b == globalState.myKernelOnlyInBinding)
         {
             int arity = check.arityAtLeast(2);
 
             SyntaxValue[] children = spec.extract(eval);
-            children[0] =
-                syntaxTrackOrigin(eval,
-                                  SyntaxSymbol.make(eval, specId.getLocation(),
-                                                    makeSymbol(eval, "only")),
-                                  spec, specId);
+            children[0] = expandRequireSpecNameToPrimitiveImportName(eval, spec, "only");
 
             // TODO This should visit the module (run its phase-1 code)
             //      but not instantiate it.
@@ -162,10 +159,38 @@ final class RequireForm
 
             expandedSpecs.add(SyntaxSexp.make(eval, children));
         }
+        else if (b == globalState.myKernelPrefixInBinding)
+        {
+            check.arityExact(3);
+
+            SyntaxValue[] children = spec.extract(eval);
+            children[0] = expandRequireSpecNameToPrimitiveImportName(eval, spec, "prefix");
+
+            children[1] = check.requiredIdentifier("prefix id", 1);
+
+            String path = check.requiredText(eval, "module path", 2);
+            checkValidModulePath(eval, check, path);
+
+            expandedSpecs.add(SyntaxSexp.make(eval, children));
+        }
         else
         {
             throw requireCheck.failure("invalid require-spec");
         }
+    }
+
+    private SyntaxSymbol expandRequireSpecNameToPrimitiveImportName(Evaluator eval,
+                                                                    SyntaxSexp spec,
+                                                                    String primitiveImportName)
+            throws FusionException
+    {
+        SyntaxSymbol specId = spec.firstIdentifier(eval);
+        return syntaxTrackOrigin(eval,
+                                 SyntaxSymbol.make(eval,
+                                                   specId.getLocation(),
+                                                   makeSymbol(eval, primitiveImportName)),
+                                 spec,
+                                 specId);
     }
 
     private void checkValidModulePath(Evaluator     eval,
@@ -229,7 +254,7 @@ final class RequireForm
             try
             {
                 compiledSpecs[i] =
-                    compileSpec(eval, baseModule, check, requireSym, spec);
+                    compileSpec(eval, env, baseModule, check, requireSym, spec);
             }
             catch (FusionException e)
             {
@@ -242,6 +267,7 @@ final class RequireForm
     }
 
     private CompiledRequireSpec compileSpec(Evaluator eval,
+                                            Environment env,
                                             ModuleIdentity baseModule,
                                             SyntaxChecker requireCheck,
                                             SyntaxSymbol lexicalContext,
@@ -269,6 +295,31 @@ final class RequireForm
                             new RequireRenameMapping(id, id.getName());
                     }
 
+                    return new CompiledPartialRequire(moduleId, mappings);
+                }
+                case "prefix":
+                {
+                    SyntaxSymbol prefixId = (SyntaxSymbol) sexp.get(eval, 1);
+
+                    ModuleIdentity moduleId =
+                            myModuleNameResolver.resolve(eval,
+                                                         baseModule,
+                                                         sexp.get(eval, 2),
+                                                         true);
+
+                    ModuleInstance moduleInstance =
+                            env.namespace().getRegistry().instantiate(eval, moduleId);
+
+                    int idCount = moduleInstance.providedBindings().size();
+                    RequireRenameMapping[] mappings = new RequireRenameMapping[idCount];
+                    int i = 0;
+                    for (FusionSymbol.BaseSymbol providedName : moduleInstance.providedNames())
+                    {
+                        String newBindingName = prefixId.stringValue() + providedName.stringValue();
+                        SyntaxSymbol newBindingSymbol = SyntaxSymbol.make(eval, newBindingName);
+                        mappings[i] = new RequireRenameMapping(newBindingSymbol, providedName);
+                        i++;
+                    }
                     return new CompiledPartialRequire(moduleId, mappings);
                 }
                 default:
@@ -324,6 +375,21 @@ final class RequireForm
             super("module_path id ...",
                   "A `require` clause that imports only the given `id`s from a module.\n" +
                   "If an `id` is not provided by the module, a syntax error is reported.\n" +
+                  "\n" +
+                  "This form can only appear within `require`.");
+        }
+    }
+
+    static final class PrefixInForm
+            extends AbstractRequireClauseForm
+    {
+        PrefixInForm()
+        {
+            super("prefix_id module_path",
+                  "A `require` clause that adjusts each identifier" +
+                  " to be bound by prefixing it with `prefix_id`.\n" +
+                  "The lexical context of the `prefix_id` is ignored," +
+                  " and instead preserved from the identifiers before prefixing.\n" +
                   "\n" +
                   "This form can only appear within `require`.");
         }
