@@ -6,6 +6,8 @@ import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionIo.safeWrite;
 import static com.amazon.fusion.FusionList.immutableList;
 import static com.amazon.fusion.FusionList.unsafeListElement;
+import static com.amazon.fusion.FusionSexp.unsafePairHead;
+import static com.amazon.fusion.FusionSexp.unsafePairTail;
 import static com.amazon.fusion.FusionString.stringToJavaString;
 import static com.amazon.fusion.FusionStruct.EMPTY_STRUCT;
 import static com.amazon.fusion.FusionStruct.NULL_STRUCT;
@@ -262,7 +264,18 @@ class Compiler
                                            stx);
             }
 
-            return compilePlainLet(argForms, lambda.myBody);
+            SourceLocation[] argLocs = new SourceLocation[argForms.length];
+            Object argSexp = stx.unwrap(myEval);
+            for (int i = 0; i < argForms.length; i++)
+            {
+                argSexp = unsafePairTail(myEval, argSexp);
+                SyntaxValue argExpr = (SyntaxValue)
+                    unsafePairHead(myEval, argSexp);
+
+                argLocs[i] = argExpr.getLocation();
+            }
+
+            return compilePlainLet(argForms, argLocs, lambda.myBody);
         }
 
         return new CompiledPlainApp(stx.getLocation(), procForm, argForms);

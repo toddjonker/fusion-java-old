@@ -140,7 +140,8 @@ final class LetValuesForm
         final int numBindingForms = bindingForms.size();
 
         int[] valueCounts = new int[numBindingForms];
-        CompiledForm[] valueForms = new CompiledForm[numBindingForms];
+        CompiledForm[]   valueForms = new CompiledForm  [numBindingForms];
+        SourceLocation[] valueLocs  = new SourceLocation[numBindingForms];
 
         int bindingCount = 0;
         boolean allSingles = true;
@@ -157,6 +158,7 @@ final class LetValuesForm
 
             SyntaxValue boundExpr = binding.get(eval, 1);
             valueForms[i] = comp.compileExpression(env, boundExpr);
+            valueLocs [i] = boundExpr.getLocation();
         }
 
         if (bindingCount != 0)
@@ -169,7 +171,7 @@ final class LetValuesForm
 
         if (allSingles)
         {
-            return compilePlainLet(valueForms, body);
+            return compilePlainLet(valueForms, valueLocs, body);
         }
 
         return new CompiledLetValues(bindingCount, valueCounts, valueForms,
@@ -177,7 +179,8 @@ final class LetValuesForm
     }
 
 
-    static CompiledForm compilePlainLet(CompiledForm[] valueForms,
+    static CompiledForm compilePlainLet(CompiledForm[]   valueForms,
+                                        SourceLocation[] valueLocs,
                                         CompiledForm body)
     {
         switch (valueForms.length)
@@ -188,11 +191,11 @@ final class LetValuesForm
                 // let_values are compiled without a local environment.
                 return body;
             case 1:
-                return new CompiledPlainLet1(valueForms, body);
+                return new CompiledPlainLet1(valueForms, valueLocs, body);
             case 2:
-                return new CompiledPlainLet2(valueForms, body);
+                return new CompiledPlainLet2(valueForms, valueLocs, body);
             default:
-                return new CompiledPlainLet(valueForms, body);
+                return new CompiledPlainLet (valueForms, valueLocs, body);
         }
     }
 
@@ -203,12 +206,16 @@ final class LetValuesForm
     private static final class CompiledPlainLet
         implements CompiledForm
     {
-        private final CompiledForm[] myValueForms;
-        private final CompiledForm   myBody;
+        private final CompiledForm[]   myValueForms;
+        private final SourceLocation[] myValueLocs;
+        private final CompiledForm     myBody;
 
-        CompiledPlainLet(CompiledForm[] valueForms, CompiledForm body)
+        CompiledPlainLet(CompiledForm  [] valueForms,
+                         SourceLocation[] valueLocs,
+                         CompiledForm     body)
         {
             myValueForms = valueForms;
+            myValueLocs  = valueLocs;
             myBody       = body;
         }
 
@@ -222,8 +229,9 @@ final class LetValuesForm
 
             for (int i = 0; i < numBindings; i++)
             {
-                CompiledForm form = myValueForms[i];
-                Object values = eval.eval(store, form);
+                CompiledForm   form = myValueForms[i];
+                SourceLocation loc  = myValueLocs [i];
+                Object values = eval.eval(store, form, loc);
                 eval.checkSingleResult(values, "local-binding form");
                 boundValues[i] = values;
             }
@@ -237,12 +245,16 @@ final class LetValuesForm
     private static final class CompiledPlainLet1
         implements CompiledForm
     {
-        private final CompiledForm myValueForm0;
-        private final CompiledForm myBody;
+        private final CompiledForm   myValueForm0;
+        private final SourceLocation myValueLoc0;
+        private final CompiledForm   myBody;
 
-        CompiledPlainLet1(CompiledForm[] valueForms, CompiledForm body)
+        CompiledPlainLet1(CompiledForm  [] valueForms,
+                          SourceLocation[] valueLocs,
+                          CompiledForm body)
         {
             myValueForm0 = valueForms[0];
+            myValueLoc0  = valueLocs [0];
             myBody       = body;
         }
 
@@ -250,7 +262,7 @@ final class LetValuesForm
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            Object value = eval.eval(store, myValueForm0);
+            Object value = eval.eval(store, myValueForm0, myValueLoc0);
             eval.checkSingleResult(value, "local-binding form");
 
             Store localStore = new LocalStore1(store, value);
@@ -264,12 +276,18 @@ final class LetValuesForm
     {
         private final CompiledForm myValueForm0;
         private final CompiledForm myValueForm1;
+        private final SourceLocation myValueLoc0;
+        private final SourceLocation myValueLoc1;
         private final CompiledForm myBody;
 
-        CompiledPlainLet2(CompiledForm[] valueForms, CompiledForm body)
+        CompiledPlainLet2(CompiledForm  [] valueForms,
+                          SourceLocation[] valueLocs,
+                          CompiledForm     body)
         {
             myValueForm0 = valueForms[0];
             myValueForm1 = valueForms[1];
+            myValueLoc0  = valueLocs [0];
+            myValueLoc1  = valueLocs [1];
             myBody       = body;
         }
 
@@ -277,10 +295,10 @@ final class LetValuesForm
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            Object value0 = eval.eval(store, myValueForm0);
+            Object value0 = eval.eval(store, myValueForm0, myValueLoc0);
             eval.checkSingleResult(value0, "local-binding form");
 
-            Object value1 = eval.eval(store, myValueForm1);
+            Object value1 = eval.eval(store, myValueForm1, myValueLoc1);
             eval.checkSingleResult(value1, "local-binding form");
 
             Store localStore = new LocalStore2(store, value0, value1);
