@@ -55,6 +55,11 @@ public class StackTraceTest
         evalForTrace("(let [(a (first 1))] a)");
         expectLocation(1, 10);
         expectLocation(1, 1);
+
+        evalForTrace("(let loop\n" +
+                     "   [(a (first 1))] a)");
+        expectLocation(2, 8);
+        expectLocation(1, 1);
     }
 
     @Test

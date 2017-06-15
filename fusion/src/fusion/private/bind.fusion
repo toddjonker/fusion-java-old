@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2017 Amazon.com, Inc.  All rights reserved.
 
 (module bind "/fusion/private/builtins"
 
@@ -142,15 +142,17 @@ the `title` field of each item:
               (let_values [((lambda_stx)
                             (pair (quote_syntax lambda)
                                   (pair names body)))]
-                (datum_to_syntax
-                  (if loop
-                    (pair (sexp (quote_syntax letrec)
-                                (sexp (sexp loop lambda_stx))
-                                loop)
-                          exprs)
-                    (pair lambda_stx exprs))
-                  ctx
-                  stx))))))))
+                (syntax_property
+                  (datum_to_syntax
+                    (if loop
+                      (pair (sexp (quote_syntax letrec)
+                                  (sexp (sexp loop lambda_stx))
+                                  loop)
+                            exprs)
+                      (pair lambda_stx exprs))
+                    ctx
+                    stx)
+                  (quote '#%plain_app retain arg locations') true))))))))
 
 
   (defpub_syntax lets

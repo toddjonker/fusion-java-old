@@ -13,8 +13,10 @@ import static com.amazon.fusion.FusionStruct.EMPTY_STRUCT;
 import static com.amazon.fusion.FusionStruct.NULL_STRUCT;
 import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionStruct.structImplAdd;
+import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbol;
 import static com.amazon.fusion.FusionValue.isAnnotated;
 import static com.amazon.fusion.FusionValue.isAnyNull;
+import static com.amazon.fusion.FusionVoid.isVoid;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.LetValuesForm.compilePlainLet;
 import com.amazon.fusion.BindingDoc.Kind;
@@ -45,6 +47,9 @@ import java.util.HashMap;
  */
 class Compiler
 {
+    private static final Object STX_PROPERTY_RETAIN_ARG_LOCS =
+        internSymbol("#%plain_app retain arg locations");
+
     private final Evaluator myEval;
 
     Compiler(Evaluator eval)
@@ -264,23 +269,38 @@ class Compiler
                                            stx);
             }
 
-            SourceLocation[] argLocs = new SourceLocation[argForms.length];
-            Object argSexp = stx.unwrap(myEval);
-            for (int i = 0; i < argForms.length; i++)
-            {
-                argSexp = unsafePairTail(myEval, argSexp);
-                SyntaxValue argExpr = (SyntaxValue)
-                    unsafePairHead(myEval, argSexp);
-
-                argLocs[i] = argExpr.getLocation();
-            }
-
+            SourceLocation[] argLocs = extractArgLocations(stx,
+                                                           argForms.length);
             return compilePlainLet(argForms, argLocs, lambda.myBody);
         }
 
-        return new CompiledPlainApp(stx.getLocation(), procForm, argForms);
+        // Look for syntax property forcing argument location tracking.
+        if (isVoid(myEval, stx.findProperty(myEval, STX_PROPERTY_RETAIN_ARG_LOCS)))
+        {
+            return new CompiledPlainApp(stx.getLocation(), procForm, argForms);
+        }
+
+        SourceLocation[] argLocs = extractArgLocations(stx, argForms.length);
+
+        return new CompiledPlainAppWithLocations(stx.getLocation(), procForm,
+                                                 argForms, argLocs);
     }
 
+    private SourceLocation[] extractArgLocations(SyntaxSexp stx, int argCount)
+        throws FusionException
+    {
+        SourceLocation[] argLocs = new SourceLocation[argCount];
+        Object argSexp = stx.unwrap(myEval);
+        for (int i = 0; i < argCount; i++)
+        {
+            argSexp = unsafePairTail(myEval, argSexp);
+            SyntaxValue argExpr = (SyntaxValue)
+                unsafePairHead(myEval, argSexp);
+
+            argLocs[i] = argExpr.getLocation();
+        }
+        return argLocs;
+    }
 
     CompiledForm compileDefine(final Environment env, SyntaxSexp stx)
         throws FusionException
@@ -791,7 +811,7 @@ class Compiler
     }
 
 
-    private static final class CompiledPlainApp
+    private static class CompiledPlainApp
         implements CompiledForm
     {
         private final SourceLocation myLocation;
@@ -805,6 +825,12 @@ class Compiler
             myLocation = location;
             myProcForm = procForm;
             myArgForms = argForms;
+        }
+
+        Object evalArg(Evaluator eval, Store store, int i, CompiledForm arg)
+            throws FusionException
+        {
+            return eval.eval(store, arg, myLocation);
         }
 
         @Override
@@ -825,7 +851,7 @@ class Compiler
                 args = new Object[argCount];
                 for (int i = 0; i < argCount; i++)
                 {
-                    args[i] = eval.eval(store, myArgForms[i], myLocation);
+                    args[i] = evalArg(eval, store, i, myArgForms[i]);
                 }
             }
 
@@ -859,6 +885,29 @@ class Compiler
             }
 
             return eval.bounceTailCall(myLocation, p, args);
+        }
+    }
+
+
+    private static final class CompiledPlainAppWithLocations
+        extends CompiledPlainApp
+    {
+        private final SourceLocation[] myArgLocs;
+
+        CompiledPlainAppWithLocations(SourceLocation   location,
+                                      CompiledForm     procForm,
+                                      CompiledForm[]   argForms,
+                                      SourceLocation[] argLocs)
+        {
+            super(location, procForm, argForms);
+            myArgLocs = argLocs;
+        }
+
+        @Override
+        Object evalArg(Evaluator eval, Store store, int i, CompiledForm arg)
+            throws FusionException
+        {
+            return eval.eval(store, arg, myArgLocs[i]);
         }
     }
 
