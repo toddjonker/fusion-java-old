@@ -26,7 +26,7 @@ contact us for clarification.
 
   // Module Forms
   (provide all_defined_out module only_in
-    prefix_in provide rename_out require)
+    prefix_in provide rename_in rename_out require)
 
   // Misc core forms
   (provide annotate annotations quasiquote quote

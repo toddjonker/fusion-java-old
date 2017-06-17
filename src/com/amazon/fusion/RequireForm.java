@@ -15,6 +15,8 @@ import static com.amazon.ion.util.IonTextUtils.printString;
 import com.amazon.fusion.Namespace.RequireRenameMapping;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -45,6 +47,7 @@ final class RequireForm
               "    the referenced module are imported.\n" +
               "  * [`only_in`][only_in] enumerates a set of names to import.\n" +
               "  * [`prefix_in`][prefix_in] provides a prefix to imported bindings.\n" +
+              "  * [`rename_in`][rename_in] renames specified bindings.\n" +
               "\n" +
               "Within a module, `require` declarations are processed before other forms,\n" +
               "regardless of their order within the module source, and imported bindings are\n" +
@@ -60,7 +63,8 @@ final class RequireForm
               "\n" +
               "[module path]: module.html#ref\n" +
               "[only_in]:     fusion/module.html#only_in\n" +
-              "[prefix_in]:   fusion/module.html#prefix_in\n");
+              "[prefix_in]:   fusion/module.html#prefix_in\n" +
+              "[rename_in]:   fusion/module.html#rename_in\n");
         myModuleNameResolver = moduleNameResolver;
     }
 
@@ -172,6 +176,40 @@ final class RequireForm
             checkValidModulePath(eval, check, path);
 
             expandedSpecs.add(SyntaxSexp.make(eval, children));
+        }
+        else if (b == globalState.myKernelRenameInBinding)
+        {
+            int arity = check.arityAtLeast(2);
+
+            SyntaxSymbol renamePrimitiveSymbol =
+                    expandRequireSpecNameToPrimitiveImportName(eval, spec, "rename");
+
+            String path = check.requiredText(eval, "module path", 1);
+            checkValidModulePath(eval, check, path);
+
+            final Set<String> localIdsSoFar = new HashSet<>();
+            for (int i = 2; i < arity; i++)
+            {
+                SyntaxSexp renamePair = check.requiredSexp("(local_id exported_id)", i);
+
+                SyntaxChecker renamePairChecker = new SyntaxChecker(eval, renamePair);
+                renamePairChecker.arityExact(2);
+
+                // In Racket,
+                // the rename sub-form has the identifiers in reverse order compared to rename-in.
+                SyntaxSymbol exportedId = renamePairChecker.requiredIdentifier("exported_id", 0);
+                SyntaxSymbol localId = renamePairChecker.requiredIdentifier("local_id", 1);
+
+                if (!localIdsSoFar.add(localId.stringValue())) {
+                    throw check.failure("rename_in pair specified duplicate local_id: " + localId,
+                                        spec);
+                }
+                expandedSpecs.add(SyntaxSexp.make(eval,
+                                                  renamePrimitiveSymbol,
+                                                  spec.get(eval, 1), // module path
+                                                  localId,
+                                                  exportedId));
+            }
         }
         else
         {
@@ -322,6 +360,19 @@ final class RequireForm
                     }
                     return new CompiledPartialRequire(moduleId, mappings);
                 }
+                case "rename":
+                {
+                    ModuleIdentity moduleId =
+                            myModuleNameResolver.resolve(eval,
+                                                         baseModule,
+                                                         sexp.get(eval, 1),
+                                                         true);
+                    SyntaxSymbol localId = (SyntaxSymbol) sexp.get(eval, 2);
+                    SyntaxSymbol exportedId = (SyntaxSymbol) sexp.get(eval, 3);
+                    RequireRenameMapping[] mappings =
+                            { new RequireRenameMapping(localId, exportedId.getName()) };
+                    return new CompiledPartialRequire(moduleId, mappings);
+                }
                 default:
                 {
                     throw requireCheck.failure("invalid provide-spec");
@@ -390,6 +441,19 @@ final class RequireForm
                   " to be bound by prefixing it with `prefix_id`.\n" +
                   "The lexical context of the `prefix_id` is ignored," +
                   " and instead preserved from the identifiers before prefixing.\n" +
+                  "\n" +
+                  "This form can only appear within `require`.");
+        }
+    }
+
+    static final class RenameInForm
+            extends AbstractRequireClauseForm
+    {
+        RenameInForm()
+        {
+            super("module_path (exported_id local_id) ...",
+                  "A `require` clause that imports each `exported_id` using the name `local_id`.\n" +
+                  "If an `exported_id` is not provided by the module, a syntax error is reported.\n" +
                   "\n" +
                   "This form can only appear within `require`.");
         }

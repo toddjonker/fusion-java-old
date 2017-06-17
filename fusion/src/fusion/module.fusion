@@ -9,5 +9,5 @@ See [Modules and Scripts](/module.html) for an overview.
   '''
 
   (provide all_defined_out module only_in prefix_in
-    provide rename_out require)
+    provide rename_in rename_out require)
 )

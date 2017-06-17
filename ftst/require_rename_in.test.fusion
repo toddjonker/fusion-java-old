@@ -1,0 +1,204 @@
+"Copyright (c) 2017 Amazon.com, Inc.  All rights reserved."
+
+(require "/fusion/experimental/check")
+(require "/fusion/experimental/syntax")
+
+// ============================================================================
+// Top-level using rename_in
+
+
+(module M1 "/fusion"
+  (define m1_binding "from M1")
+  (provide m1_binding))
+
+(require (rename_in M1 (m1_binding renamed_m1_binding)))
+(check === "from M1" renamed_m1_binding)
+
+(expect_syntax_exn m1_binding)
+
+
+// ============================================================================
+// Module using rename_in
+
+
+(module M2 "/fusion"
+  (require "/fusion/experimental/check")
+  (require (rename_in M1 (m1_binding M2_renamed_m1_binding)))
+  (check === "from M1" M2_renamed_m1_binding))
+
+
+// ============================================================================
+// Module using rename_in cannot refer to un-renamed bindings
+
+
+(expect_syntax_exn
+  (module M3 "/fusion"
+    (require "/fusion/experimental/check")
+    (require (rename_in M1 (m1_binding M3_renamed_m1_binding)))
+    
+    m1_binding))
+
+
+// ============================================================================
+// Rename multiple bindings from a single module
+
+
+(module M4 "/fusion"
+  (define m4_binding_1 "binding #1 from M4")
+  (define m4_binding_2 "binding #2 from M4")
+  (provide m4_binding_1 m4_binding_2))
+
+(require (rename_in M4 (m4_binding_1 renamed_m4_binding_1) (m4_binding_2 renamed_m4_binding_2)))
+(check === "binding #1 from M4" renamed_m4_binding_1)
+(check === "binding #2 from M4" renamed_m4_binding_2)
+
+
+// ============================================================================
+// Different rename_in forms referring to the same exported binding yield
+//    local ids that are considered free_identifier_equal
+
+
+(require (rename_in M1 (m1_binding m1_rename_1)))
+(require (rename_in M1 (m1_binding m1_rename_2)))
+
+(check free_identifier_equal
+  (quote_syntax m1_rename_1)
+  (quote_syntax m1_rename_2))
+
+
+// ============================================================================
+// "free_identifier_equal"-ity is retained throughout renames
+
+
+(module M6 "/fusion"
+  (require "/fusion/experimental/check")
+  (require (rename_in M1 (m1_binding M6_renamed_m1_binding)))
+
+  (provide M6_renamed_m1_binding))
+
+(require M6)
+
+(check === "from M1" M6_renamed_m1_binding)
+
+(require (rename_in M6 (M6_renamed_m1_binding another_rename_for_M6)))
+
+(check free_identifier_equal
+  (quote_syntax M6_renamed_m1_binding)
+  (quote_syntax another_rename_for_M6))
+
+
+// ============================================================================
+// rename_in works with rename_out
+
+
+(module M7 "/fusion"
+  (require M1)
+  (provide (rename_out (m1_binding m7_binding))))
+
+(require (rename_in M7 (m7_binding M7_renamed_m1_binding)))
+
+(check === "from M1" M7_renamed_m1_binding)
+
+
+// ============================================================================
+// rename_in doesn't allow introducing binding collisions
+
+
+(module M8 "/fusion"
+  (define bar 8)
+  (provide bar))
+
+(module M9 "/fusion"
+  (define foo_bar 9)
+  (provide foo_bar))
+
+(expect_syntax_exn
+  (module M10 "/fusion"
+    (require (rename_in M8 (bar foo_bar)))
+    (require M9)))
+
+(expect_syntax_exn
+  (module M11 "/fusion"
+    (require M9)
+    (require (rename_in M8 (bar foo_bar)))))
+
+
+// ============================================================================
+// Module fails to export an imported module's exported binding if it was renamed
+
+
+(expect_syntax_exn
+  (module M12 "/fusion"
+    (require (rename_in M1 (m1_binding M12_renamed_m1_binding)))
+
+    (provide m1_binding)))
+
+
+// ============================================================================
+// rename_in clause doesn't require pairs to be specified
+
+
+(module M13 "/fusion"
+  (require (rename_in M1)))
+
+
+// ============================================================================
+// rename_in can specify multiple rename_in pairs
+
+
+(module M14 "/fusion"
+  (define binding_1 1)
+  (define binding_2 2)
+  (provide binding_1 binding_2))
+
+(module M15 "/fusion"
+  (require (rename_in M14 (binding_1 M14_binding_1) (binding_2 M14_binding_2)))
+  (require "/fusion/experimental/check")
+  (check === 1 M14_binding_1)
+  (check === 2 M14_binding_2))
+
+
+// ============================================================================
+// multiple rename pairs fail when the local id is the same
+
+
+(module M16 "/fusion"
+  (define binding_1 1)
+  (define binding_2 2)
+  (provide binding_1 binding_2))
+
+(expect_syntax_exn
+  (require (rename_in M16 (binding_1 same_binding) (binding_2 same_binding))))
+
+(expect_syntax_exn
+  (module M17 "/fusion"
+    (require (rename_in M16 (binding_1 same_binding) (binding_2 same_binding)))))
+
+
+// ============================================================================
+// multiple rename pairs allow renaming the same provided id when the local id is different
+
+
+(require (rename_in M1 (m1_binding renamed_18_binding_1) (m1_binding renamed_18_binding_2)))
+
+(check free_identifier_equal
+  (quote_syntax renamed_18_binding_1)
+  (quote_syntax renamed_18_binding_2))
+
+(module M19 "/fusion"
+
+  (require "/fusion/experimental/check")
+  (require "/fusion/experimental/syntax")
+
+  (require (rename_in M1 (m1_binding renamed_19_binding_1) (m1_binding renamed_19_binding_2)))
+
+  (check free_identifier_equal
+    (quote_syntax renamed_19_binding_1)
+    (quote_syntax renamed_19_binding_2)))
+
+
+// ============================================================================
+// assert that we didn't import any bindings provided by M1
+
+
+(expect_syntax_exn m1_binding)

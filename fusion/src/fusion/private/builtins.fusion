@@ -11,7 +11,7 @@
 
   // Pass-through bindings from kernel
   (provide all_defined_out begin define lambda load module
-    only_in prefix_in provide rename_out require)
+    only_in prefix_in provide rename_in rename_out require)
 
   // Pass-through bindings from kernel2
   (provide if is_list is_null is_sexp is_string is_struct
