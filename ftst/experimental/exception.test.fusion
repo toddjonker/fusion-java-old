@@ -1,0 +1,198 @@
+// Copyright (c) 2017 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/fusion/exception"
+  "/fusion/experimental/exception"
+  "/fusion/experimental/check")
+
+// Definitions for Tests
+(define (catch_all x) true)
+(define (catch_none x) false)
+(define myExn { field: "field in myExn", exn_type:"myExn" })
+
+
+// Test raise
+(expect_any_exn (raise "foo"))
+
+// Verify with_handlers passes through body expressions that don't throw exceptions
+(check ===
+  "success"
+  (with_handlers
+    [(catch_all (|x| "failure")),]
+    "success"))
+
+// Verify that exceptions are caught
+(check ===
+  "handled"
+  (with_handlers
+    ((catch_all (|x| "handled")))
+    (raise "foo")))
+
+// Verify that both sexp and list specified handlers work
+(check ===
+  "listStyle"
+  (with_handlers
+    [(catch_all (|x| "listStyle")),]
+    (raise "foo")))
+
+// Verify that multiple handlers get processed.
+(check ===
+  "second"
+  (with_handlers
+    [(catch_none (|x| "first")),
+     (catch_all (|x| "second")),]
+    (raise "foo")))
+
+// Verify that with_handlers pred-exprs actually have access to the exception raise'd
+(check ===
+  "field in myExn"
+  (with_handlers
+    [((|x|
+        (=== "myExn" (. x "exn_type")))
+      (|x|
+        (. x "field"))),]
+    (+ 2 4)
+    (- 4 2)
+    (raise myExn)))
+
+// Verify that with_handlers processes predicates in order AND short-circuits
+(check ===
+  "second"
+  (with_handlers
+    [(catch_none (|x| "first")),
+     (catch_all (|x| "second")),
+     (catch_all (|x| "third")),]
+    (raise "foo")))
+
+// Verify that with_handlers allows 0+ handlers to be specified.
+(check ===
+  "foo"
+  (with_handlers ()
+    "foo"))
+
+// Verify that exceptions get passed through if they are not caught.
+(expect_any_exn
+  (with_handlers
+    [(catch_none (|x| 1)),]
+    (raise "fail")))
+
+// Verify that exceptions gets passed through.
+(expect_any_exn
+  (with_handlers
+    []
+    (raise "fail")))
+
+// Verify that a handler must be specified in the pred-handler tuple.
+(expect_syntax_exn
+  (with_handlers
+    [(catch_all),]
+    (raise "foo")))
+
+// Verify that the form requires at least 2 arguments
+(expect_syntax_exn
+  (with_handlers "foo"))
+
+// Verify that the form requires a sequence as the second argument.
+(expect_syntax_exn
+  (with_handlers "foo" (raise "foo")))
+
+// Verify that predicates only accept one argument.
+// TODO: Racket throws an arity exn in this case. We need to see why this
+//   is getting compiled which causes the syntax exception
+(expect_syntax_exn
+  (with_handlers
+    [((|x y| true) (|x| "bar")),]
+    (raise "foo")))
+
+// Verify that handlers only accept one argument.
+// TODO: Racket throws an arity exn in this case. We need to see why this
+//   is getting compiled which causes the syntax exception
+(expect_syntax_exn
+  (with_handlers
+    [((|x| true) (|x y| "bar")),]
+    (raise "foo")))
+
+// Verify that handler exceptions are thrown.
+(expect_result_exn
+  (with_handlers
+    [(catch_all (|x| (raise_result_error "bar" "baz" "biz"))),]
+    (raise "foo")))
+
+// Verify that nested with_handlers work.
+(check ===
+  "outer"
+  (with_handlers
+    [(catch_all (|x| "outer")),]
+    (with_handlers
+      []
+      (raise "foo"))))
+
+// Verify that nested with_handlers passes through on successful handle
+(check ===
+  "inner"
+  (with_handlers
+    [(catch_all (|x| "outer")),]
+    (with_handlers
+      [(catch_all (|x| "inner")),]
+      (raise "foo"))))
+
+// Test pass through of exceptions when re-raised within a handler
+(expect_contract_exn
+  (with_handlers
+    [(catch_all (|x| (raise x))),]
+    (raise_contract_error "test" "foo")))
+
+// Test predicates for existing Exceptions
+(check ===
+  "caught argument"
+  (with_handlers
+    [(is_argument_exn (|x| "caught argument"))]
+    (raise_argument_error "foo" "bar" 0 "baz")))
+(check ===
+  "caught arity"
+  (with_handlers
+    [(is_arity_exn (|x| "caught arity"))]
+    (raise_arity_error "foo" 0)))
+(check ===
+  "caught check"
+  (with_handlers
+    [(is_check_exn (|x| "caught check"))]
+    (check_true false)))
+(check ===
+  "caught contract"
+  (with_handlers
+    [(is_contract_exn (|x| "caught contract")),]
+    (raise_result_error "foo" "bar" "baz")))
+(check ===
+  "caught result"
+  (with_handlers
+    [(is_result_exn (|x| "caught result"))]
+    (raise_result_error "foo" "bar" "baz")))
+(check ===
+  "caught syntax"
+  (with_handlers
+    [(is_syntax_exn (|x| "caught syntax"))]
+    (unbound_identifier "foo")))
+
+// Verify that an exception from an imported module is catchable
+(module raiser "/fusion"
+  (require "/fusion/experimental/exception")
+  (define (nested_raise)
+    (raise 10))
+  (provide (all_defined_out)))
+
+(module tester "/fusion"
+  (require
+    "/fusion/experimental/check"
+    "/fusion/experimental/exception"
+    "raiser")
+  (define (run_module_test)
+    (check ===
+      10
+      (with_handlers
+        [((|x| (=== 10 x)) (|x| x))]
+        (nested_raise))))
+  (provide (all_defined_out)))
+
+(require "tester")
+(run_module_test)

@@ -13,4 +13,12 @@ operators only support concrete types that are not yet public.
 See issue [FUSION-54](issue:FUSION-54).
   '''
 
-  (provide java_new))
+  (provide java_new)
+
+  (define java_class
+    (java_new "com.amazon.fusion.JavaClassProc"))
+  (provide java_class)
+
+  (define java_instance_of
+    (java_new "com.amazon.fusion.JavaInstanceOfProc"))
+  (provide java_instance_of))

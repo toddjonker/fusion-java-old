@@ -1,0 +1,128 @@
+// Copyright (c) 2014-2016 Amazon.com, Inc.  All rights reserved.
+
+(module exception '/fusion'
+
+  '''
+Experimental exception raising and handling.
+
+Existing exceptions such as those raised by `raise_argument_error` can be caught
+using the provided `is_*_exn` predicates. They can be re-`raise`d but otherwise
+provide no data for processing within `handler-expr`s.
+  '''
+
+  (require
+    "/fusion/ffi/java"
+    "/fusion/experimental/defines"
+    "/fusion/experimental/syntax")
+
+  (defpub_j raise
+    '''
+    (raise value)
+
+Raises an exception with the `value` provided.
+
+If the `value` is an exception, it is passed through.
+    '''
+    "com.amazon.fusion.RaiseProc")
+
+
+  // THIS IS INTERNAL USE ONLY! DO NOT POKE
+  (define __call_with_handler
+    (java_new "com.amazon.fusion.CallWithHandlerProc"))
+
+  (defpub_syntax with_handlers
+    '''
+    (with_handlers ((pred-expr handler-expr) ...) body ...+)
+
+Evaluates the `body` forms.
+
+If no exceptions are thrown, then the result of the `with_handlers` form is
+the result of the `body` forms.
+
+If an exception is raised during the evaluation of the `body` forms then each
+`pred-expr` is applied to the exception value; if a `pred-expr` returns a truthy
+value, then the corresponding `handler-expr` is invoked with the exception as the argument.
+
+If an exception is handled by one of the `handler-expr` procedures, the result of
+the entire `with_handlers` expression is the result of the `handler-expr`.
+Otherwise the exception is raised from the continuation of the `with_handlers`
+expression.
+
+Note, the `pred-expr` and `handler-expr` procedures take one and only one argument,
+which is the value of the raised exception.
+
+Note, one should avoid using ```(lambda (x) true)``` as a condition because it
+could potentially catch Errors, see the
+[Racket Guide on Exceptions](https://docs.racket-lang.org/guide/exns.html) for more.
+    '''
+    (let [(ctx (quote_syntax here)),
+          (wrong
+            (lambda (stx)
+              (wrong_syntax stx
+                ''' Bad syntax for with_handlers; usage: '''
+                ''' (with_handlers ((pred-expr handler-expr) ...) body ...+) ''')))]
+      (lambda (stx)
+        (when (< (syntax_size stx) 3)
+          (wrong stx))
+        (lets
+          [(orig_args (tail (syntax_unwrap stx))),
+           (body_thunk
+             (pair
+               (quote_syntax thunk)
+               (tail orig_args))),
+           (handler_args (let [(h (syntax_unwrap (head orig_args)))]
+                       (if (is_sequence h)
+                           h
+                           (wrong stx)))),
+           // TODO: This should evaluate the pred-expr's and handler-exprs
+           (make_cond_check
+             (lambda (ph)
+               (unless (=== 2 (syntax_size ph))
+                 (wrong_syntax ph
+                   ''' Bad syntax. Handler must be a pair of predicate and handler expressions '''))
+               (quasisyntax
+                 (((unsyntax (syntax_get ph 0)) exn)          // ((pred-expr exn)
+                  ((unsyntax (syntax_get ph 1)) exn))))),     //  (handler-expr exn))
+           (cond_args (map make_cond_check handler_args)),]
+          (datum_to_syntax
+            (sexp
+              (quote_syntax __call_with_handler)                                               // (__call_with_handler
+              body_thunk                                                                       //   (thunk body ...+)
+              (sexp (quote_syntax lambda)                                                      //   (lambda
+                (sexp (quote_syntax exn) (quote_syntax rethrow_exn_sentinel))                  //     (exn rethrow_exn_sentinel)
+                (append (sexp (quote_syntax cond))                                             //     (cond
+                  (append cond_args                                                            //       ((pred exn) (handler exn))...
+                    (sexp (sexp (quote_syntax true) (quote_syntax rethrow_exn_sentinel)))))))  //       (true rethrow_exn_sentinel))))
+            ctx
+            stx)))))
+
+
+  (define_syntax generate_predicate
+    (let [(ctx (quote_syntax here)),
+          (message "A predicate for use with `with_handlers`. Does NOT work outside of a `with_handlers` form.")]
+      (|stx|
+        (lets
+          [(orig_args (syntax_subseq stx 1)),
+           (pred_name (syntax_get orig_args 0)),
+           (exn_class (syntax_get orig_args 1)),]
+          (datum_to_syntax
+            (sexp (quote_syntax defpub) pred_name                         // (defpub predicate
+              message                                                     //   message
+              (quasisyntax (let [(Exn (java_class (unsyntax exn_class)))] //   (let [(Exn (java_class exn_class)]
+                (|e| (java_instance_of Exn e)))))                         //     (|e| (java_instance_of Exn e))))
+            ctx
+            stx)))))
+
+  (generate_predicate is_argument_exn "com.amazon.fusion.ArgumentException")
+
+  (generate_predicate is_arity_exn "com.amazon.fusion.ArityFailure")
+
+  (generate_predicate is_check_exn "com.amazon.fusion.CheckException")
+
+  (generate_predicate is_contract_exn "com.amazon.fusion.ContractException")
+
+  (generate_predicate is_result_exn "com.amazon.fusion.ResultFailure")
+
+  (generate_predicate is_syntax_exn "com.amazon.fusion.SyntaxException")
+
+)
