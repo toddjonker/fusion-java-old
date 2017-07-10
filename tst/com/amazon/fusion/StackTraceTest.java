@@ -48,7 +48,6 @@ public class StackTraceTest
 
 
     @Test
-
     public void testLet1()
         throws Exception
     {
@@ -102,6 +101,62 @@ public class StackTraceTest
                      "      (c    (first 1))]\n" +
                      "  a)");
         expectLocation(3, 13);
+        expectLocation(1, 1);
+    }
+
+
+    //========================================================================
+
+
+    @Test
+    public void testLetrec1()
+        throws Exception
+    {
+        evalForTrace("(letrec [(a (first 1))] a)");
+        expectLocation(1, 13);
+        expectLocation(1, 1);
+    }
+
+    @Test
+    public void testLetrec2()
+        throws Exception
+    {
+        evalForTrace("(letrec [(a  (first 1)),\n" +
+                     "         (b 2)]\n" +
+                     "  a)");
+        expectLocation(1, 14);
+        expectLocation(1, 1);
+
+        evalForTrace("(letrec [(a 1),\n" +
+                     "         (b   (first 1))]\n" +
+                     "  a)");
+        expectLocation(2, 15);
+        expectLocation(1, 1);
+    }
+
+    @Test
+    public void testLetrec3()
+        throws Exception
+    {
+        evalForTrace("(letrec [(a (first 1)),\n" +
+                     "         (b 2),\n" +
+                     "         (c 3)]\n" +
+                     "  a)");
+        expectLocation(1, 13);
+        expectLocation(1, 1);
+
+        evalForTrace("(letrec [(a 1),\n" +
+                     "         (b   (first 1)),\n" +
+                     "         (c 3)]\n" +
+                     "  a)");
+        expectLocation(2, 15);
+        expectLocation(1, 1);
+
+        evalForTrace("(letrec [(a 1),\n" +
+                     "         (b 2),\n" +
+                     "         (c    (first 1))]\n" +
+                     "  a)");
+        expectLocation(3, 16);
         expectLocation(1, 1);
     }
 }

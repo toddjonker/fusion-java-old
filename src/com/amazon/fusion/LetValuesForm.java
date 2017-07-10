@@ -137,6 +137,7 @@ final class LetValuesForm
 
         SyntaxSequence bindingForms = (SyntaxSequence) expr.get(eval, 1);
 
+        // The number of bindings is >= the number of binding forms.
         final int numBindingForms = bindingForms.size();
 
         int[] valueCounts = new int[numBindingForms];

@@ -96,12 +96,15 @@ final class LetrecForm
 
         final int numBindings = bindingForms.size();
 
-        CompiledForm[] valueForms = new CompiledForm[numBindings];
+        CompiledForm  [] valueForms = new CompiledForm  [numBindings];
+        SourceLocation[] valueLocns = new SourceLocation[numBindings];
+
         for (int i = 0; i < numBindings; i++)
         {
             SyntaxSexp binding = (SyntaxSexp) bindingForms.get(eval, i);
             SyntaxValue boundExpr = binding.get(eval, 1);
             valueForms[i] = comp.compileExpression(env, boundExpr);
+            valueLocns[i] = boundExpr.getLocation();
         }
 
         CompiledForm body = comp.compileBegin(env, stx, 2);
@@ -111,11 +114,11 @@ final class LetrecForm
             case 0:
                 return body;
             case 1:
-                return new CompiledLetrec1(valueForms, body);
+                return new CompiledLetrec1(valueForms, valueLocns, body);
             case 2:
-                return new CompiledLetrec2(valueForms, body);
+                return new CompiledLetrec2(valueForms, valueLocns, body);
             default:
-                return new CompiledLetrec(valueForms, body);
+                return new CompiledLetrec(valueForms, valueLocns, body);
         }
     }
 
@@ -126,12 +129,16 @@ final class LetrecForm
     private static final class CompiledLetrec
         implements CompiledForm
     {
-        private final CompiledForm[] myValueForms;
-        private final CompiledForm   myBody;
+        private final CompiledForm[]   myValueForms;
+        private final SourceLocation[] myValueLocns;
+        private final CompiledForm     myBody;
 
-        CompiledLetrec(CompiledForm[] valueForms, CompiledForm body)
+        CompiledLetrec(CompiledForm[]   valueForms,
+                       SourceLocation[] valueLocns,
+                       CompiledForm     body)
         {
             myValueForms = valueForms;
+            myValueLocns = valueLocns;
             myBody       = body;
         }
 
@@ -148,8 +155,9 @@ final class LetrecForm
 
             for (int i = 0; i < numBindings; i++)
             {
-                CompiledForm form = myValueForms[i];
-                boundValues[i] = eval.eval(localStore, form);
+                CompiledForm   form = myValueForms[i];
+                SourceLocation locn = myValueLocns[i];
+                boundValues[i] = eval.eval(localStore, form, locn);
             }
 
             return eval.bounceTailForm(localStore, myBody);
@@ -160,12 +168,16 @@ final class LetrecForm
     private static final class CompiledLetrec1
         implements CompiledForm
     {
-        private final CompiledForm myValueForm0;
-        private final CompiledForm myBody;
+        private final CompiledForm   myValueForm0;
+        private final SourceLocation myValueLocn0;
+        private final CompiledForm   myBody;
 
-        CompiledLetrec1(CompiledForm[] valueForms, CompiledForm body)
+        CompiledLetrec1(CompiledForm[]   valueForms,
+                        SourceLocation[] valueLocns,
+                        CompiledForm     body)
         {
             myValueForm0 = valueForms[0];
+            myValueLocn0 = valueLocns[0];
             myBody       = body;
         }
 
@@ -175,7 +187,7 @@ final class LetrecForm
         {
             Store localStore = new LocalStore1(store, UNDEF);
 
-            Object value = eval.eval(localStore, myValueForm0);
+            Object value = eval.eval(localStore, myValueForm0, myValueLocn0);
             localStore.set(0, value);
 
             return eval.bounceTailForm(localStore, myBody);
@@ -186,14 +198,20 @@ final class LetrecForm
     private static final class CompiledLetrec2
         implements CompiledForm
     {
-        private final CompiledForm myValueForm0;
-        private final CompiledForm myValueForm1;
-        private final CompiledForm myBody;
+        private final CompiledForm   myValueForm0;
+        private final CompiledForm   myValueForm1;
+        private final SourceLocation myValueLocn0;
+        private final SourceLocation myValueLocn1;
+        private final CompiledForm   myBody;
 
-        CompiledLetrec2(CompiledForm[] valueForms, CompiledForm body)
+        CompiledLetrec2(CompiledForm[]   valueForms,
+                        SourceLocation[] valueLocns,
+                        CompiledForm     body)
         {
             myValueForm0 = valueForms[0];
             myValueForm1 = valueForms[1];
+            myValueLocn0 = valueLocns[0];
+            myValueLocn1 = valueLocns[1];
             myBody       = body;
         }
 
@@ -203,10 +221,10 @@ final class LetrecForm
         {
             Store localStore = new LocalStore2(store, UNDEF, UNDEF);
 
-            Object value = eval.eval(localStore, myValueForm0);
+            Object value = eval.eval(localStore, myValueForm0, myValueLocn0);
             localStore.set(0, value);
 
-            value = eval.eval(localStore, myValueForm1);
+            value = eval.eval(localStore, myValueForm1, myValueLocn1);
             localStore.set(1, value);
 
             return eval.bounceTailForm(localStore, myBody);
