@@ -109,6 +109,62 @@ public class StackTraceTest
 
 
     @Test
+    public void testLets1()
+        throws Exception
+    {
+        evalForTrace("(lets [(a (first 1))] a)");
+        expectLocation(1, 11);
+        expectLocation(1, 1);
+    }
+
+    @Test
+    public void testLets2()
+        throws Exception
+    {
+        evalForTrace("(lets [(a  (first 1)),\n" +
+                     "       (b 2)]\n" +
+                     "  a)");
+        expectLocation(1, 12);
+        expectLocation(1, 1);
+
+        evalForTrace("(lets [(a 1),\n" +
+                     "       (b   (first 1))]\n" +
+                     "  a)");
+        expectLocation(2, 13);
+        expectLocation(1, 1);
+    }
+
+    @Test
+    public void testLets3()
+        throws Exception
+    {
+        evalForTrace("(lets [(a (first 1)),\n" +
+                     "       (b 2),\n" +
+                     "       (c 3)]\n" +
+                     "  a)");
+        expectLocation(1, 11);
+        expectLocation(1, 1);
+
+        evalForTrace("(lets [(a 1),\n" +
+                     "       (b   (first 1)),\n" +
+                     "       (c 3)]\n" +
+                     "  a)");
+        expectLocation(2, 13);
+        expectLocation(1, 1);
+
+        evalForTrace("(lets [(a 1),\n" +
+                     "       (b 2),\n" +
+                     "       (c    (first 1))]\n" +
+                     "  a)");
+        expectLocation(3, 14);
+        expectLocation(1, 1);
+    }
+
+
+    //========================================================================
+
+
+    @Test
     public void testLetrec1()
         throws Exception
     {
