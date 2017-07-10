@@ -78,7 +78,7 @@ public class FusionException
     /**
      * NOT FOR APPLICATION USE!
      *
-     * @return the internal location list. DO NOT MODIFY!
+     * @return the internal location list. May be null. DO NOT MODIFY!
      */
     List<SourceLocation> getContextLocations()
     {

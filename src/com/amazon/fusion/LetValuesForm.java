@@ -176,7 +176,7 @@ final class LetValuesForm
         }
 
         return new CompiledLetValues(bindingCount, valueCounts, valueForms,
-                                     body);
+                                     valueLocs, body);
     }
 
 
@@ -314,20 +314,25 @@ final class LetValuesForm
     private static final class CompiledLetValues
         implements CompiledForm
     {
-        private final int            myBindingCount;
-        private final int[]          myValueCounts;
-        private final CompiledForm[] myValueForms;
-        private final CompiledForm   myBody;
+        private final int              myBindingCount;
+        private final int[]            myValueCounts;
+        private final CompiledForm[]   myValueForms;
+        private final SourceLocation[] myValueLocns;
+        private final CompiledForm     myBody;
 
-        CompiledLetValues(int bindingCount, int[] valueCounts,
-                          CompiledForm[] valueForms, CompiledForm body)
+        CompiledLetValues(int              bindingCount,
+                          int[]            valueCounts,
+                          CompiledForm[]   valueForms,
+                          SourceLocation[] valueLocns,
+                          CompiledForm     body)
         {
             assert valueCounts.length == valueForms.length;
 
             myBindingCount = bindingCount;
-            myValueCounts = valueCounts;
-            myValueForms = valueForms;
-            myBody       = body;
+            myValueCounts  = valueCounts;
+            myValueForms   = valueForms;
+            myValueLocns   = valueLocns;
+            myBody         = body;
         }
 
         @Override
@@ -341,8 +346,9 @@ final class LetValuesForm
             int bindingPos = 0;
             for (int i = 0; i < numBindings; i++)
             {
-                CompiledForm form = myValueForms[i];
-                Object values = eval.eval(store, form);
+                CompiledForm   form = myValueForms[i];
+                SourceLocation locn = myValueLocns[i];
+                Object values = eval.eval(store, form, locn);
 
                 int expectedCount = myValueCounts[i];
                 if (expectedCount == 1)

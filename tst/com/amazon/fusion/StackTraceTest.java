@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static org.junit.Assert.fail;
 import java.util.Iterator;
+import java.util.List;
 import org.junit.Test;
 
 public class StackTraceTest
@@ -16,7 +17,14 @@ public class StackTraceTest
         throws Exception
     {
         FusionException e = expectFailure(FusionException.class, code);
-        myStack = e.getContextLocations().iterator();
+        List<SourceLocation> locations = e.getContextLocations();
+        if (locations == null)
+        {
+            // This is probably a parsing error, since the evaluator will
+            // otherwise ensure a topmost locations.
+            throw e;
+        }
+        myStack = locations.iterator();
     }
 
 
@@ -41,6 +49,109 @@ public class StackTraceTest
             fail("Expected L" + line +" C" + column
                      + " found L" + loc.getLine() + " C" + loc.getColumn());
         }
+    }
+
+
+
+    //========================================================================
+
+    // Testing `let_values` is a bit more thorough since it compiles differently
+    // when all the binding-pairs introduce a single binding, in which case
+    // it's compiled like `let`.
+
+    @Test
+    public void testLetValues1()
+        throws Exception
+    {
+        // These examples compile like `let`:
+        evalForTrace("(let_values [((a) (first 1))] a)");
+        expectLocation(1, 19);
+        expectLocation(1, 1);
+
+        // These examples do not compile like `let`:
+        evalForTrace("(let_values [((a x) (first 1))] a)");
+        expectLocation(1, 21);
+        expectLocation(1, 1);
+    }
+
+    @Test
+    public void testLetValues2()
+        throws Exception
+    {
+        // These examples compile like `let`:
+        evalForTrace("(let_values [((a)  (first 1)),\n" +
+                     "             ((b) 2)]\n" +
+                     "  a)");
+        expectLocation(1, 20);
+        expectLocation(1, 1);
+
+        evalForTrace("(let_values [((a)  1),\n" +
+                     "             ((b) (first 2))]\n" +
+                     "  a)");
+        expectLocation(2, 19);
+        expectLocation(1, 1);
+
+        // These examples do not compile like `let`:
+        evalForTrace("(let_values [((a x) (first 1)),\n" +
+                     "             ((b)   2)]\n" +
+                     "  a)");
+        expectLocation(1, 21);  // TODO how dow this work?
+        expectLocation(1, 1);
+
+        evalForTrace("(let_values [((a x) (values 1 2)),\n" +
+                     "             ((b)   (first 1))]\n" +
+                     "  a)");
+        expectLocation(2, 21);
+        expectLocation(1, 1);
+    }
+
+    @Test
+    public void testLetValues3()
+        throws Exception
+    {
+        // These examples compile like `let`:
+        evalForTrace("(let_values [((a) (first 1)),\n" +
+                     "             ((b) 2),\n" +
+                     "             ((c) 3)]\n" +
+                     "  a)");
+        expectLocation(1, 19);
+        expectLocation(1, 1);
+
+        evalForTrace("(let_values [((a) 1),\n" +
+                     "             ((b)   (first 1)),\n" +
+                     "             ((c) 3)]\n" +
+                     "  a)");
+        expectLocation(2, 21);
+        expectLocation(1, 1);
+
+        evalForTrace("(let_values [((a) 1),\n" +
+                     "             ((b) 2),\n" +
+                     "             ((c)    (first 1))]\n" +
+                     "  a)");
+        expectLocation(3, 22);
+        expectLocation(1, 1);
+
+        // These examples do not compile like `let`:
+        evalForTrace("(let_values [((a) (first 1)),\n" +
+                     "             ((b x) (values 2 2)),\n" +
+                     "             ((c) 3)]\n" +
+                     "  a)");
+        expectLocation(1, 19);
+        expectLocation(1, 1);
+
+        evalForTrace("(let_values [((a x) (values 1 1)),\n" +
+                     "             ((b)   (first 1)),\n" +
+                     "             ((c) 3)]\n" +
+                     "  a)");
+        expectLocation(2, 21);
+        expectLocation(1, 1);
+
+        evalForTrace("(let_values [((a x) (values 1 1)),\n" +
+                     "             ((b) 2),\n" +
+                     "             ((c)    (first 1))]\n" +
+                     "  a)");
+        expectLocation(3, 22);
+        expectLocation(1, 1);
     }
 
 
