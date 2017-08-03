@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -34,7 +34,7 @@ public class SourceName
      *
      * @param path must not be null or empty.
      *
-     * @see #forFile(File)
+     * @see #forFile(String)
      */
     public static SourceName forFile(File path)
     {
@@ -61,12 +61,19 @@ public class SourceName
 
 
     /** Returns the human-readable source name, for display in messages. */
-    String display()
+    public String display()
     {
         return myDisplay;
     }
 
 
+    /**
+     * Returns the associated source file, if one is known.
+     * This is the case for instances created by {@link #forFile(File)} or
+     * {@link #forFile(String)}.
+     *
+     * @return the source file, or null.
+     */
     public File getFile()
     {
         return null;
@@ -79,6 +86,9 @@ public class SourceName
     }
 
 
+    /**
+     * For displaying messages to users, use {@link #display()} instead.
+     */
     @Override
     public String toString()
     {

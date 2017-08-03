@@ -10,10 +10,17 @@ import java.io.IOException;
 import java.util.Objects;
 
 
+/**
+ * A specific location within some Fusion source code.
+ * <p>
+ * Because Fusion souce code is Ion data, these locations have semantics
+ * aligned with {@link com.amazon.ion.TextSpan} and
+ * {@link com.amazon.ion.OffsetSpan}.
+ */
 public class SourceLocation
 {
     /** May be null. */
-    final SourceName myName;
+    final SourceName myName; // XXX Make private
 
 
     /**
@@ -26,6 +33,7 @@ public class SourceLocation
 
 
     /**
+     * Gets the name of the source of this location.
      * @return null if the source name isn't known.
      */
     public SourceName getSourceName()
@@ -37,7 +45,7 @@ public class SourceLocation
      * Gets the one-based line number.
      * @return zero if the line is unknown.
      */
-    long getLine()
+    public long getLine()
     {
         return 0;
     }
@@ -46,12 +54,13 @@ public class SourceLocation
      * Gets the one-based column number.
      * @return zero if the column is unknown.
      */
-    long getColumn()
+    public long getColumn()
     {
         return 0;
     }
 
 
+    // TODO Define what this offset is counting.
     /**
      * Gets the zero-based starting offset.
      * @return -1 if the offset is unknown.
@@ -79,13 +88,13 @@ public class SourceLocation
         }
 
         @Override
-        long getLine()
+        public long getLine()
         {
             return myLine;
         }
 
         @Override
-        long getColumn()
+        public long getColumn()
         {
             return myColumn;
         }
@@ -114,13 +123,13 @@ public class SourceLocation
         }
 
         @Override
-        long getLine()
+        public long getLine()
         {
             return myLine;
         }
 
         @Override
-        long getColumn()
+        public long getColumn()
         {
             return myColumn;
         }
@@ -149,13 +158,13 @@ public class SourceLocation
         }
 
         @Override
-        long getLine()
+        public long getLine()
         {
             return myLine;
         }
 
         @Override
-        long getColumn()
+        public long getColumn()
         {
             return myColumn;
         }
@@ -271,7 +280,13 @@ public class SourceLocation
     }
 
 
-    void display(Appendable out)
+    /**
+     * Displays this location in a human-readable form, in terms of line,
+     * column, and source name.
+     *
+     * @param out the stream to write
+     */
+    public void display(Appendable out)
         throws IOException
     {
         long line   = getLine();
@@ -280,7 +295,7 @@ public class SourceLocation
         if (line < 1)
         {
             out.append("unknown location in ");
-            out.append(myName.display());
+            out.append(myName.display());        // FIXME bad output if no name
         }
         else
         {
@@ -297,8 +312,11 @@ public class SourceLocation
         }
     }
 
-    @Override
-    public String toString()
+    /**
+     * Displays this location in a human-readable form, in terms of line,
+     * column, and source name.
+     */
+    public String display()
     {
         StringBuilder out = new StringBuilder();
         try
@@ -307,6 +325,15 @@ public class SourceLocation
         }
         catch (IOException e) { /* shouldn't happen */ }
         return out.toString();
+    }
+
+    /**
+     * For displaying messages to users, use {@link #display()} instead.
+     */
+    @Override
+    public String toString()
+    {
+        return display();
     }
 
 

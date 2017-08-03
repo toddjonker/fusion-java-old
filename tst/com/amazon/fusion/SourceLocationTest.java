@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -30,23 +30,23 @@ public class SourceLocationTest
         SourceName name = SourceName.forDisplay("test source");
         loc = SourceLocation.forCurrentSpan(ir, name);
         assertEquals("unknown location in test source",
-                     loc.toString());
+                     loc.display());
 
         // Text position, no name
         ir = sys.newReader("(hi)");
         ir.next();
         loc = SourceLocation.forCurrentSpan(ir, null);
         assertEquals("1st line, 1st column",
-                     loc.toString());
+                     loc.display());
 
         // Text position, with name
         loc = SourceLocation.forCurrentSpan(ir, name);
         assertEquals("1st line, 1st column of test source",
-                     loc.toString());
+                     loc.display());
         ir.stepIn();
         ir.next();
         loc = SourceLocation.forCurrentSpan(ir, name);
         assertEquals("1st line, 2nd column of test source",
-                     loc.toString());
+                     loc.display());
     }
 }
