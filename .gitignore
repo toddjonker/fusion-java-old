@@ -2,6 +2,7 @@
 /compiled
 /demo/compiled
 /eclipse-bin
+/old-jdiff
 cobertura.ser
 junit*.properties
 tmp*
