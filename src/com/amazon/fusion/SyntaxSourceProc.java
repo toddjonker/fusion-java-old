@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -24,7 +24,7 @@ class SyntaxSourceProc
         SourceLocation location = stx.getLocation();
         if (location != null)
         {
-            SourceName name = location.myName;
+            SourceName name = location.getSourceName();
             if (name != null)
             {
                 return makeString(eval, name.display());

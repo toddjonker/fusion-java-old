@@ -20,7 +20,7 @@ import java.util.Objects;
 public class SourceLocation
 {
     /** May be null. */
-    final SourceName myName; // XXX Make private
+    private final SourceName myName;
 
 
     /**

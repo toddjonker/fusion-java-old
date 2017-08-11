@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -287,25 +287,26 @@ public final class _Private_CoverageWriter
 
         for (SourceLocation loc : myDatabase.locations())
         {
-            if (loc.myName != null)
+            SourceName sourceName = loc.getSourceName();
+            if (sourceName != null)
             {
-                ModuleIdentity id = loc.myName.getModuleIdentity();
+                ModuleIdentity id = sourceName.getModuleIdentity();
                 if (id != null && myConfig.myModuleSelector.test(id))
                 {
                     myModules.add(id);
 
-                    SourceName prior = myNamesForModules.put(id, loc.myName);
-                    assert prior == null || prior == loc.myName;
+                    SourceName prior = myNamesForModules.put(id, sourceName);
+                    assert prior == null || prior == sourceName;
                 }
                 else
                 {
-                    File f = loc.myName.getFile();
+                    File f = sourceName.getFile();
                     if (f != null)
                     {
                         mySourceFiles.add(f);
 
-                        SourceName prior = myNamesForFiles.put(f, loc.myName);
-                        assert prior == null || prior == loc.myName;
+                        SourceName prior = myNamesForFiles.put(f, sourceName);
+                        assert prior == null || prior == sourceName;
                     }
                 }
             }

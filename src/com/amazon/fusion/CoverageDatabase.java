@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -132,9 +132,10 @@ class CoverageDatabase
         while (i.hasNext())
         {
             SourceLocation loc = i.next();
-            if (loc.myName != null)
+            SourceName name = loc.getSourceName();
+            if (name != null)
             {
-                names.add(loc.myName);
+                names.add(name);
             }
         }
 
@@ -171,7 +172,7 @@ class CoverageDatabase
         while (i.hasNext())
         {
             SourceLocation loc = i.next();
-            if (name.equals(loc.myName))
+            if (name.equals(loc.getSourceName()))
             {
                 locsList.add(loc);
             }
