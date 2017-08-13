@@ -73,16 +73,18 @@ final class FusionSyntax
 
 
     /**
-     * Works under assumption that the Identifier has been expanded, compiled, and evaluated!
-     * See http://docs.racket-lang.org/reference/stxcmp.html?q=member#%28def._%28%28quote._~23~25kernel%29._identifier-binding%29%29
+     * Provides the site where an identifier was bound.
+     * The result is only valid when the identifier is taked from fully-expanded
+     * code.
+     * <p>
+     * Based on Racket's <a href="http://docs.racket-lang.org/reference/stxcmp.html?q=member#%28def._%28%28quote._~23~25kernel%29._identifier-binding%29%29">{@code identifier-binding}</a>.
      *
      * @param id must be an identifier
      */
-    static BindingInformation unsafeIdentifierBinding(Evaluator eval,
-                                                      Object id)
+    static BindingSite unsafeIdentifierBinding(Evaluator eval, Object id)
         throws FusionException
     {
-        return ((SyntaxSymbol) id).uncachedResolve().getBindingInformation();
+        return ((SyntaxSymbol) id).uncachedResolve().getBindingSite();
     }
 
 

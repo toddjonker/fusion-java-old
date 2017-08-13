@@ -23,7 +23,7 @@ final class FreeBinding
 
 
     @Override
-    BindingInformation getBindingInformation()
+    BindingSite getBindingSite()
     {
         return null;
     }

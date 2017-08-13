@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.BindingSite.makeBindingSite;
 import static com.amazon.fusion.GlobalState.DEFINE;
 import static com.amazon.fusion.GlobalState.REQUIRE;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
@@ -22,7 +23,7 @@ final class ModuleNamespace
     {
         private final BaseSymbol     myName;
         private final SourceLocation myLoc;
-        private BindingInformation   myInfo;
+        private BindingSite          mySite;
 
         ProvidedBinding(BaseSymbol name, SourceLocation sourceLocation)
         {
@@ -34,15 +35,13 @@ final class ModuleNamespace
         final BaseSymbol getName() { return myName; }
 
         @Override
-        BindingInformation getBindingInformation()
+        BindingSite getBindingSite()
         {
-            if (myInfo == null)
+            if (mySite == null)
             {
-                myInfo = BindingInformation.makeBindingInfo(
-                             myLoc,
-                             target().getBindingInformation());
+                mySite = makeBindingSite(myLoc, target().getBindingSite());
             }
-            return myInfo;
+            return mySite;
         }
 
         @Override
@@ -84,7 +83,7 @@ final class ModuleNamespace
         DefinedProvidedBinding(ModuleDefinedBinding binding)
         {
             this(binding.getName(),
-                 binding.getBindingInformation().getSourceLocation(),
+                 binding.getBindingSite().getSourceLocation(),
                  binding);
         }
 
@@ -159,7 +158,7 @@ final class ModuleNamespace
 
     /**
      * Denotes a module-level binding imported into a module via
-     * {@code require}.
+     * {@code require} or a language declaration.
      *
      * @see LanguageBinding
      */
@@ -203,7 +202,7 @@ final class ModuleNamespace
         ProvidedBinding provideAs(BaseSymbol name,
                                   SourceLocation sourceLocation)
         {
-            return new ImportedProvidedBinding(name, sourceLocation, myTarget);
+            return new ImportedProvidedBinding(name, sourceLocation, getProvided());
         }
 
         @Override

@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.BindingSite.makeLocalBindingSite;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
@@ -22,7 +23,7 @@ final class LocalEnvironment
         private final SyntaxSymbol       myIdentifier;
                 final int                myDepth;
                 final int                myAddress;
-        private final BindingInformation myInfo;
+        private final BindingSite        mySite;
 
         private LocalBinding(SyntaxSymbol identifier, int depth, int address)
         {
@@ -30,9 +31,7 @@ final class LocalEnvironment
             myIdentifier = identifier;
             myDepth      = depth;
             myAddress    = address;
-            myInfo       = BindingInformation.makeBindingInfo(
-                               identifier.getLocation(),
-                               null);
+            mySite       = makeLocalBindingSite(identifier.getLocation());
         }
 
         @Override
@@ -42,9 +41,9 @@ final class LocalEnvironment
         }
 
         @Override
-        BindingInformation getBindingInformation()
+        BindingSite getBindingSite()
         {
-            return myInfo;
+            return mySite;
         }
 
         @Override

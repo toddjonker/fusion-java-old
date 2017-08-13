@@ -8,7 +8,10 @@ import static com.amazon.fusion.FusionSyntax.isIdentifier;
 import static com.amazon.fusion.FusionSyntax.unsafeIdentifierBinding;
 import static com.amazon.fusion.FusionSyntax.unsafeSyntaxUnwrap;
 import static com.amazon.fusion.FusionVoid.voidValue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 
@@ -71,65 +74,65 @@ public class IdentifierBindingTest
         BasicTraversalProc traversal = new BasicTraversalProc();
 
         String module =
-            "(module test_module \"/fusion\"\n" +
-            "  (define (foo x)\n" +
-            "    10)\n" +
-            "  (provide foo (rename_out (foo bar))))";
+            "(module test_module '/fusion' \n" +
+            "  (define (foo x)             \n" +
+            "    10)                       \n" +
+            "  (provide foo                \n" +
+            "    (rename_out (foo bar))))    ";
 
         String source =
-            "(require \"test_module\")\n" +
-            "bar\n" + // imported from Module.
-            "(define topBinding 10)\n" +
-            "(let ((topBinding 5700))\n" + // a shadow
-            "  topBinding)\n" +
-            "topBinding\n" +
-            "foo";
+            "(require test_module)    \n" +
+            "bar                      \n" + // <- renamedModuleReference
+            "(define topBinding 10)   \n" +
+            "(let [(topBinding 5700)] \n" + // a shadow
+            "  topBinding)            \n" +
+            "topBinding               \n" + // <- topLevelReference
+            "foo";                          // <- moduleReference
 
         eval(topLevel(), module);
-        FusionEval.expandProgram(topLevel(), source,
-                                 SourceName.forDisplay("TestFile"),
-                                 traversal);
+        SourceName sourceName = SourceName.forDisplay("TestFile");
+        FusionEval.expandProgram(topLevel(), source, sourceName, traversal);
 
 
-        BindingInformation topLevelInfo =
+        BindingSite topLevelSite =
             unsafeIdentifierBinding(eval,
                                     traversal.topLevelReference);
-        assertBindingAt(3, 9, topLevelInfo);
-        assertEquals("TestFile",
-                     topLevelInfo
-                         .getSourceLocation()
-                         .getSourceName()
-                         .toString());
+        assertBindingAt(3, 9, topLevelSite);
+        assertEquals(sourceName,
+                     topLevelSite.getSourceLocation().getSourceName());
 
 
-        // We expect the BindingInformation's SourceLocation to be null because
+        // We expect the BindingSite's SourceLocation to be null because
         // there is no local reference for the binding to go to. Thus, we'll jump
         // to the provide site using getModuleBindingInformation after confirming
         // that this is a required binding.
-        BindingInformation moduleProvidedBinding =
+        BindingSite moduleProvidedBinding =
             unsafeIdentifierBinding(eval,
                                     traversal.moduleReference);
         assertNull(moduleProvidedBinding.getSourceLocation());
-        assertTrue(moduleProvidedBinding.isRequiredBinding());
+        assertTrue(moduleProvidedBinding.isImportSite());
         assertBindingAt(4, 12,
-                        moduleProvidedBinding.getModuleBindingInformation());
+                        moduleProvidedBinding.getExportSite());
 
 
-        BindingInformation renameProvidedBinding =
+        BindingSite renameProvidedBinding =
             unsafeIdentifierBinding(eval,
                                     traversal.renamedModuleReference);
         assertNull(renameProvidedBinding.getSourceLocation());
-        assertTrue(renameProvidedBinding.isRequiredBinding());
-        assertBindingAt(4, 33, renameProvidedBinding.getModuleBindingInformation());
+        assertTrue(renameProvidedBinding.isImportSite());
+        assertBindingAt(5, 22, renameProvidedBinding.getExportSite());
 
 
-        BindingInformation moduleDefinedBinding = moduleProvidedBinding.target();
+        BindingSite moduleDefinedBinding = moduleProvidedBinding.target();
         assertBindingAt(2, 12, moduleDefinedBinding);
 
 
-        BindingInformation renamedDefinedBinding = renameProvidedBinding.target();
+        BindingSite renamedDefinedBinding = renameProvidedBinding.target();
         assertEquals(moduleDefinedBinding.getSourceLocation(),
                      renamedDefinedBinding.getSourceLocation());
+
+        // TODO test chained renames
+        // TODO test local bindings
     }
 
 
@@ -158,33 +161,30 @@ public class IdentifierBindingTest
         FusionEval.expandProgram(topLevel(), source, null, traversal);
 
 
-        BindingInformation onlyInBinding =
+        BindingSite onlyInBinding =
             unsafeIdentifierBinding(evaluator(),
                                     traversal.moduleReference);
         assertBindingAt(1, 31, onlyInBinding);
 
 
-        BindingInformation enclosingProvide =
-            onlyInBinding.getModuleBindingInformation();
+        BindingSite enclosingProvide =
+            onlyInBinding.getExportSite();
         assertBindingAt(3, 12, enclosingProvide);
 
 
-        BindingInformation definition = onlyInBinding.target();
+        BindingSite definition = onlyInBinding.target();
         assertBindingAt(2, 11, definition);
         assertNotEquals(enclosingProvide.getSourceLocation(),
                         definition.getSourceLocation());
     }
 
 
-    private void assertBindingAt(int                expectedSourceLine,
-                                 int                expectedSourceColumn,
-                                 BindingInformation bindingInfo)
+    private void assertBindingAt(int         expectedSourceLine,
+                                 int         expectedSourceColumn,
+                                 BindingSite bindingInfo)
     {
-        assertNotNull(bindingInfo);
-        assertNotNull(bindingInfo.getSourceLocation());
-        assertEquals(expectedSourceLine,
-                     bindingInfo.getSourceLocation().getLine());
-        assertEquals(expectedSourceColumn,
-                     bindingInfo.getSourceLocation().getColumn());
+        SourceLocation locn = bindingInfo.getSourceLocation();
+        assertEquals(expectedSourceLine,   locn.getLine());
+        assertEquals(expectedSourceColumn, locn.getColumn());
     }
 }

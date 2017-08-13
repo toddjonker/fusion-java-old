@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.BindingSite.makeDefineBindingSite;
+import static com.amazon.fusion.BindingSite.makeImportBindingSite;
 import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
@@ -81,18 +83,16 @@ abstract class Namespace
     abstract class NsDefinedBinding
         extends NsBinding
     {
-        private final BaseSymbol         myName;
-        private final String             myDebugName;
-        private final BindingInformation myInfo;
+        private final BaseSymbol  myName;
+        private final String      myDebugName;
+        private final BindingSite mySite;
         final int myAddress;
 
         NsDefinedBinding(SyntaxSymbol identifier, int address)
         {
             myName      = identifier.getName();
             myDebugName = identifier.debugString();
-            myInfo      = BindingInformation.makeBindingInfo(
-                              identifier.getLocation(),
-                              null);
+            mySite      = makeDefineBindingSite(identifier.getLocation());
             myAddress   = address;
         }
 
@@ -103,9 +103,9 @@ abstract class Namespace
         }
 
         @Override
-        BindingInformation getBindingInformation()
+        BindingSite getBindingSite()
         {
-            return myInfo;
+            return mySite;
         }
 
         final String getDebugName()
@@ -150,19 +150,19 @@ abstract class Namespace
     abstract static class RequiredBinding
         extends NsBinding
     {
-        private final BaseSymbol     myName;
-        private final String         myDebugName;
-        private final SourceLocation myLoc;
-        final ProvidedBinding        myTarget;  // TODO rename
-        private BindingInformation   myInfo;
+        private final BaseSymbol      myName;
+        private final String          myDebugName;
+        private final SourceLocation  myLoc;
+        private final ProvidedBinding myProvide;
+        private BindingSite           mySite;
 
-        RequiredBinding(SyntaxSymbol identifier, ProvidedBinding target)
+        RequiredBinding(SyntaxSymbol identifier, ProvidedBinding provide)
         {
-            assert target != null;
+            assert provide != null;
             myName      = identifier.getName();
             myDebugName = identifier.debugString();
             myLoc       = identifier.getLocation();
-            myTarget    = target;
+            myProvide   = provide;
         }
 
         @Override
@@ -172,16 +172,15 @@ abstract class Namespace
         }
 
         @Override
-        BindingInformation getBindingInformation()
+        BindingSite getBindingSite()
         {
-            if (myInfo == null)
+            if (mySite == null)
             {
-                myInfo = BindingInformation.makeRequiredBindingInfo(
-                             myLoc,
-                             myTarget.getBindingInformation(),
-                             target().getBindingInformation());
+                mySite = makeImportBindingSite(myLoc,
+                                               myProvide.getBindingSite(),
+                                               target().getBindingSite());
             }
-            return myInfo;
+            return mySite;
         }
 
         final String getDebugName()
@@ -192,19 +191,19 @@ abstract class Namespace
         /** Gets the binding that was {@code provide}d. */
         final ProvidedBinding getProvided()
         {
-            return myTarget;
+            return myProvide;
         }
 
         @Override
         final ModuleDefinedBinding target()
         {
-            return myTarget.target();
+            return myProvide.target();
         }
 
         @Override
         final Object lookup(Namespace ns)
         {
-            return myTarget.lookup(ns);
+            return myProvide.lookup(ns);
         }
 
         @Override

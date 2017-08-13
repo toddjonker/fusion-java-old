@@ -58,7 +58,7 @@ abstract class Binding
     /**
      * @return null if {@link FreeBinding}.
      */
-    abstract BindingInformation getBindingInformation();
+    abstract BindingSite getBindingSite();
 
     /**
      * Determines whether this is a {@link FreeBinding} with the given name.
@@ -91,7 +91,15 @@ abstract class Binding
         return target() == other.target();
     }
 
-    ProvidedBinding provideAs(BaseSymbol name, SourceLocation sourceLocation)
+    /**
+     * Derives a binding that exports this one.
+     *
+     * @param name the exported name; may be different from {@link #getName()}.
+     * @param idLocation the location, in a {@code provide} form, of the
+     *   exported identifier. May be null if the name isn't explicitly given
+     *   in the form, as in {@code (provide (all_defined_out))}.
+     */
+    ProvidedBinding provideAs(BaseSymbol name, SourceLocation idLocation)
     {
         throw new IllegalStateException("This kind of binding can't be exported");
     }

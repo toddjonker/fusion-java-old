@@ -507,6 +507,14 @@ final class ModuleForm
         private final List<ProvidedBinding>   myBindings      = new ArrayList<>();
 
 
+        /**
+         * Exports an identifier/binding, as in {@code (provide exportId)}.
+         * This creates a new {@code ProvidedBinding} at the location of the
+         * {@code exportId}.
+         *
+         * @param exportId the identifier to be exported.
+         * @param binding the binding to be exported.
+         */
         private void addBinding(SyntaxChecker check,
                                 SyntaxSymbol  exportId,
                                 Binding       binding)
@@ -547,11 +555,13 @@ final class ModuleForm
                 Object clauseObj = unsafePairHead(eval, formDatum);
                 if (clauseObj instanceof SyntaxSymbol)
                 {
+                    // (provide localId)
                     SyntaxSymbol localId = (SyntaxSymbol) clauseObj;
                     addBinding(check, localId, localId.getBinding());
                 }
                 else
                 {
+                    // (provide (FORM ...))
                     SyntaxSexp clauseStx = (SyntaxSexp) clauseObj;
                     SyntaxSymbol formName = clauseStx.firstIdentifier(eval);
                     switch (formName.getName().stringValue())
