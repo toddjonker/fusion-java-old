@@ -80,6 +80,8 @@ final class FusionSyntax
      * Based on Racket's <a href="http://docs.racket-lang.org/reference/stxcmp.html?q=member#%28def._%28%28quote._~23~25kernel%29._identifier-binding%29%29">{@code identifier-binding}</a>.
      *
      * @param id must be an identifier
+     *
+     * @return null if the identifier is free (unbound).
      */
     static BindingSite unsafeIdentifierBinding(Evaluator eval, Object id)
         throws FusionException

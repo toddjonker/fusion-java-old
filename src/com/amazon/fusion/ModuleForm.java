@@ -555,9 +555,9 @@ final class ModuleForm
                 Object clauseObj = unsafePairHead(eval, formDatum);
                 if (clauseObj instanceof SyntaxSymbol)
                 {
-                    // (provide localId)
-                    SyntaxSymbol localId = (SyntaxSymbol) clauseObj;
-                    addBinding(check, localId, localId.getBinding());
+                    // (provide insideId)
+                    SyntaxSymbol insideId = (SyntaxSymbol) clauseObj;
+                    addBinding(check, insideId, insideId.getBinding());
                 }
                 else
                 {
@@ -568,15 +568,17 @@ final class ModuleForm
                     {
                         case "all_defined":
                         {
+                            // Expansion of all_defined_out provides the
+                            // individual symbols before this marker.
                             break;
                         }
                         case "rename":
                         {
-                            SyntaxSymbol localId = (SyntaxSymbol)
+                            SyntaxSymbol insideId = (SyntaxSymbol)
                                 clauseStx.get(eval, 1);
-                            addBinding(check,
-                                       (SyntaxSymbol) clauseStx.get(eval, 2),
-                                       localId.getBinding());
+                            SyntaxSymbol outsideId = (SyntaxSymbol)
+                                clauseStx.get(eval, 2);
+                            addBinding(check, outsideId, insideId.getBinding());
                             break;
                         }
                         default:

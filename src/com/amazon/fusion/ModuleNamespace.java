@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.BindingSite.makeBindingSite;
+import static com.amazon.fusion.BindingSite.makeExportBindingSite;
 import static com.amazon.fusion.GlobalState.DEFINE;
 import static com.amazon.fusion.GlobalState.REQUIRE;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
@@ -39,7 +39,7 @@ final class ModuleNamespace
         {
             if (mySite == null)
             {
-                mySite = makeBindingSite(myLoc, target().getBindingSite());
+                mySite = makeExportBindingSite(myLoc, inside().getBindingSite());
             }
             return mySite;
         }
@@ -50,6 +50,12 @@ final class ModuleNamespace
         {
             return new ImportedProvidedBinding(name, sourceLocation, this);
         }
+
+        /**
+         * Gets the binding that's being exported, either a definition or
+         * import.
+         */
+        abstract Binding inside();
 
         @Override
         abstract ModuleDefinedBinding target();
@@ -85,6 +91,12 @@ final class ModuleNamespace
             this(binding.getName(),
                  binding.getBindingSite().getSourceLocation(),
                  binding);
+        }
+
+        @Override
+        Binding inside()
+        {
+            return myDefinition;
         }
 
         @Override
@@ -127,6 +139,12 @@ final class ModuleNamespace
         {
             super(name, sourceLocation);
             myImport = imported;
+        }
+
+        @Override
+        Binding inside()
+        {
+            return myImport;
         }
 
         @Override
@@ -314,9 +332,9 @@ final class ModuleNamespace
         }
 
         @Override
-        ProvidedBinding provideAs(BaseSymbol name, SourceLocation sourceLocation)
+        ProvidedBinding provideAs(BaseSymbol name, SourceLocation idLocation)
         {
-            return new DefinedProvidedBinding(name, sourceLocation, this);
+            return new DefinedProvidedBinding(name, idLocation, this);
         }
 
         @Override

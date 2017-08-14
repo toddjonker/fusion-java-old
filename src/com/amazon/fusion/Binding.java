@@ -39,7 +39,7 @@ import com.amazon.fusion.TopLevelNamespace.TopLevelDefinedBinding;
  *     perhaps renaming the variable along the way.
  *     <ul>
  *       <li>{@link ProvidedBinding}s refer to module-level defined
- *         bindings.
+ *         bindings, or to required binding.
  *       </li>
  *       <li>{@link RequiredBinding}s refer to provided bindings.
  *       </li>

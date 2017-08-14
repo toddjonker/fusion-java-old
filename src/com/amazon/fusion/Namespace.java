@@ -177,8 +177,7 @@ abstract class Namespace
             if (mySite == null)
             {
                 mySite = makeImportBindingSite(myLoc,
-                                               myProvide.getBindingSite(),
-                                               target().getBindingSite());
+                                               myProvide.getBindingSite());
             }
             return mySite;
         }

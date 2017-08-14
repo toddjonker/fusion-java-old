@@ -98,6 +98,8 @@ public class IdentifierBindingTest
             unsafeIdentifierBinding(eval,
                                     traversal.topLevelReference);
         assertBindingAt(3, 9, topLevelSite);
+        assertTrue(topLevelSite.isDefinitionSite());
+        assertNull(topLevelSite.nextSite());
         assertEquals(sourceName,
                      topLevelSite.getSourceLocation().getSourceName());
 
@@ -112,7 +114,7 @@ public class IdentifierBindingTest
         assertNull(moduleProvidedBinding.getSourceLocation());
         assertTrue(moduleProvidedBinding.isImportSite());
         assertBindingAt(4, 12,
-                        moduleProvidedBinding.getExportSite());
+                        moduleProvidedBinding.nextSite());
 
 
         BindingSite renameProvidedBinding =
@@ -120,7 +122,7 @@ public class IdentifierBindingTest
                                     traversal.renamedModuleReference);
         assertNull(renameProvidedBinding.getSourceLocation());
         assertTrue(renameProvidedBinding.isImportSite());
-        assertBindingAt(5, 22, renameProvidedBinding.getExportSite());
+        assertBindingAt(5, 22, renameProvidedBinding.nextSite());
 
 
         BindingSite moduleDefinedBinding = moduleProvidedBinding.target();
@@ -168,7 +170,7 @@ public class IdentifierBindingTest
 
 
         BindingSite enclosingProvide =
-            onlyInBinding.getExportSite();
+            onlyInBinding.nextSite();
         assertBindingAt(3, 12, enclosingProvide);
 
 

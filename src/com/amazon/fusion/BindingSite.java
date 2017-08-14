@@ -4,26 +4,16 @@ package com.amazon.fusion;
 
 /**
  * Exposes binding metadata about an identifier in Fusion source code.
+ * <p>
+ * <b>WARNING: This class is experimental and unstable.</b>
+ * Use at your own risk.
+ * <p>
  * {@code BindingSite} instances form a chain from some point-of-use
  * identifier (that is, a variable reference), through applicable
  * {@code require} and {@code provide} forms, to the point of definition.
- * For the purposes of this metadata, each element in the chain is treated as
- * a binding.
  * <p>
- * Example usage:
- * Call {@link #getSourceLocation()} for the location of the binding site
- * within the file (if there is one).
- * <p>
- * If there isn't, check if the binding information was obtained from an
- * imported binding using {@link #isImportSite()} and, if it was, then use
- * {@link #getExportSite()} to get the {@link BindingSite}
- * of the provide site for the imported binding.
- * <p>
- * This sequence would then be repeated for the identifier at the provide site
- * which is another variable reference which might or might not be imported.
- * <p>
- * Calling {@link #target()} will get of the {@link BindingSite} of the
- * identifiers original binding site, wherever that may be.
+ * Calling {@link #target()} will get the site at the end of the chain: the
+ * identifier's original binding site, wherever that may be.
  */
 public class BindingSite
 {
@@ -41,8 +31,8 @@ public class BindingSite
     /**
      * Returns the location of this site.
      *
-     * @return null if called on a binding with no local binding reference.
-     * This happens when there is no explicit identifier given during import.
+     * @return null if called on a site with no explicit identifier.
+     * This happens when there is no identifier given during import or export.
      */
     public SourceLocation getSourceLocation()
     {
@@ -51,44 +41,60 @@ public class BindingSite
 
 
     /**
-     * Gets the site where an imported binding was exported.
-     *
-     * Example:
-     * <pre>
-     * (module mod "/fusion"
-     *   (define foo 7)
-     *   (provide foo)
-     *
-     * (require (only_in mod foo))
-     * foo
-     * </pre>
-     *
-     * The trailing top level {@code foo} has an imported binding. Calling this
-     * method on its {@link BindingSite} will return the site of the
-     * {@code (provide foo)} in {@code mod}.
-     * Calling {@link #getSourceLocation()} on the former site would return the
-     * location of the {@code foo} reference within {@code only_in}.
-     *
-     * @return null unless this {@link #isImportSite()}.
+     * Gets the next site in the chain.
+     * <ul>
+     *   <li>The next site of a local or definition site is null.
+     *   <li>The next site of an import site is an export site.
+     *   <li>The next site of an export site is an import, local, or definition
+     *       site
+     * </ul>
      */
-    public BindingSite getExportSite()
+    BindingSite nextSite()
     {
+        // TODO Decide whether this should be exposed or if its even needed.
         return null;
     }
 
+    /**
+     * Indicates whether this site is where a local binding was declared.
+     */
+    boolean isLocalSite()
+    {
+        return false;
+    }
+
+    /**
+     * Indicates whether this site is where a (namespace-level) binding was
+     * {@code define}d.
+     */
+    boolean isDefinitionSite()
+    {
+        return false;
+    }
+
+    /**
+     * Indicates whether this site is where a binding was {@code provide}d by
+     * a module.
+     */
+    boolean isExportSite()
+    {
+        return false;
+    }
 
     /**
      * Indicates whether this site is where a binding was {@code require}d or
      * imported via a language declaration.
      */
-    public boolean isImportSite()
+    boolean isImportSite()
     {
         return false;
     }
 
 
+
     /**
-     * Gets the BindingSite of the Binding targeted by this Binding.
+     * Gets the site of the originating binding symbol, as declared by
+     * {@code define}, {@code lambda}, {@code let}, and so on.
      * This jumps across modules, renames, and files to get to the original
      * definition site.
      *
@@ -107,29 +113,86 @@ public class BindingSite
     //=========================================================================
 
 
+    private static final class LocalSite
+        extends BindingSite
+    {
+        private LocalSite(SourceLocation bindingIdLoc)
+        {
+            super(bindingIdLoc, null);
+        }
+
+        @Override
+        public boolean isLocalSite()
+        {
+            return true;
+        }
+    }
+
+
+    private static final class DefinitionSite
+        extends BindingSite
+    {
+        private DefinitionSite(SourceLocation definitionLoc)
+        {
+            super(definitionLoc, null);
+        }
+
+        @Override
+        public boolean isDefinitionSite()
+        {
+            return true;
+        }
+    }
+
+
+    private static final class ExportSite
+        extends BindingSite
+    {
+        private final BindingSite myInsideSite;
+
+        private ExportSite(SourceLocation outsideIdLoc,
+                           BindingSite    insideSite)
+        {
+            super(outsideIdLoc, insideSite.target());
+            myInsideSite = insideSite;
+        }
+
+        @Override
+        public boolean isExportSite()
+        {
+            return true;
+        }
+
+        @Override
+        public BindingSite nextSite()
+        {
+            return myInsideSite;
+        }
+    }
+
+
     private static final class ImportSite
         extends BindingSite
     {
         private final BindingSite myExportSite;
 
         private ImportSite(SourceLocation importLocation,
-                           BindingSite    exportSite,
-                           BindingSite    targetSite)
+                           BindingSite    exportSite)
         {
-            super(importLocation, targetSite);
+            super(importLocation, exportSite.target());
             myExportSite = exportSite;
-        }
-
-        @Override
-        public BindingSite getExportSite()
-        {
-            return myExportSite;
         }
 
         @Override
         public boolean isImportSite()
         {
             return true;
+        }
+
+        @Override
+        public BindingSite nextSite()
+        {
+            return myExportSite;
         }
     }
 
@@ -139,12 +202,16 @@ public class BindingSite
 
 
     /**
-     * @param bindingLoc the location of the identifier where the binding
+     * Creates a site for a local binding identifier, like the arguments to
+     * procedures and the local variables declared by {@code let},
+     * {@code letrec}, <i>etc.</i>
+     *
+     * @param bindingIdLoc the location of the identifier where the binding
      * was declared.
      */
-    static BindingSite makeLocalBindingSite(SourceLocation bindingLoc)
+    static BindingSite makeLocalBindingSite(SourceLocation bindingIdLoc)
     {
-        return new BindingSite(bindingLoc, null);
+        return new LocalSite(bindingIdLoc);
     }
 
     /**
@@ -155,26 +222,28 @@ public class BindingSite
      */
     static BindingSite makeDefineBindingSite(SourceLocation definitionLoc)
     {
-        return new BindingSite(definitionLoc, null);
+        return new DefinitionSite(definitionLoc);
     }
 
-    static BindingSite makeExportBindingSite(SourceLocation srcLoc,
-                                             BindingSite    bindingInfo)
+    /**
+     * Creates a site for an exported binding.
+     *
+     * @param outsideIdLoc the location of the identifier declaring the
+     *   exported name. May be null, since not all exports explicitly declare
+     *   their names.
+     * @param insideSite the site of the module-level definition or import
+     *   that's being exported.
+     */
+    static BindingSite makeExportBindingSite(SourceLocation outsideIdLoc,
+                                             BindingSite    insideSite)
     {
-        return new BindingSite(srcLoc, bindingInfo);
-    }
-
-    static BindingSite makeBindingSite(SourceLocation srcLoc,
-                                       BindingSite    bindingInfo)
-    {
-        return new BindingSite(srcLoc, bindingInfo);
+        return new ExportSite(outsideIdLoc, insideSite);
     }
 
 
     static BindingSite makeImportBindingSite(SourceLocation importLocation,
-                                             BindingSite    exportBindingSite,
-                                             BindingSite    targetSite)
+                                             BindingSite    exportSite)
     {
-        return new ImportSite(importLocation, exportBindingSite, targetSite);
+        return new ImportSite(importLocation, exportSite);
     }
 }
