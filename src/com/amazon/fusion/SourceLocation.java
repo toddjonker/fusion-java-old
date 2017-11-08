@@ -178,8 +178,11 @@ public class SourceLocation
 
 
     /**
-     * @param line one-based
-     * @param column one-based
+     * @param name may be null.
+     * @param line one-based. -1 indicate that the line is unknown.
+     * @param column one-based. -1 indicates that the column is unknown.
+     *
+     * @return null if no information is known.
      */
     static SourceLocation forLineColumn(SourceName name, long line, long column)
     {
@@ -207,8 +210,10 @@ public class SourceLocation
 
 
     /**
-     * @param line one-based
-     * @param column one-based
+     * @param line one-based. -1 indicate that the line is unknown.
+     * @param column one-based. -1 indicates that the column is unknown.
+     *
+     * @return null if no information is known.
      */
     static SourceLocation forLineColumn(long line, long column)
     {

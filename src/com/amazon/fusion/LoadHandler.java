@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -111,16 +111,21 @@ final class LoadHandler
     {
         if (reader.getType() == null && reader.next() == null)
         {
-            String message = "Module source has no top-level forms: " + id;
-            throw new FusionException(message);
+            String message = "Module source has no top-level forms";
+            SyntaxException e =
+                new SyntaxException(null /* syntax form */, message);
+            e.addContext(SourceLocation.forLineColumn(sourceName, -1, -1));
+            throw e;
         }
 
         SyntaxValue firstTopLevel = readSyntax(eval, reader, sourceName);
         if (reader.next() != null)
         {
-            String message =
-                "Module source has more than one top-level form: " + id;
-            throw new FusionException(message);
+            String message = "Module source has more than one top-level form";
+            SyntaxException e =
+                new SyntaxException(null /* syntax form */, message);
+            e.addContext(SourceLocation.forCurrentSpan(reader, sourceName));
+            throw e;
         }
 
         try
@@ -139,7 +144,7 @@ final class LoadHandler
         catch (ClassCastException e) { /* fall through */ }
 
         String message = "Top-level form isn't (module ...)";
-        throw new SyntaxException("load handler", message, firstTopLevel);
+        throw new SyntaxException(null /* syntax form */, message, firstTopLevel);
     }
 
 

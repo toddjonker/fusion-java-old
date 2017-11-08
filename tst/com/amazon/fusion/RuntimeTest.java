@@ -1,8 +1,10 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.isVoid;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -13,13 +15,17 @@ import com.amazon.ion.IonInt;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonValue;
 import java.io.File;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class RuntimeTest
     extends CoreTestCase
 {
     private static final File TEST_REPO = new File("tst-repo");
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void testDefaultBuilder()
@@ -335,5 +341,55 @@ public class RuntimeTest
             fail("Expected exception");
         }
         catch (FusionException e) { }
+    }
+
+    @Test
+    public void testLoadModuleNoContent()
+        throws Exception
+    {
+        String modulePath = "/local/manual";
+        SourceName source = SourceName.forDisplay("/path/to/blah");
+        String moduleContent = "/* nothing */";
+
+        thrown.expect(FusionException.class);
+        thrown.expectMessage(allOf(containsString("no top-level forms"),
+                                   containsString(modulePath),
+                                   containsString(source.display())));
+
+        topLevel().loadModule(modulePath, system().newReader(moduleContent), source);
+    }
+
+    @Test
+    public void testLoadModuleExtraContent()
+        throws Exception
+    {
+        String modulePath = "/local/manual";
+        SourceName source = SourceName.forDisplay("/path/to/blah");
+        String moduleContent = "(module m '/fusion' true) extra_data";
+
+        thrown.expect(FusionException.class);
+        thrown.expectMessage(allOf(containsString("more than one top-level form"),
+                                   containsString(modulePath),
+                                   containsString(source.display())));
+
+        topLevel().loadModule(modulePath, system().newReader(moduleContent), source);
+    }
+
+
+    @Test
+    public void testLoadModuleWrongForm()
+        throws Exception
+    {
+        String modulePath = "/local/manual";
+        SourceName source = SourceName.forDisplay("/path/to/blah");
+        String moduleContent = " (if true 1 2)";
+
+        thrown.expect(FusionException.class);
+        thrown.expectMessage(allOf(containsString("Top-level form isn't (module ...)"),
+                                   containsString(modulePath),
+                                   containsString("1st line, 2nd column"),
+                                   containsString(source.display())));
+
+        topLevel().loadModule(modulePath, system().newReader(moduleContent), source);
     }
 }
