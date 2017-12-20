@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2017 Amazon.com, Inc.  All rights reserved.
 
 (module exception '/fusion'
 
@@ -30,28 +30,36 @@ If the `value` is an exception, it is passed through.
   (define __call_with_handler
     (java_new "com.amazon.fusion.CallWithHandlerProc"))
 
+ (define (make_selector preds_and_handlers)
+   (|e sentinel|
+     (let loop [(phs preds_and_handlers)]
+       (if (is_empty phs)
+         sentinel
+         (let [(ph (head phs))]
+           (if ((head ph) e)
+             ((tail ph) e)
+             (loop (tail phs))))))))
+
+
   (defpub_syntax with_handlers
     '''
-    (with_handlers ((pred-expr handler-expr) ...) body ...+)
+    (with_handlers ((pred_expr handler_expr) ...) body ...+)
 
-Evaluates the `body` forms.
+Evaluates each `pred_expr` (predicate) and `handler_expr` (handler) in order,
+and then the `body` forms.  The predicate and handler expressions must each
+return a procedure that accepts one argument: a raised exception value.
 
-If no exceptions are thrown, then the result of the `with_handlers` form is
-the result of the `body` forms.
+If no exceptions are raised during evaluation of the body, then the result of
+the `with_handlers` form is the result of the last `body` form.
 
-If an exception is raised during the evaluation of the `body` forms then each
-`pred-expr` is applied to the exception value; if a `pred-expr` returns a truthy
-value, then the corresponding `handler-expr` is invoked with the exception as the argument.
-
-If an exception is handled by one of the `handler-expr` procedures, the result of
-the entire `with_handlers` expression is the result of the `handler-expr`.
-Otherwise the exception is raised from the continuation of the `with_handlers`
+If an exception is raised, then each predicate is applied to the exception
+value. Once a predicate returns a truthy value, then the corresponding handler
+is applied to the same value, and the handler's result becomes the result of
+the entire `with_handlers` form. If the exception is not matched by any
+predicate, then it is re-raised to the continuation of the `with_handlers`
 expression.
 
-Note, the `pred-expr` and `handler-expr` procedures take one and only one argument,
-which is the value of the raised exception.
-
-Note, one should avoid using ```(lambda (x) true)``` as a condition because it
+Note, one should avoid using `(lambda (x) true)` as a condition because it
 could potentially catch Errors, see the
 [Racket Guide on Exceptions](https://docs.racket-lang.org/guide/exns.html) for more.
     '''
@@ -71,28 +79,25 @@ could potentially catch Errors, see the
                (quote_syntax thunk)
                (tail orig_args))),
            (handler_args (let [(h (syntax_unwrap (head orig_args)))]
-                       (if (is_sequence h)
-                           h
-                           (wrong stx)))),
-           // TODO: This should evaluate the pred-expr's and handler-exprs
-           (make_cond_check
-             (lambda (ph)
-               (unless (=== 2 (syntax_size ph))
-                 (wrong_syntax ph
-                   ''' Bad syntax. Handler must be a pair of predicate and handler expressions '''))
-               (quasisyntax
-                 (((unsyntax (syntax_get ph 0)) exn)          // ((pred-expr exn)
-                  ((unsyntax (syntax_get ph 1)) exn))))),     //  (handler-expr exn))
-           (cond_args (map make_cond_check handler_args)),]
+                           (if (is_sexp h) h
+                             (if (is_list h) (apply sexp h)
+                               (wrong stx))))),
+           (ph_exprs
+             (let loop [(phs handler_args)]
+               (if (is_empty phs) (quote ())
+                 (let [(ph (head phs))]
+                   (if (=== 2 (syntax_size ph))
+                     (pair (sexp (quote_syntax pair) (syntax_get ph 0) (syntax_get ph 1))
+                       (loop (tail phs)))
+                     (wrong_syntax ph
+                       '''Bad syntax. Handler must be a pair of predicate and handler expressions.'''))
+                   ))))
+          ]
           (datum_to_syntax
-            (sexp
-              (quote_syntax __call_with_handler)                                               // (__call_with_handler
-              body_thunk                                                                       //   (thunk body ...+)
-              (sexp (quote_syntax lambda)                                                      //   (lambda
-                (sexp (quote_syntax exn) (quote_syntax rethrow_exn_sentinel))                  //     (exn rethrow_exn_sentinel)
-                (append (sexp (quote_syntax cond))                                             //     (cond
-                  (append cond_args                                                            //       ((pred exn) (handler exn))...
-                    (sexp (sexp (quote_syntax true) (quote_syntax rethrow_exn_sentinel)))))))  //       (true rethrow_exn_sentinel))))
+            (sexp (quote_syntax __call_with_handler)  // (__call_with_handler
+              body_thunk                              //   (thunk body ...+)
+              (sexp (quote_syntax make_selector)      //   (make_selector
+                (pair (quote_syntax sexp) ph_exprs))) //     (sexp (pair P H) ...)))
             ctx
             stx)))))
 

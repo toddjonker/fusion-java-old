@@ -97,17 +97,13 @@
   (with_handlers "foo" (raise "foo")))
 
 // Verify that predicates only accept one argument.
-// TODO: Racket throws an arity exn in this case. We need to see why this
-//   is getting compiled which causes the syntax exception
-(expect_syntax_exn
+(expect_arity_exn
   (with_handlers
     [((|x y| true) (|x| "bar")),]
     (raise "foo")))
 
 // Verify that handlers only accept one argument.
-// TODO: Racket throws an arity exn in this case. We need to see why this
-//   is getting compiled which causes the syntax exception
-(expect_syntax_exn
+(expect_arity_exn
   (with_handlers
     [((|x| true) (|x y| "bar")),]
     (raise "foo")))
@@ -196,3 +192,28 @@
 
 (require "tester")
 (run_module_test)
+
+
+// Verify order of operations
+// https://docs.racket-lang.org/reference/exns.html#%28form._%28%28lib._racket%2Fprivate%2Fmore-scheme..rkt%29._with-handlers%29%29
+//  Evaluates each pred-expr and handler-expr in the order that they are
+//  specified, and then evaluates the bodys with a new exception handler during
+//  its dynamic extent.
+
+(require (only_in "/fusion/list" add_m stretchy_list))
+
+(lets [(evaluation_order (stretchy_list)),
+       (doing (|v| (add_m evaluation_order v)))]
+  (check === "raised exn"
+    (with_handlers
+      [((begin (doing "decl pred1") (|e| (doing "in pred1") false))
+        (begin (doing "decl hand1") (|e| (doing "in hand1") false))),
+       ((begin (doing "decl pred2") (|e| (doing "in pred2") true))
+        (begin (doing "decl hand2") (|e| (doing "in hand2") e)))]
+      (doing "body before raise")
+      (raise "raised exn")
+      (doing "body after raise")))
+  (check === ["decl pred1", "decl hand1", "decl pred2", "decl hand2",
+              "body before raise",
+              "in pred1", "in pred2", "in hand2"]
+    evaluation_order))
