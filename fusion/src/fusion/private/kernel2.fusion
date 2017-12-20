@@ -14,6 +14,9 @@ All values are \"truthy\" except for `false`, void, and any variant of `null`.
 
 Note that only one of `then` or `else` expressions is evaluated, and both are
 in tail position.
+
+For cases that need only one outcome, use [`when`](fusion/bool.html#when) or
+[`unless`](fusion/bool.html#unless).
     '''
     (java_new "com.amazon.fusion.IfForm"))
 

@@ -96,7 +96,7 @@ Evaluates the `test`, and if it is truthy, evaluates the `body` forms left
 to right. The last `body` is in tail position, and its result is the result of
 the entire form.  If the body isn't evaluated, the result is void.
 
-A companion form is `unless`.
+A companion form is [`unless`](fusion/bool.html#unless).
     '''
     (let_values [((ctx) (quote_syntax context))]
       (lambda (stx)
@@ -124,7 +124,7 @@ Evaluates the `test`, and if it is _not_ truthy, evaluates the `body` forms
 left to right. The last `body` is in tail position, and its result is the
 result of the entire form.  If the body isn't evaluated, the result is void.
 
-A companion form is `when`.
+A companion form is [`when`](fusion/bool.html#when).
     '''
     (let_values [((ctx) (quote_syntax context))]
       (lambda (stx)
