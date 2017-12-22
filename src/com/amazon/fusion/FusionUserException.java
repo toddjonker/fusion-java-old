@@ -1,46 +1,47 @@
+// Copyright (c) 2017 Amazon.com, Inc.  All rights reserved.
+
 package com.amazon.fusion;
 
 import java.io.IOException;
 
-class FusionUserException
+/**
+ * Represents an arbitrary, non-exception Fusion value thrown by {@code raise}.
+ */
+@SuppressWarnings("serial")
+final class FusionUserException
     extends FusionException
 {
-    private final Object exceptionValue;
+    private final Object myRaisedValue;
 
-    public FusionUserException(String message, Object exceptionValue)
+    FusionUserException(String message, Object raisedValue)
     {
         super(message);
-        this.exceptionValue = exceptionValue;
+        myRaisedValue = raisedValue;
     }
 
-    public FusionUserException(String message,
-                               Throwable cause,
-                               Object exceptionValue)
+    FusionUserException(String message, Throwable cause, Object raisedValue)
     {
         super(message, cause);
-        this.exceptionValue = exceptionValue;
+        myRaisedValue = raisedValue;
     }
 
-    public FusionUserException(Throwable cause, Object exceptionValue)
+    FusionUserException(Throwable cause, Object raisedValue)
     {
         super(cause.getMessage(), cause);
-        this.exceptionValue = exceptionValue;
+        myRaisedValue = raisedValue;
     }
 
     @Override
     void displayMessage(Evaluator eval, Appendable out)
         throws IOException, FusionException
     {
-        FusionIo.write(eval, out, exceptionValue);
+        FusionIo.write(eval, out, myRaisedValue);
         super.displayMessage(eval, out);
     }
 
-    /**
-     * For use in with_handlers and CallWithHandlerProc.
-     * @return the exception value held within the FusionException
-     */
-    public final Object getExceptionValue()
+    @Override
+    public final Object getRaisedValue()
     {
-        return exceptionValue;
+        return myRaisedValue;
     }
 }

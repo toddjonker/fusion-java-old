@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,6 +10,12 @@ import java.util.Objects;
 /**
  * Represents conditions raised within Fusion code, as opposed to failures
  * within the interpreter implementation.
+ * <p>
+ * Unlike Java's {@code throw} form, Fusion's {@code raise} procedure allows
+ * one to throw arbitrary values, not just "exception" types.  Within the
+ * FusionJava implementation, all such values are wrapped in
+ * {@link FusionException}s.  To determine the value that was raised, call
+ * {@link #getRaisedValue()}.
  */
 @SuppressWarnings("serial")
 public class FusionException
@@ -108,6 +114,20 @@ public class FusionException
         }
     }
 
+    /**
+     * Gets the value that was passed to Fusion's {@code raise} procedure.
+     * The result could be any Fusion value, so it must be handled carefully.
+     * True Fusion exception values -- that is, the values raised by library
+     * features like {@code assert} and {@code raise_argument_error} -- are
+     * implemented as subclasses of this type, and this method will return
+     * {@code this} object.
+     *
+     * @return the Fusion value raised by Fusion code.
+     */
+    public Object getRaisedValue()
+    {
+        return this;
+    }
 
     /**
      * Returns the message string given to the exception constructor.

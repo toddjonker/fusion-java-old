@@ -26,9 +26,7 @@ final class CallWithHandlerProc
         {
             Procedure conder = (Procedure) cond;
 
-            Object exn = e instanceof FusionUserException
-                         ? ((FusionUserException) e).getExceptionValue()
-                         : e;
+            Object exn = e.getRaisedValue();
 
             Object rethrowSentinel = new String("sentinel value");
 
