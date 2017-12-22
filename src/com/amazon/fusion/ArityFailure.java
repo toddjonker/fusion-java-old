@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,7 +10,7 @@ import java.io.IOException;
  * Indicates a failure applying a procedure with the wrong number of arguments.
  */
 @SuppressWarnings("serial")
-class ArityFailure
+final class ArityFailure
     extends ContractException
 {
     private final String myProcIdentity;
