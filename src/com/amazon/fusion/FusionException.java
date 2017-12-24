@@ -167,4 +167,15 @@ public class FusionException
 
         return out.toString();
     }
+
+
+    static Object raise(Evaluator eval, Object value)
+        throws FusionException
+    {
+        if (value instanceof FusionException)
+        {
+            throw (FusionException) value;
+        }
+        throw new FusionUserException("Raised Exception", value);
+    }
 }
