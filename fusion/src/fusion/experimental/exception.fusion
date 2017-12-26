@@ -102,6 +102,19 @@ could potentially catch Errors, see the
             stx)))))
 
 
+  (define FusionExn     (java_class "com.amazon.fusion.FusionException"))
+  (define FusionUserExn (java_class "com.amazon.fusion.FusionUserException"))
+
+  (defpub (is_exn v)
+    '''
+Determines whether a value is a Fusion exception.
+    '''
+    // This is special-case because we have to filter out non-exception values
+    // that may have been raised.
+    (and   (java_instance_of FusionExn     v)
+      (not (java_instance_of FusionUserExn v))))
+
+
   (define_syntax generate_predicate
     (let [(ctx (quote_syntax here)),
           (message "A predicate for use with `with_handlers`. Does NOT work outside of a `with_handlers` form.")]
@@ -122,6 +135,7 @@ could potentially catch Errors, see the
 
   (generate_predicate is_arity_exn "com.amazon.fusion.ArityFailure")
 
+  // TODO is_check_exn shouldn't be built-in.
   (generate_predicate is_check_exn "com.amazon.fusion.CheckException")
 
   (generate_predicate is_contract_exn "com.amazon.fusion.ContractException")
