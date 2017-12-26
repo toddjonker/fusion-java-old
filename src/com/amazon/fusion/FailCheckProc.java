@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -14,10 +14,6 @@ final class FailCheckProc
 
     public FailCheckProc(Object stackParam)
     {
-        //    "                                                                               |
-        super("Raises a check exception, using the current context stack as populated by the\n" +
-              "dynamically enclosing checks.");
-
         myCheckStackParam = (DynamicParameter) stackParam;
     }
 

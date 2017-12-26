@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 /*                       *** WARNING ***
  *
@@ -45,21 +45,22 @@ used like first-class procedures and passed as runtime values.)
 
 ## Expecting Exceptions
 
-The `expect_*_exn` forms verify that certain kinds of exceptions
+The `expect_*_exn` forms verify that certain kinds of values
 are raised by some code under test.  Unlike the `check_*` forms, these do not
 act like procedures: evaluation of the argument is implicitly delayed via
 `thunk` to allow an exception handler to be installed.
 
-For the purposes of these forms, Fusion exceptions can be understood to have
+For the purposes of these forms, raised values can be understood to have
 an inheritance hierarchy along these lines:
 
-  * any
-      * contract
-          * argument
-          * arity
-          * result
-      * syntax
-      * check
+  * any raised value
+    * `exn`, the base exception type
+      * `contract_exn`
+          * `argument_exn`
+          * `arity_exn`
+          * `result_exn`
+      * `syntax_exn`
+      * `check_exn`
 
 So, for example, `expect_contract_exn` will succeed whenever `expect_arity_exn`
 would succeed.
@@ -107,6 +108,7 @@ the expected and actual values.
     "/fusion/eval"
     "/fusion/exception"
     "/fusion/experimental/defines"
+    "/fusion/experimental/exception"
     "/fusion/experimental/syntax"
     "/fusion/ffi/java"
     "/fusion/parameter")
@@ -117,6 +119,10 @@ the expected and actual values.
 
 
   (defpub fail_check
+    '''
+Raises a check exception, using the current context stack as populated by the
+dynamically enclosing checks.
+    '''
     (java_new "com.amazon.fusion.FailCheckProc" check_stack_param))
 
 
@@ -448,39 +454,49 @@ order:
 
   //===========================================================================
 
+  // TODO This should just use `display`. : {{{arity_exn}}}
+  (define (describe_raised v)
+    (cond
+      ((is_argument_exn v) "argument_exn")
+      ((is_arity_exn    v) "arity_exn")
+      ((is_result_exn   v) "result_exn")
+      ((is_contract_exn v) "contract_exn")
+      ((is_check_exn    v) "check_exn")
+      ((is_syntax_exn   v) "syntax_exn")
+      ((is_exn          v) "exn")
+      (true v)))
 
-  (define _check_exn
-    (java_new "com.amazon.fusion.CheckExceptionProc"))
-
-  // Currently not a "real" check macro; that adds noise to error reports
-  // and exposes our tag strings.
-  (define (check_exn tag thunk)
-    (let [(e (_check_exn tag thunk))]
-      (when (is_string e)
-        (if (== "" e)
-          (_fail_check { expected: (string_append tag " exception")})
-          (_fail_check { expected: (string_append tag " exception"),
-                         actual:   e })))))
+  (define (_expect_raise pred expected thunk)
+    (let [(meta (with_handlers
+                  [(pred void), // If predicate matches, handler returns void.
+                   ((|e| true)  // For anything else, describe what was raised.
+                    (|e| { expected: expected,
+                             actual: (describe_raised e) }))]
+                  (thunk)
+                  // The thunk was expected to raise, so the check has failed.
+                  { expected: expected }))]
+      (when meta (_fail_check meta))))
 
 
   // This should really be a procedure, but it doesn't work.
   (define_syntax define_exn_check
     '''
-    (define_exn_check name tag)
+    (define_exn_check name pred type_name)
 
 Defines a exception-expecting form used like `(name EXPR)`.
     '''
     (lambda (stx)
       (lets [(ctx (quote_syntax here)),
              (name_stx (syntax_get stx 1)),
-             (tag (syntax_unwrap (syntax_get stx 2))),
-             (skip_frame (not (syntax_unwrap (syntax_get stx 3)))),
+             (pred_stx (syntax_get stx 2)),
+             (type_name (syntax_unwrap (syntax_get stx 3))),
+             (skip_frame (not type_name)),
              (docs (if skip_frame ""
                      (string_append '''
     (''' (syntax_unwrap name_stx) ''' expr [message])
 
-Evaluates `expr` and checks that it throws an exception like that thrown by
-''' (syntax_unwrap (syntax_get stx 3)) '''.  If no exception is thrown, or if
+Evaluates `expr` and checks that it throws ''' type_name '''.
+If no exception is thrown, or if
 another kind of exception is thrown, then the check fails.''')))]
         (datum_to_syntax
           (quasiquote
@@ -509,7 +525,7 @@ another kind of exception is thrown, then the check fails.''')))]
                     (datum_to_syntax
                         // (parameterize
                         //   [(check_stack_param META)]
-                        //   (check_exn TAG (lambda () BODY)))
+                        //   (_expect_raise PRED TYPE_NAME (lambda () BODY)))
                       (sexp
                         (quote_syntax parameterize)
                         [(sexp (quote_syntax check_stack_param)
@@ -521,8 +537,9 @@ another kind of exception is thrown, then the check fails.''')))]
                                      (struct "message"
                                        (unsyntax (syntax_get stx1 2)))))))]
                         (sexp
-                          (quote_syntax check_exn)
-                          (unquote tag)
+                          (quote_syntax _expect_raise)
+                          (quote_syntax (unquote pred_stx))
+                          (unquote type_name)
                           (sexp (quote_syntax lambda) (quote ()) thunk_stx)))
                       ctx1
                       stx1))))))
@@ -531,18 +548,22 @@ another kind of exception is thrown, then the check fails.''')))]
 
 
   (provide
+    expect_any_raise expect_exn
     expect_any_exn expect_argument_exn expect_arity_exn
     expect_check_exn expect_contract_exn expect_result_exn)
 
-  (define_exn_check expect_any_exn      "any"      "any built-in feature")
-  (define_exn_check expect_argument_exn "argument" "`raise_argument_error`")
-  (define_exn_check expect_arity_exn    "arity"    "`raise_arity_error`")
-  (define_exn_check expect_check_exn    "check"    "`fail_check`")
-  (define_exn_check expect_contract_exn "contract" "`raise_contract_error`")
-  (define_exn_check expect_result_exn   "result"   "`raise_result_error`")
+  // TODO deprecate, imprecise name
+  (define_exn_check expect_any_exn      (always true)   "any value")
+  (define_exn_check expect_any_raise    (always true)   "any value")
+  (define_exn_check expect_exn          is_exn          "exn")
+  (define_exn_check expect_argument_exn is_argument_exn "argument_exn")
+  (define_exn_check expect_arity_exn    is_arity_exn    "arity_exn")
+  (define_exn_check expect_check_exn    is_check_exn    "check_exn")
+  (define_exn_check expect_contract_exn is_contract_exn "contract_exn")
+  (define_exn_check expect_result_exn   is_result_exn   "result_exn")
 
   // NOT PUBLIC! Only used by the public version below.
-  (define_exn_check _expect_syntax_exn  "syntax"   false /*skip frame*/)
+  (define_exn_check _expect_syntax_exn  is_syntax_exn   false /*skip frame*/)
 
   (defpub_syntax expect_syntax_exn
     '''

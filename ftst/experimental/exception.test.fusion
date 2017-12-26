@@ -12,7 +12,8 @@
 
 
 // Test raise
-(expect_any_exn (raise "foo"))
+(expect_any_exn (raise "foo"))   // Obsolete name for this form.
+(expect_any_raise (raise "foo"))
 
 // Verify with_handlers passes through body expressions that don't throw exceptions
 (check ===
@@ -71,13 +72,13 @@
     "foo"))
 
 // Verify that exceptions get passed through if they are not caught.
-(expect_any_exn
+(expect_any_raise
   (with_handlers
     [(catch_none (|x| 1)),]
     (raise "fail")))
 
 // Verify that exceptions gets passed through.
-(expect_any_exn
+(expect_any_raise
   (with_handlers
     []
     (raise "fail")))
