@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -35,8 +35,11 @@ class DynamicParameter
     }
 
 
+    // TODO This feature doesn't seem to exist in Racket.
+    //   It's available on continuation marks: continuation-mark-set->list
     <T> List<T> allValues(Evaluator eval)
     {
+        @SuppressWarnings("unchecked")
         List<T> marks = (List<T>) eval.continuationMarks(this);
 
         // TODO add initial value?
