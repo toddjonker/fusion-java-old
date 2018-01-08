@@ -14,7 +14,7 @@ final class CallWithHandlerProc
     extends Procedure2
 {
     @Override
-    Object doApply(Evaluator eval, Object thunk, Object cond)
+    Object doApply(Evaluator eval, Object thunk, Object handler)
         throws FusionException
     {
         try
@@ -24,20 +24,10 @@ final class CallWithHandlerProc
         }
         catch (FusionException e)
         {
-            Procedure conder = (Procedure) cond;
+            Procedure h = (Procedure) handler;
 
-            Object exn = e.getRaisedValue();
-
-            Object rethrowSentinel = new String("sentinel value");
-
-            Object r = eval.callNonTail(conder, exn, rethrowSentinel);
-
-            if (r == rethrowSentinel)
-            {
-                throw e;
-            }
-
-            return r;
+            Object raised = e.getRaisedValue();
+            return eval.bounceTailCall(h, raised);
         }
     }
 }

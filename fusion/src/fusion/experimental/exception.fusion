@@ -30,14 +30,14 @@ If the `value` is an exception, it is passed through.
   (define __call_with_handler
     (java_new "com.amazon.fusion.CallWithHandlerProc"))
 
- (define (make_selector preds_and_handlers)
-   (|e sentinel|
+ (define (sequence_handler preds_and_handlers)  // Argument is a sexp of pairs.
+   (|raised|
      (let loop [(phs preds_and_handlers)]
        (if (is_empty phs)
-         sentinel
+         (raise raised)            // Re-raise the same exception.
          (let [(ph (head phs))]
-           (if ((head ph) e)
-             ((tail ph) e)
+           (if ((head ph) raised)
+             ((tail ph) raised)
              (loop (tail phs))))))))
 
 
@@ -96,7 +96,7 @@ could potentially catch Errors, see the
           (datum_to_syntax
             (sexp (quote_syntax __call_with_handler)  // (__call_with_handler
               body_thunk                              //   (thunk body ...+)
-              (sexp (quote_syntax make_selector)      //   (make_selector
+              (sexp (quote_syntax sequence_handler)   //   (sequence_handler
                 (pair (quote_syntax sexp) ph_exprs))) //     (sexp (pair P H) ...)))
             ctx
             stx)))))
