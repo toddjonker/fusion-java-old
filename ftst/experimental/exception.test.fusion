@@ -15,6 +15,43 @@
 (expect_any_exn (raise "foo"))   // Obsolete name for this form.
 (expect_any_raise (raise "foo"))
 
+//=============================================================================
+// call_with_handler
+
+(check === "body"
+  (call_with_handler (|e| (fail)) (|| "body")))
+
+(check === "handler"
+  (call_with_handler (|e| "handler") (|| (raise "raised") "body")))
+
+(check === "raised"
+  (call_with_handler (|e| e) (|| (raise "raised") "body")))
+
+(check === "raised2"
+  (call_with_handler
+    (|e| e)
+    (|| (call_with_handler
+          (|e| (check === "raised1" e) (raise "raised2"))
+          (||  (raise "raised1"))))))
+
+// TODO Check arity of both procs before installing the handler.
+//   That requires that all procedures can report their arity.
+(expect_arity_exn
+  (call_with_handler (|e| (raise e)) (|bad args| "body")))
+(expect_arity_exn
+  (call_with_handler (|e bad| e) (|| (raise "body"))))
+(check === "body"
+  (call_with_handler (|e bad| e) (|| "body")))
+
+(expect_argument_exn
+  (call_with_handler "not a proc" (|| "body")))
+(expect_argument_exn
+  (call_with_handler (|e| e) "not a proc"))
+
+
+//=============================================================================
+// with_handlers
+
 // Verify with_handlers passes through body expressions that don't throw exceptions
 (check ===
   "success"

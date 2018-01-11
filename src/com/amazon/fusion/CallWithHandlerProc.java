@@ -7,16 +7,20 @@ package com.amazon.fusion;
  * It evaluates a thunk, catches FusionExceptions returned by the evaluation,
  *   and applies the exception value to the cond expression passed in.
  *
- * It is NOT an implementation of Racket's call-with-exception-handler which
- *   evaluates a thunk with a given exception handler.
+ * It is NOT the same as Racket's call-with-exception-handler, since this
+ * unwinds the stack before calling the handler.
  */
 final class CallWithHandlerProc
     extends Procedure2
 {
     @Override
-    Object doApply(Evaluator eval, Object thunk, Object handler)
+    Object doApply(Evaluator eval, Object handler, Object thunk)
         throws FusionException
     {
+        // TODO Check arity of both procs before installing the handler.
+        checkArg(Procedure.class, "1-arg procedure", 0, handler, thunk);
+        checkArg(Procedure.class, "0-arg procedure", 1, handler, thunk);
+
         try
         {
             Procedure thunker = (Procedure) thunk;

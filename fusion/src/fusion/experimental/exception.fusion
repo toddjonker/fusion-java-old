@@ -26,9 +26,20 @@ If the `value` is an exception, it is passed through.
     "com.amazon.fusion.RaiseProc")
 
 
-  // THIS IS INTERNAL USE ONLY! DO NOT POKE
-  (define __call_with_handler
-    (java_new "com.amazon.fusion.CallWithHandlerProc"))
+  (defpub_j call_with_handler
+    '''
+    (call_with_handler handler thunk)
+
+Installs the `handler` then calls the `thunk`.  If `raise` is called while
+the thunk is evaluated, the handler is called with the raised value.
+This happens in tail position with respect to `call_with_handler`.
+
+The handler must be a procedure that accepts one argument: the raised value.
+
+Most code should use the `with_handlers` syntax form instead of this procedure,
+which is prone to error by using a non-thunk body expression.
+    '''
+    "com.amazon.fusion.CallWithHandlerProc")
 
  (define (sequence_handler preds_and_handlers)  // Argument is a sexp of pairs.
    (|raised|
@@ -94,10 +105,10 @@ could potentially catch Errors, see the
                    ))))
           ]
           (datum_to_syntax
-            (sexp (quote_syntax __call_with_handler)  // (__call_with_handler
-              body_thunk                              //   (thunk body ...+)
+            (sexp (quote_syntax call_with_handler)    // (call_with_handler
               (sexp (quote_syntax sequence_handler)   //   (sequence_handler
-                (pair (quote_syntax sexp) ph_exprs))) //     (sexp (pair P H) ...)))
+                (pair (quote_syntax sexp) ph_exprs))  //     (sexp (pair P H) ...))
+              body_thunk)                             //   (thunk body ...+))
             ctx
             stx)))))
 
