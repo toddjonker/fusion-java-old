@@ -176,6 +176,14 @@ public class FusionException
         {
             throw (FusionException) value;
         }
+
+        if (value instanceof Throwable)
+        {
+            String message =
+                "Java Throwables cannot be raised from Fusion code";
+            throw new IllegalArgumentException(message, (Throwable) value);
+        }
+
         throw new FusionUserException(value);
     }
 }
