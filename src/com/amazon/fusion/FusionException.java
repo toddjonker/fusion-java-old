@@ -176,6 +176,6 @@ public class FusionException
         {
             throw (FusionException) value;
         }
-        throw new FusionUserException("Raised Exception", value);
+        throw new FusionUserException(value);
     }
 }

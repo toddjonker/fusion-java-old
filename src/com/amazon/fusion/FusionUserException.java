@@ -13,21 +13,9 @@ final class FusionUserException
 {
     private final Object myRaisedValue;
 
-    FusionUserException(String message, Object raisedValue)
+    FusionUserException(Object raisedValue)
     {
-        super(message);
-        myRaisedValue = raisedValue;
-    }
-
-    FusionUserException(String message, Throwable cause, Object raisedValue)
-    {
-        super(message, cause);
-        myRaisedValue = raisedValue;
-    }
-
-    FusionUserException(Throwable cause, Object raisedValue)
-    {
-        super(cause.getMessage(), cause);
+        super((String) null);
         myRaisedValue = raisedValue;
     }
 
@@ -36,7 +24,6 @@ final class FusionUserException
         throws IOException, FusionException
     {
         FusionIo.write(eval, out, myRaisedValue);
-        super.displayMessage(eval, out);
     }
 
     @Override
