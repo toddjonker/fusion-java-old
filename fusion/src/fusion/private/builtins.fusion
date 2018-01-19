@@ -1,9 +1,8 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module builtins '/fusion/private/kernel'
 
   (require
-    "/fusion/experimental/defines"
     "/fusion/private/kernel2"
     "/fusion/private/metasyntax"
   )
@@ -16,6 +15,30 @@
   // Pass-through bindings from kernel2
   (provide if is_list is_null is_sexp is_string is_struct
     let_values letrec not quote)
+
+  (provide
+    '#%top'
+    apply
+    exit
+    is_blob
+    is_bool
+    is_clob
+    is_immutable_list
+    is_mutable_list
+    is_null_null
+    is_procedure
+    is_stretchy_list
+    is_symbol
+    list
+    mutable_list
+    quasiquote
+    set
+    size
+    stretchy_list
+    unquote
+    values
+  )
+
 
   (define_syntax unquote
     '''
@@ -51,10 +74,8 @@ containing quoted datum.
               (quote_syntax quasiquote)
               (quote_syntax unquote)))
 
-  (provide quasiquote unquote)
 
 
-  (provide set)
   (define_syntax set
     '''
     (set var value)
@@ -63,7 +84,6 @@ Mutates the given `var`iable, assigning it the `value`.
     '''
     (java_new "com.amazon.fusion.SetForm"))
 
-  (provide '#%top')
   (define_syntax '#%top'
     '''
     ('#%top' id)
@@ -78,7 +98,7 @@ code and is primarily an artifact of the macro-expansion process.
     (java_new "com.amazon.fusion.TopForm"))
 
 
-  (defpub_j apply
+  (define apply
     '''
     (apply proc arg ... sequence)
 
@@ -88,9 +108,9 @@ to the elements of `sequence`.  The `proc` is called in tail position.
     (apply + [1, 2])             =>  3
     (apply + 10 11 (sexp 1 2))   =>  24
     '''
-    "com.amazon.fusion.ApplyProc")
+    (java_new "com.amazon.fusion.ApplyProc"))
 
-  (defpub_j values
+  (define values
     '''
     (values value ...)
 
@@ -98,60 +118,60 @@ Produces [multiple results](fusion/procedure.html#results), returning the zero
 or more `value`s. Usually used in conjuction with `let_values` to bind the
 results to names.
     '''
-    "com.amazon.fusion.ValuesProc")
+    (java_new "com.amazon.fusion.ValuesProc"))
 
-  (defpub_j exit
+  (define exit
     '''
     (exit)
 Exits the running Fusion program.
     '''
-    "com.amazon.fusion.ExitProc")
+    (java_new "com.amazon.fusion.ExitProc"))
 
 
   //===========================================================================
   // Basic predicates
 
-  (defpub_j is_blob
+  (define is_blob
     '''
     (is_blob value)
 
 Determines whether a `value` is of type `blob`, returning `true` or `false`.
     '''
-    "com.amazon.fusion.FusionBlob$IsBlobProc")
+    (java_new "com.amazon.fusion.FusionBlob$IsBlobProc"))
 
-  (defpub_j is_bool
+  (define is_bool
     '''
     (is_bool value)
 
 Determines whether a `value` is of type `bool`, returning `true` or `false`.
     '''
-    "com.amazon.fusion.FusionBool$IsBoolProc")
+    (java_new "com.amazon.fusion.FusionBool$IsBoolProc"))
 
-  (defpub_j is_clob
+  (define is_clob
     '''
     (is_clob value)
 
 Determines whether a `value` is of type `clob`, returning `true` or `false`.
     '''
-    "com.amazon.fusion.FusionClob$IsClobProc")
+    (java_new "com.amazon.fusion.FusionClob$IsClobProc"))
 
-  (defpub_j is_null_null
+  (define is_null_null
     '''
     (is_null_null value)
 
 Determines whether a `value` is `null.null`, returning `true` or `false`.
     '''
-    "com.amazon.fusion.FusionNull$IsNullNullProc")
+    (java_new "com.amazon.fusion.FusionNull$IsNullNullProc"))
 
-  (defpub_j is_symbol
+  (define is_symbol
     '''
     (is_symbol value)
 
 Determines whether a `value` is of type `symbol`, returning `true` or `false`.
     '''
-    "com.amazon.fusion.FusionSymbol$IsSymbolProc")
+    (java_new "com.amazon.fusion.FusionSymbol$IsSymbolProc"))
 
-  (defpub is_procedure
+  (define is_procedure
     '''
     (is_procedure value)
 
@@ -163,7 +183,7 @@ Returns `true` when `value` is a procedure, `false` otherwise.
   //===========================================================================
   // Collection primitives
 
-  (defpub_j size
+  (define size
     '''
     (size collection)
 
@@ -171,53 +191,53 @@ Returns the number of elements in the `collection`.
 The size of `null.list` (_etc._) is zero.  If `collection` is an improper sexp,
 an exception is thrown.
     '''
-    "com.amazon.fusion.FusionCollection$SizeProc")
+    (java_new "com.amazon.fusion.FusionCollection$SizeProc"))
 
-  (defpub_j is_immutable_list
+  (define is_immutable_list
     '''
     (is_immutable_list value)
 
 Determines whether `value` is an immutable list, returning `true` or `false`.
     '''
-    "com.amazon.fusion.FusionList$IsImmutableListProc")
+    (java_new "com.amazon.fusion.FusionList$IsImmutableListProc"))
 
-  (defpub_j is_mutable_list
+  (define is_mutable_list
     '''
     (is_mutable_list value)
 
 Determines whether `value` is a mutable list, returning `true` or `false`.
     '''
-    "com.amazon.fusion.FusionList$IsMutableListProc")
+    (java_new "com.amazon.fusion.FusionList$IsMutableListProc"))
 
-  (defpub_j is_stretchy_list
+  (define is_stretchy_list
     '''
     (is_stretchy_list value)
 
 Determines whether `value` is a stretchy list, returning `true` or `false`.
     '''
-    "com.amazon.fusion.FusionList$IsStretchyListProc")
+    (java_new "com.amazon.fusion.FusionList$IsStretchyListProc"))
 
-  (defpub_j list
+  (define list
     '''
     (list value ...)
 
 Makes a fresh, immutable list containing the given `value`s.
     '''
-    "com.amazon.fusion.FusionList$ImmutableListProc")
+    (java_new "com.amazon.fusion.FusionList$ImmutableListProc"))
 
-  (defpub_j mutable_list
+  (define mutable_list
     '''
     (mutable_list value ...)
 
 Makes a fresh, mutable list containing the given `value`s.
     '''
-    "com.amazon.fusion.FusionList$MutableListProc")
+    (java_new "com.amazon.fusion.FusionList$MutableListProc"))
 
-  (defpub_j stretchy_list
+  (define stretchy_list
     '''
     (stretchy_list value ...)
 
 Makes a fresh, stretchy list containing the given `value`s.
     '''
-    "com.amazon.fusion.FusionList$StretchyListProc")
+    (java_new "com.amazon.fusion.FusionList$StretchyListProc"))
 )

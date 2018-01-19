@@ -1,12 +1,10 @@
-// Copyright (c) 2013-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
 
 (module bind "/fusion/private/builtins"
 
 
   (require
-    "/fusion/experimental/defines"
     "/fusion/experimental/syntax"
-    "/fusion/number"
     "/fusion/private/compare"
     "/fusion/private/sexp"
     "/fusion/unsafe/list"
@@ -16,6 +14,13 @@
 
   // From builtins
   (provide let_values letrec values)
+
+  (provide
+    let
+    lets
+    split_content
+    unzip_bindings
+  )
 
 
   (define ctx  // PRIVATE!
@@ -70,7 +75,7 @@
         bindings_sexp
         (wrong_syntax stx "bad sequence of bindings: " bindings))))
 
-  (defpub (split_content stx content)
+  (define (split_content stx content)
 
     '''
     -> (values sexp-of-bindings sexp-of-body)
@@ -83,7 +88,7 @@ binding pairs for validity.
                  ((body)     (unsafe_pair_tail content))]
       (values (check_bindings stx bindings) body)))
 
-  (defpub (unzip_bindings stx bindings)
+  (define (unzip_bindings stx bindings)
     '''
     -> (values sexp-of-names sexp-of-exprs)
 
@@ -101,8 +106,7 @@ The `bindings` are assumed to be a sexp containing valid id/expr pairings.
 
   //==========================================================================
 
-
-  (defpub_syntax let
+  (define_syntax let
     '''
     (let ((ident expr) ...) body ...+)
 
@@ -154,8 +158,7 @@ the `title` field of each item:
                     stx)
                   (quote '#%plain_app retain arg locations') true))))))))
 
-
-  (defpub_syntax lets
+  (define_syntax lets
     '''
     (lets [(ident expr), ...] body ...+)
 
