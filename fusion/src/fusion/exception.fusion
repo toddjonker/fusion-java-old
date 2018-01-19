@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
 
 (module exception '/fusion/private/kernel'
 
@@ -9,24 +9,17 @@ At present, Fusion has no support for catching exceptions or for creating
 custom exception types.
   '''
 
+  (require
+    "/fusion/private/raise"
+  )
 
-  (provide assert)
-  (define_syntax assert
-    (java_new "com.amazon.fusion.AssertForm"))
+  (provide // from /fusion/private/raise
+    assert
+    raise
+    raise_argument_error
+    raise_arity_error
+    raise_contract_error
+    raise_result_error
+  )
 
-  (provide raise_argument_error)
-  (define raise_argument_error
-    (java_new "com.amazon.fusion.RaiseArgumentErrorProc"))
-
-  (provide raise_arity_error)
-  (define raise_arity_error
-    (java_new "com.amazon.fusion.RaiseArityErrorProc"))
-
-  (provide raise_contract_error)
-  (define raise_contract_error
-    (java_new "com.amazon.fusion.RaiseContractErrorProc"))
-
-  (provide raise_result_error)
-  (define raise_result_error
-    (java_new "com.amazon.fusion.RaiseResultErrorProc"))
 )

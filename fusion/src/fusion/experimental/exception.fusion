@@ -13,17 +13,11 @@ provide no data for processing within `handler-expr`s.
   (require
     "/fusion/ffi/java"
     "/fusion/experimental/defines"
-    "/fusion/experimental/syntax")
+    "/fusion/experimental/syntax"
+    "/fusion/private/raise"
+  )
 
-  (defpub_j raise
-    '''
-    (raise value)
-
-Raises an exception with the `value` provided.
-
-If the `value` is an exception, it is passed through.
-    '''
-    "com.amazon.fusion.RaiseProc")
+  (provide raise)
 
 
   (defpub_j call_with_handler

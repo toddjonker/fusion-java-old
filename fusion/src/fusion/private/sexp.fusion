@@ -1,10 +1,10 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module sexp '/fusion/private/kernel'
 
   (require
-    "/fusion/exception"
     "/fusion/private/kernel2"
+    "/fusion/private/raise"
     "/fusion/unsafe/sexp"
     "/fusion/void")
 
