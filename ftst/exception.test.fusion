@@ -2,7 +2,6 @@
 
 (require
   "/fusion/exception"
-  "/fusion/experimental/exception"
   "/fusion/experimental/check")
 
 // Definitions for Tests
@@ -217,8 +216,8 @@
 
 (module tester "/fusion"
   (require
+    "/fusion/exception"
     "/fusion/experimental/check"
-    "/fusion/experimental/exception"
     "raiser")
   (define (run_module_test)
     (check ===
