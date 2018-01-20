@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -9,7 +9,7 @@ package com.amazon.fusion;
  */
 @SuppressWarnings("serial")
 public class ContractException
-    extends FusionException
+    extends FusionErrorException
 {
     /**
      * @param message

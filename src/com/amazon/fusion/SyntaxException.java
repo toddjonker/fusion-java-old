@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -11,7 +11,7 @@ import java.io.IOException;
  */
 @SuppressWarnings("serial")
 public class SyntaxException
-    extends FusionException
+    extends FusionErrorException
 {
     private final String myName;
     /** May be null. */

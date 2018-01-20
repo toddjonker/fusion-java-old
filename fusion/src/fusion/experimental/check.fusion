@@ -476,6 +476,7 @@ order:
       ((is_contract_error v) "contract_error")
       ((is_check_error    v) "check_error")
       ((is_syntax_error   v) "syntax_error")
+      ((is_error_exn      v) "error_exn")
       ((is_exn            v) "exn")
       (true v)))
 
@@ -566,12 +567,14 @@ another kind of exception is thrown, then the check fails.''')))]
     expect_arity_error
     expect_check_error
     expect_contract_error
+    expect_error_exn
     expect_exn
     expect_result_error
   )
 
   (define_exn_check expect_any_raise      (always true)     "any value")
   (define_exn_check expect_exn            is_exn            "exn")
+  (define_exn_check expect_error_exn      is_error_exn      "error_exn")
   (define_exn_check expect_argument_error is_argument_error "argument_error")
   (define_exn_check expect_arity_error    is_arity_error    "arity_error")
   (define_exn_check expect_check_error    is_check_error    "check_error")

@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2018 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/exception"
@@ -168,13 +168,22 @@
 
 
 //==========================================================================
-// expect_check_exn
+// expect_check_error
 
 (expect_check_exn (fail))
 (expect_check_exn (fail "message"))
 (expect_check_exn (fail_check))
 (expect_check_exn (check = 1 2))
 (expect_check_exn (expect_check_exn (check = 1 1)))
+
+// Inheritance
+(expect_any_raise      (fail))
+(expect_exn            (fail))
+(expect_error_exn      (fail))
+(expect_check_error    (fail))
+
+(expect_check_error
+  (expect_check_error (bad_arity))) // Fails: arity_error isn't check_error
 
 
 // Malformed uses
@@ -183,12 +192,20 @@
 
 
 //==========================================================================
-// expect_argument_exn
+// expect_argument_error
 
 (expect_argument_exn
   (raise_argument_error "here" "truth and beauty" -1 "ugliness"))
 
 (expect_argument_exn (bad_argument))
+
+
+// Inheritance
+(expect_any_raise      (bad_argument))
+(expect_exn            (bad_argument))
+(expect_error_exn      (bad_argument))
+(expect_contract_error (bad_argument))
+(expect_argument_error (bad_argument))
 
 
 // Malformed uses
@@ -197,11 +214,19 @@
 
 
 //==========================================================================
-// expect_arity_exn
+// expect_arity_error
 
 (expect_arity_exn (raise_arity_error "foo" 1))
 
 (expect_arity_exn (bad_arity))
+
+
+// Inheritance
+(expect_any_raise      (bad_arity))
+(expect_exn            (bad_arity))
+(expect_error_exn      (bad_arity))
+(expect_contract_error (bad_arity))
+(expect_arity_error    (bad_arity))
 
 
 // Malformed uses
@@ -210,11 +235,19 @@
 
 
 //==========================================================================
-// expect_result_exn
+// expect_result_error
 
 (expect_result_exn (raise_result_error "here" "int" "string"))
 
 (expect_result_exn (bad_result))
+
+
+// Inheritance
+(expect_any_raise      (bad_result))
+(expect_exn            (bad_result))
+(expect_error_exn      (bad_result))
+(expect_contract_error (bad_result))
+(expect_result_error   (bad_result))
 
 
 // Malformed uses
@@ -223,13 +256,23 @@
 
 
 //==========================================================================
-// expect_contract_exn
+// expect_contract_error
 
-(expect_contract_exn (raise_contract_error "proc" "something went wrong"))
+(define (bad_contract)
+  (raise_contract_error "bad_contract" "something went wrong"))
+
+(expect_contract_exn (bad_contract))
 
 (expect_contract_exn (bad_argument))  // Argument exn IS-A contract exn
 (expect_contract_exn (bad_arity))     // Arity    exn IS-A contract exn
 (expect_contract_exn (bad_result))    // Result   exn IS-A contract exn
+
+
+// Inheritance
+(expect_any_raise      (bad_contract))
+(expect_exn            (bad_contract))
+(expect_error_exn      (bad_contract))
+(expect_contract_error (bad_contract))
 
 
 // Malformed uses
@@ -238,11 +281,18 @@
 
 
 //==========================================================================
-// expect_syntax_exn
+// expect_syntax_error
 
 (expect_syntax_exn (wrong_syntax (quote_syntax foo) "you are wrong"))
 
 (expect_syntax_exn (lambda))
+
+
+// Inheritance
+(expect_any_raise    (wrong_syntax (quote_syntax foo) ""))
+(expect_exn          (wrong_syntax (quote_syntax foo) ""))
+(expect_error_exn    (wrong_syntax (quote_syntax foo) ""))
+(expect_syntax_error (wrong_syntax (quote_syntax foo) ""))
 
 
 // Malformed uses

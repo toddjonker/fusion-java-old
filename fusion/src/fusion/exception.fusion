@@ -155,6 +155,7 @@ Determines whether a value is a Fusion exception.
             ctx
             stx)))))
 
+  (generate_predicate is_error_exn      "com.amazon.fusion.FusionErrorException")
   (generate_predicate is_argument_error "com.amazon.fusion.ArgumentException")
   (generate_predicate is_arity_error    "com.amazon.fusion.ArityFailure")
   (generate_predicate is_contract_error "com.amazon.fusion.ContractException")

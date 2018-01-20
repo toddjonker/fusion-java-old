@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -12,7 +12,7 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 final class CheckException
-    extends FusionException
+    extends FusionErrorException
 {
     private final List<Object> myStack;
 
