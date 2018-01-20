@@ -18,25 +18,73 @@
     '''
     (raise value)
 
-Raises an exception with the `value` provided.
-
-If the `value` is an exception, it is passed through.
+Passes the value to the thread's current exception handler.  Any type of value
+can the raised, but most application code should use the `raise_*_error`
+procedures to raise subtypes of `exn`.
     '''
     (java_new "com.amazon.fusion.RaiseProc"))
 
   (define_syntax assert
+    '''
+    (assert expr message ...)
+
+Evaluates the `expr`, throwing an exception if the result isn't truthy.
+The exception `display`s the `message`s, which are only evaluated on failure.
+    '''
     (java_new "com.amazon.fusion.AssertForm"))
 
   (define raise_argument_error
+    '''
+    (raise_argument_error name expected bad_pos value ...+)
+
+Raises an `argument_error` denoting contract failure due to a procedure being
+called with unacceptable argument values.
+The `name` text (string or symbol) identifies the procedure.
+The `expected` string describes the relevant contract.
+`bad_pos` is the zero-based position of the bad argument; a negative value
+means that a specific argument is not implicated.
+The `value`s are the arguments passed to the procedure.
+
+Note that an `argument_error` IS-A `contract_error`.
+    '''
     (java_new "com.amazon.fusion.RaiseArgumentErrorProc"))
 
   (define raise_arity_error
+    '''
+    (raise_arity_error name arity actual_arg ...)
+
+Raises an `arity_error` denoting contract failure due to a procedure receiving
+an unacceptable number of arguments.
+The `name` text (string or symbol) identifies the called procedure.
+The `arity` is an int indicating the expected arity.
+The `actual_arg`s are the values passed to the procedure.
+
+Note that an `arity_error` IS-A `contract_error`.
+    '''
     (java_new "com.amazon.fusion.RaiseArityErrorProc"))
 
   (define raise_contract_error
+    '''
+    (raise_contract_error name message)
+
+Raises a `contract_error` denoting a general contract failure.
+The `name` text (string or symbol) identifies the procedure.
+The `message` string describes the relevant contract failure.
+    '''
     (java_new "com.amazon.fusion.RaiseContractErrorProc"))
 
   (define raise_result_error
+    '''
+    (raise_result_error name expected value)
+
+Raises a `result_error` denoting contract failure due to a procedure returning
+an unacceptable value.
+The `name` text (string or symbol) identifies the calling procedure.
+The `expected` string describes the relevant contract.
+The `value` is the faulty result.
+
+Note that a `result_error` IS-A `contract_error`.
+    '''
     (java_new "com.amazon.fusion.RaiseResultErrorProc"))
 
 )

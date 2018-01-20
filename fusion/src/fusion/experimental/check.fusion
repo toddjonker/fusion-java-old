@@ -45,27 +45,14 @@ used like first-class procedures and passed as runtime values.)
 
 ## Expecting Exceptions
 
-The `expect_*_exn` forms verify that certain kinds of values
-are raised by some code under test.  Unlike the `check_*` forms, these do not
-act like procedures: evaluation of the argument is implicitly delayed via
+[Exceptions](fusion/exception.html) can be tested using several `expect_*`
+forms, verifing that certain kinds of values
+are `raise`d by some code under test.  Unlike the `check_*` forms, these do not
+act like procedures: evaluation of the expression is implicitly delayed via
 `thunk` to allow an exception handler to be installed.
 
-For the purposes of these forms, raised values can be understood to have
-an inheritance hierarchy along these lines:
-
-  * any raised value
-    * `exn`, the base exception type
-      * `error_exn`, exceptions that indicate runtime errors
-          * `contract_error`
-              * `argument_error`
-              * `arity_error`
-              * `result_error`
-          * `syntax_error`
-          * `check_error`
-      * `break_exn`, exceptions that indicate interruption of a thread
-        (not implemented yet)
-
-So, for example, `expect_contract_exn` will succeed whenever `expect_arity_exn`
+The expect forms observe the hierarchy of exception types.
+For example, `expect_contract_error` will succeed whenever `expect_arity_error`
 would succeed.
 
 
@@ -125,15 +112,15 @@ the expected and actual values.
 
   (defpub (is_check_error v)
     '''
-Determines whether a value is a `check_error` exception.
-Returns `true` or `false`.
+Determines whether a value is a `check_error` exception, a subtype of
+`error_exn`.  Returns `true` or `false`.
     '''
     (java_instance_of CheckExn v))
 
 
   (defpub fail_check
     '''
-Raises a check exception, using the current context stack as populated by the
+Raises a `check _error`, using the current context stack as populated by the
 dynamically enclosing checks.
     '''
     (java_new "com.amazon.fusion.FailCheckProc" check_stack_param))
@@ -142,7 +129,7 @@ dynamically enclosing checks.
   // Not public: the signature is awkward.
   (define (_fail_check meta)
     '''
-Raises a check failure exception, including a stack trace derived from the
+Raises a `check _error`, including a stack trace derived from the
 `check_stack_param` marks.
     '''
     (parameterize [(check_stack_param meta)]
@@ -588,8 +575,8 @@ another kind of exception is thrown, then the check fails.''')))]
     '''
     (expect_syntax_error top_form [message])
 
-Passes the given top-level form to `eval` and checks that it throws an
-exception like that thrown by `wrong_syntax`.
+Passes the given top-level form to `eval` and checks that it throws a
+`syntax_error` exception (as thrown by `wrong_syntax`).
 
 This form currently doesn't work as expected within a module: the evaluation
 context is not the module's namespace, because `current_namespace` isn't

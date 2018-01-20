@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -11,20 +11,6 @@ import java.util.Arrays;
 final class RaiseArgumentErrorProc
     extends Procedure
 {
-    RaiseArgumentErrorProc()
-    {
-        //    "                                                                               |
-        super("Raises a contract failure due to a procedure being called with unacceptable\n" +
-              "argument values.  The `name` text (string or symbol) identifies the procedure.\n" +
-              "The `expected` string describes the relevant contract.  `bad_pos` is the\n" +
-              "zero-based position of the bad argument; a negative value means that a specific\n" +
-              "argument is not implicated.  The `value`s are the arguments passed to the\n" +
-              "procedure.\n" +
-              "\n" +
-              "Note that an argument exception IS-A contract exception.",
-              "name", "expected", "bad_pos", "value", DOTDOTDOTPLUS);
-    }
-
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException

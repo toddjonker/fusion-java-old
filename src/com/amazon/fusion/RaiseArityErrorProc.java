@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,19 +10,6 @@ import java.util.Arrays;
 final class RaiseArityErrorProc
     extends Procedure
 {
-    RaiseArityErrorProc()
-    {
-        //    "                                                                               |
-        super("Raises a contract failure due to a procedure receiving an unacceptable number\n" +
-              "of arguments.\n" +
-              "The `name` text (string or symbol) identifies the calling procedure. The\n" +
-              "`arity` is an int indicating the expected arity. The `actual_arg`s are the\n" +
-              "arguments passed to the procedure.\n" +
-              "\n" +
-              "Note that an arity exception IS-A contract exception.",
-              "name", "arity", "actual_arg", DOTDOTDOT);
-    }
-
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException

@@ -5,8 +5,39 @@
   '''
 Operations for working with exceptions.
 
-At present, Fusion has no support for catching exceptions or for creating
-custom exception types.
+A Fusion "exception" is any value passed to `raise`, which in turn invokes the
+current exception handler on a thread.  While values of any type can be
+`raise`d, all exceptions raised by the Fusion runtime and standard library are
+subtypes of `exn`.  Thrown `exn` values include a continuation trace (_i.e._,
+stack trace) and other information describing the problem.
+
+Exceptions can be understood to have an inheritance hierarchy along these lines:
+
+  * any raised value
+    * `exn`: the base type of all standard exceptions
+      * `error_exn`: exceptions that indicate runtime errors
+          * `contract_error`: failure to satisfy the contract of a procedure or
+            syntax form
+              * `arity_error`: a procedure was called with the wrong number of
+                arguments
+              * `argument_error`: a procedure was called with an invalid
+                argument
+              * `result_error`: a procedure returned an invalid result
+          * `syntax_error`: a syntax form was used incorrectly
+      * `break_exn`: the thread was interrupted (not implemented yet)
+
+The various exception types are implicitly constructed and thrown by
+corresponding specializations of `raise`.
+
+Catch exceptions using `with_handlers`, using predicates to match exceptions
+with handlers.
+
+    (with_handlers
+      [(is_result_error   (|e| (displayln "A procedure returned a bad result"))),
+       (is_argument_error (|e| (displayln "A procedure was passed a bad value"))),
+       (is_error_exn      (|e| (displayln "Something else went wrong, rethrowing")
+                               (raise e)))]
+      (do_something_that_raises))
   '''
 
   (require
@@ -20,6 +51,7 @@ custom exception types.
     "/fusion/private/kernel2"
     "/fusion/private/raise"
     "/fusion/private/sexp"
+    "/fusion/string"
   )
 
   (provide // from /fusion/private/raise
@@ -73,14 +105,18 @@ the `with_handlers` form is the result of the last `body` form.
 
 If an exception is raised, then each predicate is applied to the exception
 value. Once a predicate returns a truthy value, then the corresponding handler
-is applied to the same value, and the handler's result becomes the result of
+is applied to the exception, and the handler's result becomes the result of
 the entire `with_handlers` form. If the exception is not matched by any
 predicate, then it is re-raised to the continuation of the `with_handlers`
 expression.
 
-Note, one should avoid using `(lambda (x) true)` as a condition because it
-could potentially catch Errors, see the
-[Racket Guide on Exceptions](https://docs.racket-lang.org/guide/exns.html) for more.
+Most code should avoid using catch-all predicates like `(lambda (x) true)` that
+match exceptions that should generally not be handled by application code.
+In particular, it will non-`error_exn` exceptions like interrupts, which must
+not be ignored.
+See the [Racket Guide on Exceptions][racket-exn] for more details.
+
+  [racket-exn]: https://docs.racket-lang.org/guide/exns.html
     '''
     (let [(ctx (quote_syntax here)),
           (wrong
@@ -127,7 +163,8 @@ could potentially catch Errors, see the
   (provide is_exn)
   (define (is_exn v)
     '''
-Determines whether a value is a Fusion exception.
+Determines whether a value is an exception of type `exn`.
+Returns `true` or `false`.
     '''
     // This is special-case because we have to filter out non-exception values
     // that may have been raised.
@@ -136,30 +173,34 @@ Determines whether a value is a Fusion exception.
 
 
   (define_syntax generate_predicate
-    (let [(ctx (quote_syntax here)),
-          (docs "A predicate for use with `with_handlers`. Does NOT work outside of a `with_handlers` form.")]
-      (lambda (stx)
-        (lets
-          [(orig_args (syntax_subseq stx 1)),
-           (pred_name (syntax_get orig_args 0)),
-           (exn_class (syntax_get orig_args 1)),]
-          (datum_to_syntax
-            (sexp (quote_syntax begin)                            // (begin
-              (sexp (quote_syntax provide) pred_name)             //   (provide NAME)
-              (sexp (quote_syntax define) pred_name               //   (define NAME
-                docs                                              //     docs
-                (quasisyntax
-                  (let [(Exn (java_class (unsyntax exn_class)))]  //     (let [(Exn (java_class exn_class))]
-                    (lambda (e)                                   //       (lambda (e)
-                      (java_instance_of Exn e))))))               //         (java_instance_of Exn e)))))
-            ctx
-            stx)))))
+    (lambda (stx)
+      (lets
+        [(orig_args (syntax_subseq stx 1)),
+         (pred_name (syntax_get orig_args 0)),
+         (exn_name  (syntax_get orig_args 1)),
+         (exn_class (syntax_get orig_args 2)),
+         (docs (string_append
+                 "\n    (" (syntax_unwrap pred_name) " v)\n\n"
+                 "Determines whether a value is an exception of type `"
+                 (syntax_unwrap exn_name)
+                 "`. Returns `true` or `false`."))]
+        (datum_to_syntax
+          (sexp (quote_syntax begin)                            // (begin
+            (sexp (quote_syntax provide) pred_name)             //   (provide NAME)
+            (sexp (quote_syntax define) pred_name               //   (define NAME
+              docs                                              //     docs
+              (quasisyntax
+                (let [(Exn (java_class (unsyntax exn_class)))]  //     (let [(Exn (java_class exn_class))]
+                  (lambda (e)                                   //       (lambda (e)
+                    (java_instance_of Exn e))))))               //         (java_instance_of Exn e)))))
+          (quote_syntax here)
+          stx))))
 
-  (generate_predicate is_error_exn      "com.amazon.fusion.FusionErrorException")
-  (generate_predicate is_argument_error "com.amazon.fusion.ArgumentException")
-  (generate_predicate is_arity_error    "com.amazon.fusion.ArityFailure")
-  (generate_predicate is_contract_error "com.amazon.fusion.ContractException")
-  (generate_predicate is_result_error   "com.amazon.fusion.ResultFailure")
-  (generate_predicate is_syntax_error   "com.amazon.fusion.SyntaxException")
+  (generate_predicate is_error_exn      error_exn      "com.amazon.fusion.FusionErrorException")
+  (generate_predicate is_argument_error argument_error "com.amazon.fusion.ArgumentException")
+  (generate_predicate is_arity_error    arity_error    "com.amazon.fusion.ArityFailure")
+  (generate_predicate is_contract_error contract_error "com.amazon.fusion.ContractException")
+  (generate_predicate is_result_error   result_error   "com.amazon.fusion.ResultFailure")
+  (generate_predicate is_syntax_error   syntax_error   "com.amazon.fusion.SyntaxException")
 
 )

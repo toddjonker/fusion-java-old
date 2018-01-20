@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -9,15 +9,6 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 final class AssertForm
     extends SyntacticForm
 {
-    AssertForm()
-    {
-        //    "                                                                               |
-        super("expr message ...",
-              "Evaluates the `expr`, throwing an exception if the result isn't truthy.\n" +
-              "The exception `display`s the `message`s, which are only evaluated on failure.");
-    }
-
-
     @Override
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException
