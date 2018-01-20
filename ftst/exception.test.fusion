@@ -179,32 +179,32 @@
 (check ===
   "caught argument"
   (with_handlers
-    [(is_argument_exn (|x| "caught argument"))]
+    [(is_argument_error (|x| "caught argument"))]
     (raise_argument_error "foo" "bar" 0 "baz")))
 (check ===
   "caught arity"
   (with_handlers
-    [(is_arity_exn (|x| "caught arity"))]
+    [(is_arity_error (|x| "caught arity"))]
     (raise_arity_error "foo" 0)))
 (check ===
   "caught check"
   (with_handlers
-    [(is_check_exn (|x| "caught check"))]
+    [(is_check_error (|x| "caught check"))]
     (check_true false)))
 (check ===
   "caught contract"
   (with_handlers
-    [(is_contract_exn (|x| "caught contract")),]
+    [(is_contract_error (|x| "caught contract")),]
     (raise_result_error "foo" "bar" "baz")))
 (check ===
   "caught result"
   (with_handlers
-    [(is_result_exn (|x| "caught result"))]
+    [(is_result_error (|x| "caught result"))]
     (raise_result_error "foo" "bar" "baz")))
 (check ===
   "caught syntax"
   (with_handlers
-    [(is_syntax_exn (|x| "caught syntax"))]
+    [(is_syntax_error (|x| "caught syntax"))]
     (unbound_identifier "foo")))
 
 // Verify that an exception from an imported module is catchable

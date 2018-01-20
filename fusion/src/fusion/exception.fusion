@@ -155,17 +155,10 @@ Determines whether a value is a Fusion exception.
             ctx
             stx)))))
 
-  (generate_predicate is_argument_exn "com.amazon.fusion.ArgumentException")
-
-  (generate_predicate is_arity_exn "com.amazon.fusion.ArityFailure")
-
-  // TODO is_check_exn shouldn't be built-in.
-  (generate_predicate is_check_exn "com.amazon.fusion.CheckException")
-
-  (generate_predicate is_contract_exn "com.amazon.fusion.ContractException")
-
-  (generate_predicate is_result_exn "com.amazon.fusion.ResultFailure")
-
-  (generate_predicate is_syntax_exn "com.amazon.fusion.SyntaxException")
+  (generate_predicate is_argument_error "com.amazon.fusion.ArgumentException")
+  (generate_predicate is_arity_error    "com.amazon.fusion.ArityFailure")
+  (generate_predicate is_contract_error "com.amazon.fusion.ContractException")
+  (generate_predicate is_result_error   "com.amazon.fusion.ResultFailure")
+  (generate_predicate is_syntax_error   "com.amazon.fusion.SyntaxException")
 
 )

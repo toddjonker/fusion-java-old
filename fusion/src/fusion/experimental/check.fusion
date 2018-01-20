@@ -55,12 +55,15 @@ an inheritance hierarchy along these lines:
 
   * any raised value
     * `exn`, the base exception type
-      * `contract_exn`
-          * `argument_exn`
-          * `arity_exn`
-          * `result_exn`
-      * `syntax_exn`
-      * `check_exn`
+      * `error_exn`, exceptions that indicate runtime errors
+          * `contract_error`
+              * `argument_error`
+              * `arity_error`
+              * `result_error`
+          * `syntax_error`
+          * `check_error`
+      * `break_exn`, exceptions that indicate interruption of a thread
+        (not implemented yet)
 
 So, for example, `expect_contract_exn` will succeed whenever `expect_arity_exn`
 would succeed.
@@ -115,6 +118,17 @@ the expected and actual values.
 
   (define check_stack_param
     (make_parameter null))
+
+
+
+  (define CheckExn (java_class "com.amazon.fusion.CheckException"))
+
+  (defpub (is_check_error v)
+    '''
+Determines whether a value is a `check_error` exception.
+Returns `true` or `false`.
+    '''
+    (java_instance_of CheckExn v))
 
 
   (defpub fail_check
@@ -456,13 +470,13 @@ order:
   // TODO This should just use `display`. : {{{arity_exn}}}
   (define (describe_raised v)
     (cond
-      ((is_argument_exn v) "argument_exn")
-      ((is_arity_exn    v) "arity_exn")
-      ((is_result_exn   v) "result_exn")
-      ((is_contract_exn v) "contract_exn")
-      ((is_check_exn    v) "check_exn")
-      ((is_syntax_exn   v) "syntax_exn")
-      ((is_exn          v) "exn")
+      ((is_argument_error v) "argument_error")
+      ((is_arity_error    v) "arity_error")
+      ((is_result_error   v) "result_error")
+      ((is_contract_error v) "contract_error")
+      ((is_check_error    v) "check_error")
+      ((is_syntax_error   v) "syntax_error")
+      ((is_exn            v) "exn")
       (true v)))
 
   (define (_expect_raise pred expected thunk)
@@ -555,14 +569,14 @@ another kind of exception is thrown, then the check fails.''')))]
   (define_exn_check expect_any_exn      (always true)   "any value")
   (define_exn_check expect_any_raise    (always true)   "any value")
   (define_exn_check expect_exn          is_exn          "exn")
-  (define_exn_check expect_argument_exn is_argument_exn "argument_exn")
-  (define_exn_check expect_arity_exn    is_arity_exn    "arity_exn")
-  (define_exn_check expect_check_exn    is_check_exn    "check_exn")
-  (define_exn_check expect_contract_exn is_contract_exn "contract_exn")
-  (define_exn_check expect_result_exn   is_result_exn   "result_exn")
+  (define_exn_check expect_argument_exn is_argument_error "argument_error")
+  (define_exn_check expect_arity_exn    is_arity_error    "arity_error")
+  (define_exn_check expect_check_exn    is_check_error    "check_error")
+  (define_exn_check expect_contract_exn is_contract_error "contract_error")
+  (define_exn_check expect_result_exn   is_result_error   "result_error")
 
   // NOT PUBLIC! Only used by the public version below.
-  (define_exn_check _expect_syntax_exn  is_syntax_exn   false /*skip frame*/)
+  (define_exn_check _expect_syntax_exn  is_syntax_error   false /*skip frame*/)
 
   (defpub_syntax expect_syntax_exn
     '''
