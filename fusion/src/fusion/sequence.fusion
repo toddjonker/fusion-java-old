@@ -135,12 +135,13 @@ The result may share structure with `seq` and has the same type as `seq`.
              (if (= 0 t)
                (quote ())
                (if (is_pair s)
-                 (pair (head s) (prefix (tail s) (- t 1)))
+                 (pair (unsafe_pair_head s)
+                       (prefix (unsafe_pair_tail s) (- t 1)))
                  (raise_argument_error "subseq"
                    "'to' less than (size seq)"
                    2 seq from to))))
            (if (is_pair s)
-             (find_head (tail s) (- f 1) (- t 1))
+             (find_head (unsafe_pair_tail s) (- f 1) (- t 1))
              (raise_argument_error "subseq" "'to' less than (size seq)"
                2 seq from to)))))
       (true (raise_argument_error "subseq" "non-null sequence"
@@ -160,12 +161,12 @@ for which `pred` returns truthy.
     '''
     (cond
       ((is_list sequence)
-        (let [(len (size sequence))]
+        (let [(len (unsafe_list_size sequence))]
           (let loop [(i 0),
                      (result (stretchy_list))]
             (if (= i len)
               result
-              (let [(elt (. sequence i))]
+              (let [(elt (unsafe_list_element sequence i))]
                 (loop
                   (+ 1 i)
                   (if (pred elt)
@@ -193,14 +194,15 @@ returning a new sequence of the same type, containing the results in order.
     '''
     (cond
       ((is_list sequence)
-        (let [(len (size sequence))]
+        (let [(len (unsafe_list_size sequence))]
           (let loop [(i 0),
                      (result (stretchy_list))]
             (if (= i len)
               result
               (loop
                 (+ 1 i)
-                (unsafe_list_add_m result (proc (. sequence i))))))))
+                (unsafe_list_add_m result
+                  (proc (unsafe_list_element sequence i))))))))
       ((is_sexp sequence)
         (let loop [(ptr sequence)]
           (if (is_empty ptr)
@@ -274,9 +276,9 @@ Vizualizing `fold_left`:
     (lambda args
       (if (< (size args) 2)
         (apply raise_arity_error "fold_left" 2 args)
-        (let [(proc (head args)),
-              (init (. args tail head)),
-              (seqs (. args tail tail))]
+        (let [(proc (unsafe_pair_head args)),
+              (init (unsafe_pair_head (unsafe_pair_tail args))),
+              (seqs (unsafe_pair_tail (unsafe_pair_tail args)))]
           (cond
             ((not (is_procedure proc))
               (apply raise_argument_error "fold_left" "procedure" 0 args))
@@ -295,7 +297,7 @@ Vizualizing `fold_left`:
                     (lambda (seq)
                       (or
                         (and (is_sexp seq) (is_empty seq))
-                        (and (is_list seq) (>= i (size seq)))))
+                        (and (is_list seq) (>= i (unsafe_list_size seq)))))
                     _seqs)
                   result
                   (let [(_args
@@ -303,7 +305,9 @@ Vizualizing `fold_left`:
                             result
                             (map
                               (lambda (seq)
-                                (if (is_sexp seq) (unsafe_pair_head seq) (. seq i)))
+                                (if (is_sexp seq)
+                                  (unsafe_pair_head seq)
+                                  (unsafe_list_element seq i)))
                               _seqs))),
                         (next
                           (map
