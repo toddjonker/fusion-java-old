@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
 
 (module for '/fusion/private/kernel'
 
@@ -77,7 +77,7 @@ If there are no `id`s declared, then the body is executed once.
         (let_values [((bindings body) (split_content stx content))]
           (let [(begin_body (pair (quote begin) body))]
             (datum_to_syntax
-              (if (== 0 (size bindings))
+              (if (not (is_pair bindings))
                 /* Base case -- no bindings */
                 (sexp (quote stretchy_list)          // (stretchy_list
                       begin_body)                    //   (begin BODY...))
@@ -140,7 +140,7 @@ for list comprehension.
           (wrong_syntax stx "expecting bindings and body"))
         (let_values [((bindings body) (split_content stx content))]
           (datum_to_syntax
-            (if (== 0 (size bindings))
+            (if (not (is_pair bindings))
               /* Base case -- no bindings */
               (sexp (quote stretchy_list)          // (stretchy_list
                     (pair (quote begin) body))     //   (begin BODY...))

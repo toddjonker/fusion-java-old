@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module collection "/fusion/private/builtins"
 
@@ -356,7 +356,9 @@ application of `pred` to the final element of the sequence is in tail position.
 Returns `true` if the size of the `collection` is zero, otherwise returns
 `false`.
     '''
-    (= 0 (size collection)))
+    // Avoid the O(n) time of `size` on non-empty sexps.
+    (and (not (is_pair collection))
+         (= 0 (size collection))))
 
 
   // Name per SRFI-1

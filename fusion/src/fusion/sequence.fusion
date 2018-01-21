@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module sequence '/fusion/private/builtins'
 
@@ -62,7 +62,7 @@ Determines whether `value` is a sequence, returning `true` or `false`.
 Returns the first element in the `sequence`. Fails if the sequence has no
 elements.
     '''
-    (if (= 0 (size sequence))
+    (if (is_empty sequence)
       (raise_argument_error "first" "non-empty sequence" 0 sequence)
       (element sequence 0)))
 

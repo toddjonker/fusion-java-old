@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module procedure "/fusion/private/builtins"
 
@@ -164,14 +164,14 @@ Equivalent to `(lambda () body ...)`.
     '''
     (lambda (stx)
       (let [(body (unsafe_pair_tail (syntax_unwrap stx)))]
-        (if (== 0 (size body))
-          (wrong_syntax stx "Expected at least one body form")
+        (if (is_pair body)
           (datum_to_syntax
             (pair (quote_syntax lambda)
-              (pair (quote ())
+              (pair (quote_syntax ())
                 body))
             (quote_syntax context)
-            stx)))))
+            stx)
+          (wrong_syntax stx "Expected at least one body form")))))
 
 // TODO This should use (provide (rename_out (thunk ||)))
 // but the documentation is wrong.
