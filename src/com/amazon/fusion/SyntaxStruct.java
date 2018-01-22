@@ -100,12 +100,11 @@ final class SyntaxStruct
         // Even if we have no marks, some children may have them.
         boolean mustReplace = (myWraps != null);  // TODO optimize further
 
-        // Make a copy of the map, then mutate it to replace children
-        // as necessary.
-        Map<String, Object> newMap =
-            ((NonNullImmutableStruct) myStruct).copyMap(eval);
+        // Replace children in map as necessary.
+        FunctionalHashTrie<String, Object> existingMap = ((NonNullImmutableStruct) myStruct).getMap(eval);
+        FunctionalHashTrie<String, Object> newMap = existingMap;
 
-        for (Map.Entry<String, Object> entry : newMap.entrySet())
+        for (Map.Entry<String, Object> entry : existingMap.entrySet())
         {
             Object value = entry.getValue();
             if (! (value instanceof Object[]))
@@ -114,7 +113,7 @@ final class SyntaxStruct
                 SyntaxValue stripped = child.stripWraps(eval);
                 if (stripped != child)
                 {
-                    entry.setValue(stripped);
+                    newMap = newMap.with(entry.getKey(), stripped);
                     mustReplace = true;
                 }
             }
@@ -138,7 +137,7 @@ final class SyntaxStruct
 
                 if (mustReplaceArray)
                 {
-                    entry.setValue(newChildren);
+                    newMap = newMap.with(entry.getKey(), newChildren);
                     mustReplace = true;
                 }
             }
@@ -147,7 +146,8 @@ final class SyntaxStruct
         if (! mustReplace) return this;
 
         BaseSymbol[] annotations = myStruct.getAnnotations();
-        ImmutableStruct s = immutableStruct(newMap, annotations);
+        int size = myStruct.size();
+        ImmutableStruct s = immutableStruct(newMap, annotations, size);
         return new SyntaxStruct(getLocation(), getProperties(), null, s);
     }
 
@@ -173,23 +173,22 @@ final class SyntaxStruct
 
         // We have wraps to propagate (and therefore children).
 
-        // Make a copy of the map, then mutate it to replace children
-        // as necessary.
-        Map<String, Object> newMap =
-            ((NonNullImmutableStruct) myStruct).copyMap(eval);
+        // Replace children in map as necessary.
+        FunctionalHashTrie<String, Object> existingMap = ((NonNullImmutableStruct) myStruct).getMap(eval);
+        FunctionalHashTrie<String, Object> newMap = existingMap;
 
         // TODO optimize this to not allocate new objects when nothing changes.
         // Idea: keep track of when there are symbols contained (recursively),
         // when there's not, maybe we can skip all this.
 
-        for (Map.Entry<String, Object> entry : newMap.entrySet())
+        for (Map.Entry<String, Object> entry : existingMap.entrySet())
         {
             Object value = entry.getValue();
             if (! (value instanceof Object[]))
             {
                 SyntaxValue child = (SyntaxValue) value;
                 Object childValue = child.addWraps(myWraps);
-                entry.setValue(childValue);
+                newMap = newMap.with(entry.getKey(), childValue);
             }
             else
             {
@@ -203,12 +202,13 @@ final class SyntaxStruct
                     Object childValue = child.addWraps(myWraps);
                     childValues[cPos++] = childValue;
                 }
-                entry.setValue(childValues);
+                newMap = newMap.with(entry.getKey(), childValues);
             }
         }
 
         BaseSymbol[] annotations = myStruct.getAnnotations();
-        myStruct = immutableStruct(newMap, annotations);
+        int size = myStruct.size();
+        myStruct = immutableStruct(newMap, annotations, size);
         myWraps = null;
 
         return myStruct;
@@ -226,21 +226,20 @@ final class SyntaxStruct
 
         // We have children, and wraps to propagate (when not recursing)
 
-        // Make a copy of the map, then mutate it to replace children
-        // as necessary.
-        Map<String, Object> newMap =
-            ((NonNullImmutableStruct) myStruct).copyMap(eval);
+        // Replace children in map as necessary.
+        FunctionalHashTrie<String, Object> existingMap = ((NonNullImmutableStruct) myStruct).getMap(eval);
+        FunctionalHashTrie<String, Object> newMap = existingMap;
 
         // TODO optimize this to not allocate new objects when nothing changes.
 
-        for (Map.Entry<String, Object> entry : newMap.entrySet())
+        for (Map.Entry<String, Object> entry : existingMap.entrySet())
         {
             Object value = entry.getValue();
             if (! (value instanceof Object[]))
             {
                 SyntaxValue child = (SyntaxValue) value;
                 Object childValue = child.syntaxToDatum(eval);
-                entry.setValue(childValue);
+                newMap = newMap.with(entry.getKey(), childValue);
             }
             else
             {
@@ -254,12 +253,13 @@ final class SyntaxStruct
                     Object childValue = child.syntaxToDatum(eval);
                     childValues[cPos++] = childValue;
                 }
-                entry.setValue(childValues);
+                newMap = newMap.with(entry.getKey(), childValues);
             }
         }
 
         BaseSymbol[] annotations = myStruct.getAnnotations();
-        return immutableStruct(newMap, annotations);
+        int size = myStruct.size();
+        return immutableStruct(newMap, annotations, size);
     }
 
 
@@ -272,13 +272,12 @@ final class SyntaxStruct
             return this;
         }
 
-        // Make a copy of the map, then mutate it to replace children
-        // as necessary.
         Evaluator eval = expander.getEvaluator();
-        Map<String, Object> newMap =
-            ((NonNullImmutableStruct) myStruct).copyMap(eval);
+        // Replace children in map as necessary.
+        FunctionalHashTrie<String, Object> existingMap = ((NonNullImmutableStruct) myStruct).getMap(eval);
+        FunctionalHashTrie<String, Object> newMap = existingMap;
 
-        for (Map.Entry<String, Object> entry : newMap.entrySet())
+        for (Map.Entry<String, Object> entry : existingMap.entrySet())
         {
             Object value = entry.getValue();
             if (! (value instanceof Object[]))
@@ -289,7 +288,7 @@ final class SyntaxStruct
                     subform = subform.addWraps(myWraps);
                 }
                 subform = expander.expandExpression(env, subform);
-                entry.setValue(subform);
+                newMap = newMap.with(entry.getKey(), subform);
             }
             else
             {
@@ -306,14 +305,15 @@ final class SyntaxStruct
                     }
                     newChildren[i] = expander.expandExpression(env, subform);
                 }
-                entry.setValue(newChildren);
+                newMap = newMap.with(entry.getKey(), newChildren);
             }
         }
 
 
         // Wraps have been pushed down so the copy doesn't need them.
         BaseSymbol[] annotations = myStruct.getAnnotations();
-        ImmutableStruct s = immutableStruct(newMap, annotations);
+        int size = myStruct.size();
+        ImmutableStruct s = immutableStruct(newMap, annotations, size);
         return new SyntaxStruct(getLocation(), s);
     }
 

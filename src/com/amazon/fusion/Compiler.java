@@ -957,7 +957,7 @@ class Compiler
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            HashMap<String, Object> map = new HashMap<String, Object>();
+            FunctionalHashTrie<String, Object> map = FunctionalHashTrie.EMPTY;
 
             for (int i = 0; i < myFieldNames.length; i++)
             {
@@ -966,10 +966,10 @@ class Compiler
 
                 String fieldName = myFieldNames[i];
 
-                structImplAdd(map, fieldName, value);
+                map = structImplAdd(map, fieldName, value);
             }
 
-            return immutableStruct(map);
+            return immutableStruct(map, myFieldNames.length);
         }
     }
 }

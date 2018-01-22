@@ -30,9 +30,7 @@ import com.amazon.ion.IonType;
 import com.amazon.ion.Timestamp;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -324,13 +322,13 @@ class StandardReader
             return nullStruct(eval, anns);
         }
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        FunctionalHashTrie<String, Object> map = FunctionalHashTrie.EMPTY;
         source.stepIn();
         while (source.next() != null)
         {
             String field = source.getFieldName();
             Object child = read(eval, source, name, readingSyntax);
-            structImplAdd(map, field, child);
+            map = structImplAdd(map, field, child);
         }
         source.stepOut();
 
