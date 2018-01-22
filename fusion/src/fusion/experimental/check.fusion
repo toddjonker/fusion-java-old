@@ -472,12 +472,13 @@ order:
     (let [(meta (with_handlers
                   [(pred void), // If predicate matches, handler returns void.
                    ((|e| true)  // For anything else, describe what was raised.
-                    (|e| { expected: expected,
-                             actual: (describe_raised e) }))]
+                    (|e| { actual: (describe_raised e) }))]
                   (thunk)
                   // The thunk was expected to raise, so the check has failed.
-                  { expected: expected }))]
-      (when meta (_fail_check meta))))
+                  { actual: "no exception raised" }))]
+      (when meta (_fail_check (if expected
+                                (put meta "expected" expected)
+                                meta)))))
 
 
   // This should really be a procedure, but it doesn't work.
@@ -603,7 +604,8 @@ but do this instead:
               (meta (struct "name"       (quote expect_syntax_error)
                             "expression" (syntax_to_datum stx)
                             "line"       (syntax_line stx)
-                            "column"     (syntax_column stx)))]
+                            "column"     (syntax_column stx)
+                            "expected"   (quote syntax_error)))]
           (datum_to_syntax
             // (parameterize
             //   [(check_stack_param (quote META))]
