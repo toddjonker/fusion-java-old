@@ -254,3 +254,12 @@
               "body before raise",
               "in pred1", "in pred2", "in hand2"]
     evaluation_order))
+
+
+//=============================================================================
+
+(require (only_in "/fusion/eval" eval))
+
+(check_pred (conjoin is_unbound_error is_syntax_error)
+  (with_handlers [(identity identity)]
+    (eval (quote 'unbound identifier'))))

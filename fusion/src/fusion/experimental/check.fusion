@@ -462,6 +462,7 @@ order:
       ((is_result_error   v) "result_error")
       ((is_contract_error v) "contract_error")
       ((is_check_error    v) "check_error")
+      ((is_unbound_error  v) "unbound_error")
       ((is_syntax_error   v) "syntax_error")
       ((is_error_exn      v) "error_exn")
       ((is_exn            v) "exn")
