@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -533,38 +533,45 @@ public final class _Private_CoverageWriter
         {
             if (first)
             {
-                indexHtml.append("<thead><tr><td class='heading'>");
+                indexHtml.append("<thead><tr>");
+                indexHtml.append("<td class='heading'>Expression Coverage</td>");
+                indexHtml.append("<td class='heading'>");
                 indexHtml.append(category);
                 indexHtml.append("</td>");
-                indexHtml.append("<td class='heading'>Expression Coverage</td>");
                 indexHtml.append("</tr></thead>\n");
                 first = false;
             }
 
-            indexHtml.append("<tr><td>");
             CoverageInfoPair pair;
             SourceName name = keyToNames.get(key);
             if (name != null)
             {
-                indexHtml.append("<a href=\"" + relativeName(name) + "\">");
-                indexHtml.append(key.toString());
-                indexHtml.append("</a>");
-
                 pair = myFileCoverages.get(name);
 
                 totalExpressions += pair.total();
             }
             else // The module was never loaded!
             {
-                indexHtml.append(key.toString());
-
                 pair = new EstimatedCoverageInfoPair();
 
                 unloadedCount++;
             }
 
-            indexHtml.append("</td><td>");
+            indexHtml.append("<tr><td>");
             pair.renderPercentageGraph(indexHtml);
+            indexHtml.append("</td><td>");
+
+            if (name != null)
+            {
+                indexHtml.append("<a href=\"" + relativeName(name) + "\">");
+                indexHtml.append(key.toString());
+                indexHtml.append("</a>");
+            }
+            else
+            {
+                indexHtml.append(key.toString());
+            }
+
             indexHtml.append("</td></tr>\n");
         }
 
