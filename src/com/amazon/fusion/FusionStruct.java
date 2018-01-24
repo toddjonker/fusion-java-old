@@ -51,7 +51,7 @@ final class FusionStruct
 
     static final NullStruct      NULL_STRUCT  = new NullStruct();
     static final NonNullImmutableStruct EMPTY_STRUCT =
-        new NonNullImmutableStruct(EMPTY_MAP, BaseSymbol.EMPTY_ARRAY);
+        new NonNullImmutableStruct(EMPTY_MAP, BaseSymbol.EMPTY_ARRAY, 0);
 
     //========================================================================
     // Constructors
@@ -106,6 +106,14 @@ final class FusionStruct
     static NonNullImmutableStruct immutableStruct(Map<String, Object> map,
                                                   BaseSymbol[] anns)
     {
+        return immutableStruct(map, anns, computeSize(map));
+    }
+
+
+    static NonNullImmutableStruct immutableStruct(Map<String, Object> map,
+                                                  BaseSymbol[] anns,
+                                                  int size)
+    {
         if (map.size() == 0)
         {
             if (anns.length == 0)
@@ -116,7 +124,7 @@ final class FusionStruct
             map = Collections.emptyMap(); // Just to normalize
         }
 
-        return new NonNullImmutableStruct(map, anns);
+        return new NonNullImmutableStruct(map, anns, size);
     }
 
     static NonNullImmutableStruct immutableStruct(Map<String, Object> map,
@@ -152,7 +160,7 @@ final class FusionStruct
             }
         }
 
-        return new NonNullImmutableStruct(map, anns);
+        return new NonNullImmutableStruct(map, anns, names.length);
     }
 
     static NonNullImmutableStruct immutableStruct(String[] names,
@@ -220,7 +228,7 @@ final class FusionStruct
             }
         }
 
-        return new MutableStruct(map, internSymbols(anns));
+        return new MutableStruct(map, internSymbols(anns), names.length);
     }
 
 
@@ -319,6 +327,22 @@ final class FusionStruct
         }
     }
 
+
+    //========================================================================
+    // Utilities
+
+    private static int computeSize(Map map)
+    {
+        int size = map.size();
+        for (Object values : map.values())
+        {
+            if (values instanceof Object[])
+            {
+                size += ((Object[]) values).length - 1;
+            }
+        }
+        return size;
+    }
 
     private static Object[] extend(Object[] array, Object element)
     {
@@ -703,7 +727,7 @@ final class FusionStruct
         {
             Map<String,Object> map = new HashMap<>(1);
             map.put(key, value);
-            return immutableStruct(map, myAnnotations);
+            return immutableStruct(map, myAnnotations, 1);
         }
 
         @Override
@@ -741,6 +765,7 @@ final class FusionStruct
             return this;
         }
 
+        // TODO: Optimize this. If the other is immutable and has same annotations, return other.
         @Override
         public Object merge(Evaluator eval, BaseStruct other)
             throws FusionException
@@ -748,7 +773,7 @@ final class FusionStruct
             if (other.size() == 0) return this;
 
             MapBasedStruct is = (MapBasedStruct) other;
-            return new NonNullImmutableStruct(is.getMap(eval), myAnnotations);
+            return new NonNullImmutableStruct(is.getMap(eval), myAnnotations, other.size());
         }
 
         @Override
@@ -842,13 +867,24 @@ final class FusionStruct
          * @param map must not be null. It is not copied; a reference is
          * retained.
          */
-        private MapBasedStruct(Map<String, Object> map, BaseSymbol[] anns)
+        private MapBasedStruct(Map<String, Object> map,
+                               BaseSymbol[] anns)
+        {
+            this(map, anns, computeSize(map));
+        }
+
+        /**
+         * @param map must not be null. It is not copied; a reference is
+         * retained.
+         */
+        private MapBasedStruct(Map<String, Object> map,
+                               BaseSymbol[] anns,
+                               int size)
         {
             super(anns);
             assert map != null;
             myMap = map;
-
-            updateSize();
+            mySize = size;
         }
 
         private MapBasedStruct(BaseSymbol[] annotations, int size)
@@ -863,15 +899,7 @@ final class FusionStruct
          */
         void updateSize()
         {
-            int size = myMap.size();
-            for (Object values : myMap.values())
-            {
-                if (values instanceof Object[])
-                {
-                    size += ((Object[]) values).length - 1;
-                }
-            }
-            mySize = size;
+            mySize = computeSize(myMap);
         }
 
         /**
@@ -885,11 +913,17 @@ final class FusionStruct
         }
 
         abstract MapBasedStruct makeSimilar(Map<String, Object> map,
-                                            BaseSymbol[] annotations);
+                                            BaseSymbol[] annotations,
+                                            int size);
 
         MapBasedStruct makeSimilar(Map<String, Object> map)
         {
-            return makeSimilar(map, myAnnotations);
+            return makeSimilar(map, myAnnotations, computeSize(map));
+        }
+
+        MapBasedStruct makeSimilar(Map<String, Object> map, int size)
+        {
+            return makeSimilar(map, myAnnotations, size);
         }
 
         Map<String, Object> copyMap(Evaluator eval)
@@ -1106,9 +1140,20 @@ final class FusionStruct
         public Object put(Evaluator eval, String key, Object value)
             throws FusionException
         {
+            int newSize = size();
             Map<String,Object> newMap = copyMap(eval);
-            newMap.put(key, value);
-            return makeSimilar(newMap);
+
+            Object prior = newMap.put(key, value);
+            if (prior == null)
+            {
+                newSize++;
+            }
+            else if (prior instanceof Object[])
+            {
+                newSize -= (((Object[]) prior).length - 1);
+            }
+
+            return makeSimilar(newMap, newSize);
         }
 
         @Override
@@ -1149,7 +1194,7 @@ final class FusionStruct
             Map<String,Object> newMap = copyMap(eval);
             structImplMergeM(newMap, is.getMap(eval));
 
-            return makeSimilar(newMap);
+            return makeSimilar(newMap, this.size() + other.size());
         }
 
         @Override
@@ -1414,6 +1459,18 @@ final class FusionStruct
             super(map, annotations);
         }
 
+        /**
+         * @param map
+         * @param annotations
+         * @param size
+         */
+        public NonNullImmutableStruct(Map<String, Object> map,
+                                      BaseSymbol[] annotations,
+                                      int size)
+        {
+            super(map, annotations, size);
+        }
+
         private NonNullImmutableStruct(BaseSymbol[] annotations, int size)
         {
             super(annotations, size);
@@ -1427,16 +1484,17 @@ final class FusionStruct
 
         @Override
         MapBasedStruct makeSimilar(Map<String, Object> map,
-                                   BaseSymbol[] annotations)
+                                   BaseSymbol[] annotations,
+                                   int size)
         {
-            return immutableStruct(map, annotations);
+            return immutableStruct(map, annotations, size);
         }
 
         @Override
         Object annotate(Evaluator eval, BaseSymbol[] annotations)
             throws FusionException
         {
-            return makeSimilar(getMap(eval), annotations);
+            return makeSimilar(getMap(eval), annotations, size());
         }
 
         @Override
@@ -1574,18 +1632,26 @@ final class FusionStruct
             super(map, annotations);
         }
 
+        public MutableStruct(Map<String, Object> map,
+                             BaseSymbol[] annotations,
+                             int size)
+        {
+            super(map, annotations, size);
+        }
+
         @Override
         MapBasedStruct makeSimilar(Map<String, Object> map,
-                                   BaseSymbol[] annotations)
+                                   BaseSymbol[] annotations,
+                                   int size)
         {
-            return new MutableStruct(map, annotations);
+            return new MutableStruct(map, annotations, size);
         }
 
         @Override
         Object annotate(Evaluator eval, BaseSymbol[] annotations)
             throws FusionException
         {
-            return makeSimilar(copyMap(eval), annotations);
+            return makeSimilar(copyMap(eval), annotations, size());
         }
 
         @Override

@@ -212,6 +212,9 @@ will have the same annotations as `struct`.
 Returns a struct that has all the name-value elements of both arguments.  This
 will result in repeated fields if the names overlap or if one of the arguments
 has repeats. The result has the same type as the first argument.
+
+    (struct_merge {a:1} {a:1}) ==> {a:1, a:1}
+    (struct_merge {a:1} {b:2}) ==> {a:1, b:2}
     '''
     "com.amazon.fusion.FusionStruct$StructMergeProc")
 
