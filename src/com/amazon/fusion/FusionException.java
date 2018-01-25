@@ -14,8 +14,7 @@ import java.util.Objects;
  * Unlike Java's {@code throw} form, Fusion's {@code raise} procedure allows
  * one to throw arbitrary values, not just "exception" types.  Within the
  * FusionJava implementation, all such values are wrapped in
- * {@link FusionException}s.  To determine the value that was raised, call
- * {@link #getRaisedValue()}.
+ * {@link FusionException}s.
  */
 @SuppressWarnings("serial")
 public class FusionException
@@ -124,7 +123,7 @@ public class FusionException
      *
      * @return the Fusion value raised by Fusion code.
      */
-    public Object getRaisedValue()
+    Object getRaisedValue()
     {
         return this;
     }
