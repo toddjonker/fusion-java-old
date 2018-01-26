@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -351,9 +351,8 @@ public class RuntimeTest
         SourceName source = SourceName.forDisplay("/path/to/blah");
         String moduleContent = "/* nothing */";
 
-        thrown.expect(FusionException.class);
+        thrown.expect(SyntaxException.class);
         thrown.expectMessage(allOf(containsString("no top-level forms"),
-                                   containsString(modulePath),
                                    containsString(source.display())));
 
         topLevel().loadModule(modulePath, system().newReader(moduleContent), source);
@@ -367,9 +366,8 @@ public class RuntimeTest
         SourceName source = SourceName.forDisplay("/path/to/blah");
         String moduleContent = "(module m '/fusion' true) extra_data";
 
-        thrown.expect(FusionException.class);
+        thrown.expect(SyntaxException.class);
         thrown.expectMessage(allOf(containsString("more than one top-level form"),
-                                   containsString(modulePath),
                                    containsString(source.display())));
 
         topLevel().loadModule(modulePath, system().newReader(moduleContent), source);
@@ -384,9 +382,8 @@ public class RuntimeTest
         SourceName source = SourceName.forDisplay("/path/to/blah");
         String moduleContent = " (if true 1 2)";
 
-        thrown.expect(FusionException.class);
+        thrown.expect(SyntaxException.class);
         thrown.expectMessage(allOf(containsString("Top-level form isn't (module ...)"),
-                                   containsString(modulePath),
                                    containsString("1st line, 2nd column"),
                                    containsString(source.display())));
 

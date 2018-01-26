@@ -1,8 +1,7 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
-import static org.hamcrest.core.Is.isA;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Before;
@@ -131,8 +130,7 @@ public class ModuleTest
     public void testDefineImportedName()
         throws Exception
     {
-        thrown.expect(FusionException.class);
-        thrown.expectCause(isA(AmbiguousBindingFailure.class));
+        thrown.expect(AmbiguousBindingFailure.class);
 
         eval("(require '/module/define_imported_name')");
     }

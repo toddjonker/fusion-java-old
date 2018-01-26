@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -149,7 +149,7 @@ public class FusionException
     }
 
     /**
-     * @return the result of calling {@link #displayMessage}.
+     * @return the base message, followed by the Fusion continuation trace.
      */
     @Override
     public final String getMessage()

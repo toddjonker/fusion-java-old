@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
 
 // A module can `define` a name that's bound by the module's language.
 // Unlike binding introduced via `require`, language bindings can be
@@ -53,7 +53,7 @@
 (expect_syntax_exn
   (module redefine_unique_require "/fusion"
     // This imports a different `apply` than the language provides.
-    (require (only_in local2 apply))
+    (require (only_in export_fusion_apply apply))
     (define apply 404)))
 
 (expect_syntax_exn

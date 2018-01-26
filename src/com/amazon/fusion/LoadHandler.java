@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -226,19 +226,8 @@ final class LoadHandler
     void loadModule(Evaluator eval, ModuleIdentity id, ModuleLocation loc)
         throws FusionException
     {
-        try
-        {
-            SyntaxSexp moduleDeclaration = readModuleDeclaration(eval, id, loc);
+        SyntaxSexp moduleDeclaration = readModuleDeclaration(eval, id, loc);
 
-            evalModuleDeclaration(eval, loc, moduleDeclaration);
-        }
-        catch (FusionException e)
-        {
-            String message =
-                "Failure loading module " + id.absolutePath() +
-                ": " + e.getMessage();
-            throw new FusionException(message, e);
-
-        }
+        evalModuleDeclaration(eval, loc, moduleDeclaration);
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -12,7 +12,6 @@ import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
 import static com.amazon.fusion.FusionSyntax.unsafeSyntaxUnwrap;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.GlobalState.PROVIDE;
-import static com.amazon.fusion.GlobalState.REQUIRE;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import static com.amazon.fusion.ModuleIdentity.isValidModulePath;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
@@ -139,20 +138,10 @@ final class ModuleForm
                 language = registry.instantiate(eval, languageId);
                 assert language != null;  // Otherwise resolve should fail
             }
-            catch (ModuleNotFoundException e)
+            catch (FusionException e)
             {
                 e.addContext(initialBindingsStx);
                 throw e;
-            }
-            catch (FusionException e)
-            {
-                String message =
-                    "Error installing language bindings: " + e.getMessage();
-                SyntaxException ex =
-                    new SyntaxException(getInferredName(), message,
-                                        initialBindingsStx);
-                ex.initCause(e);
-                throw ex;
             }
 
             source = (SyntaxSexp)
@@ -250,11 +239,8 @@ final class ModuleForm
                     }
                     catch (FusionException e)
                     {
-                        String message = e.getMessage();
-                        SyntaxException ex =
-                            new SyntaxException(REQUIRE, message, form);
-                        ex.initCause(e);
-                        throw ex;
+                        e.addContext(form);
+                        throw e;
                     }
                     formIsExpanded = true;
                 }
