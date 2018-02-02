@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -121,6 +121,14 @@ abstract class Procedure
     final void checkArityExact(Object[] args)
         throws ArityFailure
     {
+        if (myArity < 0)
+        {
+            String message =
+                "This Procedure instance used the no-args constructor from " +
+                "which arity cannot be inferred. It must use one of the " +
+                "un-deprecated checkArity methods.";
+            throw new IllegalStateException(message);
+        }
         checkArityExact(myArity, args);
     }
 

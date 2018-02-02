@@ -263,3 +263,8 @@
 (check_pred (conjoin is_unbound_error is_syntax_error)
   (with_handlers [(identity identity)]
     (eval (quote 'unbound identifier'))))
+
+(with_handlers [(identity (|e| (check_pred is_contract_error e)
+                               (check_pred (negate is_arity_error) e)
+                               (check_pred (negate is_argument_error) e)))]
+  (raise_contract_error "name" "msg"))
