@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module void "/fusion/private/kernel"
 
@@ -22,13 +22,27 @@ Along with all nulls and `false`, the void value is untruthy:
     "no"
   '''
 
+  (provide
+    is_void
+    void
+  )
 
-  (provide is_void)
+
   (define is_void
+    '''
+    (is_void value)
+
+Determines whether a `value` is the Fusion void value.
+    '''
     (java_new "com.amazon.fusion.FusionVoid$IsVoidProc"))
 
-  (provide void)
+
   (define void
+    '''
+    (void arg ...)
+
+Returns the singular void value, ignoring all `arg`s.
+    '''
     (java_new "com.amazon.fusion.FusionVoid$VoidProc"))
 
 )

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module iterator "/fusion/private/builtins"
 
@@ -16,11 +16,25 @@ based on two procedures:
 
   (require
     "/fusion/exception"
-    "/fusion/experimental/defines"
     "/fusion/ffi/java"
     "/fusion/private/bind"
     "/fusion/private/control"
     "/fusion/void")
+
+  (provide
+    empty_iterator
+    is_iterator
+    iterator_append
+    iterator_choose
+    iterator_find
+    iterator_has_next
+    iterator_map
+    iterator_map_splicing
+    iterator_next
+    make_iterator
+    value_iterator
+  )
+
 
   (define TRUE  (lambda () true))
   (define FALSE (lambda () false))
@@ -30,12 +44,41 @@ based on two procedures:
       (raise_contract_error "iterator_next" "no such element")))
 
 
-  (defpub_j is_iterator       "com.amazon.fusion.FusionIterator$IsIteratorProc")
-  (defpub_j iterator_has_next "com.amazon.fusion.FusionIterator$HasNextProc")
-  (defpub_j iterator_next     "com.amazon.fusion.FusionIterator$NextProc")
+  (define is_iterator
+    '''
+    (is_iterator value)
+
+Checks if the `value` is an iterator.  Returns `true` or `false`.
+    '''
+    (java_new "com.amazon.fusion.FusionIterator$IsIteratorProc"))
 
 
-  (defpub (make_iterator has_next_proc next_proc)
+  (define iterator_has_next
+    '''
+    (iterator_has_next iterator)
+
+Checks if the `iterator` will provide another value when `iterator_next` is
+called.  Returns `true` or `false`.
+
+After this procedure returns `false` for some iterator instance, all
+subsequent calls of `iterator_has_next` on the same instance are expected to
+return `false`, and all subsequent calls of `iterator_next` are expected to
+throw an exception.
+    '''
+    (java_new "com.amazon.fusion.FusionIterator$HasNextProc"))
+
+
+  (define iterator_next
+    '''
+    (iterator_next iterator)
+
+Returns the next element of the `iterator`.  When the iterator has no more
+elements, an exception is thrown.
+    '''
+    (java_new "com.amazon.fusion.FusionIterator$NextProc"))
+
+
+  (define (make_iterator has_next_proc next_proc)
     '''
 Returns an iterator that delegates `iterator_has_next` and `iterator_next` to
 the given procedures, which are usually closures with shared state.
@@ -43,7 +86,7 @@ the given procedures, which are usually closures with shared state.
     (java_new "com.amazon.fusion.FusionIterator" has_next_proc next_proc))
 
 
-  (defpub empty_iterator
+  (define empty_iterator
     '''
 An iterator with no elements.  `(iterator_has_next empty_iterator)` always
 returns `false`, and `(iterator_next empty_iterator)` always throws an
@@ -52,7 +95,7 @@ exception.
     (make_iterator FALSE BAD_NEXT))
 
 
-  (defpub (value_iterator value)
+  (define (value_iterator value)
     '''
 Returns an iterator that produces `value` as its only element.
     '''
@@ -66,7 +109,7 @@ Returns an iterator that produces `value` as its only element.
         (lambda () (next)))))
 
 
-  (defpub (iterator_map proc iter)
+  (define (iterator_map proc iter)
     '''
 Returns an iterator whose elements are the results of applying `proc` to the
 corresponding elements of `iter`.
@@ -81,7 +124,7 @@ corresponding elements of `iter`.
 
 
   // AKA cross-apply
-  (defpub (iterator_map_splicing proc iter)
+  (define (iterator_map_splicing proc iter)
     '''
 Returns an iterator that applies an iterator-making `proc` to each element of
 `iter`, splicing the inner iterators into a single outer iterator.
@@ -125,7 +168,7 @@ Returns an iterator that applies an iterator-making `proc` to each element of
 
 
 
-  (defpub (iterator_choose pred iter)
+  (define (iterator_choose pred iter)
     '''
 Returns an iterator whose elements are those provided by `iter` that satisfy
 predicate `pred`.
@@ -159,7 +202,7 @@ predicate `pred`.
         (lambda () (next)))))
 
 
-  (defpub (iterator_find pred iter)
+  (define (iterator_find pred iter)
     '''
 Returns the first element of `iter` that satisfies predicate `pred`.  If no
 element satisfies the predicate, the result is void.
@@ -170,7 +213,7 @@ element satisfies the predicate, the result is void.
         (void))))
 
 
-  (defpub (iterator_append iter1 iter2)
+  (define (iterator_append iter1 iter2)
     '''
 Returns an iterator that provides all the elements of `iter1` and then all the
 elements of `iter2`.

@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -2125,13 +2125,6 @@ public final class FusionNumber
     static final class IsIntProc
         extends Procedure1
     {
-        IsIntProc()
-        {
-            //    "                                                                               |
-            super("Determines whether a `value` is of type `int`, returning `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
@@ -2145,13 +2138,6 @@ public final class FusionNumber
     static final class IsDecimalProc
         extends Procedure1
     {
-        IsDecimalProc()
-        {
-            //    "                                                                               |
-            super("Determines whether a `value` is of type `decimal`, returning `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
@@ -2165,13 +2151,6 @@ public final class FusionNumber
     static final class IsFloatProc
         extends Procedure1
     {
-        IsFloatProc()
-        {
-            //    "                                                                               |
-            super("Determines whether a `value` is of type `float`, returning `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
@@ -2185,14 +2164,6 @@ public final class FusionNumber
     static final class SumProc
         extends Procedure
     {
-        SumProc()
-        {
-            //    "                                                                               |
-            super("Returns the sum of the `num`bers, which must be int or decimal.  With no\n" +
-                  "arguments, returns integer 0.",
-                  "num", DOTDOTDOT);
-        }
-
         @Override
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
@@ -2235,14 +2206,6 @@ public final class FusionNumber
     static final class ProductProc
         extends Procedure
     {
-        ProductProc()
-        {
-            //    "                                                                               |
-            super("Returns the product of the `num`bers, which must be int or decimal.  With no\n" +
-                  "arguments, returns integer 1.",
-                  "num", DOTDOTDOT);
-        }
-
         @Override
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
@@ -2285,15 +2248,6 @@ public final class FusionNumber
     static final class DifferenceProc
         extends Procedure
     {
-        DifferenceProc()
-        {
-            //    "                                                                               |
-            super("With two or more int or decimal `num`bers, returns their difference,\n" +
-                  "associating to the left.  With one int or decimal argument, returns its\n" +
-                  "negation.",
-                  "num", DOTDOTDOTPLUS);
-        }
-
         @Override
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
@@ -2340,15 +2294,6 @@ public final class FusionNumber
     static class DivideProc
         extends Procedure
     {
-        DivideProc()
-        {
-            //    "                                                                               |
-            super("Returns a decimal whose numeric value is `(dividend / divisor)`.  Both\n" +
-                  "arguments must be decimals.  An exception is thrown if the result cannot be\n" +
-                  "represented exactly.",
-                  "dividend", "divisor");
-        }
-
         /**
          * Helper to allow subclass to tweak the divison context.
          */
@@ -2374,7 +2319,7 @@ public final class FusionNumber
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            checkArityExact(args);
+            checkArityExact(2, args);
 
             BigDecimal dividend = checkRequiredDecimalArg(eval, this, 0, args);
             BigDecimal divisor  = checkRequiredDecimalArg(eval, this, 1, args);
@@ -2567,15 +2512,6 @@ public final class FusionNumber
     static final class CeilingProc
         extends Procedure1
     {
-        CeilingProc()
-        {
-            //    "                                                                               |
-            super("Returns the smallest int greater than or equal to `number` (that is, truncate\n" +
-                  "toward positive infinity). The input must be a non-null int or decimal, and\n" +
-                  "the result is an int.",
-                  "number");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg0)
             throws FusionException
@@ -2603,15 +2539,6 @@ public final class FusionNumber
     static final class FloorProc
         extends Procedure1
     {
-        FloorProc()
-        {
-            //    "                                                                               |
-            super("Returns the largest int less than or equal to `number` (that is, truncate\n" +
-                  "toward negative infinity). The input must be a non-null int or decimal, and the\n" +
-                  "result is an int.",
-                  "number");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg0)
             throws FusionException

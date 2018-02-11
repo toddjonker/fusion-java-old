@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -8,17 +8,6 @@ import java.util.Arrays;
 final class LetrecForm
     extends SyntacticForm
 {
-    LetrecForm()
-    {
-        //    "                                                                               |
-        super("((ident expr) ...) body ...+",
-              "Creates new binding locations for each `ident`, binds them to their `expr`s,\n"
-            + "then evaluates `body`. The `expr`s are evaluated left-to-right, and the\n"
-            + "`ident`s are bound in all `expr`s and `body`s. `body` may be one or more forms;\n"
-            + "the result of the last form is the result of the entire expression.");
-    }
-
-
     @Override
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException

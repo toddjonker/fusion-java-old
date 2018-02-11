@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -8,19 +8,6 @@ import static com.amazon.fusion.FusionIo.safeWriteToString;
 final class ParameterizeForm
     extends SyntacticForm
 {
-    ParameterizeForm()
-    {
-        //    "                                                                               |
-        super("((PARAM EXPR) ...) BODY ...+",
-              "Dynamically binds the PARAMs to the EXPR values while evaluating the BODY.\n" +
-              "The PARAMs are evaluated first, in order; each must result in a dynamic\n" +
-              "parameter procedure. The EXPRs are then evaluated in order, and then the params\n" +
-              "are changed to their results for the dynamic extent of the BODY.\n" +
-              "BODY may be one or more forms; the result of the last form is the result of the\n" +
-              "entire expression.");
-    }
-
-
     @Override
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module namespace '/fusion/private/kernel'
 
@@ -13,12 +13,21 @@ evaluated within the context of some namespace.
 Namespaces are typically used for [dynamic evaluation](../eval.html).
   '''
 
-  (require "/fusion/experimental/defines")
 
   (provide current_namespace)  // From kernel
 
+  (provide
+    make_namespace_with_language
+  )
 
-  (defpub_j make_namespace_with_language
-    "com.amazon.fusion.FusionNamespace$MakeNamespaceWithLanguageProc")
+
+  (define make_namespace_with_language
+    '''
+    (make_namespace_with_language language)
+
+Makes a fresh namespace with the bindings of `language`, which must be a string
+holding an absolute module path.
+    '''
+    (java_new "com.amazon.fusion.FusionNamespace$MakeNamespaceWithLanguageProc"))
 
 )

@@ -1,17 +1,10 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 final class QuoteSyntaxForm
     extends SyntacticForm
 {
-    QuoteSyntaxForm()
-    {
-        super("DATUM",
-              "Returns a syntax object retaining the lexical information of DATUM.");
-    }
-
-
     @Override
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,14 +6,6 @@ package com.amazon.fusion;
 final class SyntaxAppendProc
     extends Procedure
 {
-    SyntaxAppendProc()
-    {
-        //    "                                                                               |
-        super("Returns a new syntax sexp that combines the HEAD and TAIL sequences.",
-              "head", "tail", DOTDOTDOT);
-    }
-
-
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException

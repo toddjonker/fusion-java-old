@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2015-2018 Amazon.com, Inc.  All rights reserved.
 
 (module kernel2 "/fusion/private/kernel"
 
@@ -67,9 +67,28 @@ Determines whether `value` is a struct, returning `true` or `false`.
 
 
   (define let_values
+    '''
+    (let_values (((ident ...) expr) ...) body ...+)
+
+Captures [multiple results](fusion/procedure.html#results), creating local
+bindings for the `ident`s, with the `body` in scope.  The `expr`s are evaluated
+left-to-right, and must return as many values as there are corresponding
+`ident`s, which are then bound to those results.  After the bindings are
+installed the `body` is evaluated.  `body` may be one or more forms; the last
+form is in tail position and its result is the result of the entire expression.
+    '''
     (java_new "com.amazon.fusion.LetValuesForm"))
 
+
   (define letrec
+    '''
+    (letrec ((ident expr) ...) body ...+)
+
+Creates new binding locations for each `ident`, binds them to their `expr`s,
+then evaluates `body`. The `expr`s are evaluated left-to-right, and the
+`ident`s are bound in all `expr`s and `body`s. `body` may be one or more forms;
+the result of the last form is the result of the entire expression.
+    '''
     (java_new "com.amazon.fusion.LetrecForm"))
 
 
@@ -84,9 +103,20 @@ is as defined by [`if`](fusion/bool.html#if).
 
 
   (define quote
+    '''
+    (quote datum)
+
+Returns the Ion `datum` as-is, without evaluation.
+    '''
     (java_new "com.amazon.fusion.QuoteForm"))
 
+
   (define quote_syntax
+    '''
+    (quote_syntax datum)
+
+Returns a syntax object retaining the lexical information of `datum`.
+    '''
     (java_new "com.amazon.fusion.QuoteSyntaxForm"))
 
   (provide (all_defined_out))

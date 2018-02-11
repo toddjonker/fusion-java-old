@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -8,14 +8,6 @@ package com.amazon.fusion;
 final class QuoteForm
     extends SyntacticForm
 {
-    QuoteForm()
-    {
-        //    "                                                                               |
-        super("datum",
-              "Returns the Ion `datum` as-is, without evaluation.");
-    }
-
-
     @Override
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -11,16 +11,6 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 final class SyntaxGetProc
     extends Procedure
 {
-    SyntaxGetProc()
-    {
-        //    "                                                                               |
-        super("Traverses down through syntax objects.\n" +
-              "CONTAINER must be syntax container (struct, list, or sexp).\n" +
-              "Each PART must be a string, symbol, or int, to denote either a struct's\n" +
-              "field-name or a sequence's index.",
-              "container", "part", DOTDOTDOT);
-    }
-
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,14 +10,6 @@ import static com.amazon.fusion.FusionIo.safeDisplayManyToString;
 final class WrongSyntaxProc
     extends Procedure
 {
-    WrongSyntaxProc()
-    {
-        //    "                                                                               |
-        super("Raises a syntax error located at the given STX syntax. The MESSAGEs are\n" +
-              "displayed as part of the error.",
-              "stx", "message", DOTDOTDOT);
-    }
-
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException

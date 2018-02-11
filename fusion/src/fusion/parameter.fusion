@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module parameter '/fusion/private/kernel'
 
@@ -50,16 +50,32 @@ Java developers will recognize that this is very similar to how a Java `catch`
 clause sets an exception handler with dynamic extent.
   '''
 
-  (require "/fusion/experimental/defines")
+
+  (provide
+    make_parameter
+    parameterize
+  )
 
 
-  (defpub_j_syntax parameterize "com.amazon.fusion.ParameterizeForm")
+  (define_syntax parameterize
+    '''
+    (parameterize ((param expr) ...) body ...+)
 
-  (defpub make_parameter
-    (lambda (value)
-      '''
+Dynamically binds the `param`s to the `expr` values while evaluating the `body`.
+The `param`s are evaluated first, in order; each must result in a dynamic
+parameter. The `expr`s are then evaluated in order, and then the parameters
+are changed to their results for the dynamic extent of the `body`.
+
+The `body` may be one or more forms; the result of the last form is the result
+of the entire expression.
+    '''
+    (java_new "com.amazon.fusion.ParameterizeForm"))
+
+
+  (define (make_parameter value)
+    '''
 Makes a new dynamic parameter procedure. The initial value of the parameter is
 `value`.
-      '''
-      (java_new "com.amazon.fusion.DynamicParameter" value)))
+    '''
+    (java_new "com.amazon.fusion.DynamicParameter" value))
 )

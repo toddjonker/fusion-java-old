@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -41,14 +41,6 @@ final class FusionNamespace
     static final class MakeNamespaceWithLanguageProc
         extends Procedure1
     {
-        MakeNamespaceWithLanguageProc()
-        {
-            //    "                                                                               |
-            super("Makes a fresh namespace with the bindings of `language`, which must be a string\n" +
-                  "holding an absolute module path.",
-                  "language");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg) throws FusionException
         {

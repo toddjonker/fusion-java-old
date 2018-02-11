@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -7,20 +7,6 @@ import java.util.ArrayList;
 final class LetValuesForm
     extends SyntacticForm
 {
-    LetValuesForm()
-    {
-        //    "                                                                               |
-        super("(((ident ...) expr) ...) body ...+",
-              "Captures [multiple results](fusion/procedure.html#results), creating local\n" +
-              "bindings for the `ident`s, with the `body` in scope.  The `expr`s\n" +
-              "are evaluated left-to-right, and must return as many values as there are\n" +
-              "corresponding `ident`s, which are then bound to those results.  After the\n" +
-              "bindings are installed the `body` is evaluated.  `body` may be one or more forms;\n" +
-              "the last form is in tail position and its result is the result of the entire\n" +
-              "expression.");
-    }
-
-
     @Override
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException

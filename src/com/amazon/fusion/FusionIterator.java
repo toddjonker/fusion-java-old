@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -294,13 +294,6 @@ class FusionIterator
     static final class IsIteratorProc
         extends Procedure1
     {
-        IsIteratorProc()
-        {
-            //    "                                                                               |
-            super("Checks if the `value` is an iterator.  Returns `true` or `false`.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
@@ -314,19 +307,6 @@ class FusionIterator
     static final class HasNextProc
         extends Procedure1
     {
-        HasNextProc()
-        {
-            //    "                                                                               |
-            super("Checks if the `iterator` will provide another value when `iterator_next` is\n" +
-                  "called.  Returns `true` or `false`.\n" +
-                  "\n" +
-                  "After this procedure returns `false` for some iterator instance, all\n" +
-                  "subsequent calls of `iterator_has_next` on the same instance are expected to\n" +
-                  "return `false`, and all subsequent calls of `iterator_next` are expected to\n" +
-                  "throw an exception.",
-                  "iterator");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
@@ -340,14 +320,6 @@ class FusionIterator
     static final class NextProc
         extends Procedure1
     {
-        NextProc()
-        {
-            //    "                                                                               |
-            super("Returns the next element of the `iterator`.  When the iterator has no more\n" +
-                  "elements, an exception is thrown.",
-                  "iterator");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException

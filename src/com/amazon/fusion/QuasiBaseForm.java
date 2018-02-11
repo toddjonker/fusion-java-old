@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -19,8 +19,6 @@ abstract class QuasiBaseForm
 
     QuasiBaseForm(Object qIdentifier, Object uIdentifier)
     {
-        super("template", "...");
-
         SyntaxSymbol id = (SyntaxSymbol) qIdentifier;
         myQBinding = id.resolve().target();
 

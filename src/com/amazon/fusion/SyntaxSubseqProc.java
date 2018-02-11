@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -7,20 +7,11 @@ import static com.amazon.fusion.FusionNumber.checkIntArgToJavaInt;
 final class SyntaxSubseqProc
     extends Procedure
 {
-    SyntaxSubseqProc()
-    {
-        //    "                                                                               |
-        super("Returns a new syntax sexp that copies children from SEQUENCE starting at FROM.\n" +
-              "If FROM is beyond the end of the SEQUENCE, the result is an empty sequence.",
-              "sequence", "from");
-    }
-
-
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException
     {
-        checkArityExact(args);
+        checkArityExact(2, args);
         SyntaxSequence sequence = checkSyntaxSequenceArg(0, args);
         int from = checkIntArgToJavaInt(eval, this, 1, args);
         int size = sequence.size();

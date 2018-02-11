@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -93,13 +93,6 @@ public final class FusionVoid
 
     static final class VoidProc extends Procedure
     {
-        VoidProc()
-        {
-            //    "                                                                               |
-            super("Returns the singular void value, ignoring all `arg`s.",
-                  "arg", DOTDOTDOT);
-        }
-
         @Override
         Object doApply(Evaluator eval, Object[] args)
         {
@@ -110,13 +103,6 @@ public final class FusionVoid
 
     static final class IsVoidProc extends Procedure1
     {
-        IsVoidProc()
-        {
-            //    "                                                                               |
-            super("Determines whether a `value` is the Fusion void value.",
-                  "value");
-        }
-
         @Override
         Object doApply(Evaluator eval, Object arg)
         {

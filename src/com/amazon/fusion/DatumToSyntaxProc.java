@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -11,19 +11,6 @@ import static com.amazon.fusion.Syntax.datumToSyntax;
 class DatumToSyntaxProc
     extends Procedure
 {
-    DatumToSyntaxProc()
-    {
-        //    "                                                                               |
-        super("Recursively converts the `datum` to a syntax object with lexical information\n" +
-              "copied from the `context` syntax identifier, and source-location copied from\n" +
-              "the `location` syntax object. Existing syntax objects in `datum` are included\n" +
-              "as-is.\n" +
-              "\n" +
-              "When `context` isn't provided, converted syntax objects have no lexical\n" +
-              "context.  When `location` isn't provided, they will have no location.",
-              "datum", "[context location]");
-    }
-
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException
