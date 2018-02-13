@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -352,7 +352,7 @@ public final class _Private_ModuleDocumenter
          *    name
          *    kind
          *    doc
-         *      oneliner
+         *      oneliner -- presently unused, intended to be text description
          *      body
          *      also
          */
@@ -383,32 +383,27 @@ public final class _Private_ModuleDocumenter
 
                 append("<div class='doc'>");
 
-                StringBuilder buf = new StringBuilder();
-
-                if (doc.getUsage() != null)
+                if (doc.getUsage() != null || doc.getBody() != null)
                 {
-                    buf.append("    ");
-                    buf.append(doc.getUsage());
-                    buf.append('\n');
+                    StringBuilder buf = new StringBuilder();
 
-                    append("<div class='oneliner'>");
-                    markdown(buf.toString());
-                    append("</div>\n");
+                    if (doc.getUsage() != null)
+                    {
+                        buf.append("    ");
+                        buf.append(doc.getUsage());
+                        buf.append('\n');
+                    }
 
-                    buf.setLength(0);
-                }
-
-                if (doc.getBody() != null)
-                {
-                    buf.append('\n');
-                    buf.append(doc.getBody());
-                    buf.append('\n');
+                    if (doc.getBody() != null)
+                    {
+                        buf.append('\n');
+                        buf.append(doc.getBody());
+                        buf.append('\n');
+                    }
 
                     append("<div class='body'>");
                     markdown(buf.toString());
                     append("</div>\n");
-
-                    buf.setLength(0);
                 }
 
                 append('\n');
