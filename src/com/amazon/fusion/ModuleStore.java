@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -95,6 +95,10 @@ final class ModuleStore
                 if (value instanceof Procedure)
                 {
                     doc.setKind(BindingDoc.Kind.PROCEDURE);
+                }
+                else if (value instanceof SyntacticForm)
+                {
+                    doc.setKind(BindingDoc.Kind.SYNTAX);
                 }
             }
             return doc;
