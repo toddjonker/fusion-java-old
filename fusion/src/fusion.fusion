@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module fusion "/fusion/base"
 
@@ -6,6 +6,11 @@
   '''
 The main Fusion language. This is the default language for Fusion scripts
 and the recommended language for most modules.
+
+As the default set of recommended bindings, this module omits features that are
+specialized, uncommon, unsafe, or otherwise unwise. In particular, it omits
+non-functional features like mutation operators and mutable data types,
+except in vestigial cases.
 
 # Warning!
 
