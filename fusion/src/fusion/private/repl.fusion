@@ -1,0 +1,23 @@
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+
+(module repl "/fusion"
+
+  '''
+Helper forms for the REPL.
+  '''
+
+  (require "/fusion/ffi/java")
+
+  (provide
+    help
+  )
+
+  (define help
+    '''
+    (help ident ...)
+
+Prints documentation for the given bindings, if available.
+    '''
+    (java_new "com.amazon.fusion._Private_HelpForm"))
+
+)

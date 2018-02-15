@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -72,13 +72,6 @@ public final class _Private_HelpForm
         }
     }
 
-
-    public _Private_HelpForm()
-    {
-        //    "                                                                               |
-        super("ident ...",
-              "Prints documentation for the given bindings, if available.");
-    }
 
     @Override
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -8,7 +8,6 @@ import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.fusion.TopLevel;
-import com.amazon.fusion._Private_HelpForm;
 import com.amazon.fusion._Private_Trampoline;
 import com.amazon.ion.IonException;
 import java.io.Console;
@@ -93,10 +92,9 @@ class Repl
             // Bootstrap the runtime before printing the welcome banner, so
             // that we don't do that when there's usage problems.
             myTopLevel = runtime().getDefaultTopLevel();
+            myTopLevel.requireModule("/fusion/private/repl");
 
             welcome();
-
-            myTopLevel.define("help", new _Private_HelpForm());
 
             while (rep())
             {
