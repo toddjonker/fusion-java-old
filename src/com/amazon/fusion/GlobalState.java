@@ -118,17 +118,13 @@ final class GlobalState
         ns.define(ALL_DEFINED_OUT, new ProvideForm.AllDefinedOutForm());
         ns.define(BEGIN, new BeginForm());
 
-        ns.define("current_directory", currentDirectory,
-                  "A [parameter](fusion/parameter.html) holding the thread-local working directory.");
+        ns.define("current_directory", currentDirectory);
         ns.define("current_ion_reader", new CurrentIonReaderParameter());
-        ns.define("current_namespace", currentNamespaceParam,
-                  "A [parameter](fusion/parameter.html) holding the thread-local namespace.  This value has no direct\n" +
-                  "relationship to the namespace lexically enclosing the parameter call.");
+        ns.define("current_namespace", currentNamespaceParam);
 
         ns.define(DEFINE, new DefineForm());
         ns.define(DEFINE_SYNTAX, new DefineSyntaxForm());
-        ns.define(EOF, FusionIo.eof(null),
-                  "A unique value that denotes an end-of-file condition.");
+        ns.define(EOF, FusionIo.eof(null));
         ns.define("java_new", new JavaNewProc());
         ns.define(LAMBDA, new LambdaForm());
         ns.define("load", new LoadProc(loadHandler));

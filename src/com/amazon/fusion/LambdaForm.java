@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -13,30 +13,6 @@ import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 final class LambdaForm
     extends SyntacticForm
 {
-    LambdaForm()
-    {
-        //    "                                                                               |
-        super("(arg ...) doc? body ...+",
-              "Returns a procedure.  When invoked, the caller's arguments are bound to the\n" +
-              "`arg` identifiers (the formal arguments) and the `body` is evaluated and\n" +
-              "returned.  The `doc` is an optional documentation string.\n" +
-              "`body` may be one or more forms; the last form is in tail position and its\n" +
-              "result is the result of the procedure invocation.\n" +
-              "\n" +
-              "The Fusion runtime system may optimize procedure instantiation, so it is\n" +
-              "unspecified whether one or more `lambda` expressions will return distinct\n" +
-              "or identical objects for any evaluation.\n" +
-              "\n" +
-              "    (lambda rest_id doc? body ...+)\n" +
-              "\n" +
-              "This variant, which declares a single formal argument rather than a sequence\n" +
-              "of them, returns a procedure that accepts any number of values, which are\n" +
-              "collected into an immutable sexp and bound to the `rest_id`:\n" +
-              "\n" +
-              "    ((lambda args args) 8 9 10)   --> (8 9 10)\n");
-    }
-
-
     @Override
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException

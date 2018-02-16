@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -35,36 +35,6 @@ final class RequireForm
 
     RequireForm(ModuleNameResolver moduleNameResolver)
     {
-        //    "                                                                               |
-        super("require_clause ...+",
-              "Declares bindings to be imported into the enclosing namespace. This form may\n" +
-              "only appear at module level or top level.\n" +
-              "\n" +
-              "Each `require_clause` denotes some bindings to be imported. The following clause\n" +
-              "forms are allowed:\n" +
-              "\n" +
-              "  * A string or symbol containing a [module path][]; all names `provide`d by\n" +
-              "    the referenced module are imported.\n" +
-              "  * [`only_in`][only_in] enumerates a set of names to import.\n" +
-              "  * [`prefix_in`][prefix_in] provides a prefix to imported bindings.\n" +
-              "  * [`rename_in`][rename_in] renames specified bindings.\n" +
-              "\n" +
-              "Within a module, `require` declarations are processed before other forms,\n" +
-              "regardless of their order within the module source, and imported bindings are\n" +
-              "scoped across the entire module. No identifier may be imported multiple times,\n" +
-              "unless all such bindings refer to the same originating definition. Furthermore,\n" +
-              "no identifier may have both an import and a module-level definition.\n" +
-              "In other words: module-level bindings introduced by `require` or `define` must\n" +
-              "not conflict, although either may shadow same-named bindings introduced by the\n" +
-              "module's language declaration.\n" +
-              "\n" +
-              "At top level, `require` will replace an existing import, and may shadow an\n" +
-              "existing top-level definition.\n" +
-              "\n" +
-              "[module path]: module.html#ref\n" +
-              "[only_in]:     fusion/module.html#only_in\n" +
-              "[prefix_in]:   fusion/module.html#prefix_in\n" +
-              "[rename_in]:   fusion/module.html#rename_in\n");
         myModuleNameResolver = moduleNameResolver;
     }
 
@@ -396,11 +366,6 @@ final class RequireForm
     private abstract static class AbstractRequireClauseForm
         extends SyntacticForm
     {
-        AbstractRequireClauseForm(String bodyPattern, String doc)
-        {
-            super(bodyPattern, doc);
-        }
-
         @Override
         SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
             throws FusionException
@@ -420,43 +385,16 @@ final class RequireForm
     static final class OnlyInForm
         extends AbstractRequireClauseForm
     {
-        OnlyInForm()
-        {
-            //    "                                                                               |
-            super("module_path id ...",
-                  "A `require` clause that imports only the given `id`s from a module.\n" +
-                  "If an `id` is not provided by the module, a syntax error is reported.\n" +
-                  "\n" +
-                  "This form can only appear within `require`.");
-        }
     }
 
     static final class PrefixInForm
             extends AbstractRequireClauseForm
     {
-        PrefixInForm()
-        {
-            super("prefix_id module_path",
-                  "A `require` clause that adjusts each identifier" +
-                  " to be bound by prefixing it with `prefix_id`.\n" +
-                  "The lexical context of the `prefix_id` is ignored," +
-                  " and instead preserved from the identifiers before prefixing.\n" +
-                  "\n" +
-                  "This form can only appear within `require`.");
-        }
     }
 
     static final class RenameInForm
             extends AbstractRequireClauseForm
     {
-        RenameInForm()
-        {
-            super("module_path (exported_id local_id) ...",
-                  "A `require` clause that imports each `exported_id` using the name `local_id`.\n" +
-                  "If an `exported_id` is not provided by the module, a syntax error is reported.\n" +
-                  "\n" +
-                  "This form can only appear within `require`.");
-        }
     }
 
 

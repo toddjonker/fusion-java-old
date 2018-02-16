@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -12,13 +12,6 @@ final class LoadProc
 
     LoadProc(LoadHandler loadHandler)
     {
-        //    "                                                                               |
-        super("Opens the Fusion source file named by the given string and evaluates each\n" +
-              "expression in sequence, returning the last result.  The `filename` is resolved\n" +
-              "relative to the value of the [`current_directory`](fusion/io.html#current_directory)\n" +
-              "parameter.  The evaluation is performed within the [current namespace](fusion/namespace.html#current_namespace).",
-              "filename");
-
         myLoadHandler = loadHandler;
     }
 

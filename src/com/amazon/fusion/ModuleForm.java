@@ -42,27 +42,6 @@ final class ModuleForm
     ModuleForm(ModuleNameResolver moduleNameResolver,
                DynamicParameter currentModuleDeclareName)
     {
-        //    "                                                                               |
-        super("name language body ...+",
-              "Declares a module containing the given body. The `name` must be a symbol; it is\n" +
-              "ignored when loading a module from a file.\n" +
-              "\n" +
-              "The `language` must be an absolute [module path][]. The denoted module is\n" +
-              "instantiated and all of its `provide`d bindings are immediately imported.  This\n" +
-              "\"bootstraps\" the module with a set of bindings that form the base semantics\n" +
-              "for the body.  Unlike bindings that are `require`d, these bindings can be\n" +
-              "shadowed by module-level definitions and by `require` statements.\n" +
-              "\n" +
-              "When compiling a module, the `body` forms are partially macro-expanded in\n" +
-              "order to discover certain core forms like `require` and `provide`.  The former\n" +
-              "are handled immediately, before other forms.  The latter are handled _after_\n" +
-              "all other forms.\n" +
-              "At module level, the elements within `begin` forms are spliced into the\n" +
-              "enclosing module body, replacing the single `begin` form with its elements.\n" +
-              "This effectively enables module-level macro uses to expand into multiple forms.\n" +
-              "\n" +
-              "[module path]: module.html#ref");
-
         myCurrentModuleDeclareName = currentModuleDeclareName;
         myModuleNameResolver = moduleNameResolver;
     }

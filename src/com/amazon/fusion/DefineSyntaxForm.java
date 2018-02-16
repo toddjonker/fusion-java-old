@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -7,15 +7,6 @@ import static com.amazon.fusion.FusionString.isString;
 final class DefineSyntaxForm
     extends SyntacticForm
 {
-    DefineSyntaxForm()
-    {
-        //    "                                                                               |
-        super("id xform",
-              "Binds the identifier ID to a syntax transformer XFORM. The transformer must be\n" +
-              "a procedure that accepts an syntax object and returns a syntax object.");
-    }
-
-
     @Override
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException

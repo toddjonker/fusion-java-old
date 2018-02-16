@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -15,16 +15,6 @@ import java.util.Arrays;
 final class JavaNewProc
     extends Procedure
 {
-    JavaNewProc()
-    {
-        //    "                                                                               |
-        super("Instantiates a new Fusion value that's implemented by a Java class. `classname`\n" +
-              "is the fully-qualified Java class name. A constructor with the appropriate\n" +
-              "number of `Object` arguments will be invoked and the result returned.",
-              "classname", "arg", DOTDOTDOT);
-    }
-
-
     @Override
     Object doApply(Evaluator eval, Object[] args)
         throws FusionException

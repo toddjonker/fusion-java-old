@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -15,19 +15,6 @@ import com.amazon.fusion.FusionSymbol.BaseSymbol;
 final class DefineForm
     extends SyntacticForm
 {
-    DefineForm()
-    {
-        //    "                                                                               |
-        super("id value",
-              "Binds a top-level variable `id` to the result of `value`.\n" +
-              "\n" +
-              "    (define (id arg ...) body ...+)\n" +
-              "\n" +
-              "Defines a procedure `id`, with formal arguments `arg ...` and the `body`.\n" +
-              "This form is equivalent to `(define id (lambda (arg ...) body ...))`.");
-    }
-
-
     /**
      * Predefines the identifiers at module level. As with all binding forms,
      * we modify the original identifier so that its

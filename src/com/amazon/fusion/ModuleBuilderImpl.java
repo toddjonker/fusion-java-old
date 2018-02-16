@@ -63,14 +63,6 @@ final class ModuleBuilderImpl
         }
     }
 
-    void define(String name, Object value, String documentation)
-        throws FusionException
-    {
-        myNamespace.bind(name, value);
-        myNamespace.setDoc(name, kindOf(value), documentation);
-    }
-
-
     @Override
     public void instantiate()
         throws FusionException

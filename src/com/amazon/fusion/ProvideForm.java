@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -16,29 +16,6 @@ import java.util.ArrayList;
 final class ProvideForm
     extends SyntacticForm
 {
-    ProvideForm()
-    {
-        //    "                                                                               |
-        super("provide_clause ...",
-              "Declares bindings to be exported from the enclosing module.  This form may only\n" +
-              "appear at module level.\n" +
-              "\n" +
-              "Each `provide_clause` denotes some names to be exported. The following clause\n" +
-              "forms are allowed:\n" +
-              "\n" +
-              "  * An identifier defined at module-level or imported from another module.\n" +
-              "  * [`all_defined_out`][all_defined_out] exports all module-level definitions.\n" +
-              "  * [`rename_out`][rename_out] exports selected bindings, giving them new names\n" +
-              "    on the way out.\n" +
-              "\n" +
-              "Within a module, a single `provide` form with multiple clauses behaves\n" +
-              " identically to multiple `provide` forms with single clauses.\n" +
-              "\n" +
-              "[all_defined_out]: fusion/module.html#all_defined_out\n" +
-              "[rename_out]:      fusion/module.html#rename_out\n");
-    }
-
-
     /**
      * Note that we expand `provide` after expanding the rest of the module.
      */
@@ -245,11 +222,6 @@ final class ProvideForm
     private abstract static class AbstractProvideClauseForm
         extends SyntacticForm
     {
-        AbstractProvideClauseForm(String bodyPattern, String doc)
-        {
-            super(bodyPattern, doc);
-        }
-
         @Override
         SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
             throws FusionException
@@ -269,29 +241,11 @@ final class ProvideForm
     static final class AllDefinedOutForm
         extends AbstractProvideClauseForm
     {
-        AllDefinedOutForm()
-        {
-            //    "                                                                               |
-            super("",
-                  "A `provide` clause that exports all bindings `define`d by the enclosing module.\n" +
-                  "Imported bindings are not exported.\n" +
-                  "\n" +
-                  "This form can only appear within `provide`.");
-        }
     }
 
 
     static final class RenameOutForm
         extends AbstractProvideClauseForm
     {
-        RenameOutForm()
-        {
-            //    "                                                                               |
-            super("(local_id exported_id) ...",
-                  "A `provide` clause that exports each `local_id` using the name `exported_id`.\n" +
-                  "This effectively renames the binding on export.\n" +
-                  "\n" +
-                  "This form can only appear within `provide`.");
-        }
     }
 }
