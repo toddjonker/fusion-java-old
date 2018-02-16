@@ -53,9 +53,9 @@ final class ModuleBuilderImpl
         {
             myNamespace.setDoc(name, kindOf(value), docs);
         }
-        else if (value instanceof BaseValue)
+        else if (value instanceof Procedure)
         {
-            BindingDoc doc = ((BaseValue) value).document();
+            BindingDoc doc = ((Procedure) value).document();
             if (doc != null)
             {
                 myNamespace.setDoc(name, doc);

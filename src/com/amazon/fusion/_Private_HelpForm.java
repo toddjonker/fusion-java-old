@@ -7,6 +7,7 @@ import com.amazon.fusion.Namespace.CompiledTopVariableReference;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -18,9 +19,9 @@ public final class _Private_HelpForm
     private static final class HelpDocument
         extends BaseValue
     {
-        private final Object[] myArgs;
+        private final List<BindingDoc> myArgs;
 
-        private HelpDocument(Object[] args)
+        private HelpDocument(List<BindingDoc> args)
         {
             myArgs = args;
         }
@@ -29,19 +30,8 @@ public final class _Private_HelpForm
         public void write(Evaluator eval, Appendable out)
             throws IOException
         {
-            for (Object arg : myArgs)
+            for (BindingDoc doc : myArgs)
             {
-                BindingDoc doc = null;
-                if (arg instanceof BindingDoc)
-                {
-                    doc = (BindingDoc) arg;
-                }
-                else if (arg instanceof BaseValue)
-                {
-
-                    doc = ((BaseValue) arg).document();
-                }
-
                 if (doc == null)
                 {
                     out.append("\nNo documentation available.\n");
@@ -124,7 +114,7 @@ public final class _Private_HelpForm
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            ArrayList<Object> docs = new ArrayList<Object>();
+            ArrayList<BindingDoc> docs = new ArrayList<>();
 
             for (CompiledForm form : myChildren)
             {
@@ -154,12 +144,15 @@ public final class _Private_HelpForm
                 {
                     // Couldn't get docs from the binding, lets evaluate it.
                     Object result = eval.eval(store, form);
-                    docs.add(result);
+                    if (result instanceof Procedure)
+                    {
+                        docs.add(((Procedure) result).document());
+                    }
                 }
             }
 
             // TODO write directly to current_output_port or somesuch.
-            return new HelpDocument(docs.toArray());
+            return new HelpDocument(docs);
         }
     }
 }

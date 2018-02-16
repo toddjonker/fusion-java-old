@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -144,10 +144,9 @@ final class ModuleInstance
         if (doc == null)
         {
             Object value = binding.lookup(this);
-            if (value instanceof BaseValue)
+            if (value instanceof Procedure)
             {
-                BaseValue fv = (BaseValue) value;
-                doc = fv.document();
+                doc = ((Procedure) value).document();
                 if (doc != null)
                 {
                     {

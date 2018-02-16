@@ -31,7 +31,12 @@ abstract class Procedure
 
 
     /**
-     * @param argNames are used purely for documentation
+     * @param argNames are used for documentation, and to determine the result
+     *   of {@link #checkArityExact(Object[])}.
+     *
+     * @deprecated since Release 17, 2014-06-18.
+     *   Documentation should be supplied to module-level bindings via
+     *   {@code define}, not placed on individual values.
      */
     @Deprecated
     Procedure(String doc, String... argNames)
@@ -80,7 +85,7 @@ abstract class Procedure
     }
 
 
-    @Override
+    @Deprecated
     final BindingDoc document()
     {
         return myDocs;
@@ -114,7 +119,7 @@ abstract class Procedure
     /**
      * Checks arity against the documented argument names.
      *
-     * @deprecated
+     * @deprecated since Release 17, 2014-06-18.
      * Use {@link #checkArityExact(int, Object[])} instead.
      */
     @Deprecated
