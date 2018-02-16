@@ -1,9 +1,12 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.fusion.Namespace.NsDefinedBinding;
+import com.amazon.ion.IonString;
+import com.amazon.ion.IonStruct;
+import com.amazon.ion.IonValue;
 import java.util.Collection;
 
 
@@ -13,6 +16,7 @@ final class ModuleBuilderImpl
     private final ModuleNameResolver myResolver;
     private final ModuleRegistry     myRegistry;
     private final ModuleNamespace    myNamespace;
+    private final IonStruct          myDocs;
 
     /**
      * Prepares to build a module with no language.
@@ -21,9 +25,21 @@ final class ModuleBuilderImpl
                       ModuleRegistry registry,
                       ModuleIdentity moduleId)
     {
+        this(resolver, registry, moduleId, null);
+    }
+
+    /**
+     * @param docs will be modified by the builder.
+     */
+    ModuleBuilderImpl(ModuleNameResolver resolver,
+                      ModuleRegistry registry,
+                      ModuleIdentity moduleId,
+                      IonStruct docs)
+    {
         myResolver = resolver;
         myRegistry = registry;
         myNamespace = new ModuleNamespace(registry, moduleId);
+        myDocs = docs;
     }
 
     @Override
@@ -32,7 +48,12 @@ final class ModuleBuilderImpl
     {
         myNamespace.bind(name, value);
 
-        if (value instanceof BaseValue)
+        String docs = docsFor(name);
+        if (docs != null)
+        {
+            myNamespace.setDoc(name, kindOf(value), docs);
+        }
+        else if (value instanceof BaseValue)
         {
             BindingDoc doc = ((BaseValue) value).document();
             if (doc != null)
@@ -46,10 +67,7 @@ final class ModuleBuilderImpl
         throws FusionException
     {
         myNamespace.bind(name, value);
-
-        Kind kind =
-            (value instanceof Procedure ? Kind.PROCEDURE : Kind.CONSTANT);
-        myNamespace.setDoc(name, kind, documentation);
+        myNamespace.setDoc(name, kindOf(value), documentation);
     }
 
 
@@ -57,6 +75,13 @@ final class ModuleBuilderImpl
     public void instantiate()
         throws FusionException
     {
+        if (myDocs != null && ! myDocs.isEmpty())
+        {
+            String message =
+                "Unused documentation: " + myDocs.toPrettyString();
+            throw new IllegalStateException(message);
+        }
+
         ModuleStore store = new ModuleStore(myRegistry,
                                             myNamespace.extractValues(),
                                             myNamespace.extractBindingDocs());
@@ -69,5 +94,35 @@ final class ModuleBuilderImpl
         myRegistry.register(module);
 
         myResolver.registerDeclaredModule(myRegistry, id);
+    }
+
+
+    private Kind kindOf(Object value)
+    {
+        if (value instanceof Procedure)
+        {
+            return Kind.PROCEDURE;
+        }
+        else if (value instanceof SyntacticForm)
+        {
+            return Kind.SYNTAX;
+        }
+        else
+        {
+            return Kind.CONSTANT;
+        }
+    }
+
+    private String docsFor(String name)
+    {
+        if (myDocs != null)
+        {
+            IonValue maybeDocs = myDocs.remove(name);
+            if (maybeDocs != null)
+            {
+                return ((IonString) maybeDocs).stringValue();
+            }
+        }
+        return null;
     }
 }

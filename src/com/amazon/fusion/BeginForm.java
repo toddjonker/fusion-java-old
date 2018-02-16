@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -8,15 +8,6 @@ package com.amazon.fusion;
 final class BeginForm
     extends SyntacticForm
 {
-    BeginForm()
-    {
-        //    "                                                                               |
-        super("expr ...",
-              "Evaluates the `expr`s in order, returning the final result.  The last `expr` is\n"
-            + "in tail position.  If there are no `expr`s the result is void.");
-    }
-
-
     @Override
     SyntaxValue expand(Expander expander, Environment env, SyntaxSexp stx)
         throws FusionException

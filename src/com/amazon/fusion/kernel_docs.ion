@@ -1,0 +1,10 @@
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+
+{
+  begin: '''
+    (begin expr ...)
+
+Evaluates the `expr`s in order, returning the final result.  The last `expr` is
+in tail position.  If there are no `expr`s the result is void.
+  ''',
+}
