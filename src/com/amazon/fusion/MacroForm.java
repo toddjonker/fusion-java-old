@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -14,7 +14,6 @@ final class MacroForm
 
     MacroForm(Procedure transformer)
     {
-        super(null, null); // TODO Get docs from declaration, like procedures?
         myTransformer = transformer;
     }
 

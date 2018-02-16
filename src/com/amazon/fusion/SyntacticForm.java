@@ -1,8 +1,7 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.BindingDoc.Kind;
 import com.amazon.ion.util.IonTextUtils;
 import java.io.IOException;
 
@@ -12,28 +11,6 @@ import java.io.IOException;
 abstract class SyntacticForm
     extends NamedValue
 {
-    private final BindingDoc myDocs;
-
-    public SyntacticForm()
-    {
-        myDocs = null;
-
-    }
-
-    @Deprecated
-    SyntacticForm(String bodyPattern, String doc)
-    {
-        myDocs = new BindingDoc(null, Kind.SYNTAX, bodyPattern, doc);
-    }
-
-
-    @Override
-    final void nameInferred(String name)
-    {
-        if (myDocs != null) myDocs.setName(name);
-    }
-
-
     abstract SyntaxValue expand(Expander expander, Environment env,
                                 SyntaxSexp stx)
         throws FusionException;
@@ -88,13 +65,6 @@ abstract class SyntacticForm
             out.append("syntax ");
             IonTextUtils.printQuotedSymbol(out, name);
         }
-    }
-
-
-    @Override
-    BindingDoc document()
-    {
-        return myDocs;
     }
 
 
