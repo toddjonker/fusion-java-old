@@ -59,7 +59,7 @@ clause sets an exception handler with dynamic extent.
 
   (define_syntax parameterize
     '''
-    (parameterize ((param expr) ...) body ...+)
+    (parameterize [(param expr), ...] body ...+)
 
 Dynamically binds the `param`s to the `expr` values while evaluating the `body`.
 The `param`s are evaluated first, in order; each must result in a dynamic

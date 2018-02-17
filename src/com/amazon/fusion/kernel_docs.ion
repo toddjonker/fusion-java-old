@@ -20,14 +20,25 @@ in tail position.  If there are no `expr`s the result is void.
 
 
   current_directory: '''
-A [parameter](fusion/parameter.html) holding the thread-local working directory.
+    (current_directory)
+
+Returns the absolute path of the current working directory.
+
+This is a [parameter](fusion/parameter.html), so the value is thread-local and
+dynamically scoped via [`parameterize`](fusion/parameter.html#parameterize).
   ''',
 
 
   current_namespace: '''
-A [parameter](fusion/parameter.html) holding the thread-local namespace.
+    (current_namespace)
+
+Returns the current namespace, the default context for [`eval`](fusion/eval.html#eval)
+and similar dynamic evaluation features.
 This value has no direct relationship to the namespace lexically enclosing the
 parameter call.
+
+This is a [parameter](fusion/parameter.html), so the value is thread-local and
+dynamically scoped via [`parameterize`](fusion/parameter.html#parameterize).
   ''',
 
 
