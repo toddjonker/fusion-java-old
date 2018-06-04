@@ -29,7 +29,7 @@ import java.util.Set;
  */
 @SuppressWarnings("unchecked")
 class FunctionalHashTrie<K, V>
-    implements Map<K, V>, Iterable<Map.Entry<K, V>>
+    extends AbstractMap<K, V> implements Iterable<Map.Entry<K, V>>
 {
     private static final String NULL_ERROR_MESSAGE =
         "FunctionalHashTrie does not support null keys or values";

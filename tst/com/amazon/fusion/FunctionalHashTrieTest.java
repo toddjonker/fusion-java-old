@@ -141,6 +141,8 @@ public class FunctionalHashTrieTest
         checkSizing();
         checkIterators();
         compareEntries();
+        assertEquals(baselineMap, fht);
+        assertEquals(baselineMap.hashCode(), fht.hashCode());
     }
 
     private void performTests()
@@ -157,6 +159,7 @@ public class FunctionalHashTrieTest
     {
         setup(0);
         assertTrue(fht.isEmpty());
+        assertEquals(baselineMap.toString(), fht.toString());
         performTests();
 
         FunctionalHashTrie without = fht.without("anything");
@@ -168,6 +171,7 @@ public class FunctionalHashTrieTest
     public void checkSingle()
     {
         setup(1);
+        assertEquals(baselineMap.toString(), fht.toString());
         performTests();
     }
 
