@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FunctionalHashTrie.MutableHashTrie;
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
@@ -314,6 +315,47 @@ final class FusionStruct
         else
         {
             return map.with(name, value);
+        }
+    }
+
+    static MutableHashTrie<String, Object> structImplAddM(MutableHashTrie<String, Object> map,
+                                                          String name,
+                                                          Object value)
+    {
+        Object prev = map.get(name);
+        if (prev != null)
+        {
+            Object[] multi;
+            if (prev instanceof Object[])
+            {
+                Object[] prevArray = (Object[]) prev;
+                if (value instanceof Object[])
+                {
+                    Object[] moreArray = (Object[]) value;
+
+                    int prevLen = prevArray.length;
+                    int moreLen = moreArray.length;
+                    multi = Arrays.copyOf(prevArray, prevLen + moreLen);
+                    System.arraycopy(moreArray, 0, multi, prevLen, moreLen);
+                }
+                else
+                {
+                    multi = extend(prevArray, value);
+                }
+            }
+            else if (value instanceof Object[])
+            {
+                multi = extend((Object[]) value, prev);
+            }
+            else
+            {
+                multi = new Object[] { prev, value };
+            }
+            return map.mWith(name, multi);
+        }
+        else
+        {
+            return map.mWith(name, value);
         }
     }
 
@@ -1621,7 +1663,6 @@ final class FusionStruct
         {
             super(annotations, struct.size());
             myIonStruct = struct;
-            myMap = FunctionalHashTrie.EMPTY;
         }
 
         private synchronized IonStruct getIonStruct()
@@ -1637,14 +1678,16 @@ final class FusionStruct
         {
             if (myIonStruct != null)
             {
+                MutableHashTrie<String, Object> mutable = MutableHashTrie.makeEmpty();
                 for (IonValue v : myIonStruct)
                 {
                     String field  = v.getFieldName();
                     Object newElt = eval.inject(v);
-                    myMap = structImplAdd(myMap, field, newElt);
+                    mutable = structImplAddM(mutable, field, newElt);
                 }
 
                 myIonStruct = null;
+                myMap = mutable.asFunctional();
             }
 
             return myMap;

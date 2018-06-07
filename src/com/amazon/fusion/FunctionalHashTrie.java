@@ -383,12 +383,12 @@ class FunctionalHashTrie<K, V>
      * Mutable version of {@link FunctionalHashTrie} for faster and more memory
      * efficient instantiation of new {@link FunctionalHashTrie}s.
      */
-    private static class MutableHashTrie<K, V>
+    static class MutableHashTrie<K, V>
     {
         private int size;
         private TrieNode<K, V> root;
 
-        private static MutableHashTrie makeEmpty()
+        static MutableHashTrie makeEmpty()
         {
             return new MutableHashTrie(new FlatNode(new Object[0]), 0);
         }
@@ -400,7 +400,7 @@ class FunctionalHashTrie<K, V>
             this.size = size;
         }
 
-        private MutableHashTrie<K, V> mWith(K key, V value)
+        MutableHashTrie<K, V> mWith(K key, V value)
         {
             if (key == null || value == null)
             {
@@ -420,6 +420,25 @@ class FunctionalHashTrie<K, V>
 
             return this;
         }
+
+
+        V get(Object key)
+        {
+            if (key == null)
+            {
+                throw new NullPointerException(NULL_ERROR_MESSAGE);
+            }
+
+            if (size == 0)
+            {
+                return null;
+            }
+            else
+            {
+                return root.get(key.hashCode(), 0, key);
+            }
+        }
+
 
         /**
          * This should be called after the desired mutations on the trie are

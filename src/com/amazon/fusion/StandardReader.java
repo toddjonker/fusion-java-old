@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FunctionalHashTrie.MutableHashTrie;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionList.immutableList;
 import static com.amazon.fusion.FusionList.nullList;
@@ -13,7 +14,7 @@ import static com.amazon.fusion.FusionSexp.nullSexp;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionStruct.nullStruct;
-import static com.amazon.fusion.FusionStruct.structImplAdd;
+import static com.amazon.fusion.FusionStruct.structImplAddM;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionTimestamp.makeTimestamp;
 import static com.amazon.fusion.SourceLocation.forCurrentSpan;
@@ -322,16 +323,16 @@ class StandardReader
             return nullStruct(eval, anns);
         }
 
-        FunctionalHashTrie<String, Object> map = FunctionalHashTrie.EMPTY;
+        MutableHashTrie<String, Object> map = MutableHashTrie.makeEmpty();
         source.stepIn();
         while (source.next() != null)
         {
             String field = source.getFieldName();
             Object child = read(eval, source, name, readingSyntax);
-            map = structImplAdd(map, field, child);
+            map = structImplAddM(map, field, child);
         }
         source.stepOut();
 
-        return immutableStruct(map, anns);
+        return immutableStruct(map.asFunctional(), anns);
     }
 }
