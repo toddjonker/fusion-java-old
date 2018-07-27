@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FunctionalHashTrie.MutableHashTrie;
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionBool.trueBool;
@@ -22,11 +21,13 @@ import static com.amazon.fusion.FusionText.unsafeTextToJavaString;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.ion.util.IonTextUtils.printSymbol;
+import static java.util.AbstractMap.SimpleEntry;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionCollection.BaseCollection;
 import com.amazon.fusion.FusionCompare.EqualityTier;
 import com.amazon.fusion.FusionIterator.AbstractIterator;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
+import com.amazon.fusion.util.BiFunction;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonType;
@@ -53,6 +54,17 @@ final class FusionStruct
     static final NullStruct      NULL_STRUCT  = new NullStruct();
     static final NonNullImmutableStruct EMPTY_STRUCT =
         new FunctionalStruct(FunctionalHashTrie.EMPTY, BaseSymbol.EMPTY_ARRAY, 0);
+
+    // Utility method.
+    static final BiFunction<Object, Object, Object> STRUCT_MERGE_FUNCTION =
+        new BiFunction<Object, Object, Object>()
+        {
+            @Override
+            public Object apply(Object o, Object o2)
+            {
+                return mergeValuesForKey(o, o2);
+            }
+        };
 
     //========================================================================
     // Constructors
@@ -274,6 +286,38 @@ final class FusionStruct
     }
 
 
+    static Object mergeValuesForKey(Object prev, Object value)
+    {
+        Object[] multi;
+        if (prev instanceof Object[])
+        {
+            Object[] prevArray = (Object[]) prev;
+            if (value instanceof Object[])
+            {
+                Object[] moreArray = (Object[]) value;
+
+                int prevLen = prevArray.length;
+                int moreLen = moreArray.length;
+                multi = Arrays.copyOf(prevArray, prevLen + moreLen);
+                System.arraycopy(moreArray, 0, multi, prevLen, moreLen);
+            }
+            else
+            {
+                multi = extend(prevArray, value);
+            }
+        }
+        else if (value instanceof Object[])
+        {
+            multi = extend((Object[]) value, prev);
+        }
+        else
+        {
+            multi = new Object[] { prev, value };
+        }
+        return multi;
+    }
+
+
     /**
      * @param value may be an array (for repeated fields)
      */
@@ -284,78 +328,12 @@ final class FusionStruct
         Object prev = map.get(name);
         if (prev != null)
         {
-            Object[] multi;
-            if (prev instanceof Object[])
-            {
-                Object[] prevArray = (Object[]) prev;
-                if (value instanceof Object[])
-                {
-                    Object[] moreArray = (Object[]) value;
-
-                    int prevLen = prevArray.length;
-                    int moreLen = moreArray.length;
-                    multi = Arrays.copyOf(prevArray, prevLen + moreLen);
-                    System.arraycopy(moreArray, 0, multi, prevLen, moreLen);
-                }
-                else
-                {
-                    multi = extend(prevArray, value);
-                }
-            }
-            else if (value instanceof Object[])
-            {
-                multi = extend((Object[]) value, prev);
-            }
-            else
-            {
-                multi = new Object[] { prev, value };
-            }
+            Object[] multi = (Object[]) mergeValuesForKey(prev, value);
             return map.with(name, multi);
         }
         else
         {
             return map.with(name, value);
-        }
-    }
-
-    static MutableHashTrie<String, Object> structImplAddM(MutableHashTrie<String, Object> map,
-                                                          String name,
-                                                          Object value)
-    {
-        Object prev = map.get(name);
-        if (prev != null)
-        {
-            Object[] multi;
-            if (prev instanceof Object[])
-            {
-                Object[] prevArray = (Object[]) prev;
-                if (value instanceof Object[])
-                {
-                    Object[] moreArray = (Object[]) value;
-
-                    int prevLen = prevArray.length;
-                    int moreLen = moreArray.length;
-                    multi = Arrays.copyOf(prevArray, prevLen + moreLen);
-                    System.arraycopy(moreArray, 0, multi, prevLen, moreLen);
-                }
-                else
-                {
-                    multi = extend(prevArray, value);
-                }
-            }
-            else if (value instanceof Object[])
-            {
-                multi = extend((Object[]) value, prev);
-            }
-            else
-            {
-                multi = new Object[] { prev, value };
-            }
-            return map.mWith(name, multi);
-        }
-        else
-        {
-            return map.mWith(name, value);
         }
     }
 
@@ -1670,6 +1648,33 @@ final class FusionStruct
             return myIonStruct;
         }
 
+        private Iterator<Map.Entry<String, Object>> makeInjectingIterator(final Evaluator eval)
+        {
+            final Iterator<IonValue> internal = getIonStruct().iterator();
+            return new Iterator<Map.Entry<String, Object>>()
+            {
+                @Override
+                public boolean hasNext()
+                {
+                    return internal.hasNext();
+                }
+
+                @Override
+                public Map.Entry<String, Object> next()
+                {
+                    IonValue next = internal.next();
+                    return new SimpleEntry<>(next.getFieldName(),
+                                             eval.inject(next));
+                }
+
+                @Override
+                public void remove()
+                {
+                    throw new UnsupportedOperationException();
+                }
+            };
+        }
+
         /**
          * Synchronized so this immutable class is thread-safe for reads.
          */
@@ -1678,16 +1683,9 @@ final class FusionStruct
         {
             if (myIonStruct != null)
             {
-                MutableHashTrie<String, Object> mutable = MutableHashTrie.makeEmpty();
-                for (IonValue v : myIonStruct)
-                {
-                    String field  = v.getFieldName();
-                    Object newElt = eval.inject(v);
-                    mutable = structImplAddM(mutable, field, newElt);
-                }
-
+                myMap = FunctionalHashTrie.merge(makeInjectingIterator(eval),
+                                                 STRUCT_MERGE_FUNCTION);
                 myIonStruct = null;
-                myMap = mutable.asFunctional();
             }
 
             return myMap;

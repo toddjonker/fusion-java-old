@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import com.amazon.fusion.util.BiFunction;
+
 import java.util.AbstractCollection;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
@@ -51,6 +53,29 @@ class FunctionalHashTrie<K, V>
         for (Entry<K, V> entry : other.entrySet())
         {
             ret = ret.mWith(entry.getKey(), entry.getValue());
+        }
+
+        return ret.asFunctional();
+    }
+
+
+    static <K, V> FunctionalHashTrie<K, V> merge(Iterator<Map.Entry<K, V>> items,
+                                                 BiFunction<V, V, V> remapping)
+    {
+        MutableHashTrie<K, V> ret = MutableHashTrie.makeEmpty();
+        while (items.hasNext())
+        {
+            Entry<K, V> item = items.next();
+
+            V prev = ret.get(item.getKey());
+            if (prev != null)
+            {
+                ret.mWith(item.getKey(), remapping.apply(prev, item.getValue()));
+            }
+            else
+            {
+                ret.mWith(item.getKey(), item.getValue());
+            }
         }
 
         return ret.asFunctional();
@@ -383,12 +408,12 @@ class FunctionalHashTrie<K, V>
      * Mutable version of {@link FunctionalHashTrie} for faster and more memory
      * efficient instantiation of new {@link FunctionalHashTrie}s.
      */
-    static class MutableHashTrie<K, V>
+    private static class MutableHashTrie<K, V>
     {
         private int size;
         private TrieNode<K, V> root;
 
-        static MutableHashTrie makeEmpty()
+        private static MutableHashTrie makeEmpty()
         {
             return new MutableHashTrie(new FlatNode(new Object[0]), 0);
         }
@@ -400,7 +425,7 @@ class FunctionalHashTrie<K, V>
             this.size = size;
         }
 
-        MutableHashTrie<K, V> mWith(K key, V value)
+        private MutableHashTrie<K, V> mWith(K key, V value)
         {
             if (key == null || value == null)
             {
@@ -422,7 +447,7 @@ class FunctionalHashTrie<K, V>
         }
 
 
-        V get(Object key)
+        private V get(Object key)
         {
             if (key == null)
             {
