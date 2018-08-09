@@ -57,6 +57,30 @@ class FunctionalHashTrie<K, V>
     }
 
 
+    static <K, V> FunctionalHashTrie<K, V> merge(Iterator<Map.Entry<K, V>> items,
+                                                 BiFunction<V, V, V> remapping)
+    {
+        MutableHashTrie<K, V> ret = MutableHashTrie.makeEmpty();
+        while (items.hasNext())
+        {
+            Entry<K, V> item = items.next();
+
+            // TODO: Improve performance by having MutableHashTrie perform the merge operation itself.
+            V prev = ret.get(item.getKey());
+            if (prev != null)
+            {
+                ret.mWith(item.getKey(), remapping.apply(prev, item.getValue()));
+            }
+            else
+            {
+                ret.mWith(item.getKey(), item.getValue());
+            }
+        }
+
+        return ret.asFunctional();
+    }
+
+
     FunctionalHashTrie(TrieNode<K, V> root, int size)
     {
         this.root = root;
@@ -420,6 +444,25 @@ class FunctionalHashTrie<K, V>
 
             return this;
         }
+
+
+        private V get(Object key)
+        {
+            if (key == null)
+            {
+                throw new NullPointerException(NULL_ERROR_MESSAGE);
+            }
+
+            if (size == 0)
+            {
+                return null;
+            }
+            else
+            {
+                return root.get(key.hashCode(), 0, key);
+            }
+        }
+
 
         /**
          * This should be called after the desired mutations on the trie are
