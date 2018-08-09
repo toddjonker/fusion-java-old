@@ -348,6 +348,8 @@ class StandardReader
                     }
                     catch (FusionException e)
                     {
+                        // Throwing a RuntimeException so that we can adhere to
+                        //   the Iterator interface.
                         throw new RuntimeException(e);
                     }
 

@@ -2,8 +2,6 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.util.BiFunction;
-
 import java.util.AbstractCollection;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
@@ -67,6 +65,7 @@ class FunctionalHashTrie<K, V>
         {
             Entry<K, V> item = items.next();
 
+            // TODO: Improve performance by having MutableHashTrie perform the merge operation itself.
             V prev = ret.get(item.getKey());
             if (prev != null)
             {
