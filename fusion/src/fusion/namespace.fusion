@@ -10,7 +10,7 @@ and variable-to-value storage.  Every module has its own namespace holding its
 top-level definitions and imported bindings.  Likewise, every script is
 evaluated within the context of some namespace.
 
-Namespaces are typically used for [dynamic evaluation](../eval.html).
+Namespaces are typically used for [dynamic evaluation](fusion/eval.html).
   '''
 
 

@@ -1,11 +1,88 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module eval '/fusion/private/kernel'
 
   '''
 Loading and evaluating Fusion code.
 
-See [dynamic evaluation](eval.html) for more information.
+Fusion supports dynamic evaluation of code that's loaded or even constructed at
+runtime. For example, a Fusion application can construct S-expressions denoting
+some computation, and then evaluate that expression on the fly. The model for
+performing this evaluation is identical to the behavior of the Read-Eval-Print
+Loop provided by the Fusion command-line interface. A single dynamic evaluation
+is like running a very small script. You can run multiple evaluations in
+sequence while retaining state across the expressions, in effect running a
+longer script one top-level-form at a time.
+
+As with scripts, such evaluation has a precondition: one needs to specify the
+language in which the expression is written, to give meaning to the
+expressions. In this context as with module declarations, that language is
+defined as a module. The bindings provided by the module form the language and
+define the semantics of expressions written in that language.
+
+The process for dynamic evaluation involves these steps:
+
+1. Select the module providing a language for the expressions.
+2. Create a new namespace that uses the language module as its initial
+   bindings.
+3. Evaluate one or more expressions within that namespace.
+
+As step one, construct a module that provides exactly the set of bindings that
+you wish to have available in the language. Give it an appropriate name and
+make it available in a repository. For example, here's a very simple language
+that provides only one operator, named `bugbear`.
+
+    // File FUSION-REPO/src/demo/language.ion
+
+    (module language "/fusion"
+      (provide bugbear)
+      (define (bugbear saying)
+        (displayln "Boo! " saying)))
+
+In step two, you'll create a namespace with the language. For example:
+
+    (require "/fusion/namespace")
+    (define ns
+      (make_namespace_with_language "/demo/language"))
+
+That code creates a fresh namespace, imports all of the bindings provided by
+the module `/demo/language`, and then binds that namespace to the top-level
+variable `ns`.
+
+Step three is equally simple. Now that you have a namespace, you can evaluate
+expressions "inside" it:
+
+    (require "/fusion/eval")
+    (eval (quote (bugbear "Scared ya!")) ns)
+
+... which prints:
+
+    Boo! Scared ya!
+
+Since the `/demo/language` language only exports a single binding, the usual
+Fusion operators are not visible to the evaluated expressions. The following
+evaluation will fail:
+
+    (eval (quote (+ 1 2)) lang)
+
+
+Garbage Collection Concerns
+---------------------------
+
+A namespace will retain bindings created by any top-level `define`s, and acts
+as shared state between evaluations using that namespace. Conversely,
+evaluation results may retain references to the namespace; in particular, the
+results of `lambda` expressions will reference their enclosing namespace
+because the namespace forms part of the closure's lexical scope.  Keep this in
+mind as you consider the lifetime of the namespaces used for dynamic
+evaluation.  If your expression includes a `lambda` (either directly or through
+macro expansion), and if you retain a reference to the resulting closure,
+you're also retaining a reference to the namespace.  This could cause problems
+if you use one-off namespaces to generate closures, since the namespaces won't
+be garbage collected until the closures are released.  In such situations you
+may want to reuse a single namespace for multiple evaluations, if you know that
+the evaluations cannot interfere with each other (say by mutating top-level
+bindings or other shared state).
   '''
 
   (require "/fusion/experimental/defines")
