@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -405,22 +405,6 @@
 
 //==========================================================================
 // struct_unzip
-
-(define (remove_first pred sequence)
-  (choose (let [(looking true)]
-            (lambda (e)
-              (if (and looking (pred e))
-                (begin (set looking false) false)
-                true)))
-     sequence))
-
-(define (bag_equal equal list1 list2)
-  (let loop [(i 0), (list2 list2)]
-    (if (== i (size list1))
-      (== 0 (size list2))
-      (let ((value (element list1 i)))
-        (loop (+ i 1)
-          (remove_first (lambda (e) (equal value e)) list2))))))
 
 (define_check (check_unzip struct keys vals)
   (let_values [((k v) (struct_unzip struct))]

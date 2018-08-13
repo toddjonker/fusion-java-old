@@ -1,11 +1,18 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module testutils "/fusion"
 
   (require
+    "/fusion/experimental/check"
     "/fusion/experimental/defines"
     "/fusion/experimental/syntax"
     )
+
+  (provide
+    bag_equal
+    remove_first
+    test_equivalence
+  )
 
 
   (defpub F (lambda rest false))
@@ -113,4 +120,57 @@ Maps the given syntactic form over each entry in `representative_ion_data`.
           (quote_syntax here)
           stx))))
 
+
+(define_check (test_pairwise op vals)
+  '''
+Given an sexp, applies the operator `op` to each pair of elements, in both
+orders, including each value paired with itself.
+  '''
+  (let loop [(vals vals)]
+    (unless (is_empty vals)
+      (let [(val1 (head vals))]
+        (check op val1 val1)
+        (do (|val2|
+              (check op val1 val2)
+              (check op val2 val1))
+            (tail vals))
+        (loop (tail vals))))))
+
+
+(define_check (test_equivalence eqs neq equiv_sets)
+  (let [(num_sets (size equiv_sets))]
+    (do (|set| (do (|eq| (test_pairwise eq set)) eqs)) equiv_sets)
+
+    // Pick each set in the loop to compare its elements to the other sets
+    (let set_loop [(i 0)]
+      (when (< i num_sets)
+        (do (|val1|
+              (let other_set_loop [(j (+ 1 i))]
+                (when (< j num_sets)
+                  // Now we have a different equivalence set, all of its elts
+                  // must be <> our chosen elt
+                  (do (|val2|
+                        (check neq val1 val2)
+                        (check neq val2 val1))
+                    (. equiv_sets j))
+                  (other_set_loop (+ 1 j)))))
+          (. equiv_sets i))
+        (set_loop (+ 1 i))))))
+
+
+  (define (remove_first pred sequence)
+    (choose (let [(looking true)]
+              (lambda (e)
+                (if (and looking (pred e))
+                  (begin (set looking false) false)
+                  true)))
+       sequence))
+
+  (define (bag_equal equal list1 list2)
+    (let loop [(i 0), (list2 list2)]
+      (if (== i (size list1))
+        (== 0 (size list2))
+        (let ((value (element list1 i)))
+          (loop (+ i 1)
+            (remove_first (lambda (e) (equal value e)) list2))))))
 )
