@@ -129,7 +129,7 @@ At module level, the elements within `begin` forms are spliced into the
 enclosing module body, replacing the single `begin` form with its elements.
 This effectively enables module-level macro uses to expand into multiple forms.
 
-[module path]: module.html#ref
+[module path]: fusion/module.html#ref
   ''',
 
 
@@ -223,7 +223,7 @@ module's language declaration.
 At top level, `require` will replace an existing import, and may shadow an
 existing top-level definition.
 
-[module path]: module.html#ref
+[module path]: fusion/module.html#ref
 [only_in]:     fusion/module.html#only_in
 [prefix_in]:   fusion/module.html#prefix_in
 [rename_in]:   fusion/module.html#rename_in

@@ -1,11 +1,242 @@
-// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
 
 (module module "/fusion/private/kernel"
 
   '''
 The basic organizational component of Fusion code.
 
-See [Modules and Scripts](/module.html) for an overview.
+The Fusion language is structured around _modules_.  The module is the unit of
+dependency management, code loading, and access control.  It is similar to a
+`.so` library in Unix, or to a class in Java.
+Loading a Fusion module triggers loading of its required dependencies.
+
+Most Fusion source files contain a single module holding a bunch of related
+code.  In general, the purpose of this code is to populate a _namespace_.  Each
+module has its own namespace holding any number of variables or _bindings_.
+These bindings are kept private to the module by default, or they may be
+[`provide`][provide]d (made public) for use by other modules.
+
+A _script_ is a Fusion source file that's not a module.  As such, it's invoked
+differently, does not have a dedicated namespace, and cannot protect or export
+bindings.  Instead, a script is run inside a namespace provided by the invoker
+of the script.  This works very similarly to "sourcing" shell scripts in Unix:
+the script is run inside the environment of the invoker, and can change or
+extend that environment at will.
+
+Both modules and scripts are expressed in terms of a _language_ that provides
+meaning to the syntax, operators, procedures, _etc._ that are used therein.
+Fusion doesn't hard-code any of this: beyond the syntax of Ion, there are no
+fixed keywords, and no fixed semantics to any piece of syntax.  The meaning of
+the syntax can be entirely customized to create an independent language.  All
+of those languages, including "standard" Fusion itself, are simply modules
+exporting bindings that define the syntax and semantics of the language.
+
+
+## Module Identifiers
+
+Fusion modules are organized into a hierarchy and are identified with a
+notation similar to a URI. The module `/fusion` is both the default
+language and the parent of many submodules that make up the built-in
+libraries. Fusion applications and libraries are expected to utilize their own
+independent module hierarchies to avoid name conflicts.
+
+Fusion restricts module names to start with an ASCII letter, followed by more
+ASCII letters, digits, or underscores. By convention, submodules named
+`private` indicate hierarchies that should not be used except by their vendor.
+
+Like the path portion of a URI, module identifiers are strings starting with
+`"/"` followed by one or more module names, each separated by `"/"`.  The first
+segment is the name of a root module, with further segments denoting successive
+submodules.  For example, the module identifier `/fusion/list` denotes the
+submodule named `list` of the root module named `fusion`.
+
+
+## Repositories
+
+A _repository_ is a simple component that provides access to modules and other
+resources.
+The Fusion runtime is configured with one or more repositories, arranged into a
+prioritized sequence; the highest priority is assigned to the
+_bootstrap repository_ that contains the standard libraries. In general,
+repositories are searched from highest to lowest priority to find a
+[`require`][require]d module, but it will be possible for a module to allow
+itself to be shadowed or extended by lower-priority repositories.
+
+Repositories are usually implemented as a file-system directory, and module
+source code is held in a subdirectory called `src` which in turn contains
+one or more root modules and their submodules.  Each module is contained in its
+own file whose name matches the module name and whose extension is `.fusion`.
+As with Java, module source files are arranged in file-system hierarchies that
+mirror the module hierarchy, and the names of the modules are (usually) derived
+from the file names.
+
+To illustrate, the bootstrap repository is structured like this:
+
+    BOOTSTRAP_REPO/
+                   src/
+                       fusion.fusion
+                       fusion/
+                              base.fusion
+                              collection.fusion
+                              experimental/
+                                           syntax.fusion
+                              sexp.fusion
+                              ...
+
+The `.fusion` files above contain the source for the modules `/fusion`,
+`/fusion/base`, `/fusion/collection`, `/fusion/experimental/syntax`, and
+`/fusion/sexp`.
+
+
+## Module Syntax
+
+You declare a module using the [`module`][module] form:
+
+    (module <NAME> <LANGUAGE>
+      <CODE> ...+)
+
+The name, written as an Ion identifier, is only meaningful when this form is
+encountered within a script, in which case it denotes a local name by which the
+module can be used.  When the module is loaded from a file (by far the most
+common case), this name is ignored because the module's identity is inferred
+from the source file's name and path within the repository.
+
+The language declaration is far more critical, since it determines the
+semantics associated with all of the code within the module. It's written as
+an Ion string, holding the path to the module. The usual value is `"/fusion"`,
+the standard Fusion language.
+
+Code often requires features beyond those provided by the declared language.
+The [`require`][require] form imports bindings from another module:
+
+    (require <MODULE_REFERENCE> ...+)
+
+In most cases the module reference is a string containing a path to a module.
+This imports all of the public bindings provided by that module into the
+enclosing namespace.
+
+The [`provide`][provide] form exports bindings from a module's namespace to the
+users of the module:
+
+    (provide <ID> ...)
+
+The given identifiers must all be `define`d within the enclosing namespace or
+`require`d from another module, and they are all made public and available for
+import elsewhere.
+
+Here's a tiny sample module to tie it all together. It simply defines and
+exports two small procedures:
+
+    (module tiny "/fusion"
+      (require "/fusion/sequence")
+
+      (provide second next_to_last)
+
+      (define (second seq)
+        (element seq 1))
+
+      (define (next_to_last seq)
+        (element seq (- (size seq) 2))))
+
+
+## Module References <a id="ref"/>
+
+When `require`ing a module, you use a _module reference_ to identify the target
+module.  These references are syntactic forms that the compiler resolves to a
+module identifier for the target.
+
+Most module references are _module paths_ that describe how to get to the
+target module from the referring namespace. These paths are denoted
+(equivalently) as strings or symbols, the difference being purely syntactic.
+Stylistically, we recommend using strings for module paths, except when
+referring to a sibling module, where an Ion identifier suffices and is easier
+to read.
+
+Paths that start with `"/"` must be proper module identifiers and they denote
+absolute paths. All other paths are parsed as relative.
+
+A relative path is resolved based on the (absolute) identifier of the module
+in which it appears; see below for information on references from top-level
+code. Relative references are structured as `"/"`-separated segments composed
+in one of these ways:
+
+  * One or more name segments, the first referring to a sibling of the source
+    module, and followers referring to successive children of the sibling.
+  * A single `"."` segment followed by one or more names referring to
+    successive children of the source module.
+  * One or more `".."` segments, referring to successive parents of the source
+    module, followed by zero or more names, referring to successive children.
+
+Any `"."` and `".."` segments can only occur at the front of the path.
+
+> **WARNING: `"."` and `".."` segments are not yet implemented!**
+> See issue [FUSION-150][].
+
+> **WARNING: Relative paths are only supported at top-level!**
+> See issue [FUSION-152][].
+
+For example, consider these imports within a module `/root/parent/self`:
+
+    (require sibling)             // Resolves to /root/parent/sibling
+    (require "sibling")           // Equivalent
+    (require "sibling/niece")     // Resolves to /root/parent/sibling/niece
+
+    (require "./child")           // Resolves to /root/parent/self/child
+    (require "./child/grand")     // Resolves to /root/parent/self/child/grand
+
+    (require ..)                  // Resolves to /root/parent
+    (require "..")                // Equivalent
+    (require "../sibling")        // Resolves to /root/parent/sibling
+    (require "../sibling/niece")  // Resolves to /root/parent/sibling/niece
+    (require "../..")             // Resolves to /root
+    (require "../../..")          // ERROR: /root has no parent
+
+
+### Module References from Top-Level
+
+At top-level (_e.g._, at the REPL), relative paths are resolved based on a
+unique, transient pseudo-module identifier whose only purpose is to scope
+modules uniquely within that top level.  Relative references can therefore only
+address modules (and submodules) declared within that top-level, and those modules
+cannot be referenced from outside the top-level namespace. Furthermore, `"."`
+and `".."` segments are not allowed in paths from a top-level `require`, since
+the top-level is not a module and does not have a parent module.
+
+
+## Naming Modules <a id="nm"/>
+
+Like Java, Fusion arranges code in a hierarchy. Unlike Java, that hierarchy is
+intended to be active in providing metadata around access protection, security,
+and so on. Furthermore, we anticipate dynamic code distribution mechanisms
+that well assume and enforce a global hierarchy. Therefore it is more important
+in Fusion to carefully select a namespace within the hierarchy, since conflicts
+will cause more problems.
+
+We recommend that all Amazon code be housed under the `/amazon` root module,
+with further submodules indicating product line and product.  We generally do
+not recommend following Amazon's organizational structure, since Amazon's
+tendency to re-org will likely render your code's hierarchy obsolete.
+
+In Brazil terms, something like `/amazon/`_`appgroup`_`/`_`package`_
+will probably suffice. Of course you can include additional subdirectories
+under the package level.
+
+At this time, we do not recommend having multiple Brazil packages contribute
+modules to the same set of directories in the Fusion repository.
+That is likely to cause problems with future security features, and furthermore
+causes confusion among developers.
+
+**DO NOT CREATE SUBMODULES OF [`/fusion`][fusion].**
+That hierarchy is reserved for exclusive use by the Fusion platform.
+
+See also: [Building and Deploying Fusion Code](build.html).
+
+[fusion]:  fusion.html
+[module]:  fusion/module.html#module
+[provide]: fusion/module.html#provide
+[require]: fusion/module.html#require
+[FUSION-150]: issue:FUSION-150
+[FUSION-152]: issue:FUSION-152
   '''
 
   (provide all_defined_out module only_in prefix_in
