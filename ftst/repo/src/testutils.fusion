@@ -167,10 +167,11 @@ orders, including each value paired with itself.
        sequence))
 
   (define (bag_equal equal list1 list2)
-    (let loop [(i 0), (list2 list2)]
-      (if (== i (size list1))
-        (== 0 (size list2))
-        (let ((value (element list1 i)))
-          (loop (+ i 1)
-            (remove_first (lambda (e) (equal value e)) list2))))))
+    (and (same_size list1 list2)
+      (let loop [(i 0), (list2 list2)]
+        (if (== i (size list1))
+           (is_empty list2)
+           (let [(value (element list1 i))]
+             (loop (+ i 1)
+               (remove_first (|e| (equal value e)) list2)))))))
 )
