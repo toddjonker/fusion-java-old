@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module bool '/fusion/private/builtins'
 
@@ -42,12 +42,33 @@ doesn't need to be strictly `true` or `false`.  It can be any kind of value,
 which is then treated as either "truthy" or "untruthy" for the purposes of the
 condition.
 
+To see the difference between "truth" and "truthy", consider these expressions:
+
+    (if   0    "yes" "no")
+    (if   ""   "yes" "no")
+    (if  null  "yes" "no")
+    (if (void) "yes" "no")
+
+This sort of thing is a common idiom in dynamic languages, a shortcut
+to checking the presence of a meaningful value. In Java the program must have
+an explicit comparison to achieve a true/false value. Fusion has the added
+hiccup of `null.bool`. Early versions of Fusion forced the programmer to ensure
+that the value is exactly `true` or `false`, but that caused an abundance of
+null checks and void checks for very common use cases. (Users of the IonJava
+APIs will surely recognize this problem!) Scheme languages don't have `null`,
+and they generally say that everything is truthy except for `false`. That's
+more forgiving, but not necessarily more convenient, especially when you throw
+in all those nulls.
+
 Fusion defines truthiness as follows:
 
-  * Every value is truthy except for `false`, void, and any variant of `null`.
+  * Every value is truthy except for `false`, [void][], and any variant of
+    `null`.
 
-This definition is more lax (and hopefully more convenient) than Java, but less
-lenient (and hopefully less error-prone) than C or C++.
+Given historical experience in working with Ion data, we believe this will be
+the most convenient approach to the issue.  This definition is more lax (and
+hopefully more convenient) than Java, but less lenient (and hopefully less
+error-prone) than C or C++.
 
 Fusion supports the usual boolean combinators [`and`][and], [`or`][or], and
 [`not`][not], which also observe truthiness in the same manner. The operators
@@ -67,6 +88,7 @@ forms return the result of the last expression evaluated rather than always
   [not]:    fusion/bool.html#not
   [or]:     fusion/bool.html#or
   [unless]: fusion/bool.html#unless
+  [void]:   fusion/void.html
   [when]:   fusion/bool.html#when
   '''
 

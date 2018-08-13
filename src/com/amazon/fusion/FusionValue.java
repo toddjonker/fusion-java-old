@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -77,7 +77,7 @@ public final class FusionValue
      * This definition is more lax (and hopefully more convenient) than Java,
      * but less lenient (and hopefully less error-prone) than C or C++.
      *
-     * @see <a href="{@docRoot}/../nullvoid.html">Null and Void</a>
+     * @see <a href="{@docRoot}/../fusion/bool.html#truthiness">Truthiness</a>
      * @see FusionBool#isTrue(TopLevel, Object)
      *
      * @deprecated As of R15 in March 2014.

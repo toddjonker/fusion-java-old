@@ -14,12 +14,56 @@ also return void.  In contrast to C++ or Java, a Fusion procedure that
 whatsoever.
 
 The void value can be acquired by calling the procedure `void` with any number
-of arguments, and one can check for it via the procedure `is_void`.
+of arguments, and one can check for it via the procedure `is_void`:
 
-Along with all nulls and `false`, the void value is untruthy:
+    $ (writeln (void 1 2 3))
+    {{{void}}}
+
+    $ (is_void (void))
+    true
+
+Another nothing-ish constant value is the result of a very specific
+code defect: accessing a locally-scoped variable before it's been defined.
+Here, we'll refer to this value as _undef_ even though Fusion doesn't provide a
+binding with that name.
+The only way to generate _undef_ is via a defective use of `letrec` that
+references one of the new bindings before its value has been evaluated.
+For example, this expression returns _undef_:
+
+    (letrec [(x y), (y 2)]
+      x)
+
+`letrec` first creates all the variable bindings (the left-hand sides), then
+evaluates the right-hand sides and assigns the results to the variables. If
+any of those right-hand-side expressions references a left-hand-side variable
+that's further down the list, it will get _undef_. Thus that expression is
+more or less equivalent to:
+
+    (let [(x UNDEF), (y UNDEF)]
+      (set x y)
+      (set y 2)
+      x)
+
+This is a situation that's almost certainly a programmer error, and _undef_ is
+specifically intended to represent this case. It is *not* intended to be used
+like void as a generic "no value" result. Put another way: whereas void is
+something that is intended for applications to use (albeit sparingly), _undef_
+is something that you should never see unless there's a bug in somebody's code.
+
+Both of these values are distinct from null (of any type) because of Fusion's
+goal to enable processing Ion data. Ion has null values that are distinct from
+"no value". For example, given the struct `{ f : null }`, the result of getting
+field `f` (where the value is `null`) is quite different from the result of
+getting field `g` (where there's no value at all). Some code may need to handle
+those cases differently, and therefore Fusion needs a value to say "nothing is
+found" that's not `null`. That value is called void.
+
+Along with all nulls and `false`, the void value is [untruthy][]:
 
     $ (if (void) "yes" "no")
     "no"
+
+  [untruthy]: fusion/bool.html#truthiness
   '''
 
   (provide
