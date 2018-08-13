@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module struct '/fusion/base'
 
@@ -10,6 +10,12 @@ keyed by strings.  Since Fusion structs are based on Ion structs, these
 collections are multi-maps: the same key can map to multiple values, or even
 multiple mappings to the same value. The _elements_ of a struct are its values,
 but not the associated field names.
+
+Because structs are unordered, operations that iterate over field keys or
+values do not guarantee a repeatable order of iteration: the order may change
+at any time, even between successive procedure calls. This (lack of) contract
+most commonly affects unit tests, which must be careful to compare actual and
+expected values using order-insensitive comparisons.
 
 Structs come in two concrete types: immutable and mutable. The predicates
 `is_immutable_struct` and `is_mutable_struct` distinguish between them.
