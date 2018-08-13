@@ -1,11 +1,11 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module sexp '/fusion/base'
 
   '''
 Operations for sexps (_a.k.a._ S-expressions) and pairs.
 
-An _sexp_ is a [sequence](fusion/sequence.html) of values with zero-based
+An _sexp_ is a [sequence][], an ordered [collection][] of values, with zero-based
 integer keys and O(_n_) lookup of elements.  Generally, sexps are linked lists
 of _pairs_, each of which has a _head_ slot and a _tail_ slot.  In addition to
 pairs, there are zero-length sexps --- for example, the result of `(quote ())`
@@ -17,6 +17,8 @@ sexp (_not_ `null.sexp`).
 At present, pairs and sexps are immutable.  Issue [FUSION-102] covers mutable
 sexps.
 
+  [collection]:     fusion/collection.html
+  [sequence]:       fusion/sequence.html
   [FUSION-102]: issue:FUSION-102
   '''
 

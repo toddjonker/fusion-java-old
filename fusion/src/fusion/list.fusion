@@ -1,11 +1,11 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module list '/fusion/base'
 
   '''
 Operations for lists (_a.k.a._ arrays).
 
-A _list_ is a [sequence][] of values with zero-based
+A _list_ is a [sequence][], an ordered [collection][] of values, with zero-based
 integer keys and constant-time lookup of elements.  Lists come in three
 concrete types: immutable, mutable, or stretchy; a stretchy list IS-A mutable
 list.  Non-stretchy lists are comparable to Java arrays, while stretchy lists
