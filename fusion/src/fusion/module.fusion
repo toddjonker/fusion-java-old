@@ -229,8 +229,9 @@ causes confusion among developers.
 **DO NOT CREATE SUBMODULES OF [`/fusion`][fusion].**
 That hierarchy is reserved for exclusive use by the Fusion platform.
 
-See also: [Building and Deploying Fusion Code](build.html).
+See also: [Building and Deploying Fusion][build].
 
+[build]:   wiki:Building_and_Deploying_Fusion
 [fusion]:  fusion.html
 [module]:  fusion/module.html#module
 [provide]: fusion/module.html#provide
