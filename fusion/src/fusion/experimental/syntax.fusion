@@ -41,7 +41,7 @@ To write low-level macros you'll want to be familiar with these parts of the
   * [Syntax Objects](http://docs.racket-lang.org/reference/stxops.html),
     especially `datum->syntax` and `syntax-e` (which Fusion calls `syntax_unwrap`).
   * [Syntax Quoting](http://docs.racket-lang.org/reference/Syntax_Quoting__quote-syntax.html)
-  * [Expanding_Top-Level_Forms](http://docs.racket-lang.org/reference/Expanding_Top-Level_Forms.html)
+  * [Expanding Top-Level Forms](http://docs.racket-lang.org/reference/Expanding_Top-Level_Forms.html)
 
 ## Limitations
 
@@ -57,7 +57,7 @@ to Racket:
     is not implemented.
 
 These are the primary reasons this module is “experimental”. Of particular
-concerned is that extant code may break when phases are introduced.
+concern is that extant code may break when phases are introduced.
 
 ## Internals
 

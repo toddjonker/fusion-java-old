@@ -111,8 +111,8 @@ will be visible to later evaluations.
     '''
     (expand top_level_form)
 
-Expands a top-level form to core syntax, using the bindings of the current
-namespace.
+Expands a top-level form to core syntax, using the bindings of the
+[current namespace](fusion/namespace.html#current_namespace).
 
 The `top_level_form` may be a syntax object or another datum.
     '''
