@@ -225,19 +225,19 @@ be evaluated as a variable reference:
     (let [(g "f")]
       (. {f:2} g))     => 2
     '''
-    (lambda rest
-      (let [(size (size rest))]
-        (if (= size 0)
-          (apply raise_arity_error "." 1 rest)
-          (let loop [(pos 1),
-                     (val (elt rest 0))]
-            (if (or (= pos size) (is_void val))
-              val
-              (let [(key (elt rest pos))]
-                (loop (+ 1 pos)
-                  (if (is_procedure key)
-                    (key val)
-                    (elt val key))))))))))
+    (lambda args
+      (if (is_pair args)
+        (let loop [(val  (unsafe_pair_head args)),
+                   (rest (unsafe_pair_tail args))]
+          (if (or (is_empty rest) (is_void val))
+            val
+            (let [(key (unsafe_pair_head rest))]
+              (loop
+                (if (is_procedure key)
+                  (key val)
+                  (elt val key))
+                (unsafe_pair_tail rest)))))
+        (apply raise_arity_error "." 1 args))))
 
 
   //==========================================================================
