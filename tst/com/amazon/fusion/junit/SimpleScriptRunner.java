@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.junit;
 
@@ -69,6 +69,10 @@ public class SimpleScriptRunner
         super(testClass);
 
         FusionRuntimeBuilder b = FusionRuntimeBuilder.standard();
+
+        // The former default works in an IDE, the latter overrides it
+        // during scripted builds.
+        b = b.withBootstrapRepository(new File("fusion"));
         b = b.withConfigProperties(testClass, "/fusion.properties");
 
         File tstRepo = new File("ftst/repo");

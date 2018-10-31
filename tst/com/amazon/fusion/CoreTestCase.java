@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -100,6 +100,9 @@ public class CoreTestCase
         {
             FusionRuntimeBuilder b = FusionRuntimeBuilder.standard();
 
+            // The former default works in an IDE, the latter overrides it
+            // during scripted builds.
+            b = b.withBootstrapRepository(new File("fusion"));
             b = b.withConfigProperties(getClass(), "/fusion.properties");
 
             myRuntimeBuilder = b;
