@@ -2,6 +2,7 @@
 
 package com.amazon.fusion.junit;
 
+import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntime;
 import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.fusion.TopLevel;
@@ -50,9 +51,7 @@ public class SimpleScriptRunner
         public void evaluate()
             throws Throwable
         {
-            FusionRuntime r = myRunner.myRuntimeBuilder.build();
-            TopLevel t = r.getDefaultTopLevel();
-            t.load(myScript);
+            myRunner.load(myScript);
         }
     }
 
@@ -60,7 +59,7 @@ public class SimpleScriptRunner
     //========================================================================
 
 
-    private final FusionRuntimeBuilder myRuntimeBuilder;
+    private final FusionRuntime myRuntime;
 
 
     public SimpleScriptRunner(Class<?> testClass)
@@ -78,9 +77,14 @@ public class SimpleScriptRunner
         File tstRepo = new File("ftst/repo");
         b.addRepositoryDirectory(tstRepo);
 
-        myRuntimeBuilder = b.immutable();
+        myRuntime = b.build();
     }
 
+    void load(File script)
+        throws FusionException
+    {
+        myRuntime.makeTopLevel().load(script);
+    }
 
     @Override
     protected List<File> getChildren()
