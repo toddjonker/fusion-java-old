@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -20,6 +21,10 @@ import java.util.Set;
  * for reuse, and does not support Java nulls as keys or values. Attempts to use null
  * on operations such as {@link #get(Object)} or {@link #with(Object, Object)} will throw a
  * {@link NullPointerException} as per {@link Map} specifications.
+ *
+ * Iteration order of this data structure is undefined. All key hashes used within
+ * {@link FunctionalHashTrie} are shuffled differently in each JRE. All hashes used for
+ * navigating through the node structure should be routed through {@link #hashCodeFor(Object)}.
  *
  * Based on Clojure's PersistentHashMap and as such this implementation
  *  Uses path copying for persistence.
@@ -101,7 +106,7 @@ class FunctionalHashTrie<K, V>
         }
         else
         {
-            return root != null && root.get(key.hashCode(), 0, key) != null;
+            return root != null && root.get(hashCodeFor(key), 0, key) != null;
         }
     }
 
@@ -138,7 +143,7 @@ class FunctionalHashTrie<K, V>
         }
         else
         {
-            return root.get(key.hashCode(), 0, key);
+            return root.get(hashCodeFor(key), 0, key);
         }
     }
 
@@ -175,7 +180,7 @@ class FunctionalHashTrie<K, V>
         }
 
         Box addedLeaf = new Box(null);
-        newRoot = root.with(key.hashCode(), 0, key, value, addedLeaf);
+        newRoot = root.with(hashCodeFor(key), 0, key, value, addedLeaf);
         if (newRoot == root)
         {
             return this;
@@ -203,7 +208,7 @@ class FunctionalHashTrie<K, V>
         }
         else
         {
-            TrieNode<K, V> newRoot = root.without(key.hashCode(), 0, key);
+            TrieNode<K, V> newRoot = root.without(hashCodeFor(key), 0, key);
             if (newRoot == root)
             {
                 return this;
@@ -401,6 +406,19 @@ class FunctionalHashTrie<K, V>
         return root;
     }
 
+    /**
+     * Used to provide the hash code for a key in the {@link FunctionalHashTrie}.
+     * ALL trie node interfacing calls should use this method!!
+     *
+     * Visible for testing.
+     * @param key Object to get the hash code for.
+     * @return a consistently shuffled hash code.
+     */
+    static int hashCodeFor(Object key)
+    {
+        return key.hashCode();
+    }
+
     // TODO: Add method that accepts a function to modify each element in the trie.
 
     /**
@@ -432,7 +450,7 @@ class FunctionalHashTrie<K, V>
             }
 
             Box addedLeaf = new Box(null);
-            TrieNode<K, V> newRoot = root.mWith(key.hashCode(), 0, key, value, addedLeaf);
+            TrieNode<K, V> newRoot = root.mWith(hashCodeFor(key), 0, key, value, addedLeaf);
             if (newRoot != root)
             {
                 root = newRoot;
@@ -459,7 +477,7 @@ class FunctionalHashTrie<K, V>
             }
             else
             {
-                return root.get(key.hashCode(), 0, key);
+                return root.get(hashCodeFor(key), 0, key);
             }
         }
 
@@ -806,7 +824,7 @@ class FunctionalHashTrie<K, V>
                 }
                 else
                 {
-                    newNode = newNode.mWith(keyOrNull.hashCode(),
+                    newNode = newNode.mWith(hashCodeFor(keyOrNull),
                                             shift,
                                             keyOrNull,
                                             valOrNode,
@@ -856,17 +874,16 @@ class FunctionalHashTrie<K, V>
                     }
                     else
                     {
-                        return new CollisionNode<>(hash,
-                                                   cloneAndModify(kvPairs,
-                                                                  index + 1,
-                                                                  value));
+                        return makeSimilar(cloneAndModify(kvPairs,
+                                                          index + 1,
+                                                          value));
                     }
                 }
                 else
                 {
                     Object[] newPairs = cloneAndExtend(kvPairs, key, value);
                     addedLeaf.value = addedLeaf;
-                    return new CollisionNode<>(hash, newPairs);
+                    return makeSimilar(newPairs);
                 }
             }
 
@@ -928,6 +945,16 @@ class FunctionalHashTrie<K, V>
         TrieNode<K, V> makeSimilar(Object[] kvPairs)
         {
             return new CollisionNode<>(hash, kvPairs);
+        }
+
+        @Override
+        public String toString()
+        {
+            return "{\n" +
+                   "  Node Hash: " + hash + ",\n" +
+                   "  Nodes: " + Arrays.toString(kvPairs) + ",\n" +
+                   "}";
+
         }
     }
 
@@ -1016,7 +1043,8 @@ class FunctionalHashTrie<K, V>
                 else
                 {
                     addedLeaf.value = addedLeaf;
-                    FlatNode newNode = resolveCollision(keyOrNull,
+                    FlatNode newNode = resolveCollision(hashCodeFor(keyOrNull),
+                                                        keyOrNull,
                                                         valOrNode,
                                                         hash,
                                                         key,
@@ -1092,7 +1120,8 @@ class FunctionalHashTrie<K, V>
                 else
                 {
                     addedLeaf.value = addedLeaf;
-                    TrieNode newNode = resolveCollision(keyOrNull,
+                    TrieNode newNode = resolveCollision(hashCodeFor(keyOrNull),
+                                                        keyOrNull,
                                                         valOrNode,
                                                         hash,
                                                         key,
@@ -1277,13 +1306,13 @@ class FunctionalHashTrie<K, V>
          * Keys with hashes that are exactly the same will be placed into a {@link CollisionNode},
          * while keys with hashes that aren't exactly the same will be nested in a {@link FlatNode}.
          */
-        private static <K, V> FlatNode<K, V> resolveCollision(K key1,
+        private static <K, V> FlatNode<K, V> resolveCollision(int key1hash,
+                                                              K key1,
                                                               V value1,
                                                               int key2hash,
                                                               K key2,
                                                               V value2)
         {
-            int key1hash = key1.hashCode();
             if (key1hash == key2hash)
             {
                 return new CollisionNode<>(key1hash, new Object[]{key1, value1, key2, value2});
@@ -1308,7 +1337,7 @@ class FunctionalHashTrie<K, V>
          * not the size of the subtrie.
          */
         private int count;
-        private final TrieNode<K, V>[] nodes;
+        final TrieNode<K, V>[] nodes;
 
         HashArrayMappedNode(int count, TrieNode<K, V>[] nodes)
         {
