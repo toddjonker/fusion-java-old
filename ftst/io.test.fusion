@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -60,6 +60,7 @@
 (check_true (is_eof eof))
 
 
+//=============================================================================
 // Lob I/O
 
 (define_check (check_lob_io value)
@@ -93,3 +94,30 @@
 
 (expect_arity_exn (ionize_to_string))
 (expect_arity_exn (ionize_to_string 1 2))
+
+
+//=============================================================================
+// display_to_string
+
+(check === ""                (display_to_string))
+(check === "1"               (display_to_string 1))
+(check === "12"              (display_to_string 1 2))
+(check === "12null.int"      (display_to_string 1 2 null.int))
+(check === "hello"           (display_to_string "hel" (quote lo)))
+(check === "[\"a\", b]"      (display_to_string (quote [ "a", b ])))
+(check === "2018-11T"        (display_to_string 2018-11T))
+
+(check === "{{{anonymous procedure}}}" (display_to_string (|| null)))
+(check === "{{{procedure 'void'}}}"    (display_to_string void))
+(check === "{{{void}}}"                (display_to_string (void)))
+
+(check === "a::1"            (display_to_string (quote a::1)))
+(check === "a::1b::2"        (display_to_string (quote a::1) (quote b::2)))
+(check === "a::\"hel\"b::lo" (display_to_string (quote a::"hel") (quote b::lo)))
+
+// Structs are tricky
+(check === "{f:\"a\"}" (display_to_string { f: "a" }))
+
+(check_pred (|r| (or (=== "{f:a,g:b}" r)
+                     (=== "{g:b,f:a}" r)))
+  (display_to_string (quote { f: a, g: b })))

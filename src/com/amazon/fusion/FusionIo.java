@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -7,6 +7,7 @@ import static com.amazon.fusion.FusionLob.isLob;
 import static com.amazon.fusion.FusionLob.unsafeLobBytesNoCopy;
 import static com.amazon.fusion.FusionString.checkNonEmptyStringArg;
 import static com.amazon.fusion.FusionString.checkRequiredStringArg;
+import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionUtils.resolvePath;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import com.amazon.ion.IonException;
@@ -666,8 +667,7 @@ public final class FusionIo
                 throw new FusionException("I/O Exception", e);
             }
 
-            String text = buf.toString();
-            return FusionString.makeString(eval, text);
+            return makeString(eval, buf.toString());
         }
     }
 
@@ -714,6 +714,19 @@ public final class FusionIo
             }
 
             return voidValue(eval);
+        }
+    }
+
+
+    static final class DisplayToStringProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+                throws FusionException
+        {
+            String output = displayManyToString(eval, args, 0);
+            return makeString(eval, output);
         }
     }
 

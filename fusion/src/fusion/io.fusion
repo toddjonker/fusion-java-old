@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 (module io '/fusion/private/kernel'
 
@@ -44,6 +44,7 @@ There are three "styles" of output:
   (provide
     current_directory          // from /fusion/private/kernel
     display
+    display_to_string
     displayln
     eof                        // from /fusion/private/kernel
     ionize
@@ -192,18 +193,31 @@ contains any non-Ionizable data like closures.
     '''
     (display value ...)
 
-Outputs a text representation of the `value`s, writing character data as-is but
-otherwise following Ion syntax where possible.  In general, the result will be
-unreadable by the Fusion and Ion readers.
+Outputs a text representation of the `value`s for human consumption.
+When a `value` is an unannotated string or symbol, its character data is written
+as-is, unquoted and unescaped.
+All other values are rendered as by [`write`](fusion/io.html#write).
+No characters are written between the values.
+In general, the result will be unreadable by the Fusion and Ion readers.
     '''
     (java_new "com.amazon.fusion.FusionIo$DisplayProc"))
+
+
+  (define display_to_string
+    '''
+    (display_to_string value ...)
+
+Returns a string with a human-oriented text representation of the `value`s.
+The output format is as defined by [`display`](fusion/io.html#display).
+    '''
+    (java_new "com.amazon.fusion.FusionIo$DisplayToStringProc"))
 
 
   (define displayln
     '''
     (displayln value ...)
 
-Displays the values, then a newline.
+[Displays](fusion/io.html#display) the values, then a newline.
     '''
     (lambda rest
       (apply display rest)
@@ -212,7 +226,7 @@ Displays the values, then a newline.
 
   (define (writeln value)
     '''
-Writes the value, then a newline.
+[Writes](fusion/io.html#write) the value, then a newline.
     '''
     (write value)
     (display "\n"))

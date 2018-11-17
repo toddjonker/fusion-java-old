@@ -162,6 +162,7 @@ contact us for clarification.
   (require "/fusion/io")
   (provide
     display
+    display_to_string
     displayln
     eof
     ionize
