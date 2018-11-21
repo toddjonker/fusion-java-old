@@ -21,8 +21,10 @@ import static com.amazon.fusion.FunctionalHashTrie.CollisionNode;
 import static com.amazon.fusion.FunctionalHashTrie.BitMappedNode;
 import static com.amazon.fusion.FunctionalHashTrie.HashArrayMappedNode;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -244,38 +246,55 @@ public class FunctionalHashTrieTest
     @Test
     public void checkFlatNodeExpansion()
     {
-        List<Object> values = new LinkedList<>();
-        for (int i = 0; i < 7; i++)
+        List<Map.Entry> values = new LinkedList<>();
+        for (int i = 0; i < 9; i++)
         {
             CustomKey key = new CustomKey(i, Integer.toString(i));
-            values.add(key);
-            values.add(new Object());
+            Map.Entry entry = new AbstractMap.SimpleEntry<>(key, new Object());
+            values.add(entry);
         }
 
-        TrieNode flatNode = new FlatNode(values.toArray());
+        TrieNode flatNode = new FlatNode(new Object[0]);
 
         Box addedLeaf = new Box(null);
-        Map.Entry eighth = new AbstractMap.SimpleEntry<>(new CustomKey(8, "8"),
-                                                         new Object());
-        values.add(eighth);
+        // A flat node should hold eight entries before expanding.
+        for (int i = 0; i < 8; i++)
+        {
+            Map.Entry entry = values.get(i);
+            flatNode = flatNode.with(entry.getKey().hashCode(),
+                                     0,
+                                     entry.getKey(),
+                                     entry.getValue(),
+                                     addedLeaf);
+            assertTrue(flatNode instanceof FlatNode);
+        }
 
-        TrieNode stillFlat = flatNode.with(8, 0, eighth.getKey(), eighth.getValue(), addedLeaf);
-        assertTrue(stillFlat instanceof FlatNode);
-
-        addedLeaf = new Box(null);
-        Map.Entry ninth = new AbstractMap.SimpleEntry<>(new CustomKey(9, "9"),
-                                                        new Object());
-        values.add(ninth);
-
-        TrieNode nowBitMap = stillFlat.with(9, 0, ninth.getKey(), ninth.getValue(), addedLeaf);
+        Map.Entry ninth = values.get(8);
+        TrieNode nowBitMap = flatNode.with(ninth.getKey().hashCode(),
+                                           0,
+                                           ninth.getKey(),
+                                           ninth.getValue(),
+                                           addedLeaf);
         assertTrue(nowBitMap instanceof BitMappedNode);
         assertEquals(9, countNodeSize(nowBitMap));
 
         BitMappedNode bm = (BitMappedNode) nowBitMap;
+        Object[] kvPairs = bm.kvPairs;
+        // BMNodes will allocate some extra space during expansion since expansion uses the mWith() method.
+        assertEquals(values.size() * 2 + 2, kvPairs.length);
         for (int i = 0; i < 9; i++)
         {
-            assertEquals(values.get(i), bm.kvPairs[i]);
-            assertNotNull(bm.kvPairs[i + 1]);
+            Map.Entry entry = values.get(i);
+            boolean found = false;
+            for (int k = 0; k < kvPairs.length; k += 2)
+            {
+                if (entry.getKey().equals(kvPairs[k]))
+                {
+                    assertFalse(found);
+                    found = true;
+                    assertSame(entry.getValue(), kvPairs[k + 1]);
+                }
+            }
         }
     }
 
