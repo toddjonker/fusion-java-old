@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2017-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -9,9 +9,8 @@ import static com.amazon.fusion.FusionList.unsafeListElement;
 import static com.amazon.fusion.FusionSexp.unsafePairHead;
 import static com.amazon.fusion.FusionSexp.unsafePairTail;
 import static com.amazon.fusion.FusionString.stringToJavaString;
-import static com.amazon.fusion.FusionStruct.EMPTY_STRUCT;
-import static com.amazon.fusion.FusionStruct.NULL_STRUCT;
 import static com.amazon.fusion.FusionStruct.immutableStruct;
+import static com.amazon.fusion.FusionStruct.nullStruct;
 import static com.amazon.fusion.FusionStruct.structImplAdd;
 import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbol;
 import static com.amazon.fusion.FusionValue.isAnnotated;
@@ -40,7 +39,7 @@ import com.amazon.fusion.Namespace.RequiredBinding;
 import com.amazon.fusion.TopLevelNamespace.CompiledFreeDefine;
 import com.amazon.fusion.TopLevelNamespace.CompiledFreeVariableReference;
 import com.amazon.fusion.TopLevelNamespace.TopLevelDefinedBinding;
-import java.util.HashMap;
+import java.util.Collections;
 
 /**
  * "Registers" used during compilation.
@@ -723,13 +722,13 @@ class Compiler
 
         if (isAnyNull(myEval, struct))
         {
-            return new CompiledConstant(NULL_STRUCT);
+            return new CompiledConstant(nullStruct(myEval));
         }
 
         int size = FusionStruct.unsafeStructSize(myEval, struct);
         if (size == 0)
         {
-            return new CompiledConstant(EMPTY_STRUCT);
+            return new CompiledConstant(immutableStruct(Collections.EMPTY_MAP));
         }
 
         final String[]       fieldNames = new String[size];

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -49,8 +49,8 @@ final class FusionStruct
     private FusionStruct() {}
 
 
-    static final NullStruct      NULL_STRUCT  = new NullStruct();
-    static final NonNullImmutableStruct EMPTY_STRUCT =
+    private static final NullStruct             NULL_STRUCT  = new NullStruct();
+    private static final NonNullImmutableStruct EMPTY_STRUCT =
         new FunctionalStruct(FunctionalHashTrie.EMPTY, BaseSymbol.EMPTY_ARRAY, 0);
 
     // Utility method.
@@ -901,7 +901,7 @@ final class FusionStruct
         implements BaseStruct
     {
         /**
-         * We can't use {@link #myMap}.size() because that doesn't count
+         * We can't use {@link #getMap}().size() because that doesn't count
          * repeated fields.
          */
         int mySize;
@@ -1403,11 +1403,6 @@ final class FusionStruct
             out.append('}');
         }
 
-        /**
-         * We access {@link #myMap} directly here because the override
-         * {@link LazyInjectingStruct#ionize(Evaluator, IonWriter)}
-         * only calls here after injecting the elements.
-         */
         @Override
         public void ionize(Evaluator eval, IonWriter out)
             throws IOException, FusionException
@@ -1438,11 +1433,6 @@ final class FusionStruct
             out.stepOut();
         }
 
-        /**
-         * We access {@link #myMap} directly here because the override
-         * {@link LazyInjectingStruct#copyToIonValue(ValueFactory, boolean)}
-         * only calls here after injecting the elements.
-         */
         @Override
         IonValue copyToIonValue(ValueFactory factory,
                                 boolean throwOnConversionFailure)
@@ -1502,10 +1492,6 @@ final class FusionStruct
         extends MapBasedStruct
         implements ImmutableStruct
     {
-        /**
-         * @param annotations
-         * @param size
-         */
         private NonNullImmutableStruct(BaseSymbol[] annotations, int size)
         {
             super(annotations, size);
@@ -1568,20 +1554,16 @@ final class FusionStruct
         }
     }
 
-    static class FunctionalStruct
+    private static class FunctionalStruct
         extends NonNullImmutableStruct
     {
         /**
          * For repeated fields, the value is Object[] otherwise it's a
          * non-array Object.
          */
-        final FunctionalHashTrie<String, Object> myMap;
+        private final FunctionalHashTrie<String, Object> myMap;
 
-        /**
-         * @param map
-         * @param annotations
-         * @param size
-         */
+
         public FunctionalStruct(FunctionalHashTrie<String, Object> map,
                                 BaseSymbol[] annotations,
                                 int size)
@@ -1590,10 +1572,6 @@ final class FusionStruct
             myMap = map;
         }
 
-        /**
-         * @param map
-         * @param annotations
-         */
         public FunctionalStruct(Map<String, Object> map,
                                 BaseSymbol[] annotations)
         {
@@ -1601,11 +1579,6 @@ final class FusionStruct
             myMap = FunctionalHashTrie.create(map);
         }
 
-        /**
-         * @param map
-         * @param annotations
-         * @param size
-         */
         public FunctionalStruct(Map<String, Object> map,
                                 BaseSymbol[] annotations,
                                 int size)
@@ -1737,10 +1710,6 @@ final class FusionStruct
     }
 
 
-    /**
-     * Since this type is never lazy-injecting, we don't need to worry about
-     * protecting access to {@link MapBasedStruct#myMap}.
-     */
     private static final class MutableStruct
         extends MapBasedStruct
     {
@@ -1748,7 +1717,7 @@ final class FusionStruct
          * For repeated fields, the value is Object[] otherwise it's a
          * non-array Object.
          */
-        FunctionalHashTrie<String, Object> myMap;
+        private FunctionalHashTrie<String, Object> myMap;
 
         public MutableStruct(Map<String, Object> map,
                              BaseSymbol[] annotations)
@@ -1781,7 +1750,8 @@ final class FusionStruct
         }
 
         /**
-         * Recomputes {@link #mySize} based on {@link #getMap(Evaluator)}.
+         * Recomputes {@link #mySize} based on what's in {@link #myMap}.
+         * This takes time proportional to the number of unique field names.
          */
         void updateSize()
         {
