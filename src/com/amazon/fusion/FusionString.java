@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -163,21 +163,20 @@ public final class FusionString
         @Override
         IonValue copyToIonValue(ValueFactory factory,
                                 boolean throwOnConversionFailure)
-            throws FusionException, IonizeFailure
         {
             return factory.newNullString();
         }
 
         @Override
         void ionize(Evaluator eval, IonWriter out)
-            throws IOException, IonException, FusionException, IonizeFailure
+            throws IOException, IonException
         {
             out.writeNull(IonType.STRING);
         }
 
         @Override
         void write(Evaluator eval, Appendable out)
-            throws IOException, FusionException
+            throws IOException
         {
             out.append("null.string");
         }
@@ -204,28 +203,27 @@ public final class FusionString
         @Override
         IonValue copyToIonValue(ValueFactory factory,
                                 boolean throwOnConversionFailure)
-            throws FusionException, IonizeFailure
         {
             return factory.newString(myContent);
         }
 
         @Override
         void ionize(Evaluator eval, IonWriter out)
-            throws IOException, IonException, FusionException, IonizeFailure
+            throws IOException, IonException
         {
             out.writeString(myContent);
         }
 
         @Override
         void write(Evaluator eval, Appendable out)
-            throws IOException, FusionException
+            throws IOException
         {
             IonTextUtils.printString(out, myContent);
         }
 
         @Override
         void display(Evaluator eval, Appendable out)
-            throws IOException, FusionException
+            throws IOException
         {
             out.append(myContent);
         }
@@ -292,7 +290,7 @@ public final class FusionString
         @Override
         IonValue copyToIonValue(ValueFactory factory,
                                 boolean throwOnConversionFailure)
-            throws FusionException, IonizeFailure
+            throws FusionException
         {
             IonValue iv = myValue.copyToIonValue(factory,
                                                  throwOnConversionFailure);
@@ -302,7 +300,7 @@ public final class FusionString
 
         @Override
         void ionize(Evaluator eval, IonWriter out)
-            throws IOException, IonException, FusionException, IonizeFailure
+            throws IOException, IonException, FusionException
         {
             out.setTypeAnnotations(getAnnotationsAsJavaStrings());
             myValue.ionize(eval, out);
@@ -378,8 +376,6 @@ public final class FusionString
      *
      * @param top the top-level that was the source of the value.
      * @param value the value to test.
-     *
-     * @throws FusionException
      */
     public static boolean isString(TopLevel top, Object value)
         throws FusionException

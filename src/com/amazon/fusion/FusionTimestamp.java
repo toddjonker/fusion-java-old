@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -110,21 +110,20 @@ final class FusionTimestamp
         @Override
         IonValue copyToIonValue(ValueFactory factory,
                                 boolean throwOnConversionFailure)
-            throws FusionException, IonizeFailure
         {
             return factory.newNullTimestamp();
         }
 
         @Override
         void ionize(Evaluator eval, IonWriter out)
-            throws IOException, IonException, FusionException, IonizeFailure
+            throws IOException, IonException
         {
             out.writeNull(IonType.TIMESTAMP);
         }
 
         @Override
         void write(Evaluator eval, Appendable out)
-            throws IOException, FusionException
+            throws IOException
         {
             out.append("null.timestamp");
         }
@@ -183,28 +182,27 @@ final class FusionTimestamp
         @Override
         IonValue copyToIonValue(ValueFactory factory,
                                 boolean throwOnConversionFailure)
-            throws FusionException, IonizeFailure
         {
             return factory.newTimestamp(myContent);
         }
 
         @Override
         void ionize(Evaluator eval, IonWriter out)
-            throws IOException, IonException, FusionException, IonizeFailure
+            throws IOException, IonException
         {
             out.writeTimestamp(myContent);
         }
 
         @Override
         void write(Evaluator eval, Appendable out)
-            throws IOException, FusionException
+            throws IOException
         {
             myContent.print(out);
         }
 
         @Override
         void display(Evaluator eval, Appendable out)
-            throws IOException, FusionException
+            throws IOException
         {
             myContent.print(out);
         }
@@ -279,7 +277,7 @@ final class FusionTimestamp
         @Override
         IonValue copyToIonValue(ValueFactory factory,
                                 boolean throwOnConversionFailure)
-            throws FusionException, IonizeFailure
+            throws FusionException
         {
             IonValue iv = myValue.copyToIonValue(factory,
                                                  throwOnConversionFailure);
@@ -289,7 +287,7 @@ final class FusionTimestamp
 
         @Override
         void ionize(Evaluator eval, IonWriter out)
-            throws IOException, IonException, FusionException, IonizeFailure
+            throws IOException, IonException, FusionException
         {
             out.setTypeAnnotations(getAnnotationsAsJavaStrings());
             myValue.ionize(eval, out);

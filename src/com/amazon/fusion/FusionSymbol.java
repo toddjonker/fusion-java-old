@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -233,21 +233,20 @@ final class FusionSymbol
         @Override
         IonValue copyToIonValue(ValueFactory factory,
                                 boolean throwOnConversionFailure)
-            throws FusionException, IonizeFailure
         {
             return factory.newNullSymbol();
         }
 
         @Override
         void ionize(Evaluator eval, IonWriter out)
-            throws IOException, IonException, FusionException, IonizeFailure
+            throws IOException, IonException
         {
             out.writeNull(IonType.SYMBOL);
         }
 
         @Override
         void write(Evaluator eval, Appendable out)
-            throws IOException, FusionException
+            throws IOException
         {
             out.append("null.symbol");
         }
@@ -299,28 +298,27 @@ final class FusionSymbol
         @Override
         IonValue copyToIonValue(ValueFactory factory,
                                 boolean throwOnConversionFailure)
-            throws FusionException, IonizeFailure
         {
             return factory.newSymbol(myContent);
         }
 
         @Override
         void ionize(Evaluator eval, IonWriter out)
-            throws IOException, IonException, FusionException, IonizeFailure
+            throws IOException, IonException
         {
             out.writeSymbol(myContent);
         }
 
         @Override
         void write(Evaluator eval, Appendable out)
-            throws IOException, FusionException
+            throws IOException
         {
             IonTextUtils.printSymbol(out, myContent);
         }
 
         @Override
         void display(Evaluator eval, Appendable out)
-            throws IOException, FusionException
+            throws IOException
         {
             out.append(myContent);
         }
@@ -412,7 +410,7 @@ final class FusionSymbol
         @Override
         IonValue copyToIonValue(ValueFactory factory,
                                 boolean throwOnConversionFailure)
-            throws FusionException, IonizeFailure
+            throws FusionException
         {
             IonValue iv = myValue.copyToIonValue(factory,
                                                  throwOnConversionFailure);
@@ -422,7 +420,7 @@ final class FusionSymbol
 
         @Override
         void ionize(Evaluator eval, IonWriter out)
-            throws IOException, IonException, FusionException, IonizeFailure
+            throws IOException, IonException, FusionException
         {
             out.setTypeAnnotations(getAnnotationsAsJavaStrings());
             myValue.ionize(eval, out);
