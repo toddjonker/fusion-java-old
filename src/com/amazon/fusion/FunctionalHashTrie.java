@@ -38,6 +38,8 @@ class FunctionalHashTrie<K, V>
 {
     private static final String NULL_ERROR_MESSAGE =
         "FunctionalHashTrie does not support null keys or values";
+    private static final int STOP_RELYING_ON_UNDEFINED_BEHAVIOR =
+        new Random().nextInt();
 
     static final FunctionalHashTrie EMPTY =
         new FunctionalHashTrie<>(null, 0);
@@ -416,7 +418,7 @@ class FunctionalHashTrie<K, V>
      */
     static int hashCodeFor(Object key)
     {
-        return key.hashCode();
+        return key.hashCode() ^ STOP_RELYING_ON_UNDEFINED_BEHAVIOR;
     }
 
     // TODO: Add method that accepts a function to modify each element in the trie.
