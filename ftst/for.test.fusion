@@ -3,7 +3,8 @@
 (require
   "/fusion/experimental/check"
   "/fusion/for"
-  "/fusion/list")
+  "/fusion/list"
+  "/testutils")
 
 
 (define iterate_values
@@ -128,6 +129,20 @@
               (f [10, 20, 30]))
     (+ e f)))
 
+
+// We can iterate structs.
+
+(define_binary_check (check_bag expected actual)
+  (bag_equal === expected actual))
+
+(check_fl []
+  (for_list [((k v) null.struct)] 1))
+
+(check_bag (quote [(f 1), (g 2), (h 3)])
+  (for_list [((k v) { f:1, g:2, h:3 })]
+    (sexp k v)))
+
+
 // Macro in bound-value position
 (check_fl [74]
   (for_list ((e (let ((list [1])) list))) (+ e 73)))
@@ -224,6 +239,8 @@
 
 (expect_result_error
   (for_list [((a b) [1])] a))   // expects 2 values, returns 1
+(expect_result_error
+  (for_list [(k {f:1})] k))
 
 
 // Duplicate fors_list binding names are allowed because they shadow

@@ -37,6 +37,7 @@ to apply optimizations to the generated code.
            "/fusion/list"
            "/fusion/number"
            "/fusion/private/bind"
+           "/fusion/private/struct"
            "/fusion/sexp"
            "/fusion/string"
            "/fusion/unsafe/list"
@@ -51,8 +52,9 @@ to apply optimizations to the generated code.
   (define (iterate series)
     (cond
       ((is_iterator series) series)
-      ((is_list     series) (unsafe_list_iterator series))
-      ((is_sexp     series) (unsafe_sexp_iterator series))
+      ((is_list     series) (unsafe_list_iterator   series))
+      ((is_sexp     series) (unsafe_sexp_iterator   series))
+      ((is_struct   series) (unsafe_struct_iterator series))
       (true (raise_result_error "for_list" "series" series))))
 
   (define (normalize_ids ids)
@@ -71,11 +73,11 @@ to apply optimizations to the generated code.
 
 Iterates the `series` in parallel, binding the corresponding `id`s to each
 element in turn and evaluating `body`. Returns a stretchy list of the results.
-The second form allows for series that return multiple values.
+The second form allows for series that return multiple values, such as structs.
 
 The `series` expressions are first evaluated left-to-right, and each must return
-a list, sexp, or iterator. As long as every series has more elements, they are
-retrieved in left-to-right order, bound to their `id`s at new storage slots, and
+a list, sexp, struct, or iterator. As long as every series has more elements,
+they are retrieved in left-to-right order, bound to their `id`s at new storage slots, and
 then the `body` is evaluated, with the result being added to the end of the list
 of results.
 
