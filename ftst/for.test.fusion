@@ -5,6 +5,12 @@
   "/fusion/for"
   "/fusion/list")
 
+
+(define iterate_values
+  (lambda vs
+    (iterator_map (|v| (apply values v))
+      (sexp_iterator vs))))
+
 (define_check (check_fl expected actual)
   (check_pred is_stretchy_list actual)
   (check === expected actual))
@@ -17,9 +23,13 @@
 
 (check_fl []
   (for_list ((e [])) 73))
+(check_fl []
+  (for_list (((e) [])) 73))
 
 (check_fl []
   (fors_list ((e [])) 84))
+(check_fl []
+  (fors_list (((e) [])) 84))
 
 (check_fl [73]
   (for_list ((e [1])) 73))
@@ -29,9 +39,16 @@
 
 (check_fl [1]
   (for_list ((e [1])) e))
+(check_fl [1]
+  (for_list (((e) [1])) e))
 
 (check_fl [2]
   (fors_list ((e [2])) e))
+(check_fl [2]
+  (fors_list (((e) [2])) e))
+
+
+// Multiple Series
 
 (check_fl [11, 22, 33]
   (for_list ((e [1, 2, 3])
@@ -43,6 +60,31 @@
               (f [10, 20, 30]))
     (+ e f)))
 
+
+// Multivalue series
+
+(check_fl [12, 34, 56]
+  (for_list [((a b) (iterate_values [1, 2] [3, 4] [5, 6]))]
+    (+ (* 10 a) b)))
+
+(check_fl [125, 346]
+  (for_list [((a b) (iterate_values [1, 2] [3, 4])),
+             ((c)   (iterate_values [5] [6] [7]))]
+    (+ (* 100 a) (* 10 b) c)))
+
+(check_fl [1256, 3478]
+  (for_list [((a b) (iterate_values [1, 2] [3, 4])),
+             ((c d) (iterate_values [5, 6] [7, 8]))]
+    (+ (* 1000 a) (* 100 b) (* 10 c) d)))
+
+(check_fl [1256, 1278, 3456, 3478]
+  (fors_list [((a b) (iterate_values [1, 2] [3, 4])),
+              ((c d) (iterate_values [5, 6] [7, 8]))]
+    (+ (* 1000 a) (* 100 b) (* 10 c) d)))
+
+
+// Series of differing lengths
+
 (check_fl [11, 22]
   (for_list ((e [1, 2, 3])
              (f [10, 20]))
@@ -52,6 +94,28 @@
   (fors_list ((e [1, 2, 3])
               (f [10, 20]))
     (+ e f)))
+
+
+// Mixed single/multi-identifier clauses
+
+(check_fl [11, 22]
+  (for_list (((e) [1, 2])
+             (f   [10, 20]))
+    (+ e f)))
+(check_fl [11, 22]
+  (for_list ((e   [1, 2])
+             ((f) [10, 20]))
+    (+ e f)))
+
+(check_fl [11, 21, 12, 22]
+  (fors_list (((e) [1, 2])
+              (f   [10, 20]))
+    (+ e f)))
+(check_fl [11, 21, 12, 22]
+  (fors_list ((e   [1, 2])
+              ((f) [10, 20]))
+    (+ e f)))
+
 
 // Sexp works too
 (check_fl [11, 22]
@@ -149,6 +213,18 @@
 
 // Duplicate name
 (expect_syntax_exn (for_list [(name []), (name [])] 13))
+
+
+// Bad multi-bindings
+
+(expect_syntax_exn (for_list [(null.sexp [])] 1))  // No ids
+(expect_syntax_exn (for_list [(()        [])] 1))  // No ids
+(expect_syntax_exn (for_list [((a 9)     [])] 1))  // Not an id
+(expect_syntax_exn (for_list [([a, b]    [])] 1))  // Not a sexp
+
+(expect_result_error
+  (for_list [((a b) [1])] a))   // expects 2 values, returns 1
+
 
 // Duplicate fors_list binding names are allowed because they shadow
 // each other in order, the last of which is still meaningful.

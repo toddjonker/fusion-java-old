@@ -56,15 +56,28 @@ to apply optimizations to the generated code.
       (true (raise_result_error "for_list" "series" series))))
 
 
+  (define (check_single_or_multi_id stx ids)
+    (if (is_identifier ids)
+      true
+      (check_multi_id stx ids)))
+
+  (define (normalize_ids ids)
+    (if (is_identifier ids)
+      (sexp ids)
+      ids))
+
+
   // TODO FUSION-36 Should allow internal definitions
   // TODO Optimize for single-series case.
   //      That will make fors_list much more efficient.
   (defpub_syntax for_list
     '''
-    (for_list ((id series) ...) body ...+)
+    (for_list [(id series), ...] body ...+)
+    (for_list [((id ...+) series), ...] body ...+)
 
 Iterates the `series` in parallel, binding the corresponding `id`s to each
 element in turn and evaluating `body`. Returns a stretchy list of the results.
+The second form allows for series that return multiple values.
 
 The `series` expressions are first evaluated left-to-right, and each must return
 a list, sexp, or iterator. As long as every series has more elements, they are
@@ -72,7 +85,7 @@ retrieved in left-to-right order, bound to their `id`s at new storage slots, and
 then the `body` is evaluated, with the result being added to the end of the list
 of results.
 
-If there are no `id`s declared, then the body is executed once.
+If no bindings are declared, then the body is executed once.
 
     (for_list
       [(even [0, 2, 4]),
@@ -93,7 +106,7 @@ If there are no `id`s declared, then the body is executed once.
                 (sexp (quote stretchy_list)          // (stretchy_list
                       begin_body)                    //   (begin BODY...))
 
-                (let_values [((ids series_exprs) (unzip_bindings stx bindings check_single_id))]
+                (let_values [((ids series_exprs) (unzip_bindings stx bindings check_single_or_multi_id))]
                   (lets
                     [(series_names
                        // Sexp of synthetic names for each series.
@@ -124,7 +137,7 @@ If there are no `id`s declared, then the body is executed once.
                      (ident_rebinds
                        // Binding pairs to capture each series' next value:
                        //  ((id <next-expr>) ...)
-                       (let loop [(ids   ids),
+                       (let loop [(ids   (map normalize_ids ids)),
                                   (exprs next_exprs)]
                          (if (is_empty ids)
                            (quote ())
@@ -151,7 +164,7 @@ If there are no `id`s declared, then the body is executed once.
                               (result (stretchy_list))]
                           (let loop []
                             (if (every iterator_has_next iters)
-                              (let (unquote ident_rebinds)
+                              (let_values (unquote ident_rebinds)
                                 (add_m result (unquote begin_body))
                                 (loop))
                               result))))))))
@@ -162,7 +175,8 @@ If there are no `id`s declared, then the body is executed once.
 
   (defpub_syntax fors_list
     '''
-    (fors_list [(ident series), ...] body ...+)
+    (fors_list [(id series), ...] body ...+)
+    (fors_list [((id ...+) series), ...] body ...+)
 
 Like `for_list`, but the `series` are iterated in nested loops instead of in parallel.
 Each binding is made available to the following `series` as well as the `body` allowing

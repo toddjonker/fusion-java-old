@@ -16,6 +16,7 @@
   (provide let_values letrec values)
 
   (provide
+    check_multi_id
     check_single_id
     let
     lets
@@ -43,6 +44,18 @@
     (if (is_identifier ids)
       true
       (wrong_syntax stx "bound name isn't an identifier: " ids)))
+
+  (define (check_multi_id stx ids_stx)
+    (let_values [((ids) (syntax_unwrap ids_stx))]
+      (if (is_pair ids)
+        (check_sexp_of_ids stx ids)
+        (wrong_syntax stx "expected sexp of bound identifiers: " ids_stx))))
+
+  (define (check_sexp_of_ids stx ids)
+    (if (is_pair ids)
+      (begin (check_single_id   stx (unsafe_pair_head ids))
+             (check_sexp_of_ids stx (unsafe_pair_tail ids)))
+      true))
 
 
   (define (split_binding stx binding check_ids)
