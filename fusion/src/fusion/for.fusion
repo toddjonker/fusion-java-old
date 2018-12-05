@@ -35,8 +35,10 @@ to apply optimizations to the generated code.
            "/fusion/experimental/syntax"
            "/fusion/iterator"
            "/fusion/list"
+           "/fusion/number"
            "/fusion/private/bind"
            "/fusion/sexp"
+           "/fusion/string"
            "/fusion/unsafe/list"
            "/fusion/unsafe/sexp")
 
@@ -93,16 +95,32 @@ If there are no `id`s declared, then the body is executed once.
 
                 (let_values [((ids series_exprs) (unzip_bindings stx bindings))]
                   (lets
-                    [(next_exprs
-                       // Expressions that get the next value from each series
-                       // For now this is always (iterator_next ...) but that will change.
-                       (let loop [(series series_exprs),
-                                  (i      0)]
-                         (if (is_empty series)
+                    [(series_names
+                       // Sexp of synthetic names for each series.
+                       (let loop [(exprs series_exprs),
+                                  (i 0)]
+                         (if (is_empty exprs)
                            (quote ())
-                           (pair (sexp (quote iterator_next)
-                                   (sexp (quote element) (quote iters) i))
-                                 (loop (unsafe_pair_tail series) (+ 1 i)))))),
+                           (pair (string_to_symbol (string_append "series" (int_to_string i)))
+                                 (loop (unsafe_pair_tail exprs) (+ 1 i)))))),
+                     (series_binds
+                       // Binding pairs to name each series' iterator:
+                       //  ((series_name (iterate series_expr)) ...)
+                       (let loop [(names series_names),
+                                  (exprs series_exprs)]
+                         (if (is_empty names)
+                           (quote ())
+                           (pair (sexp (unsafe_pair_head names)
+                                       (sexp (quote iterate) (unsafe_pair_head exprs)))
+                                 (loop (unsafe_pair_tail names) (unsafe_pair_tail exprs)))))),
+                     (next_exprs
+                       // Expressions that get the next value from each series.
+                       // For now this is always (iterator_next ...) but that will change.
+                       (let loop [(names series_names)]
+                         (if (is_empty names)
+                           (quote ())
+                           (pair (sexp (quote iterator_next) (unsafe_pair_head names))
+                                 (loop (unsafe_pair_tail names)))))),
                      (ident_rebinds
                        // Binding pairs to capture each series' next value:
                        //  ((id <next-expr>) ...)
@@ -115,26 +133,28 @@ If there are no `id`s declared, then the body is executed once.
 
                     // (for_list [(I S) ...] BODY ...)
                     //   =>
-                    // (let [(iters  (map iterate (list S ...))),
-                    //       (result (stretchy_list))]
-                    //   (let loop []
-                    //     (if (every iterator_has_next iters)
-                    //       (let [(I (iterator_next (element iters 0))),
-                    //             ...]
-                    //         (add_m result (begin BODY ...))
-                    //         (loop))
-                    //       result)))
+                    // (let [(series1 (iterate S)),
+                    //       ...]
+                    //   (let [(iters  (list series1 ...)),
+                    //         (result (stretchy_list))]
+                    //     (let loop []
+                    //       (if (every iterator_has_next iters)
+                    //         (let [(I (iterator_next series1)),
+                    //               ...]
+                    //           (add_m result (begin BODY ...))
+                    //           (loop))
+                    //         result))))
 
                     (quasiquote
-                      (let [(iters (map iterate
-                                     (unquote (pair (quote list) series_exprs)))),
-                            (result (stretchy_list))]
-                        (let loop []
-                          (if (every iterator_has_next iters)
-                            (let (unquote ident_rebinds)
-                              (add_m result (unquote begin_body))
-                              (loop))
-                            result)))))))
+                      (let (unquote series_binds)
+                        (let [(iters (unquote (pair (quote list) series_names))),
+                              (result (stretchy_list))]
+                          (let loop []
+                            (if (every iterator_has_next iters)
+                              (let (unquote ident_rebinds)
+                                (add_m result (unquote begin_body))
+                                (loop))
+                              result))))))))
               ctx
               stx))))))
 
