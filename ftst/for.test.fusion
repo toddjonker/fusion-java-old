@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -110,6 +110,17 @@
     (fors_list [(x data),
                 (y (. x amountsPosted))]
       (. y amount))))
+
+
+//  Evaluation order
+(lets [(evaluation_order (stretchy_list)),
+       (record (|v| (add_m evaluation_order v) v))]
+  (check_fl [[1,2],[3,4]]
+    (for_list [(a (begin (record "a") (iterator_map record (list_iterator [1, 3])))),
+               (b (begin (record "b") (iterator_map record (list_iterator [2, 4]))))]
+      [a,b]))
+  (check === ["a", "b", 1, 2, 3, 4] evaluation_order))
+
 
 (expect_syntax_exn (for_list))
 (expect_syntax_exn (fors_list))
