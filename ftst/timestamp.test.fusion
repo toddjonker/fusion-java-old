@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -194,6 +194,13 @@
 (check === 2016T (timestamp 2016))
 
 // acceptable edge cases
+(check === 2018T (timestamp 2018 (void)))
+(check === 2018T (timestamp 2018 (void) (void)))
+(check === 2018T (timestamp 2018 (void) (void) (void)))
+(check === 2018T (timestamp 2018 (void) (void) (void) (void)))
+(check === 2018T (timestamp 2018 (void) (void) (void) (void) (void)))
+(check === 2018T (timestamp 2018 (void) (void) (void) (void) (void) (void)))
+
 (check === 2016-07-01T (timestamp 2016 7 1 (void) (void) (void) -420))
 (check === 2016-07-01T10:07-00:00 (timestamp 2016 7 1 10 7 (void) (void)))
 (check === 2016-07-01T10:07-00:00 (timestamp 2016 7 1 10 7 (void)))

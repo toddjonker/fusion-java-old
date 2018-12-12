@@ -1,11 +1,13 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
 
 (module timestamp '/fusion/private/kernel'
 
   '''
-Point-in-time values with local offset.
+Immutable point-in-time values with local offset.
 
-Fusion timestamp values are identical to Ion timestamps.
+The semantics of Fusion timestamp values are identical to [Ion timestamps][ts].
+
+[ts]: https://amzn.github.io/ion-docs/docs/spec.html#timestamp
   '''
 
   (require
@@ -86,14 +88,35 @@ Returns `null.string` when given `null.timestamp`.
     '''
     (timestamp year month? day? hour? minute? second? offset?)
 
-Creates and returns a timestamp with `year` and remaining optional fields (ordered by increasing precision), including offset.
-The returned timestamp's offset will be equal to `offset` minutes, if provided (or void otherwise).
-The returned timestamp will have precision of the last supplied time field (year, month, ...).
-If `hour` is supplied, `minute` is required to be supplied as well.
-`offset` should only be supplied if `hour`, `minute`, and `second` are present (`second` may be void to achieve minute precision with offset).
+Returns a timestamp representing a specified point in time.
 
-    i.e. to create 2016-07-01T09:05-07:00, execute:
-      (timestamp 2016 7 1 9 5 (void) -420)
+The `year` is required, and other fields can be added in increasing precision.
+Acceptable combinations of arguments being present or absent align with the
+combinations of fields allowed by [Ion timestamps][ts]. Optional arguments that are
+not present are equivalent to being void.
+
+  * When present, `month` must be an actual integer.
+  * When present, `day` must be an actual integer and `month` must be present.
+  * When either is present, `hour` and `minute` must both be actual integers,
+    and `month` and `day` must be present.
+  * When present, `second` must be an actual integer or decimal, and all
+    preceding arguments must be present.
+  * When present, `offset` must be an actual integer denoting the minutes of
+    local offset; void denotes the unknown local offset `-00:00`.  The offset
+    is ignored when the hour and minutes are not provided.
+
+For example:
+
+    (timestamp 2016)                       ==> 2016T
+    (timestamp 2016 7)                     ==> 2016-07T
+    (timestamp 2016 7 1)                   ==> 2016-07-01
+    (timestamp 2016 7 1 9 5)               ==> 2016-07-01T09:05-00:00
+    (timestamp 2016 7 1 9 5 (void) -420)   ==> 2016-07-01T09:05-07:00
+    (timestamp 2016 7 1 9 5 6. 0)          ==> 2016-07-01T09:05:06+00:00
+    (timestamp 2016 7 1 9 5 6. (void))     ==> 2016-07-01T09:05:06-00:00
+    (timestamp 2016 7 1 9 5 6.123)         ==> 2016-07-01T09:05:06.123-00:00
+
+[ts]: https://amzn.github.io/ion-docs/docs/spec.html#timestamp
     '''
     "com.amazon.fusion.FusionTimestamp$TimestampProc")
 
