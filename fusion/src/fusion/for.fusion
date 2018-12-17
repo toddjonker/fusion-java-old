@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2019 Amazon.com, Inc.  All rights reserved.
 
 (module for '/fusion/private/kernel'
 
@@ -36,14 +36,12 @@ Generic collection "comprehension" forms.
 (for_list [     ] BODY)  =>  (stretchy_list (begin BODY))
 
 
-// TODO do we allocate new bindings for each I for each iteration?
-
 (for_list [(I S) ...] BODY)
   =>
 (let [(iters (map iterate (list S ...)),
       (result (stretchy_list))]
   (let loop []
-    (if (all iterator_has_next iters)
+    (if (every iterator_has_next iters)
       (let [(I (iterator_next (element iters 0))),
             ...]
         (add_m result (begin BODY))
@@ -60,14 +58,19 @@ Generic collection "comprehension" forms.
     (for_list ((id series) ...) body ...+)
 
 Iterates the `series` in parallel, binding the corresponding `id`s to each
-element in turn and evaluating `body`.  Each `series` expression must evaluate
-to a list, sexp, or iterator.  Returns a stretchy list of the results.
+element in turn and evaluating `body`. Returns a stretchy list of the results.
+
+The `series` expressions are first evaluated left-to-right, and each must return
+a list, sexp, or iterator. As long as every series has more elements, they are
+retrieved in left-to-right order, bound to their `id`s at new storage slots, and
+then the `body` is evaluated, with the result being added to the end of the list
+of results.
 
 If there are no `id`s declared, then the body is executed once.
 
     (for_list
-      [ (even [0, 2, 4]),
-        (odd  [1, 3, 5]) ]
+      [(even [0, 2, 4]),
+       (odd  [1, 3, 5])]
       (+ even odd))             =>  [1, 5, 9]
     '''
     (lambda (stx)
@@ -84,17 +87,14 @@ If there are no `id`s declared, then the body is executed once.
                 (let_values [((ids series) (unzip_bindings stx bindings))]
                   (let
                     [(ident_rebinds
-                      (let loop [(rebinds (sexp)),
-                                 (ids ids),
+                      (let loop [(ids ids),
                                  (i 0)]
                         (if (is_empty ids)
-                          rebinds
-                          (loop (pair (sexp (head ids)
-                                        (sexp (quote iterator_next)
-                                          (sexp (quote element) (quote iters) i)))
-                                      rebinds)
-                                (tail ids)
-                                (+ 1 i)))))]
+                          (sexp)
+                          (pair (sexp (head ids)
+                                  (sexp (quote iterator_next)
+                                    (sexp (quote element) (quote iters) i)))
+                            (loop (tail ids) (+ 1 i))))))]
                     (quasiquote
                       (let [(iters (map iterate
                                      (unquote (pair (quote list) series)))),
