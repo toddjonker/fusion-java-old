@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 (module sequence '/fusion/private/builtins'
 
@@ -155,7 +155,7 @@ The result may share structure with `seq` and has the same type as `seq`.
   // ambiguous whether you're filtering "in" or "out".
   (defpub (choose pred sequence)
     '''
-Applies the one-parameter predicate `pred` to each element of `sequence`,
+Applies the one-argument predicate `pred` to each element of `sequence`,
 returning a new sequence of the same type, containing the elements (in order)
 for which `pred` returns truthy.
     '''
@@ -189,7 +189,7 @@ for which `pred` returns truthy.
   // collections but that's a bit crazy and it's unclear how useful that is.
   (defpub (map proc sequence)
     '''
-Applies the one-parameter procedure `proc` to each element of `sequence`,
+Applies the one-argument procedure `proc` to each element of `sequence`,
 returning a new sequence of the same type, containing the results in order.
     '''
     (cond
