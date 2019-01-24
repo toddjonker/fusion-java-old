@@ -54,24 +54,6 @@ to apply optimizations to the generated code.
       (true (raise_result_error "for_list" "series" series))))
 
 
-'''
-(for_list [     ] BODY)  =>  (stretchy_list (begin BODY))
-
-
-(for_list [(I S) ...] BODY)
-  =>
-(let [(iters (map iterate (list S ...)),
-      (result (stretchy_list))]
-  (let loop []
-    (if (every iterator_has_next iters)
-      (let [(I (iterator_next (element iters 0))),
-            ...]
-        (add_m result (begin BODY))
-        loop)
-      result)))
-
-'''
-
   // TODO FUSION-36 Should allow internal definitions
   // TODO Optimize for single-series case.
   //      That will make fors_list much more efficient.
@@ -103,15 +85,18 @@ If there are no `id`s declared, then the body is executed once.
           (let [(begin_body (pair (quote begin) body))]
             (datum_to_syntax
               (if (not (is_pair bindings))
-                /* Base case -- no bindings */
+
+                // Base case -- no bindings:  (for_list () BODY ...)
+
                 (sexp (quote stretchy_list)          // (stretchy_list
                       begin_body)                    //   (begin BODY...))
-                (let_values [((ids series) (unzip_bindings stx bindings))]
+
+                (let_values [((ids series_exprs) (unzip_bindings stx bindings))]
                   (lets
                     [(next_exprs
                        // Expressions that get the next value from each series
                        // For now this is always (iterator_next ...) but that will change.
-                       (let loop [(series series),
+                       (let loop [(series series_exprs),
                                   (i      0)]
                          (if (is_empty series)
                            (quote ())
@@ -127,9 +112,22 @@ If there are no `id`s declared, then the body is executed once.
                            (quote ())
                            (pair (sexp (unsafe_pair_head ids) (unsafe_pair_head exprs))
                                  (loop (unsafe_pair_tail ids) (unsafe_pair_tail exprs))))))]
+
+                    // (for_list [(I S) ...] BODY ...)
+                    //   =>
+                    // (let [(iters  (map iterate (list S ...))),
+                    //       (result (stretchy_list))]
+                    //   (let loop []
+                    //     (if (every iterator_has_next iters)
+                    //       (let [(I (iterator_next (element iters 0))),
+                    //             ...]
+                    //         (add_m result (begin BODY ...))
+                    //         (loop))
+                    //       result)))
+
                     (quasiquote
                       (let [(iters (map iterate
-                                     (unquote (pair (quote list) series)))),
+                                     (unquote (pair (quote list) series_exprs)))),
                             (result (stretchy_list))]
                         (let loop []
                           (if (every iterator_has_next iters)
