@@ -85,16 +85,26 @@ If there are no `id`s declared, then the body is executed once.
                 (sexp (quote stretchy_list)          // (stretchy_list
                       begin_body)                    //   (begin BODY...))
                 (let_values [((ids series) (unzip_bindings stx bindings))]
-                  (let
-                    [(ident_rebinds
-                      (let loop [(ids ids),
-                                 (i 0)]
-                        (if (is_empty ids)
-                          (sexp)
-                          (pair (sexp (head ids)
-                                  (sexp (quote iterator_next)
-                                    (sexp (quote element) (quote iters) i)))
-                            (loop (tail ids) (+ 1 i))))))]
+                  (lets
+                    [(next_exprs
+                       // Expressions that get the next value from each series
+                       // For now this is always (iterator_next ...) but that will change.
+                       (let loop [(series series),
+                                  (i      0)]
+                         (if (is_empty series)
+                           (quote ())
+                           (pair (sexp (quote iterator_next)
+                                   (sexp (quote element) (quote iters) i))
+                                 (loop (unsafe_pair_tail series) (+ 1 i)))))),
+                     (ident_rebinds
+                       // Binding pairs to capture each series' next value:
+                       //  ((id <next-expr>) ...)
+                       (let loop [(ids   ids),
+                                  (exprs next_exprs)]
+                         (if (is_empty ids)
+                           (quote ())
+                           (pair (sexp (unsafe_pair_head ids) (unsafe_pair_head exprs))
+                                 (loop (unsafe_pair_tail ids) (unsafe_pair_tail exprs))))))]
                     (quasiquote
                       (let [(iters (map iterate
                                      (unquote (pair (quote list) series)))),
