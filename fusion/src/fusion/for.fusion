@@ -7,6 +7,28 @@ Generic collection "comprehension" forms.
   '''
 
 
+/*
+
+Implementation Notes
+====================
+
+Today, all values that are comprehended by `for` are wrapped by iterators, but
+the loops can be more efficient by specializing the has-next/next code.
+
+Racket does this in a way that enables [performance equivalent to hand-written
+loops](https://docs.racket-lang.org/guide/for.html#%28part._for-performance%29)
+when the concrete type is evident in the code.  It has [an abstract type called
+"sequence"](https://docs.racket-lang.org/reference/sequences.html) that drives
+iterations and comprehensions.  (Fusion calls it "series" because "sequence" is
+taken for a different abstract type.)
+
+The `for` macro can then use some simple type inference, or [explicit syntactic
+hints](https://docs.racket-lang.org/guide/for.html#%28part._sequences%29),
+to apply optimizations to the generated code.
+
+*/
+
+
   (require "/fusion/base"
            "/fusion/exception"
            "/fusion/experimental/defines"
