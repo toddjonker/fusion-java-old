@@ -50,15 +50,6 @@
           (values name expr)
           (wrong_syntax stx "bound name isn't an identifier: " name)))))
 
-  (define (check_bindings_sexp stx bindings)
-    "Returns bindings if they are good, else raises syntax_error."
-    (if (is_pair bindings)
-      (begin
-        (split_binding stx (unsafe_pair_head bindings))
-        (check_bindings_sexp stx (unsafe_pair_tail bindings))
-        bindings)
-      bindings))
-
   (define (bindings_as_sexp stx bindings)
     (if (is_null bindings)
       (wrong_syntax stx "bad sequence of bindings: " bindings)
@@ -67,10 +58,6 @@
         (if (is_list bindings)
           (apply sexp bindings)
           (wrong_syntax stx "bad sequence of bindings: " bindings)))))
-
-  (define (check_bindings stx bindings)
-    "Returns the validated bindings as a sexp."
-    (check_bindings_sexp stx (bindings_as_sexp stx bindings)))
 
   (define (split_content stx content)
 
@@ -83,7 +70,7 @@ binding pairs for validity.
 
     (let_values [((bindings) (syntax_unwrap (unsafe_pair_head content))),
                  ((body)     (unsafe_pair_tail content))]
-      (values (check_bindings stx bindings) body)))
+      (values (bindings_as_sexp stx bindings) body)))
 
   (define (unzip_bindings stx bindings)
     '''
