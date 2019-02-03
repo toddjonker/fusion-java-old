@@ -80,10 +80,10 @@ If there are no `id`s declared, then the body is executed once.
       (+ even odd))             =>  [1, 5, 9]
     '''
     (lambda (stx)
-      (let [(content (unsafe_pair_tail (syntax_unwrap stx)))]
-        (when (< (size content) 2)
+      (let [(subforms (unsafe_pair_tail (syntax_unwrap stx)))]
+        (when (< (size subforms) 2)
           (wrong_syntax stx "expecting bindings and body"))
-        (let_values [((bindings body) (split_content stx content))]
+        (let_values [((bindings body) (split_letlike_subforms stx subforms))]
           (let [(begin_body (pair (quote begin) body))]
             (datum_to_syntax
               (if (not (is_pair bindings))
@@ -185,10 +185,10 @@ for list comprehension.
       z)                                   => [1, 2, 3, 4]
     '''
     (lambda (stx)
-      (let [(content (unsafe_pair_tail (syntax_unwrap stx)))]
-        (when (< (size content) 2)
+      (let [(subforms (unsafe_pair_tail (syntax_unwrap stx)))]
+        (when (< (size subforms) 2)
           (wrong_syntax stx "expecting bindings and body"))
-        (let_values [((bindings body) (split_content stx content))]
+        (let_values [((bindings body) (split_letlike_subforms stx subforms))]
           (datum_to_syntax
             (if (not (is_pair bindings))
               /* Base case -- no bindings */

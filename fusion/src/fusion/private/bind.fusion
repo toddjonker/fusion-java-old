@@ -19,7 +19,7 @@
     check_single_id
     let
     lets
-    split_content
+    split_letlike_subforms
     unzip_bindings
   )
 
@@ -70,32 +70,44 @@ Checks the syntax of a binding initializer form `(ids expr)`; returns
           (apply sexp bindings)
           (wrong_syntax stx "bad sequence of bindings: " bindings)))))
 
-  (define (split_content stx content)
+  (define (split_letlike_subforms stx subforms)
 
     '''
-    -> (values sexp-of-bindings sexp-of-body)
+Splits the bindings and body forms of a `let`-style form, normalizing the
+bindings to a sexp. In other words it accepts either of:
 
-Splits the bindings and body forms of a `let`-style form, after checking the
-binding pairs for validity.
+    ( ( binding  ... ) body ... )   // Bindings in a sexp
+    ( [ binding, ... ] body ... )   // Bindings in a list
+
+and returns
+
+    (values sexp-of-bindings sexp-of-body)
     '''
 
-    (let_values [((bindings) (syntax_unwrap (unsafe_pair_head content))),
-                 ((body)     (unsafe_pair_tail content))]
+    (let_values [((bindings) (syntax_unwrap (unsafe_pair_head subforms))),
+                 ((body)     (unsafe_pair_tail subforms))]
       (values (bindings_as_sexp stx bindings) body)))
 
   (define (unzip_bindings stx bindings check_ids)
     '''
-    -> (values sexp-of-ids sexp-of-exprs)
+Deconstructs the binding subforms of a `let`-style form, transforming a
+`bindings` sexp of the form:
 
-The `bindings` are assumed to be a sexp containing valid id/expr pairings.
+    ((ids expr) ...)
+
+and returning:
+
+    (values (ids ...) (expr ...))
+
+`(check_ids stx ids)` must raise syntax_error if the `ids` are malformed.
     '''
     (if (not (is_pair bindings))
       (values (quote ()) (quote ()))
-      (let_values [((name expr)
-                    (split_binding stx (head bindings) check_ids)),
-                   ((tail_names tail_exprs)
+      (let_values [((id expr)
+                    (split_binding stx (unsafe_pair_head bindings) check_ids)),
+                   ((tail_ids tail_exprs)
                     (unzip_bindings stx (unsafe_pair_tail bindings) check_ids))]
-        (values (pair name tail_names)
+        (values (pair id   tail_ids)
                 (pair expr tail_exprs)))))
 
 
@@ -131,16 +143,16 @@ the `title` field of each item:
       (if (< (syntax_size stx) 3)
         (wrong_syntax stx "expected bindings and body")
         (let_values [((loop) (let_loop_name stx)),
-                     ((content) (unsafe_pair_tail (syntax_unwrap stx)))]
+                     ((subforms) (unsafe_pair_tail (syntax_unwrap stx)))]
           (let_values [((bindings body)
-                        (split_content stx (if loop
-                                             (unsafe_pair_tail content)
-                                             content)))]
-            (let_values [((names exprs)
+                        (split_letlike_subforms stx (if loop
+                                                      (unsafe_pair_tail subforms)
+                                                      subforms)))]
+            (let_values [((ids exprs)
                           (unzip_bindings stx bindings check_single_id))]
               (let_values [((lambda_stx)
                             (pair (quote_syntax lambda)
-                                  (pair names body)))]
+                                  (pair ids body)))]
                 (syntax_property
                   (datum_to_syntax
                     (if loop
@@ -167,8 +179,8 @@ and the `ident`s are bound in the following `expr`s as well as the `body`.
     (lambda (stx)
       (if (< (syntax_size stx) 3)
         (wrong_syntax stx "expecting bindings and body")
-        (let_values [((content) (unsafe_pair_tail (syntax_unwrap stx)))]
-          (let_values [((bindings body) (split_content stx content))]
+        (let_values [((subforms) (unsafe_pair_tail (syntax_unwrap stx)))]
+          (let_values [((bindings body) (split_letlike_subforms stx subforms))]
             (datum_to_syntax
               (if (is_pair bindings)
 
