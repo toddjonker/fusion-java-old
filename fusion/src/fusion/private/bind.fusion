@@ -16,6 +16,7 @@
   (provide let_values letrec values)
 
   (provide
+    check_single_id
     let
     lets
     split_content
@@ -38,17 +39,27 @@
         false)))
 
 
-  (define (split_binding stx binding)
-    "Returns (values id expr), else raises syntax_error."
+  (define (check_single_id stx ids)
+    (if (is_identifier ids)
+      true
+      (wrong_syntax stx "bound name isn't an identifier: " ids)))
+
+
+  (define (split_binding stx binding check_ids)
+    '''
+Checks the syntax of a binding initializer form `(ids expr)`; returns
+`(values ids expr)` if the form is valid.
+
+`(check_ids stx ids)` must raise syntax_error if the `ids` are malformed.
+    '''
     (if (not (if (is_seq (syntax_unwrap binding))
                (= 2 (syntax_size binding))
                false))
       (wrong_syntax stx "bad binding form: " binding)
       (let_values [((name) (syntax_get binding 0)),
                    ((expr) (syntax_get binding 1))]
-        (if (is_identifier name)
-          (values name expr)
-          (wrong_syntax stx "bound name isn't an identifier: " name)))))
+        (check_ids stx name)
+        (values name expr))))
 
   (define (bindings_as_sexp stx bindings)
     (if (is_null bindings)
@@ -72,18 +83,18 @@ binding pairs for validity.
                  ((body)     (unsafe_pair_tail content))]
       (values (bindings_as_sexp stx bindings) body)))
 
-  (define (unzip_bindings stx bindings)
+  (define (unzip_bindings stx bindings check_ids)
     '''
-    -> (values sexp-of-names sexp-of-exprs)
+    -> (values sexp-of-ids sexp-of-exprs)
 
 The `bindings` are assumed to be a sexp containing valid id/expr pairings.
     '''
     (if (not (is_pair bindings))
       (values (quote ()) (quote ()))
       (let_values [((name expr)
-                    (split_binding stx (head bindings))),
+                    (split_binding stx (head bindings) check_ids)),
                    ((tail_names tail_exprs)
-                    (unzip_bindings stx (tail bindings)))]
+                    (unzip_bindings stx (unsafe_pair_tail bindings) check_ids))]
         (values (pair name tail_names)
                 (pair expr tail_exprs)))))
 
@@ -126,7 +137,7 @@ the `title` field of each item:
                                              (unsafe_pair_tail content)
                                              content)))]
             (let_values [((names exprs)
-                          (unzip_bindings stx bindings))]
+                          (unzip_bindings stx bindings check_single_id))]
               (let_values [((lambda_stx)
                             (pair (quote_syntax lambda)
                                   (pair names body)))]

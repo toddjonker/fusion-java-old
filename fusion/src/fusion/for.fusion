@@ -93,7 +93,7 @@ If there are no `id`s declared, then the body is executed once.
                 (sexp (quote stretchy_list)          // (stretchy_list
                       begin_body)                    //   (begin BODY...))
 
-                (let_values [((ids series_exprs) (unzip_bindings stx bindings))]
+                (let_values [((ids series_exprs) (unzip_bindings stx bindings check_single_id))]
                   (lets
                     [(series_names
                        // Sexp of synthetic names for each series.
