@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -64,7 +64,7 @@ final class LoadHandler
                 SourceName name = SourceName.forFile(file);
                 Object result = null;
 
-                IonReader reader = eval.getSystem().newReader(in);
+                IonReader reader = eval.getIonReaderBuilder().build(in);
                 while (reader.next() != null)
                 {
                     result = null;  // Don't hold onto garbage

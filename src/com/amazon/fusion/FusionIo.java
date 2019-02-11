@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -788,7 +788,7 @@ public final class FusionIo
         {
             String string = checkRequiredStringArg(eval, this, 0, args);
 
-            return eval.getSystem().newReader(string);
+            return eval.getIonReaderBuilder().build(string);
         }
     }
 
@@ -813,7 +813,7 @@ public final class FusionIo
 
             byte[] bytes = unsafeLobBytesNoCopy(eval, lob);
 
-            return eval.getSystem().newReader(bytes);
+            return eval.getIonReaderBuilder().build(bytes);
         }
     }
 
@@ -842,7 +842,7 @@ public final class FusionIo
             FileInputStream in = new FileInputStream(inFile);
             try
             {
-                return eval.getSystem().newReader(in);
+                return eval.getIonReaderBuilder().build(in);
             }
             catch (IonException e)
             {

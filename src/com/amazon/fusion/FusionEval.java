@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -9,7 +9,6 @@ import static com.amazon.fusion.GlobalState.MODULE;
 import static com.amazon.fusion.StandardReader.readSyntax;
 import static com.amazon.fusion.Syntax.datumToSyntax;
 import com.amazon.ion.IonReader;
-import com.amazon.ion.IonSystem;
 import java.util.LinkedList;
 
 
@@ -264,8 +263,7 @@ final class FusionEval
                                 Procedure  receiver)
         throws FusionException
     {
-        IonSystem system = eval.getGlobalState().myIonSystem;
-        IonReader i = system.newReader(source);
+        IonReader i = eval.getIonReaderBuilder().build(source);
         traverseProgram(eval, i, name, receiver);
     }
 

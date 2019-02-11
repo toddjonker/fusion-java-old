@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,7 +10,6 @@ import static com.amazon.fusion.StandardReader.readSyntax;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static java.lang.Boolean.TRUE;
 import com.amazon.ion.IonReader;
-import com.amazon.ion.IonSystem;
 import java.io.File;
 
 
@@ -83,8 +82,8 @@ final class StandardTopLevel
     public Object eval(String source, SourceName name)
         throws FusionInterruptedException, FusionException
     {
-        IonSystem system = myEvaluator.getGlobalState().myIonSystem;
-        IonReader i = system.newReader(source);
+        IonReader i =
+            myEvaluator.getIonReaderBuilder().build(source);
         return eval(i, name);
     }
 

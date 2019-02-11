@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -7,6 +7,7 @@ import static com.amazon.fusion.FusionValue.UNDEF;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonSystem;
+import com.amazon.ion.system.IonReaderBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -37,6 +38,7 @@ final class GlobalState
     static final String REQUIRE         = "require";
 
     final IonSystem                  myIonSystem;
+    final IonReaderBuilder           myIonReaderBuilder;
     final ModuleInstance             myKernelModule;
     final ModuleNameResolver         myModuleNameResolver;
     final LoadHandler                myLoadHandler;
@@ -56,6 +58,7 @@ final class GlobalState
     final Binding myKernelRequireBinding;
 
     private GlobalState(IonSystem                  ionSystem,
+                        IonReaderBuilder           ionReaderBuiler,
                         ModuleInstance             kernel,
                         ModuleNameResolver         resolver,
                         LoadHandler                loadHandler,
@@ -63,6 +66,7 @@ final class GlobalState
                         _Private_CoverageCollector coverageCollector)
     {
         myIonSystem             = ionSystem;
+        myIonReaderBuilder      = ionReaderBuiler;
         myKernelModule          = kernel;
         myModuleNameResolver    = resolver;
         myLoadHandler           = loadHandler;
@@ -89,6 +93,11 @@ final class GlobalState
                                   Namespace initialCurrentNamespace)
         throws FusionException
     {
+        IonReaderBuilder readerBuilder =
+            IonReaderBuilder.standard()
+                            .withCatalog(system.getCatalog())
+                            .immutable();
+
         // WARNING: We pass null evaluator because we know its not used.
         //          That is NOT SUPPORTED for user code!
         Object userDir =
@@ -142,7 +151,7 @@ final class GlobalState
         ModuleInstance kernel = registry.lookup(KERNEL_MODULE_IDENTITY);
 
         GlobalState globals =
-            new GlobalState(system, kernel, resolver, loadHandler,
+            new GlobalState(system, readerBuilder, kernel, resolver, loadHandler,
                             currentNamespaceParam,
                             builder.getCoverageCollector());
         return globals;

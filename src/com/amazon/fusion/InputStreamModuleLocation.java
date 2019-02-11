@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -24,7 +24,7 @@ abstract class InputStreamModuleLocation
         InputStream in = open();
         try
         {
-            reader = eval.getSystem().newReader(in);
+            reader = eval.getIonReaderBuilder().build(in);
             return reader;
         }
         finally

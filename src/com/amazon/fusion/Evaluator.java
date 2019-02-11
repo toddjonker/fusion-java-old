@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -30,6 +30,7 @@ import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonTimestamp;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
+import com.amazon.ion.system.IonReaderBuilder;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -100,6 +101,11 @@ class Evaluator
         return mySystem;
     }
 
+
+    IonReaderBuilder getIonReaderBuilder()
+    {
+        return myGlobalState.myIonReaderBuilder;
+    }
 
     GlobalState getGlobalState()
     {

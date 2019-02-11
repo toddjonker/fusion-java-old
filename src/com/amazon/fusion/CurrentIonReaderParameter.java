@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -31,7 +31,7 @@ final class CurrentIonReaderParameter
                 {
                     // TODO use current-input-port?
                     // That may be hard to predict the result.
-                    myDefaultValue = eval.getSystem().newReader(System.in);
+                    myDefaultValue = eval.getIonReaderBuilder().build(System.in);
                 }
                 result = myDefaultValue;
             }
