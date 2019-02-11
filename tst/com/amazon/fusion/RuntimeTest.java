@@ -13,6 +13,14 @@ import static org.junit.Assert.fail;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonValue;
+import com.amazon.ion.IonWriter;
+import com.amazon.ion.SymbolTable;
+import com.amazon.ion.system.IonBinaryWriterBuilder;
+import com.amazon.ion.system.SimpleCatalog;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -283,5 +291,60 @@ public class RuntimeTest
                                    containsString(source.display())));
 
         topLevel().loadModule(modulePath, system().newReader(moduleContent), source);
+    }
+
+
+    //========================================================================
+    // Default Ion Catalog
+
+    private SymbolTable newSharedSymbolTable(String name,
+                                             int version,
+                                             String... symbols)
+    {
+        Iterator<String> symIter = Arrays.asList(symbols).iterator();
+        return system().newSharedSymbolTable(name, version, symIter);
+    }
+
+    private byte[] encode(SymbolTable symtab, IonValue data)
+        throws IOException
+    {
+        IonBinaryWriterBuilder bwb =
+            IonBinaryWriterBuilder.standard().withImports(symtab);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (IonWriter writer = bwb.build(out))
+        {
+            data.writeTo(writer);
+        }
+        return out.toByteArray();
+    }
+
+    @Test
+    public void testReadingIonWithSharedSymtabs()
+        throws Exception
+    {
+        SimpleCatalog catalog = new SimpleCatalog();
+        runtimeBuilder().setDefaultIonCatalog(catalog);
+
+        SymbolTable symtab = newSharedSymbolTable("flatware", 1,
+                                                  "fork", "spoon", "knife");
+        catalog.putTable(symtab);
+
+
+        IonValue data = system().singleValue("{ spoon: knife::fork }");
+        byte[] encodedData = encode(symtab, data);
+
+
+        Object readProc = topLevel().lookup("read");
+        Object decoded = topLevel().call("with_ion_from_lob", encodedData, readProc);
+        checkIon(data, decoded);
+
+
+        // Same data should fail w/o symtab
+        assertSame(symtab, catalog.removeTable("flatware", 1));
+
+        thrown.expect(FusionException.class);
+        thrown.expectMessage("$11");
+        topLevel().call("with_ion_from_lob", encodedData, readProc);
     }
 }

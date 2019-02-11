@@ -1,7 +1,8 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import com.amazon.ion.IonCatalog;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
 
@@ -37,6 +38,14 @@ public interface FusionRuntime
      * @see FusionRuntimeBuilder#getDefaultLanguage()
      */
     public String getDefaultLanguage();
+
+
+    /**
+     * Gets the Ion symbol table catalog used when reading and writing Ion data.
+     *
+     * @return not null.
+     */
+    public IonCatalog getDefaultIonCatalog();
 
 
     /**

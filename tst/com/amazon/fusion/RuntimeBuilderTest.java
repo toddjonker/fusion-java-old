@@ -9,14 +9,19 @@ import static com.amazon.fusion.junit.Reflect.getterFor;
 import static com.amazon.fusion.junit.Reflect.invoke;
 import static com.amazon.fusion.junit.Reflect.setterFor;
 import static com.amazon.fusion.junit.Reflect.witherFor;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.lang.reflect.Method;
+import com.amazon.ion.IonCatalog;
+import com.amazon.ion.system.SimpleCatalog;
+import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -166,6 +171,47 @@ public class RuntimeBuilderTest
         // Test effect by looking for something in /fusion but not /fusion/base
         thrown.expect(UnboundIdentifierException.class);
         r.getDefaultTopLevel().eval("always");
+    }
+
+
+    //========================================================================
+
+
+    private void changeDefaultIonCatalog(FusionRuntimeBuilder orig,
+                                         IonCatalog catalog)
+    {
+        changeProperty(orig, "DefaultIonCatalog", IonCatalog.class,
+                       catalog, catalog);
+    }
+
+
+    @Test
+    public void testSetDefaultIonCatalog()
+    {
+        IonCatalog catalog = new SimpleCatalog();
+
+        changeDefaultIonCatalog(standard(), catalog);
+    }
+
+    @Test
+    public void testDefaultIonCatalogImmutability()
+    {
+        thrown.expect(UnsupportedOperationException.class);
+        standard().immutable().setDefaultIonCatalog(new SimpleCatalog());
+    }
+
+    @Test
+    public void testBuildingDefaultIonCatalog()
+        throws FusionException
+    {
+        FusionRuntimeBuilder b = standard();
+        FusionRuntime r = build(b);
+        assertThat(r.getDefaultIonCatalog(), instanceOf(SimpleCatalog.class));
+
+        SimpleCatalog catalog = new SimpleCatalog();
+        b.withDefaultIonCatalog(catalog);
+        r = build(b);
+        assertSame(catalog, r.getDefaultIonCatalog());
     }
 
 

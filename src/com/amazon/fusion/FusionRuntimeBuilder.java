@@ -4,6 +4,8 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import static com.amazon.fusion._Private_CoverageCollectorImpl.fromDirectory;
+import com.amazon.ion.IonCatalog;
+import com.amazon.ion.system.SimpleCatalog;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -66,6 +68,14 @@ import java.util.Properties;
  * {@code /fusion} language, but this default is controlled by the
  * configuration declared here.
  *
+ * <h3>Default Ion Catalog</h3>
+ *
+ * An {@link IonCatalog} provides shared symbol tables used to encode and read
+ * Ion binary data streams.  Applications can provide a default catalog that's
+ * populated, or can be populated on-demand, with any necessary shared symbol
+ * tables.  If not configured when {@link #build()} is called, the builder
+ * creates an empty {@link SimpleCatalog}.
+ *
  * <h3>Initial Current Directory</h3>
  *
  * Fusion's {@code current_directory} parameter holds the current working
@@ -121,10 +131,11 @@ public class FusionRuntimeBuilder
     //=========================================================================
 
 
-    private File    myCurrentDirectory;
-    private File    myBootstrapRepository;
-    private File[]  myRepositoryDirectories;
-    private String  myDefaultLanguage = STANDARD_DEFAULT_LANGUAGE;
+    private File       myCurrentDirectory;
+    private File       myBootstrapRepository;
+    private File[]     myRepositoryDirectories;
+    private String     myDefaultLanguage = STANDARD_DEFAULT_LANGUAGE;
+    private IonCatalog myDefaultIonCatalog;
 
     private File                       myCoverageDataDirectory;
     private _Private_CoverageCollector myCollector;
@@ -140,6 +151,7 @@ public class FusionRuntimeBuilder
         this.myBootstrapRepository   = that.myBootstrapRepository;
         this.myRepositoryDirectories = that.myRepositoryDirectories;
         this.myDefaultLanguage       = that.myDefaultLanguage;
+        this.myDefaultIonCatalog     = that.myDefaultIonCatalog;
         this.myCoverageDataDirectory = that.myCoverageDataDirectory;
         this.myCollector             = that.myCollector;
         this.myDocumenting           = that.myDocumenting;
@@ -358,6 +370,62 @@ public class FusionRuntimeBuilder
     {
         FusionRuntimeBuilder b = mutable();
         b.setDefaultLanguage(absoluteModulePath);
+        return b;
+    }
+
+
+    //=========================================================================
+
+
+    /**
+     * Gets the default Ion symbol table catalog used with Ion binary data.
+     * By default, this property is null.
+     *
+     * @return an Ion symbol table catalog. May be null, which means the builder
+     * will create a new {@link SimpleCatalog} when {@link #build()} is called.
+     *
+     * @see #setDefaultIonCatalog(IonCatalog)
+     * @see #withDefaultIonCatalog(IonCatalog)
+     */
+    public IonCatalog getDefaultIonCatalog()
+    {
+        return myDefaultIonCatalog;
+    }
+
+
+    /**
+     * Sets the default Ion symbol table catalog used with Ion binary data.
+     *
+     * @param catalog may be null, which causes the builder to create a new
+     * {@link SimpleCatalog} when {@link #build()} is called.
+     *
+     * @see #getDefaultIonCatalog()
+     * @see #withDefaultIonCatalog(IonCatalog)
+     */
+    public void setDefaultIonCatalog(IonCatalog catalog)
+    {
+        mutationCheck();
+
+        myDefaultIonCatalog = catalog;
+    }
+
+
+    /**
+     * Declares the default Ion symbol table catalog used with Ion binary data,
+     * returning a new mutable builder if this is immutable.
+     *
+     * @param catalog may be null, which causes the builder to create a new
+     * {@link SimpleCatalog} when {@link #build()} is called.
+     *
+     * @return this builder, if it's mutable; otherwise a new mutable builder.
+     *
+     * @see #getDefaultIonCatalog()
+     * @see #setDefaultIonCatalog(IonCatalog)
+     */
+    public FusionRuntimeBuilder withDefaultIonCatalog(IonCatalog catalog)
+    {
+        FusionRuntimeBuilder b = mutable();
+        b.setDefaultIonCatalog(catalog);
         return b;
     }
 

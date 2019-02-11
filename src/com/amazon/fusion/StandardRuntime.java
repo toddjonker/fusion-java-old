@@ -1,9 +1,10 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.ModuleIdentity.forAbsolutePath;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
+import com.amazon.ion.IonCatalog;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
@@ -22,7 +23,10 @@ final class StandardRuntime
     StandardRuntime(FusionRuntimeBuilder builder)
         throws FusionInterrupt
     {
-        IonSystem ionSystem = IonSystemBuilder.standard().build();
+        IonSystem ionSystem =
+            IonSystemBuilder.standard()
+                .withCatalog(builder.getDefaultIonCatalog())
+                .build();
         myRegistry = new ModuleRegistry();
 
         myDefaultLanguage = builder.getDefaultLanguage();
@@ -64,6 +68,12 @@ final class StandardRuntime
     public String getDefaultLanguage()
     {
         return myDefaultLanguage;
+    }
+
+    @Override
+    public IonCatalog getDefaultIonCatalog()
+    {
+        return myGlobalState.myIonSystem.getCatalog();
     }
 
 
