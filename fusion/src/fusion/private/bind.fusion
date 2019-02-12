@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2019 Amazon.com, Inc.  All rights reserved.
 
 (module bind "/fusion/private/builtins"
 
@@ -18,6 +18,7 @@
   (provide
     check_multi_id
     check_single_id
+    check_single_or_multi_id
     let
     lets
     split_letlike_subforms
@@ -50,6 +51,11 @@
       (if (is_pair ids)
         (check_sexp_of_ids stx ids)
         (wrong_syntax stx "expected sexp of bound identifiers: " ids_stx))))
+
+  (define (check_single_or_multi_id stx ids)
+    (if (is_identifier ids)
+      true
+      (check_multi_id stx ids)))
 
   (define (check_sexp_of_ids stx ids)
     (if (is_pair ids)
