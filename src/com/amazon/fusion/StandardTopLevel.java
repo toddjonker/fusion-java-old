@@ -11,6 +11,7 @@ import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import static java.lang.Boolean.TRUE;
 import com.amazon.ion.IonReader;
 import java.io.File;
+import java.io.IOException;
 
 
 final class StandardTopLevel
@@ -82,9 +83,16 @@ final class StandardTopLevel
     public Object eval(String source, SourceName name)
         throws FusionInterruptedException, FusionException
     {
-        IonReader i =
-            myEvaluator.getIonReaderBuilder().build(source);
-        return eval(i, name);
+        try (IonReader i = myEvaluator.getIonReaderBuilder().build(source))
+        {
+            return eval(i, name);
+        }
+        catch (IOException e)
+        {
+            String message =
+                "Error closing " + (name == null ? "source" : name.display());
+            throw new ContractException(message, e);
+        }
     }
 
 

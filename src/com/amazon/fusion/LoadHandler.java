@@ -56,15 +56,13 @@ final class LoadHandler
         eval = eval.markedContinuation(myCurrentLoadRelativeDirectory,
                                        makeString(eval, parent.getAbsolutePath()));
 
-        try
+        try (FileInputStream in = new FileInputStream(file))
         {
-            FileInputStream in = new FileInputStream(file);
-            try
-            {
-                SourceName name = SourceName.forFile(file);
-                Object result = null;
+            SourceName name = SourceName.forFile(file);
+            Object result = null;
 
-                IonReader reader = eval.getIonReaderBuilder().build(in);
+            try (IonReader reader = eval.getIonReaderBuilder().build(in))
+            {
                 while (reader.next() != null)
                 {
                     result = null;  // Don't hold onto garbage
@@ -72,13 +70,9 @@ final class LoadHandler
                     result = FusionEval.eval(eval, fileExpr, namespace);
                     // TODO TAIL
                 }
+            }
 
-                return result;
-            }
-            finally
-            {
-                in.close();
-            }
+            return result;
         }
         catch (FileNotFoundException e)
         {
