@@ -398,14 +398,18 @@ public class FusionRuntimeBuilder
     {
         mutationCheck();
 
-        if (! directory.isAbsolute())
+        if (directory != null)
         {
-            directory = directory.getAbsoluteFile();
-        }
-        if (! directory.isDirectory())
-        {
-            String message = "Argument is not a directory: " + directory;
-            throw new IllegalArgumentException(message);
+            if (! directory.isAbsolute())
+            {
+                directory = directory.getAbsoluteFile();
+            }
+
+            if (! directory.isDirectory())
+            {
+                String message = "Argument is not a directory: " + directory;
+                throw new IllegalArgumentException(message);
+            }
         }
 
         myCurrentDirectory = directory;
