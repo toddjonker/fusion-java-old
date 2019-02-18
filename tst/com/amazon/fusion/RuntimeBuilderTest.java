@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionRuntimeBuilder.standard;
+import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -13,7 +15,6 @@ import org.junit.rules.ExpectedException;
 
 
 public class RuntimeBuilderTest
-    extends CoreTestCase
 {
     private static final File TEST_REPO = new File("tst-repo");
 
@@ -21,9 +22,16 @@ public class RuntimeBuilderTest
     public ExpectedException thrown = ExpectedException.none();
 
 
+    private FusionRuntime build(FusionRuntimeBuilder b)
+        throws FusionException
+    {
+        b = b.withBootstrapRepository(new File("fusion"));
+        return b.build();
+    }
+
+
     @Test
     public void testDefaultBuilder()
-        throws Exception
     {
         FusionRuntimeBuilder b = FusionRuntimeBuilder.standard();
         assertSame(b, b.mutable());
@@ -34,14 +42,14 @@ public class RuntimeBuilderTest
     }
 
 
+    //========================================================================
+
+
     @Test
     public void testSetDefaultLanguage()
-        throws Exception
     {
-        FusionRuntimeBuilder b = runtimeBuilder();
+        FusionRuntimeBuilder b = standard();
         b.setDefaultLanguage("/fusion/base");
-        assertEquals("/fusion/base", runtime().getDefaultLanguage());
-        expectUnboundIdentifierExn("always");
 
         assertEquals("/fusion/base", b.getDefaultLanguage());
         assertEquals("/fusion/base", b.copy().getDefaultLanguage());
@@ -51,76 +59,112 @@ public class RuntimeBuilderTest
         assertEquals("/fusion", b.getDefaultLanguage());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNullDefaultLanguage()
-        throws Exception
     {
-        runtimeBuilder().setDefaultLanguage(null);
+        thrown.expect(IllegalArgumentException.class);
+        standard().setDefaultLanguage(null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testEmptyDefaultLanguage()
-        throws Exception
     {
-        runtimeBuilder().setDefaultLanguage("");
+        thrown.expect(IllegalArgumentException.class);
+        standard().setDefaultLanguage("");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testMalformedDefaultLanguage()
-        throws Exception
     {
-        runtimeBuilder().setDefaultLanguage("fusion");
+        thrown.expect(IllegalArgumentException.class);
+        standard().setDefaultLanguage("fusion");
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testDefaultLanguageImmutablity()
-        throws Exception
     {
-        runtimeBuilder().immutable().setDefaultLanguage("/fusion/base");
+        thrown.expect(UnsupportedOperationException.class);
+        standard().immutable().setDefaultLanguage("/fusion/base");
     }
 
+
+    @Test
+    public void testBuildingDefaultLanguage()
+        throws Exception
+    {
+        FusionRuntimeBuilder b = standard();
+        FusionRuntime r = build(b);
+        assertEquals("/fusion", r.getDefaultLanguage());
+
+        // Change the default
+        b.setDefaultLanguage("/fusion/base");
+        r = build(b);
+        assertEquals("/fusion/base", r.getDefaultLanguage());
+
+        // Test effect by looking for something in /fusion but not /fusion/base
+        thrown.expect(UnboundIdentifierException.class);
+        r.getDefaultTopLevel().eval("always");
+    }
+
+
+    //========================================================================
+    
+
+    private void checkCurrentDirectory(String expectedDir, FusionRuntimeBuilder b)
+        throws FusionException
+    {
+        TopLevel t = build(b).getDefaultTopLevel();
+        t.requireModule("/fusion/io");
+        Object actualDir = t.eval("(current_directory)");
+        assertEquals(expectedDir, unsafeStringToJavaString(t, actualDir));
+    }
 
     @Test
     public void testDefaultCurrentDirectory()
         throws Exception
     {
-        topLevel().requireModule("/fusion/io");
-        assertString(System.getProperty("user.dir"), "(current_directory)");
+        FusionRuntimeBuilder b = standard();
+        checkCurrentDirectory(System.getProperty("user.dir"), b);
+
+        File tst = new File("tst");
+        b.setInitialCurrentDirectory(tst);
+        checkCurrentDirectory(tst.getAbsolutePath(), b);
     }
 
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCurrentDirectoryDoesNotExist()
-        throws Exception
     {
         File file = new File("no-such-file");
         assertFalse(file.exists());
-        runtimeBuilder().setInitialCurrentDirectory(file);
+        thrown.expect(IllegalArgumentException.class);
+        standard().setInitialCurrentDirectory(file);
     }
 
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCurrentDirectoryIsNormalFile()
-        throws Exception
     {
         File file = new File("build.xml");
         assertTrue(file.isFile());
-        runtimeBuilder().setInitialCurrentDirectory(file);
+
+        thrown.expect(IllegalArgumentException.class);
+        standard().setInitialCurrentDirectory(file);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testInitialCurrentDirectoryImmutability()
-        throws Exception
     {
-        runtimeBuilder().immutable().setInitialCurrentDirectory(TEST_REPO);
+        thrown.expect(UnsupportedOperationException.class);
+        standard().immutable().setInitialCurrentDirectory(TEST_REPO);
     }
 
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testDocumentingImmutability()
-        throws Exception
     {
-        runtimeBuilder().immutable().setDocumenting(true);
+        thrown.expect(UnsupportedOperationException.class);
+        standard().immutable().setDocumenting(true);
     }
 
 }
