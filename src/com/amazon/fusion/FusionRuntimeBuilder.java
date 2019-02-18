@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -352,7 +352,7 @@ public class FusionRuntimeBuilder
      * @return this builder, if it's mutable; otherwise a new mutable builder.
      *
      * @see #getDefaultLanguage()
-     * @see #withDefaultLanguage(String)
+     * @see #setDefaultLanguage(String)
      */
     public FusionRuntimeBuilder withDefaultLanguage(String absoluteModulePath)
     {
@@ -523,7 +523,7 @@ public class FusionRuntimeBuilder
      * bootstrap repository.
      *
      * @see #getBootstrapRepository()
-     * @see #withBootstrapRepository(File)
+     * @see #setBootstrapRepository(File)
      */
     public final FusionRuntimeBuilder withBootstrapRepository(File directory)
     {
