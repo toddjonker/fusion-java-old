@@ -4,11 +4,19 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionRuntimeBuilder.standard;
 import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
+import static com.amazon.fusion.junit.Reflect.assertEqualProperties;
+import static com.amazon.fusion.junit.Reflect.getterFor;
+import static com.amazon.fusion.junit.Reflect.invoke;
+import static com.amazon.fusion.junit.Reflect.setterFor;
+import static com.amazon.fusion.junit.Reflect.witherFor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
+import java.lang.reflect.Method;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -30,15 +38,76 @@ public class RuntimeBuilderTest
     }
 
 
+    private static void assertCopiesAreEqual(FusionRuntimeBuilder b)
+    {
+        assertEqualProperties(b, b.copy());
+        assertEqualProperties(b, b.mutable());
+        assertEqualProperties(b, b.immutable());
+    }
+
+
+    /**
+     * Test combinations of get/set/with methods for a builder property.
+     */
+    private <T> void changeProperty(FusionRuntimeBuilder orig,
+                                    String property,
+                                    Class<T> type,
+                                    T newValue,
+                                    T expectedNormalizedValue)
+    {
+        Method getter = getterFor(orig, property, type);
+        Method setter = setterFor(orig, property, type);
+        Method wither = witherFor(orig, property, type);
+
+        Object defaultValue = invoke(orig, getter);
+
+        FusionRuntimeBuilder b = orig.copy();
+        invoke(b, setter, newValue);
+        assertEquals(expectedNormalizedValue, invoke(b, getter));
+        assertCopiesAreEqual(b);
+
+        FusionRuntimeBuilder c = orig.copy();
+        assertSame(c, invoke(c, wither, newValue));
+        assertEqualProperties(b, c);
+        assertCopiesAreEqual(c);
+
+        // Immutable builder is copied on modification
+        FusionRuntimeBuilder i = orig.copy().immutable();
+        FusionRuntimeBuilder d = invoke(i, wither, newValue);
+        assertNotSame(i, d);
+        assertEqualProperties(orig, i); // the immutable hasn't changed
+        assertEqualProperties(b, d);
+        assertCopiesAreEqual(d);
+
+        invoke(b, setter, defaultValue);
+        assertEquals(defaultValue, invoke(b, getter));
+        assertEqualProperties(orig, b);
+        assertCopiesAreEqual(b);
+
+        invoke(c, wither, defaultValue);
+        assertEquals(defaultValue, invoke(c, getter));
+        assertEqualProperties(orig, c);
+        assertCopiesAreEqual(c);
+    }
+
+
+    //========================================================================
+
+
     @Test
     public void testDefaultBuilder()
     {
-        FusionRuntimeBuilder b = FusionRuntimeBuilder.standard();
+        FusionRuntimeBuilder b = standard();
         assertSame(b, b.mutable());
 
         assertEquals("/fusion", b.getDefaultLanguage());
-        assertEquals("/fusion", b.copy().getDefaultLanguage());
-        assertEquals("/fusion", b.immutable().getDefaultLanguage());
+        assertNull(b.getInitialCurrentDirectory());
+        assertNull(b.getBootstrapRepository());
+        assertNull(b.getCoverageDataDirectory());
+        assertNull(b.getCoverageCollector());
+        assertFalse(b.isDocumenting());
+
+        assertCopiesAreEqual(b);
     }
 
 
@@ -48,15 +117,8 @@ public class RuntimeBuilderTest
     @Test
     public void testSetDefaultLanguage()
     {
-        FusionRuntimeBuilder b = standard();
-        b.setDefaultLanguage("/fusion/base");
-
-        assertEquals("/fusion/base", b.getDefaultLanguage());
-        assertEquals("/fusion/base", b.copy().getDefaultLanguage());
-        assertEquals("/fusion/base", b.immutable().getDefaultLanguage());
-
-        b = b.immutable().withDefaultLanguage("/fusion");
-        assertEquals("/fusion", b.getDefaultLanguage());
+        changeProperty(standard(), "DefaultLanguage", String.class,
+                       "/fusion/base", "/fusion/base");
     }
 
     @Test
@@ -81,7 +143,7 @@ public class RuntimeBuilderTest
     }
 
     @Test
-    public void testDefaultLanguageImmutablity()
+    public void testDefaultLanguageImmutability()
     {
         thrown.expect(UnsupportedOperationException.class);
         standard().immutable().setDefaultLanguage("/fusion/base");
@@ -108,7 +170,25 @@ public class RuntimeBuilderTest
 
 
     //========================================================================
-    
+
+
+    private void changeInitialCurrentDirectory(FusionRuntimeBuilder orig,
+                                               File dir)
+    {
+        changeProperty(orig, "InitialCurrentDirectory", File.class,
+                       dir, dir.getAbsoluteFile());
+    }
+
+
+    @Test
+    public void testSetInitialCurrentDirectory()
+    {
+        File dir = new File("src");
+        assertTrue(dir.isDirectory());
+
+        changeInitialCurrentDirectory(standard(), dir);
+    }
+
 
     private void checkCurrentDirectory(String expectedDir, FusionRuntimeBuilder b)
         throws FusionException
@@ -120,7 +200,7 @@ public class RuntimeBuilderTest
     }
 
     @Test
-    public void testDefaultCurrentDirectory()
+    public void testBuildingInitialCurrentDirectory()
         throws Exception
     {
         FusionRuntimeBuilder b = standard();
@@ -159,6 +239,130 @@ public class RuntimeBuilderTest
         standard().immutable().setInitialCurrentDirectory(TEST_REPO);
     }
 
+
+    //========================================================================
+
+
+    private void changeBootstrapRepository(FusionRuntimeBuilder orig, File dir)
+    {
+        changeProperty(orig, "BootstrapRepository", File.class,
+                       dir, dir.getAbsoluteFile());
+    }
+
+
+    @Test
+    public void testSetBootstrapRepository()
+    {
+        File dir = new File("fusion");
+        assertTrue(dir.isDirectory());
+
+        changeBootstrapRepository(standard(), dir);
+    }
+
+
+    @Test
+    public void testBootstrapRepositoryDoesNotExist()
+    {
+        File file = new File("no-such-file");
+        assertFalse(file.exists());
+
+        thrown.expect(IllegalArgumentException.class);
+        standard().setBootstrapRepository(file);
+    }
+
+    @Test
+    public void testBootstrapRepositoryIsNotValid()
+    {
+        // This is a Fusion repo, but not a bootstrap repository.
+        File file = new File("ftst/repo");
+
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Not a Fusion bootstrap repository: ");
+        standard().setBootstrapRepository(file);
+    }
+
+    @Test
+    public void testBootstrapRepositoryIsNormalFile()
+    {
+        File file = new File("build.xml");
+        assertTrue(file.isFile());
+
+        thrown.expect(IllegalArgumentException.class);
+        standard().setBootstrapRepository(file);
+    }
+
+    @Test
+    public void testBootstrapRepositoryImmutability()
+    {
+        thrown.expect(UnsupportedOperationException.class);
+        standard().immutable().setBootstrapRepository(TEST_REPO);
+    }
+
+
+    //========================================================================
+
+
+    private void changeCoverageDataDirectory(FusionRuntimeBuilder orig,
+                                             File dir)
+    {
+        changeProperty(orig, "CoverageDataDirectory", File.class,
+                       dir, dir.getAbsoluteFile());
+    }
+
+
+    @Test
+    public void testSetCoverageDataDirectory()
+    {
+        File dir = new File("src");
+        assertTrue(dir.isDirectory());
+
+        changeCoverageDataDirectory(standard(), dir);
+    }
+
+
+    @Test
+    public void testCoverageDataDirectoryDoesNotExist()
+    {
+        File file = new File("no-such-file");
+        assertFalse(file.exists());
+
+        // Directory doesn't have to exist
+        changeCoverageDataDirectory(standard(), file);
+    }
+
+
+    @Test
+    public void testCoverageDataDirectoryIsNormalFile()
+    {
+        File file = new File("build.xml");
+        assertTrue(file.isFile());
+
+        thrown.expect(IllegalArgumentException.class);
+        standard().setCoverageDataDirectory(file);
+    }
+
+
+    @Test
+    public void testCoverageDataDirectoryImmutability()
+    {
+        thrown.expect(UnsupportedOperationException.class);
+        standard().immutable().setCoverageDataDirectory(TEST_REPO);
+    }
+
+
+    //========================================================================
+
+
+    @Test
+    public void testSetDocumenting()
+    {
+        FusionRuntimeBuilder std = standard();
+
+        FusionRuntimeBuilder b = std.copy();
+        b.setDocumenting(true);
+        assertTrue(b.isDocumenting());
+        assertCopiesAreEqual(b);
+    }
 
     @Test
     public void testDocumentingImmutability()
