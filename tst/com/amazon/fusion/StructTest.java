@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -9,7 +9,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -30,12 +29,13 @@ public class StructTest
     //========================================================================
 
 
-    @Test @Ignore // TODO FUSION-93 struct mutability
+    @Test
     public void testDeepRemoveKeysM()
         throws Exception
     {
         assertEval("{f:1,g:{i:4}}",
-                   "(let ((s {f:1,g:{h:3,i:4}}))" +
+                   "(let [(s (mutable_struct \"f\" 1 " +
+                   "           \"g\" (mutable_struct \"h\" 3 \"i\" 4)))]" +
                    "  (remove_keys_m (. s \"g\") \"h\")" +
                    "  s)");
     }
@@ -88,15 +88,16 @@ public class StructTest
     //========================================================================
 
 
-    @Test @Ignore  // TODO FUSION-93
+    @Test
     public void testStructForEach()
         throws Exception
     {
         eval("(define add_name (lambda (name value) (add_m value name)))");
-        assertEval("{f:[\"f\"],g:[\"g\"],f:[true,false,\"f\"]}",
+        assertEval("{f:[f],g:[g],f:[true,false,f]}",
                    "(struct_for_each add_name " +
-                   "  {f:null.list,g:[],f:[true,false]})");
-        // TODO as written the struct and its field values are immutable.
+                   "  (mutable_struct \"f\" (stretchy_list) " +
+                   "                  \"g\" (stretchy_list) " +
+                   "                  \"f\" (stretchy_list true false)))");
     }
 
     @Test
