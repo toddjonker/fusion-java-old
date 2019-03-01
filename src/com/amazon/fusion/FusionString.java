@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -393,6 +393,19 @@ public final class FusionString
     //========================================================================
     // Conversions
 
+
+    /**
+     * Converts a Fusion string to its equivalent {@link String} value.
+     *
+     * @param fusionString must be a Fusion string.
+     *
+     * @return null if given {@code null.string}.
+     */
+    public static String unsafeStringToJavaString(TopLevel top, Object fusionString)
+        throws FusionException
+    {
+        return ((BaseString) fusionString).stringValue();
+    }
 
     /**
      * @param fusionString must be a Fusion string.

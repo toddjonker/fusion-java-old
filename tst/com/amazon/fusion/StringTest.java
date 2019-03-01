@@ -1,7 +1,10 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
+import static org.junit.Assert.assertEquals;
+import com.amazon.ion.util.IonTextUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,6 +17,19 @@ public class StringTest
         throws FusionException
     {
         topLevel().requireModule("/fusion/string");
+    }
+
+
+    @Test
+    public void testUnsafeStringToJavaString()
+        throws Exception
+    {
+        String text = "87g2hsst";
+        Object s = eval(IonTextUtils.printString(text));
+        assertEquals(text, unsafeStringToJavaString(topLevel(), s));
+
+        s = eval("null.string");
+        assertEquals(null, unsafeStringToJavaString(topLevel(), s));
     }
 
 
