@@ -1,10 +1,12 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
 import static com.amazon.fusion.FusionRuntimeBuilder.PROPERTY_BOOTSTRAP_REPOSITORY;
 import com.amazon.fusion.FusionRuntimeBuilder;
+import com.amazon.ion.IonException;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
@@ -23,11 +25,15 @@ class GlobalOptions
         + "--repositories DIR" + File.pathSeparator + "DIR...\n"
         + "  Additional user repositories. This option can be given more than once and\n"
         + "  all DIRs will be used.\n"
+        + "--catalogs FILE" + File.pathSeparator + "FILE...\n"
+        + "  Files containing Ion shared symbol tables. This option can be given more\n"
+        + "  than once and all FILEs will be used."
         ;
 
 
     private String          myBootstrapPath;
     private ArrayList<File> myRepositories;
+    private ArrayList<File> myCatalogs;
 
 
     public void setBootstrapRepository(String path)
@@ -36,10 +42,8 @@ class GlobalOptions
     }
 
 
-    public void setRepositories(String pathList)
+    private static void addFiles(ArrayList<File> files, String pathList)
     {
-        if (myRepositories == null) myRepositories = new ArrayList<>();
-
         StringTokenizer tokenizer =
             new StringTokenizer(pathList, File.pathSeparator);
 
@@ -50,9 +54,25 @@ class GlobalOptions
             if (token.length() != 0)
             {
                 File file = new File(token);
-                myRepositories.add(file);
+                files.add(file);
             }
         }
+    }
+
+
+    public void setRepositories(String pathList)
+    {
+        if (myRepositories == null) myRepositories = new ArrayList<>();
+
+        addFiles(myRepositories, pathList);
+    }
+
+
+    public void setCatalogs(String pathList)
+    {
+        if (myCatalogs == null) myCatalogs = new ArrayList<>();
+
+        addFiles(myCatalogs, pathList);
     }
 
 
@@ -88,6 +108,22 @@ class GlobalOptions
             catch (IllegalArgumentException e)
             {
                 String message = "repositories: " + e.getMessage();
+                throw new UsageException(message);
+            }
+        }
+
+        if (myCatalogs != null)
+        {
+            try
+            {
+                IonCatalogLoader loader = new IonCatalogLoader();
+                loader.loadFiles(myCatalogs);
+
+                builder.withDefaultIonCatalog(loader.getCatalog());
+            }
+            catch (IOException | IonException e)
+            {
+                String message = "catalogs: " + e.getMessage();
                 throw new UsageException(message);
             }
         }
