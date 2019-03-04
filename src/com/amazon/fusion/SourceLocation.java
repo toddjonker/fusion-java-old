@@ -229,35 +229,40 @@ public class SourceLocation
      * @param source may be null.
      * @param name may be null.
      *
-     * @return null if no location could be determined.
+     * @return null if no name is given and no location could be determined from
+     * the source.
      */
     static SourceLocation forCurrentSpan(IonReader source, SourceName name)
     {
-        TextSpan ts   = Spans.currentSpan(TextSpan.class,   source);
-        OffsetSpan os = Spans.currentSpan(OffsetSpan.class, source);
-
-        if (ts != null)
+        // SpanProvider.currentSpan() crashes if not on a value.
+        if (source.getType() != null)
         {
-            long line   = ts.getStartLine  ();
-            long column = ts.getStartColumn();
-            long offset = os.getStartOffset();
+            TextSpan   ts = Spans.currentSpan(TextSpan.class, source);
+            OffsetSpan os = Spans.currentSpan(OffsetSpan.class, source);
 
-            if (line   <= Short.MAX_VALUE &&
-                column <= Short.MAX_VALUE &&
-                offset <= Short.MAX_VALUE)
+            if (ts != null)
             {
-                return new Shorts(name, (short) line, (short) column,
-                                  (short) offset);
-            }
+                long line   = ts.getStartLine();
+                long column = ts.getStartColumn();
+                long offset = os.getStartOffset();
 
-            if (line   <= Integer.MAX_VALUE &&
-                column <= Integer.MAX_VALUE &&
-                offset <= Integer.MAX_VALUE)
-            {
-                return new Ints(name, (int) line, (int) column, (int) offset);
-            }
+                if (line <= Short.MAX_VALUE &&
+                    column <= Short.MAX_VALUE &&
+                    offset <= Short.MAX_VALUE)
+                {
+                    return new Shorts(name, (short) line, (short) column,
+                                      (short) offset);
+                }
 
-            return new Longs(name, line, column, offset);
+                if (line <= Integer.MAX_VALUE &&
+                    column <= Integer.MAX_VALUE &&
+                    offset <= Integer.MAX_VALUE)
+                {
+                    return new Ints(name, (int) line, (int) column, (int) offset);
+                }
+
+                return new Longs(name, line, column, offset);
+            }
         }
 
         if (name != null)
