@@ -108,7 +108,7 @@ final class LoadHandler
             String message = "Module source has no top-level forms";
             SyntaxException e =
                 new SyntaxException(null /* syntax form */, message);
-            e.addContext(SourceLocation.forLineColumn(sourceName, -1, -1));
+            e.addContext(SourceLocation.forName(sourceName));
             throw e;
         }
 

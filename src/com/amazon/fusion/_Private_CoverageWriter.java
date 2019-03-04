@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -446,7 +446,7 @@ public final class _Private_CoverageWriter
                 {
                     // Determine whether this value has been covered.
                     SourceLocation currentLoc =
-                        SourceLocation.forCurrentSpan(ionReader, null);
+                        SourceLocation.forCurrentSpan(ionReader);
 
                     SourceLocation coverageLoc = locations[locationIndex];
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -27,9 +27,9 @@ public class CoverageTest
         {
             // For simplicity we'll ignore the offset.
             SourceLocation loc2 =
-                SourceLocation.forLineColumn(loc.getSourceName(),
-                                             loc.getLine(),
-                                             loc.getColumn());
+                SourceLocation.forLineColumn(loc.getLine(),
+                                             loc.getColumn(),
+                                             loc.getSourceName());
             coverable.add(loc2);
 
             return (coverOnlyLineOne ? loc.getLine() == 1 : true);
@@ -40,9 +40,9 @@ public class CoverageTest
         {
             // For simplicity we'll ignore the offset.
             SourceLocation loc2 =
-                SourceLocation.forLineColumn(loc.getSourceName(),
-                                             loc.getLine(),
-                                             loc.getColumn());
+                SourceLocation.forLineColumn(loc.getLine(),
+                                             loc.getColumn(),
+                                             loc.getSourceName());
             covered.add(loc2);
         }
 
@@ -62,7 +62,7 @@ public class CoverageTest
      */
     private void checkCovered(SourceName name, long line, long column)
     {
-        SourceLocation loc = SourceLocation.forLineColumn(name, line, column);
+        SourceLocation loc = SourceLocation.forLineColumn(line, column, name);
         assertTrue(collector.coverable.contains(loc));
         assertTrue(collector.covered.contains(loc));
     }
@@ -84,7 +84,7 @@ public class CoverageTest
      */
     private void checkNotCovered(SourceName name, long line, long column)
     {
-        SourceLocation loc = SourceLocation.forLineColumn(name, line, column);
+        SourceLocation loc = SourceLocation.forLineColumn(line, column, name);
         assertTrue("not coverable",
                    collector.coverable.contains(loc));
         assertFalse("covered but shouldn't be",

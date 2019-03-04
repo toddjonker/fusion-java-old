@@ -1,11 +1,12 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import java.io.File;
 
 /**
- * Identifies a source of Fusion code, a file, URL, <em>etc.</em>
+ * Identifies a source of Fusion code or other data: a file, URL, <em>etc.</em>
+ * <p>
  * The primary purpose of this class is to display a suitable message fragment
  * for error reporting to users.
  */
@@ -87,6 +88,7 @@ public class SourceName
 
 
     /**
+     * Returns a view of this object suitable for debugging.
      * For displaying messages to users, use {@link #display()} instead.
      */
     @Override

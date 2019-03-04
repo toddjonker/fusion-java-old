@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -409,7 +409,7 @@ class CoverageDatabase
             }
 
             SourceLocation loc =
-                SourceLocation.forLineColumn(name, line, column);
+                SourceLocation.forLineColumn(line, column, name);
             assert loc != null;
 
             noteCoverableLocation(loc);
