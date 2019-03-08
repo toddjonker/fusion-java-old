@@ -102,7 +102,7 @@ final class IonCatalogLoader
     }
 
 
-    void loadFile(File file)
+    private void loadFile(File file)
         throws IOException
     {
         SourceName name = SourceName.forFile(file.getPath());
@@ -117,13 +117,34 @@ final class IonCatalogLoader
         }
     }
 
+    private void loadDirectory(File dir)
+        throws IOException
+    {
+        for (File file : dir.listFiles())
+        {
+            loadFileOrDirectory(file);
+        }
+    }
+
+    void loadFileOrDirectory(File file)
+        throws IOException
+    {
+        if (file.isDirectory())
+        {
+            loadDirectory(file);
+        }
+        else
+        {
+            loadFile(file);
+        }
+    }
 
     void loadFiles(List<File> catalogFiles)
         throws IOException
     {
         for (File file : catalogFiles)
         {
-            loadFile(file);
+            loadFileOrDirectory(file);
         }
     }
 }
