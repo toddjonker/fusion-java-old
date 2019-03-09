@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2019 Amazon.com, Inc.  All rights reserved.
 
 (module exception '/fusion/private/kernel'
 
@@ -111,10 +111,10 @@ the entire `with_handlers` form. If the exception is not matched by any
 predicate, then it is re-raised to the continuation of the `with_handlers`
 expression.
 
-Most code should avoid using catch-all predicates like `(lambda (x) true)` that
+Most code should avoid using catch-all predicates like `(lambda (x) true)` which
 match exceptions that should generally not be handled by application code.
-In particular, it will non-`error_exn` exceptions like interrupts, which must
-not be ignored.
+In particular, it will catch non-`error_exn` exceptions like interrupts, which
+should pass through unhindered.
 See the [Racket Guide on Exceptions][racket-exn] for more details.
 
   [racket-exn]: https://docs.racket-lang.org/guide/exns.html
