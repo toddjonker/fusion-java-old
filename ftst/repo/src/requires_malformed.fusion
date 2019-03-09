@@ -1,0 +1,9 @@
+// Copyright (c) 2019 Amazon.com, Inc.  All rights reserved.
+
+(module requires_malformed "/fusion"
+  '''
+This module cannot be visited because it requires a module that's malformed at
+the Ion syntax level.
+  '''
+  (require "/malformed/ion_syntax_error")
+)

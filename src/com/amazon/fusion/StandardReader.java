@@ -79,8 +79,13 @@ class StandardReader
         }
         catch (IonException e)
         {
-            throw new FusionException("Error reading source: " + e.getMessage(),
-                                      e);
+            // We don't try to create a SourceLocation from the reader because
+            // it usually doesn't have a current span when an error is thrown,
+            // and since the IonException's message will contain it.
+            String nameStr = (name != null ? name.display() : "source");
+            String message =
+                "Error reading " + nameStr + ":\n" + e.getMessage();
+            throw new FusionErrorException(message, e);
         }
     }
 

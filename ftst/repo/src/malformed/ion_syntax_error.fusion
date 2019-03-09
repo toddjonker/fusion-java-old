@@ -1,0 +1,7 @@
+// Copyright (c) 2019 Amazon.com, Inc.  All rights reserved.
+
+// This module is malformed due to an Ion syntax error.
+(module m "/fusion"
+  (]                         //  <-- here at L5 C4
+  (define x 1)
+)
