@@ -18,6 +18,8 @@ class CommandFactory
             {
                 new Repl(),
                 new Load(),
+                new Eval(),
+                new Require(),
                 new Cover(),
                 new Separator(),
                 new Help(),

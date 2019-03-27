@@ -3,6 +3,8 @@
 package com.amazon.fusion.cli;
 
 import static com.amazon.fusion.FusionRuntimeBuilder.PROPERTY_BOOTSTRAP_REPOSITORY;
+import com.amazon.fusion.FusionException;
+import com.amazon.fusion.FusionRuntime;
 import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.ion.IonException;
 import java.io.File;
@@ -42,6 +44,7 @@ class GlobalOptions
     private String          myBootstrapPath;
     private ArrayList<File> myRepositories;
     private ArrayList<File> myCatalogs;
+    private FusionRuntime   myRuntime;
 
 
     public void setBootstrapRepository(String path)
@@ -137,5 +140,17 @@ class GlobalOptions
         }
 
         return builder;
+    }
+
+    FusionRuntime runtime()
+        throws FusionException, UsageException
+    {
+        // Lazily loading a runtime that can be global across commands, centralized more vs original FusionExecutor implementation
+        if (myRuntime == null)
+        {
+            FusionRuntimeBuilder builder = runtimeBuilder();
+            myRuntime = builder.build();
+        }
+        return myRuntime;
     }
 }

@@ -32,12 +32,7 @@ abstract class FusionExecutor
 
     FusionRuntime runtime()
         throws FusionException, UsageException
-    {
-        if (myRuntime == null)
-        {
-            FusionRuntimeBuilder builder = runtimeBuilder();
-            myRuntime = builder.build();
-        }
-        return myRuntime;
+    { 
+        return myGlobalOptions.runtime();
     }
 }
