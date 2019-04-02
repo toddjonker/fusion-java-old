@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -71,5 +71,28 @@ public class FusionValueTest
 
             values = unsafePairTail(eval, values);
         }
+    }
+
+
+    private boolean hasAnnotation(String expr, String annotation)
+        throws Exception
+    {
+        Object value = eval(expr);
+        return FusionValue.hasAnnotation(evaluator(), value, annotation);
+    }
+
+    @Test
+    public void testHasAnnotation()
+        throws Exception
+    {
+        useTstRepo();
+
+        assertTrue(hasAnnotation("(quote a::null)", "a"));
+        assertTrue(hasAnnotation("(quote a::b::null)", "a"));
+        assertTrue(hasAnnotation("(quote a::b::null)", "b"));
+//      assertTrue(hasAnnotation("(quote ''::null)", ""));  // TODO empty symbol
+
+        assertFalse(hasAnnotation("(quote a::null)", "x"));
+        assertFalse(hasAnnotation("(quote a::b::null)", "x"));
     }
 }

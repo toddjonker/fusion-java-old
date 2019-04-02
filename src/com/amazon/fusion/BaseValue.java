@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc. All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc. All rights reserved.
 
 package com.amazon.fusion;
 
@@ -42,12 +42,13 @@ abstract class BaseValue
     }
 
     /**
-     * @return the annotation symbols.
+     * @return the annotation symbols; not null.
      * <b>Must not be modified by the caller!</b>
      */
     BaseSymbol[] getAnnotations()
         throws FusionException
     {
+        // TODO should return ImmutableList of BaseSymbol
         return BaseSymbol.EMPTY_ARRAY;
     }
 

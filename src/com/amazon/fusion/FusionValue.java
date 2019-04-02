@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -7,6 +7,7 @@ import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import com.amazon.fusion.FusionBool.BaseBool;
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
@@ -232,6 +233,29 @@ public final class FusionValue
             return ((BaseValue) value).getAnnotationsAsJavaStrings();
         }
         return EMPTY_STRING_ARRAY;
+    }
+
+    /**
+     * Determines whether a Fusion value has a specific annotation.
+     *
+     * @param eval must not be null.
+     * @param value is a Fusion value.
+     * @param annotation must not be null.
+     *
+     * @return whether the {@code value} has the {@code annotation}.
+     */
+    static boolean hasAnnotation(Evaluator eval, Object value, String annotation)
+        throws FusionException
+    {
+        if (value instanceof BaseValue)
+        {
+            for (BaseSymbol a : ((BaseValue) value).getAnnotations())
+            {
+                if (a.stringValue().equals(annotation)) return true;
+            }
+        }
+
+        return false;
     }
 
 
