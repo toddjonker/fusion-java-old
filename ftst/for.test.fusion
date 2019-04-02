@@ -12,6 +12,87 @@
     (iterator_map (|v| (apply values v))
       (sexp_iterator vs))))
 
+
+//=============================================================================
+// for_fold
+
+(check_true
+  (let_values [(() (for_fold () () (values)))]
+    true))
+
+(check === 9 (for_fold ((v 0)) () 9))
+(check === 9 (for_fold [(v 0)] [] 9))
+
+(check === 7 (for_fold [(v 7)] () v))
+(check === 7 (for_fold [(v 7)] () (values v)))
+
+(check === [2, 1]
+  (let_values [((a b) (for_fold
+                        [(v 1), (w 2)]
+                        ()
+                        (values w v)))]
+    [a, b]))
+
+// Now, some looping
+(check === 0 (for_fold [(v 0)] [(e [])] 9))
+(check === 1 (for_fold [(v 0)] [(e [1])] e))
+(check === 2 (for_fold [(v 0)] [(e [1, 2])] e))
+(check === 3 (for_fold [(v 0)] [(e [1, 2])] (+ v e)))
+
+// Multi-value series
+(check === {a:2, b:3}
+  (for_fold
+    [(r {})]
+    [((k v) { a: 1, b:2 })]
+    (put r k (+ 1 v))))
+
+// Multiple series
+(check === 33
+  (for_fold
+    [(v 0)]
+    [(e [1, 2]),
+     (f [10, 20])]
+    (+ v e f)))
+
+//  Evaluation order
+//  Corresponding Racket code is in rkt/forfold_eval_order.rkt
+
+(lets [(evaluation_order (stretchy_list)),
+       (record (|v| (add_m evaluation_order v) v))]
+  (check === [[1,2],[3,4]]
+    (for_fold
+       [(v (begin (record "v") []))]
+       [(a (begin (record "a") (iterator_map record (list_iterator [1, 3])))),
+        (b (begin (record "b") (iterator_map record (list_iterator [2, 4]))))]
+      (record "body")
+      (add v [a,b])))
+  // It's unexpected that the accumulator v is initialized after the
+  // sequences a and b, but that's how it works in Racket 6.5.
+  (check === ["a", "b", "v", 1, 2, "body", 3, 4, "body"] evaluation_order))
+
+
+(expect_syntax_error (for_fold))
+(expect_syntax_error (for_fold ()))
+(expect_syntax_error (for_fold () ()))
+
+(expect_syntax_error
+  (for_fold bad_accums () (values)))
+(expect_syntax_error
+  (for_fold () bad_clauses (values)))
+
+(expect_syntax_error
+  (for_fold [] [((a b a) [])] b))     // Duplicate binding in 1 for-clause.
+(expect_syntax_error
+  (for_fold [] [(a []), (a [])] a))   // Duplicate binding in 2 for-clauses.
+
+// Accumulator count mismatch
+(expect_result_error (for_fold () () 1))
+(expect_result_error (for_fold () () (values 1 2)))
+
+
+//=============================================================================
+// for_list, fors_list
+
 (define_check (check_fl expected actual)
   (check_pred is_stretchy_list actual)
   (check === expected actual))
@@ -249,5 +330,6 @@
   (fors_list [(name []), (name [])] 14))
 (check_fl [3,4,3,4]
   (fors_list [(name [1,2]), (name [3,4])] name))
+
 
 "PASSED" // Helpful output if you run this stand-alone

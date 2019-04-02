@@ -16,11 +16,13 @@
   (provide let_values letrec values)
 
   (provide
+    binding_ids
     check_multi_id
     check_single_id
     check_single_or_multi_id
     let
     lets
+    split_binding
     split_letlike_subforms
     unzip_bindings
   )
@@ -79,6 +81,10 @@ Checks the syntax of a binding initializer form `(ids expr)`; returns
                    ((expr) (syntax_get binding 1))]
         (check_ids stx name)
         (values name expr))))
+
+  (define (binding_ids stx binding check_ids)
+    (let_values [((ids expr) (split_binding stx binding check_ids))]
+      ids))
 
   (define (bindings_as_sexp stx bindings)
     (if (is_null bindings)
