@@ -30,7 +30,7 @@ final class FusionSequence
 
         /**
          * Assumes that this is a proper sequence, and that the length doesn't
-         * extend beyone the end of this sequence or the destination array.
+         * extend beyond the end of this sequence or the destination array.
          */
         abstract void unsafeCopy(Evaluator eval, int srcPos, Object[] dest,
                                  int destPos, int length)

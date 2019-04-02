@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -25,6 +25,7 @@ import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.ValueFactory;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -355,6 +356,34 @@ final class FusionSexp
 
     //========================================================================
     // Transformers
+
+
+    /**
+     * Extracts the values out of a Fusion sexp.
+     *
+     * @param sexp must be a proper sexp; it is not type-checked!
+     *
+     * @return null if given {@code null.sexp}, otherwise a list of the values
+     *  in the sexp.
+     *
+     * @throws FusionException
+     */
+    static List<Object> unsafeSexpToJavaList(Evaluator eval, Object sexp)
+        throws FusionException
+    {
+        if (isNullSexp(eval, sexp)) return null;
+
+        List<Object> elems = new LinkedList<>();
+
+        while (isPair(eval, sexp))
+        {
+            elems.add(unsafePairHead(eval, sexp));
+
+            sexp = unsafePairTail(eval, sexp);
+        }
+
+        return elems;
+    }
 
 
     /**
