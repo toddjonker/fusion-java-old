@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 
 /**
@@ -898,7 +899,7 @@ public final class FusionString
             checkArityExact(2, args);
             String string    = checkRequiredStringArg(eval, this, 0, args);
             String separator = checkRequiredStringArg(eval, this, 1, args);
-            String[] splitResult = string.split(separator);
+            String[] splitResult = string.split(Pattern.quote(separator));
             List<Object> fusionStrings = new ArrayList<>();
             for (int i = 0; i < splitResult.length; i++)
             {
