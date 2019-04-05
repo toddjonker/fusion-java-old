@@ -98,14 +98,8 @@ class Version
                     w.setFieldName("ion_version");
                     w.stepIn(IonType.STRUCT);
                     {
-                        w.setFieldName("release_label");
-                        w.writeString(ionInfo.getReleaseLabel());
-
-                        w.setFieldName("brazil_major_version");
-                        w.writeString(ionInfo.getBrazilMajorVersion());
-
-                        w.setFieldName("brazil_package_version");
-                        w.writeString(ionInfo.getBrazilPackageVersion());
+                        w.setFieldName("project_version");
+                        w.writeString(ionInfo.getProjectVersion());
 
                         w.setFieldName("build_time");
                         w.writeTimestamp(ionInfo.getBuildTime());
