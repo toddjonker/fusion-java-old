@@ -261,6 +261,32 @@ final class TopLevelNamespace
 
 
     /**
+     * A reference to a top-level variable in the lexically-enclosing namespace,
+     * when the binding is known at compile-time.
+     */
+    static final class CompiledTopLevelVariableReference
+        implements CompiledForm
+    {
+        final int myAddress;
+
+        CompiledTopLevelVariableReference(int address)
+        {
+            myAddress = address;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            NamespaceStore ns = store.namespace();
+            Object result = ns.lookup(myAddress);
+            assert result != null : "No value for namespace address " + myAddress;
+            return result;
+        }
+    }
+
+
+    /**
      * A reference to a top-level variable in the lexically-enclosing
      * namespace, when the binding isn't known at compile-time.
      * In other words, a forward reference.

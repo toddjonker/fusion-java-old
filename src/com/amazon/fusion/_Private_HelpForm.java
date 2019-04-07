@@ -1,9 +1,9 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import com.amazon.fusion.ModuleNamespace.CompiledImportedVariableReference;
-import com.amazon.fusion.Namespace.CompiledTopVariableReference;
+import com.amazon.fusion.TopLevelNamespace.CompiledTopLevelVariableReference;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -128,10 +128,10 @@ public final class _Private_HelpForm
                         ns.lookupRequiredModule(ref.myModuleAddress);
                     doc = module.document(ref.myBindingAddress);
                 }
-                else if (form instanceof CompiledTopVariableReference)
+                else if (form instanceof CompiledTopLevelVariableReference)
                 {
-                    CompiledTopVariableReference ref =
-                        (CompiledTopVariableReference) form;
+                    CompiledTopLevelVariableReference ref =
+                        (CompiledTopLevelVariableReference) form;
                     Namespace ns = (Namespace) store.namespace();
                     doc = ns.document(ref.myAddress);
                 }

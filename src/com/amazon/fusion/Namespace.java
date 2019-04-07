@@ -916,40 +916,14 @@ abstract class Namespace
     //========================================================================
 
 
-    /**
-     * A reference to a top-level variable in the lexically-enclosing namespace.
-     */
-    static final class CompiledTopVariableReference
-        implements CompiledForm
-    {
-        final int myAddress;
-
-        CompiledTopVariableReference(int address)
-        {
-            myAddress = address;
-        }
-
-        @Override
-        public Object doEval(Evaluator eval, Store store)
-            throws FusionException
-        {
-            NamespaceStore ns = store.namespace();
-            Object result = ns.lookup(myAddress);
-            assert result != null : "No value for namespace address " + myAddress;
-            return result;
-        }
-    }
-
-
-    // TODO rename CompiledNsDefine
-    static class CompiledTopDefine
+    static class CompiledNsDefine
         implements CompiledForm
     {
         private final String       myName;
         private final int          myAddress;
         private final CompiledForm myValueForm;
 
-        CompiledTopDefine(String name, int address, CompiledForm valueForm)
+        CompiledNsDefine(String name, int address, CompiledForm valueForm)
         {
             assert name != null;
             myName      = name;
@@ -984,11 +958,11 @@ abstract class Namespace
     }
 
 
-    static final class CompiledTopDefineSyntax
-        extends CompiledTopDefine
+    static final class CompiledNsDefineSyntax
+        extends CompiledNsDefine
     {
-        CompiledTopDefineSyntax(String name, int address,
-                                CompiledForm valueForm)
+        CompiledNsDefineSyntax(String name, int address,
+                               CompiledForm valueForm)
         {
             super(name, address, valueForm);
         }

@@ -32,13 +32,13 @@ import com.amazon.fusion.ModuleNamespace.CompiledImportedVariableReference;
 import com.amazon.fusion.ModuleNamespace.CompiledModuleVariableReference;
 import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
-import com.amazon.fusion.Namespace.CompiledTopDefine;
-import com.amazon.fusion.Namespace.CompiledTopDefineSyntax;
-import com.amazon.fusion.Namespace.CompiledTopVariableReference;
+import com.amazon.fusion.Namespace.CompiledNsDefine;
+import com.amazon.fusion.Namespace.CompiledNsDefineSyntax;
 import com.amazon.fusion.Namespace.NsDefinedBinding;
 import com.amazon.fusion.Namespace.RequiredBinding;
 import com.amazon.fusion.TopLevelNamespace.CompiledFreeDefine;
 import com.amazon.fusion.TopLevelNamespace.CompiledFreeVariableReference;
+import com.amazon.fusion.TopLevelNamespace.CompiledTopLevelVariableReference;
 import com.amazon.fusion.TopLevelNamespace.TopLevelDefinedBinding;
 import java.util.Collections;
 
@@ -388,8 +388,8 @@ class Compiler
                     Object accept(ModuleNamespace ns) throws FusionException
                     {
                         String name = b.getName().stringValue();
-                        return new CompiledTopDefine(name, b.myAddress,
-                                                     valueForm);
+                        return new CompiledNsDefine(name, b.myAddress,
+                                                    valueForm);
                     }
                 };
 
@@ -452,7 +452,7 @@ class Compiler
             public Object visit(NsDefinedBinding b) throws FusionException
             {
                 String name = b.getName().stringValue();
-                return new CompiledTopDefineSyntax(name, b.myAddress, valueForm);
+                return new CompiledNsDefineSyntax(name, b.myAddress, valueForm);
             }
 
             @Override
@@ -516,7 +516,7 @@ class Compiler
             Object visit(TopLevelDefinedBinding b) throws FusionException
             {
                 assert b.isOwnedBy(env.namespace());
-                return new CompiledTopVariableReference(b.myAddress);
+                return new CompiledTopLevelVariableReference(b.myAddress);
             }
 
             @Override
@@ -608,7 +608,7 @@ class Compiler
             @Override
             Object visit(TopLevelDefinedBinding b) throws FusionException
             {
-                return new CompiledTopVariableReference(b.myAddress);
+                return new CompiledTopLevelVariableReference(b.myAddress);
             }
 
             @Override
