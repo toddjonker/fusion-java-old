@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2017-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -29,6 +29,7 @@ import com.amazon.fusion.LocalEnvironment.CompiledLocalVariableReference;
 import com.amazon.fusion.LocalEnvironment.CompiledLocalVariableSet;
 import com.amazon.fusion.LocalEnvironment.LocalBinding;
 import com.amazon.fusion.ModuleNamespace.CompiledImportedVariableReference;
+import com.amazon.fusion.ModuleNamespace.CompiledModuleVariableReference;
 import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
 import com.amazon.fusion.Namespace.CompiledTopDefine;
@@ -535,7 +536,8 @@ class Compiler
                                                                  b.myAddress);
                 }
 
-                return new CompiledTopVariableReference(b.myAddress);
+                SourceLocation locn = identifier.getLocation();
+                return new CompiledModuleVariableReference(b.myAddress, locn);
             }
 
             @Override

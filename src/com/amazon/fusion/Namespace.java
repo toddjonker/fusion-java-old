@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -339,7 +339,7 @@ abstract class Namespace
     }
 
     /**
-     * How many namspace-level definitions do we have?
+     * How many namespace-level definitions do we have?
      * This doesn't count imports.
      */
     final int definitionCount()

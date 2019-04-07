@@ -1,6 +1,8 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
+
+import com.amazon.fusion.FusionSymbol.BaseSymbol;
 
 /**
  * Eval-time storage for modules.
@@ -11,28 +13,36 @@ final class ModuleStore
     private final ModuleRegistry myRegistry;
     private final ModuleStore[]  myRequiredModules;
     private final Object[]       myValues;
+    private final BaseSymbol[]   myDefinedNames;
     private final BindingDoc[]   myBindingDocs;
 
 
     ModuleStore(ModuleRegistry registry,
                 ModuleStore[]  requiredModules,
-                int            variableCount,
+                BaseSymbol[]   definedNames,
                 BindingDoc[]   bindingDocs)
     {
+        int variableCount = definedNames.length;
+
         myRegistry = registry;
         myRequiredModules = requiredModules;
         myValues = new Object[variableCount];
+        myDefinedNames = definedNames;
         myBindingDocs = bindingDocs;
     }
 
     ModuleStore(ModuleRegistry registry,
-                Object[] values,
-                BindingDoc[] bindingDocs)
+                Object[]       values,
+                BaseSymbol[]   definedNames,
+                BindingDoc[]   bindingDocs)
     {
+        assert values.length == definedNames.length;
+
         myRegistry = registry;
         myRequiredModules = new ModuleStore[0];
         myValues = values;
-        myBindingDocs = bindingDocs;
+        myDefinedNames = definedNames;
+        myBindingDocs  = bindingDocs;
     }
 
     @Override
@@ -82,6 +92,12 @@ final class ModuleStore
     public Object lookupImport(int moduleAddress, int bindingAddress)
     {
         return myRequiredModules[moduleAddress].myValues[bindingAddress];
+    }
+
+    @Override
+    public BaseSymbol getDefinedName(int address)
+    {
+        return myDefinedNames[address];
     }
 
     BindingDoc document(int address)

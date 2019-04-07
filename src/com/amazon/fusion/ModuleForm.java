@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -33,7 +33,7 @@ final class ModuleForm
 {
     private static final String STX_PROP_MODULE_IDENTITY   = "module identity";
     private static final String STX_PROP_LANGUAGE_IDENTITY = "language identity";
-    private static final String STX_PROP_DEFINITION_COUNT  = "definition count";
+    private static final String STX_PROP_DEFINED_NAMES     = "defined names";
 
 
     private final DynamicParameter myCurrentModuleDeclareName;
@@ -253,8 +253,8 @@ final class ModuleForm
 
         source = (SyntaxSexp)
             source.copyWithProperty(eval,
-                                    STX_PROP_DEFINITION_COUNT,
-                                    moduleNamespace.definitionCount());
+                                    STX_PROP_DEFINED_NAMES,
+                                    moduleNamespace.extractDefinedNames());
 
 
         // Pass 2: Expand the expressions. We also rearrange the forms,
@@ -426,13 +426,13 @@ final class ModuleForm
         CompiledForm[] otherFormsArray =
             otherForms.toArray(CompiledForm.EMPTY_ARRAY);
 
-        int bindingCount = (Integer)
-            moduleStx.findProperty(eval, STX_PROP_DEFINITION_COUNT);
+        BaseSymbol[] definedNames = (BaseSymbol[])
+            moduleStx.findProperty(eval, STX_PROP_DEFINED_NAMES);
 
         return new CompiledModule(id,
                                   docs,
                                   moduleNamespace.requiredModuleIds(),
-                                  bindingCount,
+                                  definedNames,
                                   moduleNamespace.extractBindingDocs(),
                                   providedBindings,
                                   otherFormsArray);
@@ -592,7 +592,7 @@ final class ModuleForm
         private final ModuleIdentity    myId;
         private final String            myDocs;
         private final ModuleIdentity[]  myRequiredModules;
-        private final int               myVariableCount;
+        private final BaseSymbol[]      myDefinedNames;
         private final BindingDoc[]      myBindingDocs;
         private final ProvidedBinding[] myProvidedBindings;
         private final CompiledForm[]    myBody;
@@ -600,7 +600,7 @@ final class ModuleForm
         private CompiledModule(ModuleIdentity    id,
                                String            docs,
                                ModuleIdentity[]  requiredModules,
-                               int               variableCount,
+                               BaseSymbol[]      definedNames,
                                BindingDoc[]      bindingDocs,
                                ProvidedBinding[] providedBindings,
                                CompiledForm[]    body)
@@ -608,7 +608,7 @@ final class ModuleForm
             myId                  = id;
             myDocs                = docs;
             myRequiredModules     = requiredModules;
-            myVariableCount       = variableCount;
+            myDefinedNames        = definedNames;
             myBindingDocs         = bindingDocs;
             myProvidedBindings    = providedBindings;
             myBody                = body;
@@ -641,7 +641,7 @@ final class ModuleForm
             // Allocate just enough space for the top-level bindings.
             ModuleStore store =
                 new ModuleStore(registry, requiredModuleStores,
-                                myVariableCount, myBindingDocs);
+                                myDefinedNames, myBindingDocs);
 
             ModuleInstance module =
                 new ModuleInstance(myId, myDocs, store, myProvidedBindings);

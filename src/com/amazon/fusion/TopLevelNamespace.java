@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -206,6 +206,12 @@ final class TopLevelNamespace
                                        ProvidedBinding target)
     {
         return new TopLevelRequiredBinding(localId, null, target);
+    }
+
+    @Override
+    public BaseSymbol getDefinedName(int address)
+    {
+        throw new UnsupportedOperationException();
     }
 
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -76,6 +76,7 @@ final class ModuleBuilderImpl
 
         ModuleStore store = new ModuleStore(myRegistry,
                                             myNamespace.extractValues(),
+                                            myNamespace.extractDefinedNames(),
                                             myNamespace.extractBindingDocs());
         Collection<NsDefinedBinding> bindings = myNamespace.getDefinedBindings();
 
