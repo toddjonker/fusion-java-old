@@ -1,16 +1,20 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionList.checkActualListArg;
 import static com.amazon.fusion.FusionList.unsafeListElement;
 import static com.amazon.fusion.FusionList.unsafeListSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import com.amazon.fusion.FusionList.UnsafeListSizeProc;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonValue;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 /**
  *
@@ -18,6 +22,9 @@ import org.junit.Test;
 public class ListTest
     extends CoreTestCase
 {
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     @Before
     public void listTestBegin()
         throws Exception
@@ -307,7 +314,7 @@ public class ListTest
     }
 
 
-    @Test()
+    @Test
     public void testIterationArityCheck()
         throws Exception
     {
@@ -316,5 +323,22 @@ public class ListTest
 
         expectArityExn("(list_from_iterator)");
         expectArityExn("(list_from_iterator empty_iterator 1)");
+    }
+
+
+
+    //========================================================================
+    // Procedure Helpers
+
+    @Test
+    public void testCheckActualListArgRejectsNullList()
+        throws Exception
+    {
+        Evaluator eval = evaluator();
+        Object nullList = FusionList.nullList(eval);
+
+        thrown.expect(ArgumentException.class);
+        thrown.expectMessage("non-null list");
+        checkActualListArg(eval, new UnsafeListSizeProc(), 0, nullList);
     }
 }

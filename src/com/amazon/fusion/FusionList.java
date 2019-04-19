@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -1275,7 +1275,7 @@ final class FusionList
     {
         String expectation = "non-null list";
         Object result = checkListArg(eval, who, expectation, argNum, args);
-        if (result == null)
+        if (isNullList(eval, result))
         {
             throw who.argFailure(expectation, argNum, args);
         }
