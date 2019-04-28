@@ -1,4 +1,4 @@
-// Copyright (c) 2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2016-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -53,9 +53,6 @@ final class BoundIdMap<V>
             return myBinding.sameTarget(other.myBinding)
                 && myMarks.equals(other.myMarks);
         }
-
-        // TODO implement Binding.hashCode for local bindings
-        //    so this class can be used for local environments too.
 
         @Override
         public int hashCode()
