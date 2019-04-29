@@ -328,9 +328,6 @@ The results of the `for_fold` expression are the final accumulator values.
 //=============================================================================
 // for_list, fors_list
 
-  // TODO FUSION-36 Should allow internal definitions
-  // TODO Optimize for single-series case.
-  //      That will make fors_list much more efficient.
   (define_syntax for_list
     '''
     (for_list [(id series), ...] body ...+)
@@ -354,81 +351,24 @@ If no bindings are declared, then the body is executed once.
       (+ even odd))             =>  [1, 5, 9]
     '''
     (lambda (stx)
+
+      // (for_fold_derived stx
+      //   [(result (stretchy_list))]
+      //   CLAUSES
+      //   (add_m result (begin BODY ...)))
+
       (let [(subforms (unsafe_pair_tail (syntax_unwrap stx)))]
         (when (< (size subforms) 2)
-          (wrong_syntax stx "expecting bindings and body"))
-        (let_values [((bindings body) (split_letlike_subforms stx subforms))]
+          (wrong_syntax stx "expecting for-clauses and body"))
+        (let_values [((clauses body) (split_letlike_subforms stx subforms))]
           (let [(begin_body (pair (quote begin) body))]
             (datum_to_syntax
-              (if (not (is_pair bindings))
-
-                // Base case -- no bindings:  (for_list () BODY ...)
-
-                (sexp (quote stretchy_list)          // (stretchy_list
-                      begin_body)                    //   (begin BODY...))
-
-                (let_values [((ids series_exprs) (unzip_bindings stx bindings check_single_or_multi_id))]
-                  (lets
-                    [(series_names
-                       // Sexp of synthetic names for each series.
-                       (let loop [(exprs series_exprs),
-                                  (i 0)]
-                         (if (is_empty exprs)
-                           (quote ())
-                           (pair (string_to_symbol (string_append "series" (int_to_string i)))
-                                 (loop (unsafe_pair_tail exprs) (+ 1 i)))))),
-                     (series_binds
-                       // Binding pairs to name each series' iterator:
-                       //  ((series_name (iterate series_expr)) ...)
-                       (let loop [(names series_names),
-                                  (exprs series_exprs)]
-                         (if (is_empty names)
-                           (quote ())
-                           (pair (sexp (unsafe_pair_head names)
-                                       (sexp (quote iterate) (unsafe_pair_head exprs)))
-                                 (loop (unsafe_pair_tail names) (unsafe_pair_tail exprs)))))),
-                     (next_exprs
-                       // Expressions that get the next value from each series.
-                       // For now this is always (iterator_next ...) but that will change.
-                       (let loop [(names series_names)]
-                         (if (is_empty names)
-                           (quote ())
-                           (pair (sexp (quote iterator_next) (unsafe_pair_head names))
-                                 (loop (unsafe_pair_tail names)))))),
-                     (ident_rebinds
-                       // Binding pairs to capture each series' next value:
-                       //  ((id <next-expr>) ...)
-                       (let loop [(ids   (map normalize_ids ids)),
-                                  (exprs next_exprs)]
-                         (if (is_empty ids)
-                           (quote ())
-                           (pair (sexp (unsafe_pair_head ids) (unsafe_pair_head exprs))
-                                 (loop (unsafe_pair_tail ids) (unsafe_pair_tail exprs))))))]
-
-                    // (for_list [(I S) ...] BODY ...)
-                    //   =>
-                    // (let [(series1 (iterate S)),
-                    //       ...]
-                    //   (let [(iters  (list series1 ...)),
-                    //         (result (stretchy_list))]
-                    //     (let loop []
-                    //       (if (every iterator_has_next iters)
-                    //         (let [(I (iterator_next series1)),
-                    //               ...]
-                    //           (add_m result (begin BODY ...))
-                    //           (loop))
-                    //         result))))
-
-                    (quasiquote
-                      (let (unquote series_binds)
-                        (let [(iters (unquote (pair (quote list) series_names))),
-                              (result (stretchy_list))]
-                          (let loop []
-                            (if (every iterator_has_next iters)
-                              (let_values (unquote ident_rebinds)
-                                (add_m result (unquote begin_body))
-                                (loop))
-                              result))))))))
+              (quasiquote
+                (for_fold_derived
+                  (unquote stx)
+                  [(result (stretchy_list))]
+                  (unquote clauses)
+                  (add_m result (unquote begin_body))))
               ctx
               stx))))))
 
