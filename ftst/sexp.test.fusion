@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -373,3 +373,38 @@
 
 // TODO test annotations
 
+
+//==========================================================================
+// reverse
+
+(check === EMPTY_SEXP
+  (reverse EMPTY_SEXP))
+(check === EMPTY_SEXP
+  (reverse (quote ann::())))
+(check === NULL_SEXP
+  (reverse NULL_SEXP))
+(check === NULL_SEXP
+  (reverse (quote ann::null.sexp)))
+
+(check === (quote (   1))     (reverse (quote    (   1))))
+(check === (quote (   1))     (reverse (quote a::(   1))))
+(check === (quote (a::1))     (reverse (quote a::(a::1))))
+
+(check === (quote (3    2 1)) (reverse (quote    (1    2 3))))
+(check === (quote (3    2 1)) (reverse (quote a::(1    2 3))))
+(check === (quote (3 a::2 1)) (reverse (quote a::(1 a::2 3))))
+
+(check === (quote (null.sexp)) (reverse (quote (null.sexp))))
+
+
+// Non-sexp arguments
+(expect_argument_error (reverse []))
+(expect_argument_error (reverse "hello"))
+(expect_argument_error (reverse {}))
+
+// Improper sexps
+(expect_argument_error (reverse (pair 1 2)))
+(expect_argument_error (reverse (pair 1 (quote null.sexp))))
+
+
+"SUCCESS"

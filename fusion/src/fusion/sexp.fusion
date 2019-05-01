@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 (module sexp '/fusion/base'
 
@@ -23,7 +23,7 @@ sexps.
   '''
 
   (require "/fusion/private/sexp")
-  (provide head is_pair is_sexp pair sexp tail)
+  (provide head is_pair is_sexp pair reverse sexp tail)
 
   (require "/fusion/sequence")
   (provide . add any append append_m choose do element elt every
