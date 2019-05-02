@@ -3,8 +3,6 @@
 package com.amazon.fusion.cli;
 
 import static com.amazon.fusion._Private_ModuleDocumenter.writeHtmlTree;
-import com.amazon.fusion.FusionRuntimeBuilder;
-import com.amazon.fusion._Private_Trampoline;
 import java.io.File;
 import java.io.PrintWriter;
 
@@ -66,6 +64,9 @@ class Document
             throw usage("Repository has no src directory: " + repoDir);
         }
 
+        globals.collectDocumentation();
+        globals.setRepositories(repoDir.getAbsolutePath());
+
         return new Executor(globals, outputDir, repoDir);
     }
 
@@ -82,16 +83,6 @@ class Document
 
             myOutputDir = outputDir;
             myRepoDir   = repoDir;
-        }
-
-        @Override
-        FusionRuntimeBuilder runtimeBuilder()
-            throws UsageException
-        {
-            FusionRuntimeBuilder builder = super.runtimeBuilder();
-            builder.addRepositoryDirectory(myRepoDir);
-            _Private_Trampoline.setDocumenting(builder, true);
-            return builder;
         }
 
         @Override
