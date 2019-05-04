@@ -5,6 +5,8 @@ package com.amazon.fusion.cli;
 import com.amazon.fusion.cli.Command.Executor;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
 class CommandFactory
 {
@@ -111,6 +113,8 @@ class CommandFactory
 
 
     /**
+     * Makes an {@link Executor} for a single command in the sequence.
+     *
      * @param commandLine includes the leading command name.
      *
      * @return an {@link Executor} to execute the command; not null.
@@ -123,7 +127,7 @@ class CommandFactory
                                         String[] commandLine)
         throws Exception
     {
-        // Strip off the leading command name, leaving the options and argse
+        // Strip off the leading command name, leaving the options and args.
         int argCount = commandLine.length - 1;
         String[] args = new String[argCount];
         System.arraycopy(commandLine, 1, args, 0, argCount);
@@ -143,34 +147,23 @@ class CommandFactory
     int executeCommandLine(String... commandLine)
         throws Exception
     {
-        int errorCode = 0;
-
         GlobalOptions globals = new GlobalOptions(myStdin, myStdout, myStderr);
 
         try
         {
             commandLine = Command.extractOptions(globals, commandLine, true);
 
-            int curStartPos = 0;
-            for (int i = 0; i < commandLine.length && errorCode == 0; i++)
+            List<Executor> execs = makeExecutors(globals, commandLine);
+            for (Executor exec : execs)
             {
-                if (";".equals(commandLine[i])) {
-                    int len = i-curStartPos;
-                    if (len > 0) {
-                        errorCode = doExecutePartial(globals,
-                                                     commandLine,
-                                                     curStartPos,
-                                                     len);
-                    }
-                    curStartPos = i+1;
+                int errorCode = exec.execute();
+                if (errorCode != 0)
+                {
+                    return errorCode;
                 }
             }
-            int len = commandLine.length-curStartPos;
-            if (errorCode == 0) {
-                errorCode = doExecutePartial(globals, commandLine, curStartPos, len);
-            }
 
-            return errorCode;
+            return 0;
         }
         catch (UsageException e)
         {
@@ -187,13 +180,43 @@ class CommandFactory
     }
 
 
+    private static List<Executor> makeExecutors(GlobalOptions globals,
+                                                String[] commandLine)
+        throws Exception
+    {
+        List<Executor> execs = new ArrayList<>();
+
+        int curStartPos = 0;
+        for (int i = 0; i < commandLine.length; i++)
+        {
+            if (";".equals(commandLine[i])) {
+                int len = i-curStartPos;
+                if (len > 0) {
+                    Executor exec = makeExecutor(globals,
+                                                 commandLine,
+                                                 curStartPos,
+                                                 len);
+                    execs.add(exec);
+                }
+                curStartPos = i+1;
+            }
+        }
+
+        int len = commandLine.length-curStartPos;
+        Executor exec = makeExecutor(globals, commandLine, curStartPos, len);
+        execs.add(exec);
+
+        return execs;
+    }
+
+
     /**
      * @return an error code, zero meaning success.
      */
-    private static int doExecutePartial(GlobalOptions globals,
-                                        String[] commandLine,
-                                        int start,
-                                        int len)
+    private static Executor makeExecutor(GlobalOptions globals,
+                                         String[] commandLine,
+                                         int start,
+                                         int len)
         throws Exception
     {
         String[] partial = new String[len];
@@ -201,10 +224,9 @@ class CommandFactory
 
         Command command = matchCommand(globals, partial);
 
-        Executor exec = makeExecutor(globals, command, partial);
-
-        return exec.execute();
+        return makeExecutor(globals, command, partial);
     }
+
 
     static class Separator extends Command
     {
