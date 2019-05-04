@@ -10,6 +10,7 @@ import static com.amazon.fusion.FusionString.checkRequiredStringArg;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionUtils.resolvePath;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonValue;
@@ -588,10 +589,12 @@ public final class FusionIo
     static final class IonizeProc
         extends Procedure1
     {
+        private final DynamicParameter     myCurrentOutputPort;
         private final IonTextWriterBuilder myBuilder;
 
-        IonizeProc()
+        IonizeProc(Object currentOutputPort)
         {
+            myCurrentOutputPort = (DynamicParameter) currentOutputPort;
             myBuilder = IonTextWriterBuilder.pretty().immutable();
         }
 
@@ -599,8 +602,10 @@ public final class FusionIo
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
         {
+            OutputStream port = myCurrentOutputPort.currentValue(eval);
+
             // Be careful not to close the output stream.
-            IonWriter writer = myBuilder.build((OutputStream) System.out);
+            IonWriter writer = myBuilder.build(port);
 
             FusionIo.ionize(eval, writer, arg);
 
@@ -675,11 +680,36 @@ public final class FusionIo
     static final class WriteProc
         extends Procedure1
     {
+        private final DynamicParameter myCurrentOutputPort;
+
+        WriteProc(Object currentOutputPort)
+        {
+            myCurrentOutputPort = (DynamicParameter) currentOutputPort;
+        }
+
         @Override
         Object doApply(Evaluator eval, Object arg)
             throws FusionException
         {
-            FusionIo.write(eval, System.out, arg);
+            try
+            {
+                OutputStream port = myCurrentOutputPort.currentValue(eval);
+
+                // Be careful not to close the output stream.
+                OutputStreamWriter out = new OutputStreamWriter(port, UTF_8);
+                try
+                {
+                    FusionIo.write(eval, out, arg);
+                }
+                finally
+                {
+                    out.flush();
+                }
+            }
+            catch (IOException e)
+            {
+                throw new FusionException(e);
+            }
 
             return voidValue(eval);
         }
@@ -689,13 +719,23 @@ public final class FusionIo
     static final class DisplayProc
         extends Procedure
     {
+        private final DynamicParameter myCurrentOutputPort;
+
+        DisplayProc(Object currentOutputPort)
+        {
+            myCurrentOutputPort = (DynamicParameter) currentOutputPort;
+        }
+
         @Override
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
             try
             {
-                OutputStreamWriter out = new OutputStreamWriter(System.out);
+                OutputStream port = myCurrentOutputPort.currentValue(eval);
+
+                // Be careful not to close the output stream.
+                OutputStreamWriter out = new OutputStreamWriter(port, UTF_8);
                 try
                 {
                     for (Object arg : args)

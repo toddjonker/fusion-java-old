@@ -7,6 +7,7 @@ import static com.amazon.fusion._Private_CoverageCollectorImpl.fromDirectory;
 import com.amazon.ion.IonCatalog;
 import com.amazon.ion.system.SimpleCatalog;
 import java.io.File;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,6 +84,13 @@ import java.util.Properties;
  * specific default value. If not configured when {@link #build()} is called,
  * the builder uses the value of the {@code "user.dir"} system property.
  *
+ * <h3>Initial Current Output Port</h3>
+ *
+ * Fusion's various output procedures ({@code write}, {@code display},
+ * {@code ionize}, <em>etc.</em>) send their data to a byte-oriented
+ * <em>output port</em>.  By default, this goes to {@link System#out}, but the
+ * runtime can be configured to use another {@link OutputStream}.
+ *
  * <h3>Code Coverage Instrumentation<a id="coverage"/></h3>
  *
  * To instruct the runtime to collect code coverage metrics, you must use
@@ -131,11 +139,12 @@ public class FusionRuntimeBuilder
     //=========================================================================
 
 
-    private File       myCurrentDirectory;
-    private File       myBootstrapRepository;
-    private File[]     myRepositoryDirectories;
-    private String     myDefaultLanguage = STANDARD_DEFAULT_LANGUAGE;
-    private IonCatalog myDefaultIonCatalog;
+    private OutputStream myCurrentOutputPort;
+    private File         myCurrentDirectory;
+    private File         myBootstrapRepository;
+    private File[]       myRepositoryDirectories;
+    private String       myDefaultLanguage = STANDARD_DEFAULT_LANGUAGE;
+    private IonCatalog   myDefaultIonCatalog;
 
     private File                       myCoverageDataDirectory;
     private _Private_CoverageCollector myCollector;
@@ -147,6 +156,7 @@ public class FusionRuntimeBuilder
 
     private FusionRuntimeBuilder(FusionRuntimeBuilder that)
     {
+        this.myCurrentOutputPort     = that.myCurrentOutputPort;
         this.myCurrentDirectory      = that.myCurrentDirectory;
         this.myBootstrapRepository   = that.myBootstrapRepository;
         this.myRepositoryDirectories = that.myRepositoryDirectories;
@@ -426,6 +436,61 @@ public class FusionRuntimeBuilder
     {
         FusionRuntimeBuilder b = mutable();
         b.setDefaultIonCatalog(catalog);
+        return b;
+    }
+
+
+    //=========================================================================
+
+
+    /**
+     * Gets the default output stream used by various output procedures.
+     * By default, this property is null.
+     *
+     * @return an output stream. May be null, which means the builder
+     * will use {@link System#out}.
+     *
+     * @see #setInitialCurrentOutputPort(OutputStream)
+     * @see #withInitialCurrentOutputPort(OutputStream)
+     */
+    public OutputStream getInitialCurrentOutputPort()
+    {
+        return myCurrentOutputPort;
+    }
+
+
+    /**
+     * Sets the default output stream used by various output procedures.
+     *
+     * @param out may be null, which causes the builder to use
+     * {@link System#out}.
+     *
+     * @see #getInitialCurrentOutputPort()
+     * @see #withInitialCurrentOutputPort(OutputStream)
+     */
+    public void setInitialCurrentOutputPort(OutputStream out)
+    {
+        mutationCheck();
+        myCurrentOutputPort = out;
+    }
+
+
+    /**
+     * Declares the default output stream used by various output procedures,
+     * returning a new mutable builder if this is immutable.
+     *
+     * @param out may be null, which causes the builder to use
+     * {@link System#out}.
+     *
+     * @return this builder, if it's mutable; otherwise a new mutable builder.
+     *
+     * @see #getInitialCurrentOutputPort()
+     * @see #setInitialCurrentOutputPort(OutputStream)
+     */
+    public final FusionRuntimeBuilder withInitialCurrentOutputPort(OutputStream out)
+    {
+        FusionRuntimeBuilder b = mutable();
+        b.setInitialCurrentOutputPort(out);
         return b;
     }
 
@@ -803,6 +868,11 @@ public class FusionRuntimeBuilder
     {
         // Ensure that we don't modify the user's builder.
         FusionRuntimeBuilder b = copy();
+
+        if (b.getInitialCurrentOutputPort() == null)
+        {
+            b.setInitialCurrentOutputPort(System.out);
+        }
 
         if (b.getInitialCurrentDirectory() == null)
         {

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -19,7 +19,7 @@ import org.junit.Test;
 /**
  *
  */
-public class IoTest
+public class FusionIoTest
     extends CoreTestCase
 {
     @Before
@@ -53,6 +53,33 @@ public class IoTest
                    "  ((current_directory " + printString(newDir) + "))" +
                    "  (load \"hello.ion\"))");
     }
+
+
+    @Test
+    public void testIonizeGoesToStdout()
+        throws Exception
+    {
+        eval("(ionize 1)");
+        assertEquals("\n1", stdoutToString());
+    }
+
+    @Test
+    public void testWriteGoesToStdout()
+        throws Exception
+    {
+        eval("(write 1)");
+        assertEquals("1", stdoutToString());
+    }
+
+    @Test
+    public void testDisplayGoesToStdout()
+        throws Exception
+    {
+        eval("(display 1)");
+        assertEquals("1", stdoutToString());
+    }
+
+
 
     @Test
     public void testLoadCurrentNamespace()

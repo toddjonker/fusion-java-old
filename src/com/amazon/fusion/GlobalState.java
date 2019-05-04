@@ -103,6 +103,8 @@ final class GlobalState
         Object userDir =
             makeString(null, builder.getInitialCurrentDirectory().toString());
 
+        DynamicParameter currentOutputPort =
+            new DynamicParameter(builder.getInitialCurrentOutputPort());
         DynamicParameter currentDirectory =
             new DynamicParameter(userDir);
         DynamicParameter currentLoadRelativeDirectory =
@@ -127,6 +129,7 @@ final class GlobalState
         ns.define(ALL_DEFINED_OUT, new ProvideForm.AllDefinedOutForm());
         ns.define(BEGIN, new BeginForm());
 
+        ns.define("current_output_port", currentOutputPort);
         ns.define("current_directory", currentDirectory);
         ns.define("current_ion_reader", new CurrentIonReaderParameter());
         ns.define("current_namespace", currentNamespaceParam);

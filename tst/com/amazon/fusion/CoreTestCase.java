@@ -14,6 +14,7 @@ import static com.amazon.fusion.FusionVoid.isVoid;
 import static com.amazon.ion.util.IonTextUtils.printString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import com.amazon.fusion.junit.StdioTestCase;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
@@ -34,6 +35,7 @@ import org.junit.Assert;
 import org.junit.Before;
 
 public class CoreTestCase
+    extends StdioTestCase
 {
     static final String NONTERMINATING_EXPRESSION =
         "((lambda (x) (x x)) (lambda (x) (x x)))";
@@ -106,6 +108,8 @@ public class CoreTestCase
             // during scripted builds.
             b = b.withBootstrapRepository(new File("fusion"));
             b = b.withConfigProperties(getClass(), "/fusion.properties");
+
+            b = b.withInitialCurrentOutputPort(stdout());
 
             myRuntimeBuilder = b;
         }

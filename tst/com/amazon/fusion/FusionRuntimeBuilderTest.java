@@ -17,17 +17,19 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import com.amazon.ion.IonCatalog;
 import com.amazon.ion.system.SimpleCatalog;
-import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 
-public class RuntimeBuilderTest
+public class FusionRuntimeBuilderTest
 {
     private static final File TEST_REPO = new File("tst-repo");
 
@@ -106,6 +108,7 @@ public class RuntimeBuilderTest
         assertSame(b, b.mutable());
 
         assertEquals("/fusion", b.getDefaultLanguage());
+        assertNull(b.getInitialCurrentOutputPort());
         assertNull(b.getInitialCurrentDirectory());
         assertNull(b.getBootstrapRepository());
         assertNull(b.getCoverageDataDirectory());
@@ -213,6 +216,57 @@ public class RuntimeBuilderTest
         r = build(b);
         assertSame(catalog, r.getDefaultIonCatalog());
     }
+
+
+    //========================================================================
+
+
+    private void changeInitialCurrentOutputPort(FusionRuntimeBuilder orig,
+                                                OutputStream out)
+    {
+        changeProperty(orig, "InitialCurrentOutputPort", OutputStream.class,
+                       out, out);
+    }
+
+
+    @Test
+    public void testSetInitialCurrentOutputPort()
+    {
+        OutputStream out = new ByteArrayOutputStream();
+        changeInitialCurrentOutputPort(standard(), out);
+    }
+
+
+    private void checkCurrentOutputPort(OutputStream expected,
+                                        FusionRuntimeBuilder b)
+        throws FusionException
+    {
+        TopLevel t = build(b).makeTopLevel(GlobalState.KERNEL_MODULE_NAME);
+        Object actual = t.eval("(current_output_port)");
+        assertSame(expected, actual);
+    }
+
+    @Test
+    public void testBuildingInitialCurrentOutputPort()
+        throws Exception
+    {
+        FusionRuntimeBuilder b = standard();
+        checkCurrentOutputPort(System.out, b);
+
+        OutputStream out = new ByteArrayOutputStream();
+        b.setInitialCurrentOutputPort(out);
+        checkCurrentOutputPort(out, b);
+    }
+
+    @Test
+    public void testInitialCurrentOutputPortImmutability()
+    {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        thrown.expect(UnsupportedOperationException.class);
+        standard().immutable().setInitialCurrentOutputPort(out);
+    }
+
 
 
     //========================================================================

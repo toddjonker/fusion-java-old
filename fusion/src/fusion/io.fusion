@@ -153,7 +153,7 @@ bound to the name `eof`.
 Outputs an Ion text representation of `value`, throwing an exception if the
 value contains any non-Ionizable data like closures.
     '''
-    (java_new "com.amazon.fusion.FusionIo$IonizeProc"))
+    (java_new "com.amazon.fusion.FusionIo$IonizeProc" current_output_port))
 
 
   (define ionize_to_blob
@@ -186,7 +186,7 @@ Outputs a text representation of `value`, following Ion syntax where possible.
 The result will be unreadable (by the Fusion and Ion readers) if the value
 contains any non-Ionizable data like closures.
     '''
-    (java_new "com.amazon.fusion.FusionIo$WriteProc"))
+    (java_new "com.amazon.fusion.FusionIo$WriteProc" current_output_port))
 
 
   (define display
@@ -200,7 +200,7 @@ All other values are rendered as by [`write`](fusion/io.html#write).
 No characters are written between the values.
 In general, the result will be unreadable by the Fusion and Ion readers.
     '''
-    (java_new "com.amazon.fusion.FusionIo$DisplayProc"))
+    (java_new "com.amazon.fusion.FusionIo$DisplayProc" current_output_port))
 
 
   (define display_to_string
