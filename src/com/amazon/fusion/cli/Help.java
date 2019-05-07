@@ -1,13 +1,14 @@
-// Copyright (c) 2005-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2005-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 class Help
     extends Command
 {
-    private static final String HELP_ONE_LINER =
+    static final String HELP_ONE_LINER =
         "Describe the usage of this program or its commands.";
 
     private static final String HELP_USAGE =
@@ -18,7 +19,7 @@ class Help
         "descriptions.  If commands are specified, print the full help information\n" +
         "for each one.";
 
-    private final static String APP_HELP_TEXT_INTRO =
+    final static String APP_HELP_TEXT_INTRO =
         "Usage: fusion [OPTIONS ...] <command> [ARGS ...]\n" +
         "Type 'fusion help <command>' for help on a specific command.\n\n" +
         "Available commands:\n";
@@ -32,7 +33,7 @@ class Help
 
     Help()
     {
-        super("help", new String[] { "?", "h" });
+        super("help", "?", "h");
         putHelpText(HELP_ONE_LINER, HELP_USAGE, HELP_BODY);
     }
 
@@ -41,19 +42,23 @@ class Help
 
 
     @Override
-    Executor makeExecutor(String[] arguments)
+    Executor makeExecutor(GlobalOptions globals,
+                          Object        options,
+                          String[]      arguments)
     {
-        return new Executor(arguments);
+        return new Executor(globals, arguments);
     }
 
 
     private static class Executor
-        implements Command.Executor
+        extends StdioExecutor
     {
         private final String[] myCommands;
 
-        private Executor(String[] commands)
+        private Executor(GlobalOptions globals, String[] commands)
         {
+            super(globals);
+
             myCommands = commands;
         }
 
@@ -62,15 +67,17 @@ class Help
         public int execute()
             throws UsageException, IOException
         {
-            System.out.println();
+            PrintStream stdout = stdout();
+
+            stdout.println();
 
             if ((myCommands == null) || (myCommands.length == 0))
             {
-                renderGeneralHelp(System.out);
+                renderGeneralHelp(stdout);
             }
             else
             {
-                renderCommands(System.out);
+                renderCommands(stdout);
             }
 
             return 0;

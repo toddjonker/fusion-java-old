@@ -9,6 +9,7 @@ import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.ion.IonException;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
@@ -41,10 +42,29 @@ class GlobalOptions
         ;
 
 
+    private PrintStream     myStdout;
+    private PrintStream     myStderr;
     private String          myBootstrapPath;
     private ArrayList<File> myRepositories;
     private ArrayList<File> myCatalogs;
     private FusionRuntime   myRuntime;
+
+
+    GlobalOptions(PrintStream stdout, PrintStream stderr)
+    {
+        myStdout = stdout;
+        myStderr = stderr;
+    }
+
+    PrintStream stdout()
+    {
+        return myStdout;
+    }
+
+    PrintStream stderr()
+    {
+        return myStderr;
+    }
 
 
     public void setBootstrapRepository(String path)

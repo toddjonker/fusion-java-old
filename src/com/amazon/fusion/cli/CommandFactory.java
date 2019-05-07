@@ -1,14 +1,25 @@
-// Copyright (c) 2005-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2005-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
 import com.amazon.fusion.cli.Command.Executor;
+import java.io.PrintStream;
 
 class CommandFactory
 {
     public static final String APP_NAME = "fusion";
 
     private static final int USAGE_ERROR_CODE = 1;
+
+
+    private final PrintStream myStdout;
+    private final PrintStream myStderr;
+
+    CommandFactory(PrintStream stdout, PrintStream stderr)
+    {
+        myStdout = stdout;
+        myStderr = stderr;
+    }
 
 
     public static Command[] getAllCommands()
@@ -47,23 +58,23 @@ class CommandFactory
     }
 
 
-    private static void writeUsage(Command cmd)
+    private void writeUsage(Command cmd)
     {
         if (cmd != null)
         {
-            System.err.print("Usage: ");
-            System.err.println(cmd.getHelpUsage());
+            myStderr.print("Usage: ");
+            myStderr.println(cmd.getHelpUsage());
         }
 
-        System.err.print("Type '" + APP_NAME + " help");
+        myStderr.print("Type '" + APP_NAME + " help");
 
         if (cmd != null)
         {
-            System.err.print(' ');
-            System.err.print(cmd.getCommand());
+            myStderr.print(' ');
+            myStderr.print(cmd.getCommand());
         }
 
-        System.err.println("' for more information.");
+        myStderr.println("' for more information.");
     }
 
 
@@ -74,7 +85,8 @@ class CommandFactory
      * @return the {@link Command} to execute; not null.
      *
      * @throws UsageException if there are
-     * command-line errors preventing the command from being used.     */
+     * command-line errors preventing the command from being determined.
+     */
     public static Command matchCommand(GlobalOptions globals,
                                        String[] commandLine)
         throws Exception
@@ -125,12 +137,12 @@ class CommandFactory
     /**
      * @return an error code, zero meaning success.
      */
-    public static int executeCommandLine(String[] commandLine)
+    int executeCommandLine(String... commandLine)
         throws Exception
     {
         int errorCode = 0;
 
-        GlobalOptions globals = new GlobalOptions();
+        GlobalOptions globals = new GlobalOptions(myStdout, myStderr);
 
         try
         {
@@ -159,12 +171,12 @@ class CommandFactory
         }
         catch (UsageException e)
         {
-            System.err.println();
+            myStderr.println();
             String message = e.getMessage();
             if (message != null)
             {
-                System.err.println(message);
-                System.err.println();
+                myStderr.println(message);
+                myStderr.println();
             }
             writeUsage(e.myCommand);
             return USAGE_ERROR_CODE;
