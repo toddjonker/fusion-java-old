@@ -167,6 +167,7 @@ class CommandFactory
         }
         catch (UsageException e)
         {
+            myStdout.flush();                // Avoid commingled console output.
             myStderr.println();
             String message = e.getMessage();
             if (message != null)
