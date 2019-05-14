@@ -1,4 +1,4 @@
-// Copyright (c) 2005-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2005-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -10,6 +10,7 @@ import com.amazon.ion.IonWriter;
 import com.amazon.ion.system.IonTextWriterBuilder;
 import com.amazon.ion.util.JarInfo;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 class Version
     extends Command
@@ -39,22 +40,25 @@ class Version
 
 
     @Override
-    Executor makeExecutor(String[] arguments)
+    Command.Executor makeExecutor(GlobalOptions globals,
+                                  Object        options,
+                                  String[]      arguments)
     {
-        return new Executor(arguments);
+        return new Executor(globals);
     }
 
 
     private static class Executor
-        implements Command.Executor
+        extends StdioExecutor
     {
-        private Executor(String[] arguments)
+        private Executor(GlobalOptions globals)
         {
+            super(globals);
         }
 
 
         @Override
-        public int execute()
+        public int execute(PrintWriter out, PrintWriter err)
             throws IOException
         {
             IonTextWriterBuilder b = IonTextWriterBuilder.pretty();
@@ -69,8 +73,7 @@ class Version
             }
             catch (IonException | FusionException e) { }
 
-
-            IonWriter w = b.build((Appendable)System.out);
+            IonWriter w = b.build(out);
             w.stepIn(IonType.STRUCT);
             {
                 if (fusionInfo != null)
@@ -109,7 +112,7 @@ class Version
             }
             w.stepOut();
             w.finish();
-            System.out.println();
+            out.println();
 
             return 0;
         }
