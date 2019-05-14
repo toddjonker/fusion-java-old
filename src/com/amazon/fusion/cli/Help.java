@@ -3,7 +3,7 @@
 package com.amazon.fusion.cli;
 
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 
 class Help
     extends Command
@@ -64,20 +64,18 @@ class Help
 
 
         @Override
-        public int execute()
+        public int execute(PrintWriter out, PrintWriter err)
             throws UsageException, IOException
         {
-            PrintStream stdout = stdout();
-
-            stdout.println();
+            out.println();
 
             if ((myCommands == null) || (myCommands.length == 0))
             {
-                renderGeneralHelp(stdout);
+                renderGeneralHelp(out);
             }
             else
             {
-                renderCommands(stdout);
+                renderCommands(out);
             }
 
             return 0;

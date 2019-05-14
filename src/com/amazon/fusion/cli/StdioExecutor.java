@@ -2,31 +2,47 @@
 
 package com.amazon.fusion.cli;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import com.amazon.fusion.cli.Command.Executor;
-import java.io.PrintStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 
 /**
- * Base {@link Executor} that's configured with the standard output streams.
+ * Base {@link Executor} that's configured with the standard character-output
+ * streams.
  */
 abstract class StdioExecutor
     implements Executor
 {
-    private final PrintStream myStdout;
-    private final PrintStream myStderr;
+    private final GlobalOptions myGlobals;
 
     StdioExecutor(GlobalOptions globals)
     {
-        myStdout = globals.stdout();
-        myStderr = globals.stderr();
+        myGlobals = globals;
     }
 
-    PrintStream stdout()
+
+    @Override
+    public final int execute()
+        throws Exception
     {
-        return myStdout;
+        PrintWriter out =
+            new PrintWriter(new OutputStreamWriter(myGlobals.stdout(), UTF_8));
+        PrintWriter err =
+            new PrintWriter(new OutputStreamWriter(myGlobals.stderr(), UTF_8));
+
+        try
+        {
+            return execute(out, err);
+        }
+        finally
+        {
+            out.flush();
+            err.flush();
+        }
     }
 
-    PrintStream stderr()
-    {
-        return myStderr;
-    }
+
+    abstract int execute(PrintWriter out, PrintWriter err)
+        throws Exception;
 }
