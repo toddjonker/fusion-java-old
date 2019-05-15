@@ -2,8 +2,6 @@
 
 package com.amazon.fusion.cli;
 
-import static com.amazon.fusion.FusionIo.write;
-import static com.amazon.fusion.FusionVoid.isVoid;
 import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntimeBuilder;
@@ -84,19 +82,26 @@ class Repl
         }
 
         @Override
-        public int execute()
+        public int execute(PrintWriter out, PrintWriter err)
             throws FusionException, UsageException
         {
-            // Bootstrap the runtime before printing the welcome banner, so
-            // that we don't do that when there's usage problems.
-            myTopLevel = runtime().getDefaultTopLevel();
-            myTopLevel.requireModule("/fusion/private/repl");
-
-            welcome();
-
-            while (rep())
+            try
             {
-                // loop!
+                // Bootstrap the runtime before printing the welcome banner, so
+                // that we don't do that when there's usage problems.
+                myTopLevel = runtime().getDefaultTopLevel();
+                myTopLevel.requireModule("/fusion/private/repl");
+
+                welcome();
+
+                while (rep())
+                {
+                    // loop!
+                }
+            }
+            finally
+            {
+                myOut.flush();
             }
 
             return 0;
@@ -128,7 +133,7 @@ class Repl
             try
             {
                 Object result = myTopLevel.eval(line);
-                print(result);
+                writeResults(myTopLevel, result, myOut);
             }
             catch (ExitException e)
             {
@@ -144,27 +149,6 @@ class Repl
 
             return true;
         }
-
-
-        private void print(Object v)
-            throws FusionException
-        {
-            if (v instanceof Object[])
-            {
-                Object[] results = (Object[]) v;
-                for (Object r : results)
-                {
-                    write(myTopLevel, r, myOut);
-                    myOut.println();
-                }
-            }
-            else if (v != null && ! isVoid(myTopLevel, v))
-            {
-                write(myTopLevel, v, myOut);
-                myOut.println();
-            }
-        }
-
 
 
         private void blue(String text)

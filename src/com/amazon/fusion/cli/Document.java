@@ -6,6 +6,7 @@ import static com.amazon.fusion._Private_ModuleDocumenter.writeHtmlTree;
 import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.fusion._Private_Trampoline;
 import java.io.File;
+import java.io.PrintWriter;
 
 
 class Document
@@ -94,9 +95,10 @@ class Document
         }
 
         @Override
-        public int execute()
+        public int execute(PrintWriter out, PrintWriter err)
             throws Exception
         {
+            // TODO send log messages to the output PrintWriter, not System.out
             File srcDir = new File(myRepoDir, "src");
             writeHtmlTree(runtime(), myOutputDir, srcDir);
             return 0;

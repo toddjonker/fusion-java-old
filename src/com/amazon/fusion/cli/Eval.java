@@ -2,10 +2,6 @@
 
 package com.amazon.fusion.cli;
 
-import static com.amazon.fusion.FusionIo.write;
-import static com.amazon.fusion.FusionVoid.isVoid;
-import com.amazon.fusion.ExitException;
-import com.amazon.fusion.FusionException;
 import com.amazon.fusion.TopLevel;
 
 
@@ -58,44 +54,10 @@ class Eval
 
 
         @Override
-        public int execute()
+        public Object execute(TopLevel top)
             throws Exception
         {
-            try
-            {
-                TopLevel top = runtime().getDefaultTopLevel();
-
-                Object result = top.eval(myEvalText);
-
-                if (result instanceof Object[])
-                {
-                    Object[] results = (Object[]) result;
-                    for (Object r : results)
-                    {
-                        write(top, r, System.out);
-                        System.out.println();
-                    }
-                }
-                else if (result != null && ! isVoid(top, result))
-                {
-                    write(top, result, System.out);
-                    System.out.println();
-                }
-
-                System.out.flush();
-            }
-            catch (ExitException e)
-            {
-                // Do nothing, just return successfully.
-            }
-            catch (FusionException e)
-            {
-                // TODO optionally display the stack trace
-                System.err.println(e.getMessage());
-                return 1;
-            }
-
-            return 0;
+            return top.eval(myEvalText);
         }
     }
 }

@@ -2,7 +2,6 @@
 
 package com.amazon.fusion.cli;
 
-import com.amazon.fusion.FusionException;
 import com.amazon.fusion.TopLevel;
 
 
@@ -56,23 +55,11 @@ class Require
 
 
         @Override
-        public int execute()
+        public Object execute(TopLevel top)
             throws Exception
         {
-            try
-            {
-                TopLevel top = runtime().getDefaultTopLevel();
-
-                top.requireModule(myModulePath);
-            }
-            catch (FusionException e)
-            {
-                // TODO optionally display the stack trace
-                System.err.println(e.getMessage());
-                return 1;
-            }
-
-            return 0;
+            top.requireModule(myModulePath);
+            return null;
         }
     }
 }
