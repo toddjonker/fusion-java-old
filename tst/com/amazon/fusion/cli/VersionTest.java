@@ -3,41 +3,28 @@
 package com.amazon.fusion.cli;
 
 import static org.junit.Assert.assertEquals;
-import com.amazon.fusion.FusionException;
+import static org.junit.Assert.assertNotNull;
 import com.amazon.fusion.util.FusionJarInfo;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonTimestamp;
+import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
 import com.amazon.ion.system.IonSystemBuilder;
 import com.amazon.ion.util.JarInfo;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class VersionTest
     extends CliTestCase
 {
     @Test
-    public void testVersionNoArgs()
+    public void testFusionVersion()
         throws Exception
     {
-        run("version");
+        IonStruct version = getField(loadVersion(), "fusion_version");
 
-        IonSystem ionSystem = IonSystemBuilder.standard().build();
-
-        // This ensures that the output is pure Ion.
-        IonStruct result = (IonStruct) ionSystem.singleValue(stdoutText);
-
-        IonStruct version = (IonStruct) result.get("fusion_version");
-        checkFusionVersion(version);
-
-        version = (IonStruct) result.get("ion_version");
-        checkIonVersion(version);
-    }
-
-    private void checkFusionVersion(IonStruct version)
-        throws FusionException
-    {
         FusionJarInfo info = new FusionJarInfo();
 
         assertEquals(info.getReleaseLabel(),
@@ -50,8 +37,17 @@ public class VersionTest
                      getTimestamp(version, "build_time"));
     }
 
-    private void checkIonVersion(IonStruct version)
+
+    /**
+     * Fails due to issue:IONJAVA-600
+     * aka https://github.com/amzn/ion-java/issues/240
+     */
+    @Test @Ignore
+    public void testIonVersion()
+        throws Exception
     {
+        IonStruct version = getField(loadVersion(), "ion_version");
+
         JarInfo info = new JarInfo();
 
         assertEquals(info.getProjectVersion(),
@@ -60,15 +56,38 @@ public class VersionTest
                      getTimestamp(version, "build_time"));
     }
 
+
+    private IonStruct loadVersion()
+        throws Exception
+    {
+        run("version");
+
+        IonSystem ionSystem = IonSystemBuilder.standard().build();
+
+        // This ensures that the output is pure Ion.
+        IonStruct version = (IonStruct) ionSystem.singleValue(stdoutText);
+        assertNotNull("No version on stdout", version);
+        return version;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    private <T extends IonValue> T getField(IonStruct struct, String fieldName)
+    {
+        IonValue value = struct.get(fieldName);
+        assertNotNull("Missing field " + fieldName + " in " + struct, value);
+        return (T) value;
+    }
+
     private String getString(IonStruct struct, String fieldName)
     {
-        IonString value = (IonString) struct.get(fieldName);
+        IonString value = getField(struct, fieldName);
         return value.stringValue();
     }
 
     private Timestamp getTimestamp(IonStruct struct, String fieldName)
     {
-        IonTimestamp value = (IonTimestamp) struct.get(fieldName);
+        IonTimestamp value = getField(struct, fieldName);
         return value.timestampValue();
     }
 }

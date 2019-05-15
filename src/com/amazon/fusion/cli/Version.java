@@ -64,57 +64,74 @@ class Version
             IonTextWriterBuilder b = IonTextWriterBuilder.pretty();
             b.setCharset(IonTextWriterBuilder.ASCII);
 
-            JarInfo ionInfo = null;
-            FusionJarInfo fusionInfo = null;
-            try
-            {
-                ionInfo = new JarInfo();
-                fusionInfo = new FusionJarInfo();
-            }
-            catch (IonException | FusionException e) { }
-
             IonWriter w = b.build(out);
             w.stepIn(IonType.STRUCT);
             {
-                if (fusionInfo != null)
-                {
-                    w.setFieldName("fusion_version");
-                    w.stepIn(IonType.STRUCT);
-                    {
-                        w.setFieldName("release_label");
-                        w.writeString(fusionInfo.getReleaseLabel());
-
-                        w.setFieldName("brazil_major_version");
-                        w.writeString(fusionInfo.getBrazilMajorVersion());
-
-                        w.setFieldName("brazil_package_version");
-                        w.writeString(fusionInfo.getBrazilPackageVersion());
-
-                        w.setFieldName("build_time");
-                        w.writeTimestamp(fusionInfo.getBuildTime());
-                    }
-                    w.stepOut();
-                }
-
-                if (ionInfo != null)
-                {
-                    w.setFieldName("ion_version");
-                    w.stepIn(IonType.STRUCT);
-                    {
-                        w.setFieldName("project_version");
-                        w.writeString(ionInfo.getProjectVersion());
-
-                        w.setFieldName("build_time");
-                        w.writeTimestamp(ionInfo.getBuildTime());
-                    }
-                    w.stepOut();
-                }
+                emitFusionVersion(w);
+                emitIonVersion(w);
             }
             w.stepOut();
             w.finish();
             out.println();
 
             return 0;
+        }
+
+
+        private void emitFusionVersion(IonWriter w)
+            throws IOException
+        {
+            try
+            {
+                FusionJarInfo fusionInfo = new FusionJarInfo();
+
+                w.setFieldName("fusion_version");
+                w.stepIn(IonType.STRUCT);
+                {
+                    w.setFieldName("release_label");
+                    w.writeString(fusionInfo.getReleaseLabel());
+
+                    w.setFieldName("brazil_major_version");
+                    w.writeString(fusionInfo.getBrazilMajorVersion());
+
+                    w.setFieldName("brazil_package_version");
+                    w.writeString(fusionInfo.getBrazilPackageVersion());
+
+                    w.setFieldName("build_time");
+                    w.writeTimestamp(fusionInfo.getBuildTime());
+                }
+                w.stepOut();
+            }
+            catch (FusionException e)
+            {
+                w.setFieldName("error");
+                w.writeString(e.toString());
+            }
+        }
+
+        private void emitIonVersion(IonWriter w)
+            throws IOException
+        {
+            try
+            {
+                JarInfo ionInfo = new JarInfo();
+
+                w.setFieldName("ion_version");
+                w.stepIn(IonType.STRUCT);
+                {
+                    w.setFieldName("project_version");
+                    w.writeString(ionInfo.getProjectVersion());
+
+                    w.setFieldName("build_time");
+                    w.writeTimestamp(ionInfo.getBuildTime());
+                }
+                w.stepOut();
+            }
+            catch (IonException e)
+            {
+                w.setFieldName("error");
+                w.writeString(e.toString());
+            }
         }
     }
 }
