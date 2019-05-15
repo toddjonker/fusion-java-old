@@ -40,9 +40,7 @@ class Version
 
 
     @Override
-    Command.Executor makeExecutor(GlobalOptions globals,
-                                  Object        options,
-                                  String[]      arguments)
+    Executor makeExecutor(GlobalOptions globals, String[] args)
     {
         return new Executor(globals);
     }

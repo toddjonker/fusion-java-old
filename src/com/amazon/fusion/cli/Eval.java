@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -19,7 +19,7 @@ class Eval
         "eval EVAL_TEXT";
     private static final String HELP_BODY =
         "Evaluate an inline script from the given EVAL_TEXT. If the result of the\n" +
-        "last expression is not void, it is sent to standard output via `write`.\n" + 
+        "last expression is not void, it is sent to standard output via `write`.\n" +
         "Be aware that regular shell quoting/escaping rules take place first.";
 
 
@@ -31,9 +31,7 @@ class Eval
 
 
     @Override
-    Executor makeExecutor(GlobalOptions globals,
-                          Object        options,
-                          String[]      args)
+    Executor makeExecutor(GlobalOptions globals, String[] args)
         throws UsageException
     {
         if (args.length != 1) throw usage();

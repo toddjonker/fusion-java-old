@@ -1,4 +1,4 @@
-// Copyright (c) 2005-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2005-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -298,7 +298,7 @@ abstract class Command
 
     /**
      * Create a new object to receive command-specific options via injection.
-     * Subclasses should override this is they have options.
+     * Subclasses should override this if they have options.
      *
      * @param globals the populated global options.
      *
@@ -340,6 +340,14 @@ abstract class Command
 
     Executor makeExecutor(GlobalOptions globals,
                           Object        options,
+                          String[]      arguments)
+        throws UsageException
+    {
+        return makeExecutor(globals, arguments);
+    }
+
+
+    Executor makeExecutor(GlobalOptions globals,
                           String[]      arguments)
         throws UsageException
     {

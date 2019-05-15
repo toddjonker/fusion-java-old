@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -42,9 +42,7 @@ class Document
 
 
     @Override
-    Executor makeExecutor(GlobalOptions globals,
-                          Object        options,
-                          String[]      args)
+    Executor makeExecutor(GlobalOptions globals, String[] args)
     {
         if (args.length != 2) return null;
 

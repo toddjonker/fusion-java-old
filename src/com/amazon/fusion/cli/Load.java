@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -31,9 +31,7 @@ class Load
 
 
     @Override
-    Executor makeExecutor(GlobalOptions globals,
-                          Object        options,
-                          String[]      args)
+    Executor makeExecutor(GlobalOptions globals, String[] args)
         throws UsageException
     {
         if (args.length != 1) throw usage();

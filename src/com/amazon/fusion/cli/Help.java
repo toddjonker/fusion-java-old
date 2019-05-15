@@ -42,11 +42,9 @@ class Help
 
 
     @Override
-    Executor makeExecutor(GlobalOptions globals,
-                          Object        options,
-                          String[]      arguments)
+    Executor makeExecutor(GlobalOptions globals, String[] args)
     {
-        return new Executor(globals, arguments);
+        return new Executor(globals, args);
     }
 
 

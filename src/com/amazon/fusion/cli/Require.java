@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -16,7 +16,7 @@ class Require
         "require MODULE_NAME";
     private static final String HELP_BODY =
         "Requires a single Fusion module. Chain commands to require multiple modules\n" +
-        "By itself, Fusion produces effect to output, but opens up modules for subsequent commands\n" + 
+        "By itself, Fusion produces effect to output, but opens up modules for subsequent commands\n" +
         "Ex: ` fusion require /fusion/struct ';' eval '(begin (define s (mutable_struct \"a\" 1)) (put_m s \"modified\" true) s)' ` ==> {a:1,modified:true}\n" +
         "Be aware that regular shell quoting/escaping rules take place first.";
 
@@ -29,9 +29,7 @@ class Require
 
 
     @Override
-    Executor makeExecutor(GlobalOptions globals,
-                          Object        options,
-                          String[]      args)
+    Executor makeExecutor(GlobalOptions globals, String[] args)
         throws UsageException
     {
         if (args.length != 1) throw usage();
