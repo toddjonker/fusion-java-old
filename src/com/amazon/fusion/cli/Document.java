@@ -43,6 +43,7 @@ class Document
 
     @Override
     Executor makeExecutor(GlobalOptions globals, String[] args)
+        throws UsageException
     {
         if (args.length != 2) return null;
 
@@ -51,23 +52,17 @@ class Document
 
         if (outputDir.isFile())
         {
-            System.err.print("Output location is a file: ");
-            System.err.println(outputDir);
-            return null;
+            throw usage("Output location is a file: " + outputDir);
         }
 
         if (! repoDir.isDirectory())
         {
-            System.err.print("Repository is not a directory: ");
-            System.err.println(repoDir);
-            return null;
+            throw usage("Repository is not a directory: " + repoDir);
         }
 
         if (! new File(repoDir, "src").isDirectory())
         {
-            System.err.print("Repository has no src directory: ");
-            System.err.println(repoDir);
-            return null;
+            throw usage("Repository has no src directory: " + repoDir);
         }
 
         return new Executor(globals, outputDir, repoDir);
