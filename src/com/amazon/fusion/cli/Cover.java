@@ -1,9 +1,10 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
 import com.amazon.fusion._Private_CoverageWriter;
 import java.io.File;
+import java.io.PrintWriter;
 
 /**
  *
@@ -29,7 +30,7 @@ class Cover
 
 
     @Override
-    Executor makeExecutor(String[] args)
+    Executor makeExecutor(GlobalOptions globals, String[] args)
         throws UsageException
     {
         if (args.length != 2) return null;
@@ -40,9 +41,7 @@ class Cover
         File dataDir = new File(dataPath);
         if (! dataDir.isDirectory())
         {
-            String message =
-                "Coverage data directory isn't a directory: " + dataPath;
-            throw new UsageException(this, message);
+            throw usage("Coverage data directory is not a directory: " + dataPath);
         }
 
         String reportPath = args[1];
@@ -51,29 +50,29 @@ class Cover
         File reportDir = new File(reportPath);
         if (reportDir.exists() && ! reportDir.isDirectory())
         {
-            String message =
-                "Report directory isn't a directory: " + reportPath;
-            throw new UsageException(this, message);
+            throw usage("Report directory is not a directory: " + reportPath);
         }
 
-        return new Executor(dataDir, reportDir);
+        return new Executor(globals, dataDir, reportDir);
     }
 
 
     static class Executor
-        implements Command.Executor
+        extends StdioExecutor
     {
         private final File myDataDir;
         private final File myReportDir;
 
-        private Executor(File dataDir, File reportDir)
+        private Executor(GlobalOptions globals, File dataDir, File reportDir)
         {
+            super(globals);
+
             myDataDir   = dataDir;
             myReportDir = reportDir;
         }
 
         @Override
-        public int execute()
+        public int execute(PrintWriter out, PrintWriter err)
             throws Exception
         {
             _Private_CoverageWriter renderer =
@@ -81,8 +80,8 @@ class Cover
 
             renderer.renderFullReport(myReportDir);
 
-            System.out.print("Wrote Fusion coverage report to ");
-            System.out.println(myReportDir.getPath());
+            out.print("Wrote Fusion coverage report to ");
+            out.println(myReportDir.getPath());
 
             return 0;
         }
