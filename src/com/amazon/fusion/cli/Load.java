@@ -38,7 +38,7 @@ class Load
         File file = new File(fileName);
         if (! (file.canRead() && file.isFile()))
         {
-            throw usage("Not a readable file: " + fileName);
+            throw usage("Script is not a readable file: " + fileName);
         }
 
         return new Executor(globals, file);

@@ -159,6 +159,8 @@ class GlobalOptions
             }
         }
 
+        builder.setInitialCurrentOutputPort(myStdout);
+
         return builder;
     }
 
