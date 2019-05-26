@@ -2,6 +2,7 @@
 
 package com.amazon.fusion.cli;
 
+import java.io.InputStream;
 import java.io.PrintStream;
 
 /**
@@ -14,6 +15,7 @@ public final class Cli
 
     public static void main(String[] args)
     {
+        InputStream stdin  = System.in;
         PrintStream stdout = System.out;
         PrintStream stderr = System.err;
 
@@ -21,7 +23,7 @@ public final class Cli
 
         try
         {
-            CommandFactory cf = new CommandFactory(stdout, stderr);
+            CommandFactory cf = new CommandFactory(stdin, stdout, stderr);
             errorCode = cf.executeCommandLine(args);
         }
         catch (Throwable e)

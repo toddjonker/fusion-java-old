@@ -9,6 +9,7 @@ import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.ion.IonException;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -42,6 +43,7 @@ class GlobalOptions
         ;
 
 
+    private InputStream     myStdin;
     private PrintStream     myStdout;
     private PrintStream     myStderr;
     private String          myBootstrapPath;
@@ -50,10 +52,16 @@ class GlobalOptions
     private FusionRuntime   myRuntime;
 
 
-    GlobalOptions(PrintStream stdout, PrintStream stderr)
+    GlobalOptions(InputStream stdin, PrintStream stdout, PrintStream stderr)
     {
+        myStdin  = stdin;
         myStdout = stdout;
         myStderr = stderr;
+    }
+
+    InputStream stdin()
+    {
+        return myStdin;
     }
 
     PrintStream stdout()

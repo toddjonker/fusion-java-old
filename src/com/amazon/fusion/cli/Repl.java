@@ -2,13 +2,18 @@
 
 package com.amazon.fusion.cli;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.fusion.TopLevel;
 import com.amazon.fusion._Private_Trampoline;
 import com.amazon.ion.IonException;
+import java.io.BufferedReader;
 import java.io.Console;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
 /**
@@ -48,7 +53,15 @@ class Repl
         Console console = System.console();
         if (console == null)
         {
-            throw new UsageException("There is no console available for the REPL.");
+            InputStreamReader isr =
+                new InputStreamReader(globals.stdin(), UTF_8);
+            BufferedReader in = new BufferedReader(isr);
+
+            OutputStreamWriter osw =
+                new OutputStreamWriter(globals.stdout(), UTF_8);
+            PrintWriter out = new PrintWriter(osw);
+
+            return new Executor(globals, in, out);
         }
 
         return new Executor(globals, console);
@@ -58,9 +71,10 @@ class Repl
     private static class Executor
         extends FusionExecutor
     {
-        private       TopLevel      myTopLevel;
-        private final Console       myConsole;
-        private final PrintWriter   myOut;
+        private       TopLevel       myTopLevel;
+        private final Console        myConsole;
+        private final BufferedReader myIn;
+        private final PrintWriter    myOut;
 
 
         Executor(GlobalOptions globals, Console console)
@@ -68,7 +82,17 @@ class Repl
             super(globals);
 
             myConsole = console;
+            myIn      = null;
             myOut     = console.writer();
+        }
+
+        Executor(GlobalOptions globals, BufferedReader in, PrintWriter out)
+        {
+            super(globals);
+
+            myConsole = null;
+            myIn      = in;
+            myOut     = out;
         }
 
 
@@ -83,7 +107,7 @@ class Repl
 
         @Override
         public int execute(PrintWriter out, PrintWriter err)
-            throws FusionException, UsageException
+            throws Exception
         {
             try
             {
@@ -118,9 +142,10 @@ class Repl
 
 
         private boolean rep()
+            throws IOException
         {
             blue("$");
-            String line = myConsole.readLine(" ");
+            String line = read();
 
             if (line == null)
             {
@@ -150,6 +175,19 @@ class Repl
             return true;
         }
 
+        private String read()
+            throws IOException
+        {
+            if (myConsole != null)
+            {
+                return myConsole.readLine(" ");
+            }
+            else
+            {
+                myOut.flush();
+                return myIn.readLine();
+            }
+        }
 
         private void blue(String text)
         {

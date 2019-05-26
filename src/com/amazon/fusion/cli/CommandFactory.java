@@ -3,6 +3,7 @@
 package com.amazon.fusion.cli;
 
 import com.amazon.fusion.cli.Command.Executor;
+import java.io.InputStream;
 import java.io.PrintStream;
 
 class CommandFactory
@@ -12,11 +13,13 @@ class CommandFactory
     private static final int USAGE_ERROR_CODE = 1;
 
 
+    private final InputStream myStdin;
     private final PrintStream myStdout;
     private final PrintStream myStderr;
 
-    CommandFactory(PrintStream stdout, PrintStream stderr)
+    CommandFactory(InputStream stdin, PrintStream stdout, PrintStream stderr)
     {
+        myStdin  = stdin;
         myStdout = stdout;
         myStderr = stderr;
     }
@@ -142,7 +145,7 @@ class CommandFactory
     {
         int errorCode = 0;
 
-        GlobalOptions globals = new GlobalOptions(myStdout, myStderr);
+        GlobalOptions globals = new GlobalOptions(myStdin, myStdout, myStderr);
 
         try
         {

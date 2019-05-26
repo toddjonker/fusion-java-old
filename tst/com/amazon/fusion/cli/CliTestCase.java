@@ -7,27 +7,19 @@ import com.amazon.fusion.junit.StdioTestCase;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.junit.After;
-import org.junit.Before;
 
 public class CliTestCase
     extends StdioTestCase
 {
-    private CommandFactory myCommandFactory;
-
     protected String stdoutText;
     protected String stderrText;
 
 
-    @Before
-    public void setupCli()
-    {
-        myCommandFactory = new CommandFactory(stdout(), stderr());
-    }
-
     @After
     public void tearDownCli()
     {
-        myCommandFactory = null;
+        stdoutText = null;
+        stderrText = null;
     }
 
 
@@ -40,14 +32,21 @@ public class CliTestCase
     void run(int expectedErrorCode, String... commandLine)
         throws Exception
     {
-        commandLine = prependGlobalOptions(commandLine);
-
-        int errorCode = myCommandFactory.executeCommandLine(commandLine);
+        int errorCode = execute(commandLine);
 
         assertEquals("error code", expectedErrorCode, errorCode);
 
         stdoutText = stdoutToString();
         stderrText = stderrToString();
+    }
+
+    private int execute(String... commandLine)
+        throws Exception
+    {
+        commandLine = prependGlobalOptions(commandLine);
+
+        CommandFactory cf = new CommandFactory(stdin(), stdout(), stderr());
+        return cf.executeCommandLine(commandLine);
     }
 
     private String[] prependGlobalOptions(String[] commandLine)

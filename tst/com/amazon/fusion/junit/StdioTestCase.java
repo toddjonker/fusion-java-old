@@ -3,15 +3,23 @@
 package com.amazon.fusion.junit;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.enumeration;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.SequenceInputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.LinkedList;
 import org.junit.After;
 import org.junit.Before;
 
 
 public class StdioTestCase
 {
+    private LinkedList<InputStream> myStdinData;
+    private InputStream             myStdin;
+
     private ByteArrayOutputStream myStdoutBytes;
     private ByteArrayOutputStream myStderrBytes;
 
@@ -32,12 +40,56 @@ public class StdioTestCase
     @After
     public void tearDownStdio()
     {
+        myStdinData = null;
+        myStdin     = null;
+
         myStdoutBytes = null;
         myStderrBytes = null;
         myStdout = null;
         myStderr = null;
     }
 
+
+    protected void supplyInput(InputStream data)
+    {
+        if (myStdinData == null)
+        {
+            myStdinData = new LinkedList<>();
+        }
+        myStdinData.push(data);
+    }
+
+    protected void supplyInput(byte[] bytes)
+    {
+        supplyInput(new ByteArrayInputStream(bytes));
+    }
+
+    protected void supplyInput(String s)
+    {
+        supplyInput(s.getBytes(UTF_8));
+    }
+
+
+    /**
+     * Lazily constructs the standard input stream.
+     * The stream will be empty unless {@link #supplyInput(String)} has been
+     * called.
+     */
+    protected InputStream stdin()
+    {
+        if (myStdin == null)
+        {
+            if (myStdinData != null)
+            {
+                myStdin = new SequenceInputStream(enumeration(myStdinData));
+            }
+            else
+            {
+                myStdin = new ByteArrayInputStream(new byte[0]);
+            }
+        }
+        return myStdin;
+    }
 
     protected PrintStream stdout()
     {
