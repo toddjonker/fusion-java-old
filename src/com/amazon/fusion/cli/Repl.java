@@ -5,9 +5,7 @@ package com.amazon.fusion.cli;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
-import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.fusion.TopLevel;
-import com.amazon.fusion._Private_Trampoline;
 import com.amazon.ion.IonException;
 import java.io.BufferedReader;
 import java.io.Console;
@@ -49,6 +47,8 @@ class Repl
         {
             return null;  // Evokes a general usage exception
         }
+
+        globals.collectDocumentation();
 
         Console console = System.console();
         if (console == null)
@@ -95,15 +95,6 @@ class Repl
             myOut     = out;
         }
 
-
-        @Override
-        FusionRuntimeBuilder runtimeBuilder()
-            throws UsageException
-        {
-            FusionRuntimeBuilder builder = super.runtimeBuilder();
-            _Private_Trampoline.setDocumenting(builder, true);
-            return builder;
-        }
 
         @Override
         public int execute(PrintWriter out, PrintWriter err)

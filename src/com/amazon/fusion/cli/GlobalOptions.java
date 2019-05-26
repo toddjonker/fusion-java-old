@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionRuntimeBuilder.PROPERTY_BOOTSTRAP_REPOSITO
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntime;
 import com.amazon.fusion.FusionRuntimeBuilder;
+import com.amazon.fusion._Private_Trampoline;
 import com.amazon.ion.IonException;
 import java.io.File;
 import java.io.IOException;
@@ -15,9 +16,9 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 /**
- *
+ * Stores options and data shared by the entire execution sequence.
  */
-class GlobalOptions
+final class GlobalOptions
 {
     static final String HELP =
         "\n\n"
@@ -49,6 +50,7 @@ class GlobalOptions
     private String          myBootstrapPath;
     private ArrayList<File> myRepositories;
     private ArrayList<File> myCatalogs;
+    private boolean         myDocsEnabled;
     private FusionRuntime   myRuntime;
 
 
@@ -115,6 +117,12 @@ class GlobalOptions
     }
 
 
+    void collectDocumentation()
+    {
+        myDocsEnabled = true;
+    }
+
+
     FusionRuntimeBuilder runtimeBuilder()
         throws UsageException
     {
@@ -169,13 +177,15 @@ class GlobalOptions
 
         builder.setInitialCurrentOutputPort(myStdout);
 
+        _Private_Trampoline.setDocumenting(builder, myDocsEnabled);
+
         return builder;
     }
 
     FusionRuntime runtime()
         throws FusionException, UsageException
     {
-        // Lazily loading a runtime that can be global across commands, centralized more vs original FusionExecutor implementation
+        // Lazily loading a runtime that can be global across commands.
         if (myRuntime == null)
         {
             FusionRuntimeBuilder builder = runtimeBuilder();
