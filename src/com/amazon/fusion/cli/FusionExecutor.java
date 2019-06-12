@@ -7,7 +7,6 @@ import static com.amazon.fusion.FusionVoid.isVoid;
 import com.amazon.fusion.ExitException;
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntime;
-import com.amazon.fusion.FusionRuntimeBuilder;
 import com.amazon.fusion.TopLevel;
 import java.io.PrintWriter;
 
@@ -25,13 +24,6 @@ abstract class FusionExecutor
         super(globals);
 
         myGlobalOptions = globals;
-    }
-
-
-    FusionRuntimeBuilder runtimeBuilder()
-        throws UsageException
-    {
-        return myGlobalOptions.runtimeBuilder();
     }
 
 
