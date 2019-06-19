@@ -58,6 +58,7 @@ to apply optimizations to the generated code.
 
   (provide
     for_fold
+    fors_fold
     for_list
     fors_list)
 
@@ -274,6 +275,21 @@ Helper form for `for_fold_derived`.
                       stx))))))))))
 
 
+  (define (expand_ffd stx nested)
+    (let [(subforms (tail (syntax_unwrap stx)))]
+      (if (is_pair subforms)
+        (let [(original (head subforms)),
+              (rest     (tail subforms))]
+          (datum_to_syntax
+            (pair
+              (quote for_foldX_derived)
+              (pair (sexp original nested false (quote ()))
+                    rest))
+            ctx
+            stx))
+        (wrong_syntax stx))))
+
+
   (define_syntax for_fold_derived
     '''
     (for_fold_derived original
@@ -285,22 +301,25 @@ Like `for_fold`, but uses the `original` syntax object when issuing error
 messages.
     '''
     (lambda (stx)
-      (let [(subforms (tail (syntax_unwrap stx)))]
-        (if (is_pair subforms)
-          (let [(original (head subforms)),
-                (rest     (tail subforms))]
-            (datum_to_syntax
-              (pair
-                (quote for_foldX_derived)
-                (pair (sexp original false false (quote ()))
-                      rest))
-              ctx
-              stx))
-          (wrong_syntax stx)))))
+      (expand_ffd stx false)))
+
+
+  (define_syntax fors_fold_derived
+    '''
+    (fors_fold_derived original
+      [(accum-id init-expr), ...]
+      (for-clause ...)
+      body ...+)
+
+Like `fors_fold`, but uses the `original` syntax object when issuing error
+messages.
+    '''
+    (lambda (stx)
+      (expand_ffd stx true)))
 
 
 //=============================================================================
-// for_fold
+// for_fold, fors_fold
 
   (define_syntax for_fold
     '''
@@ -320,6 +339,24 @@ The results of the `for_fold` expression are the final accumulator values.
     (lambda (stx)
       (datum_to_syntax
         (pair (quote for_fold_derived)
+          (pair stx (tail (syntax_unwrap stx))))
+        ctx
+        stx)))
+
+  (define_syntax fors_fold
+    '''
+    (fors_fold
+      [(accum-id init-expr), ...]
+      (for-clause ...)
+      body ...+)
+
+Like `for_fold`, except the series are iterated in nested loops instead of in
+parallel. Each clause's bindings are made available to the following clauses
+as well as the `body`.
+    '''
+    (lambda (stx)
+      (datum_to_syntax
+        (pair (quote fors_fold_derived)
           (pair stx (tail (syntax_unwrap stx))))
         ctx
         stx)))
