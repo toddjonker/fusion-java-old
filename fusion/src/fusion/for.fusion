@@ -365,6 +365,29 @@ as well as the `body`.
 //=============================================================================
 // for_list, fors_list
 
+  (define (expand_for_list stx derived)
+    (let [(subforms (unsafe_pair_tail (syntax_unwrap stx)))]
+      (when (< (size subforms) 2)
+        (wrong_syntax stx "expecting for-clauses and body"))
+      (let_values [((clauses body) (split_letlike_subforms stx subforms))]
+        (let [(begin_body (pair (quote begin) body))]
+
+          // (for_fold_derived stx
+          //   [(result (stretchy_list))]
+          //   CLAUSES
+          //   (add_m result (begin BODY ...)))
+
+          (datum_to_syntax
+            (quasiquote
+              ((unquote derived)
+                (unquote stx)
+                [(result (stretchy_list))]
+                (unquote clauses)
+                (add_m result (unquote begin_body))))
+            ctx
+            stx)))))
+
+
   (define_syntax for_list
     '''
     (for_list [(id series), ...] body ...+)
@@ -388,27 +411,7 @@ If no bindings are declared, then the body is executed once.
       (+ even odd))             =>  [1, 5, 9]
     '''
     (lambda (stx)
-
-      // (for_fold_derived stx
-      //   [(result (stretchy_list))]
-      //   CLAUSES
-      //   (add_m result (begin BODY ...)))
-
-      (let [(subforms (unsafe_pair_tail (syntax_unwrap stx)))]
-        (when (< (size subforms) 2)
-          (wrong_syntax stx "expecting for-clauses and body"))
-        (let_values [((clauses body) (split_letlike_subforms stx subforms))]
-          (let [(begin_body (pair (quote begin) body))]
-            (datum_to_syntax
-              (quasiquote
-                (for_fold_derived
-                  (unquote stx)
-                  [(result (stretchy_list))]
-                  (unquote clauses)
-                  (add_m result (unquote begin_body))))
-              ctx
-              stx))))))
-
+      (expand_for_list stx (quote for_fold_derived))))
 
 
   (define_syntax fors_list
@@ -437,32 +440,5 @@ for list comprehension.
       z)                                   => [1, 2, 3, 4]
     '''
     (lambda (stx)
-      (let [(subforms (unsafe_pair_tail (syntax_unwrap stx)))]
-        (when (< (size subforms) 2)
-          (wrong_syntax stx "expecting bindings and body"))
-        (let_values [((bindings body) (split_letlike_subforms stx subforms))]
-          (datum_to_syntax
-            (if (not (is_pair bindings))
-              /* Base case -- no bindings */
-              (sexp (quote stretchy_list)          // (stretchy_list
-                    (pair (quote begin) body))     //   (begin BODY...))
-              (let [(binding (unsafe_pair_head bindings)),
-                    (others  (unsafe_pair_tail bindings))]
-                (if (is_empty others)
-                  /* Base case -- single binding */
-                  (pair (quote_syntax for_list)          // (for_list
-                        (pair bindings                   //    BINDINGS
-                              body))                     //    BODY...)
-                  /* Recursive case */
-                  (quasiquote
-                    (apply append_m                      // (apply append_m
-                      (stretchy_list)                    //   (stretchy_list)
-                      ((unquote (quote_syntax for_list)) //   (for_list
-                         [(unquote binding)]             //     [BINDING]
-                         (unquote
-                           (pair (quote_syntax fors_list)//     (fors_list
-                                 (pair others            //       (OTHERS...)
-                                       body)))))))))     //       BODY...)))
-            ctx
-            stx)))))
+      (expand_for_list stx (quote fors_fold_derived))))
 )
