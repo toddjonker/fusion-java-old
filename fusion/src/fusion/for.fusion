@@ -363,32 +363,100 @@ as well as the `body`.
 
 
 //=============================================================================
-// for_list, fors_list
+// Derived-form helpers
 
-  (define (expand_for_list stx derived)
+  (define (for_variant_stx stx derived_id_stx fold_bind_stx wrap rhs_wrap combine)
+    '''
+Generates an expression for some variant of `for`, using `for_fold_derived` and
+applying some specialized syntax transforms to relevant components.
+
+    * `derived_id_stx` is either `for_fold_derived` or `fors_fold_derived`.
+    * `fold_bind_stx` is syntax for the accumulator initializers.
+    * `wrap` is a transform procedure applied to the results of the iteration.
+    * `rhs_wrap` is a transform procedure applied to each binding RHS.
+    * `combine` is a transform procedure applied to the body. The results of the
+      (generated) combination expression become the next accumulator values.
+    '''
     (let [(subforms (unsafe_pair_tail (syntax_unwrap stx)))]
-      (when (< (size subforms) 2)
-        (wrong_syntax stx "expecting for-clauses and body"))
-      (let_values [((clauses body) (split_letlike_subforms stx subforms))]
-        (let [(begin_body (pair (quote begin) body))]
-
-          // (for_fold_derived stx
-          //   [(result (stretchy_list))]
-          //   CLAUSES
-          //   (add_m result (begin BODY ...)))
-
+      (if (and (>= (size subforms) 2)
+               (is_sequence (syntax_unwrap (head subforms))))
+          // Got a reasonable shape, so we can proceed.
+          (let_values [((clauses body) (split_letlike_subforms stx subforms))]
+            // Wrap the RHSs
+            (let [(wrapped_clauses
+                    (map (|c| (if (and (is_pair c) (is_pair (tail c)))
+                                (pair (head c) (rhs_wrap (tail c)))
+                                // Let derived form complain about malformed
+                                // for-clause, no need to wrap it.
+                                c))
+                      clauses))]
+              (datum_to_syntax
+                (wrap (datum_to_syntax
+                        (sexp derived_id_stx
+                          stx
+                          fold_bind_stx
+                          wrapped_clauses
+                          (combine (datum_to_syntax
+                                     (apply sexp (quote let) [] body)
+                                     ctx
+                                     stx)))
+                        ctx
+                        stx))
+                ctx
+                stx)))
+          // Malformed subforms; let the derived form complain.
           (datum_to_syntax
-            (quasiquote
-              ((unquote derived)
-                (unquote stx)
-                [(result (stretchy_list))]
-                (unquote clauses)
-                (add_m result (unquote begin_body))))
-            ctx
+            (apply sexp derived_id_stx stx fold_bind_stx subforms)))))
+
+  (define_syntax define_syntax_via_derived
+    (lambda (stx)
+      (let [(subforms (unsafe_pair_tail (syntax_unwrap stx)))]
+        (let [(id         (element subforms 0)),
+              (docs       (element subforms 1)),
+              (derived_id (element subforms 2)),
+              (fold_bind  (element subforms 3)),
+              (wrap       (element subforms 4)),
+              (rhs_wrap   (element subforms 5)),
+              (combine    (element subforms 6))]
+          (quasisyntax
+            (define_syntax (unsyntax id)
+              (unsyntax docs)
+              (lambda (stx)
+                (for_variant_stx stx
+                  (quote_syntax (unsyntax derived_id))
+                  (quote_syntax (unsyntax fold_bind))
+                  (unsyntax wrap)
+                  (unsyntax rhs_wrap)
+                  (unsyntax combine)))))))))
+
+  (define_syntax define_for_variants
+    (lambda (stx)
+      (let [(subforms (unsafe_pair_tail (syntax_unwrap stx)))]
+        (let [(for       (element subforms 0)),
+              (for_docs  (element subforms 1)),
+              (fors      (element subforms 2)),
+              (fors_docs (element subforms 3)),
+              (fold_bind (element subforms 4)),
+              (wrap      (element subforms 5)),
+              (rhs_wrap  (element subforms 6)),
+              (combine   (element subforms 7))]
+          (datum_to_syntax
+            (QQ (begin
+                  (define_syntax_via_derived (UQ for) (UQ for_docs)
+                    for_fold_derived
+                    (UQ fold_bind) (UQ wrap) (UQ rhs_wrap) (UQ combine))
+                  (define_syntax_via_derived (UQ fors) (UQ fors_docs)
+                    fors_fold_derived
+                    (UQ fold_bind) (UQ wrap) (UQ rhs_wrap) (UQ combine))))
+            (quote_syntax context)
             stx)))))
 
 
-  (define_syntax for_list
+//=============================================================================
+// for_list, fors_list
+
+  (define_for_variants
+    for_list
     '''
     (for_list [(id series), ...] body ...+)
     (for_list [((id ...+) series), ...] body ...+)
@@ -410,11 +478,8 @@ If no bindings are declared, then the body is executed once.
        (odd  [1, 3, 5])]
       (+ even odd))             =>  [1, 5, 9]
     '''
-    (lambda (stx)
-      (expand_for_list stx (quote for_fold_derived))))
 
-
-  (define_syntax fors_list
+    fors_list
     '''
     (fors_list [(id series), ...] body ...+)
     (fors_list [((id ...+) series), ...] body ...+)
@@ -439,6 +504,10 @@ for list comprehension.
                 (z y)]
       z)                                   => [1, 2, 3, 4]
     '''
-    (lambda (stx)
-      (expand_for_list stx (quote fors_fold_derived))))
+
+    [(result (stretchy_list))]
+    (lambda (result) result)
+    (lambda (rhs) rhs)
+    (lambda (body) (quasisyntax (add_m result (unsyntax body)))))
+
 )
