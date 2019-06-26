@@ -126,11 +126,11 @@ an element within the collection.
        (if (is_int key)
          (if (and key  // null check
                   (<= 0 key))
-           (let loop [(key key), (s collection)]
+           (let loop [(k key), (s collection)]
              (if (is_pair s)
-               (if (= 0 key)
+               (if (= 0 k)
                  (unsafe_pair_head s)
-                 (loop (- key 1) (unsafe_pair_tail s)))
+                 (loop (- k 1) (unsafe_pair_tail s)))
                (raise_argument_error "element" "valid position"
                  1 collection key)))
            (raise_argument_error "element" "valid position" 1 collection key))
