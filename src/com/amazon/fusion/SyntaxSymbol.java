@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -238,18 +238,7 @@ final class SyntaxSymbol
     {
         if (myBinding == null)
         {
-            BaseSymbol name = getName();
-            assert name.isNonEmpty();
-
-            if (myWraps == null)
-            {
-                myBinding = new FreeBinding(name);
-            }
-            else
-            {
-                myBinding = myWraps.resolve(name);
-                if (myBinding == null) myBinding = new FreeBinding(name);
-            }
+            myBinding = uncachedResolve();
         }
         return myBinding;
     }
@@ -263,14 +252,8 @@ final class SyntaxSymbol
      */
     Binding uncachedResolve()
     {
-        if (myBinding != null) return myBinding;
-        BaseSymbol name = getName();
-        if (myWraps != null)
-        {
-            Binding b = myWraps.resolve(name);
-            if (b != null) return b;
-        }
-        return new FreeBinding(name);
+        Binding b = uncachedResolveMaybe();
+        return (b != null ? b : new FreeBinding(getName()));
     }
 
 
@@ -352,27 +335,14 @@ final class SyntaxSymbol
 
     /**
      * Checks if this symbol is bound to a {@link SyntacticForm} in the given
-     * enviroment.  If so, cache the binding and return the form.  Otherwise
+     * environment.  If so, cache the binding and return the form.  Otherwise
      * do nothing.
      *
      * @return may be null.
      */
     SyntacticForm resolveSyntaxMaybe(Environment env)
     {
-        Binding b = null;
-        if (myBinding != null)
-        {
-            b = myBinding;
-        }
-        else if (myWraps != null)
-        {
-            String name = stringValue();
-            if (name != null && name.length() != 0)
-            {
-                b = myWraps.resolve(getName());
-            }
-        }
-
+        Binding b = uncachedResolveMaybe();
         if (b != null)
         {
             Object resolved = env.namespace().lookup(b);
