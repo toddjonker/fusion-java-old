@@ -3,7 +3,85 @@
 (module for '/fusion/private/kernel'
 
   '''
-Generic collection "comprehension" forms.
+The `for`-family of syntax forms enables concise, consistent iteration
+over many different varieties of aggregate data types, known as _series_ types.
+The variants differ in how the results are accumulated, but all accept the same
+inputs and traverse them in the same manner.
+
+The basic form is `for` itself:
+
+    (for [(a [1, 2]),
+          (b (sexp "a" "b"))]
+      (display (sexp a b)))
+
+Here, `a` and `b` are bound successively to the individual elements of a list
+and a sexp, respectively, then the body (a call to `display`) is evaluated
+with those bindings. Next, `a` and `b` are given fresh storage locations and
+new bindings to the next elements of the series.
+
+
+For-clauses
+-----------
+
+Common to all `for` variants is the _for-clause_, a syntax fragment that
+declares one or more identifiers and an expression evaluating to a series value.
+Syntactically, these are similar to the binding clauses of the `let`-family of
+binding forms, allowing one or more bound identifiers:
+
+    for-clause := (id series_expr)
+                | ((id ...+) series_expr)
+
+In all forms, the `series_expr`s are evaluated once before iteration begins,
+and the result must be a value of one of the series types.  The number of `id`s
+in a for-clause must match the number of values produced by each step of the
+series.
+
+
+Series Types
+------------
+
+A _series_ is a value that can be traversed by the `for` forms.  Traversing a
+series consists of a sequence of steps, and each step produces one or more
+values (consistent through the entire traversal).
+Depending on the type of series, the order in which the series is traversed may
+or may not be predictable.
+
+The following types are usable as series:
+
+  * Sequences (sexps and lists) are traversed in order, producing a single value
+    at each step.
+  * Structs are traversed in an undefined order. Each step produces a single
+    field as two values, the field name as a `symbol`  and the field value.
+  * Iterators produce one or more values as per `iterator_next`.
+
+
+Flat and Nested Traversal
+-------------------------
+
+The family variants come in pairs, starting with `for` or `fors`. When given a
+single for-clause, these behave identically, but given multiple clauses they
+behave differently.
+
+A `for` expression traverses all of its series in lock-step, taking one step on
+each series for each evaluation of the body:
+
+    (for [(a [1, 2]),
+          (b [5, 7])]
+      (display (sexp a b)))
+    =>
+    (1 5)(2 7)
+
+A `fors` expression traverses its series as nested loops, as if each clause
+were given in its own nested `for` expression:
+
+    (fors [(a [1, 2]),
+           (b [5, 7])]
+      (display (sexp a b)))
+    =>
+    (1 5)(1 7)(2 5)(2 7)
+
+This is similar to the distinction between `let` and `lets`, and like those
+forms the bound identifiers have different scopes in the two forms.
   '''
 
 
@@ -57,10 +135,10 @@ to apply optimizations to the generated code.
     (rename_in "/fusion/base" (quote Q) (quasiquote QQ) (unquote UQ)))
 
   (provide
-    for_fold
-    fors_fold
-    for_list
-    fors_list)
+    for           fors
+    for_fold      fors_fold
+    for_list      fors_list
+  )
 
 
   (define ctx  // PRIVATE!
@@ -453,25 +531,64 @@ applying some specialized syntax transforms to relevant components.
 
 
 //=============================================================================
+// for, fors
+
+  (define_for_variants
+    for
+    '''
+    (for [for-clause, ...] body ...+)
+
+    for-clause := (id series_expr)
+                | ((id ...+) series_expr)
+
+Iterates series in parallel, binding the corresponding `id`s to the values
+produced at each step and then evaluating `body`.
+
+The `series_exprs` are first evaluated left-to-right, and each must return
+a series value. While every series can produce more elements, they are retrieved
+in left-to-right order, bound to their `id`s at new storage slots, and then the
+`body` is evaluated.
+The results of the `body` are ignored; the result of `for` is always void.
+
+If no for-clauses are provided, then the body is executed once.
+
+    (for [(a [1, 2]),
+          (b [5, 7])]
+      (display (sexp a b)))
+    =>
+    (1 5)(2 7)
+    '''
+
+    fors
+    '''
+    (fors [for-clause, ...] body ...+)
+
+Like `for`, but the series are iterated in nested loops.
+The scope of each binding identifier includes the `series_expr`s of later
+for-clauses, as well as the `body`.
+
+    (fors [(a [1, 2]),
+           (b [5, 7])]
+      (display (sexp a b)))
+    =>
+    (1 5)(1 7)(2 5)(2 7)
+    '''
+
+    [(fold_var (void))]
+    identity
+    identity
+    (|r| (quasisyntax (begin (unsyntax r) (void)))))  // ignore the body value
+
+
+//=============================================================================
 // for_list, fors_list
 
   (define_for_variants
     for_list
     '''
-    (for_list [(id series), ...] body ...+)
-    (for_list [((id ...+) series), ...] body ...+)
+    (for_list [for-clause, ...] body ...+)
 
-Iterates the `series` in parallel, binding the corresponding `id`s to each
-element in turn and evaluating `body`. Returns a stretchy list of the results.
-The second form allows for series that return multiple values, such as structs.
-
-The `series` expressions are first evaluated left-to-right, and each must return
-a list, sexp, struct, or iterator. As long as every series has more elements,
-they are retrieved in left-to-right order, bound to their `id`s at new storage slots, and
-then the `body` is evaluated, with the result being added to the end of the list
-of results.
-
-If no bindings are declared, then the body is executed once.
+Like `for`, but returning a stretchy list of the `body` results.
 
     (for_list
       [(even [0, 2, 4]),
@@ -481,12 +598,9 @@ If no bindings are declared, then the body is executed once.
 
     fors_list
     '''
-    (fors_list [(id series), ...] body ...+)
-    (fors_list [((id ...+) series), ...] body ...+)
+    (fors_list [for-clause, ...] body ...+)
 
-Like `for_list`, but the `series` are iterated in nested loops instead of in parallel.
-Each binding is made available to the following `series` as well as the `body` allowing
-for list comprehension.
+Like `fors`, but returning a stretchy list of the `body` results.
 
     (fors_list [(a [1,2]),
                 (b [5,7])]

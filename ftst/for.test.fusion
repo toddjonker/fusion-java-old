@@ -147,7 +147,105 @@
 
 
 //=============================================================================
+// for, fors
+
+// Tests here are shallow, since these forms are trivial uses of for_fold
+// and since the operational tests are easier using sibling derived forms that
+// collect results.
+
+
+(check === [155] (let [(r (stretchy_list))] (for  () (add_m r 155)) r))
+(check === [156] (let [(r (stretchy_list))] (fors [] (add_m r 156)) r))
+
+(check === [158] (let [(r (stretchy_list))] (for  [(a [158])] (add_m r a)) r))
+(check === [159] (let [(r (stretchy_list))] (fors [(a [159])] (add_m r a)) r))
+
+// Result is always void
+(check === (void) (for  [] 12))
+(check === (void) (fors [] 12))
+(check === (void) (for  [(a (sexp 1 2))] a))
+(check === (void) (fors [(a (sexp 1 2))] a))
+
+
+// All the for-forms are syntactically the same; test for syntax errors once.
+
+// Missing all subforms
+(expect_syntax_exn (for))
+(expect_syntax_exn (fors))
+
+// Missing body
+(expect_syntax_exn (for  ((name 1)) /* no body */))
+(expect_syntax_exn (fors ((name 1)) /* no body */))
+
+// For-clauses subform isn't a sequence of sexps
+(expect_syntax_exn (for  null      13))
+(expect_syntax_exn (fors null      13))
+(expect_syntax_exn (for  null.sexp 13))
+(expect_syntax_exn (fors null.sexp 13))
+(expect_syntax_exn (for  null.list 13))
+(expect_syntax_exn (fors null.list 13))
+(expect_syntax_exn (for  1         13))
+(expect_syntax_exn (fors 1         13))
+(expect_syntax_exn (for  (1)       13))
+(expect_syntax_exn (fors (1)       13))
+(expect_syntax_exn (for  (1 2)     13))
+(expect_syntax_exn (fors (1 2)     13))
+
+// For-clause is a list not a sexp
+// TODO split_binding allows this, but it's not tested nor used in this library.
+(when false
+(expect_syntax_exn (for  ([a, []]       ) 13))
+(expect_syntax_exn (fors ([a, []]       ) 13))
+(expect_syntax_exn (for  ([a, []] (b  2)) 13))
+(expect_syntax_exn (fors ([a, []] (b  2)) 13))
+(expect_syntax_exn (for  ((a  []) [b, 2]) 13))
+(expect_syntax_exn (fors ((a  []) [b, 2]) 13))
+)
+
+// For-clause doesn't start with an identifier (or sexp; see below)
+(expect_syntax_exn (for  (null.sexp) 13))
+(expect_syntax_exn (fors (null.sexp) 13))
+(expect_syntax_exn (for  (()) 13))
+(expect_syntax_exn (fors (()) 13))
+(expect_syntax_exn (for  ((12)) 13))
+(expect_syntax_exn (fors ((12)) 13))
+(expect_syntax_exn (for  ((name 1) ()) 13))
+(expect_syntax_exn (fors ((name 1) ()) 13))
+(expect_syntax_exn (for  ((name 1) (12)) 13))
+(expect_syntax_exn (fors ((name 1) (12)) 13))
+
+// For-clause has more than one series expression
+(expect_syntax_exn (for  ((name)) 13))
+(expect_syntax_exn (fors ((name)) 13))
+(expect_syntax_exn (for  ((name 1 2)) 13))
+(expect_syntax_exn (fors ((name 1 2)) 13))
+(expect_syntax_exn (for  ((name 1) (name2)) 13))
+(expect_syntax_exn (fors ((name 1) (name2)) 13))
+
+// Duplicate identifiers across clauses of plain `for` (not `fors`)
+(expect_syntax_exn (for [(name []), (name [])] 13))
+
+// For-clause has malformed sexp-of-identifiers
+(expect_syntax_exn (for  [(null.sexp [])] 1))  // No ids
+(expect_syntax_exn (fors [(null.sexp [])] 1))
+(expect_syntax_exn (for  [(()        [])] 1))
+(expect_syntax_exn (fors [(()        [])] 1))
+(expect_syntax_exn (for  [((a 9)     [])] 1))  // Not an id
+(expect_syntax_exn (fors [((a 9)     [])] 1))
+(expect_syntax_exn (for  [([a, b]    [])] 1))  // Not a sexp
+(expect_syntax_exn (fors [([a, b]    [])] 1))
+
+(expect_result_error
+  (for [((a b) [1])] a))   // expects 2 values, returns 1
+(expect_result_error
+  (for [(k {f:1})] k))     // expects 1 value, returns 2
+
+
+//=============================================================================
 // for_list, fors_list
+
+// Most extensive tests of iteration use `for_list` since it provides the
+// easiest way to check the comprehension order.
 
 (define_check (check_fl expected actual)
   (check_pred is_stretchy_list actual)
@@ -341,48 +439,6 @@
                (b (begin (record "b") (iterator_map record (list_iterator [2, 4]))))]
       [a,b]))
   (check === ["a", "b", 1, 2, 3, 4] evaluation_order))
-
-
-(expect_syntax_exn (for_list))
-(expect_syntax_exn (fors_list))
-(expect_syntax_exn (for_list 1 2))
-(expect_syntax_exn (fors_list 1 2 ))
-(expect_syntax_exn (for_list null.sexp 13))
-(expect_syntax_exn (fors_list null.sexp 24))
-(expect_syntax_exn (for_list (12) 13))
-(expect_syntax_exn (fors_list (23) 24))
-(expect_syntax_exn (for_list (1 2) 13))
-(expect_syntax_exn (fors_list (2 3) 24))
-(expect_syntax_exn (for_list (()) 13))
-(expect_syntax_exn (fors_list (()) 24))
-(expect_syntax_exn (for_list ((12)) 13))
-(expect_syntax_exn (fors_list ((23)) 24))
-(expect_syntax_exn (for_list ((name)) 13))
-(expect_syntax_exn (fors_list ((name)) 24))
-(expect_syntax_exn (for_list ((name 1 2)) 13))
-(expect_syntax_exn (fors_list ((name 2 3)) 24))
-(expect_syntax_exn (for_list ((name 1) ()) 13))
-(expect_syntax_exn (fors_list ((name 2) ()) 24))
-(expect_syntax_exn (for_list ((name 1) (name2)) 13))
-(expect_syntax_exn (fors_list ((name 2) (name3)) 24))
-(expect_syntax_exn (for_list  ((name 1)) /* no body */))
-(expect_syntax_exn (fors_list ((name 1)) /* no body */))
-
-// Duplicate name
-(expect_syntax_exn (for_list [(name []), (name [])] 13))
-
-
-// Bad multi-bindings
-
-(expect_syntax_exn (for_list [(null.sexp [])] 1))  // No ids
-(expect_syntax_exn (for_list [(()        [])] 1))  // No ids
-(expect_syntax_exn (for_list [((a 9)     [])] 1))  // Not an id
-(expect_syntax_exn (for_list [([a, b]    [])] 1))  // Not a sexp
-
-(expect_result_error
-  (for_list [((a b) [1])] a))   // expects 2 values, returns 1
-(expect_result_error
-  (for_list [(k {f:1})] k))
 
 
 // Duplicate fors_list binding names are allowed because they shadow
