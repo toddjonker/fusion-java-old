@@ -449,4 +449,21 @@
   (fors_list [(name [1,2]), (name [3,4])] name))
 
 
+//=============================================================================
+// for_sexp, fors_sexp
+
+(check === (sexp 454)       (for_sexp  [] 454))
+(check === (sexp 454)       (fors_sexp [] 454))
+(check === (sexp)           (for_sexp  [( a  [ ])] a))
+(check === (sexp)           (fors_sexp [( a  [ ])] a))
+(check === (sexp)           (for_sexp  [((a) [ ])] a))
+(check === (sexp)           (fors_sexp [((a) [ ])] a))
+(check === (sexp 1)         (for_sexp  [( a  [1])] a))
+(check === (sexp 1)         (fors_sexp [( a  [1])] a))
+(check === (sexp 1)         (for_sexp  [((a) [1])] a))
+(check === (sexp 1)         (fors_sexp [((a) [1])] a))
+(check === (sexp 5 14)      (for_sexp  [(a [1, 2]), (b [5, 7])] (* a b)))
+(check === (sexp 5 7 10 14) (fors_sexp [(a [1, 2]), (b [5, 7])] (* a b)))
+
+
 "PASSED" // Helpful output if you run this stand-alone

@@ -138,6 +138,7 @@ to apply optimizations to the generated code.
     for           fors
     for_fold      fors_fold
     for_list      fors_list
+    for_sexp      fors_sexp
   )
 
 
@@ -623,5 +624,38 @@ Like `fors`, but returning a stretchy list of the `body` results.
     (lambda (result) result)
     (lambda (rhs) rhs)
     (lambda (body) (quasisyntax (add_m result (unsyntax body)))))
+
+
+//=============================================================================
+// for_sexp, fors_sexp
+
+  (define_for_variants
+    for_sexp
+    '''
+    (for_sexp [for-clause, ...] body ...+)
+
+Like `for`, but returning a sexp of the `body` results.
+
+    (for_sexp
+      [(even [0, 2, 4]),
+       (odd  [1, 3, 5])]
+      (+ even odd))             =>  (1 5 9)
+    '''
+
+    fors_sexp
+    '''
+    (fors_sexp [for-clause, ...] body ...+)
+
+Like `fors`, but returning a sexp of the `body` results.
+
+    (fors_sexp [(a [1, 2]),
+                (b [5, 7])]
+      (* a b))                             => (5 7 10 14)
+    '''
+
+    [(result (quote ()))]
+    (lambda (result) (quasisyntax (reverse (unsyntax result))))
+    (lambda (rhs) rhs)
+    (lambda (body) (quasisyntax (pair (unsyntax body) result))))
 
 )

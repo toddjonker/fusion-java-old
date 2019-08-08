@@ -148,6 +148,7 @@ contact us for clarification.
   (provide
     for            fors
     for_list       fors_list
+    for_sexp       fors_sexp
   )
 
 
