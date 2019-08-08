@@ -466,4 +466,21 @@
 (check === (sexp 5 7 10 14) (fors_sexp [(a [1, 2]), (b [5, 7])] (* a b)))
 
 
+//=============================================================================
+// for_struct, fors_struct
+
+(check === {k:16}            (for_struct  [] (values "k" 16)))
+(check === {k:16}            (fors_struct [] (values "k" 16)))
+(check === {}                (for_struct  [( a  [ ])] (values "k" a)))
+(check === {}                (fors_struct [( a  [ ])] (values "k" a)))
+(check === {}                (for_struct  [((a) [ ])] (values "k" a)))
+(check === {}                (fors_struct [((a) [ ])] (values "k" a)))
+(check === {k:1}             (for_struct  [( a  [1])] (values "k" a)))
+(check === {k:1}             (fors_struct [( a  [1])] (values "k" a)))
+(check === {k:1}             (for_struct  [((a) [1])] (values "k" a)))
+(check === {k:1}             (fors_struct [((a) [1])] (values "k" a)))
+(check === {a:5, b:7}        (for_struct  [(a ["a", "b"]), (b [5, 7])] (values a b)))
+(check === {a:5,a:7,b:5,b:7} (fors_struct [(a ["a", "b"]), (b [5, 7])] (values a b)))
+
+
 "PASSED" // Helpful output if you run this stand-alone

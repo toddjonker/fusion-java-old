@@ -139,6 +139,7 @@ to apply optimizations to the generated code.
     for_fold      fors_fold
     for_list      fors_list
     for_sexp      fors_sexp
+    for_struct    fors_struct
   )
 
 
@@ -657,5 +658,50 @@ Like `fors`, but returning a sexp of the `body` results.
     (lambda (result) (quasisyntax (reverse (unsyntax result))))
     (lambda (rhs) rhs)
     (lambda (body) (quasisyntax (pair (unsyntax body) result))))
+
+
+//=============================================================================
+// for_struct, fors_struct
+
+  (define_for_variants
+    for_struct
+    '''
+    (for_struct [for-clause, ...] body ...+)
+
+Like `for`, but returning a struct. The `body` must return two values, a field
+name (string or symbol) and its corresponding element.
+
+    (for_struct
+      [(key (quote (a b c))),
+       (val [1, 2, 3])]
+      (values key val))             =>  {a:1, b:2, c:3}
+
+If the same field name is returned by multiple evaluations of the body, the
+resulting struct will have corresponding repeated fields:
+
+    (for_struct
+      [(key ["a", "b", "a"]),
+       (val [1, 2, 3])]
+      (values key val))             =>  {a:1, a:3, b:2}
+    '''
+
+    fors_struct
+    '''
+    (fors_struct [for-clause, ...] body ...+)
+
+Like `fors`, but returning a struct. The `body` must return two values, a field
+name (string or symbol) and its corresponding element.
+As with `for_struct`, the result can have repeated fields:
+
+    (fors_struct [(v [1, 2]),
+                  (k ["a", "b"])]
+      (values k v))                 => {a:1, a:2, b:1, b:2}
+    '''
+
+    [(result {})]
+    (lambda (result) result)
+    (lambda (rhs) rhs)
+    (lambda (body) (quasisyntax (let_values [((key val) (unsyntax body))]
+                                   (unsafe_struct_puts result key val)))))
 
 )
