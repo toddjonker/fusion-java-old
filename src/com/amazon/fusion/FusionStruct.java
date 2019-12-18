@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -516,6 +516,22 @@ final class FusionStruct
     }
 
 
+    static Object unsafeStructPuts(Evaluator eval, Object struct,
+                                   String key, Object value)
+        throws FusionException
+    {
+        return ((BaseStruct) struct).puts(eval, key, value);
+    }
+
+
+    static Object unsafeStructPutsM(Evaluator eval, Object struct,
+                                    String key, Object value)
+        throws FusionException
+    {
+        return ((BaseStruct) struct).putsM(eval, key, value);
+    }
+
+
     //========================================================================
     // Bulk modification
 
@@ -649,6 +665,12 @@ final class FusionStruct
             throws FusionException;
 
         Object putM(Evaluator eval, String key, Object value)
+            throws FusionException;
+
+        Object puts(Evaluator eval, String key, Object value)
+            throws FusionException;
+
+        Object putsM(Evaluator eval, String key, Object value)
             throws FusionException;
 
         Object removeKeys(Evaluator eval, String[] keys)
@@ -785,6 +807,20 @@ final class FusionStruct
 
         @Override
         public Object putM(Evaluator eval, String key, Object value)
+            throws FusionException
+        {
+            return put(eval, key, value);
+        }
+
+        @Override
+        public Object puts(Evaluator eval, String key, Object value)
+            throws FusionException
+        {
+            return put(eval, key, value);
+        }
+
+        @Override
+        public Object putsM(Evaluator eval, String key, Object value)
             throws FusionException
         {
             return put(eval, key, value);
@@ -1149,6 +1185,16 @@ final class FusionStruct
             FunctionalHashTrie<String, Object> newMap = map.with(key, value);
 
             return makeSimilar(newMap, newSize);
+        }
+
+        @Override
+        public Object puts(Evaluator eval, String key, Object value)
+            throws FusionException
+        {
+            FunctionalHashTrie<String, Object> map = getMap(eval);
+            FunctionalHashTrie<String, Object> newMap = structImplAdd(map, key, value);
+
+            return makeSimilar(newMap, size() + 1);
         }
 
         @Override
@@ -1526,6 +1572,13 @@ final class FusionStruct
         }
 
         @Override
+        public Object putsM(Evaluator eval, String key, Object value)
+            throws FusionException
+        {
+            return puts(eval, key, value);
+        }
+
+        @Override
         public Object removeKeysM(Evaluator eval, String[] keys)
             throws FusionException
         {
@@ -1792,6 +1845,16 @@ final class FusionStruct
         }
 
         @Override
+        public Object putsM(Evaluator eval, String key, Object value)
+            throws FusionException
+        {
+            myMap = structImplAdd(myMap, key, value);
+            mySize++;
+
+            return this;
+        }
+
+        @Override
         public Object removeKeysM(Evaluator eval, String[] keys)
             throws FusionException
         {
@@ -2017,6 +2080,32 @@ final class FusionStruct
         {
             String key = unsafeTextToJavaString(eval, args[1]);
             return unsafeStructPutM(eval, args[0], key, args[2]);
+        }
+    }
+
+
+
+    static final class UnsafeStructPutsProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            String key = unsafeTextToJavaString(eval, args[1]);
+            return unsafeStructPuts(eval, args[0], key, args[2]);
+        }
+    }
+
+    static final class UnsafeStructPutsMProc
+        extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            String key = unsafeTextToJavaString(eval, args[1]);
+            return unsafeStructPutsM(eval, args[0], key, args[2]);
         }
     }
 

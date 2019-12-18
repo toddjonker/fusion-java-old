@@ -1,8 +1,9 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
   "/fusion/list"
+  "/fusion/private/struct"
   "/fusion/struct"
   "/fusion/unsafe/list"
   "/testutils"
@@ -254,6 +255,25 @@
 (expect_argument_exn (put_m [] "f" 1))
 (expect_argument_exn (put_m {} null.string 1))
 (expect_argument_exn (put_m {} (quote null.symbol) 1))
+
+
+//==========================================================================
+// puts and puts_m
+
+(define_check (check_unsafe_puts val key v expect)
+  (check_mods unsafe_struct_puts unsafe_struct_puts_m val (list key v) expect)
+  // Retain existing annotations
+  (let [(ann_val    (annotate val    "a" "b")),
+        (ann_expect (annotate expect "a" "b"))]
+    (check_mods unsafe_struct_puts unsafe_struct_puts_m ann_val (list key v) ann_expect)))
+
+(check_unsafe_puts null.struct "f" 3 {f:3})
+(check_unsafe_puts {}          "f" 3 {f:3})
+(check_unsafe_puts {a:1}       "f" 3 {f:3, a:1})
+(check_unsafe_puts {f:2}       "f" 3 {f:3, f:2})
+(check_unsafe_puts {f:3}       "f" 3 {f:3, f:3})
+(check_unsafe_puts {f:2,f:3}   "f" 3 {f:3, f:3, f:2})
+(check_unsafe_puts {a:2,a:3}   "f" 3 {f:3, a:3, a:2})
 
 
 //==========================================================================

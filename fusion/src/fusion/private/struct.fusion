@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2019 Amazon.com, Inc.  All rights reserved.
 
 (module struct "/fusion/private/builtins"
 
@@ -12,6 +12,8 @@
     unsafe_struct_iterator
     unsafe_struct_put
     unsafe_struct_put_m
+    unsafe_struct_puts
+    unsafe_struct_puts_m
     unsafe_struct_ref
   )
 
@@ -46,6 +48,24 @@ returned, otherwise the `default` is returned as-is.
     (unsafe_struct_put_m struct key value)
     '''
     (java_new "com.amazon.fusion.FusionStruct$UnsafeStructPutMProc"))
+
+  (define unsafe_struct_puts  // TODO Should this be called `add`?
+    '''
+    (unsafe_struct_puts struct key value)
+
+Like `unsafe_struct_put`, but if any fields named `key` already exist, they
+will not be replaced, resulting in repeated fields.
+    '''
+    (java_new "com.amazon.fusion.FusionStruct$UnsafeStructPutsProc"))
+
+  (define unsafe_struct_puts_m  // TODO Should this be called `add_m`?
+    '''
+    (unsafe_struct_puts_m struct key value)
+
+Like `unsafe_struct_put_m`, but if any fields named `key` already exist, they
+will not be replaced, resulting in repeated fields.
+    '''
+    (java_new "com.amazon.fusion.FusionStruct$UnsafeStructPutsMProc"))
 
   (define unsafe_struct_iterator
     '''
