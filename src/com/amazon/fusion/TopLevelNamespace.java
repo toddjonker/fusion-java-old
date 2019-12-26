@@ -93,14 +93,14 @@ final class TopLevelNamespace
         }
 
         @Override
-        Binding resolve(BaseSymbol name,
-                        Iterator<SyntaxWrap> moreWraps,
-                        Set<MarkWrap> returnMarks)
+        Binding resolveMaybe(BaseSymbol name,
+                             Iterator<SyntaxWrap> moreWraps,
+                             Set<MarkWrap> returnMarks)
         {
             if (moreWraps.hasNext())
             {
                 SyntaxWrap nextWrap = moreWraps.next();
-                nextWrap.resolve(name, moreWraps, returnMarks);
+                nextWrap.resolveMaybe(name, moreWraps, returnMarks);
             }
 
             return getEnvironment().substituteFree(name, returnMarks);

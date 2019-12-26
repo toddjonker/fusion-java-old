@@ -407,19 +407,19 @@ final class ModuleNamespace
         }
 
         @Override
-        Binding resolve(BaseSymbol name,
-                        Iterator<SyntaxWrap> moreWraps,
-                        Set<MarkWrap> returnMarks)
+        Binding resolveMaybe(BaseSymbol name,
+                             Iterator<SyntaxWrap> moreWraps,
+                             Set<MarkWrap> returnMarks)
         {
             if (moreWraps.hasNext())
             {
                 SyntaxWrap nextWrap = moreWraps.next();
                 // Prior bindings never "leak through" a module, so we won't
                 // return this binding.
-                Binding b = nextWrap.resolve(name, moreWraps, returnMarks);
+                Binding b = nextWrap.resolveMaybe(name, moreWraps, returnMarks);
                 if (b != null)
                 {
-                    return ((Namespace)getEnvironment()).resolve(b, returnMarks);
+                    return ((Namespace)getEnvironment()).resolveMaybe(b, returnMarks);
                 }
             }
 

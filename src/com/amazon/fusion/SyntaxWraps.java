@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -9,6 +9,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * Records the lexical information associated with a {@link SyntaxValue} during
+ * expansion and compilation.  An instance may be associated with more than one
+ * syntax object, so the underlying object is not referenced here.
+ */
 final class SyntaxWraps
 {
     /** Not null. */
@@ -106,10 +111,13 @@ final class SyntaxWraps
 
 
     /**
+     * Attempt to resolve the given symbol, assumed this object represents its
+     * lexical information.
+     *
      * @return null is equivalent to a {@link FreeBinding}, and either may be
      * returned.
      */
-    Binding resolve(BaseSymbol name)
+    Binding resolveMaybe(BaseSymbol name)
     {
         if (myWraps.length == 0) return null;
 
@@ -117,14 +125,16 @@ final class SyntaxWraps
 
         SyntaxWrap wrap = i.next();
         Set<MarkWrap> marks = new HashSet<>();
-        return wrap.resolve(name, i, marks);
+        return wrap.resolveMaybe(name, i, marks);
     }
 
     /**
+     * Like {@link #resolveMaybe}, but only resolving to a top-level binding.
+     *
      * @return null is equivalent to a {@link FreeBinding}, and either may be
      * returned.
      */
-    Binding resolveTop(BaseSymbol name)
+    Binding resolveTopMaybe(BaseSymbol name)
     {
         if (myWraps.length == 0) return null;
 
@@ -132,6 +142,6 @@ final class SyntaxWraps
 
         SyntaxWrap wrap = i.next();
         Set<MarkWrap> marks = new HashSet<>();
-        return wrap.resolveTop(name, i, marks);
+        return wrap.resolveTopMaybe(name, i, marks);
     }
 }

@@ -231,15 +231,15 @@ abstract class Namespace
         }
 
         @Override
-        Binding resolveTop(BaseSymbol           name,
-                           Iterator<SyntaxWrap> moreWraps,
-                           Set<MarkWrap>        returnMarks)
+        Binding resolveTopMaybe(BaseSymbol           name,
+                                Iterator<SyntaxWrap> moreWraps,
+                                Set<MarkWrap>        returnMarks)
         {
             if (moreWraps.hasNext())
             {
                 SyntaxWrap nextWrap = moreWraps.next();
                 // The base implementation calls resolveTop here.
-                return nextWrap.resolve(name, moreWraps, returnMarks);
+                return nextWrap.resolveMaybe(name, moreWraps, returnMarks);
             }
             return null;
         }
@@ -401,7 +401,7 @@ abstract class Namespace
      *
      * @return null if there's no binding in this namespace.
      */
-    private final NsBinding resolveBound(SyntaxSymbol identifier)
+    private final NsBinding resolveBoundMaybe(SyntaxSymbol identifier)
     {
         Binding binding = identifier.resolve();
         Set<MarkWrap> marks = identifier.computeMarks();
@@ -414,7 +414,7 @@ abstract class Namespace
      *
      * @return null if identifier isn't bound here.
      */
-    final NsBinding resolve(Binding binding, Set<MarkWrap> marks)
+    final NsBinding resolveMaybe(Binding binding, Set<MarkWrap> marks)
     {
         return myBindings.get(binding, marks);
     }
@@ -423,13 +423,13 @@ abstract class Namespace
     public final NsBinding substituteFree(BaseSymbol name, Set<MarkWrap> marks)
     {
         Binding b = new FreeBinding(name);
-        return resolve(b, marks);
+        return resolveMaybe(b, marks);
     }
 
     @Override
     public final Binding substitute(Binding binding, Set<MarkWrap> marks)
     {
-        Binding subst = resolve(binding, marks);
+        Binding subst = resolveMaybe(binding, marks);
         if (subst == null) subst = binding;
         return subst;
     }
@@ -442,7 +442,7 @@ abstract class Namespace
     final NsDefinedBinding resolveDefinition(SyntaxSymbol identifier)
     {
         identifier = identifier.copyAndResolveTop();
-        NsBinding nsb = resolveBound(identifier);
+        NsBinding nsb = resolveBoundMaybe(identifier);
         return (nsb == null ? null : nsb.definition());
     }
 
@@ -452,9 +452,9 @@ abstract class Namespace
      *
      * @return null is equivalent to a {@link FreeBinding}.
      */
-    final Binding resolve(BaseSymbol name)
+    final Binding resolveMaybe(BaseSymbol name)
     {
-        return myWraps.resolve(name);
+        return myWraps.resolveMaybe(name);
     }
 
     /**
@@ -462,10 +462,10 @@ abstract class Namespace
      *
      * @return null is equivalent to a {@link FreeBinding}.
      */
-    final Binding resolve(String name)
+    final Binding resolveMaybe(String name)
     {
         BaseSymbol symbol = FusionSymbol.makeSymbol(null, name);
-        return resolve(symbol);
+        return resolveMaybe(symbol);
     }
 
 
@@ -486,7 +486,7 @@ abstract class Namespace
 
         identifier = identifier.copyAndResolveTop();
 
-        NsBinding entry = resolveBound(identifier);
+        NsBinding entry = resolveBoundMaybe(identifier);
         if (entry != null)
         {
             newDefinition = entry.redefine(identifier, formForErrors);
@@ -688,7 +688,7 @@ abstract class Namespace
         localId = localId.copyAndResolveTop();
 
         RequiredBinding required;
-        NsBinding entry = resolveBound(localId);
+        NsBinding entry = resolveBoundMaybe(localId);
         if (entry == null)
         {
             required = newRequiredBinding(localId, provided);
@@ -760,7 +760,7 @@ abstract class Namespace
      */
     final Object lookup(String name)
     {
-        Binding b = resolve(name);
+        Binding b = resolveMaybe(name);
         if (b == null)
         {
             return b;
@@ -851,7 +851,7 @@ abstract class Namespace
 
     final void setDoc(String name, BindingDoc doc)
     {
-        NsDefinedBinding binding = (NsDefinedBinding) resolve(name);
+        NsDefinedBinding binding = (NsDefinedBinding) resolveMaybe(name);
         setDoc(binding.myAddress, doc);
     }
 

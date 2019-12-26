@@ -268,7 +268,7 @@ final class SyntaxSymbol
     {
         if (myBinding != null) return myBinding;
         if (myWraps   == null) return null;
-        return myWraps.resolve(getName());
+        return myWraps.resolveMaybe(getName());
     }
 
 
@@ -281,7 +281,7 @@ final class SyntaxSymbol
         Binding b = null;
         if (myWraps != null)
         {
-            b = myWraps.resolveTop(getName());
+            b = myWraps.resolveTopMaybe(getName());
         }
         if (b == null)
         {

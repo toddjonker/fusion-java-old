@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -25,15 +25,15 @@ class EnvironmentWrap
     }
 
     @Override
-    Binding resolve(BaseSymbol name,
-                    Iterator<SyntaxWrap> moreWraps,
-                    Set<MarkWrap> returnMarks)
+    Binding resolveMaybe(BaseSymbol name,
+                         Iterator<SyntaxWrap> moreWraps,
+                         Set<MarkWrap> returnMarks)
     {
         Binding b;
         if (moreWraps.hasNext())
         {
             SyntaxWrap nextWrap = moreWraps.next();
-            b = nextWrap.resolve(name, moreWraps, returnMarks);
+            b = nextWrap.resolveMaybe(name, moreWraps, returnMarks);
             if (b != null)
             {
                 return myEnvironment.substitute(b, returnMarks);

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -29,15 +29,15 @@ class MarkWrap
 
 
     @Override
-    Binding resolve(BaseSymbol name,
-                    Iterator<SyntaxWrap> moreWraps,
-                    Set<MarkWrap> returnMarks)
+    Binding resolveMaybe(BaseSymbol name,
+                         Iterator<SyntaxWrap> moreWraps,
+                         Set<MarkWrap> returnMarks)
     {
         Binding b = null;
         if (moreWraps.hasNext())
         {
             SyntaxWrap nextWrap = moreWraps.next();
-            b = nextWrap.resolve(name, moreWraps, returnMarks);
+            b = nextWrap.resolveMaybe(name, moreWraps, returnMarks);
         }
 
         if (! returnMarks.add(this))
