@@ -403,9 +403,7 @@ abstract class Namespace
      */
     private final NsBinding resolveBoundMaybe(SyntaxSymbol identifier)
     {
-        Binding binding = identifier.resolve();
-        Set<MarkWrap> marks = identifier.computeMarks();
-        return myBindings.get(binding, marks);
+        return myBindings.get(identifier);
     }
 
     /**

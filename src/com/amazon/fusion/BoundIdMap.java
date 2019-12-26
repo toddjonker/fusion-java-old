@@ -28,13 +28,19 @@ final class BoundIdMap<V>
      */
     final V put(SyntaxSymbol identifier, V binding)
     {
-        BoundIdentifier key = new BoundIdentifier(identifier);
+        BoundIdentifier key = identifier.resolveBoundIdentifier();
         return myMap.put(key, binding);
+    }
+
+
+    final V get(BoundIdentifier identifier)
+    {
+        return myMap.get(identifier);
     }
 
     final V get(SyntaxSymbol identifier)
     {
-        return myMap.get(new BoundIdentifier(identifier));
+        return myMap.get(identifier.resolveBoundIdentifier());
     }
 
     final V get(Binding binding, Set<MarkWrap> marks)

@@ -193,9 +193,11 @@ final class LocalEnvironment
     @Override
     public Binding substitute(Binding binding, Set<MarkWrap> marks)
     {
+        BoundIdentifier boundId = new BoundIdentifier(binding, marks);
+
         for (LocalBinding b : myBindings)
         {
-            if (b.myIdentifier.resolvesBound(binding, marks))
+            if (b.myIdentifier.resolveBoundIdentifier().equals(boundId))
             {
                 return b;
             }
@@ -206,9 +208,12 @@ final class LocalEnvironment
     @Override
     public Binding substituteFree(BaseSymbol name, Set<MarkWrap> marks)
     {
+        BoundIdentifier boundId =
+            new BoundIdentifier(new FreeBinding(name), marks);
+
         for (LocalBinding b : myBindings)
         {
-            if (b.myIdentifier.resolvesFree(name, marks))
+            if (b.myIdentifier.resolveBoundIdentifier().equals(boundId))
             {
                 return b;
             }

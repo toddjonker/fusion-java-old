@@ -9,9 +9,6 @@ import java.util.Set;
  */
 final class BoundIdentifier
 {
-    /**
-     * An original binding, so there's meaningful hashCode and equals.
-     */
     private final Binding       myBinding;
     private final Set<MarkWrap> myMarks;
 
@@ -20,21 +17,35 @@ final class BoundIdentifier
 
     BoundIdentifier(Binding binding, Set<MarkWrap> marks)
     {
-        myBinding = binding.target(); // Get the original binding.
+        assert binding != null;
+        assert marks != null;
+
+        myBinding = binding;
         myMarks   = marks;
     }
 
-    BoundIdentifier(SyntaxSymbol identifier)
-    {
-        this(identifier.resolve(),
-             identifier.computeMarks());
-    }
 
     Binding getBinding()
     {
         return myBinding;
     }
 
+    BoundIdentifier copyReplacingBinding(Binding b)
+    {
+        return new BoundIdentifier(b, myMarks);
+    }
+
+
+    public boolean hasMarks()
+    {
+        return ! myMarks.isEmpty();
+    }
+
+
+    /**
+     * Semantics are of {@code bound-identifier=?}, so two instances can match
+     * even when {@link #getBinding()} returns different objects.
+     */
     @Override
     public boolean equals(Object obj)
     {
@@ -51,10 +62,10 @@ final class BoundIdentifier
         int result = 1;
         result =
             prime * result
-                + ((myBinding == null) ? 0 : myBinding.hashCode());
+                + myBinding.target().hashCode();
         result =
             prime * result
-                + ((myMarks == null) ? 0 : myMarks.hashCode());
+                + myMarks.hashCode();
         return result;
     }
 }

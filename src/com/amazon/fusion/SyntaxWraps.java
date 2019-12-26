@@ -120,11 +120,14 @@ final class SyntaxWraps
     Binding resolveMaybe(BaseSymbol name)
     {
         if (myWraps.length == 0) return null;
-
-        Iterator<SyntaxWrap> i = Arrays.asList(myWraps).iterator();
-
-        SyntaxWrap wrap = i.next();
         Set<MarkWrap> marks = new HashSet<>();
+        return doResolveMaybe(name, marks);
+    }
+
+    private Binding doResolveMaybe(BaseSymbol name, Set<MarkWrap> marks)
+    {
+        Iterator<SyntaxWrap> i = Arrays.asList(myWraps).iterator();
+        SyntaxWrap wrap = i.next();
         return wrap.resolveMaybe(name, i, marks);
     }
 
@@ -143,5 +146,22 @@ final class SyntaxWraps
         SyntaxWrap wrap = i.next();
         Set<MarkWrap> marks = new HashSet<>();
         return wrap.resolveTopMaybe(name, i, marks);
+    }
+
+    /**
+     * @return not null.
+     */
+    BoundIdentifier resolveBoundIdentifier(BaseSymbol name)
+    {
+        if (myWraps.length == 0)
+        {
+            return new BoundIdentifier(new FreeBinding(name),
+                                       Collections.<MarkWrap>emptySet());
+        }
+
+        Set<MarkWrap> marks = new HashSet<>();
+        Binding binding = doResolveMaybe(name, marks);
+        if (binding == null) binding = new FreeBinding(name);
+        return new BoundIdentifier(binding, marks);
     }
 }
