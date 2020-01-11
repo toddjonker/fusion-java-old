@@ -60,6 +60,25 @@ final class FusionSyntax
 
 
     /**
+     * Determines whether {@code id1} would bind {@code id2} (or vice versa) if
+     * one were in a binding position and the other in a suitable reference
+     * position.
+     *
+     * @param id1
+     *   must be an {@linkplain #isIdentifier(Evaluator, Object) identifier}.
+     * @param id2
+     *   must be an {@linkplain #isIdentifier(Evaluator, Object) identifier}.
+     */
+    static boolean unsafeBoundIdentifierEqual(Evaluator eval,
+                                              Object    id1,
+                                              Object    id2)
+        throws FusionException
+    {
+        return ((SyntaxSymbol) id1).boundIdentifierEqual((SyntaxSymbol) id2);
+    }
+
+
+    /**
      * Determines whether two identifiers refer to the same binding.
      *
      * @param id1

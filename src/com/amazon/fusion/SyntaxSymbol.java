@@ -397,6 +397,13 @@ final class SyntaxSymbol
     }
 
 
+    boolean boundIdentifierEqual(SyntaxSymbol that)
+    {
+        BoundIdentifier thisId = this.uncachedResolveBoundIdentifier();
+        BoundIdentifier thatId = that.uncachedResolveBoundIdentifier();
+        return thisId.equals(thatId);
+    }
+
     boolean freeIdentifierEqual(SyntaxSymbol that)
     {
         Binding thisBinding = this.uncachedResolve();
@@ -429,6 +436,22 @@ final class SyntaxSymbol
 
     //========================================================================
     // Procedures
+
+
+    static final class BoundIdentifierEqualProc
+        extends Procedure2
+    {
+        @Override
+        Object doApply(Evaluator eval, Object arg1, Object arg2)
+            throws FusionException
+        {
+            SyntaxSymbol id1 = checkIdentifierArg(eval, this, "identifier", 0, arg1, arg2);
+            SyntaxSymbol id2 = checkIdentifierArg(eval, this, "identifier", 1, arg1, arg2);
+
+            return makeBool(eval, id1.boundIdentifierEqual(id2));
+        }
+    }
+
 
     static final class FreeIdentifierEqualProc
         extends Procedure2

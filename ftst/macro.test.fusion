@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -75,6 +75,34 @@
           (id2 (make_id)))
       (quasisyntax (fie (unsyntax id1) (unsyntax id2))))))
 (check_false (compare_diff_ids))
+
+
+// Test cases taken from Racket docs for `bound-identifier=?`
+// https://docs.racket-lang.org/reference/stxcmp.html#(def._((quote._~23~25kernel)._bound-identifier~3d~3f))
+
+(define_syntax check_bound
+  (lambda (stx)
+    (let [(x (syntax_get stx 1)),
+          (y (syntax_get stx 2))]
+      (if (bound_identifier_equal x y)
+        (quasisyntax (let [((unsyntax y) "wrong")]
+                       (let [((unsyntax x) "binds")]
+                         (unsyntax y))))
+        (quasisyntax (let [((unsyntax y) "no_binds")]
+                       (let [((unsyntax x) "wrong")]
+                         (unsyntax y))))))))
+
+(check === "binds"    (check_bound a a))
+(check === "no_binds" (check_bound a b))
+(check === "binds"    (check_bound < <))
+(check === "no_binds" (check_bound < >))
+
+(define_syntax check_a
+  (lambda (stx)
+    (let [(x (syntax_get stx 1))]
+      (quasisyntax (check_bound a (unsyntax x))))))
+
+(check === "no_binds" (check_a a))
 
 
 //============================================================================

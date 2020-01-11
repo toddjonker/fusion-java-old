@@ -91,6 +91,7 @@ significantly simpler to implement and easier to understand.
   )
 
   (provide
+    bound_identifier_equal
     datum_to_syntax
     define_syntax
     expand_once
@@ -252,6 +253,17 @@ Given a `syntax` object, removes the lexical information and returns a plain
 value. This only unwraps one layer, retaining inner syntax objects.
     '''
     (java_new "com.amazon.fusion.FusionSyntax$UnwrapProc"))
+
+
+  (define bound_identifier_equal
+    '''
+    (bound_identifier_equal id1 id2)
+
+Compares two identifiers to determine whether {@code id1} would bind {@code id2}
+(or vice versa) if one were in a binding position and the other in a suitable
+reference position.
+    '''
+    (java_new "com.amazon.fusion.SyntaxSymbol$BoundIdentifierEqualProc"))
 
 
   (define free_identifier_equal
