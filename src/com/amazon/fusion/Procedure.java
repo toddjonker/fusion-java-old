@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -338,15 +338,6 @@ abstract class Procedure
         catch (ClassCastException e) {}
 
         throw new ArgumentException(this, typeName, argNum, args);
-    }
-
-
-    @Deprecated
-    final SyntaxSymbol checkSyntaxSymbolArg(int argNum, Object... args)
-        throws ArgumentException
-    {
-        return checkSyntaxArg(SyntaxSymbol.class, "syntax symbol",
-                              true /* nullable */, argNum, args);
     }
 
 

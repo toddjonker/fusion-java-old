@@ -1,9 +1,10 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
+import static com.amazon.fusion.FusionSyntax.checkIdentifierArg;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import java.util.Collections;
@@ -403,11 +404,6 @@ final class SyntaxSymbol
         return thisBinding.sameTarget(thatBinding);
     }
 
-    Object freeIdentifierEqual(Evaluator eval, SyntaxSymbol that)
-    {
-        return makeBool(eval, freeIdentifierEqual(that));
-    }
-
 
     /**
      * Give a debugging representation: the symbol name and all its marks.
@@ -428,5 +424,23 @@ final class SyntaxSymbol
             base = buf.toString();
         }
         return base;
+    }
+
+
+    //========================================================================
+    // Procedures
+
+    static final class FreeIdentifierEqualProc
+        extends Procedure2
+    {
+        @Override
+        Object doApply(Evaluator eval, Object arg1, Object arg2)
+            throws FusionException
+        {
+            SyntaxSymbol id1 = checkIdentifierArg(eval, this, "identifier", 0, arg1, arg2);
+            SyntaxSymbol id2 = checkIdentifierArg(eval, this, "identifier", 1, arg1, arg2);
+
+            return makeBool(eval, id1.freeIdentifierEqual(id2));
+        }
     }
 }

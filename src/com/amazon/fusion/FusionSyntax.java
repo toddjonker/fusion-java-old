@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -60,8 +60,12 @@ final class FusionSyntax
 
 
     /**
-     * @param id1 must be an identifier.
-     * @param id2 must be an identifier.
+     * Determines whether two identifiers refer to the same binding.
+     *
+     * @param id1
+     *   must be an {@linkplain #isIdentifier(Evaluator, Object) identifier}.
+     * @param id2
+     *   must be an {@linkplain #isIdentifier(Evaluator, Object) identifier}.
      */
     static boolean unsafeFreeIdentifierEqual(Evaluator eval,
                                              Object    id1,
