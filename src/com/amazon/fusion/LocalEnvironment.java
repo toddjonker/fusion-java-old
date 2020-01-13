@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -143,7 +143,7 @@ final class LocalEnvironment
                 if (dupe != null)
                 {
                     String message =
-                        "duplicate binding: " +
+                        "duplicate binding identifier: " +
                         printQuotedSymbol(id.stringValue());
 
                     SyntaxException ex =

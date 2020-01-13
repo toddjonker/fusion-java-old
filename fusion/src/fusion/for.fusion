@@ -158,7 +158,7 @@ to apply optimizations to the generated code.
 
   (define (normalize_ids ids)
     (if (is_identifier ids)
-      (sexp ids)
+      (datum_to_syntax (sexp ids))
       ids))
 
   (define (syntax_to_sexp stx)
@@ -166,6 +166,15 @@ to apply optimizations to the generated code.
       (if (is_sexp datum)
         datum
         (apply sexp datum))))
+
+  (define (clause_ids original clauses_stx)
+    "Given for-clauses, return sexp of identifiers."
+    (let [(ids (|clause|
+                 (syntax_unwrap
+                   (normalize_ids
+                     (binding_ids original clause check_single_or_multi_id)))))]
+      (apply append (sexp)
+        (map ids (syntax_to_sexp clauses_stx)))))
 
 
   (define (make_series series)
@@ -207,7 +216,7 @@ This is currently simpler than Racket's version because we don't have...
     '''
     (let_values
       [((ids rhs) (split_binding orig_stx clause check_single_or_multi_id))]
-      (let [(ids (datum_to_syntax (normalize_ids ids))),
+      (let [(ids (normalize_ids ids)),
             (clause_loc (|s| (datum_to_syntax s ctx rhs)))] // Copy the rhs location
         (datum_to_syntax
           (quasiquote
@@ -292,11 +301,19 @@ Helper form for `for_fold_derived`.
                         (outer_checks   (...    1)),
                         (loop_bindings  (...... 2)),
                         (pos_guards     (...    3)),
-                        (inner_bindings (...... 4)),
+                        (inner_bindings (...... 4)), // Bind the for-clause vars
                         (pre_guards     (...    5)),
                         (post_guards    (...    6)),
                         (loop_args      (...... 7)),
                         (done           (pair (quote values) fold_vars))]
+
+                    // Check for duplicate ids in the accums and for-clauses.
+                    // Racket doesn't do this; see test code for explanation.
+                    (lets [(clause_vars (clause_ids original inner_bindings)),
+                           (dupe (check_duplicate_identifier (append fold_vars clause_vars)))]
+                      (when dupe
+                        (wrong_syntax original "duplicate binding identifier: " dupe)))
+
                     (datum_to_syntax
                       (quasiquote
                         (let_values (unquote outer_bindings)

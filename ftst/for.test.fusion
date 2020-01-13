@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -144,6 +144,47 @@
 (expect_result_error (fors_fold () () 1))
 (expect_result_error (for_fold  () () (values 1 2)))
 (expect_result_error (fors_fold () () (values 1 2)))
+
+
+// Racket's documentation of `for-fold` says:
+//
+//   An accum-id and a binding from a for-clause can be the same identifier.
+//   In that case, the accum-id binding shadows the one in a for-clause within
+//   the body-or-break and body forms (even though, syntactically, a for-clause
+//   is closer to to the body).
+//
+// However, its behavior is inconsistent.  See the bug report issue at
+// https://github.com/racket/racket/issues/2703
+//
+// For consistency, Fusion rejects duplicate identifiers among those clauses
+// within each level of nested loops.
+
+(expect_syntax_error
+  (for_fold [(DUPE 0)]
+            [(DUPE [])]
+    1))
+(expect_syntax_error
+  (for_fold [(DUPE 0)]
+            [((x DUPE) [])]
+    1))
+(expect_syntax_error
+  (for_fold [(DUPE 0)]
+            [(x []), (DUPE [])]
+    1))
+(expect_syntax_error
+  (for_fold [(DUPE 0)]
+            [(x []), ((y DUPE) [])]
+    1))
+(expect_syntax_error
+  (for_fold [(a 0), (DUPE 0)]
+            [(DUPE [])]
+    1))
+
+// In fors_fold, we still allow dupes across for_clauses, since they are nested.
+(expect_syntax_error
+  (fors_fold [(DUPE 0)]
+             [(x []), ((x DUPE) [])]
+    1))
 
 
 //=============================================================================
