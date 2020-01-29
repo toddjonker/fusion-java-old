@@ -88,10 +88,14 @@ significantly simpler to implement and easier to understand.
   (require
     "/fusion/private/kernel2"
     "/fusion/private/metasyntax"
+    "/fusion/private/raise"
+    "/fusion/private/sexp"
+    "/fusion/void"
   )
 
   (provide
     bound_identifier_equal
+    check_duplicate_identifier
     datum_to_syntax
     define_syntax
     expand_once
@@ -259,7 +263,7 @@ value. This only unwraps one layer, retaining inner syntax objects.
     '''
     (bound_identifier_equal id1 id2)
 
-Compares two identifiers to determine whether {@code id1} would bind {@code id2}
+Compares two identifiers to determine whether `id1` would bind `id2`
 (or vice versa) if one were in a binding position and the other in a suitable
 reference position.
     '''
@@ -307,4 +311,43 @@ the `origin` identifier.
       (quasisyntax
         (syntax_append (quote_syntax ((unsyntax (syntax_get stx 1))))
                        (unsyntax (syntax_get stx 2))))))
+
+
+  (define (check_duplicate_identifier ids)
+    '''
+Given a sexp of identifiers `ids`, compares each pair of identifiers with
+`bound_identifier_equal`.  If any comparison returns `true`, the result is the
+first duplicate identifier (_i.e._, the first with a preceding match);
+otherwise the result is void.
+    '''
+    // TODO Improve performance: this is O(n²). Should use a bound-id-set.
+    //   This is okay for now since most local binding environments are small.
+    (letrec [(is_sexp_of_ids
+               (lambda (ids)
+                 (if (is_sexp ids)
+                   (if (is_pair ids)
+                     (if (is_identifier (head ids))
+                       (is_sexp_of_ids (tail ids))
+                       false)
+                     true)
+                   false))),
+             (has_duplicate_identifier
+               (lambda (id ids)
+                 "Is `id` `bound_identifier_equal` to any element of `ids`?"
+                 (if (is_pair ids)
+                   (if (bound_identifier_equal id (head ids))
+                     true
+                     (has_duplicate_identifier id (tail ids)))
+                   false))),
+             (find_dupe
+               (lambda (no_dupes ids)
+                 (if (is_pair ids)
+                   (let_values [((id) (head ids))]
+                     (if (has_duplicate_identifier id no_dupes)
+                       id
+                       (find_dupe (pair id no_dupes) (tail ids))))
+                   (void))))]             // Empty sexp has no duplicates
+      (if (is_sexp_of_ids ids)
+        (find_dupe (quote ()) ids)
+        (raise_argument_error "check_duplicate_identifier" "sexp of identifiers" 0 ids))))
 )

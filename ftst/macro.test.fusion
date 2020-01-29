@@ -2,7 +2,8 @@
 
 (require
   "/fusion/experimental/check"
-  "/fusion/experimental/syntax")
+  "/fusion/experimental/syntax"
+  (rename_in "/fusion/experimental/syntax" (quote_syntax QS)))
 
 
 // Very basic macro
@@ -103,6 +104,43 @@
       (quasisyntax (check_bound a (unsyntax x))))))
 
 (check === "no_binds" (check_a a))
+
+
+//============================================================================
+// check_duplicate_identifier
+
+(define ID_A (QS a))
+(define ID_B (QS b))
+(define ID_C (QS c))
+
+(define_syntax make_a
+  '''
+Expand to an identifier `a` that's not `bound_identifier_equal` to any other,
+by virtue of being macro-introduced.
+  '''
+  (lambda (stx)
+    (QS (QS a))))
+
+(check_void (check_duplicate_identifier (quote null.sexp)))
+(check_void (check_duplicate_identifier (sexp)))
+(check_void (check_duplicate_identifier (sexp ID_A)))
+(check_void (check_duplicate_identifier (sexp ID_A ID_B)))
+(check_void (check_duplicate_identifier (sexp ID_A ID_B ID_C)))
+(check_void (check_duplicate_identifier (sexp ID_A (make_a))))
+(check_void (check_duplicate_identifier (sexp (make_a) (make_a))))
+
+// Return the first duplicate id (ie, the first with a preceding match).
+(check_same ID_A (check_duplicate_identifier (sexp ID_A   ID_A)))
+(check_same ID_A (check_duplicate_identifier (sexp (QS a) ID_A)))
+(check_same ID_A (check_duplicate_identifier (sexp (QS a) ID_A   ID_B ID_B)))
+(check_same ID_A (check_duplicate_identifier (sexp ID_B   (QS a) ID_A ID_B)))
+
+(expect_argument_error (check_duplicate_identifier []))
+(expect_argument_error (check_duplicate_identifier [ID_A]))
+(expect_argument_error (check_duplicate_identifier (sexp (quote a))))
+
+// Elements following a match are checked
+(expect_argument_error (check_duplicate_identifier (sexp ID_A ID_A (quote a))))
 
 
 //============================================================================
