@@ -1,4 +1,4 @@
-// Copyright (c) 2005-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2005-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -20,9 +20,19 @@ class Help
         "for each one.";
 
     final static String APP_HELP_TEXT_INTRO =
-        "Usage: fusion [OPTIONS ...] <command> [ARGS ...]\n" +
+        "Usage: fusion [OPTIONS ...] <command> [ARGS ...] [; <command> [ARGS ...]] ...\n" +
         "Type 'fusion help <command>' for help on a specific command.\n\n" +
         "Available commands:\n";
+
+    final static String APP_HELP_TEXT_BODY =
+        "\n" +
+        "Multiple commands can be provided in the same invocation, separated by the\n" +
+        "semicolon character. In most shells this character will need escaping:\n" +
+        "\n" +
+        "    $ fusion require /fusion/io \\; load myscript.fusion\n" +
+        "\n" +
+        "All commands are evaluated, in order, in the same top-level namespace. Thus the\n" +
+        "`require` command above affects the subsequent `load`.";
 
     private final static String FULL_HELP_SEPARATOR =
         "\n                                *      *      *\n\n";
@@ -104,6 +114,7 @@ class Help
 
             table.render(out);
 
+            out.append(APP_HELP_TEXT_BODY);
             out.append(GlobalOptions.HELP);
         }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -15,8 +15,12 @@ class Load
     private static final String HELP_USAGE =
         "load FILE";
     private static final String HELP_BODY =
-        "Loads and evaluates the Fusion script in the given FILE.  If the result of the\n" +
-        "last expression is not void, it is sent to standard output via `write`.";
+        "Loads and evaluates the Fusion script in the given FILE. Preceding `require`,\n" +
+        "`eval`, and `load` commands can affect the results since they share the same\n" +
+        "namespace.\n" +
+        "\n" +
+        "If the result of the last expression is not void, it is sent to standard output\n" +
+        "via `write`.";
 
 
     Load()

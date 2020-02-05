@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -26,8 +26,10 @@ class Repl
     private static final String HELP_USAGE =
         "repl";
     private static final String HELP_BODY =
-        "Enter the interactive console. Cannot be used when stdin or stdout have been\n" +
-        "redirected.";
+        "Enters the interactive console. Preceding `require`, `eval`, and `load` commands\n" +
+        "share the same namespace.\n" +
+        "\n" +
+        "This command cannot be used when stdin or stdout have been redirected.";
 
 
     Repl()

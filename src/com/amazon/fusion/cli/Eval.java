@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2019-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -12,11 +12,15 @@ class Eval
     private static final String HELP_ONE_LINER =
         "Evaluate an inline script.";
     private static final String HELP_USAGE =
-        "eval EVAL_TEXT";
+        "eval EXPRESSIONS";
     private static final String HELP_BODY =
-        "Evaluate an inline script from the given EVAL_TEXT. If the result of the\n" +
-        "last expression is not void, it is sent to standard output via `write`.\n" +
-        "Be aware that regular shell quoting/escaping rules take place first.";
+        "Evaluates the EXPRESSIONS as top-level form(s). Preceding `require`, `eval`, and\n" +
+        "`load` commands can affect the results since they share the same namespace.\n" +
+        "\n" +
+        "If the result of the last expression is not void, it is sent to standard output\n" +
+        "via `write`.\n" +
+        "\n" +
+        "Be careful to follow your shell's quoting and escaping rules.";
 
 
     Eval()

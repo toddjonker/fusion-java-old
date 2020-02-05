@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2019-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -10,14 +10,22 @@ class Require
 {
     //=+===============================================================================
     private static final String HELP_ONE_LINER =
-        "Requires a single Fusion module.";
+        "Import bindings from a Fusion module.";
     private static final String HELP_USAGE =
-        "require MODULE_NAME";
+        "require MODULE_ID";
     private static final String HELP_BODY =
-        "Requires a single Fusion module. Chain commands to require multiple modules\n" +
-        "By itself, Fusion produces effect to output, but opens up modules for subsequent commands\n" +
-        "Ex: ` fusion require /fusion/struct ';' eval '(begin (define s (mutable_struct \"a\" 1)) (put_m s \"modified\" true) s)' ` ==> {a:1,modified:true}\n" +
-        "Be aware that regular shell quoting/escaping rules take place first.";
+        "Imports bindings from a module into the top-level namespace, equivalent to\n" +
+        "evaluating the expression `(require MODULE_ID)`.\n" +
+        "\n" +
+        "In general, this command will be followed by others that make use of the\n" +
+        "imported features. For example:\n" +
+        "\n" +
+        "    $ fusion require /fusion/struct ';' \\\n" +
+        "      eval '(define s (mutable_struct \"a\" 1)) (put_m s \"modified\" true) s'\n" +
+        "\n" +
+        "    {a:1,modified:true}\n" +
+        "\n" +
+        "Be careful to follow your shell's quoting and escaping rules.";
 
 
     Require()
