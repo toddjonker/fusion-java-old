@@ -77,6 +77,7 @@ public interface TopLevel
      * since it can provide better error reporting.
      *
      * @param source Fusion source code, in Ion data format. Must not be null.
+     *               The caller is responsible for closing this reader.
      *
      * @return the resulting Fusion value; typically the value of the last
      * expression in the source. May be null (if no value results) or an
