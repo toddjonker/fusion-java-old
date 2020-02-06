@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2017-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -626,8 +626,7 @@ class Compiler
             }
         };
 
-        // TODO Binding should already be resolved so we can use getBinding().
-        Binding binding = id.resolve();
+        Binding binding = id.getBinding();
         return (CompiledForm) binding.visit(v);
     }
 

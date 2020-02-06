@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -39,15 +39,14 @@ final class TopForm
                 // lookup by name.
 
                 SyntaxSymbol stripped = id.stripWraps(eval);
-                assert stripped.resolve() instanceof FreeBinding;
-
                 binding = ns.resolveDefinition(stripped);
                 // This may still be free, but don't fail until eval-time.
                 // We'd like things like (expand (#%top foo)) to succeed.
 
                 if (binding == null)
                 {
-                    binding = stripped.getBinding();
+                    binding = stripped.resolve();
+                    assert binding instanceof FreeBinding;
                 }
             }
 
