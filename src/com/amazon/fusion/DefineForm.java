@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -155,7 +155,10 @@ final class DefineForm
         // already checked the identifier.  Thus this will only cause an error
         // when using the original stx, so we know the error trace will
         // correctly refer to the original syntax.
-        check.requiredIdentifier(1);
+        SyntaxSymbol identifier = check.requiredIdentifier(1);
+
+        // We want all identifiers resolved by the end of expansion.
+        identifier.resolve();
 
         // https://docs.racket-lang.org/reference/define.html says:
         //   At the top level, the top-level binding for id is created after

@@ -310,7 +310,7 @@ class Compiler
         final CompiledForm valueForm = compileExpression(env, valueSource);
 
         final SyntaxSymbol identifier = (SyntaxSymbol) stx.get(myEval, 1);
-        Binding binding = identifier.resolve();
+        Binding binding = identifier.getBinding();
 
         Binding.Visitor v = new Binding.Visitor()
         {
@@ -437,7 +437,7 @@ class Compiler
         final CompiledForm valueForm = compileExpression(env, valueSource);
 
         final SyntaxSymbol identifier = (SyntaxSymbol) stx.get(myEval, 1);
-        Binding binding = identifier.resolve();
+        Binding binding = identifier.getBinding();
 
         Binding.Visitor v = new Binding.Visitor()
         {
