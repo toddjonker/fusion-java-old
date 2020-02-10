@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -284,7 +284,15 @@ final class FusionStruct
     }
 
 
-    static Object mergeValuesForKey(Object prev, Object value)
+    /**
+     * Merges one or more new values for a key with one or more existing values.
+     *
+     * @param prev may be a single value, or an array of values.
+     * @param value may be a single value, or an array of values.
+     *
+     * @return the merged array of values.
+     */
+    private static Object[] mergeValuesForKey(Object prev, Object value)
     {
         Object[] multi;
         if (prev instanceof Object[])
@@ -317,12 +325,15 @@ final class FusionStruct
 
 
     /**
+     * Adds an element to the struct, allowing for repeated fields in the result.
+     *
      * @param value may be an array (for repeated fields)
      */
     static FunctionalHashTrie<String, Object> structImplAdd(FunctionalHashTrie<String, Object> map,
                                                             String name,
                                                             Object value)
     {
+        // TODO This should be done with a single traversal of the trie.
         Object prev = map.get(name);
         if (prev != null)
         {
