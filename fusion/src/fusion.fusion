@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 (module fusion "/fusion/base"
 
@@ -147,6 +147,7 @@ contact us for clarification.
   (require "/fusion/for")
   (provide
     for            fors
+    for_fold       fors_fold
     for_list       fors_list
     for_sexp       fors_sexp
     for_struct     fors_struct
