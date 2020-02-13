@@ -1,9 +1,9 @@
-// Copyright (c) 2014-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2020 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
   "/fusion/experimental/string"
-  "/fusion/string")
+  "/fusion/list")
 
 
 
@@ -74,3 +74,33 @@
 
 (expect_argument_exn (string_explode null.string))
 (expect_argument_exn (string_implode null.list))
+
+
+//============================================================================
+// string_split_noregexp
+
+(expect_arity_exn (string_split_noregexp (void)))
+(expect_arity_exn (string_split_noregexp null.string))
+(expect_arity_exn (string_split_noregexp ""))
+(expect_argument_exn (string_split_noregexp (void) " "))
+(expect_argument_exn (string_split_noregexp null " "))
+(expect_argument_exn (string_split_noregexp null.string " "))
+(expect_argument_exn (string_split_noregexp "abc def" null))
+(expect_argument_exn (string_split_noregexp "abc def" null.string))
+
+(check === [] (string_split_noregexp "" " "))
+(check === ["a", "b", "c", " ", "d", "e", "f"] (string_split_noregexp "abc def" ""))
+(check === ["abc", "def"] (string_split_noregexp "abc def" " "))
+(check === ["abc", "", "def"] (string_split_noregexp "abc  def" " "))
+(check === ["ab", "cd", "ef"] (string_split_noregexp "ab:cd:ef" ":"))
+(check === ["abc"] (string_split_noregexp " abc " " "))
+(check === ["ab", "cd", "ef"] (string_split_noregexp "abZZZcdZZZef" "ZZZ"))
+
+// Separator shouldn't be treated as a regular expression
+(check === ["a+b",    "c"] (string_split_noregexp "a+b.c" "."))
+(check === ["a", "b", "c"] (string_split_noregexp "a+b+c" "+"))
+(check === ["a", "b", "c"] (string_split_noregexp "a\\b\\c" "\\"))
+
+(check_pred is_immutable_list (string_split_noregexp "" ""))
+(check_pred is_immutable_list (string_split_noregexp "a-b" "-"))
+(check_pred is_immutable_list (string_split_noregexp "ab" ""))
