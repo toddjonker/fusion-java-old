@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -54,6 +54,10 @@ public class SourceLocation
 
     /**
      * Gets the one-based column number.
+     * <p>
+     * Because it doesn't make sense to count columns without counting lines,
+     * this value is zero whenever the line number is zero.
+     * </p>
      * @return zero if the column is unknown.
      */
     public long getColumn()
