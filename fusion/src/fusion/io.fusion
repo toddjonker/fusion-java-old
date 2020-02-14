@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 (module io '/fusion/private/kernel'
 
@@ -12,8 +12,8 @@ The `read` procedure reads data from an Ion input stream.
 
 The _current Ion input stream_ is an internal [parameter][] that is the default
 source for reading Ion data.  If the current Ion stream is not parameterized
-(via `with_ion_from_file`), it is initialized from `stdin` when it's first
-needed.
+(via one of the `with_ion_from_*` procedures), it is initialized from `stdin`
+when it's first needed.
 
 
 ## Output
@@ -29,8 +29,12 @@ There are three "styles" of output:
   character data types (strings and symbols), which are output as-is without
   escapes.
 
+These procedures render to the _current output port_, an internal [parameter][]
+that's currently not accessible from this library, but that is configurable
+upon launch of the Fusion runtime. See [FusionRuntimeBuilder][] for details.
 
 [parameter]: fusion/parameter.html
+[FusionRuntimeBuilder]: javadoc/com/amazon/fusion/FusionRuntimeBuilder.html
   '''
 
 
@@ -150,8 +154,8 @@ bound to the name `eof`.
     '''
     (ionize value)
 
-Outputs an Ion text representation of `value`, throwing an exception if the
-value contains any non-Ionizable data like closures.
+Outputs an Ion text representation of `value` to the current output port,
+throwing an exception if the value contains any non-Ionizable data like closures.
     '''
     (java_new "com.amazon.fusion.FusionIo$IonizeProc" current_output_port))
 
@@ -182,7 +186,8 @@ containing an Ion text document.
     '''
     (write value)
 
-Outputs a text representation of `value`, following Ion syntax where possible.
+Outputs a text representation of `value` to the current output port, following
+Ion syntax where possible.
 The result will be unreadable (by the Fusion and Ion readers) if the value
 contains any non-Ionizable data like closures.
     '''
@@ -193,7 +198,8 @@ contains any non-Ionizable data like closures.
     '''
     (display value ...)
 
-Outputs a text representation of the `value`s for human consumption.
+Outputs a text representation of the `value`s  to the current output port, in a
+form meant for human consumption.
 When a `value` is an unannotated string or symbol, its character data is written
 as-is, unquoted and unescaped.
 All other values are rendered as by [`write`](fusion/io.html#write).
