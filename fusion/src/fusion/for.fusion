@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2020 Amazon.com, Inc.  All rights reserved.
 
 (module for '/fusion/private/kernel'
 
@@ -12,12 +12,18 @@ The basic form is `for` itself:
 
     (for [(a [1, 2]),
           (b (sexp "a" "b"))]
-      (display (sexp a b)))
+      (displayln (sexp a b)))
 
 Here, `a` and `b` are bound successively to the individual elements of a list
 and a sexp, respectively, then the body (a call to `display`) is evaluated
 with those bindings. Next, `a` and `b` are given fresh storage locations and
 new bindings to the next elements of the series.
+
+Since `for` always returns void, it's used to perform side effects; the example
+above prints two lines:
+
+    (1 "a")
+    (2 "b")
 
 
 For-clauses
@@ -30,6 +36,13 @@ binding forms, allowing one or more bound identifiers:
 
     for-clause := (id series_expr)
                 | ((id ...+) series_expr)
+
+The second form is used with series that produce multiple values:
+
+    (for_list [((name value) { "a": 1, "b": 2 })]
+      (display_to_string name "=" value))
+    =>
+    ["a=1", "b=2"]
 
 In all forms, the `series_expr`s are evaluated once before iteration begins,
 and the result must be a value of one of the series types.  The number of `id`s
@@ -432,6 +445,13 @@ The final `body` expression must produce the same number of values as there are
 `accum-id`s, and those become the accumulator values for the next cycle.
 
 The results of the `for_fold` expression are the final accumulator values.
+
+    (for_fold
+      [(result "")]
+      [((name value) { "a": 1, "b": 2 })]
+      (string_append result
+        (if (== result "") "" " and ")
+        (display_to_string name "=" value)))    => "a=1 and b=2"
     '''
     (lambda (stx)
       (datum_to_syntax
