@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -25,7 +25,7 @@ public interface _Private_CoverageCollector
      * evaluated yet (and may never be evaluated).
      *
      * @return whether the compiler should record coverage for the location.
-     * If false, then {@link #coverableLocation(SourceLocation)} will never be
+     * If false, then {@link #coverLocation(SourceLocation)} will never be
      * called with the given location.
      */
     boolean coverableLocation(SourceLocation loc);

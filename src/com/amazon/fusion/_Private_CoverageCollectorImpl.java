@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -203,9 +203,6 @@ public final class _Private_CoverageCollectorImpl
 
     /**
      * Remove an entry from the cache AFTER it has been flushed.
-     *
-     * @param file
-     * @param ref
      */
     private static synchronized void removeFromCache(File file,
                                                      CollectorRef ref)
