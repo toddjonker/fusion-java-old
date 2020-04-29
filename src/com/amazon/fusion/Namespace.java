@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -857,7 +857,7 @@ abstract class Namespace
     {
         if (myBindingDocs == null)
         {
-            myBindingDocs = new ArrayList<BindingDoc>();
+            myBindingDocs = new ArrayList<>();
         }
         set(myBindingDocs, address, doc);
     }

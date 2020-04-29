@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -149,15 +149,10 @@ final class LoadHandler
     {
         try
         {
-            IonReader reader = loc.read(eval);
-            try
+            try (IonReader reader = loc.read(eval))
             {
                 SourceName sourceName = loc.sourceName();
                 return readModuleDeclaration(eval, id, sourceName, reader);
-            }
-            finally
-            {
-                reader.close();
             }
         }
         catch (IOException e)

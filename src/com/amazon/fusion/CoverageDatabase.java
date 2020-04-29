@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -128,10 +127,8 @@ class CoverageDatabase
     {
         Set<SourceName> names = new HashSet<>();
 
-        Iterator<SourceLocation> i = myLocations.keySet().iterator();
-        while (i.hasNext())
+        for (SourceLocation loc : myLocations.keySet())
         {
-            SourceLocation loc = i.next();
             SourceName name = loc.getSourceName();
             if (name != null)
             {
@@ -168,10 +165,8 @@ class CoverageDatabase
     {
         ArrayList<SourceLocation> locsList = new ArrayList<>();
 
-        Iterator<SourceLocation> i = myLocations.keySet().iterator();
-        while (i.hasNext())
+        for (SourceLocation loc : myLocations.keySet())
         {
-            SourceLocation loc = i.next();
             if (name.equals(loc.getSourceName()))
             {
                 locsList.add(loc);

@@ -872,10 +872,10 @@ class Compiler
                 else
                 {
                     b.append("\nArguments were: ");
-                    for (int i = 0; i < args.length; i++)
+                    for (Object arg : args)
                     {
                         b.append("\n  ");
-                        safeWrite(eval, b, args[i]);
+                        safeWrite(eval, b, arg);
                     }
                 }
 

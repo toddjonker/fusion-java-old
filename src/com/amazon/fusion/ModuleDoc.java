@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -139,7 +139,7 @@ final class ModuleDoc
         Set<BaseSymbol> names = module.providedNames();
         if (names.size() == 0) return;
 
-        myBindings = new HashMap<String,BindingDoc>(names.size());
+        myBindings = new HashMap<>(names.size());
 
         for (BaseSymbol name : names)
         {
@@ -187,7 +187,7 @@ final class ModuleDoc
 
         if (mySubmodules == null)
         {
-            mySubmodules = new HashMap<String,ModuleDoc>();
+            mySubmodules = new HashMap<>();
         }
 
         assert ! mySubmodules.containsKey(name);

@@ -1,17 +1,16 @@
-// Copyright (c) 2005-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2005-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * Simple class for neatly printing tabular data.
  */
 class TablePrinter
 {
-    private final ArrayList<String[]> myRows = new ArrayList<String[]>();
+    private final ArrayList<String[]> myRows = new ArrayList<>();
 
     private int myIndentation = 0;
     private final int myGutterWidth = 2;
@@ -41,10 +40,8 @@ class TablePrinter
     {
         int[] columnWidths = computeColumnWidths();
 
-        for (Iterator<String[]> rowIter = myRows.iterator(); rowIter.hasNext();)
+        for (String[] row : myRows)
         {
-            String[] row = rowIter.next();
-
             renderBlanks(myIndentation, out);
 
             for (int col = 0; col < row.length; col++)
@@ -78,10 +75,8 @@ class TablePrinter
 
         int[] columnWidths = new int[columnCount];
 
-        for (Iterator<String[]> rowIter = myRows.iterator(); rowIter.hasNext();)
+        for (String[] row : myRows)
         {
-            String[] row = rowIter.next();
-
             for (int col = 0; col < row.length; col++)
             {
                 int cellWidth = row[col].length();

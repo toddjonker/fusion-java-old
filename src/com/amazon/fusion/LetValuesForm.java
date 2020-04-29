@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -24,7 +24,7 @@ final class LetValuesForm
 
         // Gather the bound names
         ArrayList<SyntaxSymbol> boundNameList =
-            new ArrayList<SyntaxSymbol>(numBindingForms);
+            new ArrayList<>(numBindingForms);
         for (int i = 0; i < numBindingForms; i++)
         {
             SyntaxChecker checkPair =

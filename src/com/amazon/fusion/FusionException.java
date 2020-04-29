@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -161,8 +161,10 @@ public class FusionException
             displayMessage(null, out);
             displayContinuation(out);
         }
-        catch (IOException e) {}
-        catch (FusionException e) {}
+        catch (IOException | FusionException e)
+        {
+            // Swallow these, we can't do anything with it at the moment.
+        }
 
         return out.toString();
     }

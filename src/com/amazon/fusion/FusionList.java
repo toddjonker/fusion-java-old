@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -706,9 +706,9 @@ final class FusionList
         {
             int myLen = size();
             int newLen = myLen;
-            for (int i = 0; i < args.length; i++)
+            for (Object arg : args)
             {
-                newLen += ((BaseSequence) args[i]).size();
+                newLen += ((BaseSequence) arg).size();
             }
 
             if (newLen == myLen) return this; // Nothing to append
@@ -1208,10 +1208,9 @@ final class FusionList
                     out.stepIn(IonType.LIST);
                     {
                         int len = myValues.length;
-                        for (int i = 0; i < len; i++)
+                        for (Object elt : myValues)
                         {
-                            IonValue iv = (IonValue) myValues[i];
-                            iv.writeTo(out);
+                            ((IonValue) elt).writeTo(out);
                         }
                     }
                     out.stepOut();

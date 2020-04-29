@@ -1,4 +1,4 @@
-// Copyright (c) 2005-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2005-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -229,9 +229,8 @@ abstract class Command
     private static PropertyDescriptor
     getPropertyDescriptor(PropertyDescriptor[] propDescs, String propName)
     {
-        for (int i = 0; i < propDescs.length; i++)
+        for (PropertyDescriptor descriptor : propDescs)
         {
-            PropertyDescriptor descriptor = propDescs[i];
             String descriptorName = descriptor.getName();
             if (descriptorName.equals(propName))
             {

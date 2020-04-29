@@ -136,9 +136,8 @@ final class LocalEnvironment
         {
             // TODO Avoid a hashmap when count==2, do a simple comparison.
             BoundIdMap<SyntaxSymbol> ids = new BoundIdMap<>();
-            for (int i = 0; i < count; i++)
+            for (SyntaxSymbol id : identifiers)
             {
-                SyntaxSymbol id   = identifiers[i];
                 SyntaxSymbol dupe = ids.put(id, id);
                 if (dupe != null)
                 {

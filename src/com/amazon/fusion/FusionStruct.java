@@ -22,6 +22,7 @@ import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.ion.util.IonTextUtils.printSymbol;
 import static java.util.AbstractMap.SimpleEntry;
+import static java.util.Collections.emptyIterator;
 import com.amazon.fusion.FusionBool.BaseBool;
 import com.amazon.fusion.FusionCollection.BaseCollection;
 import com.amazon.fusion.FusionCompare.EqualityTier;
@@ -337,7 +338,7 @@ final class FusionStruct
         Object prev = map.get(name);
         if (prev != null)
         {
-            Object[] multi = (Object[]) mergeValuesForKey(prev, value);
+            Object[] multi = mergeValuesForKey(prev, value);
             return map.with(name, multi);
         }
         else
@@ -1380,16 +1381,14 @@ final class FusionStruct
                     if (lCount != rCount) return falseBool(eval);
 
                     rArray = Arrays.copyOf(rArray, rCount);
-                    for (int i = 0; i < lCount; i++)
+                    for (Object l : lArray)
                     {
-                        lv = lArray[i];
-
                         // Seek a matching element from rArray
                         boolean found = false;
                         for (int j = 0; j < rCount; j++)
                         {
-                            rv = rArray[j];
-                            BaseBool b = tier.eval(eval, lv, rv);
+                            Object r = rArray[j];
+                            BaseBool b = tier.eval(eval, l, r);
                             if (b.isTrue())
                             {
                                 found = true;
@@ -2189,7 +2188,7 @@ final class FusionStruct
             BaseStruct s = (BaseStruct) struct;
             if (s.size() == 0)
             {
-                return iterate(eval, Arrays.asList().iterator());
+                return iterate(eval, emptyIterator());
             }
 
             Map<String, Object> map = ((MapBasedStruct) s).getMap(eval);

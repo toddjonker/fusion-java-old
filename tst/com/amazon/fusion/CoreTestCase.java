@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -215,7 +215,7 @@ public class CoreTestCase
 
     List<String> allTypeExpressions()
     {
-        ArrayList<String> exprs = new ArrayList<String>();
+        ArrayList<String> exprs = new ArrayList<>();
         Collections.addAll(exprs, ION_EXPRESSIONS);
         Collections.addAll(exprs, NON_ION_EXPRESSIONS);
         assert exprs.size() != 0;
@@ -226,7 +226,7 @@ public class CoreTestCase
     List<String> allIonExpressions()
         throws FusionException
     {
-        ArrayList<String> exprs = new ArrayList<String>();
+        ArrayList<String> exprs = new ArrayList<>();
         Collections.addAll(exprs, ION_EXPRESSIONS);
         assert exprs.size() != 0;
         return exprs;
@@ -236,7 +236,7 @@ public class CoreTestCase
     List<String> nonIonExpressions()
         throws FusionException
     {
-        ArrayList<String> exprs = new ArrayList<String>();
+        ArrayList<String> exprs = new ArrayList<>();
         Collections.addAll(exprs, NON_ION_EXPRESSIONS);
         assert exprs.size() != 0;
         return exprs;
@@ -246,7 +246,7 @@ public class CoreTestCase
     <T extends IonValue> List<String> nonIonExpressions(Class<T> klass)
         throws FusionException
     {
-        ArrayList<String> exprs = new ArrayList<String>();
+        ArrayList<String> exprs = new ArrayList<>();
         for (String expr : allTypeExpressions())
         {
             Object v = eval(expr);

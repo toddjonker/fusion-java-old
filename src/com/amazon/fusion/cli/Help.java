@@ -99,10 +99,8 @@ class Help
             table.setIndent(2);
 
             Command[] allCommands = CommandFactory.getAllCommands();
-            for (int i = 0; i < allCommands.length; i++)
+            for (Command command : allCommands)
             {
-                Command command = allCommands[i];
-
                 String oneLiner = command.getHelpOneLiner();
                 if (oneLiner != null)
                 {

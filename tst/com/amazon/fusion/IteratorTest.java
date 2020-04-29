@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -88,7 +88,7 @@ public class IteratorTest
     public void testIteratorInjecting()
         throws Exception
     {
-        ArrayList<Object> list = new ArrayList<Object>();
+        ArrayList<Object> list = new ArrayList<>();
         list.add("str");
         list.add(12);
         list.add(null);

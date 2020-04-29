@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -61,7 +61,7 @@ class Evaluator
         myGlobalState     = outerBindings.myGlobalState;
         mySystem          = outerBindings.mySystem;
         myOuterFrame      = outerBindings;
-        myContinuationMarks = new HashMap<Object, Object>();
+        myContinuationMarks = new HashMap<>();
     }
 
     /**
