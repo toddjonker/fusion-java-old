@@ -9,6 +9,7 @@ import static com.amazon.fusion.FusionList.unsafeListElement;
 import static com.amazon.fusion.FusionSexp.unsafePairHead;
 import static com.amazon.fusion.FusionSexp.unsafePairTail;
 import static com.amazon.fusion.FusionString.stringToJavaString;
+import static com.amazon.fusion.FusionStruct.emptyStruct;
 import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionStruct.nullStruct;
 import static com.amazon.fusion.FusionStruct.structImplAdd;
@@ -40,7 +41,6 @@ import com.amazon.fusion.TopLevelNamespace.CompiledFreeDefine;
 import com.amazon.fusion.TopLevelNamespace.CompiledFreeVariableReference;
 import com.amazon.fusion.TopLevelNamespace.CompiledTopLevelVariableReference;
 import com.amazon.fusion.TopLevelNamespace.TopLevelDefinedBinding;
-import java.util.Collections;
 
 /**
  * "Registers" used during compilation.
@@ -729,7 +729,7 @@ class Compiler
         int size = FusionStruct.unsafeStructSize(myEval, struct);
         if (size == 0)
         {
-            return new CompiledConstant(immutableStruct(Collections.EMPTY_MAP));
+            return new CompiledConstant(emptyStruct(myEval));
         }
 
         final String[]       fieldNames = new String[size];
@@ -957,7 +957,7 @@ class Compiler
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            FunctionalHashTrie<String, Object> map = FunctionalHashTrie.EMPTY;
+            FunctionalHashTrie<String, Object> map = FunctionalHashTrie.empty();
 
             for (int i = 0; i < myFieldNames.length; i++)
             {

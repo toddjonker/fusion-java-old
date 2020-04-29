@@ -1,3 +1,5 @@
+// Copyright (c) 2018-2020 Amazon.com, Inc.  All rights reserved.
+
 package com.amazon.fusion;
 
 import org.junit.Test;
@@ -15,7 +17,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import static com.amazon.fusion.FunctionalHashTrie.EMPTY;
 import static com.amazon.fusion.FunctionalHashTrie.TrieNode;
 import static com.amazon.fusion.FunctionalHashTrie.FlatNode;
 import static com.amazon.fusion.FunctionalHashTrie.CollisionNode;
@@ -169,7 +170,7 @@ public class FunctionalHashTrieTest
 
         FunctionalHashTrie without = fht.without("anything");
         assertTrue(fht == without);
-        assertTrue(fht == EMPTY);
+        assertTrue(fht == FunctionalHashTrie.empty());
     }
 
     @Test
@@ -595,7 +596,7 @@ public class FunctionalHashTrieTest
     @Test
     public void testDeepShifts()
     {
-        FunctionalHashTrie<CustomKey, String> customFHT = EMPTY;
+        FunctionalHashTrie<CustomKey, String> customFHT = FunctionalHashTrie.empty();
 
         // These two will be in the collision node at the bottom.
         customFHT = customFHT.with(new CustomKey(0, "foo"), "A");
@@ -678,7 +679,7 @@ public class FunctionalHashTrieTest
     {
         setup(10000);
 
-        FunctionalHashTrie seq = EMPTY;
+        FunctionalHashTrie seq = FunctionalHashTrie.empty();
         for (Map.Entry e : fht.entrySet())
         {
             seq = seq.with(e.getKey(), e.getValue());

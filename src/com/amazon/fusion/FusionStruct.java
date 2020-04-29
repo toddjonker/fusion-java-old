@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Set;
 
 
+@SuppressWarnings({"unused", "RedundantThrows", "DuplicateThrows"})
 final class FusionStruct
 {
     // Go away you big meany!
@@ -52,7 +53,7 @@ final class FusionStruct
 
     private static final NullStruct             NULL_STRUCT  = new NullStruct();
     private static final NonNullImmutableStruct EMPTY_STRUCT =
-        new FunctionalStruct(FunctionalHashTrie.EMPTY, BaseSymbol.EMPTY_ARRAY, 0);
+        new FunctionalStruct(FunctionalHashTrie.<String,Object>empty(), BaseSymbol.EMPTY_ARRAY, 0);
 
     // Utility method.
     static final BiFunction<Object, Object, Object> STRUCT_MERGE_FUNCTION =
@@ -108,6 +109,13 @@ final class FusionStruct
     }
 
 
+    static NonNullImmutableStruct emptyStruct(Evaluator eval)
+        throws FusionException
+    {
+        return EMPTY_STRUCT;
+    }
+
+
     static NonNullImmutableStruct immutableStruct(FunctionalHashTrie<String, Object> map)
     {
         return immutableStruct(map, BaseSymbol.EMPTY_ARRAY, computeSize(map));
@@ -142,7 +150,7 @@ final class FusionStruct
                 return EMPTY_STRUCT;
             }
 
-            map = FunctionalHashTrie.EMPTY;
+            map = FunctionalHashTrie.empty();
         }
 
         return new FunctionalStruct(map, anns, size);
@@ -195,7 +203,7 @@ final class FusionStruct
                                                   Object[] values,
                                                   BaseSymbol[] anns)
     {
-        FunctionalHashTrie<String, Object> map = FunctionalHashTrie.EMPTY;
+        FunctionalHashTrie<String, Object> map = FunctionalHashTrie.empty();
         if (names.length == 0)
         {
             if (anns.length == 0)
@@ -208,7 +216,7 @@ final class FusionStruct
             for (int i = 0; i < names.length; i++)
             {
                 String field  = names[i];
-                Object newElt = values[i];
+                Object newElt = values[i];  // FIXME if this is an array, then the size will be wrong.
 
                 map = structImplAdd(map, field, newElt);
             }
@@ -250,7 +258,7 @@ final class FusionStruct
     static Object mutableStruct(Evaluator eval)
         throws FusionException
     {
-        return new MutableStruct(FunctionalHashTrie.EMPTY,
+        return new MutableStruct(FunctionalHashTrie.<String,Object>empty(),
                                  BaseSymbol.EMPTY_ARRAY,
                                  0);
     }
@@ -269,7 +277,7 @@ final class FusionStruct
                                        Object[] values,
                                        String[] anns)
     {
-        FunctionalHashTrie<String, Object> map = FunctionalHashTrie.EMPTY;
+        FunctionalHashTrie<String, Object> map = FunctionalHashTrie.empty();
         if (names.length != 0)
         {
             for (int i = 0; i < names.length; i++)
@@ -396,7 +404,7 @@ final class FusionStruct
     //========================================================================
     // Utilities
 
-    private static int computeSize(Map map)
+    private static int computeSize(Map<String,Object> map)
     {
         int size = map.size();
         for (Object values : map.values())
@@ -1253,7 +1261,7 @@ final class FusionStruct
         {
             if (keys.length == 0)
             {
-                return makeSimilar(FunctionalHashTrie.EMPTY, 0);
+                return makeSimilar(FunctionalHashTrie.<String,Object>empty(), 0);
             }
 
             FunctionalHashTrie<String, Object> oldMap = getMap(eval);
@@ -1302,8 +1310,8 @@ final class FusionStruct
         public Object merge1(Evaluator eval, BaseStruct other)
             throws FusionException
         {
-            FunctionalHashTrie origMap = getMap(eval);
-            FunctionalHashTrie newMap = structImplOneify(origMap);
+            FunctionalHashTrie<String,Object> origMap = getMap(eval);
+            FunctionalHashTrie<String,Object> newMap = structImplOneify(origMap);
 
             if (other.size() == 0)
             {
@@ -1897,7 +1905,7 @@ final class FusionStruct
         {
             if (keys.length == 0)
             {
-                myMap = FunctionalHashTrie.EMPTY;
+                myMap = FunctionalHashTrie.empty();
                 mySize = 0;
             }
             else
@@ -2338,7 +2346,7 @@ final class FusionStruct
             Iterator<?> fieldIterator = unsafeJavaIterate(eval, names);
             Iterator<?> valueIterator = unsafeJavaIterate(eval, values);
 
-            FunctionalHashTrie<String, Object> map = FunctionalHashTrie.EMPTY;
+            FunctionalHashTrie<String, Object> map = FunctionalHashTrie.empty();
 
             while (fieldIterator.hasNext() && valueIterator.hasNext())
             {

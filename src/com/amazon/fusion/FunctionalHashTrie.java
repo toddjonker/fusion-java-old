@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2018-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -32,7 +32,7 @@ import java.util.Set;
  *  Uses node polymorphism rather than conditional checks.
  *  Uses a mutable version for faster creation from other {@link Map}s.
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "rawtypes"})
 class FunctionalHashTrie<K, V>
     extends AbstractMap<K, V> implements Iterable<Map.Entry<K, V>>
 {
@@ -41,11 +41,15 @@ class FunctionalHashTrie<K, V>
     private static final int STOP_RELYING_ON_UNDEFINED_BEHAVIOR =
         new Random().nextInt();
 
-    static final FunctionalHashTrie EMPTY =
+    private static final FunctionalHashTrie EMPTY =
         new FunctionalHashTrie<>(null, 0);
     private final TrieNode<K, V> root;
     private final int size;
 
+    static <K, V> FunctionalHashTrie<K, V> empty()
+    {
+        return EMPTY;
+    }
 
     static <K, V> FunctionalHashTrie<K, V> create(Map<K, V> other)
     {
@@ -526,6 +530,8 @@ class FunctionalHashTrie<K, V>
 
         /**
          * Mutates the trie to have the desired mapping from key to value.
+         * This must only be called while constructing a new Trie, when its known that
+         * nodes are not shared.
          * @return Itself
          */
         abstract TrieNode<K, V> mWith(int hash,
