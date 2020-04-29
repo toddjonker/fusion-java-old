@@ -615,7 +615,7 @@ final class FusionStruct
     //========================================================================
 
 
-    static interface StructFieldVisitor
+    interface StructFieldVisitor
     {
         /**
          * @return null means continue visiting, non-null means abort visiting.
@@ -625,7 +625,7 @@ final class FusionStruct
     }
 
 
-    static interface BaseStruct
+    interface BaseStruct
     {
         boolean isAnnotated()
             throws FusionException;
@@ -711,7 +711,7 @@ final class FusionStruct
     }
 
 
-    static interface ImmutableStruct
+    interface ImmutableStruct
         extends BaseStruct
     {
     }

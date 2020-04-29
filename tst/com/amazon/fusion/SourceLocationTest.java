@@ -1,11 +1,10 @@
-// Copyright (c) 2014-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import com.amazon.ion.IonDatagram;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;

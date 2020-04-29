@@ -164,7 +164,7 @@ class Evaluator
             {
                 if (value.isNullValue())
                 {
-                    return makeFloat(this, annotations, (Double) null);
+                    return makeFloat(this, annotations, null);
                 }
                 double d = ((IonFloat)value).doubleValue();
                 return makeFloat(this, annotations, d);
@@ -750,7 +750,7 @@ class Evaluator
     }
 
 
-    private final void checkSingleArgResults(Object[] args)
+    private void checkSingleArgResults(Object[] args)
         throws FusionException
     {
         int len = args.length;

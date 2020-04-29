@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -37,7 +37,7 @@ public interface FusionRuntime
      *
      * @see FusionRuntimeBuilder#getDefaultLanguage()
      */
-    public String getDefaultLanguage();
+    String getDefaultLanguage();
 
 
     /**
@@ -45,7 +45,7 @@ public interface FusionRuntime
      *
      * @return not null.
      */
-    public IonCatalog getDefaultIonCatalog();
+    IonCatalog getDefaultIonCatalog();
 
 
     /**
@@ -61,7 +61,7 @@ public interface FusionRuntime
      *
      * @see #getDefaultLanguage()
      */
-    public TopLevel getDefaultTopLevel()
+    TopLevel getDefaultTopLevel()
         throws FusionException;
 
 
@@ -73,7 +73,7 @@ public interface FusionRuntime
      *
      * @see #getDefaultLanguage()
      */
-    public TopLevel makeTopLevel()
+    TopLevel makeTopLevel()
         throws FusionException;
 
 
@@ -86,7 +86,7 @@ public interface FusionRuntime
      *
      * @return not null.
      */
-    public TopLevel makeTopLevel(String initialModulePath)
+    TopLevel makeTopLevel(String initialModulePath)
         throws FusionException;
 
 
@@ -97,7 +97,7 @@ public interface FusionRuntime
      * with {@code '/'}.
      * @return a new module builder.
      */
-    public ModuleBuilder makeModuleBuilder(String absoluteModulePath)
+    ModuleBuilder makeModuleBuilder(String absoluteModulePath)
         throws FusionException;
 
 
@@ -115,7 +115,7 @@ public interface FusionRuntime
      * @throws FusionException if the value is not handled by the default
      * ionization strategy, or if something else goes wrong during ionization.
      */
-    public IonValue ionize(Object fusionValue, ValueFactory factory)
+    IonValue ionize(Object fusionValue, ValueFactory factory)
         throws FusionException;
 
 
@@ -130,6 +130,6 @@ public interface FusionRuntime
      *
      * @throws FusionException if something goes wrong during ionization.
      */
-    public IonValue ionizeMaybe(Object fusionValue, ValueFactory factory)
+    IonValue ionizeMaybe(Object fusionValue, ValueFactory factory)
         throws FusionException;
 }

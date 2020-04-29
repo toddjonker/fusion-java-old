@@ -401,7 +401,7 @@ abstract class Namespace
      *
      * @return null if there's no binding in this namespace.
      */
-    private final NsBinding resolveBoundMaybe(SyntaxSymbol identifier)
+    private NsBinding resolveBoundMaybe(SyntaxSymbol identifier)
     {
         return myBindings.get(identifier);
     }

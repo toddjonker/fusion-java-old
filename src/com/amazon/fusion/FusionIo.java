@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -663,7 +663,7 @@ public final class FusionIo
         {
             StringBuilder buf = new StringBuilder(512);
 
-            try (IonWriter writer = myBuilder.build(buf);)
+            try (IonWriter writer = myBuilder.build(buf))
             {
                 FusionIo.ionize(eval, writer, arg);
             }

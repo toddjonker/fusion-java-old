@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -116,7 +116,7 @@ final class FusionUtils
     static void writeFriendlyIndex(StringBuilder out, long i)
     {
         i++;
-        out.append(Long.toString(i));
+        out.append(i);
         String suffix = friendlySuffix(i);
         out.append(suffix);
     }

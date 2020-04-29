@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -80,12 +80,12 @@ public class InjectionTest
         assertTrue(isTrue(top, fv));
 
         // Inject Byte
-        top.define("v", Byte.valueOf(Byte.MAX_VALUE));
+        top.define("v", Byte.MAX_VALUE);
         assertEval(Byte.MAX_VALUE, "v");
         assertEval(Byte.MAX_VALUE * 3, "(* 3 v)");
 
         // Inject Short
-        top.define("v", Short.valueOf(Short.MAX_VALUE));
+        top.define("v", Short.MAX_VALUE);
         assertEval(Short.MAX_VALUE, "v");
         assertEval(Short.MAX_VALUE * 2, "(* 2 v)");
 
@@ -95,7 +95,7 @@ public class InjectionTest
         assertEval(44, "(* 2 v)");
 
         // Inject Long
-        top.define("v", Long.valueOf(Long.MAX_VALUE));
+        top.define("v", Long.MAX_VALUE);
         assertEval(Long.MAX_VALUE, "v");
         assertEval(Long.MAX_VALUE - 5, "(- v 5)");
 

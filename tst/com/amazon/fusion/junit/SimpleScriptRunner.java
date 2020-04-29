@@ -1,11 +1,10 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.junit;
 
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntime;
 import com.amazon.fusion.FusionRuntimeBuilder;
-import com.amazon.fusion.TopLevel;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;

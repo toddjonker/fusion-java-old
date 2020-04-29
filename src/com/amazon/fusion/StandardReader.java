@@ -122,7 +122,7 @@ class StandardReader
             {
                 if (source.isNullValue())
                 {
-                    datum = makeBool(eval, anns, (Boolean) null);
+                    datum = makeBool(eval, anns, null);
                 }
                 else
                 {
@@ -169,7 +169,7 @@ class StandardReader
             {
                 if (source.isNullValue())
                 {
-                    datum = makeFloat(eval, anns, (Double) null);
+                    datum = makeFloat(eval, anns, null);
                 }
                 else
                 {

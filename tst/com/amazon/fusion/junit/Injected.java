@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2011-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.junit;
 
@@ -43,7 +43,7 @@ public class Injected
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
-    public static @interface Inject
+    public @interface Inject
     {
         /**
          * The name of the property to inject.

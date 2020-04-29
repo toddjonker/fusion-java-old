@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -172,7 +172,7 @@ public class ListTest
 
         for (int i = 0; i < length; i++)
         {
-            resultStr.append(Integer.toString(i+offset));
+            resultStr.append(i + offset);
             if (i != length-1)
             {
                 resultStr.append(",");

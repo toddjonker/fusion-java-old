@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -8,7 +8,7 @@ package com.amazon.fusion;
 interface CompiledForm
 {
     /** A zero-length array. */
-    static final CompiledForm[] EMPTY_ARRAY = new CompiledForm[0];
+    CompiledForm[] EMPTY_ARRAY = new CompiledForm[0];
 
 
     /** Don't call directly! Go through the evaluator. */

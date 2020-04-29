@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -17,7 +17,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;

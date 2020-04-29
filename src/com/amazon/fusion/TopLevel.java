@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -85,7 +85,7 @@ public interface TopLevel
      *
      * @see #eval(IonReader,SourceName)
      */
-    public Object eval(IonReader source)
+    Object eval(IonReader source)
         throws FusionException;
 
 
@@ -101,7 +101,7 @@ public interface TopLevel
      * expression in the source. May be null (if no value results) or an
      * {@code Object[]} (if there are multiple values).
      */
-    public Object eval(String source, SourceName name)
+    Object eval(String source, SourceName name)
         throws FusionException;
 
 
@@ -121,7 +121,7 @@ public interface TopLevel
      *
      * @see #eval(String,SourceName)
      */
-    public Object eval(String source)
+    Object eval(String source)
         throws FusionException;
 
 
@@ -138,7 +138,7 @@ public interface TopLevel
      * expression in the source. May be null (if no value results) or an
      * {@code Object[]} (if there are multiple values).
      */
-    public Object load(File source)
+    Object load(File source)
         throws FusionException;
 
 
@@ -155,7 +155,7 @@ public interface TopLevel
      * @param modulePath locates the required module. It may be either an
      * absolute or relative path.
      */
-    public void requireModule(String modulePath)
+    void requireModule(String modulePath)
         throws FusionException;
 
 
@@ -174,7 +174,7 @@ public interface TopLevel
      * <a href="{@docRoot}/overview-summary.html#inject">injectable</a>.
      * It is unspecified whether the value will be copied in whole or in part.
      */
-    public void define(String name, Object value)
+    void define(String name, Object value)
         throws FusionException;
 
 
@@ -187,7 +187,7 @@ public interface TopLevel
      * @return the bound value, or null if there's no top-level definition or
      * imported binding for the name.
      */
-    public Object lookup(String name)
+    Object lookup(String name)
         throws FusionException;
 
 
@@ -208,7 +208,7 @@ public interface TopLevel
      * multiple values).
      * Note that "no value" is not the same as "returns void".
      */
-    public Object call(String procedureName, Object... arguments)
+    Object call(String procedureName, Object... arguments)
         throws FusionException;
 
 
@@ -255,8 +255,8 @@ public interface TopLevel
      * top-level value, if a module with the given identity has already been
      * loaded, or if there's any other problem reading or compiling the module.
      */
-    public void loadModule(String absoluteModulePath,
-                           IonReader source,
-                           SourceName name)
+    void loadModule(String absoluteModulePath,
+                    IonReader source,
+                    SourceName name)
         throws FusionException;
 }
