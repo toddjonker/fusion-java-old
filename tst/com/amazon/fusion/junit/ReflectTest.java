@@ -15,7 +15,7 @@ public class ReflectTest
     public ExpectedException thrown = ExpectedException.none();
 
 
-    private class Bean
+    private static class Bean
     {
         private String s = "default";
         private Integer i;

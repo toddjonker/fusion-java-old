@@ -831,7 +831,7 @@ final class FusionTimestamp
         extends Procedure
     {
         @Override
-        Object doApply(Evaluator eval, Object args[])
+        Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
             checkArityExact(2, args);

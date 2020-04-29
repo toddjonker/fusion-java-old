@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -19,8 +19,8 @@ public class CoverageTest
     {
         boolean coverOnlyLineOne = false;
 
-        Set<SourceLocation> coverable = new HashSet<>();
-        Set<SourceLocation> covered   = new HashSet<>();
+        final Set<SourceLocation> coverable = new HashSet<>();
+        final Set<SourceLocation> covered   = new HashSet<>();
 
         @Override
         public boolean coverableLocation(SourceLocation loc)

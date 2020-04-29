@@ -43,7 +43,7 @@ public final class _Private_CoverageCollectorImpl
 
 
 
-    private static
+    private static final
     ReferenceQueue<_Private_CoverageCollectorImpl> ourReferenceQueue =
         new ReferenceQueue<>();
 

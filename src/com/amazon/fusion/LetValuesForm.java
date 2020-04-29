@@ -355,7 +355,7 @@ final class LetValuesForm
                                                 expectation, -1, vals);
                     }
 
-                    System.arraycopy(values, 0,
+                    System.arraycopy(vals, 0,
                                      boundValues, bindingPos,
                                      actualCount);
                     bindingPos += actualCount;

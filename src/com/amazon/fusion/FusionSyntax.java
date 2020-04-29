@@ -126,6 +126,7 @@ final class FusionSyntax
     }
 
 
+    @SuppressWarnings("unchecked")
     static <T extends SyntaxValue> T syntaxTrackOrigin(Evaluator    eval,
                                                        T            newStx,
                                                        SyntaxValue  origStx,

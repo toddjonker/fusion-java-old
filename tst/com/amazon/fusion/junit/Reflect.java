@@ -61,6 +61,7 @@ public class Reflect
     }
 
 
+    @SuppressWarnings("unchecked")
     public static <T> T invoke(Object o, Method method, Object... args)
     {
         try

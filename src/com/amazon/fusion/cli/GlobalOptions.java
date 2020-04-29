@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -44,9 +44,10 @@ final class GlobalOptions
         ;
 
 
-    private InputStream     myStdin;
-    private PrintStream     myStdout;
-    private PrintStream     myStderr;
+    private final InputStream myStdin;
+    private final PrintStream myStdout;
+    private final PrintStream myStderr;
+
     private String          myBootstrapPath;
     private ArrayList<File> myRepositories;
     private ArrayList<File> myCatalogs;

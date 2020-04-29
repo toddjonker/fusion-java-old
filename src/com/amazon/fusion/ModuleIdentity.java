@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 /**
- * A unique identitier for modules available to the Fusion runtime system.
+ * A unique identifier for modules available to the Fusion runtime system.
  * This plays the same role as Racket's "resolved module path", except it does
  * not contain location information about the source of the module.
  * <p>
@@ -42,10 +42,10 @@ class ModuleIdentity
     private static final AtomicLong ourTopLevelCounter = new AtomicLong();
 
 
-    private static Pattern NAME_PATTERN =
+    private static final Pattern NAME_PATTERN =
         Pattern.compile("[a-zA-Z][a-zA-Z0-9_]*");
 
-    private static Pattern PATH_PATTERN =
+    private static final Pattern PATH_PATTERN =
         Pattern.compile("(/(" + NAME_PATTERN + "))+");
 
     static boolean isValidModuleName(String name)
@@ -183,7 +183,7 @@ class ModuleIdentity
         String path =
             TOP_LEVEL_MODULE_PREFIX + ourTopLevelCounter.incrementAndGet();
 
-        ModuleIdentity id = new ModuleIdentity(path)
+        return new ModuleIdentity(path)
         {
             @Override
             String relativeBasePath()
@@ -191,8 +191,6 @@ class ModuleIdentity
                 return absolutePath() + "/";
             }
         };
-
-        return id;
     }
 
 

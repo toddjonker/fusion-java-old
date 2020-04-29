@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -18,6 +18,7 @@ public class JavaFfiTest
         topLevel().requireModule("/fusion/ffi/java");
     }
 
+    @SuppressWarnings("InnerClassMayBeStatic")
     public class NonStatic extends Procedure
     {
         @Override
