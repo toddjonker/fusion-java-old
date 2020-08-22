@@ -186,8 +186,7 @@ abstract class Procedure
     {
         try
         {
-            T arg = klass.cast(args[argNum]);
-            return klass.cast(arg);
+            return klass.cast(args[argNum]);
         }
         catch (ClassCastException e)
         {
