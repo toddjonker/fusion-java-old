@@ -17,12 +17,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import static com.amazon.fusion.FunctionalHashTrie.TrieNode;
-import static com.amazon.fusion.FunctionalHashTrie.FlatNode;
-import static com.amazon.fusion.FunctionalHashTrie.CollisionNode;
-import static com.amazon.fusion.FunctionalHashTrie.BitMappedNode;
-import static com.amazon.fusion.FunctionalHashTrie.HashArrayMappedNode;
-import static com.amazon.fusion.FunctionalHashTrie.hashCodeFor;
+import static com.amazon.fusion.HashArrayMappedTrie.TrieNode;
+import static com.amazon.fusion.HashArrayMappedTrie.FlatNode;
+import static com.amazon.fusion.HashArrayMappedTrie.CollisionNode;
+import static com.amazon.fusion.HashArrayMappedTrie.BitMappedNode;
+import static com.amazon.fusion.HashArrayMappedTrie.HashArrayMappedNode;
+import static com.amazon.fusion.HashArrayMappedTrie.hashCodeFor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
