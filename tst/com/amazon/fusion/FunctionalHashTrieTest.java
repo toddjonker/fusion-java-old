@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -262,5 +263,13 @@ public class FunctionalHashTrieTest
         FunctionalHashTrie trie = FunctionalHashTrie.merge(entries, REPLACE);
         assertEquals(1, trie.size());
         assertEquals("new", trie.get("f"));
+    }
+
+    @Test
+    public void testNoopInsertion()
+    {
+        FunctionalHashTrie trie1 = FunctionalHashTrie.empty().with(1, 1);
+        FunctionalHashTrie trie2 = trie1.with(1, 1);
+        assertSame(trie1, trie2);
     }
 }

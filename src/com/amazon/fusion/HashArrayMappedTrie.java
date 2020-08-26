@@ -87,6 +87,38 @@ class HashArrayMappedTrie
         }
     }
 
+
+    /**
+     * Returns an empty, immutable trie.
+     */
+    public static <K, V> TrieNode<K, V> empty()
+    {
+        return EmptyNode.SINGLETON;
+    }
+
+
+    private static final Iterator EMPTY_ITERATOR = new Iterator()
+    {
+        @Override
+        public boolean hasNext()
+        {
+            return false;
+        }
+
+        @Override
+        public Object next()
+        {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public void remove()
+        {
+            throw new UnsupportedOperationException();
+        }
+    };
+
+
     /**
      * Used to provide the hash code for a key in the {@link HashArrayMappedTrie}.
      * ALL trie node interfacing calls should use this method!!
@@ -218,6 +250,59 @@ class HashArrayMappedTrie
         }
     }
 
+
+    private static final class EmptyNode<K, V>
+        extends TrieNode<K, V>
+    {
+        private static final EmptyNode SINGLETON = new EmptyNode<>();
+
+        private EmptyNode() {}
+
+        @Override
+        public int countKeys()
+        {
+            return 0;
+        }
+
+        @Override
+        public V get(K key)
+        {
+            return null;
+        }
+
+        @Override
+        V get(int hash, int shift, Object key)
+        {
+            return null;
+        }
+
+        @Override
+        TrieNode<K, V> with(int hash, int shift, Object key, Object value, Results results)
+        {
+            results.keyAdded();
+            return new FlatNode<>((K) key, (V) value);
+        }
+
+        @Override
+        TrieNode<K, V> mWith(int hash, int shift, Object key, Object value, Results results)
+        {
+            results.keyAdded();
+            return new FlatNode<>((K) key, (V) value);
+        }
+
+        @Override
+        TrieNode<K, V> without(int hash, int shift, K key, Results results)
+        {
+            return this;
+        }
+
+        @Override
+        Iterator<Entry<K, V>> iterator() {
+            return EMPTY_ITERATOR;
+        }
+    }
+
+
     /**
      * A trie node storing a small number of unsorted key/value pairs, and no child nodes except
      * to hold colliding keys.
@@ -228,7 +313,7 @@ class HashArrayMappedTrie
      * Where there is a null key, the following value is a {@link CollisionNode}.
      * </p>
      * <p>
-     * Nodes of this type are created by inserting into an empty trie, or by inserting a
+     * Nodes of this type are created by inserting into an {@link EmptyNode}, or by inserting a
      * non-colliding key into a {@code CollisionNode}.
      * They may grow to hold up to {@value #MAX_CHILDREN} entries before {@link #expand}ing
      * into a {@link BitMappedNode}.
@@ -421,7 +506,7 @@ class HashArrayMappedTrie
                 {
                     CollisionNode<K, V> node = (CollisionNode<K, V>) kvPairs[index + 1];
                     TrieNode newNode = node.without(hash, shift, key, results);
-                    if (newNode == null)
+                    if (newNode == EmptyNode.SINGLETON)
                     {
                         return withoutPair(index);
                     }
@@ -445,7 +530,7 @@ class HashArrayMappedTrie
         {
             if (kvPairs.length == 2)
             {
-                return null;
+                return EmptyNode.SINGLETON;
             }
             else
             {
@@ -758,6 +843,8 @@ class HashArrayMappedTrie
             {
                 Object keyOrNull = kvPairs[keyIndex];
                 Object valOrNode = kvPairs[keyIndex + 1];
+                assert !(valOrNode instanceof EmptyNode);
+
                 if (keyOrNull == null)
                 {
                     TrieNode<K, V> node = (TrieNode<K, V>) valOrNode;
@@ -979,11 +1066,11 @@ class HashArrayMappedTrie
                 {
                     return this;
                 }
-                else if (newNode == null)
+                else if (newNode == EmptyNode.SINGLETON)
                 {
                     if (bitmap == bit)
                     {
-                        return null;
+                        return EmptyNode.SINGLETON;
                     }
                     else
                     {
@@ -1001,7 +1088,7 @@ class HashArrayMappedTrie
                 results.keyRemoved();
                 if (bitmap == bit)
                 {
-                    return null;
+                    return EmptyNode.SINGLETON;
                 }
                 else
                 {
@@ -1207,7 +1294,7 @@ class HashArrayMappedTrie
                 {
                     return this;
                 }
-                else if (newNode != null)
+                else if (newNode != EmptyNode.SINGLETON)
                 {
                     return new HashArrayMappedNode<>(count,
                                                      cloneAndModify(nodes,
@@ -1359,8 +1446,12 @@ class HashArrayMappedTrie
                 }
                 else if (valOrNode != null)
                 {
-                    childIterator = ((TrieNode<K, V>) valOrNode).iterator();
-                    return true;
+                    Iterator i = ((TrieNode<K, V>) valOrNode).iterator();
+                    if (i.hasNext())
+                    {
+                        childIterator = i;
+                        return true;
+                    }
                 }
             }
             return false;

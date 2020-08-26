@@ -20,6 +20,7 @@ import com.amazon.fusion.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +70,7 @@ public class HashArrayMappedTrieTest
 
     private static void assertEmpty(TrieNode node)
     {
-        assertNull(node);
+        assertSame(HashArrayMappedTrie.empty(), node);
     }
 
     private static <K, V> V assertValuePresent(TrieNode<K, V> node, K key)
@@ -242,9 +243,7 @@ public class HashArrayMappedTrieTest
         private void assertSizeDelta(int delta)
         {
             assertEquals("size delta", delta, results.keyCountDelta());
-
-            int newSize = (newNode == null ? 0 : newNode.countKeys());
-            assertEquals("new size", oldSize + delta, newSize);
+            assertEquals("new size", oldSize + delta, newNode.countKeys());
         }
     }
 
@@ -302,6 +301,50 @@ public class HashArrayMappedTrieTest
 
 
     //=========================================================================
+    // EmptyNode
+
+    @Test
+    public void testEmptyNodeIsSingleton()
+    {
+        assertSame(HashArrayMappedTrie.empty(), HashArrayMappedTrie.empty());
+    }
+
+    @Test
+    public void testEmptyNodeIsEmpty()
+    {
+        TrieNode<Object, Object> empty = HashArrayMappedTrie.empty();
+        assertEquals(0, empty.countKeys());
+
+        Iterator<Map.Entry<Object, Object>> iterator = empty.iterator();
+        assertFalse("iterator isn't empty", iterator.hasNext());
+    }
+
+    @Test
+    public void testEmptyNodeInsert()
+    {
+        TrieNode node = HashArrayMappedTrie.empty();
+        node = insert(node, 1, 1);
+        assertEquals(FlatNode.class, node.getClass());
+    }
+
+    @Test
+    public void testEmptyNodeMutatingInsert()
+    {
+        TrieNode node = HashArrayMappedTrie.empty();
+        node = mWith(node, 1, 1).inserts().returnsNew();
+        assertEquals(FlatNode.class, node.getClass());
+    }
+
+    @Test
+    public void testEmptyNodeRemove()
+    {
+        TrieNode empty = HashArrayMappedTrie.empty();
+        TrieNode node = noopRemove(empty, 1);
+        assertSame(empty, node);
+    }
+
+
+    //=========================================================================
     // FlatNode
 
     @Test
@@ -338,9 +381,11 @@ public class HashArrayMappedTrieTest
         TrieNode node = new FlatNode(1, 1);
         node = insert(node, 2, 2);
         node = insert(node, 3, 3);
+        node = noopRemove(node, 4);
         node = remove(node, 2);
         node = remove(node, 1);
         node = remove(node, 3);
+        node = noopRemove(node, 2);
 
         assertEmpty(node);
     }
@@ -493,9 +538,11 @@ public class HashArrayMappedTrieTest
         TrieNode node = collisionNodeForPairs(key1, 1);
         node = insert(node, key2, 2);
         node = insert(node, key3, 3);
+        node = noopRemove(node, new CustomKey(2, "key4"));
         node = remove(node, key2);
         node = remove(node, key1);
         node = remove(node, key3);
+        node = noopRemove(node, key2);
 
         assertEmpty(node);
     }
@@ -623,9 +670,11 @@ public class HashArrayMappedTrieTest
         node = insert(node, 1, 1);
         node = insert(node, 2, 2);
         node = insert(node, 3, 3);
+        node = noopRemove(node, 4);
         node = remove(node, 2);
         node = remove(node, 1);
         node = remove(node, 3);
+        node = noopRemove(node, 2);
 
         assertEmpty(node);
     }
@@ -675,6 +724,35 @@ public class HashArrayMappedTrieTest
         // This only works because values are stored into collision nodes in order of insertion...
         assertEquals(foo, ((CollisionNode) shouldBeNode).kvPairs[0]);
         assertEquals(bar, ((CollisionNode) shouldBeNode).kvPairs[2]);
+    }
+
+    @Test
+    public void checkBitMappedNodeAddAndRemoveKey()
+    {
+        Results results = new Results();
+        Object key1 = new CustomKey(0x00, 0);
+
+        TrieNode bmn0 = BitMappedNode.EMPTY;
+        TrieNode bmn1 = bmn0.with(0x00, 20, key1, key1, results);
+        TrieNode bmn2 = bmn1.without(0x00, 20, key1, results);
+        assertEmpty(bmn2);
+    }
+
+    @Test
+    public void checkBitMappedNodeAddAndRemoveSubtrie()
+    {
+        Results results = new Results();
+        Object key1 = new CustomKey(0x00, 0);
+        Object key2 = new CustomKey(0x01, 1);
+
+        // Setup a BitMappedNode that contains a subtrie as its only element.
+        TrieNode bmn0 = BitMappedNode.EMPTY;
+        TrieNode bmn1 = bmn0.with(0x00, 20, key1, key1, results);
+        TrieNode bmn2 = bmn1.with(0x01, 20, key2, key2, results);
+
+        TrieNode bmn3 = bmn2.without(0x00, 20, key1, results);
+        TrieNode bmn4 = bmn3.without(0x01, 20, key2, results);
+        assertEmpty(bmn4);
     }
 
     @Test
@@ -782,9 +860,11 @@ public class HashArrayMappedTrieTest
         node = insert(node, 1, 1);
         node = insert(node, 2, 2);
         node = insert(node, 3, 3);
+        node = noopRemove(node, 4);
         node = remove(node, 2);
         node = remove(node, 1);
         node = remove(node, 3);
+        node = noopRemove(node, 2);
 
         assertEmpty(node);
     }

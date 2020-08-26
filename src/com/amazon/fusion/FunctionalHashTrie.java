@@ -2,8 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.HashArrayMappedTrie.hashCodeFor;
-import com.amazon.fusion.HashArrayMappedTrie.FlatNode;
 import com.amazon.fusion.HashArrayMappedTrie.Results;
 import com.amazon.fusion.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractCollection;
@@ -13,7 +11,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
@@ -35,7 +32,7 @@ class FunctionalHashTrie<K, V>
         "FunctionalHashTrie does not support null keys or values";
 
     private static final FunctionalHashTrie EMPTY =
-        new FunctionalHashTrie<>(null, 0);
+        new FunctionalHashTrie<>(HashArrayMappedTrie.empty(), 0);
     private final TrieNode<K, V> root;
     private final int size;
 
@@ -93,6 +90,8 @@ class FunctionalHashTrie<K, V>
 
     FunctionalHashTrie(TrieNode<K, V> root, int size)
     {
+        root.getClass(); // Null check
+
         this.root = root;
         this.size = size;
     }
@@ -170,15 +169,8 @@ class FunctionalHashTrie<K, V>
             throw new NullPointerException(NULL_ERROR_MESSAGE);
         }
 
-        TrieNode<K, V> newRoot;
-        if (root == null)
-        {
-            newRoot = new FlatNode<>(key, value);
-            return new FunctionalHashTrie<>(newRoot, 1);
-        }
-
         Results results = new Results();
-        newRoot = root.with(key, value, results);
+        TrieNode<K, V> newRoot = root.with(key, value, results);
         if (!results.modified())
         {
             return this;
@@ -248,35 +240,9 @@ class FunctionalHashTrie<K, V>
     }
 
 
-    private static final Iterator EMPTY_ITERATOR = new Iterator()
-    {
-        @Override
-        public boolean hasNext()
-        {
-            return false;
-        }
-
-        @Override
-        public Object next()
-        {
-            throw new NoSuchElementException();
-        }
-
-        @Override
-        public void remove()
-        {
-            throw new UnsupportedOperationException();
-        }
-    };
-
-
     @Override
     public Iterator<Entry<K, V>> iterator()
     {
-        if (isEmpty())
-        {
-            return EMPTY_ITERATOR;
-        }
         return root.iterator();
     }
 
@@ -416,7 +382,7 @@ class FunctionalHashTrie<K, V>
 
         private static MutableHashTrie makeEmpty()
         {
-            return new MutableHashTrie(new FlatNode(new Object[0]), 0);
+            return new MutableHashTrie(HashArrayMappedTrie.empty(), 0);
         }
 
         private MutableHashTrie(TrieNode<K, V> root,
@@ -449,14 +415,7 @@ class FunctionalHashTrie<K, V>
                 throw new NullPointerException(NULL_ERROR_MESSAGE);
             }
 
-            if (size == 0)
-            {
-                return null;
-            }
-            else
-            {
-                return root.get(hashCodeFor(key), 0, key);
-            }
+            return root.get((K) key);
         }
 
 
