@@ -72,14 +72,9 @@ public class HashArrayMappedTrieTest
         assertNull(node);
     }
 
-    private static <K, V> V get(TrieNode<K, V> node, K key)
-    {
-        return node.get(hashCodeFor(key), 0, key);
-    }
-
     private static <K, V> V assertValuePresent(TrieNode<K, V> node, K key)
     {
-        V found = get(node, key);
+        V found = node.get(key);
         assertNotNull(found);
         return found;
     }
@@ -88,7 +83,7 @@ public class HashArrayMappedTrieTest
     {
         if (node != null)
         {
-            V found = get(node, key);
+            V found = node.get(key);
             assertNull(found);
         }
     }
@@ -126,11 +121,12 @@ public class HashArrayMappedTrieTest
         public Modifier<K, V> with(K key, V value)
         {
             this.key = key;
-            oldValue = get(oldNode, key);
+            oldValue = oldNode.get(key);
             newValue = value;
 
-            newNode = oldNode.with(hashCodeFor(key), 0, key, value, results);
+            newNode = oldNode.with(key, value, results);
             assertValueEquals(value, newNode, key);
+            assertRootReplacementImpliesModification();
 
             return this;
         }
@@ -138,11 +134,12 @@ public class HashArrayMappedTrieTest
         public Modifier<K, V> mWith(K key, V value)
         {
             this.key = key;
-            oldValue = get(oldNode, key);
+            oldValue = oldNode.get(key);
             newValue = value;
 
-            newNode = oldNode.mWith(hashCodeFor(key), 0, key, value, results);
+            newNode = oldNode.mWith(key, value, results);
             assertValueEquals(value, newNode, key);
+            assertRootReplacementImpliesModification();
 
             return this;
         }
@@ -150,11 +147,12 @@ public class HashArrayMappedTrieTest
         public Modifier<K, V> without(K key)
         {
             this.key = key;
-            oldValue = get(oldNode, key);
+            oldValue = oldNode.get(key);
             newValue = null;
 
-            newNode = oldNode.without(hashCodeFor(key), 0, key, results);
+            newNode = oldNode.without(key, results);
             assertValueAbsent(newNode, key);
+            assertRootReplacementImpliesModification();
 
             return this;
         }
@@ -233,6 +231,13 @@ public class HashArrayMappedTrieTest
             return newNode;
         }
 
+        private void assertRootReplacementImpliesModification()
+        {
+            if (newNode != oldNode)
+            {
+                assertTrue("results not modified", results.modified());
+            }
+        }
 
         private void assertSizeDelta(int delta)
         {

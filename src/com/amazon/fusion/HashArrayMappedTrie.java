@@ -109,6 +109,59 @@ class HashArrayMappedTrie
      */
     static abstract class TrieNode<K, V>
     {
+        private TrieNode() {}
+
+        /**
+         * Retrieves the value for a key in this trie.
+         */
+        public V get(K key)
+        {
+            return get(hashCodeFor(key), 0, key);
+        }
+
+        /**
+         * Functionally inserts or updates a key in this trie, returning the resulting root node.
+         * <p>
+         * The returned root can be different even if nothing was changed; this allows
+         * the implementation to amortize optimizations to the trie structure.
+         * </p>
+         */
+        public TrieNode<K, V> with(K key, V value, Results results)
+        {
+            return with(hashCodeFor(key), 0, key, value, results);
+        }
+
+
+        /**
+         * Imperatively inserts or updates a key in this trie, returning the resulting root node.
+         * This means that the operation may mutate this data structure, and therefore the root
+         * must not be shared across containers, lest there be undesirable aliasing effects.
+         * <p>
+         * The returned root can be different even if nothing was changed; this allows
+         * the implementation to amortize optimizations to the trie structure.
+         * </p>
+         */
+        public TrieNode<K, V> mWith(K key, V value, Results results)
+        {
+            return mWith(hashCodeFor(key), 0, key, value, results);
+        }
+
+
+        // TODO: Add a variation of with[out] that returns the previous value (if any).
+
+        /**
+         * Functionally removes a key from this trie, returning the resulting root node.
+         * <p>
+         * The returned root can be different even if nothing was removed; this allows
+         * the implementation to amortize optimizations to the trie structure.
+         * </p>
+         */
+        public TrieNode<K, V> without(K key, Results results)
+        {
+            return without(hashCodeFor(key), 0, key, results);
+        }
+
+
         /**
          * Computes the number of unique keys in this node and its children.
          * This is an O(n) operation.
