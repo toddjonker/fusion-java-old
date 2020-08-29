@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.HashArrayMappedTrie.hashCodeFor;
 import com.amazon.fusion.HashArrayMappedTrie.FlatNode;
+import com.amazon.fusion.HashArrayMappedTrie.Results;
 import com.amazon.fusion.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractCollection;
 import java.util.AbstractMap;
@@ -176,14 +177,14 @@ class FunctionalHashTrie<K, V>
             return new FunctionalHashTrie<>(newRoot, 1);
         }
 
-        Box addedLeaf = new Box(null);
-        newRoot = root.with(hashCodeFor(key), 0, key, value, addedLeaf);
+        Results results = new Results();
+        newRoot = root.with(hashCodeFor(key), 0, key, value, results);
         if (newRoot == root)
         {
             return this;
         }
         return new FunctionalHashTrie<>(newRoot,
-                                        addedLeaf.value == null
+                                        ! results.modified()
                                                         ? size
                                                         : size + 1);
     }
@@ -434,13 +435,13 @@ class FunctionalHashTrie<K, V>
                 throw new NullPointerException(NULL_ERROR_MESSAGE);
             }
 
-            Box addedLeaf = new Box(null);
-            TrieNode<K, V> newRoot = root.mWith(hashCodeFor(key), 0, key, value, addedLeaf);
+            Results results = new Results();
+            TrieNode<K, V> newRoot = root.mWith(hashCodeFor(key), 0, key, value, results);
             if (newRoot != root)
             {
                 root = newRoot;
             }
-            if (addedLeaf.value != null)
+            if (results.modified())
             {
                 size++;
             }

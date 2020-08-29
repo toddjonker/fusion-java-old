@@ -31,6 +31,32 @@ class HashArrayMappedTrie
     private static final int STOP_RELYING_ON_UNDEFINED_BEHAVIOR =
         new Random().nextInt();
 
+    /**
+     * Describes the results of a trie operation.
+     */
+    public static class Results
+    {
+        private boolean modified = false;
+
+        public Results()
+        {
+        }
+
+        /**
+         * Indicates if the operation changed the content of the trie: a key/value was added or
+         * removed, or a key's value was changed. This can be true even when the operation returns
+         * the same root node.
+         */
+        public boolean modified()
+        {
+            return modified;
+        }
+
+        private void keyAdded()
+        {
+            modified = true;
+        }
+    }
 
     /**
      * Used to provide the hash code for a key in the {@link HashArrayMappedTrie}.
@@ -62,7 +88,7 @@ class HashArrayMappedTrie
                                      int shift,
                                      Object key,
                                      Object value,
-                                     Box addedLeaf);
+                                     Results results);
 
         /**
          * Mutates the trie to have the desired mapping from key to value.
@@ -74,7 +100,7 @@ class HashArrayMappedTrie
                                       int shift,
                                       Object key,
                                       Object value,
-                                      Box addedLeaf);
+                                      Results results);
 
         /**
          * @return The value with the given key, or null if it does not exist in the trie.
@@ -149,7 +175,7 @@ class HashArrayMappedTrie
                             int shift,
                             Object key,
                             Object value,
-                            Box addedLeaf)
+                            Results results)
         {
             int index = linearSearch(hash, key);
             if (index != -1)
@@ -159,7 +185,7 @@ class HashArrayMappedTrie
                 if (keyOrNull == null)
                 {
                     CollisionNode<K, V> node = (CollisionNode<K, V>) valOrNode;
-                    TrieNode newNode = node.with(hash, shift, key, value, addedLeaf);
+                    TrieNode newNode = node.with(hash, shift, key, value, results);
                     if (newNode == node)
                     {
                         return this;
@@ -185,12 +211,12 @@ class HashArrayMappedTrie
             {
                 if (kvPairs.length >= 2 * BITMAP_CONVERSION_SIZE)
                 {
-                    return expand(hash, shift, key, value, addedLeaf);
+                    return expand(hash, shift, key, value, results);
                 }
                 else
                 {
                     Object[] newPairs = cloneAndExtend(kvPairs, key, value);
-                    addedLeaf.value = addedLeaf;
+                    results.keyAdded();
                     return new FlatNode<>(newPairs);
                 }
             }
@@ -202,7 +228,7 @@ class HashArrayMappedTrie
                              int shift,
                              Object key,
                              Object value,
-                             Box addedLeaf)
+                             Results results)
         {
             int index = linearSearch(hash, key);
             if (index != -1)
@@ -211,7 +237,7 @@ class HashArrayMappedTrie
                 if (kvPairs[index] == null)
                 {
                     CollisionNode<K, V> node = (CollisionNode<K, V>) valOrNode;
-                    TrieNode<K, V> newNode = node.mWith(hash, shift, key, value, addedLeaf);
+                    TrieNode<K, V> newNode = node.mWith(hash, shift, key, value, results);
                     if (newNode != node)
                     {
                         kvPairs[index + 1] = newNode;
@@ -229,12 +255,12 @@ class HashArrayMappedTrie
             {
                 if (kvPairs.length >= 2 * BITMAP_CONVERSION_SIZE)
                 {
-                    return expand(hash, shift, key, value, addedLeaf);
+                    return expand(hash, shift, key, value, results);
                 }
                 else
                 {
                     kvPairs = cloneAndExtend(kvPairs, key, value);
-                    addedLeaf.value = addedLeaf;
+                    results.keyAdded();
                 }
             }
 
@@ -347,7 +373,7 @@ class HashArrayMappedTrie
                                       int shift,
                                       Object key,
                                       Object value,
-                                      Box addedLeaf)
+                                      Results results)
         {
             // Give the new BitMappedNode some buffer space for faster mWith calls.
             // Supposing perfect hash distribution within the FlatNode, the new BitMappedNode's
@@ -364,7 +390,7 @@ class HashArrayMappedTrie
                                             shift,
                                             null,
                                             valOrNode,
-                                            addedLeaf);
+                                            results);
                 }
                 else
                 {
@@ -372,10 +398,10 @@ class HashArrayMappedTrie
                                             shift,
                                             keyOrNull,
                                             valOrNode,
-                                            addedLeaf);
+                                            results);
                 }
             }
-            return newNode.mWith(hash, shift, key, value, addedLeaf);
+            return newNode.mWith(hash, shift, key, value, results);
         }
     }
 
@@ -404,7 +430,7 @@ class HashArrayMappedTrie
                             int shift,
                             Object key,
                             Object value,
-                            Box addedLeaf)
+                            Results results)
         {
             if (hash == this.hash)
             {
@@ -426,13 +452,13 @@ class HashArrayMappedTrie
                 else
                 {
                     Object[] newPairs = cloneAndExtend(kvPairs, key, value);
-                    addedLeaf.value = addedLeaf;
+                    results.keyAdded();
                     return makeSimilar(newPairs);
                 }
             }
 
             // If it doesn't share the hash, push this collision node down a level.
-            addedLeaf.value = addedLeaf;
+            results.keyAdded();
             return new FlatNode<>(new Object[]{null, this, key, value});
         }
 
@@ -442,7 +468,7 @@ class HashArrayMappedTrie
                              int shift,
                              Object key,
                              Object value,
-                             Box addedLeaf)
+                             Results results)
         {
             if (hash == this.hash)
             {
@@ -458,14 +484,14 @@ class HashArrayMappedTrie
                 else
                 {
                     kvPairs = cloneAndExtend(kvPairs, key, value);
-                    addedLeaf.value = addedLeaf;
+                    results.keyAdded();
                 }
 
                 return this;
             }
 
             // If it doesn't share the hash, push this collision node down a level.
-            addedLeaf.value = addedLeaf;
+            results.keyAdded();
             return new FlatNode<>(new Object[]{null, this, key, value});
         }
 
@@ -510,7 +536,7 @@ class HashArrayMappedTrie
      * If the even index is not null, then it is a key and the following index is the value.
      * Otherwise, the even index is null and the following index is potentially a Node
      *  (It's possible for two consecutive indices to be null due to optimizations that
-     *  {@link #mWith(int, int, Object, Object, Box)} and {@link FlatNode#expand(int, int, Object, Object, Box)} perform).
+     *  {@link #mWith} and {@link FlatNode#expand} perform).
      *
      * Note: {@link BitMappedNode}s are never packed back down into {@link FlatNode}s.
      * This is because a search through a FlatNode would no longer be linear if the pre-packed
@@ -544,7 +570,7 @@ class HashArrayMappedTrie
                             int shift,
                             Object key,
                             Object value,
-                            Box addedLeaf)
+                            Results results)
         {
             int hashFragment = hashFragment(hash, shift);
             int bit = bitPosition(hashFragment);
@@ -557,7 +583,7 @@ class HashArrayMappedTrie
                 {
                     TrieNode<K, V> newNode =
                         ((TrieNode<K, V>) valOrNode)
-                            .with(hash, shift + 5, key, value, addedLeaf);
+                            .with(hash, shift + 5, key, value, results);
                     if (newNode == valOrNode)
                     {
                         return this;
@@ -586,7 +612,7 @@ class HashArrayMappedTrie
                 }
                 else
                 {
-                    addedLeaf.value = addedLeaf;
+                    results.keyAdded();
                     FlatNode newNode = resolveCollision(hashCodeFor(keyOrNull),
                                                         keyOrNull,
                                                         valOrNode,
@@ -603,7 +629,7 @@ class HashArrayMappedTrie
             }
             else
             {
-                addedLeaf.value = addedLeaf;
+                results.keyAdded();
                 int numVals = Integer.bitCount(bitmap);
                 if (numVals >= HAMN_CONVERSION_SIZE)
                 {
@@ -635,7 +661,7 @@ class HashArrayMappedTrie
                              int shift,
                              Object key,
                              Object value,
-                             Box addedLeaf)
+                             Results results)
         {
             int hashFragment = hashFragment(hash, shift);
             int bit = bitPosition(hashFragment);
@@ -648,7 +674,7 @@ class HashArrayMappedTrie
                 {
                     TrieNode<K, V> newNode =
                         ((TrieNode<K, V>) valOrNode)
-                            .mWith(hash, shift + 5, key, value, addedLeaf);
+                            .mWith(hash, shift + 5, key, value, results);
                     if (newNode != valOrNode)
                     {
                         kvPairs[keyIndex + 1] = newNode;
@@ -663,7 +689,7 @@ class HashArrayMappedTrie
                 }
                 else
                 {
-                    addedLeaf.value = addedLeaf;
+                    results.keyAdded();
                     TrieNode newNode = resolveCollision(hashCodeFor(keyOrNull),
                                                         keyOrNull,
                                                         valOrNode,
@@ -676,7 +702,7 @@ class HashArrayMappedTrie
             }
             else
             {
-                addedLeaf.value = addedLeaf;
+                results.keyAdded();
                 int numVals = Integer.bitCount(bitmap);
                 if (numVals >= HAMN_CONVERSION_SIZE)
                 {
@@ -896,14 +922,14 @@ class HashArrayMappedTrie
                                    int shift,
                                    Object key,
                                    Object value,
-                                   Box addedLeaf)
+                                   Results results)
         {
             int index = hashFragment(hash, shift);
             TrieNode<K, V> node = nodes[index];
 
             if (node == null)
             {
-                addedLeaf.value = addedLeaf;
+                results.keyAdded();
                 TrieNode<K, V> newNode = new FlatNode(key, value);
                 return new HashArrayMappedNode<>(count + 1,
                                                  cloneAndModify(nodes,
@@ -912,7 +938,7 @@ class HashArrayMappedTrie
             }
             else
             {
-                TrieNode<K, V> newNode = node.with(hash, shift + 5, key, value, addedLeaf);
+                TrieNode<K, V> newNode = node.with(hash, shift + 5, key, value, results);
                 if (newNode == node)
                 {
                     return this;
@@ -933,21 +959,21 @@ class HashArrayMappedTrie
                              int shift,
                              Object key,
                              Object value,
-                             Box addedLeaf)
+                             Results results)
         {
             int index = hashFragment(hash, shift);
             TrieNode<K, V> node = nodes[index];
 
             if (node == null)
             {
-                addedLeaf.value = addedLeaf;
+                results.keyAdded();
                 TrieNode<K, V> newNode = new FlatNode(key, value);
                 nodes[index] = newNode;
                 count++;
             }
             else
             {
-                TrieNode<K, V> newNode = node.mWith(hash, shift + 5, key, value, addedLeaf);
+                TrieNode<K, V> newNode = node.mWith(hash, shift + 5, key, value, results);
                 if (newNode != node)
                 {
                     nodes[index] = newNode;

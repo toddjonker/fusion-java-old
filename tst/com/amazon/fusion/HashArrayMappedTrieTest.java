@@ -15,6 +15,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import com.amazon.fusion.HashArrayMappedTrie.Results;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,14 +74,14 @@ public class HashArrayMappedTrieTest
         Object[] values = { key1, "foo", key2, "bar" };
         TrieNode collisionNode = new CollisionNode(hashCodeFor(2), values);
 
-        Box addedLeaf = new Box(null);
+        Results results = new Results();
 
         CustomKey key3 = new CustomKey(1, "key3");
         TrieNode withNewNonCollidingKey =
-            collisionNode.with(hashCodeFor(1), 0, key3, "baz", addedLeaf);
+            collisionNode.with(hashCodeFor(1), 0, key3, "baz", results);
 
         // We expect a new leaf to have been added.
-        assertTrue(addedLeaf.value != null);
+        assertTrue(results.modified());
         // We expect the collision node to have been pushed down a level.
         assertTrue(withNewNonCollidingKey instanceof FlatNode);
         assertEquals("foo", withNewNonCollidingKey.get(hashCodeFor(2), 0, key1));
@@ -89,7 +90,7 @@ public class HashArrayMappedTrieTest
 
         CustomKey key4 = new CustomKey(2, "key4");
         TrieNode withCollidingKey =
-            withNewNonCollidingKey.with(hashCodeFor(2), 0, key4, "biz", addedLeaf);
+            withNewNonCollidingKey.with(hashCodeFor(2), 0, key4, "biz", results);
         assertEquals("biz", withCollidingKey.get(hashCodeFor(2), 0, key4));
 
         TrieNode withoutKey1 = withCollidingKey.without(hashCodeFor(2), 0, key1);
@@ -127,7 +128,7 @@ public class HashArrayMappedTrieTest
 
         TrieNode flatNode = new FlatNode(new Object[0]);
 
-        Box addedLeaf = new Box(null);
+        Results results = new Results();
         // A flat node should hold eight entries before expanding.
         for (int i = 0; i < 8; i++)
         {
@@ -136,7 +137,7 @@ public class HashArrayMappedTrieTest
                                      0,
                                      entry.getKey(),
                                      entry.getValue(),
-                                     addedLeaf);
+                                     results);
             assertTrue(flatNode instanceof FlatNode);
         }
 
@@ -145,7 +146,7 @@ public class HashArrayMappedTrieTest
                                            0,
                                            ninth.getKey(),
                                            ninth.getValue(),
-                                           addedLeaf);
+                                           results);
         assertTrue(nowBitMap instanceof BitMappedNode);
         assertEquals(9, countNodeSize(nowBitMap));
 
@@ -177,13 +178,13 @@ public class HashArrayMappedTrieTest
 
         List<CustomKey> keys = new ArrayList<>(8);
 
-        Box addedLeaf = new Box(null);
+        Results results = new Results();
 
         for (int i = 1; i < 9; i++)
         {
             CustomKey key = new CustomKey(i, Integer.toString(i));
             keys.add(key);
-            trieNode = trieNode.with(hashCodeFor(i), 0, key, new Object(), addedLeaf);
+            trieNode = trieNode.with(hashCodeFor(i), 0, key, new Object(), results);
         }
 
         // 10 because the nested collision node has 2 elements.
@@ -219,12 +220,12 @@ public class HashArrayMappedTrieTest
     @Test
     public void checkCollisionNodeCreation()
     {
-        Box dummy = new Box(null);
+        Results results = new Results();
         CustomKey foo = new CustomKey(0, "foo");
         CustomKey bar = new CustomKey(0, "bar");
         TrieNode trieNode = BitMappedNode.EMPTY;
-        trieNode = trieNode.with(hashCodeFor(0), 0, foo, new Object(), dummy);
-        trieNode = trieNode.with(hashCodeFor(0), 0, bar, new Object(), dummy);
+        trieNode = trieNode.with(hashCodeFor(0), 0, foo, new Object(), results);
+        trieNode = trieNode.with(hashCodeFor(0), 0, bar, new Object(), results);
 
         Object shouldBeNull = ((BitMappedNode) trieNode).kvPairs[0];
         assertNull(shouldBeNull);
@@ -240,14 +241,14 @@ public class HashArrayMappedTrieTest
     @Test
     public void checkBitMappedNodeExpansionAndArrayNodeCompression()
     {
-        Box dummy = new Box(null);
+        Results results = new Results();
         Object[] keys = new Object[17];
         TrieNode trieNode = BitMappedNode.EMPTY;
         for (int i = 0; i < 16; i++)
         {
             Object key = new Object();
             keys[i] = key;
-            trieNode = trieNode.with(i, 0, key, new Object(), dummy);
+            trieNode = trieNode.with(i, 0, key, new Object(), results);
         }
 
         assertTrue(trieNode instanceof BitMappedNode);
@@ -255,7 +256,7 @@ public class HashArrayMappedTrieTest
 
         Object overConversionLimitKey = new Object();
         keys[16] = overConversionLimitKey;
-        trieNode = trieNode.with(16, 0, overConversionLimitKey, new Object(), dummy);
+        trieNode = trieNode.with(16, 0, overConversionLimitKey, new Object(), results);
         assertTrue(trieNode instanceof HashArrayMappedNode);
         assertEquals(17, countNodeSize(trieNode));
         for (int i = 0; i < 17; i++)
@@ -291,18 +292,18 @@ public class HashArrayMappedTrieTest
     @Test
     public void checkHashArrayMappedNode()
     {
-        Box added = new Box(null);
+        Results results = new Results();
         TrieNode node = new FlatNode(new Object[0]);
 
         for (int i = 0; i < 16; i++)
         {
             CustomKey key = new CustomKey(i, new Object());
             Object value = new Object();
-            node = node.with(hashCodeFor(key), 0, key, value, added);
+            node = node.with(hashCodeFor(key), 0, key, value, results);
         }
         CustomKey checkKey = new CustomKey(16, "foo");
         String checkVal = "bar";
-        node = node.with(hashCodeFor(checkKey), 0, checkKey, checkVal, added);
+        node = node.with(hashCodeFor(checkKey), 0, checkKey, checkVal, results);
 
         assertTrue(node instanceof HashArrayMappedNode);
         assertEquals(17, countNodeSize(node));
@@ -313,7 +314,7 @@ public class HashArrayMappedTrieTest
         TrieNode stillSameNode = node.without(hashCodeFor(10), 0, "notInFlatNode");
         assertTrue(stillSameNode == node);
 
-        TrieNode sameAfterWith = node.with(hashCodeFor(checkKey), 0, checkKey, checkVal, new Box(null));
+        TrieNode sameAfterWith = node.with(hashCodeFor(checkKey), 0, checkKey, checkVal, new Results());
         assertTrue(sameAfterWith == node);
     }
 
@@ -342,8 +343,8 @@ public class HashArrayMappedTrieTest
     @Test
     public void testCorrectShifting()
     {
-        Box ignored = new Box(null);
-        TrieNode nested = BitMappedNode.EMPTY.with(0x20, 5, new CustomKey(0, "redherring"), 1, ignored);
+        Results results = new Results();
+        TrieNode nested = BitMappedNode.EMPTY.with(0x20, 5, new CustomKey(0, "redherring"), 1, results);
         // 0x20 = 0b00001 00000 -> the second slot in a bitmap with a node at shift 5.
         assertEquals(0b010, ((BitMappedNode) nested).bitmap);
 
@@ -351,7 +352,7 @@ public class HashArrayMappedTrieTest
         // a bitmap of 0b1 to indicate that the hashFragment corresponding to 0b00000 is occupied.
         // 0b00000 is occupied because a hash of 0x20 with a shift of 0 would be nested at 0b00000
 
-        top = top.with(0x40, 0, new CustomKey(4, "ignoreme"), 2, ignored);
+        top = top.with(0x40, 0, new CustomKey(4, "ignoreme"), 2, results);
         // 0x40 = 0b00010 00000 -> the first slot (0b00000) in a bitmap with a node at shift 0.
         // Since that spot is already occupied by a node, we'll insert it in
         // the third slot (0b00010) in the nested node with shift 5.
