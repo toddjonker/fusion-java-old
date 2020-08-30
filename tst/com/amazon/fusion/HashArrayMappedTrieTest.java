@@ -923,7 +923,7 @@ public class HashArrayMappedTrieTest
 
     /**
      * This test verifies that we shift along the hash value correctly when going "down"
-     * a level in the trie. An early, pre-release {@link FunctionalHashTrie} impl had
+     * a level in the trie. An early, pre-release implementation had
      * a bug where one of the {@code shift + 5} code statements was just {@code shift}.
      *
      * What this test does is that it creates a two level trie.
@@ -977,12 +977,11 @@ public class HashArrayMappedTrieTest
     @Test
     public void testDeepShifts()
     {
-        // FIXME This should not use FHT
-        FunctionalHashTrie<CustomKey, String> customFHT = FunctionalHashTrie.empty();
+        TrieNode customFHT = HashArrayMappedTrie.empty();
 
         // These two will be in the collision node at the bottom.
-        customFHT = customFHT.with(new CustomKey(0, "foo"), "A");
-        customFHT = customFHT.with(new CustomKey(0, "bar"), "B");
+        customFHT = customFHT.with(new CustomKey(0, "foo"), "A", new Results());
+        customFHT = customFHT.with(new CustomKey(0, "bar"), "B", new Results());
 
         // For each level, push in enough nodes s.t. we convert from a FlatNode to a BitMappedNode
         for (int shift = 0; shift <= 25; shift += 5)
@@ -990,7 +989,8 @@ public class HashArrayMappedTrieTest
             // Spread out hash keys so that only "A" and "B" are in the CollisionNode at the bottom.
             for (int i = 1; i < 32; i++)
             {
-                customFHT = customFHT.with(new CustomKey(i << shift, UUID.randomUUID().toString()), UUID.randomUUID().toString());
+                CustomKey key = new CustomKey(i << shift, UUID.randomUUID().toString());
+                customFHT = customFHT.with(key, key, new Results());
             }
         }
         // The last level has to be more custom built since the only possible hash keys are going to be 00, 01, 10, and 11.
@@ -1000,16 +1000,16 @@ public class HashArrayMappedTrieTest
         {
             for (int j = 1; j < 4; j++)
             {
-                customFHT = customFHT.with(new CustomKey(j << 30, UUID.randomUUID().toString()), UUID.randomUUID().toString());
+                CustomKey key = new CustomKey(j << 30, UUID.randomUUID().toString());
+                customFHT = customFHT.with(key, key, new Results());
             }
         }
 
-        assertEquals(197, customFHT.size());
         assertEquals("A", customFHT.get(new CustomKey(0, "foo")));
         assertEquals("B", customFHT.get(new CustomKey(0, "bar")));
 
         int shuffledHash = hashCodeFor(0);                                 // Note, due to shuffling it's not necessarily at the first node of the tree.
-        TrieNode node = customFHT.getRoot();                                    // Shift 0:     HAMNode [↓, UUIDs...]
+        TrieNode node = customFHT;                                              // Shift 0:     HAMNode [↓, UUIDs...]
         for (int shift = 0; shift <= 25; shift += 5)                            // Shift 5:     HAMNode [↓, UUIDs...]
         {                                                                       // Shift 10:    HAMNode [↓, UUIDs...]
             assertTrue(node instanceof HashArrayMappedNode);                    // Shift 15:    HAMNode [↓, UUIDs...]
@@ -1029,14 +1029,13 @@ public class HashArrayMappedTrieTest
 
 
         // Now let's verify that accesses don't shift over 30. There's an assert in hashFragment()
-        customFHT = customFHT.with(new CustomKey(4 << 30, "baz"), "C"); // 4 << 30 == 0 << 30 (for 32 bit values)
+        customFHT = customFHT.with(new CustomKey(4 << 30, "baz"), "C", new Results()); // 4 << 30 == 0 << 30 (for 32 bit values)
 
-        assertEquals(198, customFHT.size());
         assertEquals("A", customFHT.get(new CustomKey(0, "foo")));
         assertEquals("B", customFHT.get(new CustomKey(0, "bar")));
         assertEquals("C", customFHT.get(new CustomKey(0, "baz")));
 
-        TrieNode newNode = customFHT.getRoot();                                 // Shift 0:     HAMNode [↓, UUIDs...]
+        TrieNode newNode = customFHT;                                           // Shift 0:     HAMNode [↓, UUIDs...]
         for (int shift = 0; shift <= 25; shift += 5)                            // Shift 5:     HAMNode [↓, UUIDs...]
         {                                                                       // Shift 10:    HAMNode [↓, UUIDs...]
             assertTrue(newNode instanceof HashArrayMappedNode);                 // Shift 15:    HAMNode [↓, UUIDs...]

@@ -360,14 +360,6 @@ class FunctionalHashTrie<K, V>
         return size == 0;
     }
 
-    /**
-     * Visible for testing purposes only. Use this at your own demise.
-     */
-    TrieNode<K, V> getRoot()
-    {
-        return root;
-    }
-
 
     // TODO: Add method that accepts a function to modify each element in the trie.
 
