@@ -1,6 +1,6 @@
 // Copyright (c) 2018-2020 Amazon.com, Inc.  All rights reserved.
 
-package com.amazon.fusion;
+package com.amazon.fusion.util.hamt;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
@@ -32,8 +32,11 @@ import java.util.Random;
  * @see <a href="https://infoscience.epfl.ch/record/64398/files/idealhashtrees.pdf">Ideal Hash Trees</a>
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
-class HashArrayMappedTrie
+public final class HashArrayMappedTrie
 {
+    // This class isn't instantiable.
+    private HashArrayMappedTrie() {}
+
     private static final int STOP_RELYING_ON_UNDEFINED_BEHAVIOR =
         new Random().nextInt();
 
@@ -139,7 +142,7 @@ class HashArrayMappedTrie
      * Abstract class interface for Nodes.
      * TODO: Convert to interface with default methods in Java 8+
      */
-    static abstract class TrieNode<K, V>
+    public static abstract class TrieNode<K, V>
     {
         private TrieNode() {}
 
@@ -236,7 +239,7 @@ class HashArrayMappedTrie
         /**
          * @return An iterator over all elements within the trie.
          */
-        abstract Iterator<Entry<K, V>> iterator();
+        public abstract Iterator<Entry<K, V>> iterator();
 
         static int hashFragment(int hash, int shift)
         {
@@ -297,7 +300,7 @@ class HashArrayMappedTrie
         }
 
         @Override
-        Iterator<Entry<K, V>> iterator() {
+        public Iterator<Entry<K, V>> iterator() {
             return EMPTY_ITERATOR;
         }
     }
@@ -546,7 +549,7 @@ class HashArrayMappedTrie
 
 
         @Override
-        Iterator<Entry<K, V>> iterator()
+        public Iterator<Entry<K, V>> iterator()
         {
             return new EntryArrayIterator<>(kvPairs);
         }
@@ -1104,7 +1107,7 @@ class HashArrayMappedTrie
 
 
         @Override
-        Iterator<Entry<K, V>> iterator()
+        public Iterator<Entry<K, V>> iterator()
         {
             return new EntryArrayIterator<>(kvPairs);
         }
@@ -1320,7 +1323,7 @@ class HashArrayMappedTrie
 
 
         @Override
-        Iterator<Entry<K, V>> iterator()
+        public Iterator<Entry<K, V>> iterator()
         {
             return new Iterator<Entry<K , V>>()
             {

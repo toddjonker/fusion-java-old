@@ -2,8 +2,9 @@
 
 package com.amazon.fusion;
 
-import com.amazon.fusion.HashArrayMappedTrie.Results;
-import com.amazon.fusion.HashArrayMappedTrie.TrieNode;
+import com.amazon.fusion.util.hamt.HashArrayMappedTrie;
+import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Results;
+import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractCollection;
 import java.util.AbstractMap;
 import java.util.AbstractSet;

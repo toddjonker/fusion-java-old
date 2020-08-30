@@ -1,8 +1,8 @@
 // Copyright (c) 2018-2020 Amazon.com, Inc.  All rights reserved.
 
-package com.amazon.fusion;
+package com.amazon.fusion.util.hamt;
 
-import static com.amazon.fusion.HashArrayMappedTrie.hashCodeFor;
+import static com.amazon.fusion.util.hamt.HashArrayMappedTrie.hashCodeFor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -11,12 +11,12 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import com.amazon.fusion.HashArrayMappedTrie.BitMappedNode;
-import com.amazon.fusion.HashArrayMappedTrie.CollisionNode;
-import com.amazon.fusion.HashArrayMappedTrie.FlatNode;
-import com.amazon.fusion.HashArrayMappedTrie.HashArrayMappedNode;
-import com.amazon.fusion.HashArrayMappedTrie.Results;
-import com.amazon.fusion.HashArrayMappedTrie.TrieNode;
+import com.amazon.fusion.util.hamt.HashArrayMappedTrie.BitMappedNode;
+import com.amazon.fusion.util.hamt.HashArrayMappedTrie.CollisionNode;
+import com.amazon.fusion.util.hamt.HashArrayMappedTrie.FlatNode;
+import com.amazon.fusion.util.hamt.HashArrayMappedTrie.HashArrayMappedNode;
+import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Results;
+import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
