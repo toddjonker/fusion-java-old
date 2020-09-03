@@ -179,14 +179,13 @@ class FunctionalHashTrie<K, V>
 
         Results results = new Results();
         newRoot = root.with(hashCodeFor(key), 0, key, value, results);
-        if (newRoot == root)
+        if (newRoot == root && !results.modified())
         {
             return this;
         }
-        return new FunctionalHashTrie<>(newRoot,
-                                        ! results.modified()
-                                                        ? size
-                                                        : size + 1);
+
+        int newSize = size + results.keyCountDelta();
+        return new FunctionalHashTrie<>(newRoot, newSize);
     }
 
 
@@ -437,14 +436,8 @@ class FunctionalHashTrie<K, V>
 
             Results results = new Results();
             TrieNode<K, V> newRoot = root.mWith(hashCodeFor(key), 0, key, value, results);
-            if (newRoot != root)
-            {
-                root = newRoot;
-            }
-            if (results.modified())
-            {
-                size++;
-            }
+            root = newRoot;
+            size += results.keyCountDelta();
 
             return this;
         }

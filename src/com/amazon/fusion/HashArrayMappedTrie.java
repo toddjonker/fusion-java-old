@@ -43,6 +43,7 @@ class HashArrayMappedTrie
     public static final class Results
     {
         private boolean modified = false;
+        private int keyCountDelta = 0;
 
         public Results()
         {
@@ -58,7 +59,29 @@ class HashArrayMappedTrie
             return modified;
         }
 
+        /**
+         * Indicates how the operation changed the total number of keys in the trie.
+         * This may be different than the number of keys changed: if one key was added and one
+         * removed, then two keys were changed but the delta would be zero.
+         */
+        public int keyCountDelta()
+        {
+            return keyCountDelta;
+        }
+
         private void keyAdded()
+        {
+            modified = true;
+            keyCountDelta++;
+        }
+
+        private void keyRemoved()
+        {
+            modified = true;
+            keyCountDelta--;
+        }
+
+        private void keyReplaced()
         {
             modified = true;
         }
@@ -228,6 +251,7 @@ class HashArrayMappedTrie
                     }
                     else
                     {
+                        // Child node has updated the Results.
                         return new FlatNode<>(cloneAndModify(kvPairs, index + 1, newNode));
                     }
                 }
@@ -239,6 +263,7 @@ class HashArrayMappedTrie
                     }
                     else
                     {
+                        results.keyReplaced();
                         return new FlatNode<>(cloneAndModify(kvPairs, index + 1, value));
                     }
                 }
@@ -247,12 +272,12 @@ class HashArrayMappedTrie
             {
                 if (kvPairs.length >= 2 * MAX_CHILDREN)
                 {
-                    return expand(hash, shift, key, value, results);
+                    return expand(shift).mWith(hash, shift, key, value, results);
                 }
                 else
                 {
-                    Object[] newPairs = cloneAndExtend(kvPairs, key, value);
                     results.keyAdded();
+                    Object[] newPairs = cloneAndExtend(kvPairs, key, value);
                     return new FlatNode<>(newPairs);
                 }
             }
@@ -279,11 +304,13 @@ class HashArrayMappedTrie
                     {
                         kvPairs[index + 1] = newNode;
                     }
+                    // Child node has updated the Results.
                 }
                 else
                 {
                     if (!equivVals(valOrNode, value))
                     {
+                        results.keyReplaced();
                         kvPairs[index + 1] = value;
                     }
                 }
@@ -292,12 +319,12 @@ class HashArrayMappedTrie
             {
                 if (kvPairs.length >= 2 * MAX_CHILDREN)
                 {
-                    return expand(hash, shift, key, value, results);
+                    return expand(shift).mWith(hash, shift, key, value, results);
                 }
                 else
                 {
-                    kvPairs = cloneAndExtend(kvPairs, key, value);
                     results.keyAdded();
+                    kvPairs = cloneAndExtend(kvPairs, key, value);
                 }
             }
 
@@ -406,12 +433,11 @@ class HashArrayMappedTrie
         }
 
 
-        private TrieNode<K, V> expand(int hash,
-                                      int shift,
-                                      Object key,
-                                      Object value,
-                                      Results results)
+        private TrieNode<K, V> expand(int shift)
         {
+            // Don't count expansion as changing the results.
+            Results results = new Results();
+
             // Give the new BitMappedNode some buffer space for faster mWith calls.
             // Supposing perfect hash distribution within the FlatNode, the new BitMappedNode's
             // array would require four extra allocations to perform expansion.
@@ -438,7 +464,7 @@ class HashArrayMappedTrie
                                             results);
                 }
             }
-            return newNode.mWith(hash, shift, key, value, results);
+            return newNode;
         }
     }
 
@@ -476,7 +502,6 @@ class HashArrayMappedTrie
             this.hash = hash;
         }
 
-
         @Override
         public int countKeys()
         {
@@ -502,6 +527,7 @@ class HashArrayMappedTrie
                     }
                     else
                     {
+                        results.keyReplaced();
                         return makeSimilar(cloneAndModify(kvPairs,
                                                           index + 1,
                                                           value));
@@ -509,8 +535,8 @@ class HashArrayMappedTrie
                 }
                 else
                 {
-                    Object[] newPairs = cloneAndExtend(kvPairs, key, value);
                     results.keyAdded();
+                    Object[] newPairs = cloneAndExtend(kvPairs, key, value);
                     return makeSimilar(newPairs);
                 }
             }
@@ -536,13 +562,14 @@ class HashArrayMappedTrie
                     Object storedValue = kvPairs[index + 1];
                     if (storedValue != value)
                     {
+                        results.keyReplaced();
                         kvPairs[index + 1] = value;
                     }
                 }
                 else
                 {
-                    kvPairs = cloneAndExtend(kvPairs, key, value);
                     results.keyAdded();
+                    kvPairs = cloneAndExtend(kvPairs, key, value);
                 }
 
                 return this;
@@ -695,12 +722,13 @@ class HashArrayMappedTrie
                     {
                         return this;
                     }
-                    else
+                    else // Same key, different value
                     {
+                        results.keyReplaced();
                         return replace(keyIndex + 1, value);
                     }
                 }
-                else
+                else // Hash fragment collision
                 {
                     results.keyAdded();
                     FlatNode newNode = resolveCollision(hashCodeFor(keyOrNull),
@@ -764,15 +792,17 @@ class HashArrayMappedTrie
                     {
                         kvPairs[keyIndex + 1] = newNode;
                     }
+                    // Child node has updated the Results.
                 }
                 else if (equivKeys(keyOrNull, key))
                 {
                     if (!equivVals(valOrNode, value))
                     {
+                        results.keyReplaced();
                         kvPairs[keyIndex + 1] = value;
                     }
                 }
-                else
+                else // Hash fragment collision
                 {
                     results.keyAdded();
                     TrieNode newNode = resolveCollision(hashCodeFor(keyOrNull),
@@ -785,7 +815,7 @@ class HashArrayMappedTrie
                     kvPairs[keyIndex + 1] = newNode;
                 }
             }
-            else // Adding a new child
+            else // New hash fragment
             {
                 results.keyAdded();
                 int numVals = Integer.bitCount(bitmap);
@@ -1003,7 +1033,6 @@ class HashArrayMappedTrie
         {
             this.count = count;
             this.nodes = nodes;
-            assert count >= MIN_CHILDREN;
             assert nodes.length == 32;
         }
 
@@ -1048,6 +1077,7 @@ class HashArrayMappedTrie
                 }
                 else
                 {
+                    // Child node has updated the Results.
                     return new HashArrayMappedNode<>(count,
                                                      cloneAndModify(nodes,
                                                                     index,
@@ -1081,6 +1111,7 @@ class HashArrayMappedTrie
                 {
                     nodes[index] = newNode;
                 }
+                // Child node has updated the Results.
             }
 
             return this;

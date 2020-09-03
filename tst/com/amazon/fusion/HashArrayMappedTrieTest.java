@@ -153,7 +153,7 @@ public class HashArrayMappedTrieTest
             oldValue = get(oldNode, key);
             newValue = null;
 
-            newNode = oldNode.without(hashCodeFor(key), 0, key);
+            newNode = oldNode.without(hashCodeFor(key), 0, key /* TODO results */);
             assertValueAbsent(newNode, key);
 
             return this;
@@ -162,41 +162,46 @@ public class HashArrayMappedTrieTest
 
         public Modifier<K, V> inserts()
         {
-            mode = Mode.INSERT;
+            // Precondition:
             assertNull("old value", oldValue);
-            assertTrue("results.modified", results.modified());
-            assertEquals("new size", oldSize + 1, newNode.countKeys());
+
+            mode = Mode.INSERT;
+            assertTrue("results not modified", results.modified());
+            assertSizeDelta(1);
             return this;
         }
 
         public Modifier<K, V> replaces()
         {
-            mode = Mode.REPLACE;
+            // Preconditions:
+            assertNotNull("old value", oldValue);
             assertNotSame("mapped value", oldValue, newValue);
-            assertTrue("results.modified", results.modified());
-            assertEquals("new size", oldSize, newNode.countKeys());
+
+            mode = Mode.REPLACE;
+            assertTrue("results not modified", results.modified());
+            assertSizeDelta(0);
             return this;
         }
 
         public Modifier<K, V> removes()
         {
-            mode = Mode.REMOVE;
+            // Precondition:
             assertNotNull("old value", oldValue);
 
-            // FIXME TrieNode.without() should take Results
+            mode = Mode.REMOVE;
 //          assertTrue("results not modified", results.modified());
-
-            int newSize = (newNode == null ? 0 : newNode.countKeys());
-            assertEquals("new size", oldSize - 1, newSize);
+//          assertSizeDelta(-1);
             return this;
         }
 
         public Modifier<K, V> noops()
         {
-            mode = Mode.NOOP;
+            // Precondition:
             assertSame("mapped value", oldValue, newValue);
+
+            mode = Mode.NOOP;
             assertFalse("results modified", results.modified());
-            assertEquals("new size", oldSize, newNode.countKeys());
+            assertSizeDelta(0);
             return this;
         }
 
@@ -226,6 +231,15 @@ public class HashArrayMappedTrieTest
         {
             assertSame(oldNode, newNode);
             return newNode;
+        }
+
+
+        private void assertSizeDelta(int delta)
+        {
+            assertEquals("size delta", delta, results.keyCountDelta());
+
+            int newSize = (newNode == null ? 0 : newNode.countKeys());
+            assertEquals("new size", oldSize + delta, newSize);
         }
     }
 
@@ -286,6 +300,60 @@ public class HashArrayMappedTrieTest
     // FlatNode
 
     @Test
+    public void testFlatNodeInsertAndReplace()
+    {
+        TrieNode node = new FlatNode(1, 1);
+        node = insert(node, 2, 2);
+        node = insert(node, 3, 3);
+        node = replace(node, 1, "one");
+        node = replace(node, 2, "two");
+        node = replace(node, 3, "three");
+
+        assertEquals(3, node.countKeys());
+        assertEquals(FlatNode.class, node.getClass());
+    }
+
+    @Test
+    public void testFlatNodeMutatingInsertAndReplace()
+    {
+        TrieNode node = new FlatNode(1, 1);
+        node = mInsert(node, 2, 2);
+        node = mInsert(node, 3, 3);
+        node = mReplace(node, 1, "one");
+        node = mReplace(node, 2, "two");
+        node = mReplace(node, 3, "three");
+
+        assertEquals(3, node.countKeys());
+        assertEquals(FlatNode.class, node.getClass());
+    }
+
+    @Test
+    public void testFlatNodeCollision()
+    {
+        CustomKey foo = new CustomKey(0, "foo");
+        CustomKey bar = new CustomKey(0, "bar");
+
+        TrieNode node = new FlatNode(foo, foo);
+        node = insert(node, bar, bar);
+
+        // FlatNode can handle collisions without pushing down a CollisionNode.
+        assertEquals(FlatNode.class, node.getClass());
+    }
+
+    @Test
+    public void testFlatNodeMutatingCollision()
+    {
+        CustomKey foo = new CustomKey(0, "foo");
+        CustomKey bar = new CustomKey(0, "bar");
+
+        TrieNode node = new FlatNode(foo, foo);
+        node = mInsert(node, bar, bar);
+
+        // FlatNode can handle collisions without pushing down a CollisionNode.
+        assertEquals(FlatNode.class, node.getClass());
+    }
+
+    @Test
     public void checkFlatNodeExpansion()
     {
         List<Map.Entry> values = new LinkedList<>();
@@ -331,9 +399,71 @@ public class HashArrayMappedTrieTest
         }
     }
 
+    @Test
+    public void checkFlatNodeMutatingExpansion()
+    {
+        final FlatNode original = new FlatNode(new Object[0]);
+        TrieNode node = original;
+        for (int i = 0; i < 8; i++)
+        {
+            node = mInsert(node, i, i);
+        }
+        assertSame(original, node);
+
+        TrieNode expanded = mWith(node, 9, 9).inserts().returnsNew();
+        assertTrue(expanded instanceof BitMappedNode);
+    }
+
 
     //=========================================================================
     // CollisionNode
+
+    static <K, V> CollisionNode<K, V> collisionNodeForPairs(Object... kvPairs)
+    {
+        assertEquals(0, kvPairs.length % 2);
+        int hash = hashCodeFor(kvPairs[0]);
+        for (int i = 2; i < kvPairs.length; i += 2)
+        {
+            assertEquals(hash, hashCodeFor(kvPairs[i]));
+        }
+        return new CollisionNode<>(hash, kvPairs);
+    }
+
+    @Test
+    public void testCollisionNodeInsertAndReplace()
+    {
+        CustomKey key1 = new CustomKey(2, "key1");
+        CustomKey key2 = new CustomKey(2, "key2");
+        CustomKey key3 = new CustomKey(2, "key3");
+
+        TrieNode node = collisionNodeForPairs(key1, 1);
+        node = insert(node, key2, 2);
+        node = insert(node, key3, 3);
+        node = replace(node, key1, "one");
+        node = replace(node, key2, "two");
+        node = replace(node, key3, "three");
+
+        assertEquals(3, node.countKeys());
+        assertEquals(CollisionNode.class, node.getClass());
+    }
+
+    @Test
+    public void testCollisionNodeMutatingInsertAndReplace()
+    {
+        CustomKey key1 = new CustomKey(2, "key1");
+        CustomKey key2 = new CustomKey(2, "key2");
+        CustomKey key3 = new CustomKey(2, "key3");
+
+        TrieNode node = collisionNodeForPairs(key1, 1);
+        node = mInsert(node, key2, 2);
+        node = mInsert(node, key3, 3);
+        node = mReplace(node, key1, "one");
+        node = mReplace(node, key2, "two");
+        node = mReplace(node, key3, "three");
+
+        assertEquals(3, node.countKeys());
+        assertEquals(CollisionNode.class, node.getClass());
+    }
 
     @Test
     public void checkCollisionNodeBehavior()
@@ -424,6 +554,61 @@ public class HashArrayMappedTrieTest
     // BitMappedNode
 
     @Test
+    public void testBitMappedNodeInsertAndReplace()
+    {
+        TrieNode node = new BitMappedNode(0, new Object[0]);
+        node = insert(node, 1, 1);
+        node = insert(node, 2, 2);
+        node = insert(node, 3, 3);
+        node = replace(node, 1, "one");
+        node = replace(node, 2, "two");
+        node = replace(node, 3, "three");
+
+        assertEquals(BitMappedNode.class, node.getClass());
+    }
+
+    @Test
+    public void testBitMappedNodeMutatingInsertAndReplace()
+    {
+        TrieNode node = new BitMappedNode(0, new Object[0]);
+        node = mInsert(node, 1, 1);
+        node = mInsert(node, 2, 2);
+        node = mInsert(node, 3, 3);
+        node = mReplace(node, 1, "one");
+        node = mReplace(node, 2, "two");
+        node = mReplace(node, 3, "three");
+
+        assertEquals(BitMappedNode.class, node.getClass());
+    }
+
+    @Test
+    public void testBitMappedNodeCollision()
+    {
+        CustomKey key1 = new CustomKey(0, "key1");
+        CustomKey key2 = new CustomKey(0, "key2");
+
+        TrieNode node = new BitMappedNode(0, new Object[0]);
+        node = insert(node, key1, 1);
+        node = insert(node, key2, 2);
+
+        assertEquals(BitMappedNode.class, node.getClass());
+    }
+
+    @Test
+    public void testBitMappedNodeMutatingCollision()
+    {
+        CustomKey key1 = new CustomKey(0, "key1");
+        CustomKey key2 = new CustomKey(0, "key2");
+
+        TrieNode node = new BitMappedNode(0, new Object[0]);
+        node = mInsert(node, key1, 1);
+        node = mInsert(node, key2, 2);
+
+        assertEquals(BitMappedNode.class, node.getClass());
+    }
+
+
+    @Test
     public void checkCollisionNodeCreation()
     {
         CustomKey foo = new CustomKey(0, "foo");
@@ -505,10 +690,68 @@ public class HashArrayMappedTrieTest
     //=========================================================================
     // HashArrayMappedNode
 
+    static <K, V> HashArrayMappedNode<K, V> emptyHamn()
+    {
+        return new HashArrayMappedNode<>(0, new TrieNode[32]);
+    }
+
+    @Test
+    public void testHashArrayMappedNodeInsertAndReplace()
+    {
+        TrieNode node = emptyHamn();
+        node = insert(node, 1, 1);
+        node = insert(node, 2, 2);
+        node = insert(node, 3, 3);
+        node = replace(node, 1, "one");
+        node = replace(node, 2, "two");
+        node = replace(node, 3, "three");
+
+        assertEquals(HashArrayMappedNode.class, node.getClass());
+    }
+
+    @Test
+    public void testHashArrayMappedNodeMutatingInsertAndReplace()
+    {
+        TrieNode node = emptyHamn();
+        node = mInsert(node, 1, 1);
+        node = mInsert(node, 2, 2);
+        node = mInsert(node, 3, 3);
+        node = mReplace(node, 1, "one");
+        node = mReplace(node, 2, "two");
+        node = mReplace(node, 3, "three");
+
+        assertEquals(HashArrayMappedNode.class, node.getClass());
+    }
+
+    @Test
+    public void testHashArrayMappedNodeCollision()
+    {
+        CustomKey key1 = new CustomKey(0, "key1");
+        CustomKey key2 = new CustomKey(0, "key2");
+
+        TrieNode node = emptyHamn();
+        node = insert(node, key1, 1);
+        node = insert(node, key2, 2);
+
+        assertEquals(HashArrayMappedNode.class, node.getClass());
+    }
+
+    @Test
+    public void testHashArrayMappedNodeMutatingCollision()
+    {
+        CustomKey key1 = new CustomKey(0, "key1");
+        CustomKey key2 = new CustomKey(0, "key2");
+
+        TrieNode node = emptyHamn();
+        node = mInsert(node, key1, 1);
+        node = mInsert(node, key2, 2);
+
+        assertEquals(HashArrayMappedNode.class, node.getClass());
+    }
+
     @Test
     public void checkHashArrayMappedNode()
     {
-        Results results = new Results();
         TrieNode node = new FlatNode(new Object[0]);
 
         for (int i = 0; i < 16; i++) {
@@ -588,6 +831,7 @@ public class HashArrayMappedTrieTest
     @Test
     public void testDeepShifts()
     {
+        // FIXME This should not use FHT
         FunctionalHashTrie<CustomKey, String> customFHT = FunctionalHashTrie.empty();
 
         // These two will be in the collision node at the bottom.
