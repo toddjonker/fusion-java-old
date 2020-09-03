@@ -2,20 +2,21 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.HashArrayMappedTrie.BitMappedNode;
-import static com.amazon.fusion.HashArrayMappedTrie.CollisionNode;
-import static com.amazon.fusion.HashArrayMappedTrie.FlatNode;
-import static com.amazon.fusion.HashArrayMappedTrie.HashArrayMappedNode;
-import static com.amazon.fusion.HashArrayMappedTrie.TrieNode;
 import static com.amazon.fusion.HashArrayMappedTrie.hashCodeFor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import com.amazon.fusion.HashArrayMappedTrie.BitMappedNode;
+import com.amazon.fusion.HashArrayMappedTrie.CollisionNode;
+import com.amazon.fusion.HashArrayMappedTrie.FlatNode;
+import com.amazon.fusion.HashArrayMappedTrie.HashArrayMappedNode;
 import com.amazon.fusion.HashArrayMappedTrie.Results;
+import com.amazon.fusion.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.junit.Test;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class HashArrayMappedTrieTest
 {
     /**
@@ -66,53 +68,154 @@ public class HashArrayMappedTrieTest
     }
 
 
+    private void assertEmpty(TrieNode node)
+    {
+        assertNull(node);
+    }
+
+    private <K, V> V get(TrieNode<K, V> node, K key)
+    {
+        return node.get(hashCodeFor(key), 0, key);
+    }
+
+    private <K, V> V assertValuePresent(TrieNode<K, V> node, K key)
+    {
+        V found = get(node, key);
+        assertNotNull(found);
+        return found;
+    }
+
+    private <K, V> void assertValueAbsent(TrieNode<K, V> node, K key)
+    {
+        if (node != null)
+        {
+            V found = get(node, key);
+            assertNull(found);
+        }
+    }
+
+    private <K, V> void assertValueEquals(V expectedValue, TrieNode<K, V> node, K key)
+    {
+        V found = assertValuePresent(node, key);
+        assertEquals(expectedValue, found);
+    }
+
+    private <K, V> TrieNode<K, V> insert(TrieNode<K, V> oldNode, K key, V newValue)
+    {
+        assertValueAbsent(oldNode, key); // Otherwise we'd replace, not insert.
+
+        Results results = new Results();
+        TrieNode<K, V> newNode = oldNode.with(hashCodeFor(key), 0, key, newValue, results);
+
+        assertNotSame(newNode, oldNode);
+        assertTrue("modified", results.modified());
+
+        assertValueAbsent(oldNode, key);
+        assertValueEquals(newValue, newNode, key);
+
+        return newNode;
+    }
+
+    private <K, V> TrieNode<K, V> replace(TrieNode<K, V> oldNode, K key, V newValue)
+    {
+        V oldValue = assertValuePresent(oldNode, key); // Otherwise we'd insert, not replace.
+
+        Results results = new Results();
+        TrieNode<K, V> newNode = oldNode.with(hashCodeFor(key), 0, key, newValue, results);
+
+        assertNotSame(newNode, oldNode);
+//      assertTrue("modified", results.modified());  // FIXME
+
+        assertValueEquals(oldValue, oldNode, key);
+        assertValueEquals(newValue, newNode, key);
+
+        return newNode;
+    }
+
+    private <K, V> TrieNode<K, V> noopReplace(TrieNode<K, V> oldNode, K key, V value)
+    {
+        assertValueEquals(value, oldNode, key);
+
+        Results results = new Results();
+        TrieNode<K, V> newNode = oldNode.with(hashCodeFor(key), 0, key, value, results);
+
+        assertSame(oldNode, newNode);
+        assertFalse("modified", results.modified());
+
+        assertValueEquals(value, oldNode, key);
+        assertValueEquals(value, newNode, key);
+
+        return newNode;
+    }
+
+    private <K, V> TrieNode<K, V> remove(TrieNode<K, V> oldNode, K key)
+    {
+        V oldValue = assertValuePresent(oldNode, key); // Otherwise we can't remove
+
+        TrieNode<K, V> newNode = oldNode.without(hashCodeFor(key), 0, key);
+
+        assertNotSame(newNode, oldNode);
+        assertValueEquals(oldValue, oldNode, key);
+        assertValueAbsent(newNode, key);
+
+        return newNode;
+    }
+
+    private <K, V> TrieNode<K, V> noopRemove(TrieNode<K, V> oldNode, K key)
+    {
+        V oldValue = oldNode.get(hashCodeFor(key), 0, key);
+
+        TrieNode<K, V> newNode = oldNode.without(hashCodeFor(key), 0, key);
+        if (oldValue == null)
+        {
+            assertValueAbsent(newNode, key);
+        }
+        else
+        {
+            assertValueEquals(oldValue, newNode, key);
+        }
+
+        assertSame(oldNode, newNode);
+        return newNode;
+    }
+
+
     @Test
     public void checkCollisionNodeBehavior()
     {
         CustomKey key1 = new CustomKey(2, "key1");
         CustomKey key2 = new CustomKey(2, "key2");
         Object[] values = { key1, "foo", key2, "bar" };
-        TrieNode collisionNode = new CollisionNode(hashCodeFor(2), values);
-
-        Results results = new Results();
+        TrieNode collisionNode = new CollisionNode(hashCodeFor(key1), values);
 
         CustomKey key3 = new CustomKey(1, "key3");
-        TrieNode withNewNonCollidingKey =
-            collisionNode.with(hashCodeFor(1), 0, key3, "baz", results);
+        TrieNode withNewNonCollidingKey = insert(collisionNode, key3, "baz");
 
-        // We expect a new leaf to have been added.
-        assertTrue(results.modified());
         // We expect the collision node to have been pushed down a level.
         assertTrue(withNewNonCollidingKey instanceof FlatNode);
-        assertEquals("foo", withNewNonCollidingKey.get(hashCodeFor(2), 0, key1));
-        assertEquals("bar", withNewNonCollidingKey.get(hashCodeFor(2), 0, key2));
-        assertEquals("baz", withNewNonCollidingKey.get(hashCodeFor(1), 0, key3));
+        assertValueEquals("foo", withNewNonCollidingKey, key1);
+        assertValueEquals("bar", withNewNonCollidingKey, key2);
+        assertValueEquals("baz", withNewNonCollidingKey, key3);
 
         CustomKey key4 = new CustomKey(2, "key4");
-        TrieNode withCollidingKey =
-            withNewNonCollidingKey.with(hashCodeFor(2), 0, key4, "biz", results);
-        assertEquals("biz", withCollidingKey.get(hashCodeFor(2), 0, key4));
+        TrieNode withCollidingKey = insert(withNewNonCollidingKey, key4, "biz");
+        assertValueEquals("biz", withCollidingKey, key4);
 
-        TrieNode withoutKey1 = withCollidingKey.without(hashCodeFor(2), 0, key1);
-        assertEquals(null, withoutKey1.get(hashCodeFor(2), 0, key1));
-        assertEquals("bar", withoutKey1.get(hashCodeFor(2), 0, key2));
-        assertEquals("baz", withoutKey1.get(hashCodeFor(1), 0, key3));
-        assertEquals("biz", withoutKey1.get(hashCodeFor(2), 0, key4));
+        assertValueEquals("foo", withNewNonCollidingKey, key1);
+        TrieNode withoutKey1 = remove(withCollidingKey, key1);
+        assertValueEquals("bar", withoutKey1, key2);
+        assertValueEquals("baz", withoutKey1, key3);
+        assertValueEquals("biz", withoutKey1, key4);
 
-        TrieNode without1And2 = withoutKey1.without(hashCodeFor(2), 0, key2);
-        assertEquals(null, without1And2.get(hashCodeFor(2), 0, key1));
-        assertEquals(null, without1And2.get(hashCodeFor(2), 0, key2));
-        assertEquals("baz", without1And2.get(hashCodeFor(1), 0, key3));
-        assertEquals("biz", withoutKey1.get(hashCodeFor(2), 0, key4));
+        TrieNode without1And2 = remove(withoutKey1, key2);
+        assertValueEquals("baz", without1And2, key3);
+        assertValueEquals("biz", withoutKey1,  key4);
 
-        TrieNode without123 = without1And2.without(hashCodeFor(1), 0, key3);
-        assertEquals(null, without123.get(hashCodeFor(2), 0, key1));
-        assertEquals(null, without123.get(hashCodeFor(2), 0, key2));
-        assertEquals(null, without123.get(hashCodeFor(1), 0, key3));
-        assertEquals("biz", without123.get(hashCodeFor(2), 0, key4));
+        TrieNode without123 = remove(without1And2, key3);
+        assertValueEquals("biz", without123, key4);
 
-        TrieNode empty = without123.without(hashCodeFor(2), 0, key4);
-        assertTrue(empty == null);
+        TrieNode empty = remove(without123, key4);
+        assertEmpty(empty);
     }
 
     @Test
@@ -128,25 +231,16 @@ public class HashArrayMappedTrieTest
 
         TrieNode flatNode = new FlatNode(new Object[0]);
 
-        Results results = new Results();
         // A flat node should hold eight entries before expanding.
         for (int i = 0; i < 8; i++)
         {
             Map.Entry entry = values.get(i);
-            flatNode = flatNode.with(hashCodeFor(entry.getKey()),
-                                     0,
-                                     entry.getKey(),
-                                     entry.getValue(),
-                                     results);
+            flatNode = insert(flatNode, entry.getKey(), entry.getValue());
             assertTrue(flatNode instanceof FlatNode);
         }
 
         Map.Entry ninth = values.get(8);
-        TrieNode nowBitMap = flatNode.with(hashCodeFor(ninth.getKey()),
-                                           0,
-                                           ninth.getKey(),
-                                           ninth.getValue(),
-                                           results);
+        TrieNode nowBitMap = insert(flatNode, ninth.getKey(), ninth.getValue());
         assertTrue(nowBitMap instanceof BitMappedNode);
         assertEquals(9, countNodeSize(nowBitMap));
 
@@ -178,13 +272,11 @@ public class HashArrayMappedTrieTest
 
         List<CustomKey> keys = new ArrayList<>(8);
 
-        Results results = new Results();
-
         for (int i = 1; i < 9; i++)
         {
             CustomKey key = new CustomKey(i, Integer.toString(i));
             keys.add(key);
-            trieNode = trieNode.with(hashCodeFor(i), 0, key, new Object(), results);
+            trieNode = insert(trieNode, key, new Object());
         }
 
         // 10 because the nested collision node has 2 elements.
@@ -220,12 +312,11 @@ public class HashArrayMappedTrieTest
     @Test
     public void checkCollisionNodeCreation()
     {
-        Results results = new Results();
         CustomKey foo = new CustomKey(0, "foo");
         CustomKey bar = new CustomKey(0, "bar");
         TrieNode trieNode = BitMappedNode.EMPTY;
-        trieNode = trieNode.with(hashCodeFor(0), 0, foo, new Object(), results);
-        trieNode = trieNode.with(hashCodeFor(0), 0, bar, new Object(), results);
+        trieNode = insert(trieNode, foo, new Object());
+        trieNode = insert(trieNode, bar, new Object());
 
         Object shouldBeNull = ((BitMappedNode) trieNode).kvPairs[0];
         assertNull(shouldBeNull);
@@ -246,22 +337,20 @@ public class HashArrayMappedTrieTest
         TrieNode trieNode = BitMappedNode.EMPTY;
         for (int i = 0; i < 16; i++)
         {
-            Object key = new Object();
-            keys[i] = key;
-            trieNode = trieNode.with(i, 0, key, new Object(), results);
+            Object key = keys[i] = Integer.toString(i);
+            trieNode = trieNode.with(i, 0, key, key, results);
         }
 
         assertTrue(trieNode instanceof BitMappedNode);
         assertEquals(16, countNodeSize(trieNode));
 
-        Object overConversionLimitKey = new Object();
-        keys[16] = overConversionLimitKey;
-        trieNode = trieNode.with(16, 0, overConversionLimitKey, new Object(), results);
+        Object overConversionLimitKey = keys[16] = "16";
+        trieNode = trieNode.with(16, 0, overConversionLimitKey, overConversionLimitKey, results);
         assertTrue(trieNode instanceof HashArrayMappedNode);
         assertEquals(17, countNodeSize(trieNode));
         for (int i = 0; i < 17; i++)
         {
-            assertNotNull("Key: " + keys[i] + " at index " + i + " was not found.", trieNode.get(i, 0, keys[i]));
+            assertSame("Key " + i, keys[i], trieNode.get(i, 0, keys[i]));
         }
 
         for (int i = 0; i < 9; i++)
@@ -274,7 +363,7 @@ public class HashArrayMappedTrieTest
         assertEquals(8, countNodeSize(trieNode));
         for (int i = 9; i < 17; i++)
         {
-            assertNotNull("Key: " + keys[i] + " at index " + i + " was not found.", trieNode.get(i, 0, keys[i]));
+            assertSame("Key " + i, keys[i], trieNode.get(i, 0, keys[i]));
         }
 
         trieNode = trieNode.without(9, 0, keys[9]);
@@ -285,7 +374,7 @@ public class HashArrayMappedTrieTest
 
         for (int i = 10; i < 17; i++)
         {
-            assertNotNull("Key: " + keys[i] + " at index " + i + " was not found.", trieNode.get(i, 0, keys[i]));
+            assertSame("Key " + i, keys[i], trieNode.get(i, 0, keys[i]));
         }
     }
 
@@ -295,27 +384,21 @@ public class HashArrayMappedTrieTest
         Results results = new Results();
         TrieNode node = new FlatNode(new Object[0]);
 
-        for (int i = 0; i < 16; i++)
-        {
+        for (int i = 0; i < 16; i++) {
             CustomKey key = new CustomKey(i, new Object());
             Object value = new Object();
-            node = node.with(hashCodeFor(key), 0, key, value, results);
+            node = insert(node, key, value);
         }
         CustomKey checkKey = new CustomKey(16, "foo");
         String checkVal = "bar";
-        node = node.with(hashCodeFor(checkKey), 0, checkKey, checkVal, results);
+        node = insert(node, checkKey, checkVal);
 
         assertTrue(node instanceof HashArrayMappedNode);
         assertEquals(17, countNodeSize(node));
 
-        TrieNode newNode = node.without(hashCodeFor(30), 0, "notInHAMNode");
-        assertTrue(newNode == node);
-
-        TrieNode stillSameNode = node.without(hashCodeFor(10), 0, "notInFlatNode");
-        assertTrue(stillSameNode == node);
-
-        TrieNode sameAfterWith = node.with(hashCodeFor(checkKey), 0, checkKey, checkVal, new Results());
-        assertTrue(sameAfterWith == node);
+        noopRemove(node, new CustomKey(30, "notInHAMNode"));
+        noopRemove(node, new CustomKey(10, "notInFlatNode"));
+        noopReplace(node, checkKey, checkVal);
     }
 
 
