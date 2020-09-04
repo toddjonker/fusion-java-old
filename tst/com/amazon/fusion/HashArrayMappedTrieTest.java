@@ -67,24 +67,24 @@ public class HashArrayMappedTrieTest
     }
 
 
-    private void assertEmpty(TrieNode node)
+    private static void assertEmpty(TrieNode node)
     {
         assertNull(node);
     }
 
-    private <K, V> V get(TrieNode<K, V> node, K key)
+    private static <K, V> V get(TrieNode<K, V> node, K key)
     {
         return node.get(hashCodeFor(key), 0, key);
     }
 
-    private <K, V> V assertValuePresent(TrieNode<K, V> node, K key)
+    private static <K, V> V assertValuePresent(TrieNode<K, V> node, K key)
     {
         V found = get(node, key);
         assertNotNull(found);
         return found;
     }
 
-    private <K, V> void assertValueAbsent(TrieNode<K, V> node, K key)
+    private static <K, V> void assertValueAbsent(TrieNode<K, V> node, K key)
     {
         if (node != null)
         {
@@ -93,11 +93,158 @@ public class HashArrayMappedTrieTest
         }
     }
 
-    private <K, V> void assertValueEquals(V expectedValue, TrieNode<K, V> node, K key)
+    private static <K, V> void assertValueEquals(V expectedValue, TrieNode<K, V> node, K key)
     {
         V found = assertValuePresent(node, key);
         assertEquals(expectedValue, found);
     }
+
+    /**
+     * Helper for writing fluent tests.
+     */
+    private static class Modifier<K, V>
+    {
+        private enum Mode { INSERT, REPLACE, REMOVE, NOOP };
+
+        private final TrieNode<K, V> oldNode;
+        private final int            oldSize;
+        private final Results        results = new Results();
+
+        private Mode           mode;
+        private K              key;
+        private V              oldValue;
+        private TrieNode<K, V> newNode;
+        private V              newValue;
+
+        public Modifier(TrieNode<K, V> node)
+        {
+            this.oldNode = node;
+            this.oldSize = node.countKeys();
+        }
+
+
+        public Modifier<K, V> with(K key, V value)
+        {
+            this.key      = key;
+            this.oldValue = get(oldNode, key);
+            this.newValue = value;
+
+            newNode = oldNode.with(hashCodeFor(key), 0, key, value, results);
+            assertValueEquals(value, newNode, key);
+
+            return this;
+        }
+
+        public Modifier<K, V> mWith(K key, V value)
+        {
+            this.key      = key;
+            this.oldValue = get(oldNode, key);
+            this.newValue = value;
+
+            newNode = oldNode.mWith(hashCodeFor(key), 0, key, value, results);
+            assertValueEquals(value, newNode, key);
+
+            return this;
+        }
+
+        public Modifier<K, V> without(K key)
+        {
+            this.key      = key;
+            this.oldValue = get(oldNode, key);
+            this.newValue = null;
+
+            newNode = oldNode.without(hashCodeFor(key), 0, key);
+            assertValueAbsent(newNode, key);
+
+            return this;
+        }
+
+
+        public Modifier<K, V> inserts()
+        {
+            mode = Mode.INSERT;
+            assertNull("old value", oldValue);
+            assertTrue("results.modified", results.modified());
+            assertEquals("new size", oldSize + 1, newNode.countKeys());
+            return this;
+        }
+
+        public Modifier<K, V> replaces()
+        {
+            mode = Mode.REPLACE;
+            assertNotSame("mapped value", oldValue, newValue);
+            assertTrue("results.modified", results.modified());
+            assertEquals("new size", oldSize, newNode.countKeys());
+            return this;
+        }
+
+        public Modifier<K, V> removes()
+        {
+            mode = Mode.REMOVE;
+            assertNotNull("old value", oldValue);
+
+            // FIXME TrieNode.without() should take Results
+//          assertTrue("results not modified", results.modified());
+
+            int newSize = (newNode == null ? 0 : newNode.countKeys());
+            assertEquals("new size", oldSize - 1, newSize);
+            return this;
+        }
+
+        public Modifier<K, V> noops()
+        {
+            mode = Mode.NOOP;
+            assertSame("mapped value", oldValue, newValue);
+            assertFalse("results modified", results.modified());
+            assertEquals("new size", oldSize, newNode.countKeys());
+            return this;
+        }
+
+
+        public TrieNode<K, V> returnsNew() {
+            assertNotSame("returned node", oldNode, newNode);
+
+            // Make sure the old node isn't changed.
+            assertEquals("old node size", oldSize, oldNode.countKeys());
+
+            // FIXME not correct in face of mutation.
+            switch (mode) {
+                case INSERT:
+                    assertValueAbsent(oldNode, key);
+                    break;
+                case REMOVE:
+                case REPLACE:
+                case NOOP:
+                    assertValueEquals(oldValue, oldNode, key);
+                    break;
+            }
+
+            return newNode;
+        }
+
+        public TrieNode<K, V> returnsSame()
+        {
+            assertSame(oldNode, newNode);
+            return newNode;
+        }
+    }
+
+
+    private static <K, V> Modifier<K, V> with(TrieNode<K,V> node, K key, V value)
+    {
+        return new Modifier(node).with(key, value);
+    }
+
+    private static <K, V> Modifier<K, V> mWith(TrieNode<K,V> node, K key, V value)
+    {
+        return new Modifier(node).mWith(key, value);
+    }
+
+    private static <K, V> Modifier<K, V> without(TrieNode<K,V> node, K key)
+    {
+        return new Modifier(node).without(key);
+    }
+
 
     private <K, V> TrieNode<K, V> insert(TrieNode<K, V> oldNode, K key, V newValue)
     {
@@ -117,6 +264,11 @@ public class HashArrayMappedTrieTest
         return newNode;
     }
 
+    private <K, V> TrieNode<K, V> mInsert(TrieNode<K, V> node, K key, V value)
+    {
+        return mWith(node, key, value).inserts().returnsSame();
+    }
+
     private <K, V> TrieNode<K, V> replace(TrieNode<K, V> oldNode, K key, V newValue)
     {
         int oldSize = oldNode.countKeys();
@@ -133,6 +285,11 @@ public class HashArrayMappedTrieTest
         assertValueEquals(newValue, newNode, key);
 
         return newNode;
+    }
+
+    private <K, V> TrieNode<K, V> mReplace(TrieNode<K, V> node, K key, V value)
+    {
+        return mWith(node, key, value).replaces().returnsSame();
     }
 
     private <K, V> TrieNode<K, V> noopReplace(TrieNode<K, V> oldNode, K key, V value)
