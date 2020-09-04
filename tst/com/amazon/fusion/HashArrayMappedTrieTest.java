@@ -110,24 +110,24 @@ public class HashArrayMappedTrieTest
         private final int            oldSize;
         private final Results        results = new Results();
 
-        private Mode           mode;
         private K              key;
         private V              oldValue;
-        private TrieNode<K, V> newNode;
         private V              newValue;
+        private TrieNode<K, V> newNode;
+        private Mode           mode;
 
         public Modifier(TrieNode<K, V> node)
         {
-            this.oldNode = node;
-            this.oldSize = node.countKeys();
+            oldNode = node;
+            oldSize = node.countKeys();
         }
 
 
         public Modifier<K, V> with(K key, V value)
         {
-            this.key      = key;
-            this.oldValue = get(oldNode, key);
-            this.newValue = value;
+            this.key = key;
+            oldValue = get(oldNode, key);
+            newValue = value;
 
             newNode = oldNode.with(hashCodeFor(key), 0, key, value, results);
             assertValueEquals(value, newNode, key);
@@ -137,9 +137,9 @@ public class HashArrayMappedTrieTest
 
         public Modifier<K, V> mWith(K key, V value)
         {
-            this.key      = key;
-            this.oldValue = get(oldNode, key);
-            this.newValue = value;
+            this.key = key;
+            oldValue = get(oldNode, key);
+            newValue = value;
 
             newNode = oldNode.mWith(hashCodeFor(key), 0, key, value, results);
             assertValueEquals(value, newNode, key);
@@ -149,9 +149,9 @@ public class HashArrayMappedTrieTest
 
         public Modifier<K, V> without(K key)
         {
-            this.key      = key;
-            this.oldValue = get(oldNode, key);
-            this.newValue = null;
+            this.key = key;
+            oldValue = get(oldNode, key);
+            newValue = null;
 
             newNode = oldNode.without(hashCodeFor(key), 0, key);
             assertValueAbsent(newNode, key);
@@ -246,22 +246,9 @@ public class HashArrayMappedTrieTest
     }
 
 
-    private <K, V> TrieNode<K, V> insert(TrieNode<K, V> oldNode, K key, V newValue)
+    private <K, V> TrieNode<K, V> insert(TrieNode<K, V> node, K key, V value)
     {
-        int oldSize = oldNode.countKeys();
-        assertValueAbsent(oldNode, key); // Otherwise we'd replace, not insert.
-
-        Results results = new Results();
-        TrieNode<K, V> newNode = oldNode.with(hashCodeFor(key), 0, key, newValue, results);
-
-        assertNotSame(newNode, oldNode);
-        assertTrue("modified", results.modified());
-        assertEquals(oldSize + 1, newNode.countKeys());
-
-        assertValueAbsent(oldNode, key);
-        assertValueEquals(newValue, newNode, key);
-
-        return newNode;
+        return with(node, key, value).inserts().returnsNew();
     }
 
     private <K, V> TrieNode<K, V> mInsert(TrieNode<K, V> node, K key, V value)
@@ -269,22 +256,9 @@ public class HashArrayMappedTrieTest
         return mWith(node, key, value).inserts().returnsSame();
     }
 
-    private <K, V> TrieNode<K, V> replace(TrieNode<K, V> oldNode, K key, V newValue)
+    private <K, V> TrieNode<K, V> replace(TrieNode<K, V> node, K key, V value)
     {
-        int oldSize = oldNode.countKeys();
-        V oldValue = assertValuePresent(oldNode, key); // Otherwise we'd insert, not replace.
-
-        Results results = new Results();
-        TrieNode<K, V> newNode = oldNode.with(hashCodeFor(key), 0, key, newValue, results);
-
-        assertNotSame(newNode, oldNode);
-//      assertTrue("modified", results.modified());  // FIXME
-        assertEquals(oldSize, newNode.countKeys());
-
-        assertValueEquals(oldValue, oldNode, key);
-        assertValueEquals(newValue, newNode, key);
-
-        return newNode;
+        return with(node, key, value).replaces().returnsNew();
     }
 
     private <K, V> TrieNode<K, V> mReplace(TrieNode<K, V> node, K key, V value)
@@ -292,60 +266,19 @@ public class HashArrayMappedTrieTest
         return mWith(node, key, value).replaces().returnsSame();
     }
 
-    private <K, V> TrieNode<K, V> noopReplace(TrieNode<K, V> oldNode, K key, V value)
+    private <K, V> TrieNode<K, V> noopReplace(TrieNode<K, V> node, K key, V value)
     {
-        int oldSize = oldNode.countKeys();
-        assertValueEquals(value, oldNode, key);
-
-        Results results = new Results();
-        TrieNode<K, V> newNode = oldNode.with(hashCodeFor(key), 0, key, value, results);
-
-        assertSame(oldNode, newNode);
-        assertFalse("modified", results.modified());
-        assertEquals(oldSize, newNode.countKeys());
-
-        assertValueEquals(value, oldNode, key);
-        assertValueEquals(value, newNode, key);
-
-        return newNode;
+        return mWith(node, key, value).noops().returnsSame();
     }
 
-    private <K, V> TrieNode<K, V> remove(TrieNode<K, V> oldNode, K key)
+    private <K, V> TrieNode<K, V> remove(TrieNode<K, V> node, K key)
     {
-        int oldSize = oldNode.countKeys();
-        V oldValue = assertValuePresent(oldNode, key); // Otherwise we can't remove
-
-        TrieNode<K, V> newNode = oldNode.without(hashCodeFor(key), 0, key);
-
-        assertNotSame(newNode, oldNode);
-//      assertTrue("modified", results.modified());      // FIXME
-//      assertEquals(oldSize - 1, newNode.countKeys());  // FIXME newNode == null
-
-        assertValueEquals(oldValue, oldNode, key);
-        assertValueAbsent(newNode, key);
-
-        return newNode;
+        return without(node, key).removes().returnsNew();
     }
 
-    private <K, V> TrieNode<K, V> noopRemove(TrieNode<K, V> oldNode, K key)
+    private <K, V> TrieNode<K, V> noopRemove(TrieNode<K, V> node, K key)
     {
-        int oldSize = oldNode.countKeys();
-        V oldValue = oldNode.get(hashCodeFor(key), 0, key);
-
-        TrieNode<K, V> newNode = oldNode.without(hashCodeFor(key), 0, key);
-        if (oldValue == null)
-        {
-            assertValueAbsent(newNode, key);
-        }
-        else
-        {
-            assertValueEquals(oldValue, newNode, key);
-        }
-
-        assertSame(oldNode, newNode);
-        assertEquals(oldSize, newNode.countKeys());
-
-        return newNode;
+        return without(node, key).noops().returnsSame();
     }
 
 
