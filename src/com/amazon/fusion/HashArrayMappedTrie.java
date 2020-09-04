@@ -10,20 +10,26 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 
 /**
- * Implementation of a
- * <a href="https://infoscience.epfl.ch/record/64398/files/idealhashtrees.pdf">Hash Array Mapped Trie</a>.
- *
- * This version is an internal implementation detail of FusionJava, is not intended
+ * Implementation of the Hash Array Mapped Trie data structure, as described in the paper
+ * <em>Ideal Hash Tries</em> by Phil Bagwell.
+ * <p>
+ * This class is an internal implementation detail of FusionJava, is not intended
  * for reuse, and does not support Java nulls as keys or values.
- *
+ * </p>
+ * <p>
  * Iteration order of this data structure is undefined. All key hashes used within
  * {@link HashArrayMappedTrie} are shuffled differently in each JRE. All hashes used for
  * navigating through the node structure should be routed through {@link #hashCodeFor(Object)}.
+ * <p>
+ * This implementation was originally based on Clojure's PersistentHashMap and so it:
+ * <ul>
+ *     <li>Uses path copying for persistence.</li>
+ *     <li>Uses {@link CollisionNode}s rather than extended hashing.</li>
+ *     <li>Uses node polymorphism rather than conditional checks.</li>
+ * </ul>
+ * </p>
  *
- * Based on Clojure's PersistentHashMap and as such this implementation
- *  Uses path copying for persistence.
- *  Uses {@link CollisionNode}s rather than extended hashing.
- *  Uses node polymorphism rather than conditional checks.
+ * @see <a href="https://infoscience.epfl.ch/record/64398/files/idealhashtrees.pdf">Ideal Hash Trees</a>
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 class HashArrayMappedTrie
@@ -131,23 +137,28 @@ class HashArrayMappedTrie
     }
 
     /**
-     * {@link FlatNode} is an optimization of {@link BitMappedNode} for small nodes.
-     * Empirically, a linear search is faster for nodes with <= 8 keys.
-     *
-     * Maintains the same invariant as {@link BitMappedNode}s:
-     * Keys are stored in even indices, values at odd.
-     * If there is a null value at an even index, that means the corresponding odd index is a {@link CollisionNode}.
-     *
-     * While this is a flat array of key-value pairs, they are in no defined order.
+     * A trie node storing a small number of unsorted key/value pairs, and no child nodes except
+     * to hold colliding keys.
+     * This is more efficient than a {@link BitMappedNode} for holding leaves:
+     * empirically, a linear search is faster for nodes with <= {@value #MAX_CHILDREN} keys.
+     * <p>
+     * Within the {@link #kvPairs} array, keys are stored in even indices, values at odd.
+     * Where there is a null key, the following value is a {@link CollisionNode}.
+     * </p>
+     * <p>
+     * Nodes of this type are created by inserting into an empty trie.
+     * They may grow to hold up to {@value #MAX_CHILDREN} entries before {@link #expand}ing
+     * into a {@link BitMappedNode}.
+     * </p>
      */
     static class FlatNode<K, V>
         extends TrieNode<K, V>
     {
         /**
-         * As mentioned in {@link FlatNode}'s Javadoc, empirically, a linear search performs just
-         * as fast or faster than a bitmapped search when there are <= 8 elements.
+         * Empirically, a linear search performs as fast or faster than a bitmapped
+         * search, up to this many elements.
          */
-        private static final int BITMAP_CONVERSION_SIZE = 8;
+        private static final int MAX_CHILDREN = 8;
 
         Object[] kvPairs;
 
@@ -209,7 +220,7 @@ class HashArrayMappedTrie
             }
             else
             {
-                if (kvPairs.length >= 2 * BITMAP_CONVERSION_SIZE)
+                if (kvPairs.length >= 2 * MAX_CHILDREN)
                 {
                     return expand(hash, shift, key, value, results);
                 }
@@ -253,7 +264,7 @@ class HashArrayMappedTrie
             }
             else
             {
-                if (kvPairs.length >= 2 * BITMAP_CONVERSION_SIZE)
+                if (kvPairs.length >= 2 * MAX_CHILDREN)
                 {
                     return expand(hash, shift, key, value, results);
                 }
@@ -407,11 +418,26 @@ class HashArrayMappedTrie
 
 
     /**
-     * A CollisionNode stores kvPairs that have direct hash collisions.
-     * This is to resolve instances where there are not enough hash bits to index further.
-     *
-     * It is an extension of {@link FlatNode} but does not store nodes
-     * within itself and is never extended into a {@link BitMappedNode} (since that is pointless)
+     * A trie node storing key/value pairs, where all keys have the same hashcode.
+     * <p>
+     * Like {@link FlatNode}, the entries are not sorted, so keys are found
+     * via linear search and compared using {@link #equivKeys}.
+     * Unlike {@code FlatNode}, this node never has child nodes since there are
+     * no more hashcode bits to use.
+     * </p>
+     * <p>
+     * Within the {@link #kvPairs} array, keys are stored in even indices, values at odd.
+     * The array is always "full", with each pair holding key/value pairs.
+     * Collisions are expected to be rare, so we optimize for space.
+     * </p>
+     * <p>
+     * Nodes of this type are created when inserting a key into a {@link BitMappedNode} or
+     * {@code FlatNode} that holds a different key (per {@link #equivKeys}) with the same hashcode.
+     * They are replaced by a normal {@code FlatNode} when inserting a key with
+     * a different hashcode, pushing the collisions down a level in the trie.
+     * They are not eliminated when they shrink to one entry (and thus without a collision);
+     * this is suboptimal and should be corrected.
+     * </p>
      */
     static class CollisionNode<K, V>
         extends FlatNode<K, V>
@@ -530,28 +556,31 @@ class HashArrayMappedTrie
 
 
     /**
-     * {@link BitMappedNode}s are the equivalent of Clojure's PersistentHashMap's BitmapIndexedNode.
-     *
-     * Piggy-backing off of the Clojure implementation, kvPairs are stored in this node as follows:
-     * If the even index is not null, then it is a key and the following index is the value.
-     * Otherwise, the even index is null and the following index is potentially a Node
-     *  (It's possible for two consecutive indices to be null due to optimizations that
-     *  {@link #mWith} and {@link FlatNode#expand} perform).
-     *
-     * Note: {@link BitMappedNode}s are never packed back down into {@link FlatNode}s.
-     * This is because a search through a FlatNode would no longer be linear if the pre-packed
-     * {@link BitMappedNode} has another non-{@link CollisionNode} as a child.
+     * A trie node storing a mix of key/value pairs and child nodes.
+     * <p>
+     * Within the {@link #kvPairs} array, keys are stored in even indices, values at odd.
+     * Where there is a null key, the following value is either a child {@link TrieNode}
+     * or null. The latter occurs due to optimizations in {@link #mWith} and {@link FlatNode#expand}.
+     * </p>
+     * <p>
+     * Nodes of this type are created when a {@link FlatNode} grows beyond its performant capacity
+     * of {@value FlatNode#MAX_CHILDREN} entries.
+     * They may grow to hold up to {@value #MAX_CHILDREN} entries before being replaced by a
+     * {@link HashArrayMappedNode}.
+     * They are never packed back down into {@code FlatNode}s because they may have child nodes
+     * that are not {@link CollisionNode}s (which would break {@code FlatNode}'s ability to
+     * linear search).
+     * </p>
      */
     static class BitMappedNode<K, V>
         extends TrieNode<K, V>
     {
         /**
-         * We convert {@link BitMappedNode}s to {@link HashArrayMappedNode}s after they reach
-         * a size of 16 elements. Empirically, this conversion provides a performance gain
-         * of up to 20% on {@link TrieNode#get} and {@link TrieNode#with}
-         * operations as the {@link HashArrayMappedTrie} grows with randomly distributed keys.
+         * We convert {@link BitMappedNode}s to {@link HashArrayMappedNode}s when they exceed
+         * this many elements. Empirically, this conversion provides a performance gain of up to
+         * 20% on lookup and insert operations as the trie grows with randomly distributed keys.
          */
-        private static final int HAMN_CONVERSION_SIZE = 16;
+        private static final int MAX_CHILDREN = 16;
 
         static final TrieNode EMPTY = new BitMappedNode(0, new Object[0]);
         int bitmap;
@@ -627,11 +656,11 @@ class HashArrayMappedTrie
                                                               newNode));
                 }
             }
-            else
+            else // Adding a new child
             {
                 results.keyAdded();
                 int numVals = Integer.bitCount(bitmap);
-                if (numVals >= HAMN_CONVERSION_SIZE)
+                if (numVals >= MAX_CHILDREN)
                 {
                     return expand(key, value, hashFragment, numVals);
                 }
@@ -700,11 +729,11 @@ class HashArrayMappedTrie
                     kvPairs[keyIndex + 1] = newNode;
                 }
             }
-            else
+            else // Adding a new child
             {
                 results.keyAdded();
                 int numVals = Integer.bitCount(bitmap);
-                if (numVals >= HAMN_CONVERSION_SIZE)
+                if (numVals >= MAX_CHILDREN)
                 {
                     return expand(key, value, hashFragment, numVals);
                 }
@@ -894,14 +923,22 @@ class HashArrayMappedTrie
         }
     }
 
+
     /**
-     * {@link HashArrayMappedNode} is the equivalent of Clojure's PersistentHashMap's ArrayNode.
-     *
-     * This node only stores other nodes as an update speed optimization and contains no key-value pairs.
+     * A trie node storing only child nodes, and no direct key/value pairs.
+     * Storage is always full-width, so there's no bitmap to track which entries are present.
+     * <p>
+     * Nodes of this type are created when a {@link BitMappedNode} grows to contain more than
+     * {@value BitMappedNode#MAX_CHILDREN} children.
+     * Conversely, when they shrink to contain fewer than {@value #MIN_CHILDREN} child nodes,
+     * they are packed back into a {@code BitMappedNode}.
+     * </p>
      */
     static class HashArrayMappedNode<K, V>
         extends TrieNode<K, V>
     {
+        private static final int MIN_CHILDREN = 8;
+
         /**
          * count refers to the number of non-null nodes in {@link #nodes},
          * not the size of the subtrie.
@@ -913,6 +950,7 @@ class HashArrayMappedTrie
         {
             this.count = count;
             this.nodes = nodes;
+            assert count >= MIN_CHILDREN;
             assert nodes.length == 32;
         }
 
@@ -1025,7 +1063,7 @@ class HashArrayMappedTrie
                 }
                 else
                 {
-                    if (count <= 8)
+                    if (count <= MIN_CHILDREN)
                     {
                         return removeAndPack(index);
                     }
