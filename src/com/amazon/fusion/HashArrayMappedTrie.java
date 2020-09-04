@@ -87,6 +87,12 @@ class HashArrayMappedTrie
     static abstract class TrieNode<K, V>
     {
         /**
+         * Computes the number of unique keys in this node and its children.
+         * This is an O(n) operation.
+         */
+        public abstract int countKeys();
+
+        /**
          * Functionally modifies the trie to have the desired mapping from key to value.
          * @return Itself if it was not modified, else a new trie with the modification.
          */
@@ -180,6 +186,24 @@ class HashArrayMappedTrie
             this.kvPairs = kvPairs;
         }
 
+
+        @Override
+        public int countKeys()
+        {
+            int count = 0;
+            for (int i = 0; i < kvPairs.length; i += 2)
+            {
+                if (kvPairs[i] == null)
+                {
+                    count += ((CollisionNode) kvPairs[i + 1]).countKeys();
+                }
+                else
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
 
         @Override
         TrieNode<K, V> with(int hash,
@@ -452,6 +476,12 @@ class HashArrayMappedTrie
 
 
         @Override
+        public int countKeys()
+        {
+            return kvPairs.length / 2;
+        }
+
+        @Override
         TrieNode<K, V> with(int hash,
                             int shift,
                             Object key,
@@ -593,6 +623,29 @@ class HashArrayMappedTrie
             this.kvPairs = kvPairs;
         }
 
+
+        @Override
+        public int countKeys()
+        {
+            int count = 0;
+            for (int i = 0; i < kvPairs.length; i += 2)
+            {
+                Object keyOrNull = kvPairs[i];
+                if (keyOrNull == null)
+                {
+                    Object node = kvPairs[i + 1];
+                    if (node != null)
+                    {
+                        count += ((TrieNode) node).countKeys();
+                    }
+                }
+                else
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
 
         @Override
         TrieNode<K, V> with(int hash,
@@ -952,6 +1005,18 @@ class HashArrayMappedTrie
             this.nodes = nodes;
             assert count >= MIN_CHILDREN;
             assert nodes.length == 32;
+        }
+
+
+        @Override
+        public int countKeys()
+        {
+            int count = 0;
+            for (TrieNode<K, V> node : nodes)
+            {
+                if (node != null) count += node.countKeys();
+            }
+            return count;
         }
 
 

@@ -20,7 +20,6 @@ import com.amazon.fusion.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +101,7 @@ public class HashArrayMappedTrieTest
 
     private <K, V> TrieNode<K, V> insert(TrieNode<K, V> oldNode, K key, V newValue)
     {
+        int oldSize = oldNode.countKeys();
         assertValueAbsent(oldNode, key); // Otherwise we'd replace, not insert.
 
         Results results = new Results();
@@ -109,6 +109,7 @@ public class HashArrayMappedTrieTest
 
         assertNotSame(newNode, oldNode);
         assertTrue("modified", results.modified());
+        assertEquals(oldSize + 1, newNode.countKeys());
 
         assertValueAbsent(oldNode, key);
         assertValueEquals(newValue, newNode, key);
@@ -118,6 +119,7 @@ public class HashArrayMappedTrieTest
 
     private <K, V> TrieNode<K, V> replace(TrieNode<K, V> oldNode, K key, V newValue)
     {
+        int oldSize = oldNode.countKeys();
         V oldValue = assertValuePresent(oldNode, key); // Otherwise we'd insert, not replace.
 
         Results results = new Results();
@@ -125,6 +127,7 @@ public class HashArrayMappedTrieTest
 
         assertNotSame(newNode, oldNode);
 //      assertTrue("modified", results.modified());  // FIXME
+        assertEquals(oldSize, newNode.countKeys());
 
         assertValueEquals(oldValue, oldNode, key);
         assertValueEquals(newValue, newNode, key);
@@ -134,6 +137,7 @@ public class HashArrayMappedTrieTest
 
     private <K, V> TrieNode<K, V> noopReplace(TrieNode<K, V> oldNode, K key, V value)
     {
+        int oldSize = oldNode.countKeys();
         assertValueEquals(value, oldNode, key);
 
         Results results = new Results();
@@ -141,6 +145,7 @@ public class HashArrayMappedTrieTest
 
         assertSame(oldNode, newNode);
         assertFalse("modified", results.modified());
+        assertEquals(oldSize, newNode.countKeys());
 
         assertValueEquals(value, oldNode, key);
         assertValueEquals(value, newNode, key);
@@ -150,11 +155,15 @@ public class HashArrayMappedTrieTest
 
     private <K, V> TrieNode<K, V> remove(TrieNode<K, V> oldNode, K key)
     {
+        int oldSize = oldNode.countKeys();
         V oldValue = assertValuePresent(oldNode, key); // Otherwise we can't remove
 
         TrieNode<K, V> newNode = oldNode.without(hashCodeFor(key), 0, key);
 
         assertNotSame(newNode, oldNode);
+//      assertTrue("modified", results.modified());      // FIXME
+//      assertEquals(oldSize - 1, newNode.countKeys());  // FIXME newNode == null
+
         assertValueEquals(oldValue, oldNode, key);
         assertValueAbsent(newNode, key);
 
@@ -163,6 +172,7 @@ public class HashArrayMappedTrieTest
 
     private <K, V> TrieNode<K, V> noopRemove(TrieNode<K, V> oldNode, K key)
     {
+        int oldSize = oldNode.countKeys();
         V oldValue = oldNode.get(hashCodeFor(key), 0, key);
 
         TrieNode<K, V> newNode = oldNode.without(hashCodeFor(key), 0, key);
@@ -176,6 +186,8 @@ public class HashArrayMappedTrieTest
         }
 
         assertSame(oldNode, newNode);
+        assertEquals(oldSize, newNode.countKeys());
+
         return newNode;
     }
 
@@ -242,7 +254,7 @@ public class HashArrayMappedTrieTest
         Map.Entry ninth = values.get(8);
         TrieNode nowBitMap = insert(flatNode, ninth.getKey(), ninth.getValue());
         assertTrue(nowBitMap instanceof BitMappedNode);
-        assertEquals(9, countNodeSize(nowBitMap));
+        assertEquals(9, nowBitMap.countKeys());
 
         BitMappedNode bm = (BitMappedNode) nowBitMap;
         Object[] kvPairs = bm.kvPairs;
@@ -280,7 +292,7 @@ public class HashArrayMappedTrieTest
         }
 
         // 10 because the nested collision node has 2 elements.
-        assertEquals(10, countNodeSize(trieNode));
+        assertEquals(10, trieNode.countKeys());
 
         assertTrue(trieNode instanceof BitMappedNode);
         BitMappedNode bitMappedNode = (BitMappedNode) trieNode;
@@ -323,7 +335,7 @@ public class HashArrayMappedTrieTest
 
         Object shouldBeNode = ((BitMappedNode) trieNode).kvPairs[1];
         assertTrue(shouldBeNode instanceof CollisionNode);
-        assertEquals(2, countNodeSize(trieNode));
+        assertEquals(2, trieNode.countKeys());
         // This only works because values are stored into collision nodes in order of insertion...
         assertEquals(foo, ((CollisionNode) shouldBeNode).kvPairs[0]);
         assertEquals(bar, ((CollisionNode) shouldBeNode).kvPairs[2]);
@@ -342,12 +354,12 @@ public class HashArrayMappedTrieTest
         }
 
         assertTrue(trieNode instanceof BitMappedNode);
-        assertEquals(16, countNodeSize(trieNode));
+        assertEquals(16, trieNode.countKeys());
 
         Object overConversionLimitKey = keys[16] = "16";
         trieNode = trieNode.with(16, 0, overConversionLimitKey, overConversionLimitKey, results);
         assertTrue(trieNode instanceof HashArrayMappedNode);
-        assertEquals(17, countNodeSize(trieNode));
+        assertEquals(17, trieNode.countKeys());
         for (int i = 0; i < 17; i++)
         {
             assertSame("Key " + i, keys[i], trieNode.get(i, 0, keys[i]));
@@ -360,7 +372,7 @@ public class HashArrayMappedTrieTest
             trieNode = trieNode.without(i, 0, key);
         }
         assertTrue(trieNode instanceof HashArrayMappedNode);
-        assertEquals(8, countNodeSize(trieNode));
+        assertEquals(8, trieNode.countKeys());
         for (int i = 9; i < 17; i++)
         {
             assertSame("Key " + i, keys[i], trieNode.get(i, 0, keys[i]));
@@ -370,7 +382,7 @@ public class HashArrayMappedTrieTest
         keys[9] = null;
 
         assertTrue(trieNode instanceof BitMappedNode);
-        assertEquals(7, countNodeSize(trieNode));
+        assertEquals(7, trieNode.countKeys());
 
         for (int i = 10; i < 17; i++)
         {
@@ -394,7 +406,7 @@ public class HashArrayMappedTrieTest
         node = insert(node, checkKey, checkVal);
 
         assertTrue(node instanceof HashArrayMappedNode);
-        assertEquals(17, countNodeSize(node));
+        assertEquals(17, node.countKeys());
 
         noopRemove(node, new CustomKey(30, "notInHAMNode"));
         noopRemove(node, new CustomKey(10, "notInFlatNode"));
@@ -543,18 +555,5 @@ public class HashArrayMappedTrieTest
         assertTrue(newValues.contains("A"));
         assertTrue(newValues.contains("B"));
         assertTrue(newValues.contains("C"));
-    }
-
-
-    private int countNodeSize(TrieNode node)
-    {
-        Iterator iter = node.iterator();
-        int size = 0;
-        while (iter.hasNext())
-        {
-            iter.next();
-            size++;
-        }
-        return size;
     }
 }
