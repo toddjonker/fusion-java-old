@@ -192,43 +192,8 @@ public class HashArrayMappedTrieTest
     }
 
 
-    @Test
-    public void checkCollisionNodeBehavior()
-    {
-        CustomKey key1 = new CustomKey(2, "key1");
-        CustomKey key2 = new CustomKey(2, "key2");
-        Object[] values = { key1, "foo", key2, "bar" };
-        TrieNode collisionNode = new CollisionNode(hashCodeFor(key1), values);
-
-        CustomKey key3 = new CustomKey(1, "key3");
-        TrieNode withNewNonCollidingKey = insert(collisionNode, key3, "baz");
-
-        // We expect the collision node to have been pushed down a level.
-        assertTrue(withNewNonCollidingKey instanceof FlatNode);
-        assertValueEquals("foo", withNewNonCollidingKey, key1);
-        assertValueEquals("bar", withNewNonCollidingKey, key2);
-        assertValueEquals("baz", withNewNonCollidingKey, key3);
-
-        CustomKey key4 = new CustomKey(2, "key4");
-        TrieNode withCollidingKey = insert(withNewNonCollidingKey, key4, "biz");
-        assertValueEquals("biz", withCollidingKey, key4);
-
-        assertValueEquals("foo", withNewNonCollidingKey, key1);
-        TrieNode withoutKey1 = remove(withCollidingKey, key1);
-        assertValueEquals("bar", withoutKey1, key2);
-        assertValueEquals("baz", withoutKey1, key3);
-        assertValueEquals("biz", withoutKey1, key4);
-
-        TrieNode without1And2 = remove(withoutKey1, key2);
-        assertValueEquals("baz", without1And2, key3);
-        assertValueEquals("biz", withoutKey1,  key4);
-
-        TrieNode without123 = remove(without1And2, key3);
-        assertValueEquals("biz", without123, key4);
-
-        TrieNode empty = remove(without123, key4);
-        assertEmpty(empty);
-    }
+    //=========================================================================
+    // FlatNode
 
     @Test
     public void checkFlatNodeExpansion()
@@ -276,6 +241,49 @@ public class HashArrayMappedTrieTest
         }
     }
 
+
+    //=========================================================================
+    // CollisionNode
+
+    @Test
+    public void checkCollisionNodeBehavior()
+    {
+        CustomKey key1 = new CustomKey(2, "key1");
+        CustomKey key2 = new CustomKey(2, "key2");
+        Object[] values = { key1, "foo", key2, "bar" };
+        TrieNode collisionNode = new CollisionNode(hashCodeFor(key1), values);
+
+        CustomKey key3 = new CustomKey(1, "key3");
+        TrieNode withNewNonCollidingKey = insert(collisionNode, key3, "baz");
+
+        // We expect the collision node to have been pushed down a level.
+        assertTrue(withNewNonCollidingKey instanceof FlatNode);
+        assertValueEquals("foo", withNewNonCollidingKey, key1);
+        assertValueEquals("bar", withNewNonCollidingKey, key2);
+        assertValueEquals("baz", withNewNonCollidingKey, key3);
+
+        CustomKey key4 = new CustomKey(2, "key4");
+        TrieNode withCollidingKey = insert(withNewNonCollidingKey, key4, "biz");
+        assertValueEquals("biz", withCollidingKey, key4);
+
+        assertValueEquals("foo", withNewNonCollidingKey, key1);
+        TrieNode withoutKey1 = remove(withCollidingKey, key1);
+        assertValueEquals("bar", withoutKey1, key2);
+        assertValueEquals("baz", withoutKey1, key3);
+        assertValueEquals("biz", withoutKey1, key4);
+
+        TrieNode without1And2 = remove(withoutKey1, key2);
+        assertValueEquals("baz", without1And2, key3);
+        assertValueEquals("biz", withoutKey1,  key4);
+
+        TrieNode without123 = remove(without1And2, key3);
+        assertValueEquals("biz", without123, key4);
+
+        TrieNode empty = remove(without123, key4);
+        assertEmpty(empty);
+    }
+
+
     @Test
     public void checkFlatNodeExpansionWithCollisionNode()
     {
@@ -320,6 +328,10 @@ public class HashArrayMappedTrieTest
         assertEquals("key2", collisionNode.kvPairs[2]);
         assertEquals("bar", collisionNode.kvPairs[3]);
     }
+
+
+    //=========================================================================
+    // BitMappedNode
 
     @Test
     public void checkCollisionNodeCreation()
@@ -391,6 +403,19 @@ public class HashArrayMappedTrieTest
     }
 
     @Test
+    public void keysNotInBitMap()
+    {
+        TrieNode node = BitMappedNode.EMPTY;
+        TrieNode stillSame = node.without(0, 0, new Object());
+        assertTrue(node == stillSame);
+        assertEquals(null, node.get(0, 0, new Object()));
+    }
+
+
+    //=========================================================================
+    // HashArrayMappedNode
+
+    @Test
     public void checkHashArrayMappedNode()
     {
         Results results = new Results();
@@ -414,14 +439,8 @@ public class HashArrayMappedTrieTest
     }
 
 
-    @Test
-    public void keysNotInBitMap()
-    {
-        TrieNode node = BitMappedNode.EMPTY;
-        TrieNode stillSame = node.without(0, 0, new Object());
-        assertTrue(node == stillSame);
-        assertEquals(null, node.get(0, 0, new Object()));
-    }
+    //=========================================================================
+    // General structural tests
 
     /**
      * This test verifies that we shift along the hash value correctly when going "down"
