@@ -4,7 +4,7 @@ package com.amazon.fusion;
 
 import org.junit.Test;
 
-import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -52,7 +52,7 @@ public class FunctionalHashTrieTest
         int toAdd = baselineMap.size();
         for (int i = 0; i < toAdd; i++)
         {
-            Map.Entry entry = new AbstractMap.SimpleEntry<>(new Object(), new Object());
+            Map.Entry entry = new SimpleEntry<>(new Object(), new Object());
 
             baselineMap.put(entry.getKey(), entry.getValue());
             fht = fht.with(entry.getKey(), entry.getValue());
@@ -244,5 +244,23 @@ public class FunctionalHashTrieTest
             Object key = e.getKey();
             assertEquals(fht.get(key), seq.get(key));
         }
+    }
+
+    /** Key-merge function that simply uses the new value. */
+    public static final BiFunction REPLACE = new BiFunction() {
+        @Override
+        public Object apply(Object o, Object o2) {
+            return o2;
+        }
+    };
+
+    @Test
+    public void testMergeWithReplacement()
+    {
+        Map.Entry[] entries = { new SimpleEntry<>("f", "old"),
+                                new SimpleEntry<>("f", "new") };
+        FunctionalHashTrie trie = FunctionalHashTrie.merge(entries, REPLACE);
+        assertEquals(1, trie.size());
+        assertEquals("new", trie.get("f"));
     }
 }

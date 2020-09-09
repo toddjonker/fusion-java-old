@@ -9,6 +9,7 @@ import com.amazon.fusion.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractCollection;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -81,6 +82,12 @@ class FunctionalHashTrie<K, V>
         }
 
         return ret.asFunctional();
+    }
+
+    static <K, V> FunctionalHashTrie<K, V> merge(Map.Entry<K, V>[] items,
+                                                 BiFunction<V, V, V> remapping)
+    {
+        return merge(Arrays.asList(items).iterator(), remapping);
     }
 
 
