@@ -153,7 +153,7 @@ public class HashArrayMappedTrieTest
             oldValue = get(oldNode, key);
             newValue = null;
 
-            newNode = oldNode.without(hashCodeFor(key), 0, key /* TODO results */);
+            newNode = oldNode.without(hashCodeFor(key), 0, key, results);
             assertValueAbsent(newNode, key);
 
             return this;
@@ -189,8 +189,8 @@ public class HashArrayMappedTrieTest
             assertNotNull("old value", oldValue);
 
             mode = Mode.REMOVE;
-//          assertTrue("results not modified", results.modified());
-//          assertSizeDelta(-1);
+            assertTrue("results not modified", results.modified());
+            assertSizeDelta(-1);
             return this;
         }
 
@@ -325,6 +325,19 @@ public class HashArrayMappedTrieTest
 
         assertEquals(3, node.countKeys());
         assertEquals(FlatNode.class, node.getClass());
+    }
+
+    @Test
+    public void testFlatNodeRemove()
+    {
+        TrieNode node = new FlatNode(1, 1);
+        node = insert(node, 2, 2);
+        node = insert(node, 3, 3);
+        node = remove(node, 2);
+        node = remove(node, 1);
+        node = remove(node, 3);
+
+        assertEmpty(node);
     }
 
     @Test
@@ -466,6 +479,23 @@ public class HashArrayMappedTrieTest
     }
 
     @Test
+    public void testCollisionNodeRemove()
+    {
+        CustomKey key1 = new CustomKey(2, "key1");
+        CustomKey key2 = new CustomKey(2, "key2");
+        CustomKey key3 = new CustomKey(2, "key3");
+
+        TrieNode node = collisionNodeForPairs(key1, 1);
+        node = insert(node, key2, 2);
+        node = insert(node, key3, 3);
+        node = remove(node, key2);
+        node = remove(node, key1);
+        node = remove(node, key3);
+
+        assertEmpty(node);
+    }
+
+    @Test
     public void checkCollisionNodeBehavior()
     {
         CustomKey key1 = new CustomKey(2, "key1");
@@ -582,6 +612,20 @@ public class HashArrayMappedTrieTest
     }
 
     @Test
+    public void testBitMappedNodeRemove()
+    {
+        TrieNode node = new BitMappedNode(0, new Object[0]);
+        node = insert(node, 1, 1);
+        node = insert(node, 2, 2);
+        node = insert(node, 3, 3);
+        node = remove(node, 2);
+        node = remove(node, 1);
+        node = remove(node, 3);
+
+        assertEmpty(node);
+    }
+
+    @Test
     public void testBitMappedNodeCollision()
     {
         CustomKey key1 = new CustomKey(0, "key1");
@@ -656,7 +700,7 @@ public class HashArrayMappedTrieTest
         {
             Object key = keys[i];
             keys[i] = null;
-            trieNode = trieNode.without(i, 0, key);
+            trieNode = trieNode.without(i, 0, key, results);
         }
         assertTrue(trieNode instanceof HashArrayMappedNode);
         assertEquals(8, trieNode.countKeys());
@@ -665,7 +709,7 @@ public class HashArrayMappedTrieTest
             assertSame("Key " + i, keys[i], trieNode.get(i, 0, keys[i]));
         }
 
-        trieNode = trieNode.without(9, 0, keys[9]);
+        trieNode = trieNode.without(9, 0, keys[9], results);
         keys[9] = null;
 
         assertTrue(trieNode instanceof BitMappedNode);
@@ -680,8 +724,11 @@ public class HashArrayMappedTrieTest
     @Test
     public void keysNotInBitMap()
     {
+        Results results = new Results();
         TrieNode node = BitMappedNode.EMPTY;
-        TrieNode stillSame = node.without(0, 0, new Object());
+        TrieNode stillSame = node.without(0, 0, new Object(), results);
+        assertFalse(results.modified());
+        assertEquals(0, results.keyCountDelta());
         assertTrue(node == stillSame);
         assertEquals(null, node.get(0, 0, new Object()));
     }
@@ -721,6 +768,20 @@ public class HashArrayMappedTrieTest
         node = mReplace(node, 3, "three");
 
         assertEquals(HashArrayMappedNode.class, node.getClass());
+    }
+
+    @Test
+    public void testHashArrayMappedNodeRemove()
+    {
+        TrieNode node = emptyHamn();
+        node = insert(node, 1, 1);
+        node = insert(node, 2, 2);
+        node = insert(node, 3, 3);
+        node = remove(node, 2);
+        node = remove(node, 1);
+        node = remove(node, 3);
+
+        assertEmpty(node);
     }
 
     @Test

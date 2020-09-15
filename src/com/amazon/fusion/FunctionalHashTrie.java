@@ -205,16 +205,15 @@ class FunctionalHashTrie<K, V>
         }
         else
         {
-            TrieNode<K, V> newRoot = root.without(hashCodeFor(key), 0, key);
-            if (newRoot == root)
+            Results results = new Results();
+            TrieNode<K, V> newRoot = root.without(hashCodeFor(key), 0, key, results);
+            if (newRoot == root && !results.modified())
             {
                 return this;
             }
-            else
-            {
-                return new FunctionalHashTrie<>(newRoot,
-                                                size - 1);
-            }
+
+            int newSize = size + results.keyCountDelta();
+            return new FunctionalHashTrie<>(newRoot, newSize);
         }
     }
 

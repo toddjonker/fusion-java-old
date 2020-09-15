@@ -146,7 +146,7 @@ class HashArrayMappedTrie
          * Functionally removes the mapping associated with the key from the trie.
          * @return Itself if it was not modified, else a new trie with the modification.
          */
-        abstract TrieNode<K, V> without(int hash, int shift, K key);
+        abstract TrieNode<K, V> without(int hash, int shift, K key, Results results);
 
         /**
          * @return An iterator over all elements within the trie.
@@ -357,15 +357,17 @@ class HashArrayMappedTrie
         @Override
         TrieNode<K, V> without(int hash,
                                int shift,
-                               K key)
+                               K key,
+                               Results results)
         {
             int index = linearSearch(hash, key);
             if (index != -1)
             {
-                if (kvPairs[index] == null)
+                Object keyOrNull = kvPairs[index];
+                if (keyOrNull == null)
                 {
                     CollisionNode<K, V> node = (CollisionNode<K, V>) kvPairs[index + 1];
-                    TrieNode newNode = node.without(hash, shift, key);
+                    TrieNode newNode = node.without(hash, shift, key, results);
                     if (newNode == null)
                     {
                         return withoutPair(index);
@@ -378,6 +380,7 @@ class HashArrayMappedTrie
                 }
                 else
                 {
+                    results.keyRemoved();
                     return withoutPair(index);
                 }
             }
@@ -785,9 +788,8 @@ class HashArrayMappedTrie
                 Object valOrNode = kvPairs[keyIndex + 1];
                 if (keyOrNull == null)
                 {
-                    TrieNode<K, V> newNode =
-                        ((TrieNode<K, V>) valOrNode)
-                            .mWith(hash, shift + 5, key, value, results);
+                    TrieNode<K, V> node = (TrieNode<K, V>) valOrNode;
+                    TrieNode<K, V> newNode = node.mWith(hash, shift + 5, key, value, results);
                     if (newNode != valOrNode)
                     {
                         kvPairs[keyIndex + 1] = newNode;
@@ -904,7 +906,7 @@ class HashArrayMappedTrie
 
 
         @Override
-        TrieNode<K, V> without(int hash, int shift, K key)
+        TrieNode<K, V> without(int hash, int shift, K key, Results results)
         {
             int hashFragment = hashFragment(hash, shift);
             int bit = bitPosition(hashFragment);
@@ -918,8 +920,8 @@ class HashArrayMappedTrie
             Object valOrNode = kvPairs[keyIndex + 1];
             if (keyOrNull == null)
             {
-                TrieNode<K, V> newNode =
-                    ((TrieNode<K, V>) valOrNode).without(hash, shift + 5, key);
+                TrieNode<K, V> node = (TrieNode<K, V>) valOrNode;
+                TrieNode<K, V> newNode = node.without(hash, shift + 5, key, results);
                 if (newNode == valOrNode)
                 {
                     return this;
@@ -943,6 +945,7 @@ class HashArrayMappedTrie
             }
             else if (equivKeys(keyOrNull, key))
             {
+                results.keyRemoved();
                 if (bitmap == bit)
                 {
                     return null;
@@ -1135,7 +1138,7 @@ class HashArrayMappedTrie
 
 
         @Override
-        public TrieNode<K, V> without(int hash, int shift, K key)
+        public TrieNode<K, V> without(int hash, int shift, K key, Results results)
         {
             int index = hashFragment(hash, shift);
             TrieNode<K, V> node = nodes[index];
@@ -1145,7 +1148,8 @@ class HashArrayMappedTrie
             }
             else
             {
-                TrieNode<K, V> newNode = node.without(hash, shift + 5, key);
+                // Child node updates Results
+                TrieNode<K, V> newNode = node.without(hash, shift + 5, key, results);
                 if (newNode == node)
                 {
                     return this;
