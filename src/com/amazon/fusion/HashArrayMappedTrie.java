@@ -40,7 +40,7 @@ class HashArrayMappedTrie
     /**
      * Describes the results of a trie operation.
      */
-    public static class Results
+    public static final class Results
     {
         private boolean modified = false;
 
@@ -152,7 +152,8 @@ class HashArrayMappedTrie
      * Where there is a null key, the following value is a {@link CollisionNode}.
      * </p>
      * <p>
-     * Nodes of this type are created by inserting into an empty trie.
+     * Nodes of this type are created by inserting into an empty trie, or by inserting a
+     * non-colliding key into a {@code CollisionNode}.
      * They may grow to hold up to {@value #MAX_CHILDREN} entries before {@link #expand}ing
      * into a {@link BitMappedNode}.
      * </p>
@@ -268,8 +269,9 @@ class HashArrayMappedTrie
             int index = linearSearch(hash, key);
             if (index != -1)
             {
+                Object keyOrNull = kvPairs[index];
                 Object valOrNode = kvPairs[index + 1];
-                if (kvPairs[index] == null)
+                if (keyOrNull == null)
                 {
                     CollisionNode<K, V> node = (CollisionNode<K, V>) valOrNode;
                     TrieNode<K, V> newNode = node.mWith(hash, shift, key, value, results);
@@ -623,6 +625,18 @@ class HashArrayMappedTrie
             this.kvPairs = kvPairs;
         }
 
+        private BitMappedNode<K, V> replace(int index, Object child)
+        {
+            Object[] newKvPairs = cloneAndModify(kvPairs, index, child);
+            return new BitMappedNode<>(bitmap, newKvPairs);
+        }
+
+        private BitMappedNode<K, V> replace(int index1, Object child1,
+                                            int index2, Object child2)
+        {
+            Object[] newKvPairs = cloneAndModify(kvPairs, index1, child1, index2, child2);
+            return new BitMappedNode<>(bitmap, newKvPairs);
+        }
 
         @Override
         public int countKeys()
@@ -663,19 +677,16 @@ class HashArrayMappedTrie
                 Object valOrNode = kvPairs[keyIndex + 1];
                 if (keyOrNull == null)
                 {
-                    TrieNode<K, V> newNode =
-                        ((TrieNode<K, V>) valOrNode)
-                            .with(hash, shift + 5, key, value, results);
+                    TrieNode<K, V> node = (TrieNode<K, V>) valOrNode;
+                    TrieNode<K, V> newNode = node.with(hash, shift + 5, key, value, results);
                     if (newNode == valOrNode)
                     {
                         return this;
                     }
                     else
                     {
-                        return new BitMappedNode<>(bitmap,
-                                                   cloneAndModify(kvPairs,
-                                                                  keyIndex + 1,
-                                                                  newNode));
+                        // Child node has updated the Results.
+                        return replace(keyIndex + 1, newNode);
                     }
                 }
                 else if (equivKeys(keyOrNull, key))
@@ -686,10 +697,7 @@ class HashArrayMappedTrie
                     }
                     else
                     {
-                        return new BitMappedNode<>(bitmap,
-                                                   cloneAndModify(kvPairs,
-                                                                  keyIndex + 1,
-                                                                  value));
+                        return replace(keyIndex + 1, value);
                     }
                 }
                 else
@@ -701,12 +709,7 @@ class HashArrayMappedTrie
                                                         hash,
                                                         key,
                                                         value);
-                    return new BitMappedNode<>(bitmap,
-                                               cloneAndModify(kvPairs,
-                                                              keyIndex,
-                                                              null,
-                                                              keyIndex + 1,
-                                                              newNode));
+                    return replace(keyIndex, null, keyIndex + 1, newNode);
                 }
             }
             else // Adding a new child
@@ -905,10 +908,7 @@ class HashArrayMappedTrie
                 }
                 else
                 {
-                    return new BitMappedNode<>(bitmap,
-                                               cloneAndModify(kvPairs,
-                                                              keyIndex + 1,
-                                                              newNode));
+                    return replace(keyIndex + 1, newNode);
                 }
             }
             else if (equivKeys(keyOrNull, key))

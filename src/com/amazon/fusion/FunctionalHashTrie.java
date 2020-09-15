@@ -105,14 +105,7 @@ class FunctionalHashTrie<K, V>
     @Override
     public boolean containsKey(Object key)
     {
-        if (key == null)
-        {
-            throw new NullPointerException(NULL_ERROR_MESSAGE);
-        }
-        else
-        {
-            return root != null && root.get(hashCodeFor(key), 0, key) != null;
-        }
+        return get(key) != null;
     }
 
 
