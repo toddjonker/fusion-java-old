@@ -32,7 +32,7 @@ import java.util.Random;
  *
  * @see <a href="https://infoscience.epfl.ch/record/64398/files/idealhashtrees.pdf">Ideal Hash Trees</a>
  */
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({"unchecked"})
 public final class HashArrayMappedTrie
 {
     // This class isn't instantiable.
@@ -97,7 +97,7 @@ public final class HashArrayMappedTrie
      */
     public static <K, V> TrieNode<K, V> empty()
     {
-        return EmptyNode.SINGLETON;
+        return (TrieNode<K, V>) EmptyNode.SINGLETON;
     }
 
 
@@ -188,8 +188,8 @@ public final class HashArrayMappedTrie
          */
         abstract TrieNode<K, V> with(int hash,
                                      int shift,
-                                     Object key,
-                                     Object value,
+                                     K key,
+                                     V value,
                                      Results results);
 
         /**
@@ -200,14 +200,14 @@ public final class HashArrayMappedTrie
          */
         abstract TrieNode<K, V> mWith(int hash,
                                       int shift,
-                                      Object key,
-                                      Object value,
+                                      K key,
+                                      V value,
                                       Results results);
 
         /**
          * @return The value with the given key, or null if it does not exist in the trie.
          */
-        abstract V get(int hash, int shift, Object key);
+        abstract V get(int hash, int shift, K key);
 
         /**
          * Functionally removes the mapping associated with the key from the trie.
@@ -236,7 +236,7 @@ public final class HashArrayMappedTrie
     private static final class EmptyNode<K, V>
         extends TrieNode<K, V>
     {
-        private static final EmptyNode SINGLETON = new EmptyNode<>();
+        private static final EmptyNode<Object, Object> SINGLETON = new EmptyNode<>();
 
         private EmptyNode() {}
 
@@ -253,23 +253,23 @@ public final class HashArrayMappedTrie
         }
 
         @Override
-        V get(int hash, int shift, Object key)
+        V get(int hash, int shift, K key)
         {
             return null;
         }
 
         @Override
-        TrieNode<K, V> with(int hash, int shift, Object key, Object value, Results results)
+        TrieNode<K, V> with(int hash, int shift, K key, V value, Results results)
         {
             results.keyAdded();
-            return new FlatNode<>((K) key, (V) value);
+            return new FlatNode<>(key, value);
         }
 
         @Override
-        TrieNode<K, V> mWith(int hash, int shift, Object key, Object value, Results results)
+        TrieNode<K, V> mWith(int hash, int shift, K key, V value, Results results)
         {
             results.keyAdded();
-            return new FlatNode<>((K) key, (V) value);
+            return new FlatNode<>(key, value);
         }
 
         @Override
@@ -339,7 +339,7 @@ public final class HashArrayMappedTrie
             {
                 if (kvPairs[i] == null)
                 {
-                    count += ((CollisionNode) kvPairs[i + 1]).countKeys();
+                    count += ((CollisionNode<K, V>) kvPairs[i + 1]).countKeys();
                 }
                 else
                 {
@@ -352,8 +352,8 @@ public final class HashArrayMappedTrie
         @Override
         TrieNode<K, V> with(int hash,
                             int shift,
-                            Object key,
-                            Object value,
+                            K key,
+                            V value,
                             Results results)
         {
             int index = linearSearch(hash, key);
@@ -364,7 +364,7 @@ public final class HashArrayMappedTrie
                 if (keyOrNull == null)
                 {
                     CollisionNode<K, V> node = (CollisionNode<K, V>) valOrNode;
-                    TrieNode newNode = node.with(hash, shift, key, value, results);
+                    TrieNode<K, V> newNode = node.with(hash, shift, key, value, results);
                     if (newNode == node)
                     {
                         return this;
@@ -407,8 +407,8 @@ public final class HashArrayMappedTrie
         @Override
         TrieNode<K, V> mWith(int hash,
                              int shift,
-                             Object key,
-                             Object value,
+                             K key,
+                             V value,
                              Results results)
         {
             int index = linearSearch(hash, key);
@@ -453,7 +453,7 @@ public final class HashArrayMappedTrie
 
 
         @Override
-        V get(int hash, int shift, Object key)
+        V get(int hash, int shift, K key)
         {
             int index = linearSearch(hash, key);
             if (index != -1)
@@ -487,7 +487,7 @@ public final class HashArrayMappedTrie
                 if (keyOrNull == null)
                 {
                     CollisionNode<K, V> node = (CollisionNode<K, V>) kvPairs[index + 1];
-                    TrieNode newNode = node.without(hash, shift, key, results);
+                    TrieNode<K, V> newNode = node.without(hash, shift, key, results);
                     if (newNode == EmptyNode.SINGLETON)
                     {
                         return withoutPair(index);
@@ -512,7 +512,7 @@ public final class HashArrayMappedTrie
         {
             if (kvPairs.length == 2)
             {
-                return EmptyNode.SINGLETON;
+                return empty();
             }
             else
             {
@@ -534,7 +534,7 @@ public final class HashArrayMappedTrie
         }
 
 
-        int linearSearch(int hash, Object key)
+        int linearSearch(int hash, K key)
         {
             for (int i = 0; i < kvPairs.length; i += 2)
             {
@@ -572,18 +572,18 @@ public final class HashArrayMappedTrie
                 Object valOrNode = kvPairs[i + 1];
                 if (keyOrNull == null)
                 {
-                    newNode = newNode.mWith(((CollisionNode) valOrNode).hash,
+                    newNode = newNode.mWith(((CollisionNode<K, V>) valOrNode).hash,
                                             shift,
                                             null,
-                                            valOrNode,
+                                            (V) valOrNode, // inaccurate, but required cast
                                             results);
                 }
                 else
                 {
                     newNode = newNode.mWith(hashCodeFor(keyOrNull),
                                             shift,
-                                            keyOrNull,
-                                            valOrNode,
+                                            (K) keyOrNull,
+                                            (V) valOrNode,
                                             results);
                 }
             }
@@ -634,8 +634,8 @@ public final class HashArrayMappedTrie
         @Override
         TrieNode<K, V> with(int hash,
                             int shift,
-                            Object key,
-                            Object value,
+                            K key,
+                            V value,
                             Results results)
         {
             if (hash == this.hash)
@@ -673,8 +673,8 @@ public final class HashArrayMappedTrie
         @Override
         TrieNode<K, V> mWith(int hash,
                              int shift,
-                             Object key,
-                             Object value,
+                             K key,
+                             V value,
                              Results results)
         {
             if (hash == this.hash)
@@ -764,7 +764,8 @@ public final class HashArrayMappedTrie
          */
         private static final int MAX_CHILDREN = 16;
 
-        static final TrieNode EMPTY = new BitMappedNode(0, new Object[0]);
+        static final TrieNode<Object, Object> EMPTY = new BitMappedNode<>(0, new Object[0]);
+
         int bitmap;
         Object[] kvPairs; // Can be either a Key Value Pair or a Null then Node Pair.
 
@@ -800,7 +801,7 @@ public final class HashArrayMappedTrie
                     Object node = kvPairs[i + 1];
                     if (node != null)
                     {
-                        count += ((TrieNode) node).countKeys();
+                        count += ((TrieNode<K, V>) node).countKeys();
                     }
                 }
                 else
@@ -814,8 +815,8 @@ public final class HashArrayMappedTrie
         @Override
         TrieNode<K, V> with(int hash,
                             int shift,
-                            Object key,
-                            Object value,
+                            K key,
+                            V value,
                             Results results)
         {
             int hashFragment = hashFragment(hash, shift);
@@ -856,12 +857,12 @@ public final class HashArrayMappedTrie
                 else // Hash fragment collision
                 {
                     results.keyAdded();
-                    FlatNode newNode = resolveCollision(hashCodeFor(keyOrNull),
-                                                        keyOrNull,
-                                                        valOrNode,
-                                                        hash,
-                                                        key,
-                                                        value);
+                    FlatNode<K, V> newNode = resolveCollision(hashCodeFor(keyOrNull),
+                                                              (K) keyOrNull,
+                                                              (V) valOrNode,
+                                                              hash,
+                                                              key,
+                                                              value);
                     return replace(keyIndex, null, keyIndex + 1, newNode);
                 }
             }
@@ -897,8 +898,8 @@ public final class HashArrayMappedTrie
         @Override
         TrieNode<K, V> mWith(int hash,
                              int shift,
-                             Object key,
-                             Object value,
+                             K key,
+                             V value,
                              Results results)
         {
             int hashFragment = hashFragment(hash, shift);
@@ -929,12 +930,12 @@ public final class HashArrayMappedTrie
                 else // Hash fragment collision
                 {
                     results.keyAdded();
-                    TrieNode newNode = resolveCollision(hashCodeFor(keyOrNull),
-                                                        keyOrNull,
-                                                        valOrNode,
-                                                        hash,
-                                                        key,
-                                                        value);
+                    TrieNode<K, V> newNode = resolveCollision(hashCodeFor(keyOrNull),
+                                                              (K) keyOrNull,
+                                                              (V) valOrNode,
+                                                              hash,
+                                                              key,
+                                                              value);
                     kvPairs[keyIndex] = null;
                     kvPairs[keyIndex + 1] = newNode;
                 }
@@ -971,26 +972,28 @@ public final class HashArrayMappedTrie
         }
 
 
-        private HashArrayMappedNode<K, V> expand(Object key,
-                                                 Object value,
+        private HashArrayMappedNode<K, V> expand(K key,
+                                                 V value,
                                                  int hashFragment,
                                                  int numVals)
         {
             TrieNode<K, V>[] nodes = new TrieNode[32];
-            nodes[hashFragment] = new FlatNode(key, value);
+            nodes[hashFragment] = new FlatNode<>(key, value);
 
             int j = 0;
             for (int i = 0; i < 32; i++)
             {
                 if (isInBitmap(1 << i))
                 {
-                    if (kvPairs[j] == null)
+                    Object keyOrNull = kvPairs[j];
+                    Object valOrNode = kvPairs[j + 1];
+                    if (keyOrNull == null)
                     {
-                        nodes[i] = (TrieNode<K, V>) kvPairs[j + 1];
+                        nodes[i] = (TrieNode<K, V>) valOrNode;
                     }
                     else
                     {
-                        nodes[i] = new FlatNode(kvPairs[j], kvPairs[j + 1]);
+                        nodes[i] = new FlatNode<>((K) keyOrNull, (V) valOrNode);
                     }
                     j += 2;
                 }
@@ -1000,7 +1003,7 @@ public final class HashArrayMappedTrie
 
 
         @Override
-        V get(int hash, int shift, Object key)
+        V get(int hash, int shift, K key)
         {
             int hashFragment = hashFragment(hash, shift);
             int bit = bitPosition(hashFragment);
@@ -1052,7 +1055,7 @@ public final class HashArrayMappedTrie
                 {
                     if (bitmap == bit)
                     {
-                        return EmptyNode.SINGLETON;
+                        return newNode;
                     }
                     else
                     {
@@ -1070,7 +1073,7 @@ public final class HashArrayMappedTrie
                 results.keyRemoved();
                 if (bitmap == bit)
                 {
-                    return EmptyNode.SINGLETON;
+                    return empty();
                 }
                 else
                 {
@@ -1113,12 +1116,8 @@ public final class HashArrayMappedTrie
          * Keys with hashes that are exactly the same will be placed into a {@link CollisionNode},
          * while keys with hashes that aren't exactly the same will be nested in a {@link FlatNode}.
          */
-        private static <K, V> FlatNode<K, V> resolveCollision(int key1hash,
-                                                              K key1,
-                                                              V value1,
-                                                              int key2hash,
-                                                              K key2,
-                                                              V value2)
+        private FlatNode<K, V> resolveCollision(int key1hash, K key1, V value1,
+                                                int key2hash, K key2, V value2)
         {
             if (key1hash == key2hash)
             {
@@ -1177,8 +1176,8 @@ public final class HashArrayMappedTrie
         @Override
         public TrieNode<K, V> with(int hash,
                                    int shift,
-                                   Object key,
-                                   Object value,
+                                   K key,
+                                   V value,
                                    Results results)
         {
             int index = hashFragment(hash, shift);
@@ -1187,7 +1186,7 @@ public final class HashArrayMappedTrie
             if (node == null)
             {
                 results.keyAdded();
-                TrieNode<K, V> newNode = new FlatNode(key, value);
+                TrieNode<K, V> newNode = new FlatNode<>(key, value);
                 return new HashArrayMappedNode<>(count + 1,
                                                  cloneAndModify(nodes,
                                                                 index,
@@ -1215,8 +1214,8 @@ public final class HashArrayMappedTrie
         @Override
         TrieNode<K, V> mWith(int hash,
                              int shift,
-                             Object key,
-                             Object value,
+                             K key,
+                             V value,
                              Results results)
         {
             int index = hashFragment(hash, shift);
@@ -1225,7 +1224,7 @@ public final class HashArrayMappedTrie
             if (node == null)
             {
                 results.keyAdded();
-                TrieNode<K, V> newNode = new FlatNode(key, value);
+                TrieNode<K, V> newNode = new FlatNode<>(key, value);
                 nodes[index] = newNode;
                 count++;
             }
@@ -1244,7 +1243,7 @@ public final class HashArrayMappedTrie
 
 
         @Override
-        public V get(int hash, int shift, Object key)
+        public V get(int hash, int shift, K key)
         {
             int index = hashFragment(hash, shift);
             TrieNode<K, V> node = nodes[index];
@@ -1428,7 +1427,7 @@ public final class HashArrayMappedTrie
                 }
                 else if (valOrNode != null)
                 {
-                    Iterator i = ((TrieNode<K, V>) valOrNode).iterator();
+                    Iterator<Entry<K, V>> i = ((TrieNode<K, V>) valOrNode).iterator();
                     if (i.hasNext())
                     {
                         childIterator = i;
