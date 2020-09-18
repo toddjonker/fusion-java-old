@@ -4,6 +4,7 @@ package com.amazon.fusion.util.hamt;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
@@ -98,28 +99,6 @@ public final class HashArrayMappedTrie
     {
         return EmptyNode.SINGLETON;
     }
-
-
-    private static final Iterator EMPTY_ITERATOR = new Iterator()
-    {
-        @Override
-        public boolean hasNext()
-        {
-            return false;
-        }
-
-        @Override
-        public Object next()
-        {
-            throw new NoSuchElementException();
-        }
-
-        @Override
-        public void remove()
-        {
-            throw new UnsupportedOperationException();
-        }
-    };
 
 
     /**
@@ -301,7 +280,7 @@ public final class HashArrayMappedTrie
 
         @Override
         public Iterator<Entry<K, V>> iterator() {
-            return EMPTY_ITERATOR;
+            return Collections.emptyIterator();
         }
     }
 
