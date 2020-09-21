@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +17,7 @@ import static org.junit.Assert.fail;
 
 public class FunctionalHashTrieTest
 {
-    private Map<Object, Object> baselineMap;
+    private HashMap<Object, Object> baselineMap;
     private FunctionalHashTrie<Object, Object> fht;
 
     public void setup(int size)
@@ -65,37 +64,30 @@ public class FunctionalHashTrieTest
         assertEquals(baselineMap.size(), fht.size());
     }
 
-    private void checkIterators()
+    private void checkKeys()
     {
         Set<Object> keySet = fht.keySet();
         Set<Object> baselineSet = baselineMap.keySet();
         assertEquals(baselineSet, keySet);
-
-        Set<Object> values = new HashSet<>(fht.values());
-        Set<Object> baselineValues = new HashSet<>(baselineMap.values());
-        assertEquals(baselineValues, values);
-
-        Set<Map.Entry<Object, Object>> entrySet = fht.entrySet();
-        Set<Map.Entry<Object, Object>> baselineEntrySet = baselineMap.entrySet();
-        assertEquals(baselineEntrySet, entrySet);
     }
 
     private void compareEntries()
     {
-        for (Map.Entry entry : baselineMap.entrySet())
+        Map<Object, Object> remainder = (Map<Object, Object>) baselineMap.clone();
+
+        for (Map.Entry<Object, Object> entry : fht)
         {
-            Object baselineValue = entry.getValue();
-            assertEquals(baselineValue, fht.get(entry.getKey()));
+            assertEquals(entry.getValue(), remainder.remove(entry.getKey()));
         }
+
+        assertEquals("elements remaining", 0, remainder.size());
     }
 
     private void compareWithBaseline()
     {
         checkSizing();
-        checkIterators();
+        checkKeys();
         compareEntries();
-        assertEquals(baselineMap, fht);
-        assertEquals(baselineMap.hashCode(), fht.hashCode());
     }
 
     private void performTests()
@@ -112,7 +104,6 @@ public class FunctionalHashTrieTest
     {
         setup(0);
         assertTrue(fht.isEmpty());
-        assertEquals(baselineMap.toString(), fht.toString());
         performTests();
 
         FunctionalHashTrie without = fht.without("anything");
@@ -124,7 +115,6 @@ public class FunctionalHashTrieTest
     public void checkSingle()
     {
         setup(1);
-        assertEquals(baselineMap.toString(), fht.toString());
         performTests();
     }
 
@@ -215,16 +205,6 @@ public class FunctionalHashTrieTest
         {
             // expected
         }
-
-        try
-        {
-            fht.containsValue(null);
-            fail(failureMessage);
-        }
-        catch (NullPointerException e)
-        {
-            // expected
-        }
     }
 
 
@@ -234,13 +214,13 @@ public class FunctionalHashTrieTest
         setup(10000);
 
         FunctionalHashTrie seq = FunctionalHashTrie.empty();
-        for (Map.Entry e : fht.entrySet())
+        for (Map.Entry e : fht)
         {
             seq = seq.with(e.getKey(), e.getValue());
         }
 
         assertEquals(fht.size(), seq.size());
-        for (Map.Entry e : fht.entrySet())
+        for (Map.Entry e : fht)
         {
             Object key = e.getKey();
             assertEquals(fht.get(key), seq.get(key));

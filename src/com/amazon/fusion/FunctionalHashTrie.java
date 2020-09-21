@@ -6,28 +6,27 @@ import com.amazon.fusion.util.hamt.HashArrayMappedTrie;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Results;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractCollection;
-import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
- * A functional {@link Map} using a
- * <a href="https://infoscience.epfl.ch/record/64398/files/idealhashtrees.pdf">Hash Array Mapped Trie</a>.
- *
+ * A functional hash table using a {@link HashArrayMappedTrie}.
+ * <p>
  * This version is an internal implementation detail of FusionJava, is not intended
  * for reuse, and does not support Java nulls as keys or values. Attempts to use null
  * on operations such as {@link #get(Object)} or {@link #with(Object, Object)} will throw a
- * {@link NullPointerException} as per {@link Map} specifications.
- *
- * Iteration order of this data structure is undefined.
+ * {@link NullPointerException}.
+ * </p>
+ * Iteration order of this data structure is undefined and not guaranteed to be stable.
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 class FunctionalHashTrie<K, V>
-    extends AbstractMap<K, V> implements Iterable<Map.Entry<K, V>>
+    implements Iterable<Entry<K, V>>
 {
     private static final String NULL_ERROR_MESSAGE =
         "FunctionalHashTrie does not support null keys or values";
@@ -59,7 +58,7 @@ class FunctionalHashTrie<K, V>
     }
 
 
-    static <K, V> FunctionalHashTrie<K, V> merge(Iterator<Map.Entry<K, V>> items,
+    static <K, V> FunctionalHashTrie<K, V> merge(Iterator<Entry<K, V>> items,
                                                  BiFunction<V, V, V> remapping)
     {
         MutableHashTrie<K, V> ret = MutableHashTrie.makeEmpty();
@@ -82,7 +81,7 @@ class FunctionalHashTrie<K, V>
         return ret.asFunctional();
     }
 
-    static <K, V> FunctionalHashTrie<K, V> merge(Map.Entry<K, V>[] items,
+    static <K, V> FunctionalHashTrie<K, V> merge(Entry<K, V>[] items,
                                                  BiFunction<V, V, V> remapping)
     {
         return merge(Arrays.asList(items).iterator(), remapping);
@@ -102,24 +101,9 @@ class FunctionalHashTrie<K, V>
      * @param key to examine the map for.
      * @return true if the key is in the map, false otherwise.
      */
-    @Override
-    public boolean containsKey(Object key)
+    public boolean containsKey(K key)
     {
         return get(key) != null;
-    }
-
-
-    /**
-     * Warning: THIS IS REALLY SLOW.
-     */
-    @Override
-    public boolean containsValue(Object value)
-    {
-        if (value == null)
-        {
-            throw new NullPointerException(NULL_ERROR_MESSAGE);
-        }
-        return values().contains(value);
     }
 
 
@@ -127,8 +111,7 @@ class FunctionalHashTrie<K, V>
      * @param key the key to search for.
      * @return the value associated with key, null it if is not in the map.
      */
-    @Override
-    public V get(Object key)
+    public V get(K key)
     {
         if (key == null)
         {
@@ -145,15 +128,6 @@ class FunctionalHashTrie<K, V>
         }
     }
 
-
-    /**
-     * put is not supported since it implicitly requires mutability.
-     */
-    @Override
-    public V put(K key, V value)
-    {
-        throw new UnsupportedOperationException();
-    }
 
     // TODO: Add a variation of with[out] that returns the previous value (if any).
 
@@ -211,36 +185,6 @@ class FunctionalHashTrie<K, V>
     }
 
 
-    /**
-     * remove is not supported because it implicitly requires mutability.
-     */
-    @Override
-    public V remove(Object key)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-
-    /**
-     * putAll is not supported because it implicitly requires mutability.
-     */
-    @Override
-    public void putAll(Map<? extends K, ? extends V> m)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-
-    /**
-     * clear is not supported because it implicitly requires mutability.
-     */
-    @Override
-    public void clear()
-    {
-        throw new UnsupportedOperationException();
-    }
-
-
     @Override
     public Iterator<Entry<K, V>> iterator()
     {
@@ -248,9 +192,9 @@ class FunctionalHashTrie<K, V>
     }
 
 
-    @Override
     public Set<K> keySet()
     {
+        // FIXME This is an extremely expensive implementation.
         return new AbstractSet<K>()
         {
             @Override
@@ -288,74 +232,12 @@ class FunctionalHashTrie<K, V>
     }
 
 
-    @Override
-    public Collection<V> values()
-    {
-        return new AbstractCollection<V>()
-        {
-            @Override
-            public Iterator<V> iterator()
-            {
-                final Iterator<Entry<K, V>> entryIter = FunctionalHashTrie.this.iterator();
-                return new Iterator<V>()
-                {
-                    @Override
-                    public boolean hasNext()
-                    {
-                        return entryIter.hasNext();
-                    }
-
-                    @Override
-                    public V next()
-                    {
-                        return entryIter.next().getValue();
-                    }
-
-                    @Override
-                    public void remove()
-                    {
-                        throw new UnsupportedOperationException();
-                    }
-                };
-            }
-
-            @Override
-            public int size()
-            {
-                return size;
-            }
-        };
-    }
-
-
-    @Override
-    public Set<Entry<K, V>> entrySet()
-    {
-        return new AbstractSet<Entry<K, V>>()
-        {
-            @Override
-            public Iterator<Entry<K, V>> iterator()
-            {
-                return FunctionalHashTrie.this.iterator();
-            }
-
-            @Override
-            public int size()
-            {
-                return size;
-            }
-        };
-    }
-
-
-    @Override
     public int size()
     {
         return size;
     }
 
 
-    @Override
     public boolean isEmpty()
     {
         return size == 0;
@@ -401,7 +283,7 @@ class FunctionalHashTrie<K, V>
         }
 
 
-        private V get(Object key)
+        private V get(K key)
         {
             if (key == null)
             {

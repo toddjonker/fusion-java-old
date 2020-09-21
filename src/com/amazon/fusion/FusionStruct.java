@@ -338,7 +338,7 @@ final class FusionStruct
     FunctionalHashTrie<String, Object> structImplMerge(FunctionalHashTrie<String, Object> map1,
                                                        FunctionalHashTrie<String, Object> map2)
     {
-        for (Map.Entry<String,Object> entry : map2.entrySet())
+        for (Map.Entry<String,Object> entry : map2)
         {
             String key   = entry.getKey();
             Object value = entry.getValue();
@@ -350,7 +350,7 @@ final class FusionStruct
     private static
     FunctionalHashTrie<String, Object> structImplOneify(FunctionalHashTrie<String, Object> map)
     {
-        for (Map.Entry<String, Object> entry : map.entrySet())
+        for (Map.Entry<String, Object> entry : map)
         {
             Object value = entry.getValue();
             if (value instanceof Object[])
@@ -366,7 +366,7 @@ final class FusionStruct
     FunctionalHashTrie<String, Object> structImplMerge1(FunctionalHashTrie<String, Object> map1,
                                                         FunctionalHashTrie<String, Object> map2)
     {
-        for (Map.Entry<String, Object> entry : map2.entrySet())
+        for (Map.Entry<String, Object> entry : map2)
         {
             String key = entry.getKey();
             Object value = entry.getValue();
@@ -386,8 +386,9 @@ final class FusionStruct
     private static int computeSize(FunctionalHashTrie<String, Object> map)
     {
         int size = map.size();
-        for (Object values : map.values())
+        for (Map.Entry<String, Object> entry : map)
         {
+            Object values = entry.getValue();
             if (values instanceof Object[])
             {
                 size += ((Object[]) values).length - 1;
@@ -1019,7 +1020,7 @@ final class FusionStruct
             FunctionalHashTrie<String, Object> oldMap = getMap(eval);
             FunctionalHashTrie<String, Object> newMap = oldMap;
 
-            for (Map.Entry<String, Object> entry : oldMap.entrySet())
+            for (Map.Entry<String, Object> entry : oldMap)
             {
                 String fieldName = entry.getKey();
 
@@ -1273,7 +1274,7 @@ final class FusionStruct
 
             // We know it has children.
             MapBasedStruct is = (MapBasedStruct) other;
-            for (Map.Entry<String,Object> entry : is.getMap(eval).entrySet())
+            for (Map.Entry<String,Object> entry : is.getMap(eval))
             {
                 String key   = entry.getKey();
                 Object value = entry.getValue();
@@ -1348,7 +1349,7 @@ final class FusionStruct
 
             FunctionalHashTrie<String, Object> leftMap = left.getMap(eval);
 
-            for (Map.Entry<String, Object> entry : getMap(eval).entrySet())
+            for (Map.Entry<String, Object> entry : getMap(eval))
             {
                 String fieldName = entry.getKey();
 
@@ -1414,7 +1415,7 @@ final class FusionStruct
             out.append('{');
 
             boolean comma = false;
-            for (Map.Entry<String, Object> entry : getMap(eval).entrySet())
+            for (Map.Entry<String, Object> entry : getMap(eval))
             {
                 String fieldName = entry.getKey();
 
@@ -1451,7 +1452,7 @@ final class FusionStruct
             out.setTypeAnnotations(getAnnotationsAsJavaStrings());
 
             out.stepIn(IonType.STRUCT);
-            for (Map.Entry<String, Object> entry : getMap(eval).entrySet())
+            for (Map.Entry<String, Object> entry : getMap(eval))
             {
                 String fieldName = entry.getKey();
 
@@ -1482,7 +1483,7 @@ final class FusionStruct
             IonStruct is = factory.newEmptyStruct();
             is.setTypeAnnotations(getAnnotationsAsJavaStrings());
 
-            for (Map.Entry<String, Object> entry : getMap(null).entrySet())
+            for (Map.Entry<String, Object> entry : getMap(null))
             {
                 String fieldName = entry.getKey();
 
@@ -2098,7 +2099,7 @@ final class FusionStruct
 
         private StructIterator(FunctionalHashTrie<String,Object> map)
         {
-            myEntryIterator = map.entrySet().iterator();
+            myEntryIterator = map.iterator();
         }
 
         @Override
