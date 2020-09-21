@@ -1,10 +1,11 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionStruct.immutableStruct;
 import com.amazon.fusion.FusionStruct.ImmutableStruct;
 import com.amazon.fusion.FusionStruct.NonNullImmutableStruct;
+import com.amazon.fusion.FusionStruct.StructFieldVisitor;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonWriter;
@@ -92,62 +93,23 @@ final class SyntaxStruct
 
 
     @Override
-    SyntaxStruct stripWraps(Evaluator eval)
+    SyntaxStruct stripWraps(final Evaluator eval)
         throws FusionException
     {
         if (hasNoChildren()) return this;  // No children, no marks, all okay!
 
-        // Even if we have no marks, some children may have them.
-        boolean mustReplace = (myWraps != null);  // TODO optimize further
-
-        // Replace children in map as necessary.
-        FunctionalHashTrie<String, Object> existingMap = ((NonNullImmutableStruct) myStruct).getMap(eval);
-        FunctionalHashTrie<String, Object> newMap = existingMap;
-
-        for (Map.Entry<String, Object> entry : existingMap.entrySet())
-        {
-            Object value = entry.getValue();
-            if (! (value instanceof Object[]))
+        StructFieldVisitor visitor = new StructFieldVisitor() {
+            @Override
+            public Object visit(String name, Object value)
+                    throws FusionException
             {
-                SyntaxValue child = (SyntaxValue) value;
-                SyntaxValue stripped = child.stripWraps(eval);
-                if (stripped != child)
-                {
-                    newMap = newMap.with(entry.getKey(), stripped);
-                    mustReplace = true;
-                }
+                return ((SyntaxValue) value).stripWraps(eval);
             }
-            else
-            {
-                Object[] children = (Object[]) value;
-                int childCount = children.length;
+        };
 
-                boolean mustReplaceArray = false;
-                Object[] newChildren = new Object[childCount];
-                for (int i = 0; i < childCount; i++)
-                {
-                    SyntaxValue child = (SyntaxValue) children[i];
-                    SyntaxValue stripped = child.stripWraps(eval);
-                    if (stripped != child)
-                    {
-                        mustReplaceArray = true;
-                    }
-                    newChildren[i] = stripped;
-                }
+        ImmutableStruct s = myStruct.transformFields(eval, visitor);
+        if (s == myStruct) return this;
 
-                if (mustReplaceArray)
-                {
-                    newMap = newMap.with(entry.getKey(), newChildren);
-                    mustReplace = true;
-                }
-            }
-        }
-
-        if (! mustReplace) return this;
-
-        BaseSymbol[] annotations = myStruct.getAnnotations();
-        int size = myStruct.size();
-        ImmutableStruct s = immutableStruct(newMap, annotations, size);
         return new SyntaxStruct(getLocation(), getProperties(), null, s);
     }
 
@@ -172,43 +134,19 @@ final class SyntaxStruct
         }
 
         // We have wraps to propagate (and therefore children).
-
-        // Replace children in map as necessary.
-        FunctionalHashTrie<String, Object> existingMap = ((NonNullImmutableStruct) myStruct).getMap(eval);
-        FunctionalHashTrie<String, Object> newMap = existingMap;
-
-        // TODO optimize this to not allocate new objects when nothing changes.
         // Idea: keep track of when there are symbols contained (recursively),
         // when there's not, maybe we can skip all this.
 
-        for (Map.Entry<String, Object> entry : existingMap.entrySet())
-        {
-            Object value = entry.getValue();
-            if (! (value instanceof Object[]))
+        StructFieldVisitor visitor = new StructFieldVisitor() {
+            @Override
+            public Object visit(String name, Object value)
+                    throws FusionException
             {
-                SyntaxValue child = (SyntaxValue) value;
-                Object childValue = child.addWraps(myWraps);
-                newMap = newMap.with(entry.getKey(), childValue);
+                return ((SyntaxValue) value).addWraps(myWraps);
             }
-            else
-            {
-                Object[] children = (Object[]) value;
-                Object[] childValues = new Object[children.length];
+        };
 
-                int cPos = 0;
-                for (Object c : children)
-                {
-                    SyntaxValue child = (SyntaxValue) c;
-                    Object childValue = child.addWraps(myWraps);
-                    childValues[cPos++] = childValue;
-                }
-                newMap = newMap.with(entry.getKey(), childValues);
-            }
-        }
-
-        BaseSymbol[] annotations = myStruct.getAnnotations();
-        int size = myStruct.size();
-        myStruct = immutableStruct(newMap, annotations, size);
+        myStruct = myStruct.transformFields(eval, visitor);
         myWraps = null;
 
         return myStruct;
@@ -216,7 +154,7 @@ final class SyntaxStruct
 
 
     @Override
-    Object syntaxToDatum(Evaluator eval)
+    Object syntaxToDatum(final Evaluator eval)
         throws FusionException
     {
         if (myStruct.size() == 0)
@@ -226,45 +164,21 @@ final class SyntaxStruct
 
         // We have children, and wraps to propagate (when not recursing)
 
-        // Replace children in map as necessary.
-        FunctionalHashTrie<String, Object> existingMap = ((NonNullImmutableStruct) myStruct).getMap(eval);
-        FunctionalHashTrie<String, Object> newMap = existingMap;
-
-        // TODO optimize this to not allocate new objects when nothing changes.
-
-        for (Map.Entry<String, Object> entry : existingMap.entrySet())
-        {
-            Object value = entry.getValue();
-            if (! (value instanceof Object[]))
+        StructFieldVisitor visitor = new StructFieldVisitor() {
+            @Override
+            public Object visit(String name, Object value)
+                    throws FusionException
             {
-                SyntaxValue child = (SyntaxValue) value;
-                Object childValue = child.syntaxToDatum(eval);
-                newMap = newMap.with(entry.getKey(), childValue);
+                return ((SyntaxValue) value).syntaxToDatum(eval);
             }
-            else
-            {
-                Object[] children = (Object[]) value;
-                Object[] childValues = new Object[children.length];
+        };
 
-                int cPos = 0;
-                for (Object c : children)
-                {
-                    SyntaxValue child = (SyntaxValue) c;
-                    Object childValue = child.syntaxToDatum(eval);
-                    childValues[cPos++] = childValue;
-                }
-                newMap = newMap.with(entry.getKey(), childValues);
-            }
-        }
-
-        BaseSymbol[] annotations = myStruct.getAnnotations();
-        int size = myStruct.size();
-        return immutableStruct(newMap, annotations, size);
+        return myStruct.transformFields(eval, visitor);
     }
 
 
     @Override
-    SyntaxValue doExpand(Expander expander, Environment env)
+    SyntaxValue doExpand(final Expander expander, final Environment env)
         throws FusionException
     {
         if (myStruct.size() == 0)
@@ -272,48 +186,25 @@ final class SyntaxStruct
             return this;
         }
 
-        Evaluator eval = expander.getEvaluator();
-        // Replace children in map as necessary.
-        FunctionalHashTrie<String, Object> existingMap = ((NonNullImmutableStruct) myStruct).getMap(eval);
-        FunctionalHashTrie<String, Object> newMap = existingMap;
+        final Evaluator eval = expander.getEvaluator();
 
-        for (Map.Entry<String, Object> entry : existingMap.entrySet())
-        {
-            Object value = entry.getValue();
-            if (! (value instanceof Object[]))
+        StructFieldVisitor visitor = new StructFieldVisitor() {
+            @Override
+            public Object visit(String name, Object value)
+                throws FusionException
             {
                 SyntaxValue subform = (SyntaxValue) value;
                 if (myWraps != null)
                 {
                     subform = subform.addWraps(myWraps);
                 }
-                subform = expander.expandExpression(env, subform);
-                newMap = newMap.with(entry.getKey(), subform);
+                return expander.expandExpression(env, subform);
             }
-            else
-            {
-                Object[] children = (Object[]) value;
-                int childCount = children.length;
+        };
 
-                Object[] newChildren = new Object[childCount];
-                for (int i = 0; i < childCount; i++)
-                {
-                    SyntaxValue subform = (SyntaxValue) children[i];
-                    if (myWraps != null)
-                    {
-                        subform = subform.addWraps(myWraps);
-                    }
-                    newChildren[i] = expander.expandExpression(env, subform);
-                }
-                newMap = newMap.with(entry.getKey(), newChildren);
-            }
-        }
-
+        ImmutableStruct s = myStruct.transformFields(eval, visitor);
 
         // Wraps have been pushed down so the copy doesn't need them.
-        BaseSymbol[] annotations = myStruct.getAnnotations();
-        int size = myStruct.size();
-        ImmutableStruct s = immutableStruct(newMap, annotations, size);
         return new SyntaxStruct(getLocation(), s);
     }
 
