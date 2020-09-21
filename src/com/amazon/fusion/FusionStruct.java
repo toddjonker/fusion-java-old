@@ -56,7 +56,7 @@ final class FusionStruct
         new FunctionalStruct(FunctionalHashTrie.<String,Object>empty(), BaseSymbol.EMPTY_ARRAY, 0);
 
     // Utility method.
-    static final BiFunction<Object, Object, Object> STRUCT_MERGE_FUNCTION =
+    private static final BiFunction<Object, Object, Object> STRUCT_MERGE_FUNCTION =
         new BiFunction<Object, Object, Object>()
         {
             @Override
@@ -116,27 +116,35 @@ final class FusionStruct
     }
 
 
-    static NonNullImmutableStruct immutableStruct(FunctionalHashTrie<String, Object> map)
+    static NonNullImmutableStruct
+    immutableStruct(Evaluator eval,
+                    Iterator<Map.Entry<String, Object>> entries,
+                    String[] annotations)
+        throws FusionException
     {
-        return immutableStruct(map, BaseSymbol.EMPTY_ARRAY, computeSize(map));
+        FunctionalHashTrie<String, Object> fht;
+
+        try
+        {
+            fht = FunctionalHashTrie.merge(entries, STRUCT_MERGE_FUNCTION);
+        }
+        catch (RuntimeException e)
+        {
+            if (e.getCause() instanceof FusionException)
+            {
+                throw (FusionException) e.getCause();
+            }
+            throw e;
+        }
+
+        return immutableStruct(fht, annotations);
     }
 
-    static NonNullImmutableStruct immutableStruct(FunctionalHashTrie<String, Object> map,
-                                                  int size)
-    {
-        return immutableStruct(map, BaseSymbol.EMPTY_ARRAY, size);
-    }
 
     static NonNullImmutableStruct immutableStruct(FunctionalHashTrie<String, Object> map,
                                                   String[] anns)
     {
         return immutableStruct(map, internSymbols(anns), computeSize(map));
-    }
-
-    static NonNullImmutableStruct immutableStruct(FunctionalHashTrie<String, Object> map,
-                                                  BaseSymbol[] anns)
-    {
-        return immutableStruct(map, anns, computeSize(map));
     }
 
     static NonNullImmutableStruct immutableStruct(FunctionalHashTrie<String, Object> map,
@@ -246,8 +254,7 @@ final class FusionStruct
     {
         if (struct instanceof ImmutableStruct) return struct;
 
-        MutableStruct s = (MutableStruct) struct;
-        return immutableStruct(s.getMap(eval), s.size());
+        return ((MutableStruct) struct).asImmutable();
     }
 
 
@@ -258,17 +265,10 @@ final class FusionStruct
     static Object mutableStruct(Evaluator eval)
         throws FusionException
     {
-        return new MutableStruct(FunctionalHashTrie.<String,Object>empty(),
-                                 BaseSymbol.EMPTY_ARRAY,
-                                 0);
+        return new MutableStruct();
     }
 
     static MutableStruct mutableStruct(Map<String, Object> map)
-    {
-        return new MutableStruct(map, BaseSymbol.EMPTY_ARRAY);
-    }
-
-    static MutableStruct mutableStruct(FunctionalHashTrie<String, Object> map)
     {
         return new MutableStruct(map, BaseSymbol.EMPTY_ARRAY);
     }
@@ -338,9 +338,10 @@ final class FusionStruct
      *
      * @param value may be an array (for repeated fields)
      */
-    static FunctionalHashTrie<String, Object> structImplAdd(FunctionalHashTrie<String, Object> map,
-                                                            String name,
-                                                            Object value)
+    private static
+    FunctionalHashTrie<String, Object> structImplAdd(FunctionalHashTrie<String, Object> map,
+                                                     String name,
+                                                     Object value)
     {
         // TODO This should be done with a single traversal of the trie.
         Object prev = map.get(name);
@@ -1797,13 +1798,6 @@ final class FusionStruct
             myMap = FunctionalHashTrie.create(map);
         }
 
-        public MutableStruct(FunctionalHashTrie<String, Object> map,
-                             BaseSymbol[] annotations)
-        {
-            super(annotations, computeSize(map));
-            myMap = map;
-        }
-
         public MutableStruct(Map<String, Object> map,
                              BaseSymbol[] annotations,
                              int size)
@@ -1818,6 +1812,12 @@ final class FusionStruct
         {
             super(annotations, size);
             myMap = map;
+        }
+
+        MutableStruct()
+        {
+            super(BaseSymbol.EMPTY_ARRAY, 0);
+            myMap = FunctionalHashTrie.empty();
         }
 
         /**
@@ -1841,6 +1841,11 @@ final class FusionStruct
                                    int size)
         {
             return new MutableStruct(map, annotations, size);
+        }
+
+        NonNullImmutableStruct asImmutable()
+        {
+            return new FunctionalStruct(myMap, myAnnotations, mySize);
         }
 
         @Override
@@ -2336,7 +2341,7 @@ final class FusionStruct
     static abstract class AbstractZipProc
         extends Procedure
     {
-        final FunctionalHashTrie<String,Object> _doApply(Evaluator eval, Object[] args)
+        final MutableStruct _doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
             checkArityExact(2, args);
@@ -2346,7 +2351,7 @@ final class FusionStruct
             Iterator<?> fieldIterator = unsafeJavaIterate(eval, names);
             Iterator<?> valueIterator = unsafeJavaIterate(eval, values);
 
-            FunctionalHashTrie<String, Object> map = FunctionalHashTrie.empty();
+            MutableStruct struct = new MutableStruct();
 
             while (fieldIterator.hasNext() && valueIterator.hasNext())
             {
@@ -2360,10 +2365,10 @@ final class FusionStruct
                 }
 
                 Object valueObj = valueIterator.next();
-                map = structImplAdd(map, name, valueObj);
+                struct.putsM(eval, name, valueObj);
             }
 
-            return map;
+            return struct;
         }
     }
 
@@ -2372,10 +2377,10 @@ final class FusionStruct
         extends AbstractZipProc
     {
         @Override
-        Object doApply(Evaluator eval, Object[] args)
+        NonNullImmutableStruct doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            return immutableStruct(_doApply(eval, args));
+            return _doApply(eval, args).asImmutable();
         }
     }
 
@@ -2384,10 +2389,10 @@ final class FusionStruct
         extends AbstractZipProc
     {
         @Override
-        Object doApply(Evaluator eval, Object[] args)
+        MutableStruct doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            return mutableStruct(_doApply(eval, args));
+            return _doApply(eval, args);
         }
     }
 

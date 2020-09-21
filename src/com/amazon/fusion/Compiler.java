@@ -12,7 +12,6 @@ import static com.amazon.fusion.FusionString.stringToJavaString;
 import static com.amazon.fusion.FusionStruct.emptyStruct;
 import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionStruct.nullStruct;
-import static com.amazon.fusion.FusionStruct.structImplAdd;
 import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbol;
 import static com.amazon.fusion.FusionValue.isAnnotated;
 import static com.amazon.fusion.FusionValue.isAnyNull;
@@ -957,19 +956,16 @@ class Compiler
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            FunctionalHashTrie<String, Object> map = FunctionalHashTrie.empty();
+            int count = myFieldNames.length;
+            Object[] values = new Object[count];
 
-            for (int i = 0; i < myFieldNames.length; i++)
+            for (int i = 0; i < count; i++)
             {
                 CompiledForm form = myFieldForms[i];
-                Object value = eval.eval(store, form);
-
-                String fieldName = myFieldNames[i];
-
-                map = structImplAdd(map, fieldName, value);
+                values[i] = eval.eval(store, form);
             }
 
-            return immutableStruct(map, myFieldNames.length);
+            return immutableStruct(myFieldNames, values, BaseSymbol.EMPTY_ARRAY);
         }
     }
 }

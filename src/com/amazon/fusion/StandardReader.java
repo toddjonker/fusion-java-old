@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -11,7 +11,6 @@ import static com.amazon.fusion.FusionNumber.makeInt;
 import static com.amazon.fusion.FusionSexp.immutableSexp;
 import static com.amazon.fusion.FusionSexp.nullSexp;
 import static com.amazon.fusion.FusionString.makeString;
-import static com.amazon.fusion.FusionStruct.STRUCT_MERGE_FUNCTION;
 import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionStruct.nullStruct;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
@@ -394,23 +393,11 @@ class StandardReader
 
         Iterator<Map.Entry<String, Object>> iterator =
             makeIonReaderStructIterator(eval, source, name, readingSyntax);
-        FunctionalHashTrie<String, Object> fht =
-            FunctionalHashTrie.merge(iterator,
-                                     STRUCT_MERGE_FUNCTION);
+
+        BaseValue struct = immutableStruct(eval, iterator, anns);
 
         source.stepOut();
 
-        try
-        {
-            return immutableStruct(fht, anns);
-        }
-        catch (RuntimeException e)
-        {
-            if (e.getCause() instanceof FusionException)
-            {
-                throw (FusionException) e.getCause();
-            }
-            throw e;
-        }
+        return struct;
     }
 }
