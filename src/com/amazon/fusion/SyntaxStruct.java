@@ -2,15 +2,11 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionStruct.immutableStruct;
 import com.amazon.fusion.FusionStruct.ImmutableStruct;
-import com.amazon.fusion.FusionStruct.NonNullImmutableStruct;
 import com.amazon.fusion.FusionStruct.StructFieldVisitor;
-import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
-import java.util.Map;
 
 final class SyntaxStruct
     extends SyntaxContainer

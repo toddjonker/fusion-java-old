@@ -1553,7 +1553,7 @@ final class FusionStruct
     }
 
 
-    static abstract class NonNullImmutableStruct
+    private static abstract class NonNullImmutableStruct
         extends MapBasedStruct
         implements ImmutableStruct
     {
