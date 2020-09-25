@@ -45,9 +45,9 @@
       (let [(result (apply op s args))]
         (check_pred is_mutable_struct result)
         (check === expect result "Unexpected result on mutable struct")
-        (check === val s)
-        // If the result === the input, it's probably the same instance
-        (unless (=== result val)
+        (check === val s)                           // s has not been modified
+        (unless (ident result s)
+          // Ensure there's no aliasing between the input to `op` and the results.
           (put_m result "mod" "mod")
           (check_void (. s "mod") "Unexpected mutation of original"))))))
 

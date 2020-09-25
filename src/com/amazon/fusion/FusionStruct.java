@@ -252,12 +252,13 @@ final class FusionStruct
     {
         if (map.size() == 0)
         {
+            // Sanity check that FHT is behaving as expected.
+            assert FunctionalHashTrie.empty() == (Object) map;
+
             if (anns.length == 0)
             {
                 return EMPTY_STRUCT;
             }
-
-            map = FunctionalHashTrie.empty();
         }
 
         return new FunctionalStruct(map, anns, size);
@@ -424,6 +425,10 @@ final class FusionStruct
     }
 
 
+    /**
+     * Visit all fields of a struct, in no particular order.
+     * If the visitor returns a non-null result, no more fields will be visited.
+     */
     static void unsafeStructFieldVisit(Evaluator eval, Object struct,
                                        StructFieldVisitor visitor)
         throws FusionException
@@ -570,7 +575,8 @@ final class FusionStruct
     interface StructFieldVisitor
     {
         /**
-         * @return null means continue visiting, non-null means abort visiting.
+         * @return The meaning of the return value depends on the invoking
+         * process.
          */
         Object visit(String name, Object value)
             throws FusionException;
