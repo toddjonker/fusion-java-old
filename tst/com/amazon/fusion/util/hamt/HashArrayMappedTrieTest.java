@@ -21,7 +21,6 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -119,11 +118,16 @@ public class HashArrayMappedTrieTest
         }
 
 
-        public Modifier<K, V> with(K key, V value)
+        private void recordKey(K key, V value)
         {
             this.key = key;
             oldValue = oldNode.get(key);
             newValue = value;
+        }
+
+        public Modifier<K, V> with(K key, V value)
+        {
+            recordKey(key, value);
 
             newNode = oldNode.with(key, value, results);
             assertValueEquals(value, newNode, key);
@@ -134,9 +138,7 @@ public class HashArrayMappedTrieTest
 
         public Modifier<K, V> mWith(K key, V value)
         {
-            this.key = key;
-            oldValue = oldNode.get(key);
-            newValue = value;
+            recordKey(key, value);
 
             newNode = oldNode.mWith(key, value, results);
             assertValueEquals(value, newNode, key);
@@ -147,9 +149,7 @@ public class HashArrayMappedTrieTest
 
         public Modifier<K, V> without(K key)
         {
-            this.key = key;
-            oldValue = oldNode.get(key);
-            newValue = null;
+            recordKey(key, null);
 
             newNode = oldNode.without(key, results);
             assertValueAbsent(newNode, key);
@@ -347,10 +347,18 @@ public class HashArrayMappedTrieTest
     //=========================================================================
     // FlatNode
 
+    static <K, V> FlatNode<K, V> flatNodeForPairs(Object... kvPairs)
+    {
+        assertTrue("too many pairs", kvPairs.length < 16);
+        assertEquals(0, kvPairs.length % 2);
+
+        return new FlatNode<>(kvPairs);
+    }
+
     @Test
     public void testFlatNodeInsertAndReplace()
     {
-        TrieNode node = new FlatNode(1, 1);
+        TrieNode node = flatNodeForPairs(1, 1);
         node = insert(node, 2, 2);
         node = insert(node, 3, 3);
         node = replace(node, 1, "one");
@@ -364,7 +372,7 @@ public class HashArrayMappedTrieTest
     @Test
     public void testFlatNodeMutatingInsertAndReplace()
     {
-        TrieNode node = new FlatNode(1, 1);
+        TrieNode node = flatNodeForPairs(1, 1);
         node = mInsert(node, 2, 2);
         node = mInsert(node, 3, 3);
         node = mReplace(node, 1, "one");
@@ -378,7 +386,7 @@ public class HashArrayMappedTrieTest
     @Test
     public void testFlatNodeRemove()
     {
-        TrieNode node = new FlatNode(1, 1);
+        TrieNode node = flatNodeForPairs(1, 1);
         node = insert(node, 2, 2);
         node = insert(node, 3, 3);
         node = noopRemove(node, 4);
@@ -396,7 +404,7 @@ public class HashArrayMappedTrieTest
         CustomKey foo = new CustomKey(0, "foo");
         CustomKey bar = new CustomKey(0, "bar");
 
-        TrieNode node = new FlatNode(foo, foo);
+        TrieNode node = flatNodeForPairs(foo, foo);
         node = insert(node, bar, bar);
 
         // FlatNode can handle collisions without pushing down a CollisionNode.
@@ -409,7 +417,7 @@ public class HashArrayMappedTrieTest
         CustomKey foo = new CustomKey(0, "foo");
         CustomKey bar = new CustomKey(0, "bar");
 
-        TrieNode node = new FlatNode(foo, foo);
+        TrieNode node = flatNodeForPairs(foo, foo);
         node = mInsert(node, bar, bar);
 
         // FlatNode can handle collisions without pushing down a CollisionNode.
@@ -419,7 +427,7 @@ public class HashArrayMappedTrieTest
     @Test
     public void checkFlatNodeExpansion()
     {
-        List<Map.Entry> values = new LinkedList<>();
+        List<Map.Entry> values = new ArrayList<>();
         for (int i = 0; i < 9; i++)
         {
             CustomKey key = new CustomKey(i, Integer.toString(i));
@@ -427,7 +435,7 @@ public class HashArrayMappedTrieTest
             values.add(entry);
         }
 
-        TrieNode flatNode = new FlatNode(new Object[0]);
+        TrieNode flatNode = new FlatNode();
 
         // A flat node should hold eight entries before expanding.
         for (int i = 0; i < 8; i++)
@@ -465,7 +473,7 @@ public class HashArrayMappedTrieTest
     @Test
     public void checkFlatNodeMutatingExpansion()
     {
-        final FlatNode original = new FlatNode(new Object[0]);
+        final FlatNode original = new FlatNode();
         TrieNode node = original;
         for (int i = 0; i < 8; i++)
         {
@@ -552,8 +560,7 @@ public class HashArrayMappedTrieTest
     {
         CustomKey key1 = new CustomKey(2, "key1");
         CustomKey key2 = new CustomKey(2, "key2");
-        Object[] values = { key1, "foo", key2, "bar" };
-        TrieNode collisionNode = new CollisionNode(hashCodeFor(key1), values);
+        TrieNode collisionNode = collisionNodeForPairs(key1, "foo", key2, "bar");
 
         CustomKey key3 = new CustomKey(1, "key3");
         TrieNode withNewNonCollidingKey = insert(collisionNode, key3, "baz");
@@ -711,7 +718,7 @@ public class HashArrayMappedTrieTest
     {
         CustomKey foo = new CustomKey(0, "foo");
         CustomKey bar = new CustomKey(0, "bar");
-        TrieNode trieNode = BitMappedNode.EMPTY;
+        TrieNode trieNode = new BitMappedNode();
         trieNode = insert(trieNode, foo, new Object());
         trieNode = insert(trieNode, bar, new Object());
 
@@ -732,7 +739,7 @@ public class HashArrayMappedTrieTest
         Results results = new Results();
         Object key1 = new CustomKey(0x00, 0);
 
-        TrieNode bmn0 = BitMappedNode.EMPTY;
+        TrieNode bmn0 = new BitMappedNode();
         TrieNode bmn1 = bmn0.with(0x00, 20, key1, key1, results);
         TrieNode bmn2 = bmn1.without(0x00, 20, key1, results);
         assertEmpty(bmn2);
@@ -746,7 +753,7 @@ public class HashArrayMappedTrieTest
         Object key2 = new CustomKey(0x01, 1);
 
         // Setup a BitMappedNode that contains a subtrie as its only element.
-        TrieNode bmn0 = BitMappedNode.EMPTY;
+        TrieNode bmn0 = new BitMappedNode();
         TrieNode bmn1 = bmn0.with(0x00, 20, key1, key1, results);
         TrieNode bmn2 = bmn1.with(0x01, 20, key2, key2, results);
 
@@ -760,7 +767,7 @@ public class HashArrayMappedTrieTest
     {
         Results results = new Results();
         Object[] keys = new Object[17];
-        TrieNode trieNode = BitMappedNode.EMPTY;
+        TrieNode trieNode = new BitMappedNode();
         for (int i = 0; i < 16; i++)
         {
             Object key = keys[i] = Integer.toString(i);
@@ -808,7 +815,7 @@ public class HashArrayMappedTrieTest
     public void keysNotInBitMap()
     {
         Results results = new Results();
-        TrieNode node = BitMappedNode.EMPTY;
+        TrieNode node = new BitMappedNode();
         TrieNode stillSame = node.without(0, 0, new Object(), results);
         assertFalse(results.modified());
         assertEquals(0, results.keyCountDelta());
@@ -820,15 +827,10 @@ public class HashArrayMappedTrieTest
     //=========================================================================
     // HashArrayMappedNode
 
-    static <K, V> HashArrayMappedNode<K, V> emptyHamn()
-    {
-        return new HashArrayMappedNode<>(0, new TrieNode[32]);
-    }
-
     @Test
     public void testHashArrayMappedNodeInsertAndReplace()
     {
-        TrieNode node = emptyHamn();
+        TrieNode node = new HashArrayMappedNode<>();
         node = insert(node, 1, 1);
         node = insert(node, 2, 2);
         node = insert(node, 3, 3);
@@ -842,7 +844,7 @@ public class HashArrayMappedTrieTest
     @Test
     public void testHashArrayMappedNodeMutatingInsertAndReplace()
     {
-        TrieNode node = emptyHamn();
+        TrieNode node = new HashArrayMappedNode<>();
         node = mInsert(node, 1, 1);
         node = mInsert(node, 2, 2);
         node = mInsert(node, 3, 3);
@@ -856,7 +858,7 @@ public class HashArrayMappedTrieTest
     @Test
     public void testHashArrayMappedNodeRemove()
     {
-        TrieNode node = emptyHamn();
+        TrieNode node = new HashArrayMappedNode<>();
         node = insert(node, 1, 1);
         node = insert(node, 2, 2);
         node = insert(node, 3, 3);
@@ -875,7 +877,7 @@ public class HashArrayMappedTrieTest
         CustomKey key1 = new CustomKey(0, "key1");
         CustomKey key2 = new CustomKey(0, "key2");
 
-        TrieNode node = emptyHamn();
+        TrieNode node = new HashArrayMappedNode<>();
         node = insert(node, key1, 1);
         node = insert(node, key2, 2);
 
@@ -888,7 +890,7 @@ public class HashArrayMappedTrieTest
         CustomKey key1 = new CustomKey(0, "key1");
         CustomKey key2 = new CustomKey(0, "key2");
 
-        TrieNode node = emptyHamn();
+        TrieNode node = new HashArrayMappedNode<>();
         node = mInsert(node, key1, 1);
         node = mInsert(node, key2, 2);
 
@@ -898,7 +900,7 @@ public class HashArrayMappedTrieTest
     @Test
     public void checkHashArrayMappedNode()
     {
-        TrieNode node = new FlatNode(new Object[0]);
+        TrieNode node = new FlatNode();
 
         for (int i = 0; i < 16; i++) {
             CustomKey key = new CustomKey(i, new Object());
@@ -937,7 +939,7 @@ public class HashArrayMappedTrieTest
     public void testCorrectShifting()
     {
         Results results = new Results();
-        TrieNode nested = BitMappedNode.EMPTY.with(0x20, 5, new CustomKey(0, "redherring"), 1, results);
+        TrieNode nested = new BitMappedNode().with(0x20, 5, new CustomKey(0, "redherring"), 1, results);
         // 0x20 = 0b00001 00000 -> the second slot in a bitmap with a node at shift 5.
         assertEquals(0b010, ((BitMappedNode) nested).bitmap);
 

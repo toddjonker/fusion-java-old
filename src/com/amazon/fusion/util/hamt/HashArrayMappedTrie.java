@@ -313,6 +313,11 @@ public final class HashArrayMappedTrie
         Object[] kvPairs;
 
 
+        FlatNode()
+        {
+            kvPairs = new Object[0];
+        }
+
         FlatNode(K key, V value)
         {
             this(new Object[]{key, value});
@@ -764,11 +769,15 @@ public final class HashArrayMappedTrie
          */
         private static final int MAX_CHILDREN = 16;
 
-        static final TrieNode<Object, Object> EMPTY = new BitMappedNode<>(0, new Object[0]);
-
         int bitmap;
         Object[] kvPairs; // Can be either a Key Value Pair or a Null then Node Pair.
 
+
+        BitMappedNode()
+        {
+            bitmap  = 0;
+            kvPairs = new Object[0];
+        }
 
         BitMappedNode(int bitmap, Object[] kvPairs)
         {
@@ -1152,6 +1161,12 @@ public final class HashArrayMappedTrie
          */
         private int count;
         final TrieNode<K, V>[] nodes;
+
+        HashArrayMappedNode()
+        {
+            count = 0;
+            nodes = new TrieNode[32];
+        }
 
         HashArrayMappedNode(int count, TrieNode<K, V>[] nodes)
         {
