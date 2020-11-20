@@ -2,18 +2,16 @@
 
 package com.amazon.fusion;
 
-import org.junit.Test;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.Test;
 
 public class FunctionalHashTrieTest
 {
@@ -104,11 +102,12 @@ public class FunctionalHashTrieTest
     {
         setup(0);
         assertTrue(fht.isEmpty());
+        assertSame(FunctionalHashTrie.empty(), fht);
         performTests();
 
         FunctionalHashTrie without = fht.without("anything");
-        assertTrue(fht == without);
-        assertTrue(fht == FunctionalHashTrie.empty());
+        assertSame(without, fht);
+        assertSame(FunctionalHashTrie.empty(), fht);
     }
 
     @Test

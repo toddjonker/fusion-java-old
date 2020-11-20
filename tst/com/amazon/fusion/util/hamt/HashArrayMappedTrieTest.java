@@ -556,6 +556,44 @@ public class HashArrayMappedTrieTest
     }
 
     @Test
+    public void testCollisionNodeExpansion()
+    {
+        CustomKey key1 = new CustomKey(2, "key1");
+        CustomKey key2 = new CustomKey(2, "key2");
+
+        TrieNode collisionNode = collisionNodeForPairs(key1, 1, key2, 2);
+
+        CustomKey key3 = new CustomKey(1, "key3");
+        TrieNode withNewNonCollidingKey = insert(collisionNode, key3, 3);
+        // We expect the collision node to have been pushed down a level.
+        assertTrue(withNewNonCollidingKey instanceof FlatNode);
+
+        assertValueEquals(1, withNewNonCollidingKey, key1);
+        assertValueEquals(2, withNewNonCollidingKey, key2);
+        assertValueEquals(3, withNewNonCollidingKey, key3);
+    }
+
+    @Test
+    public void testCollisionNodeMutatingExpansion()
+    {
+        CustomKey key1 = new CustomKey(2, "key1");
+        CustomKey key2 = new CustomKey(2, "key2");
+
+        TrieNode collisionNode = collisionNodeForPairs(key1, 1, key2, 2);
+
+        CustomKey key3 = new CustomKey(1, "key3");
+        TrieNode withNewNonCollidingKey =
+            mWith(collisionNode, key3, 3).inserts().returnsNew();
+
+        // We expect the collision node to have been pushed down a level.
+        assertTrue(withNewNonCollidingKey instanceof FlatNode);
+
+        assertValueEquals(1, withNewNonCollidingKey, key1);
+        assertValueEquals(2, withNewNonCollidingKey, key2);
+        assertValueEquals(3, withNewNonCollidingKey, key3);
+    }
+
+    @Test
     public void checkCollisionNodeBehavior()
     {
         CustomKey key1 = new CustomKey(2, "key1");
@@ -712,6 +750,34 @@ public class HashArrayMappedTrieTest
         assertEquals(BitMappedNode.class, node.getClass());
     }
 
+    @Test
+    public void testBitMappedNodeExpansion()
+    {
+        TrieNode node = new BitMappedNode(0, new Object[0]);
+        for (int i = 1; i <= 16; i++)
+        {
+            node = insert(node, i, i);
+        }
+        assertEquals(BitMappedNode.class, node.getClass());
+
+        node = insert(node, 17, 17);
+        assertEquals(HashArrayMappedNode.class, node.getClass());
+    }
+
+    @Test
+    public void testBitMappedNodeMutatingExpansion()
+    {
+        TrieNode origNode = new BitMappedNode(0, new Object[0]);
+        TrieNode node = origNode;
+        for (int i = 1; i <= 16; i++)
+        {
+            node = mInsert(node, i, i);
+        }
+        assertSame(origNode, node);
+
+        node = mWith(node, 17, 17).inserts().returnsNew();
+        assertEquals(HashArrayMappedNode.class, node.getClass());
+    }
 
     @Test
     public void checkCollisionNodeCreation()

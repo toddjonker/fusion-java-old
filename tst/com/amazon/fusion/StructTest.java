@@ -3,8 +3,11 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionStruct.asImmutableStruct;
+import static com.amazon.fusion.FusionStruct.emptyStruct;
+import static com.amazon.fusion.FusionStruct.immutableStruct;
 import static com.amazon.fusion.FusionStruct.isImmutableStruct;
 import static com.amazon.fusion.FusionStruct.isMutableStruct;
+import static com.amazon.fusion.FusionStruct.unsafeStructMerge1;
 import static com.amazon.fusion.FusionStruct.unsafeStructSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
@@ -180,6 +183,26 @@ public class StructTest
         expectContractExn("(struct_zip [\"hello\",2,\"world\"] elemList)");
     }
 
+
+    @Test
+    public void structMerge1()
+        throws Exception
+    {
+        Evaluator eval = evaluator();
+
+        Object empty = emptyStruct(eval);
+
+        Object dupes = immutableStruct(new String[]{ "a", "a" },
+                                       new Object[]{ 1, 1 },
+                                       FusionSymbol.BaseSymbol.EMPTY_ARRAY);
+        assertEquals(2, unsafeStructSize(eval, dupes));
+
+        Object merged = unsafeStructMerge1(eval, empty, dupes);
+        assertEquals(1, unsafeStructSize(eval, merged));
+
+        merged = unsafeStructMerge1(eval, dupes, empty);
+        assertEquals(1, unsafeStructSize(eval, merged));
+    }
 
     @Test
     public void structMergeFail()
