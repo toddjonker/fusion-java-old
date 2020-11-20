@@ -135,19 +135,13 @@ final class FusionStruct
             throw e;
         }
 
-        return immutableStruct(fht, annotations);
+        return immutableStruct(fht, internSymbols(annotations), computeSize(fht));
     }
 
-
-    static NonNullImmutableStruct immutableStruct(FunctionalHashTrie<String, Object> map,
-                                                  String[] anns)
-    {
-        return immutableStruct(map, internSymbols(anns), computeSize(map));
-    }
-
-    static NonNullImmutableStruct immutableStruct(FunctionalHashTrie<String, Object> map,
-                                                  BaseSymbol[] anns,
-                                                  int size)
+    private static NonNullImmutableStruct
+    immutableStruct(FunctionalHashTrie<String, Object> map,
+                    BaseSymbol[] anns,
+                    int size)
     {
         if (map.size() == 0)
         {
@@ -1237,29 +1231,9 @@ final class FusionStruct
         public Object retainKeys(Evaluator eval, String[] keys)
             throws FusionException
         {
-            if (keys.length == 0)
-            {
-                return makeSimilar(FunctionalHashTrie.<String,Object>empty(), 0);
-            }
-
             FunctionalHashTrie<String, Object> oldMap = getMap(eval);
-            FunctionalHashTrie<String, Object> newMap = oldMap;
-
-            Set<String> keysToRetain = new HashSet<>(Arrays.asList(keys));
-            Set<String> existingKeys = oldMap.keySet();
-
-            for (String key : existingKeys)
-            {
-                if (!keysToRetain.contains(key))
-                {
-                    newMap = newMap.without(key);
-                }
-            }
-
-            if (newMap == oldMap)
-            {
-                return this;
-            }
+            FunctionalHashTrie<String, Object> newMap =
+                FunctionalHashTrie.fromSelectedKeys(oldMap, keys);
 
             return makeSimilar(newMap);
         }
@@ -1864,25 +1838,8 @@ final class FusionStruct
         public Object retainKeysM(Evaluator eval, String[] keys)
             throws FusionException
         {
-            if (keys.length == 0)
-            {
-                myMap = FunctionalHashTrie.empty();
-                mySize = 0;
-            }
-            else
-            {
-                Set<String> keysToRetain = new HashSet<>(Arrays.asList(keys));
-                Set<String> existingKeys = myMap.keySet();
-
-                for (String key : existingKeys)
-                {
-                    if (!keysToRetain.contains(key))
-                    {
-                        myMap = myMap.without(key);
-                    }
-                }
-                updateSize();
-            }
+            myMap = FunctionalHashTrie.fromSelectedKeys(myMap, keys);
+            updateSize();
 
             return this;
         }

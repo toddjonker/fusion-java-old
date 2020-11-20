@@ -116,6 +116,18 @@ public final class HashArrayMappedTrie
         return trie.mWith(entries, results);
     }
 
+    /**
+     * Creates a trie by copying entries for the {@code keys} from the
+     * {@code origin} trie.
+     */
+    public static <K, V> TrieNode<K, V> fromSelectedKeys(TrieNode<K, V> origin,
+                                                         K[] keys,
+                                                         Results results)
+    {
+        TrieNode<K, V> trie = empty();
+        return trie.mWithSelectedKeys(origin, keys, results);
+    }
+
 
     /**
      * Used to provide the hash code for a key in the {@link HashArrayMappedTrie}.
@@ -187,6 +199,25 @@ public final class HashArrayMappedTrie
             while (entries.hasNext())
             {
                 root = root.mWith(entries.next(), results);
+            }
+            return root;
+        }
+
+        /**
+         * Add to this trie the values of another trie at specific keys.
+         */
+        public TrieNode<K, V> mWithSelectedKeys(TrieNode<K, V> origin,
+                                                K[] keys,
+                                                Results results)
+        {
+            TrieNode<K, V> root = this;
+            for (K key : keys)
+            {
+                V value = origin.get(key);
+                if (value != null)
+                {
+                    root = root.mWith(key, value, results);
+                }
             }
             return root;
         }

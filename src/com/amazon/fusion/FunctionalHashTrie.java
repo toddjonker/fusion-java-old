@@ -7,6 +7,7 @@ import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Results;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractSet;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -79,6 +80,20 @@ class FunctionalHashTrie<K, V>
                                                  BiFunction<V, V, V> remapping)
     {
         return merge(Arrays.asList(items).iterator(), remapping);
+    }
+
+
+    /**
+     * Creates a trie by copying entries for the {@code keys} from the
+     * {@code origin} trie.
+     */
+    static <K, V> FunctionalHashTrie<K, V>
+    fromSelectedKeys(FunctionalHashTrie<K, V> origin, K[] keys)
+    {
+        Results results = new Results();
+        TrieNode<K, V> newTrie =
+                HashArrayMappedTrie.fromSelectedKeys(origin.root, keys, results);
+        return EMPTY.resultFrom(newTrie, results);
     }
 
 

@@ -2,6 +2,8 @@
 
 package com.amazon.fusion.util.hamt;
 
+import static com.amazon.fusion.util.hamt.HashArrayMappedTrie.empty;
+import static com.amazon.fusion.util.hamt.HashArrayMappedTrie.fromSelectedKeys;
 import static com.amazon.fusion.util.hamt.HashArrayMappedTrie.hashCodeFor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -69,7 +71,7 @@ public class HashArrayMappedTrieTest
 
     private static void assertEmpty(TrieNode node)
     {
-        assertSame(HashArrayMappedTrie.empty(), node);
+        assertSame(empty(), node);
     }
 
     private static <K, V> V assertValuePresent(TrieNode<K, V> node, K key)
@@ -306,13 +308,13 @@ public class HashArrayMappedTrieTest
     @Test
     public void testEmptyNodeIsSingleton()
     {
-        assertSame(HashArrayMappedTrie.empty(), HashArrayMappedTrie.empty());
+        assertSame(empty(), empty());
     }
 
     @Test
     public void testEmptyNodeIsEmpty()
     {
-        TrieNode<Object, Object> empty = HashArrayMappedTrie.empty();
+        TrieNode<Object, Object> empty = empty();
         assertEquals(0, empty.countKeys());
 
         Iterator<Map.Entry<Object, Object>> iterator = empty.iterator();
@@ -322,7 +324,7 @@ public class HashArrayMappedTrieTest
     @Test
     public void testEmptyNodeInsert()
     {
-        TrieNode node = HashArrayMappedTrie.empty();
+        TrieNode node = empty();
         node = insert(node, 1, 1);
         assertEquals(FlatNode.class, node.getClass());
     }
@@ -330,7 +332,7 @@ public class HashArrayMappedTrieTest
     @Test
     public void testEmptyNodeMutatingInsert()
     {
-        TrieNode node = HashArrayMappedTrie.empty();
+        TrieNode node = empty();
         node = mWith(node, 1, 1).inserts().returnsNew();
         assertEquals(FlatNode.class, node.getClass());
     }
@@ -338,7 +340,7 @@ public class HashArrayMappedTrieTest
     @Test
     public void testEmptyNodeRemove()
     {
-        TrieNode empty = HashArrayMappedTrie.empty();
+        TrieNode empty = empty();
         TrieNode node = noopRemove(empty, 1);
         assertSame(empty, node);
     }
@@ -1045,7 +1047,7 @@ public class HashArrayMappedTrieTest
     @Test
     public void testDeepShifts()
     {
-        TrieNode customFHT = HashArrayMappedTrie.empty();
+        TrieNode customFHT = empty();
 
         // These two will be in the collision node at the bottom.
         customFHT = customFHT.with(new CustomKey(0, "foo"), "A", new Results());
@@ -1121,5 +1123,47 @@ public class HashArrayMappedTrieTest
         assertTrue(newValues.contains("A"));
         assertTrue(newValues.contains("B"));
         assertTrue(newValues.contains("C"));
+    }
+
+
+    public static <K, V> TrieNode<K, V> trieFromPairs(Object... kvPairs)
+    {
+        Results results = new Results();
+
+        TrieNode<K, V> root = empty();
+        for (int i = 0; i < kvPairs.length; i += 2)
+        {
+            root = root.mWith((K) kvPairs[i], (V) kvPairs[i+1], results);
+        }
+        return root;
+    }
+
+    @Test
+    public void fromSelectedKeysReturnsSubset()
+    {
+        TrieNode origin = trieFromPairs(1, 1, 2, 2, 3, 3);
+
+        Results results = new Results();
+        TrieNode t = fromSelectedKeys(origin, new Object[]{ 1, 3, 5 }, results);
+
+        assertEquals(2,    results.keyCountDelta());
+        assertEquals(1,    t.get(1));
+        assertEquals(null, t.get(2));
+        assertEquals(3,    t.get(3));
+    }
+
+    @Test
+    public void fromSelectedKeysReturnsEmptySingleton()
+    {
+        TrieNode origin = trieFromPairs(1, 1, 2, 2);
+
+        Results results = new Results();
+        TrieNode t = fromSelectedKeys(origin, new Object[]{}, results);
+        assertSame(empty(), t);
+        assertEquals(0, results.keyCountDelta());
+
+        t = fromSelectedKeys(origin, new Object[]{ 3, 4 }, results);
+        assertSame(empty(), t);
+        assertEquals(0, results.keyCountDelta());
     }
 }

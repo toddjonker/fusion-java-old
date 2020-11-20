@@ -2,6 +2,7 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FunctionalHashTrie.fromSelectedKeys;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -250,5 +251,31 @@ public class FunctionalHashTrieTest
         FunctionalHashTrie trie1 = FunctionalHashTrie.empty().with(1, 1);
         FunctionalHashTrie trie2 = trie1.with(1, 1);
         assertSame(trie1, trie2);
+    }
+
+
+    @Test
+    public void fromSelectedKeysReturnsSubset()
+    {
+        FunctionalHashTrie origin = FunctionalHashTrie.empty().with(1, 1).with(2, 2).with(3, 3);
+
+        FunctionalHashTrie t = fromSelectedKeys(origin, new Object[]{ 1, 3, 5 });
+
+        assertEquals(2,    t.size());
+        assertEquals(1,    t.get(1));
+        assertEquals(null, t.get(2));
+        assertEquals(3,    t.get(3));
+    }
+
+    @Test
+    public void fromSelectedKeysReturnsEmptySingleton()
+    {
+        FunctionalHashTrie origin = FunctionalHashTrie.empty().with(1, 1).with(2, 2);
+
+        FunctionalHashTrie t = fromSelectedKeys(origin, new Object[]{});
+        assertSame(FunctionalHashTrie.empty(), t);
+
+        t = fromSelectedKeys(origin, new Object[]{ 3, 4 });
+        assertSame(FunctionalHashTrie.empty(), t);
     }
 }
