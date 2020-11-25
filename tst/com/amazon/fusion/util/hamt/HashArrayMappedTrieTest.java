@@ -165,7 +165,7 @@ public class HashArrayMappedTrieTest
             assertNull("old value", oldValue);
 
             mode = Mode.INSERT;
-            assertTrue("results not modified", results.modified());
+            assertTrue("results not modified", results.changes() > 0);
             assertSizeDelta(1);
             return this;
         }
@@ -177,7 +177,7 @@ public class HashArrayMappedTrieTest
             assertNotSame("mapped value", oldValue, newValue);
 
             mode = Mode.REPLACE;
-            assertTrue("results not modified", results.modified());
+            assertTrue("results not modified", results.changes() > 0);
             assertSizeDelta(0);
             return this;
         }
@@ -188,7 +188,7 @@ public class HashArrayMappedTrieTest
             assertNotNull("old value", oldValue);
 
             mode = Mode.REMOVE;
-            assertTrue("results not modified", results.modified());
+            assertTrue("results not modified", results.changes() > 0);
             assertSizeDelta(-1);
             return this;
         }
@@ -199,7 +199,7 @@ public class HashArrayMappedTrieTest
             assertSame("mapped value", oldValue, newValue);
 
             mode = Mode.NOOP;
-            assertFalse("results modified", results.modified());
+            assertEquals("results modified", 0, results.changes());
             assertSizeDelta(0);
             return this;
         }
@@ -236,7 +236,7 @@ public class HashArrayMappedTrieTest
         {
             if (newNode != oldNode)
             {
-                assertTrue("results not modified", results.modified());
+                assertTrue("results not modified", results.changes() > 0);
             }
         }
 
@@ -883,7 +883,7 @@ public class HashArrayMappedTrieTest
         Results results = new Results();
         TrieNode node = new BitMappedNode();
         TrieNode stillSame = node.without(0, 0, new Object(), results);
-        assertFalse(results.modified());
+        assertEquals(0, results.changes());
         assertEquals(0, results.keyCountDelta());
         assertTrue(node == stillSame);
         assertEquals(null, node.get(0, 0, new Object()));

@@ -43,25 +43,29 @@ public final class HashArrayMappedTrie
         new Random().nextInt();
 
     /**
-     * Describes the results of a trie operation.
+     * Describes the results of one or more trie operations.
+     * Instances can be reused across multiple calls into the same or different
+     * tries, reducing the overall number of object allocations.
      */
     public static final class Results
     {
-        private boolean modified = false;
-        private int keyCountDelta = 0;
+        private int keysAdded     = 0;
+        private int keysReplaced  = 0;
+        private int keysRemoved   = 0;
 
         public Results()
         {
         }
 
         /**
-         * Indicates if the operation changed the content of the trie: a key/value was added or
-         * removed, or a key's value was changed. This can be true even when the operation returns
-         * the same root node.
+         * Returns the number of individual changes made using this instance.
+         * Incremented when a key/value is added or removed, or a key's value is changed.
+         * Due to mutation operations, this can be non-zero even when the
+         * operation returns the same root node.
          */
-        public boolean modified()
+        public int changes()
         {
-            return modified;
+            return keysAdded + keysReplaced + keysRemoved;
         }
 
         /**
@@ -71,24 +75,22 @@ public final class HashArrayMappedTrie
          */
         public int keyCountDelta()
         {
-            return keyCountDelta;
+            return keysAdded - keysRemoved;
         }
 
         private void keyAdded()
         {
-            modified = true;
-            keyCountDelta++;
+            keysAdded++;
         }
 
         private void keyRemoved()
         {
-            modified = true;
-            keyCountDelta--;
+            keysRemoved++;
         }
 
         private void keyReplaced()
         {
-            modified = true;
+            keysReplaced++;
         }
     }
 

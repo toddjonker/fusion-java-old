@@ -125,6 +125,19 @@ class FunctionalHashTrie<K, V>
 
     // TODO: Add a variation of with[out] that returns the previous value (if any).
 
+    private FunctionalHashTrie<K, V> resultFrom(TrieNode<K, V> newRoot, Results results)
+    {
+        if (results.changes() != 0)
+        {
+            int newSize = size + results.keyCountDelta();
+            if (newSize == 0) return EMPTY;
+            return new FunctionalHashTrie<>(newRoot, newSize);
+        }
+
+        assert root == newRoot;
+        return this;
+    }
+
     /**
      * This method functionally modifies the {@link FunctionalHashTrie} and returns
      * a new {@link FunctionalHashTrie} if a modification was made, otherwise returns itself.
@@ -140,13 +153,7 @@ class FunctionalHashTrie<K, V>
 
         Results results = new Results();
         TrieNode<K, V> newRoot = root.with(key, value, results);
-        if (!results.modified())
-        {
-            return this;
-        }
-
-        int newSize = size + results.keyCountDelta();
-        return new FunctionalHashTrie<>(newRoot, newSize);
+        return resultFrom(newRoot, results);
     }
 
 
@@ -168,13 +175,7 @@ class FunctionalHashTrie<K, V>
         {
             Results results = new Results();
             TrieNode<K, V> newRoot = root.without(key, results);
-            if (!results.modified())
-            {
-                return this;
-            }
-
-            int newSize = size + results.keyCountDelta();
-            return new FunctionalHashTrie<>(newRoot, newSize);
+            return resultFrom(newRoot, results);
         }
     }
 
