@@ -5,10 +5,8 @@ package com.amazon.fusion;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Results;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
-import java.util.AbstractCollection;
 import java.util.AbstractSet;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -43,42 +41,38 @@ class FunctionalHashTrie<K, V>
 
     static <K, V> FunctionalHashTrie<K, V> create(Map<K, V> other)
     {
-        if (other instanceof FunctionalHashTrie)
-        {
-            return (FunctionalHashTrie) other;
-        }
+        if (other.isEmpty()) return EMPTY;
 
-        MutableHashTrie<K, V> ret = MutableHashTrie.makeEmpty();
-        for (Entry<K, V> entry : other.entrySet())
-        {
-            ret = ret.mWith(entry.getKey(), entry.getValue());
-        }
+        Results results = new Results();
+        TrieNode<K, V> trie = HashArrayMappedTrie.fromMap(other, results);
 
-        return ret.asFunctional();
+        return new FunctionalHashTrie<>(trie, results.keyCountDelta());
     }
 
 
     static <K, V> FunctionalHashTrie<K, V> merge(Iterator<Entry<K, V>> items,
                                                  BiFunction<V, V, V> remapping)
     {
-        MutableHashTrie<K, V> ret = MutableHashTrie.makeEmpty();
+        Results results = new Results();
+
+        TrieNode<K, V> trie = HashArrayMappedTrie.empty();
         while (items.hasNext())
         {
             Entry<K, V> item = items.next();
 
             // TODO: Improve performance by having MutableHashTrie perform the merge operation itself.
-            V prev = ret.get(item.getKey());
+            V prev = trie.get(item.getKey());
             if (prev != null)
             {
-                ret.mWith(item.getKey(), remapping.apply(prev, item.getValue()));
+                trie = trie.mWith(item.getKey(), remapping.apply(prev, item.getValue()), results);
             }
             else
             {
-                ret.mWith(item.getKey(), item.getValue());
+                trie = trie.mWith(item.getKey(), item.getValue(), results);
             }
         }
 
-        return ret.asFunctional();
+        return new FunctionalHashTrie<>(trie, results.keyCountDelta());
     }
 
     static <K, V> FunctionalHashTrie<K, V> merge(Entry<K, V>[] items,
@@ -245,72 +239,4 @@ class FunctionalHashTrie<K, V>
 
 
     // TODO: Add method that accepts a function to modify each element in the trie.
-
-    /**
-     * Mutable version of {@link FunctionalHashTrie} for faster and more memory
-     * efficient instantiation of new {@link FunctionalHashTrie}s.
-     */
-    private static class MutableHashTrie<K, V>
-    {
-        private int size;
-        private TrieNode<K, V> root;
-
-        private static MutableHashTrie makeEmpty()
-        {
-            return new MutableHashTrie(HashArrayMappedTrie.empty(), 0);
-        }
-
-        private MutableHashTrie(TrieNode<K, V> root,
-                                int size)
-        {
-            this.root = root;
-            this.size = size;
-        }
-
-        private MutableHashTrie<K, V> mWith(K key, V value)
-        {
-            if (key == null || value == null)
-            {
-                throw new NullPointerException(NULL_ERROR_MESSAGE);
-            }
-
-            Results results = new Results();
-            TrieNode<K, V> newRoot = root.mWith(key, value, results);
-            root = newRoot;
-            size += results.keyCountDelta();
-
-            return this;
-        }
-
-
-        private V get(K key)
-        {
-            if (key == null)
-            {
-                throw new NullPointerException(NULL_ERROR_MESSAGE);
-            }
-
-            return root.get((K) key);
-        }
-
-
-        /**
-         * This should be called after the desired mutations on the trie are
-         * performed. Drops the current root, so that further {@link #mWith(Object, Object)} calls fail.
-         */
-        FunctionalHashTrie<K, V> asFunctional()
-        {
-            FunctionalHashTrie ret;
-            if (size == 0)
-            {
-                ret = FunctionalHashTrie.EMPTY;
-            }
-            else
-            {
-                ret = new FunctionalHashTrie(root, size);
-            }
-            root = null;
-            return ret;
-        }
-    }
 }

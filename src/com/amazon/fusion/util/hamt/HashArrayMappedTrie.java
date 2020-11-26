@@ -6,6 +6,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -101,6 +102,19 @@ public final class HashArrayMappedTrie
     }
 
 
+    public static <K, V> TrieNode<K, V> fromMap(Map<K, V> map, Results results)
+    {
+        return fromEntries(map.entrySet().iterator(), results);
+    }
+
+    public static <K, V> TrieNode<K, V> fromEntries(Iterator<Entry<K, V>> entries,
+                                                    Results results)
+    {
+        TrieNode<K, V> trie = empty();
+        return trie.mWith(entries, results);
+    }
+
+
     /**
      * Used to provide the hash code for a key in the {@link HashArrayMappedTrie}.
      * ALL trie node interfacing calls should use this method!!
@@ -158,6 +172,21 @@ public final class HashArrayMappedTrie
         public TrieNode<K, V> mWith(K key, V value, Results results)
         {
             return mWith(hashCodeFor(key), 0, key, value, results);
+        }
+
+        public TrieNode<K, V> mWith(Entry<K, V> entry, Results results)
+        {
+            return mWith(entry.getKey(), entry.getValue(), results);
+        }
+
+        public TrieNode<K, V> mWith(Iterator<Entry<K, V>> entries, Results results)
+        {
+            TrieNode<K, V> root = this;
+            while (entries.hasNext())
+            {
+                root = root.mWith(entries.next(), results);
+            }
+            return root;
         }
 
 
