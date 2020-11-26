@@ -278,4 +278,26 @@ public class FunctionalHashTrieTest
         t = fromSelectedKeys(origin, new Object[]{ 3, 4 });
         assertSame(FunctionalHashTrie.empty(), t);
     }
+
+
+    @Test
+    public void withoutKeysGivenKeysReturnsSubset()
+    {
+        FunctionalHashTrie origin = FunctionalHashTrie.empty().with(1, 1).with(2, 2).with(3, 3);
+
+        FunctionalHashTrie t = origin.withoutKeys(new Object[]{ 1, 3, 5 });
+
+        assertEquals(1,    t.size());
+        assertEquals(null, t.get(1));
+        assertEquals(2,    t.get(2));
+        assertEquals(null, t.get(3));
+    }
+
+    @Test
+    public void withoutKeysGivenAllKeysReturnsSingleton()
+    {
+        FunctionalHashTrie origin = FunctionalHashTrie.empty().with(1, 1).with(2, 2);
+        FunctionalHashTrie t = origin.withoutKeys(new Object[]{1, 2});
+        assertSame(FunctionalHashTrie.empty(), t);
+    }
 }

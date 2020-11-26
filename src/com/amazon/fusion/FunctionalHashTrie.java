@@ -7,7 +7,6 @@ import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Results;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractSet;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -192,6 +191,21 @@ class FunctionalHashTrie<K, V>
             TrieNode<K, V> newRoot = root.without(key, results);
             return resultFrom(newRoot, results);
         }
+    }
+
+
+    /**
+     * Functionally removes multiple keys from this trie.
+     *
+     * @param keys must not be null.
+     *
+     * @return the resulting trie.
+     */
+    public FunctionalHashTrie<K, V> withoutKeys(K[] keys)
+    {
+        Results results = new Results();
+        TrieNode<K, V> newRoot = root.withoutKeys(keys, results);
+        return resultFrom(newRoot, results);
     }
 
 

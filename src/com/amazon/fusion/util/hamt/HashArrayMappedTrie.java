@@ -239,6 +239,24 @@ public final class HashArrayMappedTrie
 
 
         /**
+         * Functionally removes multiple keys from this trie.
+         *
+         * @param keys must not be null.
+         *
+         * @return the resulting root node.
+         */
+        public TrieNode<K, V> withoutKeys(K[] keys, Results results)
+        {
+            TrieNode<K, V> root = this;
+            for (K key : keys)
+            {
+                root = root.without(key, results);
+            }
+            return root;
+        }
+
+
+        /**
          * Computes the number of unique keys in this node and its children.
          * This is an O(n) operation.
          */

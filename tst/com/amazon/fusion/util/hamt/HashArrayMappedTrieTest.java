@@ -345,6 +345,26 @@ public class HashArrayMappedTrieTest
         assertSame(empty, node);
     }
 
+    @Test(expected = NullPointerException.class)
+    public void emptyNodeWithoutKeysRequiresNonNullArray()
+    {
+        empty().withoutKeys(null, new Results());
+    }
+
+    @Test
+    public void emptyNodeWithoutKeysGivenNoKeysReturnsSame()
+    {
+        TrieNode trie = empty();
+        assertSame(trie, trie.withoutKeys(new Object[0], new Results()));
+    }
+
+    @Test
+    public void emptyNodeWithoutKeysGivenKeysReturnsSame()
+    {
+        TrieNode trie = empty();
+        assertSame(trie, trie.withoutKeys(new Object[]{ 1, 2 }, new Results()));
+    }
+
 
     //=========================================================================
     // FlatNode
@@ -1165,5 +1185,42 @@ public class HashArrayMappedTrieTest
         t = fromSelectedKeys(origin, new Object[]{ 3, 4 }, results);
         assertSame(empty(), t);
         assertEquals(0, results.keyCountDelta());
+    }
+
+
+    // TrieNode.withoutKeys() is implemented atop without() and not handled by
+    // individual node classes, so just testing it using the most simple
+    // subclass (as well as EmptyNode above, since it might have a shortcut
+    // override).
+
+    @Test(expected = NullPointerException.class)
+    public void withoutKeysRequiresNonNullArray()
+    {
+        new FlatNode().withoutKeys(null, new Results());
+    }
+
+    @Test
+    public void withoutKeysGivenNoKeysReturnsSame()
+    {
+        TrieNode trie = flatNodeForPairs(1, 1, 2, 2, 3, 3);
+        assertSame(trie, trie.withoutKeys(new Object[0], new Results()));
+    }
+
+    @Test
+    public void withoutKeysGivenKeysReturnsAnswer()
+    {
+        TrieNode trie = flatNodeForPairs(1, 1, 2, 2, 3, 3);
+        TrieNode answer = trie.withoutKeys(new Object[]{1, 3, 5}, new Results());
+
+        assertEquals(1, answer.countKeys());
+        assertValueEquals(2, answer, 2);
+    }
+
+    @Test
+    public void withoutKeysGivenAllKeysReturnsSingleton()
+    {
+        TrieNode trie = flatNodeForPairs(1, 1, 2, 2);
+        TrieNode answer = trie.withoutKeys(new Object[]{1, 3, 2}, new Results());
+        assertEmpty(answer);
     }
 }

@@ -37,7 +37,6 @@ import com.amazon.ion.ValueFactory;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -1193,38 +1192,12 @@ final class FusionStruct
         public Object removeKeys(Evaluator eval, String[] keys)
             throws FusionException
         {
-            if (keys.length == 0)
-            {
-                return this;
-            }
-
-            int newSize = mySize;
             FunctionalHashTrie<String, Object> oldMap = getMap(eval);
-            FunctionalHashTrie<String, Object> newMap = oldMap;
+            FunctionalHashTrie<String, Object> newMap = oldMap.withoutKeys(keys);
 
-            for (String key : keys)
-            {
-                Object old = newMap.get(key);
-                if (old != null)
-                {
-                    if (old instanceof Object[])
-                    {
-                        newSize -= ((Object[]) old).length;
-                    }
-                    else
-                    {
-                        newSize--;
-                    }
-                    newMap = newMap.without(key);
-                }
-            }
+            if (newMap == oldMap) return this;
 
-            if (newMap == oldMap)
-            {
-                return this;
-            }
-
-            return makeSimilar(newMap, newSize);
+            return makeSimilar(newMap);
         }
 
         @Override
