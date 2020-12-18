@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2018-2021 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -227,22 +227,24 @@ public class FunctionalHashTrieTest
         }
     }
 
-    /** Key-merge function that simply uses the new value. */
-    public static final BiFunction REPLACE = new BiFunction() {
-        @Override
-        public Object apply(Object o, Object o2) {
-            return o2;
-        }
-    };
 
     @Test
-    public void testMergeWithReplacement()
+    public void testMergeInvokesRemapper()
     {
+        BiFunction remapper = new BiFunction() {
+            @Override
+            public Object apply(Object oldValue, Object givenValue)
+            {
+                assert givenValue.equals("new");
+                return oldValue;
+            }
+        };
+
         Map.Entry[] entries = { new SimpleEntry<>("f", "old"),
                                 new SimpleEntry<>("f", "new") };
-        FunctionalHashTrie trie = FunctionalHashTrie.merge(entries, REPLACE);
+        FunctionalHashTrie trie = FunctionalHashTrie.merge(entries, remapper);
         assertEquals(1, trie.size());
-        assertEquals("new", trie.get("f"));
+        assertEquals("old", trie.get("f"));
     }
 
     @Test
