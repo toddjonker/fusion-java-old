@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import com.amazon.fusion.FunctionalHashTrie.Changes;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -229,11 +230,17 @@ public class FunctionalHashTrieTest
 
 
     @Test
-    public void testMergeInvokesRemapper()
+    public void testMergeInvokesChanges()
     {
-        BiFunction remapper = new BiFunction() {
+        Changes changes = new Changes() {
             @Override
-            public Object apply(Object oldValue, Object givenValue)
+            public Object inserting(Object givenValue)
+            {
+                return givenValue;
+            }
+
+            @Override
+            public Object replacing(Object oldValue, Object givenValue)
             {
                 assert givenValue.equals("new");
                 return oldValue;
@@ -242,7 +249,7 @@ public class FunctionalHashTrieTest
 
         Map.Entry[] entries = { new SimpleEntry<>("f", "old"),
                                 new SimpleEntry<>("f", "new") };
-        FunctionalHashTrie trie = FunctionalHashTrie.merge(entries, remapper);
+        FunctionalHashTrie trie = FunctionalHashTrie.fromEntries(entries, changes);
         assertEquals(1, trie.size());
         assertEquals("old", trie.get("f"));
     }
@@ -301,5 +308,45 @@ public class FunctionalHashTrieTest
         FunctionalHashTrie origin = FunctionalHashTrie.empty().with(1, 1).with(2, 2);
         FunctionalHashTrie t = origin.withoutKeys(new Object[]{1, 2});
         assertSame(FunctionalHashTrie.empty(), t);
+    }
+
+
+    private void checkChanges(int changeCount, int delta, Changes changes)
+    {
+        assertEquals("keys changed", changeCount, changes.changeCount());
+        assertEquals("key delta",    delta,       changes.keyCountDelta());
+    }
+
+    @Test
+    public void testWithReusingChanges()
+    {
+        FunctionalHashTrie trie = FunctionalHashTrie.empty();
+
+        Changes changes = new Changes();
+        trie = trie.with(1, 1, changes);
+        checkChanges(1, 1, changes);
+        assertEquals(1, trie.size());
+
+        trie = trie.with(2, 2, changes);
+        checkChanges(2, 2, changes);
+        assertEquals(2, trie.size());
+
+        trie = trie.with(2, 3, changes);
+        checkChanges(3, 2, changes);
+        assertEquals(2, trie.size());
+    }
+
+    @Test
+    public void testMergeReusingChanges()
+    {
+        FunctionalHashTrie empty = FunctionalHashTrie.empty();
+
+        Changes changes = new Changes();
+        FunctionalHashTrie trie1 = empty.with(1, 1, changes);
+
+        // Replace the existing key, so the delta stays the same.
+        FunctionalHashTrie trie2 = trie1.merge(empty.with(1, 2), changes);
+        checkChanges(2, 1, changes);
+        assertEquals(1, trie2.size());
     }
 }

@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie;
-import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Changes;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractSet;
 import java.util.Arrays;
@@ -34,23 +33,10 @@ class FunctionalHashTrie<K, V>
     private final TrieNode<K, V> root;
     private final int size;
 
-
-    // Temporary adaptor; will remove BiFunction soon.
-    private static class RemappingChanges
-        extends Changes
+    // Mostly here so consumers don't have to use HashArrayMappedTrie.
+    static class Changes
+        extends HashArrayMappedTrie.Changes
     {
-        private final BiFunction remapping;
-
-        RemappingChanges(BiFunction remapping)
-        {
-            this.remapping = remapping;
-        }
-
-        @Override
-        protected Object replacing(Object storedValue, Object givenValue)
-        {
-            return remapping.apply(storedValue, givenValue);
-        }
     }
 
 
@@ -61,29 +47,27 @@ class FunctionalHashTrie<K, V>
 
     static <K, V> FunctionalHashTrie<K, V> create(Map<K, V> other)
     {
-        if (other.isEmpty()) return EMPTY;
-
         Changes changes = new Changes();
         TrieNode<K, V> trie = HashArrayMappedTrie.fromMap(other, changes);
-
-        return new FunctionalHashTrie<>(trie, changes.keyCountDelta());
+        return EMPTY.resultFrom(trie, 0, 0, changes);
     }
 
 
-    static <K, V> FunctionalHashTrie<K, V> merge(Iterator<Entry<K, V>> items,
-                                                 BiFunction<V, V, V> remapping)
+    static <K, V> FunctionalHashTrie<K, V> fromEntries(Iterator<Entry<K, V>> items,
+                                                       Changes changes)
     {
-        if (!items.hasNext()) return EMPTY;
+        int priorChangeCount   = changes.changeCount();
+        int priorKeyCountDelta = changes.keyCountDelta();
 
-        Changes changes = new RemappingChanges(remapping);
         TrieNode<K, V> trie = HashArrayMappedTrie.fromEntries(items, changes);
-        return EMPTY.resultFrom(trie, changes);
+
+        return EMPTY.resultFrom(trie, priorChangeCount, priorKeyCountDelta, changes);
     }
 
-    static <K, V> FunctionalHashTrie<K, V> merge(Entry<K, V>[] items,
-                                                 BiFunction<V, V, V> remapping)
+    static <K, V> FunctionalHashTrie<K, V> fromEntries(Entry<K, V>[] items,
+                                                       Changes changes)
     {
-        return merge(Arrays.asList(items).iterator(), remapping);
+        return fromEntries(Arrays.asList(items).iterator(), changes);
     }
 
 
@@ -97,7 +81,7 @@ class FunctionalHashTrie<K, V>
         Changes changes = new Changes();
         TrieNode<K, V> newTrie =
                 HashArrayMappedTrie.fromSelectedKeys(origin.root, keys, changes);
-        return EMPTY.resultFrom(newTrie, changes);
+        return EMPTY.resultFrom(newTrie, 0, 0, changes);
     }
 
 
@@ -144,11 +128,14 @@ class FunctionalHashTrie<K, V>
 
     // TODO: Add a variation of with[out] that returns the previous value (if any).
 
-    private FunctionalHashTrie<K, V> resultFrom(TrieNode<K, V> newRoot, Changes changes)
+    private FunctionalHashTrie<K, V> resultFrom(TrieNode<K, V> newRoot,
+                                                int priorChangeCount,
+                                                int priorKeyCountDelta,
+                                                Changes changes)
     {
-        if (changes.changeCount() != 0)
+        if (changes.changeCount() != priorChangeCount)
         {
-            int newSize = size + changes.keyCountDelta();
+            int newSize = size + changes.keyCountDelta() - priorKeyCountDelta;
             if (newSize == 0) return EMPTY;
             return new FunctionalHashTrie<>(newRoot, newSize);
         }
@@ -165,14 +152,35 @@ class FunctionalHashTrie<K, V>
      */
     public FunctionalHashTrie<K, V> with(K key, V value)
     {
+        return with(key, value, new Changes());
+    }
+
+    /**
+     * Functionally modify this trie, allowing for custom mappings.
+     */
+    public FunctionalHashTrie<K, V> with(K key, V value, Changes changes)
+    {
         if (key == null || value == null)
         {
             throw new NullPointerException(NULL_ERROR_MESSAGE);
         }
 
-        Changes changes = new Changes();
+        int priorChangeCount   = changes.changeCount();
+        int priorKeyCountDelta = changes.keyCountDelta();
+
         TrieNode<K, V> newRoot = root.with(key, value, changes);
-        return resultFrom(newRoot, changes);
+        return resultFrom(newRoot, priorChangeCount, priorKeyCountDelta, changes);
+    }
+
+
+    public FunctionalHashTrie<K, V> merge(FunctionalHashTrie<K, V> that,
+                                          Changes changes)
+    {
+        int priorChangeCount   = changes.changeCount();
+        int priorKeyCountDelta = changes.keyCountDelta();
+
+        TrieNode<K, V> newRoot = root.with(that.iterator(), changes);
+        return resultFrom(newRoot, priorChangeCount, priorKeyCountDelta, changes);
     }
 
 
@@ -194,7 +202,7 @@ class FunctionalHashTrie<K, V>
         {
             Changes changes = new Changes();
             TrieNode<K, V> newRoot = root.without(key, changes);
-            return resultFrom(newRoot, changes);
+            return resultFrom(newRoot, 0, 0, changes);
         }
     }
 
@@ -208,9 +216,23 @@ class FunctionalHashTrie<K, V>
      */
     public FunctionalHashTrie<K, V> withoutKeys(K[] keys)
     {
-        Changes changes = new Changes();
+        return withoutKeys(keys, new Changes());
+    }
+
+    /**
+     * Functionally removes multiple keys from this trie.
+     *
+     * @param keys must not be null.
+     *
+     * @return the resulting trie.
+     */
+    public FunctionalHashTrie<K, V> withoutKeys(K[] keys, Changes changes)
+    {
+        int priorChangeCount   = changes.changeCount();
+        int priorKeyCountDelta = changes.keyCountDelta();
+
         TrieNode<K, V> newRoot = root.withoutKeys(keys, changes);
-        return resultFrom(newRoot, changes);
+        return resultFrom(newRoot, priorChangeCount, priorKeyCountDelta, changes);
     }
 
 
