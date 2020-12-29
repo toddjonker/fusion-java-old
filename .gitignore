@@ -7,3 +7,6 @@ cobertura.ser
 junit*.properties
 tmp*
 FusionJava.iml
+
+# Ignore Gradle project-specific cache directory
+.gradle
