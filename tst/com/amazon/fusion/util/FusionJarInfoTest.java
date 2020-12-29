@@ -25,8 +25,5 @@ public class FusionJarInfoTest
         if (System.getProperty("NOBRAZIL") != null) return;
 
         assertTrue(info.getReleaseLabel().startsWith("R"));
-        assertTrue(info.getBrazilMajorVersion().startsWith("1."));
-        assertTrue(info.getBrazilPackageVersion().startsWith("FusionJava-1."));
-        assertNotNull(info.getBuildTime());
     }
 }

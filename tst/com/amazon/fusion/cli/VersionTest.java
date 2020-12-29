@@ -29,12 +29,6 @@ public class VersionTest
 
         assertEquals(info.getReleaseLabel(),
                      getString(version, "release_label"));
-        assertEquals(info.getBrazilMajorVersion(),
-                     getString(version, "brazil_major_version"));
-        assertEquals(info.getBrazilPackageVersion(),
-                     getString(version, "brazil_package_version"));
-        assertEquals(info.getBuildTime(),
-                     getTimestamp(version, "build_time"));
     }
 
 
