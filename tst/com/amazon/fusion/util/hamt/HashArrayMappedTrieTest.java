@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2018-2021 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.util.hamt;
 
@@ -68,6 +68,20 @@ public class HashArrayMappedTrieTest
         }
     }
 
+    /**
+     * Wraps every value in our HAMT to test invocation of Results.
+     * @param <V>
+     */
+    private static class Wrapper<V>
+    {
+        final V target;
+
+        Wrapper(V target)
+        {
+            this.target = target;
+        }
+    }
+
 
     private static void assertEmpty(TrieNode node)
     {
@@ -76,9 +90,9 @@ public class HashArrayMappedTrieTest
 
     private static <K, V> V assertValuePresent(TrieNode<K, V> node, K key)
     {
-        V found = node.get(key);
+        Wrapper<V> found = (Wrapper<V>) node.get(key);
         assertNotNull(found);
-        return found;
+        return found.target;
     }
 
     private static <K, V> void assertValueAbsent(TrieNode<K, V> node, K key)
@@ -105,7 +119,7 @@ public class HashArrayMappedTrieTest
 
         private final TrieNode<K, V> oldNode;
         private final int            oldSize;
-        private final Results        results = new Results();
+        private final CheckingResults results = new CheckingResults();
 
         private K              key;
         private V              oldValue;
@@ -123,7 +137,10 @@ public class HashArrayMappedTrieTest
         private void recordKey(K key, V value)
         {
             this.key = key;
-            oldValue = oldNode.get(key);
+
+            Wrapper<V> wrapper = (Wrapper<V>) oldNode.get(key);
+            oldValue = (wrapper == null ? null : wrapper.target);
+
             newValue = value;
         }
 
@@ -132,6 +149,7 @@ public class HashArrayMappedTrieTest
             recordKey(key, value);
 
             newNode = oldNode.with(key, value, results);
+            assertTrue("Results not invoked", results.invoked);
             assertValueEquals(value, newNode, key);
             assertRootReplacementImpliesModification();
 
@@ -143,6 +161,7 @@ public class HashArrayMappedTrieTest
             recordKey(key, value);
 
             newNode = oldNode.mWith(key, value, results);
+            assertTrue("Results not invoked", results.invoked);
             assertValueEquals(value, newNode, key);
             assertRootReplacementImpliesModification();
 
@@ -167,6 +186,7 @@ public class HashArrayMappedTrieTest
             assertNull("old value", oldValue);
 
             mode = Mode.INSERT;
+            results.assertInserted();
             assertTrue("results not modified", results.changes() > 0);
             assertSizeDelta(1);
             return this;
@@ -179,6 +199,7 @@ public class HashArrayMappedTrieTest
             assertNotSame("mapped value", oldValue, newValue);
 
             mode = Mode.REPLACE;
+            results.assertReplaced();
             assertTrue("results not modified", results.changes() > 0);
             assertSizeDelta(0);
             return this;
@@ -190,6 +211,7 @@ public class HashArrayMappedTrieTest
             assertNotNull("old value", oldValue);
 
             mode = Mode.REMOVE;
+            results.assertRemoved();
             assertTrue("results not modified", results.changes() > 0);
             assertSizeDelta(-1);
             return this;
@@ -201,6 +223,7 @@ public class HashArrayMappedTrieTest
             assertSame("mapped value", oldValue, newValue);
 
             mode = Mode.NOOP;
+            // TODO what about Results?
             assertEquals("results modified", 0, results.changes());
             assertSizeDelta(0);
             return this;
@@ -246,6 +269,65 @@ public class HashArrayMappedTrieTest
         {
             assertEquals("size delta", delta, results.keyCountDelta());
             assertEquals("new size", oldSize + delta, newNode.countKeys());
+        }
+
+        private class CheckingResults
+            extends Results
+        {
+            boolean invoked  = false;
+            boolean inserted = false;
+            boolean replaced = false;
+            boolean removed  = false;
+
+            @Override
+            public Wrapper<V> inserting(Object givenValue)
+            {
+                invoked = inserted = true;
+
+                assertFalse("wrapper shouldn't be given", givenValue instanceof Wrapper);
+                assertSame(newValue, givenValue);
+                return new Wrapper(givenValue);
+            }
+
+            @Override
+            public Wrapper<V> replacing(Object storedValue, Object givenValue)
+            {
+                Wrapper<V> wrapper = (Wrapper<V>) storedValue;
+                invoked = replaced = true;
+                assertSame(oldValue, wrapper.target);
+                assertSame(newValue, givenValue);
+
+                if (givenValue == wrapper.target)
+                {
+                    // Don't replace an identical value.
+                    return wrapper;
+                }
+
+                return new Wrapper(givenValue);
+            }
+
+            protected void removing(Object storedValue)
+            {
+                invoked = removed = true;
+
+                Wrapper<V> wrapper = (Wrapper<V>) storedValue;
+                assertSame(oldValue, wrapper.target);
+            }
+
+            void assertInserted()
+            {
+                assertTrue("Results.inserting() not invoked", inserted);
+            }
+
+            void assertReplaced()
+            {
+                assertTrue("Results.replacing() not invoked", replaced);
+            }
+
+            void assertRemoved()
+            {
+                assertTrue("Results.removing() not invoked", removed);
+            }
         }
     }
 
@@ -374,6 +456,12 @@ public class HashArrayMappedTrieTest
         assertTrue("too many pairs", kvPairs.length < 16);
         assertEquals(0, kvPairs.length % 2);
 
+        for (int i = 0; i < kvPairs.length; i += 2)
+        {
+            V value = (V) kvPairs[i+1];
+            kvPairs[i+1] = new Wrapper(value);
+        }
+
         return new FlatNode<>(kvPairs);
     }
 
@@ -486,7 +574,8 @@ public class HashArrayMappedTrieTest
                 {
                     assertFalse(found);
                     found = true;
-                    assertSame(entry.getValue(), kvPairs[k + 1]);
+                    Wrapper w = (Wrapper) kvPairs[k + 1];
+                    assertSame(entry.getValue(), w.target);
                 }
             }
         }
@@ -515,9 +604,11 @@ public class HashArrayMappedTrieTest
     {
         assertEquals(0, kvPairs.length % 2);
         int hash = hashCodeFor(kvPairs[0]);
-        for (int i = 2; i < kvPairs.length; i += 2)
+        for (int i = 0; i < kvPairs.length; i += 2)
         {
             assertEquals(hash, hashCodeFor(kvPairs[i]));
+            V value = (V) kvPairs[i+1];
+            kvPairs[i+1] = new Wrapper(value);
         }
         return new CollisionNode<>(hash, kvPairs);
     }
@@ -1027,6 +1118,7 @@ public class HashArrayMappedTrieTest
     public void testCorrectShifting()
     {
         Results results = new Results();
+
         TrieNode nested = new BitMappedNode().with(0x20, 5, new CustomKey(0, "redherring"), 1, results);
         // 0x20 = 0b00001 00000 -> the second slot in a bitmap with a node at shift 5.
         assertEquals(0b010, ((BitMappedNode) nested).bitmap);
@@ -1069,9 +1161,11 @@ public class HashArrayMappedTrieTest
     {
         TrieNode customFHT = empty();
 
+        Results results = new Results();
+
         // These two will be in the collision node at the bottom.
-        customFHT = customFHT.with(new CustomKey(0, "foo"), "A", new Results());
-        customFHT = customFHT.with(new CustomKey(0, "bar"), "B", new Results());
+        customFHT = customFHT.with(new CustomKey(0, "foo"), "A", results);
+        customFHT = customFHT.with(new CustomKey(0, "bar"), "B", results);
 
         // For each level, push in enough nodes s.t. we convert from a FlatNode to a BitMappedNode
         for (int shift = 0; shift <= 25; shift += 5)
@@ -1080,7 +1174,7 @@ public class HashArrayMappedTrieTest
             for (int i = 1; i < 32; i++)
             {
                 CustomKey key = new CustomKey(i << shift, UUID.randomUUID().toString());
-                customFHT = customFHT.with(key, key, new Results());
+                customFHT = customFHT.with(key, key, results);
             }
         }
         // The last level has to be more custom built since the only possible hash keys are going to be 00, 01, 10, and 11.
@@ -1091,7 +1185,7 @@ public class HashArrayMappedTrieTest
             for (int j = 1; j < 4; j++)
             {
                 CustomKey key = new CustomKey(j << 30, UUID.randomUUID().toString());
-                customFHT = customFHT.with(key, key, new Results());
+                customFHT = customFHT.with(key, key, results);
             }
         }
 
@@ -1119,7 +1213,7 @@ public class HashArrayMappedTrieTest
 
 
         // Now let's verify that accesses don't shift over 30. There's an assert in hashFragment()
-        customFHT = customFHT.with(new CustomKey(4 << 30, "baz"), "C", new Results()); // 4 << 30 == 0 << 30 (for 32 bit values)
+        customFHT = customFHT.with(new CustomKey(4 << 30, "baz"), "C", results); // 4 << 30 == 0 << 30 (for 32 bit values)
 
         assertEquals("A", customFHT.get(new CustomKey(0, "foo")));
         assertEquals("B", customFHT.get(new CustomKey(0, "bar")));

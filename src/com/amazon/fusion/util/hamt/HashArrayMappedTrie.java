@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2018-2021 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.util.hamt;
 
@@ -43,11 +43,11 @@ public final class HashArrayMappedTrie
         new Random().nextInt();
 
     /**
-     * Describes the results of one or more trie operations.
+     * Intercepts and records changes made by one or more trie operations.
      * Instances can be reused across multiple calls into the same or different
      * tries, reducing the overall number of object allocations.
      */
-    public static final class Results
+    public static class Results
     {
         private int keysAdded     = 0;
         private int keysReplaced  = 0;
@@ -78,14 +78,52 @@ public final class HashArrayMappedTrie
             return keysAdded - keysRemoved;
         }
 
-        private void keyAdded()
+        /**
+         * Intercepts insertions, allowing a given value to be stored in a
+         * different form.
+         *
+         * @param givenValue the value that was requested to be inserted.
+         *
+         * @return the value to be stored.
+         */
+        protected Object inserting(Object givenValue)
         {
-            keysAdded++;
+            return givenValue;
         }
 
-        private void keyRemoved()
+        private Object keyAdded(Object givenValue)
         {
+            keysAdded++;
+            return inserting(givenValue);
+        }
+
+        /**
+         * Intercepts the removal of a key-value pair.
+         *
+         * @param storedValue the value being removed from the trie.
+         */
+
+        protected void removing(Object storedValue)
+        {
+        }
+
+        private void keyRemoved(Object storedValue)
+        {
+            removing(storedValue);
             keysRemoved++;
+        }
+
+        /**
+         * Intercepts the replacement of a value for the same key.
+         *
+         * @param storedValue the value currently present in the trie.
+         * @param givenValue the value that the operation is inserting.
+         *
+         * @return the value to be stored.
+         */
+        protected Object replacing(Object storedValue, Object givenValue)
+        {
+            return givenValue;
         }
 
         private void keyReplaced()
@@ -173,6 +211,22 @@ public final class HashArrayMappedTrie
             return with(hashCodeFor(key), 0, key, value, results);
         }
 
+        public TrieNode<K, V> with(Entry<K, V> entry, Results results)
+        {
+            return with(entry.getKey(), entry.getValue(), results);
+        }
+
+        public TrieNode<K, V> with(Iterator<Entry<K, V>> entries,
+                                   Results results)
+        {
+            TrieNode<K, V> root = this;
+            while (entries.hasNext())
+            {
+                root = root.with(entries.next(), results);
+            }
+            return root;
+
+        }
 
         /**
          * Imperatively inserts or updates a key in this trie, returning the resulting root node.
@@ -341,15 +395,15 @@ public final class HashArrayMappedTrie
         @Override
         TrieNode<K, V> with(int hash, int shift, K key, V value, Results results)
         {
-            results.keyAdded();
-            return new FlatNode<>(key, value);
+            Object newValue = results.keyAdded(value);
+            return new FlatNode<>(key, newValue);
         }
 
         @Override
         TrieNode<K, V> mWith(int hash, int shift, K key, V value, Results results)
         {
-            results.keyAdded();
-            return new FlatNode<>(key, value);
+            Object newValue = results.keyAdded(value);
+            return new FlatNode<>(key, newValue);
         }
 
         @Override
@@ -398,7 +452,7 @@ public final class HashArrayMappedTrie
             kvPairs = new Object[0];
         }
 
-        FlatNode(K key, V value)
+        FlatNode(K key, Object value)
         {
             this(new Object[]{key, value});
         }
@@ -462,14 +516,16 @@ public final class HashArrayMappedTrie
                 }
                 else
                 {
-                    if (equivVals(valOrNode, value))
+                    Object storedValue = valOrNode;
+                    Object newValue = results.replacing(storedValue, value);
+                    if (storedValue == newValue)
                     {
                         return this;
                     }
                     else
                     {
                         results.keyReplaced();
-                        return new FlatNode<>(cloneAndModify(kvPairs, index + 1, value));
+                        return new FlatNode<>(cloneAndModify(kvPairs, index + 1, newValue));
                     }
                 }
             }
@@ -481,8 +537,8 @@ public final class HashArrayMappedTrie
                 }
                 else
                 {
-                    results.keyAdded();
-                    Object[] newPairs = cloneAndExtend(kvPairs, key, value);
+                    Object newValue = results.keyAdded(value);
+                    Object[] newPairs = cloneAndExtend(kvPairs, key, newValue);
                     return new FlatNode<>(newPairs);
                 }
             }
@@ -513,10 +569,12 @@ public final class HashArrayMappedTrie
                 }
                 else
                 {
-                    if (!equivVals(valOrNode, value))
+                    Object storedValue = valOrNode;
+                    Object newValue = results.replacing(storedValue, value);
+                    if (storedValue != newValue)
                     {
                         results.keyReplaced();
-                        kvPairs[index + 1] = value;
+                        kvPairs[index + 1] = newValue;
                     }
                 }
             }
@@ -528,8 +586,8 @@ public final class HashArrayMappedTrie
                 }
                 else
                 {
-                    results.keyAdded();
-                    kvPairs = cloneAndExtend(kvPairs, key, value);
+                    Object newValue = results.keyAdded(value);
+                    kvPairs = cloneAndExtend(kvPairs, key, newValue);
                 }
             }
 
@@ -585,7 +643,7 @@ public final class HashArrayMappedTrie
                 }
                 else
                 {
-                    results.keyRemoved();
+                    results.keyRemoved(kvPairs[index + 1]);
                     return withoutPair(index);
                 }
             }
@@ -729,7 +787,8 @@ public final class HashArrayMappedTrie
                 if (index != -1)
                 {
                     Object storedValue = kvPairs[index + 1];
-                    if (storedValue == value)
+                    Object newValue = results.replacing(storedValue, value);
+                    if (storedValue == newValue)
                     {
                         return this;
                     }
@@ -738,20 +797,20 @@ public final class HashArrayMappedTrie
                         results.keyReplaced();
                         return makeSimilar(cloneAndModify(kvPairs,
                                                           index + 1,
-                                                          value));
+                                                          newValue));
                     }
                 }
                 else
                 {
-                    results.keyAdded();
-                    Object[] newPairs = cloneAndExtend(kvPairs, key, value);
+                    Object newValue = results.keyAdded(value);
+                    Object[] newPairs = cloneAndExtend(kvPairs, key, newValue);
                     return makeSimilar(newPairs);
                 }
             }
 
             // If it doesn't share the hash, push this collision node down a level.
-            results.keyAdded();
-            return new FlatNode<>(new Object[]{null, this, key, value});
+            Object newValue = results.keyAdded(value);
+            return new FlatNode<>(new Object[]{null, this, key, newValue});
         }
 
 
@@ -768,24 +827,25 @@ public final class HashArrayMappedTrie
                 if (index != -1)
                 {
                     Object storedValue = kvPairs[index + 1];
-                    if (storedValue != value)
+                    Object newValue = results.replacing(storedValue, value);
+                    if (storedValue != newValue)
                     {
                         results.keyReplaced();
-                        kvPairs[index + 1] = value;
+                        kvPairs[index + 1] = newValue;
                     }
                 }
                 else
                 {
-                    results.keyAdded();
-                    kvPairs = cloneAndExtend(kvPairs, key, value);
+                    Object newValue = results.keyAdded(value);
+                    kvPairs = cloneAndExtend(kvPairs, key, newValue);
                 }
 
                 return this;
             }
 
             // If it doesn't share the hash, push this collision node down a level.
-            results.keyAdded();
-            return new FlatNode<>(new Object[]{null, this, key, value});
+            Object newValue = results.keyAdded(value);
+            return new FlatNode<>(new Object[]{null, this, key, newValue});
         }
 
 
@@ -933,35 +993,37 @@ public final class HashArrayMappedTrie
                 }
                 else if (equivKeys(keyOrNull, key))
                 {
-                    if (equivVals(valOrNode, value))
+                    Object storedValue = valOrNode;
+                    Object newValue = results.replacing(storedValue, value);
+                    if (storedValue == newValue)
                     {
                         return this;
                     }
                     else // Same key, different value
                     {
                         results.keyReplaced();
-                        return replace(keyIndex + 1, value);
+                        return replace(keyIndex + 1, newValue);
                     }
                 }
                 else // Hash fragment collision
                 {
-                    results.keyAdded();
+                    Object newValue = results.keyAdded(value);
                     FlatNode<K, V> newNode = resolveCollision(hashCodeFor(keyOrNull),
                                                               (K) keyOrNull,
                                                               (V) valOrNode,
                                                               hash,
                                                               key,
-                                                              value);
+                                                              (V) newValue);
                     return replace(keyIndex, null, keyIndex + 1, newNode);
                 }
             }
             else // Adding a new child
             {
-                results.keyAdded();
+                Object newValue = results.keyAdded(value);
                 int numVals = Integer.bitCount(bitmap);
                 if (numVals >= MAX_CHILDREN)
                 {
-                    return expand(key, value, hashFragment, numVals);
+                    return expand(key, (V) newValue, hashFragment, numVals);
                 }
                 else
                 {
@@ -970,7 +1032,7 @@ public final class HashArrayMappedTrie
                                                               2 * (numVals + 1),
                                                               keyIndex,
                                                               key,
-                                                              value);
+                                                              newValue);
                     return new BitMappedNode<>(bitmap | bit, newPairs);
                 }
             }
@@ -1010,38 +1072,40 @@ public final class HashArrayMappedTrie
                 }
                 else if (equivKeys(keyOrNull, key))
                 {
-                    if (!equivVals(valOrNode, value))
+                    Object storedValue = valOrNode;
+                    Object newValue = results.replacing(storedValue, value);
+                    if (storedValue != newValue)
                     {
                         results.keyReplaced();
-                        kvPairs[keyIndex + 1] = value;
+                        kvPairs[keyIndex + 1] = newValue;
                     }
                 }
                 else // Hash fragment collision
                 {
-                    results.keyAdded();
+                    Object newValue = results.keyAdded(value);
                     TrieNode<K, V> newNode = resolveCollision(hashCodeFor(keyOrNull),
                                                               (K) keyOrNull,
                                                               (V) valOrNode,
                                                               hash,
                                                               key,
-                                                              value);
+                                                              (V) newValue);
                     kvPairs[keyIndex] = null;
                     kvPairs[keyIndex + 1] = newNode;
                 }
             }
             else // New hash fragment
             {
-                results.keyAdded();
+                Object newValue = results.keyAdded(value);
                 int numVals = Integer.bitCount(bitmap);
                 if (numVals >= MAX_CHILDREN)
                 {
-                    return expand(key, value, hashFragment, numVals);
+                    return expand(key, newValue, hashFragment, numVals);
                 }
                 else if (numVals * 2 < kvPairs.length)
                 {
                     System.arraycopy(kvPairs, keyIndex, kvPairs, keyIndex + 2, 2 * numVals - keyIndex);
                     kvPairs[keyIndex] = key;
-                    kvPairs[keyIndex + 1] = value;
+                    kvPairs[keyIndex + 1] = newValue;
                     bitmap |= bit;
                 }
                 else
@@ -1052,7 +1116,7 @@ public final class HashArrayMappedTrie
                                                    2 * (numVals + 2),
                                                    keyIndex,
                                                    key,
-                                                   value);
+                                                   newValue);
                     bitmap |= bit;
                 }
             }
@@ -1062,7 +1126,7 @@ public final class HashArrayMappedTrie
 
 
         private HashArrayMappedNode<K, V> expand(K key,
-                                                 V value,
+                                                 Object value,
                                                  int hashFragment,
                                                  int numVals)
         {
@@ -1159,7 +1223,7 @@ public final class HashArrayMappedTrie
             }
             else if (equivKeys(keyOrNull, key))
             {
-                results.keyRemoved();
+                results.keyRemoved(valOrNode);
                 if (bitmap == bit)
                 {
                     return empty();
@@ -1280,8 +1344,8 @@ public final class HashArrayMappedTrie
 
             if (node == null)
             {
-                results.keyAdded();
-                TrieNode<K, V> newNode = new FlatNode<>(key, value);
+                Object newValue = results.keyAdded(value);
+                TrieNode<K, V> newNode = new FlatNode<>(key, (V) newValue);
                 return new HashArrayMappedNode<>(count + 1,
                                                  cloneAndModify(nodes,
                                                                 index,
@@ -1318,8 +1382,8 @@ public final class HashArrayMappedTrie
 
             if (node == null)
             {
-                results.keyAdded();
-                TrieNode<K, V> newNode = new FlatNode<>(key, value);
+                Object newValue = results.keyAdded(value);
+                TrieNode<K, V> newNode = new FlatNode<>(key, newValue);
                 nodes[index] = newNode;
                 count++;
             }

@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2018-2021 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -34,6 +34,26 @@ class FunctionalHashTrie<K, V>
     private final TrieNode<K, V> root;
     private final int size;
 
+
+    // Temporary adaptor; will remove BiFunction soon.
+    private static class RemappingResults
+        extends Results
+    {
+        private final BiFunction remapping;
+
+        RemappingResults(BiFunction remapping)
+        {
+            this.remapping = remapping;
+        }
+
+        @Override
+        protected Object replacing(Object storedValue, Object givenValue)
+        {
+            return remapping.apply(storedValue, givenValue);
+        }
+    }
+
+
     static <K, V> FunctionalHashTrie<K, V> empty()
     {
         return EMPTY;
@@ -53,26 +73,11 @@ class FunctionalHashTrie<K, V>
     static <K, V> FunctionalHashTrie<K, V> merge(Iterator<Entry<K, V>> items,
                                                  BiFunction<V, V, V> remapping)
     {
-        Results results = new Results();
+        if (!items.hasNext()) return EMPTY;
 
-        TrieNode<K, V> trie = HashArrayMappedTrie.empty();
-        while (items.hasNext())
-        {
-            Entry<K, V> item = items.next();
-
-            // TODO: Improve performance by having MutableHashTrie perform the merge operation itself.
-            V prev = trie.get(item.getKey());
-            if (prev != null)
-            {
-                trie = trie.mWith(item.getKey(), remapping.apply(prev, item.getValue()), results);
-            }
-            else
-            {
-                trie = trie.mWith(item.getKey(), item.getValue(), results);
-            }
-        }
-
-        return new FunctionalHashTrie<>(trie, results.keyCountDelta());
+        Results results = new RemappingResults(remapping);
+        TrieNode<K, V> trie = HashArrayMappedTrie.fromEntries(items, results);
+        return EMPTY.resultFrom(trie, results);
     }
 
     static <K, V> FunctionalHashTrie<K, V> merge(Entry<K, V>[] items,
