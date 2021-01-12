@@ -2,6 +2,8 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FunctionalHashTrie.fromArrays;
+import static com.amazon.fusion.FunctionalHashTrie.fromEntries;
 import static com.amazon.fusion.FunctionalHashTrie.fromSelectedKeys;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -249,7 +251,7 @@ public class FunctionalHashTrieTest
 
         Map.Entry[] entries = { new SimpleEntry<>("f", "old"),
                                 new SimpleEntry<>("f", "new") };
-        FunctionalHashTrie trie = FunctionalHashTrie.fromEntries(entries, changes);
+        FunctionalHashTrie trie = fromEntries(entries, changes);
         assertEquals(1, trie.size());
         assertEquals("old", trie.get("f"));
     }
@@ -260,6 +262,46 @@ public class FunctionalHashTrieTest
         FunctionalHashTrie trie1 = FunctionalHashTrie.empty().with(1, 1);
         FunctionalHashTrie trie2 = trie1.with(1, 1);
         assertSame(trie1, trie2);
+    }
+
+
+    @Test
+    public void fromArraysGivenEmptyArraysReturnsEmptySingleton()
+    {
+        Changes changes = new Changes();
+
+        FunctionalHashTrie t = fromArrays(new Object[0], new Object[0], changes);
+
+        assertSame(FunctionalHashTrie.empty(), t);
+        checkChanges(0, 0, changes);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fromArraysRequiresEqualLengthArrays()
+    {
+        fromArrays(new Object[] { 1 }, new Object[] { 1, 2 }, new Changes());
+    }
+
+    @Test
+    public void fromArraysReusesChanges()
+    {
+        Changes changes = new Changes();
+
+        FunctionalHashTrie t = fromArrays(new Object[] { 1, 2 },
+                                           new Object[] { 3, 4 },
+                                           changes);
+
+        checkChanges(2, 2, changes);
+        assertEquals(3, t.get(1));
+        assertEquals(4, t.get(2));
+
+        t = fromArrays(new Object[] { 5, 6, 5 },
+                        new Object[] { 8, 9, 0 },
+                        changes);
+
+        checkChanges(5, 4, changes);
+        assertEquals(0, t.get(5));
+        assertEquals(9, t.get(6));
     }
 
 

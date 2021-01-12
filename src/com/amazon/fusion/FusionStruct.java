@@ -283,27 +283,11 @@ final class FusionStruct
                                                   Object[] values,
                                                   BaseSymbol[] anns)
     {
-        FunctionalHashTrie<String, Object> map = FunctionalHashTrie.empty();
-        if (names.length == 0)
-        {
-            if (anns.length == 0)
-            {
-                return EMPTY_STRUCT;
-            }
-        }
-        else
-        {
-            StructChanges changes = new StructChanges();
-            for (int i = 0; i < names.length; i++)
-            {
-                String field  = names[i];
-                Object newElt = values[i];  // FIXME if this is an array, then the size will be wrong.
+        StructChanges changes = new StructChanges();
+        FunctionalHashTrie<String, Object> trie =
+            FunctionalHashTrie.fromArrays(names, values, changes);
 
-                map = map.with(field, newElt, changes);
-            }
-        }
-
-        return new FunctionalStruct(map, anns, names.length);
+        return immutableStruct(trie, anns, changes.valueCountDelta);
     }
 
     static NonNullImmutableStruct immutableStruct(String[] names,
@@ -357,21 +341,10 @@ final class FusionStruct
                                        Object[] values,
                                        String[] anns)
     {
-        // TODO push down into FHT
-        FunctionalHashTrie<String, Object> map = FunctionalHashTrie.empty();
-        if (names.length != 0)
-        {
-            StructChanges changes = new StructChanges();
-            for (int i = 0; i < names.length; i++)
-            {
-                String field  = names[i];
-                Object newElt = values[i];
-
-                map = map.with(field, newElt, changes);
-            }
-        }
-
-        return new MutableStruct(map, internSymbols(anns), names.length);
+        StructChanges changes = new StructChanges();
+        FunctionalHashTrie<String, Object> trie =
+            FunctionalHashTrie.fromArrays(names, values, changes);
+        return new MutableStruct(trie, internSymbols(anns), changes.valueCountDelta);
     }
 
 

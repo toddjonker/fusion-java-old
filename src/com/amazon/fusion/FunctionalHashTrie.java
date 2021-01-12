@@ -71,6 +71,17 @@ class FunctionalHashTrie<K, V>
         return fromEntries(Arrays.asList(items).iterator(), changes);
     }
 
+    static <K, V> FunctionalHashTrie<K, V> fromArrays(K[] keys,
+                                                      V[] values,
+                                                      Changes changes)
+    {
+        int priorChangeCount   = changes.changeCount();
+        int priorKeyCountDelta = changes.keyCountDelta();
+
+        TrieNode<K, V> trie = HashArrayMappedTrie.fromArrays(keys, values, changes);
+
+        return EMPTY.resultFrom(trie, priorChangeCount, priorKeyCountDelta, changes);
+    }
 
     /**
      * Creates a trie by copying entries for the {@code keys} from the

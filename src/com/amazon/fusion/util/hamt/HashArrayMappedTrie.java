@@ -154,6 +154,14 @@ public final class HashArrayMappedTrie
         return trie.mWith(entries, changes);
     }
 
+    public static <K, V> TrieNode<K, V> fromArrays(K[] keys,
+                                                   V[] values,
+                                                   Changes changes)
+    {
+        TrieNode<K, V> trie = empty();
+        return trie.mWithEntries(keys, values, changes);
+    }
+
     /**
      * Creates a trie by copying entries for the {@code keys} from the
      * {@code origin} trie.
@@ -253,6 +261,21 @@ public final class HashArrayMappedTrie
             while (entries.hasNext())
             {
                 root = root.mWith(entries.next(), changes);
+            }
+            return root;
+        }
+
+        public TrieNode<K, V> mWithEntries(K[] keys, V[] values, Changes changes)
+        {
+            if (keys.length != values.length)
+            {
+                throw new IllegalArgumentException("keys and values have unequal length");
+            }
+
+            TrieNode<K, V> root = this;
+            for (int i = 0; i < keys.length; i++)
+            {
+                root = root.mWith(keys[i], values[i], changes);
             }
             return root;
         }

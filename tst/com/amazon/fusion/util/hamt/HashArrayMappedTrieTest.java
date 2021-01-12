@@ -3,6 +3,7 @@
 package com.amazon.fusion.util.hamt;
 
 import static com.amazon.fusion.util.hamt.HashArrayMappedTrie.empty;
+import static com.amazon.fusion.util.hamt.HashArrayMappedTrie.fromArrays;
 import static com.amazon.fusion.util.hamt.HashArrayMappedTrie.fromSelectedKeys;
 import static com.amazon.fusion.util.hamt.HashArrayMappedTrie.hashCodeFor;
 import static org.junit.Assert.assertEquals;
@@ -1237,6 +1238,53 @@ public class HashArrayMappedTrieTest
         assertTrue(newValues.contains("A"));
         assertTrue(newValues.contains("B"));
         assertTrue(newValues.contains("C"));
+    }
+
+    //=========================================================================
+    // Construction methods
+
+    @Test
+    public void fromArraysGivenEmptyArraysReturnsEmptySingleton()
+    {
+        Changes changes = new Changes();
+
+        TrieNode t = fromArrays(new Object[0], new Object[0], changes);
+
+        assertSame(empty(), t);
+        assertEquals(0, changes.keyCountDelta());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fromArraysRequiresEqualLengthArrays()
+    {
+        fromArrays(new Object[] { 1 }, new Object[] { 1, 2 }, new Changes());
+    }
+
+    @Test
+    public void fromArraysAssociatesProperly()
+    {
+        Changes changes = new Changes();
+
+        TrieNode t = fromArrays(new Object[] { 1, 2 },
+                                new Object[] { 3, 4 },
+                                changes);
+
+        assertEquals(2, changes.keyCountDelta());
+        assertEquals(3, t.get(1));
+        assertEquals(4, t.get(2));
+    }
+
+    @Test
+    public void fromArraysInsertsInGivenOrder()
+    {
+        Changes changes = new Changes();
+
+        TrieNode t = fromArrays(new Object[] { 1, 1 },
+                                new Object[] { 3, 4 },
+                                changes);
+
+        assertEquals(1, changes.keyCountDelta());
+        assertEquals(4, t.get(1));
     }
 
 
