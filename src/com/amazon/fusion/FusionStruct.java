@@ -78,17 +78,73 @@ final class FusionStruct
     private static class StructChanges
         extends FunctionalHashTrie.Changes
     {
+        int valueCountDelta = 0;
+
+        int count(Object value)
+        {
+            if (value instanceof Object[])
+            {
+                return ((Object[]) value).length;
+            }
+            return 1;
+        }
+
         @Override
         public Object inserting(Object givenValue)
         {
+            valueCountDelta += count(givenValue);
             return givenValue;
         }
 
         @Override
         public Object replacing(Object storedValue, Object givenValue)
         {
-            // TODO Inline; this is the only remaining caller.
-            return mergeValuesForKey(storedValue, givenValue);
+            Object[] newArray;
+            if (storedValue instanceof Object[])
+            {
+                Object[] storedArray = (Object[]) storedValue;
+                if (givenValue instanceof Object[])
+                {
+                    Object[] givenArray = (Object[]) givenValue;
+
+                    int storedLen = storedArray.length;
+                    int givenLen  = givenArray.length;
+                    newArray = Arrays.copyOf(storedArray, storedLen + givenLen);
+                    System.arraycopy(givenArray, 0, newArray, storedLen, givenLen);
+
+                    valueCountDelta += givenLen;
+                }
+                else
+                {
+                    newArray = extend(storedArray, givenValue);
+                    valueCountDelta++;
+                }
+            }
+            else if (givenValue instanceof Object[])
+            {
+                Object[] givenArray = (Object[]) givenValue;
+                newArray = extend(givenArray, storedValue);
+                valueCountDelta += givenArray.length;
+            }
+            else
+            {
+                newArray = new Object[] {storedValue, givenValue};
+                valueCountDelta++;
+            }
+            return newArray;
+        }
+
+        public void removing(Object storedValue)
+        {
+            valueCountDelta -= count(storedValue);
+        }
+
+        private static Object[] extend(Object[] array, Object element)
+        {
+            int len = array.length;
+            array = Arrays.copyOf(array, len+1);
+            array[len] = element;
+            return array;
         }
     }
 
@@ -102,12 +158,14 @@ final class FusionStruct
         @Override
         public Object inserting(Object givenValue)
         {
+            valueCountDelta++;
             return oneify(givenValue);
         }
 
         @Override
         public Object replacing(Object storedValue, Object givenValue)
         {
+            valueCountDelta += 1 - count(storedValue);
             return oneify(givenValue);
         }
     }
@@ -170,9 +228,10 @@ final class FusionStruct
     {
         FunctionalHashTrie<String, Object> fht;
 
+        StructChanges changes = new StructChanges();
         try
         {
-            fht = FunctionalHashTrie.fromEntries(entries, new StructChanges());
+            fht = FunctionalHashTrie.fromEntries(entries, changes);
         }
         catch (RuntimeException e)
         {
@@ -183,7 +242,7 @@ final class FusionStruct
             throw e;
         }
 
-        return immutableStruct(fht, internSymbols(annotations), computeSize(fht));
+        return immutableStruct(fht, internSymbols(annotations), changes.valueCountDelta);
     }
 
     private static NonNullImmutableStruct
@@ -316,46 +375,6 @@ final class FusionStruct
     }
 
 
-    /**
-     * Merges one or more new values for a key with one or more existing values.
-     *
-     * @param prev may be a single value, or an array of values.
-     * @param value may be a single value, or an array of values.
-     *
-     * @return the merged array of values.
-     */
-    private static Object[] mergeValuesForKey(Object prev, Object value)
-    {
-        Object[] multi;
-        if (prev instanceof Object[])
-        {
-            Object[] prevArray = (Object[]) prev;
-            if (value instanceof Object[])
-            {
-                Object[] moreArray = (Object[]) value;
-
-                int prevLen = prevArray.length;
-                int moreLen = moreArray.length;
-                multi = Arrays.copyOf(prevArray, prevLen + moreLen);
-                System.arraycopy(moreArray, 0, multi, prevLen, moreLen);
-            }
-            else
-            {
-                multi = extend(prevArray, value);
-            }
-        }
-        else if (value instanceof Object[])
-        {
-            multi = extend((Object[]) value, prev);
-        }
-        else
-        {
-            multi = new Object[] { prev, value };
-        }
-        return multi;
-    }
-
-
     // TODO push down into HAMT.transform
     private static
     FunctionalHashTrie<String, Object> structImplOneify(FunctionalHashTrie<String, Object> map)
@@ -376,28 +395,6 @@ final class FusionStruct
     //========================================================================
     // Utilities
 
-    // TODO get rid of this with a vengeance
-    private static int computeSize(FunctionalHashTrie<String, Object> map)
-    {
-        int size = map.size();
-        for (Map.Entry<String, Object> entry : map)
-        {
-            Object values = entry.getValue();
-            if (values instanceof Object[])
-            {
-                size += ((Object[]) values).length - 1;
-            }
-        }
-        return size;
-    }
-
-    private static Object[] extend(Object[] array, Object element)
-    {
-        int len = array.length;
-        array = Arrays.copyOf(array, len+1);
-        array[len] = element;
-        return array;
-    }
 
     private static Object bounceDefaultResult(Evaluator eval, Object def)
         throws FusionException
@@ -951,11 +948,6 @@ final class FusionStruct
                                             BaseSymbol[] annotations,
                                             int size);
 
-        MapBasedStruct makeSimilar(FunctionalHashTrie<String, Object> map)
-        {
-            return makeSimilar(map, myAnnotations, computeSize(map));
-        }
-
         MapBasedStruct makeSimilar(FunctionalHashTrie<String, Object> map, int size)
         {
             return makeSimilar(map, myAnnotations, size);
@@ -1157,13 +1149,13 @@ final class FusionStruct
         public Object put(Evaluator eval, String key, Object value)
             throws FusionException
         {
-            FunctionalHashTrie<String, Object> map = getMap(eval);
-            Object prior = map.get(key);
-            int newSize = size() + computeSizeDifference(prior);
+            // `put` replaces existing values at the key; don't allow duplicates.
+            StructChanges changes = new Struct1Changes();
 
-            FunctionalHashTrie<String, Object> newMap = map.with(key, value);
+            FunctionalHashTrie<String, Object> newMap =
+                getMap(eval).with(key, value, changes);
 
-            return makeSimilar(newMap, newSize);
+            return makeSimilar(newMap, mySize + changes.valueCountDelta);
         }
 
         @Override
@@ -1187,18 +1179,20 @@ final class FusionStruct
 
             if (newMap == oldMap) return this;
 
-            return makeSimilar(newMap);
+            return makeSimilar(newMap, mySize + changes.valueCountDelta);
         }
 
         @Override
         public Object retainKeys(Evaluator eval, String[] keys)
             throws FusionException
         {
+            StructChanges changes = new StructChanges();
+
             FunctionalHashTrie<String, Object> oldMap = getMap(eval);
             FunctionalHashTrie<String, Object> newMap =
-                FunctionalHashTrie.fromSelectedKeys(oldMap, keys);
+                FunctionalHashTrie.fromSelectedKeys(oldMap, keys, changes);
 
-            return makeSimilar(newMap);
+            return makeSimilar(newMap, changes.valueCountDelta);
         }
 
         @Override
@@ -1233,6 +1227,8 @@ final class FusionStruct
                 newMap = newMap.merge(is.getMap(eval), new Struct1Changes());
             }
 
+            // This is a rare case where we can trust the trie size: there's
+            // exactly one entry per key.
             return makeSimilar(newMap, newMap.size());
         }
 
@@ -1442,22 +1438,6 @@ final class FusionStruct
             }
 
             return is;
-        }
-
-        protected int computeSizeDifference(Object prior)
-        {
-            if (prior == null)
-            {
-                return 1;
-            }
-            else if (prior instanceof Object[])
-            {
-                return 1 - ((Object[]) prior).length;
-            }
-            else
-            {
-                return 0;
-            }
         }
     }
 
@@ -1708,15 +1688,6 @@ final class FusionStruct
             myMap = FunctionalHashTrie.empty();
         }
 
-        /**
-         * Recomputes {@link #mySize} based on what's in {@link #myMap}.
-         * This takes time proportional to the number of unique field names.
-         */
-        void updateSize()
-        {
-            mySize = computeSize(myMap);
-        }
-
         @Override
         FunctionalHashTrie<String, Object> getMap(Evaluator eval)
         {
@@ -1747,10 +1718,11 @@ final class FusionStruct
         public Object putM(Evaluator eval, String key, Object value)
             throws FusionException
         {
-            Object prior = myMap.get(key);
+            // `put` replaces existing values at the key; don't allow duplicates.
+            StructChanges changes = new Struct1Changes();
 
-            myMap = myMap.with(key, value);
-            mySize += computeSizeDifference(prior);
+            myMap = myMap.with(key, value, changes);
+            mySize += changes.valueCountDelta;
 
             return this;
         }
@@ -1769,25 +1741,10 @@ final class FusionStruct
         public Object removeKeysM(Evaluator eval, String[] keys)
             throws FusionException
         {
-            if (keys.length != 0)
-            {
-                for (String key : keys)
-                {
-                    Object old = myMap.get(key);
-                    if (old != null)
-                    {
-                        if (old instanceof Object[])
-                        {
-                            mySize -= ((Object[]) old).length;
-                        }
-                        else
-                        {
-                            mySize--;
-                        }
-                        myMap = myMap.without(key);
-                    }
-                }
-            }
+            StructChanges changes = new StructChanges();
+
+            myMap = myMap.withoutKeys(keys, changes);
+            mySize += changes.valueCountDelta;
 
             return this;
         }
@@ -1796,8 +1753,10 @@ final class FusionStruct
         public Object retainKeysM(Evaluator eval, String[] keys)
             throws FusionException
         {
-            myMap = FunctionalHashTrie.fromSelectedKeys(myMap, keys);
-            updateSize();
+            StructChanges changes = new StructChanges();
+
+            myMap = FunctionalHashTrie.fromSelectedKeys(myMap, keys, changes);
+            mySize = changes.valueCountDelta;
 
             return this;
         }
@@ -1830,6 +1789,8 @@ final class FusionStruct
                 myMap = myMap.merge(is.getMap(eval), new Struct1Changes());
             }
 
+            // This is a rare case where we can trust the trie size: there's
+            // exactly one entry per key.
             mySize = myMap.size();
             return this;
         }

@@ -78,12 +78,19 @@ class FunctionalHashTrie<K, V>
     static <K, V> FunctionalHashTrie<K, V>
     fromSelectedKeys(FunctionalHashTrie<K, V> origin, K[] keys)
     {
-        Changes changes = new Changes();
-        TrieNode<K, V> newTrie =
-                HashArrayMappedTrie.fromSelectedKeys(origin.root, keys, changes);
-        return EMPTY.resultFrom(newTrie, 0, 0, changes);
+        return fromSelectedKeys(origin, keys, new Changes());
     }
 
+    static <K, V> FunctionalHashTrie<K, V>
+    fromSelectedKeys(FunctionalHashTrie<K, V> origin, K[] keys, Changes changes)
+    {
+        int priorChangeCount   = changes.changeCount();
+        int priorKeyCountDelta = changes.keyCountDelta();
+
+        TrieNode<K, V> trie =
+                HashArrayMappedTrie.fromSelectedKeys(origin.root, keys, changes);
+        return EMPTY.resultFrom(trie, priorChangeCount, priorKeyCountDelta, changes);
+    }
 
     FunctionalHashTrie(TrieNode<K, V> root, int size)
     {
