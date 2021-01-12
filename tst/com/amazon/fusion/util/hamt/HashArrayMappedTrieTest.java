@@ -14,10 +14,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.BitMappedNode;
+import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Changes;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.CollisionNode;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.FlatNode;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.HashArrayMappedNode;
-import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Results;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -119,7 +119,7 @@ public class HashArrayMappedTrieTest
 
         private final TrieNode<K, V> oldNode;
         private final int            oldSize;
-        private final CheckingResults results = new CheckingResults();
+        private final CheckingChanges changes = new CheckingChanges();
 
         private K              key;
         private V              oldValue;
@@ -148,8 +148,8 @@ public class HashArrayMappedTrieTest
         {
             recordKey(key, value);
 
-            newNode = oldNode.with(key, value, results);
-            assertTrue("Results not invoked", results.invoked);
+            newNode = oldNode.with(key, value, changes);
+            assertTrue("Changes not invoked", changes.invoked);
             assertValueEquals(value, newNode, key);
             assertRootReplacementImpliesModification();
 
@@ -160,8 +160,8 @@ public class HashArrayMappedTrieTest
         {
             recordKey(key, value);
 
-            newNode = oldNode.mWith(key, value, results);
-            assertTrue("Results not invoked", results.invoked);
+            newNode = oldNode.mWith(key, value, changes);
+            assertTrue("Changes not invoked", changes.invoked);
             assertValueEquals(value, newNode, key);
             assertRootReplacementImpliesModification();
 
@@ -172,7 +172,7 @@ public class HashArrayMappedTrieTest
         {
             recordKey(key, null);
 
-            newNode = oldNode.without(key, results);
+            newNode = oldNode.without(key, changes);
             assertValueAbsent(newNode, key);
             assertRootReplacementImpliesModification();
 
@@ -186,8 +186,8 @@ public class HashArrayMappedTrieTest
             assertNull("old value", oldValue);
 
             mode = Mode.INSERT;
-            results.assertInserted();
-            assertTrue("results not modified", results.changes() > 0);
+            changes.assertInserted();
+            assertTrue("no changes were made", changes.changeCount() > 0);
             assertSizeDelta(1);
             return this;
         }
@@ -199,8 +199,8 @@ public class HashArrayMappedTrieTest
             assertNotSame("mapped value", oldValue, newValue);
 
             mode = Mode.REPLACE;
-            results.assertReplaced();
-            assertTrue("results not modified", results.changes() > 0);
+            changes.assertReplaced();
+            assertTrue("no changes were made", changes.changeCount() > 0);
             assertSizeDelta(0);
             return this;
         }
@@ -211,8 +211,8 @@ public class HashArrayMappedTrieTest
             assertNotNull("old value", oldValue);
 
             mode = Mode.REMOVE;
-            results.assertRemoved();
-            assertTrue("results not modified", results.changes() > 0);
+            changes.assertRemoved();
+            assertTrue("no changes were made", changes.changeCount() > 0);
             assertSizeDelta(-1);
             return this;
         }
@@ -223,8 +223,8 @@ public class HashArrayMappedTrieTest
             assertSame("mapped value", oldValue, newValue);
 
             mode = Mode.NOOP;
-            // TODO what about Results?
-            assertEquals("results modified", 0, results.changes());
+            // TODO what about Changes?
+            assertEquals("unexpected changes were made", 0, changes.changeCount());
             assertSizeDelta(0);
             return this;
         }
@@ -261,18 +261,18 @@ public class HashArrayMappedTrieTest
         {
             if (newNode != oldNode)
             {
-                assertTrue("results not modified", results.changes() > 0);
+                assertTrue("no changes were made", changes.changeCount() > 0);
             }
         }
 
         private void assertSizeDelta(int delta)
         {
-            assertEquals("size delta", delta, results.keyCountDelta());
+            assertEquals("size delta", delta, changes.keyCountDelta());
             assertEquals("new size", oldSize + delta, newNode.countKeys());
         }
 
-        private class CheckingResults
-            extends Results
+        private class CheckingChanges
+            extends Changes
         {
             boolean invoked  = false;
             boolean inserted = false;
@@ -430,21 +430,21 @@ public class HashArrayMappedTrieTest
     @Test(expected = NullPointerException.class)
     public void emptyNodeWithoutKeysRequiresNonNullArray()
     {
-        empty().withoutKeys(null, new Results());
+        empty().withoutKeys(null, new Changes());
     }
 
     @Test
     public void emptyNodeWithoutKeysGivenNoKeysReturnsSame()
     {
         TrieNode trie = empty();
-        assertSame(trie, trie.withoutKeys(new Object[0], new Results()));
+        assertSame(trie, trie.withoutKeys(new Object[0], new Changes()));
     }
 
     @Test
     public void emptyNodeWithoutKeysGivenKeysReturnsSame()
     {
         TrieNode trie = empty();
-        assertSame(trie, trie.withoutKeys(new Object[]{ 1, 2 }, new Results()));
+        assertSame(trie, trie.withoutKeys(new Object[]{ 1, 2 }, new Changes()));
     }
 
 
@@ -915,49 +915,49 @@ public class HashArrayMappedTrieTest
     @Test
     public void checkBitMappedNodeAddAndRemoveKey()
     {
-        Results results = new Results();
+        Changes changes = new Changes();
         Object key1 = new CustomKey(0x00, 0);
 
         TrieNode bmn0 = new BitMappedNode();
-        TrieNode bmn1 = bmn0.with(0x00, 20, key1, key1, results);
-        TrieNode bmn2 = bmn1.without(0x00, 20, key1, results);
+        TrieNode bmn1 = bmn0.with(0x00, 20, key1, key1, changes);
+        TrieNode bmn2 = bmn1.without(0x00, 20, key1, changes);
         assertEmpty(bmn2);
     }
 
     @Test
     public void checkBitMappedNodeAddAndRemoveSubtrie()
     {
-        Results results = new Results();
+        Changes changes = new Changes();
         Object key1 = new CustomKey(0x00, 0);
         Object key2 = new CustomKey(0x01, 1);
 
         // Setup a BitMappedNode that contains a subtrie as its only element.
         TrieNode bmn0 = new BitMappedNode();
-        TrieNode bmn1 = bmn0.with(0x00, 20, key1, key1, results);
-        TrieNode bmn2 = bmn1.with(0x01, 20, key2, key2, results);
+        TrieNode bmn1 = bmn0.with(0x00, 20, key1, key1, changes);
+        TrieNode bmn2 = bmn1.with(0x01, 20, key2, key2, changes);
 
-        TrieNode bmn3 = bmn2.without(0x00, 20, key1, results);
-        TrieNode bmn4 = bmn3.without(0x01, 20, key2, results);
+        TrieNode bmn3 = bmn2.without(0x00, 20, key1, changes);
+        TrieNode bmn4 = bmn3.without(0x01, 20, key2, changes);
         assertEmpty(bmn4);
     }
 
     @Test
     public void checkBitMappedNodeExpansionAndArrayNodeCompression()
     {
-        Results results = new Results();
+        Changes changes = new Changes();
         Object[] keys = new Object[17];
         TrieNode trieNode = new BitMappedNode();
         for (int i = 0; i < 16; i++)
         {
             Object key = keys[i] = Integer.toString(i);
-            trieNode = trieNode.with(i, 0, key, key, results);
+            trieNode = trieNode.with(i, 0, key, key, changes);
         }
 
         assertTrue(trieNode instanceof BitMappedNode);
         assertEquals(16, trieNode.countKeys());
 
         Object overConversionLimitKey = keys[16] = "16";
-        trieNode = trieNode.with(16, 0, overConversionLimitKey, overConversionLimitKey, results);
+        trieNode = trieNode.with(16, 0, overConversionLimitKey, overConversionLimitKey, changes);
         assertTrue(trieNode instanceof HashArrayMappedNode);
         assertEquals(17, trieNode.countKeys());
         for (int i = 0; i < 17; i++)
@@ -969,7 +969,7 @@ public class HashArrayMappedTrieTest
         {
             Object key = keys[i];
             keys[i] = null;
-            trieNode = trieNode.without(i, 0, key, results);
+            trieNode = trieNode.without(i, 0, key, changes);
         }
         assertTrue(trieNode instanceof HashArrayMappedNode);
         assertEquals(8, trieNode.countKeys());
@@ -978,7 +978,7 @@ public class HashArrayMappedTrieTest
             assertSame("Key " + i, keys[i], trieNode.get(i, 0, keys[i]));
         }
 
-        trieNode = trieNode.without(9, 0, keys[9], results);
+        trieNode = trieNode.without(9, 0, keys[9], changes);
         keys[9] = null;
 
         assertTrue(trieNode instanceof BitMappedNode);
@@ -993,11 +993,11 @@ public class HashArrayMappedTrieTest
     @Test
     public void keysNotInBitMap()
     {
-        Results results = new Results();
+        Changes changes = new Changes();
         TrieNode node = new BitMappedNode();
-        TrieNode stillSame = node.without(0, 0, new Object(), results);
-        assertEquals(0, results.changes());
-        assertEquals(0, results.keyCountDelta());
+        TrieNode stillSame = node.without(0, 0, new Object(), changes);
+        assertEquals(0, changes.changeCount());
+        assertEquals(0, changes.keyCountDelta());
         assertTrue(node == stillSame);
         assertEquals(null, node.get(0, 0, new Object()));
     }
@@ -1117,9 +1117,9 @@ public class HashArrayMappedTrieTest
     @Test
     public void testCorrectShifting()
     {
-        Results results = new Results();
+        Changes changes = new Changes();
 
-        TrieNode nested = new BitMappedNode().with(0x20, 5, new CustomKey(0, "redherring"), 1, results);
+        TrieNode nested = new BitMappedNode().with(0x20, 5, new CustomKey(0, "redherring"), 1, changes);
         // 0x20 = 0b00001 00000 -> the second slot in a bitmap with a node at shift 5.
         assertEquals(0b010, ((BitMappedNode) nested).bitmap);
 
@@ -1127,7 +1127,7 @@ public class HashArrayMappedTrieTest
         // a bitmap of 0b1 to indicate that the hashFragment corresponding to 0b00000 is occupied.
         // 0b00000 is occupied because a hash of 0x20 with a shift of 0 would be nested at 0b00000
 
-        top = top.with(0x40, 0, new CustomKey(4, "ignoreme"), 2, results);
+        top = top.with(0x40, 0, new CustomKey(4, "ignoreme"), 2, changes);
         // 0x40 = 0b00010 00000 -> the first slot (0b00000) in a bitmap with a node at shift 0.
         // Since that spot is already occupied by a node, we'll insert it in
         // the third slot (0b00010) in the nested node with shift 5.
@@ -1161,11 +1161,11 @@ public class HashArrayMappedTrieTest
     {
         TrieNode customFHT = empty();
 
-        Results results = new Results();
+        Changes changes = new Changes();
 
         // These two will be in the collision node at the bottom.
-        customFHT = customFHT.with(new CustomKey(0, "foo"), "A", results);
-        customFHT = customFHT.with(new CustomKey(0, "bar"), "B", results);
+        customFHT = customFHT.with(new CustomKey(0, "foo"), "A", changes);
+        customFHT = customFHT.with(new CustomKey(0, "bar"), "B", changes);
 
         // For each level, push in enough nodes s.t. we convert from a FlatNode to a BitMappedNode
         for (int shift = 0; shift <= 25; shift += 5)
@@ -1174,7 +1174,7 @@ public class HashArrayMappedTrieTest
             for (int i = 1; i < 32; i++)
             {
                 CustomKey key = new CustomKey(i << shift, UUID.randomUUID().toString());
-                customFHT = customFHT.with(key, key, results);
+                customFHT = customFHT.with(key, key, changes);
             }
         }
         // The last level has to be more custom built since the only possible hash keys are going to be 00, 01, 10, and 11.
@@ -1185,7 +1185,7 @@ public class HashArrayMappedTrieTest
             for (int j = 1; j < 4; j++)
             {
                 CustomKey key = new CustomKey(j << 30, UUID.randomUUID().toString());
-                customFHT = customFHT.with(key, key, results);
+                customFHT = customFHT.with(key, key, changes);
             }
         }
 
@@ -1213,7 +1213,7 @@ public class HashArrayMappedTrieTest
 
 
         // Now let's verify that accesses don't shift over 30. There's an assert in hashFragment()
-        customFHT = customFHT.with(new CustomKey(4 << 30, "baz"), "C", results); // 4 << 30 == 0 << 30 (for 32 bit values)
+        customFHT = customFHT.with(new CustomKey(4 << 30, "baz"), "C", changes); // 4 << 30 == 0 << 30 (for 32 bit values)
 
         assertEquals("A", customFHT.get(new CustomKey(0, "foo")));
         assertEquals("B", customFHT.get(new CustomKey(0, "bar")));
@@ -1242,12 +1242,12 @@ public class HashArrayMappedTrieTest
 
     public static <K, V> TrieNode<K, V> trieFromPairs(Object... kvPairs)
     {
-        Results results = new Results();
+        Changes changes = new Changes();
 
         TrieNode<K, V> root = empty();
         for (int i = 0; i < kvPairs.length; i += 2)
         {
-            root = root.mWith((K) kvPairs[i], (V) kvPairs[i+1], results);
+            root = root.mWith((K) kvPairs[i], (V) kvPairs[i+1], changes);
         }
         return root;
     }
@@ -1257,10 +1257,10 @@ public class HashArrayMappedTrieTest
     {
         TrieNode origin = trieFromPairs(1, 1, 2, 2, 3, 3);
 
-        Results results = new Results();
-        TrieNode t = fromSelectedKeys(origin, new Object[]{ 1, 3, 5 }, results);
+        Changes changes = new Changes();
+        TrieNode t = fromSelectedKeys(origin, new Object[]{ 1, 3, 5 }, changes);
 
-        assertEquals(2,    results.keyCountDelta());
+        assertEquals(2,    changes.keyCountDelta());
         assertEquals(1,    t.get(1));
         assertEquals(null, t.get(2));
         assertEquals(3,    t.get(3));
@@ -1271,14 +1271,14 @@ public class HashArrayMappedTrieTest
     {
         TrieNode origin = trieFromPairs(1, 1, 2, 2);
 
-        Results results = new Results();
-        TrieNode t = fromSelectedKeys(origin, new Object[]{}, results);
+        Changes changes = new Changes();
+        TrieNode t = fromSelectedKeys(origin, new Object[]{}, changes);
         assertSame(empty(), t);
-        assertEquals(0, results.keyCountDelta());
+        assertEquals(0, changes.keyCountDelta());
 
-        t = fromSelectedKeys(origin, new Object[]{ 3, 4 }, results);
+        t = fromSelectedKeys(origin, new Object[]{ 3, 4 }, changes);
         assertSame(empty(), t);
-        assertEquals(0, results.keyCountDelta());
+        assertEquals(0, changes.keyCountDelta());
     }
 
 
@@ -1290,21 +1290,21 @@ public class HashArrayMappedTrieTest
     @Test(expected = NullPointerException.class)
     public void withoutKeysRequiresNonNullArray()
     {
-        new FlatNode().withoutKeys(null, new Results());
+        new FlatNode().withoutKeys(null, new Changes());
     }
 
     @Test
     public void withoutKeysGivenNoKeysReturnsSame()
     {
         TrieNode trie = flatNodeForPairs(1, 1, 2, 2, 3, 3);
-        assertSame(trie, trie.withoutKeys(new Object[0], new Results()));
+        assertSame(trie, trie.withoutKeys(new Object[0], new Changes()));
     }
 
     @Test
     public void withoutKeysGivenKeysReturnsAnswer()
     {
         TrieNode trie = flatNodeForPairs(1, 1, 2, 2, 3, 3);
-        TrieNode answer = trie.withoutKeys(new Object[]{1, 3, 5}, new Results());
+        TrieNode answer = trie.withoutKeys(new Object[]{1, 3, 5}, new Changes());
 
         assertEquals(1, answer.countKeys());
         assertValueEquals(2, answer, 2);
@@ -1314,7 +1314,7 @@ public class HashArrayMappedTrieTest
     public void withoutKeysGivenAllKeysReturnsSingleton()
     {
         TrieNode trie = flatNodeForPairs(1, 1, 2, 2);
-        TrieNode answer = trie.withoutKeys(new Object[]{1, 3, 2}, new Results());
+        TrieNode answer = trie.withoutKeys(new Object[]{1, 3, 2}, new Changes());
         assertEmpty(answer);
     }
 }

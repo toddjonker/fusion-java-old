@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie;
-import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Results;
+import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Changes;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractSet;
 import java.util.Arrays;
@@ -36,12 +36,12 @@ class FunctionalHashTrie<K, V>
 
 
     // Temporary adaptor; will remove BiFunction soon.
-    private static class RemappingResults
-        extends Results
+    private static class RemappingChanges
+        extends Changes
     {
         private final BiFunction remapping;
 
-        RemappingResults(BiFunction remapping)
+        RemappingChanges(BiFunction remapping)
         {
             this.remapping = remapping;
         }
@@ -63,10 +63,10 @@ class FunctionalHashTrie<K, V>
     {
         if (other.isEmpty()) return EMPTY;
 
-        Results results = new Results();
-        TrieNode<K, V> trie = HashArrayMappedTrie.fromMap(other, results);
+        Changes changes = new Changes();
+        TrieNode<K, V> trie = HashArrayMappedTrie.fromMap(other, changes);
 
-        return new FunctionalHashTrie<>(trie, results.keyCountDelta());
+        return new FunctionalHashTrie<>(trie, changes.keyCountDelta());
     }
 
 
@@ -75,9 +75,9 @@ class FunctionalHashTrie<K, V>
     {
         if (!items.hasNext()) return EMPTY;
 
-        Results results = new RemappingResults(remapping);
-        TrieNode<K, V> trie = HashArrayMappedTrie.fromEntries(items, results);
-        return EMPTY.resultFrom(trie, results);
+        Changes changes = new RemappingChanges(remapping);
+        TrieNode<K, V> trie = HashArrayMappedTrie.fromEntries(items, changes);
+        return EMPTY.resultFrom(trie, changes);
     }
 
     static <K, V> FunctionalHashTrie<K, V> merge(Entry<K, V>[] items,
@@ -94,10 +94,10 @@ class FunctionalHashTrie<K, V>
     static <K, V> FunctionalHashTrie<K, V>
     fromSelectedKeys(FunctionalHashTrie<K, V> origin, K[] keys)
     {
-        Results results = new Results();
+        Changes changes = new Changes();
         TrieNode<K, V> newTrie =
-                HashArrayMappedTrie.fromSelectedKeys(origin.root, keys, results);
-        return EMPTY.resultFrom(newTrie, results);
+                HashArrayMappedTrie.fromSelectedKeys(origin.root, keys, changes);
+        return EMPTY.resultFrom(newTrie, changes);
     }
 
 
@@ -144,11 +144,11 @@ class FunctionalHashTrie<K, V>
 
     // TODO: Add a variation of with[out] that returns the previous value (if any).
 
-    private FunctionalHashTrie<K, V> resultFrom(TrieNode<K, V> newRoot, Results results)
+    private FunctionalHashTrie<K, V> resultFrom(TrieNode<K, V> newRoot, Changes changes)
     {
-        if (results.changes() != 0)
+        if (changes.changeCount() != 0)
         {
-            int newSize = size + results.keyCountDelta();
+            int newSize = size + changes.keyCountDelta();
             if (newSize == 0) return EMPTY;
             return new FunctionalHashTrie<>(newRoot, newSize);
         }
@@ -170,9 +170,9 @@ class FunctionalHashTrie<K, V>
             throw new NullPointerException(NULL_ERROR_MESSAGE);
         }
 
-        Results results = new Results();
-        TrieNode<K, V> newRoot = root.with(key, value, results);
-        return resultFrom(newRoot, results);
+        Changes changes = new Changes();
+        TrieNode<K, V> newRoot = root.with(key, value, changes);
+        return resultFrom(newRoot, changes);
     }
 
 
@@ -192,9 +192,9 @@ class FunctionalHashTrie<K, V>
         }
         else
         {
-            Results results = new Results();
-            TrieNode<K, V> newRoot = root.without(key, results);
-            return resultFrom(newRoot, results);
+            Changes changes = new Changes();
+            TrieNode<K, V> newRoot = root.without(key, changes);
+            return resultFrom(newRoot, changes);
         }
     }
 
@@ -208,9 +208,9 @@ class FunctionalHashTrie<K, V>
      */
     public FunctionalHashTrie<K, V> withoutKeys(K[] keys)
     {
-        Results results = new Results();
-        TrieNode<K, V> newRoot = root.withoutKeys(keys, results);
-        return resultFrom(newRoot, results);
+        Changes changes = new Changes();
+        TrieNode<K, V> newRoot = root.withoutKeys(keys, changes);
+        return resultFrom(newRoot, changes);
     }
 
 
