@@ -30,6 +30,7 @@ class FunctionalHashTrie<K, V>
 
     private static final FunctionalHashTrie EMPTY =
         new FunctionalHashTrie<>(HashArrayMappedTrie.empty(), 0);
+
     private final TrieNode<K, V> root;
     private final int size;
 
@@ -92,12 +93,28 @@ class FunctionalHashTrie<K, V>
         return EMPTY.resultFrom(trie, priorChangeCount, priorKeyCountDelta, changes);
     }
 
-    FunctionalHashTrie(TrieNode<K, V> root, int size)
+    private FunctionalHashTrie(TrieNode<K, V> root, int size)
     {
-        root.getClass(); // Null check
-
         this.root = root;
         this.size = size;
+    }
+
+
+    public int size()
+    {
+        return size;
+    }
+
+    public boolean isEmpty()
+    {
+        return size == 0;
+    }
+
+
+    @Override
+    public Iterator<Entry<K, V>> iterator()
+    {
+        return root.iterator();
     }
 
 
@@ -122,18 +139,9 @@ class FunctionalHashTrie<K, V>
             throw new NullPointerException(NULL_ERROR_MESSAGE);
         }
 
-        if (isEmpty())
-        {
-            return null;
-        }
-        else
-        {
-            return root.get((K) key);
-        }
+        return root.get(key);
     }
 
-
-    // TODO: Add a variation of with[out] that returns the previous value (if any).
 
     private FunctionalHashTrie<K, V> resultFrom(TrieNode<K, V> newRoot,
                                                 int priorChangeCount,
@@ -197,20 +205,14 @@ class FunctionalHashTrie<K, V>
      */
     public FunctionalHashTrie<K, V> without(K key)
     {
-        if (isEmpty())
-        {
-            return this;
-        }
-        else if (key == null)
+        if (key == null)
         {
             throw new NullPointerException(NULL_ERROR_MESSAGE);
         }
-        else
-        {
-            Changes changes = new Changes();
-            TrieNode<K, V> newRoot = root.without(key, changes);
-            return resultFrom(newRoot, 0, 0, changes);
-        }
+
+        Changes changes = new Changes();
+        TrieNode<K, V> newRoot = root.without(key, changes);
+        return resultFrom(newRoot, 0, 0, changes);
     }
 
 
@@ -240,13 +242,6 @@ class FunctionalHashTrie<K, V>
 
         TrieNode<K, V> newRoot = root.withoutKeys(keys, changes);
         return resultFrom(newRoot, priorChangeCount, priorKeyCountDelta, changes);
-    }
-
-
-    @Override
-    public Iterator<Entry<K, V>> iterator()
-    {
-        return root.iterator();
     }
 
 
@@ -288,19 +283,6 @@ class FunctionalHashTrie<K, V>
             }
         };
     }
-
-
-    public int size()
-    {
-        return size;
-    }
-
-
-    public boolean isEmpty()
-    {
-        return size == 0;
-    }
-
 
     // TODO: Add method that accepts a function to modify each element in the trie.
 }
