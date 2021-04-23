@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import org.junit.Test;
 
@@ -79,7 +79,7 @@ public class HashArrayMappedTrieTest
      */
     private static class Modifier<K, V>
     {
-        private enum Mode { INSERT, REPLACE, REMOVE, NOOP };
+        private enum Mode { INSERT, REPLACE, REMOVE, NOOP }
 
         private final TrieNode<K, V> oldNode;
         private final int            oldSize;
@@ -363,7 +363,7 @@ public class HashArrayMappedTrieTest
         TrieNode<Object, Object> empty = empty();
         assertEquals(0, empty.countKeys());
 
-        Iterator<Map.Entry<Object, Object>> iterator = empty.iterator();
+        Iterator<Entry<Object, Object>> iterator = empty.iterator();
         assertFalse("iterator isn't empty", iterator.hasNext());
     }
 
@@ -475,8 +475,8 @@ public class HashArrayMappedTrieTest
     @Test
     public void testFlatNodeCollision()
     {
-        CustomKey foo = new CustomKey(0, "foo");
-        CustomKey bar = new CustomKey(0, "bar");
+        CustomKey foo = new CustomKey("foo");
+        CustomKey bar = foo.collide("bar");
 
         TrieNode node = flatNodeForPairs(foo, foo);
         node = insert(node, bar, bar);
@@ -488,8 +488,8 @@ public class HashArrayMappedTrieTest
     @Test
     public void testFlatNodeMutatingCollision()
     {
-        CustomKey foo = new CustomKey(0, "foo");
-        CustomKey bar = new CustomKey(0, "bar");
+        CustomKey foo = new CustomKey("foo");
+        CustomKey bar = foo.collide("bar");
 
         TrieNode node = flatNodeForPairs(foo, foo);
         node = mInsert(node, bar, bar);
@@ -501,11 +501,11 @@ public class HashArrayMappedTrieTest
     @Test
     public void checkFlatNodeExpansion()
     {
-        List<Map.Entry> values = new ArrayList<>();
+        List<Entry> values = new ArrayList<>();
         for (int i = 0; i < 9; i++)
         {
             CustomKey key = new CustomKey(i, Integer.toString(i));
-            Map.Entry entry = new AbstractMap.SimpleEntry<>(key, new Object());
+            Entry entry = new AbstractMap.SimpleEntry<>(key, new Object());
             values.add(entry);
         }
 
@@ -514,12 +514,12 @@ public class HashArrayMappedTrieTest
         // A flat node should hold eight entries before expanding.
         for (int i = 0; i < 8; i++)
         {
-            Map.Entry entry = values.get(i);
+            Entry entry = values.get(i);
             flatNode = insert(flatNode, entry.getKey(), entry.getValue());
             assertTrue(flatNode instanceof FlatNode);
         }
 
-        Map.Entry ninth = values.get(8);
+        Entry ninth = values.get(8);
         TrieNode nowBitMap = insert(flatNode, ninth.getKey(), ninth.getValue());
         assertTrue(nowBitMap instanceof BitMappedNode);
         assertEquals(9, nowBitMap.countKeys());
@@ -530,7 +530,7 @@ public class HashArrayMappedTrieTest
         assertEquals(values.size() * 2 + 2, kvPairs.length);
         for (int i = 0; i < 9; i++)
         {
-            Map.Entry entry = values.get(i);
+            Entry entry = values.get(i);
             boolean found = false;
             for (int k = 0; k < kvPairs.length; k += 2)
             {
@@ -580,9 +580,9 @@ public class HashArrayMappedTrieTest
     @Test
     public void testCollisionNodeInsertAndReplace()
     {
-        CustomKey key1 = new CustomKey(2, "key1");
-        CustomKey key2 = new CustomKey(2, "key2");
-        CustomKey key3 = new CustomKey(2, "key3");
+        CustomKey key1 = new CustomKey("key1");
+        CustomKey key2 = key1.collide("key2");
+        CustomKey key3 = key1.collide("key3");
 
         TrieNode node = collisionNodeForPairs(key1, 1);
         node = insert(node, key2, 2);
@@ -598,9 +598,9 @@ public class HashArrayMappedTrieTest
     @Test
     public void testCollisionNodeMutatingInsertAndReplace()
     {
-        CustomKey key1 = new CustomKey(2, "key1");
-        CustomKey key2 = new CustomKey(2, "key2");
-        CustomKey key3 = new CustomKey(2, "key3");
+        CustomKey key1 = new CustomKey("key1");
+        CustomKey key2 = key1.collide("key2");
+        CustomKey key3 = key1.collide("key3");
 
         TrieNode node = collisionNodeForPairs(key1, 1);
         node = mInsert(node, key2, 2);
@@ -616,14 +616,14 @@ public class HashArrayMappedTrieTest
     @Test
     public void testCollisionNodeRemove()
     {
-        CustomKey key1 = new CustomKey(2, "key1");
-        CustomKey key2 = new CustomKey(2, "key2");
-        CustomKey key3 = new CustomKey(2, "key3");
+        CustomKey key1 = new CustomKey("key1");
+        CustomKey key2 = key1.collide("key2");
+        CustomKey key3 = key1.collide("key3");
 
         TrieNode node = collisionNodeForPairs(key1, 1);
         node = insert(node, key2, 2);
         node = insert(node, key3, 3);
-        node = noopRemove(node, new CustomKey(2, "key4"));
+        node = noopRemove(node, key1.collide("key4"));
         node = remove(node, key2);
         node = remove(node, key1);
         node = remove(node, key3);
@@ -635,12 +635,13 @@ public class HashArrayMappedTrieTest
     @Test
     public void testCollisionNodeExpansion()
     {
-        CustomKey key1 = new CustomKey(2, "key1");
-        CustomKey key2 = new CustomKey(2, "key2");
+        CustomKey key1 = new CustomKey("key1");
+        CustomKey key2 = key1.collide("key2");
 
         TrieNode collisionNode = collisionNodeForPairs(key1, 1, key2, 2);
 
-        CustomKey key3 = new CustomKey(1, "key3");
+        CustomKey key3 = key1.nonCollide("key3");
+
         TrieNode withNewNonCollidingKey = insert(collisionNode, key3, 3);
         // We expect the collision node to have been pushed down a level.
         assertTrue(withNewNonCollidingKey instanceof FlatNode);
@@ -653,12 +654,11 @@ public class HashArrayMappedTrieTest
     @Test
     public void testCollisionNodeMutatingExpansion()
     {
-        CustomKey key1 = new CustomKey(2, "key1");
-        CustomKey key2 = new CustomKey(2, "key2");
-
+        CustomKey key1 = new CustomKey("key1");
+        CustomKey key2 = key1.collide("key2");
         TrieNode collisionNode = collisionNodeForPairs(key1, 1, key2, 2);
 
-        CustomKey key3 = new CustomKey(1, "key3");
+        CustomKey key3 = key1.nonCollide("key3");
         TrieNode withNewNonCollidingKey =
             mWith(collisionNode, key3, 3).inserts().returnsNew();
 
@@ -673,11 +673,11 @@ public class HashArrayMappedTrieTest
     @Test
     public void checkCollisionNodeBehavior()
     {
-        CustomKey key1 = new CustomKey(2, "key1");
-        CustomKey key2 = new CustomKey(2, "key2");
+        CustomKey key1 = new CustomKey("key1");
+        CustomKey key2 = key1.collide("key2");
         TrieNode collisionNode = collisionNodeForPairs(key1, "foo", key2, "bar");
 
-        CustomKey key3 = new CustomKey(1, "key3");
+        CustomKey key3 = key1.nonCollide("key3");
         TrieNode withNewNonCollidingKey = insert(collisionNode, key3, "baz");
 
         // We expect the collision node to have been pushed down a level.
@@ -686,7 +686,7 @@ public class HashArrayMappedTrieTest
         assertValueEquals("bar", withNewNonCollidingKey, key2);
         assertValueEquals("baz", withNewNonCollidingKey, key3);
 
-        CustomKey key4 = new CustomKey(2, "key4");
+        CustomKey key4 = key1.collide("key4");
         TrieNode withCollidingKey = insert(withNewNonCollidingKey, key4, "biz");
         assertValueEquals("biz", withCollidingKey, key4);
 
@@ -804,8 +804,8 @@ public class HashArrayMappedTrieTest
     @Test
     public void testBitMappedNodeCollision()
     {
-        CustomKey key1 = new CustomKey(0, "key1");
-        CustomKey key2 = new CustomKey(0, "key2");
+        CustomKey key1 = new CustomKey("key1");
+        CustomKey key2 = key1.collide("key2");
 
         TrieNode node = new BitMappedNode(0, new Object[0]);
         node = insert(node, key1, 1);
@@ -817,8 +817,8 @@ public class HashArrayMappedTrieTest
     @Test
     public void testBitMappedNodeMutatingCollision()
     {
-        CustomKey key1 = new CustomKey(0, "key1");
-        CustomKey key2 = new CustomKey(0, "key2");
+        CustomKey key1 = new CustomKey("key1");
+        CustomKey key2 = key1.collide("key2");
 
         TrieNode node = new BitMappedNode(0, new Object[0]);
         node = mInsert(node, key1, 1);
@@ -859,8 +859,8 @@ public class HashArrayMappedTrieTest
     @Test
     public void checkCollisionNodeCreation()
     {
-        CustomKey foo = new CustomKey(0, "foo");
-        CustomKey bar = new CustomKey(0, "bar");
+        CustomKey foo = new CustomKey("foo");
+        CustomKey bar = foo.collide("bar");
         TrieNode trieNode = new BitMappedNode();
         trieNode = insert(trieNode, foo, new Object());
         trieNode = insert(trieNode, bar, new Object());
@@ -962,8 +962,8 @@ public class HashArrayMappedTrieTest
         TrieNode stillSame = node.without(0, 0, new Object(), changes);
         assertEquals(0, changes.changeCount());
         assertEquals(0, changes.keyCountDelta());
-        assertTrue(node == stillSame);
-        assertEquals(null, node.get(0, 0, new Object()));
+        assertSame(node, stillSame);
+        assertNull(node.get(0, 0, new Object()));
     }
 
 
@@ -1017,8 +1017,8 @@ public class HashArrayMappedTrieTest
     @Test
     public void testHashArrayMappedNodeCollision()
     {
-        CustomKey key1 = new CustomKey(0, "key1");
-        CustomKey key2 = new CustomKey(0, "key2");
+        CustomKey key1 = new CustomKey("key1");
+        CustomKey key2 = key1.collide("key2");
 
         TrieNode node = new HashArrayMappedNode<>();
         node = insert(node, key1, 1);
@@ -1030,8 +1030,8 @@ public class HashArrayMappedTrieTest
     @Test
     public void testHashArrayMappedNodeMutatingCollision()
     {
-        CustomKey key1 = new CustomKey(0, "key1");
-        CustomKey key2 = new CustomKey(0, "key2");
+        CustomKey key1 = new CustomKey("key1");
+        CustomKey key2 = key1.collide("key2");
 
         TrieNode node = new HashArrayMappedNode<>();
         node = mInsert(node, key1, 1);
@@ -1123,13 +1123,16 @@ public class HashArrayMappedTrieTest
     @Test
     public void testDeepShifts()
     {
+        CustomKey foo = new CustomKey(0, "foo");
+        CustomKey bar = foo.collide("bar");
+
         TrieNode customFHT = empty();
 
         Changes changes = new Changes();
 
         // These two will be in the collision node at the bottom.
-        customFHT = customFHT.with(new CustomKey(0, "foo"), "A", changes);
-        customFHT = customFHT.with(new CustomKey(0, "bar"), "B", changes);
+        customFHT = customFHT.with(foo, "A", changes);
+        customFHT = customFHT.with(bar, "B", changes);
 
         // For each level, push in enough nodes s.t. we convert from a FlatNode to a BitMappedNode
         for (int shift = 0; shift <= 25; shift += 5)
@@ -1153,8 +1156,8 @@ public class HashArrayMappedTrieTest
             }
         }
 
-        assertEquals("A", customFHT.get(new CustomKey(0, "foo")));
-        assertEquals("B", customFHT.get(new CustomKey(0, "bar")));
+        assertEquals("A", customFHT.get(foo));
+        assertEquals("B", customFHT.get(bar));
 
         int shuffledHash = hashCodeFor(0);                                 // Note, due to shuffling it's not necessarily at the first node of the tree.
         TrieNode node = customFHT;                                              // Shift 0:     HAMNode [↓, UUIDs...]
@@ -1179,8 +1182,8 @@ public class HashArrayMappedTrieTest
         // Now let's verify that accesses don't shift over 30. There's an assert in hashFragment()
         customFHT = customFHT.with(new CustomKey(4 << 30, "baz"), "C", changes); // 4 << 30 == 0 << 30 (for 32 bit values)
 
-        assertEquals("A", customFHT.get(new CustomKey(0, "foo")));
-        assertEquals("B", customFHT.get(new CustomKey(0, "bar")));
+        assertEquals("A", customFHT.get(foo));
+        assertEquals("B", customFHT.get(bar));
         assertEquals("C", customFHT.get(new CustomKey(0, "baz")));
 
         TrieNode newNode = customFHT;                                           // Shift 0:     HAMNode [↓, UUIDs...]

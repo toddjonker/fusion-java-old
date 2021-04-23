@@ -7,14 +7,35 @@ package com.amazon.fusion.util.hamt;
  */
 class CustomKey
 {
-    final int hash;
-    final Object key;
+    private final int hash;
+    private final Object key;
+
+    CustomKey(Object key)
+    {
+        this.key  = key;
+        this.hash = key.hashCode();
+    }
 
     CustomKey(int hash, Object key)
     {
         this.hash = hash;
         this.key = key;
     }
+
+    CustomKey collide(Object otherKey)
+    {
+        return new CustomKey(hash, otherKey);
+    }
+
+    CustomKey nonCollide(Object otherKey)
+    {
+        return new CustomKey(hash + 1, otherKey);
+    }
+
+    Object key()
+    {
+        return key;
+    };
 
     @Override
     public String toString()
