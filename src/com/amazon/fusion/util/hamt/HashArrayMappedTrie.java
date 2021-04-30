@@ -443,6 +443,66 @@ public final class HashArrayMappedTrie
 
 
     /**
+     * Base class for some node types, where entries are store as key/value
+     * pairs in a single array.
+     *
+     * In the array, keys are stored in even indices and values at odd.
+     * Where there is a null key, the following value is a {@link TrieNode}.
+     *
+     * In general, there may be empty (null/null) entries.
+     */
+    private abstract static class KvNode<K, V>
+        extends TrieNode<K, V>
+    {
+        Object[] kvPairs;
+
+        /**
+         * For easier testing, we allow nodes with fewer children than are
+         * possible to achieve via the public interface.
+         */
+        KvNode()
+        {
+            kvPairs = new Object[0];
+        }
+
+        KvNode(Object[] kvPairs)
+        {
+            this.kvPairs = kvPairs;
+        }
+
+
+        @Override
+        public int countKeys()
+        {
+            int count = 0;
+            for (int i = 0; i < kvPairs.length; i += 2)
+            {
+                Object keyOrNull = kvPairs[i];
+                if (keyOrNull == null)
+                {
+                    Object node = kvPairs[i + 1];
+                    if (node != null)
+                    {
+                        count += ((TrieNode<K, V>) node).countKeys();
+                    }
+                }
+                else
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        @Override
+        public final Iterator<Entry<K, V>> iterator()
+        {
+            return new EntryArrayIterator<>(kvPairs);
+        }
+    }
+
+
+    /**
      * A trie node storing a small number of unsorted key/value pairs, and no child nodes except
      * to hold colliding keys.
      * This is more efficient than a {@link BitMappedNode} for holding leaves:
@@ -459,7 +519,7 @@ public final class HashArrayMappedTrie
      * </p>
      */
     static class FlatNode<K, V>
-        extends TrieNode<K, V>
+        extends KvNode<K, V>
     {
         /**
          * Empirically, a linear search performs as fast or faster than a bitmapped
@@ -467,49 +527,16 @@ public final class HashArrayMappedTrie
          */
         private static final int MAX_CHILDREN = 8;
 
-        Object[] kvPairs;
-
 
         FlatNode()
         {
-            kvPairs = new Object[0];
         }
 
-        FlatNode(K key, Object value)
+        FlatNode(Object... kvPairs)
         {
-            this(new Object[]{key, value});
+            super(kvPairs);
         }
 
-
-        FlatNode(K key1, V val1, K key2, V val2)
-        {
-            this(new Object[]{key1, val1, key2, val2});
-        }
-
-
-        FlatNode(Object[] kvPairs)
-        {
-            this.kvPairs = kvPairs;
-        }
-
-
-        @Override
-        public int countKeys()
-        {
-            int count = 0;
-            for (int i = 0; i < kvPairs.length; i += 2)
-            {
-                if (kvPairs[i] == null)
-                {
-                    count += ((CollisionNode<K, V>) kvPairs[i + 1]).countKeys();
-                }
-                else
-                {
-                    count++;
-                }
-            }
-            return count;
-        }
 
         @Override
         TrieNode<K, V> with(int hash,
@@ -693,13 +720,6 @@ public final class HashArrayMappedTrie
         }
 
 
-        @Override
-        public Iterator<Entry<K, V>> iterator()
-        {
-            return new EntryArrayIterator<>(kvPairs);
-        }
-
-
         int linearSearch(int hash, K key)
         {
             for (int i = 0; i < kvPairs.length; i += 2)
@@ -833,7 +853,7 @@ public final class HashArrayMappedTrie
 
             // If it doesn't share the hash, push this collision node down a level.
             Object newValue = changes.keyAdded(value);
-            return new FlatNode<>(new Object[]{null, this, key, newValue});
+            return new FlatNode<>(null, this, key, newValue);
         }
 
 
@@ -923,7 +943,7 @@ public final class HashArrayMappedTrie
      * </p>
      */
     static class BitMappedNode<K, V>
-        extends TrieNode<K, V>
+        extends KvNode<K, V>
     {
         /**
          * We convert {@link BitMappedNode}s to {@link HashArrayMappedNode}s when they exceed
@@ -933,19 +953,17 @@ public final class HashArrayMappedTrie
         private static final int MAX_CHILDREN = 16;
 
         int bitmap;
-        Object[] kvPairs; // Can be either a Key Value Pair or a Null then Node Pair.
 
 
         BitMappedNode()
         {
             bitmap  = 0;
-            kvPairs = new Object[0];
         }
 
         BitMappedNode(int bitmap, Object[] kvPairs)
         {
+            super(kvPairs);
             this.bitmap = bitmap;
-            this.kvPairs = kvPairs;
         }
 
         private BitMappedNode<K, V> replace(int index, Object child)
@@ -961,28 +979,6 @@ public final class HashArrayMappedTrie
             return new BitMappedNode<>(bitmap, newKvPairs);
         }
 
-        @Override
-        public int countKeys()
-        {
-            int count = 0;
-            for (int i = 0; i < kvPairs.length; i += 2)
-            {
-                Object keyOrNull = kvPairs[i];
-                if (keyOrNull == null)
-                {
-                    Object node = kvPairs[i + 1];
-                    if (node != null)
-                    {
-                        count += ((TrieNode<K, V>) node).countKeys();
-                    }
-                }
-                else
-                {
-                    count++;
-                }
-            }
-            return count;
-        }
 
         @Override
         TrieNode<K, V> with(int hash,
@@ -1261,13 +1257,6 @@ public final class HashArrayMappedTrie
             {
                 return this;
             }
-        }
-
-
-        @Override
-        public Iterator<Entry<K, V>> iterator()
-        {
-            return new EntryArrayIterator<>(kvPairs);
         }
 
 
