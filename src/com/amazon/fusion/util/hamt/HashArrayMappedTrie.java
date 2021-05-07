@@ -196,6 +196,7 @@ public final class HashArrayMappedTrie
      * TODO: Convert to interface with default methods in Java 8+
      */
     public static abstract class TrieNode<K, V>
+        implements Iterable<Entry<K, V>>
     {
         private TrieNode() {}
 
@@ -525,7 +526,7 @@ public final class HashArrayMappedTrie
          * Empirically, a linear search performs as fast or faster than a bitmapped
          * search, up to this many elements.
          */
-        private static final int MAX_CHILDREN = 8;
+        static final int MAX_CHILDREN = 8;
 
 
         FlatNode()
@@ -535,6 +536,13 @@ public final class HashArrayMappedTrie
         FlatNode(Object... kvPairs)
         {
             super(kvPairs);
+        }
+
+
+        @Override
+        public String toString()
+        {
+            return "FlatNode::" + Arrays.toString(kvPairs);
         }
 
 
@@ -751,6 +759,9 @@ public final class HashArrayMappedTrie
             // Supposing perfect hash distribution within the FlatNode, the new BitMappedNode's
             // array would require four extra allocations to perform expansion.
             // In the degenerate case of extremely similar hashes, this is a slight waste of memory.
+
+            // TODO There's no point in overallocating unless this is called from mWith().
+
             TrieNode<K, V> newNode = new BitMappedNode<>(0, new Object[8]);
             for (int i = 0; i < kvPairs.length; i += 2)
             {
@@ -792,8 +803,8 @@ public final class HashArrayMappedTrie
      * Collisions are expected to be rare, so we optimize for space.
      * </p>
      * <p>
-     * Nodes of this type are created when inserting a key into a {@link BitMappedNode} or
-     * {@code FlatNode} that holds a different key (per {@link #equivKeys}) with the same hashcode.
+     * Nodes of this type are created when inserting a key into a {@link BitMappedNode}
+     * that holds a different key (per {@link #equivKeys}) with the same hashcode.
      * They are replaced by a normal {@code FlatNode} when inserting a key with
      * a different hashcode, pushing the collisions down a level in the trie.
      * They are not eliminated when they shrink to one entry (and thus without a collision);
@@ -810,6 +821,15 @@ public final class HashArrayMappedTrie
             super(kvPairs);
             this.hash = hash;
         }
+
+
+        @Override
+        public String toString()
+        {
+            return "CollisionNode::{hash:" + hash +
+                    ", kvPairs:" + Arrays.toString(kvPairs) + "}";
+        }
+
 
         @Override
         public int countKeys()
@@ -912,16 +932,6 @@ public final class HashArrayMappedTrie
         {
             return new CollisionNode<>(hash, kvPairs);
         }
-
-        @Override
-        public String toString()
-        {
-            return "{\n" +
-                   "  Node Hash: " + hash + ",\n" +
-                   "  Nodes: " + Arrays.toString(kvPairs) + ",\n" +
-                   "}";
-
-        }
     }
 
 
@@ -930,7 +940,9 @@ public final class HashArrayMappedTrie
      * <p>
      * Within the {@link #kvPairs} array, keys are stored in even indices, values at odd.
      * Where there is a null key, the following value is either a child {@link TrieNode}
-     * or null. The latter occurs due to optimizations in {@link #mWith} and {@link FlatNode#expand}.
+     * or null. The latter occurs only at the high end of the array, and results from
+     * optimizations in {@link #mWith} and {@link FlatNode#expand} intended to reduce
+     * allocations while building a trie.
      * </p>
      * <p>
      * Nodes of this type are created when a {@link FlatNode} grows beyond its performant capacity
@@ -950,7 +962,7 @@ public final class HashArrayMappedTrie
          * this many elements. Empirically, this conversion provides a performance gain of up to
          * 20% on lookup and insert operations as the trie grows with randomly distributed keys.
          */
-        private static final int MAX_CHILDREN = 16;
+        static final int MAX_CHILDREN = 16;
 
         int bitmap;
 
@@ -965,6 +977,14 @@ public final class HashArrayMappedTrie
             super(kvPairs);
             this.bitmap = bitmap;
         }
+
+
+        @Override
+        public String toString()
+        {
+            return "BitMappedNode::" + Arrays.toString(kvPairs);
+        }
+
 
         private BitMappedNode<K, V> replace(int index, Object child)
         {
@@ -1122,6 +1142,8 @@ public final class HashArrayMappedTrie
                 }
                 else if (numVals * 2 < kvPairs.length)
                 {
+                    // There's extra room in our kvPairs array, so shift things
+                    // over to make room for the new entry.
                     System.arraycopy(kvPairs, keyIndex, kvPairs, keyIndex + 2, 2 * numVals - keyIndex);
                     kvPairs[keyIndex] = key;
                     kvPairs[keyIndex + 1] = newValue;
@@ -1309,7 +1331,8 @@ public final class HashArrayMappedTrie
     static class HashArrayMappedNode<K, V>
         extends TrieNode<K, V>
     {
-        private static final int MIN_CHILDREN = 8;
+        static final int MIN_CHILDREN = 8;
+        static final int MAX_CHILDREN = 32;
 
         /**
          * count refers to the number of non-null nodes in {@link #nodes},
@@ -1321,14 +1344,21 @@ public final class HashArrayMappedTrie
         HashArrayMappedNode()
         {
             count = 0;
-            nodes = new TrieNode[32];
+            nodes = new TrieNode[MAX_CHILDREN];
         }
 
         HashArrayMappedNode(int count, TrieNode<K, V>[] nodes)
         {
             this.count = count;
             this.nodes = nodes;
-            assert nodes.length == 32;
+            assert nodes.length == MAX_CHILDREN;
+        }
+
+
+        @Override
+        public String toString()
+        {
+            return "HamNode::" + Arrays.toString(nodes);
         }
 
 

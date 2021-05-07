@@ -40,7 +40,7 @@ class CustomKey
     @Override
     public String toString()
     {
-        return "Hash: " + hash + " Key: " + key;
+        return "CustomKey::{hash:" + hash + ", key:" + key + "}";
     }
 
     @Override

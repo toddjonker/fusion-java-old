@@ -417,7 +417,8 @@ public class HashArrayMappedTrieTest
 
     static <K, V> FlatNode<K, V> flatNodeForPairs(Object... kvPairs)
     {
-        assertTrue("too many pairs", kvPairs.length < 16);
+        assertTrue("too many pairs",
+                  kvPairs.length < FlatNode.MAX_CHILDREN * 2);
         assertEquals(0, kvPairs.length % 2);
 
         for (int i = 0; i < kvPairs.length; i += 2)
@@ -502,7 +503,7 @@ public class HashArrayMappedTrieTest
     public void checkFlatNodeExpansion()
     {
         List<Entry> values = new ArrayList<>();
-        for (int i = 0; i < 9; i++)
+        for (int i = 0; i <= FlatNode.MAX_CHILDREN; i++)
         {
             CustomKey key = new CustomKey(i, Integer.toString(i));
             Entry entry = new AbstractMap.SimpleEntry<>(key, new Object());
@@ -511,16 +512,16 @@ public class HashArrayMappedTrieTest
 
         TrieNode flatNode = new FlatNode();
 
-        // A flat node should hold eight entries before expanding.
-        for (int i = 0; i < 8; i++)
+        // A flat node should hold this many entries before expanding.
+        for (int i = 0; i < FlatNode.MAX_CHILDREN; i++)
         {
             Entry entry = values.get(i);
             flatNode = insert(flatNode, entry.getKey(), entry.getValue());
             assertTrue(flatNode instanceof FlatNode);
         }
 
-        Entry ninth = values.get(8);
-        TrieNode nowBitMap = insert(flatNode, ninth.getKey(), ninth.getValue());
+        Entry next = values.get(FlatNode.MAX_CHILDREN);
+        TrieNode nowBitMap = insert(flatNode, next.getKey(), next.getValue());
         assertTrue(nowBitMap instanceof BitMappedNode);
         assertEquals(9, nowBitMap.countKeys());
 
@@ -548,15 +549,16 @@ public class HashArrayMappedTrieTest
     @Test
     public void checkFlatNodeMutatingExpansion()
     {
+        int overflow = FlatNode.MAX_CHILDREN + 1;
         final FlatNode original = new FlatNode();
         TrieNode node = original;
-        for (int i = 0; i < 8; i++)
+        for (int i = 1; i < overflow; i++)
         {
             node = mInsert(node, i, i);
         }
         assertSame(original, node);
 
-        TrieNode expanded = mWith(node, 9, 9).inserts().returnsNew();
+        TrieNode expanded = mWith(node, overflow, overflow).inserts().returnsNew();
         assertTrue(expanded instanceof BitMappedNode);
     }
 
@@ -830,29 +832,31 @@ public class HashArrayMappedTrieTest
     @Test
     public void testBitMappedNodeExpansion()
     {
+        int overflow = BitMappedNode.MAX_CHILDREN + 1;
         TrieNode node = new BitMappedNode(0, new Object[0]);
-        for (int i = 1; i <= 16; i++)
+        for (int i = 1; i < overflow; i++)
         {
             node = insert(node, i, i);
         }
         assertEquals(BitMappedNode.class, node.getClass());
 
-        node = insert(node, 17, 17);
+        node = insert(node, overflow, overflow);
         assertEquals(HashArrayMappedNode.class, node.getClass());
     }
 
     @Test
     public void testBitMappedNodeMutatingExpansion()
     {
+        int overflow = BitMappedNode.MAX_CHILDREN + 1;
         TrieNode origNode = new BitMappedNode(0, new Object[0]);
         TrieNode node = origNode;
-        for (int i = 1; i <= 16; i++)
+        for (int i = 1; i < overflow; i++)
         {
             node = mInsert(node, i, i);
         }
         assertSame(origNode, node);
 
-        node = mWith(node, 17, 17).inserts().returnsNew();
+        node = mWith(node, overflow, overflow).inserts().returnsNew();
         assertEquals(HashArrayMappedNode.class, node.getClass());
     }
 
@@ -908,20 +912,22 @@ public class HashArrayMappedTrieTest
     @Test
     public void checkBitMappedNodeExpansionAndArrayNodeCompression()
     {
+        final int max = BitMappedNode.MAX_CHILDREN;
+
         Changes changes = new Changes();
         Object[] keys = new Object[17];
         TrieNode trieNode = new BitMappedNode();
-        for (int i = 0; i < 16; i++)
+        for (int i = 0; i < max; i++)
         {
             Object key = keys[i] = Integer.toString(i);
             trieNode = trieNode.with(i, 0, key, key, changes);
         }
 
         assertTrue(trieNode instanceof BitMappedNode);
-        assertEquals(16, trieNode.countKeys());
+        assertEquals(max, trieNode.countKeys());
 
-        Object overConversionLimitKey = keys[16] = "16";
-        trieNode = trieNode.with(16, 0, overConversionLimitKey, overConversionLimitKey, changes);
+        Object overConversionLimitKey = keys[max] = "" + max;
+        trieNode = trieNode.with(max, 0, overConversionLimitKey, overConversionLimitKey, changes);
         assertTrue(trieNode instanceof HashArrayMappedNode);
         assertEquals(17, trieNode.countKeys());
         for (int i = 0; i < 17; i++)
