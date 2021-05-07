@@ -539,7 +539,7 @@ public final class HashArrayMappedTrie
         }
 
 
-        TrieNode<K, V> makeSimilar(Object[] kvPairs)
+        FlatNode<K, V> makeSimilar(Object[] kvPairs)
         {
             return new FlatNode<>(kvPairs);
         }
@@ -578,21 +578,21 @@ public final class HashArrayMappedTrie
         V get(int hash, int shift, K key)
         {
             int index = linearSearch(hash, key);
-            if (index != -1)
+            if (index == -1)
             {
-                Object keyOrNull = kvPairs[index];
-                Object valOrNode = kvPairs[index + 1];
-                if (keyOrNull == null)
-                {
-                    return ((CollisionNode<K, V>) valOrNode).get(hash, shift, key);
-                }
-                else
-                {
-                    return (V) valOrNode;
-                }
+                return null;
             }
 
-            return null;
+            Object keyOrNull = kvPairs[index];
+            Object valOrNode = kvPairs[index + 1];
+            if (keyOrNull == null)
+            {
+                return ((CollisionNode<K, V>) valOrNode).get(hash, shift, key);
+            }
+            else
+            {
+                return (V) valOrNode;
+            }
         }
 
 
@@ -619,7 +619,7 @@ public final class HashArrayMappedTrie
                     else
                     {
                         // Child node has updated the Changes.
-                        return new FlatNode<>(cloneAndModify(kvPairs, index + 1, newNode));
+                        return replaceValue(index, newNode);
                     }
                 }
                 else
@@ -630,14 +630,14 @@ public final class HashArrayMappedTrie
                     {
                         return this;
                     }
-                    else
+                    else // Same key, different value
                     {
                         changes.keyReplaced();
-                        return new FlatNode<>(cloneAndModify(kvPairs, index + 1, newValue));
+                        return replaceValue(index, newValue);
                     }
                 }
             }
-            else
+            else // Adding a new child
             {
                 if (kvPairs.length >= 2 * MAX_CHILDREN)
                 {
@@ -709,31 +709,43 @@ public final class HashArrayMappedTrie
                                K key,
                                Changes changes)
         {
-            int index = linearSearch(hash, key);
-            if (index != -1)
+            int keyIndex = linearSearch(hash, key);
+            if (keyIndex == -1)
             {
-                Object keyOrNull = kvPairs[index];
-                if (keyOrNull == null)
+                return this;
+            }
+
+            Object keyOrNull = kvPairs[keyIndex];
+            Object valOrNode = kvPairs[keyIndex + 1];
+            if (keyOrNull == null)
+            {
+                CollisionNode<K, V> node = (CollisionNode<K, V>) valOrNode;
+                TrieNode<K, V> newNode = node.without(hash, shift, key, changes);
+                if (newNode == node)
                 {
-                    CollisionNode<K, V> node = (CollisionNode<K, V>) kvPairs[index + 1];
-                    TrieNode<K, V> newNode = node.without(hash, shift, key, changes);
-                    if (newNode == EmptyNode.SINGLETON)
-                    {
-                        return withoutPair(index);
-                    }
-                    else
-                    {
-                        return new FlatNode<>(cloneAndModify(kvPairs, index + 1,
-                                                             newNode));
-                    }
+                    return this;
+                }
+                else if (newNode != EmptyNode.SINGLETON)
+                {
+                    return replaceValue(keyIndex, newNode);
                 }
                 else
                 {
-                    changes.keyRemoved(kvPairs[index + 1]);
-                    return withoutPair(index);
+                    return withoutPair(keyIndex);
                 }
             }
-            return this;
+            else
+            {
+                changes.keyRemoved(valOrNode);
+                return withoutPair(keyIndex);
+            }
+        }
+
+
+        FlatNode<K, V> replaceValue(int keyIndex, Object value)
+        {
+            Object[] newPairs = cloneAndModify(kvPairs, keyIndex + 1, value);
+            return makeSimilar(newPairs);
         }
 
 
@@ -748,7 +760,6 @@ public final class HashArrayMappedTrie
                 return makeSimilar(cloneAndRemovePair(kvPairs, index));
             }
         }
-
 
         private TrieNode<K, V> expand(int shift)
         {
@@ -811,7 +822,7 @@ public final class HashArrayMappedTrie
      * this is suboptimal and should be corrected.
      * </p>
      */
-    static class CollisionNode<K, V>
+    static final class CollisionNode<K, V>
         extends FlatNode<K, V>
     {
         private final int hash;
@@ -824,7 +835,7 @@ public final class HashArrayMappedTrie
 
 
         @Override
-        TrieNode<K, V> makeSimilar(Object[] kvPairs)
+        FlatNode<K, V> makeSimilar(Object[] kvPairs)
         {
             return new CollisionNode<>(hash, kvPairs);
         }
@@ -884,9 +895,7 @@ public final class HashArrayMappedTrie
                     else
                     {
                         changes.keyReplaced();
-                        return makeSimilar(cloneAndModify(kvPairs,
-                                                          index + 1,
-                                                          newValue));
+                        return replaceValue(index, newValue);
                     }
                 }
                 else
@@ -934,7 +943,7 @@ public final class HashArrayMappedTrie
 
             // If it doesn't share the hash, push this collision node down a level.
             Object newValue = changes.keyAdded(value);
-            return new FlatNode<>(new Object[]{null, this, key, newValue});
+            return new FlatNode<>(null, this, key, newValue);
         }
     }
 
@@ -1046,20 +1055,18 @@ public final class HashArrayMappedTrie
             {
                 Object keyOrNull = kvPairs[keyIndex];
                 Object valOrNode = kvPairs[keyIndex + 1];
-                assert !(valOrNode instanceof EmptyNode);
-
                 if (keyOrNull == null)
                 {
                     TrieNode<K, V> node = (TrieNode<K, V>) valOrNode;
                     TrieNode<K, V> newNode = node.with(hash, shift + 5, key, value, changes);
-                    if (newNode == valOrNode)
+                    if (newNode == node)
                     {
                         return this;
                     }
                     else
                     {
                         // Child node has updated the Changes.
-                        return replace(keyIndex + 1, newNode);
+                        return replaceValue(keyIndex, newNode);
                     }
                 }
                 else if (equivKeys(keyOrNull, key))
@@ -1073,7 +1080,7 @@ public final class HashArrayMappedTrie
                     else // Same key, different value
                     {
                         changes.keyReplaced();
-                        return replace(keyIndex + 1, newValue);
+                        return replaceValue(keyIndex, newValue);
                     }
                 }
                 else // Hash fragment collision
@@ -1085,7 +1092,7 @@ public final class HashArrayMappedTrie
                                                               hash,
                                                               key,
                                                               (V) newValue);
-                    return replace(keyIndex, null, keyIndex + 1, newNode);
+                    return replacePair(keyIndex, null, newNode);
                 }
             }
             else // Adding a new child
@@ -1135,7 +1142,7 @@ public final class HashArrayMappedTrie
                 {
                     TrieNode<K, V> node = (TrieNode<K, V>) valOrNode;
                     TrieNode<K, V> newNode = node.mWith(hash, shift + 5, key, value, changes);
-                    if (newNode != valOrNode)
+                    if (newNode != node)
                     {
                         kvPairs[keyIndex + 1] = newNode;
                     }
@@ -1215,39 +1222,23 @@ public final class HashArrayMappedTrie
             {
                 TrieNode<K, V> node = (TrieNode<K, V>) valOrNode;
                 TrieNode<K, V> newNode = node.without(hash, shift + 5, key, changes);
-                if (newNode == valOrNode)
+                if (newNode == node)
                 {
                     return this;
                 }
-                else if (newNode == EmptyNode.SINGLETON)
+                else if (newNode != EmptyNode.SINGLETON)
                 {
-                    if (bitmap == bit)
-                    {
-                        return newNode;
-                    }
-                    else
-                    {
-                        return new BitMappedNode<>(bitmap ^ bit,
-                                                   cloneAndRemovePair(kvPairs, keyIndex));
-                    }
+                    return replaceValue(keyIndex, newNode);
                 }
                 else
                 {
-                    return replace(keyIndex + 1, newNode);
+                    return withoutPair(bit, keyIndex);
                 }
             }
             else if (equivKeys(keyOrNull, key))
             {
                 changes.keyRemoved(valOrNode);
-                if (bitmap == bit)
-                {
-                    return empty();
-                }
-                else
-                {
-                    return new BitMappedNode<>(bitmap ^ bit,
-                                               cloneAndRemovePair(kvPairs, keyIndex));
-                }
+                return withoutPair(bit, keyIndex);
             }
             else
             {
@@ -1255,18 +1246,33 @@ public final class HashArrayMappedTrie
             }
         }
 
-
-        private BitMappedNode<K, V> replace(int index, Object child)
+        private TrieNode<K, V> withoutPair(int bit, int keyIndex)
         {
-            Object[] newKvPairs = cloneAndModify(kvPairs, index, child);
-            return new BitMappedNode<>(bitmap, newKvPairs);
+            if (bitmap == bit)
+            {
+                return empty();
+            }
+            else
+            {
+                Object[] newPairs = cloneAndRemovePair(kvPairs, keyIndex);
+                return new BitMappedNode<>(bitmap ^ bit, newPairs);
+            }
         }
 
-        private BitMappedNode<K, V> replace(int index1, Object child1,
-                                            int index2, Object child2)
+
+        private BitMappedNode<K, V> replaceValue(int keyIndex, Object value)
         {
-            Object[] newKvPairs = cloneAndModify(kvPairs, index1, child1, index2, child2);
-            return new BitMappedNode<>(bitmap, newKvPairs);
+            Object[] newPairs = cloneAndModify(kvPairs, keyIndex + 1, value);
+            return new BitMappedNode<>(bitmap, newPairs);
+        }
+
+        private BitMappedNode<K, V> replacePair(int keyIndex,
+                                                Object key,
+                                                Object value)
+        {
+            Object[] newPairs =
+                cloneAndModify(kvPairs, keyIndex, key, keyIndex + 1, value);
+            return new BitMappedNode<>(bitmap, newPairs);
         }
 
 
@@ -1414,10 +1420,7 @@ public final class HashArrayMappedTrie
             {
                 Object newValue = changes.keyAdded(value);
                 TrieNode<K, V> newNode = new FlatNode<>(key, (V) newValue);
-                return new HashArrayMappedNode<>(count + 1,
-                                                 cloneAndModify(nodes,
-                                                                index,
-                                                                newNode));
+                return replace(count + 1, index, newNode);
             }
             else
             {
@@ -1429,10 +1432,7 @@ public final class HashArrayMappedTrie
                 else
                 {
                     // Child node has updated the Changes.
-                    return new HashArrayMappedNode<>(count,
-                                                     cloneAndModify(nodes,
-                                                                    index,
-                                                                    newNode));
+                    return replace(count, index, newNode);
                 }
             }
         }
@@ -1478,36 +1478,32 @@ public final class HashArrayMappedTrie
             {
                 return this;
             }
+
+            // Child node updates Changes
+            TrieNode<K, V> newNode = node.without(hash, shift + 5, key, changes);
+            if (newNode == node)
+            {
+                return this;
+            }
+            else if (newNode != EmptyNode.SINGLETON)
+            {
+                return replace(count, index, newNode);
+            }
+            else if (count <= MIN_CHILDREN)
+            {
+                return removeAndPack(index);
+            }
             else
             {
-                // Child node updates Changes
-                TrieNode<K, V> newNode = node.without(hash, shift + 5, key, changes);
-                if (newNode == node)
-                {
-                    return this;
-                }
-                else if (newNode != EmptyNode.SINGLETON)
-                {
-                    return new HashArrayMappedNode<>(count,
-                                                     cloneAndModify(nodes,
-                                                                    index,
-                                                                    newNode));
-                }
-                else
-                {
-                    if (count <= MIN_CHILDREN)
-                    {
-                        return removeAndPack(index);
-                    }
-                    else
-                    {
-                        return new HashArrayMappedNode<>(count - 1,
-                                                         cloneAndModify(nodes,
-                                                                        index,
-                                                                        null));
-                    }
-                }
+                return replace(count - 1, index, null);
             }
+        }
+
+
+        private TrieNode<K, V> replace(int count, int index, TrieNode<K, V> value)
+        {
+            TrieNode<K, V>[] newPairs = cloneAndModify(nodes, index, value);
+            return new HashArrayMappedNode<>(count, newPairs);
         }
 
 

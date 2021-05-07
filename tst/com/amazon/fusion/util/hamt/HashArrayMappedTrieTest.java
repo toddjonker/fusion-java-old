@@ -500,6 +500,21 @@ public class HashArrayMappedTrieTest
     }
 
     @Test
+    public void testFlatNodeCollisionRemoval()
+    {
+        CustomKey foo1 = new CustomKey("foo1");
+        CustomKey foo2 = foo1.collide("foo2");
+        CustomKey foo3 = foo1.collide("foo3");
+        CustomKey bar  = new CustomKey("bar");
+
+        TrieNode node = collisionNodeForPairs(foo1, foo1, foo2, foo2);
+        node = insert(node, bar, bar);
+        assertEquals(FlatNode.class, node.getClass());
+
+        node = noopRemove(node, foo3);
+    }
+
+    @Test
     public void checkFlatNodeExpansion()
     {
         List<Entry> values = new ArrayList<>();
