@@ -13,8 +13,8 @@ import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionIterator.iterate;
 import static com.amazon.fusion.FusionList.checkNullableListArg;
 import static com.amazon.fusion.FusionList.unsafeJavaIterate;
-import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
+import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
 import static com.amazon.fusion.FusionText.textToJavaString;
 import static com.amazon.fusion.FusionText.unsafeTextToJavaString;
@@ -69,6 +69,19 @@ final class FusionStruct
         }
         return value;
     }
+
+    /**
+     * HAMT transform that replaces all multi-value entries with a single value.
+     */
+    private static final BiFunction<String, Object, Object> ONEIFY_XFORM =
+        new BiFunction<String, Object, Object>()
+        {
+            @Override
+            public Object apply(String key, Object value)
+            {
+                return oneify(value);
+            }
+        };
 
 
     /**
@@ -223,6 +236,8 @@ final class FusionStruct
     }
 
 
+    // TODO Replace this with a builder, to avoid the awkward exception handling
+    //  and eliminate Entry allocation.
     static NonNullImmutableStruct
     immutableStruct(Evaluator eval,
                     Iterator<Map.Entry<String, Object>> entries,
@@ -349,23 +364,6 @@ final class FusionStruct
         FunctionalHashTrie<String, Object> trie =
             FunctionalHashTrie.fromArrays(names, values, changes);
         return new MutableStruct(trie, internSymbols(anns), changes.valueCountDelta);
-    }
-
-
-    // TODO push down into HAMT.transform
-    private static
-    FunctionalHashTrie<String, Object> structImplOneify(FunctionalHashTrie<String, Object> map)
-    {
-        for (Map.Entry<String, Object> entry : map)
-        {
-            Object value = entry.getValue();
-            if (value instanceof Object[])
-            {
-                Object first = ((Object[]) value)[0];
-                map = map.with(entry.getKey(), first);
-            }
-        }
-        return map;
     }
 
 
@@ -583,6 +581,80 @@ final class FusionStruct
          */
         Object visit(String name, Object value)
             throws FusionException;
+    }
+
+    static class TunneledFusionException
+        extends RuntimeException
+    {
+        private final FusionException myFusionException;
+
+        TunneledFusionException(FusionException e)
+        {
+            myFusionException = e;
+        }
+
+        public FusionException getFusionException()
+        {
+            return myFusionException;
+        }
+    }
+
+
+    /**
+     * Adapts {@link StructFieldVisitor} to HAMT transform visitor.
+     */
+    private static class StructFieldXform
+        implements BiFunction<String, Object, Object>
+    {
+        private final StructFieldVisitor visitor;
+
+        public StructFieldXform(StructFieldVisitor visitor)
+        {
+            this.visitor = visitor;
+        }
+
+        private Object transformOne(String fieldName, Object value)
+        {
+            try
+            {
+                return visitor.visit(fieldName, value);
+            }
+            catch (FusionException e)
+            {
+                throw new TunneledFusionException(e);
+            }
+        }
+
+        private Object[] transformMulti(String fieldName, Object[] children)
+        {
+            int childCount = children.length;
+
+            // TODO: Don't allocate unless it's necessary.
+            boolean mustReplaceArray = false;
+            Object[] newChildren = new Object[childCount];
+            for (int i = 0; i < childCount; i++)
+            {
+                Object child = children[i];
+                Object newChild = transformOne(fieldName, child);
+                mustReplaceArray |= (newChild != child);
+                newChildren[i] = newChild;
+            }
+
+            return (mustReplaceArray ? newChildren : children);
+        }
+
+        @Override
+        public Object apply(String key, Object value)
+        {
+            if (value instanceof Object[])
+            {
+                return transformMulti(key, (Object[]) value);
+            }
+            else
+            {
+                return transformOne(key, value);
+            }
+        }
     }
 
 
@@ -850,7 +922,7 @@ final class FusionStruct
             if (other.size() == 0) return this;
 
             MapBasedStruct is = (MapBasedStruct) other;
-            FunctionalHashTrie<String, Object> map = structImplOneify(is.getMap(eval));
+            FunctionalHashTrie<String, Object> map = is.getMap(eval).transform(ONEIFY_XFORM);
             return new FunctionalStruct(map, myAnnotations, map.size());
         }
 
@@ -972,70 +1044,27 @@ final class FusionStruct
         }
 
 
-        // TODO Add transformation to HAMT.
         @Override
         public
         NonNullImmutableStruct transformFields(Evaluator eval,
                                                StructFieldVisitor visitor)
             throws FusionException
         {
-            boolean mustReplaceThis = (this instanceof MutableStruct);
-
-            if (mySize == 0 && !mustReplaceThis)
+            try
             {
+                FunctionalHashTrie<String, Object> oldMap = getMap(eval);
+                FunctionalHashTrie<String, Object> newMap =
+                    oldMap.transform(new StructFieldXform(visitor));
+                if (newMap != oldMap || this instanceof MutableStruct)
+                {
+                    return new FunctionalStruct(newMap, myAnnotations, size());
+                }
                 return (NonNullImmutableStruct) this;
             }
-
-            // Replace children in map as necessary.
-            FunctionalHashTrie<String, Object> oldMap = getMap(eval);
-            FunctionalHashTrie<String, Object> newMap = oldMap;
-
-            for (Map.Entry<String, Object> entry : oldMap)
+            catch (TunneledFusionException e)
             {
-                String fieldName = entry.getKey();
-
-                Object value = entry.getValue();
-                if (value instanceof Object[])
-                {
-                    Object[] children = (Object[]) value;
-                    int childCount = children.length;
-
-                    boolean mustReplaceArray = false;
-                    Object[] newChildren = new Object[childCount];
-                    for (int i = 0; i < childCount; i++)
-                    {
-                        Object child = children[i];
-                        Object newChild = visitor.visit(fieldName, child);
-                        if (newChild != child)
-                        {
-                            mustReplaceArray = true;
-                        }
-                        newChildren[i] = newChild;
-                    }
-
-                    if (mustReplaceArray)
-                    {
-                        newMap = newMap.with(entry.getKey(), newChildren);
-                        mustReplaceThis = true;
-                    }
-                }
-                else
-                {
-                    Object newChild = visitor.visit(fieldName, value);
-                    if (newChild != value)
-                    {
-                        newMap = newMap.with(entry.getKey(), newChild);
-                        mustReplaceThis = true;
-                    }
-                }
+                throw e.getFusionException();
             }
-
-            if (! mustReplaceThis)
-            {
-                return (NonNullImmutableStruct) this;
-            }
-
-            return new FunctionalStruct(newMap, myAnnotations, size());
         }
 
         @Override
@@ -1197,7 +1226,7 @@ final class FusionStruct
             throws FusionException
         {
             FunctionalHashTrie<String,Object> origMap = getMap(eval);
-            FunctionalHashTrie<String,Object> newMap = structImplOneify(origMap);
+            FunctionalHashTrie<String,Object> newMap = origMap.transform(ONEIFY_XFORM);
 
             if (other.size() == 0)
             {
@@ -1763,7 +1792,7 @@ final class FusionStruct
             throws FusionException
         {
             // Remove any existing repeated fields.
-            myMap = structImplOneify(myMap);
+            myMap = myMap.transform(ONEIFY_XFORM);
 
             if (other.size() != 0)
             {

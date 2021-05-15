@@ -41,6 +41,13 @@ public class StructTest
     }
 
     @Test
+    public void testStructLiteralWithBadSyntax()
+            throws Exception
+    {
+        expectSyntaxExn("{f:(define)}");
+    }
+
+    @Test
     public void testDeepRemoveKeysM()
         throws Exception
     {

@@ -256,6 +256,21 @@ class FunctionalHashTrie<K, V>
     }
 
 
+    public FunctionalHashTrie<K, V> transform(BiFunction<K, V, V> xform)
+    {
+        return transform(xform, new Changes());
+    }
+
+    public FunctionalHashTrie<K, V> transform(BiFunction<K, V, V> xform, Changes changes)
+    {
+        int priorChangeCount   = changes.changeCount();
+        int priorKeyCountDelta = changes.keyCountDelta();
+
+        TrieNode<K, V> newRoot = root.transform(xform, changes);
+        return resultFrom(newRoot, priorChangeCount, priorKeyCountDelta, changes);
+    }
+
+
     public Set<K> keySet()
     {
         // FIXME This is an extremely expensive implementation.
@@ -294,6 +309,4 @@ class FunctionalHashTrie<K, V>
             }
         };
     }
-
-    // TODO: Add method that accepts a function to modify each element in the trie.
 }
