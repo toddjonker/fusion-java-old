@@ -96,6 +96,19 @@
 (expect_arity_exn (ionize_to_string 1 2))
 
 
+// jsonize_to_string
+
+(check === "null"                          (jsonize_to_string null.int))
+(check === "1"                             (jsonize_to_string 1))
+(check === "[1,true]"                      (jsonize_to_string (sexp 1 true)))
+(check === "{\"f\":\"hi\"}"                (jsonize_to_string {f:"hi"}))
+(check === "\"\\\"!\\\"\""                 (jsonize_to_string (quote '\"!\"')))
+(check === "\"2021-06-08T10:19:00-07:00\"" (jsonize_to_string 2021-06-08T10:19:00-07:00))
+
+(expect_arity_exn (jsonize_to_string))
+(expect_arity_exn (jsonize_to_string 1 2))
+
+
 //=============================================================================
 // display_to_string
 

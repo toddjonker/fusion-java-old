@@ -55,6 +55,7 @@ upon launch of the Fusion runtime. See [FusionRuntimeBuilder][] for details.
     ionize_to_blob
     ionize_to_string
     is_eof
+    jsonize_to_string
     read
     with_ion_from_file
     with_ion_from_lob
@@ -180,6 +181,28 @@ value contains any non-Ionizable data like closures. The result is a string
 containing an Ion text document.
     '''
     (java_new "com.amazon.fusion.FusionIo$IonizeToStringProc"))
+
+
+  (define jsonize_to_string
+    '''
+    (jsonize_to_string value)
+
+Encodes an JSON text representation of `value`, throwing an exception if the
+value contains any non-Ionizable data like closures. The result is a string
+containing a JSON text document.
+
+Compared to `ionize_to_string`, this method applies these conversions:
+
+  * All annotations are suppressed.
+  * Nulls of any type are printed as JSON `null`.
+  * Blobs are printed as strings, containing Base64.
+  * Clobs are printed as strings, containing only Unicode code points
+    U+00 through U+FF.
+  * Sexps are printed as lists.
+  * Symbols are printed as strings.
+  * Timestamps are printed as strings, using Ion timestamp format.
+    '''
+    (java_new "com.amazon.fusion.FusionIo$JsonizeToStringProc"))
 
 
   (define write

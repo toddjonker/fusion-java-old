@@ -647,14 +647,19 @@ public final class FusionIo
     }
 
 
-    static final class IonizeToStringProc
+    static class IonizeToStringProc
         extends Procedure1
     {
         private final IonTextWriterBuilder myBuilder;
 
         IonizeToStringProc()
         {
-            myBuilder = IonTextWriterBuilder.minimal().immutable();
+            this(IonTextWriterBuilder.minimal());
+        }
+
+        IonizeToStringProc(IonTextWriterBuilder builder)
+        {
+            myBuilder = builder.immutable();
         }
 
         @Override
@@ -676,6 +681,14 @@ public final class FusionIo
         }
     }
 
+    static final class JsonizeToStringProc
+        extends IonizeToStringProc
+    {
+        JsonizeToStringProc()
+        {
+            super(IonTextWriterBuilder.json());
+        }
+    }
 
     static final class WriteProc
         extends Procedure1

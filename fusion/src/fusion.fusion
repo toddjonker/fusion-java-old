@@ -175,6 +175,7 @@ contact us for clarification.
     ionize_to_blob
     ionize_to_string
     is_eof
+    jsonize_to_string
     read
     with_ion_from_file
     with_ion_from_lob
