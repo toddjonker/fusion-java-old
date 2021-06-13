@@ -2,13 +2,11 @@
 
 package com.amazon.fusion.util.hamt;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.NoSuchElementException;
 import java.util.Random;
 
 /**
@@ -498,7 +496,7 @@ public final class HashArrayMappedTrie
         @Override
         public final Iterator<Entry<K, V>> iterator()
         {
-            return new EntryArrayIterator<>(kvPairs);
+            return new KvArrayIterator<>(kvPairs);
         }
     }
 
@@ -1504,60 +1502,7 @@ public final class HashArrayMappedTrie
         @Override
         public Iterator<Entry<K, V>> iterator()
         {
-            return new Iterator<Entry<K , V>>()
-            {
-                private final TrieNode<K, V>[] array = nodes;
-                private Iterator<Entry<K, V>> childIter;
-                private int i;
-
-                private boolean getAndCacheNext()
-                {
-                    while (i < array.length)
-                    {
-                        TrieNode<K, V> node = array[i++];
-                        if (node != null)
-                        {
-                            childIter = node.iterator();
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-
-                @Override
-                public boolean hasNext()
-                {
-                    return childIter != null || getAndCacheNext();
-                }
-
-                @Override
-                public Entry<K, V> next()
-                {
-                    if (childIter != null)
-                    {
-                        Entry<K, V> ret = childIter.next();
-                        if (!childIter.hasNext())
-                        {
-                            childIter = null;
-                        }
-                        return ret;
-                    }
-                    else if (getAndCacheNext())
-                    {
-                        return next();
-                    }
-                    else
-                    {
-                        throw new NoSuchElementException();
-                    }
-                }
-
-                @Override
-                public void remove()
-                {
-                    throw new UnsupportedOperationException();
-                }
-            };
+            return new NodeArrayIterator<>(nodes);
         }
 
 
@@ -1592,94 +1537,6 @@ public final class HashArrayMappedTrie
         }
     }
 
-    /**
-     * Iterator for {@link FlatNode}s, {@link CollisionNode}s, and {@link BitMappedNode}s,
-     * since they all have nearly the same invariants.
-     *
-     * A minor optimization could be made for {@link CollisionNode}s similar to that done
-     * for {@link HashArrayMappedNode}s, since {@link CollisionNode}s never have child nodes.
-     */
-    static final class EntryArrayIterator<K, V>
-        implements Iterator<Entry<K, V>>
-    {
-        private final Object[] array;
-        private int i = 0;
-
-        // At most one of these is non-null because an array will contain
-        // either a key then value pair or a null then a node pair.
-        private Iterator<Entry<K, V>> childIterator;
-        private Entry<K, V> nextEntry;
-
-        private EntryArrayIterator(Object[] array)
-        {
-            this.array = array;
-        }
-
-        private boolean getAndCacheNext()
-        {
-            while (i < array.length)
-            {
-                Object keyOrNull = array[i++];
-                Object valOrNode = array[i++];
-                if (keyOrNull != null)
-                {
-                    nextEntry = createEntry((K) keyOrNull, (V) valOrNode);
-                    return true;
-                }
-                else if (valOrNode != null)
-                {
-                    Iterator<Entry<K, V>> i = ((TrieNode<K, V>) valOrNode).iterator();
-                    if (i.hasNext())
-                    {
-                        childIterator = i;
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public boolean hasNext()
-        {
-            return childIterator != null || nextEntry != null || getAndCacheNext();
-        }
-
-        @Override
-        public Entry<K, V> next()
-        {
-            if (childIterator != null)
-            {
-                Entry<K, V> ret = childIterator.next();
-                if (!childIterator.hasNext())
-                {
-                   childIterator = null;
-                }
-                return ret;
-            }
-            else if (nextEntry != null)
-            {
-                Entry<K, V> ret = nextEntry;
-                nextEntry = null;
-                return ret;
-            }
-            else if (getAndCacheNext())
-            {
-                return next();
-            }
-            else
-            {
-                throw new NoSuchElementException();
-            }
-        }
-
-        @Override
-        public void remove()
-        {
-            throw new UnsupportedOperationException();
-        }
-    }
-
 
     //==========================================================================
     // Utility methods for node classes.
@@ -1703,14 +1560,6 @@ public final class HashArrayMappedTrie
         return val1 == val2;
     }
 
-    /**
-     * Short, generified wrapper for AbstractMap.SimpleEntry.
-     */
-    private static <K, V> Entry<K, V> createEntry(K key,
-                                                      V value)
-    {
-        return new SimpleEntry<>(key, value);
-    }
 
     private static Object[] cloneAndExtend(Object[] array,
                                            Object key,
@@ -1771,4 +1620,5 @@ public final class HashArrayMappedTrie
         System.arraycopy(array, keyIndex + 2, clone, keyIndex, clone.length - keyIndex);
         return clone;
     }
+
 }
