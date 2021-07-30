@@ -113,7 +113,7 @@ public class HashArrayMappedTrieTest
             recordKey(key, value);
 
             newNode = oldNode.with(key, value, changes);
-            assertTrue("Changes not invoked", changes.invoked);
+            assertTrue("Changes not invoked", changes.wrapped);
             assertValueEquals(value, newNode, key);
             assertRootReplacementImpliesModification();
 
@@ -125,7 +125,7 @@ public class HashArrayMappedTrieTest
             recordKey(key, value);
 
             newNode = oldNode.mWith(key, value, changes);
-            assertTrue("Changes not invoked", changes.invoked);
+            assertTrue("Changes not invoked", changes.wrapped);
             assertValueEquals(value, newNode, key);
             assertRootReplacementImpliesModification();
 
@@ -187,8 +187,10 @@ public class HashArrayMappedTrieTest
             assertSame("mapped value", oldValue, newValue);
 
             mode = Mode.NOOP;
-            // TODO what about Changes?
             assertEquals("unexpected changes were made", 0, changes.changeCount());
+            assertFalse(changes.inserted);
+            assertFalse(changes.replaced);
+            assertFalse(changes.removed);
             assertSizeDelta(0);
             return this;
         }
@@ -238,7 +240,7 @@ public class HashArrayMappedTrieTest
         private class CheckingChanges
             extends Changes
         {
-            boolean invoked  = false;
+            boolean wrapped  = false;
             boolean inserted = false;
             boolean replaced = false;
             boolean removed  = false;
@@ -246,7 +248,7 @@ public class HashArrayMappedTrieTest
             @Override
             public Wrapper<V> inserting(Object givenValue)
             {
-                invoked = inserted = true;
+                wrapped = true;
 
                 assertFalse("wrapper shouldn't be given", givenValue instanceof Wrapper);
                 assertSame(newValue, givenValue);
@@ -256,9 +258,9 @@ public class HashArrayMappedTrieTest
             @Override
             public Wrapper<V> replacing(Object storedValue, Object givenValue)
             {
+                wrapped = true;
                 Wrapper<V> wrapper = (Wrapper<V>) storedValue;
-                invoked = replaced = true;
-                assertSame(oldValue, wrapper.target);
+                assertSame(Modifier.this.oldValue, wrapper.target);
                 assertSame(newValue, givenValue);
 
                 if (givenValue == wrapper.target)
@@ -270,12 +272,38 @@ public class HashArrayMappedTrieTest
                 return new Wrapper(givenValue);
             }
 
-            protected void removing(Object storedValue)
+            @Override
+            public void keyAdded(Object key, Object newValue)
             {
-                invoked = removed = true;
+                inserted = true;
 
-                Wrapper<V> wrapper = (Wrapper<V>) storedValue;
-                assertSame(oldValue, wrapper.target);
+                assertSame(Modifier.this.key, key);
+                assertSame(Modifier.this.newValue, ((Wrapper<V>) newValue).target);
+
+                super.keyAdded(key, newValue);
+            }
+
+            @Override
+            protected void keyReplaced(Object key, Object oldValue, Object newValue)
+            {
+                replaced = true;
+
+                assertEquals(Modifier.this.key, key);
+                assertSame(Modifier.this.oldValue, ((Wrapper<V>) oldValue).target);
+                assertSame(Modifier.this.newValue, ((Wrapper<V>) newValue).target);
+
+                super.keyReplaced(key, oldValue, newValue);
+            }
+
+            @Override
+            protected void keyRemoved(Object key, Object oldValue)
+            {
+                removed = true;
+
+                assertEquals(Modifier.this.key, key);
+                assertSame(Modifier.this.oldValue, ((Wrapper<V>) oldValue).target);
+
+                super.keyRemoved(key, oldValue);
             }
 
             void assertInserted()

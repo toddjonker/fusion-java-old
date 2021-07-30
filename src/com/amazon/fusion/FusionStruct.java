@@ -90,13 +90,6 @@ final class FusionStruct
         }
 
         @Override
-        public Object inserting(Object givenValue)
-        {
-            valueCountDelta += count(givenValue);
-            return givenValue;
-        }
-
-        @Override
         public Object replacing(Object storedValue, Object givenValue)
         {
             Object[] newArray;
@@ -111,32 +104,44 @@ final class FusionStruct
                     int givenLen  = givenArray.length;
                     newArray = Arrays.copyOf(storedArray, storedLen + givenLen);
                     System.arraycopy(givenArray, 0, newArray, storedLen, givenLen);
-
-                    valueCountDelta += givenLen;
                 }
                 else
                 {
                     newArray = extend(storedArray, givenValue);
-                    valueCountDelta++;
                 }
             }
             else if (givenValue instanceof Object[])
             {
                 Object[] givenArray = (Object[]) givenValue;
                 newArray = extend(givenArray, storedValue);
-                valueCountDelta += givenArray.length;
             }
             else
             {
                 newArray = new Object[] {storedValue, givenValue};
-                valueCountDelta++;
             }
             return newArray;
         }
 
-        public void removing(Object storedValue)
+
+        @Override
+        protected void keyAdded(Object key, Object newValue)
         {
-            valueCountDelta -= count(storedValue);
+            valueCountDelta += count(newValue);
+            super.keyAdded(key, newValue);
+        }
+
+        @Override
+        protected void keyReplaced(Object key, Object oldValue, Object newValue)
+        {
+            valueCountDelta += count(newValue) - count(oldValue);
+            super.keyReplaced(key, oldValue, newValue);
+        }
+
+        @Override
+        protected void keyRemoved(Object key, Object oldValue)
+        {
+            valueCountDelta -= count(oldValue);
+            super.keyRemoved(key, oldValue);
         }
 
         private static Object[] extend(Object[] array, Object element)
@@ -158,14 +163,12 @@ final class FusionStruct
         @Override
         public Object inserting(Object givenValue)
         {
-            valueCountDelta++;
             return oneify(givenValue);
         }
 
         @Override
         public Object replacing(Object storedValue, Object givenValue)
         {
-            valueCountDelta += 1 - count(storedValue);
             return oneify(givenValue);
         }
     }
