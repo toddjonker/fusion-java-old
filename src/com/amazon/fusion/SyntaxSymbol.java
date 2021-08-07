@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2021 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -219,7 +219,7 @@ final class SyntaxSymbol
     boolean hasMarks(Evaluator eval)
     {
         if (myBoundId != null) return myBoundId.hasMarks();
-        return (myWraps == null ? false : myWraps.hasMarks(eval));
+        return (myWraps != null && myWraps.hasMarks(eval));
     }
 
 
@@ -356,16 +356,14 @@ final class SyntaxSymbol
             if (text == null)
             {
                 String message =
-                    "null.symbol is not an expression. " +
-                    "You probably want to quote this.";
+                    "`null.symbol` is not a valid expression; use `(quote null.symbol)` instead.";
                 throw new SyntaxException(null, message, this);
             }
 
             if (text.length() == 0)
             {
                 String message =
-                    "Not an expression. " +
-                    "You probably want to quote this.";
+                    "The empty symbol is not a valid expression; use `(quote '')` instead.";
                 throw new SyntaxException(null, message, this);
             }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2021 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -133,7 +133,7 @@ public class FusionException
      * This should be used instead of {@link #getMessage()} since the latter is
      * overridden here to delegate to {@link #displayMessage}.
      */
-    final String getBaseMessage()
+    String getBaseMessage()
     {
         return super.getMessage();
     }
