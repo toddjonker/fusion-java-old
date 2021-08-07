@@ -6,6 +6,7 @@ import static com.amazon.fusion.FunctionalHashTrie.fromArrays;
 import static com.amazon.fusion.FunctionalHashTrie.fromEntries;
 import static com.amazon.fusion.FunctionalHashTrie.fromSelectedKeys;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -45,7 +46,9 @@ public class FunctionalHashTrieTest
 
         for (Object key : keysToRemove)
         {
-            fht = fht.without(key);
+            FunctionalHashTrie<Object, Object> newHash = fht.without(key);
+            assertNotEquals(fht, newHash);
+            fht = newHash;
         }
     }
 
@@ -54,10 +57,13 @@ public class FunctionalHashTrieTest
         int toAdd = baselineMap.size();
         for (int i = 0; i < toAdd; i++)
         {
-            Map.Entry entry = new SimpleEntry<>(new Object(), new Object());
+            Object key   = new Object();
+            Object value = new Object();
 
-            baselineMap.put(entry.getKey(), entry.getValue());
-            fht = fht.with(entry.getKey(), entry.getValue());
+            baselineMap.put(key, value);
+            FunctionalHashTrie<Object, Object> newHash = fht.with(key, value);
+            assertNotEquals(fht, newHash);
+            fht = newHash;
         }
     }
 
@@ -222,6 +228,7 @@ public class FunctionalHashTrieTest
             seq = seq.with(e.getKey(), e.getValue());
         }
 
+        assertEquals(fht, seq);
         assertEquals(fht.size(), seq.size());
         for (Map.Entry e : fht)
         {
@@ -342,6 +349,7 @@ public class FunctionalHashTrieTest
         assertEquals(null, t.get(1));
         assertEquals(2,    t.get(2));
         assertEquals(null, t.get(3));
+        assertNotEquals(origin, t);
     }
 
     @Test

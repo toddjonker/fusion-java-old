@@ -271,6 +271,49 @@ class FunctionalHashTrie<K, V>
     }
 
 
+    public boolean equals(Object that)
+    {
+        return (this == that)
+                   || (that instanceof FunctionalHashTrie
+                           && this.equals((FunctionalHashTrie) that));
+    }
+
+    private static final BiPredicate EQUALS_BIPRED = new BiPredicate()
+    {
+        public boolean test(Object o1, Object o2)
+        {
+            return o1.equals(o2);
+        }
+    };
+
+    public boolean equals(FunctionalHashTrie<K, V> that)
+    {
+        return equals(that, EQUALS_BIPRED);
+    }
+
+    /**
+     * Compare against another hash, using a predicate to compare values.
+     */
+    public boolean equals(FunctionalHashTrie<K, V> that, BiPredicate<V, V> comp)
+    {
+        if (size() != that.size()) return false;
+
+        for (Map.Entry<K, V> entry : root)
+        {
+            K fieldName = entry.getKey();
+
+            V lv = entry.getValue();
+            V rv = that.root.get(fieldName);
+
+            if (rv == null) return false;
+
+            if (!comp.test(lv, rv)) return false;
+        }
+
+        return true;
+    }
+
+
     public Set<K> keySet()
     {
         // FIXME This is an extremely expensive implementation.

@@ -4,7 +4,6 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
-import static com.amazon.fusion.FusionBool.trueBool;
 import static com.amazon.fusion.FusionCompare.EqualityTier.LOOSE_EQUAL;
 import static com.amazon.fusion.FusionCompare.EqualityTier.STRICT_EQUAL;
 import static com.amazon.fusion.FusionCompare.EqualityTier.TIGHT_EQUAL;
@@ -516,7 +515,7 @@ final class FusionStruct
 
 
     static Object unsafeStructRemoveKeysM(Evaluator eval, Object struct,
-                                        String[] keys)
+                                          String[] keys)
         throws FusionException
     {
         if (keys.length == 0) return struct;
@@ -1279,65 +1278,84 @@ final class FusionStruct
             return falseBool(eval);
         }
 
-        private BaseBool actualStructEqual(Evaluator eval,
-                                           EqualityTier tier,
-                                           MapBasedStruct left)
+        private BaseBool actualStructEqual(final Evaluator eval,
+                                           final EqualityTier tier,
+                                           final MapBasedStruct left)
             throws FusionException
         {
-            if (size() != left.size()) return falseBool(eval);
-
-            FunctionalHashTrie<String, Object> leftMap = left.getMap(eval);
-
-            for (Map.Entry<String, Object> entry : getMap(eval))
+            BiPredicate<Object, Object> comp = new BiPredicate<Object, Object>()
             {
-                String fieldName = entry.getKey();
-
-                Object lv = leftMap.get(fieldName);
-                Object rv = entry.getValue();
-                if (lv instanceof Object[])
+                boolean compareOne(Object lv, Object rv)
                 {
-                    if (! (rv instanceof Object[])) return falseBool(eval);
-
-                    Object[] lArray = (Object[]) lv;
-                    Object[] rArray = (Object[]) rv;
-
-                    int lCount = lArray.length;
-                    int rCount = rArray.length;
-                    if (lCount != rCount) return falseBool(eval);
-
-                    rArray = Arrays.copyOf(rArray, rCount);
-                    for (Object l : lArray)
+                    try
                     {
-                        // Seek a matching element from rArray
-                        boolean found = false;
-                        for (int j = 0; j < rCount; j++)
+                        return tier.eval(eval, lv, rv).isTrue();
+                    }
+                    catch (FusionException e)
+                    {
+                        throw new TunneledFusionException(e);
+                    }
+                }
+
+                @Override
+                public boolean test(Object lv, Object rv)
+                {
+                    if (lv instanceof Object[])
+                    {
+                        if (!(rv instanceof Object[])) return false;
+
+                        Object[] lArray = (Object[]) lv;
+                        Object[] rArray = (Object[]) rv;
+
+                        int lCount = lArray.length;
+                        int rCount = rArray.length;
+                        if (lCount != rCount) return false;
+
+                        rArray = Arrays.copyOf(rArray, rCount);
+                        for (Object l : lArray)
                         {
-                            Object r = rArray[j];
-                            BaseBool b = tier.eval(eval, l, r);
-                            if (b.isTrue())
+                            // Seek a matching element from rArray
+                            boolean found = false;
+                            for (int j = 0; j < rCount; j++)
                             {
-                                found = true;
-                                rArray[j] = rArray[--rCount];
-                                break;
+                                Object r = rArray[j];
+                                if (compareOne(l, r))
+                                {
+                                    found     = true;
+                                    rArray[j] = rArray[--rCount];
+                                    break;
+                                }
                             }
+
+                            if (!found) return false;
                         }
 
-                        if (!found) return falseBool(eval);
+                        // By now we've found a match for everything!
+                        assert rCount == 0;
+
+                        return true;
                     }
+                    else
+                    {
+                        if (rv instanceof Object[]) return false;
 
-                    // By now we've found a match for everything!
-                    assert rCount == 0;
+                        return compareOne(lv, rv);
+                    }
                 }
-                else
-                {
-                    if (rv instanceof Object[]) return falseBool(eval);
+            };
 
-                    BaseBool b = tier.eval(eval, lv, rv);
-                    if (b.isFalse()) return b;
-                }
+            try
+            {
+                FunctionalHashTrie<String, Object> leftMap  = left.getMap(eval);
+                FunctionalHashTrie<String, Object> rightMap = getMap(eval);
+
+                boolean result = leftMap.equals(rightMap, comp);
+                return makeBool(eval, result);
             }
-
-            return trueBool(eval);
+            catch (TunneledFusionException e)
+            {
+                throw e.getFusionException();
+            }
         }
 
         /**
