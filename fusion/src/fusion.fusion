@@ -59,6 +59,7 @@ contact us for clarification.
     string_is_lower
     string_is_upper
     string_join
+    string_replace
     string_split
     string_starts_with
     string_to_lower

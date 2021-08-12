@@ -222,6 +222,61 @@
 
 
 //============================================================================
+// string_replace
+
+(expect_arity_exn (string_replace))
+(expect_arity_exn (string_replace "a"))
+(expect_arity_exn (string_replace "a" "b"))
+(expect_arity_exn (string_replace "a" "b" "c" "d"))
+(expect_argument_exn (string_replace (void) "b" "c"))
+(expect_argument_exn (string_replace null "b" "c"))
+(expect_argument_exn (string_replace (quote a) "b" "c"))
+(expect_argument_exn (string_replace "a" (void) "c"))
+(expect_argument_exn (string_replace "a" null "c"))
+(expect_argument_exn (string_replace "a" null.string "c"))
+(expect_argument_exn (string_replace "a" (quote b) "c"))
+(expect_argument_exn (string_replace null.string (void) "c"))
+(expect_argument_exn (string_replace null.string null "c"))
+(expect_argument_exn (string_replace null.string null.string "c"))
+(expect_argument_exn (string_replace null.string (quote b) "c"))
+(expect_argument_exn (string_replace "a" "b" (void)))
+(expect_argument_exn (string_replace "a" "b" null))
+(expect_argument_exn (string_replace "a" "b" null.string))
+(expect_argument_exn (string_replace "a" "b" (quote c)))
+(expect_argument_exn (string_replace null.string "b" (void)))
+(expect_argument_exn (string_replace null.string "b" null))
+(expect_argument_exn (string_replace null.string "b" null.string))
+(expect_argument_exn (string_replace null.string "b" (quote c)))
+
+// Simple, zero-or-one character replacements
+(check === null.string (string_replace null.string "a" "b"))
+(check === "" (string_replace "" "" ""))
+(check === "" (string_replace "" "b" "c"))
+(check === "c" (string_replace "" "" "c"))
+(check === "" (string_replace "a" "a" ""))
+(check === "a" (string_replace "a" "b" ""))
+(check === "b" (string_replace "a" "a" "b"))
+(check === "a" (string_replace "a" "b" "c"))
+(check === "xbc" (string_replace "abc" "a" "x"))
+(check === "ayc" (string_replace "abc" "b" "y"))
+(check === "abz" (string_replace "abc" "c" "z"))
+
+// Multiple character and multiple occurrence replacements
+(check === "ba" (string_replace "aaa" "aa" "b"))
+(check === "bonono" (string_replace "banana" "a" "o"))
+(check === "bnn" (string_replace "banana" "a" ""))
+(check === "... ... goose" (string_replace "duck duck goose" "duck" "..."))
+(check === "goose" (string_replace "duck duck goose" "duck " ""))
+
+// Cases when `from` is ""
+(check === "bab" (string_replace "a" "" "b"))
+(check === "zhzezlzlzoz" (string_replace "hello" "" "z"))
+(check === "hello" (string_replace "" "" "hello"))
+(check === "hello hello" (string_replace " " "" "hello"))
+(check === "hello hello hello" (string_replace "  " "" "hello"))
+
+
+//============================================================================
 // string_split
 
 (expect_arity_exn (string_split (void)))

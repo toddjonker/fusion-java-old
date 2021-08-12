@@ -119,6 +119,24 @@ If no `part`s are supplied, the result is `""`.
     '''
     "com.amazon.fusion.FusionString$JoinProc")
 
+  (defpub_j string_replace
+    '''
+    (string_replace string from to)
+
+Replaces all occurrences of `from` with `to` that occur in `string`. The `string`
+must be a nullable string; `null.string` is returned as-is. `from` and `to` must
+be actual strings.
+
+Replacement uses literal matching (no regular expressions) and proceeds from the
+beginning of the string to the end. For example `(string_replace "aaa" "aa" "b")`
+will evaluate to `"ba"`.
+
+Replacement when `from` is an empty string will insert `to` before, between, and
+after each character in `string`. For example `(string_replace "aa" "" "b")` will
+evaluate to "babab". If `string` is also `""` a string equal to `to` is returned.
+    '''
+    "com.amazon.fusion.FusionString$ReplaceProc")
+
   (defpub_j string_split
     '''
     (string_split string separator)

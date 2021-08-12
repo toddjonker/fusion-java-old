@@ -884,6 +884,31 @@ public final class FusionString
     }
 
 
+    static final class ReplaceProc
+            extends Procedure
+    {
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+                throws FusionException
+        {
+            checkArityExact(3, args);
+
+            String string = checkNullableStringArg(eval, this, 0, args);
+            String from = checkRequiredStringArg(eval, this, 1, args);
+            String to = checkRequiredStringArg(eval, this, 2, args);
+
+            String result = null;
+
+            if (string != null)
+            {
+                result = string.replace(from, to);
+            }
+
+            return makeString(eval, result);
+        }
+    }
+
+
     static class SplitProc
             extends Procedure
     {
