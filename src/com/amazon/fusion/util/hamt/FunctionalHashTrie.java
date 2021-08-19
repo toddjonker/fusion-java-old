@@ -42,6 +42,33 @@ public class FunctionalHashTrie<K, V>
     }
 
 
+    FunctionalHashTrie(TrieNode<K, V> root, int size)
+    {
+        this.root = root;
+        this.size = size;
+    }
+
+
+    private FunctionalHashTrie<K, V> resultFrom(TrieNode<K, V> newRoot,
+                                                int priorChangeCount,
+                                                int priorKeyCountDelta,
+                                                Changes changes)
+    {
+        if (changes.changeCount() != priorChangeCount)
+        {
+            int newSize = size + changes.keyCountDelta() - priorKeyCountDelta;
+            if (newSize == 0) return EMPTY;
+            return new FunctionalHashTrie<>(newRoot, newSize);
+        }
+
+        assert root == newRoot;
+        return this;
+    }
+
+
+    //=========================================================================
+    // Creation
+
     public static <K, V> FunctionalHashTrie<K, V> empty()
     {
         return EMPTY;
@@ -105,12 +132,9 @@ public class FunctionalHashTrie<K, V>
         return EMPTY.resultFrom(trie, priorChangeCount, priorKeyCountDelta, changes);
     }
 
-    private FunctionalHashTrie(TrieNode<K, V> root, int size)
-    {
-        this.root = root;
-        this.size = size;
-    }
 
+    //=========================================================================
+    // Inspection
 
     public int size()
     {
@@ -155,21 +179,8 @@ public class FunctionalHashTrie<K, V>
     }
 
 
-    private FunctionalHashTrie<K, V> resultFrom(TrieNode<K, V> newRoot,
-                                                int priorChangeCount,
-                                                int priorKeyCountDelta,
-                                                Changes changes)
-    {
-        if (changes.changeCount() != priorChangeCount)
-        {
-            int newSize = size + changes.keyCountDelta() - priorKeyCountDelta;
-            if (newSize == 0) return EMPTY;
-            return new FunctionalHashTrie<>(newRoot, newSize);
-        }
-
-        assert root == newRoot;
-        return this;
-    }
+    //=========================================================================
+    // Modification
 
     /**
      * This method functionally modifies the {@link FunctionalHashTrie} and returns
@@ -271,6 +282,9 @@ public class FunctionalHashTrie<K, V>
         return resultFrom(newRoot, priorChangeCount, priorKeyCountDelta, changes);
     }
 
+
+    //=========================================================================
+    // Comparison
 
     public boolean equals(Object that)
     {
