@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.Random;
 
 /**
  * Utilities for working with Fusion numbers.
@@ -2148,6 +2149,7 @@ public final class FusionNumber
     }
 
 
+
     static final class IsFloatProc
         extends Procedure1
     {
@@ -2559,6 +2561,28 @@ public final class FusionNumber
             }
 
             throw new ArgumentException(this, "non-null int or decimal", 0, arg0);
+        }
+    }
+
+    static final class RandomProc extends Procedure
+    {
+        private final Random myRand = new Random();
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args) throws FusionException
+        {
+            checkArityRange(0, 1, args);
+
+            if (args.length == 0)
+            {
+                Double val = myRand.nextDouble();
+                return makeFloat(eval, val);
+            }
+            else
+            {
+                BigInteger val = checkRequiredIntArg(eval, this, 0, args);
+                return makeInt(eval, myRand.nextInt(val.intValue()));
+            }
         }
     }
 }

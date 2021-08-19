@@ -25,6 +25,7 @@ Operations on numbers (int, decimal, and float).
     is_decimal
     is_float
     is_int
+    random
     string_to_int
   )
 
@@ -160,4 +161,21 @@ Examples:
     (decimal 1234 -2)    // 12.34
     '''
     (java_new "com.amazon.fusion.FusionNumber$DecimalProc"))
+
+  (define random
+    '''
+    (random)
+    (random max)
+
+Returns a random float value between 0.0 (inclusive) and 1.0 (exclusive) when no aditional arguments are provided.
+If an integer parameter (max) is send, the proc will generates a random number between 0 and max.
+Upper bound inclusive. 0 <= val < max
+
+Examples:
+    (random_float) // Decimal value: 0.0 <= value < 1.0
+    (random_float 45) // Integer value: 0 <= value < 45.
+
+    '''
+
+    (java_new "com.amazon.fusion.FusionNumber$RandomProc"))
 )
