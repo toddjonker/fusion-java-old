@@ -2,6 +2,7 @@
 
 package com.amazon.fusion.util.hamt;
 
+import com.amazon.fusion.BiFunction;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -39,6 +40,15 @@ public final class HashArrayMappedTrie
 
     private static final int STOP_RELYING_ON_UNDEFINED_BEHAVIOR =
         new Random().nextInt();
+
+
+    private static final class NoValueSentinel {}
+
+    /**
+     * Sentinel object denoting the lack of a value.
+     */
+    public static final Object NOTHING = new NoValueSentinel();
+
 
     /**
      * Intercepts and records changes made by one or more trie operations.
@@ -194,8 +204,6 @@ public final class HashArrayMappedTrie
         return key.hashCode() ^ STOP_RELYING_ON_UNDEFINED_BEHAVIOR;
     }
 
-    // TODO: Add method that accepts a function to modify each element in the trie.
-
 
     /**
      * Abstract class interface for Nodes.
@@ -349,6 +357,42 @@ public final class HashArrayMappedTrie
             return root;
         }
 
+
+        /**
+         * Functionally transform each entry in this trie, allowing for both
+         * modification and removal of key-value entries.
+         * <p>
+         * The transform function {@code xform} is invoked with each key-value
+         * entry in the trie, and the result determines the effect on the entry:
+         * <ul>
+         *     <li>
+         *         When {@code xform} returns {@link #NOTHING}, the key-value
+         *         entry is removed and {@link Changes#keyRemoved} is invoked.
+         *     </li>
+         *     <li>
+         *         When {@code xform} returns a different ({@code !=}) object
+         *         than it received (as its second argument), that instance
+         *         becomes the new value associated with the key, and
+         *         {@link Changes#keyReplaced} is invoked.
+         *     </li>
+         *     <li>
+         *         Otherwise, the entry is left unchanged.
+         *     </li>
+         * </ul>
+         * The transformation is optimized to reuse as much of the original trie
+         * as possible; if no changes are made then result is the original trie.
+         * </p>
+         *
+         * @param xform is applied to each key-value entry, and the result
+         *              becomes the new value for the key.
+         * @param changes is invoked when an entry is replaced or removed.
+         *
+         * @return the resulting root node.
+         */
+        public abstract TrieNode<K, V> transform(BiFunction<K, V, V> xform,
+                                                 Changes changes);
+
+
         //---------------------------
         // Internal recursion methods
 
@@ -448,6 +492,12 @@ public final class HashArrayMappedTrie
         {
             return this;
         }
+
+        @Override
+        public TrieNode<K, V> transform(BiFunction xform, Changes changes)
+        {
+            return this;
+        }
     }
 
 
@@ -479,6 +529,12 @@ public final class HashArrayMappedTrie
             this.kvPairs = kvPairs;
         }
 
+        /**
+         * Construct a node with the same concrete type.
+         */
+        abstract KvNode<K, V> makeSimilar(int bitmap, Object[] kvPairs);
+
+        abstract int getBitmap();
 
         @Override
         public int countKeys()
@@ -507,6 +563,101 @@ public final class HashArrayMappedTrie
         public final Iterator<Entry<K, V>> iterator()
         {
             return new KvArrayIterator<>(kvPairs);
+        }
+
+
+        /**
+         * This transform() implementation covers all three KvNode subclasses,
+         * since they are more similar than different. This means there's minor
+         * wasted work done in each case (eg, the bitmap tracking is only needed
+         * for BitMappedNode), but the algorithm is fairly complex and that
+         * seems like a reasonable alternative to multiple nearly-identical
+         * copies.
+         */
+        final public TrieNode<K, V> transform(BiFunction xform, Changes changes)
+        {
+            int newBitmap = getBitmap();
+            Object[] newPairs = null;  // Allocated only when an entry changes.
+            int j = 0;                 // Result index
+
+            // Loop through kvPairs, and when an entry changes,
+            // start copying entries from kvPairs[i] to newPairs[j].
+
+            for (int i = 0, bit = 1; i < kvPairs.length; i += 2, bit = bit << 1)
+            {
+                Object keyOrNull = kvPairs[i];
+                Object storedValue = kvPairs[i + 1];
+
+                if (storedValue == null) continue;
+
+                Object newValue;
+                if (keyOrNull == null)
+                {
+                    // This child node will invoke Changes; don't do it below.
+                    TrieNode<K, V> node = (TrieNode<K, V>) storedValue;
+                    newValue = node.transform(xform, changes);
+                    if (newValue == EmptyNode.SINGLETON)
+                    {
+                        newValue = NOTHING;
+                    }
+                    // TODO: If node has one entry, hoist it and drop the node.
+                }
+                else
+                {
+                    newValue = xform.apply(keyOrNull, storedValue);
+                }
+
+                if (newValue == NOTHING)
+                {
+                    // Turn off the bit for this entry.
+                    newBitmap = newBitmap ^ bit;
+                    if (newPairs == null)
+                    {
+                        newPairs = new Object[kvPairs.length - 2];
+                        System.arraycopy(kvPairs, 0, newPairs, 0, j);
+                    }
+                    if (keyOrNull != null)
+                    {
+                        changes.keyRemoved(keyOrNull, storedValue);
+                    }
+                }
+                else // keeping or modifying normal entry
+                {
+                    if (newPairs == null)
+                    {
+                        if (newValue != storedValue)
+                        {
+                            if (keyOrNull != null)
+                            {
+                                changes.keyReplaced(keyOrNull, storedValue, newValue);
+                            }
+                            newPairs = cloneAndModify(kvPairs, i + 1, newValue);
+                        }
+                        j += 2;
+                    }
+                    else
+                    {
+                        if (newValue != storedValue && keyOrNull != null)
+                        {
+                            changes.keyReplaced(keyOrNull, storedValue, newValue);
+                        }
+                        newPairs[j++] = keyOrNull;
+                        newPairs[j++] = newValue;
+                    }
+                }
+            }
+
+            if (newPairs == null) return this;
+
+            if (j == 0) return empty();
+
+            if (j != newPairs.length)
+            {
+                // We need to drop unused entries from the end.
+                newPairs = Arrays.copyOf(newPairs, j, Object[].class);
+            }
+
+            return makeSimilar(newBitmap, newPairs);
         }
     }
 
@@ -552,6 +703,12 @@ public final class HashArrayMappedTrie
             return new FlatNode<>(kvPairs);
         }
 
+        @Override
+        FlatNode<K, V> makeSimilar(int bitmap, Object[] kvPairs)
+        {
+            return makeSimilar(kvPairs);
+        }
+
 
         @Override
         public String toString()
@@ -559,6 +716,11 @@ public final class HashArrayMappedTrie
             return "FlatNode::" + Arrays.toString(kvPairs);
         }
 
+        @Override
+        final int getBitmap()
+        {
+            return 0;
+        }
 
         int linearSearch(int hash, K key)
         {
@@ -1005,6 +1167,12 @@ public final class HashArrayMappedTrie
             this.bitmap = bitmap;
         }
 
+        @Override
+        BitMappedNode<K, V> makeSimilar(int bitmap, Object[] kvPairs)
+        {
+            return new BitMappedNode<>(bitmap, kvPairs);
+        }
+
 
         @Override
         public String toString()
@@ -1012,6 +1180,11 @@ public final class HashArrayMappedTrie
             return "BitMappedNode::" + Arrays.toString(kvPairs);
         }
 
+        @Override
+        int getBitmap()
+        {
+            return bitmap;
+        }
 
         /**
          * The index in the array corresponds to the number of bits "below" this one.
@@ -1511,12 +1684,56 @@ public final class HashArrayMappedTrie
             }
             else if (count <= MIN_CHILDREN)
             {
-                return removeAndPack(index);
+                return pack(count - 1, nodes, index);
             }
             else
             {
                 return replace(count - 1, index, null);
             }
+        }
+
+
+        @Override
+        public TrieNode<K, V> transform(BiFunction xform, Changes changes)
+        {
+            int newCount = count;
+            TrieNode<K, V>[] newNodes = null;
+
+            for (int i = 0; i < nodes.length; i++)
+            {
+                TrieNode<K, V> child = nodes[i];
+                if (child != null)
+                {
+                    // No need to invoke Changes here since there are no direct
+                    // key-values entries to be changed.
+                    TrieNode<K, V> newChild = child.transform(xform, changes);
+                    if (newChild != child)
+                    {
+                        if (newNodes == null)
+                        {
+                            newNodes = nodes.clone();
+                        }
+
+                        if (newChild == EmptyNode.SINGLETON)
+                        {
+                            newNodes[i] = null;
+                            newCount--;
+                        }
+                        else
+                        {
+                            newNodes[i] = newChild;
+                        }
+                    }
+                }
+            }
+
+            if (newNodes == null) return this;
+
+            if (newCount == 0) return empty();
+
+            if (newCount < MIN_CHILDREN) return pack(newCount, newNodes, -1);
+
+            return new HashArrayMappedNode<>(newCount, newNodes);
         }
 
 
@@ -1528,32 +1745,26 @@ public final class HashArrayMappedTrie
 
 
         /**
-         * Removes the node at the specified index before reducing this
-         * {@link HashArrayMappedNode} back down to a {@link BitMappedNode}
+         * Pack the given nodes into a {@link BitMappedNode}, optionally
+         * removing one entry.
+         *
+         * @param removeIndex can be <0 to avoid removing anything.
          */
-        private BitMappedNode<K, V> removeAndPack(int index)
+        private BitMappedNode<K, V> pack(int count, TrieNode<K, V>[] nodes, int removeIndex)
         {
-            Object[] kvPairs = new Object[2 * (count - 1)];
+            Object[] kvPairs = new Object[2 * count];
             int j = 1;
             int bitmap = 0;
-            for (int i = 0; i < index; i++)
+            for (int i = 0; i < nodes.length; i++)
             {
-                if (nodes[i] != null)
+                if (i != removeIndex && nodes[i] != null)
                 {
                     kvPairs[j] = nodes[i];
                     bitmap |= 1 << i;
                     j += 2;
                 }
             }
-            for (int i = index + 1; i < nodes.length; i++)
-            {
-                if (nodes[i] != null)
-                {
-                    kvPairs[j] = nodes[i];
-                    bitmap |= 1 << i;
-                    j += 2;
-                }
-            }
+            assert Integer.bitCount(bitmap) == count;
             return new BitMappedNode<>(bitmap, kvPairs);
         }
     }
