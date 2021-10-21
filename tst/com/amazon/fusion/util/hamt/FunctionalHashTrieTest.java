@@ -1,16 +1,16 @@
 // Copyright (c) 2018-2021 Amazon.com, Inc.  All rights reserved.
 
-package com.amazon.fusion;
+package com.amazon.fusion.util.hamt;
 
-import static com.amazon.fusion.FunctionalHashTrie.fromArrays;
-import static com.amazon.fusion.FunctionalHashTrie.fromEntries;
-import static com.amazon.fusion.FunctionalHashTrie.fromSelectedKeys;
+import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromArrays;
+import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromEntries;
+import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromSelectedKeys;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import com.amazon.fusion.FunctionalHashTrie.Changes;
+import com.amazon.fusion.util.hamt.FunctionalHashTrie.Changes;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -20,7 +20,7 @@ import org.junit.Test;
 
 public class FunctionalHashTrieTest
 {
-    private HashMap<Object, Object> baselineMap;
+    private HashMap<Object, Object>            baselineMap;
     private FunctionalHashTrie<Object, Object> fht;
 
     public void setup(int size)

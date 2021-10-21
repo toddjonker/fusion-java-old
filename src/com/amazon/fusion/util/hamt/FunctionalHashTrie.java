@@ -1,8 +1,9 @@
 // Copyright (c) 2018-2021 Amazon.com, Inc.  All rights reserved.
 
-package com.amazon.fusion;
+package com.amazon.fusion.util.hamt;
 
-import com.amazon.fusion.util.hamt.HashArrayMappedTrie;
+import com.amazon.fusion.BiFunction;
+import com.amazon.fusion.BiPredicate;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractSet;
 import java.util.Arrays;
@@ -22,7 +23,7 @@ import java.util.Set;
  * Iteration order of this data structure is undefined and not guaranteed to be stable.
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
-class FunctionalHashTrie<K, V>
+public class FunctionalHashTrie<K, V>
     implements Iterable<Entry<K, V>>
 {
     private static final String NULL_ERROR_MESSAGE =
@@ -35,18 +36,18 @@ class FunctionalHashTrie<K, V>
     private final int size;
 
     // Mostly here so consumers don't have to use HashArrayMappedTrie.
-    static class Changes
+    public static class Changes
         extends HashArrayMappedTrie.Changes
     {
     }
 
 
-    static <K, V> FunctionalHashTrie<K, V> empty()
+    public static <K, V> FunctionalHashTrie<K, V> empty()
     {
         return EMPTY;
     }
 
-    static <K, V> FunctionalHashTrie<K, V> create(Map<K, V> other)
+    public static <K, V> FunctionalHashTrie<K, V> create(Map<K, V> other)
     {
         Changes changes = new Changes();
         TrieNode<K, V> trie = HashArrayMappedTrie.fromMap(other, changes);
@@ -54,8 +55,8 @@ class FunctionalHashTrie<K, V>
     }
 
 
-    static <K, V> FunctionalHashTrie<K, V> fromEntries(Iterator<Entry<K, V>> items,
-                                                       Changes changes)
+    public static <K, V> FunctionalHashTrie<K, V> fromEntries(Iterator<Entry<K, V>> items,
+                                                              Changes changes)
     {
         int priorChangeCount   = changes.changeCount();
         int priorKeyCountDelta = changes.keyCountDelta();
@@ -65,15 +66,15 @@ class FunctionalHashTrie<K, V>
         return EMPTY.resultFrom(trie, priorChangeCount, priorKeyCountDelta, changes);
     }
 
-    static <K, V> FunctionalHashTrie<K, V> fromEntries(Entry<K, V>[] items,
+    public static <K, V> FunctionalHashTrie<K, V> fromEntries(Entry<K, V>[] items,
                                                        Changes changes)
     {
         return fromEntries(Arrays.asList(items).iterator(), changes);
     }
 
-    static <K, V> FunctionalHashTrie<K, V> fromArrays(K[] keys,
-                                                      V[] values,
-                                                      Changes changes)
+    public static <K, V> FunctionalHashTrie<K, V> fromArrays(K[] keys,
+                                                             V[] values,
+                                                             Changes changes)
     {
         int priorChangeCount   = changes.changeCount();
         int priorKeyCountDelta = changes.keyCountDelta();
@@ -87,13 +88,13 @@ class FunctionalHashTrie<K, V>
      * Creates a trie by copying entries for the {@code keys} from the
      * {@code origin} trie.
      */
-    static <K, V> FunctionalHashTrie<K, V>
+    public static <K, V> FunctionalHashTrie<K, V>
     fromSelectedKeys(FunctionalHashTrie<K, V> origin, K[] keys)
     {
         return fromSelectedKeys(origin, keys, new Changes());
     }
 
-    static <K, V> FunctionalHashTrie<K, V>
+    public static <K, V> FunctionalHashTrie<K, V>
     fromSelectedKeys(FunctionalHashTrie<K, V> origin, K[] keys, Changes changes)
     {
         int priorChangeCount   = changes.changeCount();

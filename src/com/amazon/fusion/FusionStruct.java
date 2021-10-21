@@ -27,6 +27,7 @@ import com.amazon.fusion.FusionCollection.BaseCollection;
 import com.amazon.fusion.FusionCompare.EqualityTier;
 import com.amazon.fusion.FusionIterator.AbstractIterator;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
+import com.amazon.fusion.util.hamt.FunctionalHashTrie;
 import com.amazon.ion.IonException;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonType;
