@@ -80,6 +80,30 @@ public abstract class MultiHashTrie<K, V>
     //=========================================================================
     // Creation
 
+    public static final class Builder<K, V>
+    {
+        private       TrieNode<K, V> myTrie    = HashArrayMappedTrie.empty();
+        private final Changes        myChanges = new MultiHashTrieImpl.Changes();
+
+        private Builder() {}
+
+        public void withMulti(K key, V value)
+        {
+            myTrie = myTrie.mWith(key, value, myChanges);
+        }
+
+        public MultiHashTrie<K, V> build()
+        {
+            return myChanges.resultFrom(myTrie);
+        }
+    }
+
+    public static <K, V> Builder<K, V> builderMulti()
+    {
+        return new Builder<>();
+    }
+
+
     @SuppressWarnings("unchecked")
     public static <K, V> FunctionalHashTrie<K, V> empty()
     {

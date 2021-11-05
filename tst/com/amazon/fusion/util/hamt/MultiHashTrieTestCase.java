@@ -101,6 +101,13 @@ public abstract class MultiHashTrieTestCase
         // Test iteration and construction through another route.
         assertEquals(hash, fromEntries(hash.iterator()));
 
+        FunctionalHashTrie.Builder b = FunctionalHashTrie.builder1();
+        for (int i = 0; i < kvPairs.length; i += 2)
+        {
+            b.with1(kvPairs[i], kvPairs[i+1]);
+        }
+        assertEquals(hash, b.build());
+
         return hash;
     }
 
@@ -117,6 +124,14 @@ public abstract class MultiHashTrieTestCase
 
         // Test iteration and construction through another route.
         assertEquals(hash, MultiHashTrie.fromEntries(hash.iterator()));
+
+        MultiHashTrie.Builder b = MultiHashTrie.builderMulti();
+        for (int i = 0; i < kvPairs.length; i += 2)
+        {
+            b.withMulti(kvPairs[i], kvPairs[i+1]);
+        }
+        assertEquals(hash, b.build());
+
 
         return hash;
     }

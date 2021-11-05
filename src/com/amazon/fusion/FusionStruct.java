@@ -98,7 +98,8 @@ final class FusionStruct
 
     static final class Builder
     {
-        private MultiHashTrie<String, Object> myTrie = MultiHashTrie.empty();
+        private final MultiHashTrie.Builder<String, Object> myTrieBuilder =
+            MultiHashTrie.builderMulti();
 
         private Builder() {}
 
@@ -108,7 +109,7 @@ final class FusionStruct
          */
         void add(String fieldName, Object value)
         {
-            myTrie = myTrie.withMulti(fieldName, value);
+            myTrieBuilder.withMulti(fieldName, value);
         }
 
         // TODO add(String[], Object[])
@@ -126,7 +127,8 @@ final class FusionStruct
 
         NonNullImmutableStruct buildImmutable(BaseSymbol[] annotations)
         {
-            return immutableStruct(myTrie, annotations);
+            MultiHashTrie<String, Object> trie = myTrieBuilder.build();
+            return immutableStruct(trie, annotations);
         }
 
 
@@ -142,7 +144,8 @@ final class FusionStruct
 
         MutableStruct buildMutable(BaseSymbol[] annotations)
         {
-            return new MutableStruct(myTrie, annotations);
+            MultiHashTrie<String, Object> trie = myTrieBuilder.build();
+            return new MutableStruct(trie, annotations);
         }
     }
 

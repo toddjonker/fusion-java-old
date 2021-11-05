@@ -63,6 +63,30 @@ public class FunctionalHashTrie<K, V>
     //=========================================================================
     // Creation
 
+    public static final class Builder<K, V>
+    {
+        private       TrieNode<K, V> myTrie    = HashArrayMappedTrie.empty();
+        private final Changes        myChanges = new Changes();
+
+        private Builder() {}
+
+        public void with1(K key, V value)
+        {
+            myTrie = myTrie.mWith(key, value, myChanges);
+        }
+
+        public FunctionalHashTrie<K, V> build()
+        {
+            return myChanges.resultFrom(myTrie);
+        }
+    }
+
+    public static <K, V> Builder<K, V> builder1()
+    {
+        return new Builder<>();
+    }
+
+
     public static <K, V> FunctionalHashTrie<K, V> fromEntries(Iterator<Entry<K, V>> items)
     {
         if (! items.hasNext()) return empty();
