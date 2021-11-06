@@ -66,7 +66,7 @@ public class FunctionalHashTrie<K, V>
         return EMPTY;
     }
 
-    public static <K, V> FunctionalHashTrie<K, V> create(Map<K, V> other)
+    public static <K, V> FunctionalHashTrie<K, V> fromMap(Map<K, V> other)
     {
         Changes changes = new Changes();
         TrieNode<K, V> trie = HashArrayMappedTrie.fromMap(other, changes);
@@ -154,7 +154,7 @@ public class FunctionalHashTrie<K, V>
     // Modification
 
     @Override
-    public FunctionalHashTrie<K, V> with(K key, V value)
+    public FunctionalHashTrie<K, V> with1(K key, V value)
     {
         return with(key, value, new Changes());
     }
@@ -186,7 +186,7 @@ public class FunctionalHashTrie<K, V>
 
 
     @Override
-    public FunctionalHashTrie<K, V> without(K key)
+    public FunctionalHashTrie<K, V> withoutKey(K key)
     {
         validateKey(key);
 

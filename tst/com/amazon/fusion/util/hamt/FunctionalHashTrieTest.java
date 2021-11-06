@@ -30,7 +30,7 @@ public class FunctionalHashTrieTest
         {
             baselineMap.put(new Object(), new Object());
         }
-        fht = FunctionalHashTrie.create(baselineMap);
+        fht = FunctionalHashTrie.fromMap(baselineMap);
     }
 
     private void doRemoval()
@@ -46,7 +46,7 @@ public class FunctionalHashTrieTest
 
         for (Object key : keysToRemove)
         {
-            FunctionalHashTrie<Object, Object> newHash = fht.without(key);
+            FunctionalHashTrie<Object, Object> newHash = fht.withoutKey(key);
             assertNotEquals(fht, newHash);
             fht = newHash;
         }
@@ -61,7 +61,7 @@ public class FunctionalHashTrieTest
             Object value = new Object();
 
             baselineMap.put(key, value);
-            FunctionalHashTrie<Object, Object> newHash = fht.with(key, value);
+            FunctionalHashTrie<Object, Object> newHash = fht.with1(key, value);
             assertNotEquals(fht, newHash);
             fht = newHash;
         }
@@ -115,7 +115,7 @@ public class FunctionalHashTrieTest
         assertSame(FunctionalHashTrie.empty(), fht);
         performTests();
 
-        FunctionalHashTrie without = fht.without("anything");
+        FunctionalHashTrie without = fht.withoutKey("anything");
         assertSame(without, fht);
         assertSame(FunctionalHashTrie.empty(), fht);
     }
@@ -157,7 +157,7 @@ public class FunctionalHashTrieTest
         final String failureMessage = "Should have raised a NullPointerException";
         try
         {
-            fht.with(null, "foo");
+            fht.with1(null, "foo");
             fail(failureMessage);
         }
         catch (NullPointerException e)
@@ -167,7 +167,7 @@ public class FunctionalHashTrieTest
 
         try
         {
-            fht.with("foo", null);
+            fht.with1("foo", null);
             fail(failureMessage);
         }
         catch (NullPointerException e)
@@ -177,7 +177,7 @@ public class FunctionalHashTrieTest
 
         try
         {
-            fht.with(null, null);
+            fht.with1(null, null);
             fail(failureMessage);
         }
         catch (NullPointerException e)
@@ -187,7 +187,7 @@ public class FunctionalHashTrieTest
 
         try
         {
-            fht.without(null);
+            fht.withoutKey(null);
             fail(failureMessage);
         }
         catch (NullPointerException e)
@@ -225,7 +225,7 @@ public class FunctionalHashTrieTest
         FunctionalHashTrie seq = FunctionalHashTrie.empty();
         for (Map.Entry e : fht)
         {
-            seq = seq.with(e.getKey(), e.getValue());
+            seq = seq.with1(e.getKey(), e.getValue());
         }
 
         assertEquals(fht, seq);
@@ -266,8 +266,8 @@ public class FunctionalHashTrieTest
     @Test
     public void testNoopInsertion()
     {
-        FunctionalHashTrie trie1 = FunctionalHashTrie.empty().with(1, 1);
-        FunctionalHashTrie trie2 = trie1.with(1, 1);
+        FunctionalHashTrie trie1 = FunctionalHashTrie.empty().with1(1, 1);
+        FunctionalHashTrie trie2 = trie1.with1(1, 1);
         assertSame(trie1, trie2);
     }
 
@@ -315,7 +315,7 @@ public class FunctionalHashTrieTest
     @Test
     public void fromSelectedKeysReturnsSubset()
     {
-        FunctionalHashTrie origin = FunctionalHashTrie.empty().with(1, 1).with(2, 2).with(3, 3);
+        FunctionalHashTrie origin = FunctionalHashTrie.empty().with1(1, 1).with1(2, 2).with1(3, 3);
 
         FunctionalHashTrie t = fromSelectedKeys(origin, new Object[]{ 1, 3, 5 });
 
@@ -328,7 +328,7 @@ public class FunctionalHashTrieTest
     @Test
     public void fromSelectedKeysReturnsEmptySingleton()
     {
-        FunctionalHashTrie origin = FunctionalHashTrie.empty().with(1, 1).with(2, 2);
+        FunctionalHashTrie origin = FunctionalHashTrie.empty().with1(1, 1).with1(2, 2);
 
         FunctionalHashTrie t = fromSelectedKeys(origin, new Object[]{});
         assertSame(FunctionalHashTrie.empty(), t);
@@ -341,7 +341,7 @@ public class FunctionalHashTrieTest
     @Test
     public void withoutKeysGivenKeysReturnsSubset()
     {
-        FunctionalHashTrie origin = FunctionalHashTrie.empty().with(1, 1).with(2, 2).with(3, 3);
+        FunctionalHashTrie origin = FunctionalHashTrie.empty().with1(1, 1).with1(2, 2).with1(3, 3);
 
         FunctionalHashTrie t = origin.withoutKeys(new Object[]{ 1, 3, 5 });
 
@@ -355,7 +355,7 @@ public class FunctionalHashTrieTest
     @Test
     public void withoutKeysGivenAllKeysReturnsSingleton()
     {
-        FunctionalHashTrie origin = FunctionalHashTrie.empty().with(1, 1).with(2, 2);
+        FunctionalHashTrie origin = FunctionalHashTrie.empty().with1(1, 1).with1(2, 2);
         FunctionalHashTrie t = origin.withoutKeys(new Object[]{1, 2});
         assertSame(FunctionalHashTrie.empty(), t);
     }
@@ -395,7 +395,7 @@ public class FunctionalHashTrieTest
         FunctionalHashTrie trie1 = empty.with(1, 1, changes);
 
         // Replace the existing key, so the delta stays the same.
-        FunctionalHashTrie trie2 = trie1.merge(empty.with(1, 2), changes);
+        FunctionalHashTrie trie2 = trie1.merge(empty.with1(1, 2), changes);
         checkChanges(2, 1, changes);
         assertEquals(1, trie2.size());
     }

@@ -292,7 +292,7 @@ final class FusionStruct
     static NonNullImmutableStruct immutableStruct(Map<String, Object> map)
     {
         if (map.size() == 0) return EMPTY_STRUCT;
-        return new FunctionalStruct(FunctionalHashTrie.create(map),
+        return new FunctionalStruct(FunctionalHashTrie.fromMap(map),
                                     BaseSymbol.EMPTY_ARRAY,
                                     map.size());
     }
@@ -351,7 +351,7 @@ final class FusionStruct
     @Deprecated
     static MutableStruct mutableStruct(Map<String, Object> map)
     {
-        return new MutableStruct(FunctionalHashTrie.create(map),
+        return new MutableStruct(FunctionalHashTrie.fromMap(map),
                                  BaseSymbol.EMPTY_ARRAY,
                                  map.size());
     }
@@ -1567,7 +1567,7 @@ final class FusionStruct
          */
         private FunctionalStruct(String key, Object value, BaseSymbol[] annotations)
         {
-            this(FunctionalHashTrie.<String, Object>empty().with(key, value),
+            this(FunctionalHashTrie.<String, Object>empty().with1(key, value),
                  annotations,
                  1);
         }

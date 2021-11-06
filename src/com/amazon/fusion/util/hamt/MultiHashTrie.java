@@ -19,7 +19,7 @@ import java.util.Set;
  * </p>
  * <p>
  * There's currently no support for null keys or values. Attempts to use null
- * on operations such as {@link #get(Object)} or {@link #with(Object, Object)}
+ * on operations such as {@link #get(Object)} or {@link #with1(Object, Object)}
  * will throw a {@link NullPointerException}.
  * </p>
  * <p>
@@ -108,7 +108,7 @@ public abstract class MultiHashTrie<K, V>
      *
      * @return the resulting trie; {@code this} if nothing has changed.
      */
-    public abstract MultiHashTrie<K, V> with(K key, V value);
+    public abstract MultiHashTrie<K, V> with1(K key, V value);
 
 
     /**
@@ -118,7 +118,7 @@ public abstract class MultiHashTrie<K, V>
 
      * @return the resulting trie; {@code this} if nothing has changed.
      */
-    public abstract MultiHashTrie<K, V> without(K key);
+    public abstract MultiHashTrie<K, V> withoutKey(K key);
 
 
     /**
