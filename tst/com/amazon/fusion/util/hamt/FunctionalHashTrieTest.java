@@ -2,8 +2,10 @@
 
 package com.amazon.fusion.util.hamt;
 
+import static com.amazon.fusion.util.hamt.FunctionalHashTrie.empty;
 import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromArrays;
 import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromEntries;
+import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromMap;
 import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromSelectedKeys;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -30,7 +32,7 @@ public class FunctionalHashTrieTest
         {
             baselineMap.put(new Object(), new Object());
         }
-        fht = FunctionalHashTrie.fromMap(baselineMap);
+        fht = fromMap(baselineMap);
     }
 
     private void doRemoval()
@@ -112,12 +114,12 @@ public class FunctionalHashTrieTest
     {
         setup(0);
         assertTrue(fht.isEmpty());
-        assertSame(FunctionalHashTrie.empty(), fht);
+        assertSame(empty(), fht);
         performTests();
 
         FunctionalHashTrie without = fht.withoutKey("anything");
         assertSame(without, fht);
-        assertSame(FunctionalHashTrie.empty(), fht);
+        assertSame(empty(), fht);
     }
 
     @Test
@@ -217,12 +219,25 @@ public class FunctionalHashTrieTest
     }
 
 
+    //=========================================================================
+    // Expectations and fixture setup
+
+    private void checkChanges(int changeCount, int delta, Changes changes)
+    {
+        assertEquals("keys changed", changeCount, changes.changeCount());
+        assertEquals("key delta",    delta,       changes.keyCountDelta());
+    }
+
+
+    //=========================================================================
+    // Creation
+
     @Test
     public void compareMutableCreateVsSequential()
     {
         setup(10000);
 
-        FunctionalHashTrie seq = FunctionalHashTrie.empty();
+        FunctionalHashTrie seq = empty();
         for (Map.Entry e : fht)
         {
             seq = seq.with1(e.getKey(), e.getValue());
@@ -238,39 +253,7 @@ public class FunctionalHashTrieTest
     }
 
 
-    @Test
-    public void testMergeInvokesChanges()
-    {
-        Changes changes = new Changes() {
-            @Override
-            public Object inserting(Object givenValue)
-            {
-                return givenValue;
-            }
-
-            @Override
-            public Object replacing(Object oldValue, Object givenValue)
-            {
-                assert givenValue.equals("new");
-                return oldValue;
-            }
-        };
-
-        Map.Entry[] entries = { new SimpleEntry<>("f", "old"),
-                                new SimpleEntry<>("f", "new") };
-        FunctionalHashTrie trie = fromEntries(entries, changes);
-        assertEquals(1, trie.size());
-        assertEquals("old", trie.get("f"));
-    }
-
-    @Test
-    public void testNoopInsertion()
-    {
-        FunctionalHashTrie trie1 = FunctionalHashTrie.empty().with1(1, 1);
-        FunctionalHashTrie trie2 = trie1.with1(1, 1);
-        assertSame(trie1, trie2);
-    }
-
+    // fromArrays()
 
     @Test
     public void fromArraysGivenEmptyArraysReturnsEmptySingleton()
@@ -279,7 +262,7 @@ public class FunctionalHashTrieTest
 
         FunctionalHashTrie t = fromArrays(new Object[0], new Object[0], changes);
 
-        assertSame(FunctionalHashTrie.empty(), t);
+        assertSame(empty(), t);
         checkChanges(0, 0, changes);
     }
 
@@ -295,22 +278,24 @@ public class FunctionalHashTrieTest
         Changes changes = new Changes();
 
         FunctionalHashTrie t = fromArrays(new Object[] { 1, 2 },
-                                           new Object[] { 3, 4 },
-                                           changes);
+                                          new Object[] { 3, 4 },
+                                          changes);
 
         checkChanges(2, 2, changes);
         assertEquals(3, t.get(1));
         assertEquals(4, t.get(2));
 
         t = fromArrays(new Object[] { 5, 6, 5 },
-                        new Object[] { 8, 9, 0 },
-                        changes);
+                       new Object[] { 8, 9, 0 },
+                       changes);
 
         checkChanges(5, 4, changes);
         assertEquals(0, t.get(5));
         assertEquals(9, t.get(6));
     }
 
+
+    // fromSelectedKeys()
 
     @Test
     public void fromSelectedKeysReturnsSubset()
@@ -338,6 +323,41 @@ public class FunctionalHashTrieTest
     }
 
 
+    //=========================================================================
+    // Modification
+
+    // with1()
+
+    @Test
+    public void testNoopInsertion()
+    {
+        FunctionalHashTrie trie1 = empty().with1(1, 1);
+        FunctionalHashTrie trie2 = trie1.with1(1, 1);
+        assertSame(trie1, trie2);
+    }
+
+    @Test
+    public void testWithReusingChanges()
+    {
+        FunctionalHashTrie trie = empty();
+
+        Changes changes = new Changes();
+        trie = trie.with(1, 1, changes);
+        checkChanges(1, 1, changes);
+        assertEquals(1, trie.size());
+
+        trie = trie.with(2, 2, changes);
+        checkChanges(2, 2, changes);
+        assertEquals(2, trie.size());
+
+        trie = trie.with(2, 3, changes);
+        checkChanges(3, 2, changes);
+        assertEquals(2, trie.size());
+    }
+
+
+    // withoutKeys()
+
     @Test
     public void withoutKeysGivenKeysReturnsSubset()
     {
@@ -355,41 +375,43 @@ public class FunctionalHashTrieTest
     @Test
     public void withoutKeysGivenAllKeysReturnsSingleton()
     {
-        FunctionalHashTrie origin = FunctionalHashTrie.empty().with1(1, 1).with1(2, 2);
+        FunctionalHashTrie origin = empty().with1(1, 1).with1(2, 2);
         FunctionalHashTrie t = origin.withoutKeys(new Object[]{1, 2});
-        assertSame(FunctionalHashTrie.empty(), t);
+        assertSame(empty(), t);
     }
 
 
-    private void checkChanges(int changeCount, int delta, Changes changes)
-    {
-        assertEquals("keys changed", changeCount, changes.changeCount());
-        assertEquals("key delta",    delta,       changes.keyCountDelta());
-    }
+    // merge1()
 
     @Test
-    public void testWithReusingChanges()
+    public void testMergeInvokesChanges()
     {
-        FunctionalHashTrie trie = FunctionalHashTrie.empty();
+        Changes changes = new Changes() {
+            @Override
+            public Object inserting(Object givenValue)
+            {
+                return givenValue;
+            }
 
-        Changes changes = new Changes();
-        trie = trie.with(1, 1, changes);
-        checkChanges(1, 1, changes);
+            @Override
+            public Object replacing(Object oldValue, Object givenValue)
+            {
+                assert givenValue.equals("new");
+                return oldValue;
+            }
+        };
+
+        Map.Entry[] entries = { new SimpleEntry<>("f", "old"),
+            new SimpleEntry<>("f", "new") };
+        FunctionalHashTrie trie = fromEntries(entries, changes);
         assertEquals(1, trie.size());
-
-        trie = trie.with(2, 2, changes);
-        checkChanges(2, 2, changes);
-        assertEquals(2, trie.size());
-
-        trie = trie.with(2, 3, changes);
-        checkChanges(3, 2, changes);
-        assertEquals(2, trie.size());
+        assertEquals("old", trie.get("f"));
     }
 
     @Test
     public void testMergeReusingChanges()
     {
-        FunctionalHashTrie empty = FunctionalHashTrie.empty();
+        FunctionalHashTrie empty = empty();
 
         Changes changes = new Changes();
         FunctionalHashTrie trie1 = empty.with(1, 1, changes);
