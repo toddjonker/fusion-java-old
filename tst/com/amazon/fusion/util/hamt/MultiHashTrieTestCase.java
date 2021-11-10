@@ -2,8 +2,8 @@
 
 package com.amazon.fusion.util.hamt;
 
-import static com.amazon.fusion.util.hamt.FunctionalHashTrie.empty;
 import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromEntries;
+import static com.amazon.fusion.util.hamt.MultiHashTrie.empty;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isIn;
@@ -30,12 +30,11 @@ public abstract class MultiHashTrieTestCase
 
     static void expectEmpty(MultiHashTrie t)
     {
-        assertThat(t.isEmpty(), is(true));
         assertTrue(t.isEmpty());
-        assertEquals(0, t.keyCount());
         assertThat(t.keyCount(), is(0));
-        assertSame(empty(), t);
         assertThat(t, sameInstance((MultiHashTrie) empty()));
+        assertTrue(t.equals(empty()));
+        assertTrue(empty().equals(t));
     }
 
 

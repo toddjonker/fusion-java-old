@@ -26,10 +26,6 @@ import java.util.Map.Entry;
 public class FunctionalHashTrie<K, V>
     extends MultiHashTrie<K, V>
 {
-    private static final FunctionalHashTrie EMPTY =
-        new FunctionalHashTrie<>(HashArrayMappedTrie.empty(), 0);
-
-
     // Mostly here so consumers don't have to use HashArrayMappedTrie.
     public static class Changes
         extends HashArrayMappedTrie.Changes
@@ -51,7 +47,7 @@ public class FunctionalHashTrie<K, V>
         if (changes.changeCount() != priorChangeCount)
         {
             int newSize = keyCount() + changes.keyCountDelta() - priorKeyCountDelta;
-            if (newSize == 0) return EMPTY;
+            if (newSize == 0) return empty();
             return new FunctionalHashTrie<>(newRoot, newSize);
         }
 
@@ -63,16 +59,11 @@ public class FunctionalHashTrie<K, V>
     //=========================================================================
     // Creation
 
-    public static <K, V> FunctionalHashTrie<K, V> empty()
-    {
-        return EMPTY;
-    }
-
     public static <K, V> FunctionalHashTrie<K, V> fromMap(Map<K, V> other)
     {
         Changes changes = new Changes();
         TrieNode<K, V> trie = HashArrayMappedTrie.fromMap(other, changes);
-        return EMPTY.resultFrom(trie, 0, 0, changes);
+        return MultiHashTrie.<K,V>empty().resultFrom(trie, 0, 0, changes);
     }
 
     public static <K, V> FunctionalHashTrie<K, V> fromEntries(Iterator<Entry<K, V>> items)
@@ -88,7 +79,7 @@ public class FunctionalHashTrie<K, V>
 
         TrieNode<K, V> trie = HashArrayMappedTrie.fromEntries(items, changes);
 
-        return EMPTY.resultFrom(trie, priorChangeCount, priorKeyCountDelta, changes);
+        return MultiHashTrie.<K,V>empty().resultFrom(trie, priorChangeCount, priorKeyCountDelta, changes);
     }
 
     public static <K, V> FunctionalHashTrie<K, V> fromEntries(Entry<K, V>[] items,
@@ -112,7 +103,7 @@ public class FunctionalHashTrie<K, V>
 
         TrieNode<K, V> trie = HashArrayMappedTrie.fromArrays(keys, values, changes);
 
-        return EMPTY.resultFrom(trie, priorChangeCount, priorKeyCountDelta, changes);
+        return MultiHashTrie.<K,V>empty().resultFrom(trie, priorChangeCount, priorKeyCountDelta, changes);
     }
 
     /**
@@ -133,7 +124,7 @@ public class FunctionalHashTrie<K, V>
 
         TrieNode<K, V> trie =
                 HashArrayMappedTrie.fromSelectedKeys(origin.root, keys, changes);
-        return EMPTY.resultFrom(trie, priorChangeCount, priorKeyCountDelta, changes);
+        return MultiHashTrie.<K,V>empty().resultFrom(trie, priorChangeCount, priorKeyCountDelta, changes);
     }
 
 

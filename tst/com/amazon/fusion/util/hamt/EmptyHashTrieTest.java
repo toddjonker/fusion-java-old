@@ -3,6 +3,8 @@
 package com.amazon.fusion.util.hamt;
 
 import static com.amazon.fusion.util.hamt.FunctionalHashTrie.empty;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.Assert.assertThat;
 import com.amazon.fusion.util.hamt.TransformTestCase.IncrementXform;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -15,28 +17,6 @@ public class EmptyHashTrieTest
     MultiHashTrie simpleSubject()
     {
         return empty();
-    }
-
-
-    //=========================================================================
-    // Inspection
-    //   These are exercised extensively via hash() and other fixture methods.
-
-    // containsKey()
-
-    @Test @Ignore @Override
-    public void containsKeyRejectsNullKey()
-    {
-        // FIXME
-    }
-
-
-    // get() -- Exercised via hash() and other fixture methods.
-
-    @Test @Ignore @Override
-    public void getRejectsNullKey()
-    {
-        // FIXME
     }
 
 
@@ -67,6 +47,16 @@ public class EmptyHashTrieTest
     public void withoutKeysReturnsSingleton()
     {
         expectEmpty(empty().withoutKeys("absent", "missing", -1));
+    }
+
+
+    // merge1()
+
+    @Test
+    public void merge1GivenSingleValuesReturnsIt()
+    {
+        FunctionalHashTrie h = hash1(10,1, 11,1, 12,1);
+        assertThat(empty().merge1(h), sameInstance(h));
     }
 
 

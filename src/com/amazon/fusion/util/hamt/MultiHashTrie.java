@@ -2,6 +2,7 @@
 
 package com.amazon.fusion.util.hamt;
 
+import static com.amazon.fusion.util.hamt.EmptyHashTrie.EMPTY;
 import com.amazon.fusion.BiFunction;
 import com.amazon.fusion.BiPredicate;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
@@ -60,6 +61,16 @@ public abstract class MultiHashTrie<K, V>
     {
         this.root     = root;
         this.keyCount = keyCount;
+    }
+
+
+    //=========================================================================
+    // Creation
+
+    @SuppressWarnings("unchecked")
+    public static <K, V> FunctionalHashTrie<K, V> empty()
+    {
+        return EMPTY;
     }
 
 
