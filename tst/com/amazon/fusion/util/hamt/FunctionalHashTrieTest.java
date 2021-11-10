@@ -221,6 +221,20 @@ public class FunctionalHashTrieTest
         assertThat(h, is(hash1(1, 1, 2, 2, 3, 3)));
     }
 
+    @Test
+    public void fromMapGivenArrayValuesReturnsHash()
+    {
+        Object[] arrayValue = {2, 6};
+
+        Map m = new HashMap();
+        m.put(1, 1);
+        m.put(2, arrayValue);
+        m.put(3, 3);
+
+        FunctionalHashTrie h = MultiHashTrie.fromMap(m);
+        assertThat(h, is(hash1(1, 1, 2, arrayValue, 3, 3)));
+    }
+
 
     // fromEntries()
 

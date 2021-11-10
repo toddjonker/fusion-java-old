@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
 
 /**
@@ -30,6 +29,12 @@ public class FunctionalHashTrie<K, V>
     public static class Changes
         extends HashArrayMappedTrie.Changes
     {
+        <K, V> FunctionalHashTrie<K, V> resultFrom(TrieNode<K, V> newRoot)
+        {
+            if (changeCount() == 0) return empty();
+
+            return new FunctionalHashTrie<>(newRoot, keyCountDelta());
+        }
     }
 
 
@@ -58,13 +63,6 @@ public class FunctionalHashTrie<K, V>
 
     //=========================================================================
     // Creation
-
-    public static <K, V> FunctionalHashTrie<K, V> fromMap(Map<K, V> other)
-    {
-        Changes changes = new Changes();
-        TrieNode<K, V> trie = HashArrayMappedTrie.fromMap(other, changes);
-        return MultiHashTrie.<K,V>empty().resultFrom(trie, 0, 0, changes);
-    }
 
     public static <K, V> FunctionalHashTrie<K, V> fromEntries(Iterator<Entry<K, V>> items)
     {

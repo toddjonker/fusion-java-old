@@ -9,6 +9,7 @@ import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -71,6 +72,14 @@ public abstract class MultiHashTrie<K, V>
     public static <K, V> FunctionalHashTrie<K, V> empty()
     {
         return EMPTY;
+    }
+
+
+    public static <K, V> FunctionalHashTrie<K, V> fromMap(Map<K, V> other)
+    {
+        FunctionalHashTrie.Changes changes = new FunctionalHashTrie.Changes();
+        TrieNode<K, V>             trie    = HashArrayMappedTrie.fromMap(other, changes);
+        return changes.resultFrom(trie);
     }
 
 
