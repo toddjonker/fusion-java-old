@@ -73,6 +73,10 @@ public class FunctionalHashTrie<K, V>
         return EMPTY.resultFrom(trie, 0, 0, changes);
     }
 
+    public static <K, V> FunctionalHashTrie<K, V> fromEntries(Iterator<Entry<K, V>> items)
+    {
+        return fromEntries(items, new Changes());
+    }
 
     public static <K, V> FunctionalHashTrie<K, V> fromEntries(Iterator<Entry<K, V>> items,
                                                               Changes changes)
@@ -89,6 +93,12 @@ public class FunctionalHashTrie<K, V>
                                                        Changes changes)
     {
         return fromEntries(Arrays.asList(items).iterator(), changes);
+    }
+
+    public static <K, V> FunctionalHashTrie<K, V> fromArrays(K[] keys,
+                                                             V[] values)
+    {
+        return fromArrays(keys, values, new Changes());
     }
 
     public static <K, V> FunctionalHashTrie<K, V> fromArrays(K[] keys,
@@ -174,6 +184,11 @@ public class FunctionalHashTrie<K, V>
     }
 
 
+    public FunctionalHashTrie<K, V> merge1(FunctionalHashTrie<K, V> that)
+    {
+        return merge(that, new Changes());
+    }
+
     public FunctionalHashTrie<K, V> merge(FunctionalHashTrie<K, V> that,
                                           Changes changes)
     {
@@ -196,7 +211,7 @@ public class FunctionalHashTrie<K, V>
     }
 
     @Override
-    public FunctionalHashTrie<K, V> withoutKeys(K[] keys)
+    public FunctionalHashTrie<K, V> withoutKeys(K... keys)
     {
         return withoutKeys(keys, new Changes());
     }

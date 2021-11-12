@@ -7,21 +7,32 @@ import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromArrays;
 import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromEntries;
 import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromMap;
 import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromSelectedKeys;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isIn;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import com.amazon.fusion.util.hamt.FunctionalHashTrie.Changes;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class FunctionalHashTrieTest
 {
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     private HashMap<Object, Object>            baselineMap;
     private FunctionalHashTrie<Object, Object> fht;
 
@@ -229,6 +240,68 @@ public class FunctionalHashTrieTest
     }
 
 
+    static void expectEmpty(MultiHashTrie t)
+    {
+        assertThat(t.isEmpty(), is(true));
+        assertTrue(t.isEmpty());
+        assertEquals(0, t.keyCount());
+        assertThat(t.keyCount(), is(0));
+        assertSame(empty(), t);
+        assertThat(t, sameInstance((MultiHashTrie) empty()));
+    }
+
+
+    static void expectMapping(MultiHashTrie<Object, Object> hash,
+                              Object key,
+                              Object... expectedValues)
+    {
+        assertThat(hash.containsKey(key), is(true));
+        assertThat(hash.get(key), isIn(expectedValues));
+    }
+
+
+    /**
+     * Wraps {@link FunctionalHashTrie#with1(Object, Object)} with validation.
+     */
+    static FunctionalHashTrie with1(FunctionalHashTrie h, Object k, Object v)
+    {
+        Object priorValue = h.get(k);
+
+        FunctionalHashTrie r = h.with1(k, v);
+        expectMapping(r, k, v);
+
+        if (priorValue == v)
+        {
+            assertSame(h, r);
+        }
+
+        return r;
+    }
+
+
+    static FunctionalHashTrie hash1(Object... kvPairs)
+    {
+        assertEquals(0, kvPairs.length % 2);
+
+        FunctionalHashTrie hash = empty();
+        for (int i = 0; i < kvPairs.length; i += 2)
+        {
+            hash = with1(hash, kvPairs[i], kvPairs[i+1]);
+        }
+
+        // Test iteration and construction through another route.
+        assertEquals(hash, fromEntries(hash.iterator()));
+
+        return hash;
+    }
+
+
+    FunctionalHashTrie simpleSubject()
+    {
+        return hash1(1, 1);
+    }
+
+
     //=========================================================================
     // Creation
 
@@ -253,6 +326,50 @@ public class FunctionalHashTrieTest
     }
 
 
+    // fromMap()
+
+    @Test
+    public void fromMapGivenEmptyMapReturnsEmptySingleton()
+    {
+        FunctionalHashTrie h = fromMap(Collections.emptyMap());
+        expectEmpty(h);
+    }
+
+    @Test
+    public void fromMapGivenValidInputReturnsHash()
+    {
+        Map m = new HashMap();
+        m.put(1, 1);
+        m.put(2, 2);
+        m.put(3, 3);
+
+        FunctionalHashTrie h = fromMap(m);
+        assertThat(h, is(hash1(1, 1, 2, 2, 3, 3)));
+    }
+
+
+    // fromEntries()
+
+    @Test
+    public void fromEntriesGivenEmptyIteratorReturnsEmptySingleton()
+    {
+        FunctionalHashTrie h = fromEntries(Collections.<Map.Entry<Object,Object>>emptyIterator());
+        expectEmpty(h);
+    }
+
+    @Test
+    public void fromEntriesGivenValidInputReturnsHash()
+    {
+        Map m = new HashMap();
+        m.put(1, 1);
+        m.put(2, 2);
+        m.put(3, 3);
+
+        FunctionalHashTrie h = fromEntries(m.entrySet().iterator());
+        assertThat(h, is(hash1(1, 1, 2, 2, 3, 3)));
+    }
+
+
     // fromArrays()
 
     @Test
@@ -266,10 +383,23 @@ public class FunctionalHashTrieTest
         checkChanges(0, 0, changes);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void fromArraysRequiresEqualLengthArrays()
     {
-        fromArrays(new Object[] { 1 }, new Object[] { 1, 2 }, new Changes());
+        thrown.expect(IllegalArgumentException.class);
+        fromArrays(new Object[] { 1 }, new Object[] { 1, 2 });
+    }
+
+    @Test
+    public void fromArraysZips()
+    {
+        FunctionalHashTrie t = fromArrays(new Object[] { 1, 2 },
+                                          new Object[] { 3, 4 });
+        assertThat(t, is(hash1(1, 3, 2, 4)));
+
+        t = fromArrays(new Object[] { 5, 6, 5 },
+                       new Object[] { 8, 9, 0 });
+        assertThat(t, is(hash1(5, 0, 6, 9)));
     }
 
     @Test
@@ -300,26 +430,23 @@ public class FunctionalHashTrieTest
     @Test
     public void fromSelectedKeysReturnsSubset()
     {
-        FunctionalHashTrie origin = FunctionalHashTrie.empty().with1(1, 1).with1(2, 2).with1(3, 3);
+        FunctionalHashTrie origin = hash1(1, 1, 2, 2, 3, 3);
 
         FunctionalHashTrie t = fromSelectedKeys(origin, new Object[]{ 1, 3, 5 });
 
-        assertEquals(2,    t.size());
-        assertEquals(1,    t.get(1));
-        assertEquals(null, t.get(2));
-        assertEquals(3,    t.get(3));
+        assertThat(t, is(hash1(1, 1, 3, 3)));
     }
 
     @Test
     public void fromSelectedKeysReturnsEmptySingleton()
     {
-        FunctionalHashTrie origin = FunctionalHashTrie.empty().with1(1, 1).with1(2, 2);
+        FunctionalHashTrie origin = hash1(1, 1, 2, 2);
 
         FunctionalHashTrie t = fromSelectedKeys(origin, new Object[]{});
-        assertSame(FunctionalHashTrie.empty(), t);
+        expectEmpty(t);
 
         t = fromSelectedKeys(origin, new Object[]{ 3, 4 });
-        assertSame(FunctionalHashTrie.empty(), t);
+        expectEmpty(t);
     }
 
 
@@ -329,11 +456,16 @@ public class FunctionalHashTrieTest
     // with1()
 
     @Test
-    public void testNoopInsertion()
+    public void with1ReplacesExistingValues()
     {
-        FunctionalHashTrie trie1 = empty().with1(1, 1);
-        FunctionalHashTrie trie2 = trie1.with1(1, 1);
-        assertSame(trie1, trie2);
+        expectMapping(simpleSubject().with1(1, 3), 1, 3);
+    }
+
+    @Test
+    public void with1GivenSameValueReturnsSelf()
+    {
+        FunctionalHashTrie s = simpleSubject();
+        assertThat(s.with1(1, s.get(1)), sameInstance(s));
     }
 
     @Test
@@ -356,20 +488,29 @@ public class FunctionalHashTrieTest
     }
 
 
+    // withoutKey()
+
+    @Test
+    public void withoutKeyRemovesSingleValue()
+    {
+        FunctionalHashTrie subject = hash1(1, 1, 2, 2, 3, 3);
+
+        FunctionalHashTrie r = subject.withoutKey(3);
+        assertThat(r, is(hash1(1, 1, 2, 2)));
+        assertThat(r, not(subject));
+    }
+
+
     // withoutKeys()
 
     @Test
     public void withoutKeysGivenKeysReturnsSubset()
     {
-        FunctionalHashTrie origin = FunctionalHashTrie.empty().with1(1, 1).with1(2, 2).with1(3, 3);
+        FunctionalHashTrie origin = hash1(1, 1, 2, 2, 3, 3);
+        FunctionalHashTrie t = origin.withoutKeys(1, 3, 5);
 
-        FunctionalHashTrie t = origin.withoutKeys(new Object[]{ 1, 3, 5 });
-
-        assertEquals(1,    t.size());
-        assertEquals(null, t.get(1));
-        assertEquals(2,    t.get(2));
-        assertEquals(null, t.get(3));
-        assertNotEquals(origin, t);
+        assertThat(t, is(hash1(2, 2)));
+        assertThat(t, not(origin));
     }
 
     @Test
@@ -382,6 +523,24 @@ public class FunctionalHashTrieTest
 
 
     // merge1()
+
+    @Test
+    public void merge1GivenEmptyReturnsSelf()
+    {
+        FunctionalHashTrie s = simpleSubject();
+        FunctionalHashTrie r = s.merge1(empty());
+        assertThat(r, sameInstance(s));
+    }
+
+    @Test
+    public void merge1GivenValidInputReturnsSingleHash()
+    {
+        FunctionalHashTrie h1 = hash1(10, 1, 11, 1, 12, 1, 20, 2, 21, 2, 22, 2);
+        FunctionalHashTrie h2 = hash1(1, 5, 2, 6, 11, 5, 12, 6, 21, 5, 22, 6);
+
+        FunctionalHashTrie r = h1.merge1(h2);
+        assertThat(r, is(hash1(1, 5, 2, 6, 10, 1, 11, 5, 12, 6, 20, 2, 21, 5, 22, 6)));
+    }
 
     @Test
     public void testMergeInvokesChanges()
@@ -420,5 +579,31 @@ public class FunctionalHashTrieTest
         FunctionalHashTrie trie2 = trie1.merge(empty.with1(1, 2), changes);
         checkChanges(2, 1, changes);
         assertEquals(1, trie2.size());
+    }
+
+
+    // transform()
+
+    @Test
+    public void transformReturnsEmpty()
+    {
+        FunctionalHashTrie h1 = hash1(1, 3, 3, 3, 4, 6, 5, 15);
+        expectEmpty(h1.transform(new TransformTestCase.Remove3sIncrement2sXform()));
+    }
+
+    @Test
+    public void transformGivenNoopReturnsSame()
+    {
+        FunctionalHashTrie h = hash1(1, 1, 2, 1, 4, 5);
+        assertThat(h.transform(new TransformTestCase.Remove3sIncrement2sXform()),
+                   sameInstance(h));
+    }
+
+    @Test
+    public void transformMixedChanges()
+    {
+        FunctionalHashTrie h = hash1(1, 1, 2, 2, 3, 3, 4, 1, 5, 1, 6, 2, 7, 3, 8, 3);
+        assertThat(h.transform(new TransformTestCase.Remove3sIncrement2sXform()),
+                   is(hash1(1, 1, 2, 3, 4, 1, 5, 1, 6, 3)));
     }
 }
