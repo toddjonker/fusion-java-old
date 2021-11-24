@@ -17,6 +17,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import com.amazon.fusion.util.hamt.FunctionalHashTrie.Changes;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -329,6 +330,22 @@ public class FunctionalHashTrieTest
 
 
     //=========================================================================
+    // Inspection
+    //   These are exercised extensively via hash() and other fixture methods.
+
+    @Test
+    public void getMultiResultRejectsWriteThrough()
+    {
+        MultiHashTrie s = hash1(1, 1, 2, 2, 3, 3);
+
+        Collection values = s.getMulti(1);
+
+        thrown.expect(UnsupportedOperationException.class);
+        values.add(4);
+    }
+
+
+    //=========================================================================
     // Modification
 
     // with1()
@@ -475,5 +492,15 @@ public class FunctionalHashTrieTest
         FunctionalHashTrie h = hash1(1, 1, 2, 2, 3, 3, 4, 1, 5, 1, 6, 2, 7, 3, 8, 3);
         assertThat(h.transform(new TransformTestCase.Remove3sIncrement2sXform()),
                    is(hash1(1, 1, 2, 3, 4, 1, 5, 1, 6, 3)));
+    }
+
+
+    // oneify()
+
+    @Test
+    public void oneifyBehavesNormally()
+    {
+        checkOneify(hash1(1, 1));
+        checkOneify(hash1(1, 1, 2, 2, 3, 3, 4, 4));
     }
 }

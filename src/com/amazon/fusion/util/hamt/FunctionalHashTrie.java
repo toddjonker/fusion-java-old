@@ -6,6 +6,8 @@ import com.amazon.fusion.BiFunction;
 import com.amazon.fusion.BiPredicate;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -160,6 +162,19 @@ public class FunctionalHashTrie<K, V>
     }
 
 
+    @Override
+    public Collection<V> getMulti(K key)
+    {
+        validateKey(key);
+
+        V o = root.get(key);
+
+        if (o == null) return Collections.emptySet();
+
+        return Collections.singleton(o);
+    }
+
+
     //=========================================================================
     // Modification
 
@@ -184,12 +199,13 @@ public class FunctionalHashTrie<K, V>
     }
 
 
-    public FunctionalHashTrie<K, V> merge1(FunctionalHashTrie<K, V> that)
+    @Override
+    public FunctionalHashTrie<K, V> merge1(MultiHashTrie<K, V> that)
     {
         return merge(that, new Changes());
     }
 
-    public FunctionalHashTrie<K, V> merge(FunctionalHashTrie<K, V> that,
+    public FunctionalHashTrie<K, V> merge(MultiHashTrie<K, V> that,
                                           Changes changes)
     {
         int priorChangeCount   = changes.changeCount();
@@ -246,6 +262,13 @@ public class FunctionalHashTrie<K, V>
 
         TrieNode<K, V> newRoot = root.transform(xform, changes);
         return resultFrom(newRoot, priorChangeCount, priorKeyCountDelta, changes);
+    }
+
+
+    @Override
+    public FunctionalHashTrie<K, V> oneify()
+    {
+        return this;
     }
 
 

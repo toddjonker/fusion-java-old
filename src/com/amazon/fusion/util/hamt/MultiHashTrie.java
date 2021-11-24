@@ -6,6 +6,7 @@ import com.amazon.fusion.BiFunction;
 import com.amazon.fusion.BiPredicate;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractSet;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -94,10 +95,22 @@ public abstract class MultiHashTrie<K, V>
     }
 
     /**
+     * Get a value associated with the key.
+     * If the key has multiple entries in this hash, one is selected arbitrarily.
+     *
      * @param key the key to search for.
-     * @return the value associated with key, null if it is not in the map.
+     * @return the value associated with key, null if it is not in this hash.
      */
     public abstract V get(K key);
+
+    /**
+     * Gets all values associated with a key.
+     *
+     * @param key the key to search for.
+     *
+     * @return an immutable collection.
+     */
+    public abstract Collection<V> getMulti(K key);
 
 
     //=========================================================================
@@ -133,6 +146,14 @@ public abstract class MultiHashTrie<K, V>
 
 
     /**
+     * Merges two hashes, retaining one entry per key.
+     * Values from the argument will replace those from this hash with the same key.
+     * If a key has multiple entries, one is selected arbitrarily.
+     */
+    public abstract FunctionalHashTrie<K, V> merge1(MultiHashTrie<K, V> that);
+
+
+    /**
      * Applies a transformation function to each key-value entry in the trie.
      *
      * @param xform accepts the existing key and value, returning a transformed
@@ -141,6 +162,16 @@ public abstract class MultiHashTrie<K, V>
      * @return the resulting trie; {@code this} if nothing has changed.
      */
     public abstract MultiHashTrie<K, V> transform(BiFunction<K, V, V> xform);
+
+
+    /**
+     * Remove all but one value for every key, so that there's no remaining
+     * multi-entry keys.
+     * If a key has multiple entries, one is selected arbitrarily.
+     *
+     * @return the resulting trie; {@code this} if nothing has changed.
+     */
+    public abstract FunctionalHashTrie<K, V> oneify();
 
 
     //=========================================================================

@@ -77,4 +77,13 @@ public class EmptyHashTrieTest
     {
         expectEmpty(empty().transform(new IncrementXform()));
     }
+
+
+    // oneify()
+
+    @Test
+    public void oneifyReturnsSingleton()
+    {
+        expectEmpty(empty().oneify());
+    }
 }

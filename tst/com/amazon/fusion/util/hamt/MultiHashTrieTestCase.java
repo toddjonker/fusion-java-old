@@ -4,6 +4,7 @@ package com.amazon.fusion.util.hamt;
 
 import static com.amazon.fusion.util.hamt.FunctionalHashTrie.empty;
 import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromEntries;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isIn;
 import static org.hamcrest.Matchers.sameInstance;
@@ -44,6 +45,7 @@ public abstract class MultiHashTrieTestCase
     {
         assertThat(hash.containsKey(key), is(true));
         assertThat(hash.get(key), isIn(expectedValues));
+        assertThat(hash.getMulti(key), containsInAnyOrder(expectedValues));
     }
 
 
@@ -193,5 +195,23 @@ public abstract class MultiHashTrieTestCase
         MultiHashTrie s = simpleSubject();
         Object[]      keys = s.keySet().toArray();
         expectEmpty(s.withoutKeys(keys));
+    }
+
+
+    // oneify()
+
+    static void checkOneify(MultiHashTrie h)
+    {
+        FunctionalHashTrie<Object, Object> r = h.oneify();
+        assertThat(r.keyCount(), is(h.keyCount()));
+
+        for (Entry<Object, Object> entry : r)
+        {
+            Object key = entry.getKey();
+            assertThat(entry.getValue(), isIn(h.getMulti(key)));
+            h = h.withoutKey(key); // So we don't match the key again.
+        }
+
+        assertThat(h.size(), is(0));
     }
 }
