@@ -397,6 +397,27 @@ public class FunctionalHashTrieTest
     }
 
 
+    // withMulti()
+    // Expected behavior is tested through {@link #hash}.
+
+    @Test
+    public void withMultiGivenNewKeyReturnsSingleHash()
+    {
+        FunctionalHashTrie s = hash1(1, 1);
+        FunctionalHashTrie r = (FunctionalHashTrie) s.withMulti(2, 2);
+        assertThat(r, is(hash1(1,1, 2,2)));
+    }
+
+    @Test
+    public void withMultiGivenExistingKeyReturnsMultiHash()
+    {
+        FunctionalHashTrie s = hash1(1, 1);
+        MultiHashTrie r = s.withMulti(1, 1);
+        assertTrue(r instanceof MultiHashTrieImpl);
+        assertThat(r, is(multi(1,1, 1,1)));
+    }
+
+
     // withoutKey()
 
     @Test
@@ -480,6 +501,19 @@ public class FunctionalHashTrieTest
         FunctionalHashTrie trie2 = trie1.merge(empty.with1(1, 2), changes);
         checkChanges(2, 1, changes);
         assertEquals(1, trie2.size());
+    }
+
+
+    // mergeMulti()
+
+    @Test
+    public void mergeMultiGivenMultiHashReturnsUnion()
+    {
+        MultiHashTrie h1 = hash1(10,1, 11,1, 12,1);
+        MultiHashTrie h2 = multi( 1,5, 2,6, 2,6, 11,5, 12,1, 12,6, 12,6);
+
+        MultiHashTrie r = mergeMulti(h1, h2);
+        assertThat(r, is(hash(1,5, 2,6, 2,6, 10,1, 11,1, 11,5, 12,1, 12,1, 12,6, 12,6)));
     }
 
 

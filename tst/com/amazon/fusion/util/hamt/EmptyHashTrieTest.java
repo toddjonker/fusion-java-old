@@ -2,7 +2,8 @@
 
 package com.amazon.fusion.util.hamt;
 
-import static com.amazon.fusion.util.hamt.FunctionalHashTrie.empty;
+import static com.amazon.fusion.util.hamt.MultiHashTrie.empty;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import com.amazon.fusion.util.hamt.TransformTestCase.IncrementXform;
@@ -57,6 +58,36 @@ public class EmptyHashTrieTest
     {
         FunctionalHashTrie h = hash1(10,1, 11,1, 12,1);
         assertThat(empty().merge1(h), sameInstance(h));
+    }
+
+    @Test
+    public void merge1GivenMultiValuesReturnsOneified()
+    {
+        MultiHashTrie h = hash(10,1, 11,1, 12,1, 20,2, 20,2, 21,2, 21,2, 22,2, 22,2);
+        assertThat(empty().merge1(h), is((MultiHashTrie) h.oneify()));
+    }
+
+
+    // mergeMulti()
+
+    @Test
+    public void mergeMultiGivenEmptyReturnsSingleton()
+    {
+        expectEmpty(mergeMulti(empty(), empty()));
+    }
+
+    @Test
+    public void mergeMultiGivenSingleValuesReturnsArgument()
+    {
+        MultiHashTrie h = hash1(1,1, 2,2, 3,3);
+        assertThat(mergeMulti(empty(), h), sameInstance(h));
+    }
+
+    @Test
+    public void mergeMultiGivenMultiValuesReturnsArgument()
+    {
+        MultiHashTrie h = multi(1,1, 2,2, 2,2);
+        assertThat(mergeMulti(empty(), h), sameInstance(h));
     }
 
 

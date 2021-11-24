@@ -14,6 +14,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -66,6 +67,26 @@ public abstract class MultiHashTrieTestCase
         return r;
     }
 
+    /**
+     * Wraps {@link MultiHashTrie#withMulti(Object, Object)} with validation.
+     */
+    static MultiHashTrie withMulti(MultiHashTrie h, Object k, Object v)
+    {
+        ArrayList expectedValues = new ArrayList(h.getMulti(k));
+        expectedValues.add(v);
+
+        MultiHashTrie r = h.withMulti(k, v);
+        expectMapping(r, k, expectedValues.toArray());
+
+        // When the key is absent, with1 and withMulti have the same effect.
+        if (! h.containsKey(k))
+        {
+            assertEquals(h.with1(k, v), r);
+        }
+
+        return r;
+    }
+
 
     static FunctionalHashTrie hash1(Object... kvPairs)
     {
@@ -81,6 +102,30 @@ public abstract class MultiHashTrieTestCase
         assertEquals(hash, fromEntries(hash.iterator()));
 
         return hash;
+    }
+
+
+    static MultiHashTrie hash(Object... kvPairs)
+    {
+        assertEquals(0, kvPairs.length % 2);
+
+        MultiHashTrie hash = empty();
+        for (int i = 0; i < kvPairs.length; i += 2)
+        {
+            hash = withMulti(hash, kvPairs[i], kvPairs[i+1]);
+        }
+
+        // Test iteration and construction through another route.
+        assertEquals(hash, MultiHashTrie.fromEntries(hash.iterator()));
+
+        return hash;
+    }
+
+    static MultiHashTrie multi(Object... kvPairs)
+    {
+        MultiHashTrie r = hash(kvPairs);
+        assertTrue(r.keyCount() < r.size());
+        return r;
     }
 
 
@@ -125,6 +170,22 @@ public abstract class MultiHashTrieTestCase
     }
 
 
+    // getMulti()
+
+    @Test
+    public void getMultiRejectsNullKey()
+    {
+        thrown.expect(NullPointerException.class);
+        simpleSubject().getMulti(null);
+    }
+
+    @Test
+    public void getMultiGivenAbsentKeyReturnsEmptyCollection()
+    {
+        assertTrue(simpleSubject().getMulti(-1).isEmpty());
+    }
+
+
     //=========================================================================
     // Modification
 
@@ -142,6 +203,23 @@ public abstract class MultiHashTrieTestCase
     {
         thrown.expect(NullPointerException.class);
         simpleSubject().with1(2, null);
+    }
+
+
+    // withMulti()
+
+    @Test
+    public void withMultiRejectsNullKey()
+    {
+        thrown.expect(NullPointerException.class);
+        simpleSubject().withMulti(null, 1);
+    }
+
+    @Test
+    public void withMultiRejectsNullValue()
+    {
+        thrown.expect(NullPointerException.class);
+        simpleSubject().withMulti(2, null);
     }
 
 
@@ -194,6 +272,34 @@ public abstract class MultiHashTrieTestCase
         MultiHashTrie s = simpleSubject();
         Object[]      keys = s.keySet().toArray();
         expectEmpty(s.withoutKeys(keys));
+    }
+
+
+    // mergeMulti()
+
+    /**
+     * Wraps {@link FunctionalHashTrie#mergeMulti(MultiHashTrie)} with validation.
+     */
+    static MultiHashTrie mergeMulti(MultiHashTrie h1, MultiHashTrie h2)
+    {
+        // Ensure symmetry of the operation.
+        MultiHashTrie r1 = h1.mergeMulti(h2);
+        MultiHashTrie r2 = h2.mergeMulti(h1);
+
+        assertEquals(r1, r2);
+        assertEquals(r2, r1);
+        assertTrue(h2.isEmpty() || ! r1.equals(h1));
+        assertTrue(h1.isEmpty() || ! r2.equals(h2));
+
+        return r1;
+    }
+
+
+    @Test
+    public void mergeMultiGivenEmptyReturnsSelf()
+    {
+        MultiHashTrie s = simpleSubject();
+        assertThat(mergeMulti(s, empty()), sameInstance(s));
     }
 
 

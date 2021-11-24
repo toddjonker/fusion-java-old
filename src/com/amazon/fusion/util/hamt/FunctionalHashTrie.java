@@ -27,8 +27,26 @@ public class FunctionalHashTrie<K, V>
 {
     // Mostly here so consumers don't have to use HashArrayMappedTrie.
     public static class Changes
-        extends HashArrayMappedTrie.Changes
+        extends MultiHashTrie.Changes
     {
+        @Override
+        <K, V> FunctionalHashTrie<K, V> resultFrom(MultiHashTrie<K, V> t,
+                                                   TrieNode<K, V> newRoot)
+        {
+            assert t instanceof FunctionalHashTrie;
+
+            if (changeCount() != 0)
+            {
+                int newSize = t.keyCount() + keyCountDelta();
+                if (newSize == 0) return empty();
+                return new FunctionalHashTrie<>(newRoot, newSize);
+            }
+
+            assert t.root == newRoot;
+            return (FunctionalHashTrie<K, V>) t;
+        }
+
+        @Override
         <K, V> FunctionalHashTrie<K, V> resultFrom(TrieNode<K, V> newRoot)
         {
             if (changeCount() == 0) return empty();

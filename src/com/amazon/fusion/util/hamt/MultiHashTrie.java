@@ -54,6 +54,18 @@ public abstract class MultiHashTrie<K, V>
         }
     }
 
+    abstract static class Changes
+        extends HashArrayMappedTrie.Changes
+    {
+        abstract <K, V> MultiHashTrie<K, V> resultFrom(MultiHashTrie<K, V> t,
+                                                       TrieNode<K, V> newRoot);
+
+        <K, V> MultiHashTrie<K, V> resultFrom(TrieNode<K, V> newRoot)
+        {
+            return resultFrom(MultiHashTrie.<K,V>empty(), newRoot);
+        }
+    }
+
 
     protected final TrieNode<K, V> root;
     private   final int            keyCount;
@@ -79,6 +91,39 @@ public abstract class MultiHashTrie<K, V>
     {
         FunctionalHashTrie.Changes changes = new FunctionalHashTrie.Changes();
         TrieNode<K, V>             trie    = HashArrayMappedTrie.fromMap(other, changes);
+        return changes.resultFrom(trie);
+    }
+
+
+    /**
+     * When the same key is in multiple entries, a true multi-hash is created.
+     */
+    public static <K, V> MultiHashTrie<K, V> fromEntries(Iterator<Entry<K, V>> items)
+    {
+        Changes        changes = new MultiHashTrieImpl.Changes();
+        TrieNode<K, V> trie    = HashArrayMappedTrie.fromEntries(items, changes);
+        return changes.resultFrom(trie);
+    }
+
+
+    public static <K, V> MultiHashTrie<K, V> fromArrays(K[] keys, V[] values)
+    {
+        Changes        changes = new MultiHashTrieImpl.Changes();
+        TrieNode<K, V> trie    = HashArrayMappedTrie.fromArrays(keys, values, changes);
+        return changes.resultFrom(trie);
+    }
+
+
+    /**
+     * Creates a trie by copying entries for the {@code keys} from the
+     * {@code origin} trie.
+     */
+    public static <K, V> MultiHashTrie<K, V>
+    fromSelectedKeys(MultiHashTrie<K, V> origin, K... keys)
+    {
+        Changes changes = new MultiHashTrieImpl.Changes();
+        TrieNode<K, V> trie =
+            HashArrayMappedTrie.fromSelectedKeys(origin.root, keys, changes);
         return changes.resultFrom(trie);
     }
 
@@ -145,6 +190,20 @@ public abstract class MultiHashTrie<K, V>
 
 
     /**
+     * Adds a new entry for the given key-value, retaining existing entries for
+     * the key.
+     */
+    public MultiHashTrie<K, V> withMulti(K key, V value)
+    {
+        validateKeyAndValue(key, value);
+
+        Changes        changes = new MultiHashTrieImpl.Changes();
+        TrieNode<K, V> newRoot = root.with(key, value, changes);
+        return changes.resultFrom(this, newRoot);
+    }
+
+
+    /**
      * Removes all existing entries for a key.
      *
      * @param key must not be null.
@@ -171,6 +230,17 @@ public abstract class MultiHashTrie<K, V>
      * If a key has multiple entries, one is selected arbitrarily.
      */
     public abstract FunctionalHashTrie<K, V> merge1(MultiHashTrie<K, V> that);
+
+
+    /**
+     * Merges two hashes, retaining all entries for all keys.
+     */
+    public MultiHashTrie<K, V> mergeMulti(MultiHashTrie<K, V> that)
+    {
+        Changes        changes = new MultiHashTrieImpl.Changes();
+        TrieNode<K, V> newRoot = root.with(that.iterator(), changes);
+        return changes.resultFrom(this, newRoot);
+    }
 
 
     /**

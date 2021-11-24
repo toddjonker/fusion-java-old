@@ -67,6 +67,12 @@ final class EmptyHashTrie<K, V>
     }
 
     @Override
+    public MultiHashTrie<K, V> mergeMulti(MultiHashTrie<K, V> that)
+    {
+        return that;
+    }
+
+    @Override
     public FunctionalHashTrie<K, V> transform(BiFunction<K, V, V> xform)
     {
         return this;
