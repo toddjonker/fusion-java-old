@@ -18,7 +18,6 @@ import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
 import static com.amazon.fusion.FusionText.textToJavaString;
 import static com.amazon.fusion.FusionText.unsafeTextToJavaString;
-import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.ion.util.IonTextUtils.printSymbol;
 import static java.util.AbstractMap.SimpleEntry;
@@ -39,6 +38,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -62,7 +62,7 @@ final class FusionStruct
         String[] annStrings = struct.getTypeAnnotations();
         BaseSymbol[] annotations = internSymbols(annStrings);
 
-        // There's no benefit to being lazy injecting null.struct or {}.
+        // There's no benefit to being lazy with null.struct or {}.
         if (struct.isNullValue())
         {
             return nullStruct(eval, annotations);
@@ -96,6 +96,63 @@ final class FusionStruct
     }
 
 
+    static final class Builder
+    {
+        private MultiHashTrie<String, Object> myTrie = MultiHashTrie.empty();
+
+        private Builder() {}
+
+        /**
+         * Adds a new field to the struct, retaining existing fields with the
+         * same name.
+         */
+        void add(String fieldName, Object value)
+        {
+            myTrie = myTrie.withMulti(fieldName, value);
+        }
+
+        // TODO add(String[], Object[])
+
+
+        NonNullImmutableStruct buildImmutable()
+        {
+            return buildImmutable(BaseSymbol.EMPTY_ARRAY);
+        }
+
+        NonNullImmutableStruct buildImmutable(String[] annotations)
+        {
+            return buildImmutable(internSymbols(annotations));
+        }
+
+        NonNullImmutableStruct buildImmutable(BaseSymbol[] annotations)
+        {
+            return immutableStruct(myTrie, annotations);
+        }
+
+
+        MutableStruct buildMutable()
+        {
+            return buildMutable(BaseSymbol.EMPTY_ARRAY);
+        }
+
+        MutableStruct buildMutable(String[] annotations)
+        {
+            return buildMutable(internSymbols(annotations));
+        }
+
+        MutableStruct buildMutable(BaseSymbol[] annotations)
+        {
+            return new MutableStruct(myTrie, annotations);
+        }
+    }
+
+    static Builder builder(Evaluator eval)
+    {
+        Objects.requireNonNull(eval);
+        return new Builder();
+    }
+
+
     static NonNullImmutableStruct emptyStruct(Evaluator eval)
         throws FusionException
     {
@@ -111,32 +168,6 @@ final class FusionStruct
                                     BaseSymbol.EMPTY_ARRAY);
     }
 
-    // TODO Replace this with a builder, to avoid the awkward exception handling
-    //  and eliminate Entry allocation.
-    static NonNullImmutableStruct
-    immutableStruct(Evaluator eval,
-                    Iterator<Map.Entry<String, Object>> entries,
-                    String[] annotations)
-        throws FusionException
-    {
-        MultiHashTrie<String, Object> fht;
-
-        try
-        {
-            fht = MultiHashTrie.fromEntries(entries);
-        }
-        catch (RuntimeException e)
-        {
-            if (e.getCause() instanceof FusionException)
-            {
-                throw (FusionException) e.getCause();
-            }
-            throw e;
-        }
-
-        return immutableStruct(fht, internSymbols(annotations));
-    }
-
     private static NonNullImmutableStruct
     immutableStruct(MultiHashTrie<String, Object> map, BaseSymbol[] anns)
     {
@@ -145,10 +176,9 @@ final class FusionStruct
     }
 
     /**
-     * @deprecated It is generally better to populate a Fusion struct directly
+     * @deprecated It is generally better to use a {@link #builder} or to
+     * populate a Fusion struct directly
      * than to populate a {@link Map} and then copy it into a struct.
-     * If you really need a {@code Map}, use
-     * {@link #immutableStruct(Evaluator, Iterator, String[])}.
      */
     @Deprecated
     static NonNullImmutableStruct immutableStruct(Map<String, Object> map)
@@ -209,7 +239,8 @@ final class FusionStruct
     }
 
     /**
-     * @deprecated It is generally better to populate a Fusion struct directly
+     * @deprecated It is generally better to use a {@link #builder} or to
+     * populate a Fusion struct directly
      * than to populate a {@link Map} and then copy it into a struct.
      */
     @Deprecated
@@ -1724,7 +1755,7 @@ final class FusionStruct
 
 
 
-    abstract static class BaseStructProc
+    private abstract static class BaseStructProc
         extends Procedure
     {
         void checkArityEven(Object... args)
@@ -1744,8 +1775,7 @@ final class FusionStruct
         abstract Object singleEntry(Evaluator eval, String name, Object value)
             throws FusionException;
 
-        abstract Object makeIt(String[] names, Object[] values)
-            throws FusionException;
+        abstract Object build(Builder builder);
 
         @Override
         final Object doApply(Evaluator eval, Object[] args)
@@ -1763,19 +1793,16 @@ final class FusionStruct
 
             checkArityEven(args);
 
-            int fieldCount = (args.length / 2);
-            String[] names  = new String[fieldCount];
-            Object[] values = new Object[fieldCount];
+            Builder builder = builder(eval);
 
-            int fieldPos = 0;
-            for (int i = 0; i < args.length; i++, fieldPos++)
+            for (int i = 0; i < args.length; i++)
             {
-                names [fieldPos] = checkNonEmptyTextArg(eval, this, i, args);
-                values[fieldPos] = args[++i];
+                String name  = checkNonEmptyTextArg(eval, this, i, args);
+                Object value = args[++i];
+                builder.add(name, value);
             }
-            assert fieldPos == fieldCount;
 
-            return makeIt(names, values);
+            return build(builder);
         }
     }
 
@@ -1799,10 +1826,9 @@ final class FusionStruct
         }
 
         @Override
-        Object makeIt(String[] names, Object[] values)
-            throws FusionException
+        Object build(Builder builder)
         {
-            return immutableStruct(names, values, EMPTY_STRING_ARRAY);
+            return builder.buildImmutable();
         }
     }
 
@@ -1826,10 +1852,9 @@ final class FusionStruct
         }
 
         @Override
-        Object makeIt(String[] names, Object[] values)
-            throws FusionException
+        Object build(Builder builder)
         {
-            return mutableStruct(names, values, EMPTY_STRING_ARRAY);
+            return builder.buildMutable();
         }
     }
 
@@ -1901,8 +1926,9 @@ final class FusionStruct
         abstract Object empty(Evaluator eval)
             throws FusionException;
 
-        abstract Object finalize(MutableStruct value);
+        abstract Object build(Builder builder);
 
+        @Override
         final Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
@@ -1919,7 +1945,7 @@ final class FusionStruct
             Iterator<?> fieldIterator = unsafeJavaIterate(eval, names);
             Iterator<?> valueIterator = unsafeJavaIterate(eval, values);
 
-            MutableStruct struct = new MutableStruct();
+            FusionStruct.Builder builder = FusionStruct.builder(eval);
 
             while (fieldIterator.hasNext() && valueIterator.hasNext())
             {
@@ -1933,10 +1959,11 @@ final class FusionStruct
                 }
 
                 Object valueObj = valueIterator.next();
-                struct.putsM(eval, name, valueObj);
+
+                builder.add(name, valueObj);
             }
 
-            return finalize(struct);
+            return build(builder);
         }
     }
 
@@ -1952,9 +1979,9 @@ final class FusionStruct
         }
 
         @Override
-        Object finalize(MutableStruct value)
+        Object build(Builder builder)
         {
-            return value.asImmutable();
+            return builder.buildImmutable();
         }
     }
 
@@ -1970,9 +1997,9 @@ final class FusionStruct
         }
 
         @Override
-        Object finalize(MutableStruct value)
+        Object build(Builder builder)
         {
-            return value;
+            return builder.buildMutable();
         }
     }
 

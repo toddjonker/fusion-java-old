@@ -956,16 +956,15 @@ class Compiler
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            int count = myFieldNames.length;
-            Object[] values = new Object[count];
+            FusionStruct.Builder builder = FusionStruct.builder(eval);
 
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < myFieldNames.length; i++)
             {
-                CompiledForm form = myFieldForms[i];
-                values[i] = eval.eval(store, form);
+                Object value = eval.eval(store, myFieldForms[i]);
+                builder.add(myFieldNames[i], value);
             }
 
-            return immutableStruct(myFieldNames, values, BaseSymbol.EMPTY_ARRAY);
+            return builder.buildImmutable();
         }
     }
 
