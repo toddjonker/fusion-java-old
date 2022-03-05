@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2018-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.util.hamt;
 
@@ -86,6 +86,12 @@ public abstract class MultiHashTrie<K, V>
         return EMPTY;
     }
 
+    @SuppressWarnings("unchecked")
+    public static <K, V> FunctionalHashTrie<K, V> singleEntry(K key, V value)
+    {
+        TrieNode<K, V> trie = HashArrayMappedTrie.singleEntry(key, value);
+        return new FunctionalHashTrie<>(trie, 1);
+    }
 
     public static <K, V> FunctionalHashTrie<K, V> fromMap(Map<K, V> other)
     {

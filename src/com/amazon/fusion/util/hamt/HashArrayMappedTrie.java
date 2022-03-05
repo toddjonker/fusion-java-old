@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2018-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.util.hamt;
 
@@ -155,6 +155,12 @@ public final class HashArrayMappedTrie
     public static <K, V> TrieNode<K, V> empty()
     {
         return (TrieNode<K, V>) EmptyNode.SINGLETON;
+    }
+
+
+    public static <K, V> TrieNode<K, V> singleEntry(K key, V value)
+    {
+        return new FlatNode<>(key, value);
     }
 
 

@@ -12,6 +12,7 @@ import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionIterator.iterate;
 import static com.amazon.fusion.FusionList.checkNullableListArg;
 import static com.amazon.fusion.FusionList.unsafeJavaIterate;
+import static com.amazon.fusion.FusionList.unsafeListSize;
 import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
@@ -101,6 +102,14 @@ final class FusionStruct
         return EMPTY_STRUCT;
     }
 
+    static Object immutableStruct(Evaluator eval,
+                                  String name,
+                                  Object value)
+        throws FusionException
+    {
+        return new FunctionalStruct(MultiHashTrie.singleEntry(name, value),
+                                    BaseSymbol.EMPTY_ARRAY);
+    }
 
     // TODO Replace this with a builder, to avoid the awkward exception handling
     //  and eliminate Entry allocation.
@@ -131,14 +140,7 @@ final class FusionStruct
     private static NonNullImmutableStruct
     immutableStruct(MultiHashTrie<String, Object> map, BaseSymbol[] anns)
     {
-        if (map.size() == 0)
-        {
-            if (anns.length == 0)
-            {
-                return EMPTY_STRUCT;
-            }
-        }
-
+        if (map.size() == 0 && anns.length == 0) return EMPTY_STRUCT;
         return new FunctionalStruct(map, anns);
     }
 
@@ -197,6 +199,13 @@ final class FusionStruct
         throws FusionException
     {
         return new MutableStruct();
+    }
+
+    static Object mutableStruct(Evaluator eval, String name, Object value)
+        throws FusionException
+    {
+        return new MutableStruct(MultiHashTrie.singleEntry(name, value),
+                                 BaseSymbol.EMPTY_ARRAY);
     }
 
     /**
@@ -1111,6 +1120,7 @@ final class FusionStruct
             writeAnnotations(out, myAnnotations);
             out.append('{');
 
+            // TODO PERF: Visitor would be more efficient
             boolean comma = false;
             for (Map.Entry<String, Object> entry : getMap(eval))
             {
@@ -1133,6 +1143,7 @@ final class FusionStruct
         {
             out.setTypeAnnotations(getAnnotationsAsJavaStrings());
 
+            // TODO PERF: Visitor would be more efficient
             out.stepIn(IonType.STRUCT);
             for (Map.Entry<String, Object> entry : getMap(eval))
             {
@@ -1727,6 +1738,12 @@ final class FusionStruct
             }
         }
 
+        abstract Object empty(Evaluator eval)
+            throws FusionException;
+
+        abstract Object singleEntry(Evaluator eval, String name, Object value)
+            throws FusionException;
+
         abstract Object makeIt(String[] names, Object[] values)
             throws FusionException;
 
@@ -1734,6 +1751,16 @@ final class FusionStruct
         final Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
+            if (args.length == 0)
+            {
+                return empty(eval);
+            }
+            if (args.length == 2)
+            {
+                String name = checkNonEmptyTextArg(eval, this, 0, args);
+                return singleEntry(eval, name, args[1]);
+            }
+
             checkArityEven(args);
 
             int fieldCount = (args.length / 2);
@@ -1758,6 +1785,20 @@ final class FusionStruct
         extends BaseStructProc
     {
         @Override
+        Object empty(Evaluator eval)
+            throws FusionException
+        {
+            return emptyStruct(eval);
+        }
+
+        @Override
+        Object singleEntry(Evaluator eval, String name, Object value)
+            throws FusionException
+        {
+            return immutableStruct(eval, name, value);
+        }
+
+        @Override
         Object makeIt(String[] names, Object[] values)
             throws FusionException
         {
@@ -1770,6 +1811,20 @@ final class FusionStruct
     static final class MutableStructProc
         extends BaseStructProc
     {
+        @Override
+        Object empty(Evaluator eval)
+            throws FusionException
+        {
+            return mutableStruct(eval);
+        }
+
+        @Override
+        Object singleEntry(Evaluator eval, String name, Object value)
+            throws FusionException
+        {
+            return mutableStruct(eval, name, value);
+        }
+
         @Override
         Object makeIt(String[] names, Object[] values)
             throws FusionException
@@ -1843,12 +1898,23 @@ final class FusionStruct
     static abstract class AbstractZipProc
         extends Procedure
     {
-        final MutableStruct _doApply(Evaluator eval, Object[] args)
+        abstract Object empty(Evaluator eval)
+            throws FusionException;
+
+        abstract Object finalize(MutableStruct value);
+
+        final Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
             checkArityExact(2, args);
             Object names =  checkNullableListArg(eval, this, 0, args);
             Object values = checkNullableListArg(eval, this, 1, args);
+
+            if (unsafeListSize(eval, names) == 0 ||
+                    unsafeListSize(eval, values) == 0)
+            {
+                return empty(eval);
+            }
 
             Iterator<?> fieldIterator = unsafeJavaIterate(eval, names);
             Iterator<?> valueIterator = unsafeJavaIterate(eval, values);
@@ -1870,7 +1936,7 @@ final class FusionStruct
                 struct.putsM(eval, name, valueObj);
             }
 
-            return struct;
+            return finalize(struct);
         }
     }
 
@@ -1879,10 +1945,16 @@ final class FusionStruct
         extends AbstractZipProc
     {
         @Override
-        NonNullImmutableStruct doApply(Evaluator eval, Object[] args)
+        Object empty(Evaluator eval)
             throws FusionException
         {
-            return _doApply(eval, args).asImmutable();
+            return emptyStruct(eval);
+        }
+
+        @Override
+        Object finalize(MutableStruct value)
+        {
+            return value.asImmutable();
         }
     }
 
@@ -1891,10 +1963,16 @@ final class FusionStruct
         extends AbstractZipProc
     {
         @Override
-        MutableStruct doApply(Evaluator eval, Object[] args)
+        Object empty(Evaluator eval)
             throws FusionException
         {
-            return _doApply(eval, args);
+            return mutableStruct(eval);
+        }
+
+        @Override
+        Object finalize(MutableStruct value)
+        {
+            return value;
         }
     }
 

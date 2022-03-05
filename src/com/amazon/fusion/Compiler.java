@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2017-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -773,10 +773,10 @@ class Compiler
                                                         constFields,
                                                         BaseSymbol.EMPTY_ARRAY));
         }
-        else
-        {
-            return new CompiledStruct(fieldNames, fieldForms);
-        }
+
+        if (size == 1) return new CompiledStruct1(fieldNames[0], fieldForms[0]);
+
+        return new CompiledStruct(fieldNames, fieldForms);
     }
 
 
@@ -966,6 +966,32 @@ class Compiler
             }
 
             return immutableStruct(myFieldNames, values, BaseSymbol.EMPTY_ARRAY);
+        }
+    }
+
+
+    /**
+     * Special-case for single-field {@code {key:expr}}, which can skip a lot of
+     * bookkeeping.
+     */
+    private static final class CompiledStruct1
+        implements CompiledForm
+    {
+        private final String       myFieldName;
+        private final CompiledForm myFieldForm;
+
+        CompiledStruct1(String fieldName, CompiledForm fieldForm)
+        {
+            myFieldName = fieldName;
+            myFieldForm = fieldForm;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Object value = eval.eval(store, myFieldForm);
+            return immutableStruct(eval, myFieldName, value);
         }
     }
 }
