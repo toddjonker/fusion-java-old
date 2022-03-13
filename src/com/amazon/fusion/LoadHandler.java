@@ -192,6 +192,7 @@ final class LoadHandler
             bodyEval =
                 eval.markedContinuation(myCurrentLoadRelativeDirectory,
                                         makeString(eval, dirPath));
+            // TODO Should this set other params like current_namespace?
         }
 
         // TODO Do we need an Evaluator with no continuation marks?

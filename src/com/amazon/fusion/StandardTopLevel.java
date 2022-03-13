@@ -113,6 +113,8 @@ final class StandardTopLevel
             while (source.getType() != null)
             {
                 SyntaxValue sourceExpr = readSyntax(myEvaluator, source, name);
+
+                // This method parameterizes current_namespace for us:
                 result = FusionEval.eval(myEvaluator, sourceExpr, myNamespace);
                 source.next();
             }
@@ -141,6 +143,8 @@ final class StandardTopLevel
         try
         {
             LoadHandler load = myEvaluator.getGlobalState().myLoadHandler;
+
+            // This method parameterizes current_namespace for us:
             return load.loadTopLevel(myEvaluator,
                                      myNamespace,
                                      source.toString());
@@ -167,6 +171,8 @@ final class StandardTopLevel
 
         try
         {
+            // TODO This should set current_namespace so its registry is used.
+
             ModuleNameResolver resolver =
                 myEvaluator.getGlobalState().myModuleNameResolver;
             ModuleIdentity id =
@@ -288,6 +294,7 @@ final class StandardTopLevel
                 arguments[i] = fv;
             }
 
+            // TODO Should this set current_namespace?
             return myEvaluator.callNonTail(proc, arguments);
         }
         catch (FusionInterrupt e)

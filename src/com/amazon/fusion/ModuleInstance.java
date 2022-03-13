@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -22,6 +22,9 @@ import java.util.Set;
 final class ModuleInstance
     extends NamedValue
 {
+    // TODO This should retain the Namespace, perhaps, so we can evaluate
+    //  "inside" the module namespace
+
     private final ModuleIdentity myIdentity;
     private final String         myDocs;
     private final ModuleStore    myStore;

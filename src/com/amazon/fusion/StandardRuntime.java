@@ -7,10 +7,12 @@ import static com.amazon.fusion.ModuleIdentity.forAbsolutePath;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import static java.lang.Boolean.TRUE;
 import com.amazon.ion.IonCatalog;
+import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.ValueFactory;
 import com.amazon.ion.system.IonSystemBuilder;
+import java.io.OutputStream;
 
 
 final class StandardRuntime
@@ -130,6 +132,13 @@ final class StandardRuntime
 
 
     @Override
+    public SandboxBuilder makeSandboxBuilder()
+    {
+        return new SandboxBuilderImpl();
+    }
+
+
+    @Override
     public ModuleBuilder makeModuleBuilder(String absoluteModulePath)
     {
         if (! isValidAbsoluteModulePath(absoluteModulePath))
@@ -162,5 +171,116 @@ final class StandardRuntime
         throws FusionException
     {
         return FusionValue.copyToIonValueMaybe(fusionValue, factory);
+    }
+
+
+    //========================================================================
+
+
+    private class SandboxBuilderImpl
+        implements SandboxBuilder
+    {
+        private String myLanguage;
+
+        @Override
+        public void setLanguage(String absoluteModulePath)
+        {
+            if (! isValidAbsoluteModulePath(absoluteModulePath))
+            {
+                String message =
+                    "Not a valid absolute module path: " + absoluteModulePath;
+                throw new IllegalArgumentException(message);
+            }
+            myLanguage = absoluteModulePath;
+        }
+
+        @Override
+        public TopLevel build()
+            throws FusionException
+        {
+            if (myLanguage == null)
+            {
+                throw new IllegalStateException("No language specified.");
+            }
+
+            // Our goal here, for now, is to emulate:
+            // (make-evaluator `(begin) #:requires (list <language>))
+
+            // That said, we should avoid replicated instances of /fusion/**
+            // modules.
+
+            try
+            {
+                Object currentIonReader =
+                    myGlobalState.myCurrentIonReaderParam;
+                Object currentNamespace =
+                    myGlobalState.myCurrentNamespaceParam;
+                Object currentOutputPort =
+                    myGlobalState.myCurrentOutputPortParam;
+                Object currentSecurityGuard =
+                    myGlobalState.myCurrentSecurityGuardParam;
+
+                IonReader reader =
+                    myGlobalState.myIonReaderBuilder.build("");
+
+                // When language is given as a module path, Racket creates a
+                // new module-namespace in that language.
+
+                // SEE make-evaluation-namespace in sandbox.rkt
+                //  * Using current-namespace to find the current registry,
+                //     * instantiate myLanguage
+                //  * Create the new namespace...
+                //     * Create a fresh registry, it should contain any core
+                //       singleton modules eg #%kernel
+                //  * namespace-attach-module the language from current NS.
+                //    This attaches transitive dependencies.
+                //  * Require the language into the new NS.
+
+                TopLevelNamespace namespace = new TopLevelNamespace(myRegistry);
+                return new StandardTopLevel(myGlobalState,
+                                            namespace,
+                                            myLanguage,
+                                            // Continuation mark key/values:
+                                            currentIonReader,
+                                            reader,
+                                            currentNamespace,
+                                            namespace,
+                                            currentOutputPort,
+                                            new NullOutputStream(),
+                                            currentSecurityGuard,
+                                            SecurityGuard.CLOSED);
+
+                // StandardTopLevel automagically sets current_namespace for
+                // some entry points like eval() and load(), but not for others
+                // like call() or loadModule().
+                // TODO StandardTopLevel should *always* set current_namespace
+                //   in its outermost Evaluator, but we need some backwards
+                //   compatibility analysis before doing that.
+            }
+            catch (FusionInterrupt e)
+            {
+                throw new FusionInterruptedException(e);
+            }
+        }
+    }
+
+
+    private static final class NullOutputStream
+        extends OutputStream
+    {
+        @Override
+        public void write(int b)
+        {
+        }
+
+        @Override
+        public void write(byte[] b)
+        {
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len)
+        {
+        }
     }
 }

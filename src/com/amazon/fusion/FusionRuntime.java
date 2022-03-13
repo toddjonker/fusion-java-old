@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -88,6 +88,14 @@ public interface FusionRuntime
      */
     TopLevel makeTopLevel(String initialModulePath)
         throws FusionException;
+
+
+    /**
+     * Returns a fresh builder for creating evaluation sandboxes.
+     *
+     * @return a new builder instance.
+     */
+    SandboxBuilder makeSandboxBuilder();
 
 
     /**

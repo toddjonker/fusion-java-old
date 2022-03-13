@@ -45,8 +45,12 @@ final class GlobalState
     final ModuleInstance             myKernelModule;
     final ModuleNameResolver         myModuleNameResolver;
     final LoadHandler                myLoadHandler;
-    final DynamicParameter           myCurrentNamespaceParam;
     final _Private_CoverageCollector myCoverageCollector;
+
+    final DynamicParameter myCurrentIonReaderParam;
+    final DynamicParameter myCurrentNamespaceParam;
+    final DynamicParameter myCurrentOutputPortParam;
+    final DynamicParameter myCurrentSecurityGuardParam;
 
     final Binding myKernelAllDefinedOutBinding;
     final Binding myKernelBeginBinding;
@@ -74,8 +78,12 @@ final class GlobalState
         myKernelModule          = kernel;
         myModuleNameResolver    = resolver;
         myLoadHandler           = loadHandler;
-        myCurrentNamespaceParam = kernelValue("current_namespace");
         myCoverageCollector     = coverageCollector;
+
+        myCurrentIonReaderParam     = kernelValue("current_ion_reader");
+        myCurrentNamespaceParam     = kernelValue("current_namespace");
+        myCurrentOutputPortParam    = kernelValue("current_output_port");
+        myCurrentSecurityGuardParam = kernelValue("current_security_guard");
 
         myKernelAllDefinedOutBinding = kernelBinding(ALL_DEFINED_OUT);
         myKernelBeginBinding         = kernelBinding(BEGIN);
