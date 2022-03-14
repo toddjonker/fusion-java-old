@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -56,43 +56,12 @@ class Evaluator
         myContinuationMarks = null;
     }
 
-    private Evaluator(Evaluator outerBindings)
+    Evaluator(Evaluator outerBindings)
     {
         myGlobalState     = outerBindings.myGlobalState;
         mySystem          = outerBindings.mySystem;
         myOuterFrame      = outerBindings;
         myContinuationMarks = new HashMap<>();
-    }
-
-    /**
-     * Construct an evaluator with a single continuation mark.
-     */
-    Evaluator(Evaluator outer, Object key, Object mark)
-    {
-        this(outer);
-
-        // The keys must be hashable and equals-able!
-        assert key instanceof DynamicParameter;
-
-        myContinuationMarks.put(key, mark);
-    }
-
-    /**
-     * Construct an evaluator with multiple continuation marks.
-     */
-    Evaluator(Evaluator outer, Object[] keys, Object[] marks)
-    {
-        this(outer);
-
-        assert keys.length == marks.length;
-
-        for (int i = 0; i < keys.length; i++)
-        {
-            // The keys must be hashable and equals-able!
-            assert keys[i] instanceof DynamicParameter;
-
-            myContinuationMarks.put(keys[i], marks[i]);
-        }
     }
 
 
@@ -538,15 +507,52 @@ class Evaluator
         return results;
     }
 
-
-    Evaluator markedContinuation(Object key, Object mark)
+    Evaluator addContinuationFrame()
     {
-        return new Evaluator(this, key, mark);
+        return new Evaluator(this);
     }
 
-    Evaluator markedContinuation(Object[] keys, Object[] marks)
+    private void setMark(Object key, Object mark)
     {
-        return new Evaluator(this, keys, marks);
+        // The keys must be hashable and equals-able!
+        assert key instanceof DynamicParameter;
+        assert mark != null;
+        myContinuationMarks.put(key, mark);
+    }
+
+    final Evaluator markedContinuation(Object key, Object mark)
+    {
+        Evaluator e = addContinuationFrame();
+        e.setMark(key, mark);
+        return e;
+    }
+
+    final Evaluator markedContinuation(Object[] keys, Object[] marks)
+    {
+        Evaluator e = addContinuationFrame();
+
+        assert keys.length == marks.length;
+        for (int i = 0; i < keys.length; i++)
+        {
+            e.setMark(keys[i], marks[i]);
+        }
+
+        return e;
+    }
+
+    final Evaluator markedContinuation(Object[] keyMarkPairs)
+    {
+        Evaluator e = addContinuationFrame();
+
+        assert keyMarkPairs.length %2 == 0;
+        for (int i = 0; i < keyMarkPairs.length; i++)
+        {
+            Object key  = keyMarkPairs[i++];
+            Object mark = keyMarkPairs[i];
+            e.setMark(key, mark);
+        }
+
+        return e;
     }
 
 
