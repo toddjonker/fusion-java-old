@@ -1,14 +1,12 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.FusionIo.safeWriteToString;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import static com.amazon.fusion.StandardReader.readSyntax;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
-import static java.lang.Boolean.TRUE;
 import com.amazon.ion.IonReader;
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +25,7 @@ final class StandardTopLevel
     StandardTopLevel(GlobalState globalState,
                      Namespace namespace,
                      String initialModulePath,
-                     boolean documenting)
+                     Object... continuationMarks)
         throws FusionInterrupt, FusionException
     {
         assert ModuleIdentity.isValidAbsoluteModulePath(initialModulePath);
@@ -37,9 +35,9 @@ final class StandardTopLevel
                             ? new Evaluator(globalState)
                             : new CoverageEvaluator(globalState, collector));
 
-        if (documenting)
+        if (continuationMarks.length != 0)
         {
-            eval = eval.markedContinuation(COLLECT_DOCS_MARK, TRUE);
+            eval = eval.markedContinuation(continuationMarks);
         }
 
         myEvaluator = eval;
@@ -56,8 +54,7 @@ final class StandardTopLevel
                      String initialModulePath)
         throws FusionInterrupt, FusionException
     {
-        this(globalState, new TopLevelNamespace(registry), initialModulePath,
-             false);
+        this(globalState, new TopLevelNamespace(registry), initialModulePath);
     }
 
 
