@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 (module io '/fusion/private/kernel'
 
@@ -85,7 +85,7 @@ This leverages the fact that `read` accepts zero arguments and consumes the
 current Ion input stream.
     '''
     (java_new "com.amazon.fusion.FusionIo$WithIonFromFileProc"
-      current_directory current_ion_reader))
+      current_ion_reader))
 
 
   (define with_ion_from_string

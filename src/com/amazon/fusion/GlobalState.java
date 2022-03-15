@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -39,6 +39,7 @@ final class GlobalState
 
     final IonSystem                  myIonSystem;
     final IonReaderBuilder           myIonReaderBuilder;
+    final FileSystemSpecialist       myFileSystemSpecialist;
     final ModuleInstance             myKernelModule;
     final ModuleNameResolver         myModuleNameResolver;
     final LoadHandler                myLoadHandler;
@@ -59,6 +60,7 @@ final class GlobalState
 
     private GlobalState(IonSystem                  ionSystem,
                         IonReaderBuilder           ionReaderBuiler,
+                        FileSystemSpecialist       fileSystemSpecialist,
                         ModuleInstance             kernel,
                         ModuleNameResolver         resolver,
                         LoadHandler                loadHandler,
@@ -67,6 +69,7 @@ final class GlobalState
     {
         myIonSystem             = ionSystem;
         myIonReaderBuilder      = ionReaderBuiler;
+        myFileSystemSpecialist  = fileSystemSpecialist;
         myKernelModule          = kernel;
         myModuleNameResolver    = resolver;
         myLoadHandler           = loadHandler;
@@ -113,8 +116,11 @@ final class GlobalState
             new DynamicParameter(UNDEF);
         DynamicParameter currentNamespaceParam =
             new DynamicParameter(initialCurrentNamespace);
+
+        FileSystemSpecialist fs =
+            new FileSystemSpecialist(currentDirectory);
         LoadHandler loadHandler =
-            new LoadHandler(currentLoadRelativeDirectory, currentDirectory);
+            new LoadHandler(currentLoadRelativeDirectory);
         ModuleNameResolver resolver =
             new ModuleNameResolver(loadHandler,
                                    currentLoadRelativeDirectory,
@@ -154,7 +160,7 @@ final class GlobalState
         ModuleInstance kernel = registry.lookup(KERNEL_MODULE_IDENTITY);
 
         GlobalState globals =
-            new GlobalState(system, readerBuilder, kernel, resolver, loadHandler,
+            new GlobalState(system, readerBuilder, fs, kernel, resolver, loadHandler,
                             currentNamespaceParam,
                             builder.getCoverageCollector());
         return globals;

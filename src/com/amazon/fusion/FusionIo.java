@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -8,7 +8,6 @@ import static com.amazon.fusion.FusionLob.unsafeLobBytesNoCopy;
 import static com.amazon.fusion.FusionString.checkNonEmptyStringArg;
 import static com.amazon.fusion.FusionString.checkRequiredStringArg;
 import static com.amazon.fusion.FusionString.makeString;
-import static com.amazon.fusion.FusionUtils.resolvePath;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import com.amazon.ion.IonException;
@@ -18,8 +17,8 @@ import com.amazon.ion.IonWriter;
 import com.amazon.ion.system.IonTextWriterBuilder;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
@@ -874,14 +873,9 @@ public final class FusionIo
     static final class WithIonFromFileProc
         extends AbstractWithIonFromProc
     {
-        private final DynamicParameter myCurrentDirectoryParam;
-
-        public WithIonFromFileProc(Object currentDirectoryParam,
-                                   Object currentIonReaderParam)
+        public WithIonFromFileProc(Object currentIonReaderParam)
         {
             super(currentIonReaderParam);
-
-            myCurrentDirectoryParam = (DynamicParameter) currentDirectoryParam;
         }
 
         @Override
@@ -890,19 +884,19 @@ public final class FusionIo
         {
             String path = checkNonEmptyStringArg(eval, this, 0, args);
 
-            File inFile = resolvePath(eval, myCurrentDirectoryParam, path);
-
-            FileInputStream in = new FileInputStream(inFile);
+            FileSystemSpecialist fs = eval.getGlobalState().myFileSystemSpecialist;
+            InputStream in = fs.openInputFile(eval, identify(), new File(path));
             try
             {
                 return eval.getIonReaderBuilder().build(in);
             }
             catch (IonException e)
             {
+                // Make sure the InputStream is closed when we fail to pass
+                // that responsibility to an IonReader.
                 in.close();
                 throw e;
             }
         }
     }
 }
-
