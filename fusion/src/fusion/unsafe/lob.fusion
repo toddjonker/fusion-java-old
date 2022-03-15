@@ -1,0 +1,34 @@
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+
+(module lob '/fusion/private/builtins'
+
+  '''
+Unsafe (but fast) operations on lobs (blob and clob).
+
+These operations perform no type-checking or bounds-checking, and they
+**will crash or exhibit other unspecified behavior**
+if called with invalid arguments.
+**Use with extreme caution!**
+
+See the module [`/fusion/lob`](fusion/lob.html) for more information and
+related operations on lobs.
+  '''
+
+  (require
+    "/fusion/ffi/java"
+  )
+
+  (provide
+    unsafe_lob_to_hex
+  )
+
+  (define unsafe_lob_to_hex
+    '''
+    (unsafe_lob_to_hex lob)
+
+Converts a lob to its hex encoding as a string.  Returns `null.string`
+when given `null.clob` or `null.blob`.  The returned hex string does not
+contain a '0x' prefix, and will only contain the characters [0-9a-f].
+    '''
+    (java_new "com.amazon.fusion.FusionLob$UnsafeLobToHexProc"))
+)

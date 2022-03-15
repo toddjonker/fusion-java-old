@@ -2,12 +2,27 @@
 
 (require
   "/fusion/experimental/check"
-  "/fusion/procedure")
+  "/fusion/procedure"
+  "/fusion/lob")
 
+(module check_bindings '/fusion/lob'
+  lob_to_hex)
 
 (define is_not_blob (negate is_blob))
 (define is_not_clob (negate is_clob))
 
+(check === "08107f" (lob_to_hex {{ CBB/ }}))
+(check === "" (lob_to_hex {{ }}))
+(check === null.string (lob_to_hex null.blob))
+
+(check === "48656c6c6f" (lob_to_hex {{ "Hello" }}))
+(check === "" (lob_to_hex {{ "" }}))
+(check === null.string (lob_to_hex null.clob))
+
+(expect_arity_exn (lob_to_hex))
+(expect_arity_exn (lob_to_hex {{ CBB/ }} {{ }}))
+
+(expect_argument_exn (lob_to_hex "not_a_lob"))
 
 (check_pred is_blob null.blob)
 (check_pred is_blob (quote null.blob))

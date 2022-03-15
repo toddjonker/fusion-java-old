@@ -4,16 +4,19 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionLob.unsafeLobBytesCopy;
 import static com.amazon.fusion.FusionLob.unsafeLobBytesNoCopy;
+import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
 import static com.amazon.fusion.FusionUtils.EMPTY_BYTE_ARRAY;
 import static com.amazon.fusion.FusionUtils.EMPTY_STRING_ARRAY;
 import static com.amazon.fusion.FusionValue.annotate;
 import static com.amazon.fusion.FusionValue.isAnyNull;
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -31,6 +34,45 @@ public abstract class LobTestCase
     abstract void checkLobType(Object lob)
         throws FusionException;
 
+    @Before
+    public void requires()
+        throws Exception
+    {
+        topLevel().requireModule("/fusion/lob");
+    }
+
+    @Test
+    public void testLobToHex()
+        throws Exception
+    {
+        TopLevel top = topLevel();
+
+        Object lob = makeLob(new byte[] { 8, 16, 127 });
+        Object result = top.call("lob_to_hex", lob);
+        assertEquals("08107f", unsafeStringToJavaString(top, result));
+    }
+
+    @Test
+    public void testEmptyLobToHex()
+        throws Exception
+    {
+        TopLevel top = topLevel();
+
+        Object lob = makeLob(EMPTY_BYTE_ARRAY);
+        Object result = top.call("lob_to_hex", lob);
+        assertEquals("", unsafeStringToJavaString(topLevel(), result));
+    }
+
+    @Test
+    public void testNullLobToHex()
+        throws Exception
+    {
+        TopLevel top = topLevel();
+
+        Object lob = makeLob(null);
+        Object result = top.call("lob_to_hex", lob);
+        assertNull(unsafeStringToJavaString(topLevel(), result));
+    }
 
     @Test
     public void testMakeNullLob()

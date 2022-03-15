@@ -1,0 +1,38 @@
+// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+
+(module lob '/fusion/private/builtins'
+
+  '''
+Operations on lobs (blob and clob).
+  '''
+
+  (require
+    "/fusion/bool"
+    "/fusion/exception"
+    "/fusion/unsafe/lob" // not exported!
+  )
+
+  (provide
+    lob_to_hex
+  )
+
+  // from bool
+  (provide
+    is_clob
+    is_blob
+  )
+
+  (define (lob_to_hex lob)
+    '''
+    (lob_to_hex lob)
+
+Converts a lob to its hex encoding as a string.  Returns `null.string`
+when given `null.clob` or `null.blob`.  The returned hex string does not
+contain a '0x' prefix, and will only contain the characters [0-9a-f].
+    '''
+    (if (or (is_clob lob) (is_blob lob))
+      (if (is_null lob)
+        null.string
+        (unsafe_lob_to_hex lob))
+      (raise_argument_error "lob_to_hex" "clob or blob" 0 lob)))
+)

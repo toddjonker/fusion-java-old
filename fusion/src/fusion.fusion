@@ -47,6 +47,12 @@ contact us for clarification.
   (require "/fusion/bool")
   (provide is_bool is_false is_true is_truthy is_untruthy not)
 
+  // lob (clob & blob)
+  (require "/fusion/lob")
+  (provide
+    lob_to_hex
+  )
+
   (require "/fusion/number")
   (provide + - * / decimal int_to_string is_decimal is_float is_int string_to_int)
 

@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import com.amazon.fusion.FusionBool.BaseBool;
 import java.util.Arrays;
@@ -144,4 +145,29 @@ public final class FusionLob
     //========================================================================
     // Procedure Helpers
 
+    public static class UnsafeLobToHexProc
+        extends Procedure
+    {
+        private static final char[] DIGITS = {
+            '0', '1', '2', '3', '4', '5', '6', '7',
+            '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+        };
+
+        private static final int[] DIGIT_MASKS = { 0xF0, 0x0F };
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            byte[] in = unsafeLobBytesNoCopy(eval, args[0]);
+            StringBuilder out = new StringBuilder(in.length * 2);
+            for (byte b : in)
+            {
+                out.append(DIGITS[(DIGIT_MASKS[0] & b) >>> 4]);
+                out.append(DIGITS[(DIGIT_MASKS[1] & b)]);
+            }
+
+            return makeString(eval, out.toString());
+        }
+    }
 }
