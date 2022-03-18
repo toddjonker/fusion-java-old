@@ -1480,11 +1480,7 @@ final class FusionStruct
         public Object mergeM(Evaluator eval, BaseStruct other)
             throws FusionException
         {
-            if (other.size() != 0)
-            {
-                myMap = myMap.mergeMulti(other.getMap(eval));
-            }
-
+            myMap = myMap.mergeMulti(other.getMap(eval));
             return this;
         }
 
@@ -1492,14 +1488,7 @@ final class FusionStruct
         public Object merge1M(Evaluator eval, BaseStruct other)
             throws FusionException
         {
-            // Remove any existing repeated fields.
-            myMap = myMap.oneify();
-
-            if (other.size() != 0)
-            {
-                myMap = myMap.merge1(other.getMap(eval));
-            }
-
+            myMap = myMap.merge1(other.getMap(eval));
             return this;
         }
     }

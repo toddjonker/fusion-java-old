@@ -55,7 +55,7 @@ public final class HashArrayMappedTrie
      * Instances can be reused across multiple calls into the same or different
      * tries, reducing the overall number of object allocations.
      */
-    public static class Changes
+    static class Changes
     {
         private int keysAdded     = 0;
         private int keysReplaced  = 0;

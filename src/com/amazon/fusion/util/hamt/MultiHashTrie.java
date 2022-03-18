@@ -89,6 +89,8 @@ public abstract class MultiHashTrie<K, V>
 
     public static <K, V> FunctionalHashTrie<K, V> fromMap(Map<K, V> other)
     {
+        if (other.isEmpty()) return empty();
+
         FunctionalHashTrie.Changes changes = new FunctionalHashTrie.Changes();
         TrieNode<K, V>             trie    = HashArrayMappedTrie.fromMap(other, changes);
         return changes.resultFrom(trie);
@@ -100,6 +102,8 @@ public abstract class MultiHashTrie<K, V>
      */
     public static <K, V> MultiHashTrie<K, V> fromEntries(Iterator<Entry<K, V>> items)
     {
+        if (! items.hasNext()) return empty();
+
         Changes        changes = new MultiHashTrieImpl.Changes();
         TrieNode<K, V> trie    = HashArrayMappedTrie.fromEntries(items, changes);
         return changes.resultFrom(trie);
@@ -108,6 +112,8 @@ public abstract class MultiHashTrie<K, V>
 
     public static <K, V> MultiHashTrie<K, V> fromArrays(K[] keys, V[] values)
     {
+        if (keys.length == 0 && values.length == 0) return empty();
+
         Changes        changes = new MultiHashTrieImpl.Changes();
         TrieNode<K, V> trie    = HashArrayMappedTrie.fromArrays(keys, values, changes);
         return changes.resultFrom(trie);
@@ -121,6 +127,8 @@ public abstract class MultiHashTrie<K, V>
     public static <K, V> MultiHashTrie<K, V>
     fromSelectedKeys(MultiHashTrie<K, V> origin, K... keys)
     {
+        if (keys.length == 0) return empty();
+
         Changes changes = new MultiHashTrieImpl.Changes();
         TrieNode<K, V> trie =
             HashArrayMappedTrie.fromSelectedKeys(origin.root, keys, changes);
@@ -176,6 +184,19 @@ public abstract class MultiHashTrie<K, V>
      * @return an immutable collection.
      */
     public abstract Collection<V> getMulti(K key);
+
+
+    /**
+     * Iterate by each key-value entry, potentially returning multiple entries
+     * for the same key.
+     */
+    public abstract Iterator<Entry<K, V>> iterator();
+
+    /**
+     * Iterate by key, returning only one value per key.
+     * Equivalent to {@code this.oneify().iterator()} but much more efficient.
+     */
+    public abstract Iterator<Entry<K, V>> oneifyIterator();
 
 
     //=========================================================================
@@ -237,6 +258,8 @@ public abstract class MultiHashTrie<K, V>
      */
     public MultiHashTrie<K, V> mergeMulti(MultiHashTrie<K, V> that)
     {
+        if (that.isEmpty()) return this;
+
         Changes        changes = new MultiHashTrieImpl.Changes();
         TrieNode<K, V> newRoot = root.with(that.iterator(), changes);
         return changes.resultFrom(this, newRoot);

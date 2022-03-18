@@ -65,6 +65,8 @@ public class FunctionalHashTrie<K, V>
 
     public static <K, V> FunctionalHashTrie<K, V> fromEntries(Iterator<Entry<K, V>> items)
     {
+        if (! items.hasNext()) return empty();
+
         Changes changes = new Changes();
         TrieNode<K, V> trie = HashArrayMappedTrie.fromEntries(items, changes);
         return changes.resultFrom(trie);
@@ -74,6 +76,8 @@ public class FunctionalHashTrie<K, V>
     public static <K, V> FunctionalHashTrie<K, V> fromArrays(K[] keys,
                                                              V[] values)
     {
+        if (keys.length == 0 && values.length == 0) return empty();
+
         Changes changes = new Changes();
         TrieNode<K, V> trie = HashArrayMappedTrie.fromArrays(keys, values, changes);
         return changes.resultFrom(trie);
@@ -87,6 +91,8 @@ public class FunctionalHashTrie<K, V>
     public static <K, V> FunctionalHashTrie<K, V>
     fromSelectedKeys(FunctionalHashTrie<K, V> origin, K[] keys)
     {
+        if (keys.length == 0) return empty();
+
         Changes changes = new Changes();
         TrieNode<K, V> trie =
             HashArrayMappedTrie.fromSelectedKeys(origin.root, keys, changes);
@@ -105,6 +111,12 @@ public class FunctionalHashTrie<K, V>
 
     @Override
     public Iterator<Entry<K, V>> iterator()
+    {
+        return root.iterator();
+    }
+
+    @Override
+    public Iterator<Entry<K, V>> oneifyIterator()
     {
         return root.iterator();
     }
@@ -149,8 +161,10 @@ public class FunctionalHashTrie<K, V>
     @Override
     public FunctionalHashTrie<K, V> merge1(MultiHashTrie<K, V> that)
     {
+        if (that.isEmpty()) return this;
+
         Changes        changes = new Changes();
-        TrieNode<K, V> newRoot = root.with(that.iterator(), changes);
+        TrieNode<K, V> newRoot = root.with(that.oneifyIterator(), changes);
         return changes.resultFrom(this, newRoot);
     }
 

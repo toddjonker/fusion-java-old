@@ -186,6 +186,12 @@ class MultiHashTrieImpl<K, V>
         return new SingleValueIterator<>(root.iterator());
     }
 
+    @Override
+    public Iterator<Entry<K, V>> oneifyIterator()
+    {
+        return new OneifyIterator<>(root.iterator());
+    }
+
 
     @Override
     public V get(K key)
@@ -229,10 +235,12 @@ class MultiHashTrieImpl<K, V>
     public FunctionalHashTrie<K, V> merge1(MultiHashTrie<K, V> that)
     {
         OneifyChanges changes = new OneifyChanges();
+        // TODO see if its better to oneify after merging. That might visit more
+        //   entries but make fewer changes.
         TrieNode<K, V> newRoot = root.transform((BiFunction<K, V, V>) ONEIFY_XFORM, changes);
         if (! that.isEmpty())
         {
-            newRoot = newRoot.with(that.iterator(), changes);
+            newRoot = newRoot.with(that.oneifyIterator(), changes);
         }
         return (FunctionalHashTrie<K, V>) changes.resultFrom(this, newRoot);
     }
@@ -517,6 +525,47 @@ class MultiHashTrieImpl<K, V>
                 myCurrentKey   = null;
                 myCurrentArray = null;
             }
+        }
+
+        @Override
+        public void remove()
+        {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+
+    /**
+     * Iterates by key, returning one entry when a key maps to multiple values.
+     * Equivalent to iterating the result of {@code this.oneify()}, but faster.
+     */
+    private static final class OneifyIterator<K, V>
+        implements Iterator<Entry<K, V>>
+    {
+        private final Iterator<Entry<K, V>> myHamtIterator;
+
+        OneifyIterator(Iterator<Entry<K, V>> hamtIterator)
+        {
+            myHamtIterator = hamtIterator;
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return myHamtIterator.hasNext();
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Entry<K, V> next()
+        {
+            Entry  entry = myHamtIterator.next();
+            Object value = entry.getValue();
+            if (value instanceof MultiValue)
+            {
+                entry.setValue(((MultiValue)value).oneify());
+            }
+            return entry;
         }
 
         @Override
