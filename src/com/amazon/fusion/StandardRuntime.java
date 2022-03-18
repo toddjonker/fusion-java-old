@@ -1,9 +1,11 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
 import static com.amazon.fusion.ModuleIdentity.forAbsolutePath;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
+import static java.lang.Boolean.TRUE;
 import com.amazon.ion.IonCatalog;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
@@ -41,9 +43,17 @@ final class StandardRuntime
             myGlobalState =
                 GlobalState.initialize(ionSystem, builder, myRegistry, topNs);
 
-            myTopLevel =
-                new StandardTopLevel(myGlobalState, topNs, myDefaultLanguage,
-                                     builder.isDocumenting());
+            if (builder.isDocumenting())
+            {
+                myTopLevel =
+                    new StandardTopLevel(myGlobalState, topNs, myDefaultLanguage,
+                                         COLLECT_DOCS_MARK, TRUE);
+            }
+            else
+            {
+                myTopLevel =
+                    new StandardTopLevel(myGlobalState, topNs, myDefaultLanguage);
+            }
         }
         catch (FusionException e)
         {
