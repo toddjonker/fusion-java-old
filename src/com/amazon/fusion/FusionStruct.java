@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2021 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -501,6 +501,13 @@ final class FusionStruct
         Set<String> keys(Evaluator eval);
 
         /**
+         * Gets the implementation map, first injecting elements if needed.
+         *
+         * @return not null; perhaps empty if this is mutable.
+         */
+        MultiHashTrie<String, Object> getMap(Evaluator eval);
+
+        /**
          * Visits each field in the struct, stopping as soon as the visitation
          * returns non-null.
          */
@@ -624,6 +631,12 @@ final class FusionStruct
         }
 
         @Override
+        public MultiHashTrie<String, Object> getMap(Evaluator eval)
+        {
+            return MultiHashTrie.empty();
+        }
+
+        @Override
         Object annotate(Evaluator eval, BaseSymbol[] annotations)
             throws FusionException
         {
@@ -726,8 +739,7 @@ final class FusionStruct
         {
             if (other.size() == 0) return this;
 
-            MapBasedStruct is = (MapBasedStruct) other;
-            return new FunctionalStruct(is.getMap(eval), myAnnotations);
+            return new FunctionalStruct(other.getMap(eval), myAnnotations);
         }
 
         @Override
@@ -743,8 +755,7 @@ final class FusionStruct
         {
             if (other.size() == 0) return this;
 
-            MapBasedStruct                is  = (MapBasedStruct) other;
-            MultiHashTrie<String, Object> map = is.getMap(eval).oneify();
+            MultiHashTrie<String, Object> map = other.getMap(eval).oneify();
             return new FunctionalStruct(map, myAnnotations);
         }
 
@@ -805,13 +816,6 @@ final class FusionStruct
         {
             super(annotations);
         }
-
-        /**
-         * Gets the implementation map, first injecting elements if needed.
-         *
-         * @return not null; perhaps empty if this is mutable.
-         */
-        abstract MultiHashTrie<String, Object> getMap(Evaluator eval);
 
         abstract MapBasedStruct makeSimilar(MultiHashTrie<String, Object> map,
                                             BaseSymbol[] annotations);
@@ -1004,9 +1008,9 @@ final class FusionStruct
         {
             if (other.size() == 0) return this;
 
-            // We know it has children.
-            MapBasedStruct is = (MapBasedStruct) other;
-            MultiHashTrie<String, Object> newMap = getMap(eval).mergeMulti(is.getMap(eval));
+            MultiHashTrie<String, Object> otherMap = other.getMap(eval);
+            MultiHashTrie<String, Object> origMap = getMap(eval);
+            MultiHashTrie<String, Object> newMap = origMap.mergeMulti(otherMap);
 
             return makeSimilar(newMap);
         }
@@ -1015,16 +1019,7 @@ final class FusionStruct
         public Object merge1(Evaluator eval, BaseStruct other)
             throws FusionException
         {
-            MultiHashTrie<String, Object> otherMap;
-            if (other.size() == 0)
-            {
-                otherMap = MultiHashTrie.empty();
-            }
-            else
-            {
-                otherMap = ((MapBasedStruct) other).getMap(eval);
-            }
-
+            MultiHashTrie<String, Object> otherMap = other.getMap(eval);
             MultiHashTrie<String, Object> origMap = getMap(eval);
             MultiHashTrie<String, Object> newMap  = origMap.merge1(otherMap);
 
@@ -1274,7 +1269,7 @@ final class FusionStruct
         }
 
         @Override
-        MultiHashTrie<String, Object> getMap(Evaluator eval)
+        public MultiHashTrie<String, Object> getMap(Evaluator eval)
         {
             return myMap;
         }
@@ -1339,7 +1334,7 @@ final class FusionStruct
          * Synchronized so this immutable class is thread-safe for reads.
          */
         @Override
-        synchronized MultiHashTrie<String, Object> getMap(Evaluator eval)
+        public synchronized MultiHashTrie<String, Object> getMap(Evaluator eval)
         {
             if (myIonStruct != null)
             {
@@ -1424,7 +1419,7 @@ final class FusionStruct
         }
 
         @Override
-        MultiHashTrie<String, Object> getMap(Evaluator eval)
+        public MultiHashTrie<String, Object> getMap(Evaluator eval)
         {
             return myMap;
         }
@@ -1485,11 +1480,9 @@ final class FusionStruct
         public Object mergeM(Evaluator eval, BaseStruct other)
             throws FusionException
         {
-            int otherSize = other.size();
-            if (otherSize != 0)
+            if (other.size() != 0)
             {
-                MapBasedStruct is = (MapBasedStruct) other;
-                myMap = myMap.mergeMulti(is.getMap(eval));
+                myMap = myMap.mergeMulti(other.getMap(eval));
             }
 
             return this;
@@ -1504,8 +1497,7 @@ final class FusionStruct
 
             if (other.size() != 0)
             {
-                MapBasedStruct is = (MapBasedStruct) other;
-                myMap = myMap.merge1(is.getMap(eval));
+                myMap = myMap.merge1(other.getMap(eval));
             }
 
             return this;
@@ -1726,7 +1718,7 @@ final class FusionStruct
                 return iterate(eval, emptyIterator());
             }
 
-            return new StructIterator(((MapBasedStruct) s).getMap(eval));
+            return new StructIterator(s.getMap(eval));
         }
     }
 
