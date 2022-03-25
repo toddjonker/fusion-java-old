@@ -290,9 +290,23 @@ public abstract class MultiHashTrie<K, V>
     {
         if (that.isEmpty()) return this;
 
+        // Iterate the smaller trie for faster performance.
+        if (this.keyCount <= that.keyCount)
+        {
+            return mergeMulti(this, that);
+        }
+        else
+        {
+            return mergeMulti(that, this);
+        }
+    }
+
+    private static <K, V> MultiHashTrie<K, V> mergeMulti(MultiHashTrie<K, V> sm,
+                                                         MultiHashTrie<K, V> lg)
+    {
         Changes        changes = new MultiHashTrieImpl.Changes();
-        TrieNode<K, V> newRoot = root.with(that.iterator(), changes);
-        return changes.resultFrom(this, newRoot);
+        TrieNode<K, V> newRoot = lg.root.with(sm.root.iterator(), changes);
+        return changes.resultFrom(lg, newRoot);
     }
 
 

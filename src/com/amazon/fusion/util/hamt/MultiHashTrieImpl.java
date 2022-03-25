@@ -50,8 +50,15 @@ class MultiHashTrieImpl<K, V>
         @Override
         protected Object replacing(Object storedValue, Object givenValue)
         {
-            if (givenValue instanceof MultiValue) throw new IllegalStateException();
-
+            if (givenValue instanceof MultiValue)
+            {
+                // This case is used by mergeMulti
+                if (storedValue instanceof MultiValue)
+                {
+                    return ((MultiValue) givenValue).add((MultiValue) storedValue);
+                }
+                return ((MultiValue) givenValue).add(storedValue);
+            }
             if (storedValue instanceof MultiValue)
             {
                 return ((MultiValue) storedValue).add(givenValue);
@@ -337,6 +344,16 @@ class MultiHashTrieImpl<K, V>
             int len = myValues.length;
             Object[] newValues = Arrays.copyOf(myValues, len + 1);
             newValues[len] = newValue;
+            return new MultiValue(newValues);
+        }
+
+        private MultiValue add(MultiValue that)
+        {
+            int thisLen = this.myValues.length;
+            int thatLen = that.myValues.length;
+            Object[] newValues = new Object[thisLen + thatLen];
+            System.arraycopy(this.myValues, 0, newValues,       0, thisLen);
+            System.arraycopy(that.myValues, 0, newValues, thisLen, thatLen);
             return new MultiValue(newValues);
         }
 
