@@ -23,19 +23,20 @@ final class GlobalState
     static final ModuleIdentity KERNEL_MODULE_IDENTITY =
         ModuleIdentity.forAbsolutePath(KERNEL_MODULE_NAME);
 
-    static final String ALL_DEFINED_OUT = "all_defined_out";
-    static final String BEGIN           = "begin";
-    static final String DEFINE          = "define";
-    static final String DEFINE_SYNTAX   = "define_syntax";
-    static final String EOF             = "eof";
-    static final String LAMBDA          = "lambda";
-    static final String MODULE          = "module";
-    static final String ONLY_IN         = "only_in";
-    static final String PREFIX_IN       = "prefix_in";
-    static final String PROVIDE         = "provide";
-    static final String RENAME_IN       = "rename_in";
-    static final String RENAME_OUT      = "rename_out";
-    static final String REQUIRE         = "require";
+    static final String ALL_DEFINED_OUT       = "all_defined_out";
+    static final String BEGIN                 = "begin";
+    static final String CLOSED_SECURITY_GUARD = "closed_security_guard";
+    static final String DEFINE                = "define";
+    static final String DEFINE_SYNTAX         = "define_syntax";
+    static final String EOF                   = "eof";
+    static final String LAMBDA                = "lambda";
+    static final String MODULE                = "module";
+    static final String ONLY_IN               = "only_in";
+    static final String PREFIX_IN             = "prefix_in";
+    static final String PROVIDE               = "provide";
+    static final String RENAME_IN             = "rename_in";
+    static final String RENAME_OUT            = "rename_out";
+    static final String REQUIRE               = "require";
 
     final IonSystem                  myIonSystem;
     final IonReaderBuilder           myIonReaderBuilder;
@@ -116,11 +117,14 @@ final class GlobalState
             new DynamicParameter(UNDEF);
         DynamicParameter currentNamespaceParam =
             new DynamicParameter(initialCurrentNamespace);
+        DynamicParameter currentSecurityGuard =
+            new DynamicParameter(SecurityGuard.OPEN);
 
         FileSystemSpecialist fs =
-            new FileSystemSpecialist(currentDirectory);
+            new FileSystemSpecialist(currentSecurityGuard,
+                                     currentDirectory);
         LoadHandler loadHandler =
-            new LoadHandler(currentLoadRelativeDirectory);
+            new LoadHandler(fs, currentLoadRelativeDirectory);
         ModuleNameResolver resolver =
             new ModuleNameResolver(loadHandler,
                                    currentLoadRelativeDirectory,
@@ -134,11 +138,13 @@ final class GlobalState
 
         ns.define(ALL_DEFINED_OUT, new ProvideForm.AllDefinedOutForm());
         ns.define(BEGIN, new BeginForm());
+        ns.define(CLOSED_SECURITY_GUARD, SecurityGuard.CLOSED);
 
         ns.define("current_output_port", currentOutputPort);
         ns.define("current_directory", currentDirectory);
         ns.define("current_ion_reader", new CurrentIonReaderParameter());
         ns.define("current_namespace", currentNamespaceParam);
+        ns.define("current_security_guard", currentSecurityGuard);
 
         ns.define(DEFINE, new DefineForm());
         ns.define(DEFINE_SYNTAX, new DefineSyntaxForm());

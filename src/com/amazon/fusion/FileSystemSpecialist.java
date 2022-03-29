@@ -13,13 +13,16 @@ import java.io.InputStream;
  * Centralizes access to security-checked file system operations.
  * These exist 1:1 with {@link FusionRuntime}s.
  */
-class FileSystemSpecialist
+final class FileSystemSpecialist
 {
+    private final DynamicParameter myCurrentSecurityGuard;
     private final DynamicParameter myCurrentDirectory;
 
-    public FileSystemSpecialist(DynamicParameter currentDirectory)
+    public FileSystemSpecialist(DynamicParameter currentSecurityGuard,
+                                DynamicParameter currentDirectory)
     {
-        myCurrentDirectory = currentDirectory;
+        myCurrentSecurityGuard = currentSecurityGuard;
+        myCurrentDirectory     = currentDirectory;
     }
 
 
@@ -32,6 +35,12 @@ class FileSystemSpecialist
     File resolvePath(Evaluator eval, String who, File file)
         throws FusionException
     {
+        SecurityGuard guard = myCurrentSecurityGuard.currentValue(eval);
+        if (! guard.isFileSystemEnabled())
+        {
+            throw new FusionErrorException(who + ": Access denied to " + file);
+        }
+
         if (file.isAbsolute()) return file;
 
         String cdPath = myCurrentDirectory.asString(eval);
@@ -62,7 +71,7 @@ class FileSystemSpecialist
     InputStream openInputFile(Evaluator eval, String who, File file)
         throws FusionException
     {
-        file = resolvePath(eval, who, file);
+        file = resolvePath(eval, who, file);  // Checks the security guard
         try
         {
             return new FileInputStream(file);

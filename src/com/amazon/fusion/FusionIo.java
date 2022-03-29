@@ -885,7 +885,7 @@ public final class FusionIo
             String path = checkNonEmptyStringArg(eval, this, 0, args);
 
             FileSystemSpecialist fs = eval.getGlobalState().myFileSystemSpecialist;
-            InputStream in = fs.openInputFile(eval, identify(), new File(path));
+            InputStream in = fs.openInputFile(eval, getInferredName(), new File(path));
             try
             {
                 return eval.getIonReaderBuilder().build(in);

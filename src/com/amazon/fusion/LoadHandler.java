@@ -17,10 +17,13 @@ import java.io.InputStream;
  */
 final class LoadHandler
 {
-    private final DynamicParameter myCurrentLoadRelativeDirectory;
+    private final FileSystemSpecialist myFileSystem;
+    private final DynamicParameter     myCurrentLoadRelativeDirectory;
 
-    LoadHandler(DynamicParameter currentLoadRelativeDirectory)
+    LoadHandler(FileSystemSpecialist fileSystemSpecialist,
+                DynamicParameter     currentLoadRelativeDirectory)
     {
+        myFileSystem                   = fileSystemSpecialist;
         myCurrentLoadRelativeDirectory = currentLoadRelativeDirectory;
     }
 
@@ -43,8 +46,7 @@ final class LoadHandler
     Object loadTopLevel(Evaluator eval, Namespace namespace, String path)
         throws FusionException
     {
-        FileSystemSpecialist fs = eval.getGlobalState().myFileSystemSpecialist;
-        File file = fs.resolvePath(eval, "load", path);
+        File file = myFileSystem.resolvePath(eval, "load", path);
         File parent = file.getParentFile();
 
         // TODO this shouldn't be done in the standard load handler.
@@ -52,7 +54,7 @@ final class LoadHandler
         eval = eval.markedContinuation(myCurrentLoadRelativeDirectory,
                                        makeString(eval, parent.getAbsolutePath()));
 
-        try (InputStream in = fs.openInputFile(eval, "load", file))
+        try (InputStream in = myFileSystem.openInputFile(eval, "load", file))
         {
             SourceName name = SourceName.forFile(file);
             Object result = null;

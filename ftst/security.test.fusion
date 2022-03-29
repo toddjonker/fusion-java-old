@@ -1,0 +1,25 @@
+// Copyright (c) 2022 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/fusion/eval"
+  "/fusion/experimental/check"
+  "/fusion/parameter"
+  (only_in "/fusion/private/kernel" current_directory)
+  "/fusion/private/security")
+
+
+(define (load_hello)
+  (load "tst-data/hello.ion"))
+(define (read_hello)
+  (with_ion_from_file "tst-data/hello.ion" read))
+
+(check === "hello" (load_hello))
+(check === "hello" (read_hello))
+
+(parameterize
+  [(current_security_guard closed_security_guard)]
+  // This doesn't require file-system access:
+  (current_directory)
+  // These actions should fail:
+  (expect_error_exn (load_hello))
+  (expect_error_exn (read_hello)))
