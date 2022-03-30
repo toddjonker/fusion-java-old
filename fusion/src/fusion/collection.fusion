@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 (module collection "/fusion/private/builtins"
 
@@ -395,7 +395,7 @@ each value, and the result is either one of those values or void.
        (raise_argument_error "find" "collection" 0 collection))))
 
   // Name per Dylan.  Equivalent to SRFI-1 `for_each` but I don't want this to
-  // be confused with the `for` syntax from Racket (which I intend to provide).
+  // be confused with the `for` syntax from Racket.
   (defpub (do proc collection)
     '''
 Applies the one-argument procedure `proc` to the elements of `collection`,

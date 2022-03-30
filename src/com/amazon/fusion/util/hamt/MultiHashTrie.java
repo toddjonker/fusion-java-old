@@ -348,7 +348,6 @@ public abstract class MultiHashTrie<K, V>
      */
     public boolean equals(MultiHashTrie<K,V> that, BiPredicate<V, V> comp)
     {
-        // FIXME null check on that
         if (this.getClass() != that.getClass()) return false;
 
         if (size() != that.size()) return false;

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -12,8 +12,19 @@ final class LocalEnvironment
     implements Environment
 {
     /**
-     * Denotes a binding at some local scope, for example {@code lambda} and
-     * {@code letrec} expressions.
+     * Denotes a binding defined by a local environment, for example a
+     * {@code lambda} or {@code letrec} expression.
+     * <p>
+     * This compile-time representation of a local binding holds the data
+     * needed to compute the two-dimensional De Bruijn indexes used by
+     * compiled references to the binding. Here, the <em>depth</em> counts
+     * enclosing local environments inward from top-level, and the
+     * <em>address</em> indexes into the list of bindings introduced by that
+     * environment.
+     * </p>
+     *
+     * @see CompiledImmediateVariableReference
+     * @see CompiledLocalVariableReference
      */
     static final class LocalBinding
         extends Binding
@@ -240,7 +251,11 @@ final class LocalEnvironment
     //========================================================================
 
 
-    /** Reference to a var in the immediately-enclosing environment. */
+    /**
+     * A reference to a variable in the immediately-enclosing environment.
+     * This is an optimized form of {@link CompiledLocalVariableReference}
+     * where {@code rib == 0}.
+     */
     static final class CompiledImmediateVariableReference
         implements CompiledForm
     {
