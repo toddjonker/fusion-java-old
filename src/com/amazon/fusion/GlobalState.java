@@ -4,6 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionValue.UNDEF;
+import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonSystem;
@@ -60,21 +61,20 @@ final class GlobalState
     final Binding myKernelRequireBinding;
 
     private GlobalState(IonSystem                  ionSystem,
-                        IonReaderBuilder           ionReaderBuiler,
+                        IonReaderBuilder           ionReaderBuilder,
                         FileSystemSpecialist       fileSystemSpecialist,
                         ModuleInstance             kernel,
                         ModuleNameResolver         resolver,
                         LoadHandler                loadHandler,
-                        DynamicParameter           currentNamespaceParam,
                         _Private_CoverageCollector coverageCollector)
     {
         myIonSystem             = ionSystem;
-        myIonReaderBuilder      = ionReaderBuiler;
+        myIonReaderBuilder      = ionReaderBuilder;
         myFileSystemSpecialist  = fileSystemSpecialist;
         myKernelModule          = kernel;
         myModuleNameResolver    = resolver;
         myLoadHandler           = loadHandler;
-        myCurrentNamespaceParam = currentNamespaceParam;
+        myCurrentNamespaceParam = kernelValue("current_namespace");
         myCoverageCollector     = coverageCollector;
 
         myKernelAllDefinedOutBinding = kernelBinding(ALL_DEFINED_OUT);
@@ -167,7 +167,6 @@ final class GlobalState
 
         GlobalState globals =
             new GlobalState(system, readerBuilder, fs, kernel, resolver, loadHandler,
-                            currentNamespaceParam,
                             builder.getCoverageCollector());
         return globals;
     }
@@ -177,11 +176,18 @@ final class GlobalState
      * Ensure we have a {@linkplain Binding#target target binding} that can be
      * compared with {@code ==}.
      */
-    private Binding kernelBinding(String name)
+    private ModuleDefinedBinding kernelBinding(String name)
     {
-        Binding b = myKernelModule.resolveProvidedName(name).target();
-        assert b != null && ! (b instanceof FreeBinding);
+        ModuleDefinedBinding b = myKernelModule.resolveProvidedName(name).target();
+        assert b != null;
         return b;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T kernelValue(String name)
+    {
+        ModuleDefinedBinding b = kernelBinding(name);
+        return (T) b.lookup(myKernelModule);
     }
 
     /**
