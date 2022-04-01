@@ -236,12 +236,15 @@ final class LocalEnvironment
     public String toString()
     {
         StringBuilder buf = new StringBuilder("{{{LocalEnv (");
-        boolean first = true;
-        for (LocalBinding b : myBindings)
+        if (myBindings != null)
         {
-            if (! first) buf.append(' ');
-            buf.append(b.myIdentifier);
-            first = false;
+            boolean first = true;
+            for (LocalBinding b : myBindings)
+            {
+                if (!first) buf.append(' ');
+                buf.append(b.myIdentifier);
+                first = false;
+            }
         }
         buf.append(")}}}");
         return buf.toString();
