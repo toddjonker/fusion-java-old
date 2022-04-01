@@ -7,6 +7,7 @@ import static com.amazon.fusion.GlobalState.DEFINE;
 import static com.amazon.fusion.GlobalState.REQUIRE;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -444,20 +445,25 @@ final class ModuleNamespace
     private final List<BaseSymbol> myDefinedNames = new ArrayList<>();
 
     /**
-     * Constructs a module with a given language.  Bindings provided by the
-     * language can be shadowed by {@code require} or {@code define}.
-     *
+     * Expansion-time namespaces are bootstrapped with bindings from a language.
+     * Language bindings can be shadowed by {@code require} or {@code define}.
+     * <p>
+     * When expansion of a {@code (module ...)} form is complete, the populated
+     * namespace is discarded. A compile-time namespace is later created to
+     * replace it.
+     * </p>
      * @param moduleId identifies this module.
      */
     ModuleNamespace(Evaluator eval,
                     ModuleRegistry registry,
                     SyntaxSymbol lexicalContext,
-                    final ModuleInstance language,
-                    ModuleIdentity moduleId)
+                    ModuleIdentity moduleId,
+                    ModuleIdentity languageId)
         throws FusionException
     {
         super(registry, moduleId, MAKE_SYNTAX_WRAPS);
 
+        ModuleInstance language = instantiateRequiredModule(eval, languageId);
         for (ProvidedBinding provided : language.providedBindings())
         {
             BaseSymbol name = provided.getName();
@@ -469,6 +475,25 @@ final class ModuleNamespace
             assert prior == null;
         }
     }
+
+    /**
+     * Compile-time namespaces don't track bindings.
+     */
+    ModuleNamespace(Evaluator eval,
+                    ModuleRegistry registry,
+                    ModuleIdentity moduleId,
+                    ModuleIdentity[] requiredModules)
+        throws FusionException
+    {
+        super(registry, moduleId, MAKE_SYNTAX_WRAPS);
+
+        for (ModuleIdentity m : requiredModules)
+        {
+            instantiateRequiredModule(eval, m);
+        }
+        assert Arrays.equals(requiredModuleIds(), requiredModules);
+    }
+
 
     /**
      * Constructs a module that uses no other module. Any bindings will need to

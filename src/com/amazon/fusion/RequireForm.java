@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -81,6 +81,9 @@ final class RequireForm
         return stx.copyReplacingChildren(eval, children);
     }
 
+    /**
+     * Expand a declaration of the form {@code (require TEXT)}.
+     */
     private void expandRequireModule(Evaluator eval,
                                      SyntaxChecker requireCheck,
                                      SyntaxValue spec,
@@ -94,6 +97,9 @@ final class RequireForm
         expandedSpecs.add(spec);
     }
 
+    /**
+     * Expand a declaration of the form {@code (require (OP ARG...))}.
+     */
     private void expandRequireSexp(Expander expander,
                                    Evaluator eval,
                                    SyntaxChecker requireCheck,
@@ -332,6 +338,7 @@ final class RequireForm
                 }
                 case "rename":
                 {
+                    // Here we are loading but not instantiating the required module.
                     ModuleIdentity moduleId =
                             myModuleNameResolver.resolve(eval,
                                                          baseModule,
@@ -351,6 +358,7 @@ final class RequireForm
         }
         else // It's a (string or symbol) module path.
         {
+            // Here we are loading but not instantiating the required module.
             ModuleIdentity moduleId =
                 myModuleNameResolver.resolve(eval, baseModule, spec, true);
             return new CompiledFullRequire(moduleId, lexicalContext);

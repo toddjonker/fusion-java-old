@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -33,6 +33,7 @@ final class ModuleForm
 {
     private static final String STX_PROP_MODULE_IDENTITY   = "module identity";
     private static final String STX_PROP_LANGUAGE_IDENTITY = "language identity";
+    private static final String STX_PROP_REQUIRED_MODULES  = "required modules";
     private static final String STX_PROP_DEFINED_NAMES     = "defined names";
 
 
@@ -72,7 +73,7 @@ final class ModuleForm
             check.requiredIdentifier("module name", 1);
         ModuleIdentity.validateLocalName(moduleNameSymbol);
 
-        ModuleRegistry registry = envOutsideModule.namespace().getRegistry();
+        ModuleRegistry registry = eval.findCurrentNamespace().getRegistry();
 
         ModuleIdentity id;
         try
@@ -90,7 +91,7 @@ final class ModuleForm
         source = (SyntaxSexp)
             source.copyWithProperty(eval, STX_PROP_MODULE_IDENTITY, id);
 
-        ModuleInstance language;
+        ModuleIdentity languageId;
         {
             String path = check.requiredText(eval, "initial module path", 2);
             SyntaxValue initialBindingsStx = source.get(eval, 2);
@@ -108,14 +109,13 @@ final class ModuleForm
                 throw new ModuleNotFoundException(message, initialBindingsStx);
             }
 
-            ModuleIdentity languageId;
             try
             {
                 languageId =
                     myModuleNameResolver.resolve(eval, id, initialBindingsStx,
                                                  true /*load it*/);
-                language = registry.instantiate(eval, languageId);
-                assert language != null;  // Otherwise resolve should fail
+                // Force instantiation to tie any exception to the declaration.
+                registry.instantiate(eval, languageId);
             }
             catch (FusionException e)
             {
@@ -142,7 +142,7 @@ final class ModuleForm
         ModuleNamespace moduleNamespace =
             new ModuleNamespace(eval, registry,
                                 (SyntaxSymbol) source.get(eval, 1),
-                                language, id);
+                                id, languageId);
 
         // TODO handle #%module-begin and #%plain-module-begin
         expander = expander.enterModuleContext();
@@ -253,6 +253,9 @@ final class ModuleForm
 
         source = (SyntaxSexp)
             source.copyWithProperty(eval,
+                                    STX_PROP_REQUIRED_MODULES,
+                                    moduleNamespace.requiredModuleIds())
+                  .copyWithProperty(eval,
                                     STX_PROP_DEFINED_NAMES,
                                     moduleNamespace.extractDefinedNames());
 
@@ -354,16 +357,14 @@ final class ModuleForm
         {
             ModuleIdentity languageId = (ModuleIdentity)
                 moduleStx.findProperty(eval, STX_PROP_LANGUAGE_IDENTITY);
+            ModuleIdentity[] required = (ModuleIdentity[])
+                moduleStx.findProperty(eval, STX_PROP_REQUIRED_MODULES);
+            assert required[0] == languageId;
 
             ModuleRegistry registry =
                 envOutsideModule.namespace().getRegistry();
-            ModuleInstance language = registry.instantiate(eval, languageId);
 
-            SyntaxSymbol moduleKeyword = (SyntaxSymbol)
-                unsafePairHead(eval, moduleDatum);
-            moduleNamespace = new ModuleNamespace(eval, registry,
-                                                  moduleKeyword,
-                                                  language, id);
+            moduleNamespace = new ModuleNamespace(eval, registry, id, required);
         }
 
         // Skip `module` name language
@@ -403,7 +404,7 @@ final class ModuleForm
             if (firstBinding == kernelRequireBinding)
             {
                 // All require forms have already been evaluated.
-                // We preserve them through macro expansion so that the are
+                // We preserve them through macro expansion so that they are
                 // retained by `expand` and similar operations.
                 continue;
             }
