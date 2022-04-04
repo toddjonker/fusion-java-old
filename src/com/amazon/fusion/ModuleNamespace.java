@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -428,6 +428,19 @@ final class ModuleNamespace
     }
 
 
+    /**
+     * Helper to work-around inability of constructors to invoke virtual methods.
+     */
+    private static final Function<Namespace, SyntaxWraps> MAKE_SYNTAX_WRAPS =
+        new Function<Namespace, SyntaxWraps>() {
+            @Override
+            public SyntaxWraps apply(Namespace ns)
+            {
+                return SyntaxWraps.make(new ModuleWrap((ModuleNamespace) ns));
+            }
+        };
+
+
     private final List<BaseSymbol> myDefinedNames = new ArrayList<>();
 
     /**
@@ -443,15 +456,7 @@ final class ModuleNamespace
                     ModuleIdentity moduleId)
         throws FusionException
     {
-        super(registry, moduleId,
-              new Function<Namespace, SyntaxWraps>()
-              {
-                  @Override
-                  public SyntaxWraps apply(Namespace _this) {
-                      ModuleNamespace __this = (ModuleNamespace) _this;
-                      return SyntaxWraps.make(new ModuleWrap(__this));
-                  }
-              });
+        super(registry, moduleId, MAKE_SYNTAX_WRAPS);
 
         for (ProvidedBinding provided : language.providedBindings())
         {
@@ -473,14 +478,7 @@ final class ModuleNamespace
      */
     ModuleNamespace(ModuleRegistry registry, ModuleIdentity moduleId)
     {
-        super(registry, moduleId,
-              new Function<Namespace, SyntaxWraps>()
-              {
-                  @Override
-                  public SyntaxWraps apply(Namespace _this) {
-                      return SyntaxWraps.make(new EnvironmentWrap(_this));
-                  }
-              });
+        super(registry, moduleId, MAKE_SYNTAX_WRAPS);
     }
 
 
