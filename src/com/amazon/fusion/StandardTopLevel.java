@@ -171,7 +171,9 @@ final class StandardTopLevel
 
         try
         {
-            // TODO This should set current_namespace so its registry is used.
+            // Make sure we use the registry on our namespace.
+            Evaluator eval =
+                myEvaluator.parameterizeCurrentNamespace(myNamespace);
 
             ModuleNameResolver resolver =
                 myEvaluator.getGlobalState().myModuleNameResolver;
@@ -179,7 +181,7 @@ final class StandardTopLevel
                 ModuleIdentity.forAbsolutePath(absoluteModulePath);
             ModuleLocation loc =
                 new IonReaderModuleLocation(source, name);
-            resolver.loadModule(myEvaluator, id, loc, true /* reload it */);
+            resolver.loadModule(eval, id, loc, true /* reload it */);
         }
         catch (FusionInterrupt e)
         {

@@ -637,11 +637,17 @@ abstract class Namespace
 
 
     /**
+     * Instantiates a module into this namespace's registry, then imports all
+     * exported bindings from it.
+     *
      * @param modulePath is an absolute or relative module path.
      */
     final void require(Evaluator eval, String modulePath)
         throws FusionException
     {
+        // Make sure the resolver uses our registry.
+        eval = eval.parameterizeCurrentNamespace(this);
+
         ModuleNameResolver resolver =
             eval.getGlobalState().myModuleNameResolver;
         ModuleIdentity id =

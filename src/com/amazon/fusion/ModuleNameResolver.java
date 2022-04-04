@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,6 +10,7 @@ import static com.amazon.ion.util.IonTextUtils.printString;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  *
@@ -29,8 +30,8 @@ final class ModuleNameResolver
     /**
      * Access to this map must be synchronized on it!
      */
-    private final Set<ModuleIdentity> myLoadedModuleIds =
-        new HashSet<>();
+    private final WeakHashMap<ModuleRegistry, RegistryCache> myRegistryCache =
+        new WeakHashMap<>();
 
     ModuleNameResolver(LoadHandler loadHandler,
                        DynamicParameter currentLoadRelativeDirectory,
@@ -47,23 +48,65 @@ final class ModuleNameResolver
 
 
     /**
+     * Caches various per-registry information.
+     */
+    private static class RegistryCache
+    {
+        /**
+         * "The standard module name resolver keeps a table per module registry
+         * containing loaded module name."
+         */
+        private final Set<ModuleIdentity> myLoadedModuleIds = new HashSet<>();
+
+        void declare(ModuleIdentity id)
+        {
+            myLoadedModuleIds.add(id);
+        }
+
+        boolean isDeclared(ModuleIdentity id)
+        {
+            return myLoadedModuleIds.contains(id);
+        }
+    }
+
+    /**
      * Asserts that a particular module has already had its declaration loaded
      * in the given registry.
      */
     void registerDeclaredModule(ModuleRegistry registry, ModuleIdentity id)
         throws FusionException
     {
-        // TODO FUSION-239 Keep a set per registry
-        synchronized (myLoadedModuleIds)
+        synchronized (myRegistryCache)
         {
-            myLoadedModuleIds.add(id);
+            RegistryCache cache = myRegistryCache.get(registry);
+            if (cache == null)
+            {
+                cache = new RegistryCache();
+                myRegistryCache.put(registry, cache);
+            }
+            cache.declare(id);
         }
     }
 
+    /**
+     * Check whether we know that a module has been declared in a registry.
+     */
+    boolean isDeclared(ModuleRegistry registry, ModuleIdentity id)
+    {
+        synchronized (myRegistryCache)
+        {
+            RegistryCache cache = myRegistryCache.get(registry);
+            return (cache != null && cache.isDeclared(id));
+        }
+    }
 
     /**
      * Locates and (optionally) loads a module, dispatching on the concrete
      * syntax of the request. The module is not instantiated.
+     * <p>
+     * If {@code load} is true, the module will be declared in the current
+     * namespace's registry.
+     * </p>
      *
      * @param baseModule the starting point for relative references; not null.
      *
@@ -109,6 +152,10 @@ final class ModuleNameResolver
     /**
      * Locates and (optionally) loads a module from the registered repositories.
      * The module is not instantiated.
+     * <p>
+     * If {@code load} is true, the module will be declared in the current
+     * namespace's registry.
+     * </p>
      *
      * @param eval the evaluation context.
      * @param baseModule the starting point for relative references; not null.
@@ -131,11 +178,10 @@ final class ModuleNameResolver
             throw new SyntaxException(null, message, stxForErrors);
         }
 
+        ModuleRegistry reg = eval.findCurrentNamespace().getRegistry();
         ModuleIdentity id = ModuleIdentity.forPath(baseModule, modulePath);
-        synchronized (myLoadedModuleIds)
-        {
-            if (myLoadedModuleIds.contains(id)) return id;
-        }
+
+        if (isDeclared(reg, id)) return id;
 
         ModuleLocation loc = locate(eval, id, stxForErrors);
         if (loc != null)
@@ -233,7 +279,9 @@ final class ModuleNameResolver
                                             new Object[]{ idString, idString });
                 myLoadHandler.loadModule(loadEval, id, loc);
                 // Evaluation of 'module' declares it, but doesn't instantiate.
+                // It also calls-back to registerDeclaredModule().
             }
         }
+        assert isDeclared(reg, id);
     }
 }

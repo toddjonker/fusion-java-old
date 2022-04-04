@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
+import static com.amazon.fusion.GlobalState.KERNEL_MODULE_IDENTITY;
 import static com.amazon.fusion.ModuleIdentity.forAbsolutePath;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import static java.lang.Boolean.TRUE;
@@ -128,6 +129,17 @@ final class StandardRuntime
         throws FusionException
     {
         return makeTopLevel(getDefaultLanguage());
+    }
+
+
+    ModuleRegistry makeModuleRegistry()
+        throws FusionException
+    {
+        ModuleNameResolver resolver = myGlobalState.myModuleNameResolver;
+
+        ModuleRegistry r = new ModuleRegistry();
+        r.register(resolver, myRegistry.lookup(KERNEL_MODULE_IDENTITY), null);
+        return r;
     }
 
 

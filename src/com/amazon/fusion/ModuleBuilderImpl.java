@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -84,9 +84,7 @@ final class ModuleBuilderImpl
 
         ModuleInstance module = new ModuleInstance(id, store, bindings);
 
-        myRegistry.register(module);
-
-        myResolver.registerDeclaredModule(myRegistry, id);
+        myRegistry.register(myResolver, module, null);
     }
 
 

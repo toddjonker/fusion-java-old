@@ -621,11 +621,9 @@ final class ModuleForm
         {
             ModuleRegistry registry =
                 eval.findCurrentNamespace().getRegistry();
-            registry.declare(myId, this);
-
             ModuleNameResolver resolver =
                 eval.getGlobalState().myModuleNameResolver;
-            resolver.registerDeclaredModule(registry, myId);
+            registry.declare(resolver, myId, this);
 
             return voidValue(eval);
         }
