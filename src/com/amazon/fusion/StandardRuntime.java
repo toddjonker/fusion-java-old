@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingDoc.COLLECT_DOCS_MARK;
+import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
 import static com.amazon.fusion.GlobalState.KERNEL_MODULE_IDENTITY;
 import static com.amazon.fusion.ModuleIdentity.forAbsolutePath;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
@@ -46,17 +47,12 @@ final class StandardRuntime
             myGlobalState =
                 GlobalState.initialize(ionSystem, builder, myRegistry, topNs);
 
-            if (builder.isDocumenting())
-            {
-                myTopLevel =
-                    new StandardTopLevel(myGlobalState, topNs, myDefaultLanguage,
-                                         COLLECT_DOCS_MARK, TRUE);
-            }
-            else
-            {
-                myTopLevel =
-                    new StandardTopLevel(myGlobalState, topNs, myDefaultLanguage);
-            }
+            Object[] parameterization =
+                (builder.isDocumenting()
+                     ? new Object[]{ COLLECT_DOCS_MARK, TRUE }
+                     : EMPTY_OBJECT_ARRAY);
+
+            myTopLevel = makeTopLevel(topNs, myDefaultLanguage, parameterization);
         }
         catch (FusionException e)
         {
@@ -101,26 +97,46 @@ final class StandardRuntime
     }
 
 
-    @Override
-    public TopLevel makeTopLevel(String initialModulePath)
+    StandardTopLevel makeTopLevel(Namespace namespace,
+                                  String initialModulePath,
+                                  Object... parameterization)
         throws FusionException
     {
-        if (! isValidAbsoluteModulePath(initialModulePath))
-        {
-            String message =
-                "Not a valid absolute module path: " + initialModulePath;
-            throw new IllegalArgumentException(message);
-        }
-
         try
         {
-            return new StandardTopLevel(myGlobalState, myRegistry,
-                                        initialModulePath);
+            StandardTopLevel top =
+                new StandardTopLevel(myGlobalState, namespace, parameterization);
+            if (initialModulePath != null)
+            {
+                if (! isValidAbsoluteModulePath(initialModulePath))
+                {
+                    String message =
+                        "Not a valid absolute module path: " + initialModulePath;
+                    throw new IllegalArgumentException(message);
+                }
+
+                top.requireModule(initialModulePath);
+            }
+            return top;
         }
         catch (FusionInterrupt e)
         {
             throw new FusionInterruptedException(e);
         }
+    }
+
+    StandardTopLevel makeTopLevel(ModuleRegistry registry,
+                                  String initialModulePath)
+        throws FusionException
+    {
+        return makeTopLevel(new TopLevelNamespace(registry), initialModulePath);
+    }
+
+    @Override
+    public TopLevel makeTopLevel(String initialModulePath)
+        throws FusionException
+    {
+        return makeTopLevel(myRegistry, initialModulePath);
     }
 
 
@@ -249,18 +265,17 @@ final class StandardRuntime
                 //  * Require the language into the new NS.
 
                 TopLevelNamespace namespace = new TopLevelNamespace(myRegistry);
-                return new StandardTopLevel(myGlobalState,
-                                            namespace,
-                                            myLanguage,
-                                            // Continuation mark key/values:
-                                            currentIonReader,
-                                            reader,
-                                            currentNamespace,
-                                            namespace,
-                                            currentOutputPort,
-                                            new NullOutputStream(),
-                                            currentSecurityGuard,
-                                            SecurityGuard.CLOSED);
+                return makeTopLevel(namespace,
+                                    myLanguage,
+                                    // Continuation mark key/values:
+                                    currentIonReader,
+                                    reader,
+                                    currentNamespace,
+                                    namespace,
+                                    currentOutputPort,
+                                    new NullOutputStream(),
+                                    currentSecurityGuard,
+                                    SecurityGuard.CLOSED);
 
                 // StandardTopLevel automagically sets current_namespace for
                 // some entry points like eval() and load(), but not for others

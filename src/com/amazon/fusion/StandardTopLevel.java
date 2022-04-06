@@ -19,17 +19,11 @@ final class StandardTopLevel
     private final Namespace myNamespace;
 
 
-    /**
-     * @param initialModulePath must be absolute.
-     */
     StandardTopLevel(GlobalState globalState,
                      Namespace namespace,
-                     String initialModulePath,
                      Object... continuationMarks)
         throws FusionInterrupt, FusionException
     {
-        assert ModuleIdentity.isValidAbsoluteModulePath(initialModulePath);
-
         _Private_CoverageCollector collector = globalState.myCoverageCollector;
         Evaluator eval = (collector == null
                             ? new Evaluator(globalState)
@@ -42,19 +36,6 @@ final class StandardTopLevel
 
         myEvaluator = eval;
         myNamespace = namespace;
-
-        namespace.require(myEvaluator, initialModulePath);
-    }
-
-    /**
-     * @param initialModulePath must be absolute.
-     */
-    StandardTopLevel(GlobalState globalState,
-                     ModuleRegistry registry,
-                     String initialModulePath)
-        throws FusionInterrupt, FusionException
-    {
-        this(globalState, new TopLevelNamespace(registry), initialModulePath);
     }
 
 

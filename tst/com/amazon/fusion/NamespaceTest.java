@@ -120,9 +120,7 @@ public class NamespaceTest
         ModuleRegistry reg0 = runtime.getDefaultRegistry();
         ModuleRegistry reg1 = runtime.makeModuleRegistry();
 
-        StandardTopLevel top = new StandardTopLevel(runtime.getGlobalState(),
-                                                    reg1,
-                                                    "/fusion");
+        StandardTopLevel top = runtime.makeTopLevel(reg1, "/fusion");
         IonReader code =
             IonReaderBuilder.standard().build("(module M '/fusion' true)");
         top.loadModule("/fresh", code, null);
