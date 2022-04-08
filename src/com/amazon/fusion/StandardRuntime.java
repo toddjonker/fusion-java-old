@@ -237,6 +237,7 @@ final class StandardRuntime
             {
                 throw new IllegalStateException("No language specified.");
             }
+            ModuleIdentity langId = forAbsolutePath(myLanguage);
 
             // Our goal here, for now, is to emulate:
             // (make-evaluator `(begin) #:requires (list <language>))
@@ -246,6 +247,9 @@ final class StandardRuntime
 
             try
             {
+                ModuleNameResolver resolver =
+                    myGlobalState.myModuleNameResolver;
+
                 Object currentIonReader =
                     myGlobalState.myCurrentIonReaderParam;
                 Object currentNamespace =
@@ -271,7 +275,14 @@ final class StandardRuntime
                 //    This attaches transitive dependencies.
                 //  * Require the language into the new NS.
 
-                TopLevelNamespace namespace = new TopLevelNamespace(myRegistry);
+                // Hack to force instantiation of myLanguage in myRegistry.
+                makeTopLevel(myRegistry, myLanguage);
+
+                ModuleRegistry newRegistry = makeModuleRegistry();
+                newRegistry.attach(resolver, myRegistry, langId);
+
+                TopLevelNamespace namespace = new TopLevelNamespace(newRegistry);
+
                 return makeTopLevel(namespace,
                                     myLanguage,
                                     // Continuation mark key/values:

@@ -41,6 +41,9 @@
 (check-eq? 3 (sb-racket '(+ 5 2)))
 (sb-racket '(define + orig-+))
 
+;; Sandboxed expressions are not at module-level.
+(check-exn exn:fail:syntax? (lambda () (sb-racket '(provide))))
+
 ;;============================================================
 (define sb/defns
   (make-evaluator
@@ -51,6 +54,10 @@
 
 ;; Cannot redefine bindings from a module body.
 (check-exn exn:fail? (lambda () (sb/defns '(define progn-defn 'redefined))))
+
+;; Sandboxed expressions are not at module-level.
+(check-exn exn:fail:syntax? (lambda () (sb-racket '(provide))))
+
 
 ;;============================================================
 (define sb/begin
@@ -69,10 +76,9 @@
 ; Surprisingly, current-directory is retained inside the sandbox:
 (check-true (string-suffix? (path->string (sb/begin '(current-directory))) "/src/FusionJava/rkt/"))
 
+;; Sandboxed expressions are not at module-level.
+(check-exn exn:fail:syntax? (lambda () (sb-racket '(provide))))
 
 ;; These is surprisingly slow, whereas (make-evaluator 'racket/base) is fast.
 ;(make-evaluator '(begin) #:requires '(racket/base))
 ;(make-evaluator 'racket/base  #:requires '(racket/base))
-
-
-;(define sb2 (make-evaluator 'racket #:allow-syntactic-requires '(racket/sandbox)))

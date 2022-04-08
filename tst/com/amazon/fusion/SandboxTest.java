@@ -4,7 +4,10 @@ package com.amazon.fusion;
 
 import static com.amazon.ion.util.IonTextUtils.printString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,12 +31,18 @@ public class SandboxTest
     }
 
 
-    private TopLevel sandbox()
+    private TopLevel sandbox(String language)
         throws FusionException
     {
         SandboxBuilder b = runtime().makeSandboxBuilder();
-        b.setLanguage("/fusion");
+        b.setLanguage(language);
         return b.build();
+    }
+
+    private TopLevel sandbox()
+        throws FusionException
+    {
+        return sandbox("/fusion");
     }
 
 
@@ -88,6 +97,8 @@ public class SandboxTest
         throws Exception
     {
         assert data.exists();
+
+        topLevel().requireModule("/fusion/eval");
 
         TopLevel sandbox = sandbox();
         sandbox.requireModule("/fusion/eval");
@@ -182,5 +193,80 @@ public class SandboxTest
         sandbox.requireModule("/fusion/unsafe/list");
 
         sandbox.call("unsafe_list_element", 0, 0);
+    }
+
+
+    @Test
+    public void testEachSandboxGetsUniqueRegistry()
+        throws Exception
+    {
+        SandboxBuilder b = runtime().makeSandboxBuilder();
+        b.setLanguage("/fusion");
+
+        StandardTopLevel sandbox1 = (StandardTopLevel) b.build();
+        StandardTopLevel sandbox2 = (StandardTopLevel) b.build();
+
+        assertNotSame(sandbox1.getRegistry(),
+                      sandbox2.getRegistry());
+    }
+
+
+    @Test
+    public void testLanguageIsShared()
+        throws Exception
+    {
+        useTstRepo();
+
+        StandardRuntime  runtime = (StandardRuntime) runtime();
+        StandardTopLevel sandbox = (StandardTopLevel) sandbox("/tinylang");
+
+        ModuleRegistry reg0 = runtime.getDefaultRegistry();
+        ModuleRegistry reg1 = sandbox.getRegistry();
+
+        assertSame(reg0.lookup("/tinylang"),
+                   reg1.lookup("/tinylang"));
+    }
+
+
+    @Test
+    public void testRequiredModulesDontPollute()
+        throws Exception
+    {
+        useTstRepo();
+
+        StandardRuntime runtime = (StandardRuntime) runtime();
+        ModuleRegistry reg0 = runtime.getDefaultRegistry();
+        assertFalse(reg0.isLoaded("/tinylang"));
+
+        sandbox().requireModule("/tinylang");
+        assertFalse(reg0.isLoaded("/tinylang"));
+    }
+
+
+    @Test
+    public void testDeclaredModulesDontPollute()
+        throws Exception
+    {
+        useTstRepo();
+
+        StandardRuntime  runtime = (StandardRuntime) runtime();
+        StandardTopLevel sandbox = (StandardTopLevel) sandbox();
+
+        ModuleRegistry reg0 = runtime.getDefaultRegistry();
+        ModuleRegistry reg1 = sandbox.getRegistry();
+
+        assertFalse(reg0.isLoaded("/grain"));
+        assertFalse(reg1.isLoaded("/grain"));
+
+        sandbox.eval("(module M '/fusion'" +
+                         " (require '/grain')" +
+                         " (provide m)" +
+                         " (define m 1922))");
+        sandbox.requireModule("M");
+        checkLong(1922, sandbox.eval("m"));
+        assertTrue(reg1.isLoaded("/grain"));
+
+        // The important thing:
+        assertFalse(reg0.isLoaded("/grain"));
     }
 }

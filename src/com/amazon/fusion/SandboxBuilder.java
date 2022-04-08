@@ -9,6 +9,30 @@ package com.amazon.fusion;
  * By default, sandboxed evaluation is blocked from accessing the file system
  * and network.
  * </p>
+ * <p>
+ * Each sandbox namespace has its own module registry that only shares select
+ * module instances with other namespaces.  This prevents pollution of the
+ * runtime's default registry, which is particularly useful when sandboxed code
+ * can create new modules (for example, by evaluating a module declaration).
+ * </p>
+ * <p>
+ * On the other hand, this means that there can be unnecessary instances of
+ * common code, even from the standard libraries, resulting in increased latency
+ * (to load and instantiate them) and memory use.  More subtly, values and types
+ * created within sandboxes can be incompatible with or unrecognizable to those
+ * created elsewhere.  This is similar to Java's behavior with respect to
+ * multiple Classloaders, where the same class can be loaded twice, leading to
+ * incompatible results.
+ * </p>
+ * <p>
+ * The defaults here align with a common case where the application creates
+ * numerous transient sandboxes that all use the same language. As such, the
+ * configured language is first instantiated in the runtime's default registry,
+ * then copied into the sandbox's fresh registry, along with all modules it
+ * depends on. This results in the language's exported features being shared
+ * across all sandboxes. Any subsidiary modules will be instantiated on-demand
+ * and not shared; this includes local {@code (module ...)} declarations.
+ * </p>
  */
 public interface SandboxBuilder
 {
