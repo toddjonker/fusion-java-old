@@ -4,25 +4,41 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.GlobalState.KERNEL_MODULE_IDENTITY;
 import static com.amazon.fusion.GlobalState.KERNEL_MODULE_NAME;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import com.amazon.ion.IonReader;
+import com.amazon.ion.system.IonReaderBuilder;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class NamespaceTest
     extends CoreTestCase
 {
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+
     @Before
     public void requires()
         throws FusionException
     {
         useTstRepo();
         topLevel().requireModule("/fusion/namespace");
+    }
+
+    private IonReader read(String ionText)
+    {
+        return IonReaderBuilder.standard().build(ionText);
     }
 
 
@@ -140,9 +156,6 @@ public class NamespaceTest
         StandardTopLevel top0 = runtime.getDefaultTopLevel();
         StandardTopLevel top1 = runtime.makeEmptyTopLevelAndRegistry();
 
-        assertAttached(top0, "/fusion/base");
-        assertNotLoaded(top1, "/fusion/base");
-
         // Since top1's registry is empty modulo the kernel, we should get a
         // separate copy of any module we require.
         top1.requireModule("/fusion/base");
@@ -156,7 +169,7 @@ public class NamespaceTest
     {
         StandardRuntime runtime = (StandardRuntime) runtime();
 
-        StandardTopLevel top0 = runtime.getDefaultTopLevel();
+        StandardTopLevel top0 = runtime.makeEmptyTopLevelAndRegistry();
         StandardTopLevel top1 = runtime.makeEmptyTopLevelAndRegistry();
 
         top1.loadModule("/grain");
@@ -167,5 +180,191 @@ public class NamespaceTest
         top1.requireModule("/grain");
         assertAttached(top1, "/grain");
         assertNotLoaded(top0, "/grain");
+
+        top0.requireModule("/grain");
+        assertDifferentInstances(top0, top1, "/grain");
+    }
+
+
+    @Test
+    public void testManualDeclarationSeparation()
+        throws Exception
+    {
+        StandardRuntime runtime = (StandardRuntime) runtime();
+
+        StandardTopLevel top0 = runtime.getDefaultTopLevel();
+        StandardTopLevel top1 = runtime.makeEmptyTopLevelAndRegistry();
+
+        top1.loadModule("/manual",
+                        read("(module M '/tinylang' true)"),
+                        null);
+        assertNotLoaded(top0, "/manual");
+
+        top1.requireModule("/manual");
+        assertAttached(top1, "/manual");
+        assertNotLoaded(top0, "/manual");
+    }
+
+
+    @Test
+    public void testNamespaceAttachModule()
+        throws Exception
+    {
+        StandardRuntime runtime = (StandardRuntime) runtime();
+
+        StandardTopLevel top0 = runtime.getDefaultTopLevel();
+        StandardTopLevel top1 = runtime.makeEmptyTopLevelAndRegistry();
+
+        // Pull a non-dependency of /fusion into the startup registry,
+        // to ensure it's not copied by attach().
+        assertNotLoaded(top0, "/fusion/eval");
+        top0.requireModule("/fusion/eval");
+        assertAttached(top0, "/fusion/eval");
+
+        top1.attachModule(top0, "/fusion");
+        assertSameInstances(top0, top1, "/fusion");
+        // Transient dependencies are attached as well.
+        assertSameInstances(top0, top1, "/fusion/for");
+        // But not things that are not transient dependencies!
+        assertNotLoaded(top1, "/fusion/eval");
+
+        // Module name resolver will load a new module on demand.
+        top1.loadModule("/fusion/eval");
+        assertLoaded(top1, "/fusion/eval");
+        assertNotAttached(top1, "/fusion/eval");
+
+        // And the registry can instantiate it.
+        top1.requireModule("/fusion/eval");
+        assertDifferentInstances(top0, top1, "/fusion/eval");
+    }
+
+
+    @Test
+    public void testAttachManuallyDeclaredModule()
+        throws Exception
+    {
+        StandardRuntime runtime = (StandardRuntime) runtime();
+
+        StandardTopLevel top0 = runtime.makeEmptyTopLevelAndRegistry();
+        StandardTopLevel top1 = runtime.makeEmptyTopLevelAndRegistry();
+
+        top0.loadModule("/manual",
+                        read("(module M '/tinylang' true)"),
+                        null);
+        top0.requireModule("/manual");
+
+        top1.attachModule(top0, "/manual");
+        assertAttached(top1, "/manual");
+        assertAttached(top1, "/tinylang");
+    }
+
+
+    @Test
+    public void testAttachFromNonDefaultRegistry()
+        throws Exception
+    {
+        StandardRuntime runtime = (StandardRuntime) runtime();
+
+        StandardTopLevel top0 = runtime.makeEmptyTopLevelAndRegistry();
+        StandardTopLevel top1 = runtime.makeEmptyTopLevelAndRegistry();
+
+        top0.requireModule("/grain");
+
+        top1.attachModule(top0, "/grain");
+        assertAttached(top1, "/grain");
+
+        // Make sure we don't side-effect the default registry.
+        assertNotLoaded((StandardTopLevel) topLevel(), "/grain");
+    }
+
+
+    @Test
+    public void testAttachFailsWhenModuleNotDefinedInSource()
+        throws Exception
+    {
+        StandardRuntime runtime = (StandardRuntime) runtime();
+
+        StandardTopLevel top0 = runtime.makeEmptyTopLevelAndRegistry();
+        StandardTopLevel top1 = runtime.makeEmptyTopLevelAndRegistry();
+
+        try
+        {
+            top1.attachModule(top0, "/grain");
+            fail("Expected ContractException");
+        }
+        catch (ContractException e)
+        {
+            assertThat(e.getMessage(),
+                       containsString("Source registry has no instantiation of module /grain"));
+        }
+
+        assertNotLoaded((StandardTopLevel) topLevel(), "/grain");
+        assertNotLoaded(top0, "/grain");
+        assertNotLoaded(top1, "/grain");
+    }
+
+
+    @Test
+    public void testAttachFailsWhenModuleNotInstantiatedInSource()
+        throws Exception
+    {
+        StandardRuntime runtime = (StandardRuntime) runtime();
+
+        StandardTopLevel top0 = runtime.makeEmptyTopLevelAndRegistry();
+        StandardTopLevel top1 = runtime.makeEmptyTopLevelAndRegistry();
+
+        top0.loadModule("/grain");  // Loaded but not instantiated.
+
+        try
+        {
+            top1.attachModule(top0, "/grain");
+            fail("Expected ContractException");
+        }
+        catch (ContractException e)
+        {
+            assertThat(e.getMessage(),
+                       containsString("Source registry has no instantiation of module /grain"));
+        }
+
+        assertNotLoaded((StandardTopLevel) topLevel(), "/grain");
+        assertNotLoaded(top1, "/grain");
+    }
+
+
+    @Test
+    public void testAttachFailsWhenModuleDiffersInTarget()
+        throws Exception
+    {
+        StandardRuntime runtime = (StandardRuntime) runtime();
+
+        StandardTopLevel top0 = (StandardTopLevel) topLevel();
+        StandardTopLevel top1 = runtime.makeEmptyTopLevelAndRegistry();
+
+        // Instantiate two copies of the same module.
+        top0.requireModule("/grain");
+        top1.requireModule("/grain");
+
+        thrown.expect(ContractException.class);
+        thrown.expectMessage("Destination registry already has a module with identity /grain");
+        top1.attachModule(top0, "/grain");
+    }
+
+
+    @Test
+    public void testAttachFailsWhenDependencyDiffersInTarget()
+        throws Exception
+    {
+        StandardRuntime runtime = (StandardRuntime) runtime();
+
+        StandardTopLevel top0 = (StandardTopLevel) topLevel();
+        StandardTopLevel top1 = runtime.makeEmptyTopLevelAndRegistry();
+        top1.requireModule("/fusion");
+        assertDifferentInstances(top0, top1, "/fusion");
+
+        top0.requireModule("/grain"); // which requires /fusion
+
+        thrown.expect(ContractException.class);
+        thrown.expectMessage("Destination registry already has a module with identity /fusion");
+        top1.attachModule(top0, "/grain");
     }
 }

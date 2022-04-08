@@ -1,0 +1,7 @@
+// Copyright (c) 2022 Amazon.com, Inc.  All rights reserved.
+
+(module tinylang "/fusion/private/kernel"
+  (provide define
+           provide
+           require)
+)

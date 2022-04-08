@@ -133,4 +133,62 @@ final class ModuleRegistry
         }
         declare(resolver, instance.getIdentity(), decl);
     }
+
+
+    /**
+     * Locates an instantiated module in a source registry and attaches it to
+     * this one.  All of its required module instances and their declarations
+     * are copied as well.
+     * <p>
+     * Equivalent to Racket's {@code namespace-attach-module}.
+     * </p>
+     *
+     * @param resolver the current module name resolver, which will be notified
+     *                 of all modules newly attached here.
+     * @param source the registry to copy modules from.
+     * @param id the desired module to copy.
+     */
+    void attach(ModuleNameResolver resolver,
+                ModuleRegistry     source,
+                ModuleIdentity     id)
+        throws FusionException, ContractException
+    {
+        ModuleInstance sourceInstance;
+        CompiledModule sourceDecl;
+
+        // Avoid deadlock: don't synch on this and source simultaneously.
+        synchronized (source)
+        {
+            sourceInstance = source.myModules.get(id);
+            if (sourceInstance == null)
+            {
+                String message =
+                    "Source registry has no instantiation of module " + id;
+                throw new ContractException(message);
+            }
+
+            // null IFF the module was created by a ModuleBuilder.
+            sourceDecl = source.myDeclarations.get(id);
+        }
+
+        ModuleInstance currentInstance = lookup(id);
+        if (currentInstance == sourceInstance) return;
+
+        if (currentInstance != null)
+        {
+            String message =
+                "Destination registry already has a module with identity " + id;
+            throw new ContractException(message);
+        }
+
+        if (sourceDecl != null)
+        {
+            for (ModuleIdentity required : sourceDecl.getRequiredModules())
+            {
+                attach(resolver, source, required);
+            }
+        }
+
+        register(resolver, sourceInstance, sourceDecl);
+    }
 }

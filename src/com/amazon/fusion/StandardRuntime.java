@@ -161,7 +161,7 @@ final class StandardRuntime
         ModuleNameResolver resolver = myGlobalState.myModuleNameResolver;
 
         ModuleRegistry r = new ModuleRegistry();
-        r.register(resolver, myRegistry.lookup(KERNEL_MODULE_IDENTITY), null);
+        r.attach(resolver, myRegistry, KERNEL_MODULE_IDENTITY);
         return r;
     }
 

@@ -189,6 +189,18 @@ final class StandardTopLevel
     }
 
 
+    void attachModule(StandardTopLevel src, String modulePath)
+        throws FusionInterruptedException, FusionException
+    {
+        try
+        {
+            myNamespace.attachModule(myEvaluator, src.myNamespace, modulePath);
+        }
+        catch (FusionInterrupt e)
+        {
+            throw new FusionInterruptedException(e);
+        }
+    }
 
     @Override
     public void requireModule(String modulePath)

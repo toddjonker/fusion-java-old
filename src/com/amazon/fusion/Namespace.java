@@ -655,6 +655,22 @@ abstract class Namespace
                                                      null /* stxForErrors */);
     }
 
+    void attachModule(Evaluator eval, Namespace srcNamespace, String modulePath)
+        throws FusionException
+    {
+        ModuleNameResolver resolver = eval.findResolver();
+
+        // Resolve the path WRT the *source* registry, so we can locate
+        // manually-declared modules loaded into it.
+        // See the file rkt/ns-attach.rkt for demonstration test case.
+        eval = eval.parameterizeCurrentNamespace(srcNamespace);
+
+        ModuleIdentity id =
+            resolver.resolveModulePath(eval, myModuleId, modulePath, false, null);
+
+        myRegistry.attach(resolver, srcNamespace.getRegistry(), id);
+    }
+
 
     /**
      * Instantiates a module into this namespace's registry, then imports all

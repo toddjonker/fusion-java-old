@@ -615,6 +615,11 @@ final class ModuleForm
             myBody                = body;
         }
 
+        ModuleIdentity[] getRequiredModules()
+        {
+            return myRequiredModules;
+        }
+
         @Override
         public Object doEval(Evaluator eval, Store ignored)
             throws FusionException
