@@ -637,6 +637,26 @@ abstract class Namespace
 
 
     /**
+     * Loads a module definition into this namespace's registry, without
+     * instantiating it.
+     *
+     * @param modulePath is an absolute or relative module path.
+     */
+    final ModuleIdentity resolveAndLoadModule(Evaluator eval, String modulePath)
+        throws FusionException
+    {
+        // Make sure the resolver uses our registry.
+        eval = eval.parameterizeCurrentNamespace(this);
+
+        return eval.findResolver().resolveModulePath(eval,
+                                                     getModuleId(),
+                                                     modulePath,
+                                                     true /* load */,
+                                                     null /* stxForErrors */);
+    }
+
+
+    /**
      * Instantiates a module into this namespace's registry, then imports all
      * exported bindings from it.
      *
@@ -648,14 +668,8 @@ abstract class Namespace
         // Make sure the resolver uses our registry.
         eval = eval.parameterizeCurrentNamespace(this);
 
-        ModuleNameResolver resolver =
-            eval.getGlobalState().myModuleNameResolver;
-        ModuleIdentity id =
-            resolver.resolveModulePath(eval,
-                                       getModuleId(),
-                                       modulePath,
-                                       true /* load */,
-                                       null /* stxForErrors */);
+        ModuleIdentity id = resolveAndLoadModule(eval, modulePath);
+
         require(eval, null /* lexical context */, id);
     }
 

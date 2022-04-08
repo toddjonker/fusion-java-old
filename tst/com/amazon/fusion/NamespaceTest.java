@@ -2,7 +2,6 @@
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionNamespace.makeNamespaceWithLanguage;
 import static com.amazon.fusion.GlobalState.KERNEL_MODULE_IDENTITY;
 import static com.amazon.fusion.GlobalState.KERNEL_MODULE_NAME;
 import static org.junit.Assert.assertEquals;
@@ -10,9 +9,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import com.amazon.ion.IonReader;
-import com.amazon.ion.system.IonReaderBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -23,6 +21,7 @@ public class NamespaceTest
     public void requires()
         throws FusionException
     {
+        useTstRepo();
         topLevel().requireModule("/fusion/namespace");
     }
 
@@ -65,29 +64,70 @@ public class NamespaceTest
     }
 
 
-
-    private void assertLoaded(ModuleRegistry reg, String module)
+    private void assertLoaded(StandardTopLevel top, String module)
         throws Exception
     {
-        assertTrue(reg.isLoaded(ModuleIdentity.forAbsolutePath(module)));
+        assertTrue(top.getRegistry().isLoaded(module));
     }
 
-    private void assertNotLoaded(ModuleRegistry reg, String module)
+    private void assertNotLoaded(StandardTopLevel top, String module)
         throws Exception
     {
-        assertFalse(reg.isLoaded(ModuleIdentity.forAbsolutePath(module)));
+        assertFalse(top.getRegistry().isLoaded(module));
     }
 
-    private void assertNotAttached(ModuleRegistry reg, String module)
+    private void assertNotAttached(StandardTopLevel top, String module)
         throws Exception
     {
-        assertNull(reg.lookup(ModuleIdentity.forAbsolutePath(module)));
+        assertNull(top.getRegistry().lookup(module));
     }
 
-    private void assertAttached(ModuleRegistry reg, String module)
+    private void assertAttached(StandardTopLevel top, String module)
         throws Exception
     {
-        assertNotNull(reg.lookup(ModuleIdentity.forAbsolutePath(module)));
+        assertNotNull(top.getRegistry().lookup(module));
+    }
+
+
+    private void assertSameInstances(StandardTopLevel top0,
+                                     StandardTopLevel top1,
+                                     String module)
+    {
+        ModuleInstance inst0 = top0.getRegistry().lookup(module);
+        ModuleInstance inst1 = top1.getRegistry().lookup(module);
+        assertNotNull(inst0);
+        assertSame(inst0, inst1);
+    }
+
+    private void assertDifferentInstances(StandardTopLevel top0,
+                                          StandardTopLevel top1,
+                                          String module)
+    {
+        ModuleInstance inst0 = top0.getRegistry().lookup(module);
+        ModuleInstance inst1 = top1.getRegistry().lookup(module);
+        assertNotNull(inst0);
+        assertNotNull(inst1);
+        assertNotSame(inst0, inst1);
+    }
+
+
+
+    /**
+     * New registries must contain any essential low-level modules that must not
+     * be duplicated.
+     */
+    @Test
+    public void testNewRegistryHasKernel()
+        throws Exception
+    {
+        StandardRuntime runtime = (StandardRuntime) runtime();
+
+        StandardTopLevel top0 = runtime.getDefaultTopLevel();
+        StandardTopLevel top1 = runtime.makeEmptyTopLevelAndRegistry();
+
+        assertSameInstances(top0, top1, KERNEL_MODULE_NAME);
+        assertNotLoaded(top1, "/fusion");
+        assertNotLoaded(top1, "/fusion/base");
     }
 
 
@@ -97,17 +137,16 @@ public class NamespaceTest
     {
         StandardRuntime runtime = (StandardRuntime) runtime();
 
-        ModuleRegistry reg0 = runtime.getDefaultRegistry();
-        ModuleRegistry reg1 = runtime.makeModuleRegistry();
+        StandardTopLevel top0 = runtime.getDefaultTopLevel();
+        StandardTopLevel top1 = runtime.makeEmptyTopLevelAndRegistry();
 
-        assertAttached(reg0, "/fusion/base");
-        assertNotLoaded(reg1, "/fusion/base");
+        assertAttached(top0, "/fusion/base");
+        assertNotLoaded(top1, "/fusion/base");
 
-        // Since reg1 is empty modulo the kernel, we should get a separate
-        // copy of the language when we build a new namespace.
-        makeNamespaceWithLanguage(evaluator(), "/fusion/base", reg1);
-        assertNotSame(reg0.lookup("/fusion/base"),
-                      reg1.lookup("/fusion/base"));
+        // Since top1's registry is empty modulo the kernel, we should get a
+        // separate copy of any module we require.
+        top1.requireModule("/fusion/base");
+        assertDifferentInstances(top0, top1, "/fusion/base");
     }
 
 
@@ -117,18 +156,16 @@ public class NamespaceTest
     {
         StandardRuntime runtime = (StandardRuntime) runtime();
 
-        ModuleRegistry reg0 = runtime.getDefaultRegistry();
-        ModuleRegistry reg1 = runtime.makeModuleRegistry();
+        StandardTopLevel top0 = runtime.getDefaultTopLevel();
+        StandardTopLevel top1 = runtime.makeEmptyTopLevelAndRegistry();
 
-        StandardTopLevel top = runtime.makeTopLevel(reg1, "/fusion");
-        IonReader code =
-            IonReaderBuilder.standard().build("(module M '/fusion' true)");
-        top.loadModule("/fresh", code, null);
-        assertNotLoaded(reg0, "/fresh");
-        assertLoaded(reg1, "/fresh");
-        assertNotAttached(reg1, "/fresh"); // loadModule() doesn't instantiate.
-        top.requireModule("/fresh");
-        assertAttached(reg1, "/fresh");
-        assertNotLoaded(reg0, "/fresh");
+        top1.loadModule("/grain");
+        assertNotLoaded(top0, "/grain");
+        assertLoaded(top1, "/grain");
+        assertNotAttached(top1, "/grain"); // loadModule() doesn't instantiate.
+
+        top1.requireModule("/grain");
+        assertAttached(top1, "/grain");
+        assertNotLoaded(top0, "/grain");
     }
 }

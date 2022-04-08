@@ -558,6 +558,12 @@ class Evaluator
 
     //========================================================================
 
+    ModuleNameResolver findResolver()
+    {
+        // TODO This should be a parameter.
+        return myGlobalState.myModuleNameResolver;
+    }
+
     Namespace findCurrentNamespace()
     {
         DynamicParameter param = getGlobalState().myCurrentNamespaceParam;

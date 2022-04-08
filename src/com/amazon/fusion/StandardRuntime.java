@@ -140,6 +140,13 @@ final class StandardRuntime
     }
 
 
+    StandardTopLevel makeEmptyTopLevelAndRegistry()
+        throws FusionException
+    {
+        return makeTopLevel(makeModuleRegistry(), null);
+    }
+
+
     @Override
     public TopLevel makeTopLevel()
         throws FusionException
@@ -148,7 +155,7 @@ final class StandardRuntime
     }
 
 
-    ModuleRegistry makeModuleRegistry()
+    private ModuleRegistry makeModuleRegistry()
         throws FusionException
     {
         ModuleNameResolver resolver = myGlobalState.myModuleNameResolver;

@@ -56,6 +56,11 @@ final class StandardTopLevel
         return myEvaluator;
     }
 
+    // NOT PUBLIC
+    ModuleRegistry getRegistry()
+    {
+        return myNamespace.getRegistry();
+    }
 
     @Override
     public Object eval(String source, SourceName name)
@@ -169,6 +174,20 @@ final class StandardTopLevel
             throw new FusionInterruptedException(e);
         }
     }
+
+    ModuleIdentity loadModule(String modulePath)
+        throws FusionInterruptedException, FusionException
+    {
+        try
+        {
+            return myNamespace.resolveAndLoadModule(myEvaluator, modulePath);
+        }
+        catch (FusionInterrupt e)
+        {
+            throw new FusionInterruptedException(e);
+        }
+    }
+
 
 
     @Override

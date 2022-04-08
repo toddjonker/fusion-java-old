@@ -56,6 +56,11 @@ final class ModuleRegistry
             || myModules.containsKey(identity);
     }
 
+    boolean isLoaded(String absolutePath)
+    {
+        return isLoaded(ModuleIdentity.forAbsolutePath(absolutePath));
+    }
+
 
     /**
      * @return null if the module has not been instantiated and has not been
