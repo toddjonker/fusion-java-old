@@ -1,8 +1,9 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
+import com.amazon.fusion.util.function.Predicate;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;

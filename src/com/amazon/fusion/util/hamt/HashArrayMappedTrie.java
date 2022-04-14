@@ -2,7 +2,7 @@
 
 package com.amazon.fusion.util.hamt;
 
-import com.amazon.fusion.BiFunction;
+import com.amazon.fusion.util.function.BiFunction;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;

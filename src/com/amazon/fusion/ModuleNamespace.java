@@ -6,6 +6,7 @@ import static com.amazon.fusion.BindingSite.makeExportBindingSite;
 import static com.amazon.fusion.GlobalState.DEFINE;
 import static com.amazon.fusion.GlobalState.REQUIRE;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
+import com.amazon.fusion.util.function.Function;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;

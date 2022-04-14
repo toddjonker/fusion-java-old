@@ -3,8 +3,8 @@
 package com.amazon.fusion.util.hamt;
 
 import static com.amazon.fusion.util.hamt.EmptyHashTrie.EMPTY;
-import com.amazon.fusion.BiFunction;
-import com.amazon.fusion.BiPredicate;
+import com.amazon.fusion.util.function.BiFunction;
+import com.amazon.fusion.util.function.BiPredicate;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractSet;
 import java.util.Collection;

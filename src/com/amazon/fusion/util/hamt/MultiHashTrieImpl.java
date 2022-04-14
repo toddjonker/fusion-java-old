@@ -1,10 +1,10 @@
-// Copyright (c) 2021 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2021-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.util.hamt;
 
 import static com.amazon.fusion.util.hamt.HashArrayMappedTrie.NOTHING;
-import com.amazon.fusion.BiFunction;
-import com.amazon.fusion.BiPredicate;
+import com.amazon.fusion.util.function.BiFunction;
+import com.amazon.fusion.util.function.BiPredicate;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;

@@ -10,6 +10,7 @@ import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
 import com.amazon.fusion.TopLevelNamespace.TopLevelDefinedBinding;
+import com.amazon.fusion.util.function.Function;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

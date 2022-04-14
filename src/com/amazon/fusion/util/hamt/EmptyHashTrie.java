@@ -1,8 +1,8 @@
-// Copyright (c) 2021 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2021-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.util.hamt;
 
-import com.amazon.fusion.BiFunction;
+import com.amazon.fusion.util.function.BiFunction;
 import java.util.Collections;
 import java.util.Set;
 

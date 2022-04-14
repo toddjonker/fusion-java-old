@@ -1,7 +1,9 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+
+import com.amazon.fusion.util.function.Predicate;
 
 /**
  * Provides access to module source code in some (usually persistent) store.

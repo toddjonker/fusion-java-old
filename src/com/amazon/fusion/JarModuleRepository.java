@@ -1,8 +1,9 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.GlobalState.FUSION_SOURCE_EXTENSION;
+import com.amazon.fusion.util.function.Predicate;
 import java.io.IOException;
 import java.io.InputStream;
 

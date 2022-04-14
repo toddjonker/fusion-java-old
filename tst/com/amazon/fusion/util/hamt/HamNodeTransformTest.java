@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2021-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.util.hamt;
 
@@ -8,7 +8,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
-import com.amazon.fusion.BiFunction;
+import com.amazon.fusion.util.function.BiFunction;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.BitMappedNode;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Changes;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.HashArrayMappedNode;
