@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -145,7 +145,7 @@ public final class FusionLob
     //========================================================================
     // Procedure Helpers
 
-    public static class UnsafeLobToHexProc
+    static class UnsafeLobToHexProc
         extends Procedure
     {
         private static final char[] DIGITS = {
