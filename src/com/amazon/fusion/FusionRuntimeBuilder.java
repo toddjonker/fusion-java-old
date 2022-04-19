@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -36,7 +36,7 @@ import java.util.Properties;
  *                            .build();
  *</pre>
  *
- * <h3>Bootstrap Repository<a id="bootrepo"/></h3>
+ * <h3>Bootstrap Repository<a id="bootrepo"></a></h3>
  *
  * The most critical configuration property is the bootstrap repository,
  * a directory housing the primary resources needed by the runtime.

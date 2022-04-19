@@ -31,15 +31,15 @@ public class SandboxTest
     }
 
 
-    private TopLevel sandbox(String language)
+    private StandardTopLevel sandbox(String language)
         throws FusionException
     {
         SandboxBuilder b = runtime().makeSandboxBuilder();
         b.setLanguage(language);
-        return b.build();
+        return (StandardTopLevel) b.build();
     }
 
-    private TopLevel sandbox()
+    private StandardTopLevel sandbox()
         throws FusionException
     {
         return sandbox("/fusion");
@@ -136,8 +136,11 @@ public class SandboxTest
     public void testCurrentNamespaceIsSelf()
         throws Exception
     {
-        TopLevel sandbox = sandbox();
+        StandardTopLevel sandbox = sandbox();
+        sandbox.requireModule("/fusion/namespace");
         sandbox.requireModule("/fusion/eval");
+
+        assertSame(sandbox.getNamespace(), sandbox.eval("(current_namespace)"));
 
         sandbox.eval("(define in_sandbox 1912)");
 
@@ -149,6 +152,21 @@ public class SandboxTest
         Object varSym   = eval("(quote in_sandbox)");
         checkLong(1912, sandbox.call(evalProc, varSym));
         checkLong(1912, sandbox.call("eval", varSym));
+    }
+
+
+    @Test
+    public void testMakeNamespaceWithLanguage()
+        throws Exception
+    {
+        useTstRepo();
+
+        StandardTopLevel sandbox = sandbox();
+
+        sandbox.requireModule("/fusion/namespace");
+        Namespace ns = (Namespace) sandbox.eval("(make_namespace_with_language \"/tinylang\")");
+
+        assertSame(sandbox.getRegistry(), ns.getRegistry());
     }
 
 

@@ -8,22 +8,28 @@ import com.amazon.ion.ValueFactory;
 
 /**
  * Primary entry point for embedding Fusion within a Java program.
- * The runtime contains resources common to many evaluations, in particular a
- * registry of all loaded modules. Instances are immutable and thread-safe.
+ * The runtime contains resources common to many evaluations, in particular the
+ * default module registry tracking loaded modules.
+ * Instances are immutable and thread-safe.
  * <p>
  * <b>WARNING:</b> This interface must not be implemented or extended by
  * code outside of this library.
+ * </p>
  * <p>
  * The runtime should be considered a very heavyweight component, and it should
  * not be used in a transient or localized fashion. Most applications should
  * construct exactly one runtime.
+ * </p>
  * <p>
  * The runtime maintains a {@link TopLevel} namespace within which expressions
  * can be evaluated. The namespace bindings and state are maintained between
  * calls.  Applications that need isolated evaluation should create additional
- * top levels by calling one of the {@link #makeTopLevel} methods.
+ * top levels by calling one of the {@link #makeTopLevel} methods. More secure
+ * evaluation contexts are provided via {@link #makeSandboxBuilder()}.
+ * </p>
  * <p>
  * To create a {@link FusionRuntime}, use a {@link FusionRuntimeBuilder}.
+ * </p>
  */
 public interface FusionRuntime
 {

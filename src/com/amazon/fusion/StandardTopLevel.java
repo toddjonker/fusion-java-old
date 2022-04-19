@@ -57,6 +57,12 @@ final class StandardTopLevel
     }
 
     // NOT PUBLIC
+    Namespace getNamespace()
+    {
+        return myNamespace;
+    }
+
+    // NOT PUBLIC
     ModuleRegistry getRegistry()
     {
         return myNamespace.getRegistry();

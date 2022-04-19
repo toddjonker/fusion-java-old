@@ -5,15 +5,37 @@ package com.amazon.fusion;
 /**
  * Constructs {@link TopLevel} namespaces for evaluating code with limited
  * access to resources.
- * <p>
  * By default, sandboxed evaluation is blocked from accessing the file system
- * and network.
+ * and network.  They are not, however, blocked from loading modules from the
+ * runtime's {@linkplain FusionRuntimeBuilder#addRepositoryDirectory
+ * preconfigured repositories}, so access to the standard
+ * libraries (or other deploy libraries) is not impeded.
  * </p>
  * <p>
- * Each sandbox namespace has its own module registry that only shares select
- * module instances with other namespaces.  This prevents pollution of the
- * runtime's default registry, which is particularly useful when sandboxed code
- * can create new modules (for example, by evaluating a module declaration).
+ * To create a {@link SandboxBuilder}, use
+ * {@link FusionRuntime#makeSandboxBuilder()}.
+ * </p>
+ * <p>
+ * <b>WARNING:</b> This interface must not be implemented or extended by
+ * code outside of this library.
+ * </p>
+ *
+ * <h1>Handling of Module Instances</h1>
+ * <p>
+ * Every Fusion namespace, and thus every {@link TopLevel}, has a <em>module
+ * registry</em> that stores loaded/compiled module code and the associated
+ * module instances. All {@link TopLevel} namespaces created by the APIs on
+ * {@link FusionRuntime} share the same "default registry". This means that any
+ * modules loaded by code evaluating within those namespaces, including by
+ * evaluation of module expressions, are stored in one place and are visible to
+ * all of those namespaces.
+ * </p>
+ * <p>
+ * In contrast, each namespace created by or within a {@link SandboxBuilder}
+ * gets its own unique module registry, so that modules newly-loaded from the
+ * configured repositories are not shared across sandboxes, and (most
+ * importantly) Fusion {@code module} expressions do not pollute the default
+ * registry.
  * </p>
  * <p>
  * On the other hand, this means that there can be unnecessary instances of
