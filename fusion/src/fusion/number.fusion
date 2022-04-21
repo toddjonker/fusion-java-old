@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 (module number '/fusion/private/builtins'
 
@@ -162,20 +162,21 @@ Examples:
     '''
     (java_new "com.amazon.fusion.FusionNumber$DecimalProc"))
 
+
   (define random
     '''
     (random)
     (random max)
 
-Returns a random float value between 0.0 (inclusive) and 1.0 (exclusive) when no aditional arguments are provided.
-If an integer parameter (max) is send, the proc will generates a random number between 0 and max.
-Upper bound inclusive. 0 <= val < max
+Returns a random float value between 0.0 (inclusive) and 1.0 (exclusive) when
+no additional arguments are provided.  When `max` is provided, it must be a
+positive integer, and the result is a random number between 0 (inclusive)
+and `max` (exclusive).
 
 Examples:
-    (random_float) // Decimal value: 0.0 <= value < 1.0
-    (random_float 45) // Integer value: 0 <= value < 45.
 
+    (random)    // Returns a decimal value: 0.0 <= value < 1.0
+    (random 45) // Returns an int value:    0   <= value < 45
     '''
-
     (java_new "com.amazon.fusion.FusionNumber$RandomProc"))
 )

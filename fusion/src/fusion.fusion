@@ -54,7 +54,16 @@ contact us for clarification.
   )
 
   (require "/fusion/number")
-  (provide + - * / decimal int_to_string is_decimal is_float is_int string_to_int)
+  (provide
+    + - * /
+    decimal
+    int_to_string
+    is_decimal
+    is_float
+    is_int
+    random
+    string_to_int
+  )
 
   (require "/fusion/string")
   (provide
