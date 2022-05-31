@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2021 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.Set;
 
 final class SyntaxSymbol
-    extends SyntaxText
+    extends SyntaxText<SyntaxSymbol>
 {
     /** A zero-length array of {@link SyntaxSymbol}. */
     static final SyntaxSymbol[] EMPTY_ARRAY = new SyntaxSymbol[0];
@@ -38,8 +38,6 @@ final class SyntaxSymbol
     /** Initialized during {@link #doExpand} */
     private BoundIdentifier myBoundId;
 
-    private final SyntaxWraps myWraps;   // TODO make non-null to streamline logic.
-
     /**
      * @param datum must not be null.
      */
@@ -49,8 +47,7 @@ final class SyntaxSymbol
                          Object[]       properties,
                          BaseSymbol     datum)
     {
-        super(loc, properties, datum);
-        myWraps = wraps;
+        super(wraps, loc, properties, datum);
     }
 
 
@@ -126,7 +123,8 @@ final class SyntaxSymbol
     /**
      * @param wraps may be null.
      */
-    private SyntaxSymbol copyReplacingWraps(SyntaxWraps wraps)
+    @Override
+    SyntaxSymbol copyReplacingWraps(SyntaxWraps wraps)
     {
         // We intentionally don't copy the binding, since the wraps are
         // probably different, so the binding may be different.
@@ -155,55 +153,6 @@ final class SyntaxSymbol
         return (BaseSymbol) myDatum;
     }
 
-    @Override
-    SyntaxSymbol addWrap(SyntaxWrap wrap)
-    {
-        SyntaxWraps newWraps;
-        if (myWraps == null)
-        {
-            newWraps = SyntaxWraps.make(wrap);
-        }
-        else
-        {
-            newWraps = myWraps.addWrap(wrap);
-        }
-        return copyReplacingWraps(newWraps);
-    }
-
-    @Override
-    SyntaxSymbol addWraps(SyntaxWraps wraps)
-    {
-        SyntaxWraps newWraps;
-        if (myWraps == null)
-        {
-            newWraps = wraps;
-        }
-        else
-        {
-            newWraps = myWraps.addWraps(wraps);
-        }
-        return copyReplacingWraps(newWraps);
-    }
-
-
-    @Override
-    SyntaxSymbol stripWraps(Evaluator eval)
-    {
-        if (myWraps == null) return this;
-        return copyReplacingWraps(null);
-    }
-
-    /**
-     * Adds the wraps on this symbol onto those already on another value.
-     * @return syntax matching the source, after adding the wraps from this
-     * symbol.
-     */
-    SyntaxValue copyWrapsTo(SyntaxValue source)
-        throws FusionException
-    {
-        if (myWraps == null) return source;
-        return source.addWraps(myWraps);
-    }
 
     /**
      * @return not null.
@@ -219,7 +168,7 @@ final class SyntaxSymbol
     boolean hasMarks(Evaluator eval)
     {
         if (myBoundId != null) return myBoundId.hasMarks();
-        return (myWraps != null && myWraps.hasMarks(eval));
+        return super.hasMarks(eval);
     }
 
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -15,8 +15,8 @@ import static com.amazon.fusion.FusionNumber.makeInt;
 import static com.amazon.fusion.FusionNumber.unsafeTruncateIntToJavaInt;
 import static com.amazon.fusion.FusionString.CHAR_TYPES.LOWERCASE;
 import static com.amazon.fusion.FusionString.CHAR_TYPES.UPPERCASE;
-import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
+import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionText.checkRequiredTextArg;
 import static com.amazon.fusion.FusionVoid.voidValue;
 import static java.lang.Character.highSurrogate;
@@ -91,9 +91,15 @@ public final class FusionString
         }
 
         @Override
-        SyntaxValue datumToSyntaxMaybe(Evaluator eval, SourceLocation loc)
+        SyntaxString makeOriginalSyntax(Evaluator eval, SourceLocation loc)
         {
-            return SimpleSyntaxValue.makeSyntax(eval, loc, this);
+            return SyntaxString.makeOriginal(eval, loc, this);
+        }
+
+        @Override
+        SyntaxString datumToSyntaxMaybe(Evaluator eval, SourceLocation loc)
+        {
+            return SyntaxString.make(eval, loc, this);
         }
 
 

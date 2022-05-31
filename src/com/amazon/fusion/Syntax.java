@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -25,11 +25,13 @@ final class Syntax
 
 
     /**
+     * Applies (additional) syntactic context to a syntax object.
+     *
      * @param context may be null, in which case nothing happens.
      */
-    static SyntaxValue applyContext(Evaluator    eval,
-                                    SyntaxSymbol context,
-                                    SyntaxValue  datum)
+    static SyntaxValue applyContext(Evaluator   eval,
+                                    SyntaxText  context,
+                                    SyntaxValue datum)
         throws FusionException
     {
         if (context != null)

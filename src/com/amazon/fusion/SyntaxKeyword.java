@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -9,8 +9,20 @@ import com.amazon.ion.IonWriter;
 import java.io.IOException;
 
 final class SyntaxKeyword
-    extends SyntaxText
+    extends SyntaxText<SyntaxKeyword>
 {
+
+    /**
+     * @param datum must not be null.
+     */
+    private SyntaxKeyword(SyntaxWraps    wraps,
+                          SourceLocation loc,
+                          Object[]       properties,
+                          BaseSymbol     datum)
+    {
+        super(wraps, loc, properties, datum);
+    }
+
     /**
      * @param datum must not be null.
      */
@@ -18,7 +30,7 @@ final class SyntaxKeyword
                           Object[]       properties,
                           BaseSymbol     datum)
     {
-        super(loc, properties, datum);
+        super(null, loc, properties, datum);
     }
 
 
@@ -39,6 +51,25 @@ final class SyntaxKeyword
 
 
     //========================================================================
+
+
+    @Override
+    SyntaxKeyword copyReplacingWraps(SyntaxWraps wraps)
+    {
+        return new SyntaxKeyword(wraps,
+                                 getLocation(),
+                                 getProperties(),
+                                 (BaseSymbol) myDatum);
+    }
+
+    @Override
+    SyntaxKeyword copyReplacingProperties(Object[] properties)
+    {
+        return new SyntaxKeyword(myWraps,
+                                 getLocation(),
+                                 properties,
+                                 (BaseSymbol) myDatum);
+    }
 
 
     @Override
