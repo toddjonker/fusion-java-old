@@ -253,7 +253,6 @@ final class RequireForm
         int arity = stx.size();
 
         SyntaxChecker check = new SyntaxChecker(eval, REQUIRE, stx);
-        SyntaxSymbol requireSym = (SyntaxSymbol) stx.get(eval, 0);
 
         CompiledRequireSpec[] compiledSpecs =
             new CompiledRequireSpec[arity - 1];
@@ -268,7 +267,7 @@ final class RequireForm
             try
             {
                 compiledSpecs[i] =
-                    compileSpec(eval, env, baseModule, check, requireSym, spec);
+                    compileSpec(eval, env, baseModule, check, spec);
             }
             catch (FusionException e)
             {
@@ -284,7 +283,6 @@ final class RequireForm
                                             Environment env,
                                             ModuleIdentity baseModule,
                                             SyntaxChecker requireCheck,
-                                            SyntaxSymbol lexicalContext,
                                             SyntaxValue spec)
         throws FusionException
     {
@@ -361,7 +359,10 @@ final class RequireForm
             // Here we are loading but not instantiating the required module.
             ModuleIdentity moduleId =
                 myModuleNameResolver.resolve(eval, baseModule, spec, true);
-            return new CompiledFullRequire(moduleId, lexicalContext);
+
+            // "The lexical context of the module-path form determines the
+            // context of the introduced identifiers"
+            return new CompiledFullRequire(moduleId, (SyntaxText<?>) spec);
         }
     }
 
@@ -452,10 +453,10 @@ final class RequireForm
     private static final class CompiledFullRequire
         extends CompiledRequireSpec
     {
-        private final SyntaxSymbol myLexicalContext;
+        private final SyntaxText myLexicalContext;
 
         private CompiledFullRequire(ModuleIdentity usedModuleId,
-                                    SyntaxSymbol lexicalContext)
+                                    SyntaxText     lexicalContext)
         {
             super(usedModuleId);
             myLexicalContext = lexicalContext;

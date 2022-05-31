@@ -1,0 +1,47 @@
+// Copyright (c) 2022 Amazon.com, Inc.  All rights reserved.
+
+(module require_macro "/fusion"
+  '''
+Various implementations of a macro that expands to a `require` form.
+This is tricky to get right!
+
+Corresponding Racket code is in rkt/require_macro.rkt
+  '''
+
+  (provide (all_defined_out))
+
+  (require "/fusion/experimental/syntax")
+
+  (define (capturing_syntax stx datum)
+    // Transforms datum into syntax objects, using lexical context from
+    // stx which should be the original syntax sexp.
+    (datum_to_syntax datum
+                     (syntax_get stx 0)))
+
+
+  // WRONG: The resulting imports have a lexical context that's unreachable
+  // by any code since it's unique to a single macro expansion.
+  (define_syntax require_grain_naive
+    (lambda (stx)
+      (quote_syntax (require "/grain"))))
+
+  // WRONG: Copies the original context onto just the `require` identifier.
+  (define_syntax require_grain_wrong
+    (lambda (stx)
+      (quasisyntax ((unsyntax (capturing_syntax stx (quote require)))
+                    "/grain"))))
+
+  // RISKY: Here we copy the use-site lexical context onto the entire expansion
+  // result. This works IFF the use-site has `require` bound correctly.
+  (define_syntax require_grain_risky
+    (lambda (stx)
+      (capturing_syntax stx (quote (require "/grain")))))
+
+  // CORRECT: Here we copy the use-site context just to the module-path subform,
+  // leaving the `require` bound to its meaning in the macro tronsform code here.
+  // This works even when the use-site has a different binding (or none) for
+  // `require`.
+  (define_syntax require_grain_best
+    (lambda (stx)
+      (quasisyntax (require (unsyntax (capturing_syntax stx "/grain"))))))
+)

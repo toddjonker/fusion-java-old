@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
 
 {
   all_defined_out: '''
@@ -206,7 +206,8 @@ Each `require_clause` denotes some bindings to be imported. The following
 clause forms are allowed:
 
   * A string or symbol containing a [module path][]; all names `provide`d by
-    the referenced module are imported.
+    the referenced module are imported.  The bindings introduced by this form
+    use the lexical context of the module path.
   * [`only_in`][only_in] enumerates a set of names to import.
   * [`prefix_in`][prefix_in] provides a prefix to imported bindings.
   * [`rename_in`][rename_in] renames specified bindings.
