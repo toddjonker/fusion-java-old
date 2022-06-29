@@ -12,6 +12,10 @@ package com.amazon.fusion;
  * libraries (or other deploy libraries) is not impeded.
  * </p>
  * <p>
+ * In addition to file system access, the standard input port is set to an
+ * empty stream, and the standard output port discards all data.
+ * </p>
+ * <p>
  * To create a {@link SandboxBuilder}, use
  * {@link FusionRuntime#makeSandboxBuilder()}.
  * </p>
