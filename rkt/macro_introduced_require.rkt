@@ -82,3 +82,18 @@
   (require_prefix_barley_best)
   (check === my-barley "soup"))
 (require 'test_require_prefix)
+
+
+;; And for rename-in, which works differently.
+
+(require_rename_barley_wrong)
+(expect_syntax_exn barlee)
+(expect_syntax_exn barley)
+
+(module test_require_rename racket
+  (require rackunit
+           "fusion.rkt"
+           "require_macro.rkt")
+  (require_rename_barley_best)
+  (check === barlee "soup"))
+(require 'test_require_rename)

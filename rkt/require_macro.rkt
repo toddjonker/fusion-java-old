@@ -61,3 +61,14 @@
 (define-syntax require_prefix_barley_best
   (lambda (stx)
     (quasisyntax (require (prefix-in my- (unsyntax (capturing_syntax stx "grain.rkt")))))))
+
+
+; rename-in works a bit differently: the lexical context of the bind-id, not the require-spec, matters.
+
+(define-syntax require_rename_barley_wrong
+  (lambda (stx)
+    (quasisyntax (require (rename-in (unsyntax (capturing_syntax stx "grain.rkt")) (barley barlee))))))
+
+(define-syntax require_rename_barley_best
+  (lambda (stx)
+    (quasisyntax (require (rename-in "grain.rkt" (barley (unsyntax (capturing_syntax stx 'barlee))))))))

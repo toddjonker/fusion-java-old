@@ -359,6 +359,8 @@ final class RequireForm
                                                          baseModule,
                                                          sexp.get(eval, 1),
                                                          true);
+
+                    // In this form, we retain the lexical context from the localId.
                     SyntaxSymbol localId = (SyntaxSymbol) sexp.get(eval, 2);
                     SyntaxSymbol exportedId = (SyntaxSymbol) sexp.get(eval, 3);
                     RequireRenameMapping[] mappings =

@@ -79,3 +79,17 @@
   (require_prefix_barley_best)
   (check === my_barley "soup"))
 (require test_require_prefix)
+
+
+// And for rename-in, which works differently.
+
+(require_rename_barley_wrong)
+(expect_syntax_exn barlee)
+(expect_syntax_exn barley)
+
+(module test_require_rename "/fusion"
+  (require "/fusion/experimental/check"
+           "/require_macro")
+  (require_rename_barley_best)
+  (check === barlee "soup"))
+(require test_require_rename)

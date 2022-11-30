@@ -84,4 +84,23 @@ Corresponding Racket code is in rkt/require_macro.rkt
     (lambda (stx)
       (quasisyntax
         (require (prefix_in my_ (unsyntax (capturing_syntax stx "/grain")))))))
+
+
+  // rename-in works a bit differently: the lexical context of the bind-id,
+  // not the require-spec, matters.
+  //
+  // These macros generate lexically-distinct variants of:
+  //   (require (rename_in "/grain" (barley barlee)))
+
+  (define_syntax require_rename_barley_wrong
+    (lambda (stx)
+      (quasisyntax
+        (require (rename_in (unsyntax (capturing_syntax stx "/grain"))
+                   (barley barlee))))))
+
+  (define_syntax require_rename_barley_best
+    (lambda (stx)
+      (quasisyntax
+        (require (rename_in "/grain"
+                   (barley (unsyntax (capturing_syntax stx (quote barlee)))))))))
 )

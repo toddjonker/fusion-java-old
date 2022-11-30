@@ -187,6 +187,9 @@ identically to multiple `provide` forms with single clauses.
 A `require` clause that imports each `exported_id` using the name `local_id`.
 If an `exported_id` is not provided by the module, a syntax error is reported.
 
+In contrast to other require-clauses, bindings introduced by this form use the
+lexical context of the `local_id`s, not that of the module path.
+
 This form can only appear within `require`.
   ''',
 
