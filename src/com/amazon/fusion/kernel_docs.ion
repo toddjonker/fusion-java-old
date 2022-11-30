@@ -139,6 +139,9 @@ This effectively enables module-level macro uses to expand into multiple forms.
 A `require` clause that imports only the given `id`s from a module.
 If an `id` is not provided by the module, a syntax error is reported.
 
+Bindings introduced by this form use the lexical context of the module path,
+not that of the given identifiers.
+
 This form can only appear within `require`.
   ''',
 

@@ -30,3 +30,21 @@
 (define-syntax require_grain_best
   (lambda (stx)
     (quasisyntax (require (unsyntax (capturing_syntax stx "grain.rkt"))))))
+
+
+; Like basic require, non-renaming only-in uses the lexical context on the
+; module path.
+
+(define-syntax require_only_barley_naive
+  (lambda (stx)
+    (quote-syntax (require (only-in "grain.rkt" barley)))))
+
+; WRONG: Copies the original context onto the bind-id
+(define-syntax require_only_barley_wrong
+  (lambda (stx)
+    (quasisyntax (require (only-in "grain.rkt" (unsyntax (capturing_syntax stx 'barley)))))))
+
+; CORRECT: Copies the original context onto the module path.
+(define-syntax require_only_barley_best
+  (lambda (stx)
+    (quasisyntax (require (only-in (unsyntax (capturing_syntax stx "grain.rkt")) barley)))))

@@ -293,9 +293,14 @@ final class RequireForm
             {
                 case "only":
                 {
+                    SyntaxValue pathStx = sexp.get(eval, 1);
+
                     ModuleIdentity moduleId =
                         myModuleNameResolver.resolve(eval, baseModule,
-                                                     sexp.get(eval, 1), true);
+                                                     pathStx, true);
+
+                    // Resolver has type-checked the module-path for us.
+                    SyntaxText context = (SyntaxText) pathStx;
 
                     int idCount = sexp.size() - 2;
                     RequireRenameMapping[] mappings =
@@ -303,8 +308,13 @@ final class RequireForm
                     for (int i = 0; i < idCount; i++)
                     {
                         SyntaxSymbol id = (SyntaxSymbol) sexp.get(eval, i + 2);
-                        mappings[i] =
-                            new RequireRenameMapping(id, id.getName());
+                        FusionSymbol.BaseSymbol name = id.getName();
+
+                        // Mint a fresh identifier with only the context from the module path.
+                        SyntaxSymbol localId = SyntaxSymbol.make(eval, id.getLocation(), name);
+                        localId = (SyntaxSymbol) Syntax.applyContext(eval, context, localId);
+
+                        mappings[i] = new RequireRenameMapping(localId, name);
                     }
 
                     return new CompiledPartialRequire(moduleId, mappings);

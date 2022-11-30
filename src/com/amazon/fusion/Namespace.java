@@ -590,8 +590,8 @@ abstract class Namespace
      */
     static final class RequireRenameMapping
     {
-        final SyntaxSymbol myLocalIdentifier;
-        final BaseSymbol   myExportedIdentifier;
+        private final SyntaxSymbol myLocalIdentifier;
+        private final BaseSymbol   myExportedIdentifier;
 
         RequireRenameMapping(SyntaxSymbol localIdentifier,
                              BaseSymbol exportedIdentifier)

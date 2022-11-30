@@ -50,3 +50,20 @@
   (require_grain_best)
   (check === barley "soup"))
 (require 'test_require)
+
+
+;; Now, similar tests for require only-in
+
+(require_only_barley_naive)
+(expect_syntax_exn barley)
+
+(require_only_barley_wrong)
+(expect_syntax_exn barley)
+
+(module test_require_only racket
+  (require rackunit
+           "fusion.rkt"
+           "require_macro.rkt")
+  (require_only_barley_best)
+  (check === barley "soup"))
+(require 'test_require_only)

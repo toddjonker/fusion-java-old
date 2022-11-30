@@ -44,4 +44,26 @@ Corresponding Racket code is in rkt/require_macro.rkt
   (define_syntax require_grain_best
     (lambda (stx)
       (quasisyntax (require (unsyntax (capturing_syntax stx "/grain"))))))
+
+
+  // Like basic require, non-renaming only-in uses the lexical context on the
+  // module path.
+
+  (define_syntax require_only_barley_naive
+    (lambda (stx)
+      (quote_syntax (require (only_in "/grain" barley)))))
+
+  // WRONG: Copies the original context onto the bind-id
+  (define_syntax require_only_barley_wrong
+    (lambda (stx)
+    (quasisyntax
+      (require (only_in "/grain"
+                        (unsyntax (capturing_syntax stx (quote barley))))))))
+
+  // CORRECT: Copies the original context onto the module path.
+  (define_syntax require_only_barley_best
+    (lambda (stx)
+      (quasisyntax
+        (require (only_in (unsyntax (capturing_syntax stx "/grain"))
+                          barley)))))
 )
