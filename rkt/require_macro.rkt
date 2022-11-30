@@ -48,3 +48,16 @@
 (define-syntax require_only_barley_best
   (lambda (stx)
     (quasisyntax (require (only-in (unsyntax (capturing_syntax stx "grain.rkt")) barley)))))
+
+
+; prefix-in works the same as only-in; the context of the prefix-id is ignored.
+
+; WRONG: Copies the original context onto the prefix-id
+(define-syntax require_prefix_barley_wrong
+  (lambda (stx)
+    (quasisyntax (require (prefix-in (unsyntax (capturing_syntax stx 'my-)) "grain.rkt")))))
+
+; CORRECT: Copies the original context onto the module path.
+(define-syntax require_prefix_barley_best
+  (lambda (stx)
+    (quasisyntax (require (prefix-in my- (unsyntax (capturing_syntax stx "grain.rkt")))))))

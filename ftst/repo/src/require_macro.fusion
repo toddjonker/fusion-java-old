@@ -66,4 +66,22 @@ Corresponding Racket code is in rkt/require_macro.rkt
       (quasisyntax
         (require (only_in (unsyntax (capturing_syntax stx "/grain"))
                           barley)))))
+
+
+  // prefix-in works the same as only-in; the context of the prefix-id is ignored.
+  //
+  // These macros generate lexically-distinct variants of:
+  //   (require (prefix_in my_ "/grain"))
+
+  // WRONG: Copies the original context onto the prefix-id
+  (define_syntax require_prefix_barley_wrong
+    (lambda (stx)
+      (quasisyntax
+        (require (prefix_in (unsyntax (capturing_syntax stx (quote my_))) "/grain")))))
+
+  // CORRECT: Copies the original context onto the module path.
+  (define_syntax require_prefix_barley_best
+    (lambda (stx)
+      (quasisyntax
+        (require (prefix_in my_ (unsyntax (capturing_syntax stx "/grain")))))))
 )

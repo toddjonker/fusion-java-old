@@ -67,3 +67,18 @@
   (require_only_barley_best)
   (check === barley "soup"))
 (require 'test_require_only)
+
+
+;; And for prefix-in
+
+(require_prefix_barley_wrong)
+(expect_syntax_exn my-barley)
+(expect_syntax_exn barley)
+
+(module test_require_prefix racket
+  (require rackunit
+           "fusion.rkt"
+           "require_macro.rkt")
+  (require_prefix_barley_best)
+  (check === my-barley "soup"))
+(require 'test_require_prefix)

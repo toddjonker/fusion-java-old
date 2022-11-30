@@ -322,12 +322,16 @@ final class RequireForm
                 case "prefix":
                 {
                     SyntaxSymbol prefixId = (SyntaxSymbol) sexp.get(eval, 1);
+                    SyntaxValue pathStx = sexp.get(eval, 2);
 
                     ModuleIdentity moduleId =
                             myModuleNameResolver.resolve(eval,
                                                          baseModule,
-                                                         sexp.get(eval, 2),
+                                                         pathStx,
                                                          true);
+
+                    // Resolver has type-checked the module-path for us.
+                    SyntaxText context = (SyntaxText) pathStx;
 
                     ModuleInstance moduleInstance =
                             env.namespace().getRegistry().instantiate(eval, moduleId);
@@ -337,9 +341,12 @@ final class RequireForm
                     int i = 0;
                     for (FusionSymbol.BaseSymbol providedName : moduleInstance.providedNames())
                     {
+                        // Mint a fresh identifier with only the context from the module path.
                         String newBindingName = prefixId.stringValue() + providedName.stringValue();
-                        SyntaxSymbol newBindingSymbol = SyntaxSymbol.make(eval, newBindingName);
-                        mappings[i] = new RequireRenameMapping(newBindingSymbol, providedName);
+                        SyntaxSymbol localId = SyntaxSymbol.make(eval, newBindingName);
+                        localId = (SyntaxSymbol) Syntax.applyContext(eval, context, localId);
+
+                        mappings[i] = new RequireRenameMapping(localId, providedName);
                         i++;
                     }
                     return new CompiledPartialRequire(moduleId, mappings);

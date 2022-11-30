@@ -150,8 +150,10 @@ This form can only appear within `require`.
     (prefix_in prefix_id module_path)
 
 A `require` clause that adjusts each identifier to be bound by prefixing it
-with `prefix_id`.  The lexical context of the `prefix_id` is ignored,
-and instead preserved from the identifiers before prefixing.
+with `prefix_id`.
+
+Bindings introduced by this form use the lexical context of the module path,
+not that of the prefix identifier.
 
 This form can only appear within `require`.
   ''',
