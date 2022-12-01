@@ -163,6 +163,9 @@ final class RequireForm
             String path = check.requiredText(eval, "module path", 1);
             checkValidModulePath(eval, check, path);
 
+            // NOTE: This doesn't follow Racket, which imports everything.
+            // Unfortunately, we can't fix this without risking breakage to existing code.
+
             final Set<String> localIdsSoFar = new HashSet<>();
             for (int i = 2; i < arity; i++)
             {
@@ -171,8 +174,8 @@ final class RequireForm
                 SyntaxChecker renamePairChecker = new SyntaxChecker(eval, renamePair);
                 renamePairChecker.arityExact(2);
 
-                // In Racket,
-                // the rename sub-form has the identifiers in reverse order compared to rename-in.
+                // The rename sub-form has the identifiers in reverse order compared to rename-in,
+                // and only handles one binding per clause.
                 SyntaxSymbol exportedId = renamePairChecker.requiredIdentifier("exported_id", 0);
                 SyntaxSymbol localId = renamePairChecker.requiredIdentifier("local_id", 1);
 
