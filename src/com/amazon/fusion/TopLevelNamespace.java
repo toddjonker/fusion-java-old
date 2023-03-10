@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -219,13 +219,13 @@ final class TopLevelNamespace
     //========================================================================
     // Compiled Forms
 
-    static final class CompiledFreeDefine
+    static final class CompiledTopDefine
         implements CompiledForm
     {
         private final SyntaxSymbol myId;
         private final CompiledForm myValueForm;
 
-        CompiledFreeDefine(SyntaxSymbol id, CompiledForm valueForm)
+        CompiledTopDefine(SyntaxSymbol id, CompiledForm valueForm)
         {
             myId = id;
             myValueForm = valueForm;
@@ -263,15 +263,15 @@ final class TopLevelNamespace
 
     /**
      * Interprets non-single-binding {@code define_values} at top-level.
-     * Single-binding forms are interpreted by {@link CompiledFreeDefine}.
+     * Single-binding forms are interpreted by {@link CompiledTopDefine}.
      */
-    static final class CompiledFreeDefineValues
+    static final class CompiledTopDefineValues
         implements CompiledForm
     {
         private final SyntaxSymbol[] myIds;
         private final CompiledForm myValuesForm;
 
-        CompiledFreeDefineValues(SyntaxSymbol[] ids, CompiledForm valuesForm)
+        CompiledTopDefineValues(SyntaxSymbol[] ids, CompiledForm valuesForm)
         {
             myIds        = ids;
             myValuesForm = valuesForm;
@@ -416,8 +416,6 @@ final class TopLevelNamespace
                 address = myAddress;
             }
 
-            Object result = ns.lookup(address);
-
             // There's a potential failure here: the binding may have had an
             // address assigned, but not yet a value. That could happen when
             // another thread is in the midst of defining the binding.
@@ -427,7 +425,7 @@ final class TopLevelNamespace
             // violation since Fusion doesn't promise that concurrent
             // mutation of a top-level namespace is thread-safe.
 
-            return result;
+            return ns.lookup(address);
         }
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2023 Amazon.com, Inc.  All rights reserved.
 
 (module for '/fusion/private/kernel'
 
@@ -404,7 +404,7 @@ Helper form for `for_fold_derived`.
     '''
     (for_fold_derived original
       [(accum-id init-expr), ...]
-      (for-clause ...)
+      [for-clause, ...]
       body ...+)
 
 Like `for_fold`, but uses the `original` syntax object when issuing error
@@ -418,7 +418,7 @@ messages.
     '''
     (fors_fold_derived original
       [(accum-id init-expr), ...]
-      (for-clause ...)
+      [for-clause, ...]
       body ...+)
 
 Like `fors_fold`, but uses the `original` syntax object when issuing error
@@ -435,7 +435,7 @@ messages.
     '''
     (for_fold
       [(accum-id init-expr), ...]
-      (for-clause ...)
+      [for-clause, ...]
       body ...+)
 
 Iterates using explicit accumulators.
@@ -464,7 +464,7 @@ The results of the `for_fold` expression are the final accumulator values.
     '''
     (fors_fold
       [(accum-id init-expr), ...]
-      (for-clause ...)
+      [for-clause, ...]
       body ...+)
 
 Like `for_fold`, except the series are iterated in nested loops instead of in

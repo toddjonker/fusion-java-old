@@ -37,9 +37,9 @@ import com.amazon.fusion.Namespace.CompiledNsDefineSyntax;
 import com.amazon.fusion.Namespace.CompiledNsDefineValues;
 import com.amazon.fusion.Namespace.NsDefinedBinding;
 import com.amazon.fusion.Namespace.RequiredBinding;
-import com.amazon.fusion.TopLevelNamespace.CompiledFreeDefine;
-import com.amazon.fusion.TopLevelNamespace.CompiledFreeDefineValues;
 import com.amazon.fusion.TopLevelNamespace.CompiledFreeVariableReference;
+import com.amazon.fusion.TopLevelNamespace.CompiledTopDefine;
+import com.amazon.fusion.TopLevelNamespace.CompiledTopDefineValues;
 import com.amazon.fusion.TopLevelNamespace.CompiledTopLevelVariableReference;
 import com.amazon.fusion.TopLevelNamespace.TopLevelDefinedBinding;
 
@@ -317,11 +317,11 @@ class Compiler
             // Regardless of any current binding for this id, treat it the same.
             if (idCount == 1)
             {
-                return new CompiledFreeDefine(ids[0], valuesForm);
+                return new CompiledTopDefine(ids[0], valuesForm);
             }
             else
             {
-                return new CompiledFreeDefineValues(ids, valuesForm);
+                return new CompiledTopDefineValues(ids, valuesForm);
             }
         }
 

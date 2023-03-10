@@ -125,8 +125,8 @@ as long as the docs don't already start with a code snippet.
 
 Binds a namespace-level variable `id` to the result of `value`.
 
-At top-level, the `expr` is evaluated before top-level bindings for the `id`s
-are created.
+At top-level, the `value` expression is evaluated before top-level bindings for
+the `id`s are created.
 
     (define (id arg ...) body ...+)
 

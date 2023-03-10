@@ -339,6 +339,8 @@ class MultiHashTrieImpl<K, V>
             myValues = new Object[] { v1, v2 };
         }
 
+        // TODO introduce randomness to add() so ordering isn't stable.
+
         private MultiValue add(Object newValue)
         {
             int len = myValues.length;

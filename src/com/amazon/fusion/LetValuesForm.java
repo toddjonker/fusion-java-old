@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -190,6 +190,9 @@ final class LetValuesForm
     //========================================================================
 
 
+    /**
+     * "Plain let" is when each expression produces one value.
+     */
     private static final class CompiledPlainLet
         implements CompiledForm
     {
@@ -325,12 +328,12 @@ final class LetValuesForm
         public Object doEval(Evaluator eval, Store store)
             throws FusionException
         {
-            final int numBindings = myValueForms.length;
+            final int numBindingForms = myValueForms.length;
 
             Object[] boundValues = new Object[myBindingCount];
 
             int bindingPos = 0;
-            for (int i = 0; i < numBindings; i++)
+            for (int i = 0; i < numBindingForms; i++)
             {
                 CompiledForm   form = myValueForms[i];
                 SourceLocation locn = myValueLocns[i];
