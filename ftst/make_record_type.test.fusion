@@ -1,0 +1,56 @@
+// Copyright (c) 2023 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/fusion/experimental/check"
+  "/fusion/private/record"
+)
+
+
+(define_values (R0_type R0_ctor R0_pred R0_get) (make_record_type (quote R0) 0))
+(define_values (R1_type R1_ctor R1_pred R1_get) (make_record_type (quote R1) 1))
+
+(check_pred is_procedure R0_ctor)
+(check_pred is_procedure R0_pred)
+
+(check_pred is_procedure R1_ctor)
+(check_pred is_procedure R1_pred)
+
+(expect_arity_error (R0_ctor 1))
+(expect_arity_error (R1_ctor))
+(expect_arity_error (R1_ctor 1 2))
+
+
+(let [(r0 (R0_ctor)),
+      (r1 (R1_ctor 11))]
+  (check_pred R0_pred r0)
+  (check_pred R1_pred r1)
+
+  (check_false (R0_pred r1))
+  (check_false (R1_pred r0))
+
+  (check == 11 (R1_get r1 0))
+
+  // type mismatch
+  (expect_argument_error (R1_get r0 0))
+
+  // Index out of bounds
+  (expect_argument_error (R0_get r0  0))
+  (expect_argument_error (R1_get r1 -1))
+  (expect_argument_error (R1_get r1  1))
+
+  (check == "R0::{[]}"   (display_to_string r0))
+  (check == "R1::{[11]}" (display_to_string r1))
+)
+
+
+(expect_arity_error (make_record_type))
+(expect_arity_error (make_record_type (quote T)))
+
+(expect_argument_error (make_record_type "name" 1))              // Invalid name
+(expect_argument_error (make_record_type (quote null.symbol) 1))
+(expect_argument_error (make_record_type (quote '') 1))
+
+(expect_argument_error (make_record_type (quote T) -1))     // Invalid field_count
+
+
+"SUCCESS (make_record_type.test)"

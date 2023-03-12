@@ -1,0 +1,43 @@
+// Copyright (c) 2023 Amazon.com, Inc.  All rights reserved.
+
+(module structure "/fusion"
+  '''
+A _record type_ is a datatype holding a number of fields.
+
+These facilities are incomplete and unstable.
+
+See the Racket documentation for `make-struct-type` at
+https://docs.racket-lang.org/reference/creatingmorestructs.html
+  '''
+
+  (require
+    "/fusion/ffi/java"
+  )
+
+  (provide
+    make_record_type
+  )
+
+
+  (define make_record_type
+    '''
+    (make_record_type name field_ct)
+
+Creates a new record type with the given name and number of fields.
+The `name` must be a non-empty symbol.
+The `field_ct` must be a non-negative integer.
+
+Returns multiple values:
+  * A _record type descriptor_, an opaque object representing the type.
+  * A constructor procedure that returns new records.
+  * A predicate that detects records of this type.
+  * An accessor function for records of this type.
+
+The constructor accepts the same number of arguments as there are fields, and
+initializes the record's fields, in order, with those values.
+
+The accessor accepts a record of this type, and a integer indicating the
+(zero-based) field index.  It returns the record's value for that field.
+    '''
+    (java_new "com.amazon.fusion.Records$MakeRecordTypeProc"))
+)
