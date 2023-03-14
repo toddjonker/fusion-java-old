@@ -1,47 +1,87 @@
 // Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 (require
+  "/ftst/check_more"
   "/fusion/experimental/check")
 
 
-(define (thunk) 513)
-(check_true (is_procedure thunk))
-(check === 513 (thunk))
+(run_top_and_module
 
-(define (thunk) 514 515)
-(check === 515 (thunk))
+  (define v1 "v1")
+  (check === "v1" v1)
 
-(define (thunk) "doc" "body")
-(check === "body" (thunk))
+  (define v2 "doc" "v2")
+  (check === "v2" v2)
 
-(define (thunk) "doc" 516 517)
-(check === 517 (thunk))
+  (define (f1) 513)
+  (check_true (is_procedure f1))
+  (check === 513 (f1))
 
+  (define (f2) 514 515)
+  (check === 515 (f2))
 
-(define (proc arg) arg)
-(check_true (is_procedure proc))
-(check === 518 (proc 518))
+  (define (f3) "doc" "body")
+  (check === "body" (f3))
 
-(define (proc arg) 532 arg)
-(check === 533 (proc 533))
-
-(define (proc arg) "doc" arg)
-(check === 545 (proc 545))
-
-(define (proc arg) "doc" 546 arg)
-(check === 547 (proc 547))
-
-// Duplicate bound names
-(expect_syntax_exn
-  (define (bad x x) true))
-(expect_syntax_exn
-  (define (bad x a b c x) true))
+  (define (f4) "doc" 516 517)
+  (check === 517 (f4))
 
 
-// A top-level binding is created after the expr is evaluated.
-(expect_syntax_exn
-  (define barley barley))
+  (define (f5 arg) arg)
+  (check_true (is_procedure f5))
+  (check === 518 (f5 518))
 
+  (define (f6 arg) 532 arg)
+  (check === 533 (f6 533))
+
+  (define (f7 arg) "doc" arg)
+  (check === 545 (f7 545))
+
+  (define (f8 arg) "doc" 546 arg)
+  (check === 547 (f8 547))
+
+  // Check shadowing definitions from the language.
+  (define adjust_year "haha")
+  (check === "haha" adjust_year)
+)
+
+
+// At top-level, we can shadow an imported binding.
 (require "/grain")
 (define barley barley)
 (check === "soup" barley)
+
+
+// A top-level binding is created after the expr is evaluated.
+// A module-level binding cannot refer to itself at compile-time.
+(expect_syntax_errors_top_and_module
+  (define self_ref self_ref))
+
+
+(expect_syntax_errors_top_and_module
+  (define)                       // Too few subforms
+  (define no_body)
+  (define (f))
+
+  (define var 1 2)               // Too many subforms
+  (define var "doc" 1 2)
+
+  (define "string" 1)            // Invalid bound identifiers
+  (define null.symbol 1)
+  (define '' 1)
+  (define 1 1)
+
+  (define ())                    // Missing procedure name
+  (define () 1)
+
+  (define (null.symbol) 1)       // Invalid procedure name
+  (define ('') 1)
+  (define ("bad") 1)
+  (define (123) 1)
+
+  (define (f "a") true)          // Invalid argument id
+  (define (f a b 1 d) true)
+
+  (define (f x x) true)          // Duplicate argument id
+  (define (f x a b c x) true)
+)
