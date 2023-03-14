@@ -1,0 +1,94 @@
+// Copyright (c) 2023 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/ftst/check_more"
+  "/fusion/experimental/check")
+
+
+(run_top_and_module
+
+  (define_values () (values))
+
+  (define_values (a) "a")
+  (check === "a" a)
+
+  (define_values (b c) (values 1 2))
+  (check === [1,2] [b,c])
+
+  (define_values (d1) ["doc"] "d1")
+  (check === "d1" d1)
+
+  (define_values (d2) "doc" "d2")
+  (check === "d2" d2)
+
+  (define_values (e f)
+    ["docs for e", "docs for f"]
+    (values 1 2))
+  (check === [1,2] [e,f])
+
+  // Check shadowing definitions from the language.
+  (define_values (adjust_year curry_left) (values "haha" "hoho"))
+  (check === "haha" adjust_year)
+  (check === "hoho" curry_left)
+)
+
+
+// At top-level, we can redefine things
+(check === "a" a)
+(define_values (a x) (values "a2" "x2"))
+(check === "a2" a)
+(check === "x2" x)
+(define_values (x) "x3")
+(check === "x3" x)
+
+
+(expect_syntax_errors_top_and_module
+  (define_values)                       // Too few subforms
+  (define_values (a))
+
+  (define_values (a) 1 2)               // Too many subforms
+  (define_values (a b) 1 2)
+
+  (define_values [] 1)                  // Bindings aren't an sexp
+  (define_values [a] 1)
+
+  (define_values ("string") 1)          // Invalid bound identifiers
+  (define_values (null.symbol) 1)
+  (define_values ('') 1)
+  (define_values (1) 1)
+
+  (define_values (n1 n2) (values 1 n1)) // Reference before definition
+
+  (define_values (a a) (values 1 2))    // Duplicate id
+  (define_values (a b a)
+    (values 1 2 3))
+
+  (define_values (a) [] 1)              // Too few doc strings
+  (define_values (a b) [] 1)
+  (define_values (a b) "a" 1)
+  (define_values (a b)
+    ["a"]
+    (values 1 2))
+
+  (define_values (a) ["a", "b"] 1)      // Too many doc strings
+  (define_values (a b)
+    ["a", "b", "c"]
+    (values 1 2))
+
+  (define values (a) [docs] 1)          // Docs aren't strings
+  (define values (a b)
+    ["a", docs]
+    (values 1 2))
+)
+
+
+// Run-time arity checking on the body
+
+(expect_result_errors_top_and_module
+  (define_values (a) (values))
+  (define_values (a) (values 1 2))
+
+  (define_values (a b) (values))
+  (define_values (a b) (values 1))
+  (define_values (a b) (values 1 2 3))
+)

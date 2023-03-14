@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 (module fusion "/fusion/base"
 
@@ -27,7 +27,7 @@ contact us for clarification.
 
 
   // Top-Level Forms
-  (provide begin define)
+  (provide begin define define_values)
 
   // Module Forms
   (provide all_defined_out module only_in

@@ -262,6 +262,85 @@ final class TopLevelNamespace
 
 
     /**
+     * Interprets non-single-binding {@code define_values} at top-level.
+     * Single-binding forms are interpreted by {@link CompiledFreeDefine}.
+     */
+    static final class CompiledFreeDefineValues
+        implements CompiledForm
+    {
+        private final SyntaxSymbol[] myIds;
+        private final CompiledForm myValuesForm;
+
+        CompiledFreeDefineValues(SyntaxSymbol[] ids, CompiledForm valuesForm)
+        {
+            myIds        = ids;
+            myValuesForm = valuesForm;
+        }
+
+        @Override
+        public Object doEval(Evaluator eval, Store store)
+            throws FusionException
+        {
+            Object values = eval.eval(store, myValuesForm);
+
+            TopLevelNamespace ns = (TopLevelNamespace) store.namespace();
+
+            int expectedCount = myIds.length;
+            if (expectedCount == 1)
+            {
+                eval.checkSingleResult(values, "top-level definition");
+                defineAndBind(ns, 0, values);
+            }
+            else if (values instanceof Object[])
+            {
+                Object[] vals = (Object[]) values;
+                int actualCount = vals.length;
+                if (expectedCount != actualCount)
+                {
+                    String expectation =
+                        expectedCount + " results but received " +
+                            actualCount;
+                    throw new ResultFailure("top-level definition",
+                                            expectation, -1, vals);
+                }
+
+                for (int i = 0; i < expectedCount; i++)
+                {
+                    Object       value   = vals[i];
+                    defineAndBind(ns, i, value);
+                }
+            }
+            else
+            {
+                String expectation =
+                    expectedCount + " results but received 1";
+                throw new ResultFailure("top-level definition",
+                                        expectation, -1, values);
+            }
+
+            return voidValue(eval);
+        }
+
+        private void defineAndBind(TopLevelNamespace ns, int i, Object value)
+            throws FusionException
+        {
+            SyntaxSymbol boundId = myIds[i];
+            boundId = ns.predefine(boundId, boundId);
+
+            TopLevelDefinedBinding binding =
+                (TopLevelDefinedBinding) boundId.getBinding();
+
+            ns.set(binding.myAddress, value);
+
+            if (value instanceof NamedValue)
+            {
+                ((NamedValue) value).inferName(boundId.stringValue());
+            }
+        }
+    }
+
+
+    /**
      * A reference to a top-level variable in the lexically-enclosing namespace,
      * when the binding is known at compile-time.
      */

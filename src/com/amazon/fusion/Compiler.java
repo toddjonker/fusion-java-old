@@ -34,9 +34,11 @@ import com.amazon.fusion.ModuleNamespace.ModuleDefinedBinding;
 import com.amazon.fusion.ModuleNamespace.ProvidedBinding;
 import com.amazon.fusion.Namespace.CompiledNsDefine;
 import com.amazon.fusion.Namespace.CompiledNsDefineSyntax;
+import com.amazon.fusion.Namespace.CompiledNsDefineValues;
 import com.amazon.fusion.Namespace.NsDefinedBinding;
 import com.amazon.fusion.Namespace.RequiredBinding;
 import com.amazon.fusion.TopLevelNamespace.CompiledFreeDefine;
+import com.amazon.fusion.TopLevelNamespace.CompiledFreeDefineValues;
 import com.amazon.fusion.TopLevelNamespace.CompiledFreeVariableReference;
 import com.amazon.fusion.TopLevelNamespace.CompiledTopLevelVariableReference;
 import com.amazon.fusion.TopLevelNamespace.TopLevelDefinedBinding;
@@ -415,6 +417,73 @@ class Compiler
                                             stringToJavaString(myEval, docString));
             int address = ((NsDefinedBinding) binding).myAddress;
             env.namespace().setDoc(address, doc);
+        }
+
+        return compiled;
+    }
+
+
+    CompiledForm compileDefineValues(final Environment env, SyntaxSexp stx)
+        throws FusionException
+    {
+        int arity = stx.size();
+        SyntaxValue valueSource = stx.get(myEval, arity - 1);
+        final CompiledForm valuesForm = compileExpression(env, valueSource);
+
+        SyntaxSexp idSexp = (SyntaxSexp) stx.get(myEval, 1);
+        SyntaxSymbol[] ids = idSexp.extract(myEval, SyntaxSymbol.class);
+        int idCount = ids.length;
+
+        Namespace namespace = env.namespace();
+        if (namespace instanceof TopLevelNamespace)
+        {
+            // Regardless of any current binding for this id, treat it the same.
+            if (idCount == 1)
+            {
+                return new CompiledFreeDefine(ids[0], valuesForm);
+            }
+            else
+            {
+                return new CompiledFreeDefineValues(ids, valuesForm);
+            }
+        }
+
+        String[] names  = new String[idCount];
+        int[] addresses = new int   [idCount];
+
+        for (int i = 0; i < idCount; i++)
+        {
+            SyntaxSymbol identifier = ids[i];
+            Binding b = identifier.getBinding();
+
+            names[i] = b.getName().stringValue();
+            addresses[i] = ((ModuleDefinedBinding) b).myAddress;
+        }
+
+        CompiledForm compiled;
+        if (idCount == 1)
+        {
+            compiled = new CompiledNsDefine(names[0], addresses[0], valuesForm);
+        }
+        else
+        {
+            compiled = new CompiledNsDefineValues(names, addresses, valuesForm);
+        }
+
+        // Collect documentation when necessary.
+        if (arity != 3 && myEval.firstContinuationMark(COLLECT_DOCS_MARK) != null)
+        {
+            SyntaxSequence docSeq = (SyntaxSequence) stx.get(myEval, 2);
+
+            for (int i = 0; i < idCount; i++)
+            {
+                Object docString = docSeq.get(myEval, i).unwrap(myEval);
+                BindingDoc doc = new BindingDoc(names[i],
+                                                null, // kind
+                                                null, // usage
+                                                stringToJavaString(myEval, docString));
+                namespace.setDoc(addresses[i], doc);
+            }
         }
 
         return compiled;

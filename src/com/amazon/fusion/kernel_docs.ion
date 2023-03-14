@@ -45,7 +45,10 @@ dynamically scoped via [`parameterize`](fusion/parameter.html#parameterize).
   define: '''
     (define id value)
 
-Binds a top-level variable `id` to the result of `value`.
+Binds a namespace-level variable `id` to the result of `value`.
+
+At top-level, the `expr` is evaluated before top-level bindings for the `id`s
+are created.
 
     (define (id arg ...) body ...+)
 
@@ -59,6 +62,18 @@ This form is equivalent to `(define id (lambda (arg ...) body ...))`.
 
 Binds the identifier ID to a syntax transformer XFORM. The transformer must be
 a procedure that accepts an syntax object and returns a syntax object.
+  ''',
+
+
+  define_values: '''
+    (define_values (id ...) expr)
+
+Binds a number of namespace-level variables to the multiple results of an
+expression.  If the `expr` returns a different number of values than there are
+`id`s, a contract exception is raised.
+
+At top-level, the `expr` is evaluated before top-level bindings for the `id`s
+are created.
   ''',
 
 
