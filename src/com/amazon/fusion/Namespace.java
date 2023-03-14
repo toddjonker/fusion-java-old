@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -1011,6 +1011,7 @@ abstract class Namespace
         Object processValue(Evaluator eval, Store store, Object value)
             throws FusionException
         {
+            eval.checkSingleResult(value, "module-level definition");
             return value;
         }
     }

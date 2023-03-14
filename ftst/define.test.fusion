@@ -85,3 +85,11 @@
   (define (f x x) true)          // Duplicate argument id
   (define (f x a b c x) true)
 )
+
+
+// Run-time arity checking on the body
+
+(expect_result_errors_top_and_module
+  (define bad (values))
+  (define bad (values 1 2))
+)

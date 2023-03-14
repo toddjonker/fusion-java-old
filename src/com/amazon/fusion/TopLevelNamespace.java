@@ -236,7 +236,6 @@ final class TopLevelNamespace
             throws FusionException
         {
             Object value = eval.eval(store, myValueForm);
-
             value = processValue(eval, store, value);
 
             TopLevelNamespace ns = (TopLevelNamespace) store.namespace();
@@ -256,6 +255,7 @@ final class TopLevelNamespace
         Object processValue(Evaluator eval, Store store, Object value)
             throws FusionException
         {
+            eval.checkSingleResult(value, "top-level definition");
             return value;
         }
     }
