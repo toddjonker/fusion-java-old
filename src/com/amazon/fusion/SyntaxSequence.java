@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc. All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -30,7 +30,7 @@ abstract class SyntaxSequence
      * Gets all the children of this sequence as a new array.
      * Useful for making changes and then building a replacement sequence.
      *
-     * @return a new array.
+     * @return a new array, or null when called on null sequences.
      */
     abstract SyntaxValue[] extract(Evaluator eval)
         throws FusionException;

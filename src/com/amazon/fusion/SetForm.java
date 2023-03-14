@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -24,8 +24,7 @@ final class SetForm
         }
 
         SyntaxValue[] children = stx.extract(eval);
-        SyntaxValue valueExpr = stx.get(eval, 2);
-        children[2] = expander.expandExpression(env, valueExpr);
+        children[2] = expander.expandExpression(env, children[2]);
 
         return stx.copyReplacingChildren(eval, children);
     }

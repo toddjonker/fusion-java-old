@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -19,6 +19,7 @@ import com.amazon.fusion.FusionSexp.ImmutablePair;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.ion.IonWriter;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.IdentityHashMap;
 import java.util.List;
 
@@ -205,17 +206,23 @@ final class SyntaxSexp
     SyntaxValue[] extract(Evaluator eval)
         throws FusionException
     {
+        return extract(eval, SyntaxValue.class);
+    }
+
+    <T> T[] extract(Evaluator eval, Class<T> klass)
+        throws FusionException
+    {
         pushWraps(eval);
 
         if (isNullSexp(eval, mySexp)) return null;
 
         int len = unsafeSexpSize(eval, mySexp);
-        SyntaxValue[] extracted = new SyntaxValue[len];
+        T[] extracted = (T[]) Array.newInstance(klass, len);
 
         int i = 0;
         for (Object p = mySexp; isPair(eval, p); p = unsafePairTail(eval, p))
         {
-            extracted[i] = (SyntaxValue) unsafePairHead(eval, p);
+            extracted[i] = klass.cast(unsafePairHead(eval, p));
             i++;
         }
 
@@ -482,6 +489,19 @@ final class SyntaxSexp
         return null;
     }
 
+    /**
+     * If this expression starts with a syntax form identifier, return it.
+     *
+     * @return null if the first child isn't an identifier or isn't bound to a
+     * syntax form.
+     */
+    SyntacticForm syntaxForm(Evaluator eval, Environment env)
+        throws FusionException
+    {
+        SyntaxSymbol id = firstIdentifier(eval);
+        return (id == null ? null : id.resolveSyntaxMaybe(env));
+    }
+
 
     @Override
     SyntaxValue doExpand(Expander expander, Environment env)
@@ -497,36 +517,27 @@ final class SyntaxSexp
             throw new SyntaxException(null, message, this);
         }
 
-        SyntaxValue[] children = extract(eval);
-
-        SyntaxValue first = children[0];
-        if (first instanceof SyntaxSymbol)
+        SyntacticForm form = syntaxForm(eval, env);
+        if (form != null)
         {
-            // Do not assume that the symbol will be treated as a variable,
-            // since this scope may override #%app or #%variable-reference.
-            // Thus we cannot call expand on the symbol and must not cache the
-            // results of the binding resolution unless it resolves to syntax.
-            SyntacticForm form =
-                ((SyntaxSymbol) first).resolveSyntaxMaybe(env);
-            if (form != null)
-            {
-                // We found a static top-level binding to a built-in form or a
-                // macro. Continue the expansion process.
+            // We found a static top-level binding to a built-in form or a
+            // macro. Continue the expansion process.
 
-                // TODO FUSION-31 identifier macros entail extra work here.
-                assert expander.expand(env, first) == first;
-                // else the next stmt must change
+            // TODO FUSION-31 identifier macros entail extra work here.
+            SyntaxSymbol first = firstIdentifier(eval);
+            assert expander.expand(env, first) == first;
+            // else the next stmt must change
 
-                // We use the same expansion context as we already have.
-                // Don't need to replace the sexp since we haven't changed it.
-                SyntaxValue expandedExpr = expander.expand(env, form, this);
-                return expandedExpr;
-                // TODO FUSION-207 Needs tail-call optimization.
-            }
+            // We use the same expansion context as we already have.
+            // Don't need to replace the sexp since we haven't changed it.
+            SyntaxValue expandedExpr = expander.expand(env, form, this);
+            return expandedExpr;
+            // TODO FUSION-207 Needs tail-call optimization.
         }
 
         // else we have a procedure application, expand each subform as an
         // expression
+        SyntaxValue[] children = extract(eval);
         for (int i = 0; i < len; i++)
         {
             SyntaxValue subform = children[i];

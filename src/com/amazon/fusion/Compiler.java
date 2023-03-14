@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2017-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -160,29 +160,22 @@ class Compiler
     CompiledForm compileExpression(Environment env, SyntaxSexp stx)
         throws FusionException
     {
-        SyntaxValue first = stx.get(myEval, 0);
-        if (first instanceof SyntaxSymbol)
+        SyntacticForm form = stx.syntaxForm(myEval, env);
+        if (form != null)
         {
-            SyntacticForm form = ((SyntaxSymbol) first).resolveSyntaxMaybe(env);
+            // We found a static top-level syntax binding!
 
-            // NOTE: Failure to get a binding indicates use of a built-in
+            // NOTE: Unexpected failure to get here indicates use of a built-in
             // syntactic form that's defined (probably via java_new) in the
             // same module. That's not supported! Such modules need to be
             // broken apart to meet this requirement.  This won't affect
-            // users unless we open the whole compiler APIs so they can add
+            // users unless we open the whole compiler APIs so that they can add
             // new "built-in" syntax.
 
-            if (form != null)
-            {
-                // We found a static top-level syntax binding!
-                // Continue the compilation process.
-                // TODO bounce the tail-call?
-
-                return form.compile(this, env, stx);
-            }
+            return form.compile(this, env, stx);
         }
 
-        return compileProcedureApplication(env, stx, first);
+        return compileProcedureApplication(env, stx);
     }
 
 
@@ -248,10 +241,10 @@ class Compiler
 
 
     private CompiledForm compileProcedureApplication(Environment env,
-                                                     SyntaxSexp  stx,
-                                                     SyntaxValue procExpr)
+                                                     SyntaxSexp  stx)
         throws FusionException
     {
+        SyntaxValue procExpr = stx.get(myEval, 0);
         CompiledForm procForm = compileExpression(env, procExpr);
         CompiledForm[] argForms = compileExpressions(env, stx, 1);
 

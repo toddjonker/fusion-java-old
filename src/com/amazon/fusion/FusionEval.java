@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -200,16 +200,15 @@ final class FusionEval
         if (topLevelForm instanceof SyntaxSexp)
         {
             SyntaxSexp maybeModule = (SyntaxSexp) topLevelForm;
-            if (maybeModule.size() > 1 &&
-                maybeModule.get(eval, 0) instanceof SyntaxSymbol)
+            SyntaxSymbol maybeKeyword = maybeModule.firstIdentifier(eval);
+            if (maybeKeyword != null)
             {
-                SyntaxSymbol maybeKeyword = (SyntaxSymbol)
-                    maybeModule.get(eval, 0);
                 maybeKeyword = (SyntaxSymbol) ns.syntaxIntroduce(maybeKeyword);
                 SyntaxSymbol moduleKeyword =
                     eval.getGlobalState().kernelBoundIdentifier(eval, MODULE);
                 if (maybeKeyword.freeIdentifierEqual(moduleKeyword))
                 {
+                    // Stash the resolved identifier back in the sexp.
                     SyntaxValue[] children = maybeModule.extract(eval);
                     children[0] = maybeKeyword;
                     return maybeModule.copyReplacingChildren(eval, children);
