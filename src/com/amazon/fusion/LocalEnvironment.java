@@ -1,10 +1,10 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingSite.makeLocalBindingSite;
 import static com.amazon.fusion.FusionVoid.voidValue;
-import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
+import static com.amazon.fusion.SyntaxSymbol.ensureUniqueIdentifiers;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import java.util.Set;
 
@@ -145,23 +145,7 @@ final class LocalEnvironment
         int count = identifiers.length;
         if (count > 1)
         {
-            // TODO Avoid a hashmap when count==2, do a simple comparison.
-            BoundIdMap<SyntaxSymbol> ids = new BoundIdMap<>();
-            for (SyntaxSymbol id : identifiers)
-            {
-                SyntaxSymbol dupe = ids.put(id, id);
-                if (dupe != null)
-                {
-                    String message =
-                        "duplicate binding identifier: " +
-                        printQuotedSymbol(id.stringValue());
-
-                    SyntaxException ex =
-                        new SyntaxException(null, message, id);
-                    ex.addContext(formForErrors);
-                    throw ex;
-                }
-            }
+            ensureUniqueIdentifiers(identifiers, formForErrors);
         }
 
         myBindings = new LocalBinding[count];

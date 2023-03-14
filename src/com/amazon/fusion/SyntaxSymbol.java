@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -6,6 +6,7 @@ import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
 import static com.amazon.fusion.FusionSyntax.checkIdentifierArg;
 import static com.amazon.fusion.FusionUtils.EMPTY_OBJECT_ARRAY;
+import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import java.util.Collections;
 import java.util.Set;
@@ -356,6 +357,38 @@ final class SyntaxSymbol
         Binding thisBinding = this.uncachedResolve();
         Binding thatBinding = that.uncachedResolve();
         return thisBinding.sameTarget(thatBinding);
+    }
+
+
+    /**
+     * Verifies that a set of identifiers are unique with respect to
+     * {@link #boundIdentifierEqual)}.
+     *
+     * @param identifiers must not be null.
+     * @param formForErrors the syntax form to be implicated in error messages.
+     *
+     * @throws SyntaxException if a duplicate is found.
+     */
+    static void ensureUniqueIdentifiers(SyntaxSymbol[] identifiers,
+                                        SyntaxValue    formForErrors)
+        throws SyntaxException
+    {
+        // TODO Avoid a hashmap when count==2, do a simple comparison.
+        BoundIdMap<SyntaxSymbol> ids = new BoundIdMap<>();
+        for (SyntaxSymbol id : identifiers)
+        {
+            SyntaxSymbol dupe = ids.put(id, id);
+            if (dupe != null)
+            {
+                String message =
+                    "duplicate binding identifier: " +
+                        printQuotedSymbol(id.stringValue());
+
+                SyntaxException ex = new SyntaxException(null, message, id);
+                ex.addContext(formForErrors);
+                throw ex;
+            }
+        }
     }
 
 
