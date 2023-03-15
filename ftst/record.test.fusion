@@ -1,0 +1,34 @@
+// Copyright (c) 2023 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/fusion/experimental/check"
+  "/fusion/private/record"
+)
+
+
+// Test the `record` syntax form and its various generated bindings.
+
+(record R1 ())
+(record R2 (f))
+(record R3 (f g))
+
+(expect_syntax_error (record 12 ()))        // Record type name not an identifier
+(expect_syntax_error (record S4 (true)))    // Field name not an identifier
+(expect_syntax_error (record S5 (f g h f))) // Duplicate field names
+
+(let [(s1 (R1)),
+      (s2 (R2 1730)),
+      (s3 (R3 true "go"))]
+  (check_true  (is_R1 s1))  (check_false (is_R2 s1))  (check_false (is_R3 s1))
+  (check_false (is_R1 s2))  (check_true  (is_R2 s2))  (check_false (is_R3 s2))
+  (check_false (is_R1 s3))  (check_false (is_R2 s3))  (check_true  (is_R3 s3))
+
+  (check === 1730 (R2_f s2))
+  (check === true (R3_f s3))
+  (check === "go" (R3_g s3))
+
+  (expect_argument_error (R2_f s1))  // Type mismatch
+)
+
+
+"SUCCESS (record.test)"

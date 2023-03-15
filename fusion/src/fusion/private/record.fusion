@@ -11,11 +11,18 @@ https://docs.racket-lang.org/reference/creatingmorestructs.html
   '''
 
   (require
+    "/fusion/exception"
+    "/fusion/experimental/syntax"
     "/fusion/ffi/java"
+    (rename_in "/fusion/experimental/syntax"
+      (quote_syntax QS))
+    (rename_in "/fusion/base"
+      (quote Q) (quasiquote QQ) (unquote UQ))
   )
 
   (provide
     make_record_type
+    record
   )
 
 
@@ -40,4 +47,79 @@ The accessor accepts a record of this type, and a integer indicating the
 (zero-based) field index.  It returns the record's value for that field.
     '''
     (java_new "com.amazon.fusion.Records$MakeRecordTypeProc"))
+
+
+// TODO Add equivalent of `make-struct-field-accessor` and use from `record`.
+
+
+  (define CTX (quote_syntax lexical_context))
+
+
+  (define symbol_append
+    (lambda texts
+      (string_to_symbol (apply string_append texts))))
+
+
+  (define_syntax record
+    (lambda (stx)
+      '''
+      (record name (field_name ...))
+
+Creates a new record type and defines various related bindings based on the _name_.
+Each `name` and `field_name` must be a non-empty symbol; the `field_name`s must be
+unique.
+
+The bindings defined are:
+  * `'record:NAME'` is the record type descriptor.
+  * `NAME` is a constructor procedure that returns new records.
+  * `is_NAME` is a predicate that detects records of this type.
+  * `NAME_FIELD_NAME` for each `FIELD_NAME` is an accessor procedure.
+    It accepts an instance of this record type and returns the value of
+    the relevant field.
+      '''
+      (unless (== (syntax_size stx) 3)
+        (wrong_syntax stx "record: expected name and sexp of field names"))
+      (lets [(name_stx   (syntax_get stx 1)),
+             (fields_stx (syntax_get stx 2)),
+             (name       (syntax_unwrap name_stx)),
+             (field_ids  (syntax_unwrap fields_stx))]
+        (unless (is_identifier name_stx)
+          (wrong_syntax name_stx "record: expected identifier for record name"))
+        (unless (and (is_sexp field_ids) (every is_identifier field_ids))
+          (wrong_syntax fields_stx "record: expected sexp of field names"))
+        (let [(dupe (check_duplicate_identifier field_ids))]
+          (when dupe (wrong_syntax dupe "Duplicate field name in " name_stx)))
+
+        /*
+          (begin
+            (define_values
+              (record:NAME NAME is_NAME accessor)
+              (make_record_type NAME <field-count>))
+            (begin
+              (define (NAME-FIELD v)
+                (accessor v <field-index>))
+              ...))
+        */
+        (lets [(capture (lambda (datum) // Use the caller's lexical context!
+                          (datum_to_syntax datum name_stx))),
+               (is_name_stx (capture (symbol_append "is_"     name))),
+               (td_name_stx (capture (symbol_append "record:" name)))]
+          (let_values [((field_ct getter_exprs)
+                        (for_fold [(i       0),
+                                   (getters (sexp))]
+                                  [(f (map syntax_unwrap field_ids))]
+                          (lets [(getter_name     (symbol_append name "_" f)),
+                                 (getter_name_stx (capture getter_name))]
+                            (values (+ i 1)
+                                    (pair (QQ (define ((UQ getter_name_stx) v)
+                                                (accessor v (UQ i))))
+                                          getters)))))]
+            (datum_to_syntax
+              (QQ (begin
+                    (define_values
+                      (UQ (sexp td_name_stx name_stx is_name_stx (Q accessor)))
+                      (make_record_type (quote (UQ name_stx)) (UQ field_ct)))
+                    (UQ (pair (Q begin) getter_exprs))))
+              CTX
+              stx))))))
 )
