@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -680,12 +680,6 @@ public final class FusionString
             throws FusionException
         {
             String input = checkNullableStringArg(eval, this, 0, arg);
-
-            if (input != null && input.isEmpty())
-            {
-                throw argFailure("non-empty string", 0, arg);
-            }
-
             return makeSymbol(eval, input);
         }
     }

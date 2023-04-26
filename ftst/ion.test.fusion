@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -26,6 +26,7 @@
            (datum          (syntax_to_datum orig_datum_stx)),
            (    datum_stx (datum_to_syntax (checked_annotate datum [        ]))),
            (  a_datum_stx (datum_to_syntax (checked_annotate datum ["a"     ]))),
+           (a_$_datum_stx (datum_to_syntax (checked_annotate datum ["a", "" ]))),
            (a_a_datum_stx (datum_to_syntax (checked_annotate datum ["a", "a"]))),
            (a_b_datum_stx (datum_to_syntax (checked_annotate datum ["a", "b"])))]
       (quasisyntax
@@ -36,6 +37,9 @@
           (check ===
             (quote (unsyntax a_datum_stx))
             (annotate (quote (unsyntax orig_datum_stx)) "a"))
+          (check ===
+            (quote (unsyntax a_$_datum_stx))
+            (annotate (quote (unsyntax orig_datum_stx)) "a" ""))
           (check ===
             (quote (unsyntax a_a_datum_stx))
             (annotate (quote (unsyntax orig_datum_stx)) "a" "a"))
@@ -48,6 +52,7 @@
     (lets [(datum_stx (syntax_get stx 1)),
            (datum     (syntax_to_datum datum_stx)),
            (  a_datum_stx (datum_to_syntax (checked_annotate datum ["a"     ]))),
+           (a_$_datum_stx (datum_to_syntax (checked_annotate datum ["a", "" ]))),
            (a_a_datum_stx (datum_to_syntax (checked_annotate datum ["a", "a"]))),
            (a_b_datum_stx (datum_to_syntax (checked_annotate datum ["a", "b"])))]
       (quasisyntax
@@ -55,6 +60,7 @@
           (check_annotations [] (quote (unsyntax datum_stx)))
           (check_annotate1 (unsyntax     datum_stx))
           (check_annotate1 (unsyntax   a_datum_stx))
+          (check_annotate1 (unsyntax a_$_datum_stx))
           (check_annotate1 (unsyntax a_a_datum_stx))
           (check_annotate1 (unsyntax a_b_datum_stx)))))))
 

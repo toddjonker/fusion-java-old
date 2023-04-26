@@ -1,10 +1,10 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.safeWrite;
 import static com.amazon.fusion.FusionNumber.checkIntArgToJavaInt;
-import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
+import static com.amazon.fusion.FusionText.checkRequiredTextArg;
 import static com.amazon.fusion.FusionUtils.writeFriendlyIndex;
 import static com.amazon.fusion.FusionVoid.voidValue;
 
@@ -34,7 +34,7 @@ final class SyntaxGetProc
             }
             else
             {
-                String field = checkNonEmptyTextArg(eval, this, i, args);
+                String field = checkRequiredTextArg(eval, this, i, args);
                 SyntaxStruct s = (SyntaxStruct) stx;
                 value = s.get(eval, field);
             }

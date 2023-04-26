@@ -90,7 +90,7 @@ public class FusionValueTest
         assertTrue(hasAnnotation("(quote a::null)", "a"));
         assertTrue(hasAnnotation("(quote a::b::null)", "a"));
         assertTrue(hasAnnotation("(quote a::b::null)", "b"));
-//      assertTrue(hasAnnotation("(quote ''::null)", ""));  // TODO empty symbol
+        assertTrue(hasAnnotation("(quote ''::null)", ""));
 
         assertFalse(hasAnnotation("(quote a::null)", "x"));
         assertFalse(hasAnnotation("(quote a::b::null)", "x"));

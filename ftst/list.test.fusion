@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -73,6 +73,7 @@
 
 
 (check_annotations []            (quote []))
+(check_annotations [""]          (quote ''::[]))
 (check_annotations ["a"]         (quote a::[]))
 (check_annotations ["a","b"]     (quote a::b::[]))
 (check_annotations ["a","b","a"] (quote a::b::a::[]))
@@ -125,19 +126,23 @@
 // annotate
 
 (check_mod_f annotate null.list []                      null.list)
+(check_mod_f annotate null.list [""]       (quote   ''::null.list))
 (check_mod_f annotate null.list ["a"]      (quote a::   null.list))
 (check_mod_f annotate null.list ["a", "b"] (quote a::b::null.list))
 
 (check_mod_f annotate [] []                      [])
+(check_mod_f annotate [] [""]       (quote   ''::[]))
 (check_mod_f annotate [] ["a"]      (quote a::   []))
 (check_mod_f annotate [] ["a", "b"] (quote a::b::[]))
 
 (check_mod_f annotate [1] []                      [1])
+(check_mod_f annotate [1] [""]       (quote   ''::[1]))
 (check_mod_f annotate [1] ["a"]      (quote a::   [1]))
 (check_mod_f annotate [1] ["a", "b"] (quote a::b::[1]))
 
 
 // Replacing existing annotations
+(check_mod_f annotate (quote x::null.list) [""]       (quote ''::null.list))
 (check_mod_f annotate (quote x::null.list) ["a"]      (quote a::null.list))
 (check_mod_f annotate (quote x::null.list) ["a", "b"] (quote a::b::null.list))
 
@@ -151,7 +156,6 @@
 
 
 (expect_argument_exn (annotate null.list null))
-(expect_argument_exn (annotate null.list ""))
 (expect_argument_exn (annotate null.list null.string))
 (expect_argument_exn (annotate null.list (quote null.symbol)))
 (expect_argument_exn (annotate null.list 12))

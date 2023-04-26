@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -26,6 +26,11 @@
 (expect_syntax_exn
   (lambda (x a b c x) true))
 
+// Null/Empty bound name
+(expect_syntax_exn
+  (lambda (null.symbol) true))
+(expect_syntax_exn
+  (lambda ('') true))
 
 // These expressions crashed due to FUSION-273:
 ((lambda (t) ((lambda () t))) 1)

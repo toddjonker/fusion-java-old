@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2023 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -74,19 +74,16 @@
 // string_to_symbol
 
 (check === (quote null.symbol) (string_to_symbol null.string))
+(check === (quote '')          (string_to_symbol ""))
 (check === (quote text)        (string_to_symbol "text"))
-
-// TODO FUSION-204 support empty symbol
-(expect_argument_exn (string_to_symbol ""))
 
 
 //============================================================================
 // symbol_to_string
 
 (check === null.string (symbol_to_string (quote null.symbol)))
+(check === ""          (symbol_to_string (quote '')))
 (check === "text"      (symbol_to_string (quote text)))
-
-// TODO FUSION-204 support empty symbol
 
 
 //============================================================================

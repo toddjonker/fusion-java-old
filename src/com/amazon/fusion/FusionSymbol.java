@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -37,17 +37,11 @@ final class FusionSymbol
         /**
          * NOT FOR APPLICATION USE!
          *
-         * @param value must not be empty but may be null to make
-         * {@code null.symbol}.
+         * @param value may be null to make {@code null.symbol}.
          */
         static BaseSymbol internSymbol(String value)
         {
             if (value == null) return NULL_SYMBOL;
-
-            if (value.isEmpty())
-            {
-                throw new IllegalArgumentException("Cannot make an empty symbol");
-            }
 
             ActualSymbol sym = new ActualSymbol(value);
 

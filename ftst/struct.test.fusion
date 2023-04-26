@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -109,6 +109,7 @@
 
 (check_annotations []            (quote null.struct))
 (check_annotations []            (quote {}))
+(check_annotations [""]          (quote ''::{}))
 (check_annotations ["a"]         (quote a::{}))
 (check_annotations ["a","b"]     (quote a::b::{}))
 (check_annotations ["a","b","a"] (quote a::b::a::{}))
@@ -118,14 +119,17 @@
 // annotate
 
 (check_mod annotate null.struct []                      null.struct)
+(check_mod annotate null.struct [""]       (quote   ''::null.struct))
 (check_mod annotate null.struct ["a"]      (quote a::   null.struct))
 (check_mod annotate null.struct ["a", "b"] (quote a::b::null.struct))
 
 (check_mod annotate {} []                      {})
+(check_mod annotate {} [""]       (quote   ''::{}))
 (check_mod annotate {} ["a"]      (quote a::   {}))
 (check_mod annotate {} ["a", "b"] (quote a::b::{}))
 
 (check_mod annotate {f:1} []                      {f:1})
+(check_mod annotate {f:1} [""]       (quote   ''::{f:1}))
 (check_mod annotate {f:1} ["a"]      (quote a::   {f:1}))
 (check_mod annotate {f:1} ["a", "b"] (quote a::b::{f:1}))
 
@@ -144,7 +148,6 @@
 
 
 (expect_argument_exn (annotate null.struct null))
-(expect_argument_exn (annotate null.struct ""))
 (expect_argument_exn (annotate null.struct null.string))
 (expect_argument_exn (annotate null.struct (quote null.symbol)))
 (expect_argument_exn (annotate null.struct 12))
@@ -217,9 +220,9 @@
 (check_put {}            "f" 3 {f:3})
 (check_put {a:1}         "f" 3 {a:1,f:3})
 (check_put {a:1,a:2}     "f" 3 {a:1,a:2,f:3})
-(check_put {a:1,b:2}     "f" 3 {a:1,b:2,f:3})
-(check_put {a:1,f:2}     "f" 3 {a:1,f:3})
-(check_put {a:1,f:2,f:0} "f" 3 {a:1,f:3})  // replace repeated field
+(check_put {a:1,b:2}     ""  3 {a:1,b:2,'':3})
+(check_put {a:1,'':2}    ""  3 {a:1,'':3})
+(check_put {a:1,'':2,'':0} "" 3 {a:1,'':3})  // replace repeated field
 
 (let [(s (mutable_struct))]
   (check === 0 (size s))
@@ -232,11 +235,11 @@
 
 (let [(s (mutable_struct "f" 1 "f" 2))]
   (check === 2 (size s))
-  (put_m s "g" 1)
+  (put_m s "" 1)
   (check === 3 (size s))
   (put_m s "f" 3)
   (check === 2 (size s))
-  (put_m s "g" 3)
+  (put_m s "" 3)
   (check === 2 (size s)))
 
 
@@ -271,7 +274,7 @@
 (check_unsafe_puts {}          "f" 3 {f:3})
 (check_unsafe_puts {a:1}       "f" 3 {f:3, a:1})
 (check_unsafe_puts {f:2}       "f" 3 {f:3, f:2})
-(check_unsafe_puts {f:3}       "f" 3 {f:3, f:3})
+(check_unsafe_puts {'':3}      ""  3 {'':3, '':3})
 (check_unsafe_puts {f:2,f:3}   "f" 3 {f:3, f:3, f:2})
 (check_unsafe_puts {a:2,a:3}   "f" 3 {f:3, a:3, a:2})
 
@@ -304,27 +307,27 @@
 (check_merge null.struct null.struct null.struct)
 (check_merge null.struct {}          null.struct)
 (check_merge null.struct {a:1}       {a:1})
-(check_merge null.struct {a:1,b:2}   {a:1,b:2})
+(check_merge null.struct {a:1,'':2}  {a:1,'':2})
 (check_merge null.struct {a:1,a:3}   {a:1,a:3})
 
 (check_merge {} null.struct       {})
 (check_merge {} {}                {})
 (check_merge {} {a:1}             {a:1})
-(check_merge {} {a:1,b:2}         {a:1,b:2})
+(check_merge {} {a:1,'':2}        {a:1,'':2})
 (check_merge {} {a:1,a:3}         {a:1,a:3})
 (check_merge {} {a:1,b:2,a:3,b:4} {a:1,b:2,a:3,b:4})
 
 (check_merge {a:0} null.struct       {a:0})
 (check_merge {a:0} {}                {a:0})
 (check_merge {a:0} {a:1}             {a:0,a:1})
-(check_merge {a:0} {a:1,b:2}         {a:0,a:1,b:2})
+(check_merge {a:0} {a:1,'':2}        {a:0,a:1,'':2})
 (check_merge {a:0} {a:1,a:3}         {a:0,a:1,a:3})
 (check_merge {a:0} {a:1,b:2,a:3,b:4} {a:0,a:1,b:2,a:3,b:4})
 
 (check_merge {a:0,b:2} null.struct       {a:0,b:2})
 (check_merge {a:0,b:2} {}                {a:0,b:2})
 (check_merge {a:0,b:2} {a:1}             {a:0,b:2,a:1})
-(check_merge {a:0,b:2} {a:1,b:2}         {a:0,b:2,a:1,b:2})
+(check_merge {a:0,'':2} {a:1,'':2}       {a:0,'':2,a:1,'':2})
 (check_merge {a:0,b:2} {a:1,a:3}         {a:0,b:2,a:1,a:3})
 (check_merge {a:0,b:2} {a:1,b:2,a:3,b:4} {a:0,b:2,a:1,b:2,a:3,b:4})
 
@@ -387,21 +390,21 @@
 (check_merge1 {a:0} null.struct       {a:0})
 (check_merge1 {a:0} {}                {a:0})
 (check_merge1 {a:0} {a:1}             {a:1})
-(check_merge1 {a:0} {a:1,b:2}         {a:1,b:2})
+(check_merge1 {a:0} {a:1,'':2}         {a:1,'':2})
 (check_merge1 {a:0} {a:1,a:1}         {a:1})
 (check_merge1 {a:0} {a:1,b:2,a:1,b:2} {a:1,b:2})
 
 (check_merge1 {a:0,b:2} null.struct       {a:0,b:2})
 (check_merge1 {a:0,b:2} {}                {a:0,b:2})
 (check_merge1 {a:0,b:2} {a:1}             {a:1,b:2})
-(check_merge1 {a:0,b:2} {a:1,b:3}         {a:1,b:3})
+(check_merge1 {a:0,'':2} {a:1,'':3}       {a:1,'':3})
 (check_merge1 {a:0,b:2} {a:1,a:1}         {a:1,b:2})
 (check_merge1 {a:0,b:2} {a:1,b:3,a:1,b:3} {a:1,b:3})
 
 (check_merge1 {a:0,a:0} null.struct       {a:0})
 (check_merge1 {a:0,a:0} {}                {a:0})
 (check_merge1 {a:0,a:0} {a:1}             {a:1})
-(check_merge1 {a:0,a:0} {a:1,b:3}         {a:1,b:3})
+(check_merge1 {a:0,a:0} {a:1,'':3}        {a:1,'':3})
 (check_merge1 {a:0,a:0} {a:1,a:1}         {a:1})
 (check_merge1 {a:0,a:0} {a:1,b:3,a:1,b:3} {a:1,b:3})
 
@@ -440,7 +443,7 @@
 (check_unzip {a:1}     (quote [a]  ) [1])
 (check_unzip {a:1,a:1} (quote [a,a]) [1,1])
 (check_unzip {a:1,a:2} (quote [a,a]) [1,2])
-(check_unzip {a:1,b:2} (quote [b,a]) [2,1])
+(check_unzip {a:1,'':2} (quote ['',a]) [2,1])
 
 
 (expect_argument_exn (struct_unzip []))
@@ -461,6 +464,7 @@
 (check_zip ["f"] null.list {})
 
 (check_zip ["f"] [3] {f:3})
+(check_zip [""]  [8] {'':8})
 (check_zip ["hello"] ["world"] {hello:"world"})
 (check_zip ["f","g"] [3,"hello"] {f:3,g:"hello"})
 (check_zip ["A","B"] [3,[true,false,[]]]
@@ -483,10 +487,8 @@
 (expect_argument_exn (        struct_zip ["f"]  3 ))
 (expect_argument_exn (mutable_struct_zip ["f"]  3 ))
 
-(expect_argument_exn (struct_zip [""] [0]))
 (expect_argument_exn (struct_zip [null.string] [0]))
 (expect_argument_exn (struct_zip (quote [null.symbol]) [0]))
-// TODO FUSION-204 test struct_zip with empty symbol
 
 
 //==========================================================================
@@ -535,7 +537,7 @@
 (check_remove_keys {f:1,f:2} ["f"] {})
 (check_remove_keys {f:1,f:2} ["g"] {f:1,f:2})
 
-(check_remove_keys {g:2,f:1} ["f", "h"      ] {g:2})
+(check_remove_keys {g:2,'':1} ["", "h"      ] {g:2})
 (check_remove_keys {f:1,g:2} ["f", (quote g)] {})
 
 
@@ -568,7 +570,7 @@
 (check_retain_keys {f:1    } ["g"] {})
 (check_retain_keys {f:1,f:2} ["g"] {})
 (check_retain_keys {f:1,f:2} ["f"] {f:1,f:2})
-(check_retain_keys {f:1,g:2} ["f"] {f:1})
+(check_retain_keys {'':1,g:2} [""] {'':1})
 (check_retain_keys {f:1,g:2} ["h"] {})
 (check_retain_keys {f:1,g:2} [   ] {})
 

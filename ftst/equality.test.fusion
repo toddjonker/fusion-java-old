@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2023 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/ftst/symbol"
@@ -35,7 +35,7 @@ annotated variants of each value.
     (|accum val|
       (if (is_annotatable val)
         (apply sexp
-          val (annotate val "a") (annotate val "b")
+          val (annotate val "a") (annotate val "b") (annotate val "")
           (annotate val "a" "a") (annotate val "a" "c")
           accum)
         (pair val accum)))
@@ -164,7 +164,7 @@ annotated variants of each value.
             (apply sexp
               eqSet
               (map (|val| (annotate val "a"    )) eqSet)
-              (map (|val| (annotate val "b"    )) eqSet)
+              (map (|val| (annotate val ""     )) eqSet)
               (map (|val| (annotate val "a" "c")) eqSet)
               accum)
             (pair eqSet accum))))

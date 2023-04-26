@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -15,7 +15,7 @@ import static com.amazon.fusion.FusionList.unsafeJavaIterate;
 import static com.amazon.fusion.FusionList.unsafeListSize;
 import static com.amazon.fusion.FusionSymbol.BaseSymbol.internSymbols;
 import static com.amazon.fusion.FusionSymbol.makeSymbol;
-import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
+import static com.amazon.fusion.FusionText.checkRequiredTextArg;
 import static com.amazon.fusion.FusionText.textToJavaString;
 import static com.amazon.fusion.FusionText.unsafeTextToJavaString;
 import static com.amazon.fusion.FusionVoid.voidValue;
@@ -1792,7 +1792,7 @@ final class FusionStruct
             }
             if (args.length == 2)
             {
-                String name = checkNonEmptyTextArg(eval, this, 0, args);
+                String name = checkRequiredTextArg(eval, this, 0, args);
                 return singleEntry(eval, name, args[1]);
             }
 
@@ -1802,7 +1802,7 @@ final class FusionStruct
 
             for (int i = 0; i < args.length; i++)
             {
-                String name  = checkNonEmptyTextArg(eval, this, i, args);
+                String name  = checkRequiredTextArg(eval, this, i, args);
                 Object value = args[++i];
                 builder.add(name, value);
             }
@@ -1956,10 +1956,10 @@ final class FusionStruct
             {
                 Object nameObj = fieldIterator.next();
                 String name = textToJavaString(eval, nameObj);
-                if (name == null || name.isEmpty())
+                if (name == null)
                 {
                     String expectation =
-                        "sequence of non-empty strings or symbols";
+                        "sequence of non-null strings or symbols";
                     throw new ArgumentException(this, expectation, 0, args);
                 }
 
@@ -2027,7 +2027,7 @@ final class FusionStruct
             String[] keys = new String[args.length - 1];
             for (int i = 1; i < args.length; i++)
             {
-                keys[i-1] = checkNonEmptyTextArg(eval, this, i, args);
+                keys[i-1] = checkRequiredTextArg(eval, this, i, args);
             }
 
             return doIt(eval, struct, keys);

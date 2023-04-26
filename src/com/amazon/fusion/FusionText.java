@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -144,6 +144,8 @@ final class FusionText
 
 
     /**
+     * Similar to {@link #checkRequiredTextArg} but also expects non-empty
+     * content.
      * @return not null or empty
      */
     static String checkNonEmptyTextArg(Evaluator eval,

@@ -1,8 +1,8 @@
-// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
-import static com.amazon.fusion.FusionText.checkNonEmptyTextArg;
+import static com.amazon.fusion.FusionText.checkRequiredTextArg;
 
 
 final class AnnotateProc
@@ -22,7 +22,7 @@ final class AnnotateProc
         String[] annotations = new String[arity - 1];
         for (int i = 0; i < arity - 1; i++)
         {
-            String a = checkNonEmptyTextArg(eval, this, i+1, args);
+            String a = checkRequiredTextArg(eval, this, i+1, args);
             annotations[i] = a;
         }
 

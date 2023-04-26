@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -127,33 +127,38 @@
 // annotate
 
 (check_mod_f annotate NULL_SEXP []         (quote       null.sexp))
+(check_mod_f annotate NULL_SEXP [""]       (quote   ''::null.sexp))
 (check_mod_f annotate NULL_SEXP ["a"]      (quote a::   null.sexp))
 (check_mod_f annotate NULL_SEXP ["a", "b"] (quote a::b::null.sexp))
 
 (check_mod_f annotate valEmpty []         (quote       ()))
+(check_mod_f annotate valEmpty [""]       (quote   ''::()))
 (check_mod_f annotate valEmpty ["a"]      (quote a::   ()))
 (check_mod_f annotate valEmpty ["a", "b"] (quote a::b::()))
 
 (check_mod_f annotate val12 []         (quote       (1 2)))
+(check_mod_f annotate val12 [""]       (quote   ''::(1 2)))
 (check_mod_f annotate val12 ["a"]      (quote a::   (1 2)))
 (check_mod_f annotate val12 ["a", "b"] (quote a::b::(1 2)))
 
 
 // Replacing existing annotations
+(check_mod_f annotate (quote x::null.sexp) [""]       (quote   ''::null.sexp))
 (check_mod_f annotate (quote x::null.sexp) ["a"]      (quote a::   null.sexp))
 (check_mod_f annotate (quote x::null.sexp) ["a", "b"] (quote a::b::null.sexp))
 
 (check_mod_f annotate (quote x::()) []         (quote       ()))
+(check_mod_f annotate (quote x::()) [""]       (quote   ''::()))
 (check_mod_f annotate (quote x::()) ["a"]      (quote a::   ()))
 (check_mod_f annotate (quote x::()) ["a", "b"] (quote a::b::()))
 
 (check_mod_f annotate (quote x::(1)) []         (quote       (1)))
+(check_mod_f annotate (quote x::(1)) [""]       (quote   ''::(1)))
 (check_mod_f annotate (quote x::(1)) ["a"]      (quote a::   (1)))
 (check_mod_f annotate (quote x::(1)) ["a", "b"] (quote a::b::(1)))
 
 
 (expect_argument_exn (annotate NULL_SEXP null))
-(expect_argument_exn (annotate NULL_SEXP ""))
 (expect_argument_exn (annotate NULL_SEXP null.string))
 (expect_argument_exn (annotate NULL_SEXP (quote null.symbol)))
 (expect_argument_exn (annotate NULL_SEXP 12))

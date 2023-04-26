@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -38,6 +38,8 @@
     (check === expected_sym sym)))
 
 (check_identifier (quote a) (quote_syntax a))
+(check_identifier (quote '') (quote_syntax ''))
+(check_identifier (quote null.symbol) (quote_syntax null.symbol))
 
 
 //==========================================================================
@@ -91,12 +93,14 @@
     (lets [(datum_stx (syntax_get stx 1)),
            (datum     (syntax_unwrap datum_stx)),
            (  a_datum_stx (datum_to_syntax (annotate datum "a"    ))),
+           (a_$_datum_stx (datum_to_syntax (annotate datum "a" "" ))),
            (a_a_datum_stx (datum_to_syntax (annotate datum "a" "a"))),
            (a_b_datum_stx (datum_to_syntax (annotate datum "a" "b")))]
       (quasisyntax
         (begin
           (check_xforms1 (unsyntax     datum_stx) [])
           (check_xforms1 (unsyntax   a_datum_stx) [a])
+          (check_xforms1 (unsyntax a_$_datum_stx) [a, ""])
           (check_xforms1 (unsyntax a_a_datum_stx) [a, a])
           (check_xforms1 (unsyntax a_b_datum_stx) [a, b]))))))
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -53,7 +53,8 @@ public class BooleanTest
         "0e0",
         "2012-10-19T12:54-08:00",
         "\"\"",
-        "(quote 'sym')", // TODO add empty symbol
+        "(quote '')",
+        "(quote 'sym')",
         "{{}}",
         "{{\"\"}}",
         "[]",
