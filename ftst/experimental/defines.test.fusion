@@ -1,9 +1,15 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2023 Amazon.com, Inc.  All rights reserved.
 
 (require
+  "/defpub_use"
   "/fusion/experimental/check"
   "/fusion/experimental/defines"
   )
+
+
+// Exported variable defined via `defpub`
+(check === 39 jonny)
+
 
 (expect_syntax_exn (defpub))
 (expect_syntax_exn (defpub foo))
