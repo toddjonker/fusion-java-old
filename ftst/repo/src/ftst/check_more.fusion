@@ -1,0 +1,115 @@
+// Copyright (c) 2023 Amazon.com, Inc.  All rights reserved.
+
+(module check_more "/fusion"
+  '''
+Additional testing utilities built atop `/fusion/experimental/check`.
+
+Basically even-more-experimental stuff.
+  '''
+
+  (require
+    "/fusion/eval"
+    "/fusion/experimental/check"
+    "/fusion/experimental/syntax")
+
+  (provide (all_defined_out))
+
+
+  (define CTX
+    "Lexical context to use for macro expansion"
+    (quote_syntax context))
+
+
+  (define (strip_context v)
+    "Removes all lexical context from the argument."
+    (syntax_to_datum (datum_to_syntax v)))
+
+
+  (define (d2s_at loc datum)
+    "Shorthand for datum_to_syntax, with source-loc in a more convenient place."
+    (datum_to_syntax datum CTX loc))
+
+
+  (define make_module_name
+    "Mint a unique module name."
+    (let [(counter 0)]
+      (lambda ()
+       (set counter (+ 1 counter))
+       (string_to_symbol (string_append "M_" (int_to_string counter))))))
+
+
+  (define_syntax run_top_and_module
+    (lambda (stx)
+      '''
+    (run_top_and_module expr ...)
+
+Evaluates the body expressions at top-level, and then within a single new
+module.  The module is `require`d to ensure it runs.
+      '''
+      (let [(body (pair (quote begin) (tail (syntax_unwrap stx)))),
+             (modname (make_module_name))]
+        (d2s_at stx
+          (quasiquote (begin (unquote body)
+                             (module (unquote modname) "/fusion"
+                               (require "/fusion/experimental/check")
+                               (unquote (strip_context body)))
+                             (require (unquote modname))))))))
+
+
+  (define_syntax expect_syntax_errors_top_and_module
+    (lambda (stx)
+      '''
+    (expect_syntax_errors_top_and_module expr ...)
+
+Evaluates each individual expression at top-level and within a new module,
+expecting each one to raise a syntax error.
+      '''
+      (let [(exprs (tail (syntax_unwrap stx)))]
+        (d2s_at stx
+          (pair (quote begin)
+                (for_sexp [(expr exprs)]
+                  (d2s_at expr
+                    (quasiquote (begin (expect_syntax_error
+                                         (unquote expr)
+                                         "in top-level context")
+                                       (expect_syntax_error
+                                         (module (unquote (make_module_name)) "/fusion"
+                                           (require "/fusion/experimental/check")
+                                           (unquote (strip_context expr)))
+                                         "in module context"))))))))))
+
+
+  (define_syntax expect_result_error_top
+    (lambda (stx)
+      '''
+    (expect_result_error_top expr ...)
+
+Evaluates the body expressions at top-level, expecting a (single) result error.
+      '''
+      (lets [(exprs (tail (syntax_unwrap stx))),
+             (body (pair (quote begin) exprs))]
+        (d2s_at stx
+          // Must `eval` since `expect_result_error` uses an expression-level, not top-level, context.
+          (quasiquote (expect_result_error (eval (quote (unquote body)))))))))
+
+
+  (define_syntax expect_result_errors_top_and_module
+    (lambda (stx)
+      '''
+    (expect_result_errors_top_and_module expr ...)
+
+Evaluates each individual expression at top-level and within a new module,
+expecting all to raise result errors.
+      '''
+      (let [(exprs (tail (syntax_unwrap stx)))]
+        (d2s_at stx
+          (pair (quote begin)
+                (for_sexp [(expr exprs)]
+                  (let [(modname (make_module_name))]
+                    (quasiquote (begin (expect_result_error_top (unquote expr))
+                                       (expect_result_error_top
+                                         (module (unquote modname) "/fusion"
+                                           (require "/fusion/experimental/check")
+                                           (unquote (strip_context expr)))
+                                         (require (unquote modname))))))))))))
+)
