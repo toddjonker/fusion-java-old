@@ -1,6 +1,6 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
-(module unsafe_list '/fusion/private/builtins'
+(module unsafe_list '/fusion/private/kernel'
 
   '''
 Unsafe (but fast) operations on lists.
@@ -14,27 +14,37 @@ See the module [`/fusion/list`](fusion/list.html) for more information and
 related operations on lists.
   '''
 
-  (require "/fusion/experimental/defines")
+
+  (provide
+    unsafe_list_add
+    unsafe_list_add_m
+    unsafe_list_element
+    unsafe_list_iterator
+    unsafe_list_set
+    unsafe_list_size
+    unsafe_list_subseq)
 
 
-  (defpub_j unsafe_list_size
+  (define_values (unsafe_list_size)
     '''
     (unsafe_list_size list)
 
 Returns the number of elements in `list`.
     '''
-    "com.amazon.fusion.FusionList$UnsafeListSizeProc")
+    (java_new "com.amazon.fusion.FusionList$UnsafeListSizeProc"))
 
-  (defpub_j unsafe_list_element
+
+  (define_values (unsafe_list_element)
     '''
     (unsafe_list_element list pos)
 
 Returns the element of `list` at (zero-based) position `pos`. The `pos` must be
 a non-null int with a valid value.
     '''
-    "com.amazon.fusion.FusionList$UnsafeListElementProc")
+    (java_new "com.amazon.fusion.FusionList$UnsafeListElementProc"))
 
-  (defpub_j unsafe_list_subseq
+
+  (define_values (unsafe_list_subseq)
     '''
     (unsafe_list_subseq list from to)
 
@@ -45,26 +55,29 @@ Returns a list holding the elements from `list` between positions `from` and
 
 The result may share structure with `list`.
     '''
-    "com.amazon.fusion.FusionList$UnsafeListSubseqProc")
+    (java_new "com.amazon.fusion.FusionList$UnsafeListSubseqProc"))
 
-  (defpub_j unsafe_list_set
+
+  (define_values (unsafe_list_set)
     '''
     (unsafe_list_set list pos value)
 
 Changes the element of `list` at (zero-based) position `pos`. This assumes that
 the `list` is mutable and that the `pos` is valid.
     '''
-    "com.amazon.fusion.FusionList$UnsafeListSetProc")
+    (java_new "com.amazon.fusion.FusionList$UnsafeListSetProc"))
 
-  (defpub_j unsafe_list_add
+
+  (define_values (unsafe_list_add)
     '''
     (unsafe_list_add list value)
 
 Returns a list similar to `list` with the `value` added to the end.
     '''
-    "com.amazon.fusion.FusionList$UnsafeListAddProc")
+    (java_new "com.amazon.fusion.FusionList$UnsafeListAddProc"))
 
-  (defpub_j unsafe_list_add_m
+
+  (define_values (unsafe_list_add_m)
     '''
     (unsafe_list_add_m list value)
 
@@ -74,13 +87,14 @@ may share structure with the list, which may also be mutated.
 In particular, when given a stretchy list, the input is expanded to contain the
 given value, and the result is the `list` argument.
     '''
-    "com.amazon.fusion.FusionList$UnsafeListAddMProc")
+    (java_new "com.amazon.fusion.FusionList$UnsafeListAddMProc"))
 
-  (defpub_j unsafe_list_iterator
+
+  (define_values (unsafe_list_iterator)
     '''
     (unsafe_list_iterator list)
 
 Returns an iterator over the content of `list`.
     '''
-    "com.amazon.fusion.FusionList$UnsafeListIterateProc")
+    (java_new "com.amazon.fusion.FusionList$UnsafeListIterateProc"))
 )
