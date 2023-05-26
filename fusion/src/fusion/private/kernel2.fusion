@@ -177,6 +177,15 @@ Determines whether a `value` is `null.null`, returning `true` or `false`.
     (java_new "com.amazon.fusion.FusionNull$IsNullNullProc"))
 
 
+  (define_values (is_pair)
+    '''
+    (is_pair value)
+
+Determines whether `value` is a pair, returning `true` or `false`.
+    '''
+    (java_new "com.amazon.fusion.FusionSexp$IsPairProc"))
+
+
   (define_values (is_procedure)
     '''
     (is_procedure value)
@@ -285,6 +294,15 @@ is as defined by [`if`](fusion/bool.html#if).
     (java_new "com.amazon.fusion.NotProc"))
 
 
+  (define_values (pair)
+    '''
+    (pair head tail)
+
+Makes a fresh, immutable pair containing the given `head` and `tail`.
+    '''
+    (java_new "com.amazon.fusion.FusionSexp$PairProc"))
+
+
   (define_values (quote)
     '''
     (quote datum)
@@ -310,6 +328,15 @@ Returns a syntax object retaining the lexical information of `datum`.
 Mutates the given `var`iable, assigning it the `value`.
     '''
     (java_new "com.amazon.fusion.SetForm"))
+
+
+  (define_values (sexp)
+    '''
+    (sexp value ...)
+
+Makes a fresh, immutable sexp containing the given `value`s.
+    '''
+    (java_new "com.amazon.fusion.FusionSexp$SexpProc"))
 
 
   (define_values (size)

@@ -10,39 +10,12 @@
   (provide
     head
     is_pair
-    is_sexp       // from /fusion/private/kernel2
+    is_sexp
     pair
     sexp
     sexp_append
     reverse
     tail)
-
-
-  (define sexp
-    '''
-    (sexp value ...)
-
-Makes a fresh, immutable sexp containing the given `value`s.
-    '''
-    (java_new "com.amazon.fusion.FusionSexp$SexpProc"))
-
-
-  (define pair
-    '''
-    (pair head tail)
-
-Makes a fresh, immutable pair containing the given `head` and `tail`.
-    '''
-    (java_new "com.amazon.fusion.FusionSexp$PairProc"))
-
-
-  (define is_pair
-    '''
-    (is_pair value)
-
-Determines whether `value` is a pair, returning `true` or `false`.
-    '''
-    (java_new "com.amazon.fusion.FusionSexp$IsPairProc"))
 
 
   (define (head sexp)
