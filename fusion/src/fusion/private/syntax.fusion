@@ -1,0 +1,217 @@
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
+
+(module syntax "/fusion/private/kernel2"
+  '''
+Intrinsic operators for working with syntax objects.
+  '''
+
+  (provide
+    bound_identifier_equal
+    datum_to_syntax
+    define_syntax
+    expand_once
+    free_identifier_equal
+    is_identifier
+    is_syntax
+    quote_syntax
+    syntax_append
+    syntax_column
+    syntax_get
+    syntax_is_original
+    syntax_line
+    syntax_property
+    syntax_size
+    syntax_subseq
+    syntax_to_datum
+    syntax_track_origin
+    syntax_unwrap
+    wrong_syntax
+  )
+
+
+  (define_values (bound_identifier_equal)
+    '''
+    (bound_identifier_equal id1 id2)
+
+Compares two identifiers to determine whether `id1` would bind `id2`
+(or vice versa) if one were in a binding position and the other in a suitable
+reference position.
+    '''
+    (java_new "com.amazon.fusion.SyntaxSymbol$BoundIdentifierEqualProc"))
+
+
+  (define_values (datum_to_syntax)
+    '''
+    (datum_to_syntax datum [context location])
+
+Recursively converts the `datum` to a syntax object with lexical information
+copied from the `context` syntax identifier, and source-location copied from
+the `location` syntax object. Existing syntax objects in `datum` are included
+as-is.
+
+When `context` isn't provided, converted syntax objects have no lexical
+context.  When `location` isn't provided, they will have no location.
+    '''
+    (java_new "com.amazon.fusion.DatumToSyntaxProc"))
+
+
+  (define_values (expand_once)
+    '''
+    (expand_once top_level_form)
+
+Expands a top-level form through one step of macro expansion, using the
+bindings of the current namespace.
+
+The `top_level_form` may be a syntax object or another datum.
+    '''
+    (java_new "com.amazon.fusion.FusionEval$ExpandOnceProc"))
+
+
+  (define_values (free_identifier_equal)
+    '''
+    (free_identifier_equal identifier1 identifier2)
+
+Compares two identifiers to determine whether they both refer to the same
+binding.
+    '''
+    (java_new "com.amazon.fusion.SyntaxSymbol$FreeIdentifierEqualProc"))
+
+
+  (define_values (is_identifier)
+    '''
+    (is_identifier value)
+
+Determines whether a `value` is a syntax object holding a symbol, returning
+`true` or `false`.
+    '''
+    (java_new "com.amazon.fusion.FusionSyntax$IsIdentifierProc"))
+
+
+  (define_values (is_syntax)
+    '''
+    (is_syntax value)
+
+Determines whether a `value` is a syntax object, returning `true` or `false`.
+    '''
+    (java_new "com.amazon.fusion.FusionSyntax$IsSyntaxProc"))
+
+
+  (define_values (syntax_append)
+    '''
+    (syntax_append front back ...)
+
+Returns a new syntax sexp that combines the `front` and `back` syntax
+sequences.
+    '''
+    (java_new "com.amazon.fusion.SyntaxAppendProc"))
+
+
+  (define_values (syntax_column)
+    '''
+    (syntax_column stx)
+
+Returns the one-based column number of the source of a syntax object.
+The result is zero if there's no column number available.
+    '''
+    (java_new "com.amazon.fusion.SyntaxColumnProc"))
+
+
+  (define_values (syntax_get)
+    '''
+    (syntax_get container key ...)
+
+Traverses down through syntax objects.
+`container` must be syntax container (struct, list, or sexp).
+Each `key` must be a string, symbol, or int, to denote either a struct's
+field-name or a sequence's index.
+    '''
+    (java_new "com.amazon.fusion.SyntaxGetProc"))
+
+
+  (define_values (syntax_is_original)
+    (java_new "com.amazon.fusion.FusionSyntax$IsOriginalProc"))
+
+
+  (define_values (syntax_line)
+    '''
+    (syntax_line stx)
+
+Returns the one-based line number of the source of a syntax object.
+The result is zero if there's no line number available.
+    '''
+    (java_new "com.amazon.fusion.SyntaxLineProc"))
+
+
+  (define_values (syntax_property)
+    (java_new "com.amazon.fusion.FusionSyntax$PropertyProc"))
+
+
+  (define_values (syntax_size)
+    '''
+    (syntax_size sequence)
+
+Returns the number of child elements contained in the syntax sequence.
+The size of `null.list` and `null.sexp` is zero.
+    '''
+    (java_new "com.amazon.fusion.SyntaxSizeProc"))
+
+
+  (define_values (syntax_source)
+    '''
+    (syntax_source stx)
+
+Returns a description of the source of a syntax object.
+    '''
+    (java_new "com.amazon.fusion.SyntaxSourceProc"))
+
+
+  (define_values (syntax_subseq)
+    '''
+    (syntax_subseq sequence from)
+
+Returns a new syntax sexp that copies children from `sequence` starting at
+`from`.  If `from` is beyond the end of the sequence, the result is an empty
+sequence.
+    '''
+    (java_new "com.amazon.fusion.SyntaxSubseqProc"))
+
+
+  (define_values (syntax_to_datum)
+    '''
+    (syntax_to_datum syntax)
+
+Given a `syntax` object, removes the lexical information and returns a plain
+value, unwrapping all layers recursively.
+    '''
+    (java_new "com.amazon.fusion.FusionSyntax$ToDatumProc"))
+
+
+  (define_values (syntax_track_origin)
+    '''
+    (syntax_track_origin new_stx orig_stx origin)
+
+Copies properties from `orig_stx` to `new_stx` and extending origin data with
+the `origin` identifier.
+    '''
+    (java_new "com.amazon.fusion.FusionSyntax$TrackOriginProc"))
+
+
+  (define_values (syntax_unwrap)
+    '''
+    (syntax_unwrap syntax)
+
+Given a `syntax` object, removes the lexical information and returns a plain
+value. This only unwraps one layer, retaining inner syntax objects.
+    '''
+    (java_new "com.amazon.fusion.FusionSyntax$UnwrapProc"))
+
+
+  (define_values (wrong_syntax)
+    '''
+    (wrong_syntax stx message ...)
+
+Raises a syntax error located at the given `stx` syntax. The `message`s are
+displayed as part of the error.
+    '''
+    (java_new "com.amazon.fusion.WrongSyntaxProc"))
+)
