@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2023 Amazon.com, Inc.  All rights reserved.
 
 (module raise '/fusion/private/kernel'
 
@@ -14,7 +14,7 @@
   )
 
 
-  (define raise
+  (define_values (raise)
     '''
     (raise value)
 
@@ -33,7 +33,7 @@ The exception `display`s the `message`s, which are only evaluated on failure.
     '''
     (java_new "com.amazon.fusion.AssertForm"))
 
-  (define raise_argument_error
+  (define_values (raise_argument_error)
     '''
     (raise_argument_error name expected bad_pos value ...+)
 
@@ -49,7 +49,7 @@ Note that an `argument_error` IS-A `contract_error`.
     '''
     (java_new "com.amazon.fusion.RaiseArgumentErrorProc"))
 
-  (define raise_arity_error
+  (define_values (raise_arity_error)
     '''
     (raise_arity_error name arity actual_arg ...)
 
@@ -63,7 +63,7 @@ Note that an `arity_error` IS-A `contract_error`.
     '''
     (java_new "com.amazon.fusion.RaiseArityErrorProc"))
 
-  (define raise_contract_error
+  (define_values (raise_contract_error)
     '''
     (raise_contract_error name message)
 
@@ -73,7 +73,7 @@ The `message` string describes the relevant contract failure.
     '''
     (java_new "com.amazon.fusion.RaiseContractErrorProc"))
 
-  (define raise_result_error
+  (define_values (raise_result_error)
     '''
     (raise_result_error name expected value)
 

@@ -1,13 +1,13 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2023 Amazon.com, Inc.  All rights reserved.
 
 (module compare '/fusion/private/kernel'
 
   (require "/fusion/equality")
-  (provide =)
+
+  (provide < <= = > >=)
 
 
-  (provide <)
-  (define <
+  (define_values (<)
     '''
     (< a b)
 Returns true if `a` is less than `b`.
@@ -23,8 +23,7 @@ See [FUSION-249](issue:FUSION-249).
     (java_new "com.amazon.fusion.FusionCompare$LessThanProc"))
 
 
-  (provide >)
-  (define >
+  (define_values (>)
     '''
     (> a b)
 Returns true if `a` is greater than `b`.
@@ -40,8 +39,7 @@ See [FUSION-249](issue:FUSION-249).
     (java_new "com.amazon.fusion.FusionCompare$GreaterThanProc"))
 
 
-  (provide <=)
-  (define <=
+  (define_values (<=)
     '''
     (<= a b)
 Returns true if `a` is less than or equal to `b`.
@@ -57,8 +55,7 @@ See [FUSION-249](issue:FUSION-249).
     (java_new "com.amazon.fusion.FusionCompare$LessThanOrEqualToProc"))
 
 
-  (provide >=)
-  (define >=
+  (define_values (>=)
     '''
     (>= a b)
 Returns true if `a` is greater than or equal to `b`.

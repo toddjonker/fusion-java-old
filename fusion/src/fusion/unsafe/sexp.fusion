@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2023 Amazon.com, Inc.  All rights reserved.
 
 (module unsafe_sexp '/fusion/private/kernel'
 
@@ -16,7 +16,7 @@ related operations on sexps.
 
 
   (provide unsafe_pair_head)
-  (define unsafe_pair_head
+  (define_values (unsafe_pair_head)
     '''
     (unsafe_pair_head pair)
 
@@ -25,7 +25,7 @@ Returns the head of `pair`.
     (java_new "com.amazon.fusion.FusionSexp$UnsafePairHeadProc"))
 
   (provide unsafe_pair_tail)
-  (define unsafe_pair_tail
+  (define_values (unsafe_pair_tail)
     '''
     (unsafe_pair_tail pair)
 
@@ -34,7 +34,7 @@ Returns the tail of `pair`.
     (java_new "com.amazon.fusion.FusionSexp$UnsafePairTailProc"))
 
   (provide unsafe_sexp_iterator)
-  (define  unsafe_sexp_iterator
+  (define_values (unsafe_sexp_iterator)
     '''
     (unsafe_sexp_iterator sexp)
 

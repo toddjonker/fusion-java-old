@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 (module namespace '/fusion/private/kernel'
 
@@ -14,14 +14,13 @@ Namespaces are typically used for [dynamic evaluation](fusion/eval.html).
   '''
 
 
-  (provide current_namespace)  // From kernel
-
   (provide
+    current_namespace
     make_namespace_with_language
   )
 
 
-  (define make_namespace_with_language
+  (define_values (make_namespace_with_language)
     '''
     (make_namespace_with_language language)
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 (module java '/fusion/private/kernel'
 
@@ -13,9 +13,14 @@ operators only support concrete types that are not yet public.
 See issue [FUSION-54](issue:FUSION-54).
   '''
 
-  (provide java_new)
+  (provide
+    java_class
+    java_instance_of
+    java_new
+  )
 
-  (define java_class
+
+  (define_values (java_class)
     '''
     (java_class name)
 
@@ -24,9 +29,9 @@ Return the `java.lang.Class` instance for the given fully-qualified class name.
 Equivalent to the Java code `Class.forName(name)`.
     '''
     (java_new "com.amazon.fusion.JavaClassProc"))
-  (provide java_class)
 
-  (define java_instance_of
+
+  (define_values (java_instance_of)
     '''
     (java_instance_of value class)
 
@@ -41,4 +46,4 @@ are implemented by Java objects:
     (java_instance_of anything (java_class "java.lang.Object"))
     '''
     (java_new "com.amazon.fusion.JavaInstanceOfProc"))
-  (provide java_instance_of))
+)
