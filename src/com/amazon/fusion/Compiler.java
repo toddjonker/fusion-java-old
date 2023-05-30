@@ -75,6 +75,9 @@ class Compiler
     }
 
 
+    /**
+     * @see FusionEval#evalCompileTimePartOfTopLevel
+     */
     void evalCompileTimePart(final TopLevelNamespace topNs,
                              final SyntaxValue       stx)
         throws FusionException

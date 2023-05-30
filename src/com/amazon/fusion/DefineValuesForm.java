@@ -3,7 +3,10 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionList.immutableList;
+import static com.amazon.fusion.FusionSexp.isPair;
 import static com.amazon.fusion.FusionSexp.isSexp;
+import static com.amazon.fusion.FusionSexp.unsafePairHead;
+import static com.amazon.fusion.FusionSexp.unsafePairTail;
 import static com.amazon.fusion.FusionString.isString;
 import static com.amazon.fusion.FusionSyntax.unsafeSyntaxUnwrap;
 import static com.amazon.fusion.GlobalState.DEFINE_VALUES;
@@ -158,11 +161,14 @@ final class DefineValuesForm
                              SyntaxSexp topStx)
         throws FusionException
     {
-        if (true) throw new IllegalStateException();
-
         Evaluator eval = comp.getEvaluator();
-        SyntaxSymbol identifier = (SyntaxSymbol) topStx.get(eval, 1);
-        topNs.predefine(identifier, identifier);
+        Object idSexp = topStx.get(eval, 1).unwrap(eval);
+        while (isPair(eval, idSexp))
+        {
+            SyntaxSymbol id = (SyntaxSymbol) unsafePairHead(eval, idSexp);
+            topNs.predefine(id, id);
+            idSexp = unsafePairTail(eval, idSexp);
+        }
     }
 
 

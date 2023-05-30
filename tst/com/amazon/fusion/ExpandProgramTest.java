@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -12,6 +12,7 @@ import static com.amazon.fusion.FusionSyntax.isSyntax;
 import static com.amazon.fusion.FusionSyntax.unsafeFreeIdentifierEqual;
 import static com.amazon.fusion.FusionSyntax.unsafeSyntaxUnwrap;
 import static com.amazon.fusion.FusionVoid.voidValue;
+import static com.amazon.fusion.GlobalState.DEFINE_VALUES;
 import static com.amazon.fusion.GlobalState.LAMBDA;
 import static com.amazon.fusion.GlobalState.MODULE;
 import static org.junit.Assert.assertFalse;
@@ -33,6 +34,7 @@ public class ExpandProgramTest
         boolean receivedEof;
         Object lambdaId;
         Object moduleId;
+        Object defValuesId;
 
         @Override
         Object doApply(Evaluator eval, Object arg)
@@ -57,7 +59,7 @@ public class ExpandProgramTest
                 Object sym  = unsafeSyntaxUnwrap(eval, first);
                 String name = unsafeSymbolToJavaString(eval, sym);
 
-                // In general one can't assume that an identifer named "lambda"
+                // In general one can't assume that an identifier named "lambda"
                 // refers to the kernel's "lambda". But in this test case we
                 // are processing source code that already has those core
                 // forms. Actually this is still somewhat brittle since the
@@ -66,6 +68,11 @@ public class ExpandProgramTest
 
                 switch (name)
                 {
+                    case "define_values":
+                    {
+                        defValuesId = first;
+                        break;
+                    }
                     case "lambda":
                     {
                         lambdaId = first;
@@ -92,12 +99,14 @@ public class ExpandProgramTest
 
         Object kernelLambdaId = globals.kernelBoundIdentifier(eval, LAMBDA);
         Object kernelModuleId = globals.kernelBoundIdentifier(eval, MODULE);
+        Object kernelDefValuesId = globals.kernelBoundIdentifier(eval, DEFINE_VALUES);
 
         CoreFormCollector collector = new CoreFormCollector();
 
         String source =
             "(lambda () 1) " +
-            "(module M '/fusion' 1)";
+            "(module M '/fusion' 1) " +
+            "(define_values (s t) (values 1 2))";
 
         FusionEval.expandProgram(topLevel(), source, null, collector);
         assertTrue(collector.receivedEof);
@@ -108,5 +117,8 @@ public class ExpandProgramTest
         assertTrue(unsafeFreeIdentifierEqual(eval,
                                              collector.moduleId,
                                              kernelModuleId));
+        assertTrue(unsafeFreeIdentifierEqual(eval,
+                                             collector.defValuesId,
+                                             kernelDefValuesId));
     }
 }

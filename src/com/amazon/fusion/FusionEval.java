@@ -352,6 +352,9 @@ final class FusionEval
 
     /**
      * Evaluates the expansion-time code of a top-level form.
+     * This generally means that top-level bindings are created as a result of
+     * require and define forms.  Additionally, module declarations are
+     * compiled and registered, but not visited or instantiated.
      *
      * @param topStx must be a fully-expanded top-level form, excluding
      * {@code begin}.
