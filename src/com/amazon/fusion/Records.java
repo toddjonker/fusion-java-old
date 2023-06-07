@@ -2,7 +2,9 @@
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
+import static com.amazon.fusion.FusionNull.isNullNull;
 import static com.amazon.fusion.FusionNumber.checkIntArgToJavaInt;
 import static com.amazon.fusion.FusionSymbol.checkRequiredSymbolArg;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
@@ -17,22 +19,46 @@ final class Records
         extends BaseValue
     {
         private final BaseSymbol myName;
-        private final int        myFieldCount;
+        private final RecordType mySupertype; // TODO push to subclass?
 
-        public RecordType(BaseSymbol name, int fieldCount)
+        /**
+         * Number of fields initialized by constructor, excluding supertype.
+         */
+        private final int myFieldCount;
+
+        /**
+         * Number of fields initialized by constructor, including supertype.
+         */
+        private final int myTotalFieldCount;
+
+        RecordType(BaseSymbol name, RecordType supertype, int fieldCount)
         {
             myName = name;
+            mySupertype  = supertype;
             myFieldCount = fieldCount;
+            myTotalFieldCount =
+                fieldCount + (supertype == null
+                                ? 0
+                                : supertype.myTotalFieldCount);
         }
 
-        RecordInstance cast(Object v)
+
+        /**
+         * Determines whether a given RecordType is a supertype of this one.
+         */
+        boolean hasSupertype(RecordType supertype)
         {
-            if (v instanceof RecordInstance)
+            for (RecordType type = this; type != null; type = type.mySupertype)
             {
-                RecordInstance i = (RecordInstance) v;
-                if (i.myType == this) return i;
+                if (type == supertype) return true;
             }
-            return null;
+            return false;
+        }
+
+        boolean hasInstance(Object o)
+        {
+            return (o instanceof RecordInstance) &&
+                    ((RecordInstance) o).myType.hasSupertype(this);
         }
 
         void writeName(Evaluator eval, Appendable out)
@@ -49,6 +75,18 @@ final class Records
             writeName(eval, out);
             out.append("}}}");
         }
+
+
+        int getInitFieldCount()
+        {
+            return myFieldCount;
+        }
+
+
+        int getTotalInitFieldCount()
+        {
+            return myTotalFieldCount;
+        }
     }
 
 
@@ -60,6 +98,8 @@ final class Records
 
         RecordInstance(RecordType type, Object[] fields)
         {
+            assert fields.length == type.myTotalFieldCount;
+
             myType   = type;
             myFields = fields;
         }
@@ -95,10 +135,10 @@ final class Records
         private final RecordType myType;
         private final int        myInitFieldCount;
 
-        public RecordConstructorProc(RecordType type, int initFieldCount)
+        RecordConstructorProc(RecordType type)
         {
             myType           = type;
-            myInitFieldCount = initFieldCount;
+            myInitFieldCount = type.myTotalFieldCount;
         }
 
         @Override
@@ -117,7 +157,7 @@ final class Records
     {
         private final RecordType myType;
 
-        public RecordPredicateProc(RecordType type)
+        RecordPredicateProc(RecordType type)
         {
             myType = type;
         }
@@ -125,8 +165,7 @@ final class Records
         @Override
         Object doApply(Evaluator eval, Object v)
         {
-            RecordInstance record = myType.cast(v);
-            return FusionBool.makeBool(eval, record != null);
+            return makeBool(eval, myType.hasInstance(v));
         }
     }
 
@@ -135,18 +174,21 @@ final class Records
         extends Procedure2
     {
         private final RecordType myType;
+        private final int        myIndexOffset;
 
-        public RecordAccessorProc(RecordType type)
+        RecordAccessorProc(RecordType type)
         {
             myType = type;
+
+            RecordType supertype = myType.mySupertype;
+            myIndexOffset = (supertype == null) ? 0 : supertype.myTotalFieldCount;
         }
 
         @Override
         Object doApply(Evaluator eval, Object v, Object index)
             throws FusionException
         {
-            RecordInstance record = myType.cast(v);
-            if (record == null)
+            if (! myType.hasInstance(v))
             {
                 throw new ArgumentException(this, "instance of " + myType.myName,
                                             0, v, index);
@@ -171,14 +213,14 @@ final class Records
                                             1, v, index);
             }
 
-            return record.unsafe_access(i);
+            return ((RecordInstance) v).unsafe_access(i + myIndexOffset);
         }
     }
 
 
     /*
      * Currently:
-     *   (make_record_type name_sym field_count)
+     *   (make_record_type name_sym supertype field_count)
      *
      * Eventually this should conform to Racket's protocol:
      * (make-struct-type name super-type
@@ -192,7 +234,7 @@ final class Records
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            checkArityExact(2, args);
+            checkArityExact(3, args);
 
             String name = checkRequiredSymbolArg(eval, this, 0, args);
             if (name.length() == 0)
@@ -200,16 +242,27 @@ final class Records
                 throw new ArgumentException(this, "non-empty symbol", 0, args);
             }
 
-            final int initFieldCount = checkIntArgToJavaInt(eval, this, 1, args);
+            RecordType supertype = null;
+            if (args[1] instanceof RecordType)
+            {
+                supertype = (RecordType) args[1];
+            }
+            else if (! isNullNull(eval, args[1]))
+            {
+                String expected = "record type descriptor or null";
+                throw new ArgumentException(this, expected, 1, args);
+            }
+
+            final int initFieldCount = checkIntArgToJavaInt(eval, this, 2, args);
             if (initFieldCount < 0)
             {
                 throw new ArgumentException(this, "non-negative int", 1, args);
             }
 
             RecordType type
-                = new RecordType((BaseSymbol) args[0], initFieldCount);
+                = new RecordType((BaseSymbol) args[0], supertype, initFieldCount);
             Procedure ctor
-                = new RecordConstructorProc(type, initFieldCount);
+                = new RecordConstructorProc(type);
             Procedure pred
                 = new RecordPredicateProc(type);
             Procedure accessor
