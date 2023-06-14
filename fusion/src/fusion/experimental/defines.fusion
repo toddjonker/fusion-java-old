@@ -1,6 +1,6 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
-(module defines '/fusion/private/kernel'
+(module defines '/fusion/private/kernel2'
 
   (require
     "/fusion/equality"
@@ -8,7 +8,6 @@
     "/fusion/private/compare"
     "/fusion/private/control"
     "/fusion/private/sexp"
-    "/fusion/private/kernel2"
     "/fusion/unsafe/sexp"
   )
 

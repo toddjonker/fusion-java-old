@@ -168,9 +168,9 @@ final class GlobalState
         ns.define(ONLY_IN, new RequireForm.OnlyInForm());
         ns.define(PREFIX_IN, new RequireForm.PrefixInForm());
         ns.define(PROVIDE, new ProvideForm());
-        ns.define(REQUIRE, new RequireForm(resolver));
         ns.define(RENAME_IN, new RequireForm.RenameInForm());
         ns.define(RENAME_OUT, new ProvideForm.RenameOutForm());
+        ns.define(REQUIRE, new RequireForm(resolver));
 
 
         ns.instantiate();

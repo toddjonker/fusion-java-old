@@ -1,6 +1,31 @@
-// Copyright (c) 2015-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2015-2023 Amazon.com, Inc.  All rights reserved.
 
 (module kernel2 "/fusion/private/kernel"
+
+  // Pass-through most bindings from kernel
+  // TODO FUSION-76 (provide (all_from_out "/fusion/private/kernel"))
+  (provide
+    all_defined_out
+    begin
+    current_directory
+    current_namespace
+    define
+    define_syntax
+    define_values
+    eof
+    java_new
+    lambda
+    load
+    module
+    only_in
+    prefix_in
+    provide
+    rename_in
+    rename_out
+    require)
+
+  (provide (all_defined_out))
+
 
   (define_syntax if
     '''
@@ -118,6 +143,4 @@ Returns the Ion `datum` as-is, without evaluation.
 Returns a syntax object retaining the lexical information of `datum`.
     '''
     (java_new "com.amazon.fusion.QuoteSyntaxForm"))
-
-  (provide (all_defined_out))
 )

@@ -1,6 +1,6 @@
-// Copyright (c) 2013-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2023 Amazon.com, Inc.  All rights reserved.
 
-(module exception '/fusion/private/kernel'
+(module exception '/fusion/private/kernel2'
 
   '''
 Operations for working with exceptions.
@@ -49,7 +49,6 @@ with handlers.
     "/fusion/private/builtins"
     "/fusion/private/compare"
     "/fusion/private/control"
-    "/fusion/private/kernel2"
     "/fusion/private/raise"
     "/fusion/private/sexp"
     "/fusion/string"
