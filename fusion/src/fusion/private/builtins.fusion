@@ -12,30 +12,39 @@
     only_in prefix_in provide rename_in rename_out require)
 
   // Pass-through bindings from kernel2
-  (provide if is_list is_null is_sexp is_string is_struct
-    let_values letrec not quote)
-
   (provide
     '#%top'
     apply
     exit
+    if
     is_blob
     is_bool
     is_clob
     is_immutable_list
+    is_list
     is_mutable_list
+    is_null
     is_null_null
     is_procedure
+    is_sexp
     is_stretchy_list
+    is_string
+    is_struct
     is_symbol
+    let_values
+    letrec
     list
     mutable_list
-    quasiquote
+    not
+    quote
     set
     size
     stretchy_list
+    values)
+
+  (provide
+    quasiquote
     unquote
-    values
   )
 
 
@@ -72,174 +81,4 @@ containing quoted datum.
     (java_new "com.amazon.fusion.QuasiQuoteForm"
               (quote_syntax quasiquote)
               (quote_syntax unquote)))
-
-
-
-  (define_syntax set
-    '''
-    (set var value)
-
-Mutates the given `var`iable, assigning it the `value`.
-    '''
-    (java_new "com.amazon.fusion.SetForm"))
-
-  (define_syntax '#%top'
-    '''
-    ('#%top' id)
-
-References a top-level definition for symbol `id`, skipping over any
-surrounding local bindings.  Within a module, `id` must be defined within the
-module and not locally.
-
-As suggested by the awkward name, this form is rarely needed by application
-code and is primarily an artifact of the macro-expansion process.
-    '''
-    (java_new "com.amazon.fusion.TopForm"))
-
-
-  (define apply
-    '''
-    (apply proc arg ... sequence)
-
-Calls the given `proc` with arguments that are the (optional) `arg`s prepended
-to the elements of `sequence`.  The `proc` is called in tail position.
-
-    (apply + [1, 2])             =>  3
-    (apply + 10 11 (sexp 1 2))   =>  24
-    '''
-    (java_new "com.amazon.fusion.ApplyProc"))
-
-  (define values
-    '''
-    (values value ...)
-
-Produces [multiple results](fusion/procedure.html#results), returning the zero
-or more `value`s. Usually used in conjuction with `let_values` to bind the
-results to names.
-    '''
-    (java_new "com.amazon.fusion.ValuesProc"))
-
-  (define exit
-    '''
-    (exit)
-Exits the running Fusion program.
-    '''
-    (java_new "com.amazon.fusion.ExitProc"))
-
-
-  //===========================================================================
-  // Basic predicates
-
-  (define is_blob
-    '''
-    (is_blob value)
-
-Determines whether a `value` is of type `blob`, returning `true` or `false`.
-    '''
-    (java_new "com.amazon.fusion.FusionBlob$IsBlobProc"))
-
-  (define is_bool
-    '''
-    (is_bool value)
-
-Determines whether a `value` is of type `bool`, returning `true` or `false`.
-    '''
-    (java_new "com.amazon.fusion.FusionBool$IsBoolProc"))
-
-  (define is_clob
-    '''
-    (is_clob value)
-
-Determines whether a `value` is of type `clob`, returning `true` or `false`.
-    '''
-    (java_new "com.amazon.fusion.FusionClob$IsClobProc"))
-
-  (define is_null_null
-    '''
-    (is_null_null value)
-
-Determines whether a `value` is `null.null`, returning `true` or `false`.
-    '''
-    (java_new "com.amazon.fusion.FusionNull$IsNullNullProc"))
-
-  (define is_symbol
-    '''
-    (is_symbol value)
-
-Determines whether a `value` is of type `symbol`, returning `true` or `false`.
-    '''
-    (java_new "com.amazon.fusion.FusionSymbol$IsSymbolProc"))
-
-  (define is_procedure
-    '''
-    (is_procedure value)
-
-Returns `true` when `value` is a procedure, `false` otherwise.
-    '''
-    (java_new "com.amazon.fusion.FusionProcedure$IsProcedureProc"))
-
-
-  //===========================================================================
-  // Collection primitives
-
-  (define size
-    '''
-    (size collection)
-
-Returns the number of elements in the `collection`.
-The size of `null.list` (_etc._) is zero.  If `collection` is an improper sexp,
-an exception is thrown.
-
-**Warning:** Computing the size of an sexp takes linear time, since it must
-traverse the linked list of pairs to count elements.
-    '''
-    (java_new "com.amazon.fusion.FusionCollection$SizeProc"))
-
-  (define is_immutable_list
-    '''
-    (is_immutable_list value)
-
-Determines whether `value` is an immutable list, returning `true` or `false`.
-    '''
-    (java_new "com.amazon.fusion.FusionList$IsImmutableListProc"))
-
-  (define is_mutable_list
-    '''
-    (is_mutable_list value)
-
-Determines whether `value` is a mutable list, returning `true` or `false`.
-    '''
-    (java_new "com.amazon.fusion.FusionList$IsMutableListProc"))
-
-  (define is_stretchy_list
-    '''
-    (is_stretchy_list value)
-
-Determines whether `value` is a stretchy list, returning `true` or `false`.
-    '''
-    (java_new "com.amazon.fusion.FusionList$IsStretchyListProc"))
-
-  (define list
-    '''
-    (list value ...)
-
-Makes a fresh, immutable list containing the given `value`s.
-    '''
-    (java_new "com.amazon.fusion.FusionList$ImmutableListProc"))
-
-  (define mutable_list
-    '''
-    (mutable_list value ...)
-
-Makes a fresh, mutable list containing the given `value`s.
-    '''
-    (java_new "com.amazon.fusion.FusionList$MutableListProc"))
-
-  (define stretchy_list
-    '''
-    (stretchy_list value ...)
-
-Makes a fresh, stretchy list containing the given `value`s.
-    '''
-    (java_new "com.amazon.fusion.FusionList$StretchyListProc"))
 )

@@ -27,6 +27,27 @@
   (provide (all_defined_out))
 
 
+  (define apply
+    '''
+    (apply proc arg ... sequence)
+
+Calls the given `proc` with arguments that are the (optional) `arg`s prepended
+to the elements of `sequence`.  The `proc` is called in tail position.
+
+    (apply + [1, 2])             =>  3
+    (apply + 10 11 (sexp 1 2))   =>  24
+    '''
+    (java_new "com.amazon.fusion.ApplyProc"))
+
+
+  (define exit
+    '''
+    (exit)
+Exits the running Fusion program.
+    '''
+    (java_new "com.amazon.fusion.ExitProc"))
+
+
   (define_syntax if
     '''
     (if test then else)
@@ -46,6 +67,42 @@ For cases that need only one outcome, use [`when`](fusion/bool.html#when) or
     (java_new "com.amazon.fusion.IfForm"))
 
 
+  (define is_blob
+    '''
+    (is_blob value)
+
+Determines whether a `value` is of type `blob`, returning `true` or `false`.
+    '''
+    (java_new "com.amazon.fusion.FusionBlob$IsBlobProc"))
+
+
+  (define is_bool
+    '''
+    (is_bool value)
+
+Determines whether a `value` is of type `bool`, returning `true` or `false`.
+    '''
+    (java_new "com.amazon.fusion.FusionBool$IsBoolProc"))
+
+
+  (define is_clob
+    '''
+    (is_clob value)
+
+Determines whether a `value` is of type `clob`, returning `true` or `false`.
+    '''
+    (java_new "com.amazon.fusion.FusionClob$IsClobProc"))
+
+
+  (define is_immutable_list
+    '''
+    (is_immutable_list value)
+
+Determines whether `value` is an immutable list, returning `true` or `false`.
+    '''
+    (java_new "com.amazon.fusion.FusionList$IsImmutableListProc"))
+
+
   (define is_list
     '''
     (is_list value)
@@ -53,6 +110,15 @@ For cases that need only one outcome, use [`when`](fusion/bool.html#when) or
 Determines whether `value` is a list, returning `true` or `false`.
     '''
     (java_new "com.amazon.fusion.FusionList$IsListProc"))
+
+
+  (define is_mutable_list
+    '''
+    (is_mutable_list value)
+
+Determines whether `value` is a mutable list, returning `true` or `false`.
+    '''
+    (java_new "com.amazon.fusion.FusionList$IsMutableListProc"))
 
 
   (define is_null
@@ -64,6 +130,24 @@ Returns `true` when `value` is _any_ Ion null, `false` otherwise.
      (java_new "com.amazon.fusion.IsNullProc"))
 
 
+  (define is_null_null
+    '''
+    (is_null_null value)
+
+Determines whether a `value` is `null.null`, returning `true` or `false`.
+    '''
+    (java_new "com.amazon.fusion.FusionNull$IsNullNullProc"))
+
+
+  (define is_procedure
+    '''
+    (is_procedure value)
+
+Returns `true` when `value` is a procedure, `false` otherwise.
+    '''
+    (java_new "com.amazon.fusion.FusionProcedure$IsProcedureProc"))
+
+
   (define is_sexp
     '''
     (is_sexp value)
@@ -71,6 +155,15 @@ Returns `true` when `value` is _any_ Ion null, `false` otherwise.
 Determines whether a `value` is a sexp, returning `true` or `false`.
     '''
     (java_new "com.amazon.fusion.FusionSexp$IsSexpProc"))
+
+
+  (define is_stretchy_list
+    '''
+    (is_stretchy_list value)
+
+Determines whether `value` is a stretchy list, returning `true` or `false`.
+    '''
+    (java_new "com.amazon.fusion.FusionList$IsStretchyListProc"))
 
 
   (define is_string
@@ -89,6 +182,15 @@ Determines whether a `value` is of type `string`, returning `true` or `false`.
 Determines whether `value` is a struct, returning `true` or `false`.
     '''
     (java_new "com.amazon.fusion.FusionStruct$IsStructProc"))
+
+
+  (define is_symbol
+    '''
+    (is_symbol value)
+
+Determines whether a `value` is of type `symbol`, returning `true` or `false`.
+    '''
+    (java_new "com.amazon.fusion.FusionSymbol$IsSymbolProc"))
 
 
   (define let_values
@@ -117,6 +219,24 @@ the result of the last form is the result of the entire expression.
     (java_new "com.amazon.fusion.LetrecForm"))
 
 
+  (define list
+    '''
+    (list value ...)
+
+Makes a fresh, immutable list containing the given `value`s.
+    '''
+    (java_new "com.amazon.fusion.FusionList$ImmutableListProc"))
+
+
+  (define mutable_list
+    '''
+    (mutable_list value ...)
+
+Makes a fresh, mutable list containing the given `value`s.
+    '''
+    (java_new "com.amazon.fusion.FusionList$MutableListProc"))
+
+
   (define not
     '''
     (not value)
@@ -143,4 +263,61 @@ Returns the Ion `datum` as-is, without evaluation.
 Returns a syntax object retaining the lexical information of `datum`.
     '''
     (java_new "com.amazon.fusion.QuoteSyntaxForm"))
+
+
+  (define_syntax set
+    '''
+    (set var value)
+
+Mutates the given `var`iable, assigning it the `value`.
+    '''
+    (java_new "com.amazon.fusion.SetForm"))
+
+
+  (define size
+    '''
+    (size collection)
+
+Returns the number of elements in the `collection`.
+The size of `null.list` (_etc._) is zero.  If `collection` is an improper sexp,
+an exception is thrown.
+
+**Warning:** Computing the size of an sexp takes linear time, since it must
+traverse the linked list of pairs to count elements.
+    '''
+    (java_new "com.amazon.fusion.FusionCollection$SizeProc"))
+
+
+  (define stretchy_list
+    '''
+    (stretchy_list value ...)
+
+Makes a fresh, stretchy list containing the given `value`s.
+    '''
+    (java_new "com.amazon.fusion.FusionList$StretchyListProc"))
+
+
+  (define values
+    '''
+    (values value ...)
+
+Produces [multiple results](fusion/procedure.html#results), returning the zero
+or more `value`s. Usually used in conjuction with `let_values` to bind the
+results to names.
+    '''
+    (java_new "com.amazon.fusion.ValuesProc"))
+
+
+  (define_syntax '#%top'
+    '''
+    ('#%top' id)
+
+References a top-level definition for symbol `id`, skipping over any
+surrounding local bindings.  Within a module, `id` must be defined within the
+module and not locally.
+
+As suggested by the awkward name, this form is rarely needed by application
+code and is primarily an artifact of the macro-expansion process.
+    '''
+    (java_new "com.amazon.fusion.TopForm"))
 )
