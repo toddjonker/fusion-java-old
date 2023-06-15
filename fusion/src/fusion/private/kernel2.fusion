@@ -27,6 +27,44 @@
   (provide (all_defined_out))
 
 
+  (define annotate
+    '''
+    (annotate value text ...)
+
+Applies the given annotations to a `value`, returning a (shallow) copy if
+necessary to avoid mutating it.  If no annotations are provided, then any
+extant annotations are effectively removed.
+
+The `value` must be annotatable; that is, it must be one of the Ion types.
+The `text` arguments must be non-null, non-empty strings or symbols.
+
+    (annotate 123 "a")              =>  a::123
+    (let [(v (quote a::123))]
+      (annotate v))                 =>  123
+    (let [(anns ["a", (quote b)])]
+      (apply annotate 123 anns))    =>  a::b::123
+
+To extract annotations from a value, use
+[`annotations`](fusion.html#annotations).
+    '''
+    (java_new "com.amazon.fusion.AnnotateProc"))
+
+
+  (define annotations
+    '''
+    (annotations value)
+
+Returns a non-null immutable list of symbols containing the user type
+annotations on the `value`.
+
+    (annotations 123)                =>  []
+    (annotations (quote a::b::123))  =>  [a, b]
+
+To put annotations onto a value, use [`annotate`](fusion.html#annotate).
+    '''
+    (java_new "com.amazon.fusion.TypeAnnotationsProc"))
+
+
   (define apply
     '''
     (apply proc arg ... sequence)
@@ -295,6 +333,16 @@ traverse the linked list of pairs to count elements.
 Makes a fresh, stretchy list containing the given `value`s.
     '''
     (java_new "com.amazon.fusion.FusionList$StretchyListProc"))
+
+
+  (define type_annotations
+    '''
+    (type_annotations value)
+
+*DEPRECATED* as of Fusion R20; renamed to
+[`annotations`](fusion.html#annotations).
+    '''
+    (java_new "com.amazon.fusion.TypeAnnotationsProc"))
 
 
   (define values

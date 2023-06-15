@@ -18,12 +18,46 @@ To use this dialect for your module, declare it as follows:
 
 
   // Pass-through selected bindings from kernel2
-  (provide all_defined_out begin define if lambda letrec module only_in
-    prefix_in provide rename_in rename_out require)
-  (provide is_bool is_int is_float is_decimal is_symbol
-      is_string is_clob is_blob is_list is_sexp is_struct)
-  (provide let let_values quote values '#%top')
-  (provide apply exit is_null is_null_null is_procedure not)
+  (provide
+    all_defined_out
+    annotate
+    annotations
+    apply
+    begin
+    define
+    exit
+    if
+    is_bool
+    is_blob
+    is_clob
+    is_decimal
+    is_float
+    is_int
+    is_procedure
+    is_string
+    is_symbol
+    is_list
+    is_null
+    is_null_null
+    is_sexp
+    is_struct
+    lambda
+    letrec
+    module
+    not
+    only_in
+    prefix_in
+    provide
+    rename_in
+    rename_out
+    require
+    type_annotations
+    let
+    let_values
+    quote
+    values
+    '#%top')
+
 
   (require "/fusion/private/builtins")
   (provide quasiquote unquote)
@@ -51,57 +85,4 @@ To use this dialect for your module, declare it as follows:
 
   (require "/fusion/void")
   (provide is_void void)
-
-
-  (require "/fusion/ffi/java")
-
-  (provide annotate)
-  (define annotate
-    '''
-    (annotate value text ...)
-
-Applies the given annotations to a `value`, returning a (shallow) copy if
-necessary to avoid mutating it.  If no annotations are provided, then any
-extant annotations are effectively removed.
-
-The `value` must be annotatable; that is, it must be one of the Ion types.
-The `text` arguments must be non-null, non-empty strings or symbols.
-
-    (annotate 123 "a")              =>  a::123
-    (let [(v (quote a::123))]
-      (annotate v))                 =>  123
-    (let [(anns ["a", (quote b)])]
-      (apply annotate 123 anns))    =>  a::b::123
-
-To extract annotations from a value, use
-[`annotations`](fusion.html#annotations).
-    '''
-    (java_new "com.amazon.fusion.AnnotateProc"))
-
-
-  (provide annotations)
-  (define annotations
-    '''
-    (annotations value)
-
-Returns a non-null immutable list of symbols containing the user type
-annotations on the `value`.
-
-    (annotations 123)                =>  []
-    (annotations (quote a::b::123))  =>  [a, b]
-
-To put annotations onto a value, use [`annotate`](fusion.html#annotate).
-    '''
-    (java_new "com.amazon.fusion.TypeAnnotationsProc"))
-
-
-  (provide type_annotations)
-  (define type_annotations
-    '''
-    (type_annotations value)
-
-*DEPRECATED* as of Fusion R20; renamed to
-[`annotations`](fusion.html#annotations).
-    '''
-    (java_new "com.amazon.fusion.TypeAnnotationsProc"))
 )
