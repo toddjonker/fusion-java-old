@@ -3,9 +3,8 @@
 (module control "/fusion/private/kernel2"
 
   (require
-    "/fusion/experimental/syntax"
     "/fusion/private/compare"
-    "/fusion/private/sexp"
+    "/fusion/private/syntax"
     "/fusion/unsafe/sexp"
     "/fusion/void")
 
@@ -25,7 +24,7 @@ The last `expr` is in tail position. Given no `expr`s, the result is true.
     '''
     (let_values [((ctx) (quote_syntax context))]
       (lambda (stx)
-        (let_values [((body) (tail (syntax_unwrap stx)))]
+        (let_values [((body) (unsafe_pair_tail (syntax_unwrap stx)))]
           (if (not (is_pair body))
 
             // (and)  -->  true
@@ -62,7 +61,7 @@ The last `expr` is in tail position. Given no `expr`s, the result is false.
     '''
     (let_values [((ctx) (quote_syntax context))]
       (lambda (stx)
-        (let_values [((body) (tail (syntax_unwrap stx)))]
+        (let_values [((body) (unsafe_pair_tail (syntax_unwrap stx)))]
           (if (not (is_pair body))
 
             // (or)  -->  false
@@ -99,7 +98,7 @@ A companion form is [`unless`](fusion/bool.html#unless).
     '''
     (let_values [((ctx) (quote_syntax context))]
       (lambda (stx)
-        (let_values [((body) (tail (syntax_unwrap stx)))]
+        (let_values [((body) (unsafe_pair_tail (syntax_unwrap stx)))]
           (if (not (is_pair body))
             (wrong_syntax stx "expected condition")
             (let_values [((test) (unsafe_pair_head body)),
@@ -127,7 +126,7 @@ A companion form is [`when`](fusion/bool.html#when).
     '''
     (let_values [((ctx) (quote_syntax context))]
       (lambda (stx)
-        (let_values [((body) (tail (syntax_unwrap stx)))]
+        (let_values [((body) (unsafe_pair_tail (syntax_unwrap stx)))]
           (if (not (is_pair body))
             (wrong_syntax stx "expected condition")
             (let_values [((test) (unsafe_pair_head body)),
@@ -156,7 +155,7 @@ If no `test` is truthy, the result is void.
     '''
     (let_values [((ctx) (quote_syntax context))]
       (lambda (stx)
-        (let_values [((clauses) (tail (syntax_unwrap stx)))]
+        (let_values [((clauses) (unsafe_pair_tail (syntax_unwrap stx)))]
           (if (not (is_pair clauses))
 
             // (cond)  -->  (void)
