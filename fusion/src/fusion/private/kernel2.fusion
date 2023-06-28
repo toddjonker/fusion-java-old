@@ -8,7 +8,9 @@
     all_defined_out
     begin
     current_directory
+    current_ion_reader
     current_namespace
+    current_output_port
     define
     define_syntax
     define_values

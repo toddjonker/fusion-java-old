@@ -1,6 +1,6 @@
-// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
-(module string '/fusion/private/builtins'
+(module string '/fusion/private/kernel2'
 
   '''
 Operations for strings.
@@ -17,13 +17,25 @@ representation required for constant-time access.
 [CCS]: http://www.unicode.org/glossary/#coded_character_sequence
   '''
 
-  // Pass-through bindings from kernel
-  (provide is_string)
 
-  (require "/fusion/experimental/defines")
+  (provide
+    is_string
+    string_append
+    string_contains
+    string_ends_with
+    string_is_lower
+    string_is_upper
+    string_join
+    string_replace
+    string_split
+    string_starts_with
+    string_to_lower
+    string_to_symbol
+    string_to_upper
+    symbol_to_string)
 
 
-  (defpub_j string_append
+  (define_values (string_append)
     '''
     (string_append text ...)
 
@@ -32,61 +44,61 @@ All arguments must be actual strings.
 
 If no arguments are supplied, the result is `""`.
     '''
-    "com.amazon.fusion.FusionString$AppendProc")
+    (java_new "com.amazon.fusion.FusionString$AppendProc"))
 
-  (defpub_j string_to_lower
+  (define_values (string_to_lower)
     '''
     (string_to_lower string)
 
 Converts all the characters in a `string` to lower-case letters.
     '''
-    "com.amazon.fusion.FusionString$ToLowerProc")
+    (java_new "com.amazon.fusion.FusionString$ToLowerProc"))
 
-  (defpub_j string_to_upper
+  (define_values (string_to_upper)
     '''
     (string_to_upper string)
 
 Converts all the characters in a `string` to upper-case letters.
     '''
-    "com.amazon.fusion.FusionString$ToUpperProc")
+    (java_new "com.amazon.fusion.FusionString$ToUpperProc"))
 
-  (defpub_j string_to_symbol
+  (define_values (string_to_symbol)
     '''
     (string_to_symbol string)
 
 Converts a `string` to a symbol with the same text.  Returns `null.symbol` when
 given `null.string`.  Raises an exception when given an empty string.
     '''
-    "com.amazon.fusion.FusionString$ToSymbolProc")
+    (java_new "com.amazon.fusion.FusionString$ToSymbolProc"))
 
-  (defpub_j symbol_to_string
+  (define_values (symbol_to_string)
     '''
     (symbol_to_string symbol)
 
 Converts a `symbol` to a string with the same text. Returns `null.string` when
 given `null.symbol`.
     '''
-    "com.amazon.fusion.FusionSymbol$ToStringProc")
+    (java_new "com.amazon.fusion.FusionSymbol$ToStringProc"))
 
-  (defpub_j string_contains
+  (define_values (string_contains)
     '''
     (string_contains string substring)
 
 Returns true if and only if `string` contains the `substring`.
 Both arguments must be actual strings.
     '''
-    "com.amazon.fusion.FusionString$ContainsProc")
+    (java_new "com.amazon.fusion.FusionString$ContainsProc"))
 
-  (defpub_j string_ends_with
+  (define_values (string_ends_with)
     '''
     (string_ends_with string suffix)
 
 Returns true if and only if `string` ends with `suffix`.
 Both arguments must be actual strings.
     '''
-    "com.amazon.fusion.FusionString$EndsWithProc")
+    (java_new "com.amazon.fusion.FusionString$EndsWithProc"))
 
-  (defpub_j string_is_lower
+  (define_values (string_is_lower)
     '''
     (string_is_lower string)
 
@@ -94,9 +106,9 @@ Returns whether `string` contains only lower-case code points.
 
 A list of lower-case code points can be found [online](http://www.fileformat.info/info/unicode/category/Ll/list.htm).
     '''
-    "com.amazon.fusion.FusionString$IsLowerCaseProc")
+    (java_new "com.amazon.fusion.FusionString$IsLowerCaseProc"))
 
-  (defpub_j string_is_upper
+  (define_values (string_is_upper)
     '''
     (string_is_upper string)
 
@@ -104,9 +116,9 @@ Returns whether `string` contains only upper-case code points.
 
 A list of upper-case code points can be found [online](http://www.fileformat.info/info/unicode/category/Lu/list.htm).
     '''
-    "com.amazon.fusion.FusionString$IsUpperCaseProc")
+    (java_new "com.amazon.fusion.FusionString$IsUpperCaseProc"))
 
-  (defpub_j string_join
+  (define_values (string_join)
     '''
     (string_join separator part ...)
 
@@ -117,9 +129,9 @@ All arguments must be actual strings or symbols.
 No `separator` is added before or after the result.
 If no `part`s are supplied, the result is `""`.
     '''
-    "com.amazon.fusion.FusionString$JoinProc")
+    (java_new "com.amazon.fusion.FusionString$JoinProc"))
 
-  (defpub_j string_replace
+  (define_values (string_replace)
     '''
     (string_replace string from to)
 
@@ -135,9 +147,9 @@ Replacement when `from` is an empty string will insert `to` before, between, and
 after each character in `string`. For example `(string_replace "aa" "" "b")` will
 evaluate to "babab". If `string` is also `""` a string equal to `to` is returned.
     '''
-    "com.amazon.fusion.FusionString$ReplaceProc")
+    (java_new "com.amazon.fusion.FusionString$ReplaceProc"))
 
-  (defpub_j string_split
+  (define_values (string_split)
     '''
     (string_split string separator)
 
@@ -168,14 +180,14 @@ dependency on the Java language or library.
 [FusionJavaRegexp]: wiki:FusionJavaRegexp
 [ssn]: fusion/experimental/string.html#string_split_noregexp
     '''
-    "com.amazon.fusion.FusionString$SplitProc")
+    (java_new "com.amazon.fusion.FusionString$SplitProc"))
 
-  (defpub_j string_starts_with
+  (define_values (string_starts_with)
     '''
     (string_starts_with string prefix)
 
 Returns true if and only if `string` begins with `prefix`.
 Both arguments must be actual strings.
     '''
-    "com.amazon.fusion.FusionString$StartsWithProc")
+    (java_new "com.amazon.fusion.FusionString$StartsWithProc"))
 )

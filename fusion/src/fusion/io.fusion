@@ -1,6 +1,6 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
-(module io '/fusion/private/kernel'
+(module io '/fusion/private/kernel2'
 
   '''
 Basic input/output features.  At present these are generally Ion-oriented.
@@ -38,10 +38,6 @@ upon launch of the Fusion runtime. See [FusionRuntimeBuilder][] for details.
   '''
 
 
-  (require
-    "/fusion/private/builtins")
-
-
   // Note that we don't currently provide current_ion_reader since the name and
   // semantics are still a bit shady.
 
@@ -65,7 +61,7 @@ upon launch of the Fusion runtime. See [FusionRuntimeBuilder][] for details.
   )
 
 
-  (define with_ion_from_file
+  (define_values (with_ion_from_file)
     '''
     (with_ion_from_file path thunk)
 
@@ -88,7 +84,7 @@ current Ion input stream.
       current_ion_reader))
 
 
-  (define with_ion_from_string
+  (define_values (with_ion_from_string)
     '''
     (with_ion_from_string string thunk)
 
@@ -109,7 +105,7 @@ current Ion input stream.
       current_ion_reader))
 
 
-  (define with_ion_from_lob
+  (define_values (with_ion_from_lob)
     '''
     (with_ion_from_lob lob thunk)
 
@@ -130,7 +126,7 @@ current Ion input stream.
       current_ion_reader))
 
 
-  (define read
+  (define_values (read)
     '''
     (read)
 
@@ -140,7 +136,7 @@ there's no more data.
     (java_new "com.amazon.fusion.FusionIo$ReadProc" current_ion_reader))
 
 
-  (define is_eof
+  (define_values (is_eof)
     '''
     (is_eof value)
 
@@ -151,7 +147,7 @@ bound to the name `eof`.
 
 
 
-  (define ionize
+  (define_values (ionize)
     '''
     (ionize value)
 
@@ -161,7 +157,7 @@ throwing an exception if the value contains any non-Ionizable data like closures
     (java_new "com.amazon.fusion.FusionIo$IonizeProc" current_output_port))
 
 
-  (define ionize_to_blob
+  (define_values (ionize_to_blob)
     '''
     (ionize_to_blob value)
 
@@ -172,7 +168,7 @@ containing an Ion binary document.
     (java_new "com.amazon.fusion.FusionIo$IonizeToBlobProc"))
 
 
-  (define ionize_to_string
+  (define_values (ionize_to_string)
     '''
     (ionize_to_string value)
 
@@ -183,7 +179,7 @@ containing an Ion text document.
     (java_new "com.amazon.fusion.FusionIo$IonizeToStringProc"))
 
 
-  (define jsonize_to_string
+  (define_values (jsonize_to_string)
     '''
     (jsonize_to_string value)
 
@@ -205,7 +201,7 @@ Compared to `ionize_to_string`, this method applies these conversions:
     (java_new "com.amazon.fusion.FusionIo$JsonizeToStringProc"))
 
 
-  (define write
+  (define_values (write)
     '''
     (write value)
 
@@ -217,7 +213,7 @@ contains any non-Ionizable data like closures.
     (java_new "com.amazon.fusion.FusionIo$WriteProc" current_output_port))
 
 
-  (define display
+  (define_values (display)
     '''
     (display value ...)
 
@@ -232,7 +228,7 @@ In general, the result will be unreadable by the Fusion and Ion readers.
     (java_new "com.amazon.fusion.FusionIo$DisplayProc" current_output_port))
 
 
-  (define display_to_string
+  (define_values (display_to_string)
     '''
     (display_to_string value ...)
 
@@ -242,7 +238,7 @@ The output format is as defined by [`display`](fusion/io.html#display).
     (java_new "com.amazon.fusion.FusionIo$DisplayToStringProc"))
 
 
-  (define displayln
+  (define_values (displayln)
     '''
     (displayln value ...)
 
@@ -253,10 +249,13 @@ The output format is as defined by [`display`](fusion/io.html#display).
       (display "\n")))
 
 
-  (define (writeln value)
+  (define_values (writeln)
     '''
+    (writeln value)
+
 [Writes](fusion/io.html#write) the value, then a newline.
     '''
-    (write value)
-    (display "\n"))
+    (lambda (value)
+      (write value)
+      (display "\n")))
 )
