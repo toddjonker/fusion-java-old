@@ -15,6 +15,7 @@ The semantics of Fusion timestamp values are identical to [Ion timestamps][ts].
     "/fusion/experimental/defines"
     "/fusion/number"
     "/fusion/private/control"
+    "/fusion/private/define"
     "/fusion/void")
 
 

@@ -1,0 +1,8 @@
+// Copyright (c) 2023 Amazon.com, Inc.  All rights reserved.
+
+(module define "/fusion/private/kernel"
+
+  (provide define)
+
+  // TODO Implement `define` as a macro, not an intrinsic.
+)

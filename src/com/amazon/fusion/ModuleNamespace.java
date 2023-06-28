@@ -1,9 +1,8 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.BindingSite.makeExportBindingSite;
-import static com.amazon.fusion.GlobalState.DEFINE;
 import static com.amazon.fusion.GlobalState.REQUIRE;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import com.amazon.fusion.util.function.Function;
@@ -199,7 +198,8 @@ final class ModuleNamespace
             throws AmbiguousBindingFailure
         {
             String name = identifier.stringValue();
-            throw new AmbiguousBindingFailure(DEFINE, name, formForErrors);
+            throw new AmbiguousBindingFailure("module-level definition",
+                                              name, formForErrors);
         }
 
         @Override

@@ -7,6 +7,7 @@
     "/fusion/experimental/syntax"
     "/fusion/private/compare"
     "/fusion/private/control"
+    "/fusion/private/define"
     "/fusion/private/sexp"
     "/fusion/unsafe/sexp"
   )

@@ -3,6 +3,7 @@
 (module sexp '/fusion/private/kernel2'
 
   (require
+    "/fusion/private/define"
     "/fusion/private/raise"
     "/fusion/unsafe/sexp"
     "/fusion/void")

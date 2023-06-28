@@ -87,6 +87,7 @@ significantly simpler to implement and easier to understand.
   // TODO I think that only quasisyntax is relevant?
 
   (require
+    "/fusion/private/define"
     "/fusion/private/metasyntax"
     "/fusion/private/raise"
     "/fusion/private/sexp"
