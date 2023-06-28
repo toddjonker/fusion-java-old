@@ -27,7 +27,6 @@ final class GlobalState
     static final String ALL_DEFINED_OUT       = "all_defined_out";
     static final String BEGIN                 = "begin";
     static final String CLOSED_SECURITY_GUARD = "closed_security_guard";
-    static final String DEFINE                = "define";
     static final String DEFINE_SYNTAX         = "define_syntax";
     static final String DEFINE_VALUES         = "define_values";
     static final String EOF                   = "eof";
@@ -55,7 +54,6 @@ final class GlobalState
 
     final Binding myKernelAllDefinedOutBinding;
     final Binding myKernelBeginBinding;
-    final Binding myKernelDefineBinding;
     final Binding myKernelDefineSyntaxBinding;
     final Binding myKernelDefineValuesBinding;
     final Binding myKernelOnlyInBinding;
@@ -89,7 +87,6 @@ final class GlobalState
 
         myKernelAllDefinedOutBinding = kernelBinding(ALL_DEFINED_OUT);
         myKernelBeginBinding         = kernelBinding(BEGIN);
-        myKernelDefineBinding        = kernelBinding(DEFINE);
         myKernelDefineSyntaxBinding  = kernelBinding(DEFINE_SYNTAX);
         myKernelDefineValuesBinding  = kernelBinding(DEFINE_VALUES);
         myKernelModuleBinding        = kernelBinding(MODULE);
@@ -157,7 +154,6 @@ final class GlobalState
         ns.define("current_namespace", currentNamespaceParam);
         ns.define("current_security_guard", currentSecurityGuard);
 
-        ns.define(DEFINE, new DefineForm());
         ns.define(DEFINE_SYNTAX, new DefineSyntaxForm());
         ns.define(DEFINE_VALUES, new DefineValuesForm());
         ns.define(EOF, FusionIo.eof(null));

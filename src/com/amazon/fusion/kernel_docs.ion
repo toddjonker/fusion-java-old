@@ -42,21 +42,6 @@ dynamically scoped via [`parameterize`](fusion/parameter.html#parameterize).
   ''',
 
 
-  define: '''
-    (define id value)
-
-Binds a namespace-level variable `id` to the result of `value`.
-
-At top-level, the `expr` is evaluated before top-level bindings for the `id`s
-are created.
-
-    (define (id arg ...) body ...+)
-
-Defines a procedure `id`, with formal arguments `arg ...` and the `body`.
-This form is equivalent to `(define id (lambda (arg ...) body ...))`.
-  ''',
-
-
   define_syntax: '''
     (define_syntax id xform)
 

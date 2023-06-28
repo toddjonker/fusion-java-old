@@ -1,8 +1,150 @@
 // Copyright (c) 2023 Amazon.com, Inc.  All rights reserved.
 
-(module define "/fusion/private/kernel"
+(module define "/fusion/private/kernel2"
+
+  (require
+    "/fusion/private/control"
+    "/fusion/private/syntax"
+    "/fusion/io"
+    "/fusion/string"
+    "/fusion/unsafe/sexp"
+    "/fusion/void")
 
   (provide define)
 
-  // TODO Implement `define` as a macro, not an intrinsic.
+
+  //==========================
+  // Expanding simple `define`
+
+  (define_values (expand_simple_definition)
+    '''
+Transforms a "simple" `define` form.
+Returns the expanded `define_values` form.
+    '''
+    (lambda (stx id body)
+      (let_values [((docs body) (split_docs body))]
+        (when (is_pair (unsafe_pair_tail body))
+          (wrong_syntax stx "too many subforms for 'define'"))
+        (final_expansion stx id docs (unsafe_pair_head body)))))
+
+
+  (define_values (split_docs)
+    '''
+    (split_docs body)
+
+Determines whether the body of a `define` starts with a documentation string,
+splitting it off from the remaining body.
+
+  * `body` is a non-empty sexp containing the elements of the definition
+    following the binding name or implicit-lambda signature.
+
+Returns two values, docs and body, where docs may be void.
+    '''
+    (lambda (body)
+      (let_values [((maybedoc) (unsafe_pair_head body))]
+        (if (and (is_pair (unsafe_pair_tail body))
+                 (is_string (syntax_unwrap maybedoc)))
+          (values maybedoc (unsafe_pair_tail body))
+          (values (void) body)))))
+
+
+  (define_values (final_expansion)
+    "Produces a `define_values` form from its identifier, docs, and body."
+    (lambda (stx id docs body)
+      // (define_values (ID) DOCS? BODY)
+      (datum_to_syntax
+        (pair (quote define_values)
+          (pair (sexp id) (if docs (sexp docs body) (sexp body))))
+        (quote_syntax context)
+        stx)))
+
+
+  //========================================
+  // Expanding `define` with implicit lambda
+
+  (define_values (expand_implicit_lambda)
+    '''
+Transforms an implicit-lambda definition into a simple definition.
+
+  * `sig_stx` is the syntax-sexp holding the procedure name and arguments.
+  * `body` is a sexp holding the remainder of the definition.
+
+Returns the expanded `define_values` form.
+    '''
+    (lambda (stx sig_stx body)
+      (let_values [((signature) (syntax_unwrap sig_stx))]
+        (let_values [((id)   (unsafe_pair_head signature)),
+                     ((args) (unsafe_pair_tail signature))]
+          (unless (is_identifier id)
+            (wrong_syntax id "'define' expected procedure name"))
+          (validate_args args)
+          (let_values [((docs body) (split_docs body))]
+            (final_expansion stx id
+              (prefix_docs_with_signature signature docs)
+              (pair (quote lambda) (pair args body))))))))
+
+
+  (define_values (validate_args)
+    "Validate that an implicit-lambda signature is made up of identifiers."
+    (lambda (arg_sexp)
+      (if (is_pair arg_sexp)
+        (if (is_identifier (unsafe_pair_head arg_sexp))
+          (validate_args (unsafe_pair_tail arg_sexp))
+          (wrong_syntax (unsafe_pair_head arg_sexp)
+            "'define' expected procedure formal argument"))
+        (void))))
+
+
+  (define_values (prefix_docs_with_signature)
+    '''
+Appends a documentation string of an implicit lambda with its signature,
+as long as the docs don't already start with a code snippet.
+    '''
+    (lambda (signature doc_stx)
+      (when doc_stx  // pass-through void
+        (let_values [((doc_str) (syntax_unwrap doc_stx))]
+          (if (or (string_starts_with doc_str "    ")
+                  (string_starts_with doc_str "\n    "))
+            // Doc already starts with a code snippet, don't add one.
+            doc_stx
+            (datum_to_syntax
+              (string_append "\n    " (ionize_to_string signature) "\n" doc_str)
+              // TODO Should use original `doc_stx` for the lexical context,
+              // but datum_to_syntax currently only accepts symbols.
+              // We use the definition's bound identifier instead.
+              (unsafe_pair_head signature)
+              doc_stx))))))
+
+
+  //==================================
+  // Expanding `define` of either form
+
+  (define_syntax define
+    '''
+    (define id value)
+
+Binds a namespace-level variable `id` to the result of `value`.
+
+At top-level, the `expr` is evaluated before top-level bindings for the `id`s
+are created.
+
+    (define (id arg ...) body ...+)
+
+Defines a procedure `id`, with formal arguments `arg ...` and the `body`.
+This form is equivalent to `(define id (lambda (arg ...) body ...))`.
+    '''
+    (lambda (stx)
+      (let_values [((subforms) (unsafe_pair_tail (syntax_unwrap stx)))]
+        (unless (is_pair subforms)
+          (wrong_syntax stx "'define' expects at least 2 subforms"))
+        (let_values [((binding)  (unsafe_pair_head subforms)),
+                     ((body)     (unsafe_pair_tail subforms))]
+          (unless (is_pair body)
+            (wrong_syntax stx "'define' expects at least 2 subforms"))
+          (if (is_identifier binding)
+            (expand_simple_definition stx binding body)
+            (if (is_pair (syntax_unwrap binding))
+              (expand_implicit_lambda stx binding body)
+              (wrong_syntax binding
+                "'define' expected an identifier or procedure signature")))))))
 )

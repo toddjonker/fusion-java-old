@@ -187,12 +187,7 @@ final class ModuleForm
                 SyntaxSexp sexp = (SyntaxSexp)expanded;
                 Binding binding = sexp.firstTargetBinding(eval);
 
-                if (binding == globals.myKernelDefineBinding)
-                {
-                    expanded = DefineForm.predefine(eval, moduleNamespace,
-                                                    sexp, form);
-                }
-                else if (binding == globals.myKernelDefineValuesBinding)
+                if (binding == globals.myKernelDefineValuesBinding)
                 {
                     expanded = DefineValuesForm.predefine(eval, moduleNamespace,
                                                           sexp, form);
@@ -282,8 +277,7 @@ final class ModuleForm
             if (! expanded.next())
             {
                 Binding firstBinding = firstTargetBindingOfSexp(eval, stx);
-                if (firstBinding == globals.myKernelDefineBinding ||
-                    firstBinding == globals.myKernelDefineValuesBinding)
+                if (firstBinding == globals.myKernelDefineValuesBinding)
                 {
                     assert expander.isModuleContext();
                     stx = expander.expand(moduleNamespace, stx);
