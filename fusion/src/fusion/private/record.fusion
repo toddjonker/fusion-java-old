@@ -41,12 +41,13 @@ TODO
 
   (define make_record_type
     '''
-    (make_record_type name supertype field_ct)
+    (make_record_type name supertype field_ct [proc-spec])
 
 Creates a new record type with the given name and number of fields.
 The `name` must be a non-empty symbol.
 The `supertype` must be a record type descriptor, or `null`.
 The `field_ct` must be a non-negative integer.
+The optional `proc-spec` must be a non-negative integer, or `null`.
 
 Returns multiple values:
   * A _record type descriptor_, an opaque object representing the type.

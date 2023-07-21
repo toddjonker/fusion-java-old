@@ -56,3 +56,18 @@
 
 
 // TODO `record` also allows ctor name customization.
+
+
+// Procedure records pass-through the object name of their implementation.
+
+(define (a_method) null)
+
+(let_values [(('record:F' make_F is_F F_element /* F_set_m */)
+              (make_record_type (Q F) null 1 0))]
+  (lets [(a (make_F a_method)),
+         (b (make_F a))]
+    (check === (Q a_method) (object_name a))
+    (check === (Q a_method) (object_name b))))
+
+
+"SUCCESS (object_name.test)"

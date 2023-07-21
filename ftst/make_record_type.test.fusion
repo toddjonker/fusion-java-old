@@ -47,6 +47,9 @@
 (expect_arity_error (make_record_type (quote T)))
 (expect_arity_error (make_record_type (quote T) null))
 
+(expect_arity_error (make_record_type (quote X) null 0 null {{"extra arg"}}))  // Too many
+
+
 (expect_argument_error (make_record_type "name" null 1))         // Invalid name
 (expect_argument_error (make_record_type (quote null.symbol) null 1))
 (expect_argument_error (make_record_type (quote '') null 1))
@@ -93,5 +96,46 @@
 (expect_argument_error (S2_get s2 1))
 
 (expect_argument_error (make_record_type (quote Bad) "super" 1)) // Invalid supertype
+
+
+// Procedure Records
+
+(expect_argument_error (make_record_type (quote X) null 0 -1))  // proc-index too small
+(expect_argument_error (make_record_type (quote X) null 0 0))   // proc-index too large
+(expect_argument_error (make_record_type (quote X) null 2 2))   // proc-index too large
+
+(define_values (P1_type P1_ctor P1_pred P1_get)
+  (make_record_type (quote P1) null 1 0))
+
+(define (add1 v) (+ 1 v))
+
+(define p1 (P1_ctor add1))
+(check_same add1 (P1_get p1 0))
+
+(check_pred P1_pred      p1)
+(check_pred is_procedure p1)
+(check === 3 (p1 2))
+
+
+// A proc-record can be the proc of another proc-record.
+(define p1b (P1_ctor p1))
+(check_same p1 (P1_get p1b 0))
+
+(check_pred P1_pred      p1b)
+(check_pred is_procedure p1b)
+(check === 3 (p1b 2))
+
+
+// Subtypes can override prop:procedure
+(define_values (P2_type P2_ctor P2_pred P2_get)
+  (make_record_type (quote P2) P1_type 2 0))    // Subtype fields: proc and int
+
+(define p2 (P2_ctor add1 (|| "p2") 2))
+(check === "p2" (p2))
+
+// Unlike Racket at the moment, we type-check the procedure field upon construction.
+(expect_argument_error (P1_ctor "not a proc"))
+(expect_argument_error (P2_ctor "not a proc" "nor this" "nor that"))
+
 
 "SUCCESS (make_record_type.test)"

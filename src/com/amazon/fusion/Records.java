@@ -6,9 +6,11 @@ import static com.amazon.fusion.FusionBool.makeBool;
 import static com.amazon.fusion.FusionIo.dispatchWrite;
 import static com.amazon.fusion.FusionNull.isNullNull;
 import static com.amazon.fusion.FusionNumber.checkIntArgToJavaInt;
+import static com.amazon.fusion.FusionNumber.checkNullableIntArg;
 import static com.amazon.fusion.FusionSymbol.checkRequiredSymbolArg;
 import com.amazon.fusion.FusionSymbol.BaseSymbol;
 import java.io.IOException;
+import java.math.BigInteger;
 
 /**
  * Implementation of records; based on Racket's "structs".
@@ -59,7 +61,7 @@ final class Records
         boolean hasInstance(Object o)
         {
             return (o instanceof RecordInstance) &&
-                    ((RecordInstance) o).myType.hasSupertype(this);
+                   ((RecordInstance) o).getType().hasSupertype(this);
         }
 
         void writeName(Evaluator eval, Appendable out)
@@ -97,13 +99,24 @@ final class Records
     }
 
 
-    private final static class RecordInstance
+    private interface RecordInstance
+    {
+        RecordType getType();
+        Object unsafe_access(int i);
+    }
+
+
+    /**
+     * Implements normal, non-procedure records.
+     */
+    private final static class PlainRecordInstance
         extends BaseValue
+        implements RecordInstance
     {
         private final RecordType myType;
         private final Object[] myFields;
 
-        RecordInstance(RecordType type, Object[] fields)
+        PlainRecordInstance(RecordType type, Object[] fields)
         {
             assert fields.length == type.myTotalFieldCount;
 
@@ -111,7 +124,13 @@ final class Records
             myFields = fields;
         }
 
-        Object unsafe_access(int i)
+        @Override
+        public RecordType getType()
+        {
+            return myType;
+        }
+
+        public Object unsafe_access(int i)
         {
             return myFields[i];
         }
@@ -136,11 +155,60 @@ final class Records
     }
 
 
-    private final static class RecordConstructorProc
+    /**
+     * Implements records that can be applied as procedures.
+     */
+    private final static class ProcRecordInstance
         extends Procedure
+        implements RecordInstance
     {
         private final RecordType myType;
-        private final int        myInitFieldCount;
+        private final Object[]   myFields;
+        private final Procedure  myProc;
+
+        ProcRecordInstance(RecordType type, Object[] fields, Procedure proc)
+        {
+            assert fields.length == type.myTotalFieldCount;
+
+            myType   = type;
+            myFields = fields;
+            myProc   = proc;
+
+            // "If a structure is a procedure [...], then its name is the
+            // implementing procedure’s name."
+            // https://tinyurl.com/object-name
+
+            this.inferName(myProc.getInferredName());
+
+            // I have to wonder if there's contexts in which myProc hasn't had
+            // its inferred name assigned yet; perhaps this should be dynamic?
+        }
+
+        @Override
+        public RecordType getType()
+        {
+            return myType;
+        }
+
+        public Object unsafe_access(int i)
+        {
+            return myFields[i];
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            return eval.bounceTailCall(myProc, args);
+        }
+    }
+
+
+    private static class RecordConstructorProc
+        extends Procedure
+    {
+        final RecordType myType;
+        final int        myInitFieldCount;
 
         RecordConstructorProc(RecordType type)
         {
@@ -154,10 +222,42 @@ final class Records
         {
             checkArityExact(myInitFieldCount, args);
             // TODO apply guardian
-            return new RecordInstance(myType, args);
-
+            return new PlainRecordInstance(myType, args);
         }
     }
+
+
+    private final static class ProcRecordConstructorProc
+        extends RecordConstructorProc
+    {
+        private final int myProcIndex;
+
+        ProcRecordConstructorProc(RecordType type, int procIndex)
+        {
+            super(type);
+
+            myProcIndex = procIndex;
+        }
+
+        @Override
+        Object doApply(Evaluator eval, Object[] args)
+            throws FusionException
+        {
+            checkArityExact(myInitFieldCount, args);
+
+            // TODO apply guardian
+            Object proc = args[myProcIndex];
+            if (proc instanceof Procedure)
+            {
+                return new ProcRecordInstance(myType, args, (Procedure) proc);
+            }
+
+            // TODO Allow non-proc here, but the record always throws arity error.
+            // That requires changing ArityFailure to not require an explicit arity.
+            throw argFailure("procedure", myProcIndex, args);
+        }
+    }
+
 
     private final static class RecordPredicateProc
         extends Procedure1
@@ -227,7 +327,7 @@ final class Records
 
     /*
      * Currently:
-     *   (make_record_type name_sym supertype field_count)
+     *   (make_record_type name_sym supertype field_count [ proc-index ])
      *
      * Eventually this should conform to Racket's protocol:
      * (make-struct-type name super-type
@@ -241,7 +341,7 @@ final class Records
         Object doApply(Evaluator eval, Object[] args)
             throws FusionException
         {
-            checkArityExact(3, args);
+            checkArityRange(3, 4, args);
 
             String name = checkRequiredSymbolArg(eval, this, 0, args);
             if (name.isEmpty())
@@ -266,10 +366,41 @@ final class Records
                 throw new ArgumentException(this, "non-negative int", 1, args);
             }
 
+            int argCount = args.length;
+
+            int procIndex = -1;
+            if (argCount >= 4)
+            {
+                if (! isNullNull(eval, args[3]))
+                {
+                    BigInteger bi = checkNullableIntArg(eval, this, 3, args);
+                    if (bi != null)
+                    {
+                        // TODO JDK8 Use bi.intValueExact() to avoid truncation
+                        procIndex = bi.intValue();
+
+                        if (procIndex < 0)
+                        {
+                            throw argFailure("non-negative int", 3, args);
+                        }
+                        if (procIndex >= initFieldCount)
+                        {
+                            throw argFailure("int less than field count", 3, args);
+                        }
+                        if (supertype != null)
+                        {
+                            procIndex += supertype.getInitFieldCount();
+                        }
+                    }
+                }
+            }
+
             RecordType type
                 = new RecordType((BaseSymbol) args[0], supertype, initFieldCount);
             Procedure ctor
-                = new RecordConstructorProc(type);
+                = (procIndex < 0
+                       ? new RecordConstructorProc(type)
+                       : new ProcRecordConstructorProc(type, procIndex));
             Procedure pred
                 = new RecordPredicateProc(type);
             Procedure accessor
