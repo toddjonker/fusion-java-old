@@ -33,11 +33,11 @@
     (annotate value text ...)
 
 Applies the given annotations to a `value`, returning a (shallow) copy if
-necessary to avoid mutating it.  If no annotations are provided, then any
-extant annotations are effectively removed.
+necessary to avoid mutating it.  Any annotations on `value` are removed,
+so `(annotate value)` effectively de-annotates a value.
 
 The `value` must be annotatable; that is, it must be one of the Ion types.
-The `text` arguments must be non-null, non-empty strings or symbols.
+The `text` arguments must be non-null strings or symbols.
 
     (annotate 123 "a")              =>  a::123
     (let [(v (quote a::123))]

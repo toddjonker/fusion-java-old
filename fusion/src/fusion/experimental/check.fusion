@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 /*                       *** WARNING ***
  *
@@ -165,7 +165,7 @@ For example:
           (wrong (lambda (stx)
                    (wrong_syntax stx
                      '''Bad syntax for define_check; usage: '''
-                     '''(define_check (name arg ...) expr ...)''')))]
+                     '''(define_check (name arg ...) expr ...+)''')))]
       (lambda (stx)
         (when (< (syntax_size stx) 3)
           (wrong stx))
@@ -322,6 +322,18 @@ For example:
 
     (define_binary_check (check_same expected actual)
       (same expected actual))
+
+You should not use this for binary checks that are composed solely from other
+checks: most `check`-forms return void, not true/false, so this wrapping form
+will aways fail.  Instead, use two-argument `define_check`.  For example:
+
+    // Incorrect: check_more returns void, so this always fails.
+    (define_binary_check (check_stuff expected actual)
+      (check_more foo expected actual))
+
+    // Correct: define_check ignores the result of its body.
+    (define_check (check_stuff expected actual)
+      (check_more foo expected actual))
     '''
     (let [(ctx (quote_syntax here)),
           (wrong (lambda (stx)
@@ -373,6 +385,8 @@ A check that fails unconditionally.
   (define_simple_check (check op val1 val2)
     '''
 Checks that the result of `(op val1 val2)` is truthy.
+
+See `check_pred` for a one-value variant.
     '''
     (op val1 val2))
 
@@ -381,6 +395,8 @@ Checks that the result of `(op val1 val2)` is truthy.
   (define_simple_check (check_pred pred val)
     '''
 Checks that the result of `(pred val)` is truthy.
+
+See `check` for a two-value variant.
     '''
     (pred val))
 

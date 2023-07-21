@@ -70,8 +70,9 @@ Converts all the characters in a `string` to upper-case letters.
     (string_to_symbol string)
 
 Converts a `string` to a symbol with the same text.  Returns `null.symbol` when
-given `null.string`.  Raises an exception when given an empty string.
+given `null.string`.
     '''
+    // TODO This should preserve annotations.
     (java_new "com.amazon.fusion.FusionString$ToSymbolProc"))
 
 
@@ -95,6 +96,7 @@ If no arguments are supplied, the result is `""`.
 Converts a `symbol` to a string with the same text. Returns `null.string` when
 given `null.symbol`.
     '''
+    // TODO This should preserve annotations.
     (java_new "com.amazon.fusion.FusionSymbol$ToStringProc"))
 
   (define_values (string_contains)
