@@ -140,17 +140,21 @@ final class LoadHandler
                                              ModuleLocation loc)
         throws FusionException
     {
+        SourceName sourceName = loc.sourceName();
         try
         {
             try (IonReader reader = loc.read(eval))
             {
-                SourceName sourceName = loc.sourceName();
                 return readModuleDeclaration(eval, id, sourceName, reader);
             }
         }
-        catch (IOException e)
+        catch (IOException | IonException e)
         {
-            throw new FusionException(e);
+            String where =
+                (sourceName == null ? id.toString() : sourceName.display());
+            String message =
+                "Error loading " + where + ": " + e.getMessage();
+            throw new FusionException(message, e);
         }
     }
 
