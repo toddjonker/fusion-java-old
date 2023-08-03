@@ -103,8 +103,10 @@ The bindings defined are:
               (record:NAME NAME is_NAME accessor)
               (make_record_type NAME null <field-count>))
             (begin
-              (define (NAME-FIELD v)
-                (accessor v <field-index>))
+              (define (NAME_FIELD v)
+                (if (is_NAME v)
+                  (accessor v <field-index>)
+                  (raise_argument_error "NAME_FIELD" "NAME" 0 v)))
               ...))
         */
         (lets [(capture (lambda (datum) // Use the caller's lexical context!
@@ -119,7 +121,12 @@ The bindings defined are:
                                  (getter_name_stx (capture getter_name))]
                             (values (+ i 1)
                                     (pair (QQ (define ((UQ getter_name_stx) v)
-                                                (accessor v (UQ i))))
+                                                (if ((UQ is_name_stx) v)
+                                                  (accessor v (UQ i))
+                                                  (raise_argument_error
+                                                    (UQ (symbol_to_string getter_name))
+                                                    (UQ (symbol_to_string name))
+                                                    0 v))))
                                           getters)))))]
             (datum_to_syntax
               (QQ (begin
