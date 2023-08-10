@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2023 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -134,3 +134,21 @@
 (check_pred (|r| (or (=== "{f:a,g:b}" r)
                      (=== "{g:b,f:a}" r)))
   (display_to_string (quote { f: a, g: b })))
+
+
+//=============================================================================
+// with_output_to_string
+
+(require "/fusion/private/io")
+
+(check === "" (with_output_to_string))
+
+(check === "true12\n\"write\"display"
+  (with_output_to_string
+    (display "true")
+    (displayln 12)
+    (write "write")
+    (display "display")))
+
+
+"SUCCESS (io.test)"

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Utilities for input and output of Fusion data.
@@ -645,6 +646,36 @@ public final class FusionIo
         }
     }
 
+
+    static class MakeOutputBufferProc
+        extends Procedure0
+    {
+        @Override
+        Object doApply(Evaluator eval)
+            throws FusionException
+        {
+            return new ByteArrayOutputStream(1024);
+        }
+    }
+
+    static class OutputBufferToStringProc
+        extends Procedure1
+    {
+        @Override
+        Object doApply(Evaluator eval, Object arg)
+            throws FusionException
+        {
+            try
+            {
+                String jString = ((ByteArrayOutputStream) arg).toString(UTF_8.name());
+                return makeString(eval, jString);
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                throw new FusionErrorException("JRE doesn't have UTF-8?", e);
+            }
+        }
+    }
 
     static class IonizeToStringProc
         extends Procedure1

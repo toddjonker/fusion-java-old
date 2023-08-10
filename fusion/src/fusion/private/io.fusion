@@ -1,0 +1,42 @@
+// Copyright (c) 2023 Amazon.com, Inc.  All rights reserved.
+
+(module io '/fusion/private/kernel2'
+
+  (require
+    "/fusion/experimental/syntax"
+    "/fusion/parameter"
+    "/fusion/private/builtins"
+    "/fusion/private/sexp"
+  )
+
+  (provide
+    with_output_to_string
+  )
+
+
+  (define_values (make_buffer)
+    (java_new "com.amazon.fusion.FusionIo$MakeOutputBufferProc"))
+
+  (define_values (buffer_to_string)
+    (java_new "com.amazon.fusion.FusionIo$OutputBufferToStringProc"))
+
+
+  // TODO PERF: This unnecessarily transcodes to and from UTF-8.
+  //   We need something like a current_output_character_port that accepts
+  //   Unicode characters, not bytes, so we can build a string directly.
+  (define_syntax with_output_to_string
+    '''
+    (with_output_to_string body ...)
+
+Evaluates the `body` forms while the current output port is parameterized to a
+local buffer, returning the content of that buffer as a string.
+    '''
+    (lambda (stx)
+      (datum_to_syntax
+        (quasiquote
+          (parameterize [(current_output_port (make_buffer))]
+            (unquote (pair (quote begin) (tail (syntax_unwrap stx))))
+            (buffer_to_string (current_output_port))))
+        (quote_syntax context)
+        stx)))
+)
