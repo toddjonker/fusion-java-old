@@ -33,7 +33,9 @@ representation required for constant-time access.
     string_to_symbol
     string_to_upper
     symbol_append
-    symbol_to_string)
+    symbol_to_string
+    text_to_string
+  )
 
 
   (define_values (string_append)
@@ -205,4 +207,18 @@ Returns true if and only if `string` begins with `prefix`.
 Both arguments must be actual strings.
     '''
     (java_new "com.amazon.fusion.FusionString$StartsWithProc"))
+
+
+  (define_values (text_to_string)
+    '''
+    (text_to_string t)
+
+Normalizes a text value (string or symbol) to a string.
+Annotations are preserved and `null.symbol` is converted to `null.string`.
+    '''
+    (lambda (v)
+      (if (is_string v)
+        v
+        // TODO There should be a helper to copy annotations
+        (apply annotate (symbol_to_string v) (annotations v)))))
 )

@@ -79,19 +79,27 @@
 
 
 //============================================================================
-// string_to_symbol
+// string_to_symbol, symbol_to_string, text_to_string
 
 (check === (quote null.symbol) (string_to_symbol null.string))
 (check === (quote '')          (string_to_symbol ""))
 (check === (quote text)        (string_to_symbol "text"))
 
 
-//============================================================================
-// symbol_to_string
-
 (check === null.string (symbol_to_string (quote null.symbol)))
 (check === ""          (symbol_to_string (quote '')))
 (check === "text"      (symbol_to_string (quote text)))
+
+
+(for [(s (quote [null.string, a::null.string, "", b::c::"", "text", d::"text"]))]
+  (check ident s (text_to_string s)))
+
+(check === (quote    null.string) (text_to_string (quote    null.symbol)))
+(check === (quote a::null.string) (text_to_string (quote a::null.symbol)))
+(check === (quote    ""         ) (text_to_string (quote    '')))
+(check === (quote b::""         ) (text_to_string (quote b::'')))
+(check === (quote    "text"     ) (text_to_string (quote    text)))
+(check === (quote c::"text"     ) (text_to_string (quote c::text)))
 
 
 //============================================================================
