@@ -80,6 +80,7 @@ contact us for clarification.
     string_to_lower
     string_to_symbol
     string_to_upper
+    symbol_append
     symbol_to_string
   )
 

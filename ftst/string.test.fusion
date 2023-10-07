@@ -34,29 +34,37 @@
 
 
 //============================================================================
-// string_append
+// string_append, symbol_append
 
-(check === ""    (string_append ""   ""))
-(check === "aB"  (string_append "aB" ""))
-(check === "aBc" (string_append "aB" "c"))
+(define_check (check_appender append compare mk_text)
+  (check compare (mk_text ""    ) (append))
+  (check compare (mk_text ""    ) (append ""))
+  (check compare (mk_text ""    ) (append ""   ""))
+  (check compare (mk_text "aB"  ) (append "aB" ""))
+  (check compare (mk_text "aBc" ) (append "aB" "c"))
 
-(check === "aBcd" (string_append "aB" (quote c) "d"))
-(check === "aB"   (string_append (quote aB) ""))
-(check === "aBc"  (string_append (quote aB) "c"))
-(check === "aBcd" (string_append (quote aB) "c" (quote d)))
+  (check compare (mk_text "aBcd") (append "aB" (quote c) "d"))
+  (check compare (mk_text "aB"  ) (append (quote aB) ""))
+  (check compare (mk_text "aBc" ) (append (quote aB) "c"))
+  (check compare (mk_text "aBcd") (append (quote aB) "c" (quote d)))
 
+  (expect_argument_exn (append (void)))
+  (expect_argument_exn (append null))
+  (expect_argument_exn (append null.string))
+  (expect_argument_exn (append (quote null.symbol)))
 
-(expect_argument_exn (string_append (void)))
-(expect_argument_exn (string_append null))
-(expect_argument_exn (string_append null.string))
+  (expect_argument_exn (append (void) "anything"))
+  (expect_argument_exn (append null "anything"))
+  (expect_argument_exn (append null.string "anything"))
+  (expect_argument_exn (append (quote null.symbol) "anything"))
 
-(expect_argument_exn (string_append (void) "anything"))
-(expect_argument_exn (string_append null "anything"))
-(expect_argument_exn (string_append null.string "anything"))
+  (expect_argument_exn (append "anything" (void)))
+  (expect_argument_exn (append "anything" null))
+  (expect_argument_exn (append "anything" null.string))
+  (expect_argument_exn (append "anything" (quote null.symbol))))
 
-(expect_argument_exn (string_append "anything" (void)))
-(expect_argument_exn (string_append "anything" null))
-(expect_argument_exn (string_append "anything" null.string))
+(check_appender string_append ===   identity)
+(check_appender symbol_append ident string_to_symbol)
 
 
 //============================================================================

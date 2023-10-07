@@ -14,6 +14,7 @@ https://docs.racket-lang.org/reference/creatingmorestructs.html
     "/fusion/exception"
     "/fusion/experimental/syntax"
     "/fusion/ffi/java"
+    "/fusion/string"
     (rename_in "/fusion/experimental/syntax"
       (quote_syntax QS))
     (rename_in "/fusion/base"
@@ -60,11 +61,6 @@ fields inherited from a supertype.
 
 
   (define CTX (quote_syntax lexical_context))
-
-
-  (define symbol_append
-    (lambda texts
-      (string_to_symbol (apply string_append texts))))
 
 
   (define_syntax record
