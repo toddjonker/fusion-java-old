@@ -13,6 +13,7 @@ The semantics of Fusion timestamp values are identical to [Ion timestamps][ts].
   (require
     "/fusion/exception"
     "/fusion/experimental/defines"
+    "/fusion/experimental/syntax"
     "/fusion/number"
     "/fusion/private/control"
     "/fusion/private/define"
@@ -356,4 +357,15 @@ The result may represent a point-in-time different from `ts`.
                                               (- (or (timestamp_offset ts) 0)
                                                  offset))
                                offset))))
-)
+
+(defpub_syntax execution_millis
+'''
+    (execution_millis body ...)
+runs the body expressions, then returns an approximation of the number of milliseconds taken to do so as a decimal.
+'''
+  (lambda (stx)
+    (quasisyntax
+      (let [(time_beginning (timestamp_now))]
+        (unsyntax (syntax_cons_q begin (syntax_subseq stx 1)))
+        (- (timestamp_to_epoch_millis (timestamp_now))
+           (timestamp_to_epoch_millis time_beginning)))))))

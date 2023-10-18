@@ -18,6 +18,7 @@ The built-in sequence types are [list](fusion/list.html) and
     "/fusion/exception"
     "/fusion/experimental/defines"
     "/fusion/ffi/java"
+    "/fusion/iterator"
     "/fusion/number"
     "/fusion/private/bind"
     "/fusion/private/builtins"   // Some basic list ops
@@ -213,7 +214,63 @@ returning a new sequence of the same type, containing the results in order.
       (true
         (raise_argument_error "map" "sequence" 1 proc sequence))))
 
-  (defpub fold_left
+(define (unsafe_seq_iterator seq)
+    (if (is_list seq)
+        (unsafe_list_iterator seq)
+        (unsafe_sexp_iterator seq)))
+
+(define (unsafe_fold_left_1 proc init seq)
+  (unless (is_sequence seq)
+    (raise_argument_error "fold_left" "sequence" 2 proc init seq))
+  (let [(iter (unsafe_seq_iterator seq))]
+  (let loop [(acc init)]
+    (if (iterator_has_next iter)
+        (loop (proc acc (iterator_next iter)))
+        acc))))
+
+(define (unsafe_fold_left_2 proc init seq1 seq2)
+  (unless (is_sequence seq1)
+      (raise_argument_error "fold_left" "sequence" 2 proc init seq1 seq2))
+  (unless (is_sequence seq2)
+        (raise_argument_error "fold_left" "sequence" 3 proc init seq1 seq2))
+  (let [(iter1 (unsafe_seq_iterator seq1)),
+        (iter2 (unsafe_seq_iterator seq2))]
+  (let loop [(acc init)]
+    (if (and (iterator_has_next iter1) (iterator_has_next iter2))
+        (loop (proc acc (iterator_next iter1) (iterator_next iter2)))
+        acc))))
+
+//every, but without type switching
+(define (unsafe_list_every pred collection ind len)
+  (or (= ind len)
+      (and (pred (unsafe_list_element collection ind))
+        (unsafe_list_every pred collection (+ ind 1) len))))
+
+(define (generic_fold_left proc init seqs)
+  (let [(i 1), (iters (stretchy_list))]
+    (do (lambda (seq)
+          (set i (+ i 1))
+          (unless (is_sequence seq)
+            (apply raise_argument_error "fold_left" "sequence" i proc init seqs))
+          (unsafe_list_add_m iters (unsafe_seq_iterator seq)))
+      seqs)
+    (set i (- i 1))
+    (let loop [(acc init)]
+      (if (unsafe_list_every iterator_has_next iters 0 i)
+        (loop (apply proc acc (unsafe_map_list_to_list iterator_next iters)))
+        acc))))
+
+(define (unsafe_map_list_to_list proc expr)
+  (let [(result (stretchy_list)), (ls_size (size expr))]
+    (let loop [(ind 0)]
+      (if (< ind ls_size)
+        (begin
+          (unsafe_list_add_m result
+            (proc (unsafe_list_element expr ind)))
+          (loop (+ ind 1)))
+        result))))
+
+(defpub fold_left
     '''
     (fold_left proc init sequence ...)
 
@@ -273,45 +330,30 @@ Vizualizing `fold_left`:
               /|\\     /|\\
              5 0 ()  z 1 6
     '''
-    (lambda args
-      (if (< (size args) 2)
-        (apply raise_arity_error "fold_left" 2 args)
-        (let [(proc (unsafe_pair_head args)),
-              (init (unsafe_pair_head (unsafe_pair_tail args))),
-              (seqs (unsafe_pair_tail (unsafe_pair_tail args)))]
+(lambda args
+  (lets [(proc (if (is_pair args)
+                 (unsafe_pair_head args)
+                 (apply raise_arity_error "fold_left" 2 args))),
+         (others (unsafe_pair_tail args)),
+         (init (if (is_pair others)
+                 (unsafe_pair_head others)
+                 (apply raise_arity_error "fold_left" 2 args))),
+         (seqs (unsafe_pair_tail others))]
+    (cond
+      ((not (is_procedure proc))
+        (apply raise_argument_error "fold_left" "procedure" 0 args))
+      ((not (is_pair seqs)) init)
+      //most fold_left calls have 1 or 2 list arguments. delegate to a more optimized version
+      (true
+        (let [(first_elem (unsafe_pair_head seqs)),
+              (other_elems (unsafe_pair_tail seqs))]
           (cond
-            ((not (is_procedure proc))
-              (apply raise_argument_error "fold_left" "procedure" 0 args))
-            ((not (every is_sequence seqs))
-              (let errorloop [(i 2)]
-                (if (not (is_sequence (. args i)))
-                  (apply raise_argument_error "fold_left" "sequence" i args)
-                  (errorloop (+ i 1)))))
-            ((is_empty seqs) init)
-            (true
-              (let loop [(i 0),
-                         (result init),
-                         (_seqs seqs)]
-                (if
-                  (any
-                    (lambda (seq)
-                      (or
-                        (and (is_sexp seq) (is_empty seq))
-                        (and (is_list seq) (>= i (unsafe_list_size seq)))))
-                    _seqs)
-                  result
-                  (let [(_args
-                          (pair
-                            result
-                            (map
-                              (lambda (seq)
-                                (if (is_sexp seq)
-                                  (unsafe_pair_head seq)
-                                  (unsafe_list_element seq i)))
-                              _seqs))),
-                        (next
-                          (map
-                            (lambda (seq) (if (is_sexp seq) (unsafe_pair_tail seq) seq))
-                            _seqs))]
-                    (loop (+ i 1) (apply proc _args) next))))))))))
+            ((not (is_pair other_elems))
+              (unsafe_fold_left_1 proc init first_elem))
+            ((not (is_pair (unsafe_pair_tail other_elems)))
+              (unsafe_fold_left_2
+                proc init
+                first_elem (unsafe_pair_head other_elems)))
+               //generic version
+            (true (generic_fold_left proc init seqs)))))))))
 )
