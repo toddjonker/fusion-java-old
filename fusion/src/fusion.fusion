@@ -45,18 +45,28 @@ contact us for clarification.
 
   // bool
   (require "/fusion/bool")
-  (provide is_bool is_false is_true is_truthy is_untruthy not)
+  (provide
+    is_bool
+    is_false
+    is_true
+    is_truthy
+    is_untruthy
+    not)
 
   // lob (clob & blob)
   (require "/fusion/lob")
   (provide
+    is_blob
+    is_clob
     lob_to_hex
   )
 
   (require "/fusion/number")
   (provide
     + - * /
+    ceiling
     decimal
+    floor
     int_to_string
     is_decimal
     is_float
@@ -119,7 +129,7 @@ contact us for clarification.
   (require "/fusion/void")
   (provide is_void void)
 
-  (provide is_symbol is_clob is_blob)
+  (provide is_symbol)
 
   (provide < <= = >= >)
   (provide = == === same ident)
@@ -151,6 +161,11 @@ contact us for clarification.
 
   (provide let let_values letrec lets values)
 
+  (require "/fusion/parameter")
+  (provide
+    make_parameter
+    parameterize)
+
 
   //=========================================================================
   // Control Forms
@@ -169,6 +184,26 @@ contact us for clarification.
     for_list       fors_list
     for_sexp       fors_sexp
     for_struct     fors_struct
+  )
+
+  (require "/fusion/exception")
+  (provide
+    assert
+    call_with_handler
+    is_argument_error
+    is_arity_error
+    is_contract_error
+    is_error_exn
+    is_exn
+    is_result_error
+    is_syntax_error
+    is_unbound_error
+    raise
+    raise_argument_error
+    raise_arity_error
+    raise_contract_error
+    raise_result_error
+    with_handlers
   )
 
 
