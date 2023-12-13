@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -7,9 +7,24 @@ import java.io.IOException;
 
 abstract class NamedValue
     extends BaseValue
+    implements NamedObject
 {
     private String myName;
 
+
+    @Override
+    public final Object objectName(Evaluator eval)
+    {
+        if (myName == null)
+        {
+            return FusionVoid.voidValue(eval);
+        }
+        else
+        {
+            // TODO don't do this every time.
+            return FusionSymbol.makeSymbol(eval, myName);
+        }
+    }
 
     final String getInferredName()
     {

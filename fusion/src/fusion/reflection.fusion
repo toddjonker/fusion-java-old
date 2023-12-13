@@ -1,0 +1,18 @@
+// Copyright (c) 2023 Amazon.com, Inc.  All rights reserved.
+
+(module reflection '/fusion/private/kernel'
+
+  (provide object_name)
+
+
+  (define_values (object_name)
+    '''
+    (object_name v)
+
+Returns the name of `v` if it has one, otherwise void.
+
+At present, only procedures bound by `define` have names, which are symbols.
+In general, not all object names are symbols.
+    '''
+    (java_new "com.amazon.fusion.ObjectNameProc"))
+)

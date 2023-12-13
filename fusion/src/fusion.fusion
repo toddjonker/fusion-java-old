@@ -181,6 +181,13 @@ contact us for clarification.
 
 
   //=========================================================================
+  // Reflection
+
+  (require "/fusion/reflection")
+  (provide object_name)
+
+
+  //=========================================================================
   // I/O
 
   (require "/fusion/io")

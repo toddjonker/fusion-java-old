@@ -9,7 +9,7 @@ import java.io.IOException;
  * Base class for syntactic forms.
  */
 abstract class SyntacticForm
-    extends NamedValue
+    extends NamedValue    // Primarily for SyntaxChecker to label error messages
 {
     abstract SyntaxValue expand(Expander expander, Environment env,
                                 SyntaxSexp stx)
