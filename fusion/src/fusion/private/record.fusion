@@ -8,6 +8,18 @@ These facilities are incomplete and unstable.
 
 See the Racket documentation for `make-struct-type` at
 https://docs.racket-lang.org/reference/creatingmorestructs.html
+
+
+TODO
+----
+  * Stub out other arguments to `make_record_type` for Racket compliance.
+  * Stub out the generated mutator procedure, even if mutation doesn't work.
+  * Customized constructor object names.
+    * `record` produces a constructor with the wrong name.
+  * Add equivalent of `make-struct-field-accessor` and use from `record`.
+  * Public release preconditions:
+    * Document in `object_name`.
+    * Remove these TODOs.
   '''
 
   (require
@@ -55,9 +67,6 @@ The index must be less than `field_ct`; a subtype's accessor cannot retrieve
 fields inherited from a supertype.
     '''
     (java_new "com.amazon.fusion.Records$MakeRecordTypeProc"))
-
-
-// TODO Add equivalent of `make-struct-field-accessor` and use from `record`.
 
 
   (define CTX (quote_syntax lexical_context))

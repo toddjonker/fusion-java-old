@@ -17,6 +17,7 @@ final class Records
 {
     private final static class RecordType
         extends BaseValue
+        implements NamedObject
     {
         private final BaseSymbol myName;
         private final RecordType mySupertype; // TODO push to subclass?
@@ -86,6 +87,12 @@ final class Records
         int getTotalInitFieldCount()
         {
             return myTotalFieldCount;
+        }
+
+        @Override
+        public Object objectName(Evaluator eval)
+        {
+            return myName;
         }
     }
 
@@ -237,7 +244,7 @@ final class Records
             checkArityExact(3, args);
 
             String name = checkRequiredSymbolArg(eval, this, 0, args);
-            if (name.length() == 0)
+            if (name.isEmpty())
             {
                 throw new ArgumentException(this, "non-empty symbol", 0, args);
             }
@@ -268,10 +275,9 @@ final class Records
             Procedure accessor
                 = new RecordAccessorProc(type);
 
-            // TODO verify correct inferred object names
-            ctor.inferName(name);
+            ctor.inferName("make_" + name);
             pred.inferName("is_" + name);
-            accessor.inferName(name + "_get");
+            accessor.inferName(name + "_element");
 
             return new Object[] { type, ctor, pred, accessor };
         }

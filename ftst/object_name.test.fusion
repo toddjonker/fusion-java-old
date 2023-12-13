@@ -18,3 +18,41 @@
 (check === (Q f) (object_name f))
 
 
+// Object names for structs are based on the given symbolic name.
+// They are not "inferred" from surrounding definitions, like with procedures.
+
+(let_values (((struct_U make_U is_U U_element /* U_set_m */)
+              (make_record_type (Q U_arg) null 1)))
+  (check ===       (Q (  U_arg    make_U_arg is_U_arg U_arg_element /*U_arg_set_m*/))
+  (map object_name (sexp struct_U make_U     is_U     U_element     /*U_set_m    */))))
+
+
+(define_values (struct_V make_V is_V V_element /*V_set_m*/)
+  (make_record_type (Q V_arg) null 1))
+
+(check ===         (Q (  V_arg    make_V_arg is_V_arg V_arg_element /*V_arg_set_m*/))
+  (map object_name (sexp struct_V make_V     is_V     V_element     /*V_set_m*/    )))
+
+
+// TODO `make_record_type` allows customizing the constructor's object_name.
+// This allows `record` to name the ctor after the type (instead of `make_*`).
+
+(define_values ('struct:W' make_W is_W W_element /*W_set_m*/)
+  (make_record_type (Q W_arg) null 1 /*0 null (sexp) #f #f '() #f 'custom*/))
+
+(check ===        (Q (   W_arg     /*custom*/ is_W_arg W_arg_element /*W_arg_set_m*/))
+ (map object_name (sexp 'struct:W' /*make_W*/ is_W     W_element     /*W_set_m*/    )))
+
+
+
+// The `record` form doesn't expose the X_element and X_set_m procedures that are
+// created by the underlying `make_record_type` call.
+
+(record X (f))   // Use default constructor-id  // TODO [f #:mutable]
+
+// TODO the constructor `X` has the wrong object_name `make_X`.
+(check ===        (Q (     X       /*X*/ is_X X_f /*set_X_f_m*/))
+ (map object_name (sexp 'record:X' /*X*/ is_X X_f /*set_X_f_m*/)))
+
+
+// TODO `record` also allows ctor name customization.
