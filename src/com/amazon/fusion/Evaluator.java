@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -8,6 +8,8 @@ import static com.amazon.fusion.FusionNull.makeNullNull;
 import static com.amazon.fusion.FusionNumber.makeDecimal;
 import static com.amazon.fusion.FusionNumber.makeFloat;
 import static com.amazon.fusion.FusionNumber.makeInt;
+import static com.amazon.fusion.FusionSexp.emptySexp;
+import static com.amazon.fusion.FusionSexp.pair;
 import static com.amazon.fusion.FusionSexp.sexpFromIonSequence;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionStruct.structFromIonStruct;
@@ -506,6 +508,37 @@ class Evaluator
 
         return results;
     }
+
+    /**
+     * Collects all marks for {@code key} in the current continuation into a
+     * sexp, with the most recent mark first.
+     *
+     * @return a non-null sexp.
+     */
+    Object continuationMarkSexp(Object key)
+    {
+        Object sexp;
+        if (myOuterFrame != null)
+        {
+            sexp = myOuterFrame.continuationMarkSexp(key);
+        }
+        else
+        {
+            sexp = emptySexp(this);
+        }
+
+        if (myContinuationMarks != null)
+        {
+            Object value = myContinuationMarks.get(key);
+            if (value != null)
+            {
+                sexp = pair(this, value, sexp);
+            }
+        }
+
+        return sexp;
+    }
+
 
     Evaluator addContinuationFrame()
     {

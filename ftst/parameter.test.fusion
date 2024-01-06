@@ -1,8 +1,9 @@
-// Copyright (c) 2012-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
-  "/fusion/parameter")
+  "/fusion/parameter"
+  "/fusion/private/continuation")
 
 
 (define p (make_parameter 19))
@@ -35,6 +36,13 @@
 // Using a macro in the body
 (check === 94
   (parameterize ((p 94)) (let ((v p)) (v))))
+
+
+(check === (quote (3 2 1))
+  (parameterize [(p 1)]
+    (parameterize [(p 2)]
+      (parameterize [(p 3)]
+        (current_continuation_mark_sexp p)))))
 
 
 "PASSED" // Helpful output if you run this stand-alone

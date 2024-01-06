@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2017 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -61,5 +61,17 @@ class DynamicParameter
         throws FusionException
     {
         return currentValue(eval);
+    }
+
+
+    static final class CurrentMarkSexp
+        extends Procedure1
+    {
+        @Override
+        Object doApply(Evaluator eval, Object key)
+            throws FusionException
+        {
+            return eval.continuationMarkSexp(key);
+        }
     }
 }

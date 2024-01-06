@@ -1,0 +1,20 @@
+// Copyright (c) 2024 Amazon.com, Inc.  All rights reserved.
+
+(module continuation '/fusion/private/kernel'
+
+  (provide current_continuation_mark_sexp)
+
+
+  // This shouldn't go public until Parameters are not used as continuation
+  // mark keys.  That's an implementation shortcut that shouldn't become
+  // contractual, which it will become if they work as arguments here.
+
+  (define_values (current_continuation_mark_sexp)
+    '''
+    (current_continuation_mark_sexp key)
+
+Returns an sexp containing the marks for `key` in the current continuation.
+The innermost mark is first.
+    '''
+    (java_new "com.amazon.fusion.DynamicParameter$CurrentMarkSexp"))
+)
