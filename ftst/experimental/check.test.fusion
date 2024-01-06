@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2024 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/exception"
@@ -317,3 +317,6 @@
 // Malformed uses
 (expect_syntax_exn (expect_any_exn))
 (expect_syntax_exn (expect_any_exn true "message" "extra"))
+
+
+"SUCCESS (check.test)"

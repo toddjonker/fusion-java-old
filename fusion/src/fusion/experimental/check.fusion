@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 /*                       *** WARNING ***
  *
@@ -100,7 +100,8 @@ the expected and actual values.
     "/fusion/experimental/defines"
     "/fusion/experimental/syntax"
     "/fusion/ffi/java"
-    "/fusion/parameter")
+    "/fusion/parameter"
+    "/fusion/private/continuation")
 
 
   (define check_stack_param
@@ -118,18 +119,19 @@ Determines whether a value is a `check_error` exception, a subtype of
     (java_instance_of CheckExn v))
 
 
-  (defpub fail_check
+  (defpub (fail_check)
     '''
-Raises a `check _error`, using the current context stack as populated by the
+Raises a `check_error`, using the current context stack as populated by the
 dynamically enclosing checks.
     '''
-    (java_new "com.amazon.fusion.FailCheckProc" check_stack_param))
+    (raise (java_new "com.amazon.fusion.CheckException"
+             (current_continuation_mark_sexp check_stack_param))))
 
 
   // Not public: the signature is awkward.
   (define (_fail_check meta)
     '''
-Raises a `check _error`, including a stack trace derived from the
+Raises a `check_error`, including a stack trace derived from the
 `check_stack_param` marks.
     '''
     (parameterize [(check_stack_param meta)]

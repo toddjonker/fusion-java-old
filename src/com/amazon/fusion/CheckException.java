@@ -1,7 +1,9 @@
-// Copyright (c) 2014-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSexp.unsafePairHead;
+import static com.amazon.fusion.FusionSexp.unsafePairTail;
 import static com.amazon.fusion.FusionStruct.unsafeStructElt;
 import static com.amazon.fusion.FusionStruct.unsafeStructHasKey;
 import static com.amazon.fusion.FusionStruct.unsafeStructKeys;
@@ -14,11 +16,11 @@ import java.util.List;
 final class CheckException
     extends FusionErrorException
 {
-    private final List<Object> myStack;
+    private final Object myStack;
 
-    CheckException(List<Object> stack, String message)
+    CheckException(Object stack)
     {
-        super(message);
+        super("check failure");
         myStack = stack;
     }
 
@@ -84,8 +86,12 @@ final class CheckException
         out.append("Check failure:");
 
         Object frame = null;
-        for (Object entry : myStack)
+        for (Object stack = myStack;
+             FusionSexp.isPair(eval, stack);
+             stack = unsafePairTail(eval, stack))
         {
+            Object entry = unsafePairHead(eval, stack);
+
             if (frame == null)
             {
                 frame = entry;
