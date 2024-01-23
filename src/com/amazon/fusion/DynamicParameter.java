@@ -3,7 +3,6 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionString.stringToJavaString;
-import java.util.List;
 
 
 /**
@@ -32,19 +31,6 @@ class DynamicParameter
     {
         Object result = eval.firstContinuationMark(this);
         return (T) (result == null ? myInitialValue : result);
-    }
-
-
-    // TODO This feature doesn't seem to exist in Racket.
-    //   It's available on continuation marks: continuation-mark-set->list
-    <T> List<T> allValues(Evaluator eval)
-    {
-        @SuppressWarnings("unchecked")
-        List<T> marks = (List<T>) eval.continuationMarks(this);
-
-        // TODO add initial value?
-
-        return marks;
     }
 
 

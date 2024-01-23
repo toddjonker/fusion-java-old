@@ -483,33 +483,6 @@ class Evaluator
 
 
     /**
-     * Collects all marks for {@code key} in the current continuation,
-     * with the most recent mark first.
-     *
-     * @return a non-null list.
-     */
-    ArrayList<Object> continuationMarks(Object key)
-    {
-        // The keys must be hashable and equals-able!
-        assert key instanceof DynamicParameter;
-
-        ArrayList<Object> results = new ArrayList<>();
-
-        Evaluator e = this;
-        while (e.myOuterFrame != null)
-        {
-            Object value = e.myContinuationMarks.get(key);
-            if (value != null)
-            {
-                results.add(value);
-            }
-            e = e.myOuterFrame;
-        }
-
-        return results;
-    }
-
-    /**
      * Collects all marks for {@code key} in the current continuation into a
      * sexp, with the most recent mark first.
      *

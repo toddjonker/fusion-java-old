@@ -1,8 +1,8 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Rule;
@@ -144,7 +144,7 @@ public class ModuleTest
 
 
     @Test
-    public void testIntialModuleImportsWithNoProvides()
+    public void testInitialModuleImportsWithNoProvides()
         throws Exception
     {
         expectUnboundIdentifierExn("(module M '/NoProvides' X)");
@@ -219,7 +219,6 @@ public class ModuleTest
 
     @Test
     public void testModuleCircularity()
-        throws Exception
     {
         try
         {
@@ -228,10 +227,8 @@ public class ModuleTest
         }
         catch (FusionException e)
         {
-            String message = e.getMessage();
-            assertTrue(message.contains("/cycle1"));
-            assertTrue(message.contains("/cycle2"));
-            assertTrue(message.contains("/cycle3"));
+            assertEquals("Module dependency cycle detected: /cycle1 -> /cycle2 -> /cycle3 -> /cycle1",
+                         e.getBaseMessage());
         }
     }
 

@@ -1,14 +1,17 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
+import static com.amazon.fusion.FusionSexp.unsafePairHead;
+import static com.amazon.fusion.FusionSexp.unsafePairTail;
+import static com.amazon.fusion.FusionSexp.unsafeSexpToJavaList;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.FusionText.isText;
 import static com.amazon.fusion.FusionText.unsafeTextToJavaString;
 import static com.amazon.fusion.ModuleIdentity.isValidModulePath;
 import static com.amazon.ion.util.IonTextUtils.printString;
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -214,19 +217,25 @@ final class ModuleNameResolver
     }
 
 
-    private void checkForCycles(Evaluator eval, Object moduleId)
+    private void checkForCycles(Evaluator eval, ModuleIdentity moduleId)
         throws FusionException
     {
-        ArrayList<Object> marks =
-            eval.continuationMarks(MODULE_LOADING_MARK);
-
-        for (int i = 0; i < marks.size(); i++)
+        Object loading = eval.continuationMarkSexp(MODULE_LOADING_MARK);
+        int i = 0;
+        for (Object current = loading;
+             FusionSexp.isPair(eval, current);
+             current = unsafePairTail(eval, current), i++)
         {
-            if (marks.get(i).equals(moduleId))
+            Object m = unsafePairHead(eval, current);
+            if (m.equals(moduleId))
             {
                 // Found a cycle!
                 StringBuilder message = new StringBuilder();
                 message.append("Module dependency cycle detected: ");
+
+                // Make a copy for easier reverse traversal.
+                List<Object> marks = unsafeSexpToJavaList(eval, loading);
+                assert marks != null;
                 for ( ; i >= 0; i--)
                 {
                     message.append(marks.get(i));
@@ -269,14 +278,14 @@ final class ModuleNameResolver
         {
             if (reload || ! reg.isLoaded(id))
             {
-                Object idString = makeString(eval, id.absolutePath());
+                checkForCycles(eval, id);
 
-                checkForCycles(eval, idString);
+                Object idString = makeString(eval, id.absolutePath());
 
                 Evaluator loadEval =
                     eval.markedContinuation(new Object[]{ myCurrentModuleDeclareName,
                                                           MODULE_LOADING_MARK },
-                                            new Object[]{ idString, idString });
+                                            new Object[]{ idString, id });
                 myLoadHandler.loadModule(loadEval, id, loc);
                 // Evaluation of 'module' declares it, but doesn't instantiate.
                 // It also calls-back to registerDeclaredModule().
