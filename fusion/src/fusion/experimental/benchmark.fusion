@@ -1,0 +1,36 @@
+// Copyright (c) 2023-2024 Amazon.com, Inc.  All rights reserved.
+
+(module benchmark '/fusion'
+
+  '''
+Experimental operators for micro-benchmarking.
+  '''
+
+  (require
+    "/fusion/experimental/syntax"
+  )
+
+  (provide
+    execution_millis
+  )
+
+
+  (define_syntax execution_millis
+    '''
+    (execution_millis body ...)
+
+Runs the body expressions, returning the approximate number of milliseconds
+taken to do so, as a decimal.
+    '''
+    (lambda (stx)
+      (let [(body (syntax_cons_q begin (syntax_subseq stx 1)))]
+        (quasisyntax
+          // Sandwich the body as tightly as possible with time capture calls.
+          // We don't want to touch the body's return value(s).
+          (let_values [((start finish) (values (timestamp_now)
+                                               (begin (unsyntax body)
+                                                      (timestamp_now))))]
+              (- (timestamp_to_epoch_millis start)
+                 (timestamp_to_epoch_millis finish)))))))
+
+)

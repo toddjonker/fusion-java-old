@@ -1,0 +1,20 @@
+// Copyright (c) 2024 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/fusion/experimental/benchmark"
+  "/fusion/experimental/check"
+)
+
+
+// execution_millis runs all its body forms
+(let [(var 1)]
+  (execution_millis (set var (+ var 1))
+                    (set var (* var 2)))
+  (check_same 4 var))
+
+(let [(time (execution_millis))]
+  (check_true (is_decimal time))
+  (check < time 1.0))
+
+
+"SUCCESS (benchmark.test)"
