@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2023 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2024 Amazon.com, Inc.  All rights reserved.
 
 (module for '/fusion/private/kernel'
 
@@ -59,13 +59,8 @@ values (consistent through the entire traversal).
 Depending on the type of series, the order in which the series is traversed may
 or may not be predictable.
 
-The following types are usable as series:
-
-  * Sequences (sexps and lists) are traversed in order, producing a single value
-    at each step.
-  * Structs are traversed in an undefined order. Each step produces a single
-    field as two values, the field name as a `symbol`  and the field value.
-  * Iterators produce one or more values as per `iterator_next`.
+For more information on the types that can be used as series, and other ways
+to create them, see [/fusion/series](fusion/series.html).
 
 
 Flat and Nested Traversal
@@ -139,6 +134,7 @@ to apply optimizations to the generated code.
            "/fusion/list"
            "/fusion/number"
            "/fusion/private/bind"
+           "/fusion/private/series"
            "/fusion/private/struct"
            "/fusion/procedure"
            "/fusion/sexp"
@@ -161,14 +157,6 @@ to apply optimizations to the generated code.
     (quote_syntax context))
 
 
-  (define (iterate series)
-    (cond
-      ((is_iterator series) series)
-      ((is_list     series) (unsafe_list_iterator   series))
-      ((is_sexp     series) (unsafe_sexp_iterator   series))
-      ((is_struct   series) (unsafe_struct_iterator series))
-      (true (raise_result_error "for-clause" "series" series))))
-
   (define (normalize_ids ids)
     (if (is_identifier ids)
       (datum_to_syntax (sexp ids))
@@ -190,20 +178,37 @@ to apply optimizations to the generated code.
         (map ids (syntax_to_sexp clauses_stx)))))
 
 
+  (define (iterator_drivers iter)
+    '''
+Produce the series drivers for an iterator, using the iterator as the
+position value.
+    '''
+    (values iterator_next     // pos_vals
+            identity          // pos_next
+            iter              // init
+            iterator_has_next // pos_cont
+            false             // val_cont
+            false))           // all_cont
+
+
+  // TODO: As of Racket 6.7.0.4 the full protocal now has seven drivers.
+  // It still supports six-driver implementations, but with some complexity.
   (define (make_series series)
     '''
-Very dumbed-down implementation of the series protocol using iterators.
+Very dumbed-down implementation of the series protocol using iterators for
+most built-in series.
 
-The `pos` is an iterator.
+The name of this procedure (taken from Racket) is misleading: it doesn't make
+a series object, it returns the drivers used to consume a series within `for`.
     '''
-    (values
-      iterator_next     // pos_vals
-      identity          // pos_next
-      (iterate series)  // init
-      iterator_has_next // pos_cont
-      false             // val_cont
-      false  ))         // all_cont
-
+    (cond
+      // IMPORTANT: This must align with /fusion/private/series#is_series
+      ((is_list     series)  (iterator_drivers (unsafe_list_iterator   series)))
+      ((is_sexp     series)  (iterator_drivers (unsafe_sexp_iterator   series)))
+      ((is_struct   series)  (iterator_drivers (unsafe_struct_iterator series)))
+      ((is_iterator series)  (iterator_drivers series))
+      ((is_do_series series) (do_series_drivers series))
+      (true (raise_result_error "for-clause" "series" series))))
 
   (define (expand_clause orig_stx clause)
     '''

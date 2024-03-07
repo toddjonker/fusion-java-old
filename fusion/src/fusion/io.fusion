@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 (module io '/fusion/private/kernel2'
 
@@ -8,12 +8,21 @@ Basic input/output features.  At present these are generally Ion-oriented.
 
 ## Input
 
-The `read` procedure reads data from an Ion input stream.
+The [`read`](fusion/io.html#read) procedure reads data from an Ion input stream.
 
 The _current Ion input stream_ is an internal [parameter][] that is the default
 source for reading Ion data.  If the current Ion stream is not parameterized
 (via one of the `with_ion_from_*` procedures), it is initialized from `stdin`
 when it's first needed.
+
+Since `read` can be awkward when consuming more than one datum, it's often
+better to use the [`in_port` series](fusion/series.html#in_port) in conjuction
+with a [`for` comprehension](fusion/for.html).  For example, to consume the
+rest of the current Ion input stream into a list of top-level values, you can
+write:
+
+    (for_list [(v (in_port))]
+      v)))
 
 
 ## Output
@@ -79,6 +88,16 @@ A common use of this procedure is to read a single Ion value from a file:
 
 This leverages the fact that `read` accepts zero arguments and consumes the
 current Ion input stream.
+
+To process an entire stream, you can use a [comprehension](fusion/for.html).
+The following procedure loads an entire Ion file into a (synthetic) list
+holding its top-level values:
+
+    (define ion_file_to_list (path)
+      (with_ion_from_file path
+        (lambda ()
+          (for_list [(v (in_port))]
+            v))))
     '''
     (java_new "com.amazon.fusion.FusionIo$WithIonFromFileProc"
       current_ion_reader))
@@ -100,6 +119,15 @@ A common use of this procedure is to read a single Ion value from the data:
 
 This leverages the fact that `read` accepts zero arguments and consumes the
 current Ion input stream.
+
+To process an entire stream, you can use a [comprehension](fusion/for.html):
+
+    (with_ion_from_string "1 k {a:false}"
+      (lambda ()
+        (for_list [(v (in_port))]
+          v)))
+    =>
+    [1, k, {a:false}]
     '''
     (java_new "com.amazon.fusion.FusionIo$WithIonFromStringProc"
       current_ion_reader))
@@ -130,8 +158,10 @@ current Ion input stream.
     '''
     (read)
 
-Reads an Ion value from the current Ion input stream.  Returns `eof` when
-there's no more data.
+Reads an Ion value from the current Ion input stream.
+Returns [`eof`](fusion/io.html#eof) when there's no more data.
+
+To read a series of values, see [`in_port`](fusion/series.html#in_port).
     '''
     (java_new "com.amazon.fusion.FusionIo$ReadProc" current_ion_reader))
 
@@ -141,7 +171,7 @@ there's no more data.
     (is_eof value)
 
 Determines whether a `value` is the Fusion end-of-file value.  This value is
-bound to the name `eof`.
+bound to the name [`eof`](fusion/io.html#eof).
     '''
     (java_new "com.amazon.fusion.FusionIo$IsEofProc"))
 

@@ -1,0 +1,90 @@
+// Copyright (c) 2024 Amazon.com, Inc.  All rights reserved.
+
+(module series "/fusion/private/kernel2"
+
+  (require
+    "/fusion/io"
+    "/fusion/iterator"
+    "/fusion/private/control"
+    "/fusion/private/define"
+    "/fusion/private/record_type"
+    "/fusion/void"
+  )
+
+  (provide
+    do_series_drivers
+    in_port
+    in_producer
+    is_do_series
+    is_series
+  )
+
+
+  (define_values ('record:do_series' make_do_series is_do_series do_series_element)
+    // The one field is a thunk that initiates the series and returns its six
+    // driver procedures.  See make_series in for.fusion.
+    (make_record_type (quote series) null 1))
+
+  (define (do_series_drivers ser)
+    "Returns the six series-driver procedures."
+    // do_series holds a thunk  drivers.
+    ((do_series_element ser 0)))
+
+
+  (define (is_series value)
+    '''
+Determines whether a `value` is a [series](fusion/series.html) that can be
+consumed by a [`for` comprehension](fusion/for.html).
+    '''
+    // IMPORTANT: This predicate must align with /fusion/for#make_series
+    (or (is_list      value)
+        (is_sexp      value)
+        (is_struct    value)
+        (is_do_series value)
+        (is_iterator  value)))
+
+
+  (define (in_producer producer stop_pred)
+    '''
+Returns a [series](fusion/series.html) containing the results from calls
+to the `producer` procedure.
+
+At each step, the `producer` is invoked with no argument.
+The `stop_pred` is then applied to the result(s), and if it
+returns truthy then the series ends (without including those values).
+Otherwise the producer's results are produced by the series.
+    '''
+    (make_do_series
+      // Since producers are inherently stateful, the `pos`ition is void.
+      (lambda ()
+        (values (lambda (pos) (producer))                   // pos_vals
+                void                                        // pos_next
+                (void)                                      // init
+                false                                       // pos_cont
+                (lambda vals (not (apply stop_pred vals)))  // val_cont
+                false))))                                   // all_cont
+
+
+  (define (in_port)
+    '''
+Returns a series of elements produced by calling [`read`](fusion/io.html#read).
+In other words, the series produces the data on the current Ion input stream.
+
+The current stream can be locally parameterized to affect iteration over Ion
+data in files, lobs, or strings:
+
+    (with_ion_from_string
+      "1 k {a:false}"
+      // The with_ion_from functions take a thunk:
+      (lambda ()
+        (for_list [(v (in_port))]
+          v)))
+    =>
+    [1, k, {a:false}]
+
+See [/fusion/io](fusion/io.html) for other ways to parameterize the current
+Ion input.
+    '''
+    (in_producer (lambda () (read)) is_eof))
+
+)

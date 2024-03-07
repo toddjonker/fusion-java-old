@@ -1,0 +1,28 @@
+// Copyright (c) 2024 Amazon.com, Inc.  All rights reserved.
+
+(require
+  "/fusion/experimental/check"
+  "/testutils")
+
+
+(check_pred is_series (with_ion_from_string "" in_port))
+
+(check_pred is_series (in_producer void void))
+
+(check_pred is_series (sexp))
+(check_pred is_series [])
+(check_pred is_series {})
+
+(check_false (is_series (void)))
+
+
+//=============================================================================
+// in_port
+
+(check === (quote [1, k, {a:false}])
+  (with_ion_from_string "1 k {a:false}"
+    (|| (for_list [(v (in_port))]
+           v))))
+
+
+"SUCCESS (series.test)"

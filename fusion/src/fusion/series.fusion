@@ -1,0 +1,38 @@
+// Copyright (c) 2024 Amazon.com, Inc.  All rights reserved.
+
+(module series "/fusion/private/kernel2"
+
+  '''
+Abstract, ordered collections that can be consumed by
+[`for` comprehensions](fusion/for.html).
+
+A _series_ is an abstract data type that produces any number of values in
+order.  Their primary use is as input to the various
+[`for` comprehension forms](fusion/for.html).
+
+A number of built-in types are usable as series:
+
+  * [Sequences](fusion/sequence.html) (sexps and lists) are traversed in
+    order, producing a single value at each step.
+  * [Structs](fusion/struct.html) are traversed in an undefined order.
+    Each step produces two values: the field name as a symbol, and the
+    field value.
+  * [Iterators](fusion/iterator.html) produce one or more values as per
+    [`iterator_next`](fusion/iterator.html#iterator_next).
+
+This module provides constructors that can make new series from other
+sources of data.
+  '''
+
+
+  (require
+    "/fusion/private/series"
+  )
+
+  (provide
+    in_port
+    in_producer
+    is_series
+  )
+
+)
