@@ -1,0 +1,61 @@
+// Copyright (c) 2023-2024 Amazon.com, Inc.  All rights reserved.
+
+(module record_type "/fusion/private/kernel"
+  '''
+A _record type_ is a datatype holding a number of fields.
+
+These facilities are incomplete and unstable.
+
+See the Racket documentation for `make-struct-type` at
+https://docs.racket-lang.org/reference/creatingmorestructs.html
+
+
+TODO
+----
+  * Stub out other arguments to `make_record_type` for Racket compliance.
+  * Stub out the generated mutator procedure, even if mutation doesn't work.
+  * Add equivalent of `make-struct-field-accessor` and use from `record`.
+  * Public release preconditions:
+    * Document in `object_name`.
+  '''
+
+  (require
+    "/fusion/ffi/java"
+  )
+
+  (provide
+    make_record_type
+  )
+
+
+  (define_values (make_record_type)
+    '''
+    (make_record_type name supertype field_ct [proc-spec])
+
+Creates a new record type with the given name and number of fields.
+The `name` must be a non-empty symbol.
+The `supertype` must be a record type descriptor, or `null`.
+The `field_ct` must be a non-negative integer.
+The optional `proc-spec` must be a non-negative integer, or `null`.
+
+Returns multiple values:
+  * A _record type descriptor_, an opaque object representing the type.
+  * A constructor procedure that returns new records.
+  * A predicate that detects records of this type.
+  * An accessor function for records of this type.
+
+When a supertype is given, the new type extends it by adding additional
+fields.  Records of this type contain `field_ct` fields in addition to those
+from the supertype.
+The constructor accepts the same number of arguments as there are fields, and
+initializes the record's fields, in order, with those values.
+
+The accessor accepts a record of this type (or of a subtype), and an integer
+indicating the (zero-based) field index, returning the record's value of that
+field.
+The index must be less than `field_ct`; a subtype's accessor cannot retrieve
+fields inherited from a supertype.
+    '''
+    (java_new "com.amazon.fusion.Records$MakeRecordTypeProc"))
+
+)
