@@ -58,6 +58,7 @@ contact us for clarification.
   (provide
     is_blob
     is_clob
+    lob_digest
     lob_to_hex
   )
 

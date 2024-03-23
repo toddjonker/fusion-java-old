@@ -1,18 +1,20 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 (module lob '/fusion/private/builtins'
 
   '''
-Operations on lobs (blob and clob).
+Operations on arrays of octets, also known as "lobs" (blob and clob).
   '''
 
   (require
     "/fusion/bool"
     "/fusion/exception"
+    "/fusion/ffi/java"
     "/fusion/unsafe/lob" // not exported!
   )
 
   (provide
+    lob_digest
     lob_to_hex
   )
 
@@ -21,6 +23,21 @@ Operations on lobs (blob and clob).
     is_clob
     is_blob
   )
+
+
+  (define lob_digest
+    '''
+    (lob_digest lob algorithm)
+
+Generates a message digest for the content of a [lob](fusion/lob.html), using
+the given algorithm.  The `lob` must be a non-null blob or clob containing the
+bytes to be digested.  The `algorithm` must be a string such as `"SHA-256"`.
+The result is a non-null blob.
+
+Supported algorithms are `"SHA-256"` and `"SHA-512"`.
+    '''
+    (java_new "com.amazon.fusion.FusionLob$LobDigestProc"))
+
 
   (define (lob_to_hex lob)
     '''

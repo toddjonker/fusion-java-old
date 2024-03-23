@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2024 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -46,3 +46,58 @@
 (check_pred is_not_clob null.blob)
 (check_pred is_not_clob {{}})
 (check_pred is_not_clob {{1234}})
+
+
+//==========================================================================
+// lob_digest
+
+(define test_vectors  // From https://www.di-mgt.com.au/sha_testvectors.html
+  [
+    { data:      {{}},
+      'SHA-256': {{47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=}},
+      'SHA-512': {{z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg==}},
+    },
+    { data:      {{YWJj}},   // "abc"
+      'SHA-256': {{ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0=}},
+      'SHA-512': {{3a81oZNherrMQXNJriBBMRLm+k6JqX6iCp7u5ktV05ohkpkqJ0/BqDa6PCOj/uu9RU1EI2Q86A4qmslPpUyknw==}},
+    },
+    { data:      {{"abc"}},
+      'SHA-256': {{ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0=}},
+      'SHA-512': {{3a81oZNherrMQXNJriBBMRLm+k6JqX6iCp7u5ktV05ohkpkqJ0/BqDa6PCOj/uu9RU1EI2Q86A4qmslPpUyknw==}},
+    },
+    { data:      {{"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"}},
+      'SHA-256': {{JI1qYdIGOLjlwCaTDD5gOaM85Flk/yFn9uzt1BnbBsE=}},
+      'SHA-512': {{IEqPxt2oLwoM7XvrjgikFlfBbvRosiioJ5vjMacDwzWW/RXBOxsH+aodO+pXeJygMa2Fx6cd1wNU7GMSOMo0RQ==}},
+    },
+    { data:      {{"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu"}},
+      'SHA-256': {{z1sWp3ivg4ADbOWeewSSNwskmxHo8HpRr6xFA3r+6dE=}},
+      'SHA-512': {{jpWbddrjE9qM9PcoFPwUP493ecbrn3+hcpmurbaIkBhQHSieSQD35DMbmd7EtUM6x9Mp7rbdJlReluVbh0vpCQ==}},
+    },
+  ])
+
+
+(define_check (check_vector vector algorithm)
+  (lets [(data     (. vector "data")),
+         (expected (. vector algorithm)),
+         (actual   (lob_digest data algorithm))]
+    (check === expected actual)))
+
+(do (|vector|
+      (check_vector vector "SHA-256")
+      (check_vector vector "SHA-512"))
+  test_vectors)
+
+
+// Failure mode: bad data
+(expect_argument_error (lob_digest null.blob "SHA-256"))
+
+(expect_argument_error (lob_digest null.clob "SHA-256"))
+(expect_argument_error (lob_digest [0]       "SHA-256"))
+(expect_argument_error (lob_digest "abc"     "SHA-256"))
+
+// Failure mode: bad algorithm
+(expect_argument_error (lob_digest {{}} "SHA-1"))             // Not supported, it's deprecated
+(expect_argument_error (lob_digest {{}} "SHA-25"))            // Not a valid digest algorithm
+(expect_argument_error (lob_digest {{}} ""))                  // Not a valid digest algorithm
+(expect_argument_error (lob_digest {{}} null.string))         // Not a valid digest algorithm
+(expect_argument_error (lob_digest {{}} (quote 'SHA-256')))   // Symbols not allowed for algorithm argument

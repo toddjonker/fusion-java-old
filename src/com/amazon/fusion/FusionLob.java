@@ -1,12 +1,15 @@
-// Copyright (c) 2013-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionBool.falseBool;
 import static com.amazon.fusion.FusionBool.makeBool;
+import static com.amazon.fusion.FusionString.checkRequiredStringArg;
 import static com.amazon.fusion.FusionString.makeString;
 import static com.amazon.fusion.SimpleSyntaxValue.makeSyntax;
 import com.amazon.fusion.FusionBool.BaseBool;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 
@@ -144,6 +147,94 @@ public final class FusionLob
 
     //========================================================================
     // Procedure Helpers
+
+    /**
+     * @param expectation must not be null.
+     * @return may be null
+     */
+    static Object checkLobArg(Evaluator eval,
+                              Procedure who,
+                              String    expectation,
+                              int       argNum,
+                              Object... args)
+        throws FusionException, ArgumentException
+    {
+        Object arg = args[argNum];
+        if (arg instanceof BaseLob)
+        {
+            return arg;
+        }
+
+        throw who.argFailure(expectation, argNum, args);
+    }
+
+
+    /**
+     * @return may be null
+     */
+    static Object checkNullableLobArg(Evaluator eval,
+                                      Procedure who,
+                                      int       argNum,
+                                      Object... args)
+        throws FusionException, ArgumentException
+    {
+        String expectation = "nullable lob";
+        return checkLobArg(eval, who, expectation, argNum, args);
+    }
+
+
+    /**
+     * @return not null
+     */
+    static Object checkRequiredLobArg(Evaluator eval,
+                                      Procedure who,
+                                      int       argNum,
+                                      Object... args)
+        throws FusionException, ArgumentException
+    {
+        String expectation = "non-null lob";
+        BaseLob result = (BaseLob) checkLobArg(eval, who, expectation, argNum, args);
+        if (result.isAnyNull())
+        {
+            throw who.argFailure(expectation, argNum, args);
+        }
+        return result;
+    }
+
+
+    //========================================================================
+    // Procedures
+
+    static final class LobDigestProc
+        extends Procedure2
+    {
+        @Override
+        Object doApply(Evaluator eval, Object arg0, Object arg1)
+            throws FusionException
+        {
+            Object lob = checkRequiredLobArg(eval, this, 0, arg0, arg1);
+            String algorithm = checkRequiredStringArg(eval, this, 1, arg0, arg1);
+
+            if (algorithm.equals("SHA-256") || algorithm.equals("SHA-512"))
+            {
+                byte[] bytes = unsafeLobBytesNoCopy(eval, lob);
+
+                try
+                {
+                    MessageDigest md     = MessageDigest.getInstance(algorithm);
+                    byte[]        digest = md.digest(bytes);
+                    return FusionBlob.forBytesNoCopy(eval, digest);
+                }
+                catch (NoSuchAlgorithmException e)
+                {
+                    // Fall through and throw.
+                }
+            }
+
+            throw argFailure("algorithm name; \"SHA-256\" or \"SHA-512\"", 1, arg0, arg1);
+        }
+    }
+
 
     static class UnsafeLobToHexProc
         extends Procedure
