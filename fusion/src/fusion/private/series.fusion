@@ -77,8 +77,7 @@ data in files, lobs, or strings:
       "1 k {a:false}"
       // The with_ion_from functions take a thunk:
       (lambda ()
-        (for_list [(v (in_port))]
-          v)))
+        (series_to_list (in_port))))
     =>
     [1, k, {a:false}]
 

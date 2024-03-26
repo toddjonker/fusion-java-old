@@ -192,6 +192,8 @@ contact us for clarification.
     in_port
     in_producer
     is_series
+    series_to_list
+    series_to_sexp
   )
 
   (require "/fusion/exception")

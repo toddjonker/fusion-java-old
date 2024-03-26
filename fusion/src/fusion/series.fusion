@@ -26,6 +26,8 @@ sources of data.
 
 
   (require
+    "/fusion/for"
+    "/fusion/private/define"
     "/fusion/private/series"
   )
 
@@ -33,6 +35,28 @@ sources of data.
     in_port
     in_producer
     is_series
+    series_to_list
+    series_to_sexp
   )
+
+
+  (define (series_to_list s)
+    '''
+Converts the given [series](fusion/series.html) to a [list](fusion/list.html).
+
+Each element of the series must be a single value, so things like
+`(series_to_list {a:1})` will fail.
+    '''
+    (for_list [(v s)] v))
+
+
+  (define (series_to_sexp s)
+    '''
+Converts the given [series](fusion/series.html) to a [sexp](fusion/sexp.html).
+
+Each element of the series must be a single value, so things like
+`(series_to_sexp {a:1})` will fail.
+    '''
+    (for_sexp [(v s)] v))
 
 )

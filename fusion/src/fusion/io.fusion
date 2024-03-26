@@ -128,6 +128,14 @@ To process an entire stream, you can use a [comprehension](fusion/for.html):
           v)))
     =>
     [1, k, {a:false}]
+
+You can also use other [series](fusion/series.html) operators:
+
+    (with_ion_from_string "1 k {a:false}"
+      (lambda ()
+        (series_to_sexp (in_port))))
+    =>
+    (1 k {a:false})
     '''
     (java_new "com.amazon.fusion.FusionIo$WithIonFromStringProc"
       current_ion_reader))

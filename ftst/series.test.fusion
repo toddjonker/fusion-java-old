@@ -25,4 +25,20 @@
            v))))
 
 
+//=============================================================================
+// series_to_list and sexp
+
+(check === (quote [1, k, {a:false}])
+  (with_ion_from_string "1 k {a:false}"
+    (|| (series_to_list (in_port)))))
+
+(check === (quote (1 k {a:false}))
+  (with_ion_from_string "1 k {a:false}"
+    (|| (series_to_sexp (in_port)))))
+
+// Too many results from the series
+(expect_exn (series_to_list {a:1}))
+(expect_exn (series_to_sexp {a:1}))
+
+
 "SUCCESS (series.test)"
