@@ -17,6 +17,7 @@
     in_producer
     is_do_series
     is_series
+    make_do_series
   )
 
 

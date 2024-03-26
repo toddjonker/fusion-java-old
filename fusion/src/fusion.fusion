@@ -189,6 +189,7 @@ contact us for clarification.
 
   (require "/fusion/series")
   (provide
+    empty_series
     in_port
     in_producer
     is_series

@@ -29,15 +29,29 @@ sources of data.
     "/fusion/for"
     "/fusion/private/define"
     "/fusion/private/series"
+    "/fusion/void"
   )
 
   (provide
+    empty_series
     in_port
     in_producer
     is_series
     series_to_list
     series_to_sexp
   )
+
+
+  (define empty_series
+    "A [series](fusion/series.html) that produces no elements."
+    (make_do_series
+      (lambda () (values
+                   void
+                   void
+                   false
+                   (lambda (pos) false)
+                   false
+                   false))))
 
 
   (define (series_to_list s)

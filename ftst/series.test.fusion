@@ -41,4 +41,10 @@
 (expect_exn (series_to_sexp {a:1}))
 
 
+//=============================================================================
+// empty_series
+
+(check === [] (series_to_list empty_series))
+
+
 "SUCCESS (series.test)"
