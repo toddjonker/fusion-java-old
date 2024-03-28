@@ -4,7 +4,8 @@
 
   '''
 The `for`-family of syntax forms enables concise, consistent iteration
-over many different varieties of aggregate data types, known as _series_ types.
+over many different varieties of aggregate data types, known as
+[_series_](fusion/series.html) types.
 The variants differ in how the results are accumulated, but all accept the same
 inputs and traverse them in the same manner.
 

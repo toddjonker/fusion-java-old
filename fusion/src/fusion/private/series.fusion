@@ -28,7 +28,7 @@
 
   (define (do_series_drivers ser)
     "Returns the six series-driver procedures."
-    // do_series holds a thunk  drivers.
+    // Apply the thunk that produces the series drivers.
     ((do_series_element ser 0)))
 
 
@@ -69,13 +69,13 @@ Otherwise the producer's results are produced by the series.
   (define (in_port)
     '''
 Returns a series of elements produced by calling [`read`](fusion/io.html#read).
-In other words, the series produces the data on the current Ion input stream.
+In other words, the series produces the data on the
+[current Ion input port](fusion/io.html#input).
 
-The current stream can be locally parameterized to affect iteration over Ion
+The current port can be locally parameterized to affect iteration over Ion
 data in files, lobs, or strings:
 
-    (with_ion_from_string
-      "1 k {a:false}"
+    (with_ion_from_file "document.ion"
       // The with_ion_from functions take a thunk:
       (lambda ()
         (series_to_list (in_port))))
@@ -83,7 +83,7 @@ data in files, lobs, or strings:
     [1, k, {a:false}]
 
 See [/fusion/io](fusion/io.html) for other ways to parameterize the current
-Ion input.
+Ion input port.
     '''
     (in_producer (lambda () (read)) is_eof))
 
