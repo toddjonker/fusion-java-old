@@ -29,6 +29,7 @@ sources of data.
     "/fusion/for"
     "/fusion/private/define"
     "/fusion/private/series"
+    "/fusion/unsafe/list"
     "/fusion/void"
   )
 
@@ -56,12 +57,13 @@ sources of data.
 
   (define (series_to_list s)
     '''
-Converts the given [series](fusion/series.html) to a [list](fusion/list.html).
+Converts the given [series](fusion/series.html) to an immutable
+[list](fusion/list.html).
 
 Each element of the series must be a single value, so things like
 `(series_to_list {a:1})` will fail.
     '''
-    (for_list [(v s)] v))
+    (unsafe_list_to_immutable_list (for_list [(v s)] v)))
 
 
   (define (series_to_sexp s)

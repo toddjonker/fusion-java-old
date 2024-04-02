@@ -2,6 +2,7 @@
 
 (require
   "/fusion/experimental/check"
+  "/fusion/list"
   "/testutils")
 
 
@@ -35,6 +36,9 @@
 (check === (quote (1 k {a:false}))
   (with_ion_from_string "1 k {a:false}"
     (|| (series_to_sexp (in_port)))))
+
+(check_pred is_immutable_list (series_to_list (sexp 1 2 3)))
+
 
 // Too many results from the series
 (expect_exn (series_to_list {a:1}))
