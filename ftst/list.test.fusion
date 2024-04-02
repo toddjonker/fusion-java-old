@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 (require
   "/fusion/experimental/check"
@@ -28,13 +28,21 @@
     (_list_copy stretchy_list v)))
 
 
+(define_check (check_conversions l)
+  (let [(i (unsafe_list_to_immutable_list l))]
+    (check_pred is_immutable_list i)
+    (check === (is_immutable_list l) (same i l))
+    (check === i l)))
+
+
 (define_check (check_mod_f op val args expect)
   "Functional modification check"
   (let [(v (list_copy val))]
     (let [(result (apply op v args))]
       (check_pred is_immutable_list result "result should be immutable")
       (check === expect result "Unexpected result on immutable arg")
-      (check === val v "Immutable arg was mutated")))
+      (check === val v "Immutable arg was mutated")
+      (check_conversions result))
   (unless (is_null val)                             // There's no mutable null
     (let [(v (mutable_list_copy val))]
       (let [(result (apply op v args))]
@@ -43,7 +51,8 @@
         (check === val v "Mutable arg was mutated")
         (unless (is_empty val)
           (list_set result 0 "mod")
-          (check === val v "Unexpected mutation of original"))))
+          (check === val v "Unexpected mutation of original"))
+        (check_conversions result)))
     (let [(v (stretchy_list_copy val))]
       (let [(result (apply op v args))]
         (check_pred is_stretchy_list result)
@@ -53,7 +62,8 @@
         (check === val v "Unexpected mutation of original")
         (unless (is_empty val)
           (list_set result 0 "mod")
-          (check === val v "Unexpected mutation of original"))))))
+          (check === val v "Unexpected mutation of original"))
+        (check_conversions result))))))
 
 
 
@@ -93,7 +103,9 @@
   (check_pred is_sequence list)
   (check === mutable       (is_mutable_list   list))
   (check === (not mutable) (is_immutable_list list))
-  (check === stretchy      (is_stretchy_list  list)))
+  (check === stretchy      (is_stretchy_list  list))
+  // Not a great place to test this, but easy to get all the combinations
+  (check_conversions list))
 
 
 // Construction via literals
