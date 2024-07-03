@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2018-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.util.hamt;
 
@@ -16,7 +16,6 @@ import java.util.Random;
  * <p>
  * This class is an internal implementation detail of FusionJava, is not intended
  * for reuse, and does not support Java nulls as keys or values.
- * </p>
  * <p>
  * Iteration order of this data structure is undefined. All key hashes used within
  * {@link HashArrayMappedTrie} are shuffled differently in each JRE. All hashes used for
@@ -28,7 +27,6 @@ import java.util.Random;
  *     <li>Uses {@link CollisionNode}s rather than extended hashing.</li>
  *     <li>Uses node polymorphism rather than conditional checks.</li>
  * </ul>
- * </p>
  *
  * @see <a href="https://infoscience.epfl.ch/record/64398/files/idealhashtrees.pdf">Ideal Hash Trees</a>
  */
@@ -387,7 +385,6 @@ public final class HashArrayMappedTrie
          * </ul>
          * The transformation is optimized to reuse as much of the original trie
          * as possible; if no changes are made then result is the original trie.
-         * </p>
          *
          * @param xform is applied to each key-value entry, and the result
          *              becomes the new value for the key.

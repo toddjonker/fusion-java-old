@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2022-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -10,22 +10,18 @@ package com.amazon.fusion;
  * runtime's {@linkplain FusionRuntimeBuilder#addRepositoryDirectory
  * preconfigured repositories}, so access to the standard
  * libraries (or other deploy libraries) is not impeded.
- * </p>
  * <p>
  * In addition to file system access, the standard input port is set to an
  * empty stream, and the standard output port discards all data.
- * </p>
  * <p>
  * To create a {@link SandboxBuilder}, use
  * {@link FusionRuntime#makeSandboxBuilder()}.
- * </p>
  * <p>
  * <b>WARNING:</b> This interface must not be implemented or extended by
  * code outside of this library.
- * </p>
  *
  * <h1>Handling of Module Instances</h1>
- * <p>
+ *
  * Every Fusion namespace, and thus every {@link TopLevel}, has a <em>module
  * registry</em> that stores loaded/compiled module code and the associated
  * module instances. All {@link TopLevel} namespaces created by the APIs on
@@ -33,14 +29,12 @@ package com.amazon.fusion;
  * modules loaded by code evaluating within those namespaces, including by
  * evaluation of module expressions, are stored in one place and are visible to
  * all of those namespaces.
- * </p>
  * <p>
  * In contrast, each namespace created by or within a {@link SandboxBuilder}
  * gets its own unique module registry, so that modules newly-loaded from the
  * configured repositories are not shared across sandboxes, and (most
  * importantly) Fusion {@code module} expressions do not pollute the default
  * registry.
- * </p>
  * <p>
  * On the other hand, this means that there can be unnecessary instances of
  * common code, even from the standard libraries, resulting in increased latency
@@ -49,7 +43,6 @@ package com.amazon.fusion;
  * created elsewhere.  This is similar to Java's behavior with respect to
  * multiple Classloaders, where the same class can be loaded twice, leading to
  * incompatible results.
- * </p>
  * <p>
  * The defaults here align with a common case where the application creates
  * numerous transient sandboxes that all use the same language. As such, the
@@ -58,7 +51,6 @@ package com.amazon.fusion;
  * depends on. This results in the language's exported features being shared
  * across all sandboxes. Any subsidiary modules will be instantiated on-demand
  * and not shared; this includes local {@code (module ...)} declarations.
- * </p>
  */
 public interface SandboxBuilder
 {
