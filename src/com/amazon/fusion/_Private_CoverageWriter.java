@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -87,10 +87,7 @@ public final class _Private_CoverageWriter
 
             BigDecimal numerator = new BigDecimal(coveredExpressions * 100);
 
-            final BigDecimal percentCovered =
-                numerator.divide(new BigDecimal(total), 2, HALF_EVEN);
-
-            return percentCovered;
+            return numerator.divide(new BigDecimal(total), 2, HALF_EVEN);
         }
 
         void renderCoveragePercentage(HtmlWriter htmlWriter)
@@ -153,7 +150,7 @@ public final class _Private_CoverageWriter
     private final Map<SourceName, String>           myRelativeNamesForSources;
 
     private final CoverageInfoPair myGlobalCoverage = new CoverageInfoPair();
-    private       int              myUnloadedEntries;
+    private       long             myUnloadedEntries;
 
     // For rendering highlighted source files
     private final IonSystem mySystem = IonSystemBuilder.standard().build();
@@ -267,6 +264,8 @@ public final class _Private_CoverageWriter
             }
         };
 
+        // Collect all the modules the repositories can discover, so we can find
+        // modules that are not used and don't appear in the database.
         for (File f : myDatabase.getRepositories())
         {
             // TODO FUSION-214 Push this into the repo impl
@@ -525,8 +524,8 @@ public final class _Private_CoverageWriter
                                 Map<T, SourceName> keyToNames)
         throws IOException
     {
-        int totalExpressions = 0;
-        int unloadedCount = 0;
+        long totalExpressions = 0;
+        long unloadedCount = 0;
 
         boolean first = true;
         for (T key : keys)
@@ -577,9 +576,9 @@ public final class _Private_CoverageWriter
 
         if (unloadedCount != 0)
         {
-            int loadedCount = keys.length - unloadedCount;
-            int average = (loadedCount == 0
-                               ? 500                        // Totally made up
+            long loadedCount = keys.length - unloadedCount;
+            long average = (loadedCount == 0
+                               ? 500                        // TODO Totally made up
                                : totalExpressions / loadedCount);
 
             myGlobalCoverage.uncoveredExpressions += (unloadedCount * average);
@@ -613,7 +612,7 @@ public final class _Private_CoverageWriter
             if (myUnloadedEntries != 0)
             {
                 indexHtml.append(" (estimate since ");
-                indexHtml.append(Integer.toString(myUnloadedEntries));
+                indexHtml.append(Long.toString(myUnloadedEntries));
                 indexHtml.append(" files were not loaded)");
             }
         }
