@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -56,7 +56,6 @@ public final class FusionBlob
 
         @Override
         BaseBool tightEquals(Evaluator eval, Object right)
-            throws FusionException
         {
             boolean b = (right instanceof BaseBlob
                          && ((BaseBlob) right).isAnyNull());
@@ -87,7 +86,7 @@ public final class FusionBlob
 
         @Override
         void write(Evaluator eval, Appendable out)
-            throws IOException, FusionException
+            throws IOException
         {
             out.append("null.blob");
         }
@@ -270,12 +269,15 @@ public final class FusionBlob
 
     /**
      * Returns a blob with the given byte content.
-     * This method assumes ownership of the array and it must not be modified
+     * This method assumes ownership of the array, and it must not be modified
      * later.
      *
+     * @param top the {@link TopLevel} in which to make the blob
      * @param value may be null to make {@code null.blob}.
      *
      * @return not null.
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static Object forBytesNoCopy(TopLevel top, byte[] value)
         throws FusionException
@@ -336,6 +338,14 @@ public final class FusionBlob
 
     /**
      * Determines whether a given Fusion value is a blob.
+     *
+     * @param top the {@link TopLevel} in which to test the value
+     * @param value the value to test
+     *
+     * @return {@code true} if the value is a Fusion blob,
+     * otherwise {@code false}
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static boolean isBlob(TopLevel top, Object value)
         throws FusionException

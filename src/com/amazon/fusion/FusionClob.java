@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -270,12 +270,15 @@ public final class FusionClob
 
     /**
      * Returns a clob with the given byte content.
-     * This method assumes ownership of the array and it must not be modified
+     * This method assumes ownership of the array, and it must not be modified
      * later.
      *
+     * @param top the {@link TopLevel} in which to make the clob
      * @param value may be null to make {@code null.clob}.
      *
      * @return not null.
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static Object forBytesNoCopy(TopLevel top, byte[] value)
         throws FusionException
@@ -327,6 +330,14 @@ public final class FusionClob
 
     /**
      * Determines whether a given Fusion value is a clob.
+     *
+     * @param top the {@link TopLevel} in which to test the value
+     * @param value the value to test
+     *
+     * @return {@code true} if the value is a Fusion clob,
+     * otherwise {@code false}
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static boolean isClob(TopLevel top, Object value)
         throws FusionException

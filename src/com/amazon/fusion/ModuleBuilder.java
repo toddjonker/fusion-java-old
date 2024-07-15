@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -21,17 +21,19 @@ public interface ModuleBuilder
      *
      * @param name must be non-empty.
      * @param value must be acceptable to the Fusion runtime.
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     void define(String name, Object value)
         throws FusionException;
 
 
     /**
-     * Instatiates the module for use from Fusion code.
+     * Instantiates the module for use from Fusion code.
      * <p>
      * This builder must be discarded after this method is called.
      *
-     * @throws FusionException if anything goes wrong.
+     * @throws FusionException if an error occurs during evaluation
      */
     void instantiate()
         throws FusionException;

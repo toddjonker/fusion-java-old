@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2021 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -32,6 +32,8 @@ public final class UnboundIdentifierException
 
     /**
      * Gets the text of the unbound identifier.
+     *
+     * @return the variable name
      */
     public String getIdentifierString()
     {

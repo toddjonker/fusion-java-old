@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -45,7 +45,15 @@ public final class FusionValue
      * {@code null.null}, {@code null.bool}, {@code null.int}, <em>etc.</em>?
      * This is equivalent to the Fusion procedure {@code is_null}.
      *
+     * @param top the {@link TopLevel} in which to test the value
+     * @param value the value to test
+     *
      * @see FusionNull#isNullNull(Evaluator, Object)
+     *
+     * @return {@code true} if the value is a null of any type,
+     * otherwise {@code false}
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static boolean isAnyNull(TopLevel top, Object value)
         throws FusionException
@@ -77,6 +85,14 @@ public final class FusionValue
      * </ul>
      * This definition is more lax (and hopefully more convenient) than Java,
      * but less lenient (and hopefully less error-prone) than C or C++.
+     *
+     * @param top the {@link TopLevel} in which to test the value
+     * @param value the value to test
+     *
+     * @return {@code true} if the value is truthy,
+     * otherwise {@code false}
+     *
+     * @throws FusionException if an error occurs during evaluation
      *
      * @see <a href="{@docRoot}/../fusion/bool.html#truthiness">Truthiness</a>
      * @see FusionBool#isTrue(TopLevel, Object)
@@ -139,7 +155,8 @@ public final class FusionValue
      * that are null or empty.
      *
      * @return a Fusion value.
-     * @throws FusionException
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     static Object annotate(Evaluator eval, Object value, String[] annotations)
         throws FusionException
@@ -151,12 +168,14 @@ public final class FusionValue
      * Replaces or removes annotations on a Fusion value, generally making a
      * (shallow) copy of the value while doing so.
      *
+     * @param top the {@link TopLevel} in which to test the value
      * @param value must be an annotatable Fusion value.
      * @param annotations must not be null and must not contain elements
      * that are null or empty.
      *
      * @return a Fusion value.
-     * @throws FusionException
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static Object annotate(TopLevel top, Object value,
                                   String[] annotations)

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -63,6 +63,8 @@ public interface TopLevel
      * @return the resulting Fusion value; typically the value of the last
      * expression in the source. May be null (if no value results) or an
      * {@code Object[]} (if there are multiple values).
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     Object eval(IonReader source, SourceName name)
         throws FusionException;
@@ -83,6 +85,8 @@ public interface TopLevel
      * expression in the source. May be null (if no value results) or an
      * {@code Object[]} (if there are multiple values).
      *
+     * @throws FusionException if an error occurs during evaluation
+     *
      * @see #eval(IonReader,SourceName)
      */
     Object eval(IonReader source)
@@ -100,6 +104,8 @@ public interface TopLevel
      * @return the resulting Fusion value; typically the value of the last
      * expression in the source. May be null (if no value results) or an
      * {@code Object[]} (if there are multiple values).
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     Object eval(String source, SourceName name)
         throws FusionException;
@@ -119,6 +125,8 @@ public interface TopLevel
      * expression in the source. May be null (if no value results) or an
      * {@code Object[]} (if there are multiple values).
      *
+     * @throws FusionException if an error occurs during evaluation
+     *
      * @see #eval(String,SourceName)
      */
     Object eval(String source)
@@ -137,6 +145,8 @@ public interface TopLevel
      * @return the resulting Fusion value; typically the value of the last
      * expression in the source. May be null (if no value results) or an
      * {@code Object[]} (if there are multiple values).
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     Object load(File source)
         throws FusionException;
@@ -154,6 +164,8 @@ public interface TopLevel
      *
      * @param modulePath locates the required module. It may be either an
      * absolute or relative path.
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     void requireModule(String modulePath)
         throws FusionException;
@@ -170,9 +182,12 @@ public interface TopLevel
      * top-level definition is created or modified and will shadow the imported
      * binding in future expressions.
      *
+     * @param name the top-level binding to introduce or mutate.
      * @param value the value to bind, must be
      * <a href="{@docRoot}/overview-summary.html#inject">injectable</a>.
      * It is unspecified whether the value will be copied in whole or in part.
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     void define(String name, Object value)
         throws FusionException;
@@ -186,6 +201,8 @@ public interface TopLevel
      *
      * @return the bound value, or null if there's no top-level definition or
      * imported binding for the name.
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     Object lookup(String name)
         throws FusionException;
@@ -207,6 +224,8 @@ public interface TopLevel
      * May be null (if no value results) or an {@code Object[]} (if there are
      * multiple values).
      * Note that "no value" is not the same as "returns void".
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     Object call(String procedureName, Object... arguments)
         throws FusionException;
@@ -226,6 +245,8 @@ public interface TopLevel
      * May be null (if no value results) or an {@code Object[]} (if there are
      * multiple values).
      * Note that "no value" is not the same as "returns void".
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     Object call(Object procedure, Object... arguments)
         throws FusionException;

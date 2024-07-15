@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -74,6 +74,8 @@ public final class FusionVoid
      *
      * @param top the top-level that was the source of the value.
      * @param value the value to test.
+     *
+     * @return {@code true} if the value is void, otherwise {@code false}
      */
     public static boolean isVoid(TopLevel top, Object value)
     {

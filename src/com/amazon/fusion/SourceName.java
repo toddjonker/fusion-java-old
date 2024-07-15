@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -19,11 +19,13 @@ public class SourceName
      *
      * @param path must not be null or empty.
      *
+     * @return a new {@link SourceName} instance
+     *
      * @see #forFile(File)
      */
     public static SourceName forFile(String path)
     {
-        if (path.length() == 0) {
+        if (path.isEmpty()) {
             throw new IllegalArgumentException("path must not be empty");
         }
         return new FileSourceName(new File(path));
@@ -36,6 +38,8 @@ public class SourceName
      * @param path must not be null or empty.
      *
      * @see #forFile(String)
+     *
+     * @return a new {@link SourceName} instance
      */
     public static SourceName forFile(File path)
     {
@@ -44,11 +48,14 @@ public class SourceName
 
     /**
      * Creates a {@link SourceName} that will simply display the given text.
+     *
      * @param display must not be null.
+     *
+     * @return a new {@link SourceName} instance
      */
     public static SourceName forDisplay(String display)
     {
-        if (display.length() == 0) {
+        if (display.isEmpty()) {
             throw new IllegalArgumentException("display must not be empty");
         }
         return new SourceName(display);
@@ -61,7 +68,11 @@ public class SourceName
     }
 
 
-    /** Returns the human-readable source name, for display in messages. */
+    /**
+     * Returns the human-readable source name, for display in messages.
+     *
+     * @return the displayable name of this source
+     */
     public String display()
     {
         return myDisplay;

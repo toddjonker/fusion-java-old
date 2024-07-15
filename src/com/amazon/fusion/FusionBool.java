@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -129,9 +129,6 @@ public final class FusionBool
         private TrueBool() {}
 
         @Override
-        boolean isAnyNull() { return false; }
-
-        @Override
         boolean isTrue()    { return true; }
 
         @Override
@@ -190,9 +187,6 @@ public final class FusionBool
         extends BaseBool
     {
         private FalseBool() {}
-
-        @Override
-        boolean isAnyNull() { return false; }
 
         @Override
         boolean isTrue()    { return false; }
@@ -436,6 +430,14 @@ public final class FusionBool
 
     /**
      * Determines whether a Fusion value has type {@code bool}.
+     *
+     * @param top the {@link TopLevel} in which to test the value
+     * @param value the value to test
+     *
+     * @return {@code true} if the value is a Fusion bool,
+     * otherwise {@code false}
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static boolean isBool(TopLevel top, Object value)
         throws FusionException
@@ -469,6 +471,14 @@ public final class FusionBool
      * This is <em>not</em> a
      * <a href="{@docRoot}/../fusion/bool.html#truthiness">truthiness</a>
      * test; use {@link #isTruthy(TopLevel, Object)} for that purpose.
+     *
+     * @param top the {@link TopLevel} in which to test the value
+     * @param value the value to test
+     *
+     * @return {@code true} if the value is Fusion's {@code true} value,
+     * otherwise {@code false}
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static boolean isTrue(TopLevel top, Object value)
         throws FusionException
@@ -496,6 +506,14 @@ public final class FusionBool
      * This is <em>not</em> a
      * <a href="{@docRoot}/../fusion/bool.html#truthiness">truthiness</a>
      * test; use {@link #isTruthy(TopLevel, Object)} for that purpose.
+     *
+     * @param top the {@link TopLevel} in which to test the value
+     * @param value the value to test
+     *
+     * @return {@code true} if the value is Fusion's {@code false} value,
+     * otherwise {@code false}
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static boolean isFalse(TopLevel top, Object value)
         throws FusionException
@@ -530,6 +548,14 @@ public final class FusionBool
      * </ul>
      * This definition is more lax (and hopefully more convenient) than Java,
      * but less lenient (and hopefully less error-prone) than C or C++.
+     *
+     * @param top the {@link TopLevel} in which to test the value
+     * @param value the value to test
+     *
+     * @return {@code true} if the value is truthy,
+     * otherwise {@code false}
+     *
+     * @throws FusionException if an error occurs during evaluation
      *
      * @see <a href="{@docRoot}/../fusion/bool.html#truthiness">Truthiness</a>
      * @see FusionBool#isTrue(TopLevel, Object)
