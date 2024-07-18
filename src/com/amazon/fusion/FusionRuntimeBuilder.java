@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -19,7 +19,6 @@ import java.util.Properties;
  * <p>
  * <b>Instances of this class are not thread-safe unless
  * they are {@linkplain #immutable() immutable}.</b>
- * <p>
  *
  * <h2>Configuration Properties</h2>
  *
@@ -36,7 +35,7 @@ import java.util.Properties;
  *                            .build();
  *</pre>
  *
- * <h3>Bootstrap Repository<a id="bootrepo"></a></h3>
+ * <h3 id="bootrepo">Bootstrap Repository</h3>
  *
  * The most critical configuration property is the bootstrap repository,
  * a directory housing the primary resources needed by the runtime.
@@ -91,7 +90,7 @@ import java.util.Properties;
  * <em>output port</em>.  By default, this goes to {@link System#out}, but the
  * runtime can be configured to use another {@link OutputStream}.
  *
- * <h3>Code Coverage Instrumentation<a id="coverage"/></h3>
+ * <h3 id="coverage">Code Coverage Instrumentation</h3>
  *
  * To instruct the runtime to collect code coverage metrics, you must use
  * {@link #setCoverageDataDirectory(File)} to declare a directory storing the
@@ -304,6 +303,9 @@ public class FusionRuntimeBuilder
      *   <li>{@value #PROPERTY_COVERAGE_DATA_DIR}
      *       invokes {@link #setCoverageDataDirectory(File)}.
      * </ul>
+     *
+     * @param classForLoading the class to use for loading the properties file
+     * @param resourceName the name of the properties file
      *
      * @return this builder, if it's mutable or if no properties were
      * recognized; otherwise a new mutable builder.

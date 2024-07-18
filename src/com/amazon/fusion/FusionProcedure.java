@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -15,7 +15,13 @@ public final class FusionProcedure
     /**
      * Determines whether the given Fusion value is a procedure.
      *
-     * @param top must not be null.
+     * @param top the top-level that was the source of the value.
+     * @param value the value to test.
+     *
+     * @return {@code true} if the value is a Fusion procedure,
+     * otherwise {@code false}
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static boolean isProcedure(TopLevel top, Object value)
         throws FusionException

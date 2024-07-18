@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2018 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -1649,7 +1649,10 @@ public final class FusionNumber
      * @param top the top-level that was the source of the value.
      * @param value the value to test.
      *
-     * @throws FusionException
+     * @return {@code true} if the value is a Fusion number,
+     * otherwise {@code false}
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static boolean isNumber(TopLevel top, Object value)
         throws FusionException
@@ -1670,7 +1673,10 @@ public final class FusionNumber
      * @param top the top-level that was the source of the value.
      * @param value the value to test.
      *
-     * @throws FusionException
+     * @return {@code true} if the value is a Fusion integer,
+     * otherwise {@code false}
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static boolean isInt(TopLevel top, Object value)
         throws FusionException
@@ -1691,7 +1697,10 @@ public final class FusionNumber
      * @param top the top-level that was the source of the value.
      * @param value the value to test.
      *
-     * @throws FusionException
+     * @return {@code true} if the value is a Fusion decimal,
+     * otherwise {@code false}
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static boolean isDecimal(TopLevel top, Object value)
         throws FusionException
@@ -1712,7 +1721,10 @@ public final class FusionNumber
      * @param top the top-level that was the source of the value.
      * @param value the value to test.
      *
-     * @throws FusionException
+     * @return {@code true} if the value is a Fusion integer or decimal value,
+     * otherwise {@code false}
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static boolean isIntOrDecimal(TopLevel top, Object value)
         throws FusionException
@@ -1733,7 +1745,10 @@ public final class FusionNumber
      * @param top the top-level that was the source of the value.
      * @param value the value to test.
      *
-     * @throws FusionException
+     * @return {@code true} if the value is a Fusion float,
+     * otherwise {@code false}
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static boolean isFloat(TopLevel top, Object value)
         throws FusionException
@@ -1782,6 +1797,8 @@ public final class FusionNumber
      * @param fusionInt must be a Fusion int.
      *   <b>Any other type of value will cause a crash.</b>
      * @return {@code null} when given {@code null.int}.
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static BigInteger unsafeIntToJavaBigInteger(TopLevel top,
                                                        Object   fusionInt)
@@ -1804,6 +1821,10 @@ public final class FusionNumber
      * @param top the top-level that was the source of the value.
      * @param fusionFloat must be a non-null Fusion float.
      *   <b>Any other type of value will cause a crash.</b>
+     *
+     * @return the Java double equivalent to the Fusion float.
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static double unsafeFloatToJavaDouble(TopLevel top,
                                                  Object   fusionFloat)
@@ -1826,12 +1847,15 @@ public final class FusionNumber
      * @param top the top-level that was the source of the value.
      * @param fusionNumber must be a Fusion int, decimal, or float.
      *   <b>Any other type of value will cause a crash.</b>
+     *
      * @return {@code null} when given {@code null.int}, {@code null.decimal},
      *   or {@code null.float}.
+     *
      * @throws NumberFormatException if {@code fusionNumber} is a special
      *   float ({@code NaN}, {@code +inf}, or {@code -inf}).
      *   <b>This is a crash of the Fusion runtime and indicates a defect in the
      *   calling code.</b>
+     * @throws FusionException if any other error occurs during evaluation
      */
     public static BigDecimal unsafeNumberToJavaBigDecimal(TopLevel top,
                                                           Object   fusionNumber)

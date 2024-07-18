@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -65,6 +65,8 @@ public interface FusionRuntime
      *
      * @return not null.
      *
+     * @throws FusionException if an error occurs during evaluation
+     *
      * @see #getDefaultLanguage()
      */
     TopLevel getDefaultTopLevel()
@@ -76,6 +78,8 @@ public interface FusionRuntime
      * runtime's default language.
      *
      * @return not null.
+     *
+     * @throws FusionException if an error occurs during evaluation
      *
      * @see #getDefaultLanguage()
      */
@@ -91,6 +95,8 @@ public interface FusionRuntime
      * {@code '/'}.
      *
      * @return not null.
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     TopLevel makeTopLevel(String initialModulePath)
         throws FusionException;
@@ -109,7 +115,10 @@ public interface FusionRuntime
      *
      * @param absoluteModulePath must be an absolute module path, starting
      * with {@code '/'}.
+     *
      * @return a new module builder.
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     ModuleBuilder makeModuleBuilder(String absoluteModulePath)
         throws FusionException;
@@ -122,6 +131,7 @@ public interface FusionRuntime
      * Creates a fresh {@code IonValue} DOM from a Fusion value, using the
      * default ionization strategy.
      *
+     * @param fusionValue the value to print; must not be null.
      * @param factory must not be null.
      *
      * @return a fresh instance, without a container.
@@ -137,6 +147,7 @@ public interface FusionRuntime
      * Creates a fresh {@code IonValue} DOM from a Fusion value, using the
      * default ionization strategy.
      *
+     * @param fusionValue the value to print.
      * @param factory must not be null.
      *
      * @return a fresh instance, without a container, or null if the value is

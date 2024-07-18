@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -378,6 +378,11 @@ public final class FusionString
      *
      * @param top the top-level that was the source of the value.
      * @param value the value to test.
+     *
+     * @return {@code true} if the value is a Fusion string,
+     * otherwise {@code false}
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static boolean isString(TopLevel top, Object value)
         throws FusionException
@@ -399,9 +404,12 @@ public final class FusionString
     /**
      * Converts a Fusion string to its equivalent {@link String} value.
      *
+     * @param top the top-level that was the source of the value.
      * @param fusionString must be a Fusion string.
      *
      * @return null if given {@code null.string}.
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static String unsafeStringToJavaString(TopLevel top, Object fusionString)
         throws FusionException

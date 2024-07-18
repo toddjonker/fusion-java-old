@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2023 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -61,10 +61,16 @@ public final class FusionIo
 
     /**
      * Determines whether a value is Fusion's unique EOF object.
+     *
+     * @param top the {@link TopLevel} in which to test the value
+     * @param value the value to test
+     *
+     * @return {@code true} if the value is the Fusion EOF sentinel,
+     * otherwise {@code false}
      */
-    public static boolean isEof(TopLevel top, Object v)
+    public static boolean isEof(TopLevel top, Object value)
     {
-        return (v == EOF);
+        return (value == EOF);
     }
 
 
@@ -154,9 +160,12 @@ public final class FusionIo
      * After consuming the value, the reader is moved to the next
      * value by calling {@link IonReader#next()}.
      *
+     * @param top the {@link TopLevel} to use for evaluation
      * @param reader must be positioned on the value to read.
      *
      * @return an immutable Fusion value.
+     *
+     * @throws FusionException if an error occurs during evaluation
      *
      * @see #isEof(TopLevel, Object)
      */
@@ -233,18 +242,18 @@ public final class FusionIo
      * value, throwing an exception when any part of the value is outside the
      * Ion type system.
      *
-     * @param top must not be null.
-     * @param fusionValue must not be null.
+     * @param top the {@link TopLevel} to use for evaluation
+     * @param value the value to write; must not be null.
      * @param out the output stream; not null.
      *
      * @throws FusionException if some part of the value cannot be ionized,
      * or if there's an exception thrown by the output stream.
      */
-    public static void ionize(TopLevel top, Object fusionValue, IonWriter out)
+    public static void ionize(TopLevel top, Object value, IonWriter out)
         throws FusionException
     {
         Evaluator eval = StandardTopLevel.toEvaluator(top);
-        ionize(eval, out, fusionValue);
+        ionize(eval, out, value);
     }
 
 
@@ -255,18 +264,18 @@ public final class FusionIo
      * The result will be unreadable (by the Fusion and Ion readers) if the
      * value contains any non-Ionizable data (void, closures, etc.).
      *
-     * @param top must not be null.
-     * @param fusionValue must not be null.
+     * @param top the {@link TopLevel} to use for evaluation
+     * @param value the value to write; must not be null.
      * @param out the output stream; not null.
      *
      * @throws FusionException if there's an exception thrown by the output
      * stream.
      */
-    public static void write(TopLevel top, Object fusionValue, Appendable out)
+    public static void write(TopLevel top, Object value, Appendable out)
         throws FusionException
     {
         Evaluator eval = StandardTopLevel.toEvaluator(top);
-        write(eval, out, fusionValue);
+        write(eval, out, value);
     }
 
 
@@ -334,15 +343,20 @@ public final class FusionIo
      * Returns the output of {@link #write(TopLevel, Object, Appendable)}
      * as a {@link String}.
      *
+     * @param top the {@link TopLevel} to use for evaluation
+     * @param value the value to write; must not be null.
+     *
      * @return not null.
+     *
+     * @throws FusionException if an error occurs during evaluation
      *
      * @see #safeWriteToString(TopLevel, Object)
      */
-    public static String writeToString(TopLevel top, Object fusionValue)
+    public static String writeToString(TopLevel top, Object value)
         throws FusionException
     {
         Evaluator eval = StandardTopLevel.toEvaluator(top);
-        return writeToString(eval, fusionValue);
+        return writeToString(eval, value);
     }
 
 
@@ -535,14 +549,17 @@ public final class FusionIo
      * {@link String}, handling any {@link Exception}s by writing their
      * message into the output.
      *
+     * @param top the {@link TopLevel} to use for evaluation
+     * @param value the value to write; must not be null.
+     *
      * @return not null.
      *
      * @see #writeToString(TopLevel, Object)
      */
-    public static String safeWriteToString(TopLevel top, Object fusionValue)
+    public static String safeWriteToString(TopLevel top, Object value)
     {
         Evaluator eval = StandardTopLevel.toEvaluator(top);
-        return safeWriteToString(eval, fusionValue);
+        return safeWriteToString(eval, value);
     }
 
 

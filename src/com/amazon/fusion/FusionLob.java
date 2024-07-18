@@ -87,6 +87,14 @@ public final class FusionLob
 
     /**
      * Determines whether a Fusion value has type {@code blob} or {@code clob}.
+     *
+     * @param top the {@link TopLevel} in which to test the value
+     * @param value the value to test
+     *
+     * @return {@code true} if the value is a Fusion blob or clob,
+     * otherwise {@code false}
+     *
+     * @throws FusionException if an error occurs during evaluation
      */
     public static boolean isLob(TopLevel top, Object value)
         throws FusionException
@@ -119,6 +127,7 @@ public final class FusionLob
      * the array!</b> Any changes will violate the lob's immutability contract,
      * which may cause terrible problems.
      *
+     * @param top the {@link TopLevel} to use for evaluation
      * @param lob must be a Fusion blob or clob.
      *
      * @return null if {@code lob} is {@code null.blob} or {@code null.clob},
@@ -134,6 +143,7 @@ public final class FusionLob
      * Extracts the contents of a lob into a byte array. The bytes are copied
      * from the lob to prevent modification to the value.
      *
+     * @param top the {@link TopLevel} to use for evaluation
      * @param lob must be a Fusion blob or clob.
      *
      * @return null if {@code lob} is {@code null.blob} or {@code null.clob},

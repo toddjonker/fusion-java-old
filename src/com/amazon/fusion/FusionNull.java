@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -183,6 +183,12 @@ public final class FusionNull
     /**
      * Determines whether a Fusion value has type {@code null}; that is, is it
      * {@code null.null}?
+     *
+     * @param top the {@link TopLevel} in which to test the value
+     * @param value the value to test
+     *
+     * @return {@code true} if the value is a Fusion {@code null.null} value,
+     * otherwise {@code false}
      *
      * @see FusionValue#isAnyNull(TopLevel, Object)
      */
