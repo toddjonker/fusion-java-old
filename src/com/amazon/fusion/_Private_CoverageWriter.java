@@ -218,6 +218,16 @@ public final class _Private_CoverageWriter
                     : a.getFileSystem().getPath(""));
     }
 
+    /**
+     * Determine the number of leading {@Link Path} name elements common to all
+     * files of the given {@link SourceName}s.  We omit this prefix from the
+     * directory tree of generated HTML files.
+     * <p>
+     * TODO It would be better to use paths relative to repository roots, to
+     *   avoid exposing details of the build-time environment.
+     *
+     * @param sourceNames must not be null.
+     */
     private int commonPrefixLen(Set<SourceName> sourceNames)
         throws IOException
     {
@@ -252,6 +262,16 @@ public final class _Private_CoverageWriter
     }
 
 
+    /**
+     * Collects relevant modules into {@link #myModules}, source files
+     * into {@link #mySourceFiles}, and map covered modules and files to
+     * {@link SourceName}s via {@link #myNamesForModules} and
+     * {@link #myNamesForFiles}.
+     * <p>
+     * TODO Rename to be more informative; maybe collectModulesAndSources()?
+     *
+     * @throws FusionException if an error occurs.
+     */
     private void analyze()
         throws FusionException
     {
@@ -274,6 +294,8 @@ public final class _Private_CoverageWriter
             repo.collectModules(myConfig.myModuleSelector, consumer);
         }
 
+        // Now do the same thing for non-repository source trees.
+        // TODO Why aren't these dirs recorded in the database like modules?
         Set<String> includedSourceDirs = myConfig.getIncludedSourceDirs();
         if (includedSourceDirs != null)
         {
@@ -286,16 +308,21 @@ public final class _Private_CoverageWriter
 
         for (SourceLocation loc : myDatabase.locations())
         {
+            // TODO Assert that a name exists. There's no use in persisting
+            //      nameless locations that we can't report.
             SourceName sourceName = loc.getSourceName();
             if (sourceName != null)
             {
                 ModuleIdentity id = sourceName.getModuleIdentity();
+                // TODO Why doesn't this use myConfig.moduleIsSelected(id) ?
+                // TODO Why would this selector differ from the collection-time?
                 if (id != null && myConfig.myModuleSelector.test(id))
                 {
                     myModules.add(id);
 
                     SourceName prior = myNamesForModules.put(id, sourceName);
-                    assert prior == null || prior == sourceName;
+                    assert prior == null || prior == sourceName :
+                        "SourceName instance has changed for module " + id;
                 }
                 else
                 {
@@ -305,7 +332,8 @@ public final class _Private_CoverageWriter
                         mySourceFiles.add(f);
 
                         SourceName prior = myNamesForFiles.put(f, sourceName);
-                        assert prior == null || prior == sourceName;
+                        assert prior == null || prior == sourceName :
+                            "SourceName instance has changed for file " + f;
                     }
                 }
             }

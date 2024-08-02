@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -85,8 +85,17 @@ class CoverageDatabase
     }
 
 
+    /**
+     * Records a Fusion repository that was used by a runtime while collecting
+     * coverage data.
+     * The coverage analyzer uses these to synthesize File repositories
+     * in order to discover modules.
+     *
+     * @param repoDir must not be null.
+     */
     synchronized void noteRepository(File repoDir)
     {
+        assert repoDir != null : "repoDir is null";
         myRepositories.add(repoDir);
     }
 
@@ -102,6 +111,7 @@ class CoverageDatabase
         Boolean prev = myLocations.put(loc, Boolean.FALSE);
 
         // If already covered, don't un-cover it!
+        // TODO This is expensive for repeatedly compiled sources.
         if (prev != null && prev)
         {
             myLocations.put(loc, prev);
@@ -123,6 +133,7 @@ class CoverageDatabase
     }
 
 
+    // TODO Collect this eagerly
     synchronized Set<SourceName> sourceNames()
     {
         Set<SourceName> names = new HashSet<>();

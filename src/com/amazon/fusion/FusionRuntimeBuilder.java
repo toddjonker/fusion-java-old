@@ -854,7 +854,10 @@ public class FusionRuntimeBuilder
         return myCollector;
     }
 
-    /** NOT FOR APPLICATION USE */
+    /**
+     * NOT FOR APPLICATION USE!
+     * Used by unit tests to inject a mock collector.
+     */
     void setCoverageCollector(_Private_CoverageCollector collector)
     {
         mutationCheck();
@@ -931,11 +934,17 @@ public class FusionRuntimeBuilder
                 }
             }
 
+            // TODO Writing into a private coverageCollector property is wierd.
+            //   This should move into build(), or in getCoverageCollector()?
+            //   Note that the property exists so tests can inject a mock.
             if (b.myCoverageDataDirectory != null)
             {
                 _Private_CoverageCollectorImpl c =
                     fromDirectory(b.myCoverageDataDirectory);
 
+                // Register the active repositories with the collector.
+                // These are persisted in the coverage.ion file, so we can later
+                // scan them and identify files that haven't been covered.
                 c.noteRepository(b.getBootstrapRepository());
                 if (b.myRepositoryDirectories != null)
                 {

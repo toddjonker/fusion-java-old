@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -190,6 +190,8 @@ final class FusionUtils
 
     /**
      * Reads properties from a file.
+     *
+     * @param file must be a readable properties file.
      *
      * @throws FusionException if there's a problem reading the file.
      */

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -25,7 +25,7 @@ public class CoverageTest
         @Override
         public boolean coverableLocation(SourceLocation loc)
         {
-            // For simplicity we'll ignore the offset.
+            // For simplicity, we'll ignore the offset.
             SourceLocation loc2 =
                 SourceLocation.forLineColumn(loc.getLine(),
                                              loc.getColumn(),
@@ -38,7 +38,7 @@ public class CoverageTest
         @Override
         public void coverLocation(SourceLocation loc)
         {
-            // For simplicity we'll ignore the offset.
+            // For simplicity, we'll ignore the offset.
             SourceLocation loc2 =
                 SourceLocation.forLineColumn(loc.getLine(),
                                              loc.getColumn(),

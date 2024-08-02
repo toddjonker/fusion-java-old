@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -57,6 +57,18 @@ final class CoverageConfiguration
     private Set<String> myIncludedSources;
 
 
+    /**
+     * Parses a property's value as a colon-separated set of absolute module paths.
+     *
+     * @param configFile where the {@code props} came from; used only for error messages.
+     * @param props must not be null.
+     * @param propertyName must not be null.
+     *
+     * @return a set of absolute module paths, or null if the {@code propertyName}
+     * doesn't have an entry in the {@code props}.
+     *
+     * @throws FusionException if an entry is not an absolute module path.
+     */
     private static Set<String> readModuleSet(File       configFile,
                                              Properties props,
                                              String     propertyName)
@@ -140,7 +152,7 @@ final class CoverageConfiguration
 
 
     /**
-     * @return may be null.
+     * @return may be null, which is the same as empty-set.
      */
     Set<String> getIncludedSourceDirs()
     {
@@ -157,6 +169,12 @@ final class CoverageConfiguration
     }
 
 
+    /**
+     * A file is selected for coverage if our {@value #PROPERTY_INCLUDED_SOURCES}
+     * property includes it or a directory containing it.
+     *
+     * @param file may be null.
+     */
     boolean fileIsSelected(File file)
     {
         if (file != null)
@@ -176,8 +194,20 @@ final class CoverageConfiguration
     }
 
 
+    /**
+     * A {@link SourceLocation} is selected for coverage if it has a
+     * {@link SourceName} and either its {@link ModuleIdentity} or its file is
+     * selected.
+     *
+     * @param loc must not be null.
+     *
+     * @return true iff the location should be instrumented.
+     */
     boolean locationIsSelected(SourceLocation loc)
     {
+        // TODO This should take SourceName, which is more aligned with the
+        //  granularity of configuration.
+
         SourceName name = loc.getSourceName();
         if (name == null) return false;
 
@@ -191,6 +221,7 @@ final class CoverageConfiguration
     //=========================================================================
 
 
+    // TODO JAVA8 makes this unnecessary; use a trivial lambda instead.
     private static class TrueModuleIdentitySelector
         implements Predicate<ModuleIdentity>
     {
@@ -202,6 +233,10 @@ final class CoverageConfiguration
     }
 
 
+    /**
+     * A predicate testing whether a given module should be instrumented for
+     * code coverage, based on included and excluded sets.
+     */
     private static class SimpleModuleIdentitySelector
         implements Predicate<ModuleIdentity>
     {
@@ -216,6 +251,14 @@ final class CoverageConfiguration
         private final Set<String> myExcludedModules;
 
 
+        /**
+         * Reads the included and excluded module sets from the properties.
+         *
+         * @param configFile where the {@code props} came from; used only for error messages.
+         * @param props must not be null.
+         *
+         * @throws FusionException if an entry is not an absolute module path.
+         */
         public SimpleModuleIdentitySelector(File configFile, Properties props)
             throws FusionException
         {

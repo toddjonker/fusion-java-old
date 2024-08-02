@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -11,8 +11,8 @@ package com.amazon.fusion;
  * a {@code false} result indicates that the code point should not count
  * evaluations.
  * <p>
- * At run time, {@link #coverLocation(SourceLocation)} is called each time
- * time a coverable code point is (about to be) evaluated.
+ * At run time, {@link #coverLocation(SourceLocation)} is called each time a
+ * coverable code point is (about to be) evaluated.
  */
 public interface _Private_CoverageCollector
 {
@@ -41,6 +41,7 @@ public interface _Private_CoverageCollector
 
     // TODO Think this through. I'm not really convinced this is correct.
     //      Perhaps close() would be better?  save()?
+    // This appears to be unused.
     void flushMetrics()
         throws FusionException;
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -94,6 +94,7 @@ final class CoverageEvaluator
                 ((CoverageEvaluator) eval).myCollector;
             collector.coverLocation(myLocation);
 
+            // TODO Eliminate tail-call?
             return myForm.doEval(eval, store);
         }
     }
