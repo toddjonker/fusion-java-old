@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -85,6 +85,11 @@ final class StandardRuntime
         return myGlobalState.myIonSystem.getCatalog();
     }
 
+    // Not public
+    _Private_CoverageCollector getCoverageCollector()
+    {
+        return myGlobalState.myCoverageCollector;
+    }
 
     //========================================================================
 

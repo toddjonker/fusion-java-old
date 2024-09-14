@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -12,6 +12,7 @@ import static com.amazon.fusion.junit.Reflect.witherFor;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -23,17 +24,24 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import com.amazon.ion.IonCatalog;
 import com.amazon.ion.system.SimpleCatalog;
+import java.nio.file.Files;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
 
 public class FusionRuntimeBuilderTest
+    extends CoreTestCase
 {
     private static final File TEST_REPO = new File("tst-repo");
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder();
 
 
     private FusionRuntime build(FusionRuntimeBuilder b)
@@ -416,6 +424,42 @@ public class FusionRuntimeBuilderTest
         assertTrue(dir.isDirectory());
 
         changeCoverageDataDirectory(standard(), dir);
+    }
+
+
+    /**
+     * Ensures that different paths to the same directory don't result in
+     * different collectors that would interfere with each other.
+     */
+    @Test
+    public void testCoverageDataDirectoryCanonicalization()
+        throws Exception
+    {
+        File dir1 = tmpDir.getRoot();
+        File dir2 = tmpDir.newFolder("linkholder");
+
+        File link = new File(dir2, "link");
+        Files.createSymbolicLink(link.toPath(), dir1.toPath());
+
+        _Private_CoverageCollector c1 = makeCollector(dir1);
+        _Private_CoverageCollector c2 = makeCollector(dir2);
+        _Private_CoverageCollector c3 = makeCollector(link);
+
+        assertNotSame("different dirs", c1, c2);
+        assertSame("canonicalized symlink", c1, c3);
+    }
+
+    private _Private_CoverageCollector makeCollector(File dir)
+        throws FusionException
+    {
+        FusionRuntime r =
+            runtimeBuilder().copy()
+                            .withCoverageDataDirectory(dir)
+                            .build();
+        _Private_CoverageCollector c =
+            ((StandardRuntime) r).getCoverageCollector();
+        assertNotNull(c);
+        return c;
     }
 
 

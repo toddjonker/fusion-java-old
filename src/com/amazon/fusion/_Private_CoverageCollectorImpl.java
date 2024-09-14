@@ -301,6 +301,17 @@ public final class _Private_CoverageCollectorImpl
     {
         initCache();
 
+        // Canonicalize the dataDir, so different paths to the same directory
+        // don't lead to collectors overwriting each other's database.
+        try
+        {
+            dataDir = dataDir.getCanonicalFile();
+        }
+        catch (IOException e)
+        {
+            throw new FusionException("Error getting canonical path", e);
+        }
+
         _Private_CoverageCollectorImpl collector;
 
         CollectorRef ref = ourCollectorCache.get(dataDir);
