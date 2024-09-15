@@ -20,12 +20,13 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import com.amazon.ion.IonCatalog;
 import com.amazon.ion.system.SimpleCatalog;
-import java.nio.file.Files;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -35,8 +36,6 @@ import org.junit.rules.TemporaryFolder;
 public class FusionRuntimeBuilderTest
     extends CoreTestCase
 {
-    private static final File TEST_REPO = new File("tst-repo");
-
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -102,6 +101,41 @@ public class FusionRuntimeBuilderTest
         assertEquals(defaultValue, invoke(c, getter));
         assertEqualProperties(orig, c);
         assertCopiesAreEqual(c);
+    }
+
+
+    /**
+     * Creates a temporary normal (non-directory) file.
+     *
+     * @return a file that exists.
+     */
+    private File normalFile()
+    {
+        try
+        {
+            // JUnit docs aren't explicit that newFile() creates a physical
+            // file, not just a File reference, so assert that assumption.
+            File file = tmpDir.newFile();
+            assertTrue(file.exists());
+            return file;
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    /**
+     * Generates a path no a non-existing file.
+     *
+     * @return a file that doesn't exist.
+     */
+    private File noSuchFile()
+    {
+        Path p = tmpDir.getRoot().toPath().resolve("no-such-file");
+        assertTrue(Files.notExists(p));
+        return p.toFile();
     }
 
 
@@ -290,10 +324,7 @@ public class FusionRuntimeBuilderTest
     @Test
     public void testSetInitialCurrentDirectory()
     {
-        File dir = new File("src");
-        assertTrue(dir.isDirectory());
-
-        changeInitialCurrentDirectory(standard(), dir);
+        changeInitialCurrentDirectory(standard(), tmpDir.getRoot());
     }
 
 
@@ -313,37 +344,31 @@ public class FusionRuntimeBuilderTest
         FusionRuntimeBuilder b = standard();
         checkCurrentDirectory(System.getProperty("user.dir"), b);
 
-        File tst = new File("tst");
-        b.setInitialCurrentDirectory(tst);
-        checkCurrentDirectory(tst.getAbsolutePath(), b);
+        b.setInitialCurrentDirectory(tmpDir.getRoot());
+        checkCurrentDirectory(tmpDir.getRoot().getAbsolutePath(), b);
     }
 
 
     @Test
     public void testCurrentDirectoryDoesNotExist()
     {
-        File file = new File("no-such-file");
-        assertFalse(file.exists());
         thrown.expect(IllegalArgumentException.class);
-        standard().setInitialCurrentDirectory(file);
+        standard().setInitialCurrentDirectory(noSuchFile());
     }
 
 
     @Test
     public void testCurrentDirectoryIsNormalFile()
     {
-        File file = new File("build.xml");
-        assertTrue(file.isFile());
-
         thrown.expect(IllegalArgumentException.class);
-        standard().setInitialCurrentDirectory(file);
+        standard().setInitialCurrentDirectory(normalFile());
     }
 
     @Test
     public void testInitialCurrentDirectoryImmutability()
     {
         thrown.expect(UnsupportedOperationException.class);
-        standard().immutable().setInitialCurrentDirectory(TEST_REPO);
+        standard().immutable().setInitialCurrentDirectory(tmpDir.getRoot());
     }
 
 
@@ -367,11 +392,8 @@ public class FusionRuntimeBuilderTest
     @Test
     public void testBootstrapRepositoryDoesNotExist()
     {
-        File file = new File("no-such-file");
-        assertFalse(file.exists());
-
         thrown.expect(IllegalArgumentException.class);
-        standard().setBootstrapRepository(file);
+        standard().setBootstrapRepository(noSuchFile());
     }
 
     @Test
@@ -385,18 +407,15 @@ public class FusionRuntimeBuilderTest
     @Test
     public void testBootstrapRepositoryIsNormalFile()
     {
-        File file = new File("build.xml");
-        assertTrue(file.isFile());
-
         thrown.expect(IllegalArgumentException.class);
-        standard().setBootstrapRepository(file);
+        standard().setBootstrapRepository(normalFile());
     }
 
     @Test
     public void testBootstrapRepositoryImmutability()
     {
         thrown.expect(UnsupportedOperationException.class);
-        standard().immutable().setBootstrapRepository(TEST_REPO);
+        standard().immutable().setBootstrapRepository(tmpDir.getRoot());
     }
 
 
@@ -414,10 +433,7 @@ public class FusionRuntimeBuilderTest
     @Test
     public void testSetCoverageDataDirectory()
     {
-        File dir = new File("src");
-        assertTrue(dir.isDirectory());
-
-        changeCoverageDataDirectory(standard(), dir);
+        changeCoverageDataDirectory(standard(), tmpDir.getRoot());
     }
 
 
@@ -429,11 +445,11 @@ public class FusionRuntimeBuilderTest
     public void testCoverageDataDirectoryCanonicalization()
         throws Exception
     {
-        File dir1 = tmpDir.getRoot();
-        File dir2 = tmpDir.newFolder("linkholder");
+        Path dir1 = tmpDir.getRoot().toPath();
+        Path dir2 = tmpDir.newFolder("linkholder").toPath();
 
-        File link = new File(dir2, "link");
-        Files.createSymbolicLink(link.toPath(), dir1.toPath());
+        Path link = dir2.resolve("link");
+        Files.createSymbolicLink(link, dir1);
 
         _Private_CoverageCollector c1 = makeCollector(dir1);
         _Private_CoverageCollector c2 = makeCollector(dir2);
@@ -443,12 +459,12 @@ public class FusionRuntimeBuilderTest
         assertSame("canonicalized symlink", c1, c3);
     }
 
-    private _Private_CoverageCollector makeCollector(File dir)
+    private _Private_CoverageCollector makeCollector(Path dir)
         throws FusionException
     {
         FusionRuntime r =
             runtimeBuilder().copy()
-                            .withCoverageDataDirectory(dir)
+                            .withCoverageDataDirectory(dir.toFile())
                             .build();
         _Private_CoverageCollector c =
             ((StandardRuntime) r).getCoverageCollector();
@@ -460,22 +476,16 @@ public class FusionRuntimeBuilderTest
     @Test
     public void testCoverageDataDirectoryDoesNotExist()
     {
-        File file = new File("no-such-file");
-        assertFalse(file.exists());
-
         // Directory doesn't have to exist
-        changeCoverageDataDirectory(standard(), file);
+        changeCoverageDataDirectory(standard(), noSuchFile());
     }
 
 
     @Test
     public void testCoverageDataDirectoryIsNormalFile()
     {
-        File file = new File("build.xml");
-        assertTrue(file.isFile());
-
         thrown.expect(IllegalArgumentException.class);
-        standard().setCoverageDataDirectory(file);
+        standard().setCoverageDataDirectory(normalFile());
     }
 
 
@@ -483,7 +493,7 @@ public class FusionRuntimeBuilderTest
     public void testCoverageDataDirectoryImmutability()
     {
         thrown.expect(UnsupportedOperationException.class);
-        standard().immutable().setCoverageDataDirectory(TEST_REPO);
+        standard().immutable().setCoverageDataDirectory(tmpDir.getRoot());
     }
 
 
