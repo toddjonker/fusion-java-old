@@ -2,6 +2,9 @@
 
 package com.amazon.fusion.junit;
 
+import static com.amazon.fusion.CoreTestCase.ftstRepositoryDirectory;
+import static com.amazon.fusion.CoreTestCase.ftstScriptDirectory;
+import static com.amazon.fusion.CoreTestCase.fusionBootstrapDirectory;
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntime;
 import com.amazon.fusion.FusionRuntimeBuilder;
@@ -72,7 +75,7 @@ public class SimpleScriptRunner
         // bootstrap repo into the classpath.  In scripted builds, this has no
         // effect since the classpath includes the code, which will shadow the
         // content of this directory.
-        b = b.withBootstrapRepository(new File("fusion"));
+        b = b.withBootstrapRepository(fusionBootstrapDirectory().toFile());
 
         // Enable this to have coverage collected during an IDE run.
 //      b = b.withCoverageDataDirectory(new File("build/private/fcoverage"));
@@ -82,8 +85,7 @@ public class SimpleScriptRunner
         // configuration. Historically, it also provided the bootstrap repo.
         b = b.withConfigProperties(testClass, "/fusion.properties");
 
-        File tstRepo = new File("ftst/repo");
-        b.addRepositoryDirectory(tstRepo);
+        b.addRepositoryDirectory(ftstRepositoryDirectory().toFile());
 
         myRuntime = b.build();
     }
@@ -98,7 +100,7 @@ public class SimpleScriptRunner
     protected List<File> getChildren()
     {
         ArrayList<File> files = new ArrayList<>();
-        gatherFiles(files, new File("ftst"));
+        gatherFiles(files, ftstScriptDirectory().toFile());
         return files;
     }
 

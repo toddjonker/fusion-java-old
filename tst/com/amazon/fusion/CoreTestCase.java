@@ -24,9 +24,10 @@ import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonText;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.system.IonSystemBuilder;
-import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -69,6 +70,24 @@ public class CoreTestCase
 
     //========================================================================
 
+    /**
+     * The absolute path of the root directory of this source code.
+     * <p>
+     * Historically, tests code assumed it was run from the project root, but
+     * we'd prefer that not be a requirement.  Points of coupling to source code
+     * layout should instead use this path so they are easily adjusted if this
+     * assumption becomes false.
+     * <p>
+     * This is {@code static final} because Java doesn't guarantee that the
+     * "working directory" can't be changed dynamically.
+     * <p>
+     * This is {@code public} because we'd prefer test code use this directly
+     * than be blocked by not having a better resolver here.
+     * </p>
+     */
+    public static final Path PROJECT_DIRECTORY =
+        Paths.get("").toAbsolutePath();
+
 
     private IonSystem mySystem;
     private FusionRuntimeBuilder myRuntimeBuilder;
@@ -92,6 +111,22 @@ public class CoreTestCase
         myTopLevel = null;
     }
 
+
+    public static Path fusionBootstrapDirectory()
+    {
+        return PROJECT_DIRECTORY.resolve("fusion");
+    }
+
+    public static Path ftstScriptDirectory()
+    {
+        return PROJECT_DIRECTORY.resolve("ftst");
+    }
+
+    public static Path ftstRepositoryDirectory()
+    {
+        return ftstScriptDirectory().resolve("repo");
+    }
+
     protected IonSystem system()
     {
         return mySystem;
@@ -108,7 +143,7 @@ public class CoreTestCase
             // bootstrap repo into the classpath.  In scripted builds, this has no
             // effect since the classpath includes the code, which will shadow the
             // content of this directory.
-            b = b.withBootstrapRepository(new File("fusion"));
+            b = b.withBootstrapRepository(fusionBootstrapDirectory().toFile());
 
             // Enable this to have coverage collected during an IDE run.
 //          b = b.withCoverageDataDirectory(new File("build/private/fcoverage"));
@@ -128,8 +163,7 @@ public class CoreTestCase
     protected void useTstRepo()
         throws FusionException
     {
-        File tstRepo = new File("ftst/repo");
-        runtimeBuilder().addRepositoryDirectory(tstRepo);
+        runtimeBuilder().addRepositoryDirectory(ftstRepositoryDirectory().toFile());
     }
 
     protected synchronized FusionRuntime runtime()
@@ -184,13 +218,19 @@ public class CoreTestCase
     }
 
 
+    protected Object loadFile(Path path)
+        throws FusionException
+    {
+        TopLevel top = topLevel();
+        return top.load(path.toFile());
+    }
+
     protected Object loadFile(String path)
         throws FusionException
     {
-        File file = new File(path);
-        TopLevel top = topLevel();
-        return top.load(file);
+        return loadFile(Paths.get(path));
     }
+
 
     protected IonValue evalToIon(TopLevel top, String source)
         throws FusionException

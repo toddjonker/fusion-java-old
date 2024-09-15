@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -53,7 +53,7 @@ public class RuntimeTest
         assertEval(3328, "x");
 
         // Test eval'ing a module
-        loadFile("ftst/repo/src/grain.fusion");
+        loadFile(ftstRepositoryDirectory().resolve("src/grain.fusion"));
     }
 
 

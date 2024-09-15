@@ -47,7 +47,7 @@ public class FusionRuntimeBuilderTest
     private FusionRuntime build(FusionRuntimeBuilder b)
         throws FusionException
     {
-        b = b.withBootstrapRepository(new File("fusion"));
+        b = b.withBootstrapRepository(fusionBootstrapDirectory().toFile());
         return b.build();
     }
 
@@ -360,10 +360,7 @@ public class FusionRuntimeBuilderTest
     @Test
     public void testSetBootstrapRepository()
     {
-        File dir = new File("fusion");
-        assertTrue(dir.isDirectory());
-
-        changeBootstrapRepository(standard(), dir);
+        changeBootstrapRepository(standard(), fusionBootstrapDirectory().toFile());
     }
 
 
@@ -380,12 +377,9 @@ public class FusionRuntimeBuilderTest
     @Test
     public void testBootstrapRepositoryIsNotValid()
     {
-        // This is a Fusion repo, but not a bootstrap repository.
-        File file = new File("ftst/repo");
-
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Not a Fusion bootstrap repository: ");
-        standard().setBootstrapRepository(file);
+        standard().setBootstrapRepository(ftstRepositoryDirectory().toFile());
     }
 
     @Test
