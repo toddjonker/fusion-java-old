@@ -27,19 +27,12 @@ final class ClassLoaderModuleRepository
 
         if (getClass().getResource(fileName) != null)
         {
-            ModuleLocation loc = new InputStreamModuleLocation()
+            // TODO Maybe not the best output this way.
+            SourceName myName =
+                SourceName.forDisplay(id + " (at classpath:" + fileName + ")");
+
+            ModuleLocation loc = new InputStreamModuleLocation(myName)
             {
-                // TODO Maybe not the best output this way.
-                private final SourceName myName =
-                    SourceName.forDisplay(id + " (at classpath:" + fileName
-                                             + ")");
-
-                @Override
-                SourceName sourceName()
-                {
-                    return myName;
-                }
-
                 @Override
                 InputStream open()
                     throws IOException

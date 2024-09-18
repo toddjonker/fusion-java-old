@@ -224,7 +224,8 @@ public final class _Private_CoverageWriter
      * directory tree of generated HTML files.
      * <p>
      * TODO It would be better to use paths relative to repository roots, to
-     *   avoid exposing details of the build-time environment.
+     *   avoid exposing details of the build-time environment.  This suggests
+     *   that {@code SourceName} should track the repository holding the source.
      *
      * @param sourceNames must not be null.
      */

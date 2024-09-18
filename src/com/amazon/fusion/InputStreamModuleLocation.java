@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -12,6 +12,12 @@ import java.io.InputStream;
 abstract class InputStreamModuleLocation
     extends ModuleLocation
 {
+    InputStreamModuleLocation(SourceName name)
+    {
+        super(name);
+    }
+
+
     abstract InputStream open()
         throws IOException;
 

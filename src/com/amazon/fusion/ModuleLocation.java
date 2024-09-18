@@ -1,21 +1,44 @@
-// Copyright (c) 2013 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
 import com.amazon.ion.IonReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 
 /**
  * Abstract location of module source code.
- *
- * "ModuleResource" might be a better name.
+ * <p>
+ * These are produced by a {@link ModuleRepository} upon module discovery,
+ * encapsulating the physical location of the module code.  They are consumed by
+ * the {@link LoadHandler}, when loading the module.
+ * <p>
+ * "ModuleResource" might be a better name, or perhaps "ModuleCodeProvider"
+ * since they can only be consumed once (see {@link #read}).
+ * <p>
+ * TODO: {@link SourceName} should track the repository holding the module.
+ *    This would enable better messaging, cover Jar-based resources nicely, and
+ *    allow the coverage report to partition source-files by repo root.
  */
 abstract class ModuleLocation
 {
+    private final SourceName myName;
+
+    ModuleLocation(SourceName name)
+    {
+        this.myName = name;
+    }
+
+
     /**
      * @return may be null.
      */
-    abstract SourceName sourceName();
+    final SourceName sourceName()
+    {
+        return myName;
+    }
 
 
     /**
@@ -37,5 +60,27 @@ abstract class ModuleLocation
     {
         SourceName name = sourceName();
         return (name == null ? super.toString() : name.toString());
+    }
+
+
+    static ModuleLocation forFile(ModuleIdentity id, File sourceFile)
+    {
+        SourceName sourceName = SourceName.forModule(id, sourceFile);
+
+        return new InputStreamModuleLocation(sourceName)
+        {
+            @Override
+            InputStream open()
+                throws IOException
+            {
+                return Files.newInputStream(sourceName().getFile().toPath());
+            }
+
+            @Override
+            String parentDirectory()
+            {
+                return sourceName().getFile().getParentFile().getAbsolutePath();
+            }
+        };
     }
 }
