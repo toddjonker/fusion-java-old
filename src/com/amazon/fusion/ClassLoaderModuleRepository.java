@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -7,7 +7,7 @@ import com.amazon.fusion.util.function.Predicate;
 import java.io.IOException;
 import java.io.InputStream;
 
-final class JarModuleRepository
+final class ClassLoaderModuleRepository
     extends ModuleRepository
 {
     @Override
