@@ -382,22 +382,24 @@ public final class _Private_CoverageCollectorImpl
 
 
     @Override
-    public boolean coverableLocation(SourceLocation loc)
+    public boolean locationIsRecordable(SourceLocation loc)
     {
-        boolean coverable = myConfig.locationIsSelected(loc);
-
-        if (coverable)
-        {
-            myDatabase.noteCoverableLocation(loc);
-        }
-
-        return coverable;
+       return (myDatabase.locationIsRecordable(loc) &&
+               myConfig.locationIsSelected(loc));
     }
 
+
     @Override
-    public void coverLocation(SourceLocation loc)
+    public void locationInstrumented(SourceLocation loc)
     {
-        myDatabase.coverLocation(loc);
+        myDatabase.locationInstrumented(loc);
+    }
+
+
+    @Override
+    public void locationEvaluated(SourceLocation loc)
+    {
+        myDatabase.locationEvaluated(loc);
     }
 
 

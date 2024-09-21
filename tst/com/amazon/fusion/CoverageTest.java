@@ -17,33 +17,37 @@ public class CoverageTest
     static class Collector
         implements _Private_CoverageCollector
     {
-        boolean coverOnlyLineOne = false;
+        boolean instrumentOnlyLineOne = false;
 
-        final Set<SourceLocation> coverable = new HashSet<>();
-        final Set<SourceLocation> covered   = new HashSet<>();
+        final Set<SourceLocation> instrumented = new HashSet<>();
+        final Set<SourceLocation> evaluated    = new HashSet<>();
 
         @Override
-        public boolean coverableLocation(SourceLocation loc)
+        public boolean locationIsRecordable(SourceLocation loc)
         {
-            // For simplicity, we'll ignore the offset.
-            SourceLocation loc2 =
-                SourceLocation.forLineColumn(loc.getLine(),
-                                             loc.getColumn(),
-                                             loc.getSourceName());
-            coverable.add(loc2);
-
-            return (coverOnlyLineOne ? loc.getLine() == 1 : true);
+            return (instrumentOnlyLineOne ? loc.getLine() == 1 : true);
         }
 
         @Override
-        public void coverLocation(SourceLocation loc)
+        public void locationInstrumented(SourceLocation loc)
         {
             // For simplicity, we'll ignore the offset.
             SourceLocation loc2 =
                 SourceLocation.forLineColumn(loc.getLine(),
                                              loc.getColumn(),
                                              loc.getSourceName());
-            covered.add(loc2);
+            instrumented.add(loc2);
+        }
+
+        @Override
+        public void locationEvaluated(SourceLocation loc)
+        {
+            // For simplicity, we'll ignore the offset.
+            SourceLocation loc2 =
+                SourceLocation.forLineColumn(loc.getLine(),
+                                             loc.getColumn(),
+                                             loc.getSourceName());
+            evaluated.add(loc2);
         }
 
         @Override
@@ -63,8 +67,8 @@ public class CoverageTest
     private void checkCovered(SourceName name, long line, long column)
     {
         SourceLocation loc = SourceLocation.forLineColumn(line, column, name);
-        assertTrue(collector.coverable.contains(loc));
-        assertTrue(collector.covered.contains(loc));
+        assertTrue(collector.instrumented.contains(loc));
+        assertTrue(collector.evaluated.contains(loc));
     }
 
 
@@ -85,10 +89,8 @@ public class CoverageTest
     private void checkNotCovered(SourceName name, long line, long column)
     {
         SourceLocation loc = SourceLocation.forLineColumn(line, column, name);
-        assertTrue("not coverable",
-                   collector.coverable.contains(loc));
-        assertFalse("covered but shouldn't be",
-                    collector.covered.contains(loc));
+        assertTrue(collector.instrumented.contains(loc));
+        assertFalse(collector.evaluated.contains(loc));
     }
 
 
@@ -101,6 +103,26 @@ public class CoverageTest
         checkNotCovered(null, line, column);
     }
 
+    /**
+     * @param line one-based
+     * @param column one-based
+     */
+    private void checkNotInstrumented(SourceName name, long line, long column)
+    {
+        SourceLocation loc = SourceLocation.forLineColumn(line, column, name);
+        assertFalse(collector.instrumented.contains(loc));
+        assertFalse(collector.evaluated.contains(loc));
+    }
+
+
+    /**
+     * @param line one-based
+     * @param column one-based
+     */
+    private void checkNotInstrumented(long line, long column)
+    {
+        checkNotInstrumented(null, line, column);
+    }
 
 
     @Override
@@ -162,17 +184,17 @@ public class CoverageTest
     }
 
     @Test
-    public void testPartialCollection()
+    public void testPartialInstrumentation()
         throws FusionException
     {
-        collector.coverOnlyLineOne = true;
+        collector.instrumentOnlyLineOne = true;
 
         //    1 3 5 7 9
         eval("(if true\n" +
              "    1 2)");
-        checkCovered   (1, 1);
-        checkCovered   (1, 5);
-        checkNotCovered(2, 5);
-        checkNotCovered(2, 7);
+        checkCovered        (1, 1);
+        checkCovered        (1, 5);
+        checkNotInstrumented(2, 5);
+        checkNotInstrumented(2, 7);
     }
 }

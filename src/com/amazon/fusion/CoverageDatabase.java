@@ -122,7 +122,22 @@ class CoverageDatabase
     }
 
 
-    synchronized void noteCoverableLocation(SourceLocation loc)
+    /**
+     * Indicates whether this database can record the given location.
+     */
+    boolean locationIsRecordable(SourceLocation loc)
+    {
+        SourceName name = loc.getSourceName();
+        return name != null && name.getFile() != null;
+    }
+
+
+    /**
+     * Records that the code at some location has been instrumented.
+     *
+     * @param loc must be {@linkplain #locationIsRecordable recordable}.
+     */
+    synchronized void locationInstrumented(SourceLocation loc)
     {
         Boolean prev = myLocations.put(loc, Boolean.FALSE);
 
@@ -135,7 +150,12 @@ class CoverageDatabase
     }
 
 
-    synchronized void coverLocation(SourceLocation loc)
+    /**
+     * Records that the code at some location is about to be evaluated.
+     *
+     * @param loc must have been {@linkplain #locationInstrumented instrumented}.
+     */
+    synchronized void locationEvaluated(SourceLocation loc)
     {
         myLocations.put(loc, Boolean.TRUE);
     }
@@ -312,10 +332,7 @@ class CoverageDatabase
 
                 for (SourceName name : sourceNames())
                 {
-                    if (name.getFile() != null)
-                    {
-                        writeSource(iw, name);
-                    }
+                    writeSource(iw, name);
                 }
             }
         }
@@ -434,10 +451,10 @@ class CoverageDatabase
                 SourceLocation.forLineColumn(line, column, name);
             assert loc != null;
 
-            noteCoverableLocation(loc);
+            locationInstrumented(loc);
             if (covered)
             {
-                coverLocation(loc);
+                locationEvaluated(loc);
             }
         }
         in.stepOut();

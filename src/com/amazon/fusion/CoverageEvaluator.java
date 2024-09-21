@@ -58,9 +58,11 @@ final class CoverageEvaluator
             SourceLocation loc = source.getLocation();
             if (loc != null)
             {
-                if (myCollector.coverableLocation(loc))
+                if (myCollector.locationIsRecordable(loc))
                 {
                     form = new CoverageCompiledForm(loc, form);
+
+                    myCollector.locationInstrumented(loc);
                 }
             }
 
@@ -92,7 +94,7 @@ final class CoverageEvaluator
         {
             _Private_CoverageCollector collector =
                 ((CoverageEvaluator) eval).myCollector;
-            collector.coverLocation(myLocation);
+            collector.locationEvaluated(myLocation);
 
             // TODO Eliminate tail-call?
             return myForm.doEval(eval, store);

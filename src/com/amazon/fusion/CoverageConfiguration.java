@@ -209,9 +209,6 @@ final class CoverageConfiguration
      */
     boolean locationIsSelected(SourceLocation loc)
     {
-        // TODO This should take SourceName, which is more aligned with the
-        //  granularity of configuration.
-
         SourceName name = loc.getSourceName();
         if (name == null) return false;
 
