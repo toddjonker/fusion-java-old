@@ -26,9 +26,22 @@ import java.util.Map;
 import java.util.Set;
 
 
+/**
+ * Records and persists coverage instrumentation data.
+ * <p>
+ * Instances are tied to a specific filesystem directory, and assumes full
+ * control of its content.  In particular, no other process, and no other
+ * {@code CoverageDatabase} instance, should access the directory until the
+ * database is flushed via {@link #write()}.  This implies that instances need
+ * to be interned or otherwise deduplicated, based on physical directory.
+ * At present, {@link _Private_CoverageCollectorImpl} implements these
+ * constraints.
+ * <p>
+ * TODO: The flushing protocol would be more obvious if this class implemented
+ *       {@link java.io.Closeable}.
+ */
 class CoverageDatabase
 {
-
     private static final class SourceNameComparator
         implements Comparator<SourceName>
     {
@@ -43,6 +56,9 @@ class CoverageDatabase
         new SourceNameComparator();
 
 
+    /**
+     * Compares locations by line/column, ignoring the offset.
+     */
     private static final class SourceLocationComparator
         implements Comparator<SourceLocation>
     {

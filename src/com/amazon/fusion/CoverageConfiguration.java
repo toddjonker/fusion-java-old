@@ -37,9 +37,13 @@ import java.util.Set;
  *   <li>{@value #PROPERTY_INCLUDED_SOURCES} holds a list of directory paths,
  *       separated by the platform path separator.
  *       All code read from files under a given directory is instrumented.
- *       If not provided, only modules chosen by IncludedModules are
- *       instrumented.
- * <ul>
+ *       This is generally used to instrument non-repository scripts, such as
+ *       unit tests, that are evaluated via {@code load}, as opposed to
+ *       {@code require}d modules.
+ * </ul>
+ * Modules declared encountered while {@code load}ing scripts are assigned
+ * synthetic, unresolvable module paths that cannot be selected via the
+ * module-based properties above.
  */
 final class CoverageConfiguration
 {
@@ -288,7 +292,7 @@ final class CoverageConfiguration
         {
             String path = id.absolutePath();
 
-            // By default, all modules are included.
+            // By default, all repository-loaded modules are included.
             if (myIncludedModules != null)
             {
                 if (! setContainsModule(myIncludedModules, path)) return false;

@@ -25,8 +25,18 @@ import java.util.Set;
  * <p>
  * Instances of this class are interned in a weak-reference cache, keyed by
  * data directory.  This allows them to be shared by {@code FusionRuntime}
- * instances for as long as possible.
- * </p>
+ * instances for as long as possible, and flushed to disk when they become
+ * unreachable or the JVM exits.  This also ensures proper deduplication of the
+ * {@link CoverageDatabase} contained within.
+ * <p>
+ * <em>Flushing and reloading of a database multiple times within a test run is
+ * expected and common, particularly within this project.</em>
+ * <p>
+ * TODO: The caching/flushing mechanism is distinct from this class's main
+ * responsibility of coverage filtering, and brings significant complexity to
+ * something that should be simple.  The Single Responsibility Principle
+ * suggests it should be refactored into a dedicated class.
+ *
  * @see CoverageConfiguration
  */
 public final class _Private_CoverageCollectorImpl
@@ -52,6 +62,8 @@ public final class _Private_CoverageCollectorImpl
 
     /**
      * Polled by {@link Flusher#run()}.
+     * <p>
+     * TODO: Can we streamline this to {@code ReferenceQueue<Closeable>}?
      */
     private static final
     ReferenceQueue<_Private_CoverageCollectorImpl> ourReferenceQueue =
@@ -106,6 +118,8 @@ public final class _Private_CoverageCollectorImpl
     /**
      * Polls {@link #ourReferenceQueue} to write coverage data to disk when a
      * collector is garbage collected.
+     * <p>
+     * TODO: It could be simpler to handle {@link java.io.Closeable}.
      */
     private static class Flusher
         implements Runnable
