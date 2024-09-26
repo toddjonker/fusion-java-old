@@ -7,7 +7,6 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import static com.amazon.fusion.StandardReader.readSyntax;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
-import com.amazon.fusion.ModuleLocation.IonReaderModuleLocation;
 import com.amazon.ion.IonReader;
 import java.io.File;
 import java.io.IOException;
@@ -173,7 +172,8 @@ final class StandardTopLevel
             ModuleIdentity id =
                 ModuleIdentity.forAbsolutePath(absoluteModulePath);
             ModuleLocation loc =
-                new IonReaderModuleLocation(source, name);
+                ModuleLocation.forIonReader(source, name);
+
             resolver.loadModule(eval, id, loc, true /* reload it */);
         }
         catch (FusionInterrupt e)

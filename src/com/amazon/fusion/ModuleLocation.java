@@ -26,7 +26,7 @@ abstract class ModuleLocation
 {
     private final SourceName myName;
 
-    ModuleLocation(SourceName name)
+    private ModuleLocation(SourceName name)
     {
         this.myName = name;
     }
@@ -62,30 +62,18 @@ abstract class ModuleLocation
         return (name == null ? super.toString() : name.toString());
     }
 
+    static ModuleLocation forIonReader(IonReader source, SourceName name)
+    {
+        return new IonReaderModuleLocation(source, name);
+    }
 
     static ModuleLocation forFile(ModuleIdentity id, File sourceFile)
     {
-        SourceName sourceName = SourceName.forModule(id, sourceFile);
-
-        return new InputStreamModuleLocation(sourceName)
-        {
-            @Override
-            InputStream open()
-                throws IOException
-            {
-                return Files.newInputStream(sourceName().getFile().toPath());
-            }
-
-            @Override
-            String parentDirectory()
-            {
-                return sourceName().getFile().getParentFile().getAbsolutePath();
-            }
-        };
+        return new FileModuleLocation(id, sourceFile);
     }
 
 
-    static final class IonReaderModuleLocation
+    private static final class IonReaderModuleLocation
         extends ModuleLocation
     {
         private final IonReader  mySource;
@@ -134,6 +122,29 @@ abstract class ModuleLocation
                     in.close();
                 }
             }
+        }
+    }
+
+
+    private static final class FileModuleLocation
+        extends InputStreamModuleLocation
+    {
+        public FileModuleLocation(ModuleIdentity id, File sourceFile)
+        {
+            super(SourceName.forModule(id, sourceFile));
+        }
+
+        @Override
+        InputStream open()
+            throws IOException
+        {
+            return Files.newInputStream(sourceName().getFile().toPath());
+        }
+
+        @Override
+        String parentDirectory()
+        {
+            return sourceName().getFile().getParentFile().getAbsolutePath();
         }
     }
 }
