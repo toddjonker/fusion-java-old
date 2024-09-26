@@ -9,6 +9,20 @@ import java.net.URL;
 final class ClassLoaderModuleRepository
     extends ModuleRepository
 {
+    private final ClassLoader myClassLoader;
+    private final String      myPathPrefix;
+
+    ClassLoaderModuleRepository(ClassLoader cl, String pathPrefix)
+    {
+        myClassLoader = cl;
+        myPathPrefix  = pathPrefix + "/src";
+
+        // We want to resolve relative to the classpath root(s).
+        assert ! myPathPrefix.startsWith("/");
+    }
+
+
+
     @Override
     String identify()
     {
@@ -20,12 +34,11 @@ final class ClassLoaderModuleRepository
     ModuleLocation locateModule(Evaluator eval, final ModuleIdentity id)
         throws FusionException
     {
-        String path = id.absolutePath();
         final String resourceName =
-            "/FUSION-REPO" + path + FUSION_SOURCE_EXTENSION;
+            myPathPrefix + id.absolutePath() + FUSION_SOURCE_EXTENSION;
 
         // The protocol could be a jar: or file: (at least!)
-        URL url = getClass().getResource(resourceName);
+        URL url = myClassLoader.getResource(resourceName);
         if (url == null) return null;
 
         return ModuleLocation.forUrl(id, url);

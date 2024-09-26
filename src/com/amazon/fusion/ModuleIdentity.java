@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -213,6 +213,8 @@ class ModuleIdentity
     /**
      * Returns the absolute path of this identity.  The result can be turned
      * back into an (interned) identity via {@link #forAbsolutePath(String)}.
+     * <p>
+     * TODO NIO: Consider returning a Path here, for tighter modeling.
      *
      * @return a non-empty string starting (but not ending) with {@code '/'}.
      */
