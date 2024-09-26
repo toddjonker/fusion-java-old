@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.GlobalState.FUSION_SOURCE_EXTENSION;
+import com.amazon.fusion.ModuleLocation.InputStreamModuleLocation;
 import com.amazon.fusion.util.function.Predicate;
 import java.io.IOException;
 import java.io.InputStream;

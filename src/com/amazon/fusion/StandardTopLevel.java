@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -7,6 +7,7 @@ import static com.amazon.fusion.FusionVoid.voidValue;
 import static com.amazon.fusion.ModuleIdentity.isValidAbsoluteModulePath;
 import static com.amazon.fusion.StandardReader.readSyntax;
 import static com.amazon.ion.util.IonTextUtils.printQuotedSymbol;
+import com.amazon.fusion.ModuleLocation.IonReaderModuleLocation;
 import com.amazon.ion.IonReader;
 import java.io.File;
 import java.io.IOException;

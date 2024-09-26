@@ -83,4 +83,57 @@ abstract class ModuleLocation
             }
         };
     }
+
+
+    static final class IonReaderModuleLocation
+        extends ModuleLocation
+    {
+        private final IonReader  mySource;
+
+        IonReaderModuleLocation(IonReader source, SourceName name)
+        {
+            super(name);
+            mySource = source;
+        }
+
+        @Override
+        IonReader read(Evaluator eval)
+        {
+            return mySource;
+        }
+    }
+
+
+    abstract static class InputStreamModuleLocation
+        extends ModuleLocation
+    {
+        InputStreamModuleLocation(SourceName name)
+        {
+            super(name);
+        }
+
+        abstract InputStream open()
+            throws IOException;
+
+        @Override
+        IonReader read(Evaluator eval)
+            throws IOException
+        {
+            IonReader reader = null;
+            InputStream in = open();
+            try
+            {
+                reader = eval.getIonReaderBuilder().build(in);
+                return reader;
+            }
+            finally
+            {
+                if (reader == null)
+                {
+                    // We failed constructing the IonReader!
+                    in.close();
+                }
+            }
+        }
+    }
 }
