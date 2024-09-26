@@ -577,14 +577,6 @@ public class FusionRuntimeBuilder
     //=========================================================================
 
 
-    private static boolean isValidBootstrapRepo(File repo)
-    {
-        File src = new File(repo, "src");
-        File fusionModule = new File(new File(src, "fusion"), "base.fusion");
-        return fusionModule.isFile();
-    }
-
-
     /**
      * Gets the directory configured for use as the bootstrap repository.
      * By default, this property is null.
@@ -632,13 +624,6 @@ public class FusionRuntimeBuilder
             if (! directory.isDirectory())
             {
                 String message = "Not a directory: " + original;
-                throw new IllegalArgumentException(message);
-            }
-
-            if (! isValidBootstrapRepo(directory))
-            {
-                String message =
-                    "Not a Fusion bootstrap repository: " + original;
                 throw new IllegalArgumentException(message);
             }
         }
@@ -901,11 +886,13 @@ public class FusionRuntimeBuilder
             if (bootstrap != null)
             {
                 File file = new File(bootstrap);
-                if (! isValidBootstrapRepo(file))
+                // Directory-ness is verified below by setBootstrapRepository,
+                // but we want to include the property in the error message.
+                if (! file.isDirectory())
                 {
                     String message =
                         "Value of system property " + property +
-                        " is not a Fusion bootstrap repository: " + bootstrap;
+                        " is not a directory: " + bootstrap;
                     throw new IllegalStateException(message);
                 }
 
@@ -1007,26 +994,19 @@ public class FusionRuntimeBuilder
     {
         ArrayList<ModuleRepository> repos = new ArrayList<>();
 
-        addBootstrapRepository(repos);
+        // When our own unit tests are running in an IDE, this is nonfunctional;
+        // we rely on the test setup configuring the bootstrap explicitly.
+        repos.add(new ClassLoaderModuleRepository(getClass().getClassLoader(),
+                                                  "FUSION-REPO"));
 
-        boolean needBootstrap = repos.isEmpty();
+        // This supports legacy cases commingling user code with the bootstrap
+        // and that only configure the bootstrap.
+        addBootstrapRepository(repos);
 
         if (myRepositoryDirectories != null)
         {
             for (File f : myRepositoryDirectories)
             {
-                if (needBootstrap)
-                {
-                    if (! isValidBootstrapRepo(f))
-                    {
-                        String message =
-                            "The first repository is not a Fusion bootstrap " +
-                            "repository: " + f;
-                        throw new IllegalStateException(message);
-                    }
-                    needBootstrap = false;
-                }
-
                 // TODO FUSION-214 Push this into the repo impl
                 File src = new File(f, "src");
                 if (src.isDirectory())

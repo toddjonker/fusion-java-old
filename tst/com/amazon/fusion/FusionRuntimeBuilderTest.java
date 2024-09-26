@@ -127,7 +127,7 @@ public class FusionRuntimeBuilderTest
     }
 
     /**
-     * Generates a path no a non-existing file.
+     * Generates a path to a non-existing file.
      *
      * @return a file that doesn't exist.
      */
@@ -396,13 +396,6 @@ public class FusionRuntimeBuilderTest
         standard().setBootstrapRepository(noSuchFile());
     }
 
-    @Test
-    public void testBootstrapRepositoryIsNotValid()
-    {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("Not a Fusion bootstrap repository: ");
-        standard().setBootstrapRepository(ftstRepositoryDirectory().toFile());
-    }
 
     @Test
     public void testBootstrapRepositoryIsNormalFile()

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2020 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2014-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -128,6 +128,11 @@ final class GlobalOptions
         throws UsageException
     {
         FusionRuntimeBuilder builder = FusionRuntimeBuilder.standard();
+
+        // TODO The CLI should not allow setting a bootstrap repo.
+        //   For now, we assume this option could be in use where the given repo
+        //   has both the bootstrap and user code, so we treat this as if it
+        //   were the first user repo.
 
         if (myBootstrapPath != null)
         {
