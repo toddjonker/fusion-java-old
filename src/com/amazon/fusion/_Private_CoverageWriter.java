@@ -14,10 +14,11 @@ import com.amazon.ion.SpanProvider;
 import com.amazon.ion.Timestamp;
 import com.amazon.ion.system.IonSystemBuilder;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -235,14 +236,19 @@ public final class _Private_CoverageWriter
         Path prefix = null;
         for (SourceName sourceName : sourceNames)
         {
-            Path path = sourceName.getFile().getCanonicalFile().toPath();
-            Path parent = path.getParent();
-            if (prefix == null)
+            // Skip URL-based sources.
+            File file = sourceName.getFile();
+            if (file != null)
             {
-                prefix = parent;
-            }
-            else {
-                prefix = commonPrefix(prefix, parent);
+                Path path   = file.getCanonicalFile().toPath();
+                Path parent = path.getParent();
+                if (prefix == null)
+                {
+                    prefix = parent;
+                }
+                else {
+                    prefix = commonPrefix(prefix, parent);
+                }
             }
         }
         return prefix == null ? 0 : prefix.getNameCount();
@@ -256,9 +262,15 @@ public final class _Private_CoverageWriter
 
         for (SourceName sourceName : sourceNames)
         {
-            Path path = sourceName.getFile().getCanonicalFile().toPath();
-            Path shorterPath = path.subpath(prefixLen, path.getNameCount());
-            myRelativeNamesForSources.put(sourceName, shorterPath.toString());
+            // TODO Determine this on demand, it's only needed twice per source.
+            //      so this code is more complicated than its worth.
+            File file = sourceName.getFile();
+            if (file != null)
+            {
+                Path path        = file.getCanonicalFile().toPath();
+                Path shorterPath = path.subpath(prefixLen, path.getNameCount());
+                myRelativeNamesForSources.put(sourceName, shorterPath.toString());
+            }
         }
     }
 
@@ -417,13 +429,19 @@ public final class _Private_CoverageWriter
         coverageState = covered;
     }
 
+    private InputStream readSource(SourceName source)
+        throws IOException
+    {
+        URL url = source.getUrl();
+        if (url != null) return url.openStream();
+
+        return Files.newInputStream(source.getFile().toPath());
+    }
 
     private void renderSource(HtmlWriter sourceHtml,
                               SourceName name)
         throws IOException
     {
-        File sourceFile = name.getFile();
-
         sourceHtml.renderHeadWithInlineCss("Fusion Code Coverage", CSS);
         {
             sourceHtml.append("<h1>");
@@ -434,8 +452,19 @@ public final class _Private_CoverageWriter
                 sourceHtml.append(id.absolutePath());
                 sourceHtml.append("</h1>\n");
 
-                String path = sourceFile.getAbsolutePath();
                 sourceHtml.append("at ");
+
+                String path;
+                File file = name.getFile();
+                if (file != null)
+                {
+                    path = file.getAbsolutePath();
+                }
+                else
+                {
+                    // TODO improve this rendering
+                    path = name.getUrl().toExternalForm();
+                }
                 sourceHtml.append(sourceHtml.escapeString(path));
             }
             else
@@ -455,12 +484,13 @@ public final class _Private_CoverageWriter
         sourceHtml.append("\n<hr/>\n");
         sourceHtml.append("<pre>");
 
-        try (InputStream myIonBytes = new FileInputStream(sourceFile))
+        // Copy the document in chunks separated by coverage state changes.
+        // At each change, we insert appropriate HTML <span> markup.
+        try (InputStream ionBytes = readSource(name))
         {
             myIonBytesRead = 0;
 
-            try (IonReader ionReader =
-                    mySystem.newReader(new FileInputStream(sourceFile)))
+            try (IonReader ionReader = mySystem.newReader(readSource(name)))
             {
                 SpanProvider spanProvider =
                     ionReader.asFacet(SpanProvider.class);
@@ -485,7 +515,7 @@ public final class _Private_CoverageWriter
                     {
                         boolean covered =
                             myDatabase.locationCovered(coverageLoc);
-                        setCoverageState(sourceHtml, myIonBytes, spanProvider,
+                        setCoverageState(sourceHtml, ionBytes, spanProvider,
                                          covered);
                         locationIndex++;
 
@@ -513,7 +543,7 @@ public final class _Private_CoverageWriter
                     : "Not all locations were counted";
 
                 // Copy the rest of the Ion source.
-                copySourceThroughOffset(sourceHtml, myIonBytes, Long.MAX_VALUE);
+                copySourceThroughOffset(sourceHtml, ionBytes, Long.MAX_VALUE);
 
                 sourceHtml.append("</span>");
             }
@@ -529,7 +559,23 @@ public final class _Private_CoverageWriter
 
     private String relativeName(SourceName name)
     {
-        return myRelativeNamesForSources.get(name) + ".html";
+        String resource;
+        if (name.getFile() != null)
+        {
+            resource = myRelativeNamesForSources.get(name);
+        }
+        else
+        {
+            URL url = name.getUrl();
+            assert (url.getProtocol().equalsIgnoreCase("jar"));
+            String path = url.getPath();
+            int    bang = path.indexOf("!/");
+            assert bang > 1;
+            resource = path.substring(bang + 2);
+            assert !resource.isEmpty();
+            assert !resource.startsWith("/");
+        }
+        return resource + ".html";
     }
 
 

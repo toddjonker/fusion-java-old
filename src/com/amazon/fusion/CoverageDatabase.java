@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -105,7 +106,10 @@ class CoverageDatabase
      * Records a Fusion repository that was used by a runtime while collecting
      * coverage data.
      * The coverage analyzer uses these to synthesize File repositories
-     * in order to discover modules.
+     * in order to discover modules that would have been instrumented but were
+     * never loaded.
+     * <p>
+     * TODO: This mechanism should be enhanced to support Jar repositories.
      *
      * @param repoDir must not be null.
      */
@@ -127,8 +131,9 @@ class CoverageDatabase
      */
     boolean locationIsRecordable(SourceLocation loc)
     {
+        // We can record a location with either a file or a URL.
         SourceName name = loc.getSourceName();
-        return name != null && name.getFile() != null;
+        return name != null && (name.getFile() != null || name.getUrl() != null);
     }
 
 
@@ -234,6 +239,7 @@ class CoverageDatabase
     private void writeRepositories(IonWriter iw)
         throws IOException
     {
+        iw.addTypeAnnotation("Recorded repositories");
         iw.stepIn(IonType.LIST);
         {
             for (File f : myRepositories)
@@ -251,8 +257,18 @@ class CoverageDatabase
     {
         iw.stepIn(STRUCT);
         {
-            iw.setFieldName("file");
-            iw.writeString(name.getFile().getPath());
+            File file = name.getFile();
+            if (file != null)
+            {
+                iw.setFieldName("file");
+                iw.writeString(file.getPath());
+            }
+            else
+            {
+                URL url = name.getUrl();
+                iw.setFieldName("url");
+                iw.writeString(url.toExternalForm());
+            }
 
             ModuleIdentity id = name.getModuleIdentity();
             if (id != null)
@@ -326,7 +342,10 @@ class CoverageDatabase
         FusionUtils.createParentDirs(myCoverageFile);
         try (OutputStream out = new FileOutputStream(myCoverageFile))
         {
-            try (IonWriter iw = IonTextWriterBuilder.minimal().build(out))
+            IonTextWriterBuilder builder =
+                IonTextWriterBuilder.minimal()
+                                    .withWriteTopLevelValuesOnNewLines(true);
+            try (IonWriter iw = builder.build(out))
             {
                 writeRepositories(iw);
 
@@ -366,8 +385,9 @@ class CoverageDatabase
         assert in.getType() == STRUCT;
         in.stepIn();
         {
-            String file = null;
-            ModuleIdentity id = null;
+            String file   = null;
+            URL    url    = null;
+            String module = null;
 
             while (in.next() != null)
             {
@@ -375,16 +395,20 @@ class CoverageDatabase
 
                 switch (in.getFieldName())
                 {
+                    // TODO Defend against repeated fields.
                     case "file":
                     {
                         file = path;
                         break;
                     }
+                    case "url":
+                    {
+                        url = new URL(path);
+                        break;
+                    }
                     case "module":
                     {
-                        // TODO I'm too lazy to handle out-of-order fields.
-                        assert file != null;
-                        id = ModuleIdentity.forAbsolutePath(path);
+                        module = path;
                         break;
                     }
                     default:
@@ -395,12 +419,23 @@ class CoverageDatabase
                 }
             }
 
-            if (id != null)
+            if (module != null)
             {
-                name = SourceName.forModule(id, new File(file));
+                ModuleIdentity id = ModuleIdentity.forAbsolutePath(module);
+                if (file != null)
+                {
+                    name = SourceName.forModule(id, new File(file));
+                }
+                else
+                {
+                    assert url != null;
+                    name = SourceName.forUrl(id, url);
+                }
             }
             else
             {
+                // Without a module ID, this must've been a file-system script.
+                assert file != null && url == null;
                 name = SourceName.forFile(file);
             }
         }
