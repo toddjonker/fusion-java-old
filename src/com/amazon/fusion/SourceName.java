@@ -3,6 +3,7 @@
 package com.amazon.fusion;
 
 import java.io.File;
+import java.net.URL;
 
 /**
  * Identifies a source of Fusion code or other data: a file, URL, <em>etc.</em>
@@ -91,7 +92,17 @@ public class SourceName
         return null;
     }
 
+    URL getUrl()
+    {
+        return null;
+    }
 
+    /**
+     * It is not guaranteed that the module declaration is the only content of
+     * the file or URL.
+     * The resource could be a script with several modules inside, and modules
+     * declarations will eventually nest.
+     */
     ModuleIdentity getModuleIdentity()
     {
         return null;
@@ -178,5 +189,41 @@ public class SourceName
     {
         assert sourceFile != null;
         return new ModuleSourceName(id, sourceFile);
+    }
+
+
+    //=========================================================================
+
+
+    /**
+     * Identifies a data source using a URL.
+     */
+    private static class UrlSourceName
+        extends SourceName
+    {
+        private final ModuleIdentity myId;
+        private final URL            myUrl;
+
+        private UrlSourceName(ModuleIdentity id, URL url)
+        {
+            super(id + " (at " + url.toExternalForm() + ")");
+            myId  = id;
+            myUrl = url;
+        }
+
+        @Override
+        URL getUrl() { return myUrl; }
+
+        @Override
+        ModuleIdentity getModuleIdentity() { return myId; }
+    }
+
+
+    /**
+     * NOT FOR APPLICATION USE
+     */
+    static SourceName forUrl(ModuleIdentity id, URL url)
+    {
+        return new UrlSourceName(id, url);
     }
 }

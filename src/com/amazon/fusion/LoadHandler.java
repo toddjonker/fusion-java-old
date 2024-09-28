@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2022 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2012-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -190,6 +190,9 @@ final class LoadHandler
             wrapModuleIdentifierWithKernelBindings(eval, moduleDeclaration);
 
         Evaluator bodyEval = eval;
+
+        // TODO Jar-bundled modules won't have a directory, so `load` with
+        //      relative paths won't be able to access sibling resources.
         String dirPath = loc.parentDirectory();
         if (dirPath != null)
         {

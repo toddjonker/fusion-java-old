@@ -6,6 +6,8 @@ import com.amazon.ion.IonReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 
 /**
@@ -49,6 +51,13 @@ abstract class ModuleLocation
         throws IOException;
 
 
+    /**
+     * Returns the directory (if any) containing the module.  This is used to
+     * set the load-relative-directory when evaluating a module declaration.
+     * <p>
+     * At present, this doesn't work for Jar-bundled resources.
+     * Perhaps this mechanism should use URLs instead of Strings.
+     */
     String parentDirectory()
     {
         return null;
@@ -73,6 +82,30 @@ abstract class ModuleLocation
     }
 
 
+    static ModuleLocation forUrl(ModuleIdentity id, URL url)
+    {
+        // TODO We may want to handle jar: URLs specially, so we can distinguish
+        //  the Jar's file-system path and the internal resource path.
+
+        return url.getProtocol().equals("file")
+                   ? new FileModuleLocation(id, urlToFile(url))
+                   : new UrlModuleLocation(id, url);
+    }
+
+
+    private static File urlToFile(URL url)
+    {
+        try
+        {
+            return new File(url.toURI());
+        }
+        catch (URISyntaxException e)
+        {
+            throw new RuntimeException("Malformed `file:` URL", e);
+        }
+    }
+
+
     private static final class IonReaderModuleLocation
         extends ModuleLocation
     {
@@ -92,7 +125,7 @@ abstract class ModuleLocation
     }
 
 
-    abstract static class InputStreamModuleLocation
+    private abstract static class InputStreamModuleLocation
         extends ModuleLocation
     {
         InputStreamModuleLocation(SourceName name)
@@ -145,6 +178,23 @@ abstract class ModuleLocation
         String parentDirectory()
         {
             return sourceName().getFile().getParentFile().getAbsolutePath();
+        }
+    }
+
+
+    private static final class UrlModuleLocation
+        extends InputStreamModuleLocation
+    {
+        public UrlModuleLocation(ModuleIdentity id, URL url)
+        {
+            super(SourceName.forUrl(id, url));
+        }
+
+        @Override
+        InputStream open()
+            throws IOException
+        {
+            return sourceName().getUrl().openStream();
         }
     }
 }

@@ -3,10 +3,8 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.GlobalState.FUSION_SOURCE_EXTENSION;
-import com.amazon.fusion.ModuleLocation.InputStreamModuleLocation;
 import com.amazon.fusion.util.function.Predicate;
-import java.io.IOException;
-import java.io.InputStream;
+import java.net.URL;
 
 final class ClassLoaderModuleRepository
     extends ModuleRepository
@@ -23,29 +21,14 @@ final class ClassLoaderModuleRepository
         throws FusionException
     {
         String path = id.absolutePath();
-        final String fileName =
+        final String resourceName =
             "/FUSION-REPO" + path + FUSION_SOURCE_EXTENSION;
 
-        if (getClass().getResource(fileName) != null)
-        {
-            // TODO Maybe not the best output this way.
-            SourceName myName =
-                SourceName.forDisplay(id + " (at classpath:" + fileName + ")");
+        // The protocol could be a jar: or file: (at least!)
+        URL url = getClass().getResource(resourceName);
+        if (url == null) return null;
 
-            ModuleLocation loc = new InputStreamModuleLocation(myName)
-            {
-                @Override
-                InputStream open()
-                    throws IOException
-                {
-                    return getClass().getResourceAsStream(fileName);
-                }
-            };
-
-            return loc;
-        }
-
-        return null;
+        return ModuleLocation.forUrl(id, url);
     }
 
 
@@ -55,5 +38,7 @@ final class ClassLoaderModuleRepository
         throws FusionException
     {
         // Nothing to do. We can't introspect the classloader.
+        // TODO If the URL points to a Jar, we may be able to read its entries.
+        //   Or, perhaps write a manifest/index into the repo root at build time.
     }
 }
