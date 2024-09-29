@@ -346,7 +346,9 @@ public final class _Private_CoverageWriter
 
                         SourceName prior = myNamesForFiles.put(f, sourceName);
                         assert prior == null || prior == sourceName :
-                            "SourceName instance has changed for file " + f;
+                            "SourceName instance has changed for file " + f +
+                                "\nThis can happen if you `load` a module's file " +
+                                "within a registered repository.";
                     }
                 }
             }
@@ -637,6 +639,7 @@ public final class _Private_CoverageWriter
 
             if (name != null)
             {
+                // TODO Exclude the common prefix when key is a script File.
                 indexHtml.append("<a href=\"" + relativeName(name) + "\">");
                 indexHtml.append(key.toString());
                 indexHtml.append("</a>");

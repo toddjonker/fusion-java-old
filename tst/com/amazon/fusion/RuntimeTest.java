@@ -52,8 +52,8 @@ public class RuntimeTest
         loadFile("tst-data/trivialDefine.fusion");
         assertEval(3328, "x");
 
-        // Test eval'ing a module
-        loadFile(ftstRepositoryDirectory().resolve("src/grain.fusion"));
+        // Test loading a script with top-level modules
+        loadFile(ftstScriptDirectory().resolve("topmodules.test.fusion"));
     }
 
 
