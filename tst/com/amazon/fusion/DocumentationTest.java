@@ -1,14 +1,12 @@
-// Copyright (c) 2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2019-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeThat;
 import com.gargoylesoftware.htmlunit.IncorrectnessListener;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HTMLParserListener;
@@ -28,14 +26,6 @@ public class DocumentationTest
     @Before
     public void initWebClient()
     {
-        // Unfortunately, available versions of HTMLUnit (and dependencies) are
-        // built-for Java 8, and it would be a lot of work to untangle that.
-        // Developers will most likely be using it locally, so these tests will
-        // run there.
-        String jre = System.getProperty("java.specification.version");
-        assumeThat(jre, not("1.7"));
-
-
         myWebClient = new WebClient();
 
         myWebClient.setIncorrectnessListener(new IncorrectnessListener()
