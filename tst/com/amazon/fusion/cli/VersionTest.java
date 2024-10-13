@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2019-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -38,11 +38,7 @@ public class VersionTest
     }
 
 
-    /**
-     * Fails due to issue:IONJAVA-600
-     * aka https://github.com/amzn/ion-java/issues/240
-     */
-    @Test @Ignore
+    @Test
     public void testIonVersion()
         throws Exception
     {
