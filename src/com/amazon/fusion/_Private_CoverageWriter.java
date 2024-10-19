@@ -301,9 +301,7 @@ public final class _Private_CoverageWriter
         // modules that are not used and don't appear in the database.
         for (File f : myDatabase.getRepositories())
         {
-            // TODO FUSION-214 Push this into the repo impl
-            File src = new File(f, "src");
-            ModuleRepository repo = new FileSystemModuleRepository(src);
+            ModuleRepository repo = new FileSystemModuleRepository(f);
             repo.collectModules(myConfig.myModuleSelector, consumer);
         }
 

@@ -977,9 +977,7 @@ public class FusionRuntimeBuilder
     {
         if (myBootstrapRepository != null)
         {
-            // TODO FUSION-214 Push this into the repo impl
-            File src = new File(myBootstrapRepository, "src");
-            repos.add(new FileSystemModuleRepository(src));
+            repos.add(new FileSystemModuleRepository(myBootstrapRepository));
         }
     }
 
@@ -1007,12 +1005,7 @@ public class FusionRuntimeBuilder
         {
             for (File f : myRepositoryDirectories)
             {
-                // TODO FUSION-214 Push this into the repo impl
-                File src = new File(f, "src");
-                if (src.isDirectory())
-                {
-                    repos.add(new FileSystemModuleRepository(src));
-                }
+                repos.add(new FileSystemModuleRepository(f));
             }
         }
 

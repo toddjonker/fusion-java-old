@@ -12,6 +12,7 @@ final class FileSystemModuleRepository
     extends ModuleRepository
 {
     private final File myRepoDir;
+    private final File mySrcDir;
 
     /**
      * @param repoDir must be absolute.
@@ -20,6 +21,9 @@ final class FileSystemModuleRepository
     {
         assert repoDir.isAbsolute();
         myRepoDir = repoDir;
+
+        File src = new File(repoDir, "src");
+        mySrcDir = (src.isDirectory() ? src : null);
     }
 
 
@@ -32,12 +36,13 @@ final class FileSystemModuleRepository
 
     @Override
     ModuleLocation locateModule(Evaluator eval, final ModuleIdentity id)
-        throws FusionException
     {
+        if (mySrcDir == null) return null;
+
         String path = id.absolutePath();
         String fileName = path.substring(1) + FUSION_SOURCE_EXTENSION;
 
-        final File libFile = new File(myRepoDir, fileName);
+        final File libFile = new File(mySrcDir, fileName);
         if (libFile.exists())
         {
             return ModuleLocation.forFile(id, libFile);
@@ -109,6 +114,9 @@ final class FileSystemModuleRepository
                         Consumer<ModuleIdentity>  results)
         throws FusionException
     {
-        collectModules(selector, null, myRepoDir, results);
+        if (mySrcDir != null)
+        {
+            collectModules(selector, null, mySrcDir, results);
+        }
     }
 }
