@@ -11,7 +11,6 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -932,7 +931,11 @@ public class FusionRuntimeBuilder
                 // Register the active repositories with the collector.
                 // These are persisted in the coverage.ion file, so we can later
                 // scan them and identify files that haven't been covered.
-                c.noteRepository(b.getBootstrapRepository());
+                if (b.getBootstrapRepository() != null)
+                {
+                    c.noteRepository(b.getBootstrapRepository());
+                }
+
                 if (b.myRepositoryDirectories != null)
                 {
                     for (File f : b.myRepositoryDirectories)
@@ -973,15 +976,6 @@ public class FusionRuntimeBuilder
     }
 
 
-    private void addBootstrapRepository(List<ModuleRepository> repos)
-    {
-        if (myBootstrapRepository != null)
-        {
-            repos.add(new FileSystemModuleRepository(myBootstrapRepository));
-        }
-    }
-
-
     /**
      * NOT PUBLIC!
      *
@@ -999,7 +993,10 @@ public class FusionRuntimeBuilder
 
         // This supports legacy cases commingling user code with the bootstrap
         // and that only configure the bootstrap.
-        addBootstrapRepository(repos);
+        if (myBootstrapRepository != null)
+        {
+            repos.add(new FileSystemModuleRepository(myBootstrapRepository));
+        }
 
         if (myRepositoryDirectories != null)
         {
@@ -1007,11 +1004,6 @@ public class FusionRuntimeBuilder
             {
                 repos.add(new FileSystemModuleRepository(f));
             }
-        }
-
-        if (repos.isEmpty())
-        {
-            throw new IllegalStateException("No repositories have been declared");
         }
 
         return repos.toArray(new ModuleRepository[0]);
