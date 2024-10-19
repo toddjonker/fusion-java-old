@@ -18,6 +18,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import com.amazon.ion.IonCatalog;
+import com.amazon.ion.system.SimpleCatalog;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -25,8 +27,6 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import com.amazon.ion.IonCatalog;
-import com.amazon.ion.system.SimpleCatalog;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -77,11 +77,13 @@ public class FusionRuntimeBuilderTest
         FusionRuntimeBuilder b = orig.copy();
         invoke(b, setter, newValue);
         assertEquals(expectedNormalizedValue, invoke(b, getter));
+        assertEquals(defaultValue, invoke(orig, getter));  // No aliasing w/orig
         assertCopiesAreEqual(b);
 
         FusionRuntimeBuilder c = orig.copy();
         assertSame(c, invoke(c, wither, newValue));
         assertEqualProperties(b, c);
+        assertEquals(defaultValue, invoke(orig, getter));  // No aliasing w/orig
         assertCopiesAreEqual(c);
 
         // Immutable builder is copied on modification
