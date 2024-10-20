@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2019-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -53,7 +53,8 @@ public class CliTestCase
     {
         ArrayList<String> join = new ArrayList<>();
 
-        join.add("--bootstrapRepository");
+        // This is needed to run tests in the IDE.
+        join.add("--repositories");
         join.add("fusion");
 
         join.addAll(Arrays.asList(commandLine));

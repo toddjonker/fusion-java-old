@@ -2,7 +2,6 @@
 
 package com.amazon.fusion.cli;
 
-import static com.amazon.fusion.FusionRuntimeBuilder.PROPERTY_BOOTSTRAP_REPOSITORY;
 import com.amazon.fusion.FusionException;
 import com.amazon.fusion.FusionRuntime;
 import com.amazon.fusion.FusionRuntimeBuilder;
@@ -17,6 +16,8 @@ import java.util.StringTokenizer;
 
 /**
  * Stores options and data shared by the entire execution sequence.
+ * <p>
+ * The properties here are set via reflection by {@link Command#extractOptions}.
  */
 final class GlobalOptions
 {
@@ -27,13 +28,13 @@ final class GlobalOptions
         + "\n"
         + "--bootstrapRepository DIR\n"
         + "\n"
-        + "  Path to a Fusion bootstrap repository. The JVM system property\n"
-        + "  " + PROPERTY_BOOTSTRAP_REPOSITORY + " has the same effect.\n"
+        + "  DEPRECATED: a bootstrap repository is no longer needed.\n"
+        + "  If used, the DIR is instead treated as the first user repository.\n"
         + "\n"
         + "--repositories DIR" + File.pathSeparator + "DIR...\n"
         + "\n"
-        + "  Additional user repositories. This option can be given more than once and\n"
-        + "  all DIRs will be used.\n"
+        + "  Repositories of Fusion modules and resources. This option can be given more\n"
+        + "  than once and all DIRs will be used.\n"
         + "\n"
         + "--catalogs CATALOG" + File.pathSeparator + "CATALOG...\n"
         + "\n"
@@ -80,6 +81,7 @@ final class GlobalOptions
 
     public void setBootstrapRepository(String path)
     {
+        myStderr.println("WARNING: The --boostrapRepository option is deprecated.");
         myBootstrapPath = path;
     }
 
@@ -93,7 +95,7 @@ final class GlobalOptions
         {
             String token = tokenizer.nextToken().trim();
 
-            if (token.length() != 0)
+            if (!token.isEmpty())
             {
                 File file = new File(token);
                 files.add(file);
@@ -140,7 +142,7 @@ final class GlobalOptions
 
             try
             {
-                builder.setBootstrapRepository(dir);
+                builder.addRepositoryDirectory(dir);
             }
             catch (IllegalArgumentException e)
             {

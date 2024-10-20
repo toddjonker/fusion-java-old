@@ -27,7 +27,7 @@ extensions will probably break when that happens.
 
 <h2>Embedding Fusion</h2>
 
-The primary purpose of these APIs is to enable embedding of the Fusion
+The primary purpose of these APIs is to enable embedding the Fusion
 evaluator into Java applications. The central component for doing so is the
 {@link com.amazon.fusion.FusionRuntime}. The runtime is a heavyweight object,
 and the vast majority of applications should create exactly one runtime at
@@ -45,7 +45,7 @@ Here's a typical processing sequence:
 
     FusionRuntime runtime =
         FusionRuntimeBuilder.standard()
-            .withBootstrapRepository(fusionJavaRepository)
+            .withRepositoryDirectory(libraryRepository)
             .withRepositoryDirectory(projectRepository)
             .build();
 
