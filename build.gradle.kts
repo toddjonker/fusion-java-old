@@ -19,7 +19,11 @@ dependencies {
     //  generate their docs.  That should be handled by a plugin instead.
     implementation("org.markdownj:markdownj:0.3.0-1.0.2b4")
 
-    testImplementation("junit:junit:4.13.2")
+    testImplementation(platform("org.junit:junit-bom:5.11.3"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.vintage:junit-vintage-engine")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
     testImplementation("org.hamcrest:hamcrest-library:1.3")
     testImplementation("net.sourceforge.htmlunit:htmlunit:2.20")
 }
@@ -91,6 +95,8 @@ tasks.test {
 
     // com.amazon.fusion.ClassLoaderModuleRepositoryTest uses ftst-repo.jar.
     dependsOn(ftstRepo)
+
+    useJUnitPlatform()
 
     // Collect Fusion coverage data IFF a report is being generated.
     mustRunAfter(fcovConfigure)
