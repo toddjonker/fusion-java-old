@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2023 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2013-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion;
 
@@ -26,7 +26,6 @@ final class FusionSymbol
 
 
     abstract static class BaseSymbol
-        // WORKAROUND: Static import causes compile failure on jdk1.7.0_80
         extends FusionText.BaseText
     {
         static final BaseSymbol[] EMPTY_ARRAY = new BaseSymbol[0];

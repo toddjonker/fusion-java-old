@@ -2496,7 +2496,7 @@ public final class FusionNumber
      * notation defined for {@code BigDecimal}.
      *
      * @see <a href="https://amazon-ion.github.io/ion-docs/docs/spec.html#real-numbers">Ion specification</a>
-     * @see <a href="http://download.java.net/jdk7/archive/b123/docs/api/java/math/BigDecimal.html#BigDecimal%28java.lang.String%29">
+     * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(java.lang.String)">
      *   BigDecimal API reference</a>
      *
      **/
