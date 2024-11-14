@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2019-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -21,8 +21,9 @@ public class CoverTest
 
 
     private File plainFile()
+        throws Exception
     {
-        File f = new File("Config");
+        File f = myFolder.newFile();
         assert(f.isFile());
         return f;
     }
