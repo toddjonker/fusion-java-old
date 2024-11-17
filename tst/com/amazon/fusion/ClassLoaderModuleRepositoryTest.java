@@ -4,15 +4,15 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionIo.read;
 import static com.amazon.fusion.FusionSexp.isPair;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.amazon.ion.IonReader;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ClassLoaderModuleRepositoryTest
     extends CoreTestCase

@@ -4,7 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionClob.isClob;
 import static com.amazon.fusion.FusionLob.isLob;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *

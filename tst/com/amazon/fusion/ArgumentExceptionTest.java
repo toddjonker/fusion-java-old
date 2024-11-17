@@ -2,9 +2,8 @@
 
 package com.amazon.fusion;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests that redacted exceptions do not contain actual arguments.

@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.TailCallTest.STACK_OVERFLOW_DEPTH;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  *
