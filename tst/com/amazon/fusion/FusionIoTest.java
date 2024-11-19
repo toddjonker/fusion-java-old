@@ -32,11 +32,10 @@ public class FusionIoTest
     }
 
 
-    @Test(expected = ArityFailure.class)
+    @Test
     public void testReadMoreArgs()
-        throws Exception
     {
-        eval("(read \"hi\")");
+        assertEvalThrows(ArityFailure.class,"(read \"hi\")");
     }
 
 

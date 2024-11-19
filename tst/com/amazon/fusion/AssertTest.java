@@ -77,11 +77,10 @@ public class AssertTest
         }
     }
 
-    @Test(expected = ExitException.class)
+    @Test
     public void testAssertFailureWithExitingMessage()
-        throws Exception
     {
-        eval("(assert false (exit))");
+        assertEvalThrows(ExitException.class, "(assert false (exit))");
     }
 
     @Test

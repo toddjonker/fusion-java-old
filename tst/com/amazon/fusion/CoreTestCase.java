@@ -13,6 +13,7 @@ import static com.amazon.fusion.FusionValue.isAnyNull;
 import static com.amazon.fusion.FusionVoid.isVoid;
 import static com.amazon.ion.util.IonTextUtils.printString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import com.amazon.fusion.junit.StdioTestCase;
 import com.amazon.ion.IonContainer;
@@ -544,63 +545,49 @@ public class CoreTestCase
 
     //========================================================================
 
-    <T extends FusionException> T expectFailure(Class<T> klass, String expr)
-            throws Exception
+    <T extends Throwable> T assertEvalThrows(Class<T> klass, String expr)
     {
-        try
-        {
-            eval(expr);
-            fail("Expected exception from " + expr);
-            return null; // Dummy for compiler
-        }
-        catch (Exception e)
-        {
-            if (klass.isInstance(e))
-            {
-                return klass.cast(e);
-            }
-            throw e;
-        }
+        return assertThrows(klass, () -> eval(expr));
     }
 
     void expectFusionExn(String expr)
         throws Exception
     {
-        expectFailure(FusionException.class, expr);
+        assertEvalThrows(FusionException.class, expr);
     }
 
     void expectSyntaxExn(String expr)
         throws Exception
     {
-        expectFailure(SyntaxException.class, expr);
+        assertEvalThrows(SyntaxException.class, expr);
     }
 
 
     void expectUnboundIdentifierExn(String expr)
         throws Exception
     {
-        expectFailure(UnboundIdentifierException.class, expr);
+        assertEvalThrows(UnboundIdentifierException.class, expr);
     }
 
 
     void expectContractExn(String expr)
         throws Exception
     {
-        expectFailure(ContractException.class, expr);
+        assertEvalThrows(ContractException.class, expr);
     }
 
 
     void expectArityExn(String expr)
         throws Exception
     {
-        expectFailure(ArityFailure.class, expr);
+        assertEvalThrows(ArityFailure.class, expr);
     }
 
 
     void expectArgumentExn(String expr, int badArgNum)
         throws Exception
     {
-        ArgumentException e = expectFailure(ArgumentException.class, expr);
+        ArgumentException e = assertEvalThrows(ArgumentException.class, expr);
         assertEquals(badArgNum, e.getBadPos(), "argument #");
     }
 }

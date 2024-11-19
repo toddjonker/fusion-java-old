@@ -16,7 +16,7 @@ public class StackTraceTest
     private void evalForTrace(String code)
         throws Exception
     {
-        FusionException e = expectFailure(FusionException.class, code);
+        FusionException e = assertEvalThrows(FusionException.class, code);
         List<SourceLocation> locations = e.getContextLocations();
         if (locations == null)
         {

@@ -5,9 +5,7 @@ package com.amazon.fusion;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  *
@@ -15,9 +13,6 @@ import org.junit.rules.ExpectedException;
 public class ModuleTest
     extends CoreTestCase
 {
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Before
     public void requires()
         throws FusionException
@@ -40,11 +35,11 @@ public class ModuleTest
 
 
 
-    @Test(expected = ModuleNotFoundException.class)
+    @Test
     public void testBadLanguageSymbolInTopLevelModule()
-        throws Exception
     {
-        eval("(module m '/no_such_module' (define x 1))");
+        assertEvalThrows(ModuleNotFoundException.class,
+                         "(module m '/no_such_module' (define x 1))");
     }
 
     @Test
@@ -54,52 +49,56 @@ public class ModuleTest
         expectSyntaxExn("(module m (quote 'no_such_module') (define x 1))");
     }
 
-    @Test(expected = ModuleNotFoundException.class)
+    @Test
     public void testBadLanguageStringInTopLevelModule()
-        throws Exception
     {
-        eval("(module m \"no_such_module\" (define x 1))");
+        assertEvalThrows(ModuleNotFoundException.class,
+                         "(module m \"no_such_module\" (define x 1))");
     }
 
-    @Test(expected = ModuleNotFoundException.class)
+    @Test
     public void testRelativeLanguageStringInTopLevelModule()
-        throws Exception
     {
         // TODO FUSION-151 this isn't well-defined yet and should be rejected.
-        eval("(module m \"fusion\" (define x 1))");
+        assertEvalThrows(ModuleNotFoundException.class,
+                         "(module m \"fusion\" (define x 1))");
     }
 
-    @Test(expected = ModuleNotFoundException.class)
+    @Test
     public void testTopLevelLanguageInTopLevelModule()
         throws Exception
     {
         eval("(module lang '/fusion/base' true)");
 
         // TODO FUSION-151 this isn't well-defined yet and should be rejected.
-        eval("(module m \"lang\" (define x 1))");
+        assertEvalThrows(ModuleNotFoundException.class,
+                        "(module m \"lang\" (define x 1))");
     }
 
 
 
-    @Test(expected = FusionException.class) // ModuleNotFoundException gets wrapped
+    @Test
     public void testBadLanguageSymbolInRepoModule()
-        throws Exception
     {
-        eval("(require '/module/bad_lang_symbol')");
+        // TODO Root cause is ModuleNotFoundException; find and check it.
+        assertEvalThrows(FusionException.class,
+                         "(require '/module/bad_lang_symbol')");
     }
 
-    @Test(expected = FusionException.class) // ModuleNotFoundException gets wrapped
+    @Test
     public void testBadLanguageSymbolInRepoModule2()
-        throws Exception
     {
-        eval("(require \"/module/bad_lang_symbol\")");
+        // TODO Root cause is ModuleNotFoundException; find and check it.
+        assertEvalThrows(FusionException.class,
+                         "(require \"/module/bad_lang_symbol\")");
     }
 
-    @Test(expected = FusionException.class) // ModuleNotFoundException gets wrapped
+    @Test
     public void testBadQuotedLanguageSymbolInRepoModule()
-        throws Exception
     {
-        eval("(require '/module/bad_quoted_lang_symbol')");
+        // TODO Root cause is ModuleNotFoundException; find and check it.
+        assertEvalThrows(FusionException.class,
+                         "(require '/module/bad_quoted_lang_symbol')");
     }
 
 
@@ -112,34 +111,31 @@ public class ModuleTest
     }
 
 
-    @Test(expected = FusionException.class)
+    @Test
     public void testDuplicateDefinedName()
-        throws Exception
     {
-        eval("(require '/module/duplicate_defined_name')");
-    }
-
-    @Test(expected = FusionException.class)
-    public void testDuplicateImportedName()
-        throws Exception
-    {
-        eval("(require \"/module/duplicate_imported_name\")");
+        assertEvalThrows(FusionException.class,
+                         "(require '/module/duplicate_defined_name')");
     }
 
     @Test
-    public void testDefineImportedName()
-        throws Exception
+    public void testDuplicateImportedName()
     {
-        thrown.expect(AmbiguousBindingFailure.class);
-
-        eval("(require '/module/define_imported_name')");
+        assertEvalThrows(FusionException.class,
+                         "(require \"/module/duplicate_imported_name\")");
     }
 
-    @Test(expected = FusionException.class)
+    @Test
+    public void testDefineImportedName() {
+        assertEvalThrows(AmbiguousBindingFailure.class,
+                         "(require '/module/define_imported_name')");
+    }
+
+    @Test
     public void testImportDefinedName()
-        throws Exception
     {
-        eval("(require '/module/import_defined_name')");
+        assertEvalThrows(FusionException.class,
+                         "(require '/module/import_defined_name')");
     }
 
 
@@ -162,11 +158,11 @@ public class ModuleTest
         expectSyntaxExn("(require (lib \"/fusion/list\"))");
     }
 
-    @Test(expected = FusionException.class)
+    @Test
     public void testRequireNonModule()
-        throws Exception
     {
-        eval("(require \"/nonmodule/trivialDefine\")");
+        assertEvalThrows(FusionException.class,
+                         "(require \"/nonmodule/trivialDefine\")");
     }
 
     @Test

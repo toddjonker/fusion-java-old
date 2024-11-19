@@ -16,7 +16,7 @@ public class TailCallTest
      * stack overflow, otherwise the other tests below are not actually
      * testing anything.  We want to keep that number low so tests run fast.
      */
-    @Test(expected = StackOverflowError.class)
+    @Test
     public void testStackOverflowDepth()
         throws Exception
     {
@@ -29,7 +29,8 @@ public class TailCallTest
         assertEval(10, "(countup 0 10)");
 
         // Force a stack overflow
-        eval("(countup 0 " + STACK_OVERFLOW_DEPTH + ")");
+        assertEvalThrows(StackOverflowError.class,
+                         "(countup 0 " + STACK_OVERFLOW_DEPTH + ")");
     }
 
 

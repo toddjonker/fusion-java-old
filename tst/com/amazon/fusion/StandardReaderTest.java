@@ -4,18 +4,13 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionStruct.unsafeStructSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.amazon.ion.IonReader;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class StandardReaderTest
     extends CoreTestCase
 {
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-
     @Test
     public void testIonSyntaxError()
         throws Exception
@@ -24,9 +19,10 @@ public class StandardReaderTest
 
         // TODO This should be more specific, but SyntaxException is oriented
         // around problems with Fusion syntax forms, not Ion data forms.
-        thrown.expect(FusionErrorException.class);
-        thrown.expectMessage("Error reading /malformed/ion_syntax_error");
-        eval("(require '''/malformed/ion_syntax_error''')");
+        Throwable e =
+            assertEvalThrows(FusionErrorException.class,
+                             "(require '''/malformed/ion_syntax_error''')");
+        assertTrue(e.getMessage().contains("Error reading /malformed/ion_syntax_error"));
     }
 
     @Test
