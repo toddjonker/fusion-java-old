@@ -7,11 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.function.Executable;
 
 public class SandboxTest
     extends CoreTestCase
@@ -20,14 +20,11 @@ public class SandboxTest
     public static final File HELLO_ABSOLUTE = HELLO_RELATIVE.getAbsoluteFile();
 
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    private void expectAccessDenied(String who, File what)
+    private void expectAccessDenied(String who, File what, Executable exec)
     {
         // TODO: be more specific
-        thrown.expect(FusionErrorException.class);
-        thrown.expectMessage(who + ": Access denied to " + what);
+        Throwable e = assertThrows(FusionErrorException.class, exec);
+        assertTrue(e.getMessage().contains(who + ": Access denied to " + what));
     }
 
 
@@ -51,9 +48,7 @@ public class SandboxTest
         throws Exception
     {
         SandboxBuilder b = runtime().makeSandboxBuilder();
-
-        thrown.expect(IllegalStateException.class);
-        b.build();
+        assertThrows(IllegalStateException.class, b::build);
     }
 
 
@@ -74,8 +69,8 @@ public class SandboxTest
             "(with_ion_from_file " + printString(data.getPath()) +
                 "  read)";
 
-        expectAccessDenied("with_ion_from_file", data);
-        sandbox().eval(code);
+        expectAccessDenied("with_ion_from_file", data,
+                           () -> sandbox().eval(code));
     }
 
     @Test
@@ -105,8 +100,7 @@ public class SandboxTest
 
         String code = "(load " + printString(data.getPath()) + ")";
 
-        expectAccessDenied("load", data);
-        sandbox.eval(code);
+        expectAccessDenied("load", data, () -> sandbox.eval(code));
     }
 
 
@@ -128,8 +122,8 @@ public class SandboxTest
     public void testTopLevelLoadFails()
         throws FusionException
     {
-        expectAccessDenied("load", HELLO_RELATIVE);
-        sandbox().load(HELLO_RELATIVE);
+        expectAccessDenied("load", HELLO_RELATIVE,
+                           () -> sandbox().load(HELLO_RELATIVE));
     }
 
     @Test
@@ -203,14 +197,16 @@ public class SandboxTest
         assertEquals("123", stdoutToString());
     }
 
-    @Test(expected = ClassCastException.class)
+    @Test
     public void testFaultyCallToUnsafeProc()
         throws FusionException
     {
         TopLevel sandbox = sandbox();
         sandbox.requireModule("/fusion/unsafe/list");
 
-        sandbox.call("unsafe_list_element", 0, 0);
+        assertThrows(ClassCastException.class,
+                     () -> sandbox.call("unsafe_list_element",
+                                        0, 0));
     }
 
 

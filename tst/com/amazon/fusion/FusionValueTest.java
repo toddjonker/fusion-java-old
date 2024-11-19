@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonValue;
@@ -37,12 +38,13 @@ public class FusionValueTest
         assertSame(null, FusionValue.copyToIonValueMaybe(fv, system()));
     }
 
-    @Test(expected = FusionException.class)
+    @Test
     public void testBadCopyToIonValue()
         throws Exception
     {
         Object fv = eval("(lambda () 12)");
-        FusionValue.copyToIonValue(fv, system());
+        assertThrows(FusionException.class,
+                     () ->  FusionValue.copyToIonValue(fv, system()));
     }
 
     @Test

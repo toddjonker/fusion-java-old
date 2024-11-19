@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import com.amazon.ion.IonInt;
@@ -22,17 +23,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class RuntimeTest
     extends CoreTestCase
 {
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-
     @Test
     public void testModuleInUserRepository()
         throws Exception
@@ -82,20 +77,22 @@ public class RuntimeTest
         assertSame(null, runtime().ionizeMaybe(fv, system()));
     }
 
-    @Test(expected = FusionException.class)
+    @Test
     public void testBadIonizeProcedure()
         throws Exception
     {
         Object fv = eval("(lambda () 12)");
-        runtime().ionize(fv, system());
+        assertThrows(FusionException.class,
+                     () -> runtime().ionize(fv, system()));
     }
 
-    @Test(expected = FusionException.class)
+    @Test
     public void testBadIonizeVoid()
         throws Exception
     {
         Object fv = eval("(void)");
-        runtime().ionize(fv, system());
+        assertThrows(FusionException.class,
+                     () -> runtime().ionize(fv, system()));
     }
 
 
@@ -212,22 +209,22 @@ public class RuntimeTest
         assertEval(1115, "x");
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public void testLoadModuleNullPath()
-        throws Exception
     {
-        topLevel().loadModule(null,
-                              system().newReader(GOOD_MODULE),
-                              SourceName.forDisplay("manual source"));
+        assertThrows(IllegalArgumentException.class,
+                     () -> topLevel().loadModule(null,
+                                                 system().newReader(GOOD_MODULE),
+                                                 SourceName.forDisplay("manual source")));
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public void testLoadModuleBadPath()
-        throws Exception
     {
-        topLevel().loadModule("/a bad path",
-                              system().newReader(GOOD_MODULE),
-                              SourceName.forDisplay("manual source"));
+        assertThrows(IllegalArgumentException.class,
+                     () -> topLevel().loadModule("/a bad path",
+                                                 system().newReader(GOOD_MODULE),
+                                                 SourceName.forDisplay("manual source")));
     }
 
     @Test
@@ -255,11 +252,15 @@ public class RuntimeTest
         SourceName source = SourceName.forDisplay("/path/to/blah");
         String moduleContent = "/* nothing */";
 
-        thrown.expect(SyntaxException.class);
-        thrown.expectMessage(allOf(containsString("no top-level forms"),
-                                   containsString(source.display())));
+        Exception e =
+            assertThrows(SyntaxException.class,
+                         () -> topLevel().loadModule(modulePath,
+                                                     system().newReader(moduleContent),
+                                                     source));
 
-        topLevel().loadModule(modulePath, system().newReader(moduleContent), source);
+        assertThat(e.getMessage(),
+                   allOf(containsString("no top-level forms"),
+                         containsString(source.display())));
     }
 
     @Test
@@ -270,11 +271,15 @@ public class RuntimeTest
         SourceName source = SourceName.forDisplay("/path/to/blah");
         String moduleContent = "(module m '/fusion' true) extra_data";
 
-        thrown.expect(SyntaxException.class);
-        thrown.expectMessage(allOf(containsString("more than one top-level form"),
-                                   containsString(source.display())));
+        Exception e =
+            assertThrows(SyntaxException.class,
+                         () -> topLevel().loadModule(modulePath,
+                                                     system().newReader(moduleContent),
+                                                     source));
 
-        topLevel().loadModule(modulePath, system().newReader(moduleContent), source);
+        assertThat(e.getMessage(),
+                   allOf(containsString("more than one top-level form"),
+                         containsString(source.display())));
     }
 
 
@@ -286,12 +291,16 @@ public class RuntimeTest
         SourceName source = SourceName.forDisplay("/path/to/blah");
         String moduleContent = " (if true 1 2)";
 
-        thrown.expect(SyntaxException.class);
-        thrown.expectMessage(allOf(containsString("Top-level form isn't (module ...)"),
-                                   containsString("1st line, 2nd column"),
-                                   containsString(source.display())));
+        Exception e =
+            assertThrows(SyntaxException.class,
+                         () -> topLevel().loadModule(modulePath,
+                                                     system().newReader(moduleContent),
+                                                     source));
 
-        topLevel().loadModule(modulePath, system().newReader(moduleContent), source);
+        assertThat(e.getMessage(),
+                   allOf(containsString("Top-level form isn't (module ...)"),
+                         containsString("1st line, 2nd column"),
+                         containsString(source.display())));
     }
 
 
@@ -343,9 +352,11 @@ public class RuntimeTest
 
         // Same data should fail w/o symtab
         assertSame(symtab, catalog.removeTable("flatware", 1));
-
-        thrown.expect(FusionException.class);
-        thrown.expectMessage("$11");
-        topLevel().call("with_ion_from_lob", encodedData, readProc);
+        Throwable e =
+            assertThrows(FusionException.class,
+                         () -> topLevel().call("with_ion_from_lob",
+                                               encodedData,
+                                               readProc));
+        assertTrue(e.getMessage().contains("$11"));
     }
 }

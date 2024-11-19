@@ -6,6 +6,7 @@ import static com.amazon.fusion.util.hamt.MultiHashTrie.empty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.amazon.fusion.util.hamt.TransformTestCase.IncrementXform;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -40,8 +41,8 @@ public class EmptyHashTrieTest
     @Override
     public void withoutKeysRejectsNullKey()
     {
-        thrown.expect(NullPointerException.class);
-        simpleSubject().withoutKeys(1, null, 3);
+        assertThrows(NullPointerException.class,
+                     () -> simpleSubject().withoutKeys(1, null, 3));
     }
 
     @Test

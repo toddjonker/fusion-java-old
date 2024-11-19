@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.BitMappedNode;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Changes;
@@ -419,10 +420,11 @@ public class HashArrayMappedTrieTest
         assertSame(empty, node);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void emptyNodeWithoutKeysRequiresNonNullArray()
     {
-        empty().withoutKeys(null, new Changes());
+        assertThrows(NullPointerException.class,
+                     () -> empty().withoutKeys(null, new Changes()));
     }
 
     @Test
@@ -1269,10 +1271,15 @@ public class HashArrayMappedTrieTest
         assertEquals(0, changes.keyCountDelta());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void fromArraysRequiresEqualLengthArrays()
     {
-        fromArrays(new Object[] { 1 }, new Object[] { 1, 2 }, new Changes());
+        Changes changes = new Changes();
+
+        assertThrows(IllegalArgumentException.class,
+                     () -> fromArrays(new Object[]{ 1 },
+                                      new Object[]{ 1, 2 },
+                                      changes));
     }
 
     @Test
@@ -1350,10 +1357,11 @@ public class HashArrayMappedTrieTest
     // subclass (as well as EmptyNode above, since it might have a shortcut
     // override).
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void withoutKeysRequiresNonNullArray()
     {
-        new FlatNode().withoutKeys(null, new Changes());
+        assertThrows(NullPointerException.class,
+                     () -> new FlatNode().withoutKeys(null, new Changes()));
     }
 
     @Test

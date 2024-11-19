@@ -2,7 +2,7 @@
 
 package com.amazon.fusion.junit;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -93,7 +93,7 @@ public class Reflect
             Object actualPropertyValue   = invoke(actual,   readMethod);
 
             String message = "property " + prop.getName() + " isn't equal";
-            assertEquals(message, expectedPropertyValue, actualPropertyValue);
+            assertEquals(expectedPropertyValue, actualPropertyValue, message);
         }
     }
 }

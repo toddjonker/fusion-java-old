@@ -12,22 +12,17 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.system.IonReaderBuilder;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class NamespaceTest
     extends CoreTestCase
 {
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-
     @Before
     public void requires()
         throws FusionException
@@ -344,9 +339,10 @@ public class NamespaceTest
         top0.requireModule("/grain");
         top1.requireModule("/grain");
 
-        thrown.expect(ContractException.class);
-        thrown.expectMessage("Destination registry already has a module with identity /grain");
-        top1.attachModule(top0, "/grain");
+        Throwable e =
+            assertThrows(ContractException.class,
+                         () -> top1.attachModule(top0, "/grain"));
+        assertTrue(e.getMessage().contains("Destination registry already has a module with identity /grain"));
     }
 
 
@@ -363,8 +359,9 @@ public class NamespaceTest
 
         top0.requireModule("/grain"); // which requires /fusion
 
-        thrown.expect(ContractException.class);
-        thrown.expectMessage("Destination registry already has a module with identity /fusion");
-        top1.attachModule(top0, "/grain");
+        Throwable e =
+            assertThrows(ContractException.class,
+                         () -> top1.attachModule(top0, "/grain"));
+        assertTrue(e.getMessage().contains("Destination registry already has a module with identity /fusion"));
     }
 }

@@ -3,18 +3,13 @@
 package com.amazon.fusion.junit;
 
 import static com.amazon.fusion.junit.Reflect.assertEqualProperties;
-import org.junit.ComparisonFailure;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 
 public class ReflectTest
 {
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-
     private static class Bean
     {
         private String s = "default";
@@ -51,8 +46,8 @@ public class ReflectTest
 
         a.setS("foo");
 
-        thrown.expect(ComparisonFailure.class);
-        thrown.expectMessage("property s");
-        assertEqualProperties(a, b);
+        Throwable e = assertThrows(AssertionError.class,
+                                   () -> assertEqualProperties(a, b));
+        assertTrue(e.getMessage().contains("property s"));
     }
 }

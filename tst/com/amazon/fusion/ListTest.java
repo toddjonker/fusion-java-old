@@ -7,13 +7,13 @@ import static com.amazon.fusion.FusionList.unsafeListElement;
 import static com.amazon.fusion.FusionList.unsafeListSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.amazon.fusion.FusionList.UnsafeListSizeProc;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonValue;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  *
@@ -21,8 +21,6 @@ import org.junit.rules.ExpectedException;
 public class ListTest
     extends CoreTestCase
 {
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void listTestBegin()
@@ -336,8 +334,12 @@ public class ListTest
         Evaluator eval = evaluator();
         Object nullList = FusionList.nullList(eval);
 
-        thrown.expect(ArgumentException.class);
-        thrown.expectMessage("non-null list");
-        checkActualListArg(eval, new UnsafeListSizeProc(), 0, nullList);
+        Throwable e =
+            assertThrows(ArgumentException.class,
+                         () -> checkActualListArg(eval,
+                                                  new UnsafeListSizeProc(),
+                                                  0,
+                                                  nullList));
+        assertTrue(e.getMessage().contains("non-null list"));
     }
 }

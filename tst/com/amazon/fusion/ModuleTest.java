@@ -2,8 +2,8 @@
 
 package com.amazon.fusion;
 
-import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -176,12 +176,13 @@ public class ModuleTest
     }
 
     /** Traps an infinite-loop bug in partial expansion. */
-    @Test(expected = FusionException.class)
+    @Test
     public void testBadSexpAtModuleLevel()
         throws Exception
     {
         eval("(module m '/fusion' (1))");
-        topLevel().requireModule("m");
+        assertThrows(FusionException.class,
+                     () -> topLevel().requireModule("m"));
     }
 
     @Test
@@ -216,16 +217,11 @@ public class ModuleTest
     @Test
     public void testModuleCircularity()
     {
-        try
-        {
-            topLevel().requireModule("/cycle0");
-            fail("Expected exception");
-        }
-        catch (FusionException e)
-        {
-            assertEquals("Module dependency cycle detected: /cycle1 -> /cycle2 -> /cycle3 -> /cycle1",
-                         e.getBaseMessage());
-        }
+        FusionException e =
+            assertThrows(FusionException.class,
+                         () -> topLevel().requireModule("/cycle0"));
+        assertEquals("Module dependency cycle detected: /cycle1 -> /cycle2 -> /cycle3 -> /cycle1",
+                     e.getBaseMessage());
     }
 
 

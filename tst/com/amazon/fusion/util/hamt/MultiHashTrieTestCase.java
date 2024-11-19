@@ -12,23 +12,18 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class MultiHashTrieTestCase
 {
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-
     static void expectEmpty(MultiHashTrie t)
     {
         assertTrue(t.isEmpty());
@@ -170,8 +165,8 @@ public abstract class MultiHashTrieTestCase
     @Test
     public void containsKeyRejectsNullKey()
     {
-        thrown.expect(NullPointerException.class);
-        simpleSubject().containsKey(null);
+        assertThrows(NullPointerException.class,
+                     () -> simpleSubject().containsKey(null));
     }
 
 
@@ -180,8 +175,8 @@ public abstract class MultiHashTrieTestCase
     @Test
     public void getRejectsNullKey()
     {
-        thrown.expect(NullPointerException.class);
-        simpleSubject().get(null);
+        assertThrows(NullPointerException.class,
+                     () -> simpleSubject().get(null));
     }
 
 
@@ -190,8 +185,8 @@ public abstract class MultiHashTrieTestCase
     @Test
     public void getMultiRejectsNullKey()
     {
-        thrown.expect(NullPointerException.class);
-        simpleSubject().getMulti(null);
+        assertThrows(NullPointerException.class,
+                     () -> simpleSubject().getMulti(null));
     }
 
     @Test
@@ -209,15 +204,15 @@ public abstract class MultiHashTrieTestCase
     @Test
     public void with1RejectsNullKey()
     {
-        thrown.expect(NullPointerException.class);
-        simpleSubject().with1(null, 1);
+        assertThrows(NullPointerException.class,
+                     () -> simpleSubject().with1(null, 1));
     }
 
     @Test
     public void with1RejectsNullValue()
     {
-        thrown.expect(NullPointerException.class);
-        simpleSubject().with1(2, null);
+        assertThrows(NullPointerException.class,
+                     () -> simpleSubject().with1(2, null));
     }
 
 
@@ -226,15 +221,15 @@ public abstract class MultiHashTrieTestCase
     @Test
     public void withMultiRejectsNullKey()
     {
-        thrown.expect(NullPointerException.class);
-        simpleSubject().withMulti(null, 1);
+        assertThrows(NullPointerException.class,
+                     () -> simpleSubject().withMulti(null, 1));
     }
 
     @Test
     public void withMultiRejectsNullValue()
     {
-        thrown.expect(NullPointerException.class);
-        simpleSubject().withMulti(2, null);
+        assertThrows(NullPointerException.class,
+                     () -> simpleSubject().withMulti(2, null));
     }
 
 
@@ -243,8 +238,8 @@ public abstract class MultiHashTrieTestCase
     @Test
     public void withoutKeyRejectsNullKey()
     {
-        thrown.expect(NullPointerException.class);
-        simpleSubject().withoutKey(null);
+        assertThrows(NullPointerException.class,
+                     () -> simpleSubject().withoutKey(null));
     }
 
     @Test
@@ -261,15 +256,15 @@ public abstract class MultiHashTrieTestCase
     @Test
     public void withoutKeysRejectsNullArray()
     {
-        thrown.expect(NullPointerException.class);
-        simpleSubject().withoutKeys((Object[]) null);
+        assertThrows(NullPointerException.class,
+                     () -> simpleSubject().withoutKeys((Object[]) null));
     }
 
     @Test
     public void withoutKeysRejectsNullKey()
     {
-        thrown.expect(NullPointerException.class);
-        simpleSubject().withoutKeys(1, null, 3);
+        assertThrows(NullPointerException.class,
+                     () -> simpleSubject().withoutKeys(1, null, 3));
     }
 
     @Test

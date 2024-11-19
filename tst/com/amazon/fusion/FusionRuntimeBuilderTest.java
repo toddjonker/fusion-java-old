@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.amazon.ion.IonCatalog;
 import com.amazon.ion.system.SimpleCatalog;
@@ -29,16 +30,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
 
 public class FusionRuntimeBuilderTest
     extends CoreTestCase
 {
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder();
 
@@ -175,29 +172,30 @@ public class FusionRuntimeBuilderTest
     @Test
     public void testNullDefaultLanguage()
     {
-        thrown.expect(IllegalArgumentException.class);
-        standard().setDefaultLanguage(null);
+        assertThrows(IllegalArgumentException.class,
+                     () -> standard().setDefaultLanguage(null));
     }
 
     @Test
     public void testEmptyDefaultLanguage()
     {
-        thrown.expect(IllegalArgumentException.class);
-        standard().setDefaultLanguage("");
+        assertThrows(IllegalArgumentException.class,
+                     () -> standard().setDefaultLanguage(""));
     }
 
     @Test
     public void testMalformedDefaultLanguage()
     {
-        thrown.expect(IllegalArgumentException.class);
-        standard().setDefaultLanguage("fusion");
+        assertThrows(IllegalArgumentException.class,
+                     () -> standard().setDefaultLanguage("fusion"));
     }
 
     @Test
     public void testDefaultLanguageImmutability()
     {
-        thrown.expect(UnsupportedOperationException.class);
-        standard().immutable().setDefaultLanguage("/fusion/base");
+        assertThrows(UnsupportedOperationException.class,
+                     () -> standard().immutable()
+                                     .setDefaultLanguage("/fusion/base"));
     }
 
 
@@ -215,8 +213,9 @@ public class FusionRuntimeBuilderTest
         assertEquals("/fusion/base", r.getDefaultLanguage());
 
         // Test effect by looking for something in /fusion but not /fusion/base
-        thrown.expect(UnboundIdentifierException.class);
-        r.getDefaultTopLevel().eval("always");
+        TopLevel top = r.getDefaultTopLevel();
+        assertThrows(UnboundIdentifierException.class,
+                     () -> top.eval("always"));
     }
 
 
@@ -242,8 +241,9 @@ public class FusionRuntimeBuilderTest
     @Test
     public void testDefaultIonCatalogImmutability()
     {
-        thrown.expect(UnsupportedOperationException.class);
-        standard().immutable().setDefaultIonCatalog(new SimpleCatalog());
+        assertThrows(UnsupportedOperationException.class,
+                     () -> standard().immutable()
+                                     .setDefaultIonCatalog(new SimpleCatalog()));
     }
 
     @Test
@@ -305,9 +305,8 @@ public class FusionRuntimeBuilderTest
     public void testInitialCurrentOutputPortImmutability()
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-        thrown.expect(UnsupportedOperationException.class);
-        standard().immutable().setInitialCurrentOutputPort(out);
+        assertThrows(UnsupportedOperationException.class,
+                     () -> standard().immutable().setInitialCurrentOutputPort(out));
     }
 
 
@@ -354,23 +353,24 @@ public class FusionRuntimeBuilderTest
     @Test
     public void testCurrentDirectoryDoesNotExist()
     {
-        thrown.expect(IllegalArgumentException.class);
-        standard().setInitialCurrentDirectory(noSuchFile());
+        assertThrows(IllegalArgumentException.class,
+                     () -> standard().setInitialCurrentDirectory(noSuchFile()));
     }
 
 
     @Test
     public void testCurrentDirectoryIsNormalFile()
     {
-        thrown.expect(IllegalArgumentException.class);
-        standard().setInitialCurrentDirectory(normalFile());
+        assertThrows(IllegalArgumentException.class,
+                     () -> standard().setInitialCurrentDirectory(normalFile()));
     }
 
     @Test
     public void testInitialCurrentDirectoryImmutability()
     {
-        thrown.expect(UnsupportedOperationException.class);
-        standard().immutable().setInitialCurrentDirectory(tmpDir.getRoot());
+        assertThrows(UnsupportedOperationException.class,
+                     () -> standard().immutable()
+                                     .setInitialCurrentDirectory(tmpDir.getRoot()));
     }
 
 
@@ -394,23 +394,24 @@ public class FusionRuntimeBuilderTest
     @Test
     public void testBootstrapRepositoryDoesNotExist()
     {
-        thrown.expect(IllegalArgumentException.class);
-        standard().setBootstrapRepository(noSuchFile());
+        assertThrows(IllegalArgumentException.class,
+                     () -> standard().setBootstrapRepository(noSuchFile()));
     }
 
 
     @Test
     public void testBootstrapRepositoryIsNormalFile()
     {
-        thrown.expect(IllegalArgumentException.class);
-        standard().setBootstrapRepository(normalFile());
+        assertThrows(IllegalArgumentException.class,
+                     () -> standard().setBootstrapRepository(normalFile()));
     }
 
     @Test
     public void testBootstrapRepositoryImmutability()
     {
-        thrown.expect(UnsupportedOperationException.class);
-        standard().immutable().setBootstrapRepository(tmpDir.getRoot());
+        assertThrows(UnsupportedOperationException.class,
+                     () -> standard().immutable()
+                                     .setBootstrapRepository(tmpDir.getRoot()));
     }
 
 
@@ -479,16 +480,17 @@ public class FusionRuntimeBuilderTest
     @Test
     public void testCoverageDataDirectoryIsNormalFile()
     {
-        thrown.expect(IllegalArgumentException.class);
-        standard().setCoverageDataDirectory(normalFile());
+        assertThrows(IllegalArgumentException.class,
+                     () -> standard().setCoverageDataDirectory(normalFile()));
     }
 
 
     @Test
     public void testCoverageDataDirectoryImmutability()
     {
-        thrown.expect(UnsupportedOperationException.class);
-        standard().immutable().setCoverageDataDirectory(tmpDir.getRoot());
+        assertThrows(UnsupportedOperationException.class,
+                     () -> standard().immutable()
+                                     .setCoverageDataDirectory(tmpDir.getRoot()));
     }
 
 
@@ -509,8 +511,7 @@ public class FusionRuntimeBuilderTest
     @Test
     public void testDocumentingImmutability()
     {
-        thrown.expect(UnsupportedOperationException.class);
-        standard().immutable().setDocumenting(true);
+        assertThrows(UnsupportedOperationException.class,
+                     () -> standard().immutable().setDocumenting(true));
     }
-
 }

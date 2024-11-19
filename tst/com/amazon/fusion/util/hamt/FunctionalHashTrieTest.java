@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Collection;
 import java.util.Collections;
@@ -262,8 +263,8 @@ public class FunctionalHashTrieTest
     @Test
     public void fromArraysRequiresEqualLengthArrays()
     {
-        thrown.expect(IllegalArgumentException.class);
-        fromArrays(new Object[] { 1 }, new Object[] { 1, 2 });
+        assertThrows(IllegalArgumentException.class,
+                     () -> fromArrays(new Object[]{1}, new Object[]{1, 2}));
     }
 
     @Test
@@ -316,11 +317,10 @@ public class FunctionalHashTrieTest
     public void getMultiResultRejectsWriteThrough()
     {
         MultiHashTrie s = hash1(1, 1, 2, 2, 3, 3);
-
         Collection values = s.getMulti(1);
 
-        thrown.expect(UnsupportedOperationException.class);
-        values.add(4);
+        assertThrows(UnsupportedOperationException.class,
+                     () -> values.add(4));
     }
 
 

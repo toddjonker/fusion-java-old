@@ -10,6 +10,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.amazon.fusion.util.hamt.TransformTestCase.Remove3sIncrement2sXform;
 import java.util.Collection;
 import java.util.Collections;
@@ -66,15 +67,16 @@ public class MultiHashTrieImplTest
     @Test
     public void fromArraysRequiresEqualLengthArrays()
     {
-        thrown.expect(IllegalArgumentException.class);
-        fromArrays(new Object[] { 1 }, new Object[] { 1, 2 });
+        assertThrows(IllegalArgumentException.class,
+                     () -> fromArrays(new Object[]{ 1    },
+                                      new Object[]{ 1, 2 }));
     }
 
     @Test
     public void fromArraysGivenRepeatedKeyReturnsAll()
     {
         MultiHashTrie t = fromArrays(new Object[] { 1, 2, 1, 1 },
-                                     new Object[] { 3, 4, 5, 3});
+                                     new Object[] { 3, 4, 5, 3 });
         assertThat(t, is(multi(1,3, 1,3, 1,5, 2,4)));
 
         t = fromArrays(new Object[] { 5, 6, 5 },
@@ -116,11 +118,10 @@ public class MultiHashTrieImplTest
     public void getMultiResultRejectsWriteThrough()
     {
         MultiHashTrie s = multi(1, 1, 1, 2, 1, 3);
-
         Collection values = s.getMulti(1);
 
-        thrown.expect(UnsupportedOperationException.class);
-        values.add(4);
+        assertThrows(UnsupportedOperationException.class,
+                     () -> values.add(4));
     }
 
 
