@@ -6,20 +6,20 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.io.File;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import java.io.IOException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public class DocumentTest
     extends CliTestCase
 {
-    @Rule
-    public TemporaryFolder tmpDir = new TemporaryFolder();
+    @TempDir
+    public File tmpDir;
 
     private File noSuchFile()
         throws Exception
     {
-        File f = new File(tmpDir.getRoot(), "no-such-file");
+        File f = new File(tmpDir, "no-such-file");
         assertFalse(f.exists());
         return f;
     }
@@ -27,7 +27,7 @@ public class DocumentTest
     private File plainFile()
         throws Exception
     {
-        File f = tmpDir.newFile();
+        File f = File.createTempFile("junit", null, tmpDir);
         assert(f.isFile());
         return f;
     }
@@ -35,7 +35,7 @@ public class DocumentTest
     private File outputDir()
         throws Exception
     {
-        return tmpDir.newFolder("docs-test-output");
+        return newFolder(tmpDir, "docs-test-output");
     }
 
 
@@ -78,11 +78,20 @@ public class DocumentTest
     public void testRepoHasNoSrc()
         throws Exception
     {
-        String repo = tmpDir.newFolder().getPath();
+        String repo = newFolder(tmpDir, "junit").getPath();
 
         run(1, "document", outputDir().getPath(), repo);
 
         assertThat(stderrText, containsString("has no src"));
         assertThat(stderrText, containsString(repo));
+    }
+
+    private static File newFolder(File root, String... subDirs) throws IOException {
+        String subFolder = String.join("/", subDirs);
+        File result = new File(root, subFolder);
+        if (!result.mkdirs()) {
+            throw new IOException("Couldn't create folders " + root);
+        }
+        return result;
     }
 }

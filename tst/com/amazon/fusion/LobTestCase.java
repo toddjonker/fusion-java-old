@@ -16,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Base class for blob/clob tests.
@@ -34,7 +34,7 @@ public abstract class LobTestCase
     abstract void checkLobType(Object lob)
         throws FusionException;
 
-    @Before
+    @BeforeEach
     public void requires()
         throws Exception
     {

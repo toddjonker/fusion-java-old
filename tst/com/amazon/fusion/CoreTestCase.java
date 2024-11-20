@@ -32,8 +32,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 public class CoreTestCase
     extends StdioTestCase
@@ -94,14 +94,14 @@ public class CoreTestCase
     private FusionRuntime myRuntime;
     private TopLevel myTopLevel;
 
-    @Before
+    @BeforeEach
     public void setUp()
         throws Exception
     {
         mySystem = IonSystemBuilder.standard().build();
     }
 
-    @After
+    @AfterEach
     public void tearDown()
         throws Exception
     {

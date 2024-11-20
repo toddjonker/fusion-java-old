@@ -9,21 +9,20 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.io.IOException;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public class CoverTest
     extends CliTestCase
 {
-    @Rule
-    public final TemporaryFolder myFolder = new TemporaryFolder();
+    @TempDir
+    public File myFolder;
 
 
     private File plainFile()
         throws Exception
     {
-        File f = myFolder.newFile();
+        File f = File.createTempFile("junit", null, myFolder);
         assert(f.isFile());
         return f;
     }
@@ -31,13 +30,13 @@ public class CoverTest
     private File dataDir()
         throws IOException
     {
-        return myFolder.newFolder("data");
+        return newFolder(myFolder, "data");
     }
 
     private File reportDir()
         throws IOException
     {
-        return myFolder.newFolder("report");
+        return newFolder(myFolder, "report");
     }
 
 
@@ -54,7 +53,7 @@ public class CoverTest
     public void testDataDirIsMissing()
         throws Exception
     {
-        File f = new File(myFolder.getRoot(), "no file");
+        File f = new File(myFolder, "no file");
         assertFalse(f.exists());
 
         run(1, "report_coverage", f.getPath(), reportDir().getPath());
@@ -102,5 +101,14 @@ public class CoverTest
         assertThat(stderrText, isEmptyString());
 
         assertTrue(new File(reportDir, "index.html").isFile());
+    }
+
+    private static File newFolder(File root, String... subDirs) throws IOException {
+        String subFolder = String.join("/", subDirs);
+        File result = new File(root, subFolder);
+        if (!result.mkdirs()) {
+            throw new IOException("Couldn't create folders " + root);
+        }
+        return result;
     }
 }

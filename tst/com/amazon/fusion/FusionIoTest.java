@@ -13,8 +13,8 @@ import com.amazon.ion.IonList;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonValue;
 import com.amazon.ion.IonWriter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -22,7 +22,7 @@ import org.junit.Test;
 public class FusionIoTest
     extends CoreTestCase
 {
-    @Before
+    @BeforeEach
     public void requires()
         throws Exception
     {

@@ -6,7 +6,7 @@ import com.amazon.ion.IonValue;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Iterator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 public class LiteralEvalTest

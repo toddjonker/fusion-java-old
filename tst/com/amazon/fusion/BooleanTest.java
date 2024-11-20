@@ -8,7 +8,7 @@ import static com.amazon.fusion.FusionBool.isTrue;
 import static com.amazon.fusion.TailCallTest.STACK_OVERFLOW_DEPTH;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class BooleanTest
     extends CoreTestCase

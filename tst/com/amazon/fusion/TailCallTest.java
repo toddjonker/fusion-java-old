@@ -4,7 +4,7 @@ package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionNumber.checkIntArgToJavaInt;
 import static com.amazon.fusion.FusionNumber.makeInt;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TailCallTest
     extends CoreTestCase

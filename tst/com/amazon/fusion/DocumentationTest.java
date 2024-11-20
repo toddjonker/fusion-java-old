@@ -15,15 +15,15 @@ import com.gargoylesoftware.htmlunit.html.HtmlHeading1;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import java.io.IOException;
 import java.net.URL;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class DocumentationTest
 {
     private WebClient myWebClient;
 
-    @Before
+    @BeforeEach
     public void initWebClient()
     {
         myWebClient = new WebClient();
@@ -56,7 +56,7 @@ public class DocumentationTest
         });
     }
 
-    @After
+    @AfterEach
     public void tearDown()
     {
         myWebClient = null;

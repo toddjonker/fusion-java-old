@@ -5,14 +5,14 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.amazon.ion.util.IonTextUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 
 public class StringTest
     extends CoreTestCase
 {
-    @Before
+    @BeforeEach
     public void requires()
         throws FusionException
     {

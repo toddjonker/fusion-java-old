@@ -4,14 +4,14 @@ package com.amazon.fusion;
 
 import static com.amazon.ion.util.IonTextUtils.printString;
 import com.amazon.fusion.FusionNumber.SumProc;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 
 public class JavaFfiTest
     extends CoreTestCase
 {
-    @Before
+    @BeforeEach
     public void requires()
         throws Exception
     {

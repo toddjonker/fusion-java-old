@@ -2,8 +2,8 @@
 
 package com.amazon.fusion;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * See ftst/parameter.test.ion
@@ -11,7 +11,7 @@ import org.junit.Test;
 public class ParameterTest
     extends CoreTestCase
 {
-    @Before
+    @BeforeEach
     public void requires()
         throws Exception
     {

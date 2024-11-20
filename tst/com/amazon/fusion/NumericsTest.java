@@ -5,8 +5,8 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionNumber.checkIntArgToJavaLong;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class NumericsTest
     extends CoreTestCase
@@ -15,7 +15,7 @@ public class NumericsTest
         new BigInteger(Long.MAX_VALUE + "123");
 
 
-    @Before
+    @BeforeEach
     public void requires()
         throws FusionException
     {

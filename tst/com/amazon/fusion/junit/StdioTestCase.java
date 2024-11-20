@@ -11,8 +11,8 @@ import java.io.PrintStream;
 import java.io.SequenceInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 
 public class StdioTestCase
@@ -27,7 +27,7 @@ public class StdioTestCase
     private PrintStream myStderr;
 
 
-    @Before
+    @BeforeEach
     public void setUpStdio()
     {
         myStdoutBytes = new ByteArrayOutputStream();
@@ -37,7 +37,7 @@ public class StdioTestCase
         myStderr = new PrintStream(myStderrBytes);
     }
 
-    @After
+    @AfterEach
     public void tearDownStdio()
     {
         myStdinData = null;

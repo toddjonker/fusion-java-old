@@ -28,16 +28,15 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 
 public class FusionRuntimeBuilderTest
     extends CoreTestCase
 {
-    @Rule
-    public TemporaryFolder tmpDir = new TemporaryFolder();
+    @TempDir
+    public File tmpDir;
 
 
     private FusionRuntime build(FusionRuntimeBuilder b)
@@ -114,7 +113,7 @@ public class FusionRuntimeBuilderTest
         {
             // JUnit docs aren't explicit that newFile() creates a physical
             // file, not just a File reference, so assert that assumption.
-            File file = tmpDir.newFile();
+            File file = File.createTempFile("junit", null, tmpDir);
             assertTrue(file.exists());
             return file;
         }
@@ -132,7 +131,7 @@ public class FusionRuntimeBuilderTest
      */
     private File noSuchFile()
     {
-        Path p = tmpDir.getRoot().toPath().resolve("no-such-file");
+        Path p = tmpDir.toPath().resolve("no-such-file");
         assertTrue(Files.notExists(p));
         return p.toFile();
     }
@@ -325,7 +324,7 @@ public class FusionRuntimeBuilderTest
     @Test
     public void testSetInitialCurrentDirectory()
     {
-        changeInitialCurrentDirectory(standard(), tmpDir.getRoot());
+        changeInitialCurrentDirectory(standard(), tmpDir);
     }
 
 
@@ -345,8 +344,8 @@ public class FusionRuntimeBuilderTest
         FusionRuntimeBuilder b = standard();
         checkCurrentDirectory(System.getProperty("user.dir"), b);
 
-        b.setInitialCurrentDirectory(tmpDir.getRoot());
-        checkCurrentDirectory(tmpDir.getRoot().getAbsolutePath(), b);
+        b.setInitialCurrentDirectory(tmpDir);
+        checkCurrentDirectory(tmpDir.getAbsolutePath(), b);
     }
 
 
@@ -370,7 +369,7 @@ public class FusionRuntimeBuilderTest
     {
         assertThrows(UnsupportedOperationException.class,
                      () -> standard().immutable()
-                                     .setInitialCurrentDirectory(tmpDir.getRoot()));
+                                     .setInitialCurrentDirectory(tmpDir));
     }
 
 
@@ -411,7 +410,7 @@ public class FusionRuntimeBuilderTest
     {
         assertThrows(UnsupportedOperationException.class,
                      () -> standard().immutable()
-                                     .setBootstrapRepository(tmpDir.getRoot()));
+                                     .setBootstrapRepository(tmpDir));
     }
 
 
@@ -429,7 +428,7 @@ public class FusionRuntimeBuilderTest
     @Test
     public void testSetCoverageDataDirectory()
     {
-        changeCoverageDataDirectory(standard(), tmpDir.getRoot());
+        changeCoverageDataDirectory(standard(), tmpDir);
     }
 
 
@@ -441,8 +440,8 @@ public class FusionRuntimeBuilderTest
     public void testCoverageDataDirectoryCanonicalization()
         throws Exception
     {
-        Path dir1 = tmpDir.getRoot().toPath();
-        Path dir2 = tmpDir.newFolder("linkholder").toPath();
+        Path dir1 = tmpDir.toPath();
+        Path dir2 = newFolder(tmpDir, "linkholder").toPath();
 
         Path link = dir2.resolve("link");
         Files.createSymbolicLink(link, dir1);
@@ -490,7 +489,7 @@ public class FusionRuntimeBuilderTest
     {
         assertThrows(UnsupportedOperationException.class,
                      () -> standard().immutable()
-                                     .setCoverageDataDirectory(tmpDir.getRoot()));
+                                     .setCoverageDataDirectory(tmpDir));
     }
 
 
@@ -513,5 +512,14 @@ public class FusionRuntimeBuilderTest
     {
         assertThrows(UnsupportedOperationException.class,
                      () -> standard().immutable().setDocumenting(true));
+    }
+
+    private static File newFolder(File root, String... subDirs) throws IOException {
+        String subFolder = String.join("/", subDirs);
+        File result = new File(root, subFolder);
+        if (!result.mkdirs()) {
+            throw new IOException("Couldn't create folders " + root);
+        }
+        return result;
     }
 }

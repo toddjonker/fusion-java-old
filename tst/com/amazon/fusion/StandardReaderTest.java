@@ -6,7 +6,7 @@ import static com.amazon.fusion.FusionStruct.unsafeStructSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.amazon.ion.IonReader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class StandardReaderTest
     extends CoreTestCase

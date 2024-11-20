@@ -4,7 +4,7 @@ package com.amazon.fusion.cli;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.startsWith;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CommandFactoryTest
     extends CliTestCase

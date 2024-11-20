@@ -2,7 +2,7 @@
 
 package com.amazon.fusion;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 public class LambdaTest

@@ -2,13 +2,13 @@
 
 package com.amazon.fusion;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class SyntaxTest
     extends CoreTestCase
 {
-    @Before
+    @BeforeEach
     public void requires()
         throws Exception
     {

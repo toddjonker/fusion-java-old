@@ -12,8 +12,8 @@ import static com.amazon.fusion.FusionStruct.unsafeStructSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -21,7 +21,7 @@ import org.junit.Test;
 public class StructTest
     extends CoreTestCase
 {
-    @Before
+    @BeforeEach
     public void requires()
         throws FusionException
     {

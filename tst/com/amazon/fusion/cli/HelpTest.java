@@ -7,7 +7,7 @@ import static com.amazon.fusion.cli.Help.HELP_ONE_LINER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.startsWith;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class HelpTest
     extends CliTestCase

@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.amazon.fusion.junit.StdioTestCase;
 import java.util.ArrayList;
 import java.util.Arrays;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 
 public class CliTestCase
     extends StdioTestCase
@@ -15,7 +15,7 @@ public class CliTestCase
     protected String stderrText;
 
 
-    @After
+    @AfterEach
     public void tearDownCli()
     {
         stdoutText = null;

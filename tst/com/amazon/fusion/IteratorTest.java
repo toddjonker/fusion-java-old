@@ -6,13 +6,13 @@ import static com.amazon.fusion.FusionIterator.injectIonIterator;
 import static com.amazon.fusion.FusionIterator.injectIterator;
 import com.amazon.ion.IonList;
 import java.util.ArrayList;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 public class IteratorTest
     extends CoreTestCase
 {
-    @Test()
+    @Test
     public void testIterateValueFailures()
         throws Exception
     {

@@ -9,7 +9,7 @@ import com.amazon.ion.IonDatagram;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.system.IonSystemBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 public class SourceLocationTest

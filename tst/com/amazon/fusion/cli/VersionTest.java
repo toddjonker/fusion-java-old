@@ -13,8 +13,7 @@ import com.amazon.ion.IonValue;
 import com.amazon.ion.Timestamp;
 import com.amazon.ion.system.IonSystemBuilder;
 import com.amazon.ion.util.JarInfo;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class VersionTest
     extends CliTestCase

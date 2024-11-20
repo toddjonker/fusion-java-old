@@ -17,13 +17,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.system.IonReaderBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class NamespaceTest
     extends CoreTestCase
 {
-    @Before
+    @BeforeEach
     public void requires()
         throws FusionException
     {

@@ -12,8 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.amazon.fusion.FusionList.UnsafeListSizeProc;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonValue;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -22,7 +22,7 @@ public class ListTest
     extends CoreTestCase
 {
 
-    @Before
+    @BeforeEach
     public void listTestBegin()
         throws Exception
     {
