@@ -4,9 +4,9 @@ package com.amazon.fusion.cli;
 
 import static com.amazon.fusion.cli.Help.APP_HELP_TEXT_INTRO;
 import static com.amazon.fusion.cli.Help.HELP_ONE_LINER;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 public class HelpTest

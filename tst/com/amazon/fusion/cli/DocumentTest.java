@@ -2,9 +2,9 @@
 
 package com.amazon.fusion.cli;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.io.File;
 import org.junit.Rule;
 import org.junit.Test;

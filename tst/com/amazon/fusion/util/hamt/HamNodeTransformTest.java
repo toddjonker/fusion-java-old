@@ -4,10 +4,10 @@ package com.amazon.fusion.util.hamt;
 
 import static com.amazon.fusion.util.Permute.generateSubsets;
 import static java.util.Collections.unmodifiableList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import com.amazon.fusion.util.function.BiFunction;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.BitMappedNode;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Changes;

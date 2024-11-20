@@ -3,7 +3,7 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionStruct.unsafeStructSize;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.amazon.ion.IonReader;
 import org.junit.Rule;
 import org.junit.Test;

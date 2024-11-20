@@ -6,8 +6,8 @@ import static com.amazon.fusion.FusionBool.isBool;
 import static com.amazon.fusion.FusionBool.isFalse;
 import static com.amazon.fusion.FusionBool.isTrue;
 import static com.amazon.fusion.TailCallTest.STACK_OVERFLOW_DEPTH;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.Test;
 
 public class BooleanTest

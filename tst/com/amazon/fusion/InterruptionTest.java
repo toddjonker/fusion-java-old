@@ -3,8 +3,8 @@
 package com.amazon.fusion;
 
 import static com.amazon.fusion.FusionVoid.voidValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
 import com.amazon.ion.IonReader;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;

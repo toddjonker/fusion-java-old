@@ -3,9 +3,9 @@
 package com.amazon.fusion.util.hamt;
 
 import static com.amazon.fusion.util.hamt.MultiHashTrie.empty;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
 import com.amazon.fusion.util.hamt.TransformTestCase.IncrementXform;
 import org.junit.Ignore;
 import org.junit.Test;

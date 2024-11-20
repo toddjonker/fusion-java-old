@@ -2,8 +2,8 @@
 
 package com.amazon.fusion.cli;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 public class CommandFactoryTest
