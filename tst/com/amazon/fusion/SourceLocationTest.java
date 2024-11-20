@@ -2,9 +2,9 @@
 
 package com.amazon.fusion;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import com.amazon.ion.IonDatagram;
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonSystem;
@@ -17,10 +17,10 @@ public class SourceLocationTest
     private void assertNoLocation(IonReader ir)
     {
         SourceLocation loc = SourceLocation.forCurrentSpan(ir);
-        assertNull("expected null SourceLocation", loc);
+        assertNull(loc, "expected null SourceLocation");
 
         loc = SourceLocation.forCurrentSpan(ir, null);
-        assertNull("expected null SourceLocation", loc);
+        assertNull(loc, "expected null SourceLocation");
 
         SourceName name = SourceName.forDisplay("test source");
         loc = SourceLocation.forCurrentSpan(ir, name);
@@ -92,9 +92,9 @@ public class SourceLocationTest
         if (column < 1) column = 0;
         if (offset < 0) offset = -1;
 
-        assertEquals("line",   line,   loc.getLine());
-        assertEquals("column", column, loc.getColumn());
-        assertEquals("offset", offset, loc.getStartOffset());
+        assertEquals(line,   loc.getLine(),   "line");
+        assertEquals(column, loc.getColumn(), "column");
+        assertEquals(offset, loc.getStartOffset(), "offset");
 
         SourceName name = loc.getSourceName();
         if (display == null)
@@ -110,16 +110,16 @@ public class SourceLocationTest
             display += " of " + name.display();
         }
 
-        assertEquals("display", display, loc.display());
+        assertEquals(display, loc.display(), "display");
     }
 
     private void assertNoLineColumn(long line, long column)
     {
         SourceLocation loc = SourceLocation.forLineColumn(line, column);
-        assertNull("SourceLocation", loc);
+        assertNull(loc, "SourceLocation");
 
         loc = SourceLocation.forLineColumn(line, column, null);
-        assertNull("SourceLocation", loc);
+        assertNull(loc, "SourceLocation");
 
         SourceName name = SourceName.forDisplay("test source");
         loc = SourceLocation.forLineColumn(line, column, name);

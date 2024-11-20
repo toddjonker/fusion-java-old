@@ -9,15 +9,15 @@ import static com.amazon.fusion.junit.Reflect.getterFor;
 import static com.amazon.fusion.junit.Reflect.invoke;
 import static com.amazon.fusion.junit.Reflect.setterFor;
 import static com.amazon.fusion.junit.Reflect.witherFor;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.amazon.ion.IonCatalog;
 import com.amazon.ion.system.SimpleCatalog;
 import java.io.ByteArrayOutputStream;
@@ -450,8 +450,8 @@ public class FusionRuntimeBuilderTest
         _Private_CoverageCollector c2 = makeCollector(dir2);
         _Private_CoverageCollector c3 = makeCollector(link);
 
-        assertNotSame("different dirs", c1, c2);
-        assertSame("canonicalized symlink", c1, c3);
+        assertNotSame(c1, c2, "different dirs");
+        assertSame(c1, c3, "canonicalized symlink");
     }
 
     private _Private_CoverageCollector makeCollector(Path dir)

@@ -5,11 +5,11 @@ package com.amazon.fusion.util;
 import static com.amazon.fusion.util.Permute.generatePermutations;
 import static com.amazon.fusion.util.Permute.generateSubsetPermutations;
 import static com.amazon.fusion.util.Permute.generateSubsets;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
 import static org.hamcrest.Matchers.hasItems;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -100,7 +100,7 @@ public class PermuteTest
     private <T> void checkSubsets(Collection<T[]> results, T[] values)
     {
         int subsetCount = subsetCount(values);
-        assertEquals("number of subsets", subsetCount, results.size());
+        assertEquals(subsetCount, results.size(), "number of subsets");
 
         // Check that each result is valid and unique.
         HashSet<String> unique = new HashSet<>(subsetCount);
@@ -115,7 +115,7 @@ public class PermuteTest
             // representation instead.
             unique.add(keyForSet(result));
         }
-        assertEquals("number of unique subsets", subsetCount, unique.size());
+        assertEquals(subsetCount, unique.size(), "number of unique subsets");
     }
 
     @Test
@@ -170,7 +170,7 @@ public class PermuteTest
 
             partitionBySubset(partitions, result);
         }
-        assertEquals("number of unique subsets", subsetCount, partitions.size());
+        assertEquals(subsetCount, partitions.size(), "number of unique subsets");
 
         // Check each partition to ensure it includes all permutations.
         for (ArrayList<T[]> partition : partitions.values())

@@ -2,9 +2,9 @@
 
 package com.amazon.fusion;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 
 public class AssertTest
     extends CoreTestCase
@@ -23,31 +23,31 @@ public class AssertTest
         try
         {
             eval("(assert " + expr + ")");
-            Assert.fail("Expected exception");
+            Assertions.fail("Expected exception");
         }
         catch (FusionAssertionException e)
         {
-            Assert.assertEquals(null, e.getUserMessage());
+            Assertions.assertEquals(null, e.getUserMessage());
         }
 
         try
         {
             eval("(assert " + expr + " \"barney\")");
-            Assert.fail("Expected exception");
+            Assertions.fail("Expected exception");
         }
         catch (FusionAssertionException e)
         {
-            Assert.assertEquals("barney", e.getUserMessage());
+            Assertions.assertEquals("barney", e.getUserMessage());
         }
 
         try
         {
             eval("(assert " + expr + " \"barney\" 13)");
-            Assert.fail("Expected exception");
+            Assertions.fail("Expected exception");
         }
         catch (FusionAssertionException e)
         {
-            Assert.assertEquals("barney13", e.getUserMessage());
+            Assertions.assertEquals("barney13", e.getUserMessage());
         }
     }
 

@@ -6,14 +6,14 @@ import static com.amazon.fusion.util.hamt.HashArrayMappedTrie.empty;
 import static com.amazon.fusion.util.hamt.HashArrayMappedTrie.fromArrays;
 import static com.amazon.fusion.util.hamt.HashArrayMappedTrie.fromSelectedKeys;
 import static com.amazon.fusion.util.hamt.HashArrayMappedTrie.hashCodeFor;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.BitMappedNode;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Changes;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.CollisionNode;
@@ -113,7 +113,7 @@ public class HashArrayMappedTrieTest
             recordKey(key, value);
 
             newNode = oldNode.with(key, value, changes);
-            assertTrue("Changes not invoked", changes.wrapped);
+            assertTrue(changes.wrapped, "Changes not invoked");
             assertValueEquals(value, newNode, key);
             assertRootReplacementImpliesModification();
 
@@ -125,7 +125,7 @@ public class HashArrayMappedTrieTest
             recordKey(key, value);
 
             newNode = oldNode.mWith(key, value, changes);
-            assertTrue("Changes not invoked", changes.wrapped);
+            assertTrue(changes.wrapped, "Changes not invoked");
             assertValueEquals(value, newNode, key);
             assertRootReplacementImpliesModification();
 
@@ -147,11 +147,11 @@ public class HashArrayMappedTrieTest
         public Modifier<K, V> inserts()
         {
             // Precondition:
-            assertNull("old value", oldValue);
+            assertNull(oldValue, "old value");
 
             mode = Mode.INSERT;
             changes.assertInserted();
-            assertTrue("no changes were made", changes.changeCount() > 0);
+            assertTrue(changes.changeCount() > 0, "no changes were made");
             assertSizeDelta(1);
             return this;
         }
@@ -159,12 +159,12 @@ public class HashArrayMappedTrieTest
         public Modifier<K, V> replaces()
         {
             // Preconditions:
-            assertNotNull("old value", oldValue);
-            assertNotSame("mapped value", oldValue, newValue);
+            assertNotNull(oldValue, "old value");
+            assertNotSame(oldValue, newValue, "mapped value");
 
             mode = Mode.REPLACE;
             changes.assertReplaced();
-            assertTrue("no changes were made", changes.changeCount() > 0);
+            assertTrue(changes.changeCount() > 0, "no changes were made");
             assertSizeDelta(0);
             return this;
         }
@@ -172,11 +172,11 @@ public class HashArrayMappedTrieTest
         public Modifier<K, V> removes()
         {
             // Precondition:
-            assertNotNull("old value", oldValue);
+            assertNotNull(oldValue, "old value");
 
             mode = Mode.REMOVE;
             changes.assertRemoved();
-            assertTrue("no changes were made", changes.changeCount() > 0);
+            assertTrue(changes.changeCount() > 0, "no changes were made");
             assertSizeDelta(-1);
             return this;
         }
@@ -184,10 +184,10 @@ public class HashArrayMappedTrieTest
         public Modifier<K, V> noops()
         {
             // Precondition:
-            assertSame("mapped value", oldValue, newValue);
+            assertSame(oldValue, newValue, "mapped value");
 
             mode = Mode.NOOP;
-            assertEquals("unexpected changes were made", 0, changes.changeCount());
+            assertEquals(0, changes.changeCount(), "unexpected changes were made");
             assertFalse(changes.inserted);
             assertFalse(changes.replaced);
             assertFalse(changes.removed);
@@ -197,10 +197,10 @@ public class HashArrayMappedTrieTest
 
 
         public TrieNode<K, V> returnsNew() {
-            assertNotSame("returned node", oldNode, newNode);
+            assertNotSame(oldNode, newNode, "returned node");
 
             // Make sure the old node isn't changed.
-            assertEquals("old node size", oldSize, oldNode.countKeys());
+            assertEquals(oldSize, oldNode.countKeys(), "old node size");
 
             // FIXME not correct in face of mutation.
             switch (mode) {
@@ -227,14 +227,14 @@ public class HashArrayMappedTrieTest
         {
             if (newNode != oldNode)
             {
-                assertTrue("no changes were made", changes.changeCount() > 0);
+                assertTrue(changes.changeCount() > 0, "no changes were made");
             }
         }
 
         private void assertSizeDelta(int delta)
         {
-            assertEquals("size delta", delta, changes.keyCountDelta());
-            assertEquals("new size", oldSize + delta, newNode.countKeys());
+            assertEquals(delta, changes.keyCountDelta(), "size delta");
+            assertEquals(oldSize + delta, newNode.countKeys(), "new size");
         }
 
         private class CheckingChanges
@@ -250,7 +250,7 @@ public class HashArrayMappedTrieTest
             {
                 wrapped = true;
 
-                assertFalse("wrapper shouldn't be given", givenValue instanceof Wrapper);
+                assertFalse(givenValue instanceof Wrapper, "wrapper shouldn't be given");
                 assertSame(newValue, givenValue);
                 return new Wrapper(givenValue);
             }
@@ -308,17 +308,17 @@ public class HashArrayMappedTrieTest
 
             void assertInserted()
             {
-                assertTrue("Results.inserting() not invoked", inserted);
+                assertTrue(inserted, "Results.inserting() not invoked");
             }
 
             void assertReplaced()
             {
-                assertTrue("Results.replacing() not invoked", replaced);
+                assertTrue(replaced, "Results.replacing() not invoked");
             }
 
             void assertRemoved()
             {
-                assertTrue("Results.removing() not invoked", removed);
+                assertTrue(removed, "Results.removing() not invoked");
             }
         }
     }
@@ -392,7 +392,7 @@ public class HashArrayMappedTrieTest
         assertEquals(0, empty.countKeys());
 
         Iterator<Entry<Object, Object>> iterator = empty.iterator();
-        assertFalse("iterator isn't empty", iterator.hasNext());
+        assertFalse(iterator.hasNext(), "iterator isn't empty");
     }
 
     @Test
@@ -445,8 +445,8 @@ public class HashArrayMappedTrieTest
 
     static <K, V> FlatNode<K, V> flatNodeForPairs(Object... kvPairs)
     {
-        assertTrue("too many pairs",
-                  kvPairs.length < FlatNode.MAX_CHILDREN * 2);
+        assertTrue(kvPairs.length < FlatNode.MAX_CHILDREN * 2,
+                  "too many pairs");
         assertEquals(0, kvPairs.length % 2);
 
         for (int i = 0; i < kvPairs.length; i += 2)
@@ -789,7 +789,7 @@ public class HashArrayMappedTrieTest
             }
         }
 
-        assertNotEquals("CollisionNode does not exist within BitMappedNode", -1, collisionNodeIndex);
+        assertNotEquals(-1, collisionNodeIndex, "CollisionNode does not exist within BitMappedNode");
 
         CollisionNode collisionNode = (CollisionNode) bitMappedNode.kvPairs[collisionNodeIndex];
         assertEquals("key1", collisionNode.kvPairs[0]);
@@ -975,7 +975,7 @@ public class HashArrayMappedTrieTest
         assertEquals(17, trieNode.countKeys());
         for (int i = 0; i < 17; i++)
         {
-            assertSame("Key " + i, keys[i], trieNode.get(i, 0, keys[i]));
+            assertSame(keys[i], trieNode.get(i, 0, keys[i]), "Key " + i);
         }
 
         for (int i = 0; i < 9; i++)
@@ -988,7 +988,7 @@ public class HashArrayMappedTrieTest
         assertEquals(8, trieNode.countKeys());
         for (int i = 9; i < 17; i++)
         {
-            assertSame("Key " + i, keys[i], trieNode.get(i, 0, keys[i]));
+            assertSame(keys[i], trieNode.get(i, 0, keys[i]), "Key " + i);
         }
 
         trieNode = trieNode.without(9, 0, keys[9], changes);
@@ -999,7 +999,7 @@ public class HashArrayMappedTrieTest
 
         for (int i = 10; i < 17; i++)
         {
-            assertSame("Key " + i, keys[i], trieNode.get(i, 0, keys[i]));
+            assertSame(keys[i], trieNode.get(i, 0, keys[i]), "Key " + i);
         }
     }
 

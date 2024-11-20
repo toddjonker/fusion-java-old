@@ -8,11 +8,11 @@ import static com.amazon.fusion.FusionSexp.unsafePairHead;
 import static com.amazon.fusion.FusionSexp.unsafePairTail;
 import static com.amazon.fusion.FusionValue.annotationsAsJavaStrings;
 import static com.amazon.fusion.FusionValue.isAnnotated;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonValue;
 import org.junit.Test;
@@ -63,11 +63,10 @@ public class FusionValueTest
             assertFalse(isAnnotated(eval, value));
 
             value = top.call("annotate", value, "ann");
-            assertTrue(value.toString(), isAnnotated(eval, value));
+            assertTrue(isAnnotated(eval, value), value.toString());
 
             String[] anns = annotationsAsJavaStrings(eval, value);
-            assertArrayEquals("annotations on " + value,
-                              new String[]{ "ann" }, anns);
+            assertArrayEquals(new String[]{ "ann" }, anns, "annotations on " + value);
 
             values = unsafePairTail(eval, values);
         }

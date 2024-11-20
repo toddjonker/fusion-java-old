@@ -4,14 +4,14 @@ package com.amazon.fusion.util.hamt;
 
 import static com.amazon.fusion.util.hamt.HashArrayMappedTrie.NOTHING;
 import static com.amazon.fusion.util.hamt.HashArrayMappedTrie.empty;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 import com.amazon.fusion.util.function.BiFunction;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Changes;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
@@ -52,7 +52,7 @@ public abstract class TransformTestCase<Recipe>
         for (Entry<K, V> entry : actual)
         {
             K key = entry.getKey();
-            assertEquals("value for key " + key, expected.get(key), entry.getValue());
+            assertEquals(expected.get(key), entry.getValue(), "value for key " + key);
             expected = expected.without(key, changes);
         }
 
@@ -148,16 +148,16 @@ public abstract class TransformTestCase<Recipe>
         assertThat("replaced keys",
                    changes.actuallyReplacedKeys, is(expectedReplacedKeys));
 
-        assertEquals("keyCountDelta",
-                     -expectedRemovedKeys,
-                     changes.keyCountDelta());
-        assertEquals("changeCount",
-                     expectedReplacedKeys.size() + expectedRemovedKeys,
-                     changes.changeCount());
+        assertEquals(-expectedRemovedKeys,
+                     changes.keyCountDelta(),
+                     "keyCountDelta");
+        assertEquals(expectedReplacedKeys.size() + expectedRemovedKeys,
+                     changes.changeCount(),
+                     "changeCount");
 
         if (changes.changeCount() == 0)
         {
-            assertSame("no changes, trie should be the same", orig, actual);
+            assertSame(orig, actual, "no changes, trie should be the same");
         }
 
         return actual;

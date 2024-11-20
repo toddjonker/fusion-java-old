@@ -2,11 +2,11 @@
 
 package com.amazon.fusion;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import com.gargoylesoftware.htmlunit.IncorrectnessListener;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HTMLParserListener;
@@ -88,7 +88,7 @@ public class DocumentationTest
         HtmlElement body = page.getBody();
 
         HtmlElement p = body.getFirstByXPath("p");
-        assertNotNull("missing first <p>", p);
+        assertNotNull(p, "missing first <p>");
         assertThat(p.getTextContent(), startsWith("The main Fusion language."));
     }
 }

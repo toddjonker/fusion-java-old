@@ -2,8 +2,8 @@
 
 package com.amazon.fusion.cli;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import com.amazon.fusion.util.FusionJarInfo;
 import com.amazon.ion.IonString;
 import com.amazon.ion.IonStruct;
@@ -62,7 +62,7 @@ public class VersionTest
 
         // This ensures that the output is pure Ion.
         IonStruct version = (IonStruct) ionSystem.singleValue(stdoutText);
-        assertNotNull("No version on stdout", version);
+        assertNotNull(version, "No version on stdout");
         return version;
     }
 
@@ -71,7 +71,7 @@ public class VersionTest
     private <T extends IonValue> T getField(IonStruct struct, String fieldName)
     {
         IonValue value = struct.get(fieldName);
-        assertNotNull("Missing field " + fieldName + " in " + struct, value);
+        assertNotNull(value, "Missing field " + fieldName + " in " + struct);
         return (T) value;
     }
 

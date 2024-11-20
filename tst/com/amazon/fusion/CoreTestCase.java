@@ -12,8 +12,8 @@ import static com.amazon.fusion.FusionString.unsafeStringToJavaString;
 import static com.amazon.fusion.FusionValue.isAnyNull;
 import static com.amazon.fusion.FusionVoid.isVoid;
 import static com.amazon.ion.util.IonTextUtils.printString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import com.amazon.fusion.junit.StdioTestCase;
 import com.amazon.ion.IonContainer;
 import com.amazon.ion.IonInt;
@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 
 public class CoreTestCase
@@ -239,7 +238,7 @@ public class CoreTestCase
         IonValue iv = runtime().ionizeMaybe(fv, system());
         if (iv == null)
         {
-            Assert.fail("Result isn't ion: " + fv + "\nSource: " + source);
+            fail("Result isn't ion: " + fv + "\nSource: " + source);
         }
         return iv;
     }
@@ -429,7 +428,7 @@ public class CoreTestCase
         IonValue iv = runtime().ionizeMaybe(actual, system());
         if (iv == null)
         {
-            Assert.fail("Result isn't ion: " + actual);
+            fail("Result isn't ion: " + actual);
         }
         assertEquals(expected, iv);
     }
@@ -442,7 +441,7 @@ public class CoreTestCase
         throws FusionException
     {
         IonValue iv = evalToIon(top, source);
-        assertEquals(source, expected, iv);
+        assertEquals(expected, iv, source);
     }
 
     protected void assertEval(IonValue expected, String source)
@@ -472,8 +471,7 @@ public class CoreTestCase
         Object fv = eval(expressionIon);
         if (! isVoid(topLevel(), fv))
         {
-            Assert.fail("Result isn't void: " + fv +
-                        "\nSource: " + expressionIon);
+            fail("Result isn't void: " + fv + "\nSource: " + expressionIon);
         }
     }
 
@@ -552,7 +550,7 @@ public class CoreTestCase
         try
         {
             eval(expr);
-            Assert.fail("Expected exception from " + expr);
+            fail("Expected exception from " + expr);
             return null; // Dummy for compiler
         }
         catch (Exception e)
@@ -603,6 +601,6 @@ public class CoreTestCase
         throws Exception
     {
         ArgumentException e = expectFailure(ArgumentException.class, expr);
-        assertEquals("argument #", badArgNum, e.getBadPos());
+        assertEquals(badArgNum, e.getBadPos(), "argument #");
     }
 }

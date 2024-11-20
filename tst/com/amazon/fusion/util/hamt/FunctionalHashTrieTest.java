@@ -7,14 +7,15 @@ import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromArrays;
 import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromEntries;
 import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromMap;
 import static com.amazon.fusion.util.hamt.FunctionalHashTrie.fromSelectedKeys;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -96,7 +97,7 @@ public class FunctionalHashTrieTest
             assertEquals(entry.getValue(), remainder.remove(entry.getKey()));
         }
 
-        assertEquals("elements remaining", 0, remainder.size());
+        assertEquals(0, remainder.size(), "elements remaining");
     }
 
     private void compareWithBaseline()
@@ -358,7 +359,7 @@ public class FunctionalHashTrieTest
     {
         FunctionalHashTrie s = hash1(1, 1);
         MultiHashTrie r = s.withMulti(1, 1);
-        assertTrue(r instanceof MultiHashTrieImpl);
+        assertInstanceOf(MultiHashTrieImpl.class, r);
         assertThat(r, is(multi(1,1, 1,1)));
     }
 

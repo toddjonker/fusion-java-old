@@ -2,7 +2,7 @@
 
 package com.amazon.fusion.cli;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.amazon.fusion.junit.StdioTestCase;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +34,7 @@ public class CliTestCase
     {
         int errorCode = execute(commandLine);
 
-        assertEquals("error code", expectedErrorCode, errorCode);
+        assertEquals(expectedErrorCode, errorCode, "error code");
 
         stdoutText = stdoutToString();
         stderrText = stderrToString();

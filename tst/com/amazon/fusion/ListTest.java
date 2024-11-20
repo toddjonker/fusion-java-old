@@ -5,12 +5,11 @@ package com.amazon.fusion;
 import static com.amazon.fusion.FusionList.checkActualListArg;
 import static com.amazon.fusion.FusionList.unsafeListElement;
 import static com.amazon.fusion.FusionList.unsafeListSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import com.amazon.fusion.FusionList.UnsafeListSizeProc;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonValue;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -101,7 +100,7 @@ public class ListTest
         {
             String expr = "(add [] " + form + ")";
             IonList result = (IonList) evalToIon(expr);
-            Assert.assertEquals(1, result.size());
+            assertEquals(1, result.size());
         }
     }
 
