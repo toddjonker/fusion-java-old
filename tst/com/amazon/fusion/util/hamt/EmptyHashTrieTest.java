@@ -8,8 +8,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.amazon.fusion.util.hamt.TransformTestCase.IncrementXform;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class EmptyHashTrieTest
@@ -37,7 +37,7 @@ public class EmptyHashTrieTest
 
     // withoutKeys()
 
-    @Test @Ignore
+    @Test @Disabled
     @Override
     public void withoutKeysRejectsNullKey()
     {

@@ -7,15 +7,15 @@ import static java.util.Collections.unmodifiableList;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.BitMappedNode;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Changes;
 import java.util.List;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 public class BitMappedNodeTransformTest
     extends TransformTestCase<Object[]>
 {
     private static List<Object[]> RECIPES;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass()
     {
         Object[] elements = {
@@ -32,7 +32,7 @@ public class BitMappedNodeTransformTest
         RECIPES =  unmodifiableList(generateSubsetPermutations(elements));
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownClass()
     {
         RECIPES = null;

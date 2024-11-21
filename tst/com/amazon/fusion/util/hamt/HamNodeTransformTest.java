@@ -14,15 +14,15 @@ import com.amazon.fusion.util.hamt.HashArrayMappedTrie.Changes;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.HashArrayMappedNode;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.TrieNode;
 import java.util.List;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 public class HamNodeTransformTest
     extends TransformTestCase<Object[]>
 {
     private static List<Object[]> RECIPES;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass()
     {
         Object[] elements = {
@@ -50,7 +50,7 @@ public class HamNodeTransformTest
         RECIPES = unmodifiableList(generateSubsets(elements));
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownClass()
     {
         RECIPES = null;

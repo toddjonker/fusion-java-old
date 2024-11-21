@@ -7,8 +7,8 @@ import static java.util.Collections.unmodifiableList;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.CollisionNode;
 import com.amazon.fusion.util.hamt.HashArrayMappedTrie.FlatNode;
 import java.util.List;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 /**
  * Tests transformations of {@link FlatNode} and {@link CollisionNode}.
@@ -41,7 +41,7 @@ public class FlatNodeTransformTest
         return new CollisionNode<>(hash, kvPairs);
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass()
     {
         Object[] elements = new Object[] {
@@ -57,7 +57,7 @@ public class FlatNodeTransformTest
         RECIPES = unmodifiableList(generateSubsetPermutations(elements));
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownClass()
     {
         RECIPES = null;
