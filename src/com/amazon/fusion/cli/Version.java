@@ -1,4 +1,4 @@
-// Copyright (c) 2005-2019 Amazon.com, Inc.  All rights reserved.
+// Copyright (c) 2005-2024 Amazon.com, Inc.  All rights reserved.
 
 package com.amazon.fusion.cli;
 
@@ -88,15 +88,6 @@ class Version
                 {
                     w.setFieldName("release_label");
                     w.writeString(fusionInfo.getReleaseLabel());
-
-                    w.setFieldName("brazil_major_version");
-                    w.writeString(fusionInfo.getBrazilMajorVersion());
-
-                    w.setFieldName("brazil_package_version");
-                    w.writeString(fusionInfo.getBrazilPackageVersion());
-
-                    w.setFieldName("build_time");
-                    w.writeTimestamp(fusionInfo.getBuildTime());
                 }
                 w.stepOut();
             }

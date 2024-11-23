@@ -87,7 +87,7 @@ public class ClassLoaderModuleRepositoryTest
         // TODO We should construct the Jar here to eliminate build-logic
         //   coupling, but that's not possible AFAICT using JDK APIs.
         Path jar = PROJECT_DIRECTORY.resolve("build")
-                                    .resolve("private")
+                                    .resolve("libs")
                                     .resolve("ftst-repo.jar");
         assert Files.isRegularFile(jar);
 

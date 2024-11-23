@@ -65,7 +65,7 @@ public class DocumentationTest
     private HtmlPage loadModule(String modulePath)
         throws IOException
     {
-        String   url  = "file:build/brazil-documentation" + modulePath + ".html";
+        String   url  = "file:build/docs/fusiondoc" + modulePath + ".html";
         HtmlPage page = myWebClient.getPage(url);
         assertEquals(modulePath, page.getTitleText());
 
