@@ -13,7 +13,7 @@ A programmable programming langauge for Amazon Ion and JSON data.
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/toddjonker"><img src="https://avatars.githubusercontent.com/u/2058215?v=4?s=100" width="100px;" alt="Todd V. Jonker"/><br /><sub><b>Todd V. Jonker</b></sub></a><br /><a href="https://github.com/toddjonker/fusion-java/commits?author=toddjonker" title="Code">💻</a> <a href="https://github.com/toddjonker/fusion-java/commits?author=toddjonker" title="Documentation">📖</a> <a href="#design-toddjonker" title="Design">🎨</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/toddjonker"><img src="https://avatars.githubusercontent.com/u/2058215?v=4?s=100" width="100px;" alt="Todd V. Jonker"/><br /><sub><b>Todd V. Jonker</b></sub></a><br /><a href="https://github.com/toddjonker/fusion-java/commits?author=toddjonker" title="Code">💻</a> <a href="https://github.com/toddjonker/fusion-java/commits?author=toddjonker" title="Documentation">📖</a> <a href="#design-toddjonker" title="Design">🎨</a> <a href="https://github.com/toddjonker/fusion-java/issues?q=author%3Atoddjonker" title="Bug reports">🐛</a></td>
     </tr>
   </tbody>
 </table>
