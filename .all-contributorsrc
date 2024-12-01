@@ -5,7 +5,7 @@
   "imageSize": 100,
   "commit": false,
   "commitType": "docs",
-  "commitConvention": "angular",
+  "commitConvention": "gitmoji",
   "contributors": [
     {
       "login": "toddjonker",
