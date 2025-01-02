@@ -1,13 +1,13 @@
 // Copyright Ion Fusion contributors. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import static com.amazon.fusion.CoreTestCase.ftstRepositoryDirectory;
-import static com.amazon.fusion.CoreTestCase.fusionBootstrapDirectory;
+import static dev.ionfusion.fusion.CoreTestCase.ftstRepositoryDirectory;
+import static dev.ionfusion.fusion.CoreTestCase.fusionBootstrapDirectory;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import com.amazon.fusion.FusionException;
-import com.amazon.fusion.FusionRuntime;
-import com.amazon.fusion.FusionRuntimeBuilder;
+import dev.ionfusion.fusion.FusionException;
+import dev.ionfusion.fusion.FusionRuntime;
+import dev.ionfusion.fusion.FusionRuntimeBuilder;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
